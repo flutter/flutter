@@ -87,7 +87,7 @@ linter:
     - avoid_shadowing_type_parameters
     - avoid_single_cascade_in_expression_statements
     - avoid_slow_async_io
-    # - avoid_type_to_string # we do this commonly
+    - avoid_type_to_string
     - avoid_types_as_parameter_names
     # - avoid_types_on_closure_parameters # conflicts with always_specify_types
     # - avoid_unnecessary_containers # not yet tested
@@ -125,7 +125,7 @@ linter:
     # - lines_longer_than_80_chars # not required by flutter style
     - list_remove_unrelated_type
     # - literal_only_boolean_expressions # too many false positives: https://github.com/dart-lang/sdk/issues/34181
-    # - missing_whitespace_between_adjacent_strings # not yet tested
+    - missing_whitespace_between_adjacent_strings
     - no_adjacent_strings_in_list
     # - no_default_cases # too many false positives
     - no_duplicate_case_values

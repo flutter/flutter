@@ -11,15 +11,48 @@ import 'package:mockito/mockito.dart';
 import '../../src/common.dart';
 
 void main() {
-  testWithoutContext('EventPrinter handles a null parent', () {
-    final EventPrinter eventPrinter = EventPrinter(out: StringBuffer());
-    final _Device device = _Device();
+  group(EventPrinter, () {
     final Uri observatoryUri = Uri.parse('http://localhost:1234');
+    EventPrinter eventPrinter;
+    StringBuffer output;
 
-    expect(() => eventPrinter.handleFinishedTest(device), returnsNormally);
-    expect(() => eventPrinter.handleStartedDevice(observatoryUri), returnsNormally);
-    expect(() => eventPrinter.handleTestCrashed(device), returnsNormally);
-    expect(() => eventPrinter.handleTestTimedOut(device), returnsNormally);
+    setUp(() {
+      output = StringBuffer();
+      eventPrinter = EventPrinter(out: output);
+    });
+
+    testWithoutContext('handles a null parent', () {
+      final _Device device = _Device();
+
+      expect(() => eventPrinter.handleFinishedTest(device), returnsNormally);
+      expect(() => eventPrinter.handleStartedDevice(observatoryUri), returnsNormally);
+      expect(() => eventPrinter.handleTestCrashed(device), returnsNormally);
+      expect(() => eventPrinter.handleTestTimedOut(device), returnsNormally);
+    });
+
+    group('handleStartedDevice', () {
+      testWithoutContext('with non-null observatory', () {
+        eventPrinter.handleStartedDevice(observatoryUri);
+
+        expect(
+          output.toString(),
+          '\n'
+          '[{"event":"test.startedProcess","params":{"observatoryUri":"http://localhost:1234"}}]'
+          '\n',
+        );
+      });
+
+      testWithoutContext('with null observatory', () {
+        eventPrinter.handleStartedDevice(null);
+
+        expect(
+          output.toString(),
+          '\n'
+          '[{"event":"test.startedProcess","params":{"observatoryUri":null}}]'
+          '\n',
+        );
+      });
+    });
   });
 }
 

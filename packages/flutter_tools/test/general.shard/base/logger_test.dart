@@ -572,6 +572,7 @@ void main() {
               outputStdout().join('\n'),
               "Knock Knock, Who's There     " // initial message
               '        ' // placeholder so that spinner can backspace on its first tick
+              // ignore: missing_whitespace_between_adjacent_strings
               '\b\b\b\b\b\b\b\b       $a' // first tick
               '\b\b\b\b\b\b\b\b        ' // clearing the spinner
               '\b\b\b\b\b\b\b\b' // clearing the clearing of the spinner
@@ -580,6 +581,7 @@ void main() {
               'Rude Interrupting Cow\n' // message
               "Knock Knock, Who's There     " // message restoration
               '        ' // placeholder so that spinner can backspace on its second tick
+              // ignore: missing_whitespace_between_adjacent_strings
               '\b\b\b\b\b\b\b\b       $b' // second tick
               '\b\b\b\b\b\b\b\b        ' // clearing the spinner to put the time
               '\b\b\b\b\b\b\b\b' // clearing the clearing of the spinner

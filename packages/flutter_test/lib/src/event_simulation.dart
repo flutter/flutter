@@ -4,6 +4,7 @@
 
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 import 'test_async_utils.dart';
 
@@ -85,40 +86,47 @@ class KeyEventSimulator {
 
   static int _getKeyCode(LogicalKeyboardKey key, String platform) {
     assert(_osIsSupported(platform), 'Platform $platform not supported for key simulation');
-    late Map<int, LogicalKeyboardKey> map;
-    switch (platform) {
-      case 'android':
-        map = kAndroidToLogicalKey;
-        break;
-      case 'fuchsia':
-        map = kFuchsiaToLogicalKey;
-        break;
-      case 'macos':
-      // macOS doesn't do key codes, just scan codes.
-        return -1;
-      case 'ios':
-      // iOS doesn't do key codes, just scan codes.
-        return -1;
-      case 'web':
-        // web doesn't have int type code
-        return -1;
-      case 'linux':
-        map = kGlfwToLogicalKey;
-        break;
-      case 'windows':
-        map = kWindowsToLogicalKey;
-        break;
-    }
-    int? keyCode;
-    for (final int code in map.keys) {
-      if (key.keyId == map[code]!.keyId) {
-        keyCode = code;
-        break;
+    if (kIsWeb) {
+      // web doesn't have int type code. This check is used to treeshake
+      // keyboard map code.
+      return -1;
+    } else {
+      late Map<int, LogicalKeyboardKey> map;
+      switch (platform) {
+        case 'android':
+          map = kAndroidToLogicalKey;
+          break;
+        case 'fuchsia':
+          map = kFuchsiaToLogicalKey;
+          break;
+        case 'macos':
+        // macOS doesn't do key codes, just scan codes.
+          return -1;
+        case 'ios':
+        // iOS doesn't do key codes, just scan codes.
+          return -1;
+        case 'web':
+          // web doesn't have int type code.
+          return -1;
+        case 'linux':
+          map = kGlfwToLogicalKey;
+          break;
+        case 'windows':
+          map = kWindowsToLogicalKey;
+          break;
       }
+      int? keyCode;
+      for (final int code in map.keys) {
+        if (key.keyId == map[code]!.keyId) {
+          keyCode = code;
+          break;
+        }
+      }
+      assert(keyCode != null, 'Key $key not found in $platform keyCode map');
+      return keyCode!;
     }
-    assert(keyCode != null, 'Key $key not found in $platform keyCode map');
-    return keyCode!;
   }
+
   static String _getWebKeyCode(LogicalKeyboardKey key) {
     String? result;
     for (final String code in kWebToLogicalKey.keys) {
@@ -134,28 +142,33 @@ class KeyEventSimulator {
   static PhysicalKeyboardKey _findPhysicalKey(LogicalKeyboardKey key, String platform) {
     assert(_osIsSupported(platform), 'Platform $platform not supported for key simulation');
     late Map<dynamic, PhysicalKeyboardKey> map;
-    switch (platform) {
-      case 'android':
-        map = kAndroidToPhysicalKey;
-        break;
-      case 'fuchsia':
-        map = kFuchsiaToPhysicalKey;
-        break;
-      case 'macos':
-        map = kMacOsToPhysicalKey;
-        break;
-      case 'ios':
-        map = kIosToPhysicalKey;
-        break;
-      case 'linux':
-        map = kLinuxToPhysicalKey;
-        break;
-      case 'web':
-        map = kWebToPhysicalKey;
-        break;
-      case 'windows':
-        map = kWindowsToPhysicalKey;
-        break;
+    if (kIsWeb) {
+      // This check is used to treeshake keymap code.
+      map = kWebToPhysicalKey;
+    } else {
+      switch (platform) {
+        case 'android':
+          map = kAndroidToPhysicalKey;
+          break;
+        case 'fuchsia':
+          map = kFuchsiaToPhysicalKey;
+          break;
+        case 'macos':
+          map = kMacOsToPhysicalKey;
+          break;
+        case 'ios':
+          map = kIosToPhysicalKey;
+          break;
+        case 'linux':
+          map = kLinuxToPhysicalKey;
+          break;
+        case 'web':
+          map = kWebToPhysicalKey;
+          break;
+        case 'windows':
+          map = kWindowsToPhysicalKey;
+          break;
+      }
     }
     PhysicalKeyboardKey? result;
     for (final PhysicalKeyboardKey physicalKey in map.values) {
@@ -190,6 +203,13 @@ class KeyEventSimulator {
       'type': isDown ? 'keydown' : 'keyup',
       'keymap': platform,
     };
+
+    if (kIsWeb) {
+      result['code'] = _getWebKeyCode(key);
+      result['key'] = key.keyLabel;
+      result['metaState'] = _getWebModifierFlags(key, isDown);
+      return result;
+    }
 
     switch (platform) {
       case 'android':

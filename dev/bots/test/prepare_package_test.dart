@@ -70,6 +70,7 @@ void main() {
       ArchiveCreator creator;
       Directory tempDir;
       Directory flutterDir;
+      Directory cacheDir;
       FakeProcessManager processManager;
       final List<List<String>> args = <List<String>>[];
       final List<Map<Symbol, dynamic>> namedArgs = <Map<Symbol, dynamic>>[];
@@ -86,6 +87,8 @@ void main() {
         tempDir = Directory.systemTemp.createTempSync('flutter_prepage_package_test.');
         flutterDir = Directory(path.join(tempDir.path, 'flutter'));
         flutterDir.createSync(recursive: true);
+        cacheDir = Directory(path.join(flutterDir.path, 'bin', 'cache'));
+        cacheDir.createSync(recursive: true);
         creator = ArchiveCreator(
           tempDir,
           tempDir,
@@ -120,8 +123,8 @@ void main() {
           '$flutter create --template=app ${createBase}app': null,
           '$flutter create --template=package ${createBase}package': null,
           '$flutter create --template=plugin ${createBase}plugin': null,
-          'git clean -f -X **/.packages': null,
-          'git clean -f -X **/.dart_tool': null,
+          'git clean -f -x -- **/.packages': null,
+          'git clean -f -x -- **/.dart_tool/': null,
           if (platform.isWindows) 'attrib -h .git': null,
           if (platform.isWindows) '7za a -tzip -mx=9 $archiveName flutter': null
           else if (platform.isMacOS) 'zip -r -9 $archiveName flutter': null
@@ -156,8 +159,8 @@ void main() {
           '$flutter create --template=app ${createBase}app': null,
           '$flutter create --template=package ${createBase}package': null,
           '$flutter create --template=plugin ${createBase}plugin': null,
-          'git clean -f -X **/.packages': null,
-          'git clean -f -X **/.dart_tool': null,
+          'git clean -f -x -- **/.packages': null,
+          'git clean -f -x -- **/.dart_tool/': null,
           if (platform.isWindows) 'attrib -h .git': null,
           if (platform.isWindows) '7za a -tzip -mx=9 $archiveName flutter': null
           else if (platform.isMacOS) 'zip -r -9 $archiveName flutter': null
@@ -206,8 +209,8 @@ void main() {
           '$flutter create --template=app ${createBase}app': null,
           '$flutter create --template=package ${createBase}package': null,
           '$flutter create --template=plugin ${createBase}plugin': null,
-          'git clean -f -X **/.packages': null,
-          'git clean -f -X **/.dart_tool': null,
+          'git clean -f -x -- **/.packages': null,
+          'git clean -f -x -- **/.dart_tool/': null,
           if (platform.isWindows) 'attrib -h .git': null,
           if (platform.isWindows) '7za a -tzip -mx=9 $archiveName flutter': null
           else if (platform.isMacOS) 'zip -r -9 $archiveName flutter': null
