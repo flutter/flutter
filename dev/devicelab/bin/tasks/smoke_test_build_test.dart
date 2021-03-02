@@ -24,5 +24,8 @@ class FakeBuildTestTask extends BuildTestTask {
   Future<void> build() => Future<void>.delayed(const Duration(milliseconds: 500));
 
   @override
-  Future<TaskResult> test() async => TaskResult.success(<String, String>{'benchmark': 'data'});
+  Future<TaskResult> test() async {
+    await Future<void>.delayed(const Duration(milliseconds: 500));
+    return TaskResult.success(<String, String>{'benchmark': 'data'});
+  }
 }

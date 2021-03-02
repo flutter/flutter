@@ -82,7 +82,9 @@ Future<TaskResult> runTask(
 }) async {
   final String taskExecutable = 'bin/tasks/$taskName.dart';
 
-  if (!file(taskExecutable).existsSync()) throw 'Executable Dart file not found: $taskExecutable';
+  if (!file(taskExecutable).existsSync()) {
+    throw 'Executable Dart file not found: $taskExecutable';
+  }
 
   final Process runner = await startProcess(
     dartBin,
@@ -114,7 +116,9 @@ Future<TaskResult> runTask(
       .listen((String line) {
     if (!uri.isCompleted) {
       final Uri serviceUri = parseServiceUri(line, prefix: 'Observatory listening on ');
-      if (serviceUri != null) uri.complete(serviceUri);
+      if (serviceUri != null) {
+        uri.complete(serviceUri);
+      }
     }
     if (!silent) {
       stdout.writeln('[$taskName] [STDOUT] $line');
@@ -136,7 +140,9 @@ Future<TaskResult> runTask(
     await runner.exitCode;
     return taskResult;
   } finally {
-    if (!runnerFinished) runner.kill(ProcessSignal.sigkill);
+    if (!runnerFinished) {
+      runner.kill(ProcessSignal.sigkill);
+    }
     await stdoutSub.cancel();
     await stderrSub.cancel();
   }
@@ -161,7 +167,9 @@ Future<VMIsolateRef> _connectToRunnerIsolate(Uri vmServiceUri) async {
       final VM vm = await client.getVM();
       final VMIsolateRef isolate = vm.isolates.single;
       final String response = await isolate.invokeExtension('ext.cocoonRunnerReady') as String;
-      if (response != 'ready') throw 'not ready yet';
+      if (response != 'ready') {
+        throw 'not ready yet';
+      }
       return isolate;
     } catch (error) {
       if (stopwatch.elapsed > const Duration(seconds: 10))
