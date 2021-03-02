@@ -14,6 +14,15 @@ flutter drive \
 
 Web:
 
+In one shell, run Chromedriver ([download
+here](https://chromedriver.chromium.org/downloads)):
+
+```
+chromedriver --port 8444
+```
+
+Then, in another shell, run `flutter drive`:
+
 ```sh
 flutter drive \
   --driver=test_driver/integration_test.dart \
