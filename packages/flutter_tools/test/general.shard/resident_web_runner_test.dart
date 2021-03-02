@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
@@ -87,7 +88,6 @@ void main() {
   MockFlutterDevice mockFlutterDevice;
   MockWebDevFS mockWebDevFS;
   MockResidentCompiler mockResidentCompiler;
-  MockChrome mockChrome;
   MockChromeConnection mockChromeConnection;
   MockChromeTab mockChromeTab;
   MockWipConnection mockWipConnection;
@@ -97,8 +97,10 @@ void main() {
   FakeVmServiceHost fakeVmServiceHost;
   FileSystem fileSystem;
   ProcessManager processManager;
+  TestUsage testUsage;
 
   setUp(() {
+    testUsage = TestUsage();
     fileSystem = MemoryFileSystem.test();
     processManager = FakeProcessManager.any();
     mockDebugConnection = MockDebugConnection();
@@ -107,7 +109,6 @@ void main() {
     mockFlutterDevice = MockFlutterDevice();
     mockWebDevFS = MockWebDevFS();
     mockResidentCompiler = MockResidentCompiler();
-    mockChrome = MockChrome();
     mockChromeConnection = MockChromeConnection();
     mockChromeTab = MockChromeTab();
     mockWipConnection = MockWipConnection();
@@ -153,7 +154,6 @@ void main() {
     when(mockWebDevFS.sources).thenReturn(<Uri>[]);
     when(mockWebDevFS.baseUri).thenReturn(Uri.parse('http://localhost:12345'));
     when(mockFlutterDevice.generator).thenReturn(mockResidentCompiler);
-    when(mockChrome.chromeConnection).thenReturn(mockChromeConnection);
     when(mockChromeConnection.getTab(any)).thenAnswer((Invocation invocation) async {
       return mockChromeTab;
     });
@@ -521,14 +521,10 @@ void main() {
       ),
     ]);
     _setupMocks();
-    final ChromiumLauncher chromiumLauncher = MockChromeLauncher();
-    when(chromiumLauncher.launch(any, cacheDir: anyNamed('cacheDir')))
-      .thenAnswer((Invocation invocation) async {
-        return mockChrome;
-      });
-    when(chromiumLauncher.connectedInstance).thenAnswer((Invocation invocation) async {
-      return mockChrome;
-    });
+    final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
+    final Chromium chrome = Chromium(1, mockChromeConnection, chromiumLauncher: chromiumLauncher);
+    chromiumLauncher.instance = chrome;
+
     when(mockFlutterDevice.device).thenReturn(GoogleChromeDevice(
       fileSystem: fileSystem,
       chromiumLauncher: chromiumLauncher,
@@ -536,8 +532,6 @@ void main() {
       platform: FakePlatform(operatingSystem: 'linux'),
       processManager: FakeProcessManager.any(),
     ));
-    when(chromiumLauncher.canFindExecutable()).thenReturn(true);
-    chromiumLauncher.testLaunchChromium(mockChrome);
     when(mockWebDevFS.update(
       mainUri: anyNamed('mainUri'),
       target: anyNamed('target'),
@@ -570,23 +564,21 @@ void main() {
     expect(testLogger.statusText, contains('Restarted application in'));
     expect(result.code, 0);
     verify(mockResidentCompiler.accept()).called(2);
-	  // ensure that analytics are sent.
-    final Map<String, String> config = verify(globals.flutterUsage.sendEvent('hot', 'restart',
-      parameters: captureAnyNamed('parameters'))).captured.first as Map<String, String>;
 
-    expect(config, allOf(<Matcher>[
-      containsPair('cd27', 'web-javascript'),
-      containsPair('cd28', ''),
-      containsPair('cd29', 'false'),
-      containsPair('cd30', 'true'),
-    ]));
-    verify(globals.flutterUsage.sendTiming('hot', 'web-incremental-restart', any)).called(1);
+    // ensure that analytics are sent.
+    expect(testUsage.events, const <TestUsageEvent>[
+      TestUsageEvent('hot', 'restart', parameters: <String, String>{'cd27': 'web-javascript', 'cd28': '', 'cd29': 'false', 'cd30': 'true', 'cd13': '0'}),
+    ]);
+    expect(testUsage.timings, const <TestTimingEvent>[
+      TestTimingEvent('hot', 'web-incremental-restart', Duration.zero),
+    ]);
   }, overrides: <Type, Generator>{
-    Usage: () => MockFlutterUsage(),
+    Usage: () => testUsage,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
+    SystemClock: () => SystemClock.fixed(DateTime(2001, 1, 1))
   });
 
   testUsingContext('Can hot restart after attaching', () async {
@@ -601,15 +593,10 @@ void main() {
       ),
     ]);
     _setupMocks();
-    final ChromiumLauncher chromiumLauncher = MockChromeLauncher();
-    when(chromiumLauncher.launch(any, cacheDir: anyNamed('cacheDir')))
-      .thenAnswer((Invocation invocation) async {
-        return mockChrome;
-      });
-    when(chromiumLauncher.connectedInstance).thenAnswer((Invocation invocation) async {
-      return mockChrome;
-    });
-    when(chromiumLauncher.canFindExecutable()).thenReturn(true);
+    final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
+    final Chromium chrome = Chromium(1, mockChromeConnection, chromiumLauncher: chromiumLauncher);
+    chromiumLauncher.instance = chrome;
+
     when(mockFlutterDevice.device).thenReturn(GoogleChromeDevice(
       fileSystem: fileSystem,
       chromiumLauncher: chromiumLauncher,
@@ -617,7 +604,6 @@ void main() {
       platform: FakePlatform(operatingSystem: 'linux'),
       processManager: FakeProcessManager.any(),
     ));
-    chromiumLauncher.testLaunchChromium(mockChrome);
     Uri entrypointFileUri;
     when(mockWebDevFS.update(
       mainUri: anyNamed('mainUri'),
@@ -654,23 +640,21 @@ void main() {
     expect(testLogger.statusText, contains('Restarted application in'));
     expect(result.code, 0);
     verify(mockResidentCompiler.accept()).called(2);
-	  // ensure that analytics are sent.
-    final Map<String, String> config = verify(globals.flutterUsage.sendEvent('hot', 'restart',
-      parameters: captureAnyNamed('parameters'))).captured.first as Map<String, String>;
 
-    expect(config, allOf(<Matcher>[
-      containsPair('cd27', 'web-javascript'),
-      containsPair('cd28', ''),
-      containsPair('cd29', 'false'),
-      containsPair('cd30', 'true'),
-    ]));
-    verify(globals.flutterUsage.sendTiming('hot', 'web-incremental-restart', any)).called(1);
+	  // ensure that analytics are sent.
+    expect(testUsage.events, const <TestUsageEvent>[
+      TestUsageEvent('hot', 'restart', parameters: <String, String>{'cd27': 'web-javascript', 'cd28': '', 'cd29': 'false', 'cd30': 'true', 'cd13': '0'}),
+    ]);
+    expect(testUsage.timings, const <TestTimingEvent>[
+      TestTimingEvent('hot', 'web-incremental-restart', Duration.zero),
+    ]);
   }, overrides: <Type, Generator>{
-    Usage: () => MockFlutterUsage(),
+    Usage: () => testUsage,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
+    SystemClock: () => SystemClock.fixed(DateTime(2001, 1, 1))
   });
 
   testUsingContext('Can hot restart after attaching with web-server device', () async {
@@ -705,14 +689,17 @@ void main() {
     expect(testLogger.statusText, contains('Restarted application in'));
     expect(result.code, 0);
     verify(mockResidentCompiler.accept()).called(2);
-    // ensure that analytics are sent.
-    verifyNever(globals.flutterUsage.sendTiming('hot', 'web-incremental-restart', any));
+
+	  // web-server device does not send restart analytics
+    expect(testUsage.events, isEmpty);
+    expect(testUsage.timings, isEmpty);
   }, overrides: <Type, Generator>{
-    Usage: () => MockFlutterUsage(),
+    Usage: () => testUsage,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
+    SystemClock: () => SystemClock.fixed(DateTime(2001, 1, 1))
   });
 
   testUsingContext('web resident runner is debuggable', () {
@@ -725,6 +712,7 @@ void main() {
     ProcessManager: () => processManager,
     Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
+    SystemClock: () => SystemClock.fixed(DateTime(2001, 1, 1))
   });
 
   testUsingContext('Exits when initial compile fails', () async {
@@ -754,9 +742,10 @@ void main() {
     ));
 
     expect(await residentWebRunner.run(), 1);
-    verifyNever(globals.flutterUsage.sendTiming('hot', 'web-restart', any));
+    expect(testUsage.events, isEmpty);
+    expect(testUsage.timings, isEmpty);
   }, overrides: <Type, Generator>{
-    Usage: () => MockFlutterUsage(),
+    Usage: () => testUsage,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     Pub: () => FakePub(),
@@ -827,9 +816,10 @@ void main() {
 
     expect(result.code, 1);
     expect(result.message, contains('Failed to recompile application.'));
-    verifyNever(globals.flutterUsage.sendTiming('hot', 'web-restart', any));
+    expect(testUsage.events, isEmpty);
+    expect(testUsage.timings, isEmpty);
   }, overrides: <Type, Generator>{
-    Usage: () => MockFlutterUsage(),
+    Usage: () => testUsage,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     Pub: () => FakePub(),
@@ -1421,14 +1411,11 @@ void main() {
       ...kAttachIsolateExpectations,
     ]);
     _setupMocks();
-    final ChromiumLauncher chromiumLauncher = MockChromeLauncher();
-    when(chromiumLauncher.launch(any, cacheDir: anyNamed('cacheDir')))
-      .thenAnswer((Invocation invocation) async {
-        return mockChrome;
-      });
-    when(chromiumLauncher.connectedInstance).thenAnswer((Invocation invocation) async {
-      return mockChrome;
-    });
+    final MockChromeConnection mockChromeConnection = MockChromeConnection();
+    final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
+    final Chromium chrome = Chromium(1, mockChromeConnection, chromiumLauncher: chromiumLauncher);
+    chromiumLauncher.instance = chrome;
+
     when(mockFlutterDevice.device).thenReturn(GoogleChromeDevice(
       fileSystem: fileSystem,
       chromiumLauncher: chromiumLauncher,
@@ -1436,12 +1423,9 @@ void main() {
       platform: FakePlatform(operatingSystem: 'linux'),
       processManager: FakeProcessManager.any(),
     ));
-    when(chromiumLauncher.canFindExecutable()).thenReturn(true);
     when(mockWebDevFS.create()).thenAnswer((Invocation invocation) async {
       return Uri.parse('http://localhost:8765/app/');
     });
-    final MockChrome chrome = MockChrome();
-    final MockChromeConnection mockChromeConnection = MockChromeConnection();
     final MockChromeTab mockChromeTab = MockChromeTab();
     final MockWipConnection mockWipConnection = MockWipConnection();
     when(mockChromeConnection.getTab(any)).thenAnswer((Invocation invocation) async {
@@ -1450,8 +1434,6 @@ void main() {
     when(mockChromeTab.connect()).thenAnswer((Invocation invocation) async {
       return mockWipConnection;
     });
-    when(chrome.chromeConnection).thenReturn(mockChromeConnection);
-    chromiumLauncher.testLaunchChromium(chrome);
 
     final FakeStatusLogger fakeStatusLogger = globals.logger as FakeStatusLogger;
     final MockStatus mockStatus = MockStatus();
@@ -1642,8 +1624,6 @@ ResidentRunner setUpResidentRunner(FlutterDevice flutterDevice) {
   ) as ResidentWebRunner;
 }
 
-class MockChromeLauncher extends Mock implements ChromiumLauncher {}
-class MockFlutterUsage extends Mock implements Usage {}
 class MockChromeDevice extends Mock implements ChromiumDevice {}
 class MockDebugConnection extends Mock implements DebugConnection {}
 class MockAppConnection extends Mock implements AppConnection {}
@@ -1658,3 +1638,38 @@ class MockWipConnection extends Mock implements WipConnection {}
 class MockWipDebugger extends Mock implements WipDebugger {}
 class MockWebServerDevice extends Mock implements WebServerDevice {}
 class MockDevice extends Mock implements Device {}
+
+/// A test implementation of the [ChromiumLauncher] that launches a fixed instance.
+class TestChromiumLauncher implements ChromiumLauncher {
+  TestChromiumLauncher();
+
+  set instance(Chromium chromium) {
+    _hasInstance = true;
+    currentCompleter.complete(chromium);
+  }
+  bool _hasInstance = false;
+
+  @override
+  Completer<Chromium> currentCompleter = Completer<Chromium>();
+
+  @override
+  bool canFindExecutable() {
+    return true;
+  }
+
+  @override
+  Future<Chromium> get connectedInstance => currentCompleter.future;
+
+  @override
+  String findExecutable() {
+    return 'chrome';
+  }
+
+  @override
+  bool get hasChromeInstance => _hasInstance;
+
+  @override
+  Future<Chromium> launch(String url, {bool headless = false, int debugPort, bool skipCheck = false, Directory cacheDir}) async {
+    return currentCompleter.future;
+  }
+}
