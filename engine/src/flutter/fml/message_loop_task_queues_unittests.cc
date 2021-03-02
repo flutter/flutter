@@ -185,6 +185,13 @@ TEST(MessageLoopTaskQueue, QueueDoNotOwnItself) {
   ASSERT_FALSE(task_queue->Owns(queue_id, queue_id));
 }
 
+TEST(MessageLoopTaskQueue, QueueDoNotOwnUnmergedTaskQueueId) {
+  auto task_queue = fml::MessageLoopTaskQueues::GetInstance();
+  ASSERT_FALSE(task_queue->Owns(task_queue->CreateTaskQueue(), _kUnmerged));
+  ASSERT_FALSE(task_queue->Owns(_kUnmerged, task_queue->CreateTaskQueue()));
+  ASSERT_FALSE(task_queue->Owns(_kUnmerged, _kUnmerged));
+}
+
 // TODO(chunhtai): This unit-test is flaky and sometimes fails asynchronizely
 // after the test has finished.
 // https://github.com/flutter/flutter/issues/43858
