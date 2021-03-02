@@ -170,8 +170,8 @@ class TextSpan extends InlineSpan implements HitTestTarget {
   /// {@end-tool}
   @Deprecated(
     "TextSpan's support for recognizers has been moved to ReactiveTextSpan. "
-    'Use ReactiveTextSpan instead. '
-    'This feature was deprecated after v1.24.'
+    'Use ReactiveTextSpan.recognizer instead. '
+    'This feature was deprecated after v1.22.6.'
   )
   final GestureRecognizer? recognizer;
 
