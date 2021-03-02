@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Scenarios</string>
     <string name="title_activity_main">MainActivity</string>
+    <string name="leak_canary_test_class_name">assertk.Assert</string>
 </resources>
