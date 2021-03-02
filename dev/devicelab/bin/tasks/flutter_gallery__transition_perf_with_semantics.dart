@@ -7,11 +7,11 @@ import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 
-Future<void> main() async {
+Future<void> main(List<String> args) async {
   deviceOperatingSystem = DeviceOperatingSystem.android;
   await task(() async {
-    final TaskResult withoutSemantics = await createGalleryTransitionTest()();
-    final TaskResult withSemantics = await createGalleryTransitionTest(semanticsEnabled: true)();
+    final TaskResult withoutSemantics = await createGalleryTransitionTest(args)();
+    final TaskResult withSemantics = await createGalleryTransitionTest(args, semanticsEnabled: true)();
     if (withSemantics.benchmarkScoreKeys.isEmpty || withoutSemantics.benchmarkScoreKeys.isEmpty) {
       String message = 'Lack of data';
       if (withSemantics.benchmarkScoreKeys.isEmpty) {
