@@ -1326,9 +1326,18 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
 
   /// Called when this object is reactivated.
   ///
-  /// If the [widget] or one of its ancestors has a [GlobalKey], it is possible
-  /// for a State to be reactivated after being [deactivate]d, as part of being
-  /// reparented in the tree.
+  /// If the [widget] or one of its ancestors has a [GlobalKey], the framework
+  /// will mark this object as inactive when it is removed and call
+  /// [deactivate].
+  ///
+  /// When the object is rejoined to tree innext frame (e.g. by change
+  /// position), it will be marked as active again and this method will be
+  /// called.
+  ///
+  /// See also:
+  ///
+  ///  * [Element.activate] and [Element.deactivate] for more information about
+  ///  lifecycle.
   @protected
   @mustCallSuper
   void reactivate() { }
