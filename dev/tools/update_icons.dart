@@ -35,6 +35,7 @@ const Map<String, List<String>> _platformAdaptiveIdentifiers = <String, List<Str
   'share': <String>['share', 'ios_share'],
 };
 
+// Rewrite certain Flutter ids (reserved keywords, numbers) using prefix matching.
 const Map<String, String> _identifierRewrites = <String, String>{
   '1x': 'one_x',
   '360': 'threesixty',
