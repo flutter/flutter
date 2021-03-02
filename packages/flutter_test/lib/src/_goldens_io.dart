@@ -245,12 +245,12 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
   }
 
   if (pixelDiffCount > 0) {
-    final double diffPercent = pixelDiffCount/totalPixels) * 100;
+    final double diffPercent = pixelDiffCount / totalPixels;
     return ComparisonResult(
       passed: false,
       diffPercent: diffPercent,
       error: 'Pixel test failed, '
-        '${diffPercent.toStringAsFixed(2)}% '
+        '${(diffPercent * 100).toStringAsFixed(2)}% '
         'diff detected.',
       diffs:  <String, Image>{
         'masterImage' : masterImage,
