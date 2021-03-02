@@ -18,11 +18,12 @@ typedef ValueToString<T> = String? Function(T value);
 
 class DualHeaderWithHint extends StatelessWidget {
   const DualHeaderWithHint({
+    Key? key,
     this.name,
     this.value,
     this.hint,
     this.showHint,
-  });
+  }) : super(key: key);
 
   final String? name;
   final String? value;
@@ -80,11 +81,12 @@ class DualHeaderWithHint extends StatelessWidget {
 
 class CollapsibleBody extends StatelessWidget {
   const CollapsibleBody({
+    Key? key,
     this.margin = EdgeInsets.zero,
     this.child,
     this.onSave,
     this.onCancel,
-  });
+  }) : super(key: key);
 
   final EdgeInsets margin;
   final Widget? child;
@@ -175,6 +177,8 @@ class DemoItem<T> {
 }
 
 class ExpansionPanelsDemo extends StatefulWidget {
+  const ExpansionPanelsDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/material/expansion_panels';
 
   @override

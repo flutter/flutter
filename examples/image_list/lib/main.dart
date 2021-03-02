@@ -124,7 +124,7 @@ const int IMAGES = 50;
 
 @immutable
 class MyApp extends StatelessWidget {
-  const MyApp(this.port);
+  const MyApp(this.port, {Key? key}) : super(key: key);
 
   final int port;
 
