@@ -9,7 +9,7 @@
 void test1() { }
 
 @Deprecated(
-  'Missing space ->.'
+  'Missing space ->.' //ignore: missing_whitespace_between_adjacent_strings
   'This feature was deprecated after v1.2.3.'
 )
 void test2() { }

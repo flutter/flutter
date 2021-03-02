@@ -1981,8 +1981,7 @@ void main() {
     );
 
     testWidgets(
-      '${SnackBarBehavior.floating} should align SnackBar with the top of FloatingActionButton'
-      'when Scaffold has a FloatingActionButton',
+      '${SnackBarBehavior.floating} should align SnackBar with the top of FloatingActionButton when Scaffold has a FloatingActionButton',
       (WidgetTester tester) async {
         await tester.pumpWidget(MaterialApp(
           home: Scaffold(
