@@ -7,8 +7,6 @@
 // initialize a binding, which rendering_tester will attempt to re-initialize
 // (or vice versa).
 
-import 'dart:ui';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -1744,6 +1742,49 @@ void main() {
       '   giving the viewport loose constraints, without needing to measure\n'
       '   its intrinsic dimensions.\n',
     );
+  });
+
+  group('Viewport childrenInPaintOrder control test', () {
+    test('RenderViewport', () async {
+      final List<RenderSliver> children = <RenderSliver>[
+        RenderSliverToBoxAdapter(),
+        RenderSliverToBoxAdapter(),
+        RenderSliverToBoxAdapter(),
+      ];
+
+      final RenderViewport renderViewport = RenderViewport(
+        crossAxisDirection: AxisDirection.right,
+        offset: ViewportOffset.zero(),
+        children: children,
+      );
+
+      // Children should be painted in reverse order to the list given
+      expect(renderViewport.childrenInPaintOrder, equals(children.reversed));
+      // childrenInPaintOrder should be reverse of childrenInHitTestOrder
+      expect(renderViewport.childrenInPaintOrder,
+          equals(renderViewport.childrenInHitTestOrder.toList().reversed));
+    });
+
+    test('RenderShrinkWrappingViewport', () async {
+      final List<RenderSliver> children = <RenderSliver>[
+        RenderSliverToBoxAdapter(),
+        RenderSliverToBoxAdapter(),
+        RenderSliverToBoxAdapter(),
+      ];
+
+      final RenderShrinkWrappingViewport renderViewport =
+          RenderShrinkWrappingViewport(
+        crossAxisDirection: AxisDirection.right,
+        offset: ViewportOffset.zero(),
+        children: children,
+      );
+
+      // Children should be painted in reverse order to the list given
+      expect(renderViewport.childrenInPaintOrder, equals(children.reversed));
+      // childrenInPaintOrder should be reverse of childrenInHitTestOrder
+      expect(renderViewport.childrenInPaintOrder,
+          equals(renderViewport.childrenInHitTestOrder.toList().reversed));
+    });
   });
 
   testWidgets('Handles infinite constraints when TargetPlatform is iOS or macOS', (WidgetTester tester) async {

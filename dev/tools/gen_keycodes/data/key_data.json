@@ -6619,7 +6619,8 @@
         "RIGHT_ALT"
       ],
       "gtk": [
-        "Alt_R"
+        "Alt_R",
+        "ISO_Level3_Shift"
       ],
       "windows": [
         "RMENU"
@@ -6644,7 +6645,8 @@
         346
       ],
       "gtk": [
-        65514
+        65514,
+        65027
       ],
       "windows": [
         165

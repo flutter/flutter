@@ -774,7 +774,11 @@ abstract class TextSelectionDelegate {
   set textEditingValue(TextEditingValue value);
 
   /// Hides the text selection toolbar.
-  void hideToolbar();
+  ///
+  /// By default, hideHandles is true, and the toolbar is hidden along with its
+  /// handles. If hideHandles is set to false, then the toolbar will be hidden
+  /// but the handles will remain.
+  void hideToolbar([bool hideHandles = true]);
 
   /// Brings the provided [TextPosition] into the visible area of the text
   /// input.
@@ -1070,7 +1074,7 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
   assert(encoded['Y'] != null, 'You must provide a value for the vertical location of the floating cursor.');
   final Offset offset = state == FloatingCursorDragState.Update
     ? Offset(encoded['X'] as double, encoded['Y'] as double)
-    : const Offset(0, 0);
+    : Offset.zero;
   return RawFloatingCursorPoint(offset: offset, state: state);
 }
 

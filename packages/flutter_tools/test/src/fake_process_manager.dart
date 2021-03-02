@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io show ProcessSignal;
@@ -24,13 +26,14 @@ class FakeCommand {
     this.workingDirectory,
     this.environment,
     this.encoding,
-    this.duration = const Duration(),
+    this.duration = Duration.zero,
     this.onRun,
     this.exitCode = 0,
     this.stdout = '',
     this.stderr = '',
     this.completer,
     this.stdin,
+    this.exception,
   }) : assert(command != null),
        assert(duration != null),
        assert(exitCode != null);
@@ -94,6 +97,9 @@ class FakeCommand {
   /// An optional stdin sink that will be exposed through the resulting
   /// [FakeProcess].
   final IOSink stdin;
+
+  /// If provided, this exception will be thrown when the fake command is run.
+  final dynamic exception;
 
   void _matches(
     List<String> command,
@@ -227,6 +233,9 @@ abstract class FakeProcessManager implements ProcessManager {
   ) {
     _pid += 1;
     final FakeCommand fakeCommand = findCommand(command, workingDirectory, environment, encoding);
+    if (fakeCommand.exception != null) {
+      throw fakeCommand.exception;
+    }
     if (fakeCommand.onRun != null) {
       fakeCommand.onRun();
     }
@@ -299,8 +308,11 @@ abstract class FakeProcessManager implements ProcessManager {
     );
   }
 
+  /// Returns false if executable in [excludedExecutables].
   @override
-  bool canRun(dynamic executable, {String workingDirectory}) => true;
+  bool canRun(dynamic executable, {String workingDirectory}) => !excludedExecutables.contains(executable);
+
+  Set<String> excludedExecutables = <String>{};
 
   @override
   bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
@@ -329,7 +341,7 @@ class _FakeAnyProcessManager extends FakeProcessManager {
       workingDirectory: workingDirectory,
       environment: environment,
       encoding: encoding,
-      duration: const Duration(),
+      duration: Duration.zero,
       exitCode: 0,
       stdout: '',
       stderr: '',

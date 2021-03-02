@@ -50,7 +50,7 @@ class _GalleryAppState extends State<GalleryApp> {
   Map<String, WidgetBuilder> _buildRoutes() {
     // For a different example of how to set up an application routing table
     // using named routes, consider the example in the Navigator class documentation:
-    // https://docs.flutter.io/flutter/widgets/Navigator-class.html
+    // https://api.flutter.dev/flutter/widgets/Navigator-class.html
     return <String, WidgetBuilder>{
       for (final GalleryDemo demo in kAllGalleryDemos) demo.routeName: demo.buildRoute,
     };

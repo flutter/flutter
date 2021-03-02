@@ -110,7 +110,8 @@ class _TaskRunner {
         '--enable-macos-desktop',
         '--enable-windows-desktop',
         '--enable-linux-desktop',
-        '--enable-web'
+        '--enable-web',
+        if (localEngine != null) ...<String>['--local-engine', localEngine],
       ], canFail: true);
       if (configResult != 0) {
         print('Failed to enable configuration, tasks may not run.');

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 
 import 'package:flutter_tools/src/base/logger.dart';
@@ -14,7 +16,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/ios/code_signing.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -23,7 +24,7 @@ import '../../src/mocks.dart';
 void main() {
   group('Auto signing', () {
     ProcessManager mockProcessManager;
-    Config mockConfig;
+    Config testConfig;
     IosProject mockIosProject;
     BuildableIOSApp app;
     AnsiTerminal testTerminal;
@@ -34,7 +35,7 @@ void main() {
       mockProcessManager = MockProcessManager();
       // Assume all binaries exist and are executable
       when(mockProcessManager.canRun(any)).thenReturn(true);
-      mockConfig = MockConfig();
+      testConfig = Config.test();
       mockIosProject = MockIosProject();
       when(mockIosProject.buildSettingsForBuildInfo(any)).thenAnswer((_) {
         return Future<Map<String, String>>.value(<String, String>{
@@ -341,10 +342,10 @@ void main() {
       verify(mockOpenSslStdIn.write('This is a mock certificate'));
       expect(signingConfigs, <String, String>{'DEVELOPMENT_TEAM': '4444DDDD44'});
 
-      verify(globals.config.setValue('ios-signing-cert', 'iPhone Developer: Profile 3 (3333CCCC33)'));
+      expect(testConfig.getValue('ios-signing-cert'), 'iPhone Developer: Profile 3 (3333CCCC33)');
     },
     overrides: <Type, Generator>{
-      Config: () => mockConfig,
+      Config: () => testConfig,
       AnsiTerminal: () => testTerminal,
       OutputPreferences: () => OutputPreferences(wrapText: false),
     });
@@ -424,7 +425,7 @@ void main() {
       expect(signingConfigs, <String, String>{'DEVELOPMENT_TEAM': '5555EEEE55'});
     },
     overrides: <Type, Generator>{
-      Config: () => mockConfig,
+      Config: () => testConfig,
       AnsiTerminal: () => testTerminal,
       OutputPreferences: () => OutputPreferences(wrapText: false),
     });
@@ -484,7 +485,7 @@ void main() {
           ));
       when(mockOpenSslProcess.stderr).thenAnswer((Invocation invocation) => mockOpenSslStdErr);
       when(mockOpenSslProcess.exitCode).thenAnswer((_) => Future<int>.value(0));
-      when<String>(mockConfig.getValue('ios-signing-cert') as String).thenReturn('iPhone Developer: Profile 3 (3333CCCC33)');
+      testConfig.setValue('ios-signing-cert', 'iPhone Developer: Profile 3 (3333CCCC33)');
 
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
         iosApp: app,
@@ -506,7 +507,7 @@ void main() {
       expect(signingConfigs, <String, String>{'DEVELOPMENT_TEAM': '4444DDDD44'});
     },
     overrides: <Type, Generator>{
-      Config: () => mockConfig,
+      Config: () => testConfig,
       OutputPreferences: () => OutputPreferences(wrapText: false),
     });
 
@@ -568,7 +569,7 @@ void main() {
           ));
       when(mockOpenSslProcess.stderr).thenAnswer((Invocation invocation) => mockOpenSslStdErr);
       when(mockOpenSslProcess.exitCode).thenAnswer((_) => Future<int>.value(0));
-      when<String>(mockConfig.getValue('ios-signing-cert') as String).thenReturn('iPhone Developer: Invalid Profile');
+      testConfig.setValue('ios-signing-cert', 'iPhone Developer: Invalid Profile');
 
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
         iosApp: app,
@@ -586,10 +587,10 @@ void main() {
         contains('Certificate choice "iPhone Developer: Profile 3 (3333CCCC33)"'),
       );
       expect(signingConfigs, <String, String>{'DEVELOPMENT_TEAM': '4444DDDD44'});
-      verify(globals.config.setValue('ios-signing-cert', 'iPhone Developer: Profile 3 (3333CCCC33)'));
+      expect(testConfig.getValue('ios-signing-cert'), 'iPhone Developer: Profile 3 (3333CCCC33)');
     },
     overrides: <Type, Generator>{
-      Config: () => mockConfig,
+      Config: () => testConfig,
       AnsiTerminal: () => testTerminal,
     });
 
@@ -665,7 +666,7 @@ void main() {
       expect(signingConfigs, isNull);
     },
     overrides: <Type, Generator>{
-      Config: () => mockConfig,
+      Config: () => testConfig,
       AnsiTerminal: () => testTerminal,
     });
   });
@@ -689,7 +690,6 @@ class MockProcessManager extends Mock implements ProcessManager {}
 class MockProcess extends Mock implements Process {}
 class MockStream extends Mock implements Stream<List<int>> {}
 class MockStdIn extends Mock implements IOSink {}
-class MockConfig extends Mock implements Config {}
 
 Stream<String> mockTerminalStdInStream;
 

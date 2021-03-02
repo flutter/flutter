@@ -116,11 +116,14 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
     final String demoCategory = demo.substring(demo.indexOf('@') + 1);
     print('> $demo');
 
+    final SerializableFinder demoCategoryItem = find.text(demoCategory);
     if (currentDemoCategory == null) {
-      await driver.tap(find.text(demoCategory));
+      await driver.scrollIntoView(demoCategoryItem);
+      await driver.tap(demoCategoryItem);
     } else if (currentDemoCategory != demoCategory) {
       await driver.tap(find.byTooltip('Back'));
-      await driver.tap(find.text(demoCategory));
+      await driver.scrollIntoView(demoCategoryItem);
+      await driver.tap(demoCategoryItem);
       // Scroll back to the top
       await driver.scroll(demoList, 0.0, 10000.0, const Duration(milliseconds: 100));
     }

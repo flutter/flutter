@@ -14,7 +14,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show kPrimaryButton;
 import 'package:flutter_test/flutter_test.dart';
 
@@ -133,8 +132,8 @@ class _LiveWidgetController extends LiveWidgetController {
   }
 
   @override
-  Future<void> tap(Finder finder, { int? pointer, int buttons = kPrimaryButton }) async {
-    await super.tap(await _waitForElement(finder), pointer: pointer, buttons: buttons);
+  Future<void> tap(Finder finder, { int? pointer, int buttons = kPrimaryButton, bool warnIfMissed = true }) async {
+    await super.tap(await _waitForElement(finder), pointer: pointer, buttons: buttons, warnIfMissed: warnIfMissed);
   }
 
   Future<void> scrollIntoView(Finder finder, {required double alignment}) async {

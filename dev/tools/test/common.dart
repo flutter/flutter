@@ -4,6 +4,7 @@
 
 import 'dart:io';
 
+import 'package:file/file.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 import 'package:test/test.dart' as test_package show TypeMatcher;
 

@@ -5,7 +5,6 @@
 import 'dart:ui' as ui;
 import 'dart:ui' show PointerChange;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
@@ -51,7 +50,7 @@ void main() {
 
   void dispatchRemoveDevice([int device = 0]) {
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.remove, const Offset(0.0, 0.0), device: device),
+      _pointerData(PointerChange.remove, Offset.zero, device: device),
     ]));
   }
 
@@ -78,7 +77,7 @@ void main() {
     );
 
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.add, const Offset(0.0, 0.0)),
+      _pointerData(PointerChange.add, Offset.zero),
     ]));
     addTearDown(dispatchRemoveDevice);
 
@@ -95,7 +94,7 @@ void main() {
 
     // Pointer is added outside of the annotation.
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.add, const Offset(0.0, 0.0)),
+      _pointerData(PointerChange.add, Offset.zero),
     ]));
 
     expect(logCursors, <_CursorUpdateDetails>[
@@ -127,7 +126,7 @@ void main() {
     // Pointer moves out of the annotation
     annotation = null;
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.hover, const Offset(0.0, 0.0)),
+      _pointerData(PointerChange.hover, Offset.zero),
     ]));
 
     expect(logCursors, <_CursorUpdateDetails>[
@@ -137,7 +136,7 @@ void main() {
 
     // Pointer is removed outside of the annotation.
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.remove, const Offset(0.0, 0.0)),
+      _pointerData(PointerChange.remove, Offset.zero),
     ]));
 
     expect(logCursors, const <_CursorUpdateDetails>[
@@ -155,7 +154,7 @@ void main() {
     // Pointer is added in the annotation.
     annotation = const TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.add, const Offset(0.0, 0.0)),
+      _pointerData(PointerChange.add, Offset.zero),
     ]));
 
     expect(logCursors, <_CursorUpdateDetails>[
@@ -187,7 +186,7 @@ void main() {
     // Pointer moves back into the annotation
     annotation = const TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.hover, const Offset(0.0, 0.0)),
+      _pointerData(PointerChange.hover, Offset.zero),
     ]));
 
     expect(logCursors, <_CursorUpdateDetails>[
@@ -197,7 +196,7 @@ void main() {
 
     // Pointer is removed within the annotation.
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.remove, const Offset(0.0, 0.0)),
+      _pointerData(PointerChange.remove, Offset.zero),
     ]));
 
     expect(logCursors, <_CursorUpdateDetails>[
@@ -214,7 +213,7 @@ void main() {
 
     // Pointer is added outside of the annotation.
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.add, const Offset(0.0, 0.0)),
+      _pointerData(PointerChange.add, Offset.zero),
     ]));
 
     expect(logCursors, <_CursorUpdateDetails>[
@@ -242,7 +241,7 @@ void main() {
 
     // Pointer is removed outside of the annotation.
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.remove, const Offset(0.0, 0.0)),
+      _pointerData(PointerChange.remove, Offset.zero),
     ]));
 
     expect(logCursors, <_CursorUpdateDetails>[
@@ -263,7 +262,7 @@ void main() {
       const TestAnnotationTarget(cursor: SystemMouseCursors.grabbing),
     ];
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.add, const Offset(0.0, 0.0)),
+      _pointerData(PointerChange.add, Offset.zero),
     ]));
 
     expect(logCursors, <_CursorUpdateDetails>[
@@ -291,7 +290,7 @@ void main() {
       const TestAnnotationTarget(cursor: SystemMouseCursors.grabbing),
     ];
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.add, const Offset(0.0, 0.0)),
+      _pointerData(PointerChange.add, Offset.zero),
     ]));
 
     expect(logCursors, <_CursorUpdateDetails>[
@@ -315,7 +314,7 @@ void main() {
 
     // Pointer is added outside of the annotation.
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.add, const Offset(0.0, 0.0)),
+      _pointerData(PointerChange.add, Offset.zero),
     ]));
 
     expect(logCursors, <_CursorUpdateDetails>[
@@ -336,7 +335,7 @@ void main() {
     // Pointer moved to no annotations
     annotation = null;
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.hover, const Offset(0.0, 0.0)),
+      _pointerData(PointerChange.hover, Offset.zero),
     ]));
 
     expect(logCursors, <_CursorUpdateDetails>[
@@ -345,7 +344,7 @@ void main() {
 
     // Remove
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.remove, const Offset(0.0, 0.0)),
+      _pointerData(PointerChange.remove, Offset.zero),
     ]));
   });
 
@@ -360,7 +359,7 @@ void main() {
     // Pointer is added to the annotation, then removed
     annotation = const TestAnnotationTarget(cursor: SystemMouseCursors.click);
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.add, const Offset(0.0, 0.0)),
+      _pointerData(PointerChange.add, Offset.zero),
       _pointerData(PointerChange.hover, const Offset(5.0, 0.0)),
       _pointerData(PointerChange.remove, const Offset(5.0, 0.0)),
     ]));
@@ -370,7 +369,7 @@ void main() {
     // Pointer is added out of the annotation
     annotation = null;
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.add, const Offset(0.0, 0.0)),
+      _pointerData(PointerChange.add, Offset.zero),
     ]));
     addTearDown(dispatchRemoveDevice);
 
@@ -395,8 +394,8 @@ void main() {
 
     // Pointers are added outside of the annotation.
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.add, const Offset(0.0, 0.0), device: 1),
-      _pointerData(PointerChange.add, const Offset(0.0, 0.0), device: 2),
+      _pointerData(PointerChange.add, Offset.zero, device: 1),
+      _pointerData(PointerChange.add, Offset.zero, device: 2),
     ]));
     addTearDown(() => dispatchRemoveDevice(1));
     addTearDown(() => dispatchRemoveDevice(2));

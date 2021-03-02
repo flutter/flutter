@@ -11,6 +11,7 @@ import 'basic.dart';
 import 'framework.dart';
 import 'localizations.dart';
 import 'media_query.dart';
+import 'overlay.dart';
 import 'table.dart';
 
 // Any changes to this file should be reflected in the debugAssertAllWidgetVarsUnset()
@@ -357,6 +358,40 @@ bool debugCheckHasWidgetsLocalizations(BuildContext context) {
         ),
         ...context.describeMissingAncestor(expectedAncestorType: WidgetsLocalizations)
       ]);
+    }
+    return true;
+  }());
+  return true;
+}
+
+/// Asserts that the given context has an [Overlay] ancestor.
+///
+/// To call this function, use the following pattern, typically in the
+/// relevant Widget's build method:
+///
+/// ```dart
+/// assert(debugCheckHasOverlay(context));
+/// ```
+///
+/// Does nothing if asserts are disabled. Always returns true.
+bool debugCheckHasOverlay(BuildContext context) {
+  assert(() {
+    if (context.widget is! Overlay && context.findAncestorWidgetOfExactType<Overlay>() == null) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('No Overlay widget found.'),
+        ErrorDescription(
+          '${context.widget.runtimeType} widgets require an Overlay '
+          'widget ancestor.\n'
+          'An overlay lets widgets float on top of other widget children.'
+        ),
+        ErrorHint(
+          'To introduce an Overlay widget, you can either directly '
+          'include one, or use a widget that contains an Overlay itself, '
+          'such as a Navigator, WidgetApp, MaterialApp, or CupertinoApp.',
+        ),
+        ...context.describeMissingAncestor(expectedAncestorType: Overlay)
+      ]
+      );
     }
     return true;
   }());

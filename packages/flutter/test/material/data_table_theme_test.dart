@@ -24,6 +24,7 @@ void main() {
     expect(themeData.horizontalMargin, null);
     expect(themeData.columnSpacing, null);
     expect(themeData.dividerThickness, null);
+    expect(themeData.checkboxHorizontalMargin, null);
 
     const DataTableTheme theme = DataTableTheme(data: DataTableThemeData(), child: SizedBox());
     expect(theme.data.decoration, null);
@@ -36,6 +37,7 @@ void main() {
     expect(theme.data.horizontalMargin, null);
     expect(theme.data.columnSpacing, null);
     expect(theme.data.dividerThickness, null);
+    expect(theme.data.checkboxHorizontalMargin, null);
   });
 
   testWidgets('Default DataTableThemeData debugFillProperties', (WidgetTester tester) async {
@@ -67,6 +69,7 @@ void main() {
       horizontalMargin: 3.0,
       columnSpacing: 4.0,
       dividerThickness: 5.0,
+      checkboxHorizontalMargin: 6.0,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -84,6 +87,7 @@ void main() {
     expect(description[7], 'horizontalMargin: 3.0');
     expect(description[8], 'columnSpacing: 4.0');
     expect(description[9], 'dividerThickness: 5.0');
+    expect(description[10], 'checkboxHorizontalMargin: 6.0');
   });
 
   testWidgets('DataTable is themeable', (WidgetTester tester) async {
