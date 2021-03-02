@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
+// @dart = 2.8
 
 import 'package:file/file.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
 import 'test_data/basic_project.dart';
@@ -36,16 +37,6 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('writes pid-file', () async {
-    final File pidFile = tempDir.childFile('test.pid');
-    await _flutterRun.run(withDebugger: true);
-    await _flutterAttach.attach(
-      _flutterRun.vmServicePort,
-      pidFile: pidFile,
-    );
-    expect(pidFile.existsSync(), isTrue);
-  });
-
   testWithoutContext('can hot reload', () async {
     await _flutterRun.run(withDebugger: true);
     await _flutterAttach.attach(_flutterRun.vmServicePort);
@@ -72,4 +63,46 @@ void main() {
     await _flutterAttach.attach(_flutterRun.vmServicePort);
     await _flutterAttach.hotReload();
   });
+
+  testWithoutContext('sets activeDevToolsServerAddress extension', () async {
+    await _flutterRun.run(
+      startPaused: true,
+      withDebugger: true,
+      additionalCommandArgs: <String>['--devtools-server-address', 'http://127.0.0.1:9105'],
+    );
+    await _flutterRun.resume();
+    await pollForServiceExtensionValue<String>(
+      testDriver: _flutterRun,
+      extension: 'ext.flutter.activeDevToolsServerAddress',
+      continuePollingValue: '',
+      matches: equals('http://127.0.0.1:9105'),
+    );
+    await pollForServiceExtensionValue<String>(
+      testDriver: _flutterRun,
+      extension: 'ext.flutter.connectedVmServiceUri',
+      continuePollingValue: '',
+      matches: isNotEmpty,
+    );
+
+    final Response response = await _flutterRun.callServiceExtension('ext.flutter.connectedVmServiceUri');
+    final String vmServiceUri = response.json['value'] as String;
+
+    // Attach with a different DevTools server address.
+    await _flutterAttach.attach(
+      _flutterRun.vmServicePort,
+      additionalCommandArgs: <String>['--devtools-server-address', 'http://127.0.0.1:9110'],
+    );
+    await pollForServiceExtensionValue<String>(
+      testDriver: _flutterAttach,
+      extension: 'ext.flutter.activeDevToolsServerAddress',
+      continuePollingValue: '',
+      matches: equals('http://127.0.0.1:9110'),
+    );
+    await pollForServiceExtensionValue<String>(
+      testDriver: _flutterRun,
+      extension: 'ext.flutter.connectedVmServiceUri',
+      continuePollingValue: '',
+      matches: equals(vmServiceUri),
+    );
+  }, timeout: const Timeout.factor(4));
 }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -12,12 +14,10 @@ import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
-import '../../../src/mocks.dart';
 import '../../../src/testbed.dart';
 
 const List<String> kDart2jsLinuxArgs = <String>[
@@ -83,7 +83,7 @@ void main() {
 
     // Plugins
     expect(generated, contains("import 'package:foo/generated_plugin_registrant.dart';"));
-    expect(generated, contains('registerPlugins(webPluginRegistry);'));
+    expect(generated, contains('registerPlugins(webPluginRegistrar);'));
 
     // Main
     expect(generated, contains('entrypoint.main();'));
@@ -185,7 +185,7 @@ void main() {
 
     // Plugins
     expect(generated, contains("import 'package:foo/generated_plugin_registrant.dart';"));
-    expect(generated, contains('registerPlugins(webPluginRegistry);'));
+    expect(generated, contains('registerPlugins(webPluginRegistrar);'));
 
     // Main
     expect(generated, contains('entrypoint.main();'));
@@ -208,7 +208,7 @@ void main() {
 
     // Plugins
     expect(generated, isNot(contains("import 'package:foo/generated_plugin_registrant.dart';")));
-    expect(generated, isNot(contains('registerPlugins(webPluginRegistry);')));
+    expect(generated, isNot(contains('registerPlugins(webPluginRegistrar);')));
     // Main
     expect(generated, contains('entrypoint.main();'));
   }));
@@ -253,7 +253,7 @@ void main() {
 
     // Plugins
     expect(generated, isNot(contains("import 'package:foo/generated_plugin_registrant.dart';")));
-    expect(generated, isNot(contains('registerPlugins(webPluginRegistry);')));
+    expect(generated, isNot(contains('registerPlugins(webPluginRegistrar);')));
 
     // Main
     expect(generated, contains('entrypoint.main();'));
@@ -392,6 +392,40 @@ void main() {
     ProcessManager: () => processManager,
   }));
 
+  test('Dart2JSTarget calls dart2js with expected args in release mode with native null assertions', () => testbed.run(() async {
+    environment.defines[kBuildMode] = 'release';
+    environment.defines[kNativeNullAssertions] = 'true';
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ...kDart2jsLinuxArgs,
+        '--native-null-assertions',
+        '-Ddart.vm.product=true',
+        '--no-source-maps',
+        '-o',
+        environment.buildDir.childFile('app.dill').absolute.path,
+        '--packages=.packages',
+        '--cfe-only',
+        environment.buildDir.childFile('main.dart').absolute.path,
+      ]
+    ));
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ...kDart2jsLinuxArgs,
+        '--native-null-assertions',
+        '-Ddart.vm.product=true',
+        '--no-source-maps',
+        '-O4',
+        '-o',
+        environment.buildDir.childFile('main.dart.js').absolute.path,
+        environment.buildDir.childFile('app.dill').absolute.path,
+      ]
+    ));
+
+    await const Dart2JSTarget().build(environment);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => processManager,
+  }));
+
   test('Dart2JSTarget calls dart2js with expected args in release with dart2js optimization override', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
     environment.defines[kDart2jsOptimization] = 'O3';
@@ -426,11 +460,21 @@ void main() {
 
   test('Dart2JSTarget produces expected depfile', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
-    when(globals.processManager.run(any)).thenAnswer((Invocation invocation) async {
-      environment.buildDir.childFile('app.dill.deps')
-        .writeAsStringSync('file:///a.dart');
-      return FakeProcessResult(exitCode: 0);
-    });
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ...kDart2jsLinuxArgs,
+        '-Ddart.vm.product=true',
+        '--no-source-maps',
+        '-o',
+        environment.buildDir.childFile('app.dill').absolute.path,
+        '--packages=.packages',
+        '--cfe-only',
+        environment.buildDir.childFile('main.dart').absolute.path,
+      ], onRun: () {
+        environment.buildDir.childFile('app.dill.deps')
+          .writeAsStringSync('file:///a.dart');
+      },
+    ));
     await const Dart2JSTarget().build(environment);
 
     expect(environment.buildDir.childFile('dart2js.d'), exists);
@@ -440,12 +484,12 @@ void main() {
     expect(depfile.outputs.single.path,
       environment.buildDir.childFile('main.dart.js').absolute.path);
   }, overrides: <Type, Generator>{
-    ProcessManager: () => MockProcessManager(),
+    ProcessManager: () => processManager,
   }));
 
   test('Dart2JSTarget calls dart2js with Dart defines in release mode', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
-    environment.defines[kDartDefines] = 'FOO=bar,BAZ=qux';
+    environment.defines[kDartDefines] = encodeDartDefines(<String>['FOO=bar', 'BAZ=qux']);
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
@@ -512,7 +556,7 @@ void main() {
 
   test('Dart2JSTarget calls dart2js with Dart defines in profile mode', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'profile';
-    environment.defines[kDartDefines] = 'FOO=bar,BAZ=qux';
+    environment.defines[kDartDefines] = encodeDartDefines(<String>['FOO=bar', 'BAZ=qux']);
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
@@ -616,5 +660,3 @@ void main() {
       contains('"main.dart.js"'));
   }));
 }
-
-class MockProcessManager extends Mock implements ProcessManager {}

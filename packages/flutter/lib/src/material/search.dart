@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
@@ -60,7 +59,7 @@ Future<T?> showSearch<T>({
   assert(context != null);
   delegate.query = query ?? delegate.query;
   delegate._currentBody = _SearchBody.suggestions;
-  return Navigator.of(context)!.push(_SearchPageRoute<T>(
+  return Navigator.of(context).push(_SearchPageRoute<T>(
     delegate: delegate,
   ));
 }
@@ -69,8 +68,9 @@ Future<T?> showSearch<T>({
 ///
 /// The search page always shows an [AppBar] at the top where users can
 /// enter their search queries. The buttons shown before and after the search
-/// query text field can be customized via [SearchDelegate.buildLeading] and
-/// [SearchDelegate.buildActions].
+/// query text field can be customized via [SearchDelegate.buildLeading]
+/// and [SearchDelegate.buildActions]. Additonally, a widget can be placed
+/// across the bottom of the [AppBar] via [SearchDelegate.buildBottom].
 ///
 /// The body below the [AppBar] can either show suggested queries (returned by
 /// [SearchDelegate.buildSuggestions]) or - once the user submits a search  - the
@@ -103,7 +103,7 @@ abstract class SearchDelegate<T> {
   /// ```dart
   /// class CustomSearchHintDelegate extends SearchDelegate {
   ///   CustomSearchHintDelegate({
-  ///     String hintText,
+  ///     required String hintText,
   ///   }) : super(
   ///     searchFieldLabel: hintText,
   ///     keyboardType: TextInputType.text,
@@ -112,6 +112,12 @@ abstract class SearchDelegate<T> {
   ///
   ///   @override
   ///   Widget buildLeading(BuildContext context) => Text("leading");
+  ///
+  ///   PreferredSizeWidget buildBottom(BuildContext context) {
+  ///     return PreferredSize(
+  ///        preferredSize: Size.fromHeight(56.0),
+  ///        child: Text("bottom"));
+  ///   }
   ///
   ///   @override
   ///   Widget buildSuggestions(BuildContext context) => Text("suggestions");
@@ -188,6 +194,16 @@ abstract class SearchDelegate<T> {
   ///  * [AppBar.actions], the intended use for the return value of this method.
   List<Widget> buildActions(BuildContext context);
 
+  /// Widget to display across the bottom of the [AppBar].
+  ///
+  /// Returns null by default, i.e. a bottom widget is not included.
+  ///
+  /// See also:
+  ///
+  ///  * [AppBar.bottom], the intended use for the return value of this method.
+  ///
+  PreferredSizeWidget? buildBottom(BuildContext context) => null;
+
   /// The theme used to configure the search page.
   ///
   /// The returned [ThemeData] will be used to wrap the entire search page,
@@ -212,7 +228,7 @@ abstract class SearchDelegate<T> {
     return theme.copyWith(
       appBarTheme: AppBarTheme(
         brightness: colorScheme.brightness,
-        color: colorScheme.brightness == Brightness.dark ? Colors.grey[900] : Colors.white,
+        backgroundColor: colorScheme.brightness == Brightness.dark ? Colors.grey[900] : Colors.white,
         iconTheme: theme.primaryIconTheme.copyWith(color: Colors.grey),
         textTheme: theme.textTheme,
       ),
@@ -277,7 +293,7 @@ abstract class SearchDelegate<T> {
   void close(BuildContext context, T result) {
     _currentBody = null;
     _focusNode?.unfocus();
-    Navigator.of(context)!
+    Navigator.of(context)
       ..popUntil((Route<dynamic> route) => route == _route)
       ..pop(result);
   }
@@ -560,12 +576,13 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
               decoration: InputDecoration(hintText: searchFieldLabel),
             ),
             actions: widget.delegate.buildActions(context),
+            bottom: widget.delegate.buildBottom(context),
           ),
           body: AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
             child: body,
           ),
-        ),
+        )
       ),
     );
   }

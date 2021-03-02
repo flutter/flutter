@@ -236,15 +236,32 @@ abstract class BindingBase {
             }
             _postExtensionStateChangedEvent(
               brightnessOverrideExtensionName,
-              (debugBrightnessOverride ?? platformDispatcher.platformBrightness).toString(),
+              (debugBrightnessOverride ?? window.platformBrightness).toString(),
             );
             await reassembleApplication();
           }
           return <String, dynamic>{
-            'value': (debugBrightnessOverride ?? platformDispatcher.platformBrightness).toString(),
+            'value': (debugBrightnessOverride ?? window.platformBrightness).toString(),
           };
         },
       );
+
+      registerStringServiceExtension(
+        name: 'connectedVmServiceUri',
+        getter: () async => connectedVmServiceUri ?? '',
+        setter: (String uri) async {
+          connectedVmServiceUri = uri;
+        },
+      );
+
+      registerStringServiceExtension(
+        name: 'activeDevToolsServerAddress',
+        getter: () async => activeDevToolsServerAddress ?? '',
+        setter: (String serverAddress) async {
+          activeDevToolsServerAddress = serverAddress;
+        },
+      );
+
       return true;
     }());
     assert(() {

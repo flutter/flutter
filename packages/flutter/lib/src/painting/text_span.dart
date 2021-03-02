@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:ui' as ui show ParagraphBuilder;
 
 import 'package:flutter/foundation.dart';
@@ -43,9 +42,6 @@ import 'text_style.dart';
 /// ```
 /// {@end-tool}
 ///
-/// _There is some more detailed sample code in the documentation for the
-/// [recognizer] property._
-///
 /// The [TextSpan.text] will be used as the semantics label unless overridden
 /// by the [TextSpan.semanticsLabel] property. Any [PlaceholderSpan]s in the
 /// [TextSpan.children] list will separate the text before and after it into two
@@ -57,6 +53,8 @@ import 'text_style.dart';
 ///    [InlineSpan] tree. Specify a widget within the [children] list by
 ///    wrapping the widget with a [WidgetSpan]. The widget will be laid out
 ///    inline within the paragraph.
+///  * [ReactiveTextSpan], a text span that react to gestures and mouse movements,
+///    including support for gestures and mouse cursors.
 ///  * [Text], a widget for showing uniformly-styled text.
 ///  * [RichText], a widget for finer control of text rendering.
 ///  * [TextPainter], a class for painting [TextSpan] objects on a [Canvas].
@@ -72,7 +70,8 @@ class TextSpan extends InlineSpan implements HitTestTarget {
     TextStyle? style,
     this.recognizer,
     this.semanticsLabel,
-  }) : super(style: style);
+  }) : assert(!(text == null && semanticsLabel != null)),
+       super(style: style);
 
   /// The text contained in this span.
   ///
@@ -80,7 +79,6 @@ class TextSpan extends InlineSpan implements HitTestTarget {
   /// children.
   ///
   /// This getter does not include the contents of its children.
-  @override
   final String? text;
 
 
@@ -93,7 +91,6 @@ class TextSpan extends InlineSpan implements HitTestTarget {
   /// and may have unexpected results.
   ///
   /// The list must not contain any nulls.
-  @override
   final List<InlineSpan>? children;
 
   /// A gesture recognizer that will receive events that hit this span.
@@ -126,7 +123,7 @@ class TextSpan extends InlineSpan implements HitTestTarget {
   /// }
   ///
   /// class _BuzzingTextState extends State<BuzzingText> {
-  ///   LongPressGestureRecognizer _longPressRecognizer;
+  ///   late LongPressGestureRecognizer _longPressRecognizer;
   ///
   ///   @override
   ///   void initState() {
@@ -172,10 +169,10 @@ class TextSpan extends InlineSpan implements HitTestTarget {
   /// ```
   /// {@end-tool}
   @Deprecated(
-    "TextSpan's support for recognizers will be moved to ReactiveTextSpan. Use ReactiveTextSpan instead. "
-    'This feature was deprecated after v1.24.' // TODO: Finalize version
+    "TextSpan's support for recognizers has been moved to ReactiveTextSpan. "
+    'Use ReactiveTextSpan.recognizer instead. '
+    'This feature was deprecated after v1.22.6.'
   )
-  @override
   final GestureRecognizer? recognizer;
 
   /// An alternative semantics label for this [TextSpan].
@@ -250,36 +247,6 @@ class TextSpan extends InlineSpan implements HitTestTarget {
     return true;
   }
 
-  // TODO(garyq): Remove this after next stable release.
-  /// Walks this [TextSpan] and any descendants in pre-order and calls `visitor`
-  /// for each span that has content.
-  ///
-  /// When `visitor` returns true, the walk will continue. When `visitor`
-  /// returns false, then the walk will end.
-  @override
-  @Deprecated(
-    'Use to visitChildren instead. '
-    'This feature was deprecated after v1.7.3.'
-  )
-  bool visitTextSpan(bool visitor(TextSpan span)) {
-    if (text != null) {
-      if (!visitor(this))
-        return false;
-    }
-    if (children != null) {
-      for (final InlineSpan child in children!) {
-        assert(
-          child is TextSpan,
-          'visitTextSpan is deprecated. Use visitChildren to support InlineSpans',
-        );
-        final TextSpan textSpanChild = child as TextSpan;
-        if (!textSpanChild.visitTextSpan(visitor))
-          return false;
-      }
-    }
-    return true;
-  }
-
   /// Returns the text span that contains the given position in the text.
   @override
   InlineSpan? getSpanForPositionVisitor(TextPosition position, Accumulator offset) {
@@ -323,7 +290,7 @@ class TextSpan extends InlineSpan implements HitTestTarget {
   @override
   void computeSemanticsInformation(List<InlineSpanSemanticsInformation> collector) {
     assert(debugAssertIsValid());
-    if (text != null || semanticsLabel != null) {
+    if (text != null) {
       collector.add(InlineSpanSemanticsInformation(
         text!,
         semanticsLabel: semanticsLabel,
@@ -349,7 +316,15 @@ class TextSpan extends InlineSpan implements HitTestTarget {
     return null;
   }
 
-  @override
+  /// Populates the `semanticsOffsets` and `semanticsElements` with the appropriate data
+  /// to be able to construct a [SemanticsNode].
+  ///
+  /// If applicable, the beginning and end text offset are added to [semanticsOffsets].
+  /// [PlaceholderSpan]s have a text length of 1, which corresponds to the object
+  /// replacement character (0xFFFC) that is inserted to represent it.
+  ///
+  /// Any [GestureRecognizer]s are added to `semanticsElements`. Null is added to
+  /// `semanticsElements` for [PlaceholderSpan]s.
   void describeSemantics(Accumulator offset, List<int> semanticsOffsets, List<dynamic> semanticsElements) {
     if (
       recognizer != null &&

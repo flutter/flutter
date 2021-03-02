@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -315,7 +316,7 @@ void main() {
             text: 'Some Text',
             semanticsLabel: '',
           ),
-          TextSpan(
+          ReactiveTextSpan(
             text: 'Clickable',
             recognizer: TapGestureRecognizer()..onTap = () { },
           ),
@@ -359,7 +360,7 @@ void main() {
         TextSpan(
           children: <TextSpan>[
             const TextSpan(text: 'hello '),
-            TextSpan(
+            ReactiveTextSpan(
               text: 'world',
               recognizer: TapGestureRecognizer()..onTap = () { },
             ),
@@ -415,7 +416,7 @@ void main() {
           TextSpan(
             children: <TextSpan>[
               const TextSpan(text: '\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n'),
-              TextSpan(
+              ReactiveTextSpan(
                 text: 'world',
                 recognizer: TapGestureRecognizer()..onTap = () { },
               ),
@@ -464,7 +465,7 @@ void main() {
         TextSpan(
           children: <TextSpan>[
             const TextSpan(text: 'hello '),
-            TextSpan(
+            ReactiveTextSpan(
               text: 'world',
               recognizer: TapGestureRecognizer()..onTap = () { },
             ),
@@ -523,12 +524,12 @@ void main() {
           style: textStyle,
           children: <TextSpan>[
             const TextSpan(text: 'hello world${Unicode.RLE}${Unicode.RLO} '),
-            TextSpan(
+            ReactiveTextSpan(
               text: 'BOY',
               recognizer: LongPressGestureRecognizer()..onLongPress = () { },
             ),
             const TextSpan(text: ' HOW DO${Unicode.PDF} you ${Unicode.RLO} DO '),
-            TextSpan(
+            ReactiveTextSpan(
               text: 'SIR',
               recognizer: TapGestureRecognizer()..onTap = () { },
             ),
@@ -602,7 +603,7 @@ void main() {
       Text.rich(
         TextSpan(
           children: <TextSpan>[
-            TextSpan(
+            ReactiveTextSpan(
               text: 'click me',
               recognizer: TapGestureRecognizer()..onTap = () { },
             ),
@@ -643,7 +644,7 @@ void main() {
         TextSpan(
           children: <InlineSpan>[
             const TextSpan(text: 'a '),
-            TextSpan(
+            ReactiveTextSpan(
               text: 'pebble',
               recognizer: TapGestureRecognizer()..onTap = () { },
             ),
@@ -717,7 +718,7 @@ void main() {
         TextSpan(
           children: <InlineSpan>[
             const TextSpan(text: 'a '),
-            TextSpan(
+            ReactiveTextSpan(
               text: 'pebble',
               recognizer: TapGestureRecognizer()..onTap = () { },
             ),
@@ -1002,7 +1003,7 @@ void main() {
         textDirection: TextDirection.ltr,
         text: TextSpan(children: <InlineSpan>[
           const WidgetSpan(child: SizedBox.shrink()),
-          TextSpan(
+          ReactiveTextSpan(
             text: 'HELLO',
             style: const TextStyle(color: Colors.black),
             recognizer: TapGestureRecognizer()..onTap = () {},
@@ -1050,7 +1051,7 @@ void main() {
           text: TextSpan(children: <InlineSpan>[
             const WidgetSpan(child: SizedBox.shrink()),
             const WidgetSpan(child: Text('included')),
-            TextSpan(
+            ReactiveTextSpan(
               text: 'HELLO',
               style: const TextStyle(color: Colors.black),
               recognizer: TapGestureRecognizer()..onTap = () {},
@@ -1109,7 +1110,7 @@ void main() {
                 ],
               ),
             ),
-            TextSpan(
+            ReactiveTextSpan(
               text: 'HELLO',
               style: const TextStyle(color: Colors.black),
               recognizer: TapGestureRecognizer()..onTap = () {},
@@ -1169,7 +1170,7 @@ void main() {
                           semanticLabel: 'not clipped',
                         ),
                       ),
-                      TextSpan(
+                      ReactiveTextSpan(
                         text: 'next WS is clipped',
                         recognizer: TapGestureRecognizer()..onTap = () { },
                       ),
@@ -1209,6 +1210,47 @@ void main() {
     ignoreTransform: true,
     ));
   }, semanticsEnabled: true, skip: isBrowser); // Browser does not support widget span
+
+  testWidgets('RenderParagraph intrinsic width', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 100,
+            child: IntrinsicWidth(
+              child: RichText(
+                text: TextSpan(
+                  style: const TextStyle(fontSize: 16, height: 1),
+                  children: <InlineSpan>[
+                    const TextSpan(text: 'S '),
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.top,
+                      child: Wrap(
+                        direction: Axis.vertical,
+                        children: <Widget>[
+                          Container(width: 200, height: 100),
+                          Container(width: 200, height: 30),
+                        ],
+                      ),
+                    ),
+                    const TextSpan(text: ' E'),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(RichText)).width, 200 + 4 * 16.0);
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.byType(RichText));
+    // The inline spans are rendered on one (horizontal) line, the sum of the widths is the max intrinsic width.
+    expect(paragraph.getMaxIntrinsicWidth(0.0), 200 + 4 * 16.0);
+    // The inline spans are rendered in one vertical run, the widest one determines the min intrinsic width.
+    expect(paragraph.getMinIntrinsicWidth(0.0), 200);
+  });
 }
 
 Future<void> _pumpTextWidget({

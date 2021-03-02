@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -42,6 +44,10 @@ void main() {
     return _testFile('trivial_widget', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero);
   });
 
+  testWithoutContext('flutter test set the working directory correctly', () async {
+    return _testFile('working_directory', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero);
+  });
+
   testWithoutContext('flutter test should report nice errors for exceptions thrown within testWidgets()', () async {
     return _testFile('exception_handling', automatedTestsDirectory, flutterTestDirectory);
   });
@@ -80,6 +86,11 @@ void main() {
 
   testWithoutContext('flutter test should can load assets within its own package', () async {
     return _testFile('package_assets', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero);
+  });
+
+  testWithoutContext('flutter test should support dart defines', () async {
+    return _testFile('dart_defines', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero,
+      extraArguments: <String>['--dart-define=flutter.test.foo=bar']);
   });
 
   testWithoutContext('flutter test should run a test when its name matches a regexp', () async {
@@ -157,7 +168,7 @@ void main() {
       extraArguments: const <String>['--verbose']);
     final String stdout = result.stdout as String;
     if ((!stdout.contains('+1: All tests passed')) ||
-        (!stdout.contains('test 0: starting shell process')) ||
+        (!stdout.contains('test 0: Starting flutter_tester process with command')) ||
         (!stdout.contains('test 0: deleting temporary directory')) ||
         (!stdout.contains('test 0: finished')) ||
         (!stdout.contains('test package returned with exit code 0'))) {
@@ -174,7 +185,7 @@ void main() {
       extraArguments: const <String>['--verbose']);
     final String stdout = result.stdout as String;
     if ((!stdout.contains('+2: All tests passed')) ||
-        (!stdout.contains('test 0: starting shell process')) ||
+        (!stdout.contains('test 0: Starting flutter_tester process with command')) ||
         (!stdout.contains('test 0: deleting temporary directory')) ||
         (!stdout.contains('test 0: finished')) ||
         (!stdout.contains('test package returned with exit code 0'))) {

@@ -4,7 +4,6 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -197,6 +196,11 @@ class SimpleCustomSemanticsRenderObject extends RenderBox {
 
   @override
   bool get sizedByParent => true;
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.smallest;
+  }
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {

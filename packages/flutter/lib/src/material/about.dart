@@ -11,7 +11,6 @@ import 'package:flutter/widgets.dart' hide Flow;
 
 import 'app_bar.dart';
 import 'back_button.dart';
-import 'button_bar.dart';
 import 'card.dart';
 import 'constants.dart';
 import 'debug.dart';
@@ -43,15 +42,15 @@ import 'theme.dart';
 ///
 /// If your application does not have a [Drawer], you should provide an
 /// affordance to call [showAboutDialog] or (at least) [showLicensePage].
+///
 /// {@tool dartpad --template=stateless_widget_material}
 ///
 /// This sample shows two ways to open [AboutDialog]. The first one
 /// uses an [AboutListTile], and the second uses the [showAboutDialog] function.
 ///
 /// ```dart
-///
 ///  Widget build(BuildContext context) {
-///    final TextStyle textStyle = Theme.of(context).textTheme.bodyText2;
+///    final TextStyle textStyle = Theme.of(context).textTheme.bodyText2!;
 ///    final List<Widget> aboutBoxChildren = <Widget>[
 ///      SizedBox(height: 24),
 ///      RichText(
@@ -110,10 +109,9 @@ import 'theme.dart';
 ///        ),
 ///      ),
 ///    );
-///}
+/// }
 /// ```
 /// {@end-tool}
-///
 class AboutListTile extends StatelessWidget {
   /// Creates a list tile for showing an about box.
   ///
@@ -292,7 +290,7 @@ void showLicensePage({
 }) {
   assert(context != null);
   assert(useRootNavigator != null);
-  Navigator.of(context, rootNavigator: useRootNavigator)!.push(MaterialPageRoute<void>(
+  Navigator.of(context, rootNavigator: useRootNavigator).push(MaterialPageRoute<void>(
     builder: (BuildContext context) => LicensePage(
       applicationName: applicationName,
       applicationVersion: applicationVersion,
@@ -1200,18 +1198,16 @@ class _MasterDetailFlow extends StatefulWidget {
   /// ```dart
   /// _MasterDetailFlow.of(context).openDetailPage(arguments);
   /// ```
-  static _MasterDetailFlowProxy? of(
-      BuildContext context, {
-        bool nullOk = false,
-      }) {
+  static _MasterDetailFlowProxy? of(BuildContext context) {
     _PageOpener? pageOpener = context.findAncestorStateOfType<_MasterDetailScaffoldState>();
     pageOpener ??= context.findAncestorStateOfType<_MasterDetailFlowState>();
     assert(() {
-      if (pageOpener == null && !nullOk) {
+      if (pageOpener == null) {
         throw FlutterError(
-            'Master Detail operation requested with a context that does not include a Master Detail'
-                ' Flow.\nThe context used to open a detail page from the Master Detail Flow must be'
-                ' that of a widget that is a descendant of a Master Detail Flow widget.');
+          'Master Detail operation requested with a context that does not include a Master Detail '
+          'Flow.\nThe context used to open a detail page from the Master Detail Flow must be '
+          'that of a widget that is a descendant of a Master Detail Flow widget.'
+        );
       }
       return true;
     }());
@@ -1342,8 +1338,8 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
             ? widget.masterPageBuilder!(c, false)
             : _MasterPage(
                 leading: widget.leading ??
-                    (widget.automaticallyImplyLeading && Navigator.of(context)!.canPop()
-                        ? BackButton(onPressed: () => Navigator.of(context)!.pop())
+                    (widget.automaticallyImplyLeading && Navigator.of(context).canPop()
+                        ? BackButton(onPressed: () => Navigator.of(context).pop())
                         : null),
                 title: widget.title,
                 centerTitle: widget.centerTitle,
@@ -1364,7 +1360,7 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
         onWillPop: () async {
           // No need for setState() as rebuild happens on navigation pop.
           focus = _Focus.master;
-          Navigator.of(context)!.pop();
+          Navigator.of(context).pop();
           return false;
         },
         child: BlockSemantics(child: widget.detailPageBuilder(context, arguments, null)),
@@ -1537,13 +1533,17 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   ConstrainedBox(
-                    constraints:
-                    BoxConstraints.tightFor(width: masterViewWidth),
+                    constraints: BoxConstraints.tightFor(width: masterViewWidth),
                     child: IconTheme(
                       data: Theme.of(context).primaryIconTheme,
-                      child: ButtonBar(
-                        children:
-                        widget.actionBuilder!(context, _ActionLevel.view),
+                      child: Container(
+                        alignment: AlignmentDirectional.centerEnd,
+                        padding: const EdgeInsets.all(8),
+                        child: OverflowBar(
+                          spacing: 8,
+                          overflowAlignment: OverflowBarAlignment.end,
+                          children: widget.actionBuilder!(context, _ActionLevel.view),
+                        ),
                       ),
                     ),
                   )

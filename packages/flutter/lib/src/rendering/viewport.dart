@@ -6,7 +6,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -53,6 +52,11 @@ abstract class RenderAbstractViewport extends RenderObject {
   /// Returns the offset that would be needed to reveal the `target`
   /// [RenderObject].
   ///
+  /// This is used by [RenderViewportBase.showInViewport], which is
+  /// itself used by [RenderObject.showOnScreen] for
+  /// [RenderViewportBase], which is in turn used by the semantics
+  /// system to implement scrolling for accessibility tools.
+  ///
   /// The optional `rect` parameter describes which area of that `target` object
   /// should be revealed in the viewport. If `rect` is null, the entire
   /// `target` [RenderObject] (as defined by its [RenderObject.paintBounds])
@@ -95,7 +99,6 @@ abstract class RenderAbstractViewport extends RenderObject {
 /// the [rect] position said element would have in the viewport at that
 /// [offset].
 class RevealedOffset {
-
   /// Instantiates a return value for [RenderAbstractViewport.getOffsetToReveal].
   const RevealedOffset({
     required this.offset,
@@ -1352,7 +1355,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   bool get sizedByParent => true;
 
   @override
-  void performResize() {
+  Size computeDryLayout(BoxConstraints constraints) {
     assert(() {
       if (!constraints.hasBoundedHeight || !constraints.hasBoundedWidth) {
         switch (axis) {
@@ -1420,7 +1423,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
       }
       return true;
     }());
-    size = constraints.biggest;
+    return constraints.biggest;
   }
 
   static const int _maxLayoutCycles = 10;
@@ -2005,19 +2008,19 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
 
   @override
   Iterable<RenderSliver> get childrenInPaintOrder sync* {
-    RenderSliver? child = firstChild;
+    RenderSliver? child = lastChild;
     while (child != null) {
       yield child;
-      child = childAfter(child);
+      child = childBefore(child);
     }
   }
 
   @override
   Iterable<RenderSliver> get childrenInHitTestOrder sync* {
-    RenderSliver? child = lastChild;
+    RenderSliver? child = firstChild;
     while (child != null) {
       yield child;
-      child = childBefore(child);
+      child = childAfter(child);
     }
   }
 }

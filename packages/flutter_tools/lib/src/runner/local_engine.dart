@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
@@ -47,13 +49,16 @@ class LocalEngineLocator {
   final UserMessages _userMessages;
 
   /// Returns the engine build path of a local engine if one is located, otherwise `null`.
-  Future<EngineBuildPaths> findEnginePath(String engineSourcePath, String localEngine) async {
+  Future<EngineBuildPaths> findEnginePath(String engineSourcePath, String localEngine, String packagePath) async {
     engineSourcePath ??= _platform.environment[kFlutterEngineEnvironmentVariableName];
 
     if (engineSourcePath == null && localEngine != null) {
       try {
         final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-          _fileSystem.file(globalPackagesPath),
+          _fileSystem.file(
+            // TODO(jonahwilliams): update to package_config
+            packagePath ?? _fileSystem.path.join('.packages'),
+          ),
           logger: _logger,
           throwOnError: false,
         );

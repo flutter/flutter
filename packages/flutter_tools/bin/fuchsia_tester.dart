@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert' show json;
 import 'dart:math' as math;
 
@@ -14,8 +16,8 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
-import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
@@ -108,13 +110,11 @@ Future<void> run(List<String> args) async {
     // TODO(tvolkert): Remove once flutter_tester no longer looks for this.
     globals.fs.link(sdkRootDest.childFile('platform.dill').path).createSync('platform_strong.dill');
 
-    globalPackagesPath =
-        globals.fs.path.normalize(globals.fs.path.absolute(argResults[_kOptionPackages] as String));
-
     Directory testDirectory;
     CoverageCollector collector;
     if (argResults['coverage'] as bool) {
       collector = CoverageCollector(
+        packagesPath: globals.fs.path.normalize(globals.fs.path.absolute(argResults[_kOptionPackages] as String)),
         libraryPredicate: (String libraryName) {
           // If we have a specified coverage directory then accept all libraries.
           if (coverageDirectory != null) {
@@ -143,11 +143,17 @@ Future<void> run(List<String> args) async {
     exitCode = await const FlutterTestRunner().runTests(
       const TestWrapper(),
       tests.keys.toList(),
-      workDir: testDirectory,
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo(
+          BuildMode.debug,
+          '',
+          treeShakeIcons: false,
+          packagesPath: globals.fs.path.normalize(globals.fs.path.absolute(argResults[_kOptionPackages] as String)),
+        ),
+      ),
       watcher: collector,
       ipv6: false,
       enableObservatory: collector != null,
-      buildInfo: BuildInfo.debug,
       precompiledDillFiles: tests,
       concurrency: math.max(1, globals.platform.numberOfProcessors - 2),
       icudtlPath: globals.fs.path.absolute(argResults[_kOptionIcudtl] as String),

@@ -411,29 +411,14 @@ class _IndicatorPainter extends CustomPainter {
     _needsPaint = false;
     _painter ??= indicator.createBoxPainter(markNeedsPaint);
 
-    if (controller.indexIsChanging) {
-      // The user tapped on a tab, the tab controller's animation is running.
-      final Rect targetRect = indicatorRect(size, controller.index);
-      _currentRect = Rect.lerp(targetRect, _currentRect ?? targetRect, _indexChangeProgress(controller));
-    } else {
-      // The user is dragging the TabBarView's PageView left or right.
-      final int currentIndex = controller.index;
-      final Rect? previous = currentIndex > 0 ? indicatorRect(size, currentIndex - 1) : null;
-      final Rect middle = indicatorRect(size, currentIndex);
-      final Rect? next = currentIndex < maxTabIndex ? indicatorRect(size, currentIndex + 1) : null;
-      final double index = controller.index.toDouble();
-      final double value = controller.animation!.value;
-      if (value == index - 1.0)
-        _currentRect = previous ?? middle;
-      else if (value == index + 1.0)
-        _currentRect = next ?? middle;
-      else if (value == index)
-        _currentRect = middle;
-      else if (value < index)
-        _currentRect = previous == null ? middle : Rect.lerp(middle, previous, index - value);
-      else
-        _currentRect = next == null ? middle : Rect.lerp(middle, next, value - index);
-    }
+    final double index = controller.index.toDouble();
+    final double value = controller.animation!.value;
+    final bool ltr = index > value;
+    final int from = (ltr ? value.floor() : value.ceil()).clamp(0, maxTabIndex).toInt();
+    final int to = (ltr ? from + 1 : from - 1).clamp(0, maxTabIndex).toInt();
+    final Rect fromRect = indicatorRect(size, from);
+    final Rect toRect = indicatorRect(size, to);
+    _currentRect = Rect.lerp(fromRect, toRect, (value - from).abs());
     assert(_currentRect != null);
 
     final ImageConfiguration configuration = ImageConfiguration(
@@ -583,11 +568,108 @@ class _TabBarScrollController extends ScrollController {
 ///
 /// Uses values from [TabBarTheme] if it is set in the current context.
 ///
-/// To see a sample implementation, visit the [TabController] documentation.
+/// {@tool dartpad --template=stateless_widget_material}
+/// This sample shows the implementation of [TabBar] and [TabBarView] using a [DefaultTabController].
+/// Each [Tab] corresponds to a child of the [TabBarView] in the order they are written.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///    return DefaultTabController(
+///      initialIndex: 1,
+///      length: 3,
+///      child: Scaffold(
+///        appBar: AppBar(
+///          title: Text('TabBar Widget'),
+///          bottom: TabBar(
+///            tabs: <Widget>[
+///              Tab(
+///                icon: Icon(Icons.cloud_outlined),
+///              ),
+///              Tab(
+///                icon: Icon(Icons.beach_access_sharp),
+///              ),
+///              Tab(
+///                icon: Icon(Icons.brightness_5_sharp),
+///              ),
+///            ],
+///          ),
+///        ),
+///        body: TabBarView(
+///          children: <Widget>[
+///            Center(
+///              child: Text('It\'s cloudy here'),
+///            ),
+///            Center(
+///              child: Text('It\'s rainy here'),
+///            ),
+///            Center(
+///              child: Text('It\'s sunny here'),
+///            ),
+///          ],
+///        ),
+///      ),
+///    );
+///  }
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad --template=stateful_widget_material_ticker}
+/// [TabBar] can also be implmented by using a [TabController] which provides more options
+/// to control the behavior of the [TabBar] and [TabBarView]. This can be used instead of
+/// a [DefaultTabController], demonstrated below.
+///
+/// ```dart
+///
+/// late TabController _tabController;
+///
+///  @override
+///  void initState() {
+///    super.initState();
+///    _tabController = TabController(length: 3, vsync: this);
+///  }
+///
+///  Widget build(BuildContext context) {
+///    return Scaffold(
+///      appBar: AppBar(
+///        title: Text('TabBar Widget'),
+///        bottom: TabBar(
+///          controller: _tabController,
+///          tabs: <Widget>[
+///            Tab(
+///              icon: Icon(Icons.cloud_outlined),
+///            ),
+///            Tab(
+///             icon: Icon(Icons.beach_access_sharp),
+///            ),
+///            Tab(
+///              icon: Icon(Icons.brightness_5_sharp),
+///            ),
+///          ],
+///        ),
+///      ),
+///      body: TabBarView(
+///        controller: _tabController,
+///        children: <Widget>[
+///          Center(
+///            child: Text('It\'s cloudy here'),
+///          ),
+///          Center(
+///            child: Text('It\'s rainy here'),
+///          ),
+///          Center(
+///             child: Text('It\'s sunny here'),
+///          ),
+///        ],
+///      ),
+///    );
+///  }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
 ///  * [TabBarView], which displays page views that correspond to each tab.
+///  * [TabBar], which is used to display the [Tab] that corresponds to each page of the [TabBarView].
 class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a material design tab bar.
   ///

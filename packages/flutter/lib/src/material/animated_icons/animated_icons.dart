@@ -10,7 +10,7 @@ part of material_animated_icons;
 // generic vector graphics support in Flutter.
 
 // Examples can assume:
-// AnimationController controller;
+// late AnimationController controller;
 
 /// Shows an animated icon at a given animation [progress].
 ///
@@ -30,7 +30,6 @@ part of material_animated_icons;
 /// {@end-tool}
 ///
 class AnimatedIcon extends StatelessWidget {
-
   /// Creates an AnimatedIcon.
   ///
   /// The [progress] and [icon] arguments must not be null.

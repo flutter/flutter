@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
+import 'src/artifacts.dart';
 import 'src/base/context.dart';
 import 'src/base/file_system.dart';
 import 'src/base/io.dart';
@@ -44,16 +47,14 @@ import 'src/commands/symbolize.dart';
 import 'src/commands/test.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
+import 'src/devtools_launcher.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 // Files in `isolated` are intentionally excluded from google3 tooling.
-import 'src/isolated/devtools_launcher.dart';
 import 'src/isolated/mustache_template.dart';
 import 'src/isolated/resident_web_runner.dart';
-import 'src/isolated/web_compilation_delegate.dart';
 import 'src/resident_runner.dart';
 import 'src/runner/flutter_command.dart';
-import 'src/web/compile.dart';
 import 'src/web/web_runner.dart';
 
 /// Main entry point for commands.
@@ -62,6 +63,7 @@ import 'src/web/web_runner.dart';
 Future<void> main(List<String> args) async {
   final bool veryVerbose = args.contains('-vv');
   final bool verbose = args.contains('-v') || args.contains('--verbose') || veryVerbose;
+  final bool prefixedErrors = args.contains('--prefixed-errors');
   // Support the -? Powershell help idiom.
   final int powershellHelpIndex = args.indexOf('-?');
   if (powershellHelpIndex != -1) {
@@ -87,88 +89,107 @@ Future<void> main(List<String> args) async {
     userMessages: UserMessages(),
   );
 
-  await runner.run(args, () => <FlutterCommand>[
-    AnalyzeCommand(
+  await runner.run(
+    args,
+    () => generateCommands(
       verboseHelp: verboseHelp,
-      fileSystem: globals.fs,
-      platform: globals.platform,
-      processManager: globals.processManager,
-      logger: globals.logger,
-      terminal: globals.terminal,
-      artifacts: globals.artifacts,
+      verbose: verbose,
     ),
-    AssembleCommand(),
-    AttachCommand(verboseHelp: verboseHelp),
-    BuildCommand(verboseHelp: verboseHelp),
-    ChannelCommand(verboseHelp: verboseHelp),
-    CleanCommand(verbose: verbose),
-    ConfigCommand(verboseHelp: verboseHelp),
-    CreateCommand(),
-    DaemonCommand(hidden: !verboseHelp),
-    DevicesCommand(),
-    DoctorCommand(verbose: verbose),
-    DowngradeCommand(),
-    DriveCommand(verboseHelp: verboseHelp,
-      fileSystem: globals.fs,
-      logger: globals.logger,
-    ),
-    EmulatorsCommand(),
-    FormatCommand(),
-    GenerateCommand(),
-    GenerateLocalizationsCommand(
-      fileSystem: globals.fs,
-    ),
-    InstallCommand(),
-    LogsCommand(),
-    MakeHostAppEditableCommand(),
-    PackagesCommand(),
-    PrecacheCommand(
-      verboseHelp: verboseHelp,
-      cache: globals.cache,
-      logger: globals.logger,
-      platform: globals.platform,
-      featureFlags: featureFlags,
-    ),
-    RunCommand(verboseHelp: verboseHelp),
-    ScreenshotCommand(),
-    ShellCompletionCommand(),
-    TestCommand(verboseHelp: verboseHelp),
-    UpgradeCommand(),
-    SymbolizeCommand(
-      stdio: globals.stdio,
-      fileSystem: globals.fs,
-    ),
-    // Development-only commands. These are always hidden,
-    IdeConfigCommand(),
-    UpdatePackagesCommand(),
-  ], verbose: verbose,
-     muteCommandLogging: muteCommandLogging,
-     verboseHelp: verboseHelp,
-     overrides: <Type, Generator>{
-       WebCompilationProxy: () => BuildRunnerWebCompilationProxy(),
-       // The web runner is not supported in google3 because it depends
-       // on dwds.
-       WebRunnerFactory: () => DwdsWebRunnerFactory(),
-       // The mustache dependency is different in google3
-       TemplateRenderer: () => const MustacheTemplateRenderer(),
-       // The devtools launcher is not supported in google3 because it depends on
-       // devtools source code.
-       DevtoolsLauncher: () => DevtoolsServerLauncher(logger: globals.logger),
-       Logger: () {
-        final LoggerFactory loggerFactory = LoggerFactory(
-          outputPreferences: globals.outputPreferences,
-          terminal: globals.terminal,
-          stdio: globals.stdio,
-        );
-        return loggerFactory.createLogger(
-          daemon: daemon,
-          machine: runMachine,
-          verbose: verbose && !muteCommandLogging,
-          windows: globals.platform.isWindows,
-        );
-       }
-     });
+    verbose: verbose,
+    muteCommandLogging: muteCommandLogging,
+    verboseHelp: verboseHelp,
+    overrides: <Type, Generator>{
+      // The web runner is not supported in google3 because it depends
+      // on dwds.
+      WebRunnerFactory: () => DwdsWebRunnerFactory(),
+      // The mustache dependency is different in google3
+      TemplateRenderer: () => const MustacheTemplateRenderer(),
+      // The devtools launcher is not supported in google3 because it depends on
+      // devtools source code.
+      DevtoolsLauncher: () => DevtoolsServerLauncher(
+        processManager: globals.processManager,
+        pubExecutable: globals.artifacts.getArtifactPath(Artifact.pubExecutable),
+        logger: globals.logger,
+        platform: globals.platform,
+        persistentToolState: globals.persistentToolState,
+      ),
+      Logger: () {
+       final LoggerFactory loggerFactory = LoggerFactory(
+         outputPreferences: globals.outputPreferences,
+         terminal: globals.terminal,
+         stdio: globals.stdio,
+       );
+       return loggerFactory.createLogger(
+         daemon: daemon,
+         machine: runMachine,
+         verbose: verbose && !muteCommandLogging,
+         prefixedErrors: prefixedErrors,
+         windows: globals.platform.isWindows,
+       );
+      },
+    },
+  );
 }
+
+List<FlutterCommand> generateCommands({
+  @required bool verboseHelp,
+  @required bool verbose,
+}) => <FlutterCommand>[
+  AnalyzeCommand(
+    verboseHelp: verboseHelp,
+    fileSystem: globals.fs,
+    platform: globals.platform,
+    processManager: globals.processManager,
+    logger: globals.logger,
+    terminal: globals.terminal,
+    artifacts: globals.artifacts,
+  ),
+  AssembleCommand(verboseHelp: verboseHelp, buildSystem: globals.buildSystem),
+  AttachCommand(verboseHelp: verboseHelp),
+  BuildCommand(verboseHelp: verboseHelp),
+  ChannelCommand(verboseHelp: verboseHelp),
+  CleanCommand(verbose: verbose),
+  ConfigCommand(verboseHelp: verboseHelp),
+  CreateCommand(verboseHelp: verboseHelp),
+  DaemonCommand(hidden: !verboseHelp),
+  DevicesCommand(verboseHelp: verboseHelp),
+  DoctorCommand(verbose: verbose),
+  DowngradeCommand(verboseHelp: verboseHelp),
+  DriveCommand(verboseHelp: verboseHelp,
+    fileSystem: globals.fs,
+    logger: globals.logger,
+  ),
+  EmulatorsCommand(),
+  FormatCommand(),
+  GenerateCommand(),
+  GenerateLocalizationsCommand(
+    fileSystem: globals.fs,
+    logger: globals.logger,
+  ),
+  InstallCommand(),
+  LogsCommand(),
+  MakeHostAppEditableCommand(),
+  PackagesCommand(),
+  PrecacheCommand(
+    verboseHelp: verboseHelp,
+    cache: globals.cache,
+    logger: globals.logger,
+    platform: globals.platform,
+    featureFlags: featureFlags,
+  ),
+  RunCommand(verboseHelp: verboseHelp),
+  ScreenshotCommand(),
+  ShellCompletionCommand(),
+  TestCommand(verboseHelp: verboseHelp),
+  UpgradeCommand(verboseHelp: verboseHelp),
+  SymbolizeCommand(
+    stdio: globals.stdio,
+    fileSystem: globals.fs,
+  ),
+  // Development-only commands. These are always hidden,
+  IdeConfigCommand(),
+  UpdatePackagesCommand(),
+];
 
 /// An abstraction for instantiation of the correct logger type.
 ///
@@ -192,6 +213,7 @@ class LoggerFactory {
   /// Create the appropriate logger for the current platform and configuration.
   Logger createLogger({
     @required bool verbose,
+    @required bool prefixedErrors,
     @required bool machine,
     @required bool daemon,
     @required bool windows,
@@ -214,6 +236,9 @@ class LoggerFactory {
     }
     if (verbose) {
       logger = VerboseLogger(logger, stopwatchFactory: _stopwatchFactory);
+    }
+    if (prefixedErrors) {
+      logger = PrefixedErrorLogger(logger);
     }
     if (daemon) {
       return NotifyingLogger(verbose: verbose, parent: logger);

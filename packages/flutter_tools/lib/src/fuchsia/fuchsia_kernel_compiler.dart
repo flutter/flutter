@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
@@ -115,7 +117,6 @@ class FuchsiaKernelCompiler {
         '-Ddart.vm.profile=false',
         '-Ddart.vm.product=true',
       ],
-      '-Ddart.developer.causal_async_stacks=${buildInfo.isDebug}',
 
       for (final String dartDefine in buildInfo.dartDefines)
         '-D$dartDefine',

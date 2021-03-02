@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -345,7 +347,8 @@ class WebDevices extends PollingDeviceDiscovery {
       return <Device>[];
     }
     return <Device>[
-      _webServerDevice,
+      if (WebServerDevice.showWebServerDevice)
+        _webServerDevice,
       if (_chromeDevice.isSupported())
         _chromeDevice,
       if (await _edgeDevice?._meetsVersionConstraint() ?? false)
@@ -374,6 +377,9 @@ class WebServerDevice extends Device {
           category: Category.web,
           ephemeral: false,
        );
+
+  static const String kWebServerDeviceId = 'web-server';
+  static bool showWebServerDevice = false;
 
   final Logger _logger;
 

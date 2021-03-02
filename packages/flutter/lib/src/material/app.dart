@@ -6,8 +6,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 
 import 'arc.dart';
 import 'colors.dart';
@@ -588,7 +586,7 @@ class MaterialApp extends StatefulWidget {
   ///       LogicalKeySet(LogicalKeyboardKey.select): const ActivateIntent(),
   ///     },
   ///     color: const Color(0xFFFF0000),
-  ///     builder: (BuildContext context, Widget child) {
+  ///     builder: (BuildContext context, Widget? child) {
   ///       return const Placeholder();
   ///     },
   ///   );
@@ -621,7 +619,7 @@ class MaterialApp extends StatefulWidget {
   ///       ),
   ///     },
   ///     color: const Color(0xFFFF0000),
-  ///     builder: (BuildContext context, Widget child) {
+  ///     builder: (BuildContext context, Widget? child) {
   ///       return const Placeholder();
   ///     },
   ///   );
@@ -739,7 +737,6 @@ class _MaterialAppState extends State<MaterialApp> {
       key: widget.scaffoldMessengerKey,
       child: AnimatedTheme(
         data: theme,
-        isMaterialAppTheme: true,
         child: widget.builder != null
           ? Builder(
               builder: (BuildContext context) {

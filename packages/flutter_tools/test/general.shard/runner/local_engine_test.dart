@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -43,7 +45,7 @@ void main() {
     );
 
     expect(
-      await localEngineLocator.findEnginePath(null, 'ios_debug'),
+      await localEngineLocator.findEnginePath(null, 'ios_debug', null),
       matchesEngineBuildPaths(
         hostEngine: '/arbitrary/engine/src/out/host_debug',
         targetEngine: '/arbitrary/engine/src/out/ios_debug',
@@ -57,7 +59,7 @@ void main() {
       .writeAsStringSync('sky_engine:file:///symlink/src/out/ios_debug/gen/dart-pkg/sky_engine/lib/');
 
     expect(
-      await localEngineLocator.findEnginePath(null, 'ios_debug'),
+      await localEngineLocator.findEnginePath(null, 'ios_debug', null),
       matchesEngineBuildPaths(
         hostEngine: '/symlink/src/out/host_debug',
         targetEngine: '/symlink/src/out/ios_debug',
@@ -81,7 +83,7 @@ void main() {
     );
 
     expect(
-      await localEngineLocator.findEnginePath('$kArbitraryEngineRoot/src', 'ios_debug'),
+      await localEngineLocator.findEnginePath('$kArbitraryEngineRoot/src', 'ios_debug', null),
       matchesEngineBuildPaths(
         hostEngine: '/arbitrary/engine/src/out/host_debug',
         targetEngine: '/arbitrary/engine/src/out/ios_debug',
@@ -112,7 +114,7 @@ void main() {
     );
 
     expect(
-      await localEngineLocator.findEnginePath(null, 'ios_debug'),
+      await localEngineLocator.findEnginePath(null, 'ios_debug', null),
       matchesEngineBuildPaths(
         hostEngine: 'flutter/engine/src/out/host_debug',
         targetEngine: 'flutter/engine/src/out/ios_debug',

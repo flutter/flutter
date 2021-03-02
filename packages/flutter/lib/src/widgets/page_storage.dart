@@ -212,7 +212,7 @@ class PageStorageBucket {
 ///
 /// class ColorBoxPage extends StatelessWidget {
 ///   ColorBoxPage({
-///     Key key,
+///     Key? key,
 ///   }) : super(key: key);
 ///
 ///   @override

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import '../base/context.dart';
@@ -33,14 +35,29 @@ class FuchsiaWorkflow implements Workflow {
   @override
   bool get appliesToHostPlatform => _featureFlags.isFuchsiaEnabled && (_platform.isLinux || _platform.isMacOS);
 
+  bool get shouldUseDeviceFinder {
+    final String useDeviceFinder = _platform.environment.containsKey('FUCHSIA_DISABLED_ffx_discovery')
+      ? _platform.environment['FUCHSIA_DISABLED_ffx_discovery'] : '0';
+    if (useDeviceFinder == '1') {
+      return true;
+    }
+    return false;
+  }
+
   @override
   bool get canListDevices {
-    return _fuchsiaArtifacts.devFinder != null;
+    if (shouldUseDeviceFinder) {
+      return _fuchsiaArtifacts.devFinder != null;
+    }
+    return _fuchsiaArtifacts.ffx != null;
   }
 
   @override
   bool get canLaunchDevices {
-    return _fuchsiaArtifacts.devFinder != null && _fuchsiaArtifacts.sshConfig != null;
+    if (shouldUseDeviceFinder) {
+      return _fuchsiaArtifacts.devFinder != null && _fuchsiaArtifacts.sshConfig != null;
+    }
+    return _fuchsiaArtifacts.ffx != null && _fuchsiaArtifacts.sshConfig != null;
   }
 
   @override

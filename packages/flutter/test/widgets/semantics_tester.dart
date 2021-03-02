@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meta/meta.dart';
 
 export 'dart:ui' show SemanticsFlag, SemanticsAction;
 export 'package:flutter/rendering.dart' show SemanticsData;
@@ -349,7 +348,7 @@ class TestSemantics {
   String toString([ int indentAmount = 0 ]) {
     final String indent = '  ' * indentAmount;
     final StringBuffer buf = StringBuffer();
-    buf.writeln('$indent$runtimeType(');
+    buf.writeln('$indent${objectRuntimeType(this, 'TestSemantics')}(');
     if (id != null)
       buf.writeln('$indent  id: $id,');
     if (flags is int && flags != 0 || flags is List<SemanticsFlag> && (flags as List<SemanticsFlag>).isNotEmpty)

@@ -4,13 +4,11 @@
 
 import 'dart:ui' as ui;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 class _TestHitTester extends RenderBox {
   _TestHitTester(this.hitTestOverride);
@@ -72,7 +70,7 @@ class TestMouseTrackerFlutterBinding extends BindingBase
 
 // An object that mocks the behavior of a render object with [MouseTrackerAnnotation].
 class TestAnnotationTarget with Diagnosticable implements MouseTrackerAnnotation, HitTestTarget  {
-  const TestAnnotationTarget({this.onEnter, this.onHover, this.onExit, this.cursor = MouseCursor.defer});
+  const TestAnnotationTarget({this.onEnter, this.onHover, this.onExit, this.cursor = MouseCursor.defer, this.validForMouseTracker = true});
 
   @override
   final PointerEnterEventListener? onEnter;
@@ -84,6 +82,9 @@ class TestAnnotationTarget with Diagnosticable implements MouseTrackerAnnotation
 
   @override
   final MouseCursor cursor;
+
+  @override
+  final bool validForMouseTracker;
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {

@@ -6,8 +6,6 @@ import 'dart:ui' show Color, hashList, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 import 'app_bar_theme.dart';
 import 'banner_theme.dart';
@@ -17,6 +15,7 @@ import 'bottom_sheet_theme.dart';
 import 'button_bar_theme.dart';
 import 'button_theme.dart';
 import 'card_theme.dart';
+import 'checkbox_theme.dart';
 import 'chip_theme.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
@@ -32,8 +31,11 @@ import 'navigation_rail_theme.dart';
 import 'outlined_button_theme.dart';
 import 'page_transitions_theme.dart';
 import 'popup_menu_theme.dart';
+import 'radio_theme.dart';
+import 'scrollbar_theme.dart';
 import 'slider_theme.dart';
 import 'snack_bar_theme.dart';
+import 'switch_theme.dart';
 import 'tab_bar_theme.dart';
 import 'text_button_theme.dart';
 import 'text_selection_theme.dart';
@@ -238,17 +240,17 @@ class ThemeData with Diagnosticable {
     Color? secondaryHeaderColor,
     @Deprecated(
       'Use TextSelectionThemeData.selectionColor instead. '
-      'This feature was deprecated after v1.23.0-4.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.'
     )
     Color? textSelectionColor,
     @Deprecated(
       'Use TextSelectionThemeData.cursorColor instead. '
-      'This feature was deprecated after v1.23.0-4.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.'
     )
     Color? cursorColor,
     @Deprecated(
       'Use TextSelectionThemeData.selectionHandleColor instead. '
-      'This feature was deprecated after v1.23.0-4.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.'
     )
     Color? textSelectionHandleColor,
     Color? backgroundColor,
@@ -275,6 +277,7 @@ class ThemeData with Diagnosticable {
     bool? applyElevationOverlayColor,
     PageTransitionsTheme? pageTransitionsTheme,
     AppBarTheme? appBarTheme,
+    ScrollbarThemeData? scrollbarTheme,
     BottomAppBarTheme? bottomAppBarTheme,
     ColorScheme? colorScheme,
     DialogTheme? dialogTheme,
@@ -295,6 +298,9 @@ class ThemeData with Diagnosticable {
     OutlinedButtonThemeData? outlinedButtonTheme,
     TextSelectionThemeData? textSelectionTheme,
     DataTableThemeData? dataTableTheme,
+    CheckboxThemeData? checkboxTheme,
+    RadioThemeData? radioTheme,
+    SwitchThemeData? switchTheme,
     bool? fixTextFieldOutlineLabel,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
@@ -404,10 +410,11 @@ class ThemeData with Diagnosticable {
     tabBarTheme ??= const TabBarTheme();
     tooltipTheme ??= const TooltipThemeData();
     appBarTheme ??= const AppBarTheme();
+    scrollbarTheme ??= const ScrollbarThemeData();
     bottomAppBarTheme ??= const BottomAppBarTheme();
     cardTheme ??= const CardTheme();
     chipTheme ??= ChipThemeData.fromDefaults(
-      secondaryColor: primaryColor,
+      secondaryColor: isDark ? Colors.tealAccent[200]! : primaryColor,
       brightness: colorScheme.brightness,
       labelStyle: textTheme.bodyText1!,
     );
@@ -428,6 +435,9 @@ class ThemeData with Diagnosticable {
     outlinedButtonTheme ??= const OutlinedButtonThemeData();
     textSelectionTheme ??= const TextSelectionThemeData();
     dataTableTheme ??= const DataTableThemeData();
+    checkboxTheme ??= const CheckboxThemeData();
+    radioTheme ??= const RadioThemeData();
+    switchTheme ??= const SwitchThemeData();
 
     fixTextFieldOutlineLabel ??= false;
     useTextSelectionTheme ??= true;
@@ -484,6 +494,7 @@ class ThemeData with Diagnosticable {
       applyElevationOverlayColor: applyElevationOverlayColor,
       pageTransitionsTheme: pageTransitionsTheme,
       appBarTheme: appBarTheme,
+      scrollbarTheme: scrollbarTheme,
       bottomAppBarTheme: bottomAppBarTheme,
       colorScheme: colorScheme,
       dialogTheme: dialogTheme,
@@ -504,6 +515,9 @@ class ThemeData with Diagnosticable {
       outlinedButtonTheme: outlinedButtonTheme,
       textSelectionTheme: textSelectionTheme,
       dataTableTheme: dataTableTheme,
+      checkboxTheme: checkboxTheme,
+      radioTheme: radioTheme,
+      switchTheme: switchTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
       useTextSelectionTheme: useTextSelectionTheme,
     );
@@ -515,7 +529,7 @@ class ThemeData with Diagnosticable {
   ///
   /// This will rarely be used directly. It is used by [lerp] to
   /// create intermediate themes based on two themes created with the
-  /// [new ThemeData] constructor.
+  /// [ThemeData] constructor.
   const ThemeData.raw({
     // Warning: make sure these properties are in the exact same order as in
     // operator == and in the hashValues method and in the order of fields
@@ -545,8 +559,20 @@ class ThemeData with Diagnosticable {
     required this.buttonColor,
     required this.toggleButtonsTheme,
     required this.secondaryHeaderColor,
+    @Deprecated(
+      'Use TextSelectionThemeData.selectionColor instead. '
+      'This feature was deprecated after v1.26.0-18.0.pre.'
+    )
     required this.textSelectionColor,
+    @Deprecated(
+      'Use TextSelectionThemeData.cursorColor instead. '
+      'This feature was deprecated after v1.26.0-18.0.pre.'
+    )
     required this.cursorColor,
+    @Deprecated(
+      'Use TextSelectionThemeData.selectionHandleColor instead. '
+      'This feature was deprecated after v1.26.0-18.0.pre.'
+    )
     required this.textSelectionHandleColor,
     required this.backgroundColor,
     required this.dialogBackgroundColor,
@@ -571,6 +597,7 @@ class ThemeData with Diagnosticable {
     required this.applyElevationOverlayColor,
     required this.pageTransitionsTheme,
     required this.appBarTheme,
+    required this.scrollbarTheme,
     required this.bottomAppBarTheme,
     required this.colorScheme,
     required this.dialogTheme,
@@ -591,7 +618,14 @@ class ThemeData with Diagnosticable {
     required this.outlinedButtonTheme,
     required this.textSelectionTheme,
     required this.dataTableTheme,
+    required this.checkboxTheme,
+    required this.radioTheme,
+    required this.switchTheme,
     required this.fixTextFieldOutlineLabel,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v1.23.0-4.0.pre.'
+    )
     required this.useTextSelectionTheme,
   }) : assert(visualDensity != null),
        assert(primaryColor != null),
@@ -642,6 +676,7 @@ class ThemeData with Diagnosticable {
        assert(materialTapTargetSize != null),
        assert(pageTransitionsTheme != null),
        assert(appBarTheme != null),
+       assert(scrollbarTheme != null),
        assert(bottomAppBarTheme != null),
        assert(colorScheme != null),
        assert(dialogTheme != null),
@@ -661,6 +696,9 @@ class ThemeData with Diagnosticable {
        assert(outlinedButtonTheme != null),
        assert(textSelectionTheme != null),
        assert(dataTableTheme != null),
+       assert(checkboxTheme != null),
+       assert(radioTheme != null),
+       assert(switchTheme != null),
        assert(fixTextFieldOutlineLabel != null),
        assert(useTextSelectionTheme != null);
 
@@ -737,7 +775,7 @@ class ThemeData with Diagnosticable {
   /// this theme is localized using text geometry using [ThemeData.localize].
   factory ThemeData.dark() => ThemeData(brightness: Brightness.dark);
 
-  /// The default color theme. Same as [new ThemeData.light].
+  /// The default color theme. Same as [ThemeData.light].
   ///
   /// This is used by [Theme.of] when no theme has been specified.
   ///
@@ -910,21 +948,21 @@ class ThemeData with Diagnosticable {
   /// The color of text selections in text fields, such as [TextField].
   @Deprecated(
     'Use TextSelectionThemeData.selectionColor instead. '
-    'This feature was deprecated after v1.23.0-4.0.pre.'
+    'This feature was deprecated after v1.26.0-18.0.pre.'
   )
   final Color textSelectionColor;
 
   /// The color of cursors in Material-style text fields, such as [TextField].
   @Deprecated(
     'Use TextSelectionThemeData.cursorColor instead. '
-    'This feature was deprecated after v1.23.0-4.0.pre.'
+    'This feature was deprecated after v1.26.0-18.0.pre.'
   )
   final Color cursorColor;
 
   /// The color of the handles used to adjust what part of the text is currently selected.
   @Deprecated(
     'Use TextSelectionThemeData.selectionHandleColor instead. '
-    'This feature was deprecated after v1.23.0-4.0.pre.'
+    'This feature was deprecated after v1.26.0-18.0.pre.'
   )
   final Color textSelectionHandleColor;
 
@@ -1067,6 +1105,9 @@ class ThemeData with Diagnosticable {
   /// textTheme of [AppBar]s.
   final AppBarTheme appBarTheme;
 
+  /// A theme for customizing the colors, thickness, and shape of [Scrollbar]s.
+  final ScrollbarThemeData scrollbarTheme;
+
   /// A theme for customizing the shape, elevation, and color of a [BottomAppBar].
   final BottomAppBarTheme bottomAppBarTheme;
 
@@ -1153,6 +1194,15 @@ class ThemeData with Diagnosticable {
   /// widgets.
   final DataTableThemeData dataTableTheme;
 
+  /// A theme for customizing the appearance and layout of [Checkbox] widgets.
+  final CheckboxThemeData checkboxTheme;
+
+  /// A theme for customizing the appearance and layout of [Radio] widgets.
+  final RadioThemeData radioTheme;
+
+  /// A theme for customizing the appearance and layout of [Switch] widgets.
+  final SwitchThemeData switchTheme;
+
   /// A temporary flag to allow apps to opt-in to a
   /// [small fix](https://github.com/flutter/flutter/issues/54028) for the Y
   /// coordinate of the floating label in a [TextField] [OutlineInputBorder].
@@ -1207,17 +1257,17 @@ class ThemeData with Diagnosticable {
     Color? secondaryHeaderColor,
     @Deprecated(
       'Use TextSelectionThemeData.selectionColor instead. '
-      'This feature was deprecated after v1.23.0-4.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.'
     )
     Color? textSelectionColor,
     @Deprecated(
       'Use TextSelectionThemeData.cursorColor instead. '
-      'This feature was deprecated after v1.23.0-4.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.'
     )
     Color? cursorColor,
     @Deprecated(
       'Use TextSelectionThemeData.selectionHandleColor instead. '
-      'This feature was deprecated after v1.23.0-4.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.'
     )
     Color? textSelectionHandleColor,
     Color? backgroundColor,
@@ -1243,6 +1293,7 @@ class ThemeData with Diagnosticable {
     bool? applyElevationOverlayColor,
     PageTransitionsTheme? pageTransitionsTheme,
     AppBarTheme? appBarTheme,
+    ScrollbarThemeData? scrollbarTheme,
     BottomAppBarTheme? bottomAppBarTheme,
     ColorScheme? colorScheme,
     DialogTheme? dialogTheme,
@@ -1263,6 +1314,9 @@ class ThemeData with Diagnosticable {
     OutlinedButtonThemeData? outlinedButtonTheme,
     TextSelectionThemeData? textSelectionTheme,
     DataTableThemeData? dataTableTheme,
+    CheckboxThemeData? checkboxTheme,
+    RadioThemeData? radioTheme,
+    SwitchThemeData? switchTheme,
     bool? fixTextFieldOutlineLabel,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
@@ -1323,6 +1377,7 @@ class ThemeData with Diagnosticable {
       applyElevationOverlayColor: applyElevationOverlayColor ?? this.applyElevationOverlayColor,
       pageTransitionsTheme: pageTransitionsTheme ?? this.pageTransitionsTheme,
       appBarTheme: appBarTheme ?? this.appBarTheme,
+      scrollbarTheme: scrollbarTheme ?? this.scrollbarTheme,
       bottomAppBarTheme: bottomAppBarTheme ?? this.bottomAppBarTheme,
       colorScheme: (colorScheme ?? this.colorScheme).copyWith(brightness: brightness),
       dialogTheme: dialogTheme ?? this.dialogTheme,
@@ -1343,6 +1398,9 @@ class ThemeData with Diagnosticable {
       outlinedButtonTheme: outlinedButtonTheme ?? this.outlinedButtonTheme,
       textSelectionTheme: textSelectionTheme ?? this.textSelectionTheme,
       dataTableTheme: dataTableTheme ?? this.dataTableTheme,
+      checkboxTheme: checkboxTheme ?? this.checkboxTheme,
+      radioTheme: radioTheme ?? this.radioTheme,
+      switchTheme: switchTheme ?? this.switchTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? this.fixTextFieldOutlineLabel,
       useTextSelectionTheme: useTextSelectionTheme ?? this.useTextSelectionTheme,
     );
@@ -1477,6 +1535,7 @@ class ThemeData with Diagnosticable {
       applyElevationOverlayColor: t < 0.5 ? a.applyElevationOverlayColor : b.applyElevationOverlayColor,
       pageTransitionsTheme: t < 0.5 ? a.pageTransitionsTheme : b.pageTransitionsTheme,
       appBarTheme: AppBarTheme.lerp(a.appBarTheme, b.appBarTheme, t),
+      scrollbarTheme: ScrollbarThemeData.lerp(a.scrollbarTheme, b.scrollbarTheme, t),
       bottomAppBarTheme: BottomAppBarTheme.lerp(a.bottomAppBarTheme, b.bottomAppBarTheme, t),
       colorScheme: ColorScheme.lerp(a.colorScheme, b.colorScheme, t),
       dialogTheme: DialogTheme.lerp(a.dialogTheme, b.dialogTheme, t),
@@ -1497,6 +1556,9 @@ class ThemeData with Diagnosticable {
       outlinedButtonTheme: OutlinedButtonThemeData.lerp(a.outlinedButtonTheme, b.outlinedButtonTheme, t)!,
       textSelectionTheme: TextSelectionThemeData .lerp(a.textSelectionTheme, b.textSelectionTheme, t)!,
       dataTableTheme: DataTableThemeData.lerp(a.dataTableTheme, b.dataTableTheme, t),
+      checkboxTheme: CheckboxThemeData.lerp(a.checkboxTheme, b.checkboxTheme, t),
+      radioTheme: RadioThemeData.lerp(a.radioTheme, b.radioTheme, t),
+      switchTheme: SwitchThemeData.lerp(a.switchTheme, b.switchTheme, t),
       fixTextFieldOutlineLabel: t < 0.5 ? a.fixTextFieldOutlineLabel : b.fixTextFieldOutlineLabel,
       useTextSelectionTheme: t < 0.5 ? a.useTextSelectionTheme : b.useTextSelectionTheme,
     );
@@ -1559,6 +1621,7 @@ class ThemeData with Diagnosticable {
         && other.applyElevationOverlayColor == applyElevationOverlayColor
         && other.pageTransitionsTheme == pageTransitionsTheme
         && other.appBarTheme == appBarTheme
+        && other.scrollbarTheme == scrollbarTheme
         && other.bottomAppBarTheme == bottomAppBarTheme
         && other.colorScheme == colorScheme
         && other.dialogTheme == dialogTheme
@@ -1579,6 +1642,9 @@ class ThemeData with Diagnosticable {
         && other.outlinedButtonTheme == outlinedButtonTheme
         && other.textSelectionTheme == textSelectionTheme
         && other.dataTableTheme == dataTableTheme
+        && other.checkboxTheme == checkboxTheme
+        && other.radioTheme == radioTheme
+        && other.switchTheme == switchTheme
         && other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel
         && other.useTextSelectionTheme == useTextSelectionTheme;
   }
@@ -1640,6 +1706,7 @@ class ThemeData with Diagnosticable {
       applyElevationOverlayColor,
       pageTransitionsTheme,
       appBarTheme,
+      scrollbarTheme,
       bottomAppBarTheme,
       colorScheme,
       dialogTheme,
@@ -1660,6 +1727,9 @@ class ThemeData with Diagnosticable {
       outlinedButtonTheme,
       textSelectionTheme,
       dataTableTheme,
+      checkboxTheme,
+      radioTheme,
+      switchTheme,
       fixTextFieldOutlineLabel,
       useTextSelectionTheme,
     ];
@@ -1718,6 +1788,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<bool>('applyElevationOverlayColor', applyElevationOverlayColor, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<PageTransitionsTheme>('pageTransitionsTheme', pageTransitionsTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<AppBarTheme>('appBarTheme', appBarTheme, defaultValue: defaultData.appBarTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<ScrollbarThemeData>('ScrollbarTheme', scrollbarTheme, defaultValue: defaultData.scrollbarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<BottomAppBarTheme>('bottomAppBarTheme', bottomAppBarTheme, defaultValue: defaultData.bottomAppBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultData.colorScheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DialogTheme>('dialogTheme', dialogTheme, defaultValue: defaultData.dialogTheme, level: DiagnosticLevel.debug));
@@ -1739,6 +1810,9 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<ElevatedButtonThemeData>('elevatedButtonTheme', elevatedButtonTheme, defaultValue: defaultData.elevatedButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<OutlinedButtonThemeData>('outlinedButtonTheme', outlinedButtonTheme, defaultValue: defaultData.outlinedButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DataTableThemeData>('dataTableTheme', dataTableTheme, defaultValue: defaultData.dataTableTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<CheckboxThemeData>('checkboxTheme', checkboxTheme, defaultValue: defaultData.checkboxTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<RadioThemeData>('radioTheme', radioTheme, defaultValue: defaultData.radioTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<SwitchThemeData>('switchTheme', switchTheme, defaultValue: defaultData.switchTheme, level: DiagnosticLevel.debug));
   }
 }
 
@@ -2002,7 +2076,7 @@ class VisualDensity with Diagnosticable {
       case TargetPlatform.windows:
         return compact;
     }
-    return const VisualDensity();
+    return VisualDensity.standard;
   }
 
   /// Copy the current [VisualDensity] with the given values replacing the

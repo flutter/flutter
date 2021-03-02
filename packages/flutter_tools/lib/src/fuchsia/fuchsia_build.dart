@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
 import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -91,8 +92,6 @@ Future<void> _genSnapshot(
 
   final List<String> command = <String>[
     genSnapshot,
-    '--no-causal-async-stacks',
-    '--lazy-async-stacks',
     '--deterministic',
     '--snapshot_kind=app-aot-elf',
     '--elf=$elf',
@@ -123,7 +122,6 @@ Future<void> _buildAssets(
     manifestPath: fuchsiaProject.project.pubspecFile.path,
     packagesPath: fuchsiaProject.project.packagesFile.path,
     assetDirPath: assetDir,
-    includeDefaultFonts: false,
   );
 
   final Map<String, DevFSContent> assetEntries =

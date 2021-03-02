@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 
 import 'package:file/file.dart';
@@ -14,7 +16,6 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/pubspec_schema.dart';
 
 void main() {
   String fixPath(String path) {
@@ -106,8 +107,6 @@ $fontsSection
     });
 
     testUsingContext('App includes neither font manifest nor fonts when no defines fonts', () async {
-      writeEmptySchemaFile(globals.fs);
-
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
       writePubspecFile('p/p/pubspec.yaml', 'test_package');
@@ -122,8 +121,6 @@ $fontsSection
     });
 
     testUsingContext('App font uses font file from package', () async {
-      writeEmptySchemaFile(globals.fs);
-
       const String fontsSection = '''
        - family: foo
          fonts:
@@ -150,8 +147,6 @@ $fontsSection
     });
 
     testUsingContext('App font uses local font file and package font file', () async {
-      writeEmptySchemaFile(globals.fs);
-
       const String fontsSection = '''
        - family: foo
          fonts:
@@ -182,8 +177,6 @@ $fontsSection
     });
 
     testUsingContext('App uses package font with own font file', () async {
-      writeEmptySchemaFile(globals.fs);
-
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
       const String fontsSection = '''
@@ -215,8 +208,6 @@ $fontsSection
     });
 
     testUsingContext('App uses package font with font file from another package', () async {
-      writeEmptySchemaFile(globals.fs);
-
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/\ntest_package2:p2/p/lib/');
       const String fontsSection = '''
@@ -249,8 +240,6 @@ $fontsSection
     });
 
     testUsingContext('App uses package font with properties and own font file', () async {
-      writeEmptySchemaFile(globals.fs);
-
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
 
@@ -284,8 +273,6 @@ $fontsSection
     });
 
     testUsingContext('App uses local font and package font with own font file.', () async {
-      writeEmptySchemaFile(globals.fs);
-
       const String fontsSection = '''
        - family: foo
          fonts:

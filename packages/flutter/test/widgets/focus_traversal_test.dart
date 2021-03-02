@@ -4,11 +4,9 @@
 
 import 'dart:ui';
 
-import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import 'semantics_tester.dart';
 
@@ -349,7 +347,7 @@ void main() {
                   focusNode: testNode1,
                   autofocus: true,
                   onPressed: () {
-                    Navigator.of(context)!.push<void>(
+                    Navigator.of(context).push<void>(
                       MaterialPageRoute<void>(
                         builder: (BuildContext context) {
                           return Center(
@@ -358,7 +356,7 @@ void main() {
                               focusNode: testNode2,
                               autofocus: true,
                               onPressed: () {
-                                Navigator.of(context)!.pop();
+                                Navigator.of(context).pop();
                               },
                               child: const Text('Go Back'),
                             ),
@@ -753,7 +751,7 @@ void main() {
           child: FocusTraversalGroup(
             policy: ReadingOrderTraversalPolicy(),
             child: Stack(
-              alignment: const Alignment(-1, -1),
+              alignment: Alignment.topLeft,
               children: List<Widget>.generate(nodeCount, (int index) {
                 // Boxes that all have the same upper left origin corner.
                 return Focus(
@@ -781,7 +779,7 @@ void main() {
           child: FocusTraversalGroup(
             policy: ReadingOrderTraversalPolicy(),
             child: Stack(
-              alignment: const Alignment(0, 0),
+              alignment: Alignment.center,
               children: List<Widget>.generate(nodeCount, (int index) {
                 return Focus(
                   focusNode: nodes[index],
@@ -809,7 +807,7 @@ void main() {
           child: FocusTraversalGroup(
             policy: ReadingOrderTraversalPolicy(),
             child: Stack(
-              alignment: const Alignment(0, 0),
+              alignment: Alignment.center,
               children: List<Widget>.generate(nodeCount, (int index) {
                 return Positioned(
                   top: 5.0 * index * (index + 1),
@@ -1148,7 +1146,7 @@ void main() {
                     focusNode: testNode1,
                     autofocus: true,
                     onPressed: () {
-                      Navigator.of(context)!.push<void>(
+                      Navigator.of(context).push<void>(
                         MaterialPageRoute<void>(
                           builder: (BuildContext context) {
                             return Center(
@@ -1159,7 +1157,7 @@ void main() {
                                   focusNode: testNode2,
                                   autofocus: true,
                                   onPressed: () {
-                                    Navigator.of(context)!.pop();
+                                    Navigator.of(context).pop();
                                   },
                                   child: const Text('Go Back'),
                                 ),
@@ -2087,6 +2085,82 @@ void main() {
       expect(gotFocus, isNull);
       expect(containerNode.hasFocus, isFalse);
       expect(unfocusableNode.hasFocus, isFalse);
+    });
+    testWidgets("Nested FocusTraversalGroup with unfocusable children doesn't assert.", (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      final GlobalKey key2 = GlobalKey(debugLabel: '2');
+      final FocusNode focusNode = FocusNode();
+      bool? gotFocus;
+      await tester.pumpWidget(
+        FocusTraversalGroup(
+          child: Column(
+            children: <Widget>[
+              Focus(
+                autofocus: true,
+                child: Container(),
+              ),
+              FocusTraversalGroup(
+                descendantsAreFocusable: false,
+                child: Focus(
+                  onFocusChange: (bool focused) => gotFocus = focused,
+                  child: Focus(
+                    key: key1,
+                    focusNode: focusNode,
+                    child: Container(key: key2),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final Element childWidget = tester.element(find.byKey(key1));
+      final FocusNode unfocusableNode = Focus.of(childWidget);
+      final Element containerWidget = tester.element(find.byKey(key2));
+      final FocusNode containerNode = Focus.of(containerWidget);
+
+      await tester.pump();
+      primaryFocus!.nextFocus();
+
+      expect(gotFocus, isNull);
+      expect(containerNode.hasFocus, isFalse);
+      expect(unfocusableNode.hasFocus, isFalse);
+
+      containerNode.requestFocus();
+      await tester.pump();
+
+      expect(gotFocus, isNull);
+      expect(containerNode.hasFocus, isFalse);
+      expect(unfocusableNode.hasFocus, isFalse);
+    });
+    testWidgets("Empty FocusTraversalGroup doesn't cause an exception.", (WidgetTester tester) async {
+      final GlobalKey key = GlobalKey(debugLabel: 'Test Key');
+      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+      await tester.pumpWidget(
+        FocusTraversalGroup(
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Column(
+              children: <Widget>[
+                FocusTraversalGroup(
+                  child: Container(key: key),
+                ),
+                Focus(
+                  focusNode: focusNode,
+                  autofocus: true,
+                  child: Container(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      primaryFocus!.nextFocus();
+      await tester.pump();
+      expect(primaryFocus, equals(focusNode));
     });
   });
   group(RawKeyboardListener, () {

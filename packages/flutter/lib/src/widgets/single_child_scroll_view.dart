@@ -91,7 +91,7 @@ import 'scrollable.dart';
 /// ```dart
 ///  Widget build(BuildContext context) {
 ///    return DefaultTextStyle(
-///      style: Theme.of(context).textTheme.bodyText2,
+///      style: Theme.of(context).textTheme.bodyText2!,
 ///      child: LayoutBuilder(
 ///        builder: (BuildContext context, BoxConstraints viewportConstraints) {
 ///          return SingleChildScrollView(
@@ -161,7 +161,7 @@ import 'scrollable.dart';
 /// ```dart
 ///  Widget build(BuildContext context) {
 ///    return DefaultTextStyle(
-///      style: Theme.of(context).textTheme.bodyText2,
+///      style: Theme.of(context).textTheme.bodyText2!,
 ///      child: LayoutBuilder(
 ///        builder: (BuildContext context, BoxConstraints viewportConstraints) {
 ///          return SingleChildScrollView(
@@ -269,6 +269,11 @@ class SingleChildScrollView extends StatelessWidget {
 
   /// Whether this is the primary scroll view associated with the parent
   /// [PrimaryScrollController].
+  ///
+  /// When true, the scroll view is used for default [ScrollAction]s. If a
+  /// ScrollAction is not handled by an otherwise focused part of the application,
+  /// the ScrollAction will be evaluated using this scroll view, for example,
+  /// when executing [Shortcuts] key events like page up and down.
   ///
   /// On iOS, this identifies the scroll view that will scroll to top in
   /// response to a tap in the status bar.
@@ -534,6 +539,15 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   // want the default behavior (returning null). Otherwise, as you
   // scroll, it would shift in its parent if the parent was baseline-aligned,
   // which makes no sense.
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    if (child == null) {
+      return constraints.smallest;
+    }
+    final Size childSize = child!.getDryLayout(_getInnerConstraints(constraints));
+    return constraints.constrain(childSize);
+  }
 
   @override
   void performLayout() {

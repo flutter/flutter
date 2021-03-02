@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -14,7 +15,6 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -96,18 +96,6 @@ void main() {
         Platform: () => platform,
       }, initializeFlutterRoot: false);
 
-      testUsingContext('throw tool exit if the version file cannot be written', () async {
-        final MockFlutterVersion version = globals.flutterVersion as MockFlutterVersion;
-        when(version.ensureVersionFile()).thenThrow(const FileSystemException());
-
-        expect(() async => await runner.run(<String>['dummy']), throwsToolExit());
-
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-        Platform: () => platform,
-      }, initializeFlutterRoot: false);
-
     testUsingContext('Doesnt crash on invalid .packages file', () async {
       fs.file('pubspec.yaml').createSync();
       fs.file('.packages')
@@ -138,9 +126,9 @@ void main() {
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
         when(processManager.runSync('git fetch https://github.com/flutter/flutter.git --tags'.split(' '),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
-        when(processManager.runSync('git tag --points-at HEAD'.split(' '),
+        when(processManager.runSync('git tag --points-at random'.split(' '),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
-        when(processManager.runSync('git describe --match *.*.* --long --tags'.split(' '),
+        when(processManager.runSync('git describe --match *.*.* --long --tags random'.split(' '),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
         when(processManager.runSync(FlutterVersion.gitLog('-n 1 --pretty=format:%ad --date=iso'.split(' ')),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);

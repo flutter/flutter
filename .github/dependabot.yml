@@ -1,0 +1,17 @@
+# See Dependabot documentation for all configuration options:
+# https://help.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+updates:
+  - package-ecosystem: "bundler"
+    directory: "/dev/ci/mac"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "jmagman"
+      - "keyonghan"
+      - "yusufm"
+    labels:
+      - "team"
+      - "team: infra"
+      - "waiting for tree to go green"

@@ -11,9 +11,73 @@ import 'mouse_tracking.dart';
 
 /// An immutable span of text that can react to gestures and mouse movements.
 ///
-/// Aside from what [TextSpan] provides, [ReactiveTextSpan] also accepts a
+/// Besides what [TextSpan] provides, [ReactiveTextSpan] also accepts a
 /// [recognizer] that recognizes gestures starting on this text span, as well as
-/// allowing customizing the [mouseCursor] when a mouse hovers over it.
+/// allowing customizing the [mouseCursor] for a hovering mouse.
+///
+/// A [ReactiveTextSpan] is equal to another if all of their properties are
+/// equal (by operator ==), including [onEnter] and [onExit]. It's recommended
+/// to use memoized instances for the callbacks instead of local lambdas.
+///
+/// {@tool dartpad --template=stateful_widget_scaffold}
+/// This example shows how to use [ReactiveTextSpan] with a gesture recognizer,
+/// and sets the cursor for a hovering mouse to a text I-beam. It defines a
+/// `BuzzingText` widget which uses the [HapticFeedback] class to vibrate the
+/// device when the user long-presses the "find the" span, which is underlined in
+/// wavy green. The hit-testing is handled by the [RichText] widget.
+///
+/// ```dart imports
+/// import 'package:flutter/gestures.dart';
+/// import 'package:flutter/services.dart';
+/// import 'package:flutter/rendering.dart';
+/// ```
+///
+/// ```dart
+/// LongPressGestureRecognizer _longPressRecognizer;
+///
+/// @override
+/// void initState() {
+///   super.initState();
+///   _longPressRecognizer = LongPressGestureRecognizer()
+///     ..onLongPress = _handlePress;
+/// }
+///
+/// @override
+/// void dispose() {
+///   _longPressRecognizer.dispose();
+///   super.dispose();
+/// }
+///
+/// void _handlePress() {
+///   HapticFeedback.vibrate();
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Text.rich(
+///     TextSpan(
+///       text: 'Can you ',
+///       style: TextStyle(color: Colors.black),
+///       children: <InlineSpan>[
+///         ReactiveTextSpan(
+///           text: 'find the',
+///           mouseCursor: SystemMouseCursors.text,
+///           style: TextStyle(
+///             color: Colors.green,
+///             decoration: TextDecoration.underline,
+///             decorationStyle: TextDecorationStyle.wavy,
+///           ),
+///           recognizer: _longPressRecognizer,
+///         ),
+///         TextSpan(
+///           text: ' secret?',
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 class ReactiveTextSpan extends TextSpan implements MouseTrackerAnnotation {
   /// Creates a [ReactiveTextSpan] with the given values.
   ///
@@ -51,68 +115,7 @@ class ReactiveTextSpan extends TextSpan implements MouseTrackerAnnotation {
   /// [ReactiveTextSpan] also does not manage the lifetime of the gesture
   /// recognizer. The code that owns the [GestureRecognizer] object must call
   /// [GestureRecognizer.dispose] when the [ReactiveTextSpan] object is no longer
-  /// used.
-  ///
-  /// {@tool snippet}
-  ///
-  /// This example shows how to manage the lifetime of a gesture recognizer
-  /// provided to an [ReactiveTextSpan] object. It defines a `BuzzingText` widget
-  /// which uses the [HapticFeedback] class to vibrate the device when the user
-  /// long-presses the "find the" span, which is underlined in wavy green. The
-  /// hit-testing is handled by the [RichText] widget.
-  ///
-  /// ```dart
-  /// class BuzzingText extends StatefulWidget {
-  ///   @override
-  ///   _BuzzingTextState createState() => _BuzzingTextState();
-  /// }
-  ///
-  /// class _BuzzingTextState extends State<BuzzingText> {
-  ///   LongPressGestureRecognizer _longPressRecognizer;
-  ///
-  ///   @override
-  ///   void initState() {
-  ///     super.initState();
-  ///     _longPressRecognizer = LongPressGestureRecognizer()
-  ///       ..onLongPress = _handlePress;
-  ///   }
-  ///
-  ///   @override
-  ///   void dispose() {
-  ///     _longPressRecognizer.dispose();
-  ///     super.dispose();
-  ///   }
-  ///
-  ///   void _handlePress() {
-  ///     HapticFeedback.vibrate();
-  ///   }
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return Text.rich(
-  ///       TextSpan(
-  ///         text: 'Can you ',
-  ///         style: TextStyle(color: Colors.black),
-  ///         children: <InlineSpan>[
-  ///           ReactiveTextSpan(
-  ///             text: 'find the',
-  ///             style: TextStyle(
-  ///               color: Colors.green,
-  ///               decoration: TextDecoration.underline,
-  ///               decorationStyle: TextDecorationStyle.wavy,
-  ///             ),
-  ///             recognizer: _longPressRecognizer,
-  ///           ),
-  ///           TextSpan(
-  ///             text: ' secret?',
-  ///           ),
-  ///         ],
-  ///       ),
-  ///     );
-  ///   }
-  /// }
-  /// ```
-  /// {@end-tool}
+  /// used. See the sample code in the [ReactiveTextSpan] class for reference.
   @override
   // This field is overridden only to override the documentation.
   GestureRecognizer? get recognizer => super.recognizer;
@@ -142,4 +145,38 @@ class ReactiveTextSpan extends TextSpan implements MouseTrackerAnnotation {
   @protected
   @override
   MouseCursor get cursor => mouseCursor;
+
+  @override
+  bool get validForMouseTracker => true;
+
+  @override
+  bool operator ==(Object other) {
+    return super == other
+        && other is ReactiveTextSpan
+        && onEnter == other.onEnter
+        && onExit == other.onExit
+        && mouseCursor == other.mouseCursor;
+  }
+
+  @override
+  int get hashCode => hashValues(
+    super.hashCode,
+    onEnter,
+    onExit,
+    mouseCursor,
+  );
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+
+    properties.add(FlagsSummary<Function?>(
+      'callbacks',
+      <String, Function?> {
+        'enter': onEnter,
+        'exit': onExit,
+      },
+    ));
+    properties.add(DiagnosticsProperty<MouseCursor>('mouseCursor', cursor, defaultValue: MouseCursor.defer));
+  }
 }

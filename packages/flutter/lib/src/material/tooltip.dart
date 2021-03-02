@@ -11,7 +11,6 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'feedback.dart';
 import 'theme.dart';
-import 'theme_data.dart';
 import 'tooltip_theme.dart';
 
 /// A material design tooltip.
@@ -34,13 +33,14 @@ import 'tooltip_theme.dart';
 ///
 /// This example show a basic [Tooltip] which has a [Text] as child.
 /// [message] contains your label to be shown by the tooltip when
-/// the child that Tooltip wraps is long pressed.
+/// the child that Tooltip wraps is hovered over on web or desktop. On mobile,
+/// the tooltip is shown when the widget is long pressed.
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Tooltip(
 ///     message: "I am a Tooltip",
-///     child: Text("Tap this text and hold down to show a tooltip."),
+///     child: Text("Hover over the text to show a tooltip."),
 ///   );
 /// }
 /// ```
@@ -223,11 +223,11 @@ class Tooltip extends StatefulWidget {
 class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   static const double _defaultVerticalOffset = 24.0;
   static const bool _defaultPreferBelow = true;
-  static const EdgeInsetsGeometry _defaultMargin = EdgeInsets.all(0.0);
+  static const EdgeInsetsGeometry _defaultMargin = EdgeInsets.zero;
   static const Duration _fadeInDuration = Duration(milliseconds: 150);
   static const Duration _fadeOutDuration = Duration(milliseconds: 75);
   static const Duration _defaultShowDuration = Duration(milliseconds: 1500);
-  static const Duration _defaultWaitDuration = Duration(milliseconds: 0);
+  static const Duration _defaultWaitDuration = Duration.zero;
   static const bool _defaultExcludeFromSemantics = false;
 
   late double height;

@@ -92,8 +92,10 @@ enum AutofillContextAction {
 ///        const Text('Billing address'),
 ///        Checkbox(
 ///          value: isSameAddress,
-///          onChanged: (bool newValue) {
-///            setState(() { isSameAddress = newValue; });
+///          onChanged: (bool? newValue) {
+///            if (newValue != null) {
+///              setState(() { isSameAddress = newValue; });
+///            }
 ///          },
 ///        ),
 ///        // Again the address fields are grouped together for the same reason.

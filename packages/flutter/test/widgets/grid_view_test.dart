@@ -315,6 +315,30 @@ void main() {
     expect(find.text('4'), findsNothing);
   });
 
+  testWidgets('SliverGridRegularTileLayout - can handle close to zero mainAxisStride', (WidgetTester tester) async {
+    const SliverGridDelegateWithMaxCrossAxisExtent delegate = SliverGridDelegateWithMaxCrossAxisExtent(
+      childAspectRatio: 1e300,
+      maxCrossAxisExtent: 500.0,
+    );
+    final SliverGridLayout layout = delegate.getLayout(
+      const SliverConstraints(
+        axisDirection: AxisDirection.down,
+        growthDirection: GrowthDirection.forward,
+        userScrollDirection: ScrollDirection.forward,
+        scrollOffset: 100.0,
+        precedingScrollExtent: 0.0,
+        overlap: 0.0,
+        remainingPaintExtent: 0.0,
+        crossAxisExtent: 500,
+        crossAxisDirection: AxisDirection.right,
+        viewportMainAxisExtent: 100.0,
+        remainingCacheExtent: 0.0,
+        cacheOrigin: 0.0,
+      )
+    );
+    expect(layout.getMinChildIndexForScrollOffset(1000.0), 0.0);
+  });
+
   testWidgets('GridView - change maxChildCrossAxisExtent', (WidgetTester tester) async {
     final List<int> log = <int>[];
 
@@ -702,5 +726,73 @@ void main() {
     );
     final RenderViewport renderObject = tester.allRenderObjects.whereType<RenderViewport>().first;
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+  });
+
+  testWidgets('SliverGridDelegateWithFixedCrossAxisCount mainAxisExtent works as expected', (WidgetTester tester) async {
+    const int crossAxisCount = 4;
+    const double mainAxisExtent = 100.0;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: GridView(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            mainAxisExtent: mainAxisExtent,
+          ),
+          children: List<Widget>.generate(20, (int i) {
+            return Builder(
+              builder: (BuildContext context) {
+                return Container(
+                  child: Text('$i'),
+                );
+              }
+            );
+          }),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.text('4')), equals(const Size(200.0, mainAxisExtent)));
+  });
+
+  testWidgets('SliverGridDelegateWithMaxCrossAxisExtent mainAxisExtent works as expected', (WidgetTester tester) async {
+    const double maxCrossAxisExtent = 200.0;
+    const double mainAxisExtent = 100.0;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: GridView(
+          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: maxCrossAxisExtent,
+            mainAxisExtent: mainAxisExtent,
+          ),
+          children: List<Widget>.generate(20, (int i) {
+            return Builder(
+              builder: (BuildContext context) {
+                return Container(
+                  child: Text('$i'),
+                );
+              }
+            );
+          }),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.text('4')), equals(const Size(200.0, mainAxisExtent)));
+  });
+
+  testWidgets('SliverGridDelegateWithMaxCrossAxisExtent throws assertion error when maxCrossAxisExtent is 0', (WidgetTester tester) async {
+    const double maxCrossAxisExtent = 0;
+
+    expect(() => Directionality(
+      textDirection: TextDirection.ltr,
+      child: GridView.extent(
+        maxCrossAxisExtent: maxCrossAxisExtent,
+      ),
+    ), throwsA(isA<AssertionError>()));
+
   });
 }

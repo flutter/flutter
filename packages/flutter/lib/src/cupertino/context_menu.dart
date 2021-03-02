@@ -6,7 +6,6 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart' show kMinFlingVelocity, kLongPressTimeout;
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -292,7 +291,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
         return widget.previewBuilder!(context, animation, widget.child);
       },
     );
-    Navigator.of(context, rootNavigator: true)!.push<void>(_route!);
+    Navigator.of(context, rootNavigator: true).push<void>(_route!);
     _route!.animation!.addStatusListener(_routeAnimationStatusListener);
   }
 
@@ -686,7 +685,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
       parent: animation!,
       curve: const Interval(0.9, 1.0),
     ));
-    Navigator.of(context)!.pop();
+    Navigator.of(context).pop();
   }
 
   // Take measurements on the child and _ContextMenuSheet and update the

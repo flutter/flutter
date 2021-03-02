@@ -287,7 +287,6 @@ abstract class CustomPainter extends Listenable {
 ///  * [CustomPainter], which creates instances of this class.
 @immutable
 class CustomPainterSemantics {
-
   /// Creates semantics information describing a rectangle on a canvas.
   ///
   /// Arguments `rect` and `properties` must not be null.
@@ -488,6 +487,34 @@ class RenderCustomPaint extends RenderProxyBox {
   bool willChange;
 
   @override
+  double computeMinIntrinsicWidth(double height) {
+    if (child == null)
+      return preferredSize.width.isFinite ? preferredSize.width : 0;
+    return super.computeMinIntrinsicWidth(height);
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    if (child == null)
+      return preferredSize.width.isFinite ? preferredSize.width : 0;
+    return super.computeMaxIntrinsicWidth(height);
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    if (child == null)
+      return preferredSize.height.isFinite ? preferredSize.height : 0;
+    return super.computeMinIntrinsicHeight(width);
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    if (child == null)
+      return preferredSize.height.isFinite ? preferredSize.height : 0;
+    return super.computeMaxIntrinsicHeight(width);
+  }
+
+  @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
     _painter?.addListener(markNeedsPaint);
@@ -514,9 +541,14 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 
   @override
-  void performResize() {
-    size = constraints.constrain(preferredSize);
+  void performLayout() {
+    super.performLayout();
     markNeedsSemanticsUpdate();
+  }
+
+  @override
+  Size computeSizeForNoChild(BoxConstraints constraints) {
+    return constraints.constrain(preferredSize);
   }
 
   void _paintWithPainter(Canvas canvas, Offset offset, CustomPainter painter) {

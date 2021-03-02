@@ -67,10 +67,10 @@ export 'package:flutter/rendering.dart' show
 
 // Examples can assume:
 // class TestWidget extends StatelessWidget { @override Widget build(BuildContext context) => const Placeholder(); }
-// WidgetTester tester;
-// bool _visible;
+// late WidgetTester tester;
+// late bool _visible;
 // class Sky extends CustomPainter { @override void paint(Canvas c, Size s) => null; @override bool shouldRepaint(Sky s) => false; }
-// BuildContext context;
+// late BuildContext context;
 // dynamic userAvatarUrl;
 
 // BIDIRECTIONAL TEXT SUPPORT
@@ -908,6 +908,8 @@ class ClipPath extends SingleChildRenderObjectWidget {
 
 /// A widget representing a physical layer that clips its children to a shape.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=XgUOSS30OQk}
+///
 /// Physical layers cast shadows based on an [elevation] which is nominally in
 /// logical pixels, coming vertically out of the rendering surface.
 ///
@@ -1474,7 +1476,7 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=T4Uehk3_wlY}
 ///
-/// {@tool sample --template=stateless_widget_scaffold_center}
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
 ///
 /// In this example, the image is stretched to fill the entire [Container], which would
 /// not happen normally without using FittedBox.
@@ -2770,7 +2772,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 /// bool _offstage = true;
 ///
 /// Size _getFlutterLogoSize() {
-///   final RenderBox renderLogo = _key.currentContext.findRenderObject();
+///   final RenderBox renderLogo = _key.currentContext!.findRenderObject()! as RenderBox;
 ///   return renderLogo.size;
 /// }
 ///
@@ -2787,7 +2789,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 ///         ),
 ///       ),
 ///       Text('Flutter logo is offstage: $_offstage'),
-///       RaisedButton(
+///       ElevatedButton(
 ///         child: Text('Toggle Offstage Value'),
 ///         onPressed: () {
 ///           setState(() {
@@ -2796,7 +2798,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 ///         },
 ///       ),
 ///       if (_offstage)
-///         RaisedButton(
+///         ElevatedButton(
 ///           child: Text('Get Flutter Logo size'),
 ///           onPressed: () {
 ///             ScaffoldMessenger.of(context).showSnackBar(
@@ -4481,8 +4483,8 @@ class Flex extends MultiChildRenderObjectWidget {
 class Row extends Flex {
   /// Creates a horizontal array of children.
   ///
-  /// The [direction], [mainAxisAlignment], [mainAxisSize],
-  /// [crossAxisAlignment], and [verticalDirection] arguments must not be null.
+  /// The [mainAxisAlignment], [mainAxisSize], [crossAxisAlignment], and
+  /// [verticalDirection] arguments must not be null.
   /// If [crossAxisAlignment] is [CrossAxisAlignment.baseline], then
   /// [textBaseline] must not be null.
   ///
@@ -4683,8 +4685,8 @@ class Row extends Flex {
 class Column extends Flex {
   /// Creates a vertical array of children.
   ///
-  /// The [direction], [mainAxisAlignment], [mainAxisSize],
-  /// [crossAxisAlignment], and [verticalDirection] arguments must not be null.
+  /// The [mainAxisAlignment], [mainAxisSize], [crossAxisAlignment], and
+  /// [verticalDirection] arguments must not be null.
   /// If [crossAxisAlignment] is [CrossAxisAlignment.baseline], then
   /// [textBaseline] must not be null.
   ///
@@ -5230,7 +5232,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 /// }
 ///
 /// class _FlowMenuState extends State<FlowMenu> with SingleTickerProviderStateMixin {
-///   AnimationController menuAnimation;
+///   late AnimationController menuAnimation;
 ///   IconData lastTapped = Icons.notifications;
 ///   final List<IconData> menuItems = <IconData>[
 ///     Icons.home,
@@ -5290,7 +5292,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 /// }
 ///
 /// class FlowMenuDelegate extends FlowDelegate {
-///   FlowMenuDelegate({this.menuAnimation}) : super(repaint: menuAnimation);
+///   FlowMenuDelegate({required this.menuAnimation}) : super(repaint: menuAnimation);
 ///
 ///   final Animation<double> menuAnimation;
 ///
@@ -5303,7 +5305,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///   void paintChildren(FlowPaintingContext context) {
 ///     double dx = 0.0;
 ///     for (int i = 0; i < context.childCount; ++i) {
-///       dx = context.getChildSize(i).width * i;
+///       dx = context.getChildSize(i)!.width * i;
 ///       context.paintChild(
 ///         i,
 ///         transform: Matrix4.translationValues(
@@ -5577,6 +5579,9 @@ class RichText extends MultiChildRenderObjectWidget {
     properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
     properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: TextWidthBasis.parent));
     properties.add(StringProperty('text', text.toPlainText()));
+    properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
+    properties.add(DiagnosticsProperty<StrutStyle>('strutStyle', strutStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
   }
 }
 
@@ -5839,7 +5844,7 @@ class RawImage extends LeafRenderObjectWidget {
 ///   Future<ByteData> load(String key) async {
 ///     if (key == 'resources/test')
 ///       return ByteData.view(Uint8List.fromList(utf8.encode('Hello World!')).buffer);
-///     return null;
+///     return ByteData(0);
 ///   }
 /// }
 /// ```
@@ -6343,7 +6348,7 @@ class MouseRegion extends StatefulWidget {
   /// ```dart preamble
   /// // A region that hides its content one second after being hovered.
   /// class MyTimedButton extends StatefulWidget {
-  ///   MyTimedButton({ Key key, this.onEnterButton, this.onExitButton })
+  ///   MyTimedButton({ Key? key, required this.onEnterButton, required this.onExitButton })
   ///     : super(key: key);
   ///
   ///   final VoidCallback onEnterButton;
@@ -6609,8 +6614,6 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 
 /// A widget that is invisible during hit testing.
 ///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=qV9pqHWxYgI}
-///
 /// When [ignoring] is true, this widget (and its subtree) is invisible
 /// to hit testing. It still consumes space during layout and paints its child
 /// as usual. It just cannot be the target of located events, because it returns
@@ -6619,6 +6622,61 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 /// When [ignoringSemantics] is true, the subtree will be invisible to
 /// the semantics layer (and thus e.g. accessibility tools). If
 /// [ignoringSemantics] is null, it uses the value of [ignoring].
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=qV9pqHWxYgI}
+///
+/// {@tool dartpad --template=stateful_widget_material}
+/// The following sample has an [IgnorePointer] widget wrapping the `Column`
+/// which contains a button.
+/// When [ignoring] is set to `true` anything inside the `Column` can
+/// not be tapped. When [ignoring] is set to `false` anything
+/// inside the `Column` can be tapped.
+///
+/// ```dart
+/// bool ignoring = false;
+/// void setIgnoring(bool newValue) {
+///   setState(() {
+///     ignoring = newValue;
+///   });
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       centerTitle: true,
+///       title: ElevatedButton(
+///         onPressed: () {
+///           setIgnoring(!ignoring);
+///         },
+///         child: Text(
+///           ignoring ? 'Set ignoring to false' : 'Set ignoring to true',
+///         ),
+///       ),
+///     ),
+///     body: Center(
+///       child: IgnorePointer(
+///         ignoring: ignoring,
+///         child: Column(
+///           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+///           children: <Widget>[
+///             Text(
+///               'Ignoring: $ignoring',
+///             ),
+///             ElevatedButton(
+///               onPressed: () {},
+///               child: Text(
+///                 'Click me!',
+///               ),
+///             ),
+///           ],
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -7191,7 +7249,7 @@ class Semantics extends SingleChildRenderObjectWidget {
 ///     children: <Widget>[
 ///       Checkbox(
 ///         value: true,
-///         onChanged: (bool value) => null,
+///         onChanged: (bool? value) {},
 ///       ),
 ///       const Text("Settings"),
 ///     ],
@@ -7521,7 +7579,7 @@ typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSette
 /// await showDialog<void>(
 ///   context: context,
 ///   builder: (BuildContext context) {
-///     int selectedRadio = 0;
+///     int? selectedRadio = 0;
 ///     return AlertDialog(
 ///       content: StatefulBuilder(
 ///         builder: (BuildContext context, StateSetter setState) {
@@ -7531,7 +7589,7 @@ typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSette
 ///               return Radio<int>(
 ///                 value: index,
 ///                 groupValue: selectedRadio,
-///                 onChanged: (int value) {
+///                 onChanged: (int? value) {
 ///                   setState(() => selectedRadio = value);
 ///                 },
 ///               );
@@ -7627,6 +7685,10 @@ class _RenderColoredBox extends RenderProxyBoxWithHitTestBehavior {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    // It's tempting to want to optimize out this `drawRect()` call if the
+    // color is transparent (alpha==0), but doing so would be incorrect. See
+    // https://github.com/flutter/flutter/pull/72526#issuecomment-749185938 for
+    // a good description of why.
     if (size > Size.zero) {
       context.canvas.drawRect(offset & size, Paint()..color = color);
     }

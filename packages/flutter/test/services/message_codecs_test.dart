@@ -10,7 +10,6 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show WriteBuffer;
 import 'package:flutter/services.dart';
-import 'package:matcher/matcher.dart';
 import '../flutter_test_alternative.dart';
 import 'message_codecs_testing.dart';
 
@@ -73,6 +72,25 @@ void main() {
           () => method.decodeEnvelope(errorData),
           throwsA(predicate((PlatformException e) =>
               e is PlatformException && e.stacktrace == 'errorStacktrace')));
+    });
+
+    test('should allow null error message,', () {
+      final ByteData errorData = method.encodeErrorEnvelope(
+        code: 'errorCode',
+        message: null,
+        details: 'errorDetails',
+      );
+      expect(
+        () => method.decodeEnvelope(errorData),
+        throwsA(
+          predicate((PlatformException e) {
+            return e is PlatformException &&
+              e.code == 'errorCode' &&
+              e.message == null &&
+              e.details == 'errorDetails';
+          }),
+        ),
+      );
     });
   });
   group('Json method codec', () {

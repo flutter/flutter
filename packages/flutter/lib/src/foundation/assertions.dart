@@ -11,10 +11,10 @@ import 'print.dart';
 import 'stack_frame.dart';
 
 // Examples can assume:
-// String runtimeType;
-// bool draconisAlive;
-// bool draconisAmulet;
-// Diagnosticable draconis;
+// late String runtimeType;
+// late bool draconisAlive;
+// late bool draconisAmulet;
+// late Diagnosticable draconis;
 
 /// Signature for [FlutterError.onError] handler.
 typedef FlutterExceptionHandler = void Function(FlutterErrorDetails details);
@@ -93,7 +93,8 @@ class PartialStackFrame {
 /// A class that filters stack frames for additional filtering on
 /// [FlutterError.defaultStackFilter].
 abstract class StackFilter {
-  /// A const constructor to allow subclasses to be const.
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const StackFilter();
 
   /// Filters the list of [StackFrame]s by updating corresponding indices in

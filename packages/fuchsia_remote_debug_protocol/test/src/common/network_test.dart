@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:fuchsia_remote_debug_protocol/src/common/network.dart';
-import 'package:flutter_test/flutter_test.dart';
+
+import '../../common.dart';
 
 void main() {
   final List<String> ipv4Addresses = <String>['127.0.0.1', '8.8.8.8'];

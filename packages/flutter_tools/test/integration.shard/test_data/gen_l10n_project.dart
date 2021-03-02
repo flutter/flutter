@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
@@ -33,16 +35,16 @@ class GenL10nProject extends Project {
 
   @override
   final String pubspec = '''
-name: test
+name: test_l10n_project
 environment:
-  sdk: ">=2.0.0-dev.68.0 <3.0.0"
+  sdk: ">=2.12.0-0 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  intl: 0.17.0-nullsafety.2
+  intl: any # Pick up the pinned version from flutter_localizations
 ''';
 
   @override
@@ -52,10 +54,17 @@ import 'package:flutter/material.dart';
 import 'l10n/app_localizations.dart';
 
 class LocaleBuilder extends StatelessWidget {
-  const LocaleBuilder({ Key key, this.locale, this.test, this.callback }) : super(key: key);
-  final Locale locale;
-  final String test;
+  const LocaleBuilder({
+    Key? key,
+    this.locale,
+    this.test,
+    required this.callback,
+  }) : super(key: key);
+
+  final Locale? locale;
+  final String? test;
   final void Function (BuildContext context) callback;
+
   @override build(BuildContext context) {
     return Localizations.override(
       locale: locale,
@@ -69,9 +78,15 @@ class LocaleBuilder extends StatelessWidget {
 }
 
 class ResultBuilder extends StatelessWidget {
-  const ResultBuilder({ Key key, this.test, this.callback }) : super(key: key);
-  final String test;
+  const ResultBuilder({
+    Key? key,
+    this.test,
+    required this.callback,
+  }) : super(key: key);
+
+  final String? test;
   final void Function (BuildContext context) callback;
+
   @override build(BuildContext context) {
     return Builder(
       builder: (BuildContext context) {
@@ -100,8 +115,8 @@ class Home extends StatelessWidget {
             int n = 0;
             for (Locale locale in AppLocalizations.supportedLocales) {
               String languageCode = locale.languageCode;
-              String countryCode = locale.countryCode;
-              String scriptCode = locale.scriptCode;
+              String? countryCode = locale.countryCode;
+              String? scriptCode = locale.scriptCode;
               results.add('supportedLocales[$n]: languageCode: $languageCode, countryCode: $countryCode, scriptCode: $scriptCode');
               n += 1;
             }
@@ -112,8 +127,8 @@ class Home extends StatelessWidget {
           test: 'countryCode - en_CA',
           callback: (BuildContext context) {
             results.add('--- countryCode (en_CA) tests ---');
-            results.add(AppLocalizations.of(context).helloWorld);
-            results.add(AppLocalizations.of(context).hello("CA fallback World"));
+            results.add(AppLocalizations.of(context)!.helloWorld);
+            results.add(AppLocalizations.of(context)!.hello("CA fallback World"));
           },
         ),
         LocaleBuilder(
@@ -121,8 +136,8 @@ class Home extends StatelessWidget {
           test: 'countryCode - en_GB',
           callback: (BuildContext context) {
             results.add('--- countryCode (en_GB) tests ---');
-            results.add(AppLocalizations.of(context).helloWorld);
-            results.add(AppLocalizations.of(context).hello("GB fallback World"));
+            results.add(AppLocalizations.of(context)!.helloWorld);
+            results.add(AppLocalizations.of(context)!.hello("GB fallback World"));
           },
         ),
         LocaleBuilder(
@@ -130,17 +145,17 @@ class Home extends StatelessWidget {
           test: 'zh',
           callback: (BuildContext context) {
             results.add('--- zh ---');
-            results.add(AppLocalizations.of(context).helloWorld);
-            results.add(AppLocalizations.of(context).helloWorlds(0));
-            results.add(AppLocalizations.of(context).helloWorlds(1));
-            results.add(AppLocalizations.of(context).helloWorlds(2));
+            results.add(AppLocalizations.of(context)!.helloWorld);
+            results.add(AppLocalizations.of(context)!.helloWorlds(0));
+            results.add(AppLocalizations.of(context)!.helloWorlds(1));
+            results.add(AppLocalizations.of(context)!.helloWorlds(2));
             // Should use the fallback language, in this case,
             // "Hello 世界" should be displayed.
-            results.add(AppLocalizations.of(context).hello("世界"));
+            results.add(AppLocalizations.of(context)!.hello("世界"));
             // helloCost is tested in 'zh' because 'es' currency format contains a
             // non-breaking space character (U+00A0), which if removed,
             // makes it hard to decipher why the test is failing.
-            results.add(AppLocalizations.of(context).helloCost("价钱", 123));
+            results.add(AppLocalizations.of(context)!.helloCost("价钱", 123));
           },
         ),
         LocaleBuilder(
@@ -148,7 +163,7 @@ class Home extends StatelessWidget {
           test: 'zh',
           callback: (BuildContext context) {
             results.add('--- scriptCode: zh_Hans ---');
-            results.add(AppLocalizations.of(context).helloWorld);
+            results.add(AppLocalizations.of(context)!.helloWorld);
           },
         ),
         LocaleBuilder(
@@ -156,7 +171,7 @@ class Home extends StatelessWidget {
           test: 'scriptCode - zh_Hant',
           callback: (BuildContext context) {
             results.add('--- scriptCode - zh_Hant ---');
-            results.add(AppLocalizations.of(context).helloWorld);
+            results.add(AppLocalizations.of(context)!.helloWorld);
           },
         ),
         LocaleBuilder(
@@ -164,7 +179,7 @@ class Home extends StatelessWidget {
           test: 'scriptCode - zh_TW_Hant',
           callback: (BuildContext context) {
             results.add('--- scriptCode - zh_Hant_TW ---');
-            results.add(AppLocalizations.of(context).helloWorld);
+            results.add(AppLocalizations.of(context)!.helloWorld);
           },
         ),
         LocaleBuilder(
@@ -172,7 +187,7 @@ class Home extends StatelessWidget {
           test: 'General formatting',
           callback: (BuildContext context) {
             results.add('--- General formatting tests ---');
-            final AppLocalizations localizations = AppLocalizations.of(context);
+            final AppLocalizations localizations = AppLocalizations.of(context)!;
             results.addAll(<String>[
               '${localizations.helloWorld}',
               '${localizations.helloNewlineWorld}',
@@ -184,6 +199,13 @@ class Home extends StatelessWidget {
               '${localizations.helloWorldDuring(DateTime(1960), DateTime(2020))}',
               '${localizations.helloFor(123)}',
               '${localizations.helloCost("price", 123)}',
+              '${localizations.helloCostWithOptionalParam("price", .5)}',
+              '${localizations.helloCostWithSpecialCharacter1("price", .5)}',
+              '${localizations.helloCostWithSpecialCharacter2("price", .5)}',
+              '${localizations.helloCostWithSpecialCharacter3("price", .5)}',
+              '${localizations.helloDecimalPattern(1200000)}',
+              '${localizations.helloPercentPattern(1200000)}',
+              '${localizations.helloScientificPattern(1200000)}',
               '${localizations.helloWorlds(0)}',
               '${localizations.helloWorlds(1)}',
               '${localizations.helloWorlds(2)}',
@@ -211,7 +233,7 @@ class Home extends StatelessWidget {
           test: '--- es ---',
           callback: (BuildContext context) {
             results.add('--- es ---');
-            final AppLocalizations localizations = AppLocalizations.of(context);
+            final AppLocalizations localizations = AppLocalizations.of(context)!;
             results.addAll(<String>[
               '${localizations.helloWorld}',
               '${localizations.helloNewlineWorld}',
@@ -252,7 +274,7 @@ class Home extends StatelessWidget {
           test: 'countryCode - es_419',
           callback: (BuildContext context) {
             results.add('--- es_419 ---');
-            final AppLocalizations localizations = AppLocalizations.of(context);
+            final AppLocalizations localizations = AppLocalizations.of(context)!;
             results.addAll([
               '${localizations.helloWorld}',
               '${localizations.helloWorlds(0)}',
@@ -392,6 +414,99 @@ void main() {
       "value": {
         "type": "int",
         "format": "currency"
+      }
+    }
+  },
+
+  "helloCostWithOptionalParam": "Hello for {price} {value} (with optional param)",
+  "@helloCostWithOptionalParam": {
+    "description": "A message with string and int (currency) parameters",
+    "placeholders": {
+      "price": {},
+      "value": {
+        "type": "double",
+        "format": "currency",
+        "optionalParameters": {
+          "name": "BTC"
+        }
+      }
+    }
+  },
+
+  "helloCostWithSpecialCharacter1": "Hello for {price} {value} (with special character)",
+  "@helloCostWithSpecialCharacter1": {
+    "description": "A message with string and int (currency) parameters",
+    "placeholders": {
+      "price": {},
+      "value": {
+        "type": "double",
+        "format": "currency",
+        "optionalParameters": {
+          "name": "BTC'"
+        }
+      }
+    }
+  },
+
+  "helloCostWithSpecialCharacter2": "Hello for {price} {value} (with special character)",
+  "@helloCostWithSpecialCharacter2": {
+    "description": "A message with string and int (currency) parameters",
+    "placeholders": {
+      "price": {},
+      "value": {
+        "type": "double",
+        "format": "currency",
+        "optionalParameters": {
+          "name": "BTC\""
+        }
+      }
+    }
+  },
+
+  "helloCostWithSpecialCharacter3": "Hello for {price} {value} (with special character)",
+  "@helloCostWithSpecialCharacter3": {
+    "description": "A message with string and int (currency) parameters",
+    "placeholders": {
+      "price": {},
+      "value": {
+        "type": "double",
+        "format": "currency",
+        "optionalParameters": {
+          "name": "BTC\"'"
+        }
+      }
+    }
+  },
+
+  "helloDecimalPattern": "Hello for Decimal Pattern {value}",
+  "@helloDecimalPattern": {
+    "description": "A message which displays a number in decimal pattern",
+    "placeholders": {
+      "value": {
+        "type": "double",
+        "format": "decimalPattern"
+      }
+    }
+  },
+
+  "helloPercentPattern": "Hello for Percent Pattern {value}",
+  "@helloPercentPattern": {
+    "description": "A message which displays a number in percent pattern",
+    "placeholders": {
+      "value": {
+        "type": "double",
+        "format": "percentPattern"
+      }
+    }
+  },
+
+  "helloScientificPattern": "Hello for Scientific Pattern {value}",
+  "@helloScientificPattern": {
+    "description": "A message which displays scientific notation of a number",
+    "placeholders": {
+      "value": {
+        "type": "double",
+        "format": "scientificPattern"
       }
     }
   },

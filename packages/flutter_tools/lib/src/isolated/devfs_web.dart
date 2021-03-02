@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -24,7 +26,6 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
 import '../base/platform.dart';
-import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../cache.dart';
@@ -36,16 +37,8 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
-
-/// Web rendering backend mode.
-enum WebRendererMode {
-  /// Auto detects which rendering backend to use.
-  autoDetect,
-  /// Always uses canvaskit.
-  canvaskit,
-  /// Always uses html.
-  html,
-}
+import '../web/compile.dart';
+import '../web/memory_fs.dart';
 
 typedef DwdsLauncher = Future<Dwds> Function(
     {@required AssetReader assetReader,
@@ -110,7 +103,10 @@ class WebExpressionCompiler implements ExpressionCompiler {
   }
 
   @override
-  Future<bool> updateDependencies(Map<String, String> modules) async => true;
+  Future<void> initialize({bool soundNullSafety}) async {}
+
+  @override
+  Future<bool> updateDependencies(Map<String, ModuleInfo> modules) async => true;
 }
 
 /// A web server which handles serving JavaScript and assets.
@@ -148,8 +144,18 @@ class WebAssetServer implements AssetReader {
       final String name = moduleName.replaceAll('.lib.js', '');
       final String path = moduleName.replaceAll('.js', '');
       _modules[name] = path;
-      _digests[name] = _files[moduleName].hashCode.toString();
+      _digests[name] = _webMemoryFS.files[moduleName].hashCode.toString();
     }
+  }
+
+  @visibleForTesting
+  List<String> write(
+    File codeFile,
+    File manifestFile,
+    File sourcemapFile,
+    File metadataFile,
+  ) {
+    return _webMemoryFS.write(codeFile, manifestFile, sourcemapFile, metadataFile);
   }
 
   /// Start the web asset server on a [hostname] and [port].
@@ -198,10 +204,7 @@ class WebAssetServer implements AssetReader {
     // Allow rendering in a iframe.
     httpServer.defaultResponseHeaders.remove('x-frame-options', 'SAMEORIGIN');
 
-    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      globals.fs.file(buildInfo.packagesPath),
-      logger: globals.logger,
-    );
+    final PackageConfig packageConfig = buildInfo.packageConfig;
     final Map<String, String> digests = <String, String>{};
     final Map<String, String> modules = <String, String>{};
     final WebAssetServer server = WebAssetServer(
@@ -296,12 +299,9 @@ class WebAssetServer implements AssetReader {
 
   final NullSafetyMode _nullSafetyMode;
   final HttpServer _httpServer;
-  // If holding these in memory is too much overhead, this can be switched to a
-  // RandomAccessFile and read on demand.
-  final Map<String, Uint8List> _files = <String, Uint8List>{};
-  final Map<String, Uint8List> _sourcemaps = <String, Uint8List>{};
-  final Map<String, Uint8List> _metadataFiles = <String, Uint8List>{};
-  String _mergedMetadata;
+  final WebMemoryFS _webMemoryFS = WebMemoryFS();
+
+
   final PackageConfig _packages;
   final InternetAddress internetAddress;
   /* late final */ Dwds dwds;
@@ -311,13 +311,13 @@ class WebAssetServer implements AssetReader {
   HttpHeaders get defaultResponseHeaders => _httpServer.defaultResponseHeaders;
 
   @visibleForTesting
-  Uint8List getFile(String path) => _files[path];
+  Uint8List getFile(String path) => _webMemoryFS.files[path];
 
   @visibleForTesting
-  Uint8List getSourceMap(String path) => _sourcemaps[path];
+  Uint8List getSourceMap(String path) => _webMemoryFS.sourcemaps[path];
 
   @visibleForTesting
-  Uint8List getMetadata(String path) => _metadataFiles[path];
+  Uint8List getMetadata(String path) => _webMemoryFS.metadataFiles[path];
 
   @visibleForTesting
 
@@ -355,7 +355,7 @@ class WebAssetServer implements AssetReader {
     // Attempt to look up the file by URI.
     final String webServerPath =
         requestPath.replaceFirst('.dart.js', '.dart.lib.js');
-    if (_files.containsKey(requestPath) || _files.containsKey(webServerPath)) {
+    if (_webMemoryFS.files.containsKey(requestPath) || _webMemoryFS.files.containsKey(webServerPath)) {
       final List<int> bytes = getFile(requestPath) ?? getFile(webServerPath);
       // Use the underlying buffer hashCode as a revision string. This buffer is
       // replaced whenever the frontend_server produces new output files, which
@@ -371,7 +371,7 @@ class WebAssetServer implements AssetReader {
     }
     // If this is a sourcemap file, then it might be in the in-memory cache.
     // Attempt to lookup the file by URI.
-    if (_sourcemaps.containsKey(requestPath)) {
+    if (_webMemoryFS.sourcemaps.containsKey(requestPath)) {
       final List<int> bytes = getSourceMap(requestPath);
       final String etag = bytes.hashCode.toString();
       if (ifNoneMatch == etag) {
@@ -385,7 +385,7 @@ class WebAssetServer implements AssetReader {
 
     // If this is a metadata file, then it might be in the in-memory cache.
     // Attempt to lookup the file by URI.
-    if (_metadataFiles.containsKey(requestPath)) {
+    if (_webMemoryFS.metadataFiles.containsKey(requestPath)) {
       final List<int> bytes = getMetadata(requestPath);
       final String etag = bytes.hashCode.toString();
       if (ifNoneMatch == etag) {
@@ -463,93 +463,7 @@ class WebAssetServer implements AssetReader {
   }
 
   void writeBytes(String filePath, Uint8List contents) {
-    _files[filePath] = contents;
-  }
-
-  /// Update the in-memory asset server with the provided source and manifest files.
-  ///
-  /// Returns a list of updated modules.
-  List<String> write(
-      File codeFile, File manifestFile, File sourcemapFile, File metadataFile) {
-    final List<String> modules = <String>[];
-    final Uint8List codeBytes = codeFile.readAsBytesSync();
-    final Uint8List sourcemapBytes = sourcemapFile.readAsBytesSync();
-    final Uint8List metadataBytes = metadataFile.readAsBytesSync();
-    final Map<String, dynamic> manifest =
-        castStringKeyedMap(json.decode(manifestFile.readAsStringSync()));
-    for (final String filePath in manifest.keys) {
-      if (filePath == null) {
-        globals.printTrace('Invalid manifest file: $filePath');
-        continue;
-      }
-      final Map<String, dynamic> offsets =
-          castStringKeyedMap(manifest[filePath]);
-      final List<int> codeOffsets =
-          (offsets['code'] as List<dynamic>).cast<int>();
-      final List<int> sourcemapOffsets =
-          (offsets['sourcemap'] as List<dynamic>).cast<int>();
-      final List<int> metadataOffsets =
-          (offsets['metadata'] as List<dynamic>).cast<int>();
-      if (codeOffsets.length != 2 ||
-          sourcemapOffsets.length != 2 ||
-          metadataOffsets.length != 2) {
-        globals.printTrace('Invalid manifest byte offsets: $offsets');
-        continue;
-      }
-
-      final int codeStart = codeOffsets[0];
-      final int codeEnd = codeOffsets[1];
-      if (codeStart < 0 || codeEnd > codeBytes.lengthInBytes) {
-        globals.printTrace('Invalid byte index: [$codeStart, $codeEnd]');
-        continue;
-      }
-      final Uint8List byteView = Uint8List.view(
-        codeBytes.buffer,
-        codeStart,
-        codeEnd - codeStart,
-      );
-      final String fileName =
-          filePath.startsWith('/') ? filePath.substring(1) : filePath;
-      _files[fileName] = byteView;
-
-      final int sourcemapStart = sourcemapOffsets[0];
-      final int sourcemapEnd = sourcemapOffsets[1];
-      if (sourcemapStart < 0 || sourcemapEnd > sourcemapBytes.lengthInBytes) {
-        globals
-            .printTrace('Invalid byte index: [$sourcemapStart, $sourcemapEnd]');
-        continue;
-      }
-      final Uint8List sourcemapView = Uint8List.view(
-        sourcemapBytes.buffer,
-        sourcemapStart,
-        sourcemapEnd - sourcemapStart,
-      );
-      final String sourcemapName = '$fileName.map';
-      _sourcemaps[sourcemapName] = sourcemapView;
-
-      final int metadataStart = metadataOffsets[0];
-      final int metadataEnd = metadataOffsets[1];
-      if (metadataStart < 0 || metadataEnd > metadataBytes.lengthInBytes) {
-        globals
-            .printTrace('Invalid byte index: [$metadataStart, $metadataEnd]');
-        continue;
-      }
-      final Uint8List metadataView = Uint8List.view(
-        metadataBytes.buffer,
-        metadataStart,
-        metadataEnd - metadataStart,
-      );
-      final String metadataName = '$fileName.metadata';
-      _metadataFiles[metadataName] = metadataView;
-
-      modules.add(fileName);
-    }
-
-    _mergedMetadata = _metadataFiles.values
-        .map((Uint8List encoded) => utf8.decode(encoded))
-        .join('\n');
-
-    return modules;
+    _webMemoryFS.files[filePath] = contents;
   }
 
   /// Determines what rendering backed to use.
@@ -631,58 +545,19 @@ class WebAssetServer implements AssetReader {
     return webSdkFile;
   }
 
-  // TODO(yjbanov): https://github.com/flutter/flutter/issues/70121
-  static const Map<WebRendererMode, Map<NullSafetyMode, Artifact>> _dartSdkJsArtifactMap =
-    <WebRendererMode, Map<NullSafetyMode, Artifact>> {
-      WebRendererMode.autoDetect: <NullSafetyMode, Artifact> {
-        NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitAndHtmlSoundSdk,
-        NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitAndHtmlSdk,
-        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitAndHtmlSdk,
-      },
-      WebRendererMode.canvaskit: <NullSafetyMode, Artifact> {
-        NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitSoundSdk,
-        NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitSdk,
-        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitSdk,
-      },
-      WebRendererMode.html: <NullSafetyMode, Artifact> {
-        NullSafetyMode.sound: Artifact.webPrecompiledSoundSdk,
-        NullSafetyMode.unsound: Artifact.webPrecompiledSdk,
-        NullSafetyMode.autodetect: Artifact.webPrecompiledSdk,
-      },
-    };
-
-  // TODO(yjbanov): https://github.com/flutter/flutter/issues/70121
-  static const Map<WebRendererMode, Map<NullSafetyMode, Artifact>> _dartSdkJsMapArtifactMap =
-    <WebRendererMode, Map<NullSafetyMode, Artifact>> {
-      WebRendererMode.autoDetect: <NullSafetyMode, Artifact> {
-        NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps,
-        NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps,
-        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps,
-      },
-      WebRendererMode.canvaskit: <NullSafetyMode, Artifact> {
-        NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps,
-        NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitSdkSourcemaps,
-        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitSdkSourcemaps,
-      },
-      WebRendererMode.html: <NullSafetyMode, Artifact> {
-        NullSafetyMode.sound: Artifact.webPrecompiledSoundSdkSourcemaps,
-        NullSafetyMode.unsound: Artifact.webPrecompiledSdkSourcemaps,
-        NullSafetyMode.autodetect: Artifact.webPrecompiledSdkSourcemaps,
-      },
-    };
-
   File get _resolveDartSdkJsFile =>
       globals.fs.file(globals.artifacts.getArtifactPath(
-          _dartSdkJsArtifactMap[webRenderer][_nullSafetyMode]
+          kDartSdkJsArtifactMap[webRenderer][_nullSafetyMode]
       ));
 
   File get _resolveDartSdkJsMapFile =>
     globals.fs.file(globals.artifacts.getArtifactPath(
-        _dartSdkJsMapArtifactMap[webRenderer][_nullSafetyMode]
+        kDartSdkJsMapArtifactMap[webRenderer][_nullSafetyMode]
     ));
 
   @override
   Future<String> dartSourceContents(String serverPath) async {
+    serverPath = _stripBasePath(serverPath, basePath);
     final File result = _resolveDartFile(serverPath);
     if (result.existsSync()) {
       return result.readAsString();
@@ -692,18 +567,20 @@ class WebAssetServer implements AssetReader {
 
   @override
   Future<String> sourceMapContents(String serverPath) async {
-    return utf8.decode(_sourcemaps[serverPath]);
+    serverPath = _stripBasePath(serverPath, basePath);
+    return utf8.decode(_webMemoryFS.sourcemaps[serverPath]);
   }
 
   @override
   Future<String> metadataContents(String serverPath) async {
+    serverPath = _stripBasePath(serverPath, basePath);
     if (serverPath == 'main_module.ddc_merged_metadata') {
-      return _mergedMetadata;
+      return _webMemoryFS.mergedMetadata;
     }
-    if (_metadataFiles.containsKey(serverPath)) {
-      return utf8.decode(_metadataFiles[serverPath]);
+    if (_webMemoryFS.metadataFiles.containsKey(serverPath)) {
+      return utf8.decode(_webMemoryFS.metadataFiles[serverPath]);
     }
-    return null;
+    throw Exception('Could not find metadata contents for $serverPath');
   }
 
   @override
@@ -736,6 +613,7 @@ class WebDevFS implements DevFS {
     @required this.expressionCompiler,
     @required this.chromiumLauncher,
     @required this.nullAssertions,
+    @required this.nativeNullAssertions,
     @required this.nullSafetyMode,
     this.testMode = false,
   }) : _port = port;
@@ -752,6 +630,7 @@ class WebDevFS implements DevFS {
   final ExpressionCompiler expressionCompiler;
   final ChromiumLauncher chromiumLauncher;
   final bool nullAssertions;
+  final bool nativeNullAssertions;
   final int _port;
   final NullSafetyMode nullSafetyMode;
 
@@ -836,9 +715,9 @@ class WebDevFS implements DevFS {
       webAssetServer.webRenderer = WebRendererMode.canvaskit;
     }
     if (hostname == 'any') {
-      _baseUri = Uri.http('localhost:$selectedPort', '');
+      _baseUri = Uri.http('localhost:$selectedPort', webAssetServer.basePath);
     } else {
-      _baseUri = Uri.http('$hostname:$selectedPort', '');
+      _baseUri = Uri.http('$hostname:$selectedPort', webAssetServer.basePath);
     }
     return _baseUri;
   }
@@ -910,6 +789,7 @@ class WebDevFS implements DevFS {
         generateMainModule(
           entrypoint: entrypoint,
           nullAssertions: nullAssertions,
+          nativeNullAssertions: nativeNullAssertions,
         ),
       );
       // TODO(jonahwilliams): refactor the asset code in this and the regular devfs to
@@ -953,18 +833,12 @@ class WebDevFS implements DevFS {
     File metadataFile;
     List<String> modules;
     try {
-      final Directory parentDirectory =
-          globals.fs.directory(outputDirectoryPath);
-      codeFile =
-          parentDirectory.childFile('${compilerOutput.outputFilename}.sources');
-      manifestFile =
-          parentDirectory.childFile('${compilerOutput.outputFilename}.json');
-      sourcemapFile =
-          parentDirectory.childFile('${compilerOutput.outputFilename}.map');
-      metadataFile = parentDirectory
-          .childFile('${compilerOutput.outputFilename}.metadata');
-      modules = webAssetServer.write(
-          codeFile, manifestFile, sourcemapFile, metadataFile);
+      final Directory parentDirectory = globals.fs.directory(outputDirectoryPath);
+      codeFile = parentDirectory.childFile('${compilerOutput.outputFilename}.sources');
+      manifestFile = parentDirectory.childFile('${compilerOutput.outputFilename}.json');
+      sourcemapFile = parentDirectory.childFile('${compilerOutput.outputFilename}.map');
+      metadataFile = parentDirectory.childFile('${compilerOutput.outputFilename}.metadata');
+      modules = webAssetServer._webMemoryFS.write(codeFile, manifestFile, sourcemapFile, metadataFile);
     } on FileSystemException catch (err) {
       throwToolExit('Failed to load recompiled sources:\n$err');
     }
@@ -1092,7 +966,7 @@ Future<Directory> _loadDwdsDirectory(
   final String toolPackagePath =
       fileSystem.path.join(Cache.flutterRoot, 'packages', 'flutter_tools');
   final String packageFilePath =
-      fileSystem.path.join(toolPackagePath, kPackagesFileName);
+      fileSystem.path.join(toolPackagePath, '.dart_tool', 'package_config.json');
   final PackageConfig packageConfig = await loadPackageConfigWithLogging(
     fileSystem.file(packageFilePath),
     logger: logger,

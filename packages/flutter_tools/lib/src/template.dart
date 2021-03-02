@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:package_config/package_config_types.dart';
@@ -281,7 +283,7 @@ Directory _templateDirectoryInPackage(String name, FileSystem fileSystem) {
 Future<Directory> _templateImageDirectory(String name, FileSystem fileSystem, Logger logger) async {
   final String toolPackagePath = fileSystem.path.join(
       Cache.flutterRoot, 'packages', 'flutter_tools');
-  final String packageFilePath = fileSystem.path.join(toolPackagePath, kPackagesFileName);
+  final String packageFilePath = fileSystem.path.join(toolPackagePath, '.dart_tool', 'package_config.json');
   final PackageConfig packageConfig = await loadPackageConfigWithLogging(
     fileSystem.file(packageFilePath),
     logger: logger,

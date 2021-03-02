@@ -34,14 +34,19 @@ void main() {
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
     expect(material.shadowColor, Colors.black);
-    expect(material.shape, RoundedRectangleBorder(
-      side: BorderSide(width: 1, color: colorScheme.onSurface.withOpacity(0.12)),
-      borderRadius: BorderRadius.circular(4.0),
-    ));
+
+    expect(material.shape, isInstanceOf<RoundedRectangleBorder>());
+    final RoundedRectangleBorder materialShape = material.shape! as RoundedRectangleBorder;
+    expect(materialShape.side, BorderSide(width: 1, color: colorScheme.onSurface.withOpacity(0.12)));
+    expect(materialShape.borderRadius, BorderRadius.circular(4.0));
+
     expect(material.textStyle!.color, colorScheme.primary);
     expect(material.textStyle!.fontFamily, 'Roboto');
     expect(material.textStyle!.fontSize, 14);
     expect(material.textStyle!.fontWeight, FontWeight.w500);
+
+    final Align align = tester.firstWidget<Align>(find.ancestor(of: find.text('button'), matching: find.byType(Align)));
+    expect(align.alignment, Alignment.center);
   });
 
   group('[Theme, TextTheme, OutlinedButton style overrides]', () {
@@ -60,6 +65,7 @@ void main() {
     const MaterialTapTargetSize tapTargetSize = MaterialTapTargetSize.shrinkWrap;
     const Duration animationDuration = Duration(milliseconds: 25);
     const bool enableFeedback = false;
+    const AlignmentGeometry alignment = Alignment.centerLeft;
 
     final ButtonStyle style = OutlinedButton.styleFrom(
       primary: primaryColor,
@@ -77,6 +83,7 @@ void main() {
       tapTargetSize: tapTargetSize,
       animationDuration: animationDuration,
       enableFeedback: enableFeedback,
+      alignment: alignment,
     );
 
     Widget buildFrame({ ButtonStyle? buttonStyle, ButtonStyle? themeStyle, ButtonStyle? overallStyle }) {
@@ -138,6 +145,8 @@ void main() {
       expect(material.shape, shape);
       expect(material.animationDuration, animationDuration);
       expect(tester.getSize(find.byType(OutlinedButton)), const Size(200, 200));
+      final Align align = tester.firstWidget<Align>(find.ancestor(of: find.text('button'), matching: find.byType(Align)));
+      expect(align.alignment, alignment);
     }
 
     testWidgets('Button style overrides defaults', (WidgetTester tester) async {

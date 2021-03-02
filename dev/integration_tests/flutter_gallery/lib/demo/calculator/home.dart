@@ -253,6 +253,8 @@ class CalcKey extends StatelessWidget {
           child: Text(
             text,
             style: TextStyle(
+              // This line is used as a sentinel in the hot reload tests: hot_mode_test.dart
+              // in the devicelab.
               fontSize: (orientation == Orientation.portrait) ? 32.0 : 24.0
             ),
           ),

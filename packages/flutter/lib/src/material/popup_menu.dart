@@ -24,7 +24,7 @@ import 'tooltip.dart';
 // enum Commands { heroAndScholar, hurricaneCame }
 // dynamic _heroAndScholar;
 // dynamic _selection;
-// BuildContext context;
+// late BuildContext context;
 // void setState(VoidCallback fn) { }
 
 const Duration _kMenuDuration = Duration(milliseconds: 300);
@@ -148,6 +148,14 @@ class _RenderMenuItem extends RenderShiftedBox {
   _RenderMenuItem(this.onLayout, [RenderBox? child]) : assert(onLayout != null), super(child);
 
   ValueChanged<Size> onLayout;
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    if (child == null) {
+      return Size.zero;
+    }
+    return child!.getDryLayout(constraints);
+  }
 
   @override
   void performLayout() {
@@ -615,9 +623,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
     // The menu can be at most the size of the overlay minus 8.0 pixels in each
     // direction.
-    return BoxConstraints.loose(
-      constraints.biggest - const Offset(_kMenuScreenPadding * 2.0, _kMenuScreenPadding * 2.0) as Size,
-    );
+    return BoxConstraints.loose(constraints.biggest).deflate(const EdgeInsets.all(_kMenuScreenPadding));
   }
 
   @override
@@ -842,7 +848,7 @@ Future<T?> showMenu<T>({
       semanticLabel ??= MaterialLocalizations.of(context).popupMenuLabel;
   }
 
-  final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator)!;
+  final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator);
   return navigator.push(_PopupMenuRoute<T>(
     position: position,
     items: items,
@@ -941,10 +947,12 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.padding = const EdgeInsets.all(8.0),
     this.child,
     this.icon,
+    this.iconSize,
     this.offset = Offset.zero,
     this.enabled = true,
     this.shape,
     this.color,
+    this.enableFeedback,
   }) : assert(itemBuilder != null),
        assert(offset != null),
        assert(enabled != null),
@@ -1029,6 +1037,21 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// Theme.of(context).cardColor is used.
   final Color? color;
 
+  /// Whether detected gestures should provide acoustic and/or haptic feedback.
+  ///
+  /// For example, on Android a tap will produce a clicking sound and a
+  /// long-press will produce a short vibration, when feedback is enabled.
+  ///
+  /// See also:
+  ///
+  ///  * [Feedback] for providing platform-specific feedback to certain actions.
+  final bool? enableFeedback;
+
+  /// If provided, the size of the [Icon].
+  ///
+  /// If this property is null, the default size is 24.0 pixels.
+  final double? iconSize;
+
   @override
   PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
 }
@@ -1049,7 +1072,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   void showButtonMenu() {
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final RenderBox button = context.findRenderObject()! as RenderBox;
-    final RenderBox overlay = Navigator.of(context)!.overlay!.context.findRenderObject()! as RenderBox;
+    final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
         button.localToGlobal(widget.offset, ancestor: overlay),
@@ -1083,20 +1106,6 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     }
   }
 
-  Icon _getIcon(TargetPlatform platform) {
-    assert(platform != null);
-    switch (platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return const Icon(Icons.more_vert);
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        return const Icon(Icons.more_horiz);
-    }
-  }
-
   bool get _canRequestFocus {
     final NavigationMode mode = MediaQuery.maybeOf(context)?.navigationMode ?? NavigationMode.traditional;
     switch (mode) {
@@ -1109,6 +1118,10 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
 
   @override
   Widget build(BuildContext context) {
+    final bool enableFeedback = widget.enableFeedback
+      ?? PopupMenuTheme.of(context).enableFeedback
+      ?? true;
+
     assert(debugCheckHasMaterialLocalizations(context));
 
     if (widget.child != null)
@@ -1118,14 +1131,17 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
           onTap: widget.enabled ? showButtonMenu : null,
           canRequestFocus: _canRequestFocus,
           child: widget.child,
+          enableFeedback: enableFeedback,
         ),
       );
 
     return IconButton(
-      icon: widget.icon ?? _getIcon(Theme.of(context).platform),
+      icon: widget.icon ?? Icon(Icons.adaptive.more),
       padding: widget.padding,
+      iconSize: widget.iconSize ?? 24.0,
       tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
       onPressed: widget.enabled ? showButtonMenu : null,
+      enableFeedback: enableFeedback,
     );
   }
 }

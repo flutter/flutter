@@ -11,7 +11,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
 import 'debug.dart';
@@ -1334,8 +1333,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   bool get sizedByParent => true;
 
   @override
-  void performResize() {
-    size = Size(
+  Size computeDryLayout(BoxConstraints constraints) {
+    return Size(
       constraints.hasBoundedWidth ? constraints.maxWidth : _minPreferredTrackWidth + _maxSliderPartWidth,
       constraints.hasBoundedHeight ? constraints.maxHeight : math.max(_minPreferredTrackHeight, _maxSliderPartHeight),
     );
@@ -1588,5 +1587,10 @@ class _RenderValueIndicator extends RenderBox with RelayoutWhenSystemFontsChange
     if (_state.paintValueIndicator != null) {
       _state.paintValueIndicator!(context, offset);
     }
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.smallest;
   }
 }

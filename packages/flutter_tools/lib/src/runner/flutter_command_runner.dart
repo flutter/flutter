@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:completion/completion.dart';
@@ -16,9 +18,9 @@ import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../dart/package_map.dart';
 import '../globals.dart' as globals;
 import '../tester/flutter_tester.dart';
+import '../web/web_device.dart';
 
 const String kFlutterRootEnvironmentVariableName = 'FLUTTER_ROOT'; // should point to //flutter/ (root of flutter/flutter repo)
 const String kFlutterEngineEnvironmentVariableName = 'FLUTTER_ENGINE'; // should point to //engine/src/ (root of flutter/engine repo)
@@ -43,7 +45,14 @@ class FlutterCommandRunner extends CommandRunner<void> {
         abbr: 'v',
         negatable: false,
         help: 'Noisy logging, including all shell commands executed.\n'
-              'If used with --help, shows hidden options.');
+              'If used with "--help", shows hidden options. '
+              'If used with "flutter doctor", shows additional diagnostic information. '
+              '(Use "-vv" to force verbose logging in those cases.)');
+    argParser.addFlag('prefixed-errors',
+        negatable: false,
+        help: 'Causes lines sent to stderr to be prefixed with "ERROR:".',
+        hide: !verboseHelp,
+        defaultsTo: false);
     argParser.addFlag('quiet',
         negatable: false,
         hide: !verboseHelp,
@@ -56,8 +65,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
     argParser.addOption('wrap-column',
         hide: !verboseHelp,
         help: 'Sets the output wrap column. If not set, uses the width of the terminal. No '
-            'wrapping occurs if not writing to a terminal. Use --no-wrap to turn off wrapping '
-            'when connected to a terminal.',
+              'wrapping occurs if not writing to a terminal. Use "--no-wrap" to turn off wrapping '
+              'when connected to a terminal.',
         defaultsTo: null);
     argParser.addOption('device-id',
         abbr: 'd',
@@ -68,7 +77,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     argParser.addFlag('machine',
         negatable: false,
         hide: !verboseHelp,
-        help: 'When used with the --version flag, outputs the information using JSON.');
+        help: 'When used with the "--version" flag, outputs the information using JSON.');
     argParser.addFlag('color',
         negatable: true,
         hide: !verboseHelp,
@@ -82,19 +91,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
     argParser.addFlag('suppress-analytics',
         negatable: false,
         help: 'Suppress analytics reporting when this command runs.');
-
-    String packagesHelp;
-    bool showPackagesCommand;
-    if (globals.fs.isFileSync(kPackagesFileName)) {
-      packagesHelp = '(defaults to "$kPackagesFileName")';
-      showPackagesCommand = verboseHelp;
-    } else {
-      packagesHelp = '(required, since the current directory does not contain a "$kPackagesFileName" file)';
-      showPackagesCommand = true;
-    }
     argParser.addOption('packages',
-        hide: !showPackagesCommand,
-        help: 'Path to your ".packages" file.\n$packagesHelp');
+        hide: !verboseHelp,
+        help: 'Path to your "package_config.json" file.');
     if (verboseHelp) {
       argParser.addSeparator('Local build selection options (not normally required):');
     }
@@ -110,7 +109,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         hide: !verboseHelp,
         help: 'Name of a build output within the engine out directory, if you are building Flutter locally.\n'
               'Use this to select a specific version of the engine if you have built multiple engine targets.\n'
-              'This path is relative to --local-engine-src-path/out.');
+              'This path is relative to "--local-engine-src-path" or "--local-engine-src-out" (q.v.).');
 
     if (verboseHelp) {
       argParser.addSeparator('Options for testing the "flutter" tool itself:');
@@ -118,8 +117,13 @@ class FlutterCommandRunner extends CommandRunner<void> {
     argParser.addFlag('show-test-device',
         negatable: false,
         hide: !verboseHelp,
-        help: "List the special 'flutter-tester' device in device listings. "
-              'This headless device is used to\ntest Flutter tooling.');
+        help: 'List the special "flutter-tester" device in device listings. '
+              'This headless device is used to test Flutter tooling.');
+    argParser.addFlag('show-web-server-device',
+        negatable: false,
+        hide: !verboseHelp,
+        help: 'List the special "web-server" device in device listings.',
+    );
   }
 
   @override
@@ -215,11 +219,16 @@ class FlutterCommandRunner extends CommandRunner<void> {
         topLevelResults['device-id'] == FlutterTesterDevices.kTesterDeviceId) {
       FlutterTesterDevices.showFlutterTesterDevice = true;
     }
+    if (topLevelResults['show-web-server-device'] as bool ||
+        topLevelResults['device-id'] == WebServerDevice.kWebServerDeviceId) {
+      WebServerDevice.showWebServerDevice = true;
+    }
 
     // Set up the tooling configuration.
     final EngineBuildPaths engineBuildPaths = await globals.localEngineLocator.findEnginePath(
       topLevelResults['local-engine-src-path'] as String,
-      topLevelResults['local-engine'] as String
+      topLevelResults['local-engine'] as String,
+      topLevelResults['packages'] as String,
     );
     if (engineBuildPaths != null) {
       contextOverrides.addAll(<Type, dynamic>{
@@ -242,20 +251,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
           globals.flutterUsage.suppressAnalytics = true;
         }
 
-        try {
-          await globals.flutterVersion.ensureVersionFile();
-        } on FileSystemException catch (e) {
-          globals.printError('Failed to write the version file to the artifact cache: "$e".');
-          globals.printError('Please ensure you have permissions in the artifact cache directory.');
-          throwToolExit('Failed to write the version file');
-        }
+        globals.flutterVersion.ensureVersionFile();
         final bool machineFlag = topLevelResults['machine'] as bool;
         if (topLevelResults.command?.name != 'upgrade' && topLevelResults['version-check'] as bool && !machineFlag) {
           await globals.flutterVersion.checkFlutterVersionFreshness();
-        }
-
-        if (topLevelResults.wasParsed('packages')) {
-          globalPackagesPath = globals.fs.path.normalize(globals.fs.path.absolute(topLevelResults['packages'] as String));
         }
 
         // See if the user specified a specific device.
@@ -279,7 +278,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         }
 
         if (machineFlag) {
-          throwToolExit('The --machine flag is only valid with the --version flag.', exitCode: 2);
+          throwToolExit('The "--machine" flag is only valid with the "--version" flag.', exitCode: 2);
         }
         await super.runCommand(topLevelResults);
       },

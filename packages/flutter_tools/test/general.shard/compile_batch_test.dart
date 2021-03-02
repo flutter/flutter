@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:file/memory.dart';
@@ -75,10 +77,6 @@ void main() {
     expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
     expect(logger.errorText, equals('line1\nline2\n'));
     expect(output.outputFilename, equals('/path/to/main.dart.dill'));
-    final VerificationResult argVerification = verify(mockProcessManager.start(captureAny));
-    expect(argVerification.captured.single, containsAll(<String>[
-      '-Ddart.developer.causal_async_stacks=true',
-    ]));
   });
 
   testWithoutContext('passes correct AOT config to kernel compiler in aot/profile mode', () async {
@@ -113,7 +111,6 @@ void main() {
       '--tfa',
       '-Ddart.vm.profile=true',
       '-Ddart.vm.product=false',
-      '-Ddart.developer.causal_async_stacks=false',
     ]));
   });
 
@@ -149,7 +146,6 @@ void main() {
       '--tfa',
       '-Ddart.vm.profile=false',
       '-Ddart.vm.product=true',
-      '-Ddart.developer.causal_async_stacks=false',
     ]));
   });
 

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 part of reporting;
 
 /// Provide suggested GitHub issue templates to user when Flutter encounters an error.
@@ -119,7 +121,7 @@ ${_projectMetadataInformation()}
       }
       final FlutterProjectMetadata metadata = FlutterProjectMetadata(project.metadataFile, _logger);
       final StringBuffer description = StringBuffer()
-        ..writeln('**Type**: ${metadata.projectType?.name}')
+        ..writeln('**Type**: ${flutterProjectTypeToString(metadata.projectType)}')
         ..writeln('**Version**: ${manifest.appVersion}')
         ..writeln('**Material**: ${manifest.usesMaterialDesign}')
         ..writeln('**Android X**: ${manifest.usesAndroidX}')

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:matcher/matcher.dart';
 import 'package:vm_service/vm_service.dart';
@@ -33,7 +35,8 @@ void batch1() {
     // No need to start paused as all breakpoint would be eventually reached.
     return  _flutter.run(
       withDebugger: true, chrome: true,
-      expressionEvaluation: expressionEvaluation);
+      expressionEvaluation: expressionEvaluation,
+      additionalCommandArgs: <String>['--verbose']);
   }
 
   Future<void> breakInBuildMethod(FlutterTestDriver flutter) async {
@@ -139,7 +142,8 @@ void batch2() {
     return  _flutter.run(
       withDebugger: true, chrome: true,
       expressionEvaluation: expressionEvaluation,
-      startPaused: true, script: _project.testFilePath);
+      startPaused: true, script: _project.testFilePath,
+      additionalCommandArgs: <String>['--verbose']);
   }
 
   testWithoutContext('flutter test expression evaluation - error if expression evaluation disabled', () async {
@@ -164,7 +168,7 @@ void batch2() {
     await breakInMethod(_flutter);
     await evaluateComplexExpressions(_flutter);
     await cleanProject();
-  });
+  }, skip: 'https://github.com/dart-lang/sdk/issues/41480');
 }
 
 Future<void> failToEvaluateExpression(FlutterTestDriver flutter) async {

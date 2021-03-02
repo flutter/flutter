@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -130,23 +132,6 @@ void main() {
     ]);
 
     expect(result.stderr, contains('Target file')); // Target file not found, but different paths on Windows and Linux/macOS.
-  });
-
-  testWithoutContext('flutter build aot is deprecated', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
-    final ProcessResult result = await processManager.run(<String>[
-      flutterBin,
-      ...getLocalEngineArguments(),
-      'build',
-      '-h',
-      '-v',
-    ]);
-
-    // Deprecated.
-    expect(result.stdout, isNot(contains('aot')));
-
-    // Only printed by verbose tool.
-    expect(result.stdout, isNot(contains('exiting with code 0')));
   });
 
   testWithoutContext('flutter --version --machine outputs JSON with flutterRoot', () async {
