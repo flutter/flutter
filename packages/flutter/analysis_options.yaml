@@ -1,8 +1,0 @@
-# Use the parent analysis options settings and enable null-experiment.
-
-include: ../analysis_options.yaml
-
-analyzer:
-  errors:
-    always_require_non_null_named_parameters: false # not needed with nnbd
-    unnecessary_null_comparison: false # Turned off until null-safe rollout is complete.

@@ -1,1 +1,4 @@
 # This ensures that parent analysis options do not accidentally break the fix tests.
+analyzer:
+  exclude:
+    - '**'

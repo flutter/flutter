@@ -36,6 +36,8 @@ analyzer:
     # Stream and not importing dart:async
     # Please see https://github.com/flutter/flutter/pull/24528 for details.
     sdk_version_async_exported_from_core: ignore
+    # Turned off until null-safe rollout is complete.
+    unnecessary_null_comparison: ignore
   exclude:
     - "bin/cache/**"
     # the following two are relative to the stocks example and the flutter package respectively
