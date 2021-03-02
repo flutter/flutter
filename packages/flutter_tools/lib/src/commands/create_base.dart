@@ -113,8 +113,8 @@ abstract class CreateBase extends FlutterCommand {
     argParser.addFlag(
       'implementation-tests',
       help:
-          'Include implementation tests that verify the template functions correctly'
-          'This is normally enabled to test the tool itself.',
+          'Include implementation tests that verify the template functions correctly. '
+          'This is only intended to enable testing of the tool itself.',
       hide: !verboseHelp,
     );
   }
