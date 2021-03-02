@@ -1030,19 +1030,14 @@ void main() {
     editable.selection = const TextSelection.collapsed(offset: 0);
     pumpFrame();
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+    editable.moveSelectionRight(SelectionChangedCause.keyboard);
+    editable.moveSelectionRight(SelectionChangedCause.keyboard);
+    editable.moveSelectionRight(SelectionChangedCause.keyboard);
+    editable.moveSelectionRight(SelectionChangedCause.keyboard);
     expect(editable.selection?.isCollapsed, true);
     expect(editable.selection?.baseOffset, 4);
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
+    editable.moveSelectionLeft(SelectionChangedCause.keyboard);
     expect(editable.selection?.isCollapsed, true);
     expect(editable.selection?.baseOffset, 3);
 
