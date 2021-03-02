@@ -259,8 +259,7 @@ String regenerateIconsFile(String iconData, Map<String, String> tokenPairMap) {
       final List<String> platformAdaptiveDeclarations = <String>[];
       _platformAdaptiveIdentifiers.forEach((String flutterId, List<String> ids) {
         // Automatically finds and generates styled icon declarations.
-        for (final IconStyle iconStyle in IconStyle.values) {
-          final String style = iconStyle.idSuffix();
+        for (final String style in _Icon.styleSuffixes) {
           try {
             final _Icon agnosticIcon = newIcons.firstWhere(
                 (_Icon icon) => icon.id == '${ids[0]}$style',
@@ -271,7 +270,8 @@ String regenerateIconsFile(String iconData, Map<String, String> tokenPairMap) {
 
             platformAdaptiveDeclarations.add(_Icon.platformAdaptiveDeclaration('$flutterId$style', agnosticIcon, iOSIcon));
           } catch (e) {
-            if (iconStyle == IconStyle.regular) {
+            if (style == '') {
+              // Throw an error for regular (unstyled) icons.
               stderr.writeln("Error while generating platformAdaptiveDeclarations: Icon '$e' not found.");
               exit(1);
             } else {
@@ -325,54 +325,35 @@ void _overwriteOldCodepoints(File newCodepointsFile, File oldCodepointsFile) {
   newCodepointsFile.copySync(oldCodepointsFile.path);
 }
 
-enum IconStyle {
-  regular,
-  outlined,
-  rounded,
-  sharp,
-}
-
-extension IconStyleExtension on IconStyle {
-  // The suffix for the 'material-icons' HTML class.
-  String htmlSuffix() {
-    switch (this) {
-      case IconStyle.outlined: return '-outlined';
-      case IconStyle.rounded: return '-round';
-      case IconStyle.sharp: return '-sharp';
-      default: return '';
-    }
-  }
-
-  // The suffix for icon ids.
-  String idSuffix() {
-    switch (this) {
-      case IconStyle.outlined:
-      case IconStyle.rounded:
-      case IconStyle.sharp:
-        return '_' + toString().split('.').last;
-      default: return '';
-    }
-  }
-}
-
 class _Icon {
+  static const List<String> styleSuffixes = ['', '_outlined', '_rounded', '_sharp'];
+
+  String id;            // e.g. 5g, 5g_outlined, 5g_rounded, 5g_sharp
+  String shortId;       // e.g. 5g
+  String flutterId;     // e.g. five_g, five_g_outlined, five_g_rounded, five_g_sharp
+  String name;          // e.g. five g, five g outlined, five g rounded, five g sharp
+  String hexCodepoint;  // e.g. e547
+
+  // The suffix for the 'material-icons' HTML class.
+  String htmlSuffix;
+
   // Parse tokenPair (e.g. {"6_ft_apart_outlined": "e004"}).
   _Icon(MapEntry<String, String> tokenPair) {
     id = tokenPair.key;
     hexCodepoint = tokenPair.value;
 
     if (id.endsWith('_outlined') && id!='insert_chart_outlined') {
-      style = IconStyle.outlined;
       shortId = _replaceLast(id, '_outlined');
+      htmlSuffix = '-outlined';
     } else if (id.endsWith('_rounded')) {
-      style = IconStyle.rounded;
       shortId = _replaceLast(id, '_rounded');
+      htmlSuffix = '-round';
     } else if (id.endsWith('_sharp')) {
-      style = IconStyle.sharp;
       shortId = _replaceLast(id, '_sharp');
+      htmlSuffix = '-sharp';
     } else {
-      style = IconStyle.regular;
       shortId = id;
+      htmlSuffix = '';
     }
 
     flutterId = id;
@@ -385,21 +366,9 @@ class _Icon {
     name = id.replaceAll('_', ' ');
   }
 
-  String _replaceLast(String string, String toReplace) {
-    return string.replaceAll(RegExp('$toReplace\$'), '');
-  }
-
-  String id;            // e.g. 5g, 5g_outlined, 5g_rounded, 5g_sharp
-  String shortId;       // e.g. 5g
-  String flutterId;     // e.g. five_g, five_g_outlined, five_g_rounded, five_g_sharp
-  String name;          // e.g. five g, five g outlined, five g rounded, five g sharp
-  IconStyle style;      // e.g. IconStyle.outlined
-  String hexCodepoint;  // e.g. e547
-
   String get mirroredInRTL => _iconsMirroredWhenRTL.contains(shortId) ? ', matchTextDirection: true' : '';
 
-  String get dartDoc =>
-      '<i class="material-icons${style.htmlSuffix()} md-36">$shortId</i> &#x2014; material icon named "$name"';
+  String get dartDoc => '<i class="material-icons$htmlSuffix md-36">$shortId</i> &#x2014; material icon named "$name"';
 
   String get declaration =>
       "static const IconData $flutterId = IconData(0x$hexCodepoint, fontFamily: 'MaterialIcons'$mirroredInRTL);";
@@ -418,4 +387,8 @@ class _Icon {
 
   @override
   String toString() => id;
+
+  String _replaceLast(String string, String toReplace) {
+    return string.replaceAll(RegExp('$toReplace\$'), '');
+  }
 }
