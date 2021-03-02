@@ -1785,6 +1785,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   Rect getLocalRectForCaret(TextPosition caretPosition) {
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     final Offset caretOffset = _textPainter.getOffsetForCaret(caretPosition, _caretPrototype);
+    print('justin offset for caret $caretOffset');
     // This rect is the same as _caretPrototype but without the vertical padding.
     final Rect rect = Rect.fromLTWH(0.0, 0.0, cursorWidth, cursorHeight).shift(caretOffset + _paintOffset + cursorOffset);
     // Add additional cursor offset (generally only if on iOS).

@@ -676,7 +676,9 @@ class TextPainter {
     int graphemeClusterLength = needsSearch ? 2 : 1;
     List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty) {
+      final String flattenedText = _text!.toPlainText(includePlaceholders: false);
       final int prevRuneOffset = max(0, offset - graphemeClusterLength);
+      //final int prevRuneOffset = offset - graphemeClusterLength;
       // Use BoxHeightStyle.strut to ensure that the caret's height fits within
       // the line's height and is consistent throughout the line.
       boxes = _paragraph!.getBoxesForRange(prevRuneOffset, offset, boxHeightStyle: ui.BoxHeightStyle.strut);
@@ -687,7 +689,8 @@ class TextPainter {
         if (!needsSearch) {
           break; // Only perform one iteration if no search is required.
         }
-        if (prevRuneOffset < 1) {
+        if (prevRuneOffset < -flattenedText.length) {
+        //if (prevRuneOffset < 1) {
           break; // Stop iterating when beyond the max length of the text.
         }
         // Multiply by two to log(n) time cover the entire text span. This allows
@@ -832,6 +835,7 @@ class TextPainter {
         break;
       }
     }
+    print('justin rect $rect');
     _caretMetrics = _CaretMetrics(
       offset: rect != null ? Offset(rect.left, rect.top) : _emptyOffset,
       fullHeight: rect != null ? rect.bottom - rect.top : null,
