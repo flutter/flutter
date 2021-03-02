@@ -9,6 +9,7 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/MacOSGLContextSwitch.h"
 
 @interface FlutterFrameBufferProvider () {
+  const NSOpenGLContext* _openGLContext;
   uint32_t _frameBufferId;
   uint32_t _backingTexture;
 }
@@ -17,7 +18,8 @@
 @implementation FlutterFrameBufferProvider
 - (instancetype)initWithOpenGLContext:(const NSOpenGLContext*)openGLContext {
   if (self = [super init]) {
-    MacOSGLContextSwitch context_switch(openGLContext);
+    _openGLContext = openGLContext;
+    MacOSGLContextSwitch context_switch(_openGLContext);
 
     glGenFramebuffers(1, &_frameBufferId);
     glGenTextures(1, &_backingTexture);
@@ -46,6 +48,8 @@
 }
 
 - (void)dealloc {
+  MacOSGLContextSwitch context_switch(_openGLContext);
+
   glDeleteFramebuffers(1, &_frameBufferId);
   glDeleteTextures(1, &_backingTexture);
 }
