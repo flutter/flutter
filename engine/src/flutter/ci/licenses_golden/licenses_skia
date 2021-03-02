@@ -1,4 +1,4 @@
-Signature: f91a082e951d3ea29437f41e6680ef3a
+Signature: 76e09ae97c7e30cd7e54397f0f72aca6
 
 UNUSED LICENSES:
 
@@ -970,6 +970,7 @@ FILE: ../../../third_party/skia/demos.skia.org/demos/hello_world/index.html
 FILE: ../../../third_party/skia/demos.skia.org/demos/image_decode_web_worker/index.html
 FILE: ../../../third_party/skia/demos.skia.org/demos/image_decode_web_worker/main.js
 FILE: ../../../third_party/skia/demos.skia.org/demos/image_decode_web_worker/worker.js
+FILE: ../../../third_party/skia/demos.skia.org/demos/image_sampling/index.html
 FILE: ../../../third_party/skia/demos.skia.org/demos/path_performance/garbage.svg
 FILE: ../../../third_party/skia/demos.skia.org/demos/path_performance/index.html
 FILE: ../../../third_party/skia/demos.skia.org/demos/path_performance/main.js
