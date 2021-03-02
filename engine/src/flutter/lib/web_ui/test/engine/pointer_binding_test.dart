@@ -2090,6 +2090,60 @@ void testMain() {
     },
   );
 
+  _testEach<_PointerEventContext>(
+    [
+      _PointerEventContext(),
+    ],
+    'handles random pointer id on up events',
+    (_PointerEventContext context) {
+      PointerBinding.instance.debugOverrideDetector(context);
+      // This happens with pens that are simulated with mouse events
+      // (e.g. Wacom). It sends events with the pointer type "mouse", and
+      // assigns a random pointer ID to each event.
+      //
+      // For more info, see: https://github.com/flutter/flutter/issues/75559
+
+      List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+        packets.add(packet);
+      };
+
+      glassPane.dispatchEvent(context.mouseDown(
+        pointerId: 12,
+        button: 0,
+        buttons: 1,
+        clientX: 10.0,
+        clientY: 10.0,
+      ));
+
+      expect(packets, hasLength(1));
+      expect(packets.single.data, hasLength(2));
+
+      expect(packets.single.data[0].change, equals(ui.PointerChange.add));
+      expect(packets.single.data[0].synthesized, equals(true));
+      expect(packets.single.data[1].change, equals(ui.PointerChange.down));
+      packets.clear();
+
+      expect(
+        () {
+          glassPane.dispatchEvent(context.mouseUp(
+            pointerId: 41,
+            button: 0,
+            buttons: 0,
+            clientX: 10.0,
+            clientY: 10.0,
+          ));
+        },
+        returnsNormally,
+      );
+
+      expect(packets, hasLength(1));
+      expect(packets.single.data, hasLength(1));
+
+      expect(packets.single.data[0].change, equals(ui.PointerChange.up));
+    },
+  );
+
   // TOUCH ADAPTER
 
   _testEach(
@@ -2537,9 +2591,9 @@ class _PointerEventContext extends _BasicEventContext
 
   @override
   html.Event mouseDown(
-      {double clientX, double clientY, int button, int buttons}) {
+      {double clientX, double clientY, int button, int buttons, int pointerId = 1}) {
     return _downWithFullDetails(
-      pointer: 1,
+      pointer: pointerId,
       buttons: buttons,
       button: button,
       clientX: clientX,
@@ -2581,9 +2635,9 @@ class _PointerEventContext extends _BasicEventContext
 
   @override
   html.Event mouseMove(
-      {double clientX, double clientY, int button, int buttons}) {
+      {double clientX, double clientY, int button, int buttons, int pointerId = 1}) {
     return _moveWithFullDetails(
-      pointer: 1,
+      pointer: pointerId,
       buttons: buttons,
       button: button,
       clientX: clientX,
@@ -2623,9 +2677,9 @@ class _PointerEventContext extends _BasicEventContext
   }
 
   @override
-  html.Event mouseUp({double clientX, double clientY, int button, int buttons}) {
+  html.Event mouseUp({double clientX, double clientY, int button, int buttons, int pointerId = 1}) {
     return _upWithFullDetails(
-      pointer: 1,
+      pointer: pointerId,
       button: button,
       buttons: buttons,
       clientX: clientX,
