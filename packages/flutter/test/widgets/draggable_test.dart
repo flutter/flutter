@@ -85,6 +85,83 @@ void main() {
     expect(moveCount, 1);
   });
 
+  testWidgets('Drag and drop - onLeave callback fires correctly with generic parameter',
+      (WidgetTester tester) async {
+    final Map<String,int> leftBehind = <String,int>{
+      'Target 1': 0,
+      'Target 2': 0,
+    };
+
+    await tester.pumpWidget(MaterialApp(
+      home: Column(
+        children: <Widget>[
+          const Draggable<int>(
+            data: 1,
+            child: Text('Source'),
+            feedback: Text('Dragging'),
+          ),
+          DragTarget<int>(
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
+              return Container(height: 100.0, child: const Text('Target 1'));
+            },
+            onLeave: (int? data) {
+              if (data != null) {
+                leftBehind['Target 1'] = leftBehind['Target 1']! + data;
+              }
+            },
+          ),
+          DragTarget<int>(
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
+              return Container(height: 100.0, child: const Text('Target 2'));
+            },
+            onLeave: (int? data) {
+              if (data != null) {
+                leftBehind['Target 2'] = leftBehind['Target 2']! + data;
+              }
+            },
+          ),
+        ],
+      ),
+    ));
+
+    expect(leftBehind['Target 1'], equals(0));
+    expect(leftBehind['Target 2'], equals(0));
+
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+
+    expect(leftBehind['Target 1'], equals(0));
+    expect(leftBehind['Target 2'], equals(0));
+
+    final Offset secondLocation = tester.getCenter(find.text('Target 1'));
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+
+    expect(leftBehind['Target 1'], equals(0));
+    expect(leftBehind['Target 2'], equals(0));
+
+    final Offset thirdLocation = tester.getCenter(find.text('Target 2'));
+    await gesture.moveTo(thirdLocation);
+    await tester.pump();
+
+    expect(leftBehind['Target 1'], equals(1));
+    expect(leftBehind['Target 2'], equals(0));
+
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+
+    expect(leftBehind['Target 1'], equals(1));
+    expect(leftBehind['Target 2'], equals(1));
+
+    await gesture.up();
+    await tester.pump();
+
+    expect(leftBehind['Target 1'], equals(1));
+    expect(leftBehind['Target 2'], equals(1));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/76825
   testWidgets('Drag and drop - onLeave callback fires correctly', (WidgetTester tester) async {
     final Map<String,int> leftBehind = <String,int>{
       'Target 1': 0,
@@ -103,82 +180,6 @@ void main() {
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return Container(height: 100.0, child: const Text('Target 1'));
             },
-            onLeave: (int? data) {
-              if (data != null) {
-                leftBehind['Target 1'] = leftBehind['Target 1']! + data;
-              }
-            },
-          ),
-          DragTarget<int>(
-            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-              return Container(height: 100.0, child: const Text('Target 2'));
-            },
-            onLeave: (int? data) {
-              if (data != null) {
-                leftBehind['Target 2'] = leftBehind['Target 2']! + data;
-              }
-            },
-          ),
-        ],
-      ),
-    ));
-
-    expect(leftBehind['Target 1'], equals(0));
-    expect(leftBehind['Target 2'], equals(0));
-
-    final Offset firstLocation = tester.getCenter(find.text('Source'));
-    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
-    await tester.pump();
-
-    expect(leftBehind['Target 1'], equals(0));
-    expect(leftBehind['Target 2'], equals(0));
-
-    final Offset secondLocation = tester.getCenter(find.text('Target 1'));
-    await gesture.moveTo(secondLocation);
-    await tester.pump();
-
-    expect(leftBehind['Target 1'], equals(0));
-    expect(leftBehind['Target 2'], equals(0));
-
-    final Offset thirdLocation = tester.getCenter(find.text('Target 2'));
-    await gesture.moveTo(thirdLocation);
-    await tester.pump();
-
-    expect(leftBehind['Target 1'], equals(1));
-    expect(leftBehind['Target 2'], equals(0));
-
-    await gesture.moveTo(secondLocation);
-    await tester.pump();
-
-    expect(leftBehind['Target 1'], equals(1));
-    expect(leftBehind['Target 2'], equals(1));
-
-    await gesture.up();
-    await tester.pump();
-
-    expect(leftBehind['Target 1'], equals(1));
-    expect(leftBehind['Target 2'], equals(1));
-  });
-
-  // Legacy test for clients from before https://github.com/flutter/flutter/issues/76825
-  testWidgets('Drag and drop - onLeave callback fires correctly with Object data', (WidgetTester tester) async {
-    final Map<String,int> leftBehind = <String,int>{
-      'Target 1': 0,
-      'Target 2': 0,
-    };
-
-    await tester.pumpWidget(MaterialApp(
-      home: Column(
-        children: <Widget>[
-          const Draggable<int>(
-            data: 1,
-            child: Text('Source'),
-            feedback: Text('Dragging'),
-          ),
-          DragTarget<int>(
-            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-              return Container(height: 100.0, child: const Text('Target 1'));
-            },
             onLeave: (Object? data) {
               if (data is int) {
                 leftBehind['Target 1'] = leftBehind['Target 1']! + data;
@@ -236,7 +237,8 @@ void main() {
     expect(leftBehind['Target 2'], equals(1));
   });
 
-  testWidgets('Drag and drop - onMove callback fires correctly', (WidgetTester tester) async {
+  testWidgets('Drag and drop - onMove callback fires correctly with generic parameter',
+      (WidgetTester tester) async {
     final Map<String,int> targetMoveCount = <String,int>{
       'Target 1': 0,
       'Target 2': 0,
@@ -309,8 +311,8 @@ void main() {
     expect(targetMoveCount['Target 2'], equals(1));
   });
 
-  // Legacy test for clients from before https://github.com/flutter/flutter/issues/76825
-  testWidgets('Drag and drop - onMove callback fires correctly with dynamic parameter', (WidgetTester tester) async {
+  // Regression test for https://github.com/flutter/flutter/issues/76825
+  testWidgets('Drag and drop - onMove callback fires correctly', (WidgetTester tester) async {
     final Map<String,int> targetMoveCount = <String,int>{
       'Target 1': 0,
       'Target 2': 0,
