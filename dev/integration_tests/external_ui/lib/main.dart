@@ -11,10 +11,12 @@ import 'package:flutter_driver/driver_extension.dart';
 void main() {
   enableFlutterDriverExtension();
   debugPrint('Application starting...');
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
+  const MyApp({Key key}) : super(key: key);
+
   @override
   State createState() => MyAppState();
 }

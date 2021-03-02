@@ -93,6 +93,8 @@ class DateTimeItem extends StatelessWidget {
 }
 
 class FullScreenDialogDemo extends StatefulWidget {
+  const FullScreenDialogDemo({Key? key}) : super(key: key);
+
   @override
   FullScreenDialogDemoState createState() => FullScreenDialogDemoState();
 }
