@@ -85,6 +85,7 @@ void main() {
     expect(moveCount, 1);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/76825
   testWidgets('Drag and drop - onLeave callback fires correctly with generic parameter',
       (WidgetTester tester) async {
     final Map<String,int> leftBehind = <String,int>{
@@ -161,7 +162,6 @@ void main() {
     expect(leftBehind['Target 2'], equals(1));
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/76825
   testWidgets('Drag and drop - onLeave callback fires correctly', (WidgetTester tester) async {
     final Map<String,int> leftBehind = <String,int>{
       'Target 1': 0,
@@ -237,6 +237,7 @@ void main() {
     expect(leftBehind['Target 2'], equals(1));
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/76825
   testWidgets('Drag and drop - onMove callback fires correctly with generic parameter',
       (WidgetTester tester) async {
     final Map<String,int> targetMoveCount = <String,int>{
@@ -311,7 +312,6 @@ void main() {
     expect(targetMoveCount['Target 2'], equals(1));
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/76825
   testWidgets('Drag and drop - onMove callback fires correctly', (WidgetTester tester) async {
     final Map<String,int> targetMoveCount = <String,int>{
       'Target 1': 0,
