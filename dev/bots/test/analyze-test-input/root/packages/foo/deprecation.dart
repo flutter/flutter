@@ -26,7 +26,7 @@ void test3() { }
 )
 void test4() { }
 
-@deprecated // no message
+@deprecated // ignore: provide_deprecation_message
 void test5() { }
 
 @Deprecated('Not the right syntax. This feature was deprecated after v1.2.3.')
