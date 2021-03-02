@@ -87,7 +87,7 @@ linter:
     - avoid_shadowing_type_parameters
     - avoid_single_cascade_in_expression_statements
     - avoid_slow_async_io
-    # - avoid_type_to_string # we do this commonly
+    - avoid_type_to_string
     - avoid_types_as_parameter_names
     # - avoid_types_on_closure_parameters # conflicts with always_specify_types
     # - avoid_unnecessary_containers # not yet tested

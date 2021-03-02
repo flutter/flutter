@@ -204,19 +204,6 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
   return 0
 }
 
-# Destructively thins the Flutter and App frameworks to include only the specified
-# architectures.
-ThinAppFrameworks() {
-  RunCommand "${FLUTTER_ROOT}/bin/flutter"                                \
-    ${verbose_flag}                                                       \
-    assemble                                                              \
-    --no-version-check                                                    \
-    --output="${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}"              \
-    -dTargetPlatform=ios                                                  \
-    -dIosArchs="${ARCHS}"                                                 \
-    "thin_ios_application_frameworks"
-}
-
 # Adds the App.framework as an embedded binary and the flutter_assets as
 # resources.
 EmbedFlutterFrameworks() {
@@ -273,11 +260,6 @@ AddObservatoryBonjourService() {
   fi
 }
 
-EmbedAndThinFrameworks() {
-  EmbedFlutterFrameworks
-  ThinAppFrameworks
-}
-
 # Main entry point.
 if [[ $# == 0 ]]; then
   # Named entry points were introduced in Flutter v0.0.7.
@@ -288,11 +270,13 @@ else
     "build")
       BuildApp ;;
     "thin")
-      ThinAppFrameworks ;;
+      # No-op, thinning is handled during the bundle asset assemble build target.
+      ;;
     "embed")
       EmbedFlutterFrameworks ;;
     "embed_and_thin")
-      EmbedAndThinFrameworks ;;
+      # Thinning is handled during the bundle asset assemble build target, so just embed.
+      EmbedFlutterFrameworks ;;
     "test_observatory_bonjour_service")
       # Exposed for integration testing only.
       AddObservatoryBonjourService ;;

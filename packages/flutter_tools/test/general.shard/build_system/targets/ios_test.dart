@@ -239,10 +239,26 @@ void main() {
     Platform: () => macPlatform,
   });
 
-  group('copy engine Flutter.framework', () {
-    testWithoutContext('iphonesimulator', () async {
+  group('copy and thin engine Flutter.framework', () {
+    Directory outputDir;
+    FakeCommand copyPhysicalFrameworkCommand;
+
+    setUp(() {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final Directory outputDir = fileSystem.directory('output');
+      outputDir = fileSystem.directory('output');
+      copyPhysicalFrameworkCommand = FakeCommand(command: <String>[
+        'rsync',
+        '-av',
+        '--delete',
+        '--filter',
+        '- .DS_Store/',
+        'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.physical',
+        outputDir.path,
+      ]);
+    });
+
+    testWithoutContext('iphonesimulator', () async {
+      final File binary = outputDir.childDirectory('Flutter.framework').childFile('Flutter');
       final Environment environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: processManager,
@@ -251,6 +267,7 @@ void main() {
         fileSystem: fileSystem,
         outputDir: outputDir,
         defines: <String, String>{
+          kIosArchs: 'x86_64',
           kSdkRoot: 'path/to/iPhoneSimulator.sdk',
         },
       );
@@ -264,47 +281,34 @@ void main() {
           '- .DS_Store/',
           'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.simulator',
           outputDir.path,
-        ]),
-      );
-
-      await const DebugUnpackIOS().build(environment);
-    });
-
-    testWithoutContext('iphoneos', () async {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final Directory outputDir = fileSystem.directory('output');
-      final Environment environment = Environment.test(
-        fileSystem.currentDirectory,
-        processManager: processManager,
-        artifacts: artifacts,
-        logger: logger,
-        fileSystem: fileSystem,
-        outputDir: outputDir,
-        defines: <String, String>{
-          kSdkRoot: 'path/to/iPhoneOS.sdk',
-        },
+          ],
+          onRun: () => binary.createSync(recursive: true),
+        ),
       );
 
       processManager.addCommand(
         FakeCommand(command: <String>[
-          'rsync',
-          '-av',
-          '--delete',
-          '--filter',
-          '- .DS_Store/',
-          'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.physical',
-          outputDir.path,
-        ]),
+          'lipo',
+          '-info',
+          binary.path,
+        ], stdout: 'Non-fat file:'),
       );
 
+      processManager.addCommand(
+        FakeCommand(command: <String>[
+          'lipo',
+          binary.path,
+          '-verify_arch',
+          'x86_64',
+        ]),
+      );
       await const DebugUnpackIOS().build(environment);
-    });
-  });
 
-  group('thin frameworks', () {
-    testWithoutContext('fails when frameworks missing', () async {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final Directory outputDir = fileSystem.directory('Runner.app').childDirectory('Frameworks');
+      expect(logger.traceText, contains('Skipping lipo for non-fat file output/Flutter.framework/Flutter'));
+      expect(processManager.hasRemainingExpectations, isFalse);
+    });
+
+    testWithoutContext('thinning fails when frameworks missing', () async {
       final Environment environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: processManager,
@@ -314,10 +318,12 @@ void main() {
         outputDir: outputDir,
         defines: <String, String>{
           kIosArchs: 'arm64',
+          kSdkRoot: 'path/to/iPhoneOS.sdk',
         },
       );
+      processManager.addCommand(copyPhysicalFrameworkCommand);
       expect(
-        const ThinIosApplicationFrameworks().build(environment),
+        const DebugUnpackIOS().build(environment),
         throwsA(isA<Exception>().having(
           (Exception exception) => exception.toString(),
           'description',
@@ -325,9 +331,7 @@ void main() {
         )));
     });
 
-    testWithoutContext('fails when requested archs missing from framework', () async {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final Directory outputDir = fileSystem.directory('Runner.app').childDirectory('Frameworks')..createSync(recursive: true);
+    testWithoutContext('thinning fails when requested archs missing from framework', () async {
       final File binary = outputDir.childDirectory('Flutter.framework').childFile('Flutter')..createSync(recursive: true);
 
       final Environment environment = Environment.test(
@@ -339,9 +343,11 @@ void main() {
         outputDir: outputDir,
         defines: <String, String>{
           kIosArchs: 'arm64 armv7',
+          kSdkRoot: 'path/to/iPhoneOS.sdk',
         },
       );
 
+      processManager.addCommand(copyPhysicalFrameworkCommand);
       processManager.addCommand(
         FakeCommand(command: <String>[
           'lipo',
@@ -361,7 +367,7 @@ void main() {
       );
 
       expect(
-          const ThinIosApplicationFrameworks().build(environment),
+          const DebugUnpackIOS().build(environment),
           throwsA(isA<Exception>().having(
                 (Exception exception) => exception.toString(),
             'description',
@@ -369,9 +375,7 @@ void main() {
           )));
     });
 
-    testWithoutContext('fails when lipo extract fails', () async {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final Directory outputDir = fileSystem.directory('Runner.app').childDirectory('Frameworks')..createSync(recursive: true);
+    testWithoutContext('thinning fails when lipo extract fails', () async {
       final File binary = outputDir.childDirectory('Flutter.framework').childFile('Flutter')..createSync(recursive: true);
 
       final Environment environment = Environment.test(
@@ -383,9 +387,11 @@ void main() {
         outputDir: outputDir,
         defines: <String, String>{
           kIosArchs: 'arm64 armv7',
+          kSdkRoot: 'path/to/iPhoneOS.sdk',
         },
       );
 
+      processManager.addCommand(copyPhysicalFrameworkCommand);
       processManager.addCommand(
         FakeCommand(command: <String>[
           'lipo',
@@ -419,17 +425,15 @@ void main() {
       );
 
       expect(
-        const ThinIosApplicationFrameworks().build(environment),
+        const DebugUnpackIOS().build(environment),
         throwsA(isA<Exception>().having(
               (Exception exception) => exception.toString(),
           'description',
-          contains('Failed to extract arm64 armv7 for Runner.app/Frameworks/Flutter.framework/Flutter.\nlipo error\nRunning lipo -info:\nArchitectures in the fat file:'),
+          contains('Failed to extract arm64 armv7 for output/Flutter.framework/Flutter.\nlipo error\nRunning lipo -info:\nArchitectures in the fat file:'),
         )));
     });
 
     testWithoutContext('skips thin frameworks', () async {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final Directory outputDir = fileSystem.directory('Runner.app').childDirectory('Frameworks')..createSync(recursive: true);
       final File binary = outputDir.childDirectory('Flutter.framework').childFile('Flutter')..createSync(recursive: true);
 
       final Environment environment = Environment.test(
@@ -441,9 +445,11 @@ void main() {
         outputDir: outputDir,
         defines: <String, String>{
           kIosArchs: 'arm64',
+          kSdkRoot: 'path/to/iPhoneOS.sdk',
         },
       );
 
+      processManager.addCommand(copyPhysicalFrameworkCommand);
       processManager.addCommand(
         FakeCommand(command: <String>[
           'lipo',
@@ -460,16 +466,14 @@ void main() {
           'arm64',
         ]),
       );
-      await const ThinIosApplicationFrameworks().build(environment);
+      await const DebugUnpackIOS().build(environment);
 
-      expect(logger.traceText, contains('Skipping lipo for non-fat file Runner.app/Frameworks/Flutter.framework/Flutter'));
+      expect(logger.traceText, contains('Skipping lipo for non-fat file output/Flutter.framework/Flutter'));
 
       expect(processManager.hasRemainingExpectations, isFalse);
     });
 
     testWithoutContext('thins fat frameworks', () async {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final Directory outputDir = fileSystem.directory('Runner.app').childDirectory('Frameworks')..createSync(recursive: true);
       final File binary = outputDir.childDirectory('Flutter.framework').childFile('Flutter')..createSync(recursive: true);
 
       final Environment environment = Environment.test(
@@ -481,9 +485,11 @@ void main() {
         outputDir: outputDir,
         defines: <String, String>{
           kIosArchs: 'arm64 armv7',
+          kSdkRoot: 'path/to/iPhoneOS.sdk',
         },
       );
 
+      processManager.addCommand(copyPhysicalFrameworkCommand);
       processManager.addCommand(
         FakeCommand(command: <String>[
           'lipo',
@@ -515,7 +521,7 @@ void main() {
         ]),
       );
 
-      await const ThinIosApplicationFrameworks().build(environment);
+      await const DebugUnpackIOS().build(environment);
       expect(processManager.hasRemainingExpectations, isFalse);
     });
   });

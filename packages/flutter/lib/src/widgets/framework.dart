@@ -258,27 +258,6 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   }
 }
 
-/// This class is a work-around for the "is" operator not accepting a variable value as its right operand.
-///
-/// This class is deprecated. It will be deleted soon.
-// TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
-@Deprecated(
-  'TypeMatcher has been deprecated because it is no longer used in framework(only in deprecated methods). '
-  'This feature was deprecated after v1.12.1.'
-)
-@optionalTypeArgs
-class TypeMatcher<T> {
-  /// Creates a type matcher for the given type parameter.
-  @Deprecated(
-    'TypeMatcher has been deprecated because it is no longer used in framework(only in deprecated methods). '
-    'This feature was deprecated after v1.12.1.'
-  )
-  const TypeMatcher();
-
-  /// Returns true if the given object is of type `T`.
-  bool check(dynamic object) => object is T;
-}
-
 /// Describes the configuration for an [Element].
 ///
 /// Widgets are the central class hierarchy in the Flutter framework. A widget

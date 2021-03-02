@@ -100,7 +100,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
-    Cache: () => FakeCache(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
   });
 
   group('shard-index and total-shards', () {
@@ -124,7 +124,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
-      Cache: () => FakeCache(),
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     });
 
     testUsingContext('without the params they not Piped to package:test',
@@ -145,7 +145,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
-      Cache: () => FakeCache(),
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     });
   });
 
@@ -168,7 +168,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
-    Cache: () => FakeCache(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
   });
 
   testUsingContext('Pipes start-paused to package:test',
@@ -193,7 +193,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
-    Cache: () => FakeCache(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
   });
 
   testUsingContext('Pipes run-skipped to package:test',
@@ -218,7 +218,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
-    Cache: () => FakeCache(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
   });
 
   testUsingContext('Pipes enable-observatory', () async {
@@ -266,7 +266,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
-    Cache: () => FakeCache(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
   });
 }
 

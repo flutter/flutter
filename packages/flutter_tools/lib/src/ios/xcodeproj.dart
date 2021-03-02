@@ -172,6 +172,10 @@ List<String> _xcodeBuildSettingsLines({
   // This holds because requiresProjectRoot is true for this command
   xcodeBuildSettings.add('FLUTTER_APPLICATION_PATH=${globals.fs.path.normalize(project.directory.path)}');
 
+  // Tell CocoaPods behavior to codesign in parallel with rest of scripts to speed it up.
+  // Value must be "true", not "YES". https://github.com/CocoaPods/CocoaPods/pull/6088
+  xcodeBuildSettings.add('COCOAPODS_PARALLEL_CODE_SIGN=true');
+
   // Relative to FLUTTER_APPLICATION_PATH, which is [Directory.current].
   if (targetOverride != null) {
     xcodeBuildSettings.add('FLUTTER_TARGET=$targetOverride');

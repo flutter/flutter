@@ -9,6 +9,7 @@ import 'dart:async';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
@@ -20,18 +21,17 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/testbed.dart';
 
 void main() {
   FakeProcessManager processManager;
   Artifacts artifacts;
-  FakeCache fakeCache;
+  Cache fakeCache;
   BufferLogger logger;
   String ideviceSyslogPath;
 
   setUp(() {
     processManager = FakeProcessManager.list(<FakeCommand>[]);
-    fakeCache = FakeCache();
+    fakeCache = Cache.test();
     artifacts = Artifacts.test();
     logger = BufferLogger.test();
     ideviceSyslogPath = artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios);
