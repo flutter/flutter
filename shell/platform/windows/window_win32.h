@@ -107,6 +107,9 @@ class WindowWin32 {
   // Called when IME composing begins.
   virtual void OnComposeBegin() = 0;
 
+  // Called when IME composing text is committed.
+  virtual void OnComposeCommit() = 0;
+
   // Called when IME composing ends.
   virtual void OnComposeEnd() = 0;
 

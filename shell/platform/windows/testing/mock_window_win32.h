@@ -42,6 +42,7 @@ class MockWin32Window : public WindowWin32 {
   MOCK_METHOD6(OnKey, bool(int, int, int, char32_t, bool, bool));
   MOCK_METHOD2(OnScroll, void(double, double));
   MOCK_METHOD0(OnComposeBegin, void());
+  MOCK_METHOD0(OnComposeCommit, void());
   MOCK_METHOD0(OnComposeEnd, void());
   MOCK_METHOD2(OnComposeChange, void(const std::u16string&, int));
   MOCK_METHOD4(DefaultWindowProc, LRESULT(HWND, UINT, WPARAM, LPARAM));

@@ -181,6 +181,10 @@ void KeyboardKeyHandler::ComposeBeginHook() {
   // Ignore.
 }
 
+void KeyboardKeyHandler::ComposeCommitHook() {
+  // Ignore.
+}
+
 void KeyboardKeyHandler::ComposeEndHook() {
   // Ignore.
 }

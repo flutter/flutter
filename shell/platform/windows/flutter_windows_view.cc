@@ -210,6 +210,10 @@ void FlutterWindowsView::OnComposeBegin() {
   SendComposeBegin();
 }
 
+void FlutterWindowsView::OnComposeCommit() {
+  SendComposeCommit();
+}
+
 void FlutterWindowsView::OnComposeEnd() {
   SendComposeEnd();
 }
@@ -326,6 +330,12 @@ bool FlutterWindowsView::SendKey(int key,
 void FlutterWindowsView::SendComposeBegin() {
   for (const auto& handler : keyboard_handlers_) {
     handler->ComposeBeginHook();
+  }
+}
+
+void FlutterWindowsView::SendComposeCommit() {
+  for (const auto& handler : keyboard_handlers_) {
+    handler->ComposeCommitHook();
   }
 }
 
