@@ -1411,7 +1411,7 @@ void main() {
       ...kAttachIsolateExpectations,
     ]);
     _setupMocks();
-      final MockChromeConnection mockChromeConnection = MockChromeConnection();
+    final MockChromeConnection mockChromeConnection = MockChromeConnection();
     final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
     final Chromium chrome = Chromium(1, mockChromeConnection, chromiumLauncher: chromiumLauncher);
     chromiumLauncher.instance = chrome;
