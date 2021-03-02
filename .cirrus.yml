@@ -1,9 +1,8 @@
 # CIRRUS CONFIGURATION FILE
 # https://cirrus-ci.org/guide/writing-tasks/
 
-# YAML anchors used to share fields between tasks.
+# YAML anchors are used to share fields between tasks.
 # See https://confluence.atlassian.com/bitbucket/yaml-anchors-960154027.html
-
 
 use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
 
@@ -190,3 +189,6 @@ task:
         - sleep 1
         - cd ../../../examples/hello_world/
         - flutter drive --target=test_driver/smoke_web_engine.dart -d web-server --profile --browser-name=chrome
+
+  check_for_stray_changed_files_script:
+    - git diff --exit-code # verify that we didn't change anything in the git workspace
