@@ -21,10 +21,14 @@ class DeferredComponentsProject extends Project {
     flutter:
       sdk: flutter
   flutter:
+    assets:
+      - test_assets/asset1.txt
     deferred-components:
       - name: component1
         libraries:
           - package:test/deferred_library.dart
+        assets:
+          - test_assets/asset2.txt
   ''';
 
   @override
@@ -575,6 +579,16 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
             android:src="@mipmap/launch_image" />
     </item> -->
 </layer-list>
+  ''';
+
+  @override
+  String get asset1 => r'''
+asset 1 contents
+  ''';
+
+  @override
+  String get asset2 => r'''
+asset 2 contents
   ''';
 
   @override

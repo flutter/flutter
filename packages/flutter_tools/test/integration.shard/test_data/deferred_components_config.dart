@@ -22,6 +22,8 @@ abstract class DeferredComponentsConfig {
   String get appStrings;
   String get appStyles;
   String get appLaunchBackground;
+  String get asset1;
+  String get asset2;
   List<DeferredComponentModule> get deferredComponents;
 
   void setUpIn(Directory dir) {
@@ -63,6 +65,12 @@ abstract class DeferredComponentsConfig {
     }
     if (appLaunchBackground != null) {
       writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'drawable', 'launch_background.xml'), appLaunchBackground);
+    }
+    if (asset1 != null) {
+      writeFile(fileSystem.path.join(dir.path, 'test_assets/asset1.txt'), asset1);
+    }
+    if (asset2 != null) {
+      writeFile(fileSystem.path.join(dir.path, 'test_assets/asset2.txt'), asset2);
     }
     if (deferredComponents != null) {
       for (final DeferredComponentModule component in deferredComponents) {

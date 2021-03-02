@@ -58,6 +58,9 @@ void main() {
     expect(archive.findFile('base/lib/arm64-v8a/libflutter.so') != null, true);
     expect(archive.findFile('component1/lib/arm64-v8a/libapp.so-2.part.so') != null, true);
 
+    expect(archive.findFile('component1/assets/flutter_assets/test_assets/asset2.txt') != null, true);
+    expect(archive.findFile('base/assets/flutter_assets/test_assets/asset1.txt') != null, true);
+
     expect(result.exitCode, 0);
   }, timeout: const Timeout(Duration(minutes: 2)));
 
@@ -98,8 +101,11 @@ void main() {
     expect(archive.findFile('base/lib/x86_64/libflutter.so') != null, true);
     expect(archive.findFile('component1/lib/x86_64/libapp.so-2.part.so') != null, true);
 
+    expect(archive.findFile('component1/assets/flutter_assets/test_assets/asset2.txt') != null, true);
+    expect(archive.findFile('base/assets/flutter_assets/test_assets/asset1.txt') != null, true);
+
     expect(result.exitCode, 0);
-  }, timeout: const Timeout(Duration(minutes: 2)));
+  }, timeout: const Timeout(Duration(minutes: 3)));
 
   testWithoutContext('simple build appbundle no-deferred-components succeeds', () async {
     final DeferredComponentsProject project = DeferredComponentsProject(BasicDeferredComponentsConfig());
@@ -129,10 +135,23 @@ void main() {
 
     expect(archive.findFile('base/lib/arm64-v8a/libapp.so') != null, true);
     expect(archive.findFile('base/lib/arm64-v8a/libflutter.so') != null, true);
-    expect(archive.findFile('component1/lib/arm64-v8a/libapp.so-2.part.so') == null, true);
+    expect(archive.findFile('component1/lib/arm64-v8a/libapp.so-2.part.so') != null, false);
+
+    expect(archive.findFile('base/lib/armeabi-v7a/libapp.so') != null, true);
+    expect(archive.findFile('base/lib/armeabi-v7a/libflutter.so') != null, true);
+    expect(archive.findFile('component1/lib/armeabi-v7a/libapp.so-2.part.so') != null, false);
+
+    expect(archive.findFile('base/lib/x86_64/libapp.so') != null, true);
+    expect(archive.findFile('base/lib/x86_64/libflutter.so') != null, true);
+    expect(archive.findFile('component1/lib/x86_64/libapp.so-2.part.so') != null, false);
+
+    // Asset 2 is merged into the base module assets.
+    expect(archive.findFile('component1/assets/flutter_assets/test_assets/asset2.txt') != null, false);
+    expect(archive.findFile('base/assets/flutter_assets/test_assets/asset2.txt') != null, true);
+    expect(archive.findFile('base/assets/flutter_assets/test_assets/asset1.txt') != null, true);
 
     expect(result.exitCode, 0);
-  }, timeout: const Timeout(Duration(minutes: 2)));
+  }, timeout: const Timeout(Duration(minutes: 3)));
 
   testWithoutContext('simple build appbundle mismatched golden no-verify-deferred-components succeeds', () async {
     final DeferredComponentsProject project = DeferredComponentsProject(MismatchedGoldenDeferredComponentsConfig());
@@ -167,8 +186,19 @@ void main() {
     expect(archive.findFile('base/lib/arm64-v8a/libflutter.so') != null, true);
     expect(archive.findFile('component1/lib/arm64-v8a/libapp.so-2.part.so') != null, true);
 
+    expect(archive.findFile('base/lib/armeabi-v7a/libapp.so') != null, true);
+    expect(archive.findFile('base/lib/armeabi-v7a/libflutter.so') != null, true);
+    expect(archive.findFile('component1/lib/armeabi-v7a/libapp.so-2.part.so') != null, true);
+
+    expect(archive.findFile('base/lib/x86_64/libapp.so') != null, true);
+    expect(archive.findFile('base/lib/x86_64/libflutter.so') != null, true);
+    expect(archive.findFile('component1/lib/x86_64/libapp.so-2.part.so') != null, true);
+
+    expect(archive.findFile('component1/assets/flutter_assets/test_assets/asset2.txt') != null, true);
+    expect(archive.findFile('base/assets/flutter_assets/test_assets/asset1.txt') != null, true);
+
     expect(result.exitCode, 0);
-  }, timeout: const Timeout(Duration(minutes: 2)));
+  }, timeout: const Timeout(Duration(minutes: 3)));
 
   testWithoutContext('simple build appbundle missing android dynamic feature module fails', () async {
     final DeferredComponentsProject project = DeferredComponentsProject(NoAndroidDynamicFeatureModuleDeferredComponentsConfig());
