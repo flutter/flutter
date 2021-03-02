@@ -134,7 +134,7 @@ linter:
     # - no_runtimeType_toString # ok in tests; we enable this only in packages/
     - non_constant_identifier_names
     - null_check_on_nullable_type_parameter
-    # - null_closures # not required by flutter style
+    - null_closures
     # - omit_local_variable_types # opposite of always_specify_types
     # - one_member_abstracts # too many false positives
     # - only_throw_errors # https://github.com/flutter/flutter/issues/5792
