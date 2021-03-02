@@ -905,6 +905,32 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
           'A ScrollController is required when Scrollbar.isAlwaysShown is true. '
           'Either Scrollbar.controller was not provided, or a PrimaryScrollController could not be found.',
         );
+        assert(
+          scrollController!.hasClients,
+          'The ScrollController has no positions attached. The Scrollbar cannot '
+          'be painted without a ScrollPosition.'
+        );
+        assert (() {
+          try {
+            scrollController!.position;
+          } catch (_) {
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary(
+                'The ScrollController is currently attached to more than one '
+                'ScrollPosition. The Scrollbar cannot be painted.'
+              ),
+              ErrorDescription(
+                'The Scrollbar attempted to paint using the position attached to the '
+                '${widget.controller == null ? 'PrimaryScrollController' : 'provided ScrollController'}.'
+              ),
+              ErrorHint(
+                'When Scrollbar.isAlwaysShown is true, the associated Scrollable '
+                'widgets should have unique ScrollControllers. '
+              ),
+            ]);
+          }
+          return true;
+        }());
         scrollController!.position.didUpdateScrollPositionBy(0);
       }
     });
