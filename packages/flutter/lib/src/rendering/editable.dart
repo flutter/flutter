@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui show TextBox, BoxHeightStyle, BoxWidthStyle;
 
 import 'package:characters/characters.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';

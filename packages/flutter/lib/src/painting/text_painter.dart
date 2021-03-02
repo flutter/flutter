@@ -667,7 +667,6 @@ class TextPainter {
   // Get the Rect of the cursor (in logical pixels) based off the near edge
   // of the character upstream from the given string offset.
   Rect? _getRectFromUpstream(int offset, Rect caretPrototype) {
-    final String flattenedText = _text!.toPlainText(includePlaceholders: false);
     final int? prevCodeUnit = _text!.codeUnitAt(max(0, offset - 1));
     if (prevCodeUnit == null)
       return null;
@@ -677,7 +676,7 @@ class TextPainter {
     int graphemeClusterLength = needsSearch ? 2 : 1;
     List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty) {
-      final int prevRuneOffset = offset - graphemeClusterLength;
+      final int prevRuneOffset = max(0, offset - graphemeClusterLength);
       // Use BoxHeightStyle.strut to ensure that the caret's height fits within
       // the line's height and is consistent throughout the line.
       boxes = _paragraph!.getBoxesForRange(prevRuneOffset, offset, boxHeightStyle: ui.BoxHeightStyle.strut);
@@ -688,7 +687,7 @@ class TextPainter {
         if (!needsSearch) {
           break; // Only perform one iteration if no search is required.
         }
-        if (prevRuneOffset < -flattenedText.length) {
+        if (prevRuneOffset < 1) {
           break; // Stop iterating when beyond the max length of the text.
         }
         // Multiply by two to log(n) time cover the entire text span. This allows
@@ -698,7 +697,7 @@ class TextPainter {
         graphemeClusterLength *= 2;
         continue;
       }
-      final TextBox box = boxes.first;
+      final TextBox box = boxes.last;
 
       // If the upstream character is a newline, cursor is at start of next line
       const int NEWLINE_CODE_UNIT = 10;
@@ -747,7 +746,7 @@ class TextPainter {
         graphemeClusterLength *= 2;
         continue;
       }
-      final TextBox box = boxes.last;
+      final TextBox box = boxes.first;
       final double caretStart = box.start;
       final double dx = box.direction == TextDirection.rtl ? caretStart - caretPrototype.width : caretStart;
       return Rect.fromLTRB(min(dx, _paragraph!.width), box.top, min(dx, _paragraph!.width), box.bottom);
