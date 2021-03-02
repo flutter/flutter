@@ -5,6 +5,7 @@
 import 'dart:ui' as ui show TextStyle, ParagraphStyle, FontFeature, Shadow;
 
 import 'package:flutter/painting.dart';
+import 'package:flutter/src/foundation/constants.dart';
 import '../flutter_test_alternative.dart';
 
 // This matcher verifies ui.TextStyle.toString (from dart:ui) reports a superset
@@ -29,7 +30,9 @@ class _DartUiTextStyleToStringMatcher extends Matcher {
     _propertyToString('letterSpacing', textStyle.letterSpacing),
     _propertyToString('wordSpacing', textStyle.wordSpacing),
     _propertyToString('height', textStyle.height),
-    _propertyToString('leadingDistribution', textStyle.leadingDistribution),
+    // TODO(LongCatIsLooong): web support for
+    // https://github.com/flutter/flutter/issues/72521
+    if (!kIsWeb) _propertyToString('leadingDistribution', textStyle.leadingDistribution),
     _propertyToString('locale', textStyle.locale),
     _propertyToString('background', textStyle.background),
     _propertyToString('foreground', textStyle.foreground),
