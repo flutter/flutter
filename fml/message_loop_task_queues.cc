@@ -238,7 +238,14 @@ bool MessageLoopTaskQueues::Unmerge(TaskQueueId owner) {
 bool MessageLoopTaskQueues::Owns(TaskQueueId owner,
                                  TaskQueueId subsumed) const {
   std::lock_guard guard(queue_mutex_);
-  return subsumed == queue_entries_.at(owner)->owner_of;
+  return owner != _kUnmerged && subsumed != _kUnmerged &&
+         subsumed == queue_entries_.at(owner)->owner_of;
+}
+
+TaskQueueId MessageLoopTaskQueues::GetSubsumedTaskQueueId(
+    TaskQueueId owner) const {
+  std::lock_guard guard(queue_mutex_);
+  return queue_entries_.at(owner)->owner_of;
 }
 
 // Subsumed queues will never have pending tasks.
