@@ -18,7 +18,6 @@ import 'convert.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'flutter_manifest.dart';
-import 'globals.dart' as globals;
 import 'license_collector.dart';
 import 'project.dart';
 
@@ -496,7 +495,6 @@ class ManifestAssetBundle implements AssetBundle {
         deferredComponentsAssetVariants[component.name] = <_Asset, List<_Asset>>{};
         final _AssetDirectoryCache cache = _AssetDirectoryCache(<String>[], _fileSystem);
         for (final Uri assetUri in component.assets) {
-          final String assetGlobalPath = globals.fs.path.absolute(projectDirectory.path + globals.platform.pathSeparator + assetUri.path);
           if (assetUri.path.endsWith('/')) {
             wildcardDirectories.add(assetUri);
             _parseAssetsFromFolder(

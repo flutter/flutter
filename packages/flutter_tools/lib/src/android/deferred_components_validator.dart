@@ -206,7 +206,7 @@ $_thinDivider\n''');
       }
       // TODO(garyq): Add link to web tutorial/guide once it is written.
       logger.printStatus('''
-Setup verification can be skipped by passing the `--no-verify-deferred-components`
+Setup verification can be skipped by passing the `--no-validate-deferred-components`
 flag, however, doing so may put your app at risk of not functioning even if the
 build is successful.
 $_thickDivider''');

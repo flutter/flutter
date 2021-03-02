@@ -41,8 +41,8 @@ void main() {
     ], workingDirectory: tempDir.path);
 
     expect(result.stdout.toString(), contains('app-release.aab'));
-    expect(result.stdout.toString(), contains('Deferred components prebuild verification passed.'));
-    expect(result.stdout.toString(), contains('Deferred components gen_snapshot verification passed.'));
+    expect(result.stdout.toString(), contains('Deferred components prebuild validation passed.'));
+    expect(result.stdout.toString(), contains('Deferred components gen_snapshot validation passed.'));
 
     final String line = result.stdout.toString()
       .split('\n')
@@ -76,8 +76,8 @@ void main() {
     ], workingDirectory: tempDir.path);
 
     expect(result.stdout.toString(), contains('app-release.aab'));
-    expect(result.stdout.toString(), contains('Deferred components prebuild verification passed.'));
-    expect(result.stdout.toString(), contains('Deferred components gen_snapshot verification passed.'));
+    expect(result.stdout.toString(), contains('Deferred components prebuild validation passed.'));
+    expect(result.stdout.toString(), contains('Deferred components gen_snapshot validation passed.'));
 
     final String line = result.stdout.toString()
       .split('\n')
@@ -120,8 +120,8 @@ void main() {
     ], workingDirectory: tempDir.path);
 
     expect(result.stdout.toString().contains('app-release.aab'), true);
-    expect(result.stdout.toString().contains('Deferred components prebuild verification passed.'), false);
-    expect(result.stdout.toString().contains('Deferred components gen_snapshot verification passed.'), false);
+    expect(result.stdout.toString().contains('Deferred components prebuild validation passed.'), false);
+    expect(result.stdout.toString().contains('Deferred components gen_snapshot validation passed.'), false);
 
     final String line = result.stdout.toString()
       .split('\n')
@@ -153,7 +153,7 @@ void main() {
     expect(result.exitCode, 0);
   }, timeout: const Timeout(Duration(minutes: 3)));
 
-  testWithoutContext('simple build appbundle mismatched golden no-verify-deferred-components succeeds', () async {
+  testWithoutContext('simple build appbundle mismatched golden no-validate-deferred-components succeeds', () async {
     final DeferredComponentsProject project = DeferredComponentsProject(MismatchedGoldenDeferredComponentsConfig());
     await project.setUpIn(tempDir);
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
@@ -162,12 +162,12 @@ void main() {
       ...getLocalEngineArguments(),
       'build',
       'appbundle',
-      '--no-verify-deferred-components',
+      '--no-validate-deferred-components',
     ], workingDirectory: tempDir.path);
 
     expect(result.stdout.toString().contains('app-release.aab'), true);
-    expect(result.stdout.toString().contains('Deferred components prebuild verification passed.'), false);
-    expect(result.stdout.toString().contains('Deferred components gen_snapshot verification passed.'), false);
+    expect(result.stdout.toString().contains('Deferred components prebuild validation passed.'), false);
+    expect(result.stdout.toString().contains('Deferred components gen_snapshot validation passed.'), false);
 
     expect(result.stdout.toString().contains('New loading units were found:'), false);
     expect(result.stdout.toString().contains('Previously existing loading units no longer exist:'), false);
@@ -212,8 +212,8 @@ void main() {
     ], workingDirectory: tempDir.path);
 
     expect(result.stdout.toString().contains('app-release.aab'), false);
-    expect(result.stdout.toString().contains('Deferred components prebuild verification passed.'), false);
-    expect(result.stdout.toString().contains('Deferred components gen_snapshot verification passed.'), false);
+    expect(result.stdout.toString().contains('Deferred components prebuild validation passed.'), false);
+    expect(result.stdout.toString().contains('Deferred components gen_snapshot validation passed.'), false);
 
     expect(result.stdout.toString(), contains('Newly generated android files:'));
     expect(result.stdout.toString(), contains('build/android_deferred_components_setup_files/component1/build.gradle'));
@@ -234,8 +234,8 @@ void main() {
     ], workingDirectory: tempDir.path);
 
     expect(result.stdout.toString().contains('app-release.aab'), false);
-    expect(result.stdout.toString().contains('Deferred components prebuild verification passed.'), true);
-    expect(result.stdout.toString().contains('Deferred components gen_snapshot verification passed.'), false);
+    expect(result.stdout.toString().contains('Deferred components prebuild validation passed.'), true);
+    expect(result.stdout.toString().contains('Deferred components gen_snapshot validation passed.'), false);
 
     expect(result.stdout.toString(), contains('New loading units were found:'));
     expect(result.stdout.toString(), contains('- package:test/deferred_library.dart'));
@@ -257,8 +257,8 @@ void main() {
     ], workingDirectory: tempDir.path);
 
     expect(result.stdout.toString().contains('app-release.aab'), false);
-    expect(result.stdout.toString().contains('Deferred components prebuild verification passed.'), true);
-    expect(result.stdout.toString().contains('Deferred components gen_snapshot verification passed.'), false);
+    expect(result.stdout.toString().contains('Deferred components prebuild validation passed.'), true);
+    expect(result.stdout.toString().contains('Deferred components gen_snapshot validation passed.'), false);
 
     expect(result.stdout.toString(), contains('New loading units were found:'));
     expect(result.stdout.toString(), contains('- package:test/deferred_library.dart'));

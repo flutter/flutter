@@ -47,6 +47,7 @@ void main() {
     final AndroidAotDeferredComponentsBundle androidDefBundle = AndroidAotDeferredComponentsBundle(androidAotBundle);
     final DeferredComponentsGenSnapshotValidatorTarget validatorTarget = DeferredComponentsGenSnapshotValidatorTarget(
       deferredComponentsDependencies: <AndroidAotDeferredComponentsBundle>[androidDefBundle],
+      nonDeferredComponentsDependencies: <Target>[],
       title: 'test checks',
       exitOnFail: false,
     );
@@ -79,6 +80,7 @@ void main() {
     final AndroidAotDeferredComponentsBundle androidDefBundle = AndroidAotDeferredComponentsBundle(androidAotBundle);
     final DeferredComponentsGenSnapshotValidatorTarget validatorTarget = DeferredComponentsGenSnapshotValidatorTarget(
       deferredComponentsDependencies: <AndroidAotDeferredComponentsBundle>[androidDefBundle],
+      nonDeferredComponentsDependencies: <Target>[],
       title: 'test checks',
       exitOnFail: false,
     );
@@ -110,6 +112,7 @@ void main() {
     final AndroidAotDeferredComponentsBundle androidDefBundle = AndroidAotDeferredComponentsBundle(androidAotBundle);
     final DeferredComponentsGenSnapshotValidatorTarget validatorTarget = DeferredComponentsGenSnapshotValidatorTarget(
       deferredComponentsDependencies: <AndroidAotDeferredComponentsBundle>[androidDefBundle],
+      nonDeferredComponentsDependencies: <Target>[],
       title: 'test checks',
       exitOnFail: false,
     );

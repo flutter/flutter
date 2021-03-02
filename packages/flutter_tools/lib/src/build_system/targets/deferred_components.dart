@@ -20,13 +20,14 @@ class DeferredComponentsGenSnapshotValidatorTarget extends Target {
   /// Create an [AndroidAotDeferredComponentsBundle] implementation for a given [targetPlatform] and [buildMode].
   DeferredComponentsGenSnapshotValidatorTarget({
     @required this.deferredComponentsDependencies,
+    @required this.nonDeferredComponentsDependencies,
     this.title,
     this.exitOnFail = true,
-    String name = 'deferred_components_setup_validator',
-  }) : _name = name;
+  });
 
   /// The [AndroidAotDeferredComponentsBundle] derived target instances this rule depends on.
   final List<AndroidAotDeferredComponentsBundle> deferredComponentsDependencies;
+  final List<Target> nonDeferredComponentsDependencies;
 
   /// The title of the [DeferredComponentsGenSnapshotValidator] that is
   /// displayed to the developer when logging results.
@@ -50,8 +51,7 @@ class DeferredComponentsGenSnapshotValidatorTarget extends Target {
   }
 
   @override
-  String get name => _name;
-  final String _name;
+  String get name => 'deferred_components_gen_snapshot_validator';
 
   @override
   List<Source> get inputs => const <Source>[];
@@ -65,7 +65,11 @@ class DeferredComponentsGenSnapshotValidatorTarget extends Target {
   ];
 
   @override
-  List<Target> get dependencies => <Target>[CompositeTarget(deferredComponentsDependencies)];
+  List<Target> get dependencies {
+    final List<Target> deps = <Target>[CompositeTarget(deferredComponentsDependencies)];
+    deps.addAll(nonDeferredComponentsDependencies);
+    return deps;
+  }
 
   @visibleForTesting
   DeferredComponentsGenSnapshotValidator validator;

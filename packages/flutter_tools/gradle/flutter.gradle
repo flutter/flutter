@@ -732,8 +732,8 @@ class FlutterPlugin implements Plugin<Project> {
             deferredComponentsValue = project.property('deferred-components').toBoolean()
         }
         Boolean verifyDeferredComponentsValue = true
-        if (project.hasProperty('verify-deferred-components')) {
-            verifyDeferredComponentsValue = project.property('verify-deferred-components').toBoolean()
+        if (project.hasProperty('validate-deferred-components')) {
+            verifyDeferredComponentsValue = project.property('validate-deferred-components').toBoolean()
         }
         def targetPlatforms = getTargetPlatforms()
         def addFlutterDeps = { variant ->

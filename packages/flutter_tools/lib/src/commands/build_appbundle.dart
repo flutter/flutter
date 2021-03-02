@@ -53,7 +53,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
             ' the regular assets section in pubspec.yaml. This flag has no effect on '
             'non-deferred components apps.',
     );
-    argParser.addFlag('verify-deferred-components',
+    argParser.addFlag('validate-deferred-components',
       negatable: true,
       defaultsTo: true,
       help: 'When enabled, deferred component apps will fail to build if setup problems are '
@@ -112,11 +112,11 @@ class BuildAppBundleCommand extends BuildSubCommand {
     );
     // Do all setup verification that doesn't involve loading units. Checks that
     // require generated loading units are done after gen_snapshot in assemble.
-    if (FlutterProject.current().manifest.deferredComponents != null && boolArg('deferred-components') && boolArg('verify-deferred-components') && !boolArg('debug')) {
+    if (FlutterProject.current().manifest.deferredComponents != null && boolArg('deferred-components') && boolArg('validate-deferred-components') && !boolArg('debug')) {
       final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
         FlutterProject.current().directory,
         globals.logger,
-        title: 'Deferred components prebuild verification',
+        title: 'Deferred components prebuild validation',
         exitOnFail: true,
       );
       validator.clearOutputDir();
@@ -147,7 +147,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
       project: FlutterProject.current(),
       target: targetFile,
       androidBuildInfo: androidBuildInfo,
-      verifyDeferredComponents: boolArg('verify-deferred-components'),
+      verifyDeferredComponents: boolArg('validate-deferred-components'),
       deferredComponentsEnabled: boolArg('deferred-components') && !boolArg('debug'),
     );
     return FlutterCommandResult.success();

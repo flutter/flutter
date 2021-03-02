@@ -365,7 +365,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     if (project.manifest.deferredComponents != null) {
       if (deferredComponentsEnabled) {
         command.add('-Pdeferred-components=true');
-        androidBuildInfo.buildInfo.dartDefines.add('verify-deferred-components=$verifyDeferredComponents');
+        androidBuildInfo.buildInfo.dartDefines.add('validate-deferred-components=$verifyDeferredComponents');
       }
       // Pass in deferred components regardless of building split aot to satisfy
       // android dynamic features registry in build.gradle.

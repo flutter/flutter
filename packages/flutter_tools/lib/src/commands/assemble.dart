@@ -259,21 +259,28 @@ class AssembleCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final List<Target> targets = createTargets();
-    Target target = CompositeTarget(targets);
     final Environment env = createEnvironment();
-    // Do the remaining setup verification not handled in build_appbundle as
-    // now the compilation has completed and the generated loading units are
-    // available. Checks performed here all require loading units.
+    final List<Target> targets = createTargets();
+    final List<Target> nonDeferredTargets = <Target>[];
+    final List<Target> deferredTargets = <AndroidAotDeferredComponentsBundle>[];
+    for (final Target target in targets) {
+      if (deferredComponentsTargets.contains(target.name)) {
+        deferredTargets.add(target);
+      } else {
+        nonDeferredTargets.add(target);
+      }
+    }
+    Target target;
     final List<String> decodedDefines = decodeDartDefines(env.defines, kDartDefines);
     if (FlutterProject.current().manifest.deferredComponents != null
-        && decodedDefines.contains('verify-deferred-components=true')
-        && isDeferredComponentsTargets()
+        && decodedDefines.contains('validate-deferred-components=true')
+        && deferredTargets.isNotEmpty
         && !isDebug()) {
+      // Add deferred components validation target that require loading units.
       target = DeferredComponentsGenSnapshotValidatorTarget(
-        deferredComponentsDependencies: targets.cast<AndroidAotDeferredComponentsBundle>(),
-        title: 'Deferred components gen_snapshot verification',
-        name: 'deferred_components_gen_snapshot_validator',
+        deferredComponentsDependencies: deferredTargets.cast<AndroidAotDeferredComponentsBundle>(),
+        nonDeferredComponentsDependencies: nonDeferredTargets,
+        title: 'Deferred components gen_snapshot validation',
       );
     } else if (targets.length > 1) {
       target = CompositeTarget(targets);
