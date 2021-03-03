@@ -19,13 +19,16 @@ AndroidStudio get androidStudio => context.get<AndroidStudio>();
 
 // Linux/Windows:
 // $HOME/.AndroidStudioX.Y/system/.home
+// $HOME/.cache/Google/AndroidStudioX.Y/.home
 
 // macOS:
 // /Applications/Android Studio.app/Contents/
 // $HOME/Applications/Android Studio.app/Contents/
 
+// Match Android Studio >= 4.1 base folder (AndroidStudio*.*)
+// and < 4.1 (.AndroidStudio*.*)
 final RegExp _dotHomeStudioVersionMatcher =
-    RegExp(r'^\.(AndroidStudio[^\d]*)([\d.]+)');
+    RegExp(r'^\.?(AndroidStudio[^\d]*)([\d.]+)');
 
 String get javaPath => androidStudio?.javaPath;
 
@@ -104,14 +107,30 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     if (studioAppName == null || version == null) {
       return null;
     }
+
+    final int major = version?.major;
+    final int minor = version?.minor;
+
+    // The install path is written in a .home text file,
+    // it location is in <base dir>/.home for Android Studio >= 4.1
+    // and <base dir>/system/.home for Android Studio < 4.1
+    String dotHomeFilePath;
+
+    if (major != null && major >= 4 && minor != null && minor >= 1) {
+      dotHomeFilePath = globals.fs.path.join(homeDotDir.path, '.home');
+    } else {
+      dotHomeFilePath =
+          globals.fs.path.join(homeDotDir.path, 'system', '.home');
+    }
+
     String installPath;
+
     try {
-      installPath = globals.fs
-          .file(globals.fs.path.join(homeDotDir.path, 'system', '.home'))
-          .readAsStringSync();
+      installPath = globals.fs.file(dotHomeFilePath).readAsStringSync();
     } on Exception {
       // ignored, installPath will be null, which is handled below
     }
+
     if (installPath != null && globals.fs.isDirectorySync(installPath)) {
       return AndroidStudio(
           installPath,
@@ -161,6 +180,24 @@ class AndroidStudio implements Comparable<AndroidStudio> {
         );
       }
     } else {
+      // JetBrains Toolbox write plugins here
+      final String toolboxPluginsPath = '$directory.plugins';
+
+      if (globals.fs.directory(toolboxPluginsPath).existsSync()) {
+        return toolboxPluginsPath;
+      }
+
+      if (major != null && major >= 4 && minor != null && minor >= 1 &&
+          globals.platform.isLinux) {
+        return globals.fs.path.join(
+          globals.fsUtils.homeDirPath,
+          '.local',
+          'share',
+          'Google',
+          '$studioAppName$major.$minor',
+        );
+      }
+
       return globals.fs.path.join(
         globals.fsUtils.homeDirPath,
         '.$studioAppName$major.$minor',
@@ -271,15 +308,35 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       });
     }
 
-    // Read all $HOME/.AndroidStudio*/system/.home files. There may be several
-    // pointing to the same installation, so we grab only the latest one.
-    if (globals.fsUtils.homeDirPath != null &&
-        globals.fs.directory(globals.fsUtils.homeDirPath).existsSync()) {
-      final Directory homeDir = globals.fs.directory(globals.fsUtils.homeDirPath);
-      for (final Directory entity in homeDir.listSync(followLinks: false).whereType<Directory>()) {
-        if (!entity.basename.startsWith('.AndroidStudio')) {
-          continue;
-        }
+    // Read all $HOME/.AndroidStudio*/system/.home
+    // or $HOME/.cache/Google/AndroidStudio*/.home files.
+    // There may be several pointing to the same installation,
+    // so we grab only the latest one.
+    final String homeDirPath = globals.fsUtils.homeDirPath;
+
+    if (homeDirPath != null && globals.fs.directory(homeDirPath).existsSync()) {
+      final Directory homeDir = globals.fs.directory(homeDirPath);
+
+      final List<Directory> directoriesToSearch = <Directory>[homeDir];
+
+      // >=4.1 has new install location at $HOME/.cache/Google
+      final String cacheDirPath =
+          globals.fs.path.join(homeDirPath, '.cache', 'Google');
+
+      if (globals.fs.isDirectorySync(cacheDirPath)) {
+        directoriesToSearch.add(globals.fs.directory(cacheDirPath));
+      }
+
+      final List<Directory> entities = <Directory>[];
+
+      for (final Directory baseDir in directoriesToSearch) {
+        final Iterable<Directory> directories =
+            baseDir.listSync(followLinks: false).whereType<Directory>();
+        entities.addAll(directories.where((Directory directory) =>
+            _dotHomeStudioVersionMatcher.hasMatch(directory.basename)));
+      }
+
+      for (final Directory entity in entities) {
         final AndroidStudio studio = AndroidStudio.fromHomeDot(entity);
         if (studio != null && !_hasStudioAt(studio.directory, newerThan: studio.version)) {
           studios.removeWhere((AndroidStudio other) => other.directory == studio.directory);
@@ -287,6 +344,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
         }
       }
     }
+
     // 4.1 has a different location for AndroidStudio installs on Windows.
     if (globals.platform.isWindows) {
       final File homeDot = globals.fs.file(globals.fs.path.join(
