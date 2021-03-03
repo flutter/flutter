@@ -144,8 +144,7 @@ class MediaQueryData {
       highContrast = window.accessibilityFeatures.highContrast,
       alwaysUse24HourFormat = window.alwaysUse24HourFormat,
       navigationMode = NavigationMode.traditional,
-      displayFeatures = window.displayFeatures.map(
-              (feature) => feature.withDevicePixelRatio(window.devicePixelRatio)).toList();
+      displayFeatures = window.displayFeatures;
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
   ///
@@ -368,23 +367,42 @@ class MediaQueryData {
   /// a widget subtree for those widgets sensitive to it.
   final NavigationMode navigationMode;
 
-  /// Areas of the display that are obstructed by hardware features.
+  /// Areas of the display that are obstructed by hardware features. This list is
+  /// populated only on Android. If the device has no display features, this list
+  /// is empty.
   ///
-  /// List of rectangle bounds, which the application can use to guide layout.
-  /// These areas may be obscured or not have touch capabilities. Each feature
-  /// has a type, which can be used to determine behaviour.
+  /// The space in which the [dart:ui.DisplayFeature.bounds] are defined includes all screens
+  /// and the space between them. For a dual-screen device, this means that the space
+  /// between the screens is virtually part of the Flutter view space, with the
+  /// [dart:ui.DisplayFeature.bounds] of the display feature as an obstructed area. The
+  /// [dart:ui.DisplayFeature.type] can be used to determine if this display feature
+  /// obstructs the screen or not. For example, [dart:ui.DisplayFeatureType.hinge] and
+  /// [dart:ui.DisplayFeatureType.cutout] both obstruct the display, while
+  /// [dart:ui.DisplayFeatureType.fold] is more like a crease in the display.
   ///
-  /// For example, a hinge feature can be used to separate the layout into 2
-  /// logical areas or panels in the application.
+  /// Folding [dart:ui.DisplayFeature]s like the [dart:ui.DisplayFeatureType.hinge] and
+  /// [dart:ui.DisplayFeatureType.fold] also have a [dart:ui.DisplayFeature.state] which can be
+  /// used to determine the posture the device is in.
+  /// 
+  /// See also:
+  ///
+  ///  * [dart:ui.DisplayFeatureType], where you can see types of display features.
+  ///  * [dart:ui.DisplayFeatureState], where you can see possible states for 
+  ///  folding features ([dart:ui.DisplayFeatureType.fold] and
+  ///  [dart:ui.DisplayFeatureType.hinge])
   final List<ui.DisplayFeature> displayFeatures;
 
 
-  /// Area of the display that is obstructed by the hinge.
+  /// Area of the display that is obstructed specifically by the [DisplayFeatureType.hinge].
   ///
-  /// A hinge is the space between 2 physical displays. The size of the screen
+  /// A hinge is the space between 2 physical displays. The size of the Flutter view
   /// in this case contains both screens and the area between them. The hinge
   /// area can be used to separate the layout into 2 logical areas or panels in
   /// the application.
+  ///
+  /// See also:
+  ///
+  ///  * [TwoPane], a widget that helps with building layouts for dual-screen devices.
   ui.DisplayFeature? get hinge {
     for (ui.DisplayFeature e in displayFeatures) {
       if (e.type == ui.DisplayFeatureType.hinge) return e;
