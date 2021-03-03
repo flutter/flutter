@@ -246,7 +246,6 @@ class FakeAndroidBuilder extends Fake implements AndroidBuilder {
   String outputDirectoryPath;
   String buildNumber;
 
-
   @override
   Future<void> buildAar({
     @required FlutterProject project,
