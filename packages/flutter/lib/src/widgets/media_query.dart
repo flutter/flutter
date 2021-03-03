@@ -403,6 +403,8 @@ class MediaQueryData {
   /// See also:
   ///
   ///  * [TwoPane], a widget that helps with building layouts for dual-screen devices.
+  ///  * [HingeAvoidingModalWrapper], which helps with making popups and dialogs
+  ///  avoid areas obstructed by display features.
   ui.DisplayFeature? get hinge {
     for (ui.DisplayFeature e in displayFeatures) {
       if (e.type == ui.DisplayFeatureType.hinge) return e;

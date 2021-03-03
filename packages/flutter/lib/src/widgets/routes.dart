@@ -1770,6 +1770,11 @@ abstract class RouteAware {
 /// The `settings` argument define the settings for this route. See
 /// [RouteSettings] for details.
 ///
+/// The `screen` argument is used to determine which screen to use when showing
+/// this dialog on devices with multiple screens, e.g. a dual-screen device. If
+/// `screen` value exceeds the number of screens available, the last screen is
+/// used.
+///
 /// See also:
 ///
 ///  * [showGeneralDialog], which is a way to display a RawDialogRoute.
@@ -1785,6 +1790,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
     Duration transitionDuration = const Duration(milliseconds: 200),
     RouteTransitionsBuilder? transitionBuilder,
     RouteSettings? settings,
+    int screen = 0,
   }) : assert(barrierDismissible != null),
        _pageBuilder = pageBuilder,
        _barrierDismissible = barrierDismissible,
@@ -1792,6 +1798,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
        _barrierColor = barrierColor,
        _transitionDuration = transitionDuration,
        _transitionBuilder = transitionBuilder,
+       _screen = screen,
        super(settings: settings);
 
   final RoutePageBuilder _pageBuilder;
@@ -1814,11 +1821,14 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 
   final RouteTransitionsBuilder? _transitionBuilder;
 
+  final int _screen;
+
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     return Semantics(
       child: HingeAvoidingModalWrapper(
         child: _pageBuilder(context, animation, secondaryAnimation),
+        screen: _screen,
       ),
       scopesRoute: true,
       explicitChildNodes: true,
@@ -1839,14 +1849,36 @@ class RawDialogRoute<T> extends PopupRoute<T> {
   }
 }
 
+/// Widget that can be added at the root of a popup route in order to make
+/// the contents avoid any [dart:ui.DisplayFeature] present on the device.
+///
+/// This widget first looks at the positioning of the [dart:ui.DisplayFeature]
+/// and determines where the safe areas are located, which no longer overlap any
+/// of the display features. Then the [screen] paramenter is used to pick which
+/// safe area to use.
+///
+/// For example, a device with two screens and a display cutout for cameras on
+/// the left screen will have two safe areas:
+///
+///  * First safe area will be the left screen, excluding the camera cutout,
+///  similar to how [SafeArea] works. This is `screen` 0.
+///  * Second safe area will be the right screen. This is `screen` 1.
+///
+/// See also:
+///
+///  * [showGeneralDialog], which is a way to display a RawDialogRoute.
+///  * [showDialog], which is a way to display a DialogRoute.
+///  * [showCupertinoDialog], which displays an iOS-style dialog.
 class HingeAvoidingModalWrapper extends StatelessWidget {
   final Widget child;
+  final int screen;
 
-  HingeAvoidingModalWrapper({required this.child});
+  HingeAvoidingModalWrapper({required this.child, this.screen = 0});
   
   @override
   Widget build(BuildContext context) {
-    final safeArea = _safeAreasInNavigator(context).first;
+    final safeAreas = _safeAreasInNavigator(context);
+    final safeArea = safeAreas.length > screen ? safeAreas[screen] : safeAreas.last;
 
     return Stack(
       children: [

@@ -979,6 +979,11 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// The `routeSettings` argument is passed to [showGeneralDialog],
 /// see [RouteSettings] for details.
 ///
+/// The `screen` argument is used to determine which screen to use when showing
+/// this dialog on devices with multiple screens, e.g. a dual-screen device. If
+/// `screen` value exceeds the number of screens available, the last screen is
+/// used.
+///
 /// If the application has multiple [Navigator] objects, it may be necessary to
 /// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
 /// dialog rather than just `Navigator.pop(context, result)`.
@@ -1067,6 +1072,7 @@ Future<T?> showDialog<T>({
   bool useSafeArea = true,
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
+  int screen = 0,
 }) {
   assert(builder != null);
   assert(barrierDismissible != null);
@@ -1091,6 +1097,7 @@ Future<T?> showDialog<T>({
     useSafeArea: useSafeArea,
     settings: routeSettings,
     themes: themes,
+    screen: screen,
   ));
 }
 
@@ -1129,6 +1136,11 @@ Future<T?> showDialog<T>({
 /// The `settings` argument define the settings for this route. See
 /// [RouteSettings] for details.
 ///
+/// The `screen` argument is used to determine which screen to use when showing
+/// this dialog on devices with multiple screens, e.g. a dual-screen device. If
+/// `screen` value exceeds the number of screens available, the last screen is
+/// used.
+///
 /// See also:
 ///
 ///  * [showDialog], which is a way to display a DialogRoute.
@@ -1147,6 +1159,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
     String? barrierLabel,
     bool useSafeArea = true,
     RouteSettings? settings,
+    int screen = 0,
   }) : assert(barrierDismissible != null),
        super(
          pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
@@ -1163,6 +1176,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
          transitionDuration: const Duration(milliseconds: 150),
          transitionBuilder: _buildMaterialDialogTransitions,
          settings: settings,
+         screen: screen,
        );
 }
 

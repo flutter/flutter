@@ -31,8 +31,8 @@ import 'container.dart';
 /// panes are laid out (e.g left to right would position pane 1 on the left and
 /// pane 2 on the right).
 ///
-/// For narrow screens where you want to display only one pane, you can use [singlePane]
-/// to pick either [TwoPaneSinglePane.pane1] or [TwoPaneSinglePane.pane2].
+/// For narrow screens where you want to display only one pane, you can use [panePriority]
+/// to pick either [TwoPanePriority.pane1] or [TwoPanePriority.pane2].
 ///
 /// In addition, this widget also wraps children in [MediaQuery] parents that
 /// makes sense for their side of the screen. For example, let's consider a flip
@@ -48,12 +48,12 @@ import 'container.dart';
 class TwoPane extends StatelessWidget {
   /// First pane, which can sit on the left for left to right layouts,
   /// or at the top for top to bottom layouts.
-  /// If [singlePane] is [TwoPaneSinglePane.pane1], this is the only pane visible.
+  /// If [panePriority] is [TwoPanePriority.pane1], this is the only pane visible.
   final Widget pane1;
 
   /// Second pane, which can sit on the right for left to right layouts,
   /// or at the bottom for top to bottom layouts.
-  /// If [singlePane] is [TwoPaneSinglePane.pane2], this is the only pane visible.
+  /// If [panePriority] is [TwoPanePriority.pane2], this is the only pane visible.
   final Widget pane2;
 
   /// Proportion of the screen ocupied by the first pane. The second pane takes
@@ -83,8 +83,8 @@ class TwoPane extends StatelessWidget {
   /// defining behaviour on narrow devices, where the 2 panes cannot be shown at
   /// the same time.
   ///
-  /// Defaults to [TwoPaneSinglePane.both]
-  final TwoPaneSinglePane singlePane;
+  /// Defaults to [TwoPanePriority.both]
+  final TwoPanePriority panePriority;
 
   const TwoPane({
     Key? key,
@@ -94,7 +94,7 @@ class TwoPane extends StatelessWidget {
     this.textDirection,
     this.verticalDirection = VerticalDirection.down,
     this.direction = Axis.horizontal,
-    this.singlePane = TwoPaneSinglePane.both,
+    this.panePriority = TwoPanePriority.both,
   }) : super(key: key);
 
   TextDirection _textDirection(BuildContext context) =>
@@ -216,14 +216,14 @@ class TwoPane extends StatelessWidget {
 
     return Flex(
       children: [
-        if (singlePane != TwoPaneSinglePane.pane2)
+        if (panePriority != TwoPanePriority.pane2)
           Expanded(
             flex: (100 * _paneProportion).toInt(),
             child: _pane1,
           ),
-        if (singlePane == TwoPaneSinglePane.both)
+        if (panePriority == TwoPanePriority.both)
           _delimiter,
-        if (singlePane != TwoPaneSinglePane.pane1)
+        if (panePriority != TwoPanePriority.pane1)
           Expanded(
             flex: (100 * (1 - _paneProportion)).toInt(),
             child: _pane2,
@@ -238,6 +238,6 @@ class TwoPane extends StatelessWidget {
 }
 
 /// Describes which pane to show or if both should be shown.
-enum TwoPaneSinglePane{
+enum TwoPanePriority{
   both, pane1, pane2,
 }
