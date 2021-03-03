@@ -7,15 +7,15 @@ import 'dart:io';
 import 'package:meta/meta.dart';
 
 @immutable
-class TestFile {
-  factory TestFile(File file) {
-    final String errorPrefix = 'Could not parse: ${file.path}\n';
+class CustomerTest {
+  factory CustomerTest(File testFile) {
+    final String errorPrefix = 'Could not parse: ${testFile.path}\n';
     final List<String> contacts = <String>[];
     final List<String> fetch = <String>[];
     final List<Directory> update = <Directory>[];
     final List<String> test = <String>[];
     bool hasTests = false;
-    for (final String line in file.readAsLinesSync().map((String line) => line.trim())) {
+    for (final String line in testFile.readAsLinesSync().map((String line) => line.trim())) {
       if (line.isEmpty) {
         // blank line
       } else if (line.startsWith('#')) {
@@ -67,7 +67,7 @@ class TestFile {
       throw FormatException('${errorPrefix}No "update" directives specified. At least one directory must be specified. (It can be "." to just upgrade the root of the repository.)');
     if (!hasTests)
       throw FormatException('${errorPrefix}No "test" directives specified. At least one command must be specified to run tests.');
-    return TestFile._(
+    return CustomerTest._(
       List<String>.unmodifiable(contacts),
       List<String>.unmodifiable(fetch),
       List<Directory>.unmodifiable(update),
@@ -75,7 +75,7 @@ class TestFile {
     );
   }
 
-  const TestFile._(this.contacts, this.fetch, this.update, this.tests);
+  const CustomerTest._(this.contacts, this.fetch, this.update, this.tests);
 
   // (e-mail regexp from HTML standard)
   static final RegExp _email = RegExp(r"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$");

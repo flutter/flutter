@@ -46,9 +46,9 @@ Future<bool> runTests({
   for (final File file in shardedFiles) {
     if (verbose)
       print('Processing ${file.path}...');
-    TestFile instructions;
+    CustomerTest instructions;
     try {
-      instructions = TestFile(file);
+      instructions = CustomerTest(file);
     } on FormatException catch (error) {
       print('ERROR: ${error.message}');
       print('');

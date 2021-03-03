@@ -25,7 +25,7 @@ test.windows=.\test_utilities\bin\flutter_test_runner.bat repo_dashboard
     ''';
     final File registryFile = MemoryFileSystem().file('flutter_cocoon.test')..writeAsStringSync(registryContent);
 
-    final TestFile test = TestFile(registryFile);
+    final CustomerTest test = CustomerTest(registryFile);
     expect(test.contacts, containsAll(<String>['abc@gmail.com']));
     expect(
         test.fetch,
@@ -55,7 +55,7 @@ unknownfield=super not cool
     ''';
     final File registryFile = MemoryFileSystem().file('abc.test')..writeAsStringSync(registryContent);
 
-    expect(() => TestFile(registryFile), throwsFormatException);
+    expect(() => CustomerTest(registryFile), throwsFormatException);
   });
 
   test('throws exception when no tests given', () async {
@@ -66,7 +66,7 @@ fetch=git clone https://github.com/flutter/cocoon.git tests
 ''';
     final File registryFile = MemoryFileSystem().file('abc.test')..writeAsStringSync(registryContent);
 
-    expect(() => TestFile(registryFile), throwsFormatException);
+    expect(() => CustomerTest(registryFile), throwsFormatException);
   });
 
   test('throws exception when only one fetch instruction given', () async {
@@ -79,7 +79,7 @@ test.windows=.\test_utilities\bin\flutter_test_runner.bat repo_dashboard
     ''';
     final File registryFile = MemoryFileSystem().file('abc.test')..writeAsStringSync(registryContent);
 
-    expect(() => TestFile(registryFile), throwsFormatException);
+    expect(() => CustomerTest(registryFile), throwsFormatException);
   });
 
   test('throws exception when no contacts given', () async {
@@ -91,6 +91,6 @@ test.windows=.\test_utilities\bin\flutter_test_runner.bat repo_dashboard
     ''';
     final File registryFile = MemoryFileSystem().file('abc.test')..writeAsStringSync(registryContent);
 
-    expect(() => TestFile(registryFile), throwsFormatException);
+    expect(() => CustomerTest(registryFile), throwsFormatException);
   });
 }
