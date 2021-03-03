@@ -223,9 +223,11 @@ class AndroidAot extends AotElfBase {
       output.createSync(recursive: true);
     }
     final List<String> extraGenSnapshotOptions = decodeCommaSeparated(environment.defines, kExtraGenSnapshotOptions);
+    final List<File> outputs = <File>[]; // outputs for the depfile
     final String manifestPath = '${output.path}${globals.platform.pathSeparator}manifest.json';
     if (environment.defines[kDeferredComponents] == 'true') {
       extraGenSnapshotOptions.add('--loading_unit_manifest=$manifestPath');
+      outputs.add(environment.fileSystem.file(manifestPath));
     }
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
@@ -255,7 +257,6 @@ class AndroidAot extends AotElfBase {
     if (snapshotExitCode != 0) {
       throw Exception('AOT snapshotter exited with code $snapshotExitCode');
     }
-    final List<File> outputs = <File>[];
     if (environment.defines[kDeferredComponents] == 'true') {
       // Parse the manifest for .so paths
       final List<LoadingUnit> loadingUnits = LoadingUnit.parseLoadingUnitManifest(environment.fileSystem.file(manifestPath), environment.logger);
@@ -268,7 +269,7 @@ class AndroidAot extends AotElfBase {
       logger: environment.logger,
     );
     depfileService.writeToFile(
-      Depfile(<File>[], outputs),
+      Depfile(<File>[environment.buildDir.childFile('app.dill')], outputs),
       environment.buildDir.childFile('flutter_$name.d'),
     );
   }
@@ -342,12 +343,11 @@ class AndroidAotBundle extends Target {
 
     final List<File> inputs = <File>[];
     final List<File> outputs = <File>[];
-    final File outputManifestFile = buildDir.childFile('manifest.json');
-    if (outputManifestFile.existsSync()) {
+    final File manifestFile = buildDir.childFile('manifest.json');
+    if (manifestFile.existsSync()) {
       final File destinationFile = outputDirectory.childFile('manifest.json');
-      outputManifestFile.copySync(destinationFile.path);
-
-      inputs.add(outputManifestFile);
+      manifestFile.copySync(destinationFile.path);
+      inputs.add(manifestFile);
       outputs.add(destinationFile);
     }
     final DepfileService depfileService = DepfileService(
