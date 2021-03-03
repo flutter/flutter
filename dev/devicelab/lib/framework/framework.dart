@@ -41,9 +41,8 @@ bool _isTaskRegistered = false;
 /// It is OK for a [task] to perform many things. However, only one task can be
 /// registered per Dart VM.
 Future<TaskResult> task(TaskFunction task) async {
-  if (_isTaskRegistered) {
+  if (_isTaskRegistered)
     throw StateError('A task is already registered');
-  }
 
   _isTaskRegistered = true;
 
@@ -60,18 +59,16 @@ Future<TaskResult> task(TaskFunction task) async {
 
 class _TaskRunner {
   _TaskRunner(this.task) {
-    registerExtension('ext.cocoonRunTask', (String method, Map<String, String> parameters) async {
+    registerExtension('ext.cocoonRunTask',
+        (String method, Map<String, String> parameters) async {
       final Duration taskTimeout = parameters.containsKey('timeoutInMinutes')
-          ? Duration(minutes: int.parse(parameters['timeoutInMinutes']))
-          : null;
-      // This is only expected to be passed in unit test runs so they do not
-      // kill the Dart process that is running them.
-      final bool runProcessCleanup = parameters['runProcessCleanup'] != 'false';
-      final bool enableConfig = parameters['enableConfig'] != 'false';
-      final TaskResult result = await run(taskTimeout, runProcessCleanup: runProcessCleanup, enableConfig: enableConfig);
+        ? Duration(minutes: int.parse(parameters['timeoutInMinutes']))
+        : null;
+      final TaskResult result = await run(taskTimeout);
       return ServiceExtensionResponse.result(json.encode(result.toJson()));
     });
-    registerExtension('ext.cocoonRunnerReady', (String method, Map<String, String> parameters) async {
+    registerExtension('ext.cocoonRunnerReady',
+        (String method, Map<String, String> parameters) async {
       return ServiceExtensionResponse.result('"ready"');
     });
   }
@@ -90,77 +87,59 @@ class _TaskRunner {
   /// Signals that this task runner finished running the task.
   Future<TaskResult> get whenDone => _completer.future;
 
-  Future<TaskResult> run(Duration taskTimeout, {
-    bool runProcessCleanup = true,
-    bool enableConfig = true,
-  }) async {
+  Future<TaskResult> run(Duration taskTimeout) async {
     try {
       _taskStarted = true;
       print('Running task with a timeout of $taskTimeout.');
       final String exe = Platform.isWindows ? '.exe' : '';
-      Set<RunningProcessInfo> beforeRunningDartInstances;
-      if (runProcessCleanup) {
-        section('Checking running Dart$exe processes');
-        beforeRunningDartInstances = await getRunningProcesses(
-          processName: 'dart$exe',
-        ).toSet();
-        final Set<RunningProcessInfo> allProcesses = await getRunningProcesses().toSet();
-        beforeRunningDartInstances.forEach(print);
-        for (final RunningProcessInfo info in allProcesses) {
-          if (info.commandLine.contains('iproxy')) {
-            print('[LEAK]: ${info.commandLine} ${info.creationDate} ${info.pid} ');
-          }
+      section('Checking running Dart$exe processes');
+      final Set<RunningProcessInfo> beforeRunningDartInstances = await getRunningProcesses(
+        processName: 'dart$exe',
+      ).toSet();
+      final Set<RunningProcessInfo> allProcesses = await getRunningProcesses().toSet();
+      beforeRunningDartInstances.forEach(print);
+      for (final RunningProcessInfo info in allProcesses) {
+        if (info.commandLine.contains('iproxy')) {
+          print('[LEAK]: ${info.commandLine} ${info.creationDate} ${info.pid} ');
         }
       }
-      if (enableConfig) {
-        print('enabling configs for macOS, Linux, Windows, and Web...');
-        final int configResult = await exec(
-            path.join(flutterDirectory.path, 'bin', 'flutter'),
-            <String>[
-              'config',
-              '-v',
-              '--enable-macos-desktop',
-              '--enable-windows-desktop',
-              '--enable-linux-desktop',
-              '--enable-web',
-              if (localEngine != null) ...<String>['--local-engine', localEngine],
-            ],
-            canFail: true);
-        if (configResult != 0) {
-          print('Failed to enable configuration, tasks may not run.');
-        }
-      } else {
-        section('Skipping flutter config. You should only see this in devicelab unit tests');
+      print('enabling configs for macOS, Linux, Windows, and Web...');
+      final int configResult = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
+        'config',
+        '-v',
+        '--enable-macos-desktop',
+        '--enable-windows-desktop',
+        '--enable-linux-desktop',
+        '--enable-web',
+        if (localEngine != null) ...<String>['--local-engine', localEngine],
+      ], canFail: true);
+      if (configResult != 0) {
+        print('Failed to enable configuration, tasks may not run.');
       }
 
       Future<TaskResult> futureResult = _performTask();
-      if (taskTimeout != null) {
+      if (taskTimeout != null)
         futureResult = futureResult.timeout(taskTimeout);
-      }
 
       TaskResult result = await futureResult;
 
-      if (runProcessCleanup) {
-        section('Checking running Dart$exe processes after task...');
-        final List<RunningProcessInfo> afterRunningDartInstances = await getRunningProcesses(
-          processName: 'dart$exe',
-        ).toList();
-        for (final RunningProcessInfo info in afterRunningDartInstances) {
-          if (!beforeRunningDartInstances.contains(info)) {
-            print('$info was leaked by this test.');
-            if (result is TaskResultCheckProcesses) {
-              result = TaskResult.failure('This test leaked dart processes');
-            }
-            final bool killed = await killProcess(info.pid);
-            if (!killed) {
-              print('Failed to kill process ${info.pid}.');
-            } else {
-              print('Killed process id ${info.pid}.');
-            }
+      section('Checking running Dart$exe processes after task...');
+      final List<RunningProcessInfo> afterRunningDartInstances = await getRunningProcesses(
+        processName: 'dart$exe',
+      ).toList();
+      for (final RunningProcessInfo info in afterRunningDartInstances) {
+        if (!beforeRunningDartInstances.contains(info)) {
+          print('$info was leaked by this test.');
+          if (result is TaskResultCheckProcesses) {
+            result = TaskResult.failure('This test leaked dart processes');
+          }
+          final bool killed = await killProcess(info.pid);
+          if (!killed) {
+            print('Failed to kill process ${info.pid}.');
+          } else {
+            print('Killed process id ${info.pid}.');
           }
         }
-      } else {
-        section('Skipping Dart process cleanup. You should only see this in devicelab unit tests');
       }
       _completer.complete(result);
       return result;
@@ -170,10 +149,8 @@ class _TaskRunner {
       print(stackTrace);
       return TaskResult.failure('Task timed out after $taskTimeout');
     } finally {
-      if (runProcessCleanup) {
-        await checkForRebootRequired();
-        await forceQuitRunningProcesses();
-      }
+      await checkForRebootRequired();
+      await forceQuitRunningProcesses();
       _closeKeepAlivePort();
     }
   }
@@ -211,9 +188,8 @@ class _TaskRunner {
   /// Causes the Dart VM to stay alive until a request to run the task is
   /// received via the VM service protocol.
   void keepVmAliveUntilTaskRunRequested() {
-    if (_taskStarted) {
+    if (_taskStarted)
       throw StateError('Task already started.');
-    }
 
     // Merely creating this port object will cause the VM to stay alive and keep
     // the VM service server running until the port is disposed of.
@@ -242,15 +218,17 @@ class _TaskRunner {
       completer.complete(await task());
     }, onError: (dynamic taskError, Chain taskErrorStack) {
       final String message = 'Task failed: $taskError';
-      stderr..writeln(message)..writeln('\nStack trace:')..writeln(taskErrorStack.terse);
+      stderr
+        ..writeln(message)
+        ..writeln('\nStack trace:')
+        ..writeln(taskErrorStack.terse);
       // IMPORTANT: We're completing the future _successfully_ but with a value
       // that indicates a task failure. This is intentional. At this point we
       // are catching errors coming from arbitrary (and untrustworthy) task
       // code. Our goal is to convert the failure into a readable message.
       // Propagating it further is not useful.
-      if (!completer.isCompleted) {
+      if (!completer.isCompleted)
         completer.complete(TaskResult.failure(message));
-      }
     });
     return completer.future;
   }

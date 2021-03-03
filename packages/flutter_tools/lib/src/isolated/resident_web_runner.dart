@@ -569,7 +569,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
     String reason,
     bool benchmarkMode = false,
   }) async {
-    final Stopwatch timer = Stopwatch()..start();
+    final DateTime start = globals.systemClock.now();
     final Status status = globals.logger.startProgress(
       'Performing hot restart...',
       progressId: 'hot.restart',
@@ -620,12 +620,13 @@ class _ResidentWebRunner extends ResidentWebRunner {
       status.stop();
     }
 
-    final String elapsed = getElapsedAsMilliseconds(timer.elapsed);
-    globals.printStatus('Restarted application in $elapsed.');
+    final Duration elapsed = globals.systemClock.now().difference(start);
+    final String elapsedMS = getElapsedAsMilliseconds(elapsed);
+    globals.printStatus('Restarted application in $elapsedMS.');
 
     // Don't track restart times for dart2js builds or web-server devices.
     if (debuggingOptions.buildInfo.isDebug && deviceIsDebuggable) {
-      globals.flutterUsage.sendTiming('hot', 'web-incremental-restart', timer.elapsed);
+      globals.flutterUsage.sendTiming('hot', 'web-incremental-restart', elapsed);
       HotEvent(
         'restart',
         targetPlatform: getNameForTargetPlatform(TargetPlatform.web_javascript),
@@ -633,7 +634,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
         emulator: false,
         fullRestart: true,
         reason: reason,
-        overallTimeInMs: timer.elapsed.inMilliseconds,
+        overallTimeInMs: elapsed.inMilliseconds,
         fastReassemble: null,
       ).send();
     }

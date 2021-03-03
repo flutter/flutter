@@ -11,17 +11,13 @@ import '../framework/adb.dart';
 import '../framework/framework.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
-import 'build_test_task.dart';
 
-final Directory galleryDirectory = dir('${flutterDirectory.path}/dev/integration_tests/flutter_gallery');
-
-TaskFunction createGalleryTransitionTest(List<String> args, {bool semanticsEnabled = false}) {
-  return GalleryTransitionTest(args, semanticsEnabled: semanticsEnabled, workingDirectory: galleryDirectory,);
+TaskFunction createGalleryTransitionTest({bool semanticsEnabled = false}) {
+  return GalleryTransitionTest(semanticsEnabled: semanticsEnabled);
 }
 
-TaskFunction createGalleryTransitionE2ETest(List<String> args, {bool semanticsEnabled = false}) {
+TaskFunction createGalleryTransitionE2ETest({bool semanticsEnabled = false}) {
   return GalleryTransitionTest(
-    args,
     testFile: semanticsEnabled
         ? 'transitions_perf_e2e_with_semantics'
         : 'transitions_perf_e2e',
@@ -30,23 +26,21 @@ TaskFunction createGalleryTransitionE2ETest(List<String> args, {bool semanticsEn
     transitionDurationFile: null,
     timelineTraceFile: null,
     driverFile: 'transitions_perf_e2e_test',
-    workingDirectory: galleryDirectory,
   );
 }
 
-TaskFunction createGalleryTransitionHybridTest(List<String> args, {bool semanticsEnabled = false}) {
+TaskFunction createGalleryTransitionHybridTest({bool semanticsEnabled = false}) {
   return GalleryTransitionTest(
-    args,
     semanticsEnabled: semanticsEnabled,
     driverFile: semanticsEnabled
         ? 'transitions_perf_hybrid_with_semantics_test'
         : 'transitions_perf_hybrid_test',
-    workingDirectory: galleryDirectory,
   );
 }
 
-class GalleryTransitionTest extends BuildTestTask {
-  GalleryTransitionTest(List<String> args, {
+class GalleryTransitionTest {
+
+  GalleryTransitionTest({
     this.semanticsEnabled = false,
     this.testFile = 'transitions_perf',
     this.needFullTimeline = true,
@@ -54,8 +48,7 @@ class GalleryTransitionTest extends BuildTestTask {
     this.timelineTraceFile = 'transitions.timeline',
     this.transitionDurationFile = 'transition_durations.timeline',
     this.driverFile,
-    Directory workingDirectory,
-  }) : super(args, workingDirectory: workingDirectory);
+  });
 
   final bool semanticsEnabled;
   final bool needFullTimeline;
@@ -65,48 +58,59 @@ class GalleryTransitionTest extends BuildTestTask {
   final String transitionDurationFile;
   final String driverFile;
 
-  @override
-  List<String> getBuildArgs(DeviceOperatingSystem deviceOperatingSystem) {
-      switch (deviceOperatingSystem) {
-        case DeviceOperatingSystem.android:
-          return <String>[
-              'apk',
-              '--no-android-gradle-daemon',
-              '--profile',
-              '-t',
-              'test_driver/$testFile.dart',
-              '--target-platform',
-              'android-arm,android-arm64',
-            ];
-          default:
-           throw Exception('$deviceOperatingSystem has no build configuration');
+  Future<TaskResult> call() async {
+    final Device device = await devices.workingDevice;
+    await device.unlock();
+    final String deviceId = device.deviceId;
+    final Directory galleryDirectory = dir('${flutterDirectory.path}/dev/integration_tests/flutter_gallery');
+    await inDirectory<void>(galleryDirectory, () async {
+      String applicationBinaryPath;
+      if (deviceOperatingSystem == DeviceOperatingSystem.android) {
+        section('BUILDING APPLICATION');
+        await flutter(
+          'build',
+          options: <String>[
+            'apk',
+            '--no-android-gradle-daemon',
+            '--profile',
+            '-t',
+            'test_driver/$testFile.dart',
+            '--target-platform',
+            'android-arm,android-arm64',
+          ],
+        );
+        applicationBinaryPath = 'build/app/outputs/flutter-apk/app-profile.apk';
       }
-    }
 
-  @override
-  List<String> getTestArgs(DeviceOperatingSystem deviceOperatingSystem, String deviceId) {
-    final String testDriver = driverFile ?? (semanticsEnabled
-      ? '${testFile}_with_semantics_test'
-      : '${testFile}_test');
-    return <String>[
+      final String testDriver = driverFile ?? (semanticsEnabled
+          ? '${testFile}_with_semantics_test'
+          : '${testFile}_test');
+      section('DRIVE START');
+      await flutter('drive', options: <String>[
         '--profile',
         if (needFullTimeline)
           '--trace-startup',
-        '--use-application-binary=${getApplicationBinaryPath()}',
-        '--driver', 'test_driver/$testDriver.dart',
-        '-d', deviceId,
-      ];
-  }
+        if (applicationBinaryPath != null)
+          '--use-application-binary=$applicationBinaryPath'
+        else
+          ...<String>[
+            '-t',
+            'test_driver/$testFile.dart',
+          ],
+        '--driver',
+        'test_driver/$testDriver.dart',
+        '-d',
+        deviceId,
+      ]);
+    });
 
-  @override
-  Future<TaskResult> parseTaskResult() async {
     final Map<String, dynamic> summary = json.decode(
-      file('${workingDirectory.path}/build/$timelineSummaryFile.json').readAsStringSync(),
+      file('${galleryDirectory.path}/build/$timelineSummaryFile.json').readAsStringSync(),
     ) as Map<String, dynamic>;
 
     if (transitionDurationFile != null) {
       final Map<String, dynamic> original = json.decode(
-        file('${workingDirectory.path}/build/$transitionDurationFile.json').readAsStringSync(),
+        file('${galleryDirectory.path}/build/$transitionDurationFile.json').readAsStringSync(),
       ) as Map<String, dynamic>;
       final Map<String, List<int>> transitions = <String, List<int>>{};
       for (final String key in original.keys) {
@@ -119,9 +123,9 @@ class GalleryTransitionTest extends BuildTestTask {
     return TaskResult.success(summary,
       detailFiles: <String>[
         if (transitionDurationFile != null)
-          '${workingDirectory.path}/build/$transitionDurationFile.json',
+          '${galleryDirectory.path}/build/$transitionDurationFile.json',
         if (timelineTraceFile != null)
-          '${workingDirectory.path}/build/$timelineTraceFile.json'
+          '${galleryDirectory.path}/build/$timelineTraceFile.json'
       ],
       benchmarkScoreKeys: <String>[
         if (transitionDurationFile != null)
@@ -136,20 +140,6 @@ class GalleryTransitionTest extends BuildTestTask {
         '99th_percentile_frame_rasterizer_time_millis',
       ],
     );
-  }
-
-  @override
-  String getApplicationBinaryPath() {
-    if (applicationBinaryPath != null) {
-      return applicationBinaryPath;
-    }
-
-    switch (deviceOperatingSystem) {
-      case DeviceOperatingSystem.android:
-        return 'build/app/outputs/flutter-apk/app-profile.apk';
-      default:
-        throw UnimplementedError('getApplicationBinaryPath does not support $deviceOperatingSystem');
-    }
   }
 }
 

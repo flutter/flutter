@@ -9,6 +9,7 @@ import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
 
 import 'package:flutter_devicelab/framework/ab.dart';
+import 'package:flutter_devicelab/framework/cocoon.dart';
 import 'package:flutter_devicelab/framework/manifest.dart';
 import 'package:flutter_devicelab/framework/runner.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
@@ -104,14 +105,46 @@ Future<void> main(List<String> rawArgs) async {
   if (args.wasParsed('ab')) {
     await _runABTest();
   } else {
-    await runTasks(_taskNames,
+    await _runTasks();
+  }
+}
+
+Future<void> _runTasks() async {
+  for (final String taskName in _taskNames) {
+    section('Running task "$taskName"');
+    final TaskResult result = await runTask(
+      taskName,
       silent: silent,
-      exitOnFirstTestFailure: exitOnFirstTestFailure,
+      localEngine: localEngine,
+      localEngineSrcPath: localEngineSrcPath,
       deviceId: deviceId,
-      gitBranch: gitBranch,
-      luciBuilder: luciBuilder,
-      resultsPath: resultsPath,
     );
+
+    print('Task result:');
+    print(const JsonEncoder.withIndent('  ').convert(result));
+    section('Finished task "$taskName"');
+
+    if (resultsPath != null) {
+      final Cocoon cocoon = Cocoon();
+      await cocoon.writeTaskResultToFile(
+        builderName: luciBuilder,
+        gitBranch: gitBranch,
+        result: result,
+        resultsPath: resultsPath,
+      );
+    } else if (serviceAccountTokenFile != null) {
+      final Cocoon cocoon = Cocoon(serviceAccountTokenPath: serviceAccountTokenFile);
+
+      /// Cocoon references LUCI tasks by the [luciBuilder] instead of [taskName].
+      await cocoon.sendTaskResult(builderName: luciBuilder, result: result, gitBranch: gitBranch);
+    }
+
+    if (!result.succeeded) {
+      exitCode = 1;
+      if (exitOnFirstTestFailure) {
+        return;
+      }
+    }
   }
 }
 
