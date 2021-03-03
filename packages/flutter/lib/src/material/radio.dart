@@ -353,14 +353,45 @@ class Radio<T> extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
-  bool get _selected => value == groupValue;
-
   @override
   _RadioState<T> createState() => _RadioState<T>();
 }
 
-class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, ToggleableStateMixin {
-  final _RadioPainter _painter = _RadioPainter();
+class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
+  bool get enabled => widget.onChanged != null;
+  late Map<Type, Action<Intent>> _actionMap;
+
+  @override
+  void initState() {
+    super.initState();
+    _actionMap = <Type, Action<Intent>>{
+      ActivateIntent: CallbackAction<ActivateIntent>(
+        onInvoke: _actionHandler,
+      ),
+    };
+  }
+
+  void _actionHandler(ActivateIntent intent) {
+    if (widget.onChanged != null) {
+      widget.onChanged!(widget.value);
+    }
+    final RenderObject renderObject = context.findRenderObject()!;
+    renderObject.sendSemanticsEvent(const TapSemanticEvent());
+  }
+
+  bool _focused = false;
+  void _handleHighlightChanged(bool focused) {
+    if (_focused != focused) {
+      setState(() { _focused = focused; });
+    }
+  }
+
+  bool _hovering = false;
+  void _handleHoverChanged(bool hovering) {
+    if (_hovering != hovering) {
+      setState(() { _hovering = hovering; });
+    }
+  }
 
   void _handleChanged(bool? selected) {
     if (selected == null) {
@@ -372,28 +403,14 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
     }
   }
 
-  @override
-  void didUpdateWidget(Radio<T> oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget._selected != oldWidget._selected) {
-      animateToValue();
-    }
-  }
+  bool get _selected => widget.value == widget.groupValue;
 
-  @override
-  void dispose() {
-    _painter.dispose();
-    super.dispose();
-  }
-
-  @override
-  ValueChanged<bool?>? get onChanged => widget.onChanged != null ? _handleChanged : null;
-
-  @override
-  bool get tristate => widget.toggleable;
-
-  @override
-  bool? get value => widget._selected;
+  Set<MaterialState> get _states => <MaterialState>{
+    if (!enabled) MaterialState.disabled,
+    if (_hovering) MaterialState.hovered,
+    if (_focused) MaterialState.focused,
+    if (_selected) MaterialState.selected,
+  };
 
   MaterialStateProperty<Color?> get _widgetFillColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
@@ -440,17 +457,15 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
         break;
     }
     size += effectiveVisualDensity.baseSizeAdjustment;
-
-    final MaterialStateProperty<MouseCursor> effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
-      return MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
-        ?? themeData.radioTheme.mouseCursor?.resolve(states)
-        ?? MaterialStateProperty.resolveAs<MouseCursor>(MaterialStateMouseCursor.clickable, states);
-    });
+    final BoxConstraints additionalConstraints = BoxConstraints.tight(size);
+    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, _states)
+      ?? themeData.radioTheme.mouseCursor?.resolve(_states)
+      ?? MaterialStateProperty.resolveAs<MouseCursor>(MaterialStateMouseCursor.clickable, _states);
 
     // Colors need to be resolved in selected and non selected states separately
     // so that they can be lerped between.
-    final Set<MaterialState> activeStates = states..add(MaterialState.selected);
-    final Set<MaterialState> inactiveStates = states..remove(MaterialState.selected);
+    final Set<MaterialState> activeStates = _states..add(MaterialState.selected);
+    final Set<MaterialState> inactiveStates = _states..remove(MaterialState.selected);
     final Color effectiveActiveColor = widget.fillColor?.resolve(activeStates)
       ?? _widgetFillColor.resolve(activeStates)
       ?? themeData.radioTheme.fillColor?.resolve(activeStates)
@@ -460,13 +475,13 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
       ?? themeData.radioTheme.fillColor?.resolve(inactiveStates)
       ?? _defaultFillColor.resolve(inactiveStates);
 
-    final Set<MaterialState> focusedStates = states..add(MaterialState.focused);
+    final Set<MaterialState> focusedStates = _states..add(MaterialState.focused);
     final Color effectiveFocusOverlayColor = widget.overlayColor?.resolve(focusedStates)
       ?? widget.focusColor
       ?? themeData.radioTheme.overlayColor?.resolve(focusedStates)
       ?? themeData.focusColor;
 
-    final Set<MaterialState> hoveredStates = states..add(MaterialState.hovered);
+    final Set<MaterialState> hoveredStates = _states..add(MaterialState.hovered);
     final Color effectiveHoverOverlayColor = widget.overlayColor?.resolve(hoveredStates)
         ?? widget.hoverColor
         ?? themeData.radioTheme.overlayColor?.resolve(hoveredStates)
@@ -482,40 +497,156 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
         ?? themeData.radioTheme.overlayColor?.resolve(inactivePressedStates)
         ?? effectiveActiveColor.withAlpha(kRadialReactionAlpha);
 
-    return Semantics(
-      inMutuallyExclusiveGroup: true,
-      checked: widget._selected,
-      child: buildToggleable(
-        focusNode: widget.focusNode,
-        autofocus: widget.autofocus,
-        mouseCursor: effectiveMouseCursor,
-        size: size,
-        painter: _painter
-          ..position = position
-          ..reaction = reaction
-          ..reactionFocusFade = reactionFocusFade
-          ..reactionHoverFade = reactionHoverFade
-          ..inactiveReactionColor = effectiveInactivePressedOverlayColor
-          ..reactionColor = effectiveActivePressedOverlayColor
-          ..hoverColor = effectiveHoverOverlayColor
-          ..focusColor = effectiveFocusOverlayColor
-          ..splashRadius = widget.splashRadius ?? themeData.radioTheme.splashRadius ?? kRadialReactionRadius
-          ..downPosition = downPosition
-          ..isFocused = states.contains(MaterialState.focused)
-          ..isHovered = states.contains(MaterialState.hovered)
-          ..activeColor = effectiveActiveColor
-          ..inactiveColor = effectiveInactiveColor
+
+    return FocusableActionDetector(
+      actions: _actionMap,
+      focusNode: widget.focusNode,
+      autofocus: widget.autofocus,
+      mouseCursor: effectiveMouseCursor,
+      enabled: enabled,
+      onShowFocusHighlight: _handleHighlightChanged,
+      onShowHoverHighlight: _handleHoverChanged,
+      child: Builder(
+        builder: (BuildContext context) {
+          return _RadioRenderObjectWidget(
+            selected: _selected,
+            activeColor: effectiveActiveColor,
+            inactiveColor: effectiveInactiveColor,
+            focusColor: effectiveFocusOverlayColor,
+            hoverColor: effectiveHoverOverlayColor,
+            reactionColor: effectiveActivePressedOverlayColor,
+            inactiveReactionColor: effectiveInactivePressedOverlayColor,
+            splashRadius: widget.splashRadius ?? themeData.radioTheme.splashRadius ?? kRadialReactionRadius,
+            onChanged: enabled ? _handleChanged : null,
+            toggleable: widget.toggleable,
+            additionalConstraints: additionalConstraints,
+            vsync: this,
+            hasFocus: _focused,
+            hovering: _hovering,
+          );
+        },
       ),
     );
   }
 }
 
-class _RadioPainter extends ToggleablePainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    paintRadialReaction(canvas: canvas, origin: size.center(Offset.zero));
+class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
+  const _RadioRenderObjectWidget({
+    Key? key,
+    required this.selected,
+    required this.activeColor,
+    required this.inactiveColor,
+    required this.focusColor,
+    required this.hoverColor,
+    required this.reactionColor,
+    required this.inactiveReactionColor,
+    required this.additionalConstraints,
+    this.onChanged,
+    required this.toggleable,
+    required this.vsync,
+    required this.hasFocus,
+    required this.hovering,
+    required this.splashRadius,
+  }) : assert(selected != null),
+       assert(activeColor != null),
+       assert(inactiveColor != null),
+       assert(vsync != null),
+       assert(toggleable != null),
+       super(key: key);
 
-    final Offset center = (Offset.zero & size).center;
+  final bool selected;
+  final bool hasFocus;
+  final bool hovering;
+  final Color inactiveColor;
+  final Color activeColor;
+  final Color focusColor;
+  final Color hoverColor;
+  final Color reactionColor;
+  final Color inactiveReactionColor;
+  final double splashRadius;
+  final ValueChanged<bool?>? onChanged;
+  final bool toggleable;
+  final TickerProvider vsync;
+  final BoxConstraints additionalConstraints;
+
+  @override
+  _RenderRadio createRenderObject(BuildContext context) => _RenderRadio(
+    value: selected,
+    activeColor: activeColor,
+    inactiveColor: inactiveColor,
+    focusColor: focusColor,
+    hoverColor: hoverColor,
+    reactionColor: reactionColor,
+    inactiveReactionColor: inactiveReactionColor,
+    splashRadius: splashRadius,
+    onChanged: onChanged,
+    tristate: toggleable,
+    vsync: vsync,
+    additionalConstraints: additionalConstraints,
+    hasFocus: hasFocus,
+    hovering: hovering,
+  );
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderRadio renderObject) {
+    renderObject
+      ..value = selected
+      ..activeColor = activeColor
+      ..inactiveColor = inactiveColor
+      ..focusColor = focusColor
+      ..hoverColor = hoverColor
+      ..reactionColor = reactionColor
+      ..inactiveReactionColor = inactiveReactionColor
+      ..splashRadius = splashRadius
+      ..onChanged = onChanged
+      ..tristate = toggleable
+      ..additionalConstraints = additionalConstraints
+      ..vsync = vsync
+      ..hasFocus = hasFocus
+      ..hovering = hovering;
+  }
+}
+
+class _RenderRadio extends RenderToggleable {
+  _RenderRadio({
+    required bool value,
+    required Color activeColor,
+    required Color inactiveColor,
+    required Color focusColor,
+    required Color hoverColor,
+    required Color reactionColor,
+    required Color inactiveReactionColor,
+    required double splashRadius,
+    required ValueChanged<bool?>? onChanged,
+    required bool tristate,
+    required BoxConstraints additionalConstraints,
+    required TickerProvider vsync,
+    required bool hasFocus,
+    required bool hovering,
+  }) : super(
+         value: value,
+         activeColor: activeColor,
+         inactiveColor: inactiveColor,
+         focusColor: focusColor,
+         hoverColor: hoverColor,
+         reactionColor: reactionColor,
+         inactiveReactionColor: inactiveReactionColor,
+         splashRadius: splashRadius,
+         onChanged: onChanged,
+         tristate: tristate,
+         additionalConstraints: additionalConstraints,
+         vsync: vsync,
+         hasFocus: hasFocus,
+         hovering: hovering,
+       );
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final Canvas canvas = context.canvas;
+
+    paintRadialReaction(canvas, offset, size.center(Offset.zero));
+
+    final Offset center = (offset & size).center;
 
     // Outer circle
     final Paint paint = Paint()
@@ -529,5 +660,13 @@ class _RadioPainter extends ToggleablePainter {
       paint.style = PaintingStyle.fill;
       canvas.drawCircle(center, _kInnerRadius * position.value, paint);
     }
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config
+      ..isInMutuallyExclusiveGroup = true
+      ..isChecked = value == true;
   }
 }

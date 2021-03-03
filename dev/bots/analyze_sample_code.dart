@@ -5,7 +5,7 @@
 // See ../snippets/README.md for documentation.
 
 // To run this, from the root of the Flutter repository:
-//   bin/cache/dart-sdk/bin/dart dev/bots/analyze-sample-code.dart
+//   bin/cache/dart-sdk/bin/dart dev/bots/analyze_sample_code.dart
 
 import 'dart:io';
 
