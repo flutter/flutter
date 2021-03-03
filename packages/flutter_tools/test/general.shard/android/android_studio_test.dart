@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -56,8 +56,6 @@ final Platform windowsPlatform = FakePlatform(
   }
 );
 
-class MockPlistUtils extends Mock implements PlistParser {}
-
 Platform macPlatform() {
   return FakePlatform(
     operatingSystem: 'macos',
@@ -100,10 +98,10 @@ void main() {
   group('pluginsPath on Mac', () {
     FileSystemUtils fsUtils;
     Platform platform;
-    MockPlistUtils plistUtils;
+    FakePlistUtils plistUtils;
 
     setUp(() {
-      plistUtils = MockPlistUtils();
+      plistUtils = FakePlistUtils();
       platform = macPlatform();
       fsUtils = FileSystemUtils(
         fileSystem: fileSystem,
@@ -121,7 +119,7 @@ void main() {
       globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
       final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
-      when(plistUtils.parseFile(plistFilePath)).thenReturn(macStudioInfoPlist4_1);
+      plistUtils.fileContents[plistFilePath] = macStudioInfoPlist4_1;
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         globals.fs.directory(studioInApplicationPlistFolder)?.parent?.path,
       );
@@ -154,7 +152,7 @@ void main() {
       globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
       final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
-      when(plistUtils.parseFile(plistFilePath)).thenReturn(macStudioInfoPlist);
+      plistUtils.fileContents[plistFilePath] = macStudioInfoPlist;
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         globals.fs.directory(studioInApplicationPlistFolder)?.parent?.path,
       );
@@ -186,7 +184,7 @@ void main() {
       globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
       final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
-      when(plistUtils.parseFile(plistFilePath)).thenReturn(macStudioInfoPlist);
+      plistUtils.fileContents[plistFilePath] = macStudioInfoPlist;
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         globals.fs.directory(studioInApplicationPlistFolder)?.parent?.path,
       );
@@ -226,7 +224,7 @@ void main() {
         jetbrainsStudioInApplicationPlistFolder,
         'Info.plist',
       );
-      when(plistUtils.parseFile(jetbrainsPlistFilePath)).thenReturn(jetbrainsInfoPlist);
+      plistUtils.fileContents[jetbrainsPlistFilePath] = jetbrainsInfoPlist;
 
       final String studioInApplicationPlistFolder = globals.fs.path.join(
         globals.fs.path.join(homeMac,'Library','Application Support'),
@@ -243,7 +241,7 @@ void main() {
         studioInApplicationPlistFolder,
         'Info.plist',
       );
-      when(plistUtils.parseFile(studioPlistFilePath)).thenReturn(macStudioInfoPlist);
+      plistUtils.fileContents[studioPlistFilePath] = macStudioInfoPlist;
 
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         globals.fs.directory(jetbrainsStudioInApplicationPlistFolder)?.parent?.path,
@@ -381,4 +379,13 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
   });
+}
+
+class FakePlistUtils extends Fake implements PlistParser {
+  final Map<String, Map<String, dynamic>> fileContents = <String, Map<String, dynamic>>{};
+
+  @override
+  Map<String, dynamic> parseFile(String plistFilePath) {
+    return fileContents[plistFilePath];
+  }
 }
