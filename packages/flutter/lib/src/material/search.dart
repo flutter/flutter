@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
@@ -229,7 +228,7 @@ abstract class SearchDelegate<T> {
     return theme.copyWith(
       appBarTheme: AppBarTheme(
         brightness: colorScheme.brightness,
-        color: colorScheme.brightness == Brightness.dark ? Colors.grey[900] : Colors.white,
+        backgroundColor: colorScheme.brightness == Brightness.dark ? Colors.grey[900] : Colors.white,
         iconTheme: theme.primaryIconTheme.copyWith(color: Colors.grey),
         textTheme: theme.textTheme,
       ),

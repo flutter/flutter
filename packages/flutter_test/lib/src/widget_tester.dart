@@ -9,7 +9,6 @@ import 'package:flutter/material.dart' show Tooltip;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 
 // ignore: deprecated_member_use
@@ -100,7 +99,7 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 ///
 /// ```dart
 /// testWidgets('MyWidget', (WidgetTester tester) async {
-///   await tester.pumpWidget(new MyWidget());
+///   await tester.pumpWidget(MyWidget());
 ///   await tester.tap(find.text('Save'));
 ///   expect(find.text('Success'), findsOneWidget);
 /// });
@@ -109,7 +108,7 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 void testWidgets(
   String description,
   WidgetTesterCallback callback, {
-  bool skip = false,
+  bool? skip,
   test_package.Timeout? timeout,
   Duration? initialTimeout,
   bool semanticsEnabled = true,
@@ -371,8 +370,8 @@ const String kDebugWarning = '''
 ///     main() async {
 ///       assert(false); // fail in checked mode
 ///       await benchmarkWidgets((WidgetTester tester) async {
-///         await tester.pumpWidget(new MyWidget());
-///         final Stopwatch timer = new Stopwatch()..start();
+///         await tester.pumpWidget(MyWidget());
+///         final Stopwatch timer = Stopwatch()..start();
 ///         for (int index = 0; index < 10000; index += 1) {
 ///           await tester.tap(find.text('Tap me'));
 ///           await tester.pump();
@@ -797,7 +796,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
         orElse: () => null,
       );
       if (innerTargetElement == null) {
-        debugPrint('No widgets found at ${binding.globalToLocal(event.position)}.');
+        printToConsole('No widgets found at ${binding.globalToLocal(event.position)}.');
         return;
       }
       final List<Element> candidates = <Element>[];
@@ -810,7 +809,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       int numberOfWithTexts = 0;
       int numberOfTypes = 0;
       int totalNumber = 0;
-      debugPrint('Some possible finders for the widgets at ${binding.globalToLocal(event.position)}:');
+      printToConsole('Some possible finders for the widgets at ${binding.globalToLocal(event.position)}:');
       for (final Element element in candidates) {
         if (totalNumber > 13) // an arbitrary number of finders that feels useful without being overwhelming
           break;
@@ -820,7 +819,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
         if (widget is Tooltip) {
           final Iterable<Element> matches = find.byTooltip(widget.message).evaluate();
           if (matches.length == 1) {
-            debugPrint("  find.byTooltip('${widget.message}')");
+            printToConsole("  find.byTooltip('${widget.message}')");
             continue;
           }
         }
@@ -832,7 +831,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           final Iterable<Element> matches = find.text(text).evaluate();
           descendantText = widget.data;
           if (matches.length == 1) {
-            debugPrint("  find.text('$text')");
+            printToConsole("  find.text('$text')");
             continue;
           }
         }
@@ -850,7 +849,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           if (keyLabel != null) {
             final Iterable<Element> matches = find.byKey(key).evaluate();
             if (matches.length == 1) {
-              debugPrint('  find.byKey($keyLabel)');
+              printToConsole('  find.byKey($keyLabel)');
               continue;
             }
           }
@@ -860,7 +859,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           if (numberOfTypes < 5) {
             final Iterable<Element> matches = find.byType(widget.runtimeType).evaluate();
             if (matches.length == 1) {
-              debugPrint('  find.byType(${widget.runtimeType})');
+              printToConsole('  find.byType(${widget.runtimeType})');
               numberOfTypes += 1;
               continue;
             }
@@ -869,7 +868,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           if (descendantText != null && numberOfWithTexts < 5) {
             final Iterable<Element> matches = find.widgetWithText(widget.runtimeType, descendantText).evaluate();
             if (matches.length == 1) {
-              debugPrint("  find.widgetWithText(${widget.runtimeType}, '$descendantText')");
+              printToConsole("  find.widgetWithText(${widget.runtimeType}, '$descendantText')");
               numberOfWithTexts += 1;
               continue;
             }
@@ -879,7 +878,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
         if (!_isPrivate(element.runtimeType)) {
           final Iterable<Element> matches = find.byElementType(element.runtimeType).evaluate();
           if (matches.length == 1) {
-            debugPrint('  find.byElementType(${element.runtimeType})');
+            printToConsole('  find.byElementType(${element.runtimeType})');
             continue;
           }
         }
@@ -887,7 +886,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
         totalNumber -= 1; // if we got here, we didn't actually find something to say about it
       }
       if (totalNumber == 0)
-        debugPrint('  <could not come up with any unique finders>');
+        printToConsole('  <could not come up with any unique finders>');
     }
   }
 
@@ -1060,6 +1059,11 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
       await tap(backButton);
     });
+  }
+
+  @override
+  void printToConsole(String message) {
+    binding.debugPrintOverride(message);
   }
 }
 

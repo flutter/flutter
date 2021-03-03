@@ -6,7 +6,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -100,7 +99,6 @@ abstract class RenderAbstractViewport extends RenderObject {
 /// the [rect] position said element would have in the viewport at that
 /// [offset].
 class RevealedOffset {
-
   /// Instantiates a return value for [RenderAbstractViewport.getOffsetToReveal].
   const RevealedOffset({
     required this.offset,
@@ -2010,19 +2008,19 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
 
   @override
   Iterable<RenderSliver> get childrenInPaintOrder sync* {
-    RenderSliver? child = firstChild;
+    RenderSliver? child = lastChild;
     while (child != null) {
       yield child;
-      child = childAfter(child);
+      child = childBefore(child);
     }
   }
 
   @override
   Iterable<RenderSliver> get childrenInHitTestOrder sync* {
-    RenderSliver? child = lastChild;
+    RenderSliver? child = firstChild;
     while (child != null) {
       yield child;
-      child = childBefore(child);
+      child = childAfter(child);
     }
   }
 }

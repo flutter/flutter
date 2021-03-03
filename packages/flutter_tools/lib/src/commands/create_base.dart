@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
 
@@ -30,13 +32,15 @@ const List<String> _kAvailablePlatforms = <String>[
 ];
 
 const String _kDefaultPlatformArgumentHelp =
-    'Required: The platforms supported by this project. '
+    '(required) The platforms supported by this project. '
     'Platform folders (e.g. android/) will be generated in the target project. '
     'Adding desktop platforms requires the corresponding desktop config setting to be enabled.';
 
 /// Common behavior for `flutter create` commands.
 abstract class CreateBase extends FlutterCommand {
-  CreateBase() {
+  CreateBase({
+    @required bool verboseHelp,
+  }) {
     argParser.addFlag(
       'pub',
       defaultsTo: true,
@@ -55,9 +59,10 @@ abstract class CreateBase extends FlutterCommand {
       'with-driver-test',
       negatable: true,
       defaultsTo: false,
-      help: '(Deprecated) Also add a flutter_driver dependency and generate a '
-          "sample 'flutter drive' test. This flag has been deprecated, instead see "
-          'package:integration_test at https://pub.dev/packages/integration_test .',
+      help: '(deprecated) Historically, this added a flutter_driver dependency and generated a '
+            'sample "flutter drive" test. Now it does nothing. Consider using the '
+            '"integration_test" package: https://pub.dev/packages/integration_test',
+      hide: !verboseHelp,
     );
     argParser.addFlag(
       'overwrite',
@@ -89,19 +94,21 @@ abstract class CreateBase extends FlutterCommand {
       abbr: 'i',
       defaultsTo: 'swift',
       allowed: <String>['objc', 'swift'],
+      help: 'The language to use for iOS-specific code, either ObjectiveC (legacy) or Swift (recommended).'
     );
     argParser.addOption(
       'android-language',
       abbr: 'a',
       defaultsTo: 'kotlin',
       allowed: <String>['java', 'kotlin'],
+      help: 'The language to use for Android-specific code, either Java (legacy) or Kotlin (recommended).',
     );
     argParser.addFlag(
       'skip-name-checks',
       help:
-          'integration test only parameter to allow creating applications/plugins with '
-          'invalid names.',
-      hide: true,
+          'Allow the creation of applications and plugins with invalid names. '
+          'This is only intended to enable testing of the tool itself.',
+      hide: !verboseHelp,
     );
   }
 
@@ -247,10 +254,16 @@ abstract class CreateBase extends FlutterCommand {
   @protected
   void validateProjectDir({bool overwrite = false}) {
     if (globals.fs.path.isWithin(flutterRoot, projectDirPath)) {
-      throwToolExit(
-          'Cannot create a project within the Flutter SDK. '
-          "Target directory '$projectDirPath' is within the Flutter SDK at '$flutterRoot'.",
-          exitCode: 2);
+      // Make exception for dev and examples to facilitate example project development.
+      final String examplesDirectory = globals.fs.path.join(flutterRoot, 'examples');
+      final String devDirectory = globals.fs.path.join(flutterRoot, 'dev');
+      if (!globals.fs.path.isWithin(examplesDirectory, projectDirPath) &&
+          !globals.fs.path.isWithin(devDirectory, projectDirPath)) {
+        throwToolExit(
+            'Cannot create a project within the Flutter SDK. '
+                "Target directory '$projectDirPath' is within the Flutter SDK at '$flutterRoot'.",
+            exitCode: 2);
+      }
     }
 
     // If the destination directory is actually a file, then we refuse to
@@ -311,6 +324,7 @@ abstract class CreateBase extends FlutterCommand {
     String androidLanguage,
     String iosLanguage,
     String flutterRoot,
+    String dartSdkVersionBounds,
     bool withPluginHook = false,
     bool ios = false,
     bool android = false,
@@ -351,6 +365,8 @@ abstract class CreateBase extends FlutterCommand {
       'pluginClassSnakeCase': pluginClassSnakeCase,
       'pluginClassCapitalSnakeCase': pluginClassCapitalSnakeCase,
       'pluginDartClass': pluginDartClass,
+      // TODO(jonahwilliams): update after google3 uuid is updated.
+      // ignore: prefer_const_constructors
       'pluginProjectUUID': Uuid().v4().toUpperCase(),
       'withPluginHook': withPluginHook,
       'androidLanguage': androidLanguage,
@@ -364,6 +380,7 @@ abstract class CreateBase extends FlutterCommand {
       'macos': macos,
       'windows': windows,
       'year': DateTime.now().year,
+      'dartSdkVersionBounds': dartSdkVersionBounds,
     };
   }
 
@@ -504,7 +521,7 @@ abstract class CreateBase extends FlutterCommand {
 
   int _injectGradleWrapper(FlutterProject project) {
     int filesCreated = 0;
-    globals.fsUtils.copyDirectorySync(
+    copyDirectory(
       globals.cache.getArtifactDirectory('gradle_wrapper'),
       project.android.hostAppGradleRoot,
       onFileCopied: (File sourceFile, File destinationFile) {

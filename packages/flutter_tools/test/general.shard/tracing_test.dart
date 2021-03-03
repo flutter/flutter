@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -128,6 +130,29 @@ void main() {
       'timeToFirstFrameMicros': 2,
       'timeAfterFrameworkInitMicros': 1,
     });
+  });
+
+  testWithoutContext('throws tool exit if the vmservice disconnects', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
+      ...vmServiceSetup,
+      const FakeVmServiceRequest(
+        method: 'getVMTimeline',
+        errorCode: RPCErrorCodes.kServiceDisappeared,
+      ),
+      const FakeVmServiceRequest(
+        method: 'setVMTimelineFlags',
+        args: <String, Object>{
+          'recordedStreams': <Object>[],
+        },
+      ),
+    ]);
+
+    await expectLater(() async => await downloadStartupTrace(fakeVmServiceHost.vmService,
+      output: fileSystem.currentDirectory,
+      logger: logger,
+    ), throwsToolExit(message: 'The device disconnected before the timeline could be retrieved.'));
   });
 
   testWithoutContext('throws tool exit if timeline is missing the engine start event', () async {

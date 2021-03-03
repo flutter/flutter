@@ -4,10 +4,11 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class ExampleDragTarget extends StatefulWidget {
+  const ExampleDragTarget({Key key}) : super(key: key);
+
   @override
   ExampleDragTargetState createState() => ExampleDragTargetState();
 }
@@ -175,7 +176,7 @@ class DashOutlineCirclePainter extends CustomPainter {
 }
 
 class MovableBall extends StatelessWidget {
-  const MovableBall(this.position, this.ballPosition, this.callback);
+  const MovableBall(this.position, this.ballPosition, this.callback, {Key key}) : super(key: key);
 
   final int position;
   final int ballPosition;
@@ -224,6 +225,8 @@ class MovableBall extends StatelessWidget {
 }
 
 class DragAndDropApp extends StatefulWidget {
+  const DragAndDropApp({Key key}) : super(key: key);
+
   @override
   DragAndDropAppState createState() => DragAndDropAppState();
 }
@@ -271,7 +274,7 @@ class DragAndDropAppState extends State<DragAndDropApp> {
           ),
           Expanded(
             child: Row(
-              children: <Widget>[
+              children: const <Widget>[
                 Expanded(child: ExampleDragTarget()),
                 Expanded(child: ExampleDragTarget()),
                 Expanded(child: ExampleDragTarget()),
@@ -296,7 +299,7 @@ class DragAndDropAppState extends State<DragAndDropApp> {
 }
 
 void main() {
-  runApp(MaterialApp(
+  runApp(const MaterialApp(
     title: 'Drag and Drop Flutter Demo',
     home: DragAndDropApp(),
   ));

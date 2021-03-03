@@ -10,7 +10,6 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show WriteBuffer;
 import 'package:flutter/services.dart';
-import 'package:matcher/matcher.dart';
 import '../flutter_test_alternative.dart';
 import 'message_codecs_testing.dart';
 

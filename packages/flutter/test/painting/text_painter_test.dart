@@ -4,11 +4,8 @@
 
 import 'dart:ui' as ui;
 
-import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../flutter_test_alternative.dart' show Fake;
 
 void main() {
   test('TextPainter caret test', () {

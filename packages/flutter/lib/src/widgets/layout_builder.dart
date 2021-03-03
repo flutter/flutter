@@ -351,7 +351,7 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
       'Calculating the dry layout would require running the layout callback '
       'speculatively, which might mutate the live render object tree.',
     ));
-    return const Size(0, 0);
+    return Size.zero;
   }
 
   @override

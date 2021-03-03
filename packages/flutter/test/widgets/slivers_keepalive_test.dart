@@ -4,7 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/rendering.dart';
 
 void main() {
   testWidgets('Sliver with keep alive without key - should dispose after reordering', (WidgetTester tester) async {

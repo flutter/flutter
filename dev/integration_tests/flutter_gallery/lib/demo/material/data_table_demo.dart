@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 import '../../gallery/demo.dart';
 
@@ -143,6 +142,8 @@ class DessertDataSource extends DataTableSource {
 }
 
 class DataTableDemo extends StatefulWidget {
+  const DataTableDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/material/data-table';
 
   @override

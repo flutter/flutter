@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:yaml/yaml.dart';
 
 import 'base/file_system.dart';
@@ -23,14 +25,14 @@ enum FlutterProjectType {
   plugin,
 }
 
-extension FlutterProjectTypeExtension on FlutterProjectType {
-  String get name => getEnumName(this);
+String flutterProjectTypeToString(FlutterProjectType type) {
+  return getEnumName(type);
 }
 
 FlutterProjectType stringToProjectType(String value) {
   FlutterProjectType result;
   for (final FlutterProjectType type in FlutterProjectType.values) {
-    if (value == type.name) {
+    if (value == flutterProjectTypeToString(type)) {
       result = type;
       break;
     }

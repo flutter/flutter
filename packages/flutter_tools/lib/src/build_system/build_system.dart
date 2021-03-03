@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:async/async.dart';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
@@ -248,6 +250,29 @@ abstract class Target {
   }
 }
 
+/// Target that contains multiple other targets.
+///
+/// This target does not do anything in its own [build]
+/// and acts as a wrapper around multiple other targets.
+class CompositeTarget extends Target {
+  CompositeTarget(this.dependencies);
+
+  @override
+  final List<Target> dependencies;
+
+  @override
+  String get name => '_composite';
+
+  @override
+  Future<void> build(Environment environment) async { }
+
+  @override
+  List<Source> get inputs => <Source>[];
+
+  @override
+  List<Source> get outputs => <Source>[];
+}
+
 /// The [Environment] defines several constants for use during the build.
 ///
 /// The environment contains configuration and file paths that are safe to
@@ -306,6 +331,7 @@ class Environment {
     @required Artifacts artifacts,
     @required ProcessManager processManager,
     @required String engineVersion,
+    @required bool generateDartPluginRegistry,
     Directory buildDir,
     Map<String, String> defines = const <String, String>{},
     Map<String, String> inputs = const <String, String>{},
@@ -345,6 +371,7 @@ class Environment {
       processManager: processManager,
       engineVersion: engineVersion,
       inputs: inputs,
+      generateDartPluginRegistry: generateDartPluginRegistry,
     );
   }
 
@@ -361,6 +388,7 @@ class Environment {
     Map<String, String> defines = const <String, String>{},
     Map<String, String> inputs = const <String, String>{},
     String engineVersion,
+    bool generateDartPluginRegistry = false,
     @required FileSystem fileSystem,
     @required Logger logger,
     @required Artifacts artifacts,
@@ -379,6 +407,7 @@ class Environment {
       artifacts: artifacts,
       processManager: processManager,
       engineVersion: engineVersion,
+      generateDartPluginRegistry: generateDartPluginRegistry,
     );
   }
 
@@ -396,6 +425,7 @@ class Environment {
     @required this.artifacts,
     @required this.engineVersion,
     @required this.inputs,
+    @required this.generateDartPluginRegistry,
   });
 
   /// The [Source] value which is substituted with the path to [projectDir].
@@ -473,6 +503,11 @@ class Environment {
 
   /// The version of the current engine, or `null` if built with a local engine.
   final String engineVersion;
+
+  /// Whether to generate the Dart plugin registry.
+  /// When [true], the main entrypoint is wrapped and the wrapper becomes
+  /// the new entrypoint.
+  final bool generateDartPluginRegistry;
 }
 
 /// The result information from the build system.

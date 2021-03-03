@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 class BottomAppBarDemo extends StatefulWidget {
+  const BottomAppBarDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/material/bottom_app_bar';
 
   @override
@@ -488,7 +490,7 @@ class _DiamondBorder extends ShapeBorder {
 
   @override
   EdgeInsetsGeometry get dimensions {
-    return const EdgeInsets.only();
+    return EdgeInsets.zero;
   }
 
   @override
