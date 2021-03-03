@@ -914,7 +914,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
           try {
             scrollController!.position;
           } catch (_) {
-            final bool primary = widget.controller == null;
             throw FlutterError.fromParts(<DiagnosticsNode>[
               ErrorSummary(
                 'The ScrollController is currently attached to more than one '
