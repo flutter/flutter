@@ -47,8 +47,8 @@ abstract class TextEditingAction<T extends Intent> extends ContextAction<T> {
   /// Returns the currently focused [TextEditingAction], if any.
   @protected
   TextEditingActionTarget? get textEditingActionTarget {
-    // If an EditableText is not focused, then ignore this action.
-    if (primaryFocus?.context?.widget is! EditableText) {
+    // If a TextEditingActionTarget is not focused, then ignore this action.
+    if (primaryFocus?.context?.widget is! TextEditingActionTarget) {
       return null;
     }
     return (primaryFocus!.context! as StatefulElement).state as TextEditingActionTarget;
@@ -56,8 +56,8 @@ abstract class TextEditingAction<T extends Intent> extends ContextAction<T> {
 
   @override
   bool isEnabled(Intent intent) {
-    // The Action is disabled if there is no focused EditableText, or if the
-    // platform is web, because web lets the browser handle text editing.
+    // The Action is disabled if there is no focused TextEditingActionTarget, or
+    // if the platform is web, because web lets the browser handle text editing.
     return !kIsWeb && textEditingActionTarget != null;
   }
 }
