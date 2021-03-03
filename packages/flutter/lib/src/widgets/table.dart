@@ -374,8 +374,9 @@ class _TableElement extends RenderObjectElement {
   @override
   RenderTable get renderObject => super.renderObject as RenderTable;
 
-  // This class ignores the child's slot entirely.
   // Instead of doing incremental updates to the child list, it replaces the entire list each frame.
+  // This class ignores the child's slot during [_TableElement.mount] and [_TableElement.update]
+  // phase, and then updates the slot to [_TableSlot] after completing the update of the child list.
 
   List<_TableElementRow> _children = const<_TableElementRow>[];
 
@@ -396,6 +397,7 @@ class _TableElement extends RenderObjectElement {
 
   @override
   void insertRenderObjectChild(RenderObject child, dynamic slot) {
+    assert(slot == null || slot is _TableSlot);
     renderObject.setupParentData(child);
     if (slot is _TableSlot)
       renderObject.setChild(slot.x, slot.y, child as RenderBox);
@@ -436,13 +438,13 @@ class _TableElement extends RenderObjectElement {
       }
       newChildren.add(_TableElementRow(
         key: row.key,
-        children: updateChildren(oldChildren, row.children!, forgottenChildren: _forgottenChildren),
+        children: updateChildren(oldChildren, row.children!, forgottenChildren: _forgottenChildren, ignoreSlot: true),
       ));
     }
     while (oldUnkeyedRows.moveNext())
-      updateChildren(oldUnkeyedRows.current.children, const <Widget>[], forgottenChildren: _forgottenChildren);
+      updateChildren(oldUnkeyedRows.current.children, const <Widget>[], forgottenChildren: _forgottenChildren, ignoreSlot: true);
     for (final List<Element> oldChildren in oldKeyedRows.values.where((List<Element> list) => !taken.contains(list)))
-      updateChildren(oldChildren, const <Widget>[], forgottenChildren: _forgottenChildren);
+      updateChildren(oldChildren, const <Widget>[], forgottenChildren: _forgottenChildren, ignoreSlot: true);
 
     _children = newChildren;
     _updateRenderObjectChildren();

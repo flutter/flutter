@@ -5507,7 +5507,8 @@ abstract class RenderObjectElement extends Element {
   ///
   /// This function is a convenience wrapper around [updateChild], which updates
   /// each individual child. When calling [updateChild], this function uses an
-  /// [IndexedSlot<Element>] as the value for the `newSlot` argument.
+  /// [IndexedSlot<Element>] as the value for the `newSlot` argument if [ignoreSlot]
+  /// is `false`.
   /// [IndexedSlot.index] is set to the index that the currently processed
   /// `child` corresponds to in the `newWidgets` list and [IndexedSlot.value] is
   /// set to the [Element] of the previous widget in that list (or null if it is
@@ -5536,7 +5537,9 @@ abstract class RenderObjectElement extends Element {
   /// knows where a child needs to move to in a linked list by providing its new
   /// previous sibling.
   @protected
-  List<Element> updateChildren(List<Element> oldChildren, List<Widget> newWidgets, { Set<Element>? forgottenChildren }) {
+  List<Element> updateChildren(
+    List<Element> oldChildren, List<Widget> newWidgets, {Set<Element>? forgottenChildren, bool ignoreSlot = false}
+  ) {
     assert(oldChildren != null);
     assert(newWidgets != null);
 
@@ -5592,7 +5595,7 @@ abstract class RenderObjectElement extends Element {
       assert(oldChild == null || oldChild._lifecycleState == _ElementLifecycle.active);
       if (oldChild == null || !Widget.canUpdate(oldChild.widget, newWidget))
         break;
-      final Element newChild = updateChild(oldChild, newWidget, IndexedSlot<Element?>(newChildrenTop, previousChild))!;
+      final Element newChild = updateChild(oldChild, newWidget, !ignoreSlot ? IndexedSlot<Element?>(newChildrenTop, previousChild) : null)!;
       assert(newChild._lifecycleState == _ElementLifecycle.active);
       newChildren[newChildrenTop] = newChild;
       previousChild = newChild;
@@ -5650,7 +5653,7 @@ abstract class RenderObjectElement extends Element {
         }
       }
       assert(oldChild == null || Widget.canUpdate(oldChild.widget, newWidget));
-      final Element newChild = updateChild(oldChild, newWidget, IndexedSlot<Element?>(newChildrenTop, previousChild))!;
+      final Element newChild = updateChild(oldChild, newWidget, !ignoreSlot ? IndexedSlot<Element?>(newChildrenTop, previousChild) : null)!;
       assert(newChild._lifecycleState == _ElementLifecycle.active);
       assert(oldChild == newChild || oldChild == null || oldChild._lifecycleState != _ElementLifecycle.active);
       newChildren[newChildrenTop] = newChild;
@@ -5672,7 +5675,7 @@ abstract class RenderObjectElement extends Element {
       assert(oldChild._lifecycleState == _ElementLifecycle.active);
       final Widget newWidget = newWidgets[newChildrenTop];
       assert(Widget.canUpdate(oldChild.widget, newWidget));
-      final Element newChild = updateChild(oldChild, newWidget, IndexedSlot<Element?>(newChildrenTop, previousChild))!;
+      final Element newChild = updateChild(oldChild, newWidget, !ignoreSlot ? IndexedSlot<Element?>(newChildrenTop, previousChild) : null)!;
       assert(newChild._lifecycleState == _ElementLifecycle.active);
       assert(oldChild == newChild || oldChild == null || oldChild._lifecycleState != _ElementLifecycle.active);
       newChildren[newChildrenTop] = newChild;
