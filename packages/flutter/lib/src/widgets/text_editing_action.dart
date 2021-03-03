@@ -48,7 +48,7 @@ abstract class TextEditingAction<T extends Intent> extends ContextAction<T> {
   @protected
   TextEditingActionTarget? get textEditingActionTarget {
     // If a TextEditingActionTarget is not focused, then ignore this action.
-    if (primaryFocus?.context?.widget is! TextEditingActionTarget) {
+    if ((primaryFocus!.context! as StatefulElement).state is! TextEditingActionTarget) {
       return null;
     }
     return (primaryFocus!.context! as StatefulElement).state as TextEditingActionTarget;
