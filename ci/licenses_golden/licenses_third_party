@@ -1,4 +1,4 @@
-Signature: 11c187a0827dd36e29a89328d586f29a
+Signature: 7c75aab577f739cd38c11fdf9545f361
 
 UNUSED LICENSES:
 
@@ -11991,6 +11991,8 @@ LIBRARY: dart
 ORIGIN: ../../../third_party/dart/runtime/vm/compiler/ffi/range.h + ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/range.h
+FILE: ../../../third_party/dart/runtime/vm/pending_deopts.cc
+FILE: ../../../third_party/dart/runtime/vm/pending_deopts.h
 FILE: ../../../third_party/dart/runtime/vm/virtual_memory_compressed.cc
 FILE: ../../../third_party/dart/runtime/vm/virtual_memory_compressed.h
 FILE: ../../../third_party/dart/samples/ffi/resource_management/utf8_helpers.dart
