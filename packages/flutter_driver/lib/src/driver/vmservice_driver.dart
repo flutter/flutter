@@ -440,7 +440,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
 
   @override
   Future<Timeline> traceAction(
-      Future<dynamic> action(), {
+      Future<dynamic> Function() action, {
         List<TimelineStream> streams = const <TimelineStream>[TimelineStream.all],
         bool retainPriorEvents = false,
       }) async {
@@ -493,7 +493,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
   }
 
   @override
-  Future<T> runUnsynchronized<T>(Future<T> action(), { Duration? timeout }) async {
+  Future<T> runUnsynchronized<T>(Future<T> Function() action, { Duration? timeout }) async {
     await sendCommand(SetFrameSync(false, timeout: timeout));
     T result;
     try {

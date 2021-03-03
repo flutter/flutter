@@ -290,7 +290,7 @@ abstract class BindingBase {
   ///
   /// The [Future] returned by the `callback` argument is returned by [lockEvents].
   @protected
-  Future<void> lockEvents(Future<void> callback()) {
+  Future<void> lockEvents(Future<void> Function() callback) {
     developer.Timeline.startSync('Lock events');
 
     assert(callback != null);

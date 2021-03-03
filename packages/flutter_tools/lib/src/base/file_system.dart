@@ -123,8 +123,8 @@ class FileSystemUtils {
 void copyDirectory(
   Directory srcDir,
   Directory destDir, {
-  bool shouldCopyFile(File srcFile, File destFile),
-  void onFileCopied(File srcFile, File destFile),
+  bool Function(File srcFile, File destFile) shouldCopyFile,
+  void Function(File srcFile, File destFile) onFileCopied,
 }) {
   if (!srcDir.existsSync()) {
     throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');

@@ -179,7 +179,7 @@ Matcher containsIgnoringWhitespace(String toSearch) {
 /// system temporary directory are deleted after each test by calling
 /// `LocalFileSystem.dispose()`.
 @isTest
-void test(String description, FutureOr<void> body(), {
+void test(String description, FutureOr<void> Function() body, {
   String testOn,
   Timeout timeout,
   dynamic skip,
@@ -213,7 +213,7 @@ void test(String description, FutureOr<void> body(), {
 ///
 /// For more information, see https://github.com/flutter/flutter/issues/47161
 @isTest
-void testWithoutContext(String description, FutureOr<void> body(), {
+void testWithoutContext(String description, FutureOr<void> Function() body, {
   String testOn,
   Timeout timeout,
   dynamic skip,
