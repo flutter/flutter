@@ -268,7 +268,7 @@ class AndroidAot extends AotElfBase {
       logger: environment.logger,
     );
     depfileService.writeToFile(
-      Depfile(<File>[environment.buildDir.childFile('app.dill')], outputs),
+      Depfile(<File>[], outputs),
       environment.buildDir.childFile('flutter_$name.d'),
     );
   }
@@ -310,14 +310,17 @@ class AndroidAotBundle extends Target {
   @override
   List<Source> get inputs => <Source>[
     Source.pattern('{BUILD_DIR}/$_androidAbiName/app.so'),
-    Source.pattern('{BUILD_DIR}/$_androidAbiName/manifest.json'),
   ];
 
   // flutter.gradle has been updated to correctly consume it.
   @override
   List<Source> get outputs => <Source>[
     Source.pattern('{OUTPUT_DIR}/$_androidAbiName/app.so'),
-    Source.pattern('{OUTPUT_DIR}/$_androidAbiName/manifest.json'),
+  ];
+
+  @override
+  List<String> get depfiles => <String>[
+    'flutter_$name.d',
   ];
 
   @override
@@ -337,10 +340,24 @@ class AndroidAotBundle extends Target {
     final File outputLibFile = buildDir.childFile('app.so');
     outputLibFile.copySync(outputDirectory.childFile('app.so').path);
 
+    final List<File> inputs = <File>[];
+    final List<File> outputs = <File>[];
     final File outputManifestFile = buildDir.childFile('manifest.json');
     if (outputManifestFile.existsSync()) {
-      outputManifestFile.copySync(outputDirectory.childFile('manifest.json').path);
+      final File destinationFile = outputDirectory.childFile('manifest.json');
+      outputManifestFile.copySync(destinationFile.path);
+
+      inputs.add(outputManifestFile);
+      outputs.add(destinationFile);
     }
+    final DepfileService depfileService = DepfileService(
+      fileSystem: environment.fileSystem,
+      logger: environment.logger,
+    );
+    depfileService.writeToFile(
+      Depfile(inputs, outputs),
+      environment.buildDir.childFile('flutter_$name.d'),
+    );
   }
 }
 
