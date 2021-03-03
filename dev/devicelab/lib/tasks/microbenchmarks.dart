@@ -38,7 +38,7 @@ TaskFunction createMicrobenchmarkTask() {
           return await _startFlutter(
             options: options,
             canFail: false,
-          );
+          ).timeout(const Duration(seconds: 60));
         });
 
         return await _readJsonResults(flutterProcess);
