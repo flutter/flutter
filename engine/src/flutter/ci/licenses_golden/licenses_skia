@@ -1,4 +1,4 @@
-Signature: 6117abe872698510ee44b47b2d1e81c4
+Signature: f7929e6f83bf7ad01e369a0506922225
 
 UNUSED LICENSES:
 
@@ -5759,6 +5759,8 @@ FILE: ../../../third_party/skia/modules/svg/src/SkSVGMask.cpp
 FILE: ../../../third_party/skia/src/gpu/GrDrawIndirectCommand.h
 FILE: ../../../third_party/skia/src/gpu/GrRenderTaskCluster.cpp
 FILE: ../../../third_party/skia/src/gpu/GrRenderTaskCluster.h
+FILE: ../../../third_party/skia/src/gpu/GrThreadSafePipelineBuilder.cpp
+FILE: ../../../third_party/skia/src/gpu/GrThreadSafePipelineBuilder.h
 FILE: ../../../third_party/skia/src/gpu/mock/GrMockRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/mock/GrMockSurfaceProxy.h
 ----------------------------------------------------------------------------------------------------
