@@ -68,7 +68,7 @@ void FlutterWindowWinUWP::UpdateFlutterCursor(const std::string& cursor_name) {
   // https://github.com/flutter/flutter/issues/70199
 }
 
-void FlutterWindowWinUWP::UpdateCursorRect(const Rect& rect) {
+void FlutterWindowWinUWP::OnCursorRectUpdated(const Rect& rect) {
   // TODO(cbracken): Implement IMM candidate window positioning.
 }
 
