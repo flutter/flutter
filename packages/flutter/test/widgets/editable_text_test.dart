@@ -7101,7 +7101,7 @@ void main() {
           width: 400,
           child: Shortcuts(
             shortcuts: <LogicalKeySet, Intent>{
-              LogicalKeySet(LogicalKeyboardKey.arrowLeft): MoveSelectionRightTextIntent(),
+              LogicalKeySet(LogicalKeyboardKey.arrowLeft): const MoveSelectionRightTextIntent(),
             },
             child: EditableText(
               maxLines: 10,
