@@ -918,7 +918,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final TextSelection nextSelection = selection!.copyWith(
       extentOffset: _plainText.length,
     );
-    _updateSelection(nextSelection, cause);
+    _setSelection(nextSelection, cause);
   }
 
   // Extend the current selection to the start of the field.
@@ -943,7 +943,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final TextSelection nextSelection = selection!.copyWith(
       extentOffset: 0,
     );
-    _updateSelection(nextSelection, cause);
+    _setSelection(nextSelection, cause);
   }
 
   // Returns the TextPosition above or below the given offset.
@@ -1024,7 +1024,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       _cursorResetLocation = nextSelection.extentOffset;
     }
 
-    _updateSelection(nextSelection, cause);
+    _setSelection(nextSelection, cause);
   }
 
   /// Expand the current [selection] to the end of the field.
@@ -1059,7 +1059,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       baseOffset: firstOffset,
       extentOffset: _plainText.length,
     );
-    _updateSelection(nextSelection, cause);
+    _setSelection(nextSelection, cause);
   }
 
   /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
@@ -1089,7 +1089,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
     final int distance = selection!.extentOffset - nextSelection.extentOffset;
     _cursorResetLocation -= distance;
-    _updateSelection(nextSelection, cause);
+    _setSelection(nextSelection, cause);
   }
 
   /// Extend the current [selection] to the start of
@@ -1135,7 +1135,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       );
     }
 
-    _updateSelection(nextSelection, cause);
+    _setSelection(nextSelection, cause);
   }
 
   /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
@@ -1165,7 +1165,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
     final int distance = nextSelection.extentOffset - selection!.extentOffset;
     _cursorResetLocation += distance;
-    _updateSelection(nextSelection, cause);
+    _setSelection(nextSelection, cause);
   }
 
   /// Extend the current [selection] to the end of [TextSelection.extentOffset]'s
@@ -1207,7 +1207,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       );
     }
 
-    _updateSelection(nextSelection, cause);
+    _setSelection(nextSelection, cause);
   }
 
   /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
@@ -1256,7 +1256,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       _cursorResetLocation = nextSelection.extentOffset;
     }
 
-    _updateSelection(nextSelection, cause);
+    _setSelection(nextSelection, cause);
   }
 
   /// Expand the current [selection] to the start of the field.
@@ -1292,7 +1292,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       baseOffset: lastOffset,
       extentOffset: 0,
     );
-    _updateSelection(nextSelection, cause);
+    _setSelection(nextSelection, cause);
   }
 
   /// Expand the current [selection] to the start of the line.
@@ -1332,7 +1332,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       );
     }
 
-    _updateSelection(nextSelection, cause);
+    _setSelection(nextSelection, cause);
   }
 
   /// Extend the current [selection] to the previous start of a word.
@@ -1366,7 +1366,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (nextSelection == selection) {
       return;
     }
-    _updateSelection(nextSelection, cause);
+    _setSelection(nextSelection, cause);
   }
 
   /// Extend the current [selection] to the next end of a word.
@@ -1400,7 +1400,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (nextSelection == selection) {
       return;
     }
-    _updateSelection(nextSelection, cause);
+    _setSelection(nextSelection, cause);
   }
 
   /// Expand the current [selection] to the end of the line.
@@ -1440,7 +1440,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       );
     }
 
-    _updateSelection(nextSelection, cause);
+    _setSelection(nextSelection, cause);
   }
 
   /// Move the current [selection] to the next line.
@@ -1473,7 +1473,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       _cursorResetLocation = nextSelection.extentOffset;
     }
 
-    _updateSelection(nextSelection, cause);
+    _setSelection(nextSelection, cause);
   }
 
   /// Move the current [selection] left by one character.
@@ -1494,7 +1494,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
     _cursorResetLocation -= selection!.extentOffset - nextSelection.extentOffset;
-    _updateSelection(nextSelection, cause);
+    _setSelection(nextSelection, cause);
   }
 
   /// Move the current [selection] to the leftmost of the current line.
@@ -1525,7 +1525,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       offset: selectedLine.baseOffset,
     );
 
-    _updateSelection(nextSelection, cause);
+    _setSelection(nextSelection, cause);
   }
 
   /// Move the current [selection] to the previous start of a word.
@@ -1559,7 +1559,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (nextSelection == selection) {
       return;
     }
-    _updateSelection(nextSelection, cause);
+    _setSelection(nextSelection, cause);
   }
 
   /// Move the current [selection] to the right by one character.
@@ -1579,7 +1579,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (nextSelection == selection) {
       return;
     }
-    _updateSelection(nextSelection, cause);
+    _setSelection(nextSelection, cause);
   }
 
   /// Move the current [selection] to the rightmost point of the current line.
@@ -1611,7 +1611,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       offset: selectedLine.extentOffset,
     );
 
-    _updateSelection(nextSelection, cause);
+    _setSelection(nextSelection, cause);
   }
 
   /// Move the current [selection] to the next end of a word.
@@ -1645,7 +1645,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (nextSelection == selection) {
       return;
     }
-    _updateSelection(nextSelection, cause);
+    _setSelection(nextSelection, cause);
   }
 
   /// Move the current [selection] to the end of the field.
@@ -1665,7 +1665,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final TextSelection nextSelection = TextSelection.collapsed(
       offset: _plainText.length,
     );
-    _updateSelection(nextSelection, cause);
+    _setSelection(nextSelection, cause);
   }
 
   /// Move the current [selection] to the start of the field.
@@ -1682,7 +1682,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
     const TextSelection nextSelection = TextSelection.collapsed(offset: 0);
-    _updateSelection(nextSelection, cause);
+    _setSelection(nextSelection, cause);
   }
 
   /// Move the current [selection] up by one line.
@@ -1714,14 +1714,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       _cursorResetLocation = nextSelection.extentOffset;
     }
 
-    _updateSelection(nextSelection, cause);
-  }
-
-  // Handle updating the class to the new given selection.
-  void _updateSelection(TextSelection nextSelection, SelectionChangedCause cause) {
-    _handleSelectionChange(nextSelection, cause);
-    // Update the text selection delegate so that the engine knows what we did.
-    textSelectionDelegate.textEditingValue = textSelectionDelegate.textEditingValue.copyWith(selection: nextSelection);
+    _setSelection(nextSelection, cause);
   }
 
   // Handles shortcut functionality including cut, copy, paste and select all
