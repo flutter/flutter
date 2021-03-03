@@ -8,10 +8,10 @@ import 'dart:io';
 
 import 'package:vm_service_client/vm_service_client.dart';
 
-import 'package:flutter_devicelab/framework/utils.dart';
-import 'package:flutter_devicelab/framework/adb.dart';
-
+import 'adb.dart';
+import 'cocoon.dart';
 import 'task_result.dart';
+import 'utils.dart';
 
 Future<void> runTasks(
   List<String> taskNames, {
