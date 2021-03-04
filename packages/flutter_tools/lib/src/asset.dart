@@ -490,33 +490,34 @@ class ManifestAssetBundle implements AssetBundle {
   }) {
     final List<DeferredComponent> components = flutterManifest.deferredComponents;
     final Map<String, Map<_Asset, List<_Asset>>> deferredComponentsAssetVariants = <String, Map<_Asset, List<_Asset>>>{};
-    if (components != null) {
-      for (final DeferredComponent component in components) {
-        deferredComponentsAssetVariants[component.name] = <_Asset, List<_Asset>>{};
-        final _AssetDirectoryCache cache = _AssetDirectoryCache(<String>[], _fileSystem);
-        for (final Uri assetUri in component.assets) {
-          if (assetUri.path.endsWith('/')) {
-            wildcardDirectories.add(assetUri);
-            _parseAssetsFromFolder(
-              packageConfig,
-              flutterManifest,
-              assetBasePath,
-              cache,
-              deferredComponentsAssetVariants[component.name],
-              assetUri,
-              excludeDirs: excludeDirs,
-            );
-          } else {
-            _parseAssetFromFile(
-              packageConfig,
-              flutterManifest,
-              assetBasePath,
-              cache,
-              deferredComponentsAssetVariants[component.name],
-              assetUri,
-              excludeDirs: excludeDirs,
-            );
-          }
+    if (components == null) {
+      return deferredComponentsAssetVariants;
+    }
+    for (final DeferredComponent component in components) {
+      deferredComponentsAssetVariants[component.name] = <_Asset, List<_Asset>>{};
+      final _AssetDirectoryCache cache = _AssetDirectoryCache(<String>[], _fileSystem);
+      for (final Uri assetUri in component.assets) {
+        if (assetUri.path.endsWith('/')) {
+          wildcardDirectories.add(assetUri);
+          _parseAssetsFromFolder(
+            packageConfig,
+            flutterManifest,
+            assetBasePath,
+            cache,
+            deferredComponentsAssetVariants[component.name],
+            assetUri,
+            excludeDirs: excludeDirs,
+          );
+        } else {
+          _parseAssetFromFile(
+            packageConfig,
+            flutterManifest,
+            assetBasePath,
+            cache,
+            deferredComponentsAssetVariants[component.name],
+            assetUri,
+            excludeDirs: excludeDirs,
+          );
         }
       }
     }

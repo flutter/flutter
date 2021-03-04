@@ -243,7 +243,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     @required FlutterProject project,
     @required AndroidBuildInfo androidBuildInfo,
     @required String target,
-    bool verifyDeferredComponents = true,
+    bool validateDeferredComponents = true,
     bool deferredComponentsEnabled = false,
   }) async {
     await buildGradleApp(
@@ -252,7 +252,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       target: target,
       isBuildingBundle: true,
       localGradleErrors: gradleErrors,
-      verifyDeferredComponents: verifyDeferredComponents,
+      validateDeferredComponents: validateDeferredComponents,
       deferredComponentsEnabled: deferredComponentsEnabled,
     );
   }
@@ -275,7 +275,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     @required bool isBuildingBundle,
     @required List<GradleHandledError> localGradleErrors,
     bool shouldBuildPluginAsAar = false,
-    bool verifyDeferredComponents = true,
+    bool validateDeferredComponents = true,
     bool deferredComponentsEnabled = false,
     int retries = 1,
   }) async {
@@ -365,7 +365,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     if (project.manifest.deferredComponents != null) {
       if (deferredComponentsEnabled) {
         command.add('-Pdeferred-components=true');
-        androidBuildInfo.buildInfo.dartDefines.add('validate-deferred-components=$verifyDeferredComponents');
+        androidBuildInfo.buildInfo.dartDefines.add('validate-deferred-components=$validateDeferredComponents');
       }
       // Pass in deferred components regardless of building split aot to satisfy
       // android dynamic features registry in build.gradle.

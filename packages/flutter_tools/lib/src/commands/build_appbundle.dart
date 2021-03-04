@@ -147,7 +147,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
       project: FlutterProject.current(),
       target: targetFile,
       androidBuildInfo: androidBuildInfo,
-      verifyDeferredComponents: boolArg('validate-deferred-components'),
+      validateDeferredComponents: boolArg('validate-deferred-components'),
       deferredComponentsEnabled: boolArg('deferred-components') && !boolArg('debug'),
     );
     return FlutterCommandResult.success();

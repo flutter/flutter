@@ -731,9 +731,9 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('deferred-components')) {
             deferredComponentsValue = project.property('deferred-components').toBoolean()
         }
-        Boolean verifyDeferredComponentsValue = true
+        Boolean validateDeferredComponentsValue = true
         if (project.hasProperty('validate-deferred-components')) {
-            verifyDeferredComponentsValue = project.property('validate-deferred-components').toBoolean()
+            validateDeferredComponentsValue = project.property('validate-deferred-components').toBoolean()
         }
         def targetPlatforms = getTargetPlatforms()
         def addFlutterDeps = { variant ->
@@ -777,7 +777,7 @@ class FlutterPlugin implements Plugin<Project> {
                 performanceMeasurementFile performanceMeasurementFileValue
                 codeSizeDirectory codeSizeDirectoryValue
                 deferredComponents deferredComponentsValue
-                verifyDeferredComponents verifyDeferredComponentsValue
+                validateDeferredComponents validateDeferredComponentsValue
                 doLast {
                     project.exec {
                         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -996,7 +996,7 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Optional @Input
     Boolean deferredComponents
     @Optional @Input
-    Boolean verifyDeferredComponents
+    Boolean validateDeferredComponents
 
     @OutputFiles
     FileCollection getDependenciesFiles() {
