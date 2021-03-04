@@ -113,7 +113,7 @@ Future<bool> run(List<String> arguments) async {
     print('Error: There are more shard indexes than shards.');
     return help;
   }
-  
+
   return runTests(
     repeat: repeat,
     skipOnFetchFailure: skipOnFetchFailure,
