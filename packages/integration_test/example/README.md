@@ -12,7 +12,7 @@ flutter drive \
   --target=integration_test/example_test.dart
 ```
 
-Web:
+## Web
 
 In one shell, run Chromedriver ([download
 here](https://chromedriver.chromium.org/downloads)):
