@@ -1,4 +1,4 @@
-Signature: a5be4e40fb17ad65270afe1acee48b9e
+Signature: e83f1dba1ee3846d754943cb43799965
 
 UNUSED LICENSES:
 
@@ -2376,7 +2376,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/bridge_internal.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/defer.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/function_traits.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/nullable.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/optional.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/promise.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/promise_internal.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/result.h
