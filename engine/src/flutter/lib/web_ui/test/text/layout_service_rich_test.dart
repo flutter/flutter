@@ -164,26 +164,7 @@ void testMain() async {
     expect(paragraph.minIntrinsicWidth, 300.0);
     expect(paragraph.height, 50.0);
     expectLines(paragraph, [
-      l('', 0, 0, hardBreak: true, width: 300.0, left: 100.0),
-    ]);
-  });
-
-  test('correct maxIntrinsicWidth when paragraph ends with placeholder', () {
-    final EngineParagraphStyle paragraphStyle = EngineParagraphStyle(
-      fontFamily: 'ahem',
-      fontSize: 10,
-      textAlign: ui.TextAlign.center,
-    );
-    final CanvasParagraph paragraph = rich(paragraphStyle, (builder) {
-      builder.addText('abcd');
-      builder.addPlaceholder(300.0, 50.0, ui.PlaceholderAlignment.bottom);
-    })..layout(constrain(400.0));
-
-    expect(paragraph.maxIntrinsicWidth, 340.0);
-    expect(paragraph.minIntrinsicWidth, 300.0);
-    expect(paragraph.height, 50.0);
-    expectLines(paragraph, [
-      l('abcd', 0, 4, hardBreak: true, width: 340.0, left: 30.0),
+      l('', 0, 0, hardBreak: false, width: 300.0, left: 100.0),
     ]);
   });
 }
