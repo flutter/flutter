@@ -66,7 +66,7 @@ sk_sp<SkImage> EmbedderExternalTextureMetal::ResolveTexture(int64_t texture_id,
   switch (texture->pixel_format) {
     case FlutterMetalExternalTexturePixelFormat::kRGBA: {
       if (ValidNumTextures(1, texture->num_textures)) {
-        id<MTLTexture> rgbaTex = reinterpret_cast<id<MTLTexture>>(texture->textures[0]);
+        id<MTLTexture> rgbaTex = (__bridge id<MTLTexture>)texture->textures[0];
         image = [FlutterDarwinExternalTextureSkImageWrapper wrapRGBATexture:rgbaTex
                                                                   grContext:context
                                                                       width:size.width()
@@ -76,8 +76,8 @@ sk_sp<SkImage> EmbedderExternalTextureMetal::ResolveTexture(int64_t texture_id,
     }
     case FlutterMetalExternalTexturePixelFormat::kYUVA: {
       if (ValidNumTextures(2, texture->num_textures)) {
-        id<MTLTexture> yTex = reinterpret_cast<id<MTLTexture>>(texture->textures[0]);
-        id<MTLTexture> uvTex = reinterpret_cast<id<MTLTexture>>(texture->textures[1]);
+        id<MTLTexture> yTex = (__bridge id<MTLTexture>)texture->textures[0];
+        id<MTLTexture> uvTex = (__bridge id<MTLTexture>)texture->textures[1];
         image = [FlutterDarwinExternalTextureSkImageWrapper wrapYUVATexture:yTex
                                                                       UVTex:uvTex
                                                                   grContext:context
