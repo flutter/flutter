@@ -24,9 +24,14 @@ TaskRunnerWin32::TaskRunnerWin32(DWORD main_thread_id,
                                  const TaskExpiredCallback& on_task_expired)
     : main_thread_id_(main_thread_id),
       get_current_time_(get_current_time),
-      on_task_expired_(std::move(on_task_expired)) {}
+      on_task_expired_(std::move(on_task_expired)) {
+  task_runner_window_ = TaskRunnerWin32Window::GetSharedInstance();
+  task_runner_window_->AddDelegate(this);
+}
 
-TaskRunnerWin32::~TaskRunnerWin32() = default;
+TaskRunnerWin32::~TaskRunnerWin32() {
+  task_runner_window_->RemoveDelegate(this);
+}
 
 bool TaskRunnerWin32::RunsTasksOnCurrentThread() const {
   return GetCurrentThreadId() == main_thread_id_;
@@ -116,9 +121,7 @@ void TaskRunnerWin32::EnqueueTask(Task task) {
     // the lock here momentarily till the end of the scope is a pessimization.
   }
 
-  if (!PostThreadMessage(main_thread_id_, WM_NULL, 0, 0)) {
-    std::cerr << "Failed to post message to main thread." << std::endl;
-  }
+  task_runner_window_->WakeUp();
 }
 
 }  // namespace flutter

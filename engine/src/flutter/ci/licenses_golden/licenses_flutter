@@ -1539,6 +1539,8 @@ FILE: ../../../flutter/shell/platform/windows/system_utils_winuwp.cc
 FILE: ../../../flutter/shell/platform/windows/task_runner.h
 FILE: ../../../flutter/shell/platform/windows/task_runner_win32.cc
 FILE: ../../../flutter/shell/platform/windows/task_runner_win32.h
+FILE: ../../../flutter/shell/platform/windows/task_runner_win32_window.cc
+FILE: ../../../flutter/shell/platform/windows/task_runner_win32_window.h
 FILE: ../../../flutter/shell/platform/windows/task_runner_winuwp.cc
 FILE: ../../../flutter/shell/platform/windows/task_runner_winuwp.h
 FILE: ../../../flutter/shell/platform/windows/text_input_manager_win32.cc

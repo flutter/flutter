@@ -103,6 +103,8 @@ source_set("flutter_windows_source") {
       "system_utils_win32.cc",
       "task_runner_win32.cc",
       "task_runner_win32.h",
+      "task_runner_win32_window.cc",
+      "task_runner_win32_window.h",
       "text_input_manager_win32.cc",
       "text_input_manager_win32.h",
       "window_proc_delegate_manager_win32.cc",

@@ -17,7 +17,6 @@
 
 #include "flutter/shell/platform/windows/dpi_utils_win32.h"
 #include "flutter/shell/platform/windows/flutter_window_win32.h"
-#include "flutter/shell/platform/windows/task_runner_win32.h"
 
 // Returns the engine corresponding to the given opaque API handle.
 static flutter::FlutterWindowsEngine* EngineFromHandle(
@@ -69,10 +68,7 @@ bool FlutterDesktopViewControllerHandleTopLevelWindowProc(
 }
 
 uint64_t FlutterDesktopEngineProcessMessages(FlutterDesktopEngineRef engine) {
-  return static_cast<flutter::TaskRunnerWin32*>(
-             EngineFromHandle(engine)->task_runner())
-      ->ProcessTasks()
-      .count();
+  return std::numeric_limits<uint64_t>::max();
 }
 
 void FlutterDesktopPluginRegistrarRegisterTopLevelWindowProcDelegate(
