@@ -269,8 +269,9 @@ class AndroidAot extends AotElfBase {
       logger: environment.logger,
     );
     depfileService.writeToFile(
-      Depfile(<File>[environment.buildDir.childFile('app.dill')], outputs),
+      Depfile(<File>[], outputs),
       environment.buildDir.childFile('flutter_$name.d'),
+      writeEmpty: true,
     );
   }
 }
@@ -357,6 +358,7 @@ class AndroidAotBundle extends Target {
     depfileService.writeToFile(
       Depfile(inputs, outputs),
       environment.buildDir.childFile('flutter_$name.d'),
+      writeEmpty: true,
     );
   }
 }
@@ -438,6 +440,7 @@ class AndroidAotDeferredComponentsBundle extends Target {
     depfileService.writeToFile(
       libDepfile,
       environment.buildDir.childFile('flutter_$name.d'),
+      writeEmpty: true,
     );
   }
 }
