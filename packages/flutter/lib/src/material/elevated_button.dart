@@ -47,29 +47,28 @@ import 'theme_data.dart';
 /// If [onPressed] and [onLongPress] callbacks are null, then the
 /// button will be disabled.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 ///
-/// This sample shows how to render a disabled ElevatedButton, an enabled
-/// ElevatedButton.
+/// This sample produces an enabled and a disabled ElevatedButton.
 ///
 /// ```dart
+/// 
+/// final ButtonStyle style =
+///   ElevatedButton.styleFrom(textStyle: TextStyle(fontSize: 20));
+/// 
 /// Widget build(BuildContext context) {
 ///   return Center(
 ///     child: Column(
 ///       mainAxisSize: MainAxisSize.min,
 ///       children: <Widget>[
 ///         ElevatedButton(
-///            style: ElevatedButton.styleFrom(
-///              textStyle: TextStyle(fontSize: 20),
-///            ),
+///            style: style,
 ///            onPressed: null,
 ///            child: const Text('Disabled'),
 ///         ),
 ///         const SizedBox(height: 30),
 ///         ElevatedButton(
-///           style: ElevatedButton.styleFrom(
-///             textStyle: TextStyle(fontSize: 20),
-///           ),
+///           style: style,
 ///           onPressed: () {},
 ///           child: const Text('Enabled'),
 ///         ),
