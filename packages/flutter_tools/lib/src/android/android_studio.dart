@@ -346,7 +346,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     }
 
     // 4.1 has a different location for AndroidStudio installs on Windows.
-    if (globals.platform.isWindows) {
+    if (globals.platform.isWindows && globals.platform.environment.containsKey('LOCALAPPDATA')) {
       final File homeDot = globals.fs.file(globals.fs.path.join(
         globals.platform.environment['LOCALAPPDATA'],
         'Google',
