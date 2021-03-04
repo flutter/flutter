@@ -23,7 +23,7 @@ import 'package:process/process.dart';
 import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
+import '../../src/mocks.dart' hide MockAndroidSdk;
 
 void main() {
   Cache.disableLocking();
@@ -131,7 +131,7 @@ void main() {
       gradlew = globals.fs.path.join(tempDir.path, 'flutter_project', 'android',
           globals.platform.isWindows ? 'gradlew.bat' : 'gradlew');
 
-      mockProcessManager = MockProcessManager();
+      mockProcessManager = FakeProcessManager.any();
       when(mockProcessManager.run(<String>[gradlew, '-v'],
           environment: anyNamed('environment')))
         .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(0, 0, '', '')));
@@ -173,8 +173,7 @@ void main() {
         return Future<ProcessResult>.value(ProcessResult(0, 0, '', ''));
       });
 
-      mockAndroidSdk = MockAndroidSdk();
-      when(mockAndroidSdk.directory).thenReturn(globals.fs.directory('irrelevant'));
+      mockAndroidSdk = FakeAndroidSdk(globals.fs.directory('irrelevant'));
     });
 
     tearDown(() {
@@ -530,5 +529,9 @@ Future<BuildApkCommand> runBuildApkCommand(
   return command;
 }
 
-class MockAndroidSdk extends Mock implements AndroidSdk {}
-class MockProcessManager extends Mock implements ProcessManager {}
+class FakeAndroidSdk extends Fake implements AndroidSdk {
+  FakeAndroidSdk(this.directory);
+
+  @override
+  final Directory directory;
+}

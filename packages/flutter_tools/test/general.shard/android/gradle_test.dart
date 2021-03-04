@@ -630,7 +630,7 @@ flutter:
   group('buildPluginsAsAar', () {
     FileSystem fs;
     FakeProcessManager fakeProcessManager;
-    MockAndroidSdk mockAndroidSdk;
+    FakeAndroidSdk androidSdk;
     AndroidGradleBuilder builder;
     BufferLogger logger;
 
@@ -638,8 +638,7 @@ flutter:
       logger = BufferLogger.test();
       fs = MemoryFileSystem.test();
       fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
-      mockAndroidSdk = MockAndroidSdk();
-      when(mockAndroidSdk.directory).thenReturn(fs.directory('irrelevant'));
+      androidSdk = FakeAndroidSdk();
       builder = AndroidGradleBuilder(
         logger: logger,
         processManager: fakeProcessManager,
@@ -761,7 +760,7 @@ plugin2=${plugin2.path}
       );
       expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     }, overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
+      AndroidSdk: () => androidSdk,
       FileSystem: () => fs,
       ProcessManager: () => fakeProcessManager,
       GradleUtils: () => FakeGradleUtils(),
@@ -808,7 +807,7 @@ plugin1=${plugin1.path}
       );
       expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     }, overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
+      AndroidSdk: () => androidSdk,
       FileSystem: () => fs,
       ProcessManager: () => fakeProcessManager,
       GradleUtils: () => FakeGradleUtils(),
@@ -1031,6 +1030,6 @@ class FakeGradleUtils extends GradleUtils {
   }
 }
 
-class MockAndroidSdk extends Mock implements AndroidSdk {}
+class FakeAndroidSdk extends Fake implements AndroidSdk {}
 class MockAndroidProject extends Mock implements AndroidProject {}
 class MockFlutterProject extends Mock implements FlutterProject {}
