@@ -761,12 +761,18 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
                               arguments:@[ @(client), @(start), @(end) ]];
 }
 
-#pragma mark - Screenshot Delegate
+#pragma mark - FlutterViewEngineDelegate
 
 - (flutter::Rasterizer::Screenshot)takeScreenshot:(flutter::Rasterizer::ScreenshotType)type
                                   asBase64Encoded:(BOOL)base64Encode {
   FML_DCHECK(_shell) << "Cannot takeScreenshot without a shell";
   return _shell->Screenshot(type, base64Encode);
+}
+
+- (void)flutterViewAccessibilityDidCall {
+  if (self.viewController.view.accessibilityElements == nil) {
+    [self ensureSemanticsEnabled];
+  }
 }
 
 - (NSObject<FlutterBinaryMessenger>*)binaryMessenger {
