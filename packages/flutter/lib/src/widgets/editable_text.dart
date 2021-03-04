@@ -2432,7 +2432,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   String _cachedText = '';
-  double _cachedScrollOffset = 0.0;
   Rect? _cachedFirstRect;
 
   void _updateSelectionRects() {
@@ -2441,19 +2440,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final TextSpan textSpan = buildTextSpan();
     final StringBuffer text = StringBuffer();
     textSpan.computeToPlainText(text);
-    final Rect firstRect = renderEditable.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1)).first.toRect();
-    final double scrollOffset = _scrollController?.offset ?? 0.0;
+    final Rect firstRect = renderEditable.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1)).first;
     final ScrollDirection scrollDirection = _scrollController?.position.userScrollDirection ?? ScrollDirection.idle;
-    if (scrollDirection == ScrollDirection.idle && text.toString() != _cachedText ||
-        scrollOffset != _cachedScrollOffset ||
-        _cachedFirstRect != firstRect) {
+    if (scrollDirection == ScrollDirection.idle && (text.toString() != _cachedText ||
+        _cachedFirstRect != firstRect)) {
       _cachedText = text.toString();
-      _cachedScrollOffset = scrollOffset;
       _cachedFirstRect = firstRect;
-      final Offset rectOffset = Offset(_isMultiline ? 0.0 : -1 * scrollOffset, _isMultiline ? -1 * scrollOffset : 0.0);
       final List<Rect> rects = List<Rect>.generate(
-              text.length, (int i) => renderEditable.getBoxesForSelection(TextSelection(baseOffset: i, extentOffset: i + 1)).first.toRect())
-          .map((Rect rect) => rect.translate(rectOffset.dx, rectOffset.dy))
+              text.length, (int i) => renderEditable.getBoxesForSelection(TextSelection(baseOffset: i, extentOffset: i + 1)).first)
           .toList();
       _textInputConnection!.setSelectionRects(rects);
     }
