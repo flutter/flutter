@@ -36,8 +36,8 @@ typedef MoveCursorHandler = void Function(bool extendSelection);
 /// text selection (or re-position the cursor) to `selection`.
 typedef SetSelectionHandler = void Function(TextSelection selection);
 
-/// Signature for the [SemanticsAction.setText] handlers to change the
-/// text selection (or re-position the cursor) to `selection`.
+/// Signature for the [SemanticsAction.setText] handlers to replace the
+/// current text with the input `text`.
 typedef SetTextHandler = void Function(String text);
 
 typedef _SemanticsActionHandler = void Function(dynamic args);
@@ -3179,8 +3179,8 @@ class SemanticsConfiguration {
 
   /// The handler for [SemanticsAction.setText].
   ///
-  /// This handler is invoked when the user either wants to replace the current
-  /// text in the text field with a new text.
+  /// This handler is invoked when the user wants to replace the current text in
+  /// the text field with a new text.
   ///
   /// Voice access users can trigger this handler by speaking "type <text>" to
   /// their Android devices.

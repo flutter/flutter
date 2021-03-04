@@ -3014,31 +3014,31 @@ void main() {
               id: 1,
               children: <TestSemantics>[
                 TestSemantics(
-                    id: 2,
-                    children: <TestSemantics>[
-                      TestSemantics(
-                        id: 3,
-                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                        children: <TestSemantics>[
-                          TestSemantics.rootChild(
-                            id: expectedNodeId,
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.isTextField,
-                              SemanticsFlag.isFocused,
-                            ],
-                            actions: <SemanticsAction>[
-                              SemanticsAction.setSelection,
-                              SemanticsAction.setText,
-                            ],
-                            value: '',
-                            textSelection: TextSelection.collapsed(
-                                offset: controller.text.length),
-                            textDirection: TextDirection.ltr,
-                          ),
-                        ],
-                      ),
-                    ]
-                )
+                  id: 2,
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 3,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics.rootChild(
+                          id: expectedNodeId,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isTextField,
+                            SemanticsFlag.isFocused,
+                          ],
+                          actions: <SemanticsAction>[
+                            SemanticsAction.setSelection,
+                            SemanticsAction.setText,
+                          ],
+                          value: '',
+                          textSelection: TextSelection.collapsed(
+                              offset: controller.text.length),
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ],
             ),
           ],
