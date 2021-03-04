@@ -26,7 +26,8 @@ import 'theme_data.dart';
 ///  * [ElevatedButton], a filled ButtonStyleButton whose material elevates when pressed.
 ///  * [OutlinedButton], similar to [TextButton], but with an outline.
 abstract class ButtonStyleButton extends StatefulWidget {
-  /// Create a [ButtonStyleButton].
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const ButtonStyleButton({
     Key? key,
     required this.onPressed,

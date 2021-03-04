@@ -434,7 +434,10 @@ void main() {
         });
 
         testUsingContext('upgrade continue prints welcome message', () async {
-          final UpgradeCommand upgradeCommand = UpgradeCommand(fakeCommandRunner);
+          final UpgradeCommand upgradeCommand = UpgradeCommand(
+            verboseHelp: false,
+            commandRunner: fakeCommandRunner,
+          );
 
           await createTestCommandRunner(upgradeCommand).run(
             <String>[

@@ -355,6 +355,10 @@ void main() {
   });
 
   testWidgets('CheckBox color rendering', (WidgetTester tester) async {
+    const Color borderColor = Color(0xff1e88e5);
+    Color checkColor = const Color(0xffFFFFFF);
+    Color activeColor;
+
     Widget buildFrame({Color? activeColor, Color? checkColor, ThemeData? themeData}) {
       return Material(
         child: Theme(
@@ -379,21 +383,27 @@ void main() {
       }));
     }
 
-    await tester.pumpWidget(buildFrame(checkColor: const Color(0xFFFFFFFF)));
+    await tester.pumpWidget(buildFrame(checkColor: checkColor));
     await tester.pumpAndSettle();
-    expect(getCheckboxRenderer(), paints..path(color: const Color(0xFFFFFFFF))); // paints's color is 0xFFFFFFFF (default color)
+    expect(getCheckboxRenderer(), paints..path(color: borderColor)..path(color: checkColor)); // paints's color is 0xFFFFFFFF (default color)
 
-    await tester.pumpWidget(buildFrame(checkColor: const Color(0xFF000000)));
-    await tester.pumpAndSettle();
-    expect(getCheckboxRenderer(), paints..path(color: const Color(0xFF000000))); // paints's color is 0xFF000000 (params)
+    checkColor = const Color(0xFF000000);
 
-    await tester.pumpWidget(buildFrame(themeData: ThemeData(toggleableActiveColor: const Color(0xFF00FF00))));
+    await tester.pumpWidget(buildFrame(checkColor: checkColor));
     await tester.pumpAndSettle();
-    expect(getCheckboxRenderer(), paints..rrect(color: const Color(0xFF00FF00))); // paints's color is 0xFF00FF00 (theme)
+    expect(getCheckboxRenderer(), paints..path(color: borderColor)..path(color: checkColor)); // paints's color is 0xFF000000 (params)
 
-    await tester.pumpWidget(buildFrame(activeColor: const Color(0xFF000000)));
+    activeColor = const Color(0xFF00FF00);
+
+    await tester.pumpWidget(buildFrame(themeData: ThemeData(toggleableActiveColor: activeColor)));
     await tester.pumpAndSettle();
-    expect(getCheckboxRenderer(), paints..rrect(color: const Color(0xFF000000))); // paints's color is 0xFF000000 (params)
+    expect(getCheckboxRenderer(), paints..path(color: activeColor)); // paints's color is 0xFF00FF00 (theme)
+
+    activeColor = const Color(0xFF000000);
+
+    await tester.pumpWidget(buildFrame(activeColor: activeColor));
+    await tester.pumpAndSettle();
+    expect(getCheckboxRenderer(), paints..path(color: activeColor)); // paints's color is 0xFF000000 (params)
   });
 
   testWidgets('Checkbox is focusable and has correct focus color', (WidgetTester tester) async {
@@ -429,10 +439,7 @@ void main() {
       Material.of(tester.element(find.byType(Checkbox))),
       paints
         ..circle(color: Colors.orange[500])
-        ..rrect(
-            color: const Color(0xff1e88e5),
-            rrect: RRect.fromLTRBR(
-                391.0, 291.0, 409.0, 309.0, const Radius.circular(1.0)))
+        ..path(color: const Color(0xff1e88e5))
         ..path(color: Colors.white),
     );
 
@@ -525,11 +532,8 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
-        ..rrect(
-            color: const Color(0xff1e88e5),
-            rrect: RRect.fromLTRBR(
-                391.0, 291.0, 409.0, 309.0, const Radius.circular(1.0)))
-        ..path(color: const Color(0xffffffff), style: PaintingStyle.stroke, strokeWidth: 2.0),
+        ..path(color: const Color(0xff1e88e5))
+        ..path(color: const Color(0xffffffff),style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
 
     // Start hovering
@@ -542,10 +546,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
-        ..rrect(
-            color: const Color(0xff1e88e5),
-            rrect: RRect.fromLTRBR(
-                391.0, 291.0, 409.0, 309.0, const Radius.circular(1.0)))
+        ..path(color: const Color(0xff1e88e5))
         ..path(color: const Color(0xffffffff), style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
 
@@ -555,10 +556,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
-        ..rrect(
-            color: const Color(0x61000000),
-            rrect: RRect.fromLTRBR(
-                391.0, 291.0, 409.0, 309.0, const Radius.circular(1.0)))
+        ..path(color: const Color(0x61000000))
         ..path(color: const Color(0xffffffff), style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
   });
@@ -835,11 +833,11 @@ void main() {
 
     await tester.pumpWidget(buildFrame(enabled: true));
     await tester.pumpAndSettle();
-    expect(getCheckboxRenderer(), paints..rrect(color: activeEnabledFillColor));
+    expect(getCheckboxRenderer(), paints..path(color: activeEnabledFillColor));
 
     await tester.pumpWidget(buildFrame(enabled: false));
     await tester.pumpAndSettle();
-    expect(getCheckboxRenderer(), paints..rrect(color: activeDisabledFillColor));
+    expect(getCheckboxRenderer(), paints..path(color: activeDisabledFillColor));
   });
 
   testWidgets('Checkbox fill color resolves in hovered/focused states', (WidgetTester tester) async {
@@ -889,7 +887,7 @@ void main() {
     await tester.pumpWidget(buildFrame());
     await tester.pumpAndSettle();
     expect(focusNode.hasPrimaryFocus, isTrue);
-    expect(getCheckboxRenderer(), paints..rrect(color: focusedFillColor));
+    expect(getCheckboxRenderer(), paints..path(color: focusedFillColor));
 
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -898,7 +896,53 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
-    expect(getCheckboxRenderer(), paints..rrect(color: hoveredFillColor));
+    expect(getCheckboxRenderer(), paints..path(color: hoveredFillColor));
+  });
+
+  testWidgets('Checkbox respects shape and side', (WidgetTester tester) async {
+    final RoundedRectangleBorder roundedRectangleBorder =
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(5));
+
+    const BorderSide side = BorderSide(
+      width: 4,
+      color: Color(0xfff44336),
+    );
+
+    Widget buildApp() {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+              return Checkbox(
+                value: false,
+                onChanged: (bool? newValue) {},
+                shape: roundedRectangleBorder,
+                side: side,
+              );
+            }),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<Checkbox>(find.byType(Checkbox)).shape,
+        roundedRectangleBorder);
+    expect(tester.widget<Checkbox>(find.byType(Checkbox)).side, side);
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      paints
+        ..drrect(
+          color: const Color(0xfff44336),
+            outer: RRect.fromLTRBR(
+                391.0, 291.0, 409.0, 309.0, const Radius.circular(5)),
+            inner: RRect.fromLTRBR(
+                395.0, 295.0, 405.0, 305.0, const Radius.circular(1)))
+        ,
+    );
   });
 
   testWidgets('Checkbox overlay color resolves in active/pressed/focused/hovered states', (WidgetTester tester) async {

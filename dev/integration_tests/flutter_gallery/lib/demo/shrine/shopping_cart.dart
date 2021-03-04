@@ -14,6 +14,8 @@ import 'package:flutter_gallery/demo/shrine/model/product.dart';
 const double _leftColumnWidth = 60.0;
 
 class ShoppingCartPage extends StatefulWidget {
+  const ShoppingCartPage({Key? key}) : super(key: key);
+
   @override
   _ShoppingCartPageState createState() => _ShoppingCartPageState();
 }
@@ -103,7 +105,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
 }
 
 class ShoppingCartSummary extends StatelessWidget {
-  const ShoppingCartSummary({this.model});
+  const ShoppingCartSummary({Key? key, this.model}) : super(key: key);
 
   final AppStateModel? model;
 
@@ -183,10 +185,11 @@ class ShoppingCartSummary extends StatelessWidget {
 
 class ShoppingCartRow extends StatelessWidget {
   const ShoppingCartRow({
+    Key? key,
     required this.product,
     required this.quantity,
     this.onPressed,
-  });
+  }) : super(key: key);
 
   final Product product;
   final int? quantity;

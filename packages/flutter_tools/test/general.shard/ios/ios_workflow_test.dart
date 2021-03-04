@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/macos/xcode.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/testbed.dart';
+import '../../src/fakes.dart';
 
 void main() {
   testWithoutContext('iOS workflow is disabled if feature is disabled', () {

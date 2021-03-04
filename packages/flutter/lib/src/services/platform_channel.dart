@@ -52,7 +52,7 @@ class BasicMessageChannel<T> {
   ///
   /// Returns a [Future] which completes to the received response, which may
   /// be null.
-  Future<T> send(T message) async {
+  Future<T?> send(T message) async {
     return codec.decodeMessage(await binaryMessenger.send(name, codec.encodeMessage(message)));
   }
 
@@ -65,7 +65,7 @@ class BasicMessageChannel<T> {
   ///
   /// The handler's return value is sent back to the platform plugins as a
   /// message reply. It may be null.
-  void setMessageHandler(Future<T> Function(T message)? handler) {
+  void setMessageHandler(Future<T> Function(T? message)? handler) {
     if (handler == null) {
       binaryMessenger.setMessageHandler(name, null);
     } else {
@@ -86,7 +86,7 @@ class BasicMessageChannel<T> {
   ///
   /// This is intended for testing. Messages intercepted in this manner are not
   /// sent to platform plugins.
-  void setMockMessageHandler(Future<T> Function(T message)? handler) {
+  void setMockMessageHandler(Future<T> Function(T? message)? handler) {
     if (handler == null) {
       binaryMessenger.setMockMessageHandler(name, null);
     } else {
@@ -292,7 +292,7 @@ class MethodChannel {
   ///     NSArray* items = [BWPlayApi items];
   ///     NSMutableArray* json = [NSMutableArray arrayWithCapacity:items.count];
   ///     for (final BWPlayItem* item in items) {
-  ///       [json addObject:@{@"id":item.itemId, @"title":item.name, @"artist":item.artist}];
+  ///       [json addObject:@{ @"id":item.itemId, @"title":item.name, @"artist":item.artist }];
   ///     }
   ///     result(json);
   ///   } else if ([@"play" isEqualToString:call.method]) {

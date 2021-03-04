@@ -111,7 +111,9 @@ void _updateGeneratedEnvironmentVariablesScript({
   localsBuffer.writeln('#!/bin/sh');
   localsBuffer.writeln('# This is a generated file; do not edit or check into version control.');
   for (final String line in xcodeBuildSettings) {
-    localsBuffer.writeln('export "$line"');
+    if (!line.contains('[')) { // Exported conditional Xcode build settings do not work.
+      localsBuffer.writeln('export "$line"');
+    }
   }
 
   final File generatedModuleBuildPhaseScript = useMacOSConfig
@@ -172,6 +174,10 @@ List<String> _xcodeBuildSettingsLines({
   // This holds because requiresProjectRoot is true for this command
   xcodeBuildSettings.add('FLUTTER_APPLICATION_PATH=${globals.fs.path.normalize(project.directory.path)}');
 
+  // Tell CocoaPods behavior to codesign in parallel with rest of scripts to speed it up.
+  // Value must be "true", not "YES". https://github.com/CocoaPods/CocoaPods/pull/6088
+  xcodeBuildSettings.add('COCOAPODS_PARALLEL_CODE_SIGN=true');
+
   // Relative to FLUTTER_APPLICATION_PATH, which is [Directory.current].
   if (targetOverride != null) {
     xcodeBuildSettings.add('FLUTTER_TARGET=$targetOverride');
@@ -222,6 +228,9 @@ List<String> _xcodeBuildSettingsLines({
   if (useMacOSConfig) {
     // ARM not yet supported https://github.com/flutter/flutter/issues/69221
     xcodeBuildSettings.add('EXCLUDED_ARCHS=arm64');
+  } else {
+    // Apple Silicon ARM simulators not yet supported.
+    xcodeBuildSettings.add('EXCLUDED_ARCHS[sdk=iphonesimulator*]=arm64 i386');
   }
 
   for (final MapEntry<String, String> config in buildInfo.toEnvironmentConfig().entries) {

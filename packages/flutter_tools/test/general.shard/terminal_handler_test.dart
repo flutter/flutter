@@ -362,9 +362,9 @@ class MockDevice extends Mock implements Device {
 
 class MockResidentRunner extends Mock implements ResidentRunner {}
 class MockFlutterDevice extends Mock implements FlutterDevice {}
-class MockResidentCompiler extends Mock implements ResidentCompiler {}
+class FakeResidentCompiler extends Fake implements ResidentCompiler {}
 
-class TestRunner extends Mock implements ResidentRunner {
+class TestRunner extends Fake implements ResidentRunner {
   bool hasHelpBeenPrinted = false;
   String receivedCommand;
 

@@ -1885,16 +1885,16 @@ void main() {
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
-        Container(width: 300, height: 600,
+        SizedBox(width: 300, height: 600,
           child: Stack(
             alignment: Alignment.topLeft,
             children: <Widget>[
               Transform.translate(
                 offset: const Offset(0, 100),
-                child: Container(
+                child: const SizedBox(
                   width: 300,
                   height: 500,
-                  child: const UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr)),),
+                  child: UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr)),),
               Transform.translate(
                 offset: const Offset(0, 500),
                 child: Container(

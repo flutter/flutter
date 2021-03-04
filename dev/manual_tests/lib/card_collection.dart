@@ -18,6 +18,8 @@ class CardModel {
 }
 
 class CardCollection extends StatefulWidget {
+  const CardCollection({Key key}) : super(key: key);
+
   @override
   CardCollectionState createState() => CardCollectionState();
 }
@@ -389,7 +391,7 @@ class CardCollectionState extends State<CardCollection> {
 }
 
 void main() {
-  runApp(MaterialApp(
+  runApp(const MaterialApp(
     title: 'Cards',
     home: CardCollection(),
   ));

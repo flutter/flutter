@@ -104,7 +104,7 @@ void main() {
     test('throws if local output is not awaited', () {
       try {
         comparator.generateFailureOutput(
-          ComparisonResult(passed: false),
+          ComparisonResult(passed: false, diffPercent: 1.0),
           Uri.parse('foo_test.dart'),
           Uri.parse('/foo/bar/'),
         );

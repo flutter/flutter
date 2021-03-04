@@ -6,7 +6,6 @@ import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/rendering.dart';
 
 import '../rendering/mock_canvas.dart';
 
@@ -66,11 +65,11 @@ void main() {
           axisDirection: AxisDirection.down,
           color: const Color(0x0DFFFFFF),
           notificationPredicate: (ScrollNotification notification) => notification.depth == 1,
-          child: SingleChildScrollView(
+          child: const SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            child: Container(
+            child: SizedBox(
                 width: 600.0,
-                child: const CustomScrollView(
+                child: CustomScrollView(
                   slivers: <Widget>[
                     SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
                   ],

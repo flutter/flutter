@@ -226,7 +226,7 @@ abstract class DevFSWriter {
 class _DevFSHttpWriter implements DevFSWriter {
   _DevFSHttpWriter(
     this.fsName,
-    vm_service.VmService serviceProtocol, {
+    FlutterVmService serviceProtocol, {
     @required OperatingSystemUtils osUtils,
     @required HttpClient httpClient,
     @required Logger logger,
@@ -372,7 +372,7 @@ class DevFS {
   ///
   /// Failed uploads are retried after [uploadRetryThrottle] duration, defaults to 500ms.
   DevFS(
-    vm_service.VmService serviceProtocol,
+    FlutterVmService serviceProtocol,
     this.fsName,
     this.rootDirectory, {
     @required OperatingSystemUtils osUtils,
@@ -394,7 +394,7 @@ class DevFS {
           : context.get<HttpClientFactory>()())
       );
 
-  final vm_service.VmService _vmService;
+  final FlutterVmService _vmService;
   final _DevFSHttpWriter _httpWriter;
   final Logger _logger;
   final FileSystem _fileSystem;
@@ -518,6 +518,20 @@ class DevFS {
     // dill files that depend on the invalidated files.
     _logger.printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
 
+    // `generated_main.dart` contains the Dart plugin registry.
+    if (projectRootPath != null) {
+      final File generatedMainDart = _fileSystem.file(
+        _fileSystem.path.join(
+          projectRootPath,
+          '.dart_tool',
+          'flutter_build',
+          'generated_main.dart',
+        ),
+      );
+      if (generatedMainDart != null && generatedMainDart.existsSync()) {
+        mainUri = generatedMainDart.uri;
+      }
+    }
     // Await the compiler response after checking if the bundle is updated. This allows the file
     // stating to be done while waiting for the frontend_server response.
     final Future<CompilerOutput> pendingCompilerOutput = generator.recompile(
