@@ -2075,11 +2075,9 @@ void main() {
             body: ListView.builder(
               itemCount: 50,
               itemBuilder: (BuildContext context, int index) {
-                return Container(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text('Item $index'),
-                  )
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('Item $index'),
                 );
               }
             ),

@@ -389,10 +389,10 @@ void main() {
                     ),
                     delegate: SliverChildListDelegate(
                       <Widget>[
-                        Container(child: const Center(child: Text('A'))),
-                        Container(child: const Center(child: Text('B'))),
-                        Container(child: const Center(child: Text('C'))),
-                        Container(child: const Center(child: Text('D'))),
+                        const Center(child: Text('A')),
+                        const Center(child: Text('B')),
+                        const Center(child: Text('C')),
+                        const Center(child: Text('D')),
                       ],
                     ),
                   ),
@@ -952,15 +952,13 @@ void main() {
             SliverGrid(
               delegate: SliverChildBuilderDelegate(
                   (BuildContext context, int index) {
-                  return Container(
-                    child: Material(
-                      color: index.isEven ? Colors.yellow : Colors.red,
-                      child: InkWell(
-                        onTap: () {
-                          index.isEven ? firstTapped++ : secondTapped++;
-                        },
-                        child: Text('Index $index'),
-                      ),
+                  return Material(
+                    color: index.isEven ? Colors.yellow : Colors.red,
+                    child: InkWell(
+                      onTap: () {
+                        index.isEven ? firstTapped++ : secondTapped++;
+                      },
+                      child: Text('Index $index'),
                     ),
                   );
                 },
