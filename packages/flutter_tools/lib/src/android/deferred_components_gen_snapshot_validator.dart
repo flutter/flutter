@@ -113,8 +113,10 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
       mappingBuffer.write('$key:${mapping[key]},');
     }
     String encodedMapping = mappingBuffer.toString();
-    // remove trailing comma.
-    encodedMapping = encodedMapping.substring(0, encodedMapping.length - 1);
+    // remove trailing comma if any
+    if (encodedMapping.endsWith(',')) {
+      encodedMapping = encodedMapping.substring(0, encodedMapping.length - 1);
+    }
     // Check for existing metadata entry and see if needs changes.
     bool exists = false;
     bool modified = false;

@@ -216,8 +216,9 @@ void main() {
     expect(result.stdout.toString().contains('Deferred components gen_snapshot validation passed.'), false);
 
     expect(result.stdout.toString(), contains('Newly generated android files:'));
-    expect(result.stdout.toString(), contains('build/android_deferred_components_setup_files/component1/build.gradle'));
-    expect(result.stdout.toString(), contains('build/android_deferred_components_setup_files/component1/src/main/AndroidManifest.xml'));
+    final String pathSeparator = fileSystem.path.separator == r'\' ? '\\${fileSystem.path.separator}' : fileSystem.path.separator;
+    expect(result.stdout.toString(), contains('build${pathSeparator}android_deferred_components_setup_files${pathSeparator}component1${pathSeparator}build.gradle'));
+    expect(result.stdout.toString(), contains('build${pathSeparator}android_deferred_components_setup_files${pathSeparator}component1${pathSeparator}src${pathSeparator}main${pathSeparator}AndroidManifest.xml'));
 
     expect(result.exitCode, 1);
   });
