@@ -181,7 +181,7 @@ linter:
     - provide_deprecation_message
     # - public_member_api_docs # enabled on a case-by-case basis; see e.g. packages/analysis_options.yaml
     - recursive_getters
-    # - sized_box_for_whitespace # not yet tested
+    - sized_box_for_whitespace
     - slash_for_doc_comments
     # - sort_child_properties_last # not yet tested
     - sort_constructors_first

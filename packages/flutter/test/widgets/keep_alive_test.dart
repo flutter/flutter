@@ -103,7 +103,7 @@ void main() {
           addAutomaticKeepAlives: false,
           addRepaintBoundaries: false,
           addSemanticIndexes: false,
-          children: generateList(Container(height: 12.3, child: const Placeholder())), // about 50 widgets visible
+          children: generateList(const SizedBox(height: 12.3, child: Placeholder())), // about 50 widgets visible
         ),
       ),
     );

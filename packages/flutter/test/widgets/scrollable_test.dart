@@ -45,19 +45,19 @@ Future<void> pumpDoubleScrollableTest(
     theme: ThemeData(
       platform: platform,
     ),
-    home: CustomScrollView(
+    home: const CustomScrollView(
       slivers: <Widget>[
         SliverToBoxAdapter(
-          child: Container(
+          child: SizedBox(
             height: 300,
-            child: const CustomScrollView(
+            child: CustomScrollView(
               slivers: <Widget>[
                 SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
               ],
             ),
           ),
         ),
-        const SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
+        SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
       ],
     ),
   ));
@@ -1168,7 +1168,7 @@ void main() {
                       Text('SingleChildScrollView $i'),
                   ]
                 ),
-                Container(
+                SizedBox(
                   height: 3000,
                   width: 400,
                   child: ListView.builder(

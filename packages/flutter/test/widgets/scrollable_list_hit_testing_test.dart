@@ -15,19 +15,17 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 50.0,
             child: ListView(
               dragStartBehavior: DragStartBehavior.down,
               itemExtent: 290.0,
               scrollDirection: Axis.horizontal,
               children: items.map<Widget>((int item) {
-                return Container(
-                  child: GestureDetector(
-                    onTap: () { tapped.add(item); },
-                    child: Text('$item'),
-                    dragStartBehavior: DragStartBehavior.down,
-                  ),
+                return GestureDetector(
+                  onTap: () { tapped.add(item); },
+                  child: Text('$item'),
+                  dragStartBehavior: DragStartBehavior.down,
                 );
               }).toList(),
             ),
@@ -59,7 +57,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             width: 50.0,
             child: ListView(
               dragStartBehavior: DragStartBehavior.down,

@@ -949,7 +949,7 @@ void main() {
                   ),
                 ),
               ],
-              drawer: Container(
+              drawer: SizedBox(
                 key: drawer,
                 width: 204.0,
                 child: SafeArea(
@@ -1051,7 +1051,7 @@ void main() {
                   ),
                 ),
               ],
-              drawer: Container(
+              drawer: SizedBox(
                 key: drawer,
                 width: 204.0,
                 child: SafeArea(
@@ -2108,7 +2108,7 @@ void main() {
                   scaffoldMessenger = ScaffoldMessenger.maybeOf(context);
                 },
                 behavior: HitTestBehavior.opaque,
-                child: Container(
+                child: const SizedBox(
                   height: 100.0,
                   width: 100.0,
                 ),
@@ -2145,7 +2145,7 @@ void main() {
                   ScaffoldMessenger.of(context);
                 },
                 behavior: HitTestBehavior.opaque,
-                child: Container(
+                child: const SizedBox(
                   height: 100.0,
                   width: 100.0,
                 ),
