@@ -154,6 +154,9 @@ FLUTTER_EXPORT bool FlutterDesktopEngineRun(FlutterDesktopEngineRef engine,
                                             const char* entry_point);
 
 #ifndef WINUWP
+// DEPRECATED: This is no longer necessary to call, Flutter will take care of
+// processing engine messages transparently through DispatchMessage.
+//
 // Processes any pending events in the Flutter engine, and returns the
 // number of nanoseconds until the next scheduled event (or max, if none).
 //

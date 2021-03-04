@@ -17,13 +17,15 @@
 
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/task_runner.h"
+#include "flutter/shell/platform/windows/task_runner_win32_window.h"
 
 namespace flutter {
 
 // A custom task runner that integrates with user32 GetMessage semantics so that
 // host app can own its own message loop and flutter still gets to process
 // tasks on a timely basis.
-class TaskRunnerWin32 : public TaskRunner {
+class TaskRunnerWin32 : public TaskRunner,
+                        public TaskRunnerWin32Window::Delegate {
  public:
   // Creates a new task runner with the given main thread ID, current time
   // provider, and callback for tasks that are ready to be run.
@@ -43,7 +45,8 @@ class TaskRunnerWin32 : public TaskRunner {
   // |TaskRunner|
   void PostTask(TaskClosure task) override;
 
-  std::chrono::nanoseconds ProcessTasks();
+  // |TaskRunnerWin32Window::Delegate|
+  std::chrono::nanoseconds ProcessTasks() override;
 
  private:
   typedef std::variant<FlutterTask, TaskClosure> TaskVariant;
@@ -75,6 +78,7 @@ class TaskRunnerWin32 : public TaskRunner {
   TaskExpiredCallback on_task_expired_;
   std::mutex task_queue_mutex_;
   std::priority_queue<Task, std::deque<Task>, Task::Comparer> task_queue_;
+  std::shared_ptr<TaskRunnerWin32Window> task_runner_window_;
 
   TaskRunnerWin32(const TaskRunnerWin32&) = delete;
 
