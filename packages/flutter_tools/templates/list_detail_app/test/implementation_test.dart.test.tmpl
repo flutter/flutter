@@ -16,7 +16,6 @@ void main() {
       await tester.pumpWidget(MyApp(settingsController: controller));
 
       expect(find.byType(ListTile), findsNWidgets(3));
-      await expectLater(find.byType(MyApp), matchesGoldenFile('list.png'));
     });
 
     testWidgets('navigates to an item page', (WidgetTester tester) async {
@@ -29,7 +28,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(DummyItemDetailsView), findsOneWidget);
-      await expectLater(find.byType(MyApp), matchesGoldenFile('details.png'));
     });
 
     testWidgets('changes the app theme', (WidgetTester tester) async {
@@ -45,7 +43,7 @@ void main() {
       // Verify defaults in place
       expect(controller.themeMode, ThemeMode.system);
       expect(find.byType(SettingsView), findsOneWidget);
-      await expectLater(find.byType(MyApp), matchesGoldenFile('system.png'));
+      expect(findApp(ThemeMode.system), findsOneWidget);
 
       // Change to Dark Theme
       await tester.tap(find.text('System Theme'));
@@ -55,7 +53,7 @@ void main() {
 
       // Verify Dark Theme rendered
       expect(controller.themeMode, ThemeMode.dark);
-      await expectLater(find.byType(MyApp), matchesGoldenFile('dark.png'));
+      expect(findApp(ThemeMode.dark), findsOneWidget);
 
       // Change to Light Theme
       await tester.tap(find.text('Dark Theme'));
@@ -65,7 +63,11 @@ void main() {
 
       // Verify light theme enabled
       expect(controller.themeMode, ThemeMode.light);
-      await expectLater(find.byType(MyApp), matchesGoldenFile('light.png'));
+      expect(findApp(ThemeMode.light), findsOneWidget);
     });
   });
 }
+
+Finder findApp(ThemeMode themeMode) => find.byWidgetPredicate(
+    (widget) => widget is MaterialApp && widget.themeMode == themeMode);
+
