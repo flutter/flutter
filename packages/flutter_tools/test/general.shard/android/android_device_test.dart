@@ -19,7 +19,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -63,7 +63,7 @@ void main() {
       platform: FakePlatform(operatingSystem: 'macos')
     );
 
-    // Parsing succeedes despite the error.
+    // Parsing succeeds despite the error.
     expect(await windowsDevice.isLocalEmulator, true);
 
     // Parsing fails and these default to false.
@@ -466,8 +466,7 @@ AndroidDevice setUpAndroidDevice({
   Platform platform,
   AndroidConsoleSocketFactory androidConsoleSocketFactory = kAndroidConsoleSocketFactory,
 }) {
-  androidSdk ??= MockAndroidSdk();
-  when(androidSdk.adbPath).thenReturn('adb');
+  androidSdk ??= FakeAndroidSdk();
   return AndroidDevice(id ?? '1234',
     logger: BufferLogger.test(),
     platform: platform ?? FakePlatform(operatingSystem: 'linux'),
@@ -478,7 +477,10 @@ AndroidDevice setUpAndroidDevice({
   );
 }
 
-class MockAndroidSdk extends Mock implements AndroidSdk {}
+class FakeAndroidSdk extends Fake implements AndroidSdk {
+  @override
+  String get adbPath => 'adb';
+}
 
 const String kAdbShellGetprop = '''
 [dalvik.vm.dex2oat-Xms]: [64m]
