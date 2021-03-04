@@ -558,6 +558,19 @@ deps = {
      'condition': 'host_os == "linux"',
      'dep_type': 'cipd',
    },
+
+  # CppWinRT tooling for UWP builds
+  'src/third_party/cppwinrt': {
+    'packages': [
+      {
+        'package': 'flutter/cppwinrt/win-amd64',
+        'version': 'build:2.0.210301.1'
+      }
+    ],
+    'condition': 'download_windows_deps',
+    'dep_type': 'cipd',
+  },
+
 }
 
 hooks = [
