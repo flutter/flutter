@@ -10,12 +10,13 @@
 @implementation FlutterRenderingBackend
 
 + (BOOL)renderUsingMetal {
+#ifdef SHELL_ENABLE_METAL
   if (@available(macOS 10.14, *)) {
     BOOL systemSupportsMetal = MTLCreateSystemDefaultDevice() != nil;
     return systemSupportsMetal;
-  } else {
-    return NO;
   }
+#endif
+  return NO;
 }
 
 + (Class)layerClass {
