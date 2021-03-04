@@ -61,7 +61,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
             'tooling also provides guidance on how to set up the project files to pass this '
             'verification. Disabling setup verification will always attempt to fully build '
             'the app regardless of any problems detected. Builds that are part of CI testing '
-            'and advanced users with custom deferred components implementations should disable'
+            'and advanced users with custom deferred components implementations should disable '
             'setup verification. This flag has no effect on non-deferred components apps.',
     );
   }
