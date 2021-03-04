@@ -21,6 +21,16 @@
                                   asBase64Encoded:(BOOL)base64Encode;
 
 - (std::shared_ptr<flutter::FlutterPlatformViewsController>&)platformViewsController;
+
+/**
+ * A callback that is called when iOS queries accessibility information of the Flutter view.
+ *
+ * This is useful to predict the current iOS accessibility status. For example, there is
+ * no API to listen whether voice control is turned on or off. The Flutter engine uses
+ * this callback to enable semantics in order to catch the case that voice control is
+ * on.
+ */
+- (void)flutterViewAccessibilityDidCall;
 @end
 
 @interface FlutterView : UIView
