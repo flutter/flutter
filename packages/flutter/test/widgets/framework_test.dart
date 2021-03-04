@@ -1030,7 +1030,7 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
-        child: Container(
+        child: SizedBox(
           height: 100,
           child: CustomScrollView(
             controller: ScrollController(),
@@ -1667,7 +1667,7 @@ class DependentState extends State<DependentStatefulWidget> {
 }
 
 class SwapKeyWidget extends StatefulWidget {
-  const SwapKeyWidget({this.childKey}): super();
+  const SwapKeyWidget({Key? key, this.childKey}): super(key: key);
 
   final Key? childKey;
   @override

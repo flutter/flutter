@@ -432,6 +432,17 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
     _snackBarTimer = null;
   }
 
+  /// Removes all the snackBars currently in queue by clearing the queue
+  /// and running normal exit animation on the current snackBar.
+  void clearSnackBars() {
+    if (_snackBars.isEmpty || _snackBarController!.status == AnimationStatus.dismissed)
+      return;
+    final ScaffoldFeatureController<SnackBar, SnackBarClosedReason> currentSnackbar = _snackBars.first;
+    _snackBars.clear();
+    _snackBars.add(currentSnackbar);
+    hideCurrentSnackBar();
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
@@ -2295,10 +2306,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       assert(debugCheckHasScaffoldMessenger(context));
       assert(
         _scaffoldMessenger != null,
-        'A SnackBar was shown by the ScaffoldMessenger, but has been called upon'
-          'to be removed from a Scaffold that is not registered with a '
-          'ScaffoldMessenger, this can happen if a Scaffold has been rebuilt '
-          'without an ancestor ScaffoldMessenger.',
+        'A SnackBar was shown by the ScaffoldMessenger, but has been called upon '
+        'to be removed from a Scaffold that is not registered with a '
+        'ScaffoldMessenger, this can happen if a Scaffold has been rebuilt '
+        'without an ancestor ScaffoldMessenger.',
       );
       _scaffoldMessenger!.removeCurrentSnackBar(reason: reason);
       return;
@@ -2339,8 +2350,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       // ScaffoldMessenger is presenting SnackBars.
       assert(debugCheckHasScaffoldMessenger(context));
       assert(
-      _scaffoldMessenger != null,
-      'A SnackBar was shown by the ScaffoldMessenger, but has been called upon'
+        _scaffoldMessenger != null,
+        'A SnackBar was shown by the ScaffoldMessenger, but has been called upon '
         'to be removed from a Scaffold that is not registered with a '
         'ScaffoldMessenger, this can happen if a Scaffold has been rebuilt '
         'without an ancestor ScaffoldMessenger.',

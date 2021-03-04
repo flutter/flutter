@@ -56,7 +56,7 @@ typedef ContextInitializer = void Function(AppContext testContext);
 @isTest
 void testUsingContext(
   String description,
-  dynamic testMethod(), {
+  dynamic Function() testMethod, {
   Map<Type, Generator> overrides = const <Type, Generator>{},
   bool initializeFlutterRoot = true,
   String testOn,
@@ -338,16 +338,16 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   bool get isInstalled => true;
 
   @override
-  String get versionText => 'Xcode 11.0';
+  String get versionText => 'Xcode 12.0.1';
 
   @override
-  int get majorVersion => 11;
+  int get majorVersion => 12;
 
   @override
   int get minorVersion => 0;
 
   @override
-  int get patchVersion => 0;
+  int get patchVersion => 1;
 
   @override
   Future<Map<String, String>> getBuildSettings(

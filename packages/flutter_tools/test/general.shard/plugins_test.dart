@@ -28,6 +28,7 @@ import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 import '../src/pubspec_schema.dart';
 import '../src/testbed.dart';
 

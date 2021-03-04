@@ -750,7 +750,7 @@ void main() {
                 );
               },
               behavior: HitTestBehavior.opaque,
-              child: Container(
+              child: const SizedBox(
                 height: 100.0,
                 width: 100.0,
               ),
@@ -802,18 +802,16 @@ void main() {
                     reverseDuration: const Duration(seconds: 2),
                   ),
                   builder: (BuildContext context) {
-                    return Container(
-                      child: MaterialButton(
-                        child: const Text('BottomSheet'),
-                        onPressed: () => Navigator.pop(context),
-                        key: tapTargetToClose,
-                      ),
+                    return MaterialButton(
+                      child: const Text('BottomSheet'),
+                      onPressed: () => Navigator.pop(context),
+                      key: tapTargetToClose,
                     );
                   },
                 );
               },
               behavior: HitTestBehavior.opaque,
-              child: Container(
+              child: const SizedBox(
                 height: 100.0,
                 width: 100.0,
               ),

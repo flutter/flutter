@@ -161,20 +161,20 @@ void main() {
               slivers: <Widget>[
                 SliverList(
                   delegate: SliverChildListDelegate(
-                    <Widget>[
-                      Container(height: 22.2, child: const Text('TOP')),
-                      Container(height: 22.2),
-                      Container(height: 22.2),
+                    const <Widget>[
+                      SizedBox(height: 22.2, child: Text('TOP')),
+                      SizedBox(height: 22.2),
+                      SizedBox(height: 22.2),
                     ],
                   ),
                 ),
                 SliverFixedExtentList(
                   itemExtent: 22.2,
                   delegate: SliverChildListDelegate(
-                    <Widget>[
-                      Container(),
-                      Container(child: const Text('A')),
-                      Container(),
+                    const <Widget>[
+                      SizedBox(),
+                      Text('A'),
+                      SizedBox(),
                     ],
                   ),
                 ),
@@ -183,19 +183,19 @@ void main() {
                     crossAxisCount: 2,
                   ),
                   delegate: SliverChildListDelegate(
-                    <Widget>[
-                      Container(),
-                      Container(child: const Text('B')),
-                      Container(),
+                    const <Widget>[
+                      SizedBox(),
+                      Text('B'),
+                      SizedBox(),
                     ],
                   ),
                 ),
                 SliverList(
                   delegate: SliverChildListDelegate(
-                    <Widget>[
-                      Container(height: 22.2),
-                      Container(height: 22.2),
-                      Container(height: 22.2, child: const Text('BOTTOM')),
+                    const <Widget>[
+                      SizedBox(height: 22.2),
+                      SizedBox(height: 22.2),
+                      SizedBox(height: 22.2, child: Text('BOTTOM')),
                     ],
                   ),
                 ),

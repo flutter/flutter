@@ -17,7 +17,7 @@ void main() {
   testWidgets(
     'Frame Counter and Input Delay for benchmarkLive',
     (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(home: Scaffold(body: SimpleScroll())));
+      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SimpleScroll())));
       await tester.pumpAndSettle();
       final Offset location = tester.getCenter(find.byType(ListView));
       int frameCount = 0;

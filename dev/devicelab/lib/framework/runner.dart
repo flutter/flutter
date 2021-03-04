@@ -8,10 +8,56 @@ import 'dart:io';
 
 import 'package:vm_service_client/vm_service_client.dart';
 
-import 'package:flutter_devicelab/framework/utils.dart';
-import 'package:flutter_devicelab/framework/adb.dart';
-
+import 'adb.dart';
+import 'cocoon.dart';
 import 'task_result.dart';
+import 'utils.dart';
+
+Future<void> runTasks(
+  List<String> taskNames, {
+  bool exitOnFirstTestFailure = false,
+  bool silent = false,
+  String deviceId,
+  String gitBranch,
+  String localEngine,
+  String localEngineSrcPath,
+  String luciBuilder,
+  String resultsPath,
+  List<String> taskArgs,
+}) async {
+  for (final String taskName in taskNames) {
+    section('Running task "$taskName"');
+    final TaskResult result = await runTask(
+      taskName,
+      deviceId: deviceId,
+      localEngine: localEngine,
+      localEngineSrcPath: localEngineSrcPath,
+      silent: silent,
+      taskArgs: taskArgs,
+    );
+
+    print('Task result:');
+    print(const JsonEncoder.withIndent('  ').convert(result));
+    section('Finished task "$taskName"');
+
+    if (resultsPath != null) {
+      final Cocoon cocoon = Cocoon();
+      await cocoon.writeTaskResultToFile(
+        builderName: luciBuilder,
+        gitBranch: gitBranch,
+        result: result,
+        resultsPath: resultsPath,
+      );
+    }
+
+    if (!result.succeeded) {
+      exitCode = 1;
+      if (exitOnFirstTestFailure) {
+        return;
+      }
+    }
+  }
+}
 
 /// Runs a task in a separate Dart VM and collects the result using the VM
 /// service protocol.
@@ -21,12 +67,15 @@ import 'task_result.dart';
 ///
 /// Running the task in [silent] mode will suppress standard output from task
 /// processes and only print standard errors.
+///
+/// [taskArgs] are passed to the task executable for additional configuration.
 Future<TaskResult> runTask(
   String taskName, {
   bool silent = false,
   String localEngine,
   String localEngineSrcPath,
   String deviceId,
+  List<String> taskArgs,
 }) async {
   final String taskExecutable = 'bin/tasks/$taskName.dart';
 
@@ -42,6 +91,7 @@ Future<TaskResult> runTask(
       if (localEngine != null) '-DlocalEngine=$localEngine',
       if (localEngineSrcPath != null) '-DlocalEngineSrcPath=$localEngineSrcPath',
       taskExecutable,
+      ...?taskArgs,
     ],
     environment: <String, String>{
       if (deviceId != null)

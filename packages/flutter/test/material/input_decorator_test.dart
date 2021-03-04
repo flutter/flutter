@@ -1330,8 +1330,8 @@ void main() {
       buildInputDecorator(
         // isEmpty: false (default)
         // isFocused: false (default)
-        decoration: InputDecoration(
-          prefix: Container(
+        decoration: const InputDecoration(
+          prefix: SizedBox(
             key: pKey,
             height: 100,
             width: 10,
@@ -1374,9 +1374,9 @@ void main() {
       buildInputDecorator(
         // isEmpty: false (default)
         // isFocused: false (default)
-        decoration: InputDecoration(
-          border: const OutlineInputBorder(),
-          prefix: Container(
+        decoration: const InputDecoration(
+          border: OutlineInputBorder(),
+          prefix: SizedBox(
             key: pKey,
             height: 100,
             width: 10,
@@ -1905,8 +1905,8 @@ void main() {
           buildInputDecorator(
             // isEmpty: false (default)
             // isFocused: false (default)
-            decoration: InputDecoration(
-              prefix: Container(
+            decoration: const InputDecoration(
+              prefix: SizedBox(
                 key: pKey,
                 height: 100,
                 width: 10,
@@ -1934,8 +1934,8 @@ void main() {
           buildInputDecorator(
             // isEmpty: false (default)
             // isFocused: false (default)
-            decoration: InputDecoration(
-              prefix: Container(
+            decoration: const InputDecoration(
+              prefix: SizedBox(
                 key: pKey,
                 height: 100,
                 width: 10,
@@ -1963,8 +1963,8 @@ void main() {
           buildInputDecorator(
             // isEmpty: false (default)
             // isFocused: false (default)
-            decoration: InputDecoration(
-              prefix: Container(
+            decoration: const InputDecoration(
+              prefix: SizedBox(
                 key: pKey,
                 height: 100,
                 width: 10,
@@ -1995,9 +1995,9 @@ void main() {
             // isEmpty: false (default)
             // isFocused: false (default)
             expands: true,
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              prefix: Container(
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              prefix: SizedBox(
                 key: pKey,
                 height: 100,
                 width: 10,
@@ -2026,9 +2026,9 @@ void main() {
             // isEmpty: false (default)
             // isFocused: false (default)
             expands: true,
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              prefix: Container(
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              prefix: SizedBox(
                 key: pKey,
                 height: 100,
                 width: 10,
@@ -2059,9 +2059,9 @@ void main() {
             // isEmpty: false (default)
             // isFocused: false (default)
             expands: true,
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              prefix: Container(
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              prefix: SizedBox(
                 key: pKey,
                 height: 100,
                 width: 10,
@@ -2090,9 +2090,9 @@ void main() {
             // isEmpty: false (default)
             // isFocused: false (default)
             expands: true,
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              prefix: Container(
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              prefix: SizedBox(
                 key: pKey,
                 height: 100,
                 width: 10,
@@ -4109,7 +4109,7 @@ void main() {
 
     await tester.pumpWidget(
       Center(
-        child: Container(
+        child: SizedBox(
           width: 100,
           height: 100,
           child: buildInputDecorator(
@@ -4132,7 +4132,7 @@ void main() {
 
     await tester.pumpWidget(
       Center(
-        child: Container(
+        child: SizedBox(
           width: 100,
           height: 100,
           child: buildInputDecorator(
@@ -4260,7 +4260,7 @@ void main() {
 
     Widget getLabeledInputDecorator(FloatingLabelBehavior floatingLabelBehavior) => MaterialApp(
         home: Material(
-          child: Container(
+          child: SizedBox(
             width: 300,
             child: TextField(
               decoration: InputDecoration(
@@ -4361,7 +4361,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Center(
-          child: Container(
+          child: SizedBox(
             width: 200,
             height: 28,
             child: TextField(

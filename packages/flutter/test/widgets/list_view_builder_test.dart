@@ -22,7 +22,7 @@ void main() {
             itemExtent: 100.0,
             itemBuilder: (BuildContext context, int index) {
               callbackTracker.add(index);
-              return Container(
+              return SizedBox(
                 key: ValueKey<int>(index),
                 height: 100.0,
                 child: Text('$index'),
@@ -70,7 +70,7 @@ void main() {
 
     final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
       callbackTracker.add(index);
-      return Container(
+      return SizedBox(
         key: ValueKey<int>(index),
         width: 500.0, // this should be ignored
         height: 400.0, // should be overridden by itemExtent
@@ -143,7 +143,7 @@ void main() {
 
     final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
       callbackTracker.add(index);
-      return Container(
+      return SizedBox(
         key: ValueKey<int>(index),
         width: 400.0, // this should be overridden by itemExtent
         height: 500.0, // this should be ignored

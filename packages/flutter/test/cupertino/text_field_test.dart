@@ -3475,7 +3475,6 @@ void main() {
         from: tester.getTopRight(find.byType(CupertinoApp)),
         cause: SelectionChangedCause.tap,
       );
-      expect(state.showToolbar(), true);
       await tester.pumpAndSettle();
 
       // -1 because we want to reach the end of the line, not the start of a new line.
@@ -3536,7 +3535,6 @@ void main() {
         from: tester.getCenter(find.byType(EditableText)),
         cause: SelectionChangedCause.tap,
       );
-      expect(state.showToolbar(), true);
       await tester.pumpAndSettle();
 
       bottomLeftSelectionPosition = textOffsetToBottomLeftPosition(tester, state.renderEditable.selection!.baseOffset);
@@ -4219,7 +4217,7 @@ void main() {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Container(
+              SizedBox(
                 width: 100.0,
                 child: CupertinoTextField(
                   controller: controller1,
@@ -4230,21 +4228,21 @@ void main() {
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  Container(
+                  SizedBox(
                     width: 100.0,
                     child: CupertinoTextField(
                       controller: controller2,
                       focusNode: focusNode2,
                     ),
                   ),
-                  Container(
+                  SizedBox(
                     width: 100.0,
                     child: CupertinoTextField(
                       controller: controller3,
                       focusNode: focusNode3,
                     ),
                   ),
-                  Container(
+                  SizedBox(
                     width: 100.0,
                     child: CupertinoTextField(
                       controller: controller4,
@@ -4253,7 +4251,7 @@ void main() {
                   ),
                 ],
               ),
-              Container(
+              SizedBox(
                 width: 100.0,
                 child: CupertinoTextField(
                   controller: controller5,

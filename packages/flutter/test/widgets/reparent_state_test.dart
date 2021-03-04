@@ -205,7 +205,7 @@ void main() {
         child: ListView(
           itemExtent: 100.0,
           children: <Widget>[
-            Container(
+            SizedBox(
               key: const Key('container'),
               height: 100.0,
               child: StateMarker(key: key),
@@ -279,7 +279,7 @@ void main() {
     await tester.pumpWidget(Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
-        Container(width: 100.0, height: 100.0, child: StateMarker(key: key)),
+        SizedBox(width: 100.0, height: 100.0, child: StateMarker(key: key)),
         const SizedBox(width: 100.0, height: 100.0),
       ],
     ));
@@ -303,7 +303,7 @@ void main() {
       textDirection: TextDirection.ltr,
       children: <Widget>[
         const SizedBox(width: 100.0, height: 100.0),
-        Container(width: 100.0, height: 100.0, child: StateMarker(key: key)),
+        SizedBox(width: 100.0, height: 100.0, child: StateMarker(key: key)),
       ],
     ));
 

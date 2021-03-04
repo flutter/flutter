@@ -106,7 +106,7 @@ class FuchsiaPM {
   ///
   /// The argument [repoPath] should have previously been an argument to
   /// [newrepo]. The [host] should be the host reported by
-  /// [FuchsiaDevFinder.resolve], and [port] should be an unused port for the
+  /// [FuchsiaDevFinder.resolve] or [FuchsiaFfx.resolve] and [port] should be an unused port for the
   /// http server to bind.
   Future<Process> serve(String repoPath, String host, int port) async {
     if (globals.fuchsiaArtifacts.pm == null) {

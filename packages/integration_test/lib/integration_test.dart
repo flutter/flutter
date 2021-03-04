@@ -180,7 +180,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
 
   @override
   Future<void> runTest(
-    Future<void> testBody(),
+    Future<void> Function() testBody,
     VoidCallback invariantTester, {
     String description = '',
     Duration? timeout,
@@ -232,7 +232,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
   /// [action]. Otherwise, prior events are cleared before calling [action]. By
   /// default, prior events are cleared.
   Future<vm.Timeline> traceTimeline(
-    Future<dynamic> action(), {
+    Future<dynamic> Function() action, {
     List<String> streams = const <String>['all'],
     bool retainPriorEvents = false,
   }) async {
@@ -268,7 +268,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
   /// The `streams` and `retainPriorEvents` parameters are passed as-is to
   /// [traceTimeline].
   Future<void> traceAction(
-    Future<dynamic> action(), {
+    Future<dynamic> Function() action, {
     List<String> streams = const <String>['all'],
     bool retainPriorEvents = false,
     String reportKey = 'timeline',
@@ -288,7 +288,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
   /// This can be used to implement performance tests previously using
   /// [traceAction] and [TimelineSummary] from [flutter_driver]
   Future<void> watchPerformance(
-    Future<void> action(), {
+    Future<void> Function() action, {
     String reportKey = 'performance',
   }) async {
     assert(() {

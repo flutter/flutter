@@ -16,10 +16,8 @@ import 'package:flutter_tools/src/commands/build_web.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/web/compile.dart';
-import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -112,7 +110,7 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
     Pub: () => FakePub(),
     ProcessManager: () => FakeProcessManager.any(),
-    BuildSystem: () => MockBuildSystem(),
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
   });
 
   testUsingContext('hidden if feature flag is not enabled', () async {
@@ -149,7 +147,7 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
     Pub: () => FakePub(),
     ProcessManager: () => FakeProcessManager.any(),
-    BuildSystem: () => MockBuildSystem(),
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
   });
 }
 
@@ -201,15 +199,7 @@ class UrlLauncherPlugin {}
 ''');
   fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       .writeAsStringSync('void main() { }');
-
-  // Process calls. We're not testing that these invocations are correct because
-  // that is covered in targets/web_test.dart.
-  when(globals.buildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
-    return BuildResult(success: true);
-  });
 }
-
-class MockBuildSystem extends Mock implements BuildSystem {}
 
 class TestWebBuildCommand extends FlutterCommand {
   TestWebBuildCommand({ bool verboseHelp = false }) :
