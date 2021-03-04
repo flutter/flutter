@@ -333,6 +333,7 @@ const double _kDefaultFontSize = 14.0;
 /// const TextStyle(fontFamily: 'Raleway')
 /// ```
 /// {@end-tool}
+///
 /// #### Supported font formats
 ///
 /// Font formats currently supported by Flutter :
@@ -340,6 +341,7 @@ const double _kDefaultFontSize = 14.0;
 /// * `.otf`
 ///
 /// Flutter does not support `.woff` and `.woff2` fonts for all platforms.
+///
 /// ### Custom Font Fallback
 ///
 /// A custom [fontFamilyFallback] list can be provided. The list should be an
