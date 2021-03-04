@@ -1075,7 +1075,7 @@ class AppInstance {
     _logger.close();
   }
 
-  Future<T> _runInZone<T>(AppDomain domain, FutureOr<T> method()) async {
+  Future<T> _runInZone<T>(AppDomain domain, FutureOr<T> Function() method) async {
     return method();
   }
 }

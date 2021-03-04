@@ -94,7 +94,7 @@ Future<int> _handleToolError(
   bool verbose,
   List<String> args,
   bool reportCrashes,
-  String getFlutterVersion(),
+  String Function() getFlutterVersion,
 ) async {
   if (error is UsageException) {
     globals.printError('${error.message}\n');

@@ -652,7 +652,7 @@ class FakeWorkingAndroidConsoleSocket extends Fake implements Socket {
   final StreamController<String> _controller = StreamController<String>();
 
   @override
-  Stream<E> asyncMap<E>(FutureOr<E> convert(Uint8List event)) => _controller.stream as Stream<E>;
+  Stream<E> asyncMap<E>(FutureOr<E> Function(Uint8List event) convert) => _controller.stream as Stream<E>;
 
   @override
   void add(List<int> data) {
@@ -676,7 +676,7 @@ class FakeUnresponsiveAndroidConsoleSocket extends Fake implements Socket {
   final StreamController<String> _controller = StreamController<String>();
 
   @override
-  Stream<E> asyncMap<E>(FutureOr<E> convert(Uint8List event)) => _controller.stream as Stream<E>;
+  Stream<E> asyncMap<E>(FutureOr<E> Function(Uint8List event) convert) => _controller.stream as Stream<E>;
 
   @override
   void add(List<int> data) {}
@@ -697,7 +697,7 @@ class FakeDisconnectingAndroidConsoleSocket extends Fake implements Socket {
   final StreamController<String> _controller = StreamController<String>();
 
   @override
-  Stream<E> asyncMap<E>(FutureOr<E> convert(Uint8List event)) => _controller.stream as Stream<E>;
+  Stream<E> asyncMap<E>(FutureOr<E> Function(Uint8List event) convert) => _controller.stream as Stream<E>;
 
   @override
   void add(List<int> data) {

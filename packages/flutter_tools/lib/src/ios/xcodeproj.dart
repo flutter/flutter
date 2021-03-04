@@ -650,7 +650,7 @@ class XcodeProjectInfo {
     return 'Release';
   }
 
-  static String _uniqueMatch(Iterable<String> strings, bool matches(String s)) {
+  static String _uniqueMatch(Iterable<String> strings, bool Function(String s) matches) {
     final List<String> options = strings.where(matches).toList();
     if (options.length == 1) {
       return options.first;

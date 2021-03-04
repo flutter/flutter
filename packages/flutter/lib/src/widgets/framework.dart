@@ -2232,7 +2232,7 @@ abstract class BuildContext {
   /// because the element tree is no longer stable at that time. To refer to
   /// an ancestor from one of those methods, save a reference to the ancestor
   /// by calling [visitAncestorElements] in [State.didChangeDependencies].
-  void visitAncestorElements(bool visitor(Element element));
+  void visitAncestorElements(bool Function(Element element) visitor);
 
   /// Walks the children of this widget.
   ///
@@ -2458,7 +2458,7 @@ class BuildOwner {
   ///
   /// This mechanism is used to ensure that, for instance, [State.dispose] does
   /// not call [State.setState].
-  void lockState(void callback()) {
+  void lockState(VoidCallback callback) {
     assert(callback != null);
     assert(_debugStateLockLevel >= 0);
     assert(() {
@@ -4031,7 +4031,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  void visitAncestorElements(bool visitor(Element element)) {
+  void visitAncestorElements(bool Function(Element element) visitor) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     Element? ancestor = _parent;
     while (ancestor != null && visitor(ancestor))

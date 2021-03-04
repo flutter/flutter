@@ -325,7 +325,7 @@ include ':app'
       android = fakePlatform('android');
     });
 
-    void testUsingAndroidContext(String description, dynamic testMethod()) {
+    void testUsingAndroidContext(String description, dynamic Function() testMethod) {
       testUsingContext(description, testMethod, overrides: <Type, Generator>{
         Artifacts: () => localEngineArtifacts,
         Platform: () => android,

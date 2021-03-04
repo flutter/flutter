@@ -685,7 +685,7 @@ class _FindsWidgetMatcher extends Matcher {
   }
 }
 
-bool _hasAncestorMatching(Finder finder, bool predicate(Widget widget)) {
+bool _hasAncestorMatching(Finder finder, bool Function(Widget widget) predicate) {
   final Iterable<Element> nodes = finder.evaluate();
   if (nodes.length != 1)
     return false;
