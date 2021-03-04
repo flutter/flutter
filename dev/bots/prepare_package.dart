@@ -443,6 +443,7 @@ class ArchiveCreator {
         'zip',
         '-r',
         '-9',
+        '--symlinks',
         output.absolute.path,
         path.basename(source.path),
       ];
