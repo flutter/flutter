@@ -498,7 +498,7 @@ void main() {
     }
 
     semantics.dispose();
-  });
+  }, skip: true); // disable for soft transition https://github.com/flutter/flutter/issues/77271
 
   testWidgets('Semantics widget supports all flags', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
