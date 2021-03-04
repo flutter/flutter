@@ -188,6 +188,9 @@ class ImageCache {
         },
       );
     }
+    for (final _CachedImage image in _cache.values) {
+      image.dispose();
+    }
     _cache.clear();
     _pendingImages.clear();
     _currentSizeBytes = 0;
