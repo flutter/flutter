@@ -1282,13 +1282,11 @@ void main() {
               controller: ScrollController(initialScrollOffset: 300.0),
               itemExtent: 100.0,
               children: outerChildren = List<Widget>.generate(10, (int i) {
-                return Container(
-                  child: Center(
-                    child: innerChildren[i] = SizedBox(
-                      height: 50.0,
-                      width: 50.0,
-                      child: Text('Item $i'),
-                    ),
+                return Center(
+                  child: innerChildren[i] = SizedBox(
+                    height: 50.0,
+                    width: 50.0,
+                    child: Text('Item $i'),
                   ),
                 );
               }),
@@ -1354,13 +1352,11 @@ void main() {
               itemExtent: 100.0,
               children:
               outerChildren = List<Widget>.generate(10, (int i) {
-                return Container(
-                  child: Center(
-                    child: innerChildren[i] = SizedBox(
-                      height: 50.0,
-                      width: 50.0,
-                      child: Text('Item $i'),
-                    ),
+                return Center(
+                  child: innerChildren[i] = SizedBox(
+                    height: 50.0,
+                    width: 50.0,
+                    child: Text('Item $i'),
                   ),
                 );
               }),

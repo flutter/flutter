@@ -3732,12 +3732,11 @@ void main() {
                   ),
                   Expanded(
                     child: Navigator(
-                      onGenerateRoute: (_) =>
-                        CupertinoPageRoute<void>(builder: (_) => Container(
-                          child: CupertinoTextField(
-                            controller: controller,
-                          ),
-                        )),
+                      onGenerateRoute: (_) => CupertinoPageRoute<void>(
+                        builder: (_) => CupertinoTextField(
+                          controller: controller,
+                        ),
+                      ),
                     ),
                   ),
                 ],

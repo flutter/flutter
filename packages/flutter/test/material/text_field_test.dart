@@ -3568,11 +3568,9 @@ void main() {
 
     await tester.pumpWidget(
       overlay(
-        child: Container(
-          child: TextField(
-            controller: controller,
-            maxLines: 6,
-          ),
+        child: TextField(
+          controller: controller,
+          maxLines: 6,
         ),
       ),
     );

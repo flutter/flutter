@@ -269,9 +269,7 @@ void main() {
           restorationId: 'pager',
           children: List<Widget>.generate(
             50,
-            (int index) => Container(
-              child: Text('Tile $index'),
-            ),
+            (int index) => Text('Tile $index'),
           ),
         ),
       ),
@@ -325,9 +323,7 @@ void main() {
           itemExtent: 50,
           children: List<Widget>.generate(
             50,
-            (int index) => Container(
-              child: Text('Tile $index'),
-            ),
+            (int index) => Text('Tile $index'),
           ),
         ),
       ),

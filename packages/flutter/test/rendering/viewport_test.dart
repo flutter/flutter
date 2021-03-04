@@ -1592,17 +1592,13 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
-            child: ListView(
-              scrollDirection: a1,
-              children: List<Widget>.generate(10, (int y) {
-                return Container(
-                  child: ListView(
-                    scrollDirection: a2,
-                  ),
-                );
-              }),
-            ),
+          child: ListView(
+            scrollDirection: a1,
+            children: List<Widget>.generate(10, (int y) {
+              return ListView(
+                scrollDirection: a2,
+              );
+            }),
           ),
         ),
       );

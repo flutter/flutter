@@ -87,7 +87,7 @@ linter:
     - avoid_type_to_string
     - avoid_types_as_parameter_names
     # - avoid_types_on_closure_parameters # conflicts with always_specify_types
-    # - avoid_unnecessary_containers # not yet tested
+    - avoid_unnecessary_containers
     - avoid_unused_constructor_parameters
     - avoid_void_async
     # - avoid_web_libraries_in_flutter # not yet tested

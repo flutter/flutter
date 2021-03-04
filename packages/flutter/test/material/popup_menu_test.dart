@@ -1151,26 +1151,24 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: Container(
-            child: Center(
-              child: PopupMenuButton<String>(
-                onSelected: (String result) {
-                  selectedValue = result;
-                },
-                child: const Text('Menu Button'),
-                initialValue: '1',
-                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  const PopupMenuItem<String>(
-                    child: Text('1'),
-                    value: '1',
-                  ),
-                  const PopupMenuDivider(),
-                  const PopupMenuItem<String>(
-                    child: Text('2'),
-                    value: '2',
-                  ),
-                ],
-              ),
+          body: Center(
+            child: PopupMenuButton<String>(
+              onSelected: (String result) {
+                selectedValue = result;
+              },
+              child: const Text('Menu Button'),
+              initialValue: '1',
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  child: Text('1'),
+                  value: '1',
+                ),
+                const PopupMenuDivider(),
+                const PopupMenuItem<String>(
+                  child: Text('2'),
+                  value: '2',
+                ),
+              ],
             ),
           ),
         ),

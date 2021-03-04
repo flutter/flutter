@@ -551,9 +551,7 @@ class ItemGalleryBox extends StatelessWidget {
                 }).toList(),
               ),
             ),
-            Container(
-              child: const TabPageSelector(),
-            ),
+            const TabPageSelector(),
           ],
         ),
       ),

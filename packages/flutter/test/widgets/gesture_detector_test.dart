@@ -858,9 +858,7 @@ void main() {
             textDirection: TextDirection.ltr,
             child: RawGestureDetector(
               key: key,
-              child: Container(
-                child: const Text('Text'),
-              ),
+              child: const Text('Text'),
             ),
           ),
         );

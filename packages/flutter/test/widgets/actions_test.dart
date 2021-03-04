@@ -379,11 +379,9 @@ void main() {
           actions: <Type, Action<Intent>>{
             TestIntent: testAction,
           },
-          child: Container(
-            child: Actions(
-              actions: const <Type, Action<Intent>>{},
-              child: Container(key: containerKey),
-            ),
+          child: Actions(
+            actions: const <Type, Action<Intent>>{},
+            child: Container(key: containerKey),
           ),
         ),
       );

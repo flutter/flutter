@@ -944,9 +944,7 @@ Future<void> main() async {
                 children: <Widget> [
                   const SizedBox(height: 200.0),
                   // This container will appear at Y=200
-                  Container(
-                    child: const Hero(tag: 'H', child: SizedBox(key: homeHeroKey, height: 100.0, width: 100.0)),
-                  ),
+                  const Hero(tag: 'H', child: SizedBox(key: homeHeroKey, height: 100.0, width: 100.0)),
                   TextButton(
                     child: const Text('PUSH'),
                     onPressed: () { Navigator.push(context, route); },
@@ -1023,9 +1021,7 @@ Future<void> main() async {
                 children: <Widget> [
                   const SizedBox(height: 200.0),
                   // This container will appear at Y=200
-                  Container(
-                    child: const Hero(tag: 'H', child: SizedBox(key: homeHeroKey, height: 100.0, width: 100.0)),
-                  ),
+                  const Hero(tag: 'H', child: SizedBox(key: homeHeroKey, height: 100.0, width: 100.0)),
                   TextButton(
                     child: const Text('PUSH'),
                     onPressed: () { Navigator.push(context, route); },
@@ -1077,19 +1073,17 @@ Future<void> main() async {
       builder: (BuildContext context) {
         return Material(
           child: ListView(
-            children: <Widget>[
+            children: const <Widget>[
               // This container will appear at Y=0
-              Container(
-                child: const Hero(
-                  tag: 'BC',
-                  child: SizedBox(
-                    key: heroBCKey,
-                    height: 150.0,
-                    child: Text('Hero'),
-                  ),
+              Hero(
+                tag: 'BC',
+                child: SizedBox(
+                  key: heroBCKey,
+                  height: 150.0,
+                  child: Text('Hero'),
                 ),
               ),
-              const SizedBox(height: 800.0),
+              SizedBox(height: 800.0),
             ],
           ),
         );
@@ -1104,27 +1098,23 @@ Future<void> main() async {
             children: <Widget>[
               const SizedBox(height: 100.0),
               // This container will appear at Y=100
-              Container(
-                child: const Hero(
-                  tag: 'AB',
-                  child: SizedBox(
-                    key: heroABKey,
-                    height: 200.0,
-                    child: Text('Hero'),
-                  ),
+              const Hero(
+                tag: 'AB',
+                child: SizedBox(
+                  key: heroABKey,
+                  height: 200.0,
+                  child: Text('Hero'),
                 ),
               ),
               TextButton(
                 child: const Text('PUSH C'),
                 onPressed: () { Navigator.push(context, routeC); },
               ),
-              Container(
-                child: const Hero(
-                  tag: 'BC',
-                  child: SizedBox(
-                    height: 150.0,
-                    child: Text('Hero'),
-                  ),
+              const Hero(
+                tag: 'BC',
+                child: SizedBox(
+                  height: 150.0,
+                  child: Text('Hero'),
                 ),
               ),
               const SizedBox(height: 800.0),
@@ -1144,14 +1134,12 @@ Future<void> main() async {
                 children: <Widget> [
                   const SizedBox(height: 200.0),
                   // This container will appear at Y=200
-                  Container(
-                    child: const Hero(
-                      tag: 'AB',
-                      child: SizedBox(
-                        height: 100.0,
-                        width: 100.0,
-                        child: Text('Hero'),
-                      ),
+                  const Hero(
+                    tag: 'AB',
+                    child: SizedBox(
+                      height: 100.0,
+                      width: 100.0,
+                      child: Text('Hero'),
                     ),
                   ),
                   TextButton(
@@ -2107,15 +2095,13 @@ Future<void> main() async {
 
   testWidgets('Hero within a Hero subtree, throws', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Material(
-          child: Container(
-            child: const Hero(
-              tag: 'a',
-              child: Hero(
-                tag: 'b',
-                child: Text('Child of a Hero'),
-              ),
+          child: Hero(
+            tag: 'a',
+            child: Hero(
+              tag: 'b',
+              child: Text('Child of a Hero'),
             ),
           ),
         ),
@@ -2426,11 +2412,9 @@ Future<void> main() async {
             child: Hero(
               tag: 'hero',
               transitionOnUserGestures: true,
-              child: Container(
-                child: Image(
-                  image: imageProvider,
-                  key: imageKey2,
-                ),
+              child: Image(
+                image: imageProvider,
+                key: imageKey2,
               ),
             ),
           );
