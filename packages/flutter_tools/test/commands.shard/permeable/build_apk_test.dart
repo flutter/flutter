@@ -131,7 +131,7 @@ void main() {
       gradlew = globals.fs.path.join(tempDir.path, 'flutter_project', 'android',
           globals.platform.isWindows ? 'gradlew.bat' : 'gradlew');
 
-      mockProcessManager = FakeProcessManager.any();
+      mockProcessManager = MockProcessManager();
       when(mockProcessManager.run(<String>[gradlew, '-v'],
           environment: anyNamed('environment')))
         .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(0, 0, '', '')));
@@ -535,3 +535,5 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
   @override
   final Directory directory;
 }
+
+class MockProcessManager extends Mock implements ProcessManager {}
