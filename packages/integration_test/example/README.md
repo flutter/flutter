@@ -4,7 +4,7 @@ Demonstrates how to use the `package:integration_test`.
 
 To run `integration_test/example_test.dart`,
 
-Android / iOS:
+## Android / iOS
 
 ```sh
 flutter drive \
