@@ -17,7 +17,7 @@ import 'package:test/fake.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 
- final vm_service.Isolate isolate = vm_service.Isolate(
+final vm_service.Isolate isolate = vm_service.Isolate(
   id: '1',
   pauseEvent: vm_service.Event(
     kind: vm_service.EventKind.kResume,
@@ -40,60 +40,17 @@ import '../src/context.dart';
   startTime: 0,
   isSystemIsolate: false,
   isolateFlags: <vm_service.IsolateFlag>[],
-  extensionRPCs: <String>['foo']
-);
-
-final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
-  id: '1',
-  pauseEvent: vm_service.Event(
-    kind: vm_service.EventKind.kResume,
-    timestamp: 0
-  ),
-  breakpoints: <vm_service.Breakpoint>[],
-  exceptionPauseMode: null,
-  extensionRPCs: <String>[],
-  libraries: <vm_service.LibraryRef>[
-    vm_service.LibraryRef(
-      id: '1',
-      uri: 'file:///hello_world/main.dart',
-      name: '',
-    ),
-  ],
-  livePorts: 0,
-  name: 'test',
-  number: '1',
-  pauseOnExit: false,
-  runnable: true,
-  startTime: 0,
-  isSystemIsolate: false,
-  isolateFlags: <vm_service.IsolateFlag>[],
-);
-
-final vm_service.VM fakeVM = vm_service.VM(
-  isolates: <vm_service.IsolateRef>[fakeUnpausedIsolate],
-  pid: 1,
-  hostCPU: '',
-  isolateGroups: <vm_service.IsolateGroupRef>[],
-  targetCPU: '',
-  startTime: 0,
-  name: 'dart',
-  architectureBits: 64,
-  operatingSystem: '',
-  version: '',
-  systemIsolateGroups: <vm_service.IsolateGroupRef>[],
-  systemIsolates: <vm_service.IsolateRef>[],
-);
-
-final FlutterView fakeFlutterView = FlutterView(
-  id: 'a',
-  uiIsolate: fakeUnpausedIsolate,
+  extensionRPCs: <String>['ext.flutter.connectedVmServiceUri'],
 );
 
 final FakeVmServiceRequest listViews = FakeVmServiceRequest(
   method: kListViewsMethod,
   jsonResponse: <String, Object>{
     'views': <Object>[
-      fakeFlutterView.toJson(),
+      FlutterView(
+        id: 'a',
+        uiIsolate: isolate,
+      ).toJson()
     ],
   },
 );
@@ -170,13 +127,13 @@ void main() {
       BufferLogger.test(),
     );
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
       const FakeVmServiceRequest(
         method: 'streamListen',
         args: <String, Object>{
-          'streamId': 'Extension',
+          'streamId': 'Isolate',
         }
       ),
-      FakeVmServiceRequest(method: 'getVM', jsonResponse: fakeVM.toJson()),
       FakeVmServiceRequest(
         method: 'getIsolate',
         jsonResponse: isolate.toJson(),
@@ -184,13 +141,11 @@ void main() {
           'isolateId': '1',
         },
       ),
-      FakeVmServiceStreamResponse(
-        streamId: 'Extension',
-        event: vm_service.Event(
-          timestamp: 0,
-          extensionKind: 'Flutter.FrameworkInitialization',
-          kind: 'test',
-        ),
+      const FakeVmServiceRequest(
+        method: 'streamCancel',
+        args: <String, Object>{
+          'streamId': 'Isolate',
+        },
       ),
       listViews,
       const FakeVmServiceRequest(
@@ -217,62 +172,7 @@ void main() {
       flutterDevices: <FlutterDevice>[device],
     );
   });
-
-  testWithoutContext('wait for extension handles an immediate extension', () {
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      const FakeVmServiceRequest(
-        method: 'streamListen',
-        args: <String, Object>{
-          'streamId': 'Extension',
-        }
-      ),
-      FakeVmServiceRequest(method: 'getVM', jsonResponse: fakeVM.toJson()),
-      FakeVmServiceRequest(
-        method: 'getIsolate',
-        jsonResponse: isolate.toJson(),
-        args: <String, Object>{
-          'isolateId': '1',
-        },
-      ),
-    ]);
-    waitForExtension(fakeVmServiceHost.vmService.service, 'foo');
-  });
-
-  testWithoutContext('wait for extension handles no isolates', () {
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      const FakeVmServiceRequest(
-        method: 'streamListen',
-        args: <String, Object>{
-          'streamId': 'Extension',
-        }
-      ),
-      FakeVmServiceRequest(method: 'getVM', jsonResponse: vm_service.VM(
-        isolates: <vm_service.IsolateRef>[],
-        pid: 1,
-        hostCPU: '',
-        isolateGroups: <vm_service.IsolateGroupRef>[],
-        targetCPU: '',
-        startTime: 0,
-        name: 'dart',
-        architectureBits: 64,
-        operatingSystem: '',
-        version: '',
-        systemIsolateGroups: <vm_service.IsolateGroupRef>[],
-        systemIsolates: <vm_service.IsolateRef>[],
-      ).toJson()),
-      FakeVmServiceStreamResponse(
-        streamId: 'Extension',
-        event: vm_service.Event(
-          timestamp: 0,
-          extensionKind: 'Flutter.FrameworkInitialization',
-          kind: 'test',
-        ),
-      ),
-    ]);
-    waitForExtension(fakeVmServiceHost.vmService.service, 'foo');
-  });
 }
-
 
 class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
   @override

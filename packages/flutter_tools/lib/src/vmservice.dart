@@ -4,6 +4,8 @@
 
 // @dart = 2.8
 
+import 'dart:async';
+
 import 'package:file/file.dart';
 import 'package:meta/meta.dart' show required;
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -479,7 +481,7 @@ class FlutterVmService {
     @required Uri assetsDirectory,
   }) async {
     try {
-      await service.streamListen('Isolate');
+      await service.streamListen(vm_service.EventStreams.kIsolate);
     } on vm_service.RPCError {
       // Do nothing, since the tool is already subscribed.
     }
@@ -781,6 +783,37 @@ class FlutterVmService {
         return views;
       }
       await Future<void>.delayed(delay);
+    }
+  }
+
+  /// Waits for a signal from the VM service that [extensionName] is registered.
+  ///
+  /// Looks at the list of loaded extensions for first Flutter view, as well as
+  /// the stream of added extensions to avoid races.
+  Future<vm_service.IsolateRef> findExtensionIsolate(String extensionName) async {
+    final vm_service.IsolateRef isolateRef = (await getFlutterViews()).first.uiIsolate;
+    try {
+      await service.streamListen(vm_service.EventStreams.kIsolate);
+    } on vm_service.RPCError {
+      // Do nothing, since the tool is already subscribed.
+    }
+
+    try {
+      await Future.any(<Future<void>>[
+        service.getIsolate(isolateRef.id).then(
+          (vm_service.Isolate isolate) async => isolate.extensionRPCs.contains(extensionName)
+            ? null
+            // Never complete.
+            : Completer<void>().future,
+        ),
+        service.onIsolateEvent.firstWhere(
+          (vm_service.Event event) => event.kind == vm_service.EventKind.kServiceExtensionAdded
+              && event.extensionRPC == extensionName,
+        ),
+      ]);
+      return isolateRef;
+    } finally {
+      await service.streamCancel(vm_service.EventStreams.kIsolate);
     }
   }
 

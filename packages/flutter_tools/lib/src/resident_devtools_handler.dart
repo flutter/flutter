@@ -7,7 +7,6 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'base/logger.dart';
 import 'resident_runner.dart';
@@ -111,7 +110,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     await Future.wait(<Future<void>>[
       for (final FlutterDevice device in flutterDevices)
         if (device.vmService != null)
-          waitForExtension(device.vmService.service, 'ext.flutter.connectedVmServiceUri'),
+          device.vmService.findExtensionIsolate('ext.flutter.connectedVmServiceUri')
     ]);
   }
 
@@ -179,37 +178,6 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     _shutdown = true;
     await _devToolsLauncher.close();
   }
-}
-
-
-@visibleForTesting
-Future<void> waitForExtension(vm_service.VmService vmService, String extension) async {
-  final Completer<void> completer = Completer<void>();
-  try {
-    await vmService.streamListen(vm_service.EventStreams.kExtension);
-  } on Exception {
-    // do nothing
-  }
-  StreamSubscription<vm_service.Event> extensionStream;
-  extensionStream = vmService.onExtensionEvent.listen((vm_service.Event event) {
-    if (event.json['extensionKind'] == 'Flutter.FrameworkInitialization') {
-      // The 'Flutter.FrameworkInitialization' event is sent on hot restart
-      // as well, so make sure we don't try to complete this twice.
-      if (!completer.isCompleted) {
-        completer.complete();
-        extensionStream.cancel();
-      }
-    }
-  });
-  final vm_service.VM vm = await vmService.getVM();
-  if (vm.isolates.isNotEmpty) {
-    final vm_service.IsolateRef isolateRef = vm.isolates.first;
-    final vm_service.Isolate isolate = await vmService.getIsolate(isolateRef.id);
-    if (isolate.extensionRPCs.contains(extension)) {
-      return;
-    }
-  }
-  await completer.future;
 }
 
 @visibleForTesting
