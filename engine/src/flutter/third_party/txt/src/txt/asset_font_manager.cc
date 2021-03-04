@@ -105,7 +105,6 @@ sk_sp<SkTypeface> AssetFontManager::onMakeFromFile(const char path[],
 sk_sp<SkTypeface> AssetFontManager::onLegacyMakeTypeface(
     const char familyName[],
     SkFontStyle) const {
-  FML_DCHECK(false);
   return nullptr;
 }
 
