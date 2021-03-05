@@ -137,9 +137,8 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
     local_engine_flag="--local-engine=${LOCAL_ENGINE}"
     flutter_framework="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.xcframework"
   fi
-
   local bitcode_flag=""
-  if [[ "$ENABLE_BITCODE" == "YES" ]]; then
+  if [[ "$ENABLE_BITCODE" == "YES" && "$ACTION" == "install" ]]; then
     bitcode_flag="true"
   fi
 
@@ -218,10 +217,6 @@ EmbedFlutterFrameworks() {
 
   # Copy Xcode behavior and don't copy over headers or modules.
   RunCommand rsync -av --delete --filter "- .DS_Store" --filter "- Headers" --filter "- Modules" "${BUILT_PRODUCTS_DIR}/Flutter.framework" "${xcode_frameworks_dir}/"
-  if [[ "$ACTION" != "install" || "$ENABLE_BITCODE" == "NO" ]]; then
-    # Strip bitcode from the destination unless archiving, or if bitcode is disabled entirely.
-    RunCommand "${DT_TOOLCHAIN_DIR}"/usr/bin/bitcode_strip "${BUILT_PRODUCTS_DIR}/Flutter.framework/Flutter" -r -o "${xcode_frameworks_dir}/Flutter.framework/Flutter"
-  fi
 
   # Sign the binaries we moved.
   if [[ -n "${EXPANDED_CODE_SIGN_IDENTITY:-}" ]]; then
