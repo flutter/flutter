@@ -413,9 +413,7 @@ abstract class CreateBase extends FlutterCommand {
 
   /// Merges named templates into a single template, output to `directory`.
   ///
-  /// `names` should match one of directory names under flutter_tools/template/.
-  /// `imageDirectory` should match a directory in the `templates` folder of the
-  /// `flutter_template_images` repository.
+  /// `names` should match directory names under flutter_tools/template/.
   ///
   /// If `overwrite` is true, overwrites existing files, `overwrite` defaults to `false`.
   @protected
