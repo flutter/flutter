@@ -18,6 +18,8 @@ import '../widgets/editable_text_utils.dart' show findRenderEditable, globalize,
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
+typedef FormatEditUpdateCallback = void Function(TextEditingValue, TextEditingValue);
+
 class MockClipboard {
   Object _clipboardData = <String, dynamic>{
     'text': null,
@@ -125,6 +127,16 @@ double getOpacity(WidgetTester tester, Finder finder) {
       matching: find.byType(FadeTransition),
     ),
   ).opacity.value;
+}
+
+class TestFormatter extends TextInputFormatter {
+  TestFormatter(this.onFormatEditUpdate);
+  FormatEditUpdateCallback onFormatEditUpdate;
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+    onFormatEditUpdate(oldValue, newValue);
+    return newValue;
+  }
 }
 
 void main() {
@@ -474,15 +486,56 @@ void main() {
     );
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
+  testWidgets('TextInputFormatter gets correct selection value', (WidgetTester tester) async {
+    late TextEditingValue actualOldValue;
+    late TextEditingValue actualNewValue;
+    final FormatEditUpdateCallback callBack = (TextEditingValue oldValue, TextEditingValue newValue) {
+      actualOldValue = oldValue;
+      actualNewValue = newValue;
+    };
+    final FocusNode focusNode = FocusNode();
+    final TextEditingController controller = TextEditingController(text: '123');
+    await tester.pumpWidget(
+      boilerplate(
+        child: TextField(
+          controller: controller,
+          focusNode: focusNode,
+          inputFormatters: <TextInputFormatter>[TestFormatter(callBack)],
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+    await tester.pumpAndSettle();
+
+    expect(
+      actualOldValue,
+      const TextEditingValue(
+        text: '123',
+        selection: TextSelection.collapsed(offset: 3, affinity: TextAffinity.upstream),
+      ),
+    );
+    expect(
+      actualNewValue,
+      const TextEditingValue(
+        text: '12',
+        selection: TextSelection.collapsed(offset: 2),
+      ),
+    );
+  });
+
   testWidgets('text field selection toolbar renders correctly inside opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           body: Center(
-            child: Container(
+            child: SizedBox(
               width: 100,
               height: 100,
-              child: const Opacity(
+              child: Opacity(
                 opacity: 0.5,
                 child: TextField(
                   decoration: InputDecoration(hintText: 'Placeholder'),
@@ -1071,11 +1124,9 @@ void main() {
     ));
 
     expect(find.text('Paste'), findsNothing);
-
     final Offset emptyPos = textOffsetToPosition(tester, 0);
     await tester.longPressAt(emptyPos, pointer: 7);
     await tester.pumpAndSettle();
-
     expect(find.text('Paste'), findsOneWidget);
   });
 
@@ -2355,7 +2406,7 @@ void main() {
       Widget? prefix,
     }) {
       return boilerplate(
-        child: Container(
+        child: SizedBox(
           height: height,
           child: TextField(
             key: textFieldKey,
@@ -3122,9 +3173,9 @@ void main() {
   testWidgets('Can align to center', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
-        child: Container(
+        child: const SizedBox(
           width: 300.0,
-          child: const TextField(
+          child: TextField(
             textAlign: TextAlign.center,
             decoration: null,
           ),
@@ -3156,9 +3207,9 @@ void main() {
   testWidgets('Can align to center within center', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
-        child: Container(
+        child: const SizedBox(
           width: 300.0,
-          child: const Center(
+          child: Center(
             child: TextField(
               textAlign: TextAlign.center,
               decoration: null,
@@ -3477,7 +3528,7 @@ void main() {
 
     await tester.pumpWidget(
       overlay(
-        child: Container(
+        child: SizedBox(
           width: 100.0,
           child: TextField(
             controller: controller,
@@ -3497,8 +3548,11 @@ void main() {
     // scrolls to make the caret visible.
     scrollableState = tester.firstState(find.byType(Scrollable));
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    editableTextState.textEditingValue = editableTextState.textEditingValue.copyWith(
-      selection: TextSelection.collapsed(offset: longText.length),
+    editableTextState.userUpdateTextEditingValue(
+      editableTextState.textEditingValue.copyWith(
+        selection: TextSelection.collapsed(offset: longText.length),
+      ),
+      null,
     );
 
     await tester.pump(); // TODO(ianh): Figure out why this extra pump is needed.
@@ -3514,11 +3568,9 @@ void main() {
 
     await tester.pumpWidget(
       overlay(
-        child: Container(
-          child: TextField(
-            controller: controller,
-            maxLines: 6,
-          ),
+        child: TextField(
+          controller: controller,
+          maxLines: 6,
         ),
       ),
     );
@@ -3533,8 +3585,11 @@ void main() {
     // Move the caret to the end of the text and check that the text field
     // scrolls to make the caret visible.
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    editableTextState.textEditingValue = editableTextState.textEditingValue.copyWith(
-      selection: const TextSelection.collapsed(offset: tallText.length),
+    editableTextState.userUpdateTextEditingValue(
+      editableTextState.textEditingValue.copyWith(
+        selection: const TextSelection.collapsed(offset: tallText.length),
+      ),
+      null,
     );
     await tester.pump();
     await skipPastScrollingAnimation(tester);
@@ -3552,7 +3607,7 @@ void main() {
 
     await tester.pumpWidget(
       overlay(
-        child: Container(
+        child: SizedBox(
           width: 100.0,
           child: TextField(
             controller: controller,
@@ -8120,9 +8175,9 @@ void main() {
   testWidgets('Caret center position', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
-        child: Container(
+        child: const SizedBox(
           width: 300.0,
-          child: const TextField(
+          child: TextField(
             textAlign: TextAlign.center,
             decoration: null,
           ),
@@ -8160,9 +8215,9 @@ void main() {
   testWidgets('Caret indexes into trailing whitespace center align', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
-        child: Container(
+        child: const SizedBox(
           width: 300.0,
-          child: const TextField(
+          child: TextField(
             textAlign: TextAlign.center,
             decoration: null,
           ),
@@ -8779,7 +8834,7 @@ void main() {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Container(
+              SizedBox(
                 width: 100.0,
                 child: TextField(
                   controller: controller1,
@@ -8790,21 +8845,21 @@ void main() {
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    Container(
+                    SizedBox(
                       width: 100.0,
                       child: TextField(
                         controller: controller2,
                         focusNode: focusNode2,
                       ),
                     ),
-                    Container(
+                    SizedBox(
                       width: 100.0,
                       child: TextField(
                         controller: controller3,
                         focusNode: focusNode3,
                       ),
                     ),
-                    Container(
+                    SizedBox(
                       width: 100.0,
                       child: TextField(
                         controller: controller4,
@@ -8813,7 +8868,7 @@ void main() {
                     ),
                   ],
                 ),
-              Container(
+              SizedBox(
                 width: 100.0,
                 child: TextField(
                   controller: controller5,
@@ -9083,7 +9138,7 @@ void main() {
         child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setter) {
             setState = setter;
-            return Container(
+            return SizedBox(
               width: isWide ? wideWidth : narrowWidth,
               child: TextField(
                 key: textFieldKey,

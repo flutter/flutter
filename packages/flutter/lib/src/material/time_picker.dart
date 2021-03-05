@@ -159,7 +159,7 @@ class _TimePickerHeader extends StatelessWidget {
         controls = Column(
           children: <Widget>[
             const SizedBox(height: 16.0),
-            Container(
+            SizedBox(
               height: kMinInteractiveDimension * 2,
               child: Row(
                 children: <Widget>[
@@ -209,7 +209,7 @@ class _TimePickerHeader extends StatelessWidget {
                   orientation: orientation,
                   onChanged: onChanged,
                 ),
-              Container(
+              SizedBox(
                 height: kMinInteractiveDimension * 2,
                 child: Row(
                   // Hour/minutes should not change positions in RTL locales.
@@ -287,7 +287,7 @@ class _HourMinuteControl extends StatelessWidget {
     final ShapeBorder shape = timePickerTheme.hourMinuteShape ?? _kDefaultShape;
 
     final Set<MaterialState> states = isSelected ? <MaterialState>{MaterialState.selected} : <MaterialState>{};
-    return Container(
+    return SizedBox(
       height: _kTimePickerHeaderControlHeight,
       child: Material(
         color: MaterialStateProperty.resolveAs(backgroundColor, states),
@@ -610,7 +610,7 @@ class _DayPeriodControl extends StatelessWidget {
         result = _DayPeriodInputPadding(
           minSize: const Size(width, kMinInteractiveDimension * 2),
           orientation: orientation,
-          child: Container(
+          child: SizedBox(
             width: width,
             height: _kTimePickerHeaderControlHeight,
             child: Material(
@@ -637,7 +637,7 @@ class _DayPeriodControl extends StatelessWidget {
         result = _DayPeriodInputPadding(
           minSize: const Size(0.0, kMinInteractiveDimension),
           orientation: orientation,
-          child: Container(
+          child: SizedBox(
             height: 40.0,
             child: Material(
               clipBehavior: Clip.antiAlias,

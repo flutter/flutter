@@ -120,6 +120,7 @@ class FlutterOptions {
   static const String kAnalyzeSize = 'analyze-size';
   static const String kNullAssertions = 'null-assertions';
   static const String kAndroidGradleDaemon = 'android-gradle-daemon';
+  static const String kDeferredComponents = 'deferred-components';
 }
 
 abstract class FlutterCommand extends Command<void> {

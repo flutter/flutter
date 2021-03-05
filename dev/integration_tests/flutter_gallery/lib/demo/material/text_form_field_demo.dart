@@ -26,6 +26,7 @@ class PersonData {
 
 class PasswordField extends StatefulWidget {
   const PasswordField({
+    Key? key,
     this.fieldKey,
     this.hintText,
     this.labelText,
@@ -33,7 +34,7 @@ class PasswordField extends StatefulWidget {
     this.onSaved,
     this.validator,
     this.onFieldSubmitted,
-  });
+  }) : super(key: key);
 
   final Key? fieldKey;
   final String? hintText;

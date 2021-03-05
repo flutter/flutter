@@ -226,6 +226,24 @@ abstract class RawKeyEventData {
   /// interacting with an input method editor (IME).
   /// {@endtemplate}
   String get keyLabel;
+
+  /// Whether a key down event, and likewise its accompanying key up event,
+  /// should be disapatched.
+  ///
+  /// Certain events on some platforms should not be dispatched to listeners
+  /// according to Flutter's event model. For example, on macOS, Fn keys are
+  /// skipped to be consistant with other platform. On Win32, events dispatched
+  /// for IME (`VK_PROCESSKEY`) are also skipped.
+  ///
+  /// This method will be called upon every down events. By default, this method
+  /// always return true. Subclasses should override this method to define the
+  /// filtering rule for the platform. If this method returns false for an event
+  /// message, the event will not be dispatched to listeners, but respond with
+  /// "handled: true" immediately. Moreover, the following up event with the
+  /// same physical key will also be skipped.
+  bool shouldDispatchEvent() {
+    return true;
+  }
 }
 
 /// Defines the interface for raw key events.
@@ -614,23 +632,27 @@ class RawKeyboard {
 
   Future<dynamic> _handleKeyEvent(dynamic message) async {
     final RawKeyEvent event = RawKeyEvent.fromMessage(message as Map<String, dynamic>);
-    if (event.data is RawKeyEventDataMacOs && event.logicalKey == LogicalKeyboardKey.fn) {
-      // On macOS laptop keyboards, the fn key is used to generate home/end and
-      // f1-f12, but it ALSO generates a separate down/up event for the fn key
-      // itself. Other platforms hide the fn key, and just produce the key that
-      // it is combined with, so to keep it possible to write cross platform
-      // code that looks at which keys are pressed, the fn key is ignored on
-      // macOS.
-      return;
-    }
+    bool shouldDispatch = true;
     if (event is RawKeyDownEvent) {
-      _keysPressed[event.physicalKey] = event.logicalKey;
+      if (event.data.shouldDispatchEvent()) {
+        _keysPressed[event.physicalKey] = event.logicalKey;
+      } else {
+        shouldDispatch = false;
+        _hiddenKeysPressed.add(event.physicalKey);
+      }
+    } else if (event is RawKeyUpEvent) {
+      if (!_hiddenKeysPressed.contains(event.physicalKey)) {
+        // Use the physical key in the key up event to find the physical key from
+        // the corresponding key down event and remove it, even if the logical
+        // keys don't match.
+        _keysPressed.remove(event.physicalKey);
+      } else {
+        _hiddenKeysPressed.remove(event.physicalKey);
+        shouldDispatch = false;
+      }
     }
-    if (event is RawKeyUpEvent) {
-      // Use the physical key in the key up event to find the physical key from
-      // the corresponding key down event and remove it, even if the logical
-      // keys don't match.
-      _keysPressed.remove(event.physicalKey);
+    if (!shouldDispatch) {
+      return <String, dynamic>{ 'handled': true };
     }
     // Make sure that the modifiers reflect reality, in case a modifier key was
     // pressed/released while the app didn't have focus.
@@ -742,6 +764,7 @@ class RawKeyboard {
   }
 
   final Map<PhysicalKeyboardKey, LogicalKeyboardKey> _keysPressed = <PhysicalKeyboardKey, LogicalKeyboardKey>{};
+  final Set<PhysicalKeyboardKey> _hiddenKeysPressed = <PhysicalKeyboardKey>{};
 
   /// Returns the set of keys currently pressed.
   Set<LogicalKeyboardKey> get keysPressed => _keysPressed.values.toSet();

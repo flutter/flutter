@@ -105,12 +105,12 @@ Future<void> _testConstrainedLabel(
   await tester.pumpWidget(
     _wrapForChip(
       child: Center(
-        child: Container(
+        child: SizedBox(
           width: chipParentWidth,
           height: chipParentHeight,
           child: Chip(
             avatar: avatar,
-            label: Container(
+            label: SizedBox(
               key: labelKey,
               width: labelWidth,
               height: labelHeight,
@@ -321,13 +321,13 @@ void main() {
       await tester.pumpWidget(
         _wrapForChip(
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 500.0,
               height: 500.0,
               child: Column(
                 children: <Widget>[
                   Chip(
-                    label: Container(
+                    label: SizedBox(
                       key: labelKey,
                       width: labelWidth,
                       height: labelHeight,
@@ -396,7 +396,7 @@ void main() {
       Widget chipBuilder (String text, {Widget? avatar, VoidCallback? onDeleted}) {
         return MaterialApp(
           home: Scaffold(
-            body: Container(
+            body: SizedBox(
               width: 150,
               child: Column(
                 children: <Widget>[
@@ -634,7 +634,7 @@ void main() {
             ),
             Chip(
               avatar: const CircleAvatar(child: Text('B')),
-              label: Container(key: keyB, width: 10.0, height: 10.0),
+              label: SizedBox(key: keyB, width: 10.0, height: 10.0),
             ),
           ],
         ),
@@ -662,7 +662,7 @@ void main() {
         child: Column(
           children: <Widget>[
             Chip(
-              avatar: Container(key: keyA, width: 20.0, height: 20.0),
+              avatar: SizedBox(key: keyA, width: 20.0, height: 20.0),
               label: const Text('Chip A'),
             ),
           ],
@@ -680,7 +680,7 @@ void main() {
         child: Column(
           children: <Widget>[
             Chip(
-              deleteIcon: Container(key: keyA, width: 20.0, height: 20.0),
+              deleteIcon: SizedBox(key: keyA, width: 20.0, height: 20.0),
               label: const Text('Chip A'),
               onDeleted: () { },
             ),
@@ -706,7 +706,7 @@ void main() {
                   child: Center(
                     child: Chip(
                       avatar: Placeholder(key: keyA),
-                      label: Container(
+                      label: SizedBox(
                         key: keyB,
                         width: 40.0,
                         height: 40.0,
@@ -743,7 +743,7 @@ void main() {
                   child: Center(
                     child: Chip(
                       avatar: Placeholder(key: keyA),
-                      label: Container(
+                      label: SizedBox(
                         key: keyB,
                         width: 40.0,
                         height: 40.0,
@@ -1226,13 +1226,13 @@ void main() {
     // With avatar, but not selectable.
     final UniqueKey avatarKey = UniqueKey();
     await pushChip(
-      avatar: Container(width: 40.0, height: 40.0, key: avatarKey),
+      avatar: SizedBox(width: 40.0, height: 40.0, key: avatarKey),
     );
     expect(tester.getSize(find.byType(RawChip)), equals(const Size(104.0, 48.0)));
 
     // Turn on selection.
     await pushChip(
-      avatar: Container(width: 40.0, height: 40.0, key: avatarKey),
+      avatar: SizedBox(width: 40.0, height: 40.0, key: avatarKey),
       selectable: true,
     );
     await tester.pumpAndSettle();
@@ -1384,7 +1384,7 @@ void main() {
 
     final UniqueKey avatarKey = UniqueKey();
     await pushChip(
-      avatar: Container(width: 40.0, height: 40.0, key: avatarKey),
+      avatar: SizedBox(width: 40.0, height: 40.0, key: avatarKey),
       selectable: true,
     );
     await tester.pumpAndSettle();

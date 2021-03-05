@@ -271,7 +271,7 @@ void main() {
           controller: controller,
           child: Column(
             children: List<Widget>.generate(30, (int i) {
-              return Container(
+              return SizedBox(
                 height: 200.0,
                 child: Text('Tile $i'),
               );
@@ -442,14 +442,14 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             width: 300.0,
             child: SingleChildScrollView(
               controller: ScrollController(initialScrollOffset: 300.0),
               child: Column(
                 children: children = List<Widget>.generate(20, (int i) {
-                  return Container(
+                  return SizedBox(
                     height: 100.0,
                     width: 300.0,
                     child: Text('Tile $i'),
@@ -484,7 +484,7 @@ void main() {
 
   testWidgets('SingleChildScrollView getOffsetToReveal - up', (WidgetTester tester) async {
     final List<Widget> children = List<Widget>.generate(20, (int i) {
-      return Container(
+      return SizedBox(
         height: 100.0,
         width: 300.0,
         child: Text('Tile $i'),
@@ -494,7 +494,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             width: 300.0,
             child: SingleChildScrollView(
@@ -536,7 +536,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 300.0,
             width: 200.0,
             child: SingleChildScrollView(
@@ -544,7 +544,7 @@ void main() {
               controller: ScrollController(initialScrollOffset: 300.0),
               child: Row(
                 children: children = List<Widget>.generate(20, (int i) {
-                  return Container(
+                  return SizedBox(
                     height: 300.0,
                     width: 100.0,
                     child: Text('Tile $i'),
@@ -579,7 +579,7 @@ void main() {
 
   testWidgets('SingleChildScrollView getOffsetToReveal - left', (WidgetTester tester) async {
     final List<Widget> children = List<Widget>.generate(20, (int i) {
-      return Container(
+      return SizedBox(
         height: 300.0,
         width: 100.0,
         child: Text('Tile $i'),
@@ -590,7 +590,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 300.0,
             width: 200.0,
             child: SingleChildScrollView(
@@ -661,7 +661,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             width: 200.0,
             child: SingleChildScrollView(
@@ -798,24 +798,24 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: Container(
+            child: SizedBox(
               height: 200.0,
               width: 300.0,
               child: SingleChildScrollView(
                 controller: outer,
                 child: Column(
                   children: <Widget>[
-                    Container(
+                    const SizedBox(
                       height: 200.0,
                     ),
-                    Container(
+                    SizedBox(
                       height: 200.0,
                       width: 300.0,
                       child: SingleChildScrollView(
                         controller: inner,
                         child: Column(
                           children: children = List<Widget>.generate(10, (int i) {
-                            return Container(
+                            return SizedBox(
                               height: 100.0,
                               width: 300.0,
                               child: Text('$i'),
@@ -824,7 +824,7 @@ void main() {
                         ),
                       ),
                     ),
-                    Container(
+                    const SizedBox(
                       height: 200.0,
                     ),
                   ],
@@ -934,7 +934,7 @@ void main() {
               keyboardDismissBehavior: behavior,
               child: Column(
                 children: focusNodes.map((FocusNode focusNode) {
-                  return Container(
+                  return SizedBox(
                     height: 50,
                     child: TextField(focusNode: focusNode),
                   );

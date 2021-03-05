@@ -160,9 +160,7 @@ void main() {
             return Builder(
               builder: (BuildContext context) {
                 log.add(i);
-                return Container(
-                  child: Text('$i'),
-                );
+                return Text('$i');
               }
             );
           }),
@@ -254,9 +252,7 @@ void main() {
             return Builder(
               builder: (BuildContext context) {
                 log.add(i);
-                return Container(
-                  child: Text('$i'),
-                );
+                return Text('$i');
               }
             );
           }),
@@ -292,9 +288,7 @@ void main() {
             return Builder(
               builder: (BuildContext context) {
                 log.add(i);
-                return Container(
-                  child: Text('$i'),
-                );
+                return Text('$i');
               }
             );
           }),
@@ -353,9 +347,7 @@ void main() {
             return Builder(
               builder: (BuildContext context) {
                 log.add(i);
-                return Container(
-                  child: Text('$i'),
-                );
+                return Text('$i');
               }
             );
           }),
@@ -391,9 +383,7 @@ void main() {
             return Builder(
               builder: (BuildContext context) {
                 log.add(i);
-                return Container(
-                  child: Text('$i'),
-                );
+                return Text('$i');
               }
             );
           }),
@@ -454,9 +444,7 @@ void main() {
             child: GridView.count(
               crossAxisCount: 4,
               children: List<Widget>.generate(20, (int i) {
-                return Container(
-                  child: Text('$i'),
-                );
+                return Text('$i');
               }),
             ),
           ),
@@ -477,9 +465,7 @@ void main() {
             crossAxisCount: 4,
             shrinkWrap: true,
             children: List<Widget>.generate(20, (int i) {
-              return Container(
-                child: Text('$i'),
-              );
+              return Text('$i');
             }),
           ),
         ),
@@ -501,9 +487,7 @@ void main() {
           shrinkWrap: true,
           itemCount: 20,
           itemBuilder: (BuildContext context, int index) {
-            return Container(
-              child: Text('$index'),
-            );
+            return Text('$index');
           },
         ),
       ),
@@ -523,9 +507,7 @@ void main() {
           ),
           shrinkWrap: true,
           itemBuilder: (BuildContext context, int index) {
-            return Container(
-              child: Text('$index'),
-            );
+            return Text('$index');
           },
         ),
       ),
@@ -743,9 +725,7 @@ void main() {
           children: List<Widget>.generate(20, (int i) {
             return Builder(
               builder: (BuildContext context) {
-                return Container(
-                  child: Text('$i'),
-                );
+                return Text('$i');
               }
             );
           }),
@@ -771,9 +751,7 @@ void main() {
           children: List<Widget>.generate(20, (int i) {
             return Builder(
               builder: (BuildContext context) {
-                return Container(
-                  child: Text('$i'),
-                );
+                return Text('$i');
               }
             );
           }),

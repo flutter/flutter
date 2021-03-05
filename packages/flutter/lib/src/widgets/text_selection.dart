@@ -205,12 +205,15 @@ abstract class TextSelectionControls {
     Clipboard.setData(ClipboardData(
       text: value.selection.textInside(value.text),
     ));
-    delegate.textEditingValue = TextEditingValue(
-      text: value.selection.textBefore(value.text)
-          + value.selection.textAfter(value.text),
-      selection: TextSelection.collapsed(
-        offset: value.selection.start
+    delegate.userUpdateTextEditingValue(
+      TextEditingValue(
+        text: value.selection.textBefore(value.text)
+            + value.selection.textAfter(value.text),
+        selection: TextSelection.collapsed(
+          offset: value.selection.start
+        )
       ),
+      SelectionChangedCause.toolBar,
     );
     delegate.bringIntoView(delegate.textEditingValue.selection.extent);
     delegate.hideToolbar();
@@ -241,9 +244,12 @@ abstract class TextSelectionControls {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         // Collapse the selection and hide the toolbar and handles.
-        delegate.textEditingValue = TextEditingValue(
-          text: value.text,
-          selection: TextSelection.collapsed(offset: value.selection.end),
+        delegate.userUpdateTextEditingValue(
+          TextEditingValue(
+            text: value.text,
+            selection: TextSelection.collapsed(offset: value.selection.end),
+          ),
+          SelectionChangedCause.toolBar,
         );
         delegate.hideToolbar();
         return;
@@ -265,13 +271,16 @@ abstract class TextSelectionControls {
     final TextEditingValue value = delegate.textEditingValue; // Snapshot the input before using `await`.
     final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
     if (data != null) {
-      delegate.textEditingValue = TextEditingValue(
-        text: value.selection.textBefore(value.text)
-            + data.text!
-            + value.selection.textAfter(value.text),
-        selection: TextSelection.collapsed(
-          offset: value.selection.start + data.text!.length
+      delegate.userUpdateTextEditingValue(
+        TextEditingValue(
+          text: value.selection.textBefore(value.text)
+              + data.text!
+              + value.selection.textAfter(value.text),
+          selection: TextSelection.collapsed(
+              offset: value.selection.start + data.text!.length
+          ),
         ),
+        SelectionChangedCause.toolBar,
       );
     }
     delegate.bringIntoView(delegate.textEditingValue.selection.extent);
@@ -286,12 +295,15 @@ abstract class TextSelectionControls {
   /// This is called by subclasses when their select-all affordance is activated
   /// by the user.
   void handleSelectAll(TextSelectionDelegate delegate) {
-    delegate.textEditingValue = TextEditingValue(
-      text: delegate.textEditingValue.text,
-      selection: TextSelection(
-        baseOffset: 0,
-        extentOffset: delegate.textEditingValue.text.length,
+    delegate.userUpdateTextEditingValue(
+      TextEditingValue(
+        text: delegate.textEditingValue.text,
+        selection: TextSelection(
+          baseOffset: 0,
+          extentOffset: delegate.textEditingValue.text.length,
+        ),
       ),
+      SelectionChangedCause.toolBar,
     );
     delegate.bringIntoView(delegate.textEditingValue.selection.extent);
   }
@@ -450,13 +462,16 @@ class TextSelectionOverlay {
 
   /// Builds the handles by inserting them into the [context]'s overlay.
   void showHandles() {
-    assert(_handles == null);
+    if (_handles != null)
+      return;
+
     _handles = <OverlayEntry>[
       OverlayEntry(builder: (BuildContext context) => _buildHandle(context, _TextSelectionHandlePosition.start)),
       OverlayEntry(builder: (BuildContext context) => _buildHandle(context, _TextSelectionHandlePosition.end)),
     ];
 
-    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!.insertAll(_handles!);
+    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!
+      .insertAll(_handles!);
   }
 
   /// Destroys the handles by removing them from overlay.
@@ -636,10 +651,13 @@ class TextSelectionOverlay {
         textPosition = newSelection.base;
         break;
       case _TextSelectionHandlePosition.end:
-        textPosition =newSelection.extent;
+        textPosition = newSelection.extent;
         break;
     }
-    selectionDelegate!.textEditingValue = _value.copyWith(selection: newSelection, composing: TextRange.empty);
+    selectionDelegate!.userUpdateTextEditingValue(
+      _value.copyWith(selection: newSelection, composing: TextRange.empty),
+      SelectionChangedCause.drag,
+    );
     selectionDelegate!.bringIntoView(textPosition);
   }
 }

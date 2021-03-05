@@ -37,7 +37,7 @@ void main() {
     expect(log, equals(<dynamic>[false, '-', false]));
   });
 
-  testWidgets('SwitchListTile control test', (WidgetTester tester) async {
+  testWidgets('SwitchListTile semantics test', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(wrap(
       child: Column(

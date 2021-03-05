@@ -280,8 +280,18 @@ abstract class UnpackIOS extends Target {
     if (environment.defines[kIosArchs] == null) {
       throw MissingDefineException(kIosArchs, name);
     }
+    if (environment.defines[kBitcodeFlag] == null) {
+      throw MissingDefineException(kBitcodeFlag, name);
+    }
     await _copyFramework(environment);
-    await _thinFramework(environment);
+
+    final File frameworkBinary = environment.outputDir.childDirectory('Flutter.framework').childFile('Flutter');
+    final String frameworkBinaryPath = frameworkBinary.path;
+    if (!frameworkBinary.existsSync()) {
+      throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
+    }
+    await _thinFramework(environment, frameworkBinaryPath);
+    await _bitcodeStripFramework(environment, frameworkBinaryPath);
   }
 
   Future<void> _copyFramework(Environment environment) async {
@@ -312,37 +322,30 @@ abstract class UnpackIOS extends Target {
   }
 
   /// Destructively thin Flutter.framework to include only the specified architectures.
-  Future<void> _thinFramework(Environment environment) async {
-    final Directory frameworkDirectory = environment.outputDir;
-
-    final File flutterFramework = frameworkDirectory.childDirectory('Flutter.framework').childFile('Flutter');
-    final String binaryPath = flutterFramework.path;
-    if (!flutterFramework.existsSync()) {
-      throw Exception('Binary $binaryPath does not exist, cannot thin');
-    }
+  Future<void> _thinFramework(Environment environment, String frameworkBinaryPath) async {
     final String archs = environment.defines[kIosArchs];
     final List<String> archList = archs.split(' ').toList();
     final ProcessResult infoResult = environment.processManager.runSync(<String>[
       'lipo',
       '-info',
-      binaryPath,
+      frameworkBinaryPath,
     ]);
     final String lipoInfo = infoResult.stdout as String;
 
     final ProcessResult verifyResult = environment.processManager.runSync(<String>[
       'lipo',
-      binaryPath,
+      frameworkBinaryPath,
       '-verify_arch',
       ...archList
     ]);
 
     if (verifyResult.exitCode != 0) {
-      throw Exception('Binary $binaryPath does not contain $archs. Running lipo -info:\n$lipoInfo');
+      throw Exception('Binary $frameworkBinaryPath does not contain $archs. Running lipo -info:\n$lipoInfo');
     }
 
     // Skip thinning for non-fat executables.
     if (lipoInfo.startsWith('Non-fat file:')) {
-      environment.logger.printTrace('Skipping lipo for non-fat file $binaryPath');
+      environment.logger.printTrace('Skipping lipo for non-fat file $frameworkBinaryPath');
       return;
     }
 
@@ -350,17 +353,36 @@ abstract class UnpackIOS extends Target {
     final ProcessResult extractResult = environment.processManager.runSync(<String>[
       'lipo',
       '-output',
-      binaryPath,
+      frameworkBinaryPath,
       for (final String arch in archList)
         ...<String>[
           '-extract',
           arch,
         ],
-      ...<String>[binaryPath],
+      ...<String>[frameworkBinaryPath],
     ]);
 
     if (extractResult.exitCode != 0) {
-      throw Exception('Failed to extract $archs for $binaryPath.\n${extractResult.stderr}\nRunning lipo -info:\n$lipoInfo');
+      throw Exception('Failed to extract $archs for $frameworkBinaryPath.\n${extractResult.stderr}\nRunning lipo -info:\n$lipoInfo');
+    }
+  }
+
+  /// Destructively strip bitcode from the framework, if needed.
+  Future<void> _bitcodeStripFramework(Environment environment, String frameworkBinaryPath) async {
+    if (environment.defines[kBitcodeFlag] == 'true') {
+      return;
+    }
+    final ProcessResult stripResult = environment.processManager.runSync(<String>[
+      'xcrun',
+      'bitcode_strip',
+      frameworkBinaryPath,
+      '-m', // leave the bitcode marker.
+      '-o',
+      frameworkBinaryPath,
+    ]);
+
+    if (stripResult.exitCode != 0) {
+      throw Exception('Failed to strip bitcode for $frameworkBinaryPath.\n${stripResult.stderr}');
     }
   }
 }

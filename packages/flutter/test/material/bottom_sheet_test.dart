@@ -487,9 +487,7 @@ void main() {
 
 
     showModalBottomSheet<void>(context: scaffoldKey.currentContext!, builder: (BuildContext context) {
-      return Container(
-        child: const Text('BottomSheet'),
-      );
+      return const Text('BottomSheet');
     });
 
     await tester.pump(); // bottom sheet show animation starts
@@ -548,9 +546,7 @@ void main() {
       shape: shape,
       clipBehavior: clipBehavior,
       builder: (BuildContext context) {
-        return Container(
-          child: const Text('BottomSheet'),
-        );
+        return const Text('BottomSheet');
       },
     );
 
@@ -587,9 +583,7 @@ void main() {
           builder: (_, ScrollController controller) {
             return SingleChildScrollView(
               controller: controller,
-              child: Container(
-                child: const Text('BottomSheet'),
-              ),
+              child: const Text('BottomSheet'),
             );
           },
         );
@@ -713,9 +707,7 @@ void main() {
       routeSettings: routeSettings,
       builder: (BuildContext context) {
         retrievedRouteSettings = ModalRoute.of(context)!.settings;
-        return Container(
-          child: const Text('BottomSheet'),
-        );
+        return const Text('BottomSheet');
       },
     );
 
@@ -743,14 +735,12 @@ void main() {
                     reverseDuration: const Duration(seconds: 2),
                   ),
                   builder: (BuildContext context) {
-                    return Container(
-                      child: const Text('BottomSheet'),
-                    );
+                    return const Text('BottomSheet');
                   },
                 );
               },
               behavior: HitTestBehavior.opaque,
-              child: Container(
+              child: const SizedBox(
                 height: 100.0,
                 width: 100.0,
               ),
@@ -802,18 +792,16 @@ void main() {
                     reverseDuration: const Duration(seconds: 2),
                   ),
                   builder: (BuildContext context) {
-                    return Container(
-                      child: MaterialButton(
-                        child: const Text('BottomSheet'),
-                        onPressed: () => Navigator.pop(context),
-                        key: tapTargetToClose,
-                      ),
+                    return MaterialButton(
+                      child: const Text('BottomSheet'),
+                      onPressed: () => Navigator.pop(context),
+                      key: tapTargetToClose,
                     );
                   },
                 );
               },
               behavior: HitTestBehavior.opaque,
-              child: Container(
+              child: const SizedBox(
                 height: 100.0,
                 width: 100.0,
               ),
