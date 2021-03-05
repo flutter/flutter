@@ -331,13 +331,6 @@ void main() {
       requiredArtifacts: DevelopmentArtifact.universal,
     );
     await artifact.updateInner(MockArtifactUpdater(), fileSystem, operatingSystemUtils);
-    final Directory dir = fileSystem.systemTempDirectory
-        .listSync(recursive: true)
-        .whereType<Directory>()
-        .singleWhere((Directory directory) => directory.basename == 'bin_dir', orElse: () => null);
-
-    expect(dir, isNotNull);
-    expect(dir.path, artifactDir.childDirectory('bin_dir').path);
     expect(unzippedFramework, exists);
     expect(staleFile, isNot(exists));
   });
