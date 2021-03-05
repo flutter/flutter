@@ -56,6 +56,12 @@ const String samplesIndexJson = '''
   { "id": "sample2" }
 ]''';
 
+const Platform localPlatform = LocalPlatform();
+
+final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', localPlatform.isWindows ? 'flutter.bat' : 'flutter');
+
+final String dartfmt = globals.fs.path.join(getFlutterRoot(), 'bin', 'cache', 'dart-sdk', 'bin', localPlatform.isWindows ? 'dartfmt.bat' : 'dartfmt');
+
 void main() {
   Directory tempDir;
   Directory projectDir;
@@ -195,7 +201,6 @@ void main() {
 
   testUsingContext('cannot create a project in flutter root', () async {
     Cache.flutterRoot = '../..';
-    final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', globals.platform.isWindows ? 'flutter.bat' : 'flutter');
     final ProcessResult exec = await Process.run(
       flutterBin,
       <String>[
@@ -1038,11 +1043,7 @@ void main() {
         final String original = file.readAsStringSync();
 
         final Process process = await Process.start(
-          globals.fs.path.join(
-            globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
-            'bin',
-            globals.platform.isWindows ? 'dartfmt.bat' : 'dartfmt',
-          ),
+          dartfmt,
           <String>[file.path],
           workingDirectory: projectDir.path,
         );
@@ -1142,11 +1143,7 @@ void main() {
         final String original = file.readAsStringSync();
 
         final Process process = await Process.start(
-          globals.fs.path.join(
-            globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
-            'bin',
-            globals.platform.isWindows ? 'dartfmt.bat' : 'dartfmt',
-          ),
+          dartfmt,
           <String>[file.path],
           workingDirectory: projectDir.path,
         );
