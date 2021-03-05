@@ -40,10 +40,16 @@ const String frameworkRevision = '12345678';
 const String frameworkChannel = 'omega';
 const String _kDisabledPlatformRequestedMessage = 'currently not supported on your local environment.';
 
-final Generator _kNoColorTerminalPlatform = () => FakePlatform(stdoutSupportsAnsi: false, operatingSystem: 'linux');
+final Generator _kNoColorTerminalPlatform = () => FakePlatform(
+  stdoutSupportsAnsi: false,
+  operatingSystem: 'linux',
+  environment: <String, String>{},
+);
+
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
 };
+
 const String samplesIndexJson = '''
 [
   { "id": "sample1" },
