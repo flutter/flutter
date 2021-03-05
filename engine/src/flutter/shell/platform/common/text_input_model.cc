@@ -239,6 +239,24 @@ bool TextInputModel::MoveCursorToEnd() {
   return true;
 }
 
+bool TextInputModel::SelectToBeginning() {
+  size_t min_pos = editable_range().start();
+  if (selection_.collapsed() && selection_.position() == min_pos) {
+    return false;
+  }
+  selection_ = TextRange(selection_.base(), min_pos);
+  return true;
+}
+
+bool TextInputModel::SelectToEnd() {
+  size_t max_pos = editable_range().end();
+  if (selection_.collapsed() && selection_.position() == max_pos) {
+    return false;
+  }
+  selection_ = TextRange(selection_.base(), max_pos);
+  return true;
+}
+
 bool TextInputModel::MoveCursorForward() {
   // If there's a selection, move to the end of the selection.
   if (!selection_.collapsed()) {
