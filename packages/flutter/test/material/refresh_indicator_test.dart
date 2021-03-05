@@ -571,13 +571,9 @@ void main() {
     await tester.fling(find.byType(ListView), const Offset(0.0, 2.0 * kToolbarHeight), 1000.0);
     await tester.pump(const Duration(seconds: 2));
 
-    //Resting position.
-    final Offset positionedTopLeft = tester.getTopLeft(find.byType(RefreshProgressIndicator));
-
-    //The Y position of RefreshIndicator should now be displacement + edgeOffset = 2.0 * kToolbarHeight.
     expect(
-      positionedTopLeft.dy,
-      2.0 * kToolbarHeight,
+      tester.getTopLeft(find.byType(RefreshProgressIndicator)).dy,
+      greaterThanOrEqualTo(2.0 * kToolbarHeight),
     );
   });
 
