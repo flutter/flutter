@@ -326,17 +326,6 @@ void _overwriteOldCodepoints(File newCodepointsFile, File oldCodepointsFile) {
 }
 
 class _Icon {
-  static const List<String> styleSuffixes = ['', '_outlined', '_rounded', '_sharp'];
-
-  String id;            // e.g. 5g, 5g_outlined, 5g_rounded, 5g_sharp
-  String shortId;       // e.g. 5g
-  String flutterId;     // e.g. five_g, five_g_outlined, five_g_rounded, five_g_sharp
-  String name;          // e.g. five g, five g outlined, five g rounded, five g sharp
-  String hexCodepoint;  // e.g. e547
-
-  // The suffix for the 'material-icons' HTML class.
-  String htmlSuffix;
-
   // Parse tokenPair (e.g. {"6_ft_apart_outlined": "e004"}).
   _Icon(MapEntry<String, String> tokenPair) {
     id = tokenPair.key;
@@ -365,6 +354,17 @@ class _Icon {
 
     name = id.replaceAll('_', ' ');
   }
+
+  static const List<String> styleSuffixes = <String>['', '_outlined', '_rounded', '_sharp'];
+
+  String id;            // e.g. 5g, 5g_outlined, 5g_rounded, 5g_sharp
+  String shortId;       // e.g. 5g
+  String flutterId;     // e.g. five_g, five_g_outlined, five_g_rounded, five_g_sharp
+  String name;          // e.g. five g, five g outlined, five g rounded, five g sharp
+  String hexCodepoint;  // e.g. e547
+
+  // The suffix for the 'material-icons' HTML class.
+  String htmlSuffix;
 
   String get mirroredInRTL => _iconsMirroredWhenRTL.contains(shortId) ? ', matchTextDirection: true' : '';
 
