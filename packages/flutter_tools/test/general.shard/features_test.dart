@@ -448,6 +448,34 @@ void main() {
 
       expect(featureFlags.isWindowsEnabled, true);
     });
+
+    // Windows UWP desktop
+
+    testWithoutContext('flutter windows UWP desktop off by default on master', () {
+      when(mockFlutterVerion.channel).thenReturn('master');
+
+      expect(featureFlags.isWindowsUWPEnabled, false);
+    });
+
+    testWithoutContext('flutter windows UWP desktop enabled with config on master', () {
+      when(mockFlutterVerion.channel).thenReturn('master');
+      testConfig.setValue('enable-windows-uwp-desktop', true);
+
+      expect(featureFlags.isWindowsUWPEnabled, true);
+    });
+
+    testWithoutContext('flutter windows UWP desktop off by default on stable', () {
+      when(mockFlutterVerion.channel).thenReturn('stable');
+
+      expect(featureFlags.isWindowsUWPEnabled, false);
+    });
+
+    testWithoutContext('flutter windows UWP desktop not enabled with config on stable', () {
+      when(mockFlutterVerion.channel).thenReturn('stable');
+      testConfig.setValue('enable-windows-uwp-desktop', true);
+
+      expect(featureFlags.isWindowsUWPEnabled, false);
+    });
   });
 }
 
