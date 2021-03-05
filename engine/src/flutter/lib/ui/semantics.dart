@@ -38,6 +38,7 @@ class SemanticsAction {
   static const int _kDismissIndex = 1 << 18;
   static const int _kMoveCursorForwardByWordIndex = 1 << 19;
   static const int _kMoveCursorBackwardByWordIndex = 1 << 20;
+  static const int _kSetText = 1 << 21;
   // READ THIS: if you add an action here, you MUST update the
   // numSemanticsActions value in testing/dart/semantics_test.dart, or tests
   // will fail.
@@ -114,6 +115,14 @@ class SemanticsAction {
   /// The action includes a boolean argument, which indicates whether the cursor
   /// movement should extend (or start) a selection.
   static const SemanticsAction moveCursorBackwardByCharacter = SemanticsAction._(_kMoveCursorBackwardByCharacterIndex);
+
+  /// Replaces the current text in the text field.
+  ///
+  /// This is for example used by the text editing in voice access.
+  ///
+  /// The action includes a string argument, which is the new text to
+  /// replace.
+  static const SemanticsAction setText = SemanticsAction._(_kSetText);
 
   /// Set the text selection to the given range.
   ///
@@ -218,6 +227,7 @@ class SemanticsAction {
     _kDismissIndex: dismiss,
     _kMoveCursorForwardByWordIndex: moveCursorForwardByWord,
     _kMoveCursorBackwardByWordIndex: moveCursorBackwardByWord,
+    _kSetText: setText,
   };
 
   @override
@@ -265,6 +275,8 @@ class SemanticsAction {
         return 'SemanticsAction.moveCursorForwardByWord';
       case _kMoveCursorBackwardByWordIndex:
         return 'SemanticsAction.moveCursorBackwardByWord';
+      case _kSetText:
+        return 'SemanticsAction.setText';
     }
     assert(false, 'Unhandled index: $index');
     return '';

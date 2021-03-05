@@ -29,6 +29,7 @@ class SemanticsAction {
   static const int _kDismissIndex = 1 << 18;
   static const int _kMoveCursorForwardByWordIndex = 1 << 19;
   static const int _kMoveCursorBackwardByWordIndex = 1 << 20;
+  static const int _kSetText = 1 << 21;
   final int index;
   static const SemanticsAction tap = SemanticsAction._(_kTapIndex);
   static const SemanticsAction longPress = SemanticsAction._(_kLongPressIndex);
@@ -57,6 +58,7 @@ class SemanticsAction {
       SemanticsAction._(_kMoveCursorForwardByWordIndex);
   static const SemanticsAction moveCursorBackwardByWord =
       SemanticsAction._(_kMoveCursorBackwardByWordIndex);
+  static const SemanticsAction setText = SemanticsAction._(_kSetText);
   static const Map<int, SemanticsAction> values = <int, SemanticsAction>{
     _kTapIndex: tap,
     _kLongPressIndex: longPress,
