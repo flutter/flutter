@@ -379,11 +379,9 @@ void main() {
           actions: <Type, Action<Intent>>{
             TestIntent: testAction,
           },
-          child: Container(
-            child: Actions(
-              actions: const <Type, Action<Intent>>{},
-              child: Container(key: containerKey),
-            ),
+          child: Actions(
+            actions: const <Type, Action<Intent>>{},
+            child: Container(key: containerKey),
           ),
         ),
       );
@@ -425,7 +423,7 @@ void main() {
                 },
                 onShowHoverHighlight: (bool value) => hovering = value,
                 onShowFocusHighlight: (bool value) => focusing = value,
-                child: Container(width: 100, height: 100, key: containerKey),
+                child: SizedBox(width: 100, height: 100, key: containerKey),
               ),
             ),
           ),
@@ -800,7 +798,7 @@ void main() {
                 },
                 onShowHoverHighlight: supplyCallbacks ? (bool value) => hovering = value : null,
                 onShowFocusHighlight: supplyCallbacks ? (bool value) => focusing = value : null,
-                child: Container(width: 100, height: 100, key: key),
+                child: SizedBox(width: 100, height: 100, key: key),
               ),
             ),
           ),

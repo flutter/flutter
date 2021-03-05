@@ -319,6 +319,7 @@ class ComparisonResult {
   /// Creates a new [ComparisonResult] for the current test.
   ComparisonResult({
     required this.passed,
+    required this.diffPercent,
     this.error,
     this.diffs,
   });
@@ -335,4 +336,7 @@ class ComparisonResult {
   /// values in the execution of the pixel test.
   // TODO(jonahwilliams): fix type signature when image is updated to support web.
   final Map<String, Object>? diffs;
+
+  /// The calculated percentage of pixel difference between two images.
+  final double diffPercent;
 }

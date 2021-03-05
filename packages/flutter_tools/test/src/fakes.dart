@@ -12,11 +12,14 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
 
 /// A fake implementation of the [DeviceLogReader].
@@ -442,4 +445,210 @@ class FakePub extends Fake implements Pub {
     String flutterRootOverride,
     bool checkUpToDate = false,
   }) async { }
+}
+
+class FakeFlutterVersion implements FlutterVersion {
+  @override
+  void fetchTagsAndUpdate() {  }
+
+  @override
+  String get channel => 'master';
+
+  @override
+  Future<void> checkFlutterVersionFreshness() async { }
+
+  @override
+  bool checkRevisionAncestry({String tentativeDescendantRevision, String tentativeAncestorRevision}) {
+    throw UnimplementedError();
+  }
+
+  @override
+  String get dartSdkVersion => '12';
+
+  @override
+  String get engineRevision => '42.2';
+
+  @override
+  String get engineRevisionShort => '42';
+
+  @override
+  Future<void> ensureVersionFile() async { }
+
+  @override
+  String get frameworkAge => null;
+
+  @override
+  String get frameworkCommitDate => null;
+
+  @override
+  String get frameworkDate => null;
+
+  @override
+  String get frameworkRevision => null;
+
+  @override
+  String get frameworkRevisionShort => null;
+
+  @override
+  String get frameworkVersion => null;
+
+  @override
+  GitTagVersion get gitTagVersion => null;
+
+  @override
+  String getBranchName({bool redactUnknownBranches = false}) {
+    return 'master';
+  }
+
+  @override
+  String getVersionString({bool redactUnknownBranches = false}) {
+    return 'v0.0.0';
+  }
+
+  @override
+  String get repositoryUrl => null;
+
+  @override
+  Map<String, Object> toJson() {
+    return null;
+  }
+}
+
+// A test implementation of [FeatureFlags] that allows enabling without reading
+// config. If not otherwise specified, all values default to false.
+class TestFeatureFlags implements FeatureFlags {
+  TestFeatureFlags({
+    this.isLinuxEnabled = false,
+    this.isMacOSEnabled = false,
+    this.isWebEnabled = false,
+    this.isWindowsEnabled = false,
+    this.isSingleWidgetReloadEnabled = false,
+    this.isAndroidEnabled = true,
+    this.isIOSEnabled = true,
+    this.isFuchsiaEnabled = false,
+    this.isExperimentalInvalidationStrategyEnabled = false,
+  });
+
+  @override
+  final bool isLinuxEnabled;
+
+  @override
+  final bool isMacOSEnabled;
+
+  @override
+  final bool isWebEnabled;
+
+  @override
+  final bool isWindowsEnabled;
+
+  @override
+  final bool isSingleWidgetReloadEnabled;
+
+  @override
+  final bool isAndroidEnabled;
+
+  @override
+  final bool isIOSEnabled;
+
+  @override
+  final bool isFuchsiaEnabled;
+
+  @override
+  final bool isExperimentalInvalidationStrategyEnabled;
+
+  @override
+  bool isEnabled(Feature feature) {
+    switch (feature) {
+      case flutterWebFeature:
+        return isWebEnabled;
+      case flutterLinuxDesktopFeature:
+        return isLinuxEnabled;
+      case flutterMacOSDesktopFeature:
+        return isMacOSEnabled;
+      case flutterWindowsDesktopFeature:
+        return isWindowsEnabled;
+      case singleWidgetReload:
+        return isSingleWidgetReloadEnabled;
+      case flutterAndroidFeature:
+        return isAndroidEnabled;
+      case flutterIOSFeature:
+        return isIOSEnabled;
+      case flutterFuchsiaFeature:
+        return isFuchsiaEnabled;
+      case experimentalInvalidationStrategy:
+        return isExperimentalInvalidationStrategyEnabled;
+    }
+    return false;
+  }
+}
+
+class FakeStatusLogger extends DelegatingLogger {
+  FakeStatusLogger(Logger delegate) : super(delegate);
+
+  Status status;
+
+  @override
+  Status startProgress(String message, {Duration timeout, String progressId, bool multilineOutput = false, int progressIndicatorPadding = kDefaultStatusPadding}) {
+    return status;
+  }
+}
+
+class TestBuildSystem implements BuildSystem {
+  /// Create a [BuildSystem] instance that returns the provided results in order.
+  TestBuildSystem.list(this._results, [this._onRun])
+    : _exception = null,
+      _singleResult = null;
+
+  /// Create a [BuildSystem] instance that returns the provided result for every build
+  /// and buildIncremental request.
+  TestBuildSystem.all(this._singleResult, [this._onRun])
+    : _exception = null,
+      _results = <BuildResult>[];
+
+  /// Create a [BuildSystem] instance that always throws the provided error for every build
+  /// and buildIncremental request.
+  TestBuildSystem.error(this._exception)
+    : _singleResult = null,
+      _results = <BuildResult>[],
+      _onRun = null;
+
+  final List<BuildResult> _results;
+  final BuildResult _singleResult;
+  final dynamic _exception;
+  final void Function(Target target, Environment environment) _onRun;
+  int _nextResult = 0;
+
+  @override
+  Future<BuildResult> build(Target target, Environment environment, {BuildSystemConfig buildSystemConfig = const BuildSystemConfig()}) async {
+    if (_onRun != null) {
+      _onRun(target, environment);
+    }
+    if (_exception != null) {
+      throw _exception;
+    }
+    if (_singleResult != null) {
+      return _singleResult;
+    }
+    if (_nextResult >= _results.length) {
+      throw StateError('Unexpected buildIncremental request of ${target.name}');
+    }
+    return _results[_nextResult++];
+  }
+
+  @override
+  Future<BuildResult> buildIncremental(Target target, Environment environment, BuildResult previousBuild) async {
+    if (_onRun != null) {
+      _onRun(target, environment);
+    }
+    if (_exception != null) {
+      throw _exception;
+    }
+    if (_singleResult != null) {
+      return _singleResult;
+    }
+    if (_nextResult >= _results.length) {
+      throw StateError('Unexpected buildIncremental request of ${target.name}');
+    }
+    return _results[_nextResult++];
+  }
 }

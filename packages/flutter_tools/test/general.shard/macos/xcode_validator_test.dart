@@ -69,7 +69,7 @@ void main() {
       expect(result.type, ValidationType.partial);
       expect(result.messages.last.type, ValidationMessageType.hint);
       expect(result.messages.last.message, contains('Xcode 11.0.0 out of date (12.0.1 is recommended)'));
-    });
+    }, skip: true); // Unskip and update when minimum and required check versions diverge.
 
     testWithoutContext('Emits partial status when Xcode EULA not signed', () async {
       when(xcode.isInstalled).thenReturn(true);

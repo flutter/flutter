@@ -560,7 +560,7 @@ void main() {
   });
 
   group('close button', () {
-    Future<void> expectCloseIcon(WidgetTester tester, PageRoute<void> routeBuilder(), String type) async {
+    Future<void> expectCloseIcon(WidgetTester tester, PageRoute<void> Function() routeBuilder, String type) async {
       const IconData expectedIcon = Icons.close;
       await tester.pumpWidget(
         MaterialApp(
@@ -949,7 +949,7 @@ void main() {
                   ),
                 ),
               ],
-              drawer: Container(
+              drawer: SizedBox(
                 key: drawer,
                 width: 204.0,
                 child: SafeArea(
@@ -1051,7 +1051,7 @@ void main() {
                   ),
                 ),
               ],
-              drawer: Container(
+              drawer: SizedBox(
                 key: drawer,
                 width: 204.0,
                 child: SafeArea(
@@ -1831,9 +1831,7 @@ void main() {
               body: Center(
                 child: Container(),
               ),
-              bottomSheet: Container(
-                child: const Text('Bottom sheet'),
-              ),
+              bottomSheet: const Text('Bottom sheet'),
             ),
           ),
         );
@@ -2108,7 +2106,7 @@ void main() {
                   scaffoldMessenger = ScaffoldMessenger.maybeOf(context);
                 },
                 behavior: HitTestBehavior.opaque,
-                child: Container(
+                child: const SizedBox(
                   height: 100.0,
                   width: 100.0,
                 ),
@@ -2145,7 +2143,7 @@ void main() {
                   ScaffoldMessenger.of(context);
                 },
                 behavior: HitTestBehavior.opaque,
-                child: Container(
+                child: const SizedBox(
                   height: 100.0,
                   width: 100.0,
                 ),

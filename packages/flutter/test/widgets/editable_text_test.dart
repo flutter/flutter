@@ -1806,8 +1806,7 @@ void main() {
   });
 
   testWidgets(
-    'iOS autocorrection rectangle should appear on demand'
-    'and dismiss when the text changes or when focus is lost',
+    'iOS autocorrection rectangle should appear on demand and dismiss when the text changes or when focus is lost',
     (WidgetTester tester) async {
       const Color rectColor = Color(0xFFFF0000);
 
@@ -4682,19 +4681,17 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Align(
         alignment: Alignment.topLeft,
-        child: Container(
-          child: SizedBox(
-            width: 100,
-            child: EditableText(
-              showSelectionHandles: true,
-              controller: controller,
-              focusNode: FocusNode(),
-              style: Typography.material2018(platform: TargetPlatform.iOS).black.subtitle1!,
-              cursorColor: Colors.blue,
-              backgroundCursorColor: Colors.grey,
-              selectionControls: cupertinoTextSelectionControls,
-              keyboardType: TextInputType.text,
-            ),
+        child: SizedBox(
+          width: 100,
+          child: EditableText(
+            showSelectionHandles: true,
+            controller: controller,
+            focusNode: FocusNode(),
+            style: Typography.material2018(platform: TargetPlatform.iOS).black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: cupertinoTextSelectionControls,
+            keyboardType: TextInputType.text,
           ),
         ),
       ),

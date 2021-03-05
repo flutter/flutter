@@ -258,27 +258,6 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   }
 }
 
-/// This class is a work-around for the "is" operator not accepting a variable value as its right operand.
-///
-/// This class is deprecated. It will be deleted soon.
-// TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
-@Deprecated(
-  'TypeMatcher has been deprecated because it is no longer used in framework(only in deprecated methods). '
-  'This feature was deprecated after v1.12.1.'
-)
-@optionalTypeArgs
-class TypeMatcher<T> {
-  /// Creates a type matcher for the given type parameter.
-  @Deprecated(
-    'TypeMatcher has been deprecated because it is no longer used in framework(only in deprecated methods). '
-    'This feature was deprecated after v1.12.1.'
-  )
-  const TypeMatcher();
-
-  /// Returns true if the given object is of type `T`.
-  bool check(dynamic object) => object is T;
-}
-
 /// Describes the configuration for an [Element].
 ///
 /// Widgets are the central class hierarchy in the Flutter framework. A widget
@@ -2253,7 +2232,7 @@ abstract class BuildContext {
   /// because the element tree is no longer stable at that time. To refer to
   /// an ancestor from one of those methods, save a reference to the ancestor
   /// by calling [visitAncestorElements] in [State.didChangeDependencies].
-  void visitAncestorElements(bool visitor(Element element));
+  void visitAncestorElements(bool Function(Element element) visitor);
 
   /// Walks the children of this widget.
   ///
@@ -2479,7 +2458,7 @@ class BuildOwner {
   ///
   /// This mechanism is used to ensure that, for instance, [State.dispose] does
   /// not call [State.setState].
-  void lockState(void callback()) {
+  void lockState(VoidCallback callback) {
     assert(callback != null);
     assert(_debugStateLockLevel >= 0);
     assert(() {
@@ -4052,7 +4031,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  void visitAncestorElements(bool visitor(Element element)) {
+  void visitAncestorElements(bool Function(Element element) visitor) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     Element? ancestor = _parent;
     while (ancestor != null && visitor(ancestor))

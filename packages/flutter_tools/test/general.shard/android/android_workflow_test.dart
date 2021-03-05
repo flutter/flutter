@@ -21,7 +21,6 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/mocks.dart' show MockAndroidSdk, MockProcessManager;
-import '../../src/testbed.dart';
 
 class MockAndroidSdkVersion extends Mock implements AndroidSdkVersion {}
 

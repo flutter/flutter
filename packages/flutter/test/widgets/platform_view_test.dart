@@ -230,12 +230,10 @@ void main() {
 
       await tester.pumpWidget(
         Center(
-          child: Container(
-            child: SizedBox(
-              width: 200.0,
-              height: 100.0,
-              child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr, key: key),
-            ),
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr, key: key),
           ),
         ),
       );
@@ -1337,12 +1335,10 @@ void main() {
 
       await tester.pumpWidget(
         Center(
-          child: Container(
-            child: SizedBox(
-              width: 200.0,
-              height: 100.0,
-              child: UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr, key: key),
-            ),
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr, key: key),
           ),
         ),
       );
@@ -1885,16 +1881,16 @@ void main() {
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
-        Container(width: 300, height: 600,
+        SizedBox(width: 300, height: 600,
           child: Stack(
             alignment: Alignment.topLeft,
             children: <Widget>[
               Transform.translate(
                 offset: const Offset(0, 100),
-                child: Container(
+                child: const SizedBox(
                   width: 300,
                   height: 500,
-                  child: const UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr)),),
+                  child: UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr)),),
               Transform.translate(
                 offset: const Offset(0, 500),
                 child: Container(
@@ -2348,12 +2344,10 @@ void main() {
 
       await tester.pumpWidget(
         Center(
-          child: Container(
-            child: SizedBox(
-              width: 200.0,
-              height: 100.0,
-              child: createPlatformViewLink(),
-            ),
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: createPlatformViewLink(),
           ),
         ),
       );

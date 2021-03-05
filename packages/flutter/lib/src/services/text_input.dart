@@ -822,7 +822,11 @@ abstract class TextSelectionDelegate {
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause);
 
   /// Hides the text selection toolbar.
-  void hideToolbar();
+  ///
+  /// By default, hideHandles is true, and the toolbar is hidden along with its
+  /// handles. If hideHandles is set to false, then the toolbar will be hidden
+  /// but the handles will remain.
+  void hideToolbar([bool hideHandles = true]);
 
   /// Brings the provided [TextPosition] into the visible area of the text
   /// input.

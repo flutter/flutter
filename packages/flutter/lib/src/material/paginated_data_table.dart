@@ -539,7 +539,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                   data: const IconThemeData(
                     opacity: 0.54
                   ),
-                  child: Container(
+                  child: SizedBox(
                     // TODO(bkonyi): this won't handle text zoom correctly,
                     //  https://github.com/flutter/flutter/issues/48522
                     height: 56.0,

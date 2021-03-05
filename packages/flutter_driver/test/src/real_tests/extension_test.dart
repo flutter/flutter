@@ -525,8 +525,8 @@ void main() {
         alignment: Alignment.topLeft,
         child: Transform.translate(
           offset: const Offset(40, 30),
-          child: Container(
-            key: const ValueKey<int>(1),
+          child: const SizedBox(
+            key: ValueKey<int>(1),
             width: 100,
             height: 120,
           ),
@@ -560,14 +560,14 @@ void main() {
                 key: const ValueKey<String>('column'),
                 children: <Widget>[
                   const Text('Hello1', key: ValueKey<String>('text1')),
-                  Container(
+                  SizedBox(
                     height: 25.0,
                     child: RichText(
                       key: const ValueKey<String>('text2'),
                       text: const TextSpan(text: 'Hello2'),
                     ),
                   ),
-                  Container(
+                  SizedBox(
                     height: 25.0,
                     child: EditableText(
                       key: const ValueKey<String>('text3'),
@@ -578,21 +578,21 @@ void main() {
                       backgroundCursorColor: Colors.black,
                     ),
                   ),
-                  Container(
+                  SizedBox(
                     height: 25.0,
                     child: TextField(
                       key: const ValueKey<String>('text4'),
                       controller: TextEditingController(text: 'Hello4'),
                     ),
                   ),
-                  Container(
+                  SizedBox(
                     height: 25.0,
                     child: TextFormField(
                       key: const ValueKey<String>('text5'),
                       controller: TextEditingController(text: 'Hello5'),
                     ),
                   ),
-                  Container(
+                  SizedBox(
                     height: 25.0,
                     child: RichText(
                       key: const ValueKey<String>('text6'),
@@ -724,20 +724,20 @@ void main() {
       await tester.pumpWidget(
           MaterialApp(
             home: Center(
-                child: Container(
+                child: SizedBox(
                   key: const ValueKey<String>('parent'),
                   height: 100,
                   width: 100,
                   child: Center(
                     child: Row(
-                      children: <Widget>[
-                        Container(
-                          key: const ValueKey<String>('leftchild'),
+                      children: const <Widget>[
+                        SizedBox(
+                          key: ValueKey<String>('leftchild'),
                           width: 25,
                           height: 25,
                         ),
-                        Container(
-                          key: const ValueKey<String>('righttchild'),
+                        SizedBox(
+                          key: ValueKey<String>('righttchild'),
                           width: 25,
                           height: 25,
                         ),
@@ -780,7 +780,7 @@ void main() {
       Future<Offset?> getAncestorTopLeft() async {
         final Map<String, String> arguments = GetOffset(Ancestor(
           of: ByValueKey('leaf'),
-          matching: const ByType('Container'),
+          matching: const ByType('SizedBox'),
           firstMatchOnly: true,
         ), OffsetType.topLeft, timeout: const Duration(seconds: 1)).serialize();
         final Map<String, dynamic> response = await driverExtension.call(arguments);
@@ -792,18 +792,18 @@ void main() {
       }
 
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Center(
-            child: Container(
+            child: SizedBox(
               height: 200,
               width: 200,
               child: Center(
-                child: Container(
+                child: SizedBox(
                   height: 100,
                   width: 100,
                   child: Center(
-                    child: Container(
-                      key: const ValueKey<String>('leaf'),
+                    child: SizedBox(
+                      key: ValueKey<String>('leaf'),
                       height: 50,
                       width: 50,
                     ),

@@ -82,8 +82,7 @@ void main() {
       );
     });
 
-    testWithoutContext('Picks up changes to the .packages file and updates package_config.json'
-      ', asyncScanning: $asyncScanning', () async {
+    testWithoutContext('Picks up changes to the .packages file and updates package_config.json, asyncScanning: $asyncScanning', () async {
       final DateTime past = DateTime.now().subtract(const Duration(seconds: 1));
       final FileSystem fileSystem = MemoryFileSystem.test();
       const PackageConfig packageConfig = PackageConfig.empty;
@@ -124,9 +123,7 @@ void main() {
       ]));
     });
 
-
-    testWithoutContext('Picks up changes to the .packages file and updates PackageConfig'
-      ', asyncScanning: $asyncScanning', () async {
+    testWithoutContext('Picks up changes to the .packages file and updates PackageConfig, asyncScanning: $asyncScanning', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
       const PackageConfig packageConfig = PackageConfig.empty;
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(

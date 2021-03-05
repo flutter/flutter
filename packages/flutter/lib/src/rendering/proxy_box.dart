@@ -5221,7 +5221,7 @@ class RenderFollowerLayer extends RenderProxyBox {
     assert(
       link.leaderSize != null || (link.leader == null || leaderAnchor == Alignment.topLeft),
       '$link: layer is linked to ${link.leader} but a valid leaderSize is not set. '
-      'leaderSize is required when leaderAnchor is not Alignment.topLeft'
+      'leaderSize is required when leaderAnchor is not Alignment.topLeft '
       '(current value is $leaderAnchor).',
     );
     final Offset effectiveLinkedOffset = leaderSize == null

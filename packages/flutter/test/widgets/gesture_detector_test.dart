@@ -155,7 +155,7 @@ void main() {
                     color: const Color(0xFF00FF00),
                   ),
                 ),
-                Container(
+                SizedBox(
                   width: 100.0,
                   height: 100.0,
                   child: GestureDetector(
@@ -858,9 +858,7 @@ void main() {
             textDirection: TextDirection.ltr,
             child: RawGestureDetector(
               key: key,
-              child: Container(
-                child: const Text('Text'),
-              ),
+              child: const Text('Text'),
             ),
           ),
         );
