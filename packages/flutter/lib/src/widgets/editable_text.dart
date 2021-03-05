@@ -17,6 +17,7 @@ import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'constants.dart';
+import 'container.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
@@ -31,6 +32,7 @@ import 'text.dart';
 import 'text_editing_action.dart';
 import 'text_selection.dart';
 import 'ticker_provider.dart';
+import 'widget_span.dart';
 
 export 'package:flutter/services.dart' show SelectionChangedCause, TextEditingValue, TextSelection, TextInputType, SmartQuotesType, SmartDashesType;
 
@@ -2583,6 +2585,27 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  int _placeholderLocation = -1;
+  Size _placeholderSize = Size.zero;
+
+  @override
+  void insertTextPlaceholder(Size size) {
+    print('[scribble][flutter] insertTextPlaceholder $size');
+    setState(() {
+      _placeholderLocation = _cachedText.length - widget.controller.selection.end;
+      _placeholderSize = size;
+    });
+  }
+
+  @override
+  void removeTextPlaceholder() {
+    print('[scribble][flutter] removeTextPlaceholder');
+    setState(() {
+      _placeholderLocation = -1;
+      _placeholderSize = Size.zero;
+    });
+  }
+
   @override
   String get autofillId => 'EditableText-$hashCode';
 
@@ -2747,6 +2770,25 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
       return TextSpan(style: widget.style, text: text);
     }
+    if (_placeholderLocation >= 0 && _placeholderLocation <= _value.text.length) {
+      List<_ScribblePlaceholder> placeholders = [];
+      final int placeholderLocation = _value.text.length - _placeholderLocation;
+      if (_placeholderSize.height > 0) {
+        final Rect selectionBox = renderEditable.getBoxesForSelection(TextSelection(baseOffset: placeholderLocation, extentOffset: placeholderLocation + 1)).first;
+        final Offset topLeft = renderEditable.globalToLocal(selectionBox.topLeft);
+        placeholders.add(_ScribblePlaceholder(child: Container(), size: Size(renderEditable.size.width - topLeft.dx - selectionBox.width, 0.0)));
+        placeholders.add(_ScribblePlaceholder(child: Container(), size: Size(topLeft.dx - selectionBox.width, 0.0)));
+      } else {
+        placeholders.add(_ScribblePlaceholder(child: Container(), size: _placeholderSize));
+      }
+      return TextSpan(style: widget.style, children: [
+          TextSpan(text: _value.text.substring(0, placeholderLocation)),
+          ...placeholders,
+          TextSpan(text: _value.text.substring(placeholderLocation)),
+        ],
+      );
+    }
+
     // Read only mode should not paint text composing.
     return widget.controller.buildTextSpan(
       context: context,
@@ -3017,5 +3059,54 @@ class _ScribbleElementState extends State<_ScribbleElement> implements ScribbleC
   @override
   Widget build(BuildContext context) {
     return widget.child;
+  }
+}
+
+class _ScribblePlaceholder extends WidgetSpan {
+  final Size size;
+
+  const _ScribblePlaceholder({
+    required Widget child,
+    ui.PlaceholderAlignment alignment = ui.PlaceholderAlignment.bottom,
+    TextBaseline? baseline,
+    TextStyle? style,
+    required this.size,
+  }) : assert(child != null),
+       assert(baseline != null || !(
+         identical(alignment, ui.PlaceholderAlignment.aboveBaseline) ||
+         identical(alignment, ui.PlaceholderAlignment.belowBaseline) ||
+         identical(alignment, ui.PlaceholderAlignment.baseline)
+       )),
+       super(
+         alignment: alignment,
+         baseline: baseline,
+         style: style,
+         child: child,
+       );
+
+  /// Adds a placeholder box to the paragraph builder if a size has been
+  /// calculated for the widget.
+  ///
+  /// Sizes are provided through `dimensions`, which should contain a 1:1
+  /// in-order mapping of widget to laid-out dimensions. If no such dimension
+  /// is provided, the widget will be skipped.
+  ///
+  /// The `textScaleFactor` will be applied to the laid-out size of the widget.
+  @override
+  void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions>? dimensions }) {
+    assert(debugAssertIsValid());
+    final bool hasStyle = style != null;
+    if (hasStyle) {
+      builder.pushStyle(style!.getTextStyle(textScaleFactor: textScaleFactor));
+    }
+    builder.addPlaceholder(
+      size.width,
+      size.height,
+      alignment,
+      scale: textScaleFactor,
+    );
+    if (hasStyle) {
+      builder.pop();
+    }
   }
 }
