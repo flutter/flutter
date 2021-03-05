@@ -337,9 +337,10 @@ const double _kDefaultFontSize = 14.0;
 /// #### Supported font formats
 ///
 /// Font formats currently supported by Flutter :
-/// * `.ttf`
-/// * `.otf`
-/// * `.ttc`
+///
+///  * `.ttc`
+///  * `.ttf`
+///  * `.otf`
 ///
 /// Flutter does not support `.woff` and `.woff2` fonts for all platforms.
 ///
