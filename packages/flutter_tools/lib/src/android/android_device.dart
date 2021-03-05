@@ -707,6 +707,9 @@ class AndroidDevice extends Device {
   bool get supportsFastStart => true;
 
   @override
+  bool get supportsColdRestart => true;
+
+  @override
   Future<bool> stopApp(
     AndroidApk app, {
     String userIdentifier,
