@@ -58,8 +58,10 @@ std::string VulkanResultToString(VkResult result) {
       return "VK_ERROR_VALIDATION_FAILED_EXT";
     case VK_ERROR_INVALID_SHADER_NV:
       return "VK_ERROR_INVALID_SHADER_NV";
+#if VK_HEADER_VERSION < 140
     case VK_RESULT_RANGE_SIZE:
       return "VK_RESULT_RANGE_SIZE";
+#endif
     case VK_RESULT_MAX_ENUM:
       return "VK_RESULT_MAX_ENUM";
     case VK_ERROR_INVALID_EXTERNAL_HANDLE:
