@@ -29,10 +29,9 @@ To update the CIPD package, follow these steps:
    ```
    unzip microsoft.windows.cppwinrt.<version_number>.nupkg -d tmp
    ```
-4. `cd` into the `tmp` directory.
 4. Create the CIPD package:
    ```
-   cipd create --pkg-def ../cppwinrt-win-amd64.cipd.yaml`
+   cipd create --pkg-def cppwinrt-win-amd64.cipd.yaml
    ```
    The tool should output that the package was successfully uploaded and
    verified, including the package path and an identifier SHA.
@@ -42,7 +41,7 @@ To update the CIPD package, follow these steps:
    ```
 6. Verify the package was successfully created and tagged:
    ```
-   cipd describe flutter/cppwinrt/win-amd64 <new_version_sha>
+   cipd describe flutter/cppwinrt/win-amd64 -version <new_version_sha>
    ```
 7. Delete the archive and temp directory:
    ```
