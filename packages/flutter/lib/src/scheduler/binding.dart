@@ -338,8 +338,8 @@ mixin SchedulerBinding on BindingBase {
   /// The preferred way to watch for changes to this value is using
   /// [WidgetsBindingObserver.didChangeAppLifecycleState].
   ///
-  /// Be aware that the [lifecycleState]'s value when your entrypoint is
-  /// executed is undefined since a Flutter instance can be launched at any
+  /// The [lifecycleState]'s value when the Dart entrypoint (typicially `void main()`) is
+  /// executed is undefined, because a Flutter instance can be launched at any
   /// time.
   AppLifecycleState? get lifecycleState => _lifecycleState;
   AppLifecycleState? _lifecycleState;
