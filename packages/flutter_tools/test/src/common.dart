@@ -90,6 +90,15 @@ String getFlutterRoot() {
   return path.normalize(path.join(toolsPath, '..', '..'));
 }
 
+/// Gets the path to the root of the Android SDK from the environment variable.
+String getAndroidSdkRoot() {
+  const Platform platform = LocalPlatform();
+  if (platform.environment.containsKey('ANDROID_SDK_ROOT')) {
+    return platform.environment['ANDROID_SDK_ROOT'];
+  }
+  throw StateError('ANDROID_SDK_ROOT environment varible not set');
+}
+
 CommandRunner<void> createTestCommandRunner([ FlutterCommand command ]) {
   final FlutterCommandRunner runner = TestFlutterCommandRunner();
   if (command != null) {
