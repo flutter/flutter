@@ -17,6 +17,7 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/mocks.dart';
 
 void main() {
   FileSystem fileSystem;

@@ -144,8 +144,6 @@ class FlutterVersion {
   String _frameworkVersion;
   String get frameworkVersion => _frameworkVersion;
 
-  String get frameworkDate => frameworkCommitDate;
-
   String get dartSdkVersion => globals.cache.dartSdkVersion;
 
   String get engineRevision => globals.cache.engineRevision;
