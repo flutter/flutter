@@ -559,10 +559,10 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
       scopesRoute: true,
       namesRoute: true,
       label: routeName,
-      child: Theme(
-        data: theme,
-        child: Scaffold(
-          appBar: AppBar(
+      child: Scaffold(
+        appBar: Theme(
+          data: theme,
+          child: AppBar(
             leading: widget.delegate.buildLeading(context),
             title: TextField(
               controller: widget.delegate._queryTextController,
@@ -578,11 +578,11 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
             actions: widget.delegate.buildActions(context),
             bottom: widget.delegate.buildBottom(context),
           ),
-          body: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            child: body,
-          ),
-        )
+        ),
+        body: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: body,
+        ),
       ),
     );
   }
