@@ -91,12 +91,9 @@ void main() {
   });
 
   testWithoutContext('FlutterValidator handles exception thrown by version checking', () async {
-    final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
-      frameworkVersion: '0.0.0',
-    );
     final FlutterValidator flutterValidator = FlutterValidator(
       platform: FakePlatform(operatingSystem: 'windows', localeName: 'en_US.UTF-8'),
-      flutterVersion: () => flutterVersion,
+      flutterVersion: () => FakeThrowingFlutterVersion(),
       userMessages: UserMessages(),
       artifacts: Artifacts.test(),
       fileSystem: MemoryFileSystem.test(),
@@ -104,8 +101,6 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[]),
       flutterRoot: () => 'sdk/flutter',
     );
-
-    when(flutterVersion.frameworkCommitDate).thenThrow(VersionCheckError('version error'));
 
     expect(await flutterValidator.validate(), matchDoctorValidation(
       validationType: ValidationType.partial,
@@ -115,7 +110,7 @@ void main() {
         ValidationMessage.error('version error'),
       ]),
     );
-  }, skip: true);
+  });
 
   testWithoutContext('FlutterValidator shows mirrors on pub and flutter cloud storage', () async {
     final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
@@ -158,4 +153,11 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
 
   @override
   final String name;
+}
+
+class FakeThrowingFlutterVersion extends FakeFlutterVersion {
+  @override
+   String get frameworkCommitDate {
+     throw VersionCheckError('version error');
+   }
 }
