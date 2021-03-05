@@ -69,5 +69,5 @@ void main() {
 }
 
 Finder findApp(ThemeMode themeMode) => find.byWidgetPredicate(
-    (widget) => widget is MaterialApp && widget.themeMode == themeMode);
-
+    (widget) => widget is MaterialApp && widget.themeMode == themeMode,
+);
