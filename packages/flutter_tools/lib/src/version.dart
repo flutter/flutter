@@ -244,10 +244,6 @@ class FlutterVersion {
       await _run(<String>['git', 'fetch', _versionCheckRemote, branch]);
       final String revision = await _run(gitLog(<String>['$_versionCheckRemote/$branch', '-n', '1', '--pretty=format:%H']));
       return revision;
-      //return _latestGitCommitDate(
-        //branch: '$_versionCheckRemote/$branch',
-        //lenient: false,
-      //);
     } on VersionCheckError catch (error) {
       if (globals.platform.environment.containsKey('FLUTTER_GIT_URL')) {
         globals.logger.printError('Warning: the Flutter git upstream was overridden '
