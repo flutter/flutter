@@ -500,7 +500,7 @@ void main() {
     );
   });
 
-  testWidgets('RefreshIndicator responds to edgeDistance', (WidgetTester tester) async {
+  testWidgets('RefreshIndicator responds to edgeOffset', (WidgetTester tester) async {
     await tester.pumpWidget(
         MaterialApp(
           home: RefreshIndicator(
@@ -518,7 +518,7 @@ void main() {
         )
     );
 
-    //By default the value of edgeDistance is 0.0
+    //By default the value of edgeOffset is 0.0
     expect(
         tester.widget<RefreshIndicator>(find.byType(RefreshIndicator)).edgeOffset,
         0.0,
@@ -548,7 +548,7 @@ void main() {
     );
   });
 
-  testWidgets('RefreshIndicator appears at edgeDistance', (WidgetTester tester) async {
+  testWidgets('RefreshIndicator appears at edgeOffset', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: RefreshIndicator(
         edgeOffset: kToolbarHeight,
@@ -574,7 +574,7 @@ void main() {
     //Resting position.
     final Offset positionedTopLeft = tester.getTopLeft(find.byType(RefreshProgressIndicator));
 
-    //The Y position of RefreshIndicator should now be displacement + edgeDistance = 2.0 * kToolbarHeight.
+    //The Y position of RefreshIndicator should now be displacement + edgeOffset = 2.0 * kToolbarHeight.
     expect(
       positionedTopLeft.dy,
       2.0 * kToolbarHeight,
