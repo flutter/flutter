@@ -30,7 +30,7 @@ void main() {
     return Net(
       httpClientFactory: () => client,
       logger: testLogger,
-      platform: FakePlatform(),
+      platform: FakePlatform(operatingSystem: 'linux'),
     );
   }
 
@@ -183,6 +183,7 @@ void main() {
       },
       logger: testLogger,
       platform: FakePlatform(
+        operatingSystem: 'linux',
         environment: <String, String>{
           'FLUTTER_STORAGE_BASE_URL': 'example.invalid',
         },

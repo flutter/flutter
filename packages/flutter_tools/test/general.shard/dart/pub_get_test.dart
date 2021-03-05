@@ -45,6 +45,7 @@ void main() {
       processManager: processManager,
       usage: TestUsage(),
       platform: FakePlatform(
+        operatingSystem: 'linux',
         environment: const <String, String>{},
       ),
       botDetector: const BotDetectorAlwaysNo(),
@@ -83,6 +84,7 @@ void main() {
       processManager: processManager,
       usage: TestUsage(),
       platform: FakePlatform(
+        operatingSystem: 'linux',
         environment: const <String, String>{},
       ),
       botDetector: const BotDetectorAlwaysNo(),
@@ -121,6 +123,7 @@ void main() {
       processManager: processManager,
       usage: TestUsage(),
       platform: FakePlatform(
+        operatingSystem: 'linux',
         environment: const <String, String>{},
       ),
       botDetector: const BotDetectorAlwaysNo(),
@@ -159,6 +162,7 @@ void main() {
       processManager: processManager,
       usage: TestUsage(),
       platform: FakePlatform(
+        operatingSystem: 'linux',
         environment: const <String, String>{},
       ),
       botDetector: const BotDetectorAlwaysNo(),
@@ -196,6 +200,7 @@ void main() {
       processManager: processManager,
       usage: TestUsage(),
       platform: FakePlatform(
+        operatingSystem: 'linux',
         environment: const <String, String>{},
       ),
       botDetector: const BotDetectorAlwaysNo(),
@@ -235,6 +240,7 @@ void main() {
       processManager: processManager,
       usage: TestUsage(),
       platform: FakePlatform(
+        operatingSystem: 'linux',
         environment: const <String, String>{},
       ),
       botDetector: const BotDetectorAlwaysNo(),
@@ -276,6 +282,7 @@ void main() {
       processManager: processManager,
       usage: TestUsage(),
       platform: FakePlatform(
+        operatingSystem: 'linux',
         environment: const <String, String>{},
       ),
       botDetector: const BotDetectorAlwaysNo(),
@@ -302,6 +309,7 @@ void main() {
       processManager: processMock,
       usage: TestUsage(),
       platform: FakePlatform(
+        operatingSystem: 'linux',
         environment: const <String, String>{},
       ),
       botDetector: const BotDetectorAlwaysNo(),
@@ -368,7 +376,7 @@ void main() {
     final BufferLogger logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Pub pub = Pub(
-      platform: FakePlatform(environment: const <String, String>{}),
+      platform: FakePlatform(environment: const <String, String>{}, operatingSystem: 'linux'),
       fileSystem: fileSystem,
       logger: logger,
       usage: TestUsage(),
@@ -401,7 +409,7 @@ void main() {
     fileSystem.directory(Cache.flutterRoot).childDirectory('.pub-cache').createSync();
 
     final Pub pub = Pub(
-      platform: FakePlatform(environment: const <String, String>{}),
+      platform: FakePlatform(environment: const <String, String>{}, operatingSystem: 'linux'),
       usage: TestUsage(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -435,6 +443,7 @@ void main() {
       usage: TestUsage(),
       botDetector: const BotDetectorAlwaysNo(),
       platform: FakePlatform(
+        operatingSystem: 'linux',
         environment: const <String, String>{
           'PUB_CACHE': 'custom/pub-cache/path',
         },
@@ -468,6 +477,7 @@ void main() {
       botDetector: const BotDetectorAlwaysNo(),
       usage: usage,
       platform: FakePlatform(
+        operatingSystem: 'linux',
         environment: const <String, String>{
           'PUB_CACHE': 'custom/pub-cache/path',
         }
@@ -498,6 +508,7 @@ void main() {
       botDetector: const BotDetectorAlwaysNo(),
       usage: usage,
       platform: FakePlatform(
+        operatingSystem: 'linux',
         environment: const <String, String>{
           'PUB_CACHE': 'custom/pub-cache/path',
         }
@@ -544,6 +555,7 @@ void main() {
       processManager: MockProcessManager(1),
       botDetector: const BotDetectorAlwaysNo(),
       platform: FakePlatform(
+        operatingSystem: 'linux',
         environment: const <String, String>{
           'PUB_CACHE': 'custom/pub-cache/path',
         },
@@ -571,6 +583,7 @@ void main() {
         stderr: 'version solving failed',
       ),
       platform: FakePlatform(
+        operatingSystem: 'linux',
         environment: <String, String>{
           'PUB_CACHE': 'custom/pub-cache/path',
         },

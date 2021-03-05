@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:io' as io show Platform, stdin, stdout;
 
 /// Provides API parity with the `Platform` class in `dart:io`, but using
 /// instance properties rather than static properties. This difference enables
-/// the use of these APIs in tests, where you can provide mock implementations.
+/// the use of these APIs in tests, where you can provide fake implementations.
 abstract class Platform {
   /// Creates a new [Platform].
   const Platform();
@@ -103,7 +101,7 @@ abstract class Platform {
   /// specifies how Dart packages are looked up.
   ///
   /// If there is no `--packages` flag, `null` is returned.
-  String get packageConfig;
+  String? get packageConfig;
 
   /// The version of the current Dart runtime.
   ///
@@ -158,7 +156,7 @@ class LocalPlatform extends Platform {
   List<String> get executableArguments => io.Platform.executableArguments;
 
   @override
-  String get packageConfig => io.Platform.packageConfig;
+  String? get packageConfig => io.Platform.packageConfig;
 
   @override
   String get version => io.Platform.version;
@@ -176,89 +174,119 @@ class LocalPlatform extends Platform {
 /// Provides a mutable implementation of the [Platform] interface.
 class FakePlatform extends Platform {
   /// Creates a new [FakePlatform] with the specified properties.
-  ///
-  /// Unspecified properties will *not* be assigned default values (they will
-  /// remain `null`).
   FakePlatform({
-    this.numberOfProcessors,
-    this.pathSeparator,
-    this.operatingSystem,
-    this.operatingSystemVersion,
-    this.localHostname,
-    this.environment,
-    this.executable,
-    this.resolvedExecutable,
-    this.script,
-    this.executableArguments,
+    this.numberOfProcessors = 1,
+    String? pathSeparator,
+    required this.operatingSystem,
+    String? operatingSystemVersion,
+    String? localHostname,
+    Map<String, String>? environment,
+    String? executable,
+    String? resolvedExecutable,
+    Uri? script,
+    List<String>? executableArguments,
     this.packageConfig,
-    this.version,
-    this.stdinSupportsAnsi,
-    this.stdoutSupportsAnsi,
-    this.localeName,
-  });
+    String? version,
+    bool stdinSupportsAnsi = false,
+    bool stdoutSupportsAnsi = false,
+    String? localeName,
+  })  : _pathSeparator = pathSeparator,
+        _operatingSystemVersion = operatingSystemVersion,
+        _localHostname = localHostname,
+        _environment = environment,
+        _executable = executable,
+        _resolvedExecutable = resolvedExecutable,
+        _script = script,
+        _executableArguments = executableArguments,
+        _version = version,
+        _stdinSupportsAnsi = stdinSupportsAnsi,
+        _stdoutSupportsAnsi = stdoutSupportsAnsi,
+        _localeName = localeName;
 
   /// Creates a new [FakePlatform] with properties whose initial values mirror
   /// the specified [platform].
   FakePlatform.fromPlatform(Platform platform)
       : numberOfProcessors = platform.numberOfProcessors,
-        pathSeparator = platform.pathSeparator,
+        _pathSeparator = platform.pathSeparator,
         operatingSystem = platform.operatingSystem,
-        operatingSystemVersion = platform.operatingSystemVersion,
-        localHostname = platform.localHostname,
-        environment = Map<String, String>.from(platform.environment),
-        executable = platform.executable,
-        resolvedExecutable = platform.resolvedExecutable,
-        script = platform.script,
-        executableArguments =
-            List<String>.from(platform.executableArguments),
+        _operatingSystemVersion = platform.operatingSystemVersion,
+        _localHostname = platform.localHostname,
+        _environment = Map<String, String>.from(platform.environment),
+        _executable = platform.executable,
+        _resolvedExecutable = platform.resolvedExecutable,
+        _script = platform.script,
+        _executableArguments = List<String>.from(platform.executableArguments),
         packageConfig = platform.packageConfig,
-        version = platform.version,
-        stdinSupportsAnsi = platform.stdinSupportsAnsi,
-        stdoutSupportsAnsi = platform.stdoutSupportsAnsi,
-        localeName = platform.localeName;
+        _version = platform.version,
+        _stdinSupportsAnsi = platform.stdinSupportsAnsi,
+        _stdoutSupportsAnsi = platform.stdoutSupportsAnsi,
+        _localeName = platform.localeName;
 
   @override
-  int numberOfProcessors;
+  final int numberOfProcessors;
 
   @override
-  String pathSeparator;
+  String get pathSeparator => _throwIfNull(_pathSeparator);
+  final String? _pathSeparator;
 
   @override
-  String operatingSystem;
+  final String operatingSystem;
 
   @override
-  String operatingSystemVersion;
+  String get operatingSystemVersion => _throwIfNull(_operatingSystemVersion);
+  final String? _operatingSystemVersion;
 
   @override
-  String localHostname;
+  String get localHostname => _throwIfNull(_localHostname);
+  final String? _localHostname;
 
   @override
-  Map<String, String> environment;
+  Map<String, String> get environment => _throwIfNull(_environment);
+  set environment(Map<String, String> value) {
+    _environment = value;
+  }
+  Map<String, String>? _environment;
 
   @override
-  String executable;
+  String get executable => _throwIfNull(_executable);
+  final String? _executable;
 
   @override
-  String resolvedExecutable;
+  String get resolvedExecutable => _throwIfNull(_resolvedExecutable);
+  final String? _resolvedExecutable;
 
   @override
-  Uri script;
+  Uri get script => _throwIfNull(_script);
+  final Uri? _script;
 
   @override
-  List<String> executableArguments;
+  List<String> get executableArguments => _throwIfNull(_executableArguments);
+  final List<String>? _executableArguments;
 
   @override
-  String packageConfig;
+  String? packageConfig;
 
   @override
-  String version;
+  String get version => _throwIfNull(_version);
+  final String? _version;
 
   @override
-  bool stdinSupportsAnsi;
+  bool get stdinSupportsAnsi => _throwIfNull(_stdinSupportsAnsi);
+  final bool? _stdinSupportsAnsi;
 
   @override
-  bool stdoutSupportsAnsi;
+  bool get stdoutSupportsAnsi => _throwIfNull(_stdoutSupportsAnsi);
+  final bool? _stdoutSupportsAnsi;
 
   @override
-  String localeName;
+  String get localeName => _throwIfNull(_localeName);
+  final String? _localeName;
+
+  T _throwIfNull<T>(T? value) {
+    if (value == null) {
+      throw StateError(
+        'Tried to read property of FakePlatform but it was unset.');
+    }
+    return value;
+  }
 }

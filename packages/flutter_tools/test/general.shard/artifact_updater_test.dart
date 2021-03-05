@@ -20,7 +20,7 @@ import '../src/common.dart';
 import '../src/fake_http_client.dart';
 import '../src/fakes.dart';
 
-final Platform testPlatform = FakePlatform(environment: const <String, String>{});
+final Platform testPlatform = FakePlatform(operatingSystem: 'linux', environment: const <String, String>{});
 
 void main() {
   testWithoutContext('ArtifactUpdater can download a zip archive', () async {
@@ -249,6 +249,7 @@ void main() {
       logger: logger,
       operatingSystemUtils: operatingSystemUtils,
       platform: FakePlatform(
+        operatingSystem: 'linux',
         environment: <String, String>{
           'FLUTTER_STORAGE_BASE_URL': 'foo-bar'
         },

@@ -741,7 +741,9 @@ void main() {
       environment: anyNamed('environment'),
     )).called(1);
   }, overrides: <Type, Generator>{
-    Platform: () => FakePlatform(environment: <String, String>{
+    Platform: () => FakePlatform(
+      operatingSystem: 'linux',
+      environment: <String, String>{
       'FLUTTER_GIT_URL': 'https://githubmirror.com/flutter.git',
     }),
   });

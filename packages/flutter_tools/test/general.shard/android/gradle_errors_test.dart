@@ -73,7 +73,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
-      Platform: () => FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
+      Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{'HOME': 'foo/'}),
     });
 
     testUsingContext('retries if gradle fails while downloading', () async {

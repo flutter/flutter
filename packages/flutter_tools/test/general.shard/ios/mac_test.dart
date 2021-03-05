@@ -22,7 +22,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
 
-final Generator _kNoColorTerminalPlatform = () => FakePlatform(stdoutSupportsAnsi: false);
+final Generator _kNoColorTerminalPlatform = () => FakePlatform(stdoutSupportsAnsi: false, operatingSystem: 'linux');
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
 };

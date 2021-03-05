@@ -622,7 +622,7 @@ Information about project "Runner":
     FakePlatform platform;
 
     setUp(() {
-      platform = FakePlatform();
+      platform = FakePlatform(operatingSystem: 'linux');
     });
 
     testWithoutContext('environment variables as Xcode build settings', () {

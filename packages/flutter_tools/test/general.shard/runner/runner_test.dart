@@ -88,10 +88,14 @@ void main() {
       final CrashingUsage crashingUsage = globals.flutterUsage as CrashingUsage;
       expect(crashingUsage.sentException, 'an exception % --');
     }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform(environment: <String, String>{
-        'FLUTTER_ANALYTICS_LOG_FILE': 'test',
-        'FLUTTER_ROOT': '/',
-      }),
+      Platform: () => FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{
+          'FLUTTER_ANALYTICS_LOG_FILE': 'test',
+          'FLUTTER_ROOT': '/',
+        },
+        localeName: 'US_en',
+      ),
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       Usage: () => CrashingUsage(),
@@ -130,10 +134,14 @@ void main() {
       ));
       await completer.future;
     }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform(environment: <String, String>{
-        'FLUTTER_ANALYTICS_LOG_FILE': 'test',
-        'FLUTTER_ROOT': '/',
-      }),
+      Platform: () => FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{
+          'FLUTTER_ANALYTICS_LOG_FILE': 'test',
+          'FLUTTER_ROOT': '/',
+        },
+        localeName: 'US_en',
+      ),
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       CrashReporter: () => WaitingCrashReporter(commandCompleter.future),
@@ -192,7 +200,8 @@ void main() {
           'FLUTTER_ANALYTICS_LOG_FILE': 'test',
           'FLUTTER_ROOT': '/',
         },
-        operatingSystem: 'linux'
+        operatingSystem: 'linux',
+        localeName: 'US_en',
       ),
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),

@@ -26,7 +26,7 @@ void main() {
   Platform platform;
 
   setUp(() {
-    platform = FakePlatform();
+    platform = FakePlatform(operatingSystem: 'linux');
     fileSystem = MemoryFileSystem.test();
     environment = Environment.test(
       fileSystem.currentDirectory,

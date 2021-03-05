@@ -99,9 +99,13 @@ void main() {
     }, skip: true); // TODO(jonahwilliams): implement support for lock so this can be tested with the memory file system.
 
     testWithoutContext('should not throw when FLUTTER_ALREADY_LOCKED is set', () {
-     final Cache cache = Cache.test(platform: FakePlatform(environment: <String, String>{
-       'FLUTTER_ALREADY_LOCKED': 'true',
-     }));
+     final Cache cache = Cache.test(
+       platform: FakePlatform(
+         operatingSystem: 'linux',
+         environment: <String, String>{
+          'FLUTTER_ALREADY_LOCKED': 'true',
+        },
+      ));
 
       expect(cache.checkLockAcquired, returnsNormally);
     });
@@ -263,9 +267,11 @@ void main() {
 
     testWithoutContext('Invalid URI for FLUTTER_STORAGE_BASE_URL throws ToolExit', () async {
       final Cache cache = Cache.test(
-        platform: FakePlatform(environment: <String, String>{
-        'FLUTTER_STORAGE_BASE_URL': ' http://foo',
-        },
+        platform: FakePlatform(
+          operatingSystem: 'linux',
+          environment: <String, String>{
+          'FLUTTER_STORAGE_BASE_URL': ' http://foo',
+          },
       ));
 
       expect(() => cache.storageBaseUrl, throwsToolExit());
@@ -576,7 +582,7 @@ void main() {
       ],
       logger: logger,
       fileSystem: fileSystem,
-      platform: FakePlatform(),
+      platform: FakePlatform(operatingSystem: 'linux'),
       osUtils: MockOperatingSystemUtils(),
       rootOverride: fileSystem.currentDirectory,
     );
@@ -604,7 +610,7 @@ void main() {
       ],
       logger: logger,
       fileSystem: fileSystem,
-      platform: FakePlatform(),
+      platform: FakePlatform(operatingSystem: 'linux'),
       osUtils: MockOperatingSystemUtils(),
       rootOverride: fileSystem.currentDirectory,
     );
@@ -631,7 +637,7 @@ void main() {
       ],
       logger: logger,
       fileSystem: fileSystem,
-      platform: FakePlatform(),
+      platform: FakePlatform(operatingSystem: 'linux'),
       osUtils: MockOperatingSystemUtils(),
       rootOverride: fileSystem.currentDirectory,
     );
@@ -670,7 +676,7 @@ void main() {
     final FakeCache cache = FakeCache(
       fileSystem: fileSystem,
       logger: logger,
-      platform: FakePlatform(),
+      platform: FakePlatform(operatingSystem: 'linux'),
       osUtils: MockOperatingSystemUtils()
     );
     final File file = fileSystem.file('stamp');
@@ -694,7 +700,7 @@ void main() {
     final FakeCache cache = FakeCache(
         fileSystem: fileSystem,
         logger: logger,
-        platform: FakePlatform(),
+        platform: FakePlatform(operatingSystem: 'linux'),
         osUtils: MockOperatingSystemUtils()
     );
 

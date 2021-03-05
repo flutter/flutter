@@ -21,7 +21,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
 
-final Platform _kNoAnsiPlatform = FakePlatform(stdoutSupportsAnsi: false);
+final Platform _kNoAnsiPlatform = FakePlatform(operatingSystem: 'linux', stdoutSupportsAnsi: false);
 final String red = RegExp.escape(AnsiTerminal.red);
 final String bold = RegExp.escape(AnsiTerminal.bold);
 final String resetBold = RegExp.escape(AnsiTerminal.resetBold);
@@ -266,7 +266,7 @@ void main() {
       final BufferLogger mockLogger = BufferLogger(
         terminal: AnsiTerminal(
           stdio:  FakeStdio(),
-          platform: FakePlatform(stdoutSupportsAnsi: true),
+          platform: FakePlatform(operatingSystem: 'linux', stdoutSupportsAnsi: true),
         ),
         outputPreferences: OutputPreferences.test(showColor: true),
       );
@@ -404,8 +404,8 @@ void main() {
         AnsiStatus ansiStatus;
 
         setUp(() {
-          platform = FakePlatform(stdoutSupportsAnsi: false);
-          ansiPlatform = FakePlatform(stdoutSupportsAnsi: true);
+          platform = FakePlatform(operatingSystem: 'linux', stdoutSupportsAnsi: false);
+          ansiPlatform = FakePlatform(operatingSystem: 'linux', stdoutSupportsAnsi: true);
 
           terminal = AnsiTerminal(
             stdio: mockStdio,
@@ -830,7 +830,7 @@ void main() {
       final Logger logger = StdoutLogger(
         terminal: AnsiTerminal(
           stdio: fakeStdio,
-          platform: FakePlatform(stdoutSupportsAnsi: true),
+          platform: FakePlatform(operatingSystem: 'linux', stdoutSupportsAnsi: true),
         ),
         stdio: fakeStdio,
         outputPreferences: OutputPreferences.test(showColor: true),
@@ -847,7 +847,7 @@ void main() {
       final Logger logger = StdoutLogger(
         terminal: AnsiTerminal(
           stdio: fakeStdio,
-          platform: FakePlatform(),
+          platform: FakePlatform(operatingSystem: 'linux'),
         ),
         stdio: fakeStdio,
         outputPreferences:  OutputPreferences.test(showColor: true),
@@ -864,7 +864,7 @@ void main() {
       final Logger logger = StdoutLogger(
         terminal: AnsiTerminal(
           stdio: fakeStdio,
-          platform: FakePlatform(),
+          platform: FakePlatform(operatingSystem: 'linux'),
         ),
         stdio: fakeStdio,
         outputPreferences: OutputPreferences.test(showColor: true),

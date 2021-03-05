@@ -128,7 +128,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[]),
       pubExecutable: 'pub',
       logger: BufferLogger.test(),
-      platform: FakePlatform(),
+      platform: FakePlatform(operatingSystem: 'linux'),
       persistentToolState: null,
     );
     final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(

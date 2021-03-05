@@ -115,9 +115,12 @@ void main() {
     }, overrides: <Type, Generator>{
       FlutterVersion: () => FlutterVersion(clock: const SystemClock()),
       Config: () => testConfig,
-      Platform: () => FakePlatform(environment: <String, String>{
-        'FLUTTER_ANALYTICS_LOG_FILE': 'test',
-      }),
+      Platform: () => FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{
+          'FLUTTER_ANALYTICS_LOG_FILE': 'test',
+        },
+      ),
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
@@ -138,9 +141,12 @@ void main() {
     }, overrides: <Type, Generator>{
       FlutterVersion: () => FlutterVersion(clock: const SystemClock()),
       Config: () => testConfig,
-      Platform: () => FakePlatform(environment: <String, String>{
-        'FLUTTER_ANALYTICS_LOG_FILE': 'test',
-      }),
+      Platform: () => FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{
+          'FLUTTER_ANALYTICS_LOG_FILE': 'test',
+        },
+      ),
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
@@ -243,6 +249,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       SystemClock: () => fakeClock,
       Platform: () => FakePlatform(
+        operatingSystem: 'linux',
         environment: <String, String>{
           'FLUTTER_ANALYTICS_LOG_FILE': 'analytics.log',
         },
@@ -273,6 +280,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       SystemClock: () => fakeClock,
       Platform: () => FakePlatform(
+        operatingSystem: 'linux',
         environment: <String, String>{
           'FLUTTER_ANALYTICS_LOG_FILE': 'analytics.log',
         },

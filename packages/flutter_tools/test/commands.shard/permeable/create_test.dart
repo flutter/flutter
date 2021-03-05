@@ -39,8 +39,8 @@ const String _kNoPlatformsMessage = 'You\'ve created a plugin project that doesn
 const String frameworkRevision = '12345678';
 const String frameworkChannel = 'omega';
 const String _kDisabledPlatformRequestedMessage = 'currently not supported on your local environment.';
-// TODO(fujino): replace FakePlatform.fromPlatform() with FakePlatform()
-final Generator _kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
+
+final Generator _kNoColorTerminalPlatform = () => FakePlatform(stdoutSupportsAnsi: false, operatingSystem: 'linux');
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
 };

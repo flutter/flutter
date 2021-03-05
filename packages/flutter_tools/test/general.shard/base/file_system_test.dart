@@ -26,7 +26,7 @@ void main() {
       fs = MemoryFileSystem.test();
       fsUtils = FileSystemUtils(
         fileSystem: fs,
-        platform: FakePlatform(),
+        platform: FakePlatform(operatingSystem: 'linux'),
       );
     });
 

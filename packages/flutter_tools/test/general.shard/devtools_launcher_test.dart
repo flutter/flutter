@@ -26,7 +26,7 @@ void main() {
 
   setUp(() {
     logger = BufferLogger.test();
-    platform = FakePlatform(environment: <String, String>{});
+    platform = FakePlatform(environment: <String, String>{}, operatingSystem: 'linux');
 
     final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('devtools_launcher_test');
     persistentToolState = PersistentToolState.test(
@@ -59,9 +59,12 @@ void main() {
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       pubExecutable: 'pub',
       logger: logger,
-      platform: FakePlatform(environment: <String, String>{
-        'PUB_HOSTED_URL': 'https://pub2.dev'
-      }),
+      platform: FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{
+          'PUB_HOSTED_URL': 'https://pub2.dev'
+        },
+      ),
       persistentToolState: persistentToolState,
       httpClient: FakeHttpClient.list(<FakeRequest>[
         FakeRequest(
@@ -81,9 +84,12 @@ void main() {
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       pubExecutable: 'pub',
       logger: logger,
-      platform: FakePlatform(environment: <String, String>{
-        'PUB_HOSTED_URL': r'not_an_http_url'
-      }),
+      platform: FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{
+          'PUB_HOSTED_URL': r'not_an_http_url'
+        },
+      ),
       persistentToolState: persistentToolState,
       httpClient: FakeHttpClient.list(<FakeRequest>[]),
       processManager: FakeProcessManager.list(<FakeCommand>[]),

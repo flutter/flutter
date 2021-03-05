@@ -12,31 +12,44 @@ import '../../src/common.dart';
 
 void main() {
   testWithoutContext('ProxyValidator does not show if HTTP_PROXY is not set', () {
-    final Platform platform = FakePlatform(environment: <String, String>{});
+    final Platform platform = FakePlatform(
+      environment: <String, String>{},
+      operatingSystem: 'linux',
+    );
 
     expect(ProxyValidator(platform: platform).shouldShow, isFalse);
   });
 
   testWithoutContext('ProxyValidator does not show if HTTP_PROXY is only whitespace', () {
-    final Platform platform = FakePlatform(environment: <String, String>{'HTTP_PROXY': ' '});
+    final Platform platform = FakePlatform(
+      environment: <String, String>{'HTTP_PROXY': ' '},
+      operatingSystem: 'linux',
+    );
 
     expect(ProxyValidator(platform: platform).shouldShow, isFalse);
   });
 
   testWithoutContext('ProxyValidator shows when HTTP_PROXY is set', () {
-    final Platform platform = FakePlatform(environment: <String, String>{'HTTP_PROXY': 'fakeproxy.local'});
+    final Platform platform = FakePlatform(
+      operatingSystem: 'linux',
+      environment: <String, String>{'HTTP_PROXY': 'fakeproxy.local'},
+    );
 
     expect(ProxyValidator(platform: platform).shouldShow, isTrue);
   });
 
   testWithoutContext('ProxyValidator shows when http_proxy is set', () {
-    final Platform platform = FakePlatform(environment: <String, String>{'http_proxy': 'fakeproxy.local'});
+    final Platform platform = FakePlatform(
+      operatingSystem: 'linux',
+      environment: <String, String>{'http_proxy': 'fakeproxy.local'},
+    );
 
     expect(ProxyValidator(platform: platform).shouldShow, isTrue);
   });
 
   testWithoutContext('ProxyValidator reports success when NO_PROXY is configured correctly', () async {
     final Platform platform = FakePlatform(
+      operatingSystem: 'linux',
       environment: <String, String>{
         'HTTP_PROXY': 'fakeproxy.local',
         'NO_PROXY': 'localhost,127.0.0.1',
@@ -54,6 +67,7 @@ void main() {
 
   testWithoutContext('ProxyValidator reports success when no_proxy is configured correctly', () async {
     final Platform platform = FakePlatform(
+      operatingSystem: 'linux',
       environment: <String, String>{
         'http_proxy': 'fakeproxy.local',
         'no_proxy': 'localhost,127.0.0.1',
@@ -71,6 +85,7 @@ void main() {
 
   testWithoutContext('ProxyValidator reports issues when NO_PROXY is missing localhost', () async {
     final Platform platform = FakePlatform(
+      operatingSystem: 'linux',
       environment: <String, String>{
         'HTTP_PROXY': 'fakeproxy.local',
         'NO_PROXY': '127.0.0.1',
@@ -87,10 +102,13 @@ void main() {
   });
 
   testWithoutContext('ProxyValidator reports issues when NO_PROXY is missing 127.0.0.1', () async {
-    final Platform platform =  FakePlatform(environment: <String, String>{
-      'HTTP_PROXY': 'fakeproxy.local',
-      'NO_PROXY': 'localhost',
-    });
+    final Platform platform =  FakePlatform(
+      operatingSystem: 'linux',
+      environment: <String, String>{
+        'HTTP_PROXY': 'fakeproxy.local',
+        'NO_PROXY': 'localhost',
+      },
+    );
     final ValidationResult results = await ProxyValidator(platform: platform).validate();
 
     expect(results.messages, const <ValidationMessage>[

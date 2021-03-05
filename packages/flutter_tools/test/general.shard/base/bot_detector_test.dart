@@ -24,7 +24,7 @@ void main() {
     PersistentToolState persistentToolState;
 
     setUp(() {
-      fakePlatform = FakePlatform()..environment = <String, String>{};
+      fakePlatform = FakePlatform(operatingSystem: 'linux', environment: <String, String>{});
       fakeStdio = FakeStdio();
       persistentToolState = PersistentToolState.test(
         directory: MemoryFileSystem.test().currentDirectory,

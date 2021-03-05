@@ -469,7 +469,9 @@ void main() {
     FlutterBuildSystem(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
-      platform: FakePlatform(),
+      platform: FakePlatform(
+        operatingSystem: 'linux',
+      ),
     ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{});
 
     expect(environment.outputDir.childFile('.last_build_id'), exists);
@@ -489,7 +491,9 @@ void main() {
     FlutterBuildSystem(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
-      platform: FakePlatform(),
+      platform: FakePlatform(
+        operatingSystem: 'linux',
+      ),
     ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{});
 
     expect(environment.outputDir.childFile('.last_build_id'), exists);
@@ -504,7 +508,9 @@ void main() {
     FlutterBuildSystem(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
-      platform: FakePlatform(),
+      platform: FakePlatform(
+        operatingSystem: 'linux',
+      ),
     ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{});
 
     expect(environment.outputDir.childFile('.last_build_id').lastModifiedSync(),
@@ -524,7 +530,7 @@ void main() {
     FlutterBuildSystem(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
-      platform: FakePlatform(),
+      platform: FakePlatform(operatingSystem: 'linux'),
     ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{});
 
     expect(environment.outputDir.childFile('.last_build_id').readAsStringSync(),
@@ -547,7 +553,7 @@ void main() {
     FlutterBuildSystem(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
-      platform: FakePlatform(),
+      platform: FakePlatform(operatingSystem: 'linux'),
     ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{});
 
     expect(environment.outputDir.childFile('.last_build_id').readAsStringSync(),

@@ -41,7 +41,7 @@ void main() {
       ),
       processManager: FakeProcessManager.list(<FakeCommand>[]),
       fileSystem: MemoryFileSystem.test(),
-      platform: FakePlatform(),
+      platform: FakePlatform(operatingSystem: 'linux'),
       userMessages: UserMessages(),
     );
 
@@ -62,7 +62,7 @@ void main() {
       ),
       processManager: fakeProcessManager,
       fileSystem: MemoryFileSystem.test(),
-      platform: FakePlatform(),
+      platform: FakePlatform(operatingSystem: 'linux'),
       userMessages: UserMessages(),
     );
 
@@ -82,7 +82,7 @@ void main() {
       ),
       processManager: FakeProcessManager.list(<FakeCommand>[]),
       fileSystem: MemoryFileSystem.test(),
-      platform: FakePlatform(),
+      platform: FakePlatform(operatingSystem: 'linux'),
       userMessages: UserMessages(),
     );
 
@@ -103,7 +103,7 @@ void main() {
       androidWorkflow: androidWorkflow,
       processManager: processManager,
       fileSystem: MemoryFileSystem.test(),
-      platform: FakePlatform(),
+      platform: FakePlatform(operatingSystem: 'linux'),
       userMessages: UserMessages(),
     );
 
@@ -124,7 +124,7 @@ void main() {
       ),
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),
-      platform: FakePlatform(),
+      platform: FakePlatform(operatingSystem: 'linux'),
       userMessages: UserMessages(),
     );
 
@@ -147,7 +147,7 @@ List of devices attached
   ''',
         )
       ]),
-      platform: FakePlatform(),
+      platform: FakePlatform(operatingSystem: 'linux'),
       fileSystem: MemoryFileSystem.test(),
     );
 
@@ -176,7 +176,7 @@ emulator-5612          host features:shell_2
   ''',
         )
       ]),
-      platform: FakePlatform(),
+      platform: FakePlatform(operatingSystem: 'linux'),
       fileSystem: MemoryFileSystem.test(),
     );
 
@@ -204,7 +204,7 @@ ZX1G22JJWR             device usb:3-3 product:shamu model:Nexus_6 device:shamu f
 ''',
         )
       ]),
-      platform: FakePlatform(),
+      platform: FakePlatform(operatingSystem: 'linux'),
       fileSystem: MemoryFileSystem.test(),
     );
 
@@ -230,7 +230,7 @@ Use the 'android' tool to install them:
 ''',
         )
       ]),
-      platform: FakePlatform(),
+      platform: FakePlatform(operatingSystem: 'linux'),
       fileSystem: MemoryFileSystem.test(),
     );
 

@@ -90,7 +90,7 @@ void main() {
       mockLogger = BufferLogger(
         terminal: AnsiTerminal(
           stdio: FakeStdio(),
-          platform: FakePlatform(stdoutSupportsAnsi: false),
+          platform: FakePlatform(operatingSystem: 'linux', stdoutSupportsAnsi: false),
         ),
         outputPreferences: OutputPreferences(wrapText: true, wrapColumn: 40),
       );
@@ -280,7 +280,7 @@ void main() {
       testLogger = BufferLogger(
         terminal: AnsiTerminal(
           stdio: FakeStdio(),
-          platform: FakePlatform(stdinSupportsAnsi: false),
+          platform: FakePlatform(operatingSystem: 'linux', stdinSupportsAnsi: false),
         ),
         outputPreferences: OutputPreferences(wrapText: true, wrapColumn: 40),
       );

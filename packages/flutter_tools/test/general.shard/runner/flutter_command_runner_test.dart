@@ -45,6 +45,7 @@ void main() {
           'FLUTTER_ROOT': _kFlutterRoot,
         },
         version: '1 2 3 4 5',
+        operatingSystem: 'linux'
       );
 
       runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;

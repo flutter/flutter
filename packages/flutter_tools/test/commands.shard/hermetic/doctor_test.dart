@@ -41,6 +41,7 @@ final Generator _kNoColorOutputPlatform = () => FakePlatform(
   localeName: 'en_US.UTF-8',
   environment: <String, String>{},
   stdoutSupportsAnsi: false,
+  operatingSystem: 'linux',
 );
 
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{

@@ -18,6 +18,7 @@ CommandHelp _createCommandHelp({
   @required int wrapColumn,
 }) {
   final Platform platform = FakePlatform(
+    operatingSystem: 'linux',
     stdoutSupportsAnsi: ansi,
   );
   return CommandHelp(
@@ -82,7 +83,7 @@ void main() {
   group('CommandHelp', () {
     group('toString', () {
       testWithoutContext('ends with a resetBold when it has parenthetical text', () {
-        final Platform platform = FakePlatform(stdoutSupportsAnsi: true);
+        final Platform platform = FakePlatform(operatingSystem: 'linux', stdoutSupportsAnsi: true);
         final AnsiTerminal terminal = AnsiTerminal(stdio: null, platform: platform);
 
         final CommandHelpOption commandHelpOption = CommandHelpOption(

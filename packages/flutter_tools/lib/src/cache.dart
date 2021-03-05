@@ -162,7 +162,7 @@ class Cache {
     ProcessManager processManager,
   }) {
     fileSystem ??= rootOverride?.fileSystem ?? MemoryFileSystem.test();
-    platform ??= FakePlatform(environment: <String, String>{});
+    platform ??= FakePlatform(environment: <String, String>{}, operatingSystem: 'linux');
     logger ??= BufferLogger.test();
     return Cache(
       rootOverride: rootOverride ??= fileSystem.directory('cache'),

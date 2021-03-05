@@ -22,7 +22,10 @@ import 'package:process/process.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 
-final Platform _kNoColorTerminalPlatform = FakePlatform(stdoutSupportsAnsi: false);
+final Platform _kNoColorTerminalPlatform = FakePlatform(
+  operatingSystem: 'linux',
+  stdoutSupportsAnsi: false,
+);
 
 void main() {
   String analyzerSeparator;

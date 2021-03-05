@@ -32,7 +32,7 @@ void main() {
   });
 
   testUsingContext('precache should acquire lock', () async {
-    final Platform platform = FakePlatform(environment: <String, String>{});
+    final Platform platform = FakePlatform(environment: <String, String>{}, operatingSystem: 'linux');
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
@@ -71,7 +71,7 @@ void main() {
       cache: cache,
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(isWebEnabled: true),
-      platform: FakePlatform(environment: <String, String>{}),
+      platform: FakePlatform(environment: <String, String>{}, operatingSystem: 'linux'),
     );
     await createTestCommandRunner(command).run(const <String>['precache', '--web', '--no-android', '--no-ios']);
 
@@ -86,7 +86,7 @@ void main() {
       cache: cache,
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(isWebEnabled: false),
-      platform: FakePlatform(environment: <String, String>{}),
+      platform: FakePlatform(environment: <String, String>{}, operatingSystem: 'linux'),
     );
     await createTestCommandRunner(command).run(const <String>['precache', '--web', '--no-android', '--no-ios']);
 
@@ -100,7 +100,7 @@ void main() {
       cache: cache,
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(isMacOSEnabled: true),
-      platform: FakePlatform(environment: <String, String>{}),
+      platform: FakePlatform(environment: <String, String>{}, operatingSystem: 'linux'),
     );
     await createTestCommandRunner(command).run(const <String>['precache', '--macos', '--no-android', '--no-ios']);
 
@@ -115,7 +115,7 @@ void main() {
       cache: cache,
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(isMacOSEnabled: false),
-      platform: FakePlatform(environment: <String, String>{}),
+      platform: FakePlatform(environment: <String, String>{}, operatingSystem: 'linux'),
     );
     await createTestCommandRunner(command).run(const <String>['precache', '--macos', '--no-android', '--no-ios']);
 
@@ -129,7 +129,7 @@ void main() {
       cache: cache,
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(isWindowsEnabled: true),
-      platform: FakePlatform(environment: <String, String>{}),
+      platform: FakePlatform(environment: <String, String>{}, operatingSystem: 'linux'),
     );
     await createTestCommandRunner(command).run(const <String>['precache', '--windows', '--no-android', '--no-ios']);
 
@@ -144,7 +144,7 @@ void main() {
       cache: cache,
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(isWindowsEnabled: false),
-      platform: FakePlatform(environment: <String, String>{}),
+      platform: FakePlatform(environment: <String, String>{}, operatingSystem: 'linux'),
     );
     await createTestCommandRunner(command).run(const <String>['precache', '--windows', '--no-android', '--no-ios']);
 
@@ -158,7 +158,7 @@ void main() {
       cache: cache,
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(isLinuxEnabled: true),
-      platform: FakePlatform(environment: <String, String>{}),
+      platform: FakePlatform(environment: <String, String>{}, operatingSystem: 'linux'),
     );
     await createTestCommandRunner(command).run(const <String>['precache', '--linux', '--no-android', '--no-ios']);
 
@@ -173,7 +173,7 @@ void main() {
       cache: cache,
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(isLinuxEnabled: false),
-      platform: FakePlatform(environment: <String, String>{}),
+      platform: FakePlatform(environment: <String, String>{}, operatingSystem: 'linux'),
     );
     await createTestCommandRunner(command).run(const <String>['precache', '--linux', '--no-android', '--no-ios']);
 
@@ -187,7 +187,7 @@ void main() {
       cache: cache,
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(isWebEnabled: false),
-      platform: FakePlatform(environment: <String, String>{}),
+      platform: FakePlatform(environment: <String, String>{}, operatingSystem: 'linux'),
     );
 
     expect(createTestCommandRunner(command).run(const <String>['precache',
@@ -207,7 +207,7 @@ void main() {
         isWindowsEnabled: true,
         isFuchsiaEnabled: true,
       ),
-      platform: FakePlatform(environment: <String, String>{}),
+      platform: FakePlatform(environment: <String, String>{}, operatingSystem: 'linux'),
     );
     await createTestCommandRunner(command).run(
       const <String>[
@@ -242,7 +242,7 @@ void main() {
       cache: cache,
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(),
-      platform: FakePlatform(environment: <String, String>{}),
+      platform: FakePlatform(environment: <String, String>{}, operatingSystem: 'linux'),
     );
     await createTestCommandRunner(command).run(
       const <String>[
@@ -264,7 +264,7 @@ void main() {
       cache: cache,
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(),
-      platform: FakePlatform(environment: <String, String>{}),
+      platform: FakePlatform(environment: <String, String>{}, operatingSystem: 'linux'),
     );
     await createTestCommandRunner(command).run(
       const <String>[
@@ -289,7 +289,7 @@ void main() {
       cache: cache,
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(),
-      platform: FakePlatform(environment: <String, String>{}),
+      platform: FakePlatform(environment: <String, String>{}, operatingSystem: 'linux'),
     );
 
     await createTestCommandRunner(command).run(
@@ -318,7 +318,7 @@ void main() {
         isWindowsEnabled: true,
         isFuchsiaEnabled: true,
       ),
-      platform: FakePlatform(environment: <String, String>{}),
+      platform: FakePlatform(environment: <String, String>{}, operatingSystem: 'linux'),
     );
 
     await createTestCommandRunner(command).run(
@@ -348,7 +348,7 @@ void main() {
       cache: cache,
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(),
-      platform: FakePlatform(environment: <String, String>{}),
+      platform: FakePlatform(environment: <String, String>{}, operatingSystem: 'linux'),
     );
 
     await createTestCommandRunner(command).run(
@@ -400,7 +400,7 @@ void main() {
       featureFlags: TestFeatureFlags(
         isMacOSEnabled: true,
       ),
-      platform: FakePlatform(environment: <String, String>{}),
+      platform: FakePlatform(environment: <String, String>{}, operatingSystem: 'linux'),
     );
     await createTestCommandRunner(command).run(const <String>['precache', '--force']);
 
@@ -419,7 +419,7 @@ void main() {
         isIOSEnabled: false,
         isAndroidEnabled: false,
       ),
-      platform: FakePlatform(environment: <String, String>{}),
+      platform: FakePlatform(environment: <String, String>{}, operatingSystem: 'linux'),
     );
     await createTestCommandRunner(command).run(const <String>['precache']);
 

@@ -199,7 +199,7 @@ void main() {
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
 
 final Generator _kNoColorTerminalPlatform =
-    () => FakePlatform(stdoutSupportsAnsi: false);
+    () => FakePlatform(stdoutSupportsAnsi: false, operatingSystem: 'linux');
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
 };

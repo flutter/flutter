@@ -41,7 +41,7 @@ void main() {
       flutterRoot: '',
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      platform: FakePlatform(environment: <String, String>{}),
+      platform: FakePlatform(environment: <String, String>{}, operatingSystem: 'linux'),
     );
 
     expect(
@@ -79,7 +79,7 @@ void main() {
       flutterRoot: '',
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      platform: FakePlatform(environment: <String, String>{}),
+      platform: FakePlatform(environment: <String, String>{}, operatingSystem: 'linux'),
     );
 
     expect(
@@ -110,7 +110,7 @@ void main() {
       flutterRoot: 'flutter/flutter',
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      platform: FakePlatform(environment: <String, String>{}),
+      platform: FakePlatform(environment: <String, String>{}, operatingSystem: 'linux'),
     );
 
     expect(

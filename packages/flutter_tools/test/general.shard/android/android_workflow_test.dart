@@ -92,7 +92,10 @@ void main() {
       androidSdk: sdk,
       fileSystem: fileSystem,
       processManager: processManager,
-      platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
+      platform: FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{'HOME': '/home/me'},
+      ),
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
@@ -111,7 +114,10 @@ void main() {
       androidSdk: sdk,
       fileSystem: fileSystem,
       processManager: processManager,
-      platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
+      platform: FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{'HOME': '/home/me'},
+      ),
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
@@ -129,7 +135,10 @@ void main() {
       androidSdk: sdk,
       fileSystem: fileSystem,
       processManager: processManager,
-      platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
+      platform: FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{'HOME': '/home/me'},
+      ),
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
@@ -154,7 +163,10 @@ void main() {
       androidSdk: sdk,
       fileSystem: fileSystem,
       processManager: processManager,
-      platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
+      platform: FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{'HOME': '/home/me'},
+      ),
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
@@ -178,7 +190,10 @@ void main() {
       androidSdk: sdk,
       fileSystem: fileSystem,
       processManager: processManager,
-      platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
+      platform: FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{'HOME': '/home/me'},
+      ),
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
@@ -202,7 +217,10 @@ void main() {
       androidSdk: sdk,
       fileSystem: fileSystem,
       processManager: processManager,
-      platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
+      platform: FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{'HOME': '/home/me'},
+      ),
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
@@ -222,7 +240,10 @@ void main() {
       androidSdk: sdk,
       fileSystem: fileSystem,
       processManager: processManager,
-      platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
+      platform: FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{'HOME': '/home/me'},
+      ),
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
@@ -241,7 +262,10 @@ void main() {
       androidSdk: sdk,
       fileSystem: fileSystem,
       processManager: processManager,
-      platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
+      platform: FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{'HOME': '/home/me'},
+      ),
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
@@ -260,7 +284,10 @@ void main() {
       androidSdk: sdk,
       fileSystem: fileSystem,
       processManager: processManager,
-      platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
+      platform: FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{'HOME': '/home/me'},
+      ),
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
@@ -280,7 +307,10 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+      platform: FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{'HOME': '/home/me'},
+      ),
       userMessages: UserMessages(),
     ).validate();
     expect(validationResult.type, ValidationType.partial);
@@ -306,7 +336,7 @@ void main() {
       sdk.sdkManagerPath,
       kAndroidSdkMinVersion,
       kAndroidSdkBuildToolsMinVersion.toString(),
-      FakePlatform(),
+      FakePlatform(operatingSystem: 'linux'),
     );
 
     final AndroidValidator androidValidator = AndroidValidator(
@@ -315,7 +345,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+      platform: FakePlatform(operatingSystem: 'linux', environment: <String, String>{'HOME': '/home/me'}),
       userMessages: UserMessages(),
     );
 
@@ -373,7 +403,7 @@ void main() {
       androidStudio: null,
       fileSystem: fileSystem,
       logger: logger,
-      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
+      platform: FakePlatform(operatingSystem: 'linux', environment: <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'}),
       processManager: processManager,
       userMessages: UserMessages(),
     ).validate();
@@ -396,7 +426,7 @@ void main() {
       androidStudio: null,
       fileSystem: fileSystem,
       logger: logger,
-      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
+      platform: FakePlatform(operatingSystem: 'linux', environment: <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'}),
       processManager: processManager,
       userMessages: UserMessages(),
     ).validate();

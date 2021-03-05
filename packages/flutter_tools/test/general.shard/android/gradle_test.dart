@@ -646,7 +646,7 @@ flutter:
         artifacts: Artifacts.test(),
         usage: TestUsage(),
         gradleUtils: FakeGradleUtils(),
-        platform: FakePlatform(),
+        platform: FakePlatform(operatingSystem: 'linux'),
       );
     });
 

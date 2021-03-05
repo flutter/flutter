@@ -23,7 +23,7 @@ void main() {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         fileSystem: fileSystem,
-        platform: FakePlatform(),
+        platform: FakePlatform(operatingSystem: 'linux'),
         logger: BufferLogger.test(),
       );
       fileSystem.file('.packages').writeAsStringSync('\n');
@@ -44,7 +44,7 @@ void main() {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         fileSystem: fileSystem,
-        platform: FakePlatform(),
+        platform: FakePlatform(operatingSystem: 'linux'),
         logger: BufferLogger.test(),
       );
       fileSystem.file('.packages').writeAsStringSync('\n');
@@ -65,7 +65,7 @@ void main() {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         fileSystem: MemoryFileSystem.test(),
-        platform: FakePlatform(),
+        platform: FakePlatform(operatingSystem: 'linux'),
         logger: BufferLogger.test(),
       );
       fileSystem.file('.packages').writeAsStringSync('\n');
@@ -88,7 +88,7 @@ void main() {
       const PackageConfig packageConfig = PackageConfig.empty;
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         fileSystem: fileSystem,
-        platform: FakePlatform(),
+        platform: FakePlatform(operatingSystem: 'linux'),
         logger: BufferLogger.test(),
       );
       fileSystem.file('.packages')
@@ -128,7 +128,7 @@ void main() {
       const PackageConfig packageConfig = PackageConfig.empty;
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         fileSystem: fileSystem,
-        platform: FakePlatform(),
+        platform: FakePlatform(operatingSystem: 'linux'),
         logger: BufferLogger.test(),
       );
       fileSystem.file('.packages')

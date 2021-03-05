@@ -18,9 +18,10 @@ void main() {
         fileSystem: MemoryFileSystem.test(),
         userMessages: UserMessages(),
         platform: FakePlatform(
-            environment: <String, String>{
-              'FLUTTER_ROOT': 'path/to/flutter'
-            }
+          operatingSystem: 'linux',
+          environment: <String, String>{
+            'FLUTTER_ROOT': 'path/to/flutter'
+          }
         )
     );
 
@@ -39,6 +40,7 @@ void main() {
         fileSystem: fileSystem,
         userMessages: UserMessages(),
         platform: FakePlatform(
+          operatingSystem: 'linux',
           environment: <String, String>{},
           script: Uri.parse('data:,Hello%2C%20World!'),
         )
@@ -53,6 +55,7 @@ void main() {
         fileSystem: fileSystem,
         userMessages: UserMessages(),
         platform: FakePlatform(
+          operatingSystem: 'linux',
             environment: <String, String>{},
             script: Uri.parse('package:flutter_tools/flutter_tools.dart'),
             packageConfig: 'flutter/packages/flutter_tools/.packages'
@@ -68,6 +71,7 @@ void main() {
         fileSystem: fileSystem,
         userMessages: UserMessages(),
         platform: FakePlatform(
+          operatingSystem: 'linux',
           environment: <String, String>{},
           script: Uri.parse('file:///flutter/bin/cache/flutter_tools.snapshot'),
         )
@@ -82,6 +86,7 @@ void main() {
         fileSystem: fileSystem,
         userMessages: UserMessages(),
         platform: FakePlatform(
+          operatingSystem: 'linux',
           environment: <String, String>{},
           script: Uri.parse('file:///flutter/packages/flutter_tools/bin/flutter_tools.dart'),
         )
@@ -96,6 +101,7 @@ void main() {
         fileSystem: fileSystem,
         userMessages: UserMessages(),
         platform: FakePlatform(
+          operatingSystem: 'linux',
           environment: <String, String>{},
           script: Uri.parse('http://foo.bar'), // does not match any heuristics.
         )

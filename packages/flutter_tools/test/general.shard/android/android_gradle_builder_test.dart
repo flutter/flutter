@@ -47,7 +47,7 @@ void main() {
         artifacts: Artifacts.test(),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
-        platform: FakePlatform(),
+       platform: FakePlatform(operatingSystem: 'linux'),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -134,7 +134,7 @@ void main() {
         artifacts: Artifacts.test(),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
-        platform: FakePlatform(),
+        platform: FakePlatform(operatingSystem: 'linux'),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -236,7 +236,7 @@ void main() {
         artifacts: Artifacts.test(),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
-        platform: FakePlatform(),
+        platform: FakePlatform(operatingSystem: 'linux'),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -323,7 +323,7 @@ void main() {
         artifacts: Artifacts.test(),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
-        platform: FakePlatform(),
+        platform: FakePlatform(operatingSystem: 'linux'),
       );
       processManager.addCommand(FakeCommand(
         command: const <String>[
@@ -383,7 +383,7 @@ void main() {
         artifacts: Artifacts.test(),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
-        platform: FakePlatform(),
+        platform: FakePlatform(operatingSystem: 'linux'),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -482,6 +482,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(
+          operatingSystem: 'linux',
           environment: <String, String>{
             'HOME': '/home',
           },
@@ -578,7 +579,9 @@ void main() {
         artifacts: Artifacts.test(),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
-        platform: FakePlatform(),
+        platform: FakePlatform(
+          operatingSystem: 'linux',
+        ),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -689,7 +692,9 @@ void main() {
         artifacts: Artifacts.test(),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
-        platform: FakePlatform(),
+        platform: FakePlatform(
+          operatingSystem: 'linux',
+        ),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -753,7 +758,9 @@ void main() {
         artifacts: Artifacts.test(),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
-        platform: FakePlatform(),
+        platform: FakePlatform(
+          operatingSystem: 'linux',
+        ),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -816,7 +823,9 @@ void main() {
         artifacts: Artifacts.test(),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
-        platform: FakePlatform(),
+        platform: FakePlatform(
+          operatingSystem: 'linux',
+        ),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -872,7 +881,9 @@ void main() {
         artifacts: Artifacts.test(localEngine: 'out/android_arm'),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
-        platform: FakePlatform(),
+        platform: FakePlatform(
+          operatingSystem: 'linux',
+        ),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -946,7 +957,9 @@ void main() {
         artifacts: Artifacts.test(localEngine: 'out/android_arm64'),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
-        platform: FakePlatform(),
+        platform: FakePlatform(
+          operatingSystem: 'linux',
+        ),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1020,7 +1033,9 @@ void main() {
         artifacts: Artifacts.test(localEngine: 'out/android_x86'),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
-        platform: FakePlatform(),
+        platform: FakePlatform(
+          operatingSystem: 'linux',
+        ),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1094,7 +1109,9 @@ void main() {
         artifacts: Artifacts.test(localEngine: 'out/android_x64'),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
-        platform: FakePlatform(),
+        platform: FakePlatform(
+          operatingSystem: 'linux',
+        ),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1168,7 +1185,9 @@ void main() {
         artifacts: Artifacts.test(),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
-        platform: FakePlatform(),
+        platform: FakePlatform(
+          operatingSystem: 'linux',
+        ),
       );
       processManager.addCommand(
         const FakeCommand(command: <String>[
@@ -1223,7 +1242,9 @@ void main() {
         artifacts: Artifacts.test(localEngine: 'out/android_arm'),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
-        platform: FakePlatform(),
+        platform: FakePlatform(
+          operatingSystem: 'linux',
+        ),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1308,7 +1329,9 @@ void main() {
         artifacts: Artifacts.test(localEngine: 'out/android_arm64'),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
-        platform: FakePlatform(),
+        platform: FakePlatform(
+          operatingSystem: 'linux',
+        ),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1393,7 +1416,9 @@ void main() {
         artifacts: Artifacts.test(localEngine: 'out/android_x86'),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
-        platform: FakePlatform(),
+        platform: FakePlatform(
+          operatingSystem: 'linux',
+        ),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1478,7 +1503,9 @@ void main() {
         artifacts: Artifacts.test(localEngine: 'out/android_x64'),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
-        platform: FakePlatform(),
+        platform: FakePlatform(
+          operatingSystem: 'linux',
+        ),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
