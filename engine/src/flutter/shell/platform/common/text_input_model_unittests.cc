@@ -1234,12 +1234,32 @@ TEST(TextInputModel, MoveCursorToBeginningStart) {
   EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
 }
 
+TEST(TextInputModel, SelectToBeginningStart) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ABCDE");
+  EXPECT_TRUE(model->SetSelection(TextRange(0)));
+  EXPECT_FALSE(model->SelectToBeginning());
+  EXPECT_EQ(model->selection(), TextRange(0));
+  EXPECT_EQ(model->composing_range(), TextRange(0));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+}
+
 TEST(TextInputModel, MoveCursorToBeginningMiddle) {
   auto model = std::make_unique<TextInputModel>();
   model->SetText("ABCDE");
   EXPECT_TRUE(model->SetSelection(TextRange(2)));
   EXPECT_TRUE(model->MoveCursorToBeginning());
   EXPECT_EQ(model->selection(), TextRange(0));
+  EXPECT_EQ(model->composing_range(), TextRange(0));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+}
+
+TEST(TextInputModel, SelectToBeginningMiddle) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ABCDE");
+  EXPECT_TRUE(model->SetSelection(TextRange(2)));
+  EXPECT_TRUE(model->SelectToBeginning());
+  EXPECT_EQ(model->selection(), TextRange(2, 0));
   EXPECT_EQ(model->composing_range(), TextRange(0));
   EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
 }
@@ -1254,12 +1274,32 @@ TEST(TextInputModel, MoveCursorToBeginningEnd) {
   EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
 }
 
+TEST(TextInputModel, SelectToBeginningEnd) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ABCDE");
+  EXPECT_TRUE(model->SetSelection(TextRange(5)));
+  EXPECT_TRUE(model->SelectToBeginning());
+  EXPECT_EQ(model->selection(), TextRange(5, 0));
+  EXPECT_EQ(model->composing_range(), TextRange(0));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+}
+
 TEST(TextInputModel, MoveCursorToBeginningSelection) {
   auto model = std::make_unique<TextInputModel>();
   model->SetText("ABCDE");
   EXPECT_TRUE(model->SetSelection(TextRange(1, 4)));
   EXPECT_TRUE(model->MoveCursorToBeginning());
   EXPECT_EQ(model->selection(), TextRange(0));
+  EXPECT_EQ(model->composing_range(), TextRange(0));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+}
+
+TEST(TextInputModel, SelectToBeginningSelection) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ABCDE");
+  EXPECT_TRUE(model->SetSelection(TextRange(1, 4)));
+  EXPECT_TRUE(model->SelectToBeginning());
+  EXPECT_EQ(model->selection(), TextRange(1, 0));
   EXPECT_EQ(model->composing_range(), TextRange(0));
   EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
 }
@@ -1274,12 +1314,33 @@ TEST(TextInputModel, MoveCursorToBeginningReverseSelection) {
   EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
 }
 
+TEST(TextInputModel, SelectToBeginningReverseSelection) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ABCDE");
+  EXPECT_TRUE(model->SetSelection(TextRange(4, 1)));
+  EXPECT_TRUE(model->SelectToBeginning());
+  EXPECT_EQ(model->selection(), TextRange(4, 0));
+  EXPECT_EQ(model->composing_range(), TextRange(0));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+}
+
 TEST(TextInputModel, MoveCursorToBeginningStartComposing) {
   auto model = std::make_unique<TextInputModel>();
   model->SetText("ABCDE");
   model->BeginComposing();
   EXPECT_TRUE(model->SetComposingRange(TextRange(1, 4), 0));
   EXPECT_FALSE(model->MoveCursorToBeginning());
+  EXPECT_EQ(model->selection(), TextRange(1));
+  EXPECT_EQ(model->composing_range(), TextRange(1, 4));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+}
+
+TEST(TextInputModel, SelectToBeginningStartComposing) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ABCDE");
+  model->BeginComposing();
+  EXPECT_TRUE(model->SetComposingRange(TextRange(1, 4), 0));
+  EXPECT_FALSE(model->SelectToBeginning());
   EXPECT_EQ(model->selection(), TextRange(1));
   EXPECT_EQ(model->composing_range(), TextRange(1, 4));
   EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
@@ -1296,6 +1357,17 @@ TEST(TextInputModel, MoveCursorToBeginningStartReverseComposing) {
   EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
 }
 
+TEST(TextInputModel, SelectToBeginningStartReverseComposing) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ABCDE");
+  model->BeginComposing();
+  EXPECT_TRUE(model->SetComposingRange(TextRange(4, 1), 0));
+  EXPECT_FALSE(model->SelectToBeginning());
+  EXPECT_EQ(model->selection(), TextRange(1));
+  EXPECT_EQ(model->composing_range(), TextRange(4, 1));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+}
+
 TEST(TextInputModel, MoveCursorToBeginningMiddleComposing) {
   auto model = std::make_unique<TextInputModel>();
   model->SetText("ABCDE");
@@ -1303,6 +1375,17 @@ TEST(TextInputModel, MoveCursorToBeginningMiddleComposing) {
   EXPECT_TRUE(model->SetComposingRange(TextRange(1, 4), 1));
   EXPECT_TRUE(model->MoveCursorToBeginning());
   EXPECT_EQ(model->selection(), TextRange(1));
+  EXPECT_EQ(model->composing_range(), TextRange(1, 4));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+}
+
+TEST(TextInputModel, SelectToBeginningMiddleComposing) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ABCDE");
+  model->BeginComposing();
+  EXPECT_TRUE(model->SetComposingRange(TextRange(1, 4), 1));
+  EXPECT_TRUE(model->SelectToBeginning());
+  EXPECT_EQ(model->selection(), TextRange(2, 1));
   EXPECT_EQ(model->composing_range(), TextRange(1, 4));
   EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
 }
@@ -1318,7 +1401,29 @@ TEST(TextInputModel, MoveCursorToBeginningMiddleReverseComposing) {
   EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
 }
 
+TEST(TextInputModel, SelectToBeginningMiddleReverseComposing) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ABCDE");
+  model->BeginComposing();
+  EXPECT_TRUE(model->SetComposingRange(TextRange(4, 1), 1));
+  EXPECT_TRUE(model->SelectToBeginning());
+  EXPECT_EQ(model->selection(), TextRange(2, 1));
+  EXPECT_EQ(model->composing_range(), TextRange(4, 1));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+}
+
 TEST(TextInputModel, MoveCursorToBeginningEndComposing) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ABCDE");
+  model->BeginComposing();
+  EXPECT_TRUE(model->SetComposingRange(TextRange(1, 4), 3));
+  EXPECT_TRUE(model->MoveCursorToBeginning());
+  EXPECT_EQ(model->selection(), TextRange(1));
+  EXPECT_EQ(model->composing_range(), TextRange(1, 4));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+}
+
+TEST(TextInputModel, SelectToBeginningEndComposing) {
   auto model = std::make_unique<TextInputModel>();
   model->SetText("ABCDE");
   model->BeginComposing();
@@ -1340,12 +1445,33 @@ TEST(TextInputModel, MoveCursorToBeginningEndReverseComposing) {
   EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
 }
 
+TEST(TextInputModel, SelectToBeginningEndReverseComposing) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ABCDE");
+  model->BeginComposing();
+  EXPECT_TRUE(model->SetComposingRange(TextRange(4, 1), 3));
+  EXPECT_TRUE(model->SelectToBeginning());
+  EXPECT_EQ(model->selection(), TextRange(4, 1));
+  EXPECT_EQ(model->composing_range(), TextRange(4, 1));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+}
+
 TEST(TextInputModel, MoveCursorToEndStart) {
   auto model = std::make_unique<TextInputModel>();
   model->SetText("ABCDE");
   EXPECT_TRUE(model->SetSelection(TextRange(0)));
   EXPECT_TRUE(model->MoveCursorToEnd());
   EXPECT_EQ(model->selection(), TextRange(5));
+  EXPECT_EQ(model->composing_range(), TextRange(0));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+}
+
+TEST(TextInputModel, SelectToEndStart) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ABCDE");
+  EXPECT_TRUE(model->SetSelection(TextRange(0)));
+  EXPECT_TRUE(model->SelectToEnd());
+  EXPECT_EQ(model->selection(), TextRange(0, 5));
   EXPECT_EQ(model->composing_range(), TextRange(0));
   EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
 }
@@ -1360,11 +1486,31 @@ TEST(TextInputModel, MoveCursorToEndMiddle) {
   EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
 }
 
+TEST(TextInputModel, SelectToEndMiddle) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ABCDE");
+  EXPECT_TRUE(model->SetSelection(TextRange(2)));
+  EXPECT_TRUE(model->SelectToEnd());
+  EXPECT_EQ(model->selection(), TextRange(2, 5));
+  EXPECT_EQ(model->composing_range(), TextRange(0));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+}
+
 TEST(TextInputModel, MoveCursorToEndEnd) {
   auto model = std::make_unique<TextInputModel>();
   model->SetText("ABCDE");
   EXPECT_TRUE(model->SetSelection(TextRange(5)));
   EXPECT_FALSE(model->MoveCursorToEnd());
+  EXPECT_EQ(model->selection(), TextRange(5));
+  EXPECT_EQ(model->composing_range(), TextRange(0));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+}
+
+TEST(TextInputModel, SelectToEndEnd) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ABCDE");
+  EXPECT_TRUE(model->SetSelection(TextRange(5)));
+  EXPECT_FALSE(model->SelectToEnd());
   EXPECT_EQ(model->selection(), TextRange(5));
   EXPECT_EQ(model->composing_range(), TextRange(0));
   EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
@@ -1380,12 +1526,32 @@ TEST(TextInputModel, MoveCursorToEndSelection) {
   EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
 }
 
+TEST(TextInputModel, SelectToEndSelection) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ABCDE");
+  EXPECT_TRUE(model->SetSelection(TextRange(1, 4)));
+  EXPECT_TRUE(model->SelectToEnd());
+  EXPECT_EQ(model->selection(), TextRange(1, 5));
+  EXPECT_EQ(model->composing_range(), TextRange(0));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+}
+
 TEST(TextInputModel, MoveCursorToEndReverseSelection) {
   auto model = std::make_unique<TextInputModel>();
   model->SetText("ABCDE");
   EXPECT_TRUE(model->SetSelection(TextRange(4, 1)));
   EXPECT_TRUE(model->MoveCursorToEnd());
   EXPECT_EQ(model->selection(), TextRange(5));
+  EXPECT_EQ(model->composing_range(), TextRange(0));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+}
+
+TEST(TextInputModel, SelectToEndReverseSelection) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ABCDE");
+  EXPECT_TRUE(model->SetSelection(TextRange(4, 1)));
+  EXPECT_TRUE(model->SelectToEnd());
+  EXPECT_EQ(model->selection(), TextRange(4, 5));
   EXPECT_EQ(model->composing_range(), TextRange(0));
   EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
 }
@@ -1401,6 +1567,17 @@ TEST(TextInputModel, MoveCursorToEndStartComposing) {
   EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
 }
 
+TEST(TextInputModel, SelectToEndStartComposing) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ABCDE");
+  model->BeginComposing();
+  EXPECT_TRUE(model->SetComposingRange(TextRange(1, 4), 0));
+  EXPECT_TRUE(model->SelectToEnd());
+  EXPECT_EQ(model->selection(), TextRange(1, 4));
+  EXPECT_EQ(model->composing_range(), TextRange(1, 4));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+}
+
 TEST(TextInputModel, MoveCursorToEndStartReverseComposing) {
   auto model = std::make_unique<TextInputModel>();
   model->SetText("ABCDE");
@@ -1408,6 +1585,17 @@ TEST(TextInputModel, MoveCursorToEndStartReverseComposing) {
   EXPECT_TRUE(model->SetComposingRange(TextRange(1, 4), 0));
   EXPECT_TRUE(model->MoveCursorToEnd());
   EXPECT_EQ(model->selection(), TextRange(4));
+  EXPECT_EQ(model->composing_range(), TextRange(1, 4));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+}
+
+TEST(TextInputModel, SelectToEndStartReverseComposing) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ABCDE");
+  model->BeginComposing();
+  EXPECT_TRUE(model->SetComposingRange(TextRange(1, 4), 0));
+  EXPECT_TRUE(model->SelectToEnd());
+  EXPECT_EQ(model->selection(), TextRange(1, 4));
   EXPECT_EQ(model->composing_range(), TextRange(1, 4));
   EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
 }
@@ -1423,6 +1611,17 @@ TEST(TextInputModel, MoveCursorToEndMiddleComposing) {
   EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
 }
 
+TEST(TextInputModel, SelectToEndMiddleComposing) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ABCDE");
+  model->BeginComposing();
+  EXPECT_TRUE(model->SetComposingRange(TextRange(1, 4), 1));
+  EXPECT_TRUE(model->SelectToEnd());
+  EXPECT_EQ(model->selection(), TextRange(2, 4));
+  EXPECT_EQ(model->composing_range(), TextRange(1, 4));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+}
+
 TEST(TextInputModel, MoveCursorToEndMiddleReverseComposing) {
   auto model = std::make_unique<TextInputModel>();
   model->SetText("ABCDE");
@@ -1430,6 +1629,17 @@ TEST(TextInputModel, MoveCursorToEndMiddleReverseComposing) {
   EXPECT_TRUE(model->SetComposingRange(TextRange(4, 1), 1));
   EXPECT_TRUE(model->MoveCursorToEnd());
   EXPECT_EQ(model->selection(), TextRange(4));
+  EXPECT_EQ(model->composing_range(), TextRange(4, 1));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+}
+
+TEST(TextInputModel, SelectToEndMiddleReverseComposing) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ABCDE");
+  model->BeginComposing();
+  EXPECT_TRUE(model->SetComposingRange(TextRange(4, 1), 1));
+  EXPECT_TRUE(model->SelectToEnd());
+  EXPECT_EQ(model->selection(), TextRange(2, 4));
   EXPECT_EQ(model->composing_range(), TextRange(4, 1));
   EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
 }
@@ -1445,12 +1655,34 @@ TEST(TextInputModel, MoveCursorToEndEndComposing) {
   EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
 }
 
+TEST(TextInputModel, SelectToEndEndComposing) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ABCDE");
+  model->BeginComposing();
+  EXPECT_TRUE(model->SetComposingRange(TextRange(1, 4), 3));
+  EXPECT_FALSE(model->SelectToEnd());
+  EXPECT_EQ(model->selection(), TextRange(4));
+  EXPECT_EQ(model->composing_range(), TextRange(1, 4));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+}
+
 TEST(TextInputModel, MoveCursorToEndEndReverseComposing) {
   auto model = std::make_unique<TextInputModel>();
   model->SetText("ABCDE");
   model->BeginComposing();
   EXPECT_TRUE(model->SetComposingRange(TextRange(4, 1), 3));
   EXPECT_FALSE(model->MoveCursorToEnd());
+  EXPECT_EQ(model->selection(), TextRange(4));
+  EXPECT_EQ(model->composing_range(), TextRange(4, 1));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+}
+
+TEST(TextInputModel, SelectToEndEndReverseComposing) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ABCDE");
+  model->BeginComposing();
+  EXPECT_TRUE(model->SetComposingRange(TextRange(4, 1), 3));
+  EXPECT_FALSE(model->SelectToEnd());
   EXPECT_EQ(model->selection(), TextRange(4));
   EXPECT_EQ(model->composing_range(), TextRange(4, 1));
   EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
