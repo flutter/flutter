@@ -510,7 +510,11 @@ static gboolean fl_text_input_plugin_filter_keypress_default(
     switch (event->keyval) {
       case GDK_KEY_End:
       case GDK_KEY_KP_End:
-        changed = priv->text_model->MoveCursorToEnd();
+        if (event->state & GDK_SHIFT_MASK) {
+          changed = priv->text_model->SelectToEnd();
+        } else {
+          changed = priv->text_model->MoveCursorToEnd();
+        }
         break;
       case GDK_KEY_Return:
       case GDK_KEY_KP_Enter:
@@ -523,7 +527,11 @@ static gboolean fl_text_input_plugin_filter_keypress_default(
         break;
       case GDK_KEY_Home:
       case GDK_KEY_KP_Home:
-        changed = priv->text_model->MoveCursorToBeginning();
+        if (event->state & GDK_SHIFT_MASK) {
+          changed = priv->text_model->SelectToBeginning();
+        } else {
+          changed = priv->text_model->MoveCursorToBeginning();
+        }
         break;
       case GDK_KEY_BackSpace:
       case GDK_KEY_Delete:
