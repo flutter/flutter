@@ -564,7 +564,7 @@ deps = {
     'packages': [
       {
         'package': 'flutter/cppwinrt/win-amd64',
-        'version': 'build:2.0.210301.1'
+        'version': 'build:2.0.210304.5'
       }
     ],
     'condition': 'download_windows_deps',
