@@ -179,6 +179,8 @@ class FlutterVersion {
     'dartSdkVersion': dartSdkVersion,
   };
 
+  String get frameworkDate => frameworkCommitDate;
+
   /// A date String describing the last framework commit.
   ///
   /// If a git command fails, this will return a placeholder date.

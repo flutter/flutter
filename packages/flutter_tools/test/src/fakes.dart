@@ -498,6 +498,9 @@ class FakeFlutterVersion implements FlutterVersion {
   final String frameworkCommitDate;
 
   @override
+  String get frameworkDate => frameworkCommitDate;
+
+  @override
   void fetchTagsAndUpdate() {
     _didFetchTagsAndUpdate = true;
   }
