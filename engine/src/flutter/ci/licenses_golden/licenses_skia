@@ -1,4 +1,4 @@
-Signature: 5f3bf49567c507dd9685dc20e295b61f
+Signature: 0bd0fc732fe0e415e813a0e67224fce3
 
 UNUSED LICENSES:
 
@@ -3971,8 +3971,8 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeIndirectTessellator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeIterator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrVectorXform.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrWangsFormula.h
-FILE: ../../../third_party/skia/src/gpu/text/GrSDFTOptions.cpp
-FILE: ../../../third_party/skia/src/gpu/text/GrSDFTOptions.h
+FILE: ../../../third_party/skia/src/gpu/text/GrSDFTControl.cpp
+FILE: ../../../third_party/skia/src/gpu/text/GrSDFTControl.h
 FILE: ../../../third_party/skia/src/opts/SkOpts_skx.cpp
 FILE: ../../../third_party/skia/src/ports/SkScalerContext_mac_ct.h
 FILE: ../../../third_party/skia/src/ports/SkTypeface_mac_ct.h
