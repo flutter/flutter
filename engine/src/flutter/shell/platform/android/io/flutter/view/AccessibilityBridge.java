@@ -1056,6 +1056,16 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           accessibilityChannel.dispatchSemanticsAction(virtualViewId, Action.DISMISS);
           return true;
         }
+      case AccessibilityNodeInfo.ACTION_SET_TEXT:
+        {
+          // Set text APIs aren't available until API 21. We can't handle the case here so
+          // return false instead. It's extremely unlikely that this case would ever be
+          // triggered in the first place in API < 21.
+          if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            return false;
+          }
+          return performSetText(virtualViewId, arguments);
+        }
       default:
         // might be a custom accessibility accessibilityAction.
         final int flutterId = accessibilityAction - FIRST_RESOURCE_ID;
@@ -1113,6 +1123,22 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         break;
     }
     return false;
+  }
+
+  /**
+   * Handles the responsibilities of {@link #performAction(int, int, Bundle)} for the specific
+   * scenario of cursor movement.
+   */
+  @TargetApi(21)
+  @RequiresApi(21)
+  private boolean performSetText(int virtualViewId, @NonNull Bundle arguments) {
+    String newText = "";
+    if (arguments != null
+        && arguments.containsKey(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE)) {
+      newText = arguments.getString(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE);
+    }
+    accessibilityChannel.dispatchSemanticsAction(virtualViewId, Action.SET_TEXT, newText);
+    return true;
   }
 
   // TODO(ianh): implement findAccessibilityNodeInfosByText()
@@ -1755,7 +1781,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     CUSTOM_ACTION(1 << 17),
     DISMISS(1 << 18),
     MOVE_CURSOR_FORWARD_BY_WORD(1 << 19),
-    MOVE_CURSOR_BACKWARD_BY_WORD(1 << 20);
+    MOVE_CURSOR_BACKWARD_BY_WORD(1 << 20),
+    SET_TEXT(1 << 21);
 
     public final int value;
 

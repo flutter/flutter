@@ -20,6 +20,7 @@ import android.annotation.TargetApi;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewParent;
@@ -330,6 +331,45 @@ public class AccessibilityBridgeTest {
     sentences = event.getText();
     assertEquals(sentences.size(), 1);
     assertEquals(sentences.get(0).toString(), "new_node2");
+  }
+
+  @TargetApi(21)
+  @Test
+  public void itCanPerformSetText() {
+    AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
+    AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    View mockRootView = mock(View.class);
+    Context context = mock(Context.class);
+    when(mockRootView.getContext()).thenReturn(context);
+    when(context.getPackageName()).thenReturn("test");
+    AccessibilityBridge accessibilityBridge =
+        setUpBridge(
+            /*rootAccessibilityView=*/ mockRootView,
+            /*accessibilityChannel=*/ mockChannel,
+            /*accessibilityManager=*/ mockManager,
+            /*contentResolver=*/ null,
+            /*accessibilityViewEmbedder=*/ mockViewEmbedder,
+            /*platformViewsAccessibilityDelegate=*/ null);
+
+    ViewParent mockParent = mock(ViewParent.class);
+    when(mockRootView.getParent()).thenReturn(mockParent);
+    when(mockManager.isEnabled()).thenReturn(true);
+
+    TestSemanticsNode root = new TestSemanticsNode();
+    root.id = 0;
+    TestSemanticsNode node1 = new TestSemanticsNode();
+    node1.id = 1;
+    node1.addFlag(AccessibilityBridge.Flag.IS_TEXT_FIELD);
+    root.children.add(node1);
+    TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
+    accessibilityBridge.updateSemantics(testSemanticsUpdate.buffer, testSemanticsUpdate.strings);
+    Bundle bundle = new Bundle();
+    String expectedText = "some string";
+    bundle.putString(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, expectedText);
+    accessibilityBridge.performAction(1, AccessibilityNodeInfo.ACTION_SET_TEXT, bundle);
+    verify(mockChannel)
+        .dispatchSemanticsAction(1, AccessibilityBridge.Action.SET_TEXT, expectedText);
   }
 
   @Test
