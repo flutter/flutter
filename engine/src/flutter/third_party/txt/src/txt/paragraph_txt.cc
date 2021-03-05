@@ -518,8 +518,8 @@ bool ParagraphTxt::IsStrutValid() const {
 }
 
 void ParagraphTxt::ComputeStrut(StrutMetrics* strut, SkFont& font) {
-  strut->ascent = std::numeric_limits<SkScalar>::lowest();
-  strut->descent = std::numeric_limits<SkScalar>::lowest();
+  strut->ascent = 0;
+  strut->descent = 0;
   strut->leading = 0;
   strut->half_leading = 0;
   strut->line_height = 0;
@@ -1123,8 +1123,10 @@ void ParagraphTxt::Layout(double width) {
 
     // Calculate the amount to advance in the y direction. This is done by
     // computing the maximum ascent and descent with respect to the strut.
-    double max_ascent = strut_.ascent + strut_.half_leading;
-    double max_descent = strut_.descent + strut_.half_leading;
+    double max_ascent = IsStrutValid() ? strut_.ascent + strut_.half_leading
+                                       : std::numeric_limits<double>::lowest();
+    double max_descent = IsStrutValid() ? strut_.descent + strut_.half_leading
+                                        : std::numeric_limits<double>::lowest();
     double max_unscaled_ascent = 0;
     for (const PaintRecord& paint_record : paint_records) {
       UpdateLineMetrics(paint_record.metrics(), paint_record.style(),
