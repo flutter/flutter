@@ -1,5 +1,5 @@
 # Temp directory into which we unpack the .nupkg archive
-cppwinrt
+tmp
 
 # nupkg archives
 *.nupkg

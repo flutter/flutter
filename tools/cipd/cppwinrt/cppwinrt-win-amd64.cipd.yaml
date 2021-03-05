@@ -2,7 +2,7 @@ package: flutter/cppwinrt/win-amd64
 description: C++/WinRT tool used for building WinRT headers for Windows UWP builds
 install_mode: copy
 # The temp directory into which the nupkg archive is extracted.
-root: cppwinrt
+root: tmp
 data:
   # Contents of the cppwinrt/ directory are at the root of the CIPD package.
   - dir: .
