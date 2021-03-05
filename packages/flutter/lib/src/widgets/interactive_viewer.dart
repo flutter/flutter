@@ -11,7 +11,10 @@ import 'package:vector_math/vector_math_64.dart' show Quad, Vector3, Matrix4;
 import 'basic.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'layout_builder.dart';
 import 'ticker_provider.dart';
+
+typedef TransformedWidgetBuilder = Widget Function(BuildContext context, Rect viewport);
 
 /// A widget that enables pan and zoom interactions with its child.
 ///
@@ -84,9 +87,54 @@ class InteractiveViewer extends StatefulWidget {
     this.panEnabled = true,
     this.scaleEnabled = true,
     this.transformationController,
-    required this.child,
+    required Widget child,
   }) : assert(alignPanAxis != null),
        assert(child != null),
+       assert(constrained != null),
+       assert(minScale != null),
+       assert(minScale > 0),
+       assert(minScale.isFinite),
+       assert(maxScale != null),
+       assert(maxScale > 0),
+       assert(!maxScale.isNaN),
+       assert(maxScale >= minScale),
+       assert(panEnabled != null),
+       assert(scaleEnabled != null),
+       // boundaryMargin must be either fully infinite or fully finite, but not
+       // a mix of both.
+       assert((boundaryMargin.horizontal.isInfinite
+           && boundaryMargin.vertical.isInfinite) || (boundaryMargin.top.isFinite
+           && boundaryMargin.right.isFinite && boundaryMargin.bottom.isFinite
+           && boundaryMargin.left.isFinite)),
+       builder = _getBuilderForChild(child),
+       super(key: key);
+
+  // TODO(justinmc): Example. Or put it in the builder param docs.
+  /// Creates an InteractiveViewer for a child that is created on demand.
+  ///
+  /// Can be used to render a child that changes in response to the current
+  /// transformation.
+  ///
+  /// The [builder] parameter must not be null.
+  InteractiveViewer.builder({
+    Key? key,
+    this.clipBehavior = Clip.hardEdge,
+    this.alignPanAxis = false,
+    this.boundaryMargin = EdgeInsets.zero,
+    this.constrained = true,
+    // These default scale values were eyeballed as reasonable limits for common
+    // use cases.
+    this.maxScale = 2.5,
+    this.minScale = 0.8,
+    this.onInteractionEnd,
+    this.onInteractionStart,
+    this.onInteractionUpdate,
+    this.panEnabled = true,
+    this.scaleEnabled = true,
+    this.transformationController,
+    required this.builder,
+  }) : assert(alignPanAxis != null),
+       assert(builder != null),
        assert(constrained != null),
        assert(minScale != null),
        assert(minScale > 0),
@@ -141,10 +189,21 @@ class InteractiveViewer extends StatefulWidget {
   /// exact same size and position as the [child].
   final EdgeInsets boundaryMargin;
 
-  /// The Widget to perform the transformations on.
+  /// Builds the child of this widget.
   ///
-  /// Cannot be null.
-  final Widget child;
+  /// If a child is passed directly, then this is simply a function that returns
+  /// that child.
+  ///
+  /// If using the [InteractiveViewer.builder] constructor, this can be passed
+  /// directly. This allows the child to be built in response to the current
+  /// transformation.
+  ///
+  /// See also:
+  ///
+  ///   * [ListView.builder], which follows a similar pattern.
+  ///   * [InteractiveViewer.builder], which has an example of building the
+  ///     child on demand.
+  final TransformedWidgetBuilder builder;
 
   /// Whether the normal size constraints at this point in the widget tree are
   /// applied to the child.
@@ -422,6 +481,13 @@ class InteractiveViewer extends StatefulWidget {
   ///  * [TextEditingController] for an example of another similar pattern.
   final TransformationController? transformationController;
 
+  // Get a TransformedWidgetBuilder that simply returns the given child.
+  static TransformedWidgetBuilder _getBuilderForChild(Widget child) {
+    return (BuildContext context, Rect viewport) {
+      return child;
+    };
+  }
+
   /// Returns the closest point to the given point on the given line segment.
   @visibleForTesting
   static Vector3 getNearestPointOnLine(Vector3 point, Vector3 l1, Vector3 l2) {
@@ -540,6 +606,61 @@ class InteractiveViewer extends StatefulWidget {
     return closestOverall;
   }
 
+  // Convert an axis aligned Quad to a Rect.
+  //
+  // All Rects must axis aligned.
+  static Rect _axisAlignedQuadToRect(Quad quad) {
+    assert(isAxisAligned(quad));
+    double? xMin;
+    double? xMax;
+    double? yMin;
+    double? yMax;
+
+    for (final Vector3 point in <Vector3>[quad.point0, quad.point1, quad.point2, quad.point3]) {
+      if (xMin == null || point.x < xMin) {
+        xMin = point.x;
+      }
+      if (xMax == null || point.x > xMax) {
+        xMax = point.x;
+      }
+      if (yMin == null || point.y < yMin) {
+        yMin = point.y;
+      }
+      if (yMax == null || point.y > yMax) {
+        yMax = point.y;
+      }
+    }
+    return Rect.fromLTRB(xMin!, yMin!, xMax!, yMax!);
+  }
+
+  /// Returns true iff the given Quad is axis aligned.
+  @visibleForTesting
+  static bool isAxisAligned(Quad quad) {
+    final double x0 = quad.point0.x;
+    if (quad.point1.x != x0) {
+      final double x1 = quad.point1.x;
+      if ((quad.point2.x != x0 && quad.point2.x != x1)
+          || (quad.point3.x != x0 && quad.point3.x != x1)) {
+        return false;
+      }
+    } else if (quad.point2.x == x0 || quad.point2.x != quad.point3.x) {
+      return false;
+    }
+
+    final double y0 = quad.point0.y;
+    if (quad.point1.y != y0) {
+      final double y1 = quad.point1.y;
+      if ((quad.point2.y != y0 && quad.point2.y != y1)
+          || (quad.point3.y != y0 && quad.point3.y != y1)) {
+        return false;
+      }
+    } else if (quad.point2.y == y0 || quad.point2.y != quad.point3.y) {
+      return false;
+    }
+
+    return true;
+  }
+
   @override _InteractiveViewerState createState() => _InteractiveViewerState();
 }
 
@@ -555,6 +676,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   double? _scaleStart; // Scale value at start of scaling gesture.
   double? _rotationStart = 0.0; // Rotation at start of rotation gesture.
   double _currentRotation = 0.0; // Rotation of _transformationController.value.
+  late Size _maxConstraints;
   _GestureType? _gestureType;
 
   // TODO(justinmc): Add rotateEnabled parameter to the widget and remove this
@@ -590,9 +712,19 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   // The Rect representing the child's parent.
   Rect get _viewport {
+    /*
     assert(_parentKey.currentContext != null);
     final RenderBox parentRenderBox = _parentKey.currentContext!.findRenderObject()! as RenderBox;
     return Offset.zero & parentRenderBox.size;
+    */
+    assert(_parentKey.currentContext != null);
+    if (_parentKey.currentContext != null) {
+      final RenderBox parentRenderBox = _parentKey.currentContext!.findRenderObject()! as RenderBox;
+      if (parentRenderBox.hasSize) {
+        return Offset.zero & parentRenderBox.size;
+      }
+    }
+    return Offset.zero & _maxConstraints;
   }
 
   // Return a new matrix representing the given matrix after applying the given
@@ -1062,44 +1194,54 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   @override
   Widget build(BuildContext context) {
-    Widget child = Transform(
-      transform: _transformationController!.value,
-      child: KeyedSubtree(
-        key: _childKey,
-        child: widget.child,
-      ),
-    );
-
-    if (!widget.constrained) {
-      child = OverflowBox(
-        alignment: Alignment.topLeft,
-        minWidth: 0.0,
-        minHeight: 0.0,
-        maxWidth: double.infinity,
-        maxHeight: double.infinity,
-        child: child,
-      );
-    }
-
-    if (widget.clipBehavior != Clip.none) {
-      child = ClipRect(
-        clipBehavior: widget.clipBehavior,
-        child: child,
-      );
-    }
-
     // A GestureDetector allows the detection of panning and zooming gestures on
     // the child.
     return Listener(
       key: _parentKey,
       onPointerSignal: _receivedPointerSignal,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque, // Necessary when panning off screen.
-        dragStartBehavior: DragStartBehavior.start,
-        onScaleEnd: _onScaleEnd,
-        onScaleStart: _onScaleStart,
-        onScaleUpdate: _onScaleUpdate,
-        child: child,
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          _maxConstraints = Size(constraints.maxWidth, constraints.maxHeight);
+
+          final Matrix4 matrix = _transformationController!.value;
+          final Rect transformedViewport = InteractiveViewer._axisAlignedQuadToRect(
+            _transformViewport(matrix, _viewport),
+          );
+          Widget child = Transform(
+            transform: matrix,
+            child: KeyedSubtree(
+              key: _childKey,
+              child: widget.builder(context, transformedViewport),
+            ),
+          );
+
+          if (!widget.constrained) {
+            child = OverflowBox(
+              alignment: Alignment.topLeft,
+              minWidth: 0.0,
+              minHeight: 0.0,
+              maxWidth: double.infinity,
+              maxHeight: double.infinity,
+              child: child,
+            );
+          }
+
+          if (widget.clipBehavior != Clip.none) {
+            child = ClipRect(
+              clipBehavior: widget.clipBehavior,
+              child: child,
+            );
+          }
+
+          return GestureDetector(
+            behavior: HitTestBehavior.opaque, // Necessary when panning off screen.
+            dragStartBehavior: DragStartBehavior.start,
+            onScaleEnd: _onScaleEnd,
+            onScaleStart: _onScaleStart,
+            onScaleUpdate: _onScaleUpdate,
+            child: child,
+          );
+        },
       ),
     );
   }
