@@ -159,7 +159,7 @@ linter:
     - prefer_final_locals
     - prefer_for_elements_to_map_fromIterable
     - prefer_foreach
-    # - prefer_function_declarations_over_variables # not yet tested
+    - prefer_function_declarations_over_variables
     - prefer_generic_function_type_aliases
     - prefer_if_elements_to_conditional_expressions
     - prefer_if_null_operators

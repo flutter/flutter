@@ -1035,7 +1035,7 @@ void main() {
 
   group('extension commands', () {
     int invokes = 0;
-    final VoidCallback stubCallback = () => invokes++;
+    void stubCallback() => invokes++;
 
     final Widget debugTree = Directionality(
       textDirection: TextDirection.ltr,
