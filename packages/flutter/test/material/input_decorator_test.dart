@@ -3356,7 +3356,7 @@ void main() {
       bool enabled = true,
       bool filled = true,
     }) async {
-      return await tester.pumpWidget(
+      return tester.pumpWidget(
         buildInputDecorator(
           isHovering: hovering,
           decoration: InputDecoration(
@@ -3435,7 +3435,7 @@ void main() {
       bool enabled = true,
       bool filled = true,
     }) async {
-      return await tester.pumpWidget(
+      return tester.pumpWidget(
         buildInputDecorator(
           isFocused: focused,
           decoration: InputDecoration(
@@ -3486,7 +3486,7 @@ void main() {
       bool empty = true,
       bool directional = false,
     }) async {
-      return await tester.pumpWidget(
+      return tester.pumpWidget(
         buildInputDecorator(
           isEmpty: empty,
           isFocused: focused,

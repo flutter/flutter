@@ -113,7 +113,7 @@ void main() {
         workingDirectory: anyNamed('workingDirectory'),
       )).thenAnswer((_) => Future<ProcessResult>.value(exitsHappy));
 
-      expect(() async => await getCodeSigningIdentityDevelopmentTeam(
+      expect(() async => getCodeSigningIdentityDevelopmentTeam(
         iosApp: app,
         processManager: mockProcessManager,
         logger: logger,

@@ -676,7 +676,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
       PaintingBinding.instance!.imageCache!.evict(key);
       throw StateError('Unable to read data');
     }
-    return await decode(data.buffer.asUint8List());
+    return decode(data.buffer.asUint8List());
   }
 }
 
@@ -887,7 +887,7 @@ class FileImage extends ImageProvider<FileImage> {
       throw StateError('$file is empty and cannot be loaded as an image.');
     }
 
-    return await decode(bytes);
+    return decode(bytes);
   }
 
   @override

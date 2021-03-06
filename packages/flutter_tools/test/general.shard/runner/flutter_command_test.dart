@@ -135,7 +135,7 @@ void main() {
       final FakeTargetCommand fakeTargetCommand = FakeTargetCommand();
       final CommandRunner<void> runner = createTestCommandRunner(fakeTargetCommand);
 
-      expect(() async => await runner.run(<String>['test', '-t', 'lib/foo.dart']), throwsToolExit());
+      expect(() async => runner.run(<String>['test', '-t', 'lib/foo.dart']), throwsToolExit());
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),

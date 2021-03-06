@@ -956,7 +956,7 @@ void main() {
 
       Future<Map<String, dynamic>> getText(SerializableFinder finder) async {
         final Map<String, String> arguments = GetText(finder, timeout: const Duration(seconds: 1)).serialize();
-        return await driverExtension.call(arguments);
+        return driverExtension.call(arguments);
       }
 
       await tester.pumpWidget(debugTree);
@@ -1023,7 +1023,7 @@ void main() {
 
       Future<Map<String, dynamic>> tap(SerializableFinder finder) async {
         final Map<String, String> arguments = Tap(finder, timeout: const Duration(seconds: 1)).serialize();
-        return await driverExtension.call(arguments);
+        return driverExtension.call(arguments);
       }
 
       await tester.pumpWidget(debugTree);
@@ -1066,7 +1066,7 @@ void main() {
 
       Future<Map<String, dynamic>> invokeCommand(SerializableFinder finder, int times) async {
         final Map<String, String> arguments = StubNestedCommand(finder, times).serialize();
-        return await driverExtension.call(arguments);
+        return driverExtension.call(arguments);
       }
 
       await tester.pumpWidget(debugTree);
