@@ -360,7 +360,48 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     // Meta + shift + arrow up has no effect on text editing on this platform.
   };
 
+  // Web handles its text selection natively and doesn't use any of these
+  // shortcuts in Flutter.
+  static final Map<LogicalKeySet, Intent> _webShortcuts = <LogicalKeySet, Intent>{
+    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowDown): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowLeft): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowRight): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowUp): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowDown): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.arrowDown): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.arrowLeft): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.arrowRight): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.arrowUp): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowLeft): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowRight): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.end): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.home): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowDown): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowLeft): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowRight): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowUp): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowDown): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowDown): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.end): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.home): DoNothingAndStopPropagationIntent(),
+  };
+
   static Map<LogicalKeySet, Intent> get _shortcuts {
+    if (kIsWeb) {
+      return _webShortcuts;
+    }
+
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return _androidShortcuts;
