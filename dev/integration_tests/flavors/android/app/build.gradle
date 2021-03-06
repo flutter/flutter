@@ -35,10 +35,6 @@ android {
         }
     }
 
-    aaptOptions {
-        
-    }
-
     flavorDimensions "mode"
 
     productFlavors {

@@ -35,10 +35,6 @@ android {
             signingConfig signingConfigs.debug
         }
     }
-
-    aaptOptions {
-        
-    }
 }
 
 flutter {
