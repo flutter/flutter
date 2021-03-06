@@ -377,7 +377,7 @@ void main() {
 
     testWithoutContext('Flutter Windows desktop enabled with config on master', () {
       when(mockFlutterVerion.channel).thenReturn('master');
-      testConfig.setValue('enable-Windows-desktop', true);
+      testConfig.setValue('enable-windows-desktop', true);
 
       expect(featureFlags.isWindowsEnabled, true);
     });
@@ -397,7 +397,7 @@ void main() {
 
     testWithoutContext('Flutter Windows desktop enabled with config on dev', () {
       when(mockFlutterVerion.channel).thenReturn('dev');
-      testConfig.setValue('enable-Windows-desktop', true);
+      testConfig.setValue('enable-windows-desktop', true);
 
       expect(featureFlags.isWindowsEnabled, true);
     });
@@ -417,7 +417,7 @@ void main() {
 
     testWithoutContext('Flutter Windows desktop enabled with config on beta', () {
       when(mockFlutterVerion.channel).thenReturn('beta');
-      testConfig.setValue('enable-Windows-desktop', true);
+      testConfig.setValue('enable-windows-desktop', true);
 
       expect(featureFlags.isWindowsEnabled, true);
     });
@@ -437,7 +437,7 @@ void main() {
 
     testWithoutContext('Flutter Windows desktop enabled with config on stable', () {
       when(mockFlutterVerion.channel).thenReturn('stable');
-      testConfig.setValue('enable-Windows-desktop', true);
+      testConfig.setValue('enable-windows-desktop', true);
 
       expect(featureFlags.isWindowsEnabled, true);
     });
@@ -459,7 +459,7 @@ void main() {
 
     testWithoutContext('Flutter Windows UWP desktop enabled with config on master', () {
       when(mockFlutterVerion.channel).thenReturn('master');
-      testConfig.setValue('enable-Windows-uwp-desktop', true);
+      testConfig.setValue('enable-windows-uwp-desktop', true);
 
       expect(featureFlags.isWindowsUwpEnabled, true);
     });
@@ -472,7 +472,7 @@ void main() {
 
     testWithoutContext('Flutter Windows UWP desktop not enabled with config on stable', () {
       when(mockFlutterVerion.channel).thenReturn('stable');
-      testConfig.setValue('enable-Windows-uwp-desktop', true);
+      testConfig.setValue('enable-windows-uwp-desktop', true);
 
       expect(featureFlags.isWindowsUwpEnabled, false);
     });
