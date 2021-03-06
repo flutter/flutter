@@ -630,6 +630,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onMoveCursorForwardByWord,
     this.onMoveCursorBackwardByWord,
     this.onSetSelection,
+    this.onSetText,
     this.onDidGainAccessibilityFocus,
     this.onDidLoseAccessibilityFocus,
     this.onDismiss,
@@ -1100,6 +1101,15 @@ class SemanticsProperties extends DiagnosticableTree {
   /// TalkBack users can trigger this handler by selecting "Move cursor to
   /// beginning/end" or "Select all" from the local context menu.
   final SetSelectionHandler? onSetSelection;
+
+  /// The handler for [SemanticsAction.setText].
+  ///
+  /// This handler is invoked when the user wants to replace the current text in
+  /// the text field with a new text.
+  ///
+  /// Voice access users can trigger this handler by speaking "type <text>" to
+  /// their Android devices.
+  final SetTextHandler? onSetText;
 
   /// The handler for [SemanticsAction.didGainAccessibilityFocus].
   ///
