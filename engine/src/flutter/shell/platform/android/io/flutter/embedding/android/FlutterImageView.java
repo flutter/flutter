@@ -118,9 +118,6 @@ public class FlutterImageView extends View implements RenderSurface {
    */
   @Override
   public void attachToRenderer(@NonNull FlutterRenderer flutterRenderer) {
-    if (isAttachedToFlutterRenderer) {
-      return;
-    }
     switch (kind) {
       case background:
         flutterRenderer.swapSurface(imageReader.getSurface());
