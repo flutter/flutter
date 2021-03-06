@@ -54,10 +54,10 @@ void main() {
   test('Adds rootBundle LICENSES to LicenseRegistry', () async {
     TestBinding().defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) async {
       if (const StringCodec().decodeMessage(message) == 'NOTICES.Z' && !kIsWeb) {
-        return Uint8List.fromList(gzip.encode(utf8.encode(licenses))).buffer.asByteData();
+        return Uint8List.fromList(gzip.encode(utf8.encode(combinedLicenses))).buffer.asByteData();
       }
       if (const StringCodec().decodeMessage(message) == 'NOTICES' && kIsWeb) {
-        return const StringCodec().encodeMessage(licenses);
+        return const StringCodec().encodeMessage(combinedLicenses);
       }
       return null;
     });
