@@ -74,7 +74,7 @@ Future<T> runInContext<T>(
     return runner();
   }
 
-  return await context.run<T>(
+  return context.run<T>(
     name: 'global fallbacks',
     body: runnerWrapper,
     overrides: overrides,

@@ -65,7 +65,7 @@ class ApplicationPackageFactory {
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
         if (applicationBinary == null) {
-          return await AndroidApk.fromAndroidProject(
+          return AndroidApk.fromAndroidProject(
             FlutterProject.current().android,
             processManager: _processManager,
             processUtils: _processUtils,

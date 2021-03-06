@@ -750,7 +750,7 @@ Future<int> gitClone({String path, String repo}) async {
 
   await Directory(path).create(recursive: true);
 
-  return await inDirectory<int>(
+  return inDirectory<int>(
     path,
         () => exec('git', <String>['clone', repo]),
   );

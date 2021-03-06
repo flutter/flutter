@@ -340,8 +340,8 @@ void main() {
     logger.printStatus('message');
     logger.printError('error message');
 
-    expect(() async => await stdout.done, throwsA(isA<Exception>()));
-    expect(() async => await stderr.done, throwsA(isA<Exception>()));
+    expect(() async => stdout.done, throwsA(isA<Exception>()));
+    expect(() async => stderr.done, throwsA(isA<Exception>()));
   });
 
   group('Spinners', () {

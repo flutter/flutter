@@ -454,7 +454,7 @@ void main() {
     );
 
     expect(
-        () async => await xcodeProjectInterpreter.getInfo(workingDirectory),
+        () async => xcodeProjectInterpreter.getInfo(workingDirectory),
         throwsToolExit(message: stderr));
     expect(fakeProcessManager.hasRemainingExpectations, isFalse);
   });

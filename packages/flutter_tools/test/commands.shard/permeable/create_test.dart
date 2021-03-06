@@ -164,7 +164,7 @@ void main() {
   testUsingContext('cannot create a project if non-empty non-project directory exists with .metadata', () async {
     await projectDir.absolute.childDirectory('blag').create(recursive: true);
     await projectDir.absolute.childFile('.metadata').writeAsString('project_type: blag\n');
-    expect(() async => await _createAndAnalyzeProject(
+    expect(() async => _createAndAnalyzeProject(
         projectDir,
         <String>[],
         <String>[],

@@ -486,7 +486,7 @@ class StartupTest {
   final bool reportMetrics;
 
   Future<TaskResult> run() async {
-    return await inDirectory<TaskResult>(testDirectory, () async {
+    return inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
       const int iterations = 5;
       final List<Map<String, dynamic>> results = <Map<String, dynamic>>[];
@@ -995,7 +995,7 @@ class CompileTest {
   final bool reportPackageContentSizes;
 
   Future<TaskResult> run() async {
-    return await inDirectory<TaskResult>(testDirectory, () async {
+    return inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
       await device.unlock();
       await flutter('packages', options: <String>['get']);

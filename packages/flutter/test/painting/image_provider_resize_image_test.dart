@@ -148,7 +148,7 @@ Future<Size> _resolveAndGetSize(ImageProvider imageProvider,
     }
   );
   stream.addListener(listener);
-  return await completer.future;
+  return completer.future;
 }
 
 // This version of MemoryImage guarantees obtainKey returns a future that has not been

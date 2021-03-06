@@ -2215,7 +2215,7 @@ Future<TimeOfDay?> showTimePicker({
     confirmText: confirmText,
     helpText: helpText,
   );
-  return await showDialog<TimeOfDay>(
+  return showDialog<TimeOfDay>(
     context: context,
     useRootNavigator: useRootNavigator,
     builder: (BuildContext context) {

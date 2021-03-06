@@ -206,7 +206,7 @@ class FuchsiaRemoteConnection {
       interface = addressAndInterface[1];
     }
 
-    return await FuchsiaRemoteConnection.connectWithSshCommandRunner(
+    return FuchsiaRemoteConnection.connectWithSshCommandRunner(
       SshCommandRunner(
         address: address,
         interface: interface,
@@ -356,7 +356,7 @@ class FuchsiaRemoteConnection {
     }
     final List<List<FlutterView>> flutterViewLists =
         await _invokeForAllVms<List<FlutterView>>((DartVm vmService) async {
-      return await vmService.getAllFlutterViews();
+      return vmService.getAllFlutterViews();
     });
     final List<FlutterView> results = flutterViewLists.fold<List<FlutterView>>(
         <FlutterView>[], (List<FlutterView> acc, List<FlutterView> element) {

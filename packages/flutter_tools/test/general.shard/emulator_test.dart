@@ -83,7 +83,7 @@ void main() {
         ),
       );
 
-      await expectLater(() async => await emulatorManager.getAllAvailableEmulators(),
+      await expectLater(() async => emulatorManager.getAllAvailableEmulators(),
         returnsNormally);
     });
 
@@ -106,7 +106,7 @@ void main() {
         ),
       );
 
-      await expectLater(() async => await emulatorManager.getAllAvailableEmulators(),
+      await expectLater(() async => emulatorManager.getAllAvailableEmulators(),
         returnsNormally);
     });
 

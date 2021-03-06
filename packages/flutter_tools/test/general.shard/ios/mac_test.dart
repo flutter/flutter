@@ -79,7 +79,7 @@ void main() {
           logger: logger,
         );
 
-        expect(() async => await iMobileDevice.takeScreenshot(
+        expect(() async => iMobileDevice.takeScreenshot(
           outputFile,
           '1234',
           IOSDeviceInterface.usb,

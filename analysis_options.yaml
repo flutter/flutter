@@ -173,7 +173,7 @@ linter:
     - prefer_iterable_whereType
     # - prefer_mixin # https://github.com/dart-lang/language/issues/32
     - prefer_null_aware_operators
-    # - prefer_relative_imports # not yet tested
+    # - prefer_relative_imports # incompatible with sub-package imports
     - prefer_single_quotes
     - prefer_spread_collections
     - prefer_typing_uninitialized_variables
@@ -193,7 +193,7 @@ linter:
     # - type_annotate_public_apis # subset of always_specify_types
     - type_init_formals
     # - unawaited_futures # too many false positives
-    # - unnecessary_await_in_return # not yet tested
+    - unnecessary_await_in_return
     - unnecessary_brace_in_string_interps
     - unnecessary_const
     # - unnecessary_final # conflicts with prefer_final_locals

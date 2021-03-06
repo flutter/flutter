@@ -148,7 +148,7 @@ class AppContext {
       Map<Type, Generator>.unmodifiable(overrides ?? const <Type, Generator>{}),
       Map<Type, Generator>.unmodifiable(fallbacks ?? const <Type, Generator>{}),
     );
-    return await runZoned<Future<V>>(
+    return runZoned<Future<V>>(
       () async => await body(),
       zoneValues: <_Key, AppContext>{_Key.key: child},
       zoneSpecification: zoneSpecification,

@@ -40,7 +40,7 @@ void main() {
         exitCode: 1,
       ));
 
-      expect(() async => await processUtils.run(<String>['false'], throwOnError: true),
+      expect(() async => processUtils.run(<String>['false'], throwOnError: true),
              throwsA(isA<ProcessException>()));
     });
   });
@@ -518,7 +518,7 @@ void main() {
         ArgumentError('Bad input'),
       );
       expect(
-        () async => await processUtils.exitsHappy(<String>['invalid']),
+        () async => processUtils.exitsHappy(<String>['invalid']),
         throwsArgumentError,
       );
     });
