@@ -1184,7 +1184,7 @@ abstract class FlutterCommand extends Command<void> {
       Usage.command(commandPath, parameters: additionalUsageValues);
     }
 
-    return  runCommand();
+    return runCommand();
   }
 
   Future<void> _sendNullSafetyAnalyticsEvents(FlutterProject project) async {
