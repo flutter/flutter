@@ -965,7 +965,7 @@ void main() {
     final Key buildCounterKey = UniqueKey();
     const String counterText = 'I show instead of count';
     final Widget counter = Text('hello', key: counterKey);
-    final InputCounterWidgetBuilder buildCounter = (
+    Widget buildCounter(
       BuildContext context, {
       required int currentLength,
       required int? maxLength,
@@ -975,7 +975,7 @@ void main() {
         '${currentLength.toString()} of ${maxLength.toString()}',
         key: buildCounterKey,
       );
-    };
+    }
 
     await tester.pumpWidget(buildFrame(
       counterText: counterText,

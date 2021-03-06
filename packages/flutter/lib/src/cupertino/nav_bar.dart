@@ -2223,7 +2223,7 @@ class _NavigationBarComponentsTransition {
 
 /// Navigation bars' hero rect tween that will move between the static bars
 /// but keep a constant size that's the bigger of both navigation bars.
-CreateRectTween _linearTranslateWithLargestRectSizeTween = (Rect? begin, Rect? end) {
+RectTween _linearTranslateWithLargestRectSizeTween(Rect? begin, Rect? end) {
   final Size largestSize = Size(
     math.max(begin!.size.width, end!.size.width),
     math.max(begin.size.height, end.size.height),
@@ -2232,9 +2232,9 @@ CreateRectTween _linearTranslateWithLargestRectSizeTween = (Rect? begin, Rect? e
     begin: begin.topLeft & largestSize,
     end: end.topLeft & largestSize,
   );
-};
+}
 
-final HeroPlaceholderBuilder _navBarHeroLaunchPadBuilder = (
+Widget _navBarHeroLaunchPadBuilder(
   BuildContext context,
   Size heroSize,
   Widget child,
@@ -2258,10 +2258,10 @@ final HeroPlaceholderBuilder _navBarHeroLaunchPadBuilder = (
     visible: false,
     child: child,
   );
-};
+}
 
 /// Navigation bars' hero flight shuttle builder.
-final HeroFlightShuttleBuilder _navBarHeroFlightShuttleBuilder = (
+Widget _navBarHeroFlightShuttleBuilder(
   BuildContext flightContext,
   Animation<double> animation,
   HeroFlightDirection flightDirection,
@@ -2310,4 +2310,4 @@ final HeroFlightShuttleBuilder _navBarHeroFlightShuttleBuilder = (
         topNavBar: fromNavBar,
       );
   }
-};
+}

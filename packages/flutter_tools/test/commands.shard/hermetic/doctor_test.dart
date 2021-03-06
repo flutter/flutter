@@ -37,7 +37,7 @@ import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/testbed.dart';
 
-final Generator _kNoColorOutputPlatform = () => FakePlatform(
+FakePlatform _kNoColorOutputPlatform() => FakePlatform(
   localeName: 'en_US.UTF-8',
   environment: <String, String>{},
   stdoutSupportsAnsi: false,

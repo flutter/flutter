@@ -1031,7 +1031,7 @@ class HeroController extends NavigatorObserver {
     _flights.remove(flight.manifest.tag);
   }
 
-  static final HeroFlightShuttleBuilder _defaultHeroFlightShuttleBuilder = (
+  Widget _defaultHeroFlightShuttleBuilder(
     BuildContext flightContext,
     Animation<double> animation,
     HeroFlightDirection flightDirection,
@@ -1040,7 +1040,7 @@ class HeroController extends NavigatorObserver {
   ) {
     final Hero toHero = toHeroContext.widget as Hero;
     return toHero.child;
-  };
+  }
 }
 
 /// Enables or disables [Hero]es in the widget subtree.

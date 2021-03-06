@@ -93,7 +93,7 @@ void main() {
 
   testWidgets('Passes onEditingComplete to underlying CupertinoTextField',
       (WidgetTester tester) async {
-    final VoidCallback onEditingComplete = () {};
+    void onEditingComplete() {}
 
     await tester.pumpWidget(
       CupertinoApp(
