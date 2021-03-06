@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// cannot be used in combination with other classes that do the same.
 class FeedbackTester {
   FeedbackTester() {
-    SystemChannels.platform.setMockMethodCallHandler(_handler);
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, _handler);
   }
 
   /// Number of times haptic feedback was requested (vibration).
@@ -32,7 +32,7 @@ class FeedbackTester {
 
   /// Stops tracking.
   void dispose() {
-    assert(SystemChannels.platform.checkMockMethodCallHandler(_handler));
-    SystemChannels.platform.setMockMethodCallHandler(null);
+    assert(TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.checkMockMessageHandler(SystemChannels.platform.name, _handler));
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
   }
 }

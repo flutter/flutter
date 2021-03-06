@@ -758,11 +758,11 @@ void main() {
     group('when Clipboard fails', () {
       setUp(() {
         final MockClipboard mockClipboard = MockClipboard(getDataThrows: true);
-        SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
       });
 
       tearDown(() {
-        SystemChannels.platform.setMockMethodCallHandler(null);
+        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
       });
 
       test('Clipboard API failure is gracefully recovered from', () async {
@@ -778,11 +778,11 @@ void main() {
       final MockClipboard mockClipboard = MockClipboard();
 
       setUp(() {
-        SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
       });
 
       tearDown(() {
-        SystemChannels.platform.setMockMethodCallHandler(null);
+        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
       });
 
       test('update sets value based on clipboard contents', () async {

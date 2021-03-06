@@ -29,6 +29,7 @@ void main() {
         RawKeyboard.instance.removeListener(handleKey);
       }
     });
+
     testWidgets('No character is produced for non-printables', (WidgetTester tester) async {
       for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows', 'web']) {
         void handleKey(RawKeyEvent event) {
@@ -39,6 +40,7 @@ void main() {
         RawKeyboard.instance.removeListener(handleKey);
       }
     });
+
     testWidgets('keysPressed is maintained', (WidgetTester tester) async {
       for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows', 'ios']) {
         RawKeyboard.instance.clearKeysPressed();
@@ -208,7 +210,7 @@ void main() {
       // when this event is received, but it's not in keysPressed yet.
       data['modifiers'] |= RawKeyEventDataMacOs.modifierLeftShift | RawKeyEventDataMacOs.modifierShift;
       // dispatch the modified data.
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
         (ByteData? data) {},
@@ -233,7 +235,7 @@ void main() {
       // when this event is received, but it's not in keysPressed yet.
       data['modifiers'] |= RawKeyEventDataMacOs.modifierLeftShift | RawKeyEventDataMacOs.modifierShift;
       // dispatch the modified data.
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
         (ByteData? data) {},
@@ -258,7 +260,7 @@ void main() {
       // when this event is received, but it's not in keysPressed yet.
       data['modifiers'] |= RawKeyEventDataWindows.modifierLeftShift | RawKeyEventDataWindows.modifierShift;
       // dispatch the modified data.
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
         (ByteData? data) {},
@@ -283,7 +285,7 @@ void main() {
       // when this event is received, but it's not in keysPressed yet.
       data['metaState'] |= RawKeyEventDataAndroid.modifierLeftShift | RawKeyEventDataAndroid.modifierShift;
       // dispatch the modified data.
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
         (ByteData? data) {},
@@ -308,7 +310,7 @@ void main() {
       // when this event is received, but it's not in keysPressed yet.
       data['modifiers'] |= RawKeyEventDataFuchsia.modifierLeftShift;
       // dispatch the modified data.
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
         (ByteData? data) {},
@@ -333,7 +335,7 @@ void main() {
       // when this event is received, but it's not in keysPressed yet.
       data['modifiers'] |= GLFWKeyHelper.modifierShift;
       // dispatch the modified data.
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
         (ByteData? data) {},
@@ -363,7 +365,7 @@ void main() {
         isDown: true,
       )..['metaState'] |= RawKeyEventDataWeb.modifierShift;
       // Dispatch the modified data.
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
         (ByteData? data) {},
@@ -455,7 +457,7 @@ void main() {
         RawKeyEventDataAndroid.modifierControl |
         RawKeyEventDataAndroid.modifierMeta;
       // dispatch the modified data.
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
             (ByteData? data) {},
@@ -493,7 +495,7 @@ void main() {
           RawKeyEventDataMacOs.modifierCommand |
           RawKeyEventDataMacOs.modifierControl;
       // dispatch the modified data.
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
             (ByteData? data) {},
@@ -569,7 +571,7 @@ void main() {
           RawKeyEventDataWindows.modifierAlt |
           RawKeyEventDataWindows.modifierControl;
       // dispatch the modified data.
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
             (ByteData? data) {},
@@ -606,7 +608,7 @@ void main() {
         GLFWKeyHelper.modifierControl |
         GLFWKeyHelper.modifierMeta;
       // dispatch the modified data.
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
             (ByteData? data) {},
@@ -644,7 +646,7 @@ void main() {
         RawKeyEventDataWeb.modifierControl |
         RawKeyEventDataWeb.modifierMeta;
       // dispatch the modified data.
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
             (ByteData? data) {},
@@ -685,7 +687,7 @@ void main() {
       }
 
       try {
-        await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+        await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
           SystemChannels.keyEvent.name,
           SystemChannels.keyEvent.codec.encodeMessage(keyEventMessage),
           (ByteData? data) { },
@@ -746,6 +748,7 @@ void main() {
         }
       }
     });
+
     test('modifier keys are recognized when combined', () {
       for (final int modifier in modifierTests.keys) {
         if (modifier == RawKeyEventDataAndroid.modifierFunction) {
@@ -788,6 +791,7 @@ void main() {
         }
       }
     });
+
     test('Printable keyboard keys are correctly translated', () {
       final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(<String, dynamic>{
         'type': 'keydown',
@@ -806,6 +810,7 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
       expect(data.keyLabel, equals('a'));
     });
+
     test('Control keyboard keys are correctly translated', () {
       final RawKeyEvent escapeKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -822,6 +827,7 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
       expect(data.keyLabel, isEmpty);
     });
+
     test('Modifier keyboard keys are correctly translated', () {
       final RawKeyEvent shiftLeftKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -839,6 +845,7 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
       expect(data.keyLabel, isEmpty);
     });
+
     test('DPAD keys from a joystick give physical key mappings', () {
       final RawKeyEvent joystickDpadDown = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -856,6 +863,7 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowDown));
       expect(data.keyLabel, isEmpty);
     });
+
     test('Arrow keys from a keyboard give correct physical key mappings', () {
       final RawKeyEvent joystickDpadDown = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -872,6 +880,7 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowDown));
       expect(data.keyLabel, isEmpty);
     });
+
     test('DPAD center from a game pad gives physical key mappings', () {
       final RawKeyEvent joystickDpadCenter = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -889,6 +898,7 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.select));
       expect(data.keyLabel, isEmpty);
     });
+
     test('Device id is read from message', () {
       final RawKeyEvent joystickDpadCenter = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -904,6 +914,7 @@ void main() {
       final RawKeyEventDataAndroid data = joystickDpadCenter.data as RawKeyEventDataAndroid;
       expect(data.deviceId, equals(10));
     });
+
     test('Repeat count is passed correctly', () {
       final RawKeyEvent repeatCountEvent = RawKeyEvent.fromMessage(<String, dynamic>{
         'type': 'keydown',
@@ -920,6 +931,7 @@ void main() {
       final RawKeyEventDataAndroid data = repeatCountEvent.data as RawKeyEventDataAndroid;
       expect(data.repeatCount, equals(42));
     });
+
     testWidgets('Key events are responded to correctly.', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
@@ -929,7 +941,7 @@ void main() {
         isDown: true,
       );
       Map<String, dynamic>? message;
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
         (ByteData? data) {
@@ -952,7 +964,7 @@ void main() {
       focusNode.requestFocus();
       await tester.pump();
 
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
         (ByteData? data) {
@@ -960,7 +972,7 @@ void main() {
         },
       );
       expect(message, equals(<String, dynamic>{ 'handled': true }));
-      ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler(SystemChannels.keyEvent.name, null);
+      tester.binding.defaultBinaryMessenger.setMockMessageHandler(SystemChannels.keyEvent.name, null);
     });
   }, skip: isBrowser); // This is an Android-specific group.
 
@@ -1008,6 +1020,7 @@ void main() {
         }
       }
     });
+
     test('modifier keys are recognized when combined', () {
       for (final int modifier in modifierTests.keys) {
         if (modifier == RawKeyEventDataFuchsia.modifierCapsLock) {
@@ -1041,6 +1054,7 @@ void main() {
         }
       }
     });
+
     test('Printable keyboard keys are correctly translated', () {
       final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(<String, dynamic>{
         'type': 'keydown',
@@ -1054,6 +1068,7 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
       expect(data.keyLabel, equals('a'));
     });
+
     test('Control keyboard keys are correctly translated', () {
       final RawKeyEvent escapeKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -1125,6 +1140,7 @@ void main() {
         }
       }
     });
+
     test('modifier keys are recognized when combined', () {
       for (final int modifier in modifierTests.keys) {
         if (modifier == RawKeyEventDataMacOs.modifierCapsLock) {
@@ -1164,6 +1180,7 @@ void main() {
         }
       }
     });
+
     test('Printable keyboard keys are correctly translated', () {
       const String unmodifiedCharacter = 'a';
       final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
@@ -1179,6 +1196,7 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
       expect(data.keyLabel, equals('a'));
     });
+
     test('Control keyboard keys are correctly translated', () {
       final RawKeyEvent escapeKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -1270,6 +1288,7 @@ void main() {
         }
       }
     });
+
     test('modifier keys are recognized when combined', () {
       for (final int modifier in modifierTests.keys) {
         if (modifier == RawKeyEventDataIos.modifierCapsLock) {
@@ -1309,6 +1328,7 @@ void main() {
         }
       }
     });
+
     test('Printable keyboard keys are correctly translated', () {
       const String unmodifiedCharacter = 'a';
       final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
@@ -1324,6 +1344,7 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
       expect(data.keyLabel, equals('a'));
     });
+
     test('Control keyboard keys are correctly translated', () {
       final RawKeyEvent escapeKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -1416,6 +1437,7 @@ void main() {
         }
       }
     });
+
     test('modifier keys are recognized when combined', () {
       for (final int modifier in modifierTests.keys) {
         if (modifier == RawKeyEventDataWindows.modifierCaps) {
@@ -1455,6 +1477,7 @@ void main() {
         }
       }
     });
+
     test('Printable keyboard keys are correctly translated', () {
       const int unmodifiedCharacter = 97; // ASCII value for 'a'.
       final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
@@ -1470,6 +1493,7 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
       expect(data.keyLabel, equals('a'));
     });
+
     test('Control keyboard keys are correctly translated', () {
       final RawKeyEvent escapeKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -1484,6 +1508,7 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
       expect(data.keyLabel, isEmpty);
     });
+
     test('Modifier keyboard keys are correctly translated', () {
       final RawKeyEvent shiftLeftKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -1498,6 +1523,7 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
       expect(data.keyLabel, isEmpty);
     });
+
     test('Unprintable keyboard keys are correctly translated', () {
       final RawKeyEvent leftArrowKey = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -1511,6 +1537,7 @@ void main() {
       expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowLeft));
     });
+
     testWidgets('Win32 VK_PROCESSKEY events are skipped', (WidgetTester tester) async {
       const  String platform = 'windows';
       bool lastHandled = true;
@@ -1609,6 +1636,7 @@ void main() {
         }
       }
     });
+
     test('modifier keys are recognized when combined', () {
       for (final int modifier in modifierTests.keys) {
         if (modifier == GLFWKeyHelper.modifierControl) {
@@ -1649,6 +1677,7 @@ void main() {
         }
       }
     });
+
     test('Printable keyboard keys are correctly translated', () {
       final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -1664,6 +1693,7 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyQ));
       expect(data.keyLabel, equals('q'));
     });
+
     test('Code points with two Unicode scalar values are allowed', () {
       final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -1712,6 +1742,7 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
       expect(data.keyLabel, isEmpty);
     });
+
     test('Modifier keyboard keys are correctly translated', () {
       final RawKeyEvent shiftLeftKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -1793,6 +1824,7 @@ void main() {
         }
       }
     });
+
     test('modifier keys are recognized when combined', () {
       for (final int modifier in modifierTests.keys) {
         if (modifier == GtkKeyHelper.modifierControl) {
@@ -1833,6 +1865,7 @@ void main() {
         }
       }
     });
+
     test('Printable keyboard keys are correctly translated', () {
       final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -1848,6 +1881,7 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyQ));
       expect(data.keyLabel, equals('q'));
     });
+
     test('Code points with two Unicode scalar values are allowed', () {
       final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -1896,6 +1930,7 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
       expect(data.keyLabel, isEmpty);
     });
+
     test('Modifier keyboard keys are correctly translated', () {
       final RawKeyEvent shiftLeftKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -1949,6 +1984,7 @@ void main() {
         }
       }
     });
+
     test('modifier keys are recognized when combined', () {
       for (final int modifier in modifierTests.keys) {
         if (modifier == RawKeyEventDataWeb.modifierMeta) {
@@ -1981,6 +2017,7 @@ void main() {
         }
       }
     });
+
     test('Printable keyboard keys are correctly translated', () {
       final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -1994,6 +2031,7 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
       expect(data.keyLabel, equals('a'));
     });
+
     test('Control keyboard keys are correctly translated', () {
       final RawKeyEvent escapeKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -2006,6 +2044,7 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
       expect(data.keyLabel, isEmpty);
     });
+
     test('Modifier keyboard keys are correctly translated', () {
       final RawKeyEvent shiftKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -2018,6 +2057,7 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
       expect(data.keyLabel, isEmpty);
     });
+
     test('Arrow keys from a keyboard give correct physical key mappings', () {
       final RawKeyEvent arrowKeyDown = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
