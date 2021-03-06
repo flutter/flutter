@@ -29,6 +29,7 @@ import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import '../../general.shard/ios/code_signing_test.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
@@ -799,6 +800,9 @@ class StreamLogger extends Logger {
 
   @override
   void clear() => _log('[stdout] ${globals.terminal.clearScreen()}\n');
+
+  @override
+  Terminal get terminal => TestTerminal();
 }
 
 class LoggerInterrupted implements Exception {
