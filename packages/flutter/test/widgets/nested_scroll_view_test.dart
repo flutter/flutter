@@ -71,43 +71,41 @@ Widget buildTest({
               body: TabBarView(
                 children: <Widget>[
                   ListView(
-                    children: <Widget>[
-                      Container(
+                    children: const <Widget>[
+                      SizedBox(
                         height: 300.0,
-                        child: const Text('aaa1'),
+                        child: Text('aaa1'),
                       ),
-                      Container(
+                      SizedBox(
                         height: 200.0,
-                        child: const Text('aaa2'),
+                        child: Text('aaa2'),
                       ),
-                      Container(
+                      SizedBox(
                         height: 100.0,
-                        child: const Text('aaa3'),
+                        child: Text('aaa3'),
                       ),
-                      Container(
+                      SizedBox(
                         height: 50.0,
-                        child: const Text('aaa4'),
+                        child: Text('aaa4'),
                       ),
                     ],
                   ),
                   ListView(
                     dragStartBehavior: DragStartBehavior.down,
-                    children: <Widget>[
-                      Container(
+                    children: const <Widget>[
+                      SizedBox(
                         height: 100.0,
-                        child: const Text('bbb1'),
+                        child: Text('bbb1'),
                       ),
                     ],
                   ),
-                  Container(
-                    child: const Center(child: Text('ccc1')),
-                  ),
+                  const Center(child: Text('ccc1')),
                   ListView(
                     dragStartBehavior: DragStartBehavior.down,
-                    children: <Widget>[
-                      Container(
+                    children: const <Widget>[
+                      SizedBox(
                         height: 10000.0,
-                        child: const Text('ddd1'),
+                        child: Text('ddd1'),
                       ),
                     ],
                   ),
@@ -773,11 +771,11 @@ void main() {
                   ),
                 ];
               },
-              body: SingleChildScrollView(
+              body: const SingleChildScrollView(
                 dragStartBehavior: DragStartBehavior.down,
-                child: Container(
+                child: SizedBox(
                   height: 1000.0,
-                  child: const Placeholder(key: key2),
+                  child: Placeholder(key: key2),
                 ),
               ),
             ),
@@ -2077,11 +2075,9 @@ void main() {
             body: ListView.builder(
               itemCount: 50,
               itemBuilder: (BuildContext context, int index) {
-                return Container(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text('Item $index'),
-                  )
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('Item $index'),
                 );
               }
             ),
@@ -2391,9 +2387,9 @@ class _TestLayoutExtentIsNegative extends StatelessWidget {
                   pinned: true,
                   forceElevated: innerBoxIsScrolled,
                   backgroundColor: Colors.blue[300],
-                  title: Container(
+                  title: const SizedBox(
                     height: 50,
-                    child: const Center(
+                    child: Center(
                       child: Text('Sticky Header'),
                     ),
                   ),

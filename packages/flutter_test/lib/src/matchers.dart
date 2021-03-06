@@ -483,6 +483,7 @@ Matcher matchesSemantics({
   bool hasMoveCursorBackwardByCharacterAction = false,
   bool hasMoveCursorForwardByWordAction = false,
   bool hasMoveCursorBackwardByWordAction = false,
+  bool hasSetTextAction = false,
   bool hasSetSelectionAction = false,
   bool hasCopyAction = false,
   bool hasCutAction = false,
@@ -546,6 +547,7 @@ Matcher matchesSemantics({
     if (hasDismissAction) SemanticsAction.dismiss,
     if (hasMoveCursorForwardByWordAction) SemanticsAction.moveCursorForwardByWord,
     if (hasMoveCursorBackwardByWordAction) SemanticsAction.moveCursorBackwardByWord,
+    if (hasSetTextAction) SemanticsAction.setText,
   ];
   SemanticsHintOverrides? hintOverrides;
   if (onTapHint != null || onLongPressHint != null)
@@ -685,7 +687,7 @@ class _FindsWidgetMatcher extends Matcher {
   }
 }
 
-bool _hasAncestorMatching(Finder finder, bool predicate(Widget widget)) {
+bool _hasAncestorMatching(Finder finder, bool Function(Widget widget) predicate) {
   final Iterable<Element> nodes = finder.evaluate();
   if (nodes.length != 1)
     return false;

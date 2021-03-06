@@ -28,7 +28,6 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
 
 void main() {
   final FakePlatform macPlatform = FakePlatform(operatingSystem: 'macos');
@@ -584,3 +583,4 @@ void main() {
 class MockIOSApp extends Mock implements IOSApp {}
 class MockIOSWorkflow extends Mock implements IOSWorkflow {}
 class MockXcdevice extends Mock implements XCDevice {}
+class MockProcess extends Mock implements Process {}

@@ -448,7 +448,7 @@ class _SwitchingChildBuilderTest extends State<SwitchingChildBuilderTest> {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
-        child: Container(
+        child: SizedBox(
           height: 100,
           child: CustomScrollView(
             cacheExtent: 0,
@@ -490,7 +490,7 @@ class _SwitchingChildListTest extends State<SwitchingChildListTest> {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
-        child: Container(
+        child: SizedBox(
           height: 100,
           child: CustomScrollView(
             cacheExtent: 0,
@@ -527,7 +527,7 @@ class _SwitchingSliverListTest extends State<SwitchingSliverListTest> {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
-        child: Container(
+        child: SizedBox(
           height: 100,
           child: CustomScrollView(
             cacheExtent: 0,

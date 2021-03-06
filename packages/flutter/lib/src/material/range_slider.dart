@@ -524,7 +524,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
   // immediately selected while the drag displacement is zero. If the first
   // non-zero displacement is negative, then the left thumb is selected, and if its
   // positive, then the right thumb is selected.
-  static final RangeThumbSelector _defaultRangeThumbSelector = (
+  Thumb? _defaultRangeThumbSelector(
     TextDirection textDirection,
     RangeValues values,
     double tapValue,
@@ -566,9 +566,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
         return Thumb.end;
     }
     return null;
-  };
-
-
+  }
 
   @override
   Widget build(BuildContext context) {

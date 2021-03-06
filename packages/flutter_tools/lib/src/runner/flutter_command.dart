@@ -14,7 +14,6 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/io.dart' as io;
-import '../base/signals.dart';
 import '../base/terminal.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
@@ -120,6 +119,7 @@ class FlutterOptions {
   static const String kAnalyzeSize = 'analyze-size';
   static const String kNullAssertions = 'null-assertions';
   static const String kAndroidGradleDaemon = 'android-gradle-daemon';
+  static const String kDeferredComponents = 'deferred-components';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -448,8 +448,8 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag('publish-port',
         negatable: true,
         hide: !verboseHelp,
-        help: 'Publish the VM service port over mDNS. Disable to prevent the'
-            'local network permission app dialog in debug and profile build modes (iOS devices only.)',
+        help: 'Publish the VM service port over mDNS. Disable to prevent the '
+              'local network permission app dialog in debug and profile build modes (iOS devices only.)',
         defaultsTo: enabledByDefault);
   }
 
@@ -670,7 +670,7 @@ abstract class FlutterCommand extends Command<void> {
     );
     argParser.addMultiOption(useLegacyNames ? kExtraGenSnapshotOptions : FlutterOptions.kExtraGenSnapshotOptions,
       help: 'A comma-separated list of additional command line arguments that will be passed directly to the Dart native compiler. '
-            '(Only used in "--profile" or "--release" builds.)'
+            '(Only used in "--profile" or "--release" builds.) '
             'For example, "--${FlutterOptions.kExtraGenSnapshotOptions}=--no-strip".',
       valueHelp: '--foo,--bar',
       splitCommas: true,
@@ -1067,7 +1067,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void _registerSignalHandlers(String commandPath, DateTime startTime) {
-    final SignalHandler handler = (io.ProcessSignal s) {
+    void handler(io.ProcessSignal s) {
       globals.cache.releaseLock();
       _sendPostUsage(
         commandPath,
@@ -1075,7 +1075,7 @@ abstract class FlutterCommand extends Command<void> {
         startTime,
         globals.systemClock.now(),
       );
-    };
+    }
     globals.signals.addHandler(io.ProcessSignal.SIGTERM, handler);
     globals.signals.addHandler(io.ProcessSignal.SIGINT, handler);
   }
@@ -1153,6 +1153,7 @@ abstract class FlutterCommand extends Command<void> {
         outputDir: globals.fs.directory(getBuildDirectory()),
         processManager: globals.processManager,
         projectDir: project.directory,
+        generateDartPluginRegistry: true,
       );
 
       await generateLocalizationsSyntheticPackage(
@@ -1182,7 +1183,7 @@ abstract class FlutterCommand extends Command<void> {
       Usage.command(commandPath, parameters: additionalUsageValues);
     }
 
-    return await runCommand();
+    return runCommand();
   }
 
   Future<void> _sendNullSafetyAnalyticsEvents(FlutterProject project) async {

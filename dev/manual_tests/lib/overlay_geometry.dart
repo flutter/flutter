@@ -86,6 +86,8 @@ class Marker extends StatelessWidget {
 }
 
 class OverlayGeometryApp extends StatefulWidget {
+  const OverlayGeometryApp({Key key}) : super(key: key);
+
   @override
   OverlayGeometryAppState createState() => OverlayGeometryAppState();
 }
@@ -209,6 +211,6 @@ void main() {
       accentColor: Colors.redAccent,
     ),
     title: 'Cards',
-    home: OverlayGeometryApp(),
+    home: const OverlayGeometryApp(),
   ));
 }
