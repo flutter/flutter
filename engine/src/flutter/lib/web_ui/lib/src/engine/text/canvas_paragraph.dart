@@ -403,7 +403,7 @@ abstract class StyleNode {
     return style;
   }
 
-  ui.Color get _color;
+  ui.Color? get _color;
   ui.TextDecoration? get _decoration;
   ui.Color? get _decorationColor;
   ui.TextDecorationStyle? get _decorationStyle;
@@ -439,7 +439,7 @@ class ChildStyleNode extends StyleNode {
   // property isn't defined, go to the parent node.
 
   @override
-  ui.Color get _color => style._color ?? parent._color;
+  ui.Color? get _color => style._color ?? (_foreground == null ? parent._color : null);
 
   @override
   ui.TextDecoration? get _decoration => style._decoration ?? parent._decoration;
