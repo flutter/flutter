@@ -17,7 +17,7 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/testbed.dart';
+import '../../src/fakes.dart';
 
 void main() {
   AndroidWorkflow androidWorkflow;

@@ -13,6 +13,8 @@ const String _kAsset2 = 'people/square/sandra.png';
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 
 class DrawerDemo extends StatefulWidget {
+  const DrawerDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/material/drawer';
 
   @override

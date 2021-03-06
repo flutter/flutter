@@ -14,6 +14,8 @@ class CardModel {
 }
 
 class PageViewApp extends StatefulWidget {
+  const PageViewApp({Key key}) : super(key: key);
+
   @override
   PageViewAppState createState() => PageViewAppState();
 }
@@ -146,6 +148,6 @@ void main() {
       primarySwatch: Colors.blue,
       accentColor: Colors.redAccent,
     ),
-    home: PageViewApp(),
+    home: const PageViewApp(),
   ));
 }

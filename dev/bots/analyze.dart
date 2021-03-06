@@ -99,7 +99,7 @@ Future<void> run(List<String> arguments) async {
   // Analyze all the sample code in the repo
   print('$clock Sample code...');
   await runCommand(dart,
-    <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze-sample-code.dart')],
+    <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze_sample_code.dart')],
     workingDirectory: flutterRoot,
   );
 
@@ -232,7 +232,7 @@ Future<void> verifyNoMissingLicense(String workingDirectory, { bool checkMinimum
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'h', overrideMinimumMatches ?? 30, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'm', overrideMinimumMatches ?? 30, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'swift', overrideMinimumMatches ?? 10, _generateLicense('// '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'gradle', overrideMinimumMatches ?? 100, _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'gradle', overrideMinimumMatches ?? 80, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'gn', overrideMinimumMatches ?? 0, _generateLicense('# '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'sh', overrideMinimumMatches ?? 1, '#!/usr/bin/env bash\n' + _generateLicense('# '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'bat', overrideMinimumMatches ?? 1, '@ECHO off\n' + _generateLicense('REM '));
@@ -1203,7 +1203,7 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
 Future<void> _runFlutterAnalyze(String workingDirectory, {
   List<String> options = const <String>[],
 }) async {
-  return await runCommand(
+  return runCommand(
     flutter,
     <String>['analyze', '--dartdocs', ...options],
     workingDirectory: workingDirectory,
@@ -1214,7 +1214,7 @@ final RegExp _importPattern = RegExp(r'''^\s*import (['"])package:flutter/([^.]+
 final RegExp _importMetaPattern = RegExp(r'''^\s*import (['"])package:meta/meta\.dart\1''');
 
 Future<Set<String>> _findFlutterDependencies(String srcPath, List<String> errors, { bool checkForMeta = false }) async {
-  return await _allFiles(srcPath, 'dart', minimumMatches: 1)
+  return _allFiles(srcPath, 'dart', minimumMatches: 1)
     .map<Set<String>>((File file) {
       final Set<String> result = <String>{};
       for (final String line in file.readAsLinesSync()) {

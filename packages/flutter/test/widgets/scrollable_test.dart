@@ -45,19 +45,19 @@ Future<void> pumpDoubleScrollableTest(
     theme: ThemeData(
       platform: platform,
     ),
-    home: CustomScrollView(
+    home: const CustomScrollView(
       slivers: <Widget>[
         SliverToBoxAdapter(
-          child: Container(
+          child: SizedBox(
             height: 300,
-            child: const CustomScrollView(
+            child: CustomScrollView(
               slivers: <Widget>[
                 SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
               ],
             ),
           ),
         ),
-        const SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
+        SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
       ],
     ),
   ));
@@ -1157,31 +1157,29 @@ void main() {
       home: Scaffold(
         body: SingleChildScrollView(
           controller: outerController,
-          child: Container(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Column(
-                  children: <Widget>[
-                    for (int i = 0; i < 100; i++)
-                      Text('SingleChildScrollView $i'),
-                  ]
-                ),
-                Container(
-                  height: 3000,
-                  width: 400,
-                  child: ListView.builder(
-                    controller: innerController,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: 100,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Text('Nested NeverScrollable ListView $index');
-                    },
-                  )
-                ),
-              ]
-            )
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Column(
+                children: <Widget>[
+                  for (int i = 0; i < 100; i++)
+                    Text('SingleChildScrollView $i'),
+                ]
+              ),
+              SizedBox(
+                height: 3000,
+                width: 400,
+                child: ListView.builder(
+                  controller: innerController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: 100,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Text('Nested NeverScrollable ListView $index');
+                  },
+                )
+              ),
+            ]
           )
         )
       ),

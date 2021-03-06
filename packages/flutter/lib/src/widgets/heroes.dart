@@ -118,7 +118,7 @@ enum HeroFlightDirection {
 ///    return Column(
 ///      crossAxisAlignment: CrossAxisAlignment.start,
 ///      children: <Widget>[
-///        SizedBox(
+///        const SizedBox(
 ///          height: 20.0,
 ///        ),
 ///        ListTile(
@@ -127,7 +127,7 @@ enum HeroFlightDirection {
 ///            child: _blueRectangle(Size(50,50)),
 ///          ),
 ///          onTap: () => _gotoDetailsPage(context),
-///          title: Text('Tap on the icon to view hero animation transition.'),
+///          title: const Text('Tap on the icon to view hero animation transition.'),
 ///        ),
 ///      ],
 ///    );
@@ -145,7 +145,7 @@ enum HeroFlightDirection {
 ///    Navigator.of(context).push(MaterialPageRoute(
 ///      builder: (BuildContext context) => Scaffold(
 ///        appBar: AppBar(
-///          title: Text('second Page'),
+///          title: const Text('second Page'),
 ///        ),
 ///        body: Center(
 ///          child: Column(
@@ -1031,7 +1031,7 @@ class HeroController extends NavigatorObserver {
     _flights.remove(flight.manifest.tag);
   }
 
-  static final HeroFlightShuttleBuilder _defaultHeroFlightShuttleBuilder = (
+  Widget _defaultHeroFlightShuttleBuilder(
     BuildContext flightContext,
     Animation<double> animation,
     HeroFlightDirection flightDirection,
@@ -1040,7 +1040,7 @@ class HeroController extends NavigatorObserver {
   ) {
     final Hero toHero = toHeroContext.widget as Hero;
     return toHero.child;
-  };
+  }
 }
 
 /// Enables or disables [Hero]es in the widget subtree.

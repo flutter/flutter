@@ -8,13 +8,11 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -352,7 +350,7 @@ Command: /home/android/gradlew assembleRelease
 
     testUsingContext('handler - no plugins', () async {
       final GradleBuildStatus status = await androidXFailureHandler
-        .handler(line: '', project: FlutterProject.current());
+        .handler(line: '', project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory));
 
       expect(testUsage.events, contains(
         const TestUsageEvent(
@@ -378,7 +376,7 @@ Command: /home/android/gradlew assembleRelease
       final GradleBuildStatus status = await androidXFailureHandler
         .handler(
           line: '',
-          project: FlutterProject.current(),
+          project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
           usesAndroidX: false,
         );
 
@@ -412,7 +410,7 @@ Command: /home/android/gradlew assembleRelease
 
       final GradleBuildStatus status = await androidXFailureHandler.handler(
         line: '',
-        project: FlutterProject.current(),
+        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
         usesAndroidX: true,
         shouldBuildPluginAsAar: true,
       );
@@ -440,7 +438,7 @@ Command: /home/android/gradlew assembleRelease
 
       final GradleBuildStatus status = await androidXFailureHandler.handler(
         line: '',
-        project: FlutterProject.current(),
+        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
         usesAndroidX: true,
         shouldBuildPluginAsAar: false,
       );
@@ -509,7 +507,7 @@ Command: /home/android/gradlew assembleRelease
     testUsingContext('handler', () async {
       await licenseNotAcceptedHandler.handler(
         line: 'You have not accepted the license agreements of the following SDK components: [foo, bar]',
-        project: FlutterProject.current(),
+        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
       );
 
       expect(
@@ -581,7 +579,7 @@ assembleFooTest
       ));
 
       await flavorUndefinedHandler.handler(
-        project: FlutterProject.current(),
+        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
       );
 
       expect(
@@ -623,7 +621,7 @@ assembleProfile
       ));
 
       await flavorUndefinedHandler.handler(
-        project: FlutterProject.current(),
+        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
       );
 
       expect(

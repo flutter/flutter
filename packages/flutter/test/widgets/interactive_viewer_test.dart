@@ -20,7 +20,7 @@ void main() {
             body: Center(
               child: InteractiveViewer(
                 transformationController: transformationController,
-                child: Container(width: 200.0, height: 200.0),
+                child: const SizedBox(width: 200.0, height: 200.0),
               ),
             ),
           ),
@@ -31,7 +31,7 @@ void main() {
 
       // Attempting to drag to pan doesn't work because the child fits inside
       // the viewport and has a tight boundary.
-      final Offset childOffset = tester.getTopLeft(find.byType(Container));
+      final Offset childOffset = tester.getTopLeft(find.byType(SizedBox));
       final Offset childInterior = Offset(
         childOffset.dx + 20.0,
         childOffset.dy + 20.0,
@@ -76,7 +76,7 @@ void main() {
                 boundaryMargin: const EdgeInsets.all(boundaryMargin),
                 minScale: minScale,
                 transformationController: transformationController,
-                child: Container(width: 200.0, height: 200.0),
+                child: const SizedBox(width: 200.0, height: 200.0),
               ),
             ),
           ),
@@ -86,7 +86,7 @@ void main() {
       expect(transformationController.value, equals(Matrix4.identity()));
 
       // Dragging to pan works only until it hits the boundary.
-      final Offset childOffset = tester.getTopLeft(find.byType(Container));
+      final Offset childOffset = tester.getTopLeft(find.byType(SizedBox));
       final Offset childInterior = Offset(
         childOffset.dx + 20.0,
         childOffset.dy + 20.0,
@@ -133,7 +133,7 @@ void main() {
                 constrained: false,
                 scaleEnabled: false,
                 transformationController: transformationController,
-                child: Container(width: 2000.0, height: 2000.0),
+                child: const SizedBox(width: 2000.0, height: 2000.0),
               ),
             ),
           ),
@@ -143,7 +143,7 @@ void main() {
       expect(transformationController.value, equals(Matrix4.identity()));
 
       // Attempting to move against the boundary doesn't work.
-      final Offset childOffset = tester.getTopLeft(find.byType(Container));
+      final Offset childOffset = tester.getTopLeft(find.byType(SizedBox));
       final Offset childInterior = Offset(
         childOffset.dx + 20.0,
         childOffset.dy + 20.0,
@@ -211,7 +211,7 @@ void main() {
                 boundaryMargin: const EdgeInsets.all(double.infinity),
                 minScale: minScale,
                 transformationController: transformationController,
-                child: Container(width: 200.0, height: 200.0),
+                child: const SizedBox(width: 200.0, height: 200.0),
               ),
             ),
           ),
@@ -222,7 +222,7 @@ void main() {
 
       // Drag to pan works because even though the viewport fits perfectly
       // around the child, there is no boundary.
-      final Offset childOffset = tester.getTopLeft(find.byType(Container));
+      final Offset childOffset = tester.getTopLeft(find.byType(SizedBox));
       final Offset childInterior = Offset(
         childOffset.dx + 20.0,
         childOffset.dy + 20.0,
@@ -268,7 +268,7 @@ void main() {
                 alignPanAxis: true,
                 boundaryMargin: const EdgeInsets.all(double.infinity),
                 transformationController: transformationController,
-                child: Container(width: 200.0, height: 200.0),
+                child: const SizedBox(width: 200.0, height: 200.0),
               ),
             ),
           ),
@@ -278,7 +278,7 @@ void main() {
       expect(transformationController.value, equals(Matrix4.identity()));
 
       // Perform a diagonal drag gesture.
-      final Offset childOffset = tester.getTopLeft(find.byType(Container));
+      final Offset childOffset = tester.getTopLeft(find.byType(SizedBox));
       final Offset childInterior = Offset(
         childOffset.dx + 20.0,
         childOffset.dy + 20.0,
@@ -308,7 +308,7 @@ void main() {
                 alignPanAxis: true,
                 boundaryMargin: const EdgeInsets.all(double.infinity),
                 transformationController: transformationController,
-                child: Container(width: 200.0, height: 200.0),
+                child: const SizedBox(width: 200.0, height: 200.0),
               ),
             ),
           ),
@@ -318,7 +318,7 @@ void main() {
       expect(transformationController.value, equals(Matrix4.identity()));
 
       // Perform a horizontally leaning diagonal drag gesture.
-      final Offset childOffset = tester.getTopLeft(find.byType(Container));
+      final Offset childOffset = tester.getTopLeft(find.byType(SizedBox));
       final Offset childInterior = Offset(
         childOffset.dx + 20.0,
         childOffset.dy + 10.0,
@@ -350,7 +350,7 @@ void main() {
                 boundaryMargin: const EdgeInsets.all(boundaryMargin),
                 minScale: minScale,
                 transformationController: transformationController,
-                child: Container(width: 200.0, height: 200.0),
+                child: const SizedBox(width: 200.0, height: 200.0),
               ),
             ),
           ),
@@ -358,7 +358,7 @@ void main() {
       );
 
       // Fling the child.
-      final Offset childOffset = tester.getTopLeft(find.byType(Container));
+      final Offset childOffset = tester.getTopLeft(find.byType(SizedBox));
       const Offset flingEnd = Offset(20.0, 15.0);
       await tester.flingFrom(childOffset, flingEnd, 1000.0);
       await tester.pump();
@@ -411,7 +411,7 @@ void main() {
                 boundaryMargin: const EdgeInsets.all(boundaryMargin),
                 minScale: minScale,
                 transformationController: transformationController,
-                child: Container(width: 200.0, height: 200.0),
+                child: const SizedBox(width: 200.0, height: 200.0),
               ),
             ),
           ),
@@ -423,7 +423,7 @@ void main() {
       expect(translation.y, 0.0);
 
       // Pan into the corner of the boundaries.
-      final Offset childOffset = tester.getTopLeft(find.byType(Container));
+      final Offset childOffset = tester.getTopLeft(find.byType(SizedBox));
       const Offset flingEnd = Offset(20.0, 15.0);
       await tester.flingFrom(childOffset, flingEnd, 1000.0);
       await tester.pumpAndSettle();
@@ -433,7 +433,7 @@ void main() {
 
       // Zoom out so the entire child is visible. The child will also be
       // translated in order to keep it inside the boundaries.
-      final Offset childCenter = tester.getCenter(find.byType(Container));
+      final Offset childCenter = tester.getCenter(find.byType(SizedBox));
       Offset scaleStart1 = Offset(childCenter.dx - 40.0, childCenter.dy);
       Offset scaleStart2 = Offset(childCenter.dx + 40.0, childCenter.dy);
       Offset scaleEnd1 = Offset(childCenter.dx - 10.0, childCenter.dy);
@@ -497,7 +497,7 @@ void main() {
                 boundaryMargin: const EdgeInsets.all(boundaryMargin),
                 minScale: minScale,
                 transformationController: transformationController,
-                child: Container(width: 200.0, height: 200.0),
+                child: const SizedBox(width: 200.0, height: 200.0),
               ),
             ),
           ),
@@ -510,12 +510,12 @@ void main() {
 
       // Pan into the corner of the boundaries in two gestures, since
       // alignPanAxis prevents diagonal panning.
-      final Offset childOffset1 = tester.getTopLeft(find.byType(Container));
+      final Offset childOffset1 = tester.getTopLeft(find.byType(SizedBox));
       const Offset flingEnd1 = Offset(20.0, 0.0);
       await tester.flingFrom(childOffset1, flingEnd1, 1000.0);
       await tester.pumpAndSettle();
       await tester.pump(const Duration(seconds: 5));
-      final Offset childOffset2 = tester.getTopLeft(find.byType(Container));
+      final Offset childOffset2 = tester.getTopLeft(find.byType(SizedBox));
       const Offset flingEnd2 = Offset(0.0, 15.0);
       await tester.flingFrom(childOffset2, flingEnd2, 1000.0);
       await tester.pumpAndSettle();
@@ -525,7 +525,7 @@ void main() {
 
       // Zoom out so the entire child is visible. The child will also be
       // translated in order to keep it inside the boundaries.
-      final Offset childCenter = tester.getCenter(find.byType(Container));
+      final Offset childCenter = tester.getCenter(find.byType(SizedBox));
       Offset scaleStart1 = Offset(childCenter.dx - 40.0, childCenter.dy);
       Offset scaleStart2 = Offset(childCenter.dx + 40.0, childCenter.dy);
       Offset scaleEnd1 = Offset(childCenter.dx - 10.0, childCenter.dy);
@@ -584,7 +584,7 @@ void main() {
             body: Center(
               child: InteractiveViewer(
                 transformationController: transformationController,
-                child: Container(width: 200.0, height: 200.0),
+                child: const SizedBox(width: 200.0, height: 200.0),
               ),
             ),
           ),
@@ -607,7 +607,7 @@ void main() {
               child: InteractiveViewer(
                 transformationController: transformationController,
                 scaleEnabled: false,
-                child: Container(width: 200.0, height: 200.0),
+                child: const SizedBox(width: 200.0, height: 200.0),
               ),
             ),
           ),
@@ -645,7 +645,7 @@ void main() {
                 onInteractionEnd: (ScaleEndDetails details){
                   currentVelocity = details.velocity;
                 },
-                child: Container(width: 200.0, height: 200.0),
+                child: const SizedBox(width: 200.0, height: 200.0),
               ),
             ),
           ),
@@ -684,7 +684,7 @@ void main() {
               maxScale: 100000,
               minScale: 0.01,
               transformationController: transformationController,
-              child: Container(width: 1000.0, height: 1000.0),
+              child: const SizedBox(width: 1000.0, height: 1000.0),
             ),
           )),
         ),
@@ -728,7 +728,7 @@ void main() {
                 onInteractionEnd: (ScaleEndDetails details){
                   currentVelocity = details.velocity;
                 },
-                child: Container(width: 200.0, height: 200.0),
+                child: const SizedBox(width: 200.0, height: 200.0),
               ),
             ),
           ),
@@ -818,7 +818,7 @@ void main() {
               child: InteractiveViewer(
                 boundaryMargin: const EdgeInsets.all(boundaryMargin),
                 transformationController: transformationController,
-                child: Container(width: 200.0, height: 200.0),
+                child: const SizedBox(width: 200.0, height: 200.0),
               ),
             ),
           ),
@@ -830,7 +830,7 @@ void main() {
       expect(translation.y, 0.0);
 
       // Start a pan gesture.
-      final Offset childCenter = tester.getCenter(find.byType(Container));
+      final Offset childCenter = tester.getCenter(find.byType(SizedBox));
       final TestGesture gesture = await tester.createGesture();
       await gesture.down(childCenter);
       await tester.pump();
@@ -922,7 +922,7 @@ void main() {
                     scale = details.scale;
                   },
                   transformationController: transformationController,
-                  child: Container(width: 200.0, height: 200.0),
+                  child: const SizedBox(width: 200.0, height: 200.0),
                 ),
               ),
             ),
@@ -936,7 +936,7 @@ void main() {
 
       // Pinch to zoom isn't immediately detected for a small amount of
       // movement due to the GestureDetector.
-      final Offset childOffset = tester.getTopLeft(find.byType(Container));
+      final Offset childOffset = tester.getTopLeft(find.byType(SizedBox));
       final Offset childInterior = Offset(
         childOffset.dx + 20.0,
         childOffset.dy + 20.0,

@@ -144,7 +144,7 @@ List<FlutterCommand> generateCommands({
     terminal: globals.terminal,
     artifacts: globals.artifacts,
   ),
-  AssembleCommand(verboseHelp: verboseHelp),
+  AssembleCommand(verboseHelp: verboseHelp, buildSystem: globals.buildSystem),
   AttachCommand(verboseHelp: verboseHelp),
   BuildCommand(verboseHelp: verboseHelp),
   ChannelCommand(verboseHelp: verboseHelp),

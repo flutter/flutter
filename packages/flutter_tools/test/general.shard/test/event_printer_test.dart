@@ -5,19 +5,55 @@
 // @dart = 2.8
 
 import 'package:flutter_tools/src/test/event_printer.dart';
-import 'package:flutter_tools/src/test/watcher.dart';
+import 'package:flutter_tools/src/test/test_device.dart';
+import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
-import '../../src/fakes.dart';
 
 void main() {
-  testWithoutContext('EventPrinter handles a null parent', () {
-    final EventPrinter eventPrinter = EventPrinter(out: StringBuffer());
-    final ProcessEvent processEvent = ProcessEvent(0, FakeProcess());
+  group(EventPrinter, () {
+    final Uri observatoryUri = Uri.parse('http://localhost:1234');
+    EventPrinter eventPrinter;
+    StringBuffer output;
 
-    expect(() => eventPrinter.handleFinishedTest(processEvent), returnsNormally);
-    expect(() => eventPrinter.handleStartedProcess(processEvent), returnsNormally);
-    expect(() => eventPrinter.handleTestCrashed(processEvent), returnsNormally);
-    expect(() => eventPrinter.handleTestTimedOut(processEvent), returnsNormally);
+    setUp(() {
+      output = StringBuffer();
+      eventPrinter = EventPrinter(out: output);
+    });
+
+    testWithoutContext('handles a null parent', () {
+      final _Device device = _Device();
+
+      expect(() => eventPrinter.handleFinishedTest(device), returnsNormally);
+      expect(() => eventPrinter.handleStartedDevice(observatoryUri), returnsNormally);
+      expect(() => eventPrinter.handleTestCrashed(device), returnsNormally);
+      expect(() => eventPrinter.handleTestTimedOut(device), returnsNormally);
+    });
+
+    group('handleStartedDevice', () {
+      testWithoutContext('with non-null observatory', () {
+        eventPrinter.handleStartedDevice(observatoryUri);
+
+        expect(
+          output.toString(),
+          '\n'
+          '[{"event":"test.startedProcess","params":{"observatoryUri":"http://localhost:1234"}}]'
+          '\n',
+        );
+      });
+
+      testWithoutContext('with null observatory', () {
+        eventPrinter.handleStartedDevice(null);
+
+        expect(
+          output.toString(),
+          '\n'
+          '[{"event":"test.startedProcess","params":{"observatoryUri":null}}]'
+          '\n',
+        );
+      });
+    });
   });
 }
+
+class _Device extends Mock implements TestDevice {}
