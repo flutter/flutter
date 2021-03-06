@@ -70,7 +70,7 @@ class WindowsDevice extends DesktopDevice {
   }
 }
 
-// A device that represents a desktop Windows target.
+// A device that represents a desktop Windows UWP target.
 class WindowsUWPDevice extends DesktopDevice {
   WindowsUWPDevice({
     @required ProcessManager processManager,
@@ -164,7 +164,7 @@ class WindowsDevices extends PollingDeviceDiscovery {
         processManager: _processManager,
         operatingSystemUtils: _operatingSystemUtils,
       ),
-      if (_featureFlags.isWindowsUWPEnabled)
+      if (_featureFlags.isWindowsUwpEnabled)
         WindowsUWPDevice(
           fileSystem: _fileSystem,
           logger: _logger,

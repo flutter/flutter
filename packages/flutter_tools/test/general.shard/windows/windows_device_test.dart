@@ -68,8 +68,8 @@ void main() {
     ).devices, hasLength(1));
   });
 
-  testWithoutContext('WindowsDevices lists a UWP windows device if feature is enabled', () async {
-    final FeatureFlags featureFlags = TestFeatureFlags(isWindowsEnabled: true, isWindowsUWPEnabled: true);
+  testWithoutContext('WindowsDevices lists a UWP Windows device if feature is enabled', () async {
+    final FeatureFlags featureFlags = TestFeatureFlags(isWindowsEnabled: true, isWindowsUwpEnabled: true);
     expect(await WindowsDevices(
       windowsWorkflow: WindowsWorkflow(
         featureFlags: featureFlags,

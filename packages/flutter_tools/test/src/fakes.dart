@@ -527,7 +527,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isIOSEnabled = true,
     this.isFuchsiaEnabled = false,
     this.isExperimentalInvalidationStrategyEnabled = false,
-    this.isWindowsUWPEnabled = false,
+    this.isWindowsUwpEnabled = false,
   });
 
   @override
@@ -558,7 +558,7 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isExperimentalInvalidationStrategyEnabled;
 
   @override
-  final bool isWindowsUWPEnabled;
+  final bool isWindowsUwpEnabled;
 
   @override
   bool isEnabled(Feature feature) {
@@ -581,8 +581,8 @@ class TestFeatureFlags implements FeatureFlags {
         return isFuchsiaEnabled;
       case experimentalInvalidationStrategy:
         return isExperimentalInvalidationStrategyEnabled;
-      case windowsUWPEmbedding:
-        return isWindowsUWPEnabled;
+      case windowsUwpEmbedding:
+        return isWindowsUwpEnabled;
     }
     return false;
   }
