@@ -181,6 +181,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     String obscuringCharacter = '•',
     bool obscureText = false,
+    bool showLastCharWhenObscureText = true,
     Locale? locale,
     double cursorWidth = 1.0,
     double? cursorHeight,
@@ -220,6 +221,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        assert(paintCursorAboveText != null),
        assert(obscuringCharacter != null && obscuringCharacter.characters.length == 1),
        assert(obscureText != null),
+       assert(showLastCharWhenObscureText != null),
        assert(textSelectionDelegate != null),
        assert(cursorWidth != null && cursorWidth >= 0.0),
        assert(cursorHeight == null || cursorHeight >= 0.0),
@@ -254,6 +256,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        _endHandleLayerLink = endHandleLayerLink,
        _obscuringCharacter = obscuringCharacter,
        _obscureText = obscureText,
+       _showLastCharWhenObscureText = showLastCharWhenObscureText,
        _readOnly = readOnly,
        _forceLine = forceLine,
        _clipBehavior = clipBehavior {
@@ -461,6 +464,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (_obscureText == value)
       return;
     _obscureText = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// Whether show the last char When hide the text.
+  bool get showLastCharWhenObscureText => _showLastCharWhenObscureText;
+  bool _showLastCharWhenObscureText;
+  set showLastCharWhenObscureText(bool value) {
+    if (_showLastCharWhenObscureText == value)
+      return;
+    _showLastCharWhenObscureText = value;
     markNeedsSemanticsUpdate();
   }
 
