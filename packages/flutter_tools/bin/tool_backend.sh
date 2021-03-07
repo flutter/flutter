@@ -6,4 +6,4 @@
 readonly flutter_bin_dir="${FLUTTER_ROOT}/bin"
 readonly dart_bin_dir="${flutter_bin_dir}/cache/dart-sdk/bin"
 
-exec "${dart_bin_dir}/dart" "${FLUTTER_ROOT}/packages/flutter_tools/bin/tool_backend.dart" "${@:1}"
+exec "${dart_bin_dir}/dart" "${FLUTTER_ROOT}/packages/flutter_tools/bin/tool_backend.dart" linux "${@:1}"
