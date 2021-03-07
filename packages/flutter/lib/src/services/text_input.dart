@@ -454,6 +454,7 @@ class TextInputConfiguration {
     this.inputType = TextInputType.text,
     this.readOnly = false,
     this.obscureText = false,
+    this.showLastCharWhenObscureText = true,
     this.autocorrect = true,
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
@@ -465,6 +466,7 @@ class TextInputConfiguration {
     this.autofillConfiguration,
   }) : assert(inputType != null),
        assert(obscureText != null),
+       assert(showLastCharWhenObscureText != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(autocorrect != null),
@@ -485,6 +487,11 @@ class TextInputConfiguration {
   ///
   /// Defaults to false.
   final bool obscureText;
+
+  /// Whether show the last char When hide the text.
+  ///
+  /// Defaults to true.
+  final bool showLastCharWhenObscureText;
 
   /// Whether to enable autocorrection.
   ///
@@ -593,6 +600,7 @@ class TextInputConfiguration {
       'inputType': inputType.toJson(),
       'readOnly': readOnly,
       'obscureText': obscureText,
+      'showLastCharWhenObscureText': showLastCharWhenObscureText,
       'autocorrect': autocorrect,
       'smartDashesType': smartDashesType.index.toString(),
       'smartQuotesType': smartQuotesType.index.toString(),
