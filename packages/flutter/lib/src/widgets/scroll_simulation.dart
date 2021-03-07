@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -178,10 +177,10 @@ class ClampingScrollSimulation extends Simulation {
 
   // See computeDeceleration().
   static double _decelerationForFriction(double friction) {
-    return 9.80665 * 
+    return 9.80665 *
         39.37 *
         friction *
-        MediaQueryData.fromWindow(window).devicePixelRatio *
+        1.0 * // Assume display density of 1.0.
         160.0;
   }
 
@@ -209,12 +208,18 @@ class ClampingScrollSimulation extends Simulation {
 
   @override
   double x(double time) {
+    if (time == 0) {
+      return position;
+    }
     final _NBSample sample = _NBSample(time, _duration);
     return position + (sample.distanceCoef * _distance) * velocity.sign;
   }
 
   @override
   double dx(double time) {
+    if (time == 0) {
+      return velocity;
+    }
     final _NBSample sample = _NBSample(time, _duration);
     return sample.velocityCoef * _distance / _duration * velocity.sign * 1000.0;
   }
@@ -276,7 +281,7 @@ class _NBSample {
         x = xMin + (xMax - xMin) / 2.0;
         coef = 3.0 * x * (1.0 - x);
         tx = coef * ((1.0 - x) * p1 + x * p2) + x * x * x;
-        if ((tx - alpha).abs() < 0.00001) {
+        if ((tx - alpha).abs() < 1e-5) {
           break;
         }
         if (tx > alpha) {
@@ -292,7 +297,7 @@ class _NBSample {
         y = yMin + (yMax - yMin) / 2.0;
         coef = 3.0 * y * (1.0 - y);
         dy = coef * ((1.0 - y) * _startTension + y) + y * y * y;
-        if ((dy - alpha).abs() < 0.00001) {
+        if ((dy - alpha).abs() < 1e-5) {
           break;
         }
         if (dy > alpha) {
