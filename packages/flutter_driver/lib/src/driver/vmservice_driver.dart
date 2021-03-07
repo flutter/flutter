@@ -351,7 +351,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
   }
 
   Future<vms.Timestamp> _getVMTimelineMicros() async {
-    return await _serviceClient.getVMTimelineMicros();
+    return _serviceClient.getVMTimelineMicros();
   }
 
   @override

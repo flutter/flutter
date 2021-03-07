@@ -200,7 +200,7 @@ void main() {
       ]);
 
       await expectLater(
-            () async => await realCommandRunner.fetchLatestVersion(),
+            () async => realCommandRunner.fetchLatestVersion(),
         throwsToolExit(message: 'You are not currently on a release branch.'),
       );
       expect(processManager.hasRemainingExpectations, isFalse);
@@ -225,7 +225,7 @@ void main() {
       ]);
 
       await expectLater(
-            () async => await realCommandRunner.fetchLatestVersion(),
+            () async => realCommandRunner.fetchLatestVersion(),
         throwsToolExit(
           message: 'Unable to upgrade Flutter: no origin repository configured.',
         ),
@@ -251,7 +251,7 @@ void main() {
       );
 
       await expectLater(
-            () async => await realCommandRunner.attemptReset(revision),
+            () async => realCommandRunner.attemptReset(revision),
         throwsToolExit(message: errorMessage),
       );
       expect(processManager.hasRemainingExpectations, isFalse);

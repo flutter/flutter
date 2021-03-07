@@ -252,7 +252,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux }), skip: kIsWeb);
 
   testWidgets('TextField passes onEditingComplete to EditableText', (WidgetTester tester) async {
-    final VoidCallback onEditingComplete = () { };
+    void onEditingComplete() { }
 
     await tester.pumpWidget(
       MaterialApp(
@@ -489,10 +489,10 @@ void main() {
   testWidgets('TextInputFormatter gets correct selection value', (WidgetTester tester) async {
     late TextEditingValue actualOldValue;
     late TextEditingValue actualNewValue;
-    final FormatEditUpdateCallback callBack = (TextEditingValue oldValue, TextEditingValue newValue) {
+    void callBack(TextEditingValue oldValue, TextEditingValue newValue) {
       actualOldValue = oldValue;
       actualNewValue = newValue;
-    };
+    }
     final FocusNode focusNode = FocusNode();
     final TextEditingController controller = TextEditingController(text: '123');
     await tester.pumpWidget(

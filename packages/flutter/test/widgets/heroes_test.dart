@@ -2244,7 +2244,7 @@ Future<void> main() async {
 
   testWidgets('On an iOS back swipe and snap, only a single flight should take place', (WidgetTester tester) async {
     int shuttlesBuilt = 0;
-    final HeroFlightShuttleBuilder shuttleBuilder = (
+    Widget shuttleBuilder(
       BuildContext flightContext,
       Animation<double> animation,
       HeroFlightDirection flightDirection,
@@ -2253,7 +2253,7 @@ Future<void> main() async {
     ) {
       shuttlesBuilt += 1;
       return const Text("I'm flying in a jetplane");
-    };
+    }
 
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
     await tester.pumpWidget(

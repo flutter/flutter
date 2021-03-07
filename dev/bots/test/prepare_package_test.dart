@@ -377,7 +377,7 @@ void main() {
           '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 0, '', '')],
         };
         processManager.fakeResults = calls;
-        expect(() async => await publisher.publishArchive(false), throwsException);
+        expect(() async => publisher.publishArchive(false), throwsException);
         processManager.verifyCalls(calls.keys.toList());
       });
 

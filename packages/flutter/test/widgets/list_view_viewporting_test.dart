@@ -68,7 +68,7 @@ void main() {
     // so if our widget is 200 pixels tall, it should fit exactly 3 times.
     // but if we are offset by 300 pixels, there will be 4, numbered 1-4.
 
-    final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
+    Widget itemBuilder(BuildContext context, int index) {
       callbackTracker.add(index);
       return SizedBox(
         key: ValueKey<int>(index),
@@ -76,7 +76,7 @@ void main() {
         height: 200.0,
         child: Text('$index', textDirection: TextDirection.ltr),
       );
-    };
+    }
 
     Widget builder() {
       return Directionality(
@@ -131,7 +131,7 @@ void main() {
     // so if our widget is 200 pixels wide, it should fit exactly 4 times.
     // but if we are offset by 300 pixels, there will be 5, numbered 1-5.
 
-    final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
+    Widget itemBuilder(BuildContext context, int index) {
       callbackTracker.add(index);
       return SizedBox(
         key: ValueKey<int>(index),
@@ -139,7 +139,7 @@ void main() {
         width: 200.0,
         child: Text('$index', textDirection: TextDirection.ltr),
       );
-    };
+    }
 
     Widget builder() {
       return Directionality(
@@ -182,7 +182,7 @@ void main() {
     final List<int> callbackTracker = <int>[];
     final List<String?> text = <String?>[];
 
-    final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
+    Widget itemBuilder(BuildContext context, int index) {
       callbackTracker.add(index);
       return SizedBox(
         key: ValueKey<int>(index),
@@ -190,7 +190,7 @@ void main() {
         height: 220.0,
         child: Text('$index', textDirection: TextDirection.ltr),
       );
-    };
+    }
 
     void collectText(Widget widget) {
       if (widget is Text)
@@ -233,7 +233,7 @@ void main() {
     late StateSetter setState;
     ThemeData themeData = ThemeData.light();
 
-    final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
+    Widget itemBuilder(BuildContext context, int index) {
       return Container(
         key: ValueKey<int>(index),
         width: 500.0, // this should be ignored
@@ -241,7 +241,7 @@ void main() {
         color: Theme.of(context).primaryColor,
         child: Text('$index', textDirection: TextDirection.ltr),
       );
-    };
+    }
 
     final Widget viewport = ListView.builder(
       itemBuilder: itemBuilder,
@@ -273,7 +273,7 @@ void main() {
   });
 
   testWidgets('ListView padding', (WidgetTester tester) async {
-    final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
+    Widget itemBuilder(BuildContext context, int index) {
       return Container(
         key: ValueKey<int>(index),
         width: 500.0, // this should be ignored
@@ -281,7 +281,7 @@ void main() {
         color: Colors.green[500],
         child: Text('$index', textDirection: TextDirection.ltr),
       );
-    };
+    }
 
     await tester.pumpWidget(
       Directionality(

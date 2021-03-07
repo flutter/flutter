@@ -252,7 +252,7 @@ void main() {
     }, variant: buttonVariant);
 
     testWidgets('cache render object', (WidgetTester tester) async {
-      final GestureTapCallback inputCallback = () { };
+      void inputCallback() { }
 
       await tester.pumpWidget(
         Center(

@@ -145,7 +145,7 @@ void main() {
     ))..failOnce = true;
 
     await expectLater(
-      () async => await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true),
+      () async => driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true),
       returnsNormally,
     );
   });

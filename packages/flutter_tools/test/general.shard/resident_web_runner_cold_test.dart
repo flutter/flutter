@@ -82,7 +82,7 @@ void main() {
   testUsingContext('ResidentWebRunner calls appFailedToStart if initial compilation fails', () async {
     _setupMocks();
 
-    expect(() async => await residentWebRunner.run(), throwsToolExit());
+    expect(() async => residentWebRunner.run(), throwsToolExit());
     expect(await residentWebRunner.waitForAppToFinish(), 1);
   }, overrides: <Type, Generator>{
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: false)),
@@ -94,7 +94,7 @@ void main() {
   testUsingContext('ResidentWebRunner calls appFailedToStart if error is thrown during startup', () async {
     _setupMocks();
 
-    expect(() async => await residentWebRunner.run(), throwsA(isA<Exception>()));
+    expect(() async => residentWebRunner.run(), throwsA(isA<Exception>()));
     expect(await residentWebRunner.waitForAppToFinish(), 1);
   }, overrides: <Type, Generator>{
     BuildSystem: () => TestBuildSystem.error(Exception('foo')),

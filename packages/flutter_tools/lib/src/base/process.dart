@@ -543,7 +543,7 @@ class _DefaultProcessUtils implements ProcessUtils {
     unawaited(stdoutSubscription.cancel());
     unawaited(stderrSubscription.cancel());
 
-    return await process.exitCode;
+    return process.exitCode;
   }
 
   @override
