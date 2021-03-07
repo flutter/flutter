@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 
 /// An implementation of scroll physics that matches iOS.
@@ -35,13 +37,13 @@ class BouncingScrollSimulation extends Simulation {
     required this.trailingExtent,
     required this.spring,
     Tolerance tolerance = Tolerance.defaultTolerance,
-  }) : assert(position != null),
-       assert(velocity != null),
-       assert(leadingExtent != null),
-       assert(trailingExtent != null),
-       assert(leadingExtent <= trailingExtent),
-       assert(spring != null),
-       super(tolerance: tolerance) {
+  })  : assert(position != null),
+        assert(velocity != null),
+        assert(leadingExtent != null),
+        assert(trailingExtent != null),
+        assert(leadingExtent <= trailingExtent),
+        assert(spring != null),
+        super(tolerance: tolerance) {
     if (position < leadingExtent) {
       _springSimulation = _underscrollSimulation(position, velocity);
       _springTime = double.negativeInfinity;
@@ -57,14 +59,16 @@ class BouncingScrollSimulation extends Simulation {
         _springTime = _frictionSimulation.timeAtX(trailingExtent);
         _springSimulation = _overscrollSimulation(
           trailingExtent,
-          math.min(_frictionSimulation.dx(_springTime), maxSpringTransferVelocity),
+          math.min(
+              _frictionSimulation.dx(_springTime), maxSpringTransferVelocity),
         );
         assert(_springTime.isFinite);
       } else if (velocity < 0.0 && finalX < leadingExtent) {
         _springTime = _frictionSimulation.timeAtX(leadingExtent);
         _springSimulation = _underscrollSimulation(
           leadingExtent,
-          math.min(_frictionSimulation.dx(_springTime), maxSpringTransferVelocity),
+          math.min(
+              _frictionSimulation.dx(_springTime), maxSpringTransferVelocity),
         );
         assert(_springTime.isFinite);
       } else {
@@ -129,6 +133,8 @@ class BouncingScrollSimulation extends Simulation {
   }
 }
 
+const double _inflexion = 0.35;
+
 /// An implementation of scroll physics that matches Android.
 ///
 /// See also:
@@ -147,10 +153,9 @@ class ClampingScrollSimulation extends Simulation {
     required this.velocity,
     this.friction = 0.015,
     Tolerance tolerance = Tolerance.defaultTolerance,
-  }) : assert(_flingVelocityPenetration(0.0) == _initialVelocityPenetration),
-       super(tolerance: tolerance) {
-    _duration = _flingDuration(velocity);
-    _distance = (velocity * _duration / _initialVelocityPenetration).abs();
+  }) : super(tolerance: tolerance) {
+    _duration = _splineFlingDuration(velocity);
+    _distance = _splineFlingDistance(velocity);
   }
 
   /// The position of the particle at the beginning of the simulation.
@@ -165,7 +170,7 @@ class ClampingScrollSimulation extends Simulation {
   /// The more friction the particle experiences, the sooner it stops.
   final double friction;
 
-  late double _duration;
+  late int _duration;
   late double _distance;
 
   // See DECELERATION_RATE.
@@ -173,59 +178,132 @@ class ClampingScrollSimulation extends Simulation {
 
   // See computeDeceleration().
   static double _decelerationForFriction(double friction) {
-    return friction * 61774.04968;
+    return 9.80665 * 
+        39.37 *
+        friction *
+        MediaQueryData.fromWindow(window).devicePixelRatio *
+        160.0;
   }
 
-  // See getSplineFlingDuration(). Returns a value in seconds.
-  double _flingDuration(double velocity) {
-    // See mPhysicalCoeff
-    final double scaledFriction = friction * _decelerationForFriction(0.84);
-
-    // See getSplineDeceleration().
-    final double deceleration = math.log(0.35 * velocity.abs() / scaledFriction);
-
-    return math.exp(deceleration / (_kDecelerationRate - 1.0));
+  // See getSplineDeceleration().
+  double _splineDeceleration(double velocity) {
+    return math.log(_inflexion *
+        velocity.abs() /
+        (friction * _decelerationForFriction(0.84)));
   }
 
-  // Based on a cubic curve fit to the Scroller.computeScrollOffset() values
-  // produced for an initial velocity of 4000. The value of Scroller.getDuration()
-  // and Scroller.getFinalY() were 686ms and 961 pixels respectively.
-  //
-  // Algebra courtesy of Wolfram Alpha.
-  //
-  // f(x) = scrollOffset, x is time in milliseconds
-  // f(x) = 3.60882×10^-6 x^3 - 0.00668009 x^2 + 4.29427 x - 3.15307
-  // f(x) = 3.60882×10^-6 x^3 - 0.00668009 x^2 + 4.29427 x, so f(0) is 0
-  // f(686ms) = 961 pixels
-  // Scale to f(0 <= t <= 1.0), x = t * 686
-  // f(t) = 1165.03 t^3 - 3143.62 t^2 + 2945.87 t
-  // Scale f(t) so that 0.0 <= f(t) <= 1.0
-  // f(t) = (1165.03 t^3 - 3143.62 t^2 + 2945.87 t) / 961.0
-  //      = 1.2 t^3 - 3.27 t^2 + 3.065 t
-  static const double _initialVelocityPenetration = 3.065;
-  static double _flingDistancePenetration(double t) {
-    return (1.2 * t * t * t) - (3.27 * t * t) + (_initialVelocityPenetration * t);
+  // See getSplineFlingDuration().
+  int _splineFlingDuration(double velocity) {
+    final double deceleration = _splineDeceleration(velocity);
+    return (1000 * math.exp(deceleration / (_kDecelerationRate - 1.0))).round();
   }
 
-  // The derivative of the _flingDistancePenetration() function.
-  static double _flingVelocityPenetration(double t) {
-    return (3.6 * t * t) - (6.54 * t) + _initialVelocityPenetration;
+  // See getSplineFlingDistance().
+  double _splineFlingDistance(double velocity) {
+    final double l = _splineDeceleration(velocity);
+    final double decelMinusOne = _kDecelerationRate - 1.0;
+    return friction *
+        _decelerationForFriction(0.84) *
+        math.exp(_kDecelerationRate / decelMinusOne * l);
   }
 
   @override
   double x(double time) {
-    final double t = (time / _duration).clamp(0.0, 1.0);
-    return position + _distance * _flingDistancePenetration(t) * velocity.sign;
+    final _NBSample sample = _NBSample(time, _duration);
+    return position + (sample.distanceCoef * _distance) * velocity.sign;
   }
 
   @override
   double dx(double time) {
-    final double t = (time / _duration).clamp(0.0, 1.0);
-    return _distance * _flingVelocityPenetration(t) * velocity.sign / _duration;
+    final _NBSample sample = _NBSample(time, _duration);
+    return sample.velocityCoef * _distance / _duration * velocity.sign * 1000.0;
   }
 
   @override
   bool isDone(double time) {
-    return time >= _duration;
+    return time * 1000.0 >= _duration;
+  }
+}
+
+class _NBSample {
+  _NBSample(double time, int duration) {
+    _initSplinePosition();
+
+    // See computeScrollOffset().
+    final double t = time * 1000.0 / duration;
+    final int index = (_nbSamples * t).round();
+    _distanceCoef = 1.0;
+    _velocityCoef = 0.0;
+    if (index < _nbSamples) {
+      final double tInf = index / _nbSamples;
+      final double tSup = (index + 1) / _nbSamples;
+      final double dInf = _splinePosition[index];
+      final double dSup = _splinePosition[index + 1];
+      _velocityCoef = (dSup - dInf) / (tSup - tInf);
+      _distanceCoef = dInf + (t - tInf) * _velocityCoef;
+    }
+  }
+
+  late double _velocityCoef;
+  double get velocityCoef => _velocityCoef;
+
+  late double _distanceCoef;
+  double get distanceCoef => _distanceCoef;
+
+  static const int _nbSamples = 100;
+  static final List<double> _splinePosition =
+      List<double>.filled(_nbSamples + 1, 0.0);
+  static final List<double> _splineTime =
+      List<double>.filled(_nbSamples + 1, 0.0);
+  static const double _startTension = 0.5;
+  static const double _endTension = 1.0;
+  static bool _isInitialized = false;
+
+  // See static iniitalization in Scroller.java.
+  static void _initSplinePosition() {
+    if (_isInitialized) {
+      return;
+    }
+    const double p1 = _startTension * _inflexion;
+    const double p2 = 1.0 - _endTension * (1.0 - _inflexion);
+    double xMin = 0.0;
+    double yMin = 0.0;
+    for (int i = 0; i < _nbSamples; i++) {
+      final double alpha = i / _nbSamples;
+      double xMax = 1.0;
+      double x, tx, coef;
+      while (true) {
+        x = xMin + (xMax - xMin) / 2.0;
+        coef = 3.0 * x * (1.0 - x);
+        tx = coef * ((1.0 - x) * p1 + x * p2) + x * x * x;
+        if ((tx - alpha).abs() < 0.00001) {
+          break;
+        }
+        if (tx > alpha) {
+          xMax = x;
+        } else {
+          xMin = x;
+        }
+      }
+      _splinePosition[i] = coef * ((1.0 - x) * _startTension + x) + x * x * x;
+      double yMax = 1.0;
+      double y, dy;
+      while (true) {
+        y = yMin + (yMax - yMin) / 2.0;
+        coef = 3.0 * y * (1.0 - y);
+        dy = coef * ((1.0 - y) * _startTension + y) + y * y * y;
+        if ((dy - alpha).abs() < 0.00001) {
+          break;
+        }
+        if (dy > alpha) {
+          yMax = y;
+        } else {
+          yMin = y;
+        }
+      }
+      _splineTime[i] = coef * ((1.0 - y) * p1 + y * p2) + y * y * y;
+    }
+    _splinePosition[_nbSamples] = _splineTime[_nbSamples] = 1.0;
+    _isInitialized = true;
   }
 }
