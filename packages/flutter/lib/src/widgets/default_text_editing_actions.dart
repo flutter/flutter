@@ -31,27 +31,6 @@ class DefaultTextEditingActions extends StatelessWidget {
   /// The child [Widget] of DefaultTextEditingActions.
   final Widget child;
 
-  // TODO(justinmc): Put Actions here that are triggered directly, not by
-  // Shortcuts.
-  // https://github.com/flutter/flutter/issues/75004
-  static final Map<Type, Action<Intent>> _androidActions = <Type, Action<Intent>>{
-  };
-
-  static final Map<Type, Action<Intent>> _fuchsiaActions = <Type, Action<Intent>>{
-  };
-
-  static final Map<Type, Action<Intent>> _iOSActions = <Type, Action<Intent>>{
-  };
-
-  static final Map<Type, Action<Intent>> _linuxActions = <Type, Action<Intent>>{
-  };
-
-  static final Map<Type, Action<Intent>> _macActions = <Type, Action<Intent>>{
-  };
-
-  static final Map<Type, Action<Intent>> _windowsActions = <Type, Action<Intent>>{
-  };
-
   // These Intents are triggered by DefaultTextEditingShortcuts. They are included
   // regardless of the platform; it's up to DefaultTextEditingShortcuts to decide which
   // are called on which platform.
@@ -80,29 +59,11 @@ class DefaultTextEditingActions extends StatelessWidget {
     MoveSelectionUpTextIntent: _MoveSelectionUpTextAction(),
   };
 
-  static Map<Type, Action<Intent>> get _actions {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-        return _androidActions;
-      case TargetPlatform.fuchsia:
-        return _fuchsiaActions;
-      case TargetPlatform.iOS:
-        return _iOSActions;
-      case TargetPlatform.linux:
-        return _linuxActions;
-      case TargetPlatform.macOS:
-        return _macActions;
-      case TargetPlatform.windows:
-        return _windowsActions;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Actions(
       actions: <Type, Action<Intent>>{
         ..._shortcutsActions,
-        ..._actions,
       },
       child: child,
     );
