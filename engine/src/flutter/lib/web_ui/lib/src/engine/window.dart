@@ -44,17 +44,13 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
   /// button, etc.
   @visibleForTesting
   BrowserHistory get browserHistory {
-    return _browserHistory ??=
-        MultiEntriesBrowserHistory(urlStrategy: _urlStrategyForInitialization);
-  }
-
-  UrlStrategy? get _urlStrategyForInitialization {
     final UrlStrategy? urlStrategy = _isUrlStrategySet
         ? _customUrlStrategy
         : _createDefaultUrlStrategy();
     // Prevent any further customization of URL strategy.
     _isUrlStrategySet = true;
-    return urlStrategy;
+    return _browserHistory ??=
+        MultiEntriesBrowserHistory(urlStrategy: urlStrategy);
   }
 
   BrowserHistory? _browserHistory;
@@ -63,14 +59,8 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
     if (_browserHistory is SingleEntryBrowserHistory) {
       return;
     }
-
-    final UrlStrategy? strategy;
-    if (_browserHistory == null) {
-      strategy = _urlStrategyForInitialization;
-    } else {
-      strategy = _browserHistory?.urlStrategy;
-      await _browserHistory?.tearDown();
-    }
+    final UrlStrategy? strategy = _browserHistory?.urlStrategy;
+    await _browserHistory?.tearDown();
     _browserHistory = SingleEntryBrowserHistory(urlStrategy: strategy);
   }
 
@@ -78,14 +68,8 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
     if (_browserHistory is MultiEntriesBrowserHistory) {
       return;
     }
-
-    final UrlStrategy? strategy;
-    if (_browserHistory == null) {
-      strategy = _urlStrategyForInitialization;
-    } else {
-      strategy = _browserHistory?.urlStrategy;
-      await _browserHistory?.tearDown();
-    }
+    final UrlStrategy? strategy = _browserHistory?.urlStrategy;
+    await _browserHistory?.tearDown();
     _browserHistory = MultiEntriesBrowserHistory(urlStrategy: strategy);
   }
 
@@ -277,7 +261,7 @@ external set _jsSetUrlStrategy(_JsSetUrlStrategy? newJsSetUrlStrategy);
 
 UrlStrategy? _createDefaultUrlStrategy() {
   return ui.debugEmulateFlutterTesterEnvironment
-      ? TestUrlStrategy.fromEntry(TestHistoryEntry('default', null, '/default'))
+      ? null
       : const HashUrlStrategy();
 }
 
