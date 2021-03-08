@@ -520,9 +520,9 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
   }
 
   _DragAvatar<T>? _startDrag(Offset position) {
-    final Offset dragStartPoint;
     if (widget.maxSimultaneousDrags != null && _activeCount >= widget.maxSimultaneousDrags!)
       return null;
+    final Offset dragStartPoint;
     if (widget.dragAnchorStrategy == null) {
       switch (widget.dragAnchor) {
         case DragAnchor.child:
