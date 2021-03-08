@@ -1511,9 +1511,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   void _handleSetText(String text) {
-    textSelectionDelegate.textEditingValue = TextEditingValue(
-      text: text,
-      selection: TextSelection.collapsed(offset: text.length),
+    textSelectionDelegate.userUpdateTextEditingValue(
+      TextEditingValue(
+        text: text,
+        selection: TextSelection.collapsed(offset: text.length),
+      ),
+      SelectionChangedCause.keyboard,
     );
   }
 
