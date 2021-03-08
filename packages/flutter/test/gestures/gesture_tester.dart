@@ -12,8 +12,9 @@ import '../flutter_test_alternative.dart';
 class TestGestureFlutterBinding extends BindingBase with GestureBinding { }
 
 void ensureGestureBinding() {
-  if (GestureBinding.instance == null)
+  if (GestureBinding.instance == null) {
     TestGestureFlutterBinding();
+  }
   assert(GestureBinding.instance != null);
 }
 

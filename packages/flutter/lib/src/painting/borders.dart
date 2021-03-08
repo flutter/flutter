@@ -88,12 +88,15 @@ class BorderSide {
     assert(canMerge(a, b));
     final bool aIsNone = a.style == BorderStyle.none && a.width == 0.0;
     final bool bIsNone = b.style == BorderStyle.none && b.width == 0.0;
-    if (aIsNone && bIsNone)
+    if (aIsNone && bIsNone) {
       return BorderSide.none;
-    if (aIsNone)
+    }
+    if (aIsNone) {
       return b;
-    if (bIsNone)
+    }
+    if (bIsNone) {
       return a;
+    }
     assert(a.color == b.color);
     assert(a.style == b.style);
     return BorderSide(
@@ -197,8 +200,9 @@ class BorderSide {
     assert(a != null);
     assert(b != null);
     if ((a.style == BorderStyle.none && a.width == 0.0) ||
-        (b.style == BorderStyle.none && b.width == 0.0))
+        (b.style == BorderStyle.none && b.width == 0.0)) {
       return true;
+    }
     return a.style == b.style
         && a.color == b.color;
   }
@@ -212,13 +216,16 @@ class BorderSide {
     assert(a != null);
     assert(b != null);
     assert(t != null);
-    if (t == 0.0)
+    if (t == 0.0) {
       return a;
-    if (t == 1.0)
+    }
+    if (t == 1.0) {
       return b;
+    }
     final double width = ui.lerpDouble(a.width, b.width, t)!;
-    if (width < 0.0)
+    if (width < 0.0) {
       return BorderSide.none;
+    }
     if (a.style == b.style) {
       return BorderSide(
         color: Color.lerp(a.color, b.color, t)!,
@@ -252,10 +259,12 @@ class BorderSide {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is BorderSide
         && other.color == color
         && other.width == width
@@ -380,8 +389,9 @@ abstract class ShapeBorder {
   /// Instead of calling this directly, use [ShapeBorder.lerp].
   @protected
   ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
-    if (a == null)
+    if (a == null) {
       return scale(t);
+    }
     return null;
   }
 
@@ -412,8 +422,9 @@ abstract class ShapeBorder {
   /// Instead of calling this directly, use [ShapeBorder.lerp].
   @protected
   ShapeBorder? lerpTo(ShapeBorder? b, double t) {
-    if (b == null)
+    if (b == null) {
       return scale(1.0 - t);
+    }
     return null;
   }
 
@@ -428,10 +439,12 @@ abstract class ShapeBorder {
   static ShapeBorder? lerp(ShapeBorder? a, ShapeBorder? b, double t) {
     assert(t != null);
     ShapeBorder? result;
-    if (b != null)
+    if (b != null) {
       result = b.lerpFrom(a, t);
-    if (result == null && a != null)
+    }
+    if (result == null && a != null) {
       result = a.lerpTo(b, t);
+    }
     return result ?? (t < 0.5 ? a : b);
   }
 
@@ -601,18 +614,21 @@ class _CompoundBorder extends ShapeBorder {
       // is inserted before the shape that is going away, so that the outer path changes to
       // the new border earlier rather than later. (This affects, among other things, where
       // the ShapeDecoration class puts its background.)
-      if (localB != null)
+      if (localB != null) {
         results.add(localB.scale(t));
-      if (localA != null)
+      }
+      if (localA != null) {
         results.add(localA.scale(1.0 - t));
+      }
     }
     return _CompoundBorder(results);
   }
 
   @override
   Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
-    for (int index = 0; index < borders.length - 1; index += 1)
+    for (int index = 0; index < borders.length - 1; index += 1) {
       rect = borders[index].dimensions.resolve(textDirection).deflateRect(rect);
+    }
     return borders.last.getInnerPath(rect, textDirection: textDirection);
   }
 
@@ -631,10 +647,12 @@ class _CompoundBorder extends ShapeBorder {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is _CompoundBorder
         && listEquals<ShapeBorder>(other.borders, borders);
   }

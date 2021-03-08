@@ -187,8 +187,9 @@ class Rect {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is Rect
         && other.top == top
         && other.left == left
@@ -219,8 +220,9 @@ class Size {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is Size
         && other.width == width
         && other.height == height;

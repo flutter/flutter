@@ -467,10 +467,12 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
   // Otherwise, the shape is determined by the widget type as described in the
   // Material class documentation.
   ShapeBorder _getShape() {
-    if (widget.shape != null)
+    if (widget.shape != null) {
       return widget.shape!;
-    if (widget.borderRadius != null)
+    }
+    if (widget.borderRadius != null) {
       return RoundedRectangleBorder(borderRadius: widget.borderRadius!);
+    }
     switch (widget.type) {
       case MaterialType.canvas:
       case MaterialType.transparency:
@@ -530,8 +532,9 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
   }
 
   void _didChangeLayout() {
-    if (_inkFeatures != null && _inkFeatures!.isNotEmpty)
+    if (_inkFeatures != null && _inkFeatures!.isNotEmpty) {
       markNeedsPaint();
+    }
   }
 
   @override
@@ -544,8 +547,9 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
       canvas.save();
       canvas.translate(offset.dx, offset.dy);
       canvas.clipRect(Offset.zero & size);
-      for (final InkFeature inkFeature in _inkFeatures!)
+      for (final InkFeature inkFeature in _inkFeatures!) {
         inkFeature._paint(canvas);
+      }
       canvas.restore();
     }
     super.paint(context, offset);
@@ -626,8 +630,9 @@ abstract class InkFeature {
       return true;
     }());
     _controller._removeFeature(this);
-    if (onRemoved != null)
+    if (onRemoved != null) {
       onRemoved!();
+    }
   }
 
   void _paint(Canvas canvas) {
@@ -643,8 +648,9 @@ abstract class InkFeature {
     // determine the transform that gets our coordinate system to be like theirs
     final Matrix4 transform = Matrix4.identity();
     assert(descendants.length >= 2);
-    for (int index = descendants.length - 1; index > 0; index -= 1)
+    for (int index = descendants.length - 1; index > 0; index -= 1) {
       descendants[index].applyPaintTransform(descendants[index - 1], transform);
+    }
     paintFeature(canvas, transform);
   }
 

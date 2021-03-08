@@ -719,8 +719,9 @@ abstract class BoxScrollView extends ScrollView {
       }
     }
 
-    if (effectivePadding != null)
+    if (effectivePadding != null) {
       sliver = SliverPadding(padding: effectivePadding, sliver: sliver);
+    }
     return <Widget>[ sliver ];
   }
 

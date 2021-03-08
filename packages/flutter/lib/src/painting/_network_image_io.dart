@@ -69,8 +69,9 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   static HttpClient get _httpClient {
     HttpClient client = _sharedHttpClient;
     assert(() {
-      if (debugNetworkImageHttpClientProvider != null)
+      if (debugNetworkImageHttpClientProvider != null) {
         client = debugNetworkImageHttpClientProvider!();
+      }
       return true;
     }());
     return client;
@@ -108,8 +109,9 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
           ));
         },
       );
-      if (bytes.lengthInBytes == 0)
+      if (bytes.lengthInBytes == 0) {
         throw Exception('NetworkImage is an empty file: $resolved');
+      }
 
       return decode(bytes);
     } catch (e) {
@@ -127,8 +129,9 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is NetworkImage
         && other.url == url
         && other.scale == scale;

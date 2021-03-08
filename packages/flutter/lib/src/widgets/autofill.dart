@@ -274,8 +274,9 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   void dispose() {
     super.dispose();
 
-    if (!_isTopmostAutofillGroup || widget.onDisposeAction == null)
+    if (!_isTopmostAutofillGroup || widget.onDisposeAction == null) {
       return;
+    }
     switch (widget.onDisposeAction) {
       case AutofillContextAction.cancel:
         TextInput.finishAutofillContext(shouldSave: false);

@@ -2833,8 +2833,9 @@ void main() {
             },
             onAccept: accepted.add,
             onWillAccept: (int? data) {
-              if (data == null)
+              if (data == null) {
                 isReceiveNullDataForCheck = true;
+              }
               return data != null;
             },
           ),

@@ -298,8 +298,9 @@ abstract class BaseMouseTracker extends ChangeNotifier {
   void _monitorMouseConnection(VoidCallback task) {
     final bool mouseWasConnected = mouseIsConnected;
     task();
-    if (mouseWasConnected != mouseIsConnected)
+    if (mouseWasConnected != mouseIsConnected) {
       notifyListeners();
+    }
   }
 
   bool _debugDuringDeviceUpdate = false;
@@ -322,8 +323,9 @@ abstract class BaseMouseTracker extends ChangeNotifier {
 
   // Whether an observed event might update a device.
   static bool _shouldMarkStateDirty(_MouseState? state, PointerEvent event) {
-    if (state == null)
+    if (state == null) {
       return true;
+    }
     assert(event != null);
     final PointerEvent lastEvent = state.latestEvent;
     assert(event.device == lastEvent.device);
@@ -332,8 +334,9 @@ abstract class BaseMouseTracker extends ChangeNotifier {
     assert((event is PointerAddedEvent) == (lastEvent is PointerRemovedEvent));
 
     // Ignore events that are unrelated to mouse tracking.
-    if (event is PointerSignalEvent)
+    if (event is PointerSignalEvent) {
       return false;
+    }
     return lastEvent is PointerAddedEvent
       || event is PointerRemovedEvent
       || lastEvent.position != event.position;
@@ -361,8 +364,9 @@ abstract class BaseMouseTracker extends ChangeNotifier {
     assert(hitTest != null);
     final Offset globalPosition = state.latestEvent.position;
     final int device = state.device;
-    if (!_mouseStates.containsKey(device))
+    if (!_mouseStates.containsKey(device)) {
       return <MouseTrackerAnnotation, Matrix4>{} as LinkedHashMap<MouseTrackerAnnotation, Matrix4>;
+    }
 
     return _hitTestResultToAnnotations(hitTest(globalPosition));
   }
@@ -405,14 +409,17 @@ abstract class BaseMouseTracker extends ChangeNotifier {
     assert(event != null);
     final HitTestResult result = event is PointerRemovedEvent ? HitTestResult() : getResult();
     assert(result != null);
-    if (event.kind != PointerDeviceKind.mouse)
+    if (event.kind != PointerDeviceKind.mouse) {
       return;
-    if (event is PointerSignalEvent)
+    }
+    if (event is PointerSignalEvent) {
       return;
+    }
     final int device = event.device;
     final _MouseState? existingState = _mouseStates[device];
-    if (!_shouldMarkStateDirty(existingState, event))
+    if (!_shouldMarkStateDirty(existingState, event)) {
       return;
+    }
 
     _monitorMouseConnection(() {
       _deviceUpdatePhase(() {
@@ -424,8 +431,9 @@ abstract class BaseMouseTracker extends ChangeNotifier {
           _mouseStates[device] = _MouseState(initialEvent: event);
         } else {
           assert(event is! PointerAddedEvent);
-          if (event is PointerRemovedEvent)
+          if (event is PointerRemovedEvent) {
             _mouseStates.remove(event.device);
+          }
         }
         final _MouseState targetState = _mouseStates[device] ?? existingState!;
 
@@ -497,8 +505,9 @@ mixin _MouseTrackerEventMixin on BaseMouseTracker {
     final PointerExitEvent baseExitEvent = PointerExitEvent.fromMouseEvent(latestEvent);
     lastAnnotations.forEach((MouseTrackerAnnotation annotation, Matrix4 transform) {
       if (!nextAnnotations.containsKey(annotation))
-        if (annotation.validForMouseTracker && annotation.onExit != null)
+        if (annotation.validForMouseTracker && annotation.onExit != null) {
           annotation.onExit!(baseExitEvent.transformed(lastAnnotations[annotation]));
+        }
     });
 
     // Send enter events to annotations that are not in last but in next, in
@@ -508,8 +517,9 @@ mixin _MouseTrackerEventMixin on BaseMouseTracker {
     ).toList();
     final PointerEnterEvent baseEnterEvent = PointerEnterEvent.fromMouseEvent(latestEvent);
     for (final MouseTrackerAnnotation annotation in enteringAnnotations.reversed) {
-      if (annotation.validForMouseTracker && annotation.onEnter != null)
+      if (annotation.validForMouseTracker && annotation.onEnter != null) {
         annotation.onEnter!(baseEnterEvent.transformed(nextAnnotations[annotation]));
+      }
     }
   }
 

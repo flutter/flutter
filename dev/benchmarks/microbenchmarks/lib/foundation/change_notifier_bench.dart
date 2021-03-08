@@ -47,14 +47,18 @@ void main() {
       addListenerWatch.start();
 
       notifier.addListener(listener);
-      if (listenersCount > 1)
+      if (listenersCount > 1) {
         notifier.addListener(listener2);
-      if (listenersCount > 2)
+      }
+      if (listenersCount > 2) {
         notifier.addListener(listener3);
-      if (listenersCount > 3)
+      }
+      if (listenersCount > 3) {
         notifier.addListener(listener4);
-      if (listenersCount > 4)
+      }
+      if (listenersCount > 4) {
         notifier.addListener(listener5);
+      }
 
       addListenerWatch.stop();
       notifyListenersWatch.start();
@@ -66,14 +70,18 @@ void main() {
 
       // Remove listeners in reverse order to evaluate the worse-case scenario:
       // the listener removed is the last listener
-      if (listenersCount > 4)
+      if (listenersCount > 4) {
         notifier.removeListener(listener5);
-      if (listenersCount > 3)
+      }
+      if (listenersCount > 3) {
         notifier.removeListener(listener4);
-      if (listenersCount > 2)
+      }
+      if (listenersCount > 2) {
         notifier.removeListener(listener3);
-      if (listenersCount > 1)
+      }
+      if (listenersCount > 1) {
         notifier.removeListener(listener2);
+      }
       notifier.removeListener(listener);
 
       removeListenerWatch.stop();

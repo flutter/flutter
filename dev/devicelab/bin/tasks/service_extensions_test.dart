@@ -51,8 +51,9 @@ void main() {
       });
       run.exitCode.then<void>((int exitCode) { ok = false; });
       await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
-      if (!ok)
+      if (!ok) {
         throw 'Failed to run test app.';
+      }
 
       final VMServiceClient client = VMServiceClient.connect('ws://localhost:$vmServicePort/ws');
       final VM vm = await client.getVM();
@@ -107,14 +108,16 @@ void main() {
 
       run.stdin.write('q');
       final int result = await run.exitCode;
-      if (result != 0)
+      if (result != 0) {
         throw 'Received unexpected exit code $result from run process.';
+      }
     });
     return TaskResult.success(null);
   });
 }
 
 void expect(bool value) {
-  if (!value)
+  if (!value) {
     throw 'failed assertion in service extensions test';
+  }
 }

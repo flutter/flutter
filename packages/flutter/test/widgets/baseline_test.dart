@@ -149,8 +149,9 @@ class RenderBaselineDetector extends RenderBox {
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
-    if (callback != null)
+    if (callback != null) {
       callback();
+    }
     return 20.0;
   }
 

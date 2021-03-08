@@ -610,8 +610,9 @@ class _RenderCupertinoAlert extends RenderBox {
 
   Color get dividerColor => _dividerPaint.color;
   set dividerColor(Color value) {
-    if (value == _dividerPaint.color)
+    if (value == _dividerPaint.color) {
       return;
+    }
     _dividerPaint.color = value;
     markNeedsPaint();
   }
@@ -698,10 +699,12 @@ class _RenderCupertinoAlert extends RenderBox {
     final bool hasDivider = contentHeight > 0.0 && actionsHeight > 0.0;
     double height = contentHeight + (hasDivider ? _dividerThickness : 0.0) + actionsHeight;
 
-    if (actionsHeight > 0 || contentHeight > 0)
+    if (actionsHeight > 0 || contentHeight > 0) {
       height -= 2 * _kEdgeVerticalPadding;
-    if (height.isFinite)
+    }
+    if (height.isFinite) {
       return height;
+    }
     return 0.0;
   }
 
@@ -712,10 +715,12 @@ class _RenderCupertinoAlert extends RenderBox {
     final bool hasDivider = contentHeight > 0.0 && actionsHeight > 0.0;
     double height = contentHeight + (hasDivider ? _dividerThickness : 0.0) + actionsHeight;
 
-    if (actionsHeight > 0 || contentHeight > 0)
+    if (actionsHeight > 0 || contentHeight > 0) {
       height -= 2 * _kEdgeVerticalPadding;
-    if (height.isFinite)
+    }
+    if (height.isFinite) {
       return height;
+    }
     return 0.0;
   }
 
@@ -1055,8 +1060,9 @@ class _ActionButtonParentDataWidget extends ParentDataWidget<_ActionButtonParent
 
       // Force a repaint.
       final AbstractNode? targetParent = renderObject.parent;
-      if (targetParent is RenderObject)
+      if (targetParent is RenderObject) {
         targetParent.markNeedsPaint();
+      }
     }
   }
 
@@ -1213,8 +1219,9 @@ class _RenderCupertinoAlertActions extends RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! _ActionButtonParentData)
+    if (child.parentData is! _ActionButtonParentData) {
       child.parentData = _ActionButtonParentData();
+    }
   }
 
   @override
@@ -1229,12 +1236,15 @@ class _RenderCupertinoAlertActions extends RenderBox
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    if (childCount == 0)
+    if (childCount == 0) {
       return 0.0;
-    if (childCount == 1)
+    }
+    if (childCount == 1) {
       return firstChild!.computeMaxIntrinsicHeight(width) + dividerThickness;
-    if (hasCancelButton && childCount < 4)
+    }
+    if (hasCancelButton && childCount < 4) {
       return _computeMinIntrinsicHeightWithCancel(width);
+    }
     return _computeMinIntrinsicHeightWithoutCancel(width);
   }
 
@@ -1265,10 +1275,12 @@ class _RenderCupertinoAlertActions extends RenderBox
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    if (childCount == 0)
+    if (childCount == 0) {
       return 0.0;
-    if (childCount == 1)
+    }
+    if (childCount == 1) {
       return firstChild!.computeMaxIntrinsicHeight(width) + dividerThickness;
+    }
     return _computeMaxIntrinsicHeightStacked(width);
   }
 

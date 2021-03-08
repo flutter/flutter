@@ -95,8 +95,9 @@ Future<bool> run(List<String> arguments) async {
   if (help || repeat == null || files.isEmpty) {
     printHelp();
     if (verbose) {
-      if (repeat == null)
+      if (repeat == null) {
         print('Error: Could not parse repeat count ("${parsedArguments['repeat']}")');
+      }
       if (parsedArguments.rest.isEmpty) {
         print('Error: No file arguments specified.');
       } else if (files.isEmpty) {
@@ -106,8 +107,9 @@ Future<bool> run(List<String> arguments) async {
     return help;
   }
 
-  if (files.length < shardIndex)
+  if (files.length < shardIndex) {
     print('Warning: There are more shards than tests. Some shards will not run any tests.');
+  }
 
   if (numberShards <= shardIndex) {
     print('Error: There are more shard indexes than shards.');

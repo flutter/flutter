@@ -508,8 +508,9 @@ class ToggleButtons extends StatelessWidget {
     ThemeData theme,
     ToggleButtonsThemeData toggleButtonsTheme,
   ) {
-    if (!renderBorder)
+    if (!renderBorder) {
       return BorderSide.none;
+    }
 
     final double resultingBorderWidth = borderWidth
       ?? toggleButtonsTheme.borderWidth
@@ -543,8 +544,9 @@ class ToggleButtons extends StatelessWidget {
     ThemeData theme,
     ToggleButtonsThemeData toggleButtonsTheme,
   ) {
-    if (!renderBorder)
+    if (!renderBorder) {
       return BorderSide.none;
+    }
 
     final double resultingBorderWidth = borderWidth
       ?? toggleButtonsTheme.borderWidth
@@ -578,11 +580,13 @@ class ToggleButtons extends StatelessWidget {
     ThemeData theme,
     ToggleButtonsThemeData toggleButtonsTheme,
   ) {
-    if (!renderBorder)
+    if (!renderBorder) {
       return BorderSide.none;
+    }
 
-    if (index != children.length - 1)
+    if (index != children.length - 1) {
       return BorderSide.none;
+    }
 
     final double resultingBorderWidth = borderWidth
       ?? toggleButtonsTheme.borderWidth
@@ -627,8 +631,9 @@ class ToggleButtons extends StatelessWidget {
     );
     assert(
       () {
-        if (focusNodes != null)
+        if (focusNodes != null) {
           return focusNodes!.length == children.length;
+        }
         return true;
       }(),
       'focusNodes.length must match children.length.\n'
@@ -1044,8 +1049,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   Axis get direction => _direction;
   Axis _direction;
   set direction(Axis value) {
-    if (_direction == value)
+    if (_direction == value) {
       return;
+    }
     _direction = value;
     markNeedsLayout();
   }
@@ -1053,8 +1059,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   VerticalDirection get verticalDirection => _verticalDirection;
   VerticalDirection _verticalDirection;
   set verticalDirection(VerticalDirection value) {
-    if (_verticalDirection == value)
+    if (_verticalDirection == value) {
       return;
+    }
     _verticalDirection = value;
     markNeedsLayout();
   }
@@ -1063,8 +1070,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   BorderSide get leadingBorderSide => _leadingBorderSide;
   BorderSide _leadingBorderSide;
   set leadingBorderSide(BorderSide value) {
-    if (_leadingBorderSide == value)
+    if (_leadingBorderSide == value) {
       return;
+    }
     _leadingBorderSide = value;
     markNeedsLayout();
   }
@@ -1073,8 +1081,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   BorderSide get borderSide  => _borderSide;
   BorderSide _borderSide;
   set borderSide(BorderSide value) {
-    if (_borderSide == value)
+    if (_borderSide == value) {
       return;
+    }
     _borderSide = value;
     markNeedsLayout();
   }
@@ -1083,8 +1092,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   BorderSide get trailingBorderSide => _trailingBorderSide;
   BorderSide _trailingBorderSide;
   set trailingBorderSide(BorderSide value) {
-    if (_trailingBorderSide == value)
+    if (_trailingBorderSide == value) {
       return;
+    }
     _trailingBorderSide = value;
     markNeedsLayout();
   }
@@ -1093,8 +1103,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   BorderRadius get borderRadius => _borderRadius;
   BorderRadius _borderRadius;
   set borderRadius(BorderRadius value) {
-    if (_borderRadius == value)
+    if (_borderRadius == value) {
       return;
+    }
     _borderRadius = value;
     markNeedsLayout();
   }
@@ -1103,8 +1114,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   bool get isFirstButton => _isFirstButton;
   bool _isFirstButton;
   set isFirstButton(bool value) {
-    if (_isFirstButton == value)
+    if (_isFirstButton == value) {
       return;
+    }
     _isFirstButton = value;
     markNeedsLayout();
   }
@@ -1113,8 +1125,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   bool get isLastButton => _isLastButton;
   bool _isLastButton;
   set isLastButton(bool value) {
-    if (_isLastButton == value)
+    if (_isLastButton == value) {
       return;
+    }
     _isLastButton = value;
     markNeedsLayout();
   }
@@ -1123,8 +1136,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
-    if (_textDirection == value)
+    if (_textDirection == value) {
       return;
+    }
     _textDirection = value;
     markNeedsLayout();
   }

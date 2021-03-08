@@ -448,8 +448,9 @@ class TextSelectionOverlay {
   bool _handlesVisible = false;
   set handlesVisible(bool visible) {
     assert(visible != null);
-    if (_handlesVisible == visible)
+    if (_handlesVisible == visible) {
       return;
+    }
     _handlesVisible = visible;
     // If we are in build state, it will be too late to update visibility.
     // We will need to schedule the build in next frame.
@@ -462,8 +463,9 @@ class TextSelectionOverlay {
 
   /// Builds the handles by inserting them into the [context]'s overlay.
   void showHandles() {
-    if (_handles != null)
+    if (_handles != null) {
       return;
+    }
 
     _handles = <OverlayEntry>[
       OverlayEntry(builder: (BuildContext context) => _buildHandle(context, _TextSelectionHandlePosition.start)),
@@ -501,8 +503,9 @@ class TextSelectionOverlay {
   /// that if you do call this during a build, the UI will not update until the
   /// next frame (i.e. many milliseconds later).
   void update(TextEditingValue newValue) {
-    if (_value == newValue)
+    if (_value == newValue) {
       return;
+    }
     _value = newValue;
     if (SchedulerBinding.instance!.schedulerPhase == SchedulerPhase.persistentCallbacks) {
       SchedulerBinding.instance!.addPostFrameCallback(_markNeedsBuild);
@@ -564,9 +567,9 @@ class TextSelectionOverlay {
   Widget _buildHandle(BuildContext context, _TextSelectionHandlePosition position) {
     Widget handle;
     if ((_selection.isCollapsed && position == _TextSelectionHandlePosition.end) ||
-         selectionControls == null)
-      handle = Container(); // hide the second handle when collapsed
-    else {
+         selectionControls == null) {
+      handle = Container();
+    } else {
       handle = Visibility(
         visible: handlesVisible,
         child: _TextSelectionHandleOverlay(
@@ -590,8 +593,9 @@ class TextSelectionOverlay {
   }
 
   Widget _buildToolbar(BuildContext context) {
-    if (selectionControls == null)
+    if (selectionControls == null) {
       return Container();
+    }
 
     // Find the horizontal midpoint, just above the selected text.
     final List<TextSelectionPoint> endpoints =
@@ -772,15 +776,17 @@ class _TextSelectionHandleOverlayState
         break;
     }
 
-    if (newSelection.baseOffset >= newSelection.extentOffset)
-      return; // don't allow order swapping.
+    if (newSelection.baseOffset >= newSelection.extentOffset) {
+      return;
+    } // don't allow order swapping.
 
     widget.onSelectionHandleChanged(newSelection);
   }
 
   void _handleTap() {
-    if (widget.onSelectionHandleTapped != null)
+    if (widget.onSelectionHandleTapped != null) {
       widget.onSelectionHandleTapped!();
+    }
   }
 
   @override
@@ -875,8 +881,9 @@ class _TextSelectionHandleOverlayState
     TextSelectionHandleType ltrType,
     TextSelectionHandleType rtlType,
   ) {
-    if (widget.selection.isCollapsed)
+    if (widget.selection.isCollapsed) {
       return TextSelectionHandleType.collapsed;
+    }
 
     assert(textDirection != null);
     switch (textDirection) {
@@ -1043,8 +1050,9 @@ class TextSelectionGestureDetectorBuilder {
       from: details.globalPosition,
       cause: SelectionChangedCause.forcePress,
     );
-    if (shouldShowSelectionToolbar)
+    if (shouldShowSelectionToolbar) {
       editableText.showToolbar();
+    }
   }
 
   /// Handler for [TextSelectionGestureDetector.onSingleTapUp].
@@ -1121,8 +1129,9 @@ class TextSelectionGestureDetectorBuilder {
   ///    callback.
   @protected
   void onSingleLongTapEnd(LongPressEndDetails details) {
-    if (shouldShowSelectionToolbar)
+    if (shouldShowSelectionToolbar) {
       editableText.showToolbar();
+    }
   }
 
   /// Handler for [TextSelectionGestureDetector.onSecondaryTap].
@@ -1167,8 +1176,9 @@ class TextSelectionGestureDetectorBuilder {
   void onDoubleTapDown(TapDownDetails details) {
     if (delegate.selectionEnabled) {
       renderEditable.selectWord(cause: SelectionChangedCause.tap);
-      if (shouldShowSelectionToolbar)
+      if (shouldShowSelectionToolbar) {
         editableText.showToolbar();
+      }
     }
   }
 
@@ -1182,8 +1192,9 @@ class TextSelectionGestureDetectorBuilder {
   ///    this callback.
   @protected
   void onDragSelectionStart(DragStartDetails details) {
-    if (!delegate.selectionEnabled)
+    if (!delegate.selectionEnabled) {
       return;
+    }
     final PointerDeviceKind? kind = details.kind;
     _shouldShowSelectionToolbar = kind == null
       || kind == PointerDeviceKind.touch
@@ -1206,8 +1217,9 @@ class TextSelectionGestureDetectorBuilder {
   ///    this callback./lib/src/material/text_field.dart
   @protected
   void onDragSelectionUpdate(DragStartDetails startDetails, DragUpdateDetails updateDetails) {
-    if (!delegate.selectionEnabled)
+    if (!delegate.selectionEnabled) {
       return;
+    }
     renderEditable.selectPositionAt(
       from: startDetails.globalPosition,
       to: updateDetails.globalPosition,
@@ -1473,13 +1485,15 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   void _forcePressStarted(ForcePressDetails details) {
     _doubleTapTimer?.cancel();
     _doubleTapTimer = null;
-    if (widget.onForcePressStart != null)
+    if (widget.onForcePressStart != null) {
       widget.onForcePressStart!(details);
+    }
   }
 
   void _forcePressEnded(ForcePressDetails details) {
-    if (widget.onForcePressEnd != null)
+    if (widget.onForcePressEnd != null) {
       widget.onForcePressEnd!(details);
+    }
   }
 
   void _handleLongPressStart(LongPressStartDetails details) {

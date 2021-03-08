@@ -285,8 +285,9 @@ class SlideTransition extends AnimatedWidget {
   @override
   Widget build(BuildContext context) {
     Offset offset = position.value;
-    if (textDirection == TextDirection.rtl)
+    if (textDirection == TextDirection.rtl) {
       offset = Offset(-offset.dx, offset.dy);
+    }
     return FractionalTranslation(
       translation: offset,
       transformHitTests: transformHitTests,
@@ -600,10 +601,11 @@ class SizeTransition extends AnimatedWidget {
   @override
   Widget build(BuildContext context) {
     final AlignmentDirectional alignment;
-    if (axis == Axis.vertical)
+    if (axis == Axis.vertical) {
       alignment = AlignmentDirectional(-1.0, axisAlignment);
-    else
+    } else {
       alignment = AlignmentDirectional(axisAlignment, -1.0);
+    }
     return ClipRect(
       child: Align(
         alignment: alignment,

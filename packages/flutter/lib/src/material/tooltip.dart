@@ -438,8 +438,9 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   void dispose() {
     GestureBinding.instance!.pointerRouter.removeGlobalRoute(_handlePointerEvent);
     RendererBinding.instance!.mouseTracker.removeListener(_handleMouseTrackerChange);
-    if (_entry != null)
+    if (_entry != null) {
       _removeEntry();
+    }
     _controller.dispose();
     super.dispose();
   }
@@ -447,8 +448,9 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   void _handleLongPress() {
     _longPressActivated = true;
     final bool tooltipCreated = ensureTooltipVisible();
-    if (tooltipCreated)
+    if (tooltipCreated) {
       Feedback.forLongPress(context);
+    }
   }
 
   @override

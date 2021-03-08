@@ -86,8 +86,9 @@ class Counter {
 class Trigger {
   VoidCallback? callback;
   void fire() {
-    if (callback != null)
+    if (callback != null) {
       callback!();
+    }
   }
 }
 

@@ -248,8 +248,9 @@ TaskFunction createBasicMaterialCompileTest() {
       await flutter('create', options: <String>['--template=app', sampleAppName]);
     });
 
-    if (!sampleDir.existsSync())
+    if (!sampleDir.existsSync()) {
       throw 'Failed to create default Flutter app in ${sampleDir.path}';
+    }
 
     return CompileTest(sampleDir.path).run();
   };
@@ -570,8 +571,9 @@ class StartupTest {
 
       final Map<String, dynamic> averageResults = _average(results, iterations);
 
-      if (!reportMetrics)
+      if (!reportMetrics) {
         return TaskResult.success(averageResults);
+      }
 
       return TaskResult.success(averageResults, benchmarkScoreKeys: <String>[
         'timeToFirstFrameMicros',
@@ -1048,8 +1050,9 @@ class CompileTest {
         // IPAs are created manually, https://flutter.dev/ios-release/
         await exec('tar', <String>['-zcf', 'build/app.ipa', appPath]);
         releaseSizeInBytes = await file('$cwd/build/app.ipa').length();
-        if (reportPackageContentSizes)
+        if (reportPackageContentSizes) {
           metrics.addAll(await getSizesFromIosApp(appPath));
+        }
         break;
       case DeviceOperatingSystem.android:
       case DeviceOperatingSystem.androidArm:
@@ -1063,8 +1066,9 @@ class CompileTest {
         final String apkPath = '$cwd/build/app/outputs/flutter-apk/app-release.apk';
         final File apk = file(apkPath);
         releaseSizeInBytes = apk.lengthSync();
-        if (reportPackageContentSizes)
+        if (reportPackageContentSizes) {
           metrics.addAll(await getSizesFromApk(apkPath));
+        }
         break;
       case DeviceOperatingSystem.androidArm64:
         options.insert(0, 'apk');
@@ -1077,8 +1081,9 @@ class CompileTest {
         final String apkPath = '$cwd/build/app/outputs/flutter-apk/app-release.apk';
         final File apk = file(apkPath);
         releaseSizeInBytes = apk.lengthSync();
-        if (reportPackageContentSizes)
+        if (reportPackageContentSizes) {
           metrics.addAll(await getSizesFromApk(apkPath));
+        }
         break;
       case DeviceOperatingSystem.fuchsia:
         throw Exception('Unsupported option for Fuchsia devices');
@@ -1211,8 +1216,9 @@ class MemoryTest {
 
       final StreamSubscription<String> adb = device.logcat.listen(
         (String data) {
-          if (data.contains('==== MEMORY BENCHMARK ==== $_nextMessage ===='))
+          if (data.contains('==== MEMORY BENCHMARK ==== $_nextMessage ====')) {
             _receivedNextMessage.complete();
+          }
         },
       );
 
@@ -1489,8 +1495,9 @@ class ReportedDurationTest {
 
       final StreamSubscription<String> adb = device.logcat.listen(
         (String data) {
-          if (durationPattern.hasMatch(data))
+          if (durationPattern.hasMatch(data)) {
             durationCompleter.complete(int.parse(durationPattern.firstMatch(data).group(1)));
+          }
         },
       );
       print('launching $project$test on device...');

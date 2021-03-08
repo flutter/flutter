@@ -783,10 +783,12 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   static final Animatable<double> _flexTween = Tween<double>(begin: 1.0, end: 1.5);
 
   void _resetState() {
-    for (final AnimationController controller in _controllers)
+    for (final AnimationController controller in _controllers) {
       controller.dispose();
-    for (final _Circle circle in _circles)
+    }
+    for (final _Circle circle in _circles) {
       circle.dispose();
+    }
     _circles.clear();
 
     _controllers = List<AnimationController>.generate(widget.items.length, (int index) {
@@ -846,10 +848,12 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
 
   @override
   void dispose() {
-    for (final AnimationController controller in _controllers)
+    for (final AnimationController controller in _controllers) {
       controller.dispose();
-    for (final _Circle circle in _circles)
+    }
+    for (final _Circle circle in _circles) {
       circle.dispose();
+    }
     super.dispose();
   }
 
@@ -905,8 +909,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
       _controllers[oldWidget.currentIndex].reverse();
       _controllers[widget.currentIndex].forward();
     } else {
-      if (_backgroundColor != widget.items[widget.currentIndex].backgroundColor)
+      if (_backgroundColor != widget.items[widget.currentIndex].backgroundColor) {
         _backgroundColor = widget.items[widget.currentIndex].backgroundColor;
+      }
     }
   }
 
@@ -985,8 +990,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         unselectedLabelStyle: effectiveUnselectedLabelStyle,
         enableFeedback: widget.enableFeedback ?? bottomTheme.enableFeedback ?? true,
         onTap: () {
-          if (widget.onTap != null)
+          if (widget.onTap != null) {
             widget.onTap!(i);
+          }
         },
         colorTween: colorTween,
         flex: _evaluateFlex(_animations[i]),
@@ -1128,15 +1134,20 @@ class _RadialPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RadialPainter oldPainter) {
-    if (textDirection != oldPainter.textDirection)
+    if (textDirection != oldPainter.textDirection) {
       return true;
-    if (circles == oldPainter.circles)
+    }
+    if (circles == oldPainter.circles) {
       return false;
-    if (circles.length != oldPainter.circles.length)
+    }
+    if (circles.length != oldPainter.circles.length) {
       return true;
-    for (int i = 0; i < circles.length; i += 1)
-      if (circles[i] != oldPainter.circles[i])
+    }
+    for (int i = 0; i < circles.length; i += 1) {
+      if (circles[i] != oldPainter.circles[i]) {
         return true;
+      }
+    }
     return false;
   }
 

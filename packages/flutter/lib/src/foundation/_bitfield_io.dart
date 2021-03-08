@@ -37,10 +37,11 @@ class BitField<T extends dynamic> implements bitfield.BitField<T> {
   void operator []=(T index, bool value) {
     final int _index = index.index as int;
     assert(_index < _length);
-    if (value)
+    if (value) {
       _bits = _bits | (1 << _index);
-    else
+    } else {
       _bits = _bits & ~(1 << _index);
+    }
   }
 
   @override

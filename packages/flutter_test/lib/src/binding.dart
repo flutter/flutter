@@ -443,8 +443,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   Future<void> setSurfaceSize(Size? size) {
     return TestAsyncUtils.guard<void>(() async {
       assert(inTest);
-      if (_surfaceSize == size)
+      if (_surfaceSize == size) {
         return;
+      }
       _surfaceSize = size;
       handleMetricsChanged();
     });
@@ -623,8 +624,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         reportTestException(_pendingExceptionDetails!, testDescription);
         _pendingExceptionDetails = null;
       }
-      if (!completer.isCompleted)
+      if (!completer.isCompleted) {
         completer.complete();
+      }
     };
   }
 
@@ -675,10 +677,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // information to stack traces, in this case the Trace and Chain classes
       // can be present. Because these StackTrace implementations do not follow
       // the format the framework expects, we covert them to a vm trace here.
-      if (stack is stack_trace.Trace)
+      if (stack is stack_trace.Trace) {
         return stack.vmTrace;
-      if (stack is stack_trace.Chain)
+      }
+      if (stack is stack_trace.Chain) {
         return stack.toTrace().vmTrace;
+      }
       return stack;
     };
     final Completer<void> testCompleter = Completer<void>();
@@ -748,13 +752,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
           return FlutterError.defaultStackFilter(frames.skip(stackLinesToOmit));
         },
         informationCollector: () sync* {
-          if (stackLinesToOmit > 0)
+          if (stackLinesToOmit > 0) {
             yield* omittedFrames;
+          }
           if (showAppDumpInErrors) {
             yield DiagnosticsProperty<DiagnosticsNode>('At the time of the failure, the widget tree looked as follows', treeDump, linePrefix: '# ', style: DiagnosticsTreeStyle.flat);
           }
-          if (description.isNotEmpty)
+          if (description.isNotEmpty) {
             yield DiagnosticsProperty<String>('The test description was', description, style: DiagnosticsTreeStyle.errorProperty);
+          }
         },
       ));
       assert(_parentZone != null);
@@ -960,8 +966,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     return TestAsyncUtils.guard<void>(() {
       assert(inTest);
       assert(_clock != null);
-      if (duration != null)
+      if (duration != null) {
         _currentFakeAsync!.elapse(duration);
+      }
       _phase = newPhase;
       if (hasScheduledFrame) {
         addTime(const Duration(milliseconds: 500));
@@ -984,8 +991,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }) {
     assert(additionalTime != null);
     assert(() {
-      if (_pendingAsyncTasks == null)
+      if (_pendingAsyncTasks == null) {
         return true;
+      }
       throw test_package.TestFailure(
           'Reentrant call to runAsync() denied.\n'
           'runAsync() was called, then before its future completed, it '
@@ -1152,8 +1160,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   void addTime(Duration duration) {
-    if (_timeout != null)
+    if (_timeout != null) {
       _timeout = _timeout! + duration;
+    }
   }
 
   @override
@@ -1434,15 +1443,17 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   void scheduleFrame() {
-    if (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark)
-      return; // In benchmark mode, don't actually schedule any engine frames.
+    if (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark) {
+      return;
+    } // In benchmark mode, don't actually schedule any engine frames.
     super.scheduleFrame();
   }
 
   @override
   void scheduleForcedFrame() {
-    if (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark)
-      return; // In benchmark mode, don't actually schedule any engine frames.
+    if (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark) {
+      return;
+    } // In benchmark mode, don't actually schedule any engine frames.
     super.scheduleForcedFrame();
   }
 
@@ -1466,8 +1477,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void handleDrawFrame() {
     assert(_doDrawThisFrame != null);
-    if (_doDrawThisFrame!)
+    if (_doDrawThisFrame!) {
       super.handleDrawFrame();
+    }
     _doDrawThisFrame = null;
     _viewNeedsPaint = false;
     if (_expectingFrame) { // set during pump
@@ -1522,8 +1534,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         final _LiveTestPointerRecord? record = renderView._pointers[event.pointer];
         if (record != null) {
           record.position = event.position;
-          if (!event.down)
+          if (!event.down) {
             record.decay = _kPointerDecay;
+          }
           _handleViewNeedsPaint();
         } else if (event.down) {
           renderView._pointers[event.pointer] = _LiveTestPointerRecord(
@@ -1535,8 +1548,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         super.handlePointerEvent(event, source: TestBindingEventSource.test);
         break;
       case TestBindingEventSource.device:
-        if (deviceEventDispatcher != null)
+        if (deviceEventDispatcher != null) {
           super.handlePointerEvent(event, source: TestBindingEventSource.device);
+        }
         break;
     }
   }
@@ -1586,8 +1600,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     Duration additionalTime = const Duration(milliseconds: 1000),
   }) async {
     assert(() {
-      if (!_runningAsyncTasks)
+      if (!_runningAsyncTasks) {
         return true;
+      }
       throw test_package.TestFailure(
           'Reentrant call to runAsync() denied.\n'
           'runAsync() was called, then before its future completed, it '
@@ -1815,8 +1830,9 @@ class _LiveTestRenderView extends RenderView {
         final _LiveTestPointerRecord record = _pointers[pointer]!;
         paint.color = record.color.withOpacity(record.decay < 0 ? (record.decay / (_kPointerDecay - 1)) : 1.0);
         canvas.drawPath(path.shift(record.position), paint);
-        if (record.decay < 0)
+        if (record.decay < 0) {
           dirty = true;
+        }
         record.decay += 1;
       }
       _pointers
@@ -1824,8 +1840,9 @@ class _LiveTestRenderView extends RenderView {
         .where((int pointer) => _pointers[pointer]!.decay == 0)
         .toList()
         .forEach(_pointers.remove);
-      if (dirty && onNeedPaint != null)
+      if (dirty && onNeedPaint != null) {
         scheduleMicrotask(onNeedPaint);
+      }
     }
     _label?.paint(context.canvas, offset - const Offset(0.0, 10.0));
   }

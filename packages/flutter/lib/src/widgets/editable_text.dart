@@ -238,8 +238,9 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// If the new selection if of non-zero length, or is outside the composing
   /// range, the composing composing range is cleared.
   set selection(TextSelection newSelection) {
-    if (!isSelectionWithinTextBounds(newSelection))
+    if (!isSelectionWithinTextBounds(newSelection)) {
       throw FlutterError('invalid text selection: $newSelection');
+    }
     final TextRange newComposing =
         newSelection.isCollapsed && _isSelectionWithinComposingRange(newSelection)
             ? value.composing
@@ -1385,8 +1386,9 @@ class EditableText extends StatefulWidget {
       }
     }
 
-    if (returnValue != null || maxLines != 1)
+    if (returnValue != null || maxLines != 1) {
       return returnValue ?? TextInputType.multiline;
+    }
 
     const Map<String, TextInputType> inferKeyboardType = <String, TextInputType> {
       AutofillHints.addressCity : TextInputType.streetAddress,
@@ -1761,8 +1763,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         // If this is a multiline EditableText, do nothing for a "newline"
         // action; The newline is already inserted. Otherwise, finalize
         // editing.
-        if (!_isMultiline)
+        if (!_isMultiline) {
           _finalizeEditing(action, shouldUnfocus: true);
+        }
         break;
       case TextInputAction.done:
       case TextInputAction.go:
@@ -1849,9 +1852,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final Offset finalPosition = renderEditable.getLocalRectForCaret(_lastTextPosition!).centerLeft - _floatingCursorOffset;
     if (_floatingCursorResetController.isCompleted) {
       renderEditable.setFloatingCursor(FloatingCursorDragState.End, finalPosition, _lastTextPosition!);
-      if (_lastTextPosition!.offset != renderEditable.selection!.baseOffset)
-        // The cause is technically the force cursor, but the cause is listed as tap as the desired functionality is the same.
+      if (_lastTextPosition!.offset != renderEditable.selection!.baseOffset) {
         _handleSelectionChanged(TextSelection.collapsed(offset: _lastTextPosition!.offset), SelectionChangedCause.forcePress);
+      }
       _startCaretRect = null;
       _lastTextPosition = null;
       _pointOffsetOrigin = null;
@@ -1948,11 +1951,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _updateRemoteEditingValueIfNeeded() {
-    if (_batchEditDepth > 0 || !_hasInputConnection)
+    if (_batchEditDepth > 0 || !_hasInputConnection) {
       return;
+    }
     final TextEditingValue localValue = _value;
-    if (localValue == _lastKnownRemoteTextEditingValue)
+    if (localValue == _lastKnownRemoteTextEditingValue) {
       return;
+    }
     _textInputConnection!.setEditingState(localValue);
     _lastKnownRemoteTextEditingValue = localValue;
   }
@@ -1975,8 +1980,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // `renderEditable.preferredLineHeight`, before the target scroll offset is
   // calculated.
   RevealedOffset _getOffsetToRevealCaret(Rect rect) {
-    if (!_scrollController!.position.allowImplicitScrolling)
+    if (!_scrollController!.position.allowImplicitScrolling) {
       return RevealedOffset(offset: _scrollController!.offset, rect: rect);
+    }
 
     final Size editableSize = renderEditable.size;
     final double additionalOffset;
@@ -2121,8 +2127,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // We return early if the selection is not valid. This can happen when the
     // text of [EditableText] is updated at the same time as the selection is
     // changed by a gesture event.
-    if (!widget.controller.isSelectionWithinTextBounds(selection))
+    if (!widget.controller.isSelectionWithinTextBounds(selection)) {
       return;
+    }
 
     widget.controller.selection = selection;
 
@@ -2276,8 +2283,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // TODO(LongCatIsLooong): The if statement here is for retaining the
       // previous behavior. The input formatter logic will be updated in an
       // upcoming PR.
-      if (widget.inputFormatters?.isNotEmpty ?? false)
+      if (widget.inputFormatters?.isNotEmpty ?? false) {
         value = _whitespaceFormatter.formatEditUpdate(_value, value);
+      }
     }
 
     // Put all optional user callback invocations in a batch edit to prevent
@@ -2365,8 +2373,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void _startCursorTimer() {
     _targetCursorVisibility = true;
     _cursorBlinkOpacityController.value = 1.0;
-    if (EditableText.debugDeterministicCursor)
+    if (EditableText.debugDeterministicCursor) {
       return;
+    }
     if (widget.cursorOpacityAnimates) {
       _cursorTimer = Timer.periodic(_kCursorBlinkWaitForStart, _cursorWaitForStart);
     } else {
@@ -2379,10 +2388,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _cursorTimer = null;
     _targetCursorVisibility = false;
     _cursorBlinkOpacityController.value = 0.0;
-    if (EditableText.debugDeterministicCursor)
+    if (EditableText.debugDeterministicCursor) {
       return;
-    if (resetCharTicks)
+    }
+    if (resetCharTicks) {
       _obscureShowCharTicksPending = 0;
+    }
     if (widget.cursorOpacityAnimates) {
       _cursorBlinkOpacityController.stop();
       _cursorBlinkOpacityController.value = 0.0;
@@ -2390,10 +2401,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _startOrStopCursorTimerIfNeeded() {
-    if (_cursorTimer == null && _hasFocus && _value.selection.isCollapsed)
+    if (_cursorTimer == null && _hasFocus && _value.selection.isCollapsed) {
       _startCursorTimer();
-    else if (_cursorTimer != null && (!_hasFocus || !_value.selection.isCollapsed))
+    } else if (_cursorTimer != null && (!_hasFocus || !_value.selection.isCollapsed)) {
       _stopCursorTimer();
+    }
   }
 
   void _didChangeTextEditingValue() {
@@ -2696,8 +2708,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           !kIsWeb) {
         final int? o =
             _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
-        if (o != null && o >= 0 && o < text.length)
+        if (o != null && o >= 0 && o < text.length) {
           text = text.replaceRange(o, o + 1, _value.text.substring(o, o + 1));
+        }
       }
       return TextSpan(style: widget.style, text: text);
     }

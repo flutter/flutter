@@ -436,8 +436,9 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
     return DelayedMultiDragGestureRecognizer(delay: delay)
       ..onStart = (Offset position) {
         final Drag? result = onStart(position);
-        if (result != null && hapticFeedbackOnStart)
+        if (result != null && hapticFeedbackOnStart) {
           HapticFeedback.selectionClick();
+        }
         return result;
       };
   }
@@ -469,21 +470,24 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
   int _activeCount = 0;
 
   void _disposeRecognizerIfInactive() {
-    if (_activeCount > 0)
+    if (_activeCount > 0) {
       return;
+    }
     _recognizer!.dispose();
     _recognizer = null;
   }
 
   void _routePointer(PointerDownEvent event) {
-    if (widget.maxSimultaneousDrags != null && _activeCount >= widget.maxSimultaneousDrags!)
+    if (widget.maxSimultaneousDrags != null && _activeCount >= widget.maxSimultaneousDrags!) {
       return;
+    }
     _recognizer!.addPointer(event);
   }
 
   _DragAvatar<T>? _startDrag(Offset position) {
-    if (widget.maxSimultaneousDrags != null && _activeCount >= widget.maxSimultaneousDrags!)
+    if (widget.maxSimultaneousDrags != null && _activeCount >= widget.maxSimultaneousDrags!) {
       return null;
+    }
     final Offset dragStartPoint;
     switch (widget.dragAnchor) {
       case DragAnchor.child:
@@ -527,14 +531,17 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
               offset: offset,
           ));
         }
-        if (wasAccepted && widget.onDragCompleted != null)
+        if (wasAccepted && widget.onDragCompleted != null) {
           widget.onDragCompleted!();
-        if (!wasAccepted && widget.onDraggableCanceled != null)
+        }
+        if (!wasAccepted && widget.onDraggableCanceled != null) {
           widget.onDraggableCanceled!(velocity, offset);
+        }
       },
     );
-    if (widget.onDragStarted != null)
+    if (widget.onDragStarted != null) {
       widget.onDragStarted!();
+    }
     return avatar;
   }
 
@@ -682,8 +689,9 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
   // because dart doubles and ints are backed by the same kind of object on web.
   // JavaScript does not support integers.
   bool isExpectedDataType(Object? data, Type type) {
-    if (kIsWeb && ((type == int && T == double) || (type == double && T == int)))
+    if (kIsWeb && ((type == int && T == double) || (type == double && T == int))) {
       return false;
+    }
     return data is T?;
   }
 
@@ -705,34 +713,41 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
 
   void didLeave(_DragAvatar<Object> avatar) {
     assert(_candidateAvatars.contains(avatar) || _rejectedAvatars.contains(avatar));
-    if (!mounted)
+    if (!mounted) {
       return;
+    }
     setState(() {
       _candidateAvatars.remove(avatar);
       _rejectedAvatars.remove(avatar);
     });
-    if (widget.onLeave != null)
+    if (widget.onLeave != null) {
       widget.onLeave!(avatar.data as T?);
+    }
   }
 
   void didDrop(_DragAvatar<Object> avatar) {
     assert(_candidateAvatars.contains(avatar));
-    if (!mounted)
+    if (!mounted) {
       return;
+    }
     setState(() {
       _candidateAvatars.remove(avatar);
     });
-    if (widget.onAccept != null)
+    if (widget.onAccept != null) {
       widget.onAccept!(avatar.data! as T);
-    if (widget.onAcceptWithDetails != null)
+    }
+    if (widget.onAcceptWithDetails != null) {
       widget.onAcceptWithDetails!(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
+    }
   }
 
   void didMove(_DragAvatar<Object> avatar) {
-    if (!mounted)
+    if (!mounted) {
       return;
-    if (widget.onMove != null)
+    }
+    if (widget.onMove != null) {
       widget.onMove!(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
+    }
   }
 
   @override
@@ -847,8 +862,9 @@ class _DragAvatar<T extends Object> extends Drag {
     // Enter new targets.
     final _DragTargetState<Object>? newTarget = targets.cast<_DragTargetState<Object>?>().firstWhere(
       (_DragTargetState<Object>? target) {
-        if (target == null)
+        if (target == null) {
           return false;
+        }
         _enteredTargets.add(target);
         return target.didEnter(this);
       },
@@ -870,15 +886,17 @@ class _DragAvatar<T extends Object> extends Drag {
       final HitTestTarget target = entry.target;
       if (target is RenderMetaData) {
         final dynamic metaData = target.metaData;
-        if (metaData is _DragTargetState && metaData.isExpectedDataType(data, T))
+        if (metaData is _DragTargetState && metaData.isExpectedDataType(data, T)) {
           yield metaData;
+        }
       }
     }
   }
 
   void _leaveAllEntered() {
-    for (int i = 0; i < _enteredTargets.length; i += 1)
+    for (int i = 0; i < _enteredTargets.length; i += 1) {
       _enteredTargets[i].didLeave(this);
+    }
     _enteredTargets.clear();
   }
 
@@ -894,8 +912,9 @@ class _DragAvatar<T extends Object> extends Drag {
     _entry!.remove();
     _entry = null;
     // TODO(ianh): consider passing _entry as well so the client can perform an animation.
-    if (onDragEnd != null)
+    if (onDragEnd != null) {
       onDragEnd!(velocity ?? Velocity.zero, _lastOffset!, wasAccepted);
+    }
   }
 
   Widget _build(BuildContext context) {

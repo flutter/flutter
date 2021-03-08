@@ -207,8 +207,9 @@ class SliverGridRegularTileLayout extends SliverGridLayout {
   }
 
   double _getOffsetFromStartInCrossAxis(double crossAxisStart) {
-    if (reverseCrossAxis)
+    if (reverseCrossAxis) {
       return crossAxisCount * crossAxisStride - crossAxisStart - childCrossAxisExtent - (crossAxisStride - childCrossAxisExtent);
+    }
     return crossAxisStart;
   }
 
@@ -557,8 +558,9 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
 
   @override
   void setupParentData(RenderObject child) {
-    if (child.parentData is! SliverGridParentData)
+    if (child.parentData is! SliverGridParentData) {
       child.parentData = SliverGridParentData();
+    }
   }
 
   /// The delegate that controls the size and position of the children.
@@ -566,11 +568,13 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
   SliverGridDelegate _gridDelegate;
   set gridDelegate(SliverGridDelegate value) {
     assert(value != null);
-    if (_gridDelegate == value)
+    if (_gridDelegate == value) {
       return;
+    }
     if (value.runtimeType != _gridDelegate.runtimeType ||
-        value.shouldRelayout(_gridDelegate))
+        value.shouldRelayout(_gridDelegate)) {
       markNeedsLayout();
+    }
     _gridDelegate = value;
   }
 
@@ -708,8 +712,9 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
 
     // We may have started the layout while scrolled to the end, which
     // would not expose a new child.
-    if (estimatedTotalExtent == trailingScrollOffset)
+    if (estimatedTotalExtent == trailingScrollOffset) {
       childManager.setDidUnderflow(true);
+    }
     childManager.didFinishLayout();
   }
 }

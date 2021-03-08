@@ -432,8 +432,9 @@ class _CupertinoAppState extends State<CupertinoApp> {
   // localizationsDelegate parameter can be used to override
   // _CupertinoLocalizationsDelegate.
   Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates sync* {
-    if (widget.localizationsDelegates != null)
+    if (widget.localizationsDelegates != null) {
       yield* widget.localizationsDelegates!;
+    }
     yield DefaultCupertinoLocalizations.delegate;
   }
 

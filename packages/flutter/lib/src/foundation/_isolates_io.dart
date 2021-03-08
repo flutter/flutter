@@ -51,8 +51,9 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
   });
   resultPort.listen((dynamic resultData) {
     assert(resultData == null || resultData is R);
-    if (!result.isCompleted)
+    if (!result.isCompleted) {
       result.complete(resultData as R);
+    }
   });
   await result.future;
   Timeline.startSync('$debugLabel: end', flow: Flow.end(flow.id));

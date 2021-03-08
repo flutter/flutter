@@ -1944,8 +1944,9 @@ void main() {
 
     late Rect activeTrackRect;
     expect(renderObject, paints..something((Symbol method, List<dynamic> arguments) {
-      if (method != #drawRect)
+      if (method != #drawRect) {
         return false;
+      }
       activeTrackRect = arguments[0] as Rect;
       return true;
     }));

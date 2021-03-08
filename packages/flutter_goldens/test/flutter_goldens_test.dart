@@ -616,8 +616,9 @@ void main() {
         );
         bool shouldThrow = true;
         result.then((_) {
-          if (shouldThrow)
+          if (shouldThrow) {
             fail('Compare completed before validation completed!');
+          }
         });
         await Future<void>.value();
         shouldThrow = false;

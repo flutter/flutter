@@ -95,8 +95,9 @@ Future<void> main(List<String> rawArgs) async {
   buffer.writeln('const Map<String, dynamic> dateSymbols = <String, dynamic> {');
   symbolFiles.forEach((String locale, File data) {
     currentLocale = locale;
-    if (supportedLocales.contains(locale))
+    if (supportedLocales.contains(locale)) {
       buffer.writeln(_jsonToMapEntry(locale, json.decode(data.readAsStringSync())));
+    }
   });
   currentLocale = null;
   buffer.writeln('};');
@@ -137,11 +138,13 @@ String _jsonToMapEntry(String key, dynamic value) {
 }
 
 String _jsonToMap(dynamic json) {
-  if (json == null || json is num || json is bool)
+  if (json == null || json is num || json is bool) {
     return '$json';
+  }
 
-  if (json is String)
+  if (json is String) {
     return generateEncodedString(currentLocale, json);
+  }
 
   if (json is Iterable) {
     final StringBuffer buffer = StringBuffer('<dynamic>[');

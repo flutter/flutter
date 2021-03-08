@@ -38,15 +38,17 @@ class Evaluation {
   /// The [reason] will be concatenated with a newline, and [passed] will be
   /// combined with an `&&` operator.
   Evaluation operator +(Evaluation? other) {
-    if (other == null)
+    if (other == null) {
       return this;
+    }
     final StringBuffer buffer = StringBuffer();
     if (reason != null) {
       buffer.write(reason);
       buffer.write(' ');
     }
-    if (other.reason != null)
+    if (other.reason != null) {
       buffer.write(other.reason);
+    }
     return Evaluation._(passed && other.passed, buffer.isEmpty ? null : buffer.toString());
   }
 }
@@ -87,19 +89,22 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
         result += traverse(child);
         return true;
       });
-      if (node.isMergedIntoParent)
+      if (node.isMergedIntoParent) {
         return result;
+      }
       final SemanticsData data = node.getSemanticsData();
       // Skip node if it has no actions, or is marked as hidden.
       if ((!data.hasAction(ui.SemanticsAction.longPress)
         && !data.hasAction(ui.SemanticsAction.tap))
-        || data.hasFlag(ui.SemanticsFlag.isHidden))
+        || data.hasFlag(ui.SemanticsFlag.isHidden)) {
         return result;
+      }
       Rect paintBounds = node.rect;
       SemanticsNode? current = node;
       while (current != null) {
-        if (current.transform != null)
+        if (current.transform != null) {
           paintBounds = MatrixUtils.transformRect(current.transform!, paintBounds);
+        }
         current = current.parent;
       }
       // skip node if it is touching the edge of the screen, since it might
@@ -108,8 +113,9 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
       if (paintBounds.left <= delta
         || paintBounds.top <= delta
         || (paintBounds.bottom - tester.binding.window.physicalSize.height).abs() <= delta
-        || (paintBounds.right - tester.binding.window.physicalSize.width).abs() <= delta)
+        || (paintBounds.right - tester.binding.window.physicalSize.width).abs() <= delta) {
         return result;
+      }
       // shrink by device pixel ratio.
       final Size candidateSize = paintBounds.size / tester.binding.window.devicePixelRatio;
       if (candidateSize.width < size.width - delta || candidateSize.height < size.height - delta) {
@@ -144,12 +150,14 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
         result += traverse(child);
         return true;
       });
-      if (node.isMergedIntoParent || node.isInvisible || node.hasFlag(ui.SemanticsFlag.isHidden))
+      if (node.isMergedIntoParent || node.isInvisible || node.hasFlag(ui.SemanticsFlag.isHidden)) {
         return result;
+      }
       final SemanticsData data = node.getSemanticsData();
       // Skip node if it has no actions, or is marked as hidden.
-      if (!data.hasAction(ui.SemanticsAction.longPress) && !data.hasAction(ui.SemanticsAction.tap))
+      if (!data.hasAction(ui.SemanticsAction.longPress) && !data.hasAction(ui.SemanticsAction.tap)) {
         return result;
+      }
       if (data.label == null || data.label.isEmpty) {
         result += Evaluation.fail(
           '$node: expected tappable node to have semantic label, but none was found\n',
@@ -209,8 +217,9 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 
     Future<Evaluation> evaluateNode(SemanticsNode node) async {
       Evaluation result = const Evaluation.pass();
-      if (node.isInvisible || node.isMergedIntoParent || node.hasFlag(ui.SemanticsFlag.isHidden))
+      if (node.isInvisible || node.isMergedIntoParent || node.hasFlag(ui.SemanticsFlag.isHidden)) {
         return result;
+      }
       final SemanticsData data = node.getSemanticsData();
       final List<SemanticsNode> children = <SemanticsNode>[];
       node.visitChildren((SemanticsNode child) {
@@ -298,10 +307,12 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 
   // Skip routes which might have labels, and nodes without any text.
   bool _shouldSkipNode(SemanticsData data) {
-    if (data.hasFlag(ui.SemanticsFlag.scopesRoute))
+    if (data.hasFlag(ui.SemanticsFlag.scopesRoute)) {
       return true;
-    if (data.label.trim().isEmpty && data.value.trim().isEmpty)
+    }
+    if (data.label.trim().isEmpty && data.value.trim().isEmpty) {
       return true;
+    }
     return false;
   }
 
@@ -535,18 +546,21 @@ class _ContrastReport {
     double r = color.red / 255.0;
     double g = color.green / 255.0;
     double b = color.blue / 255.0;
-    if (r <= 0.03928)
+    if (r <= 0.03928) {
       r /= 12.92;
-    else
+    } else {
       r = math.pow((r + 0.055)/ 1.055, 2.4).toDouble();
-    if (g <= 0.03928)
+    }
+    if (g <= 0.03928) {
       g /= 12.92;
-    else
+    } else {
       g = math.pow((g + 0.055)/ 1.055, 2.4).toDouble();
-    if (b <= 0.03928)
+    }
+    if (b <= 0.03928) {
       b /= 12.92;
-    else
+    } else {
       b = math.pow((b + 0.055)/ 1.055, 2.4).toDouble();
+    }
     return 0.2126 * r + 0.7152 * g + 0.0722 * b;
   }
 }

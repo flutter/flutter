@@ -122,8 +122,9 @@ class TimeOfDay {
   @override
   String toString() {
     String _addLeadingZeroIfNeeded(int value) {
-      if (value < 10)
+      if (value < 10) {
         return '0$value';
+      }
       return value.toString();
     }
 

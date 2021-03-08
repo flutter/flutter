@@ -189,8 +189,9 @@ class ByValueKey extends SerializableFinder {
   ByValueKey(this.keyValue)
       : keyValueString = '$keyValue',
         keyValueType = '${keyValue.runtimeType}' {
-    if (!_supportedKeyValueTypes.contains(keyValue.runtimeType))
+    if (!_supportedKeyValueTypes.contains(keyValue.runtimeType)) {
       throw _createInvalidKeyValueTypeError('$keyValue.runtimeType');
+    }
   }
 
   /// The true value of the key.

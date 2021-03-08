@@ -16,8 +16,9 @@ void main() {
     });
 
     tearDownAll(() async {
-      if (driver != null)
+      if (driver != null) {
         driver.close();
+      }
     });
 
     test('measure', () async {

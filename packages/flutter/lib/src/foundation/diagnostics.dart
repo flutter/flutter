@@ -894,11 +894,13 @@ class _PrefixedStringBuilder {
     // This helper is called with increasing indexes.
     bool noWrap(int index) {
       while (true) {
-        if (currentChunk >= wrapRanges.length)
+        if (currentChunk >= wrapRanges.length) {
           return true;
+        }
 
-        if (index < wrapRanges[currentChunk + 1])
-          break; // Found nearest chunk.
+        if (index < wrapRanges[currentChunk + 1]) {
+          break;
+        } // Found nearest chunk.
         currentChunk+= 2;
       }
       return index < wrapRanges[currentChunk];
@@ -906,14 +908,16 @@ class _PrefixedStringBuilder {
     while (true) {
       switch (mode) {
         case _WordWrapParseMode.inSpace: // at start of break point (or start of line); can't break until next break
-          while ((index < message.length) && (message[index] == ' '))
+          while ((index < message.length) && (message[index] == ' ')) {
             index += 1;
+          }
           lastWordStart = index;
           mode = _WordWrapParseMode.inWord;
           break;
         case _WordWrapParseMode.inWord: // looking for a good break point. Treat all text
-          while ((index < message.length) && (message[index] != ' ' || noWrap(index)))
+          while ((index < message.length) && (message[index] != ' ' || noWrap(index))) {
             index += 1;
+          }
           mode = _WordWrapParseMode.atBreak;
           break;
         case _WordWrapParseMode.atBreak: // at start of break point
@@ -927,15 +931,17 @@ class _PrefixedStringBuilder {
             final String line = message.substring(start, lastWordEnd);
             yield line;
             addPrefix = true;
-            if (lastWordEnd >= message.length)
+            if (lastWordEnd >= message.length) {
               return;
+            }
             // just yielded a line
             if (lastWordEnd == index) {
               // we broke at current position
               // eat all the wrappable spaces, then set our start point
               // Even if some of the spaces are not wrappable that is ok.
-              while ((index < message.length) && (message[index] == ' '))
+              while ((index < message.length) && (message[index] == ' ')) {
                 index += 1;
+              }
               start = index;
               mode = _WordWrapParseMode.inWord;
             } else {
@@ -964,8 +970,9 @@ class _PrefixedStringBuilder {
   /// If [allowWrap] is true, the text may be wrapped to stay within the
   /// allow `wrapWidth`.
   void write(String s, {bool allowWrap = false}) {
-    if (s.isEmpty)
+    if (s.isEmpty) {
       return;
+    }
 
     final List<String> lines = s.split('\n');
     for (int i = 0; i < lines.length; i += 1) {
@@ -1003,8 +1010,9 @@ class _PrefixedStringBuilder {
   }) {
     line = '${_getCurrentPrefix(firstLine)}$line';
     _buffer.write(line.trimRight());
-    if (includeLineBreak)
+    if (includeLineBreak) {
       _buffer.write('\n');
+    }
     _numLines++;
   }
 
@@ -1015,8 +1023,9 @@ class _PrefixedStringBuilder {
   /// Write lines assuming the lines obey the specified prefixes. Ensures that
   /// a newline is added if one is not present.
   void writeRawLines(String lines) {
-    if (lines.isEmpty)
+    if (lines.isEmpty) {
       return;
+    }
 
     if (_currentLine.isNotEmpty) {
       _finalizeLine(true);
@@ -1024,8 +1033,9 @@ class _PrefixedStringBuilder {
     assert (_currentLine.isEmpty);
 
     _buffer.write(lines);
-    if (!lines.endsWith('\n'))
+    if (!lines.endsWith('\n')) {
       _buffer.write('\n');
+    }
     _numLines++;
     _updatePrefix();
   }
@@ -1047,8 +1057,9 @@ class _PrefixedStringBuilder {
   }
 
   String build() {
-    if (_currentLine.isNotEmpty)
+    if (_currentLine.isNotEmpty) {
       _finalizeLine(false);
+    }
 
     return _buffer.toString();
   }
@@ -1145,8 +1156,9 @@ class TextTreeRenderer {
     }
 
     final TextTreeConfiguration config = node.textTreeConfiguration!;
-    if (prefixOtherLines.isEmpty)
+    if (prefixOtherLines.isEmpty) {
       prefixOtherLines += config.prefixOtherLinesRootNode;
+    }
 
     if (node.style == DiagnosticsTreeStyle.truncateChildren) {
       // This style is different enough that it isn't worthwhile to reuse the
@@ -1161,8 +1173,9 @@ class TextTreeRenderer {
           if (lines < maxLines) {
             depth += 1;
             descendants.add('$prefixOtherLines${"  " * depth}$child');
-            if (depth < maxDepth)
+            if (depth < maxDepth) {
               visitor(child);
+            }
             depth -= 1;
           } else if (lines == maxLines) {
             descendants.add('$prefixOtherLines  ...(descendants list truncated after $lines lines)');
@@ -1202,15 +1215,17 @@ class TextTreeRenderer {
       name = name?.toUpperCase();
     }
     if (description == null || description.isEmpty) {
-      if (node.showName && name != null)
+      if (node.showName && name != null) {
         builder.write(name, allowWrap: wrapName);
+      }
     } else {
       bool includeName = false;
       if (name != null && name.isNotEmpty && node.showName) {
         includeName = true;
         builder.write(name, allowWrap: wrapName);
-        if (node.showSeparator)
+        if (node.showSeparator) {
           builder.write(config.afterName, allowWrap: wrapName);
+        }
 
         builder.write(
           config.isNameOnOwnLine || description.contains('\n') ? '\n' : ' ',
@@ -1273,11 +1288,13 @@ class TextTreeRenderer {
       builder.write(config.afterDescriptionIfBody);
     }
 
-    if (config.lineBreakProperties)
+    if (config.lineBreakProperties) {
       builder.write(config.lineBreak);
+    }
 
-    if (properties.isNotEmpty)
+    if (properties.isNotEmpty) {
       builder.write(config.beforeProperties);
+    }
 
     builder.incrementPrefixOtherLines(config.bodyIndent, updateCurrentLine: false);
 
@@ -1286,14 +1303,16 @@ class TextTreeRenderer {
         children.isEmpty &&
         prefixLineOne.isNotEmpty) {
       builder.write(node.emptyBodyDescription!);
-      if (config.lineBreakProperties)
+      if (config.lineBreakProperties) {
         builder.write(config.lineBreak);
+      }
     }
 
     for (int i = 0; i < properties.length; ++i) {
       final DiagnosticsNode property = properties[i];
-      if (i > 0)
+      if (i > 0) {
         builder.write(config.propertySeparator);
+      }
 
       final TextTreeConfiguration propertyStyle = property.textTreeConfiguration!;
       if (_isSingleLine(property.style)) {
@@ -1310,8 +1329,9 @@ class TextTreeRenderer {
           builder.write(propertyLines.first);
         } else {
           builder.write(propertyRender, allowWrap: false);
-          if (!propertyRender.endsWith('\n'))
+          if (!propertyRender.endsWith('\n')) {
             builder.write('\n');
+          }
         }
       } else {
         final String propertyRender = render(property,
@@ -1322,13 +1342,15 @@ class TextTreeRenderer {
         builder.writeRawLines(propertyRender);
       }
     }
-    if (properties.isNotEmpty)
+    if (properties.isNotEmpty) {
       builder.write(config.afterProperties);
+    }
 
     builder.write(config.mandatoryAfterProperties);
 
-    if (!config.lineBreakProperties)
+    if (!config.lineBreakProperties) {
       builder.write(config.lineBreak);
+    }
 
     final String prefixChildren = config.bodyIndent;
     final String prefixChildrenRaw = '$prefixOtherLines$prefixChildren';
@@ -1619,8 +1641,9 @@ abstract class DiagnosticsNode {
     DiagnosticsSerializationDelegate delegate,
   ) {
     bool truncated = false;
-    if (nodes == null)
+    if (nodes == null) {
       return const <Map<String, Object?>>[];
+    }
     final int originalNodeCount = nodes.length;
     nodes = delegate.truncateNodesList(nodes, parent);
     if (nodes.length != originalNodeCount) {
@@ -1630,8 +1653,9 @@ abstract class DiagnosticsNode {
     final List<Map<String, Object?>> json = nodes.map<Map<String, Object?>>((DiagnosticsNode node) {
       return node.toJsonMap(delegate.delegateForNode(node));
     }).toList();
-    if (truncated)
+    if (truncated) {
       json.last['truncated'] = true;
+    }
     return json;
   }
 
@@ -1863,8 +1887,9 @@ class StringProperty extends DiagnosticsProperty<String> {
     if (quoted && text != null) {
       // An empty value would not appear empty after being surrounded with
       // quotes so we have to handle this case separately.
-      if (ifEmpty != null && text.isEmpty)
+      if (ifEmpty != null && text.isEmpty) {
         return ifEmpty!;
+      }
       return '"$text"';
     }
     return text.toString();
@@ -1917,8 +1942,9 @@ abstract class _NumProperty<T extends num> extends DiagnosticsProperty<T> {
   @override
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
     final Map<String, Object?> json = super.toJsonMap(delegate);
-    if (unit != null)
+    if (unit != null) {
       json['unit'] = unit;
+    }
 
     json['numberToString'] = numberToString();
     return json;
@@ -1936,8 +1962,9 @@ abstract class _NumProperty<T extends num> extends DiagnosticsProperty<T> {
 
   @override
   String valueToString({ TextTreeConfiguration? parentConfiguration }) {
-    if (value == null)
+    if (value == null) {
       return value.toString();
+    }
 
     return unit != null ? '${numberToString()}$unit' : numberToString();
   }
@@ -2072,16 +2099,18 @@ class PercentProperty extends DoubleProperty {
 
   @override
   String valueToString({ TextTreeConfiguration? parentConfiguration }) {
-    if (value == null)
+    if (value == null) {
       return value.toString();
+    }
     return unit != null ? '${numberToString()} $unit' : numberToString();
   }
 
   @override
   String numberToString() {
     final double? v = value;
-    if (v == null)
+    if (v == null) {
       return value.toString();
+    }
     return '${(v.clamp(0.0, 1.0) * 100.0).toStringAsFixed(1)}%';
   }
 }
@@ -2154,10 +2183,12 @@ class FlagProperty extends DiagnosticsProperty<bool> {
   @override
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
     final Map<String, Object?> json = super.toJsonMap(delegate);
-    if (ifTrue != null)
+    if (ifTrue != null) {
       json['ifTrue'] = ifTrue;
-    if (ifFalse != null)
+    }
+    if (ifFalse != null) {
       json['ifFalse'] = ifFalse;
+    }
 
     return json;
   }
@@ -2177,11 +2208,13 @@ class FlagProperty extends DiagnosticsProperty<bool> {
   @override
   String valueToString({ TextTreeConfiguration? parentConfiguration }) {
     if (value == true) {
-      if (ifTrue != null)
+      if (ifTrue != null) {
         return ifTrue!;
+      }
     } else if (value == false) {
-      if (ifFalse != null)
+      if (ifFalse != null) {
         return ifFalse!;
+      }
     }
     return super.valueToString(parentConfiguration: parentConfiguration);
   }
@@ -2201,12 +2234,14 @@ class FlagProperty extends DiagnosticsProperty<bool> {
   @override
   DiagnosticLevel get level {
     if (value == true) {
-      if (ifTrue == null)
+      if (ifTrue == null) {
         return DiagnosticLevel.hidden;
+      }
     }
     if (value == false) {
-      if (ifFalse == null)
+      if (ifFalse == null) {
         return DiagnosticLevel.hidden;
+      }
     }
     return super.level;
   }
@@ -2256,11 +2291,13 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
 
   @override
   String valueToString({TextTreeConfiguration? parentConfiguration}) {
-    if (value == null)
+    if (value == null) {
       return value.toString();
+    }
 
-    if (value!.isEmpty)
+    if (value!.isEmpty) {
       return ifEmpty ?? '[]';
+    }
 
     final Iterable<String> formattedValues = value!.map((T v) {
       if (T == double && v is double) {
@@ -2288,8 +2325,9 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
   /// null.
   @override
   DiagnosticLevel get level {
-    if (ifEmpty == null && value != null && value!.isEmpty && super.level != DiagnosticLevel.hidden)
+    if (ifEmpty == null && value != null && value!.isEmpty && super.level != DiagnosticLevel.hidden) {
       return DiagnosticLevel.fine;
+    }
     return super.level;
   }
 
@@ -2331,8 +2369,9 @@ class EnumProperty<T> extends DiagnosticsProperty<T> {
 
   @override
   String valueToString({ TextTreeConfiguration? parentConfiguration }) {
-    if (value == null)
+    if (value == null) {
       return value.toString();
+    }
     return describeEnum(value!);
   }
 }
@@ -2414,11 +2453,13 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
   @override
   String valueToString({ TextTreeConfiguration? parentConfiguration }) {
     if (value != null) {
-      if (ifPresent != null)
+      if (ifPresent != null) {
         return ifPresent!;
+      }
     } else {
-      if (ifNull != null)
+      if (ifNull != null) {
         return ifNull!;
+      }
     }
     return super.valueToString(parentConfiguration: parentConfiguration);
   }
@@ -2438,11 +2479,13 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
   @override
   DiagnosticLevel get level {
     if (value != null) {
-      if (ifPresent == null)
+      if (ifPresent == null) {
         return DiagnosticLevel.hidden;
+      }
     } else {
-      if (ifNull == null)
+      if (ifNull == null) {
         return DiagnosticLevel.hidden;
+      }
     }
 
     return super.level;
@@ -2451,8 +2494,9 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
   @override
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
     final Map<String, Object?> json = super.toJsonMap(delegate);
-    if (ifPresent != null)
+    if (ifPresent != null) {
       json['ifPresent'] = ifPresent;
+    }
     return json;
   }
 }
@@ -2510,8 +2554,9 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T?>> {
   @override
   String valueToString({TextTreeConfiguration? parentConfiguration}) {
     assert(value != null);
-    if (!_hasNonNullEntry() && ifEmpty != null)
+    if (!_hasNonNullEntry() && ifEmpty != null) {
       return ifEmpty!;
+    }
 
     final Iterable<String> formattedValues = _formattedValues();
     if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
@@ -2530,16 +2575,18 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T?>> {
   /// level [DiagnosticLevel.hidden] is returned.
   @override
   DiagnosticLevel get level {
-    if (!_hasNonNullEntry() && ifEmpty == null)
+    if (!_hasNonNullEntry() && ifEmpty == null) {
       return DiagnosticLevel.hidden;
+    }
     return super.level;
   }
 
   @override
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
     final Map<String, Object?> json = super.toJsonMap(delegate);
-    if (value.isNotEmpty)
+    if (value.isNotEmpty) {
       json['values'] = _formattedValues().toList();
+    }
     return json;
   }
 
@@ -2695,27 +2742,33 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
     if (properties != null) {
       json['properties'] = properties;
     }
-    if (defaultValue != kNoDefaultValue)
+    if (defaultValue != kNoDefaultValue) {
       json['defaultValue'] = defaultValue.toString();
-    if (ifEmpty != null)
+    }
+    if (ifEmpty != null) {
       json['ifEmpty'] = ifEmpty;
-    if (ifNull != null)
+    }
+    if (ifNull != null) {
       json['ifNull'] = ifNull;
-    if (tooltip != null)
+    }
+    if (tooltip != null) {
       json['tooltip'] = tooltip;
+    }
     json['missingIfNull'] = missingIfNull;
-    if (exception != null)
+    if (exception != null) {
       json['exception'] = exception.toString();
+    }
     json['propertyType'] = propertyType.toString();
     json['defaultLevel'] = describeEnum(_defaultLevel);
-    if (value is Diagnosticable || value is DiagnosticsNode)
+    if (value is Diagnosticable || value is DiagnosticsNode) {
       json['isDiagnosticableValue'] = true;
-    if (v is num)
-      // Workaround for https://github.com/flutter/flutter/issues/39937#issuecomment-529558033.
-      // JSON.stringify replaces infinity and NaN with null.
+    }
+    if (v is num) {
       json['value'] = v.isFinite ? v :  v.toString();
-    if (value is String || value is bool || value == null)
+    }
+    if (value is String || value is bool || value == null) {
       json['value'] = value;
+    }
     return json;
   }
 
@@ -2742,18 +2795,22 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
 
   @override
   String toDescription({ TextTreeConfiguration? parentConfiguration }) {
-    if (_description != null)
+    if (_description != null) {
       return _addTooltip(_description!);
+    }
 
-    if (exception != null)
+    if (exception != null) {
       return 'EXCEPTION (${exception.runtimeType})';
+    }
 
-    if (ifNull != null && value == null)
+    if (ifNull != null && value == null) {
       return _addTooltip(ifNull!);
+    }
 
     String result = valueToString(parentConfiguration: parentConfiguration);
-    if (result.isEmpty && ifEmpty != null)
+    if (result.isEmpty && ifEmpty != null) {
       result = ifEmpty!;
+    }
     return _addTooltip(result);
   }
 
@@ -2829,8 +2886,9 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   }
 
   void _maybeCacheValue() {
-    if (_valueComputed)
+    if (_valueComputed) {
       return;
+    }
 
     _valueComputed = true;
     assert(_computeValue != null);
@@ -2864,18 +2922,22 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   /// [value] equals [defaultValue].
   @override
   DiagnosticLevel get level {
-    if (_defaultLevel == DiagnosticLevel.hidden)
+    if (_defaultLevel == DiagnosticLevel.hidden) {
       return _defaultLevel;
+    }
 
-    if (exception != null)
+    if (exception != null) {
       return DiagnosticLevel.error;
+    }
 
-    if (value == null && missingIfNull)
+    if (value == null && missingIfNull) {
       return DiagnosticLevel.warning;
+    }
 
     // Use a low level when the value matches the default value.
-    if (defaultValue != kNoDefaultValue && value == defaultValue)
+    if (defaultValue != kNoDefaultValue && value == defaultValue) {
       return DiagnosticLevel.fine;
+    }
 
     return _defaultLevel;
   }

@@ -390,14 +390,16 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
   }
 
   void _handleHighlightChanged(bool value) {
-    if (_pressed == value)
+    if (_pressed == value) {
       return;
+    }
     setState(() {
       _pressed = value;
-      if (value)
+      if (value) {
         _controller.forward();
-      else
+      } else {
         _controller.reverse();
+      }
     });
   }
 
@@ -408,8 +410,9 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
   }
 
   Color _getFillColor() {
-    if (widget.highlightElevation == null || widget.highlightElevation == 0.0)
+    if (widget.highlightElevation == null || widget.highlightElevation == 0.0) {
       return Colors.transparent;
+    }
     final Color color = widget.color ?? Theme.of(context).canvasColor;
     final Tween<Color?> colorTween = ColorTween(
       begin: color.withAlpha(0x00),
@@ -421,18 +424,22 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
   Color? get _outlineColor {
     // If outline color is a `MaterialStateProperty`, it will be used in all
     // states, otherwise we determine the outline color in the current state.
-    if (widget.borderSide?.color is MaterialStateProperty<Color?>)
+    if (widget.borderSide?.color is MaterialStateProperty<Color?>) {
       return widget.borderSide!.color;
-    if (!widget.enabled)
+    }
+    if (!widget.enabled) {
       return widget.disabledBorderColor;
-    if (_pressed)
+    }
+    if (_pressed) {
       return widget.highlightedBorderColor;
+    }
     return widget.borderSide?.color;
   }
 
   BorderSide _getOutline() {
-    if (widget.borderSide?.style == BorderStyle.none)
+    if (widget.borderSide?.style == BorderStyle.none) {
       return widget.borderSide!;
+    }
 
     final Color themeColor = Theme.of(context).colorScheme.onSurface.withOpacity(0.12);
 
@@ -443,8 +450,9 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
   }
 
   double _getHighlightElevation() {
-    if (widget.highlightElevation == null || widget.highlightElevation == 0.0)
+    if (widget.highlightElevation == null || widget.highlightElevation == 0.0) {
       return 0.0;
+    }
     return Tween<double>(
       begin: 0.0,
       end: widget.highlightElevation,
@@ -565,10 +573,12 @@ class _OutlineBorder extends ShapeBorder implements MaterialStateProperty<ShapeB
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is _OutlineBorder
         && other.side == side
         && other.shape == shape;

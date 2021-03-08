@@ -167,8 +167,9 @@ class FormState extends State<Form> {
   // Called when a form field has changed. This will cause all form fields
   // to rebuild, useful if form fields have interdependencies.
   void _fieldDidChange() {
-    if (widget.onChanged != null)
+    if (widget.onChanged != null) {
       widget.onChanged!();
+    }
 
 
     _hasInteractedByUser = _fields
@@ -217,8 +218,9 @@ class FormState extends State<Form> {
 
   /// Saves every [FormField] that is a descendant of this [Form].
   void save() {
-    for (final FormFieldState<dynamic> field in _fields)
+    for (final FormFieldState<dynamic> field in _fields) {
       field.save();
+    }
   }
 
   /// Resets every [FormField] that is a descendant of this [Form] back to its
@@ -229,8 +231,9 @@ class FormState extends State<Form> {
   /// If the form's [Form.autovalidateMode] property is [AutovalidateMode.always],
   /// the fields will all be revalidated after being reset.
   void reset() {
-    for (final FormFieldState<dynamic> field in _fields)
+    for (final FormFieldState<dynamic> field in _fields) {
       field.reset();
+    }
     _hasInteractedByUser = false;
     _fieldDidChange();
   }
@@ -247,8 +250,9 @@ class FormState extends State<Form> {
 
   bool _validate() {
     bool hasError = false;
-    for (final FormFieldState<dynamic> field in _fields)
+    for (final FormFieldState<dynamic> field in _fields) {
       hasError = !field.validate() || hasError;
+    }
     return !hasError;
   }
 }
@@ -435,8 +439,9 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   /// Calls the [FormField]'s onSaved method with the current value.
   void save() {
-    if (widget.onSaved != null)
+    if (widget.onSaved != null) {
       widget.onSaved!(value);
+    }
   }
 
   /// Resets the field to its initial value.
@@ -464,8 +469,9 @@ class FormFieldState<T> extends State<FormField<T>> {
   }
 
   void _validate() {
-    if (widget.validator != null)
+    if (widget.validator != null) {
       _errorText = widget.validator!(_value);
+    }
   }
 
   /// Updates this field's state to the new value. Useful for responding to

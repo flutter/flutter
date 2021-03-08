@@ -521,8 +521,9 @@ class TextTheme with Diagnosticable {
   ///    individual fields in the [TextTheme] instead of merging all of the
   ///    fields of two [TextTheme]s.
   TextTheme merge(TextTheme? other) {
-    if (other == null)
+    if (other == null) {
       return this;
+    }
     return copyWith(
       headline1: headline1?.merge(other.headline1) ?? other.headline1,
       headline2: headline2?.merge(other.headline2) ?? other.headline2,
@@ -705,10 +706,12 @@ class TextTheme with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is TextTheme
       && headline1 == other.headline1
       && headline2 == other.headline2

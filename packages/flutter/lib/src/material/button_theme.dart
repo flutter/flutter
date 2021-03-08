@@ -282,8 +282,9 @@ class ButtonThemeData with Diagnosticable {
   ///  * [getPadding], which is used by [RaisedButton], [OutlineButton]
   ///    and [FlatButton].
   EdgeInsetsGeometry get padding {
-    if (_padding != null)
+    if (_padding != null) {
       return _padding!;
+    }
     switch (textTheme) {
       case ButtonTextTheme.normal:
       case ButtonTextTheme.accent:
@@ -309,8 +310,9 @@ class ButtonThemeData with Diagnosticable {
   ///  * [getShape], which is used by [RaisedButton], [OutlineButton]
   ///    and [FlatButton].
   ShapeBorder get shape {
-    if (_shape != null)
+    if (_shape != null) {
       return _shape!;
+    }
     switch (textTheme) {
       case ButtonTextTheme.normal:
       case ButtonTextTheme.accent:
@@ -455,10 +457,12 @@ class ButtonThemeData with Diagnosticable {
   /// If [MaterialButton.textColor] is a [MaterialStateProperty<Color>], it will be
   /// used as the `disabledTextColor`. It will be resolved in the [MaterialState.disabled] state.
   Color getDisabledTextColor(MaterialButton button) {
-    if (button.textColor is MaterialStateProperty<Color?>)
+    if (button.textColor is MaterialStateProperty<Color?>) {
       return button.textColor!;
-    if (button.disabledTextColor != null)
+    }
+    if (button.disabledTextColor != null) {
       return button.disabledTextColor!;
+    }
     return colorScheme!.onSurface.withOpacity(0.38);
   }
 
@@ -473,10 +477,12 @@ class ButtonThemeData with Diagnosticable {
   /// Otherwise the color scheme's [ColorScheme.onSurface] color is returned
   /// with its opacity set to 0.38.
   Color getDisabledFillColor(MaterialButton button) {
-    if (button.disabledColor != null)
+    if (button.disabledColor != null) {
       return button.disabledColor!;
-    if (_disabledColor != null)
+    }
+    if (_disabledColor != null) {
       return _disabledColor!;
+    }
     return colorScheme!.onSurface.withOpacity(0.38);
   }
 
@@ -507,14 +513,17 @@ class ButtonThemeData with Diagnosticable {
   ///    with opacity 0.12.
   Color? getFillColor(MaterialButton button) {
     final Color? fillColor = button.enabled ? button.color : button.disabledColor;
-    if (fillColor != null)
+    if (fillColor != null) {
       return fillColor;
+    }
 
-    if (button is FlatButton || button is OutlineButton || button.runtimeType == MaterialButton)
+    if (button is FlatButton || button is OutlineButton || button.runtimeType == MaterialButton) {
       return null;
+    }
 
-    if (button.enabled && button is RaisedButton && _buttonColor != null)
+    if (button.enabled && button is RaisedButton && _buttonColor != null) {
       return _buttonColor;
+    }
 
     switch (getTextTheme(button)) {
       case ButtonTextTheme.normal:
@@ -545,11 +554,13 @@ class ButtonThemeData with Diagnosticable {
   ///    otherwise if [button] is a [FlatButton] or an [OutlineButton] then
   ///    [ColorScheme.primary] of [colorScheme], otherwise [Colors.black].
   Color getTextColor(MaterialButton button) {
-    if (!button.enabled)
+    if (!button.enabled) {
       return getDisabledTextColor(button);
+    }
 
-    if (button.textColor != null)
+    if (button.textColor != null) {
       return button.textColor!;
+    }
 
     switch (getTextTheme(button)) {
       case ButtonTextTheme.normal:
@@ -563,10 +574,12 @@ class ButtonThemeData with Diagnosticable {
         final bool fillIsDark = fillColor != null
           ? ThemeData.estimateBrightnessForColor(fillColor) == Brightness.dark
           : getBrightness(button) == Brightness.dark;
-        if (fillIsDark)
+        if (fillIsDark) {
           return Colors.white;
-        if (button is FlatButton || button is OutlineButton)
+        }
+        if (button is FlatButton || button is OutlineButton) {
           return colorScheme!.primary;
+        }
         return Colors.black;
     }
   }
@@ -585,11 +598,13 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// Otherwise, returns [getTextColor] with an opacity of 0.12.
   Color getSplashColor(MaterialButton button) {
-    if (button.splashColor != null)
+    if (button.splashColor != null) {
       return button.splashColor!;
+    }
 
-    if (_splashColor != null && (button is RaisedButton || button is OutlineButton))
+    if (_splashColor != null && (button is RaisedButton || button is OutlineButton)) {
       return _splashColor!;
+    }
 
     if (_splashColor != null && button is FlatButton) {
       switch (getTextTheme(button)) {
@@ -640,8 +655,9 @@ class ButtonThemeData with Diagnosticable {
   ///    otherwise the value of [getTextColor] with opacity 0.16.
   ///  * [ButtonTextTheme.primary], returns [Colors.transparent].
   Color getHighlightColor(MaterialButton button) {
-    if (button.highlightColor != null)
+    if (button.highlightColor != null) {
       return button.highlightColor!;
+    }
 
     switch (getTextTheme(button)) {
       case ButtonTextTheme.normal:
@@ -658,10 +674,12 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// If button is a [FlatButton] then elevation is 0.0, otherwise it is 2.0.
   double getElevation(MaterialButton button) {
-    if (button.elevation != null)
+    if (button.elevation != null) {
       return button.elevation!;
-    if (button is FlatButton)
+    }
+    if (button is FlatButton) {
       return 0.0;
+    }
     return 2.0;
   }
 
@@ -672,12 +690,15 @@ class ButtonThemeData with Diagnosticable {
   /// If button is a [FlatButton] or an [OutlineButton] then the focus
   /// elevation is 0.0, otherwise the highlight elevation is 4.0.
   double getFocusElevation(MaterialButton button) {
-    if (button.focusElevation != null)
+    if (button.focusElevation != null) {
       return button.focusElevation!;
-    if (button is FlatButton)
+    }
+    if (button is FlatButton) {
       return 0.0;
-    if (button is OutlineButton)
+    }
+    if (button is OutlineButton) {
       return 0.0;
+    }
     return 4.0;
   }
 
@@ -688,12 +709,15 @@ class ButtonThemeData with Diagnosticable {
   /// If button is a [FlatButton] or an [OutlineButton] then the hover
   /// elevation is 0.0, otherwise the highlight elevation is 4.0.
   double getHoverElevation(MaterialButton button) {
-    if (button.hoverElevation != null)
+    if (button.hoverElevation != null) {
       return button.hoverElevation!;
-    if (button is FlatButton)
+    }
+    if (button is FlatButton) {
       return 0.0;
-    if (button is OutlineButton)
+    }
+    if (button is OutlineButton) {
       return 0.0;
+    }
     return 4.0;
   }
 
@@ -704,12 +728,15 @@ class ButtonThemeData with Diagnosticable {
   /// If button is a [FlatButton] or an [OutlineButton] then the highlight
   /// elevation is 0.0, otherwise the highlight elevation is 8.0.
   double getHighlightElevation(MaterialButton button) {
-    if (button.highlightElevation != null)
+    if (button.highlightElevation != null) {
       return button.highlightElevation!;
-    if (button is FlatButton)
+    }
+    if (button is FlatButton) {
       return 0.0;
-    if (button is OutlineButton)
+    }
+    if (button is OutlineButton) {
       return 0.0;
+    }
     return 8.0;
   }
 
@@ -720,8 +747,9 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// Otherwise the disabled elevation is 0.0.
   double getDisabledElevation(MaterialButton button) {
-    if (button.disabledElevation != null)
+    if (button.disabledElevation != null) {
       return button.disabledElevation!;
+    }
     return 0.0;
   }
 
@@ -739,14 +767,17 @@ class ButtonThemeData with Diagnosticable {
   /// [getTextTheme] is [ButtonTextTheme.primary], 16.0 on the left and right
   /// otherwise.
   EdgeInsetsGeometry getPadding(MaterialButton button) {
-    if (button.padding != null)
+    if (button.padding != null) {
       return button.padding!;
+    }
 
-    if (button is MaterialButtonWithIconMixin)
+    if (button is MaterialButtonWithIconMixin) {
       return const EdgeInsetsDirectional.only(start: 12.0, end: 16.0);
+    }
 
-    if (_padding != null)
+    if (_padding != null) {
       return _padding!;
+    }
 
     switch (getTextTheme(button)) {
       case ButtonTextTheme.normal:
@@ -832,8 +863,9 @@ class ButtonThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ButtonThemeData
         && other.textTheme == textTheme
         && other.minWidth == minWidth

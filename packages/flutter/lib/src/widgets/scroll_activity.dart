@@ -214,8 +214,9 @@ class HoldScrollActivity extends ScrollActivity implements ScrollHoldController 
 
   @override
   void dispose() {
-    if (onHoldCanceled != null)
+    if (onHoldCanceled != null) {
       onHoldCanceled!();
+    }
     super.dispose();
   }
 }
@@ -375,8 +376,9 @@ class ScrollDragController implements Drag {
     if (offset == 0.0) {
       return;
     }
-    if (_reversed) // e.g. an AxisDirection.up scrollable
+    if (_reversed) {
       offset = -offset;
+    }
     delegate.applyUserOffset(offset);
   }
 
@@ -387,13 +389,15 @@ class ScrollDragController implements Drag {
     // the scroll has to move upwards. It's the same reason that update()
     // above negates the delta before applying it to the scroll offset.
     double velocity = -details.primaryVelocity!;
-    if (_reversed) // e.g. an AxisDirection.up scrollable
+    if (_reversed) {
       velocity = -velocity;
+    }
     _lastDetails = details;
 
     // Build momentum only if dragging in the same direction.
-    if (_retainMomentum && velocity.sign == carriedVelocity!.sign)
+    if (_retainMomentum && velocity.sign == carriedVelocity!.sign) {
       velocity += carriedVelocity!;
+    }
     delegate.goBallistic(velocity);
   }
 
@@ -406,8 +410,9 @@ class ScrollDragController implements Drag {
   @mustCallSuper
   void dispose() {
     _lastDetails = null;
-    if (onDragCanceled != null)
+    if (onDragCanceled != null) {
       onDragCanceled!();
+    }
   }
 
   /// The most recently observed [DragStartDetails], [DragUpdateDetails], or
@@ -536,8 +541,9 @@ class BallisticScrollActivity extends ScrollActivity {
   }
 
   void _tick() {
-    if (!applyMoveTo(_controller.value))
+    if (!applyMoveTo(_controller.value)) {
       delegate.goIdle();
+    }
   }
 
   /// Move the position to the given location.
@@ -631,8 +637,9 @@ class DrivenScrollActivity extends ScrollActivity {
   Future<void> get done => _completer.future;
 
   void _tick() {
-    if (delegate.setPixels(_controller.value) != 0.0)
+    if (delegate.setPixels(_controller.value) != 0.0) {
       delegate.goIdle();
+    }
   }
 
   void _end() {

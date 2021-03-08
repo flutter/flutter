@@ -147,8 +147,9 @@ class VideoPlayPause extends StatefulWidget {
 class _VideoPlayPauseState extends State<VideoPlayPause> {
   _VideoPlayPauseState() {
     listener = () {
-      if (mounted)
+      if (mounted) {
         setState(() { });
+      }
     };
   }
 

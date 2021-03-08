@@ -56,8 +56,9 @@ class Clipboard {
       'Clipboard.getData',
       format,
     );
-    if (result == null)
+    if (result == null) {
       return null;
+    }
     return ClipboardData(text: result['text'] as String?);
   }
 }

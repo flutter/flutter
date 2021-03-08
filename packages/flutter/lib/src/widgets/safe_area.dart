@@ -98,8 +98,9 @@ class SafeArea extends StatelessWidget {
     final MediaQueryData data = MediaQuery.of(context);
     EdgeInsets padding = data.padding;
     // Bottom padding has been consumed - i.e. by the keyboard
-    if (data.padding.bottom == 0.0 && data.viewInsets.bottom != 0.0 && maintainBottomViewPadding)
+    if (data.padding.bottom == 0.0 && data.viewInsets.bottom != 0.0 && maintainBottomViewPadding) {
       padding = padding.copyWith(bottom: data.viewPadding.bottom);
+    }
 
     return Padding(
       padding: EdgeInsets.only(

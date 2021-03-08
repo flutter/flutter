@@ -232,13 +232,15 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     }
 
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.dragged))
+      if (states.contains(MaterialState.dragged)) {
         return _scrollbarTheme.thumbColor?.resolve(states) ?? dragColor;
+      }
 
       // If the track is visible, the thumb color hover animation is ignored and
       // changes immediately.
-      if (states.contains(MaterialState.hovered) && _showTrackOnHover)
+      if (states.contains(MaterialState.hovered) && _showTrackOnHover) {
         return _scrollbarTheme.thumbColor?.resolve(states) ?? hoverColor;
+      }
 
       return Color.lerp(
         _scrollbarTheme.thumbColor?.resolve(states) ?? idleColor,
@@ -278,10 +280,11 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
 
   MaterialStateProperty<double> get _thickness {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered) && _showTrackOnHover)
+      if (states.contains(MaterialState.hovered) && _showTrackOnHover) {
         return widget.hoverThickness
           ?? _scrollbarTheme.thickness?.resolve(states)
           ?? _kScrollbarThicknessWithTrack;
+      }
       // The default scrollbar thickness is smaller on mobile.
       return widget.thickness
         ?? _scrollbarTheme.thickness?.resolve(states)

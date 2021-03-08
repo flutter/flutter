@@ -53,14 +53,18 @@ Future<void> main() async {
     }
     final int result = await analysis.exitCode;
     clock.stop();
-    if (!sawFinalLine)
+    if (!sawFinalLine) {
       throw Exception('flutter analyze did not output final message');
-    if (publicMembers == 0 && otherErrors == 0 && result != 0)
+    }
+    if (publicMembers == 0 && otherErrors == 0 && result != 0) {
       throw Exception('flutter analyze exited with unexpected error code $result');
-    if (publicMembers != 0 && otherErrors != 0 && result == 0)
+    }
+    if (publicMembers != 0 && otherErrors != 0 && result == 0) {
       throw Exception('flutter analyze exited with successful status code despite reporting errors');
-    if (otherLines != 0)
+    }
+    if (otherLines != 0) {
       throw Exception('flutter analyze had unexpected output (we saw $otherLines unexpected line${ otherLines == 1 ? "" : "s" })');
+    }
     final Map<String, dynamic> data = <String, dynamic>{
       'members_missing_dartdocs': publicMembers,
       'analysis_errors': otherErrors,

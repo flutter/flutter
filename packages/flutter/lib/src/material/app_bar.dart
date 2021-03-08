@@ -676,10 +676,12 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 
 
   bool _getEffectiveCenterTitle(ThemeData theme) {
-    if (centerTitle != null)
+    if (centerTitle != null) {
       return centerTitle!;
-    if (theme.appBarTheme.centerTitle != null)
+    }
+    if (theme.appBarTheme.centerTitle != null) {
       return theme.appBarTheme.centerTitle!;
+    }
     assert(theme.platform != null);
     switch (theme.platform) {
       case TargetPlatform.android:
@@ -769,10 +771,12 @@ class _AppBarState extends State<AppBar> {
 
     if (widget.toolbarOpacity != 1.0) {
       final double opacity = const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.toolbarOpacity);
-      if (titleTextStyle?.color != null)
+      if (titleTextStyle?.color != null) {
         titleTextStyle = titleTextStyle!.copyWith(color: titleTextStyle.color!.withOpacity(opacity));
-      if (toolbarTextStyle?.color != null)
+      }
+      if (toolbarTextStyle?.color != null) {
         toolbarTextStyle = toolbarTextStyle!.copyWith(color: toolbarTextStyle.color!.withOpacity(opacity));
+      }
       overallIconTheme = overallIconTheme.copyWith(
         opacity: opacity * (overallIconTheme.opacity ?? 1.0),
       );
@@ -790,8 +794,9 @@ class _AppBarState extends State<AppBar> {
           tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
         );
       } else {
-        if (!hasEndDrawer && canPop)
+        if (!hasEndDrawer && canPop) {
           leading = useCloseButton ? const CloseButton() : const BackButton();
+        }
       }
     }
     if (leading != null) {
@@ -999,17 +1004,20 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_position != null)
+    if (_position != null) {
       _position!.isScrollingNotifier.removeListener(_isScrollingListener);
+    }
     _position = Scrollable.of(context)?.position;
-    if (_position != null)
+    if (_position != null) {
       _position!.isScrollingNotifier.addListener(_isScrollingListener);
+    }
   }
 
   @override
   void dispose() {
-    if (_position != null)
+    if (_position != null) {
       _position!.isScrollingNotifier.removeListener(_isScrollingListener);
+    }
     super.dispose();
   }
 
@@ -1018,16 +1026,18 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
   }
 
   void _isScrollingListener() {
-    if (_position == null)
+    if (_position == null) {
       return;
+    }
 
     // When a scroll stops, then maybe snap the appbar into view.
     // Similarly, when a scroll starts, then maybe stop the snap animation.
     final RenderSliverFloatingPersistentHeader? header = _headerRenderer();
-    if (_position!.isScrollingNotifier.value)
+    if (_position!.isScrollingNotifier.value) {
       header?.maybeStopSnapAnimation(_position!.userScrollDirection);
-    else
+    } else {
       header?.maybeStartSnapAnimation(_position!.userScrollDirection);
+    }
   }
 
   @override
@@ -1766,10 +1776,12 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
   @override
   void didUpdateWidget(SliverAppBar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.snap != oldWidget.snap || widget.floating != oldWidget.floating)
+    if (widget.snap != oldWidget.snap || widget.floating != oldWidget.floating) {
       _updateSnapConfiguration();
-    if (widget.stretch != oldWidget.stretch)
+    }
+    if (widget.stretch != oldWidget.stretch) {
       _updateStretchConfiguration();
+    }
   }
 
   @override

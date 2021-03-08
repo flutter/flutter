@@ -153,8 +153,9 @@ class BorderTween extends Tween<Border?> {
   /// Returns the value this variable has at the given animation clock value.
   @override
   Border? lerp(double t) {
-    if (begin == null || end == null)
+    if (begin == null || end == null) {
       return t < 0.5 ? begin : end;
+    }
     return Border.lerp(begin!, end!, t);
   }
 }
@@ -370,8 +371,9 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     _controller.addStatusListener((AnimationStatus status) {
       switch (status) {
         case AnimationStatus.completed:
-          if (widget.onEnd != null)
+          if (widget.onEnd != null) {
             widget.onEnd!();
+          }
           break;
         case AnimationStatus.dismissed:
         case AnimationStatus.forward:
@@ -385,8 +387,9 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   @override
   void didUpdateWidget(T oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.curve != oldWidget.curve)
+    if (widget.curve != oldWidget.curve) {
       _animation = _createCurve();
+    }
     _controller.duration = widget.duration;
     if (_constructTweens()) {
       forEachTween((Tween<dynamic>? tween, dynamic targetValue, TweenConstructor<dynamic> constructor) {
@@ -415,8 +418,9 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   }
 
   void _updateTween(Tween<dynamic>? tween, dynamic targetValue) {
-    if (tween == null)
+    if (tween == null) {
       return;
+    }
     tween
       ..begin = tween.evaluate(_animation)
       ..end = targetValue;
@@ -427,8 +431,9 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     forEachTween((Tween<dynamic>? tween, dynamic targetValue, TweenConstructor<dynamic> constructor) {
       if (targetValue != null) {
         tween ??= constructor(targetValue);
-        if (_shouldAnimateTween(tween, targetValue))
+        if (_shouldAnimateTween(tween, targetValue)) {
           shouldStartAnimation = true;
+        }
       } else {
         tween = null;
       }

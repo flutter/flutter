@@ -323,8 +323,9 @@ class SingleChildScrollView extends StatelessWidget {
   Widget build(BuildContext context) {
     final AxisDirection axisDirection = _getDirection(context);
     Widget? contents = child;
-    if (padding != null)
+    if (padding != null) {
       contents = Padding(padding: padding!, child: contents);
+    }
     final ScrollController? scrollController = primary
         ? PrimaryScrollController.of(context)
         : controller;
@@ -419,8 +420,9 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   AxisDirection _axisDirection;
   set axisDirection(AxisDirection value) {
     assert(value != null);
-    if (value == _axisDirection)
+    if (value == _axisDirection) {
       return;
+    }
     _axisDirection = value;
     markNeedsLayout();
   }
@@ -431,13 +433,16 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   ViewportOffset _offset;
   set offset(ViewportOffset value) {
     assert(value != null);
-    if (value == _offset)
+    if (value == _offset) {
       return;
-    if (attached)
+    }
+    if (attached) {
       _offset.removeListener(_hasScrolled);
+    }
     _offset = value;
-    if (attached)
+    if (attached) {
       _offset.addListener(_hasScrolled);
+    }
     markNeedsLayout();
   }
 
@@ -446,8 +451,9 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   double _cacheExtent;
   set cacheExtent(double value) {
     assert(value != null);
-    if (value == _cacheExtent)
+    if (value == _cacheExtent) {
       return;
+    }
     _cacheExtent = value;
     markNeedsLayout();
   }
@@ -475,8 +481,9 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   void setupParentData(RenderObject child) {
     // We don't actually use the offset argument in BoxParentData, so let's
     // avoid allocating it at all.
-    if (child.parentData is! ParentData)
+    if (child.parentData is! ParentData) {
       child.parentData = ParentData();
+    }
   }
 
   @override
@@ -511,8 +518,9 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
 
   double get _maxScrollExtent {
     assert(hasSize);
-    if (child == null)
+    if (child == null) {
       return 0.0;
+    }
     switch (axis) {
       case Axis.horizontal:
         return math.max(0.0, child!.size.width - size.width);
@@ -532,29 +540,33 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    if (child != null)
+    if (child != null) {
       return child!.getMinIntrinsicWidth(height);
+    }
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    if (child != null)
+    if (child != null) {
       return child!.getMaxIntrinsicWidth(height);
+    }
     return 0.0;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    if (child != null)
+    if (child != null) {
       return child!.getMinIntrinsicHeight(width);
+    }
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    if (child != null)
+    if (child != null) {
       return child!.getMaxIntrinsicHeight(width);
+    }
     return 0.0;
   }
 
@@ -639,8 +651,9 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
 
   @override
   Rect? describeApproximatePaintClip(RenderObject? child) {
-    if (child != null && _shouldClipAtPaintOffset(_paintOffset))
+    if (child != null && _shouldClipAtPaintOffset(_paintOffset)) {
       return Offset.zero & size;
+    }
     return null;
   }
 
@@ -662,8 +675,9 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   @override
   RevealedOffset getOffsetToReveal(RenderObject target, double alignment, { Rect? rect }) {
     rect ??= target.paintBounds;
-    if (target is! RenderBox)
+    if (target is! RenderBox) {
       return RevealedOffset(offset: offset.pixels, rect: rect);
+    }
 
     final RenderBox targetBox = target;
     final Matrix4 transform = targetBox.getTransformTo(child);

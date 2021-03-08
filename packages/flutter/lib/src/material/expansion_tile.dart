@@ -183,8 +183,9 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     _backgroundColor = _controller.drive(_backgroundColorTween.chain(_easeOutTween));
 
     _isExpanded = PageStorage.of(context)?.readState(context) as bool? ?? widget.initiallyExpanded;
-    if (_isExpanded)
+    if (_isExpanded) {
       _controller.value = 1.0;
+    }
   }
 
   @override
@@ -200,8 +201,9 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
         _controller.forward();
       } else {
         _controller.reverse().then<void>((void value) {
-          if (!mounted)
+          if (!mounted) {
             return;
+          }
           setState(() {
             // Rebuild without widget.children.
           });
@@ -209,8 +211,9 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       }
       PageStorage.of(context)?.writeState(context, _isExpanded);
     });
-    if (widget.onExpansionChanged != null)
+    if (widget.onExpansionChanged != null) {
       widget.onExpansionChanged!(_isExpanded);
+    }
   }
 
   Widget _buildChildren(BuildContext context, Widget? child) {

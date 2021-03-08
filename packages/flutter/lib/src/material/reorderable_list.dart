@@ -398,8 +398,9 @@ class _ReorderableListContent extends StatefulWidget {
 class _ReorderableListContentState extends State<_ReorderableListContent> {
   Widget _wrapWithSemantics(Widget child, int index) {
     void reorder(int startIndex, int endIndex) {
-      if (startIndex != endIndex)
+      if (startIndex != endIndex) {
         widget.onReorder(startIndex, endIndex);
+      }
     }
 
     // First, determine which semantics actions apply.
@@ -596,8 +597,9 @@ class _ReorderableListViewChildGlobalKey extends GlobalObjectKey {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is _ReorderableListViewChildGlobalKey
         && other.subKey == subKey
         && other.state == state;

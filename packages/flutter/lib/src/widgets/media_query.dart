@@ -429,8 +429,9 @@ class MediaQueryData {
     bool removeRight = false,
     bool removeBottom = false,
   }) {
-    if (!(removeLeft || removeTop || removeRight || removeBottom))
+    if (!(removeLeft || removeTop || removeRight || removeBottom)) {
       return this;
+    }
     return MediaQueryData(
       size: size,
       devicePixelRatio: devicePixelRatio,
@@ -477,8 +478,9 @@ class MediaQueryData {
     bool removeRight = false,
     bool removeBottom = false,
   }) {
-    if (!(removeLeft || removeTop || removeRight || removeBottom))
+    if (!(removeLeft || removeTop || removeRight || removeBottom)) {
       return this;
+    }
     return MediaQueryData(
       size: size,
       devicePixelRatio: devicePixelRatio,
@@ -525,8 +527,9 @@ class MediaQueryData {
     bool removeRight = false,
     bool removeBottom = false,
   }) {
-    if (!(removeLeft || removeTop || removeRight || removeBottom))
+    if (!(removeLeft || removeTop || removeRight || removeBottom)) {
       return this;
+    }
     return MediaQueryData(
       size: size,
       devicePixelRatio: devicePixelRatio,
@@ -556,8 +559,9 @@ class MediaQueryData {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is MediaQueryData
         && other.size == size
         && other.devicePixelRatio == devicePixelRatio

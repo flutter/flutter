@@ -137,8 +137,9 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
   }
 
   void _handlePressed() {
-    if (widget.onPressed != null)
+    if (widget.onPressed != null) {
       widget.onPressed!(widget.isExpanded);
+    }
   }
 
   /// Default icon colors and opacities for when [Theme.brightness] is set to

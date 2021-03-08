@@ -436,8 +436,9 @@ class _RouterState<T> extends State<Router<T>> {
   String? _lastSeenLocation;
 
   void _scheduleRouteInformationReportingTask() {
-    if (_routeInformationReportingTaskScheduled)
+    if (_routeInformationReportingTaskScheduled) {
       return;
+    }
     assert(_currentIntentionToReport != _IntentionToReportRouteInformation.none);
     _routeInformationReportingTaskScheduled = true;
     SchedulerBinding.instance!.addPostFrameCallback(_reportRouteInformation);
@@ -485,8 +486,9 @@ class _RouterState<T> extends State<Router<T>> {
 
   RouteInformation? _retrieveNewRouteInformation() {
     final T? configuration = widget.routerDelegate.currentConfiguration;
-    if (configuration == null)
+    if (configuration == null) {
       return null;
+    }
     final RouteInformation? routeInformation = widget.routeInformationParser!.restoreRouteInformation(configuration);
     assert((){
       if (routeInformation == null) {
@@ -640,8 +642,9 @@ class _RouterState<T> extends State<Router<T>> {
           widget.routeInformationProvider == originalWidget.routeInformationProvider &&
           widget.backButtonDispatcher == originalWidget.backButtonDispatcher &&
           widget.routeInformationParser == originalWidget.routeInformationParser &&
-          widget.routerDelegate == originalWidget.routerDelegate)
+          widget.routerDelegate == originalWidget.routerDelegate) {
         return SynchronousFuture<void>(data);
+      }
       return _never;
     };
   }
@@ -761,8 +764,9 @@ class _CallbackHookProvider<T> {
   /// [FlutterError.reportError].
   @protected
   T invokeCallback(T defaultValue) {
-    if (_callbacks.isEmpty)
+    if (_callbacks.isEmpty) {
       return defaultValue;
+    }
     try {
       return _callbacks.single();
     } catch (exception, stack) {
@@ -830,8 +834,9 @@ abstract class BackButtonDispatcher extends _CallbackHookProvider<Future<bool>> 
 
       Future<bool> notifyNextChild(bool result) {
         // If the previous child handles the callback, we return the result.
-        if (result)
+        if (result) {
           return SynchronousFuture<bool>(result);
+        }
         // If the previous child did not handle the callback, we ask the next
         // child to handle the it.
         if (childIndex > 0) {
@@ -928,16 +933,18 @@ class RootBackButtonDispatcher extends BackButtonDispatcher with WidgetsBindingO
 
   @override
   void addCallback(ValueGetter<Future<bool>> callback) {
-    if (!hasCallbacks)
+    if (!hasCallbacks) {
       WidgetsBinding.instance!.addObserver(this);
+    }
     super.addCallback(callback);
   }
 
   @override
   void removeCallback(ValueGetter<Future<bool>> callback) {
     super.removeCallback(callback);
-    if (!hasCallbacks)
+    if (!hasCallbacks) {
       WidgetsBinding.instance!.removeObserver(this);
+    }
   }
 
   @override
@@ -993,8 +1000,9 @@ class ChildBackButtonDispatcher extends BackButtonDispatcher {
   @override
   void removeCallback(ValueGetter<Future<bool>> callback) {
     super.removeCallback(callback);
-    if (!hasCallbacks)
+    if (!hasCallbacks) {
       parent.forget(this);
+    }
   }
 }
 
@@ -1201,24 +1209,27 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
   RouteInformation? _value;
 
   void _platformReportsNewRouteInformation(RouteInformation routeInformation) {
-    if (_value == routeInformation)
+    if (_value == routeInformation) {
       return;
+    }
     _value = routeInformation;
     notifyListeners();
   }
 
   @override
   void addListener(VoidCallback listener) {
-    if (!hasListeners)
+    if (!hasListeners) {
       WidgetsBinding.instance!.addObserver(this);
+    }
     super.addListener(listener);
   }
 
   @override
   void removeListener(VoidCallback listener) {
     super.removeListener(listener);
-    if (!hasListeners)
+    if (!hasListeners) {
       WidgetsBinding.instance!.removeObserver(this);
+    }
   }
 
   @override
@@ -1227,8 +1238,9 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
     // will be added and removed in a coherent fashion such that when the object
     // is no longer being used, there's no listener, and so it will get garbage
     // collected.
-    if (hasListeners)
+    if (hasListeners) {
       WidgetsBinding.instance!.removeObserver(this);
+    }
     super.dispose();
   }
 
@@ -1265,8 +1277,9 @@ mixin PopNavigatorRouterDelegateMixin<T> on RouterDelegate<T> {
   @override
   Future<bool> popRoute() {
     final NavigatorState? navigator = navigatorKey?.currentState;
-    if (navigator == null)
+    if (navigator == null) {
       return SynchronousFuture<bool>(false);
+    }
     return navigator.maybePop();
   }
 }

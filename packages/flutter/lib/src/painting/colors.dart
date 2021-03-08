@@ -200,12 +200,15 @@ class HSVColor {
   /// Values outside of the valid range for each channel will be clamped.
   static HSVColor? lerp(HSVColor? a, HSVColor? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
-    if (a == null)
+    }
+    if (a == null) {
       return b!._scaleAlpha(t);
-    if (b == null)
+    }
+    if (b == null) {
       return a._scaleAlpha(1.0 - t);
+    }
     return HSVColor.fromAHSV(
       lerpDouble(a.alpha, b.alpha, t)!.clamp(0.0, 1.0),
       lerpDouble(a.hue, b.hue, t)! % 360.0,
@@ -216,8 +219,9 @@ class HSVColor {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
+    }
     return other is HSVColor
         && other.alpha == alpha
         && other.hue == hue
@@ -384,12 +388,15 @@ class HSLColor {
   /// an [AnimationController].
   static HSLColor? lerp(HSLColor? a, HSLColor? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
-    if (a == null)
+    }
+    if (a == null) {
       return b!._scaleAlpha(t);
-    if (b == null)
+    }
+    if (b == null) {
       return a._scaleAlpha(1.0 - t);
+    }
     return HSLColor.fromAHSL(
       lerpDouble(a.alpha, b.alpha, t)!.clamp(0.0, 1.0),
       lerpDouble(a.hue, b.hue, t)! % 360.0,
@@ -400,8 +407,9 @@ class HSLColor {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
+    }
     return other is HSLColor
         && other.alpha == alpha
         && other.hue == hue
@@ -444,10 +452,12 @@ class ColorSwatch<T> extends Color {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return super == other
         && other is ColorSwatch<T>
         && mapEquals<T, Color>(other._swatch, _swatch);

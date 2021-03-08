@@ -318,10 +318,11 @@ class CommonFinders {
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder bySemanticsLabel(Pattern label, { bool skipOffstage = true }) {
-    if (WidgetsBinding.instance!.pipelineOwner.semanticsOwner == null)
+    if (WidgetsBinding.instance!.pipelineOwner.semanticsOwner == null) {
       throw StateError('Semantics are not enabled. '
                        'Make sure to call tester.ensureSemantics() before using '
                        'this finder, and call dispose on its return value after.');
+    }
     return byElementPredicate(
       (Element element) {
         // Multiple elements can have the same renderObject - we want the "owner"
@@ -433,12 +434,15 @@ abstract class Finder {
     final String additional = skipOffstage ? ' (ignoring offstage widgets)' : '';
     final List<Element> widgets = evaluate().toList();
     final int count = widgets.length;
-    if (count == 0)
+    if (count == 0) {
       return 'zero widgets with $description$additional';
-    if (count == 1)
+    }
+    if (count == 1) {
       return 'exactly one widget with $description$additional: ${widgets.single}';
-    if (count < 4)
+    }
+    if (count < 4) {
       return '$count widgets with $description$additional: $widgets';
+    }
     return '$count widgets with $description$additional: ${widgets[0]}, ${widgets[1]}, ${widgets[2]}, ...';
   }
 }
@@ -559,8 +563,9 @@ class _TextFinder extends MatchFinder {
   bool matches(Element candidate) {
     final Widget widget = candidate.widget;
     if (widget is Text) {
-      if (widget.data != null)
+      if (widget.data != null) {
         return widget.data == text;
+      }
       assert(widget.textSpan != null);
       return widget.textSpan!.toPlainText() == text;
     } else if (widget is EditableText) {
@@ -583,8 +588,9 @@ class _TextContainingFinder extends MatchFinder {
   bool matches(Element candidate) {
     final Widget widget = candidate.widget;
     if (widget is Text) {
-      if (widget.data != null)
+      if (widget.data != null) {
         return widget.data!.contains(pattern);
+      }
       assert(widget.textSpan != null);
       return widget.textSpan!.toPlainText().contains(pattern);
     } else if (widget is EditableText) {
@@ -713,8 +719,9 @@ class _DescendantFinder extends Finder {
 
   @override
   String get description {
-    if (matchRoot)
+    if (matchRoot) {
       return '${descendant.description} in the subtree(s) beginning with ${ancestor.description}';
+    }
     return '${descendant.description} that has ancestor(s) with ${ancestor.description}';
   }
 
@@ -729,8 +736,9 @@ class _DescendantFinder extends Finder {
     final List<Element> candidates = ancestorElements.expand<Element>(
       (Element element) => collectAllElementsFrom(element, skipOffstage: skipOffstage)
     ).toSet().toList();
-    if (matchRoot)
+    if (matchRoot) {
       candidates.insertAll(0, ancestorElements);
+    }
     return candidates;
   }
 }
@@ -744,8 +752,9 @@ class _AncestorFinder extends Finder {
 
   @override
   String get description {
-    if (matchRoot)
+    if (matchRoot) {
       return 'ancestor ${ancestor.description} beginning with ${descendant.description}';
+    }
     return '${ancestor.description} which is an ancestor of ${descendant.description}';
   }
 
@@ -759,8 +768,9 @@ class _AncestorFinder extends Finder {
     final List<Element> candidates = <Element>[];
     for (final Element root in descendant.evaluate()) {
       final List<Element> ancestors = <Element>[];
-      if (matchRoot)
+      if (matchRoot) {
         ancestors.add(root);
+      }
       root.visitAncestorElements((Element element) {
         ancestors.add(element);
         return true;

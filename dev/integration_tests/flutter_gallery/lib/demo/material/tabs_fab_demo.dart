@@ -107,8 +107,9 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
   }
 
   Widget? buildFloatingActionButton(_Page page) {
-    if (!page.fabDefined)
+    if (!page.fabDefined) {
       return null;
+    }
 
     if (_extendedButtons) {
       return FloatingActionButton.extended(

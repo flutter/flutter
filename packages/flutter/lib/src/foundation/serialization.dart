@@ -86,8 +86,9 @@ class WriteBuffer {
   void _alignTo(int alignment) {
     final int mod = _buffer!.length % alignment;
     if (mod != 0) {
-      for (int i = 0; i < alignment - mod; i++)
+      for (int i = 0; i < alignment - mod; i++) {
         _buffer!.add(0);
+      }
     }
   }
 
@@ -190,7 +191,8 @@ class ReadBuffer {
 
   void _alignTo(int alignment) {
     final int mod = _position % alignment;
-    if (mod != 0)
+    if (mod != 0) {
       _position += alignment - mod;
+    }
   }
 }

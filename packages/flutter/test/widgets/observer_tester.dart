@@ -30,19 +30,22 @@ class TestObserver extends NavigatorObserver {
 
   @override
   void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (onRemoved != null)
+    if (onRemoved != null) {
       onRemoved!(route, previousRoute);
+    }
   }
 
   @override
   void didReplace({ Route<dynamic>? oldRoute, Route<dynamic>? newRoute }) {
-    if (onReplaced != null)
+    if (onReplaced != null) {
       onReplaced!(newRoute, oldRoute);
+    }
   }
 
   @override
   void didStartUserGesture(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (onStartUserGesture != null)
+    if (onStartUserGesture != null) {
       onStartUserGesture!(route, previousRoute);
+    }
   }
 }

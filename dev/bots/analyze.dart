@@ -161,49 +161,61 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
     for (int lineNumber in linesWithDeprecations) {
       try {
         final Match match1 = _deprecationPattern1.firstMatch(lines[lineNumber]);
-        if (match1 == null)
+        if (match1 == null) {
           throw 'Deprecation notice does not match required pattern.';
+        }
         final String indent = match1[1];
         lineNumber += 1;
-        if (lineNumber >= lines.length)
+        if (lineNumber >= lines.length) {
           throw 'Incomplete deprecation notice.';
+        }
         Match match3;
         String message;
         do {
           final Match match2 = _deprecationPattern2.firstMatch(lines[lineNumber]);
-          if (match2 == null)
+          if (match2 == null) {
             throw 'Deprecation notice does not match required pattern.';
-          if (!lines[lineNumber].startsWith("$indent  '"))
+          }
+          if (!lines[lineNumber].startsWith("$indent  '")) {
             throw 'Unexpected deprecation notice indent.';
+          }
           if (message == null) {
             final String firstChar = String.fromCharCode(match2[1].runes.first);
-            if (firstChar.toUpperCase() != firstChar)
+            if (firstChar.toUpperCase() != firstChar) {
               throw 'Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo';
+            }
           }
           message = match2[1];
           lineNumber += 1;
-          if (lineNumber >= lines.length)
+          if (lineNumber >= lines.length) {
             throw 'Incomplete deprecation notice.';
+          }
           match3 = _deprecationPattern3.firstMatch(lines[lineNumber]);
         } while (match3 == null);
         final int v1 = int.parse(match3[1]);
         final int v2 = int.parse(match3[2]);
         final bool hasV4 = match3[4] != null;
         if (v1 > 1 || (v1 == 1 && v2 >= 20)) {
-          if (!hasV4)
+          if (!hasV4) {
             throw 'Deprecation notice does not accurately indicate a dev branch version number; please see https://flutter.dev/docs/development/tools/sdk/releases to find the latest dev build version number.';
+          }
         }
-        if (!message.endsWith('.') && !message.endsWith('!') && !message.endsWith('?'))
+        if (!message.endsWith('.') && !message.endsWith('!') && !message.endsWith('?')) {
           throw 'Deprecation notice should be a grammatically correct sentence and end with a period.';
-        if (!lines[lineNumber].startsWith("$indent  '"))
+        }
+        if (!lines[lineNumber].startsWith("$indent  '")) {
           throw 'Unexpected deprecation notice indent.';
+        }
         lineNumber += 1;
-        if (lineNumber >= lines.length)
+        if (lineNumber >= lines.length) {
           throw 'Incomplete deprecation notice.';
-        if (!lines[lineNumber].contains(_deprecationPattern4))
+        }
+        if (!lines[lineNumber].contains(_deprecationPattern4)) {
           throw 'End of deprecation notice does not match required pattern.';
-        if (!lines[lineNumber].startsWith('$indent)'))
+        }
+        if (!lines[lineNumber].startsWith('$indent)')) {
           throw 'Unexpected deprecation notice indent.';
+        }
       } catch (error) {
         errors.add('${file.path}:${lineNumber + 1}: $error');
       }
@@ -247,10 +259,12 @@ Future<void> _verifyNoMissingLicenseForExtension(String workingDirectory, String
   final List<String> errors = <String>[];
   await for (final File file in _allFiles(workingDirectory, extension, minimumMatches: minimumMatches)) {
     final String contents = file.readAsStringSync().replaceAll('\r\n', '\n');
-    if (contents.isEmpty)
-      continue; // let's not go down the /bin/true rabbit hole
-    if (!contents.startsWith(licensePattern))
+    if (contents.isEmpty) {
+      continue;
+    } // let's not go down the /bin/true rabbit hole
+    if (!contents.startsWith(licensePattern)) {
       errors.add(file.path);
+    }
   }
   // Fail if any errors
   if (errors.isNotEmpty) {
@@ -280,8 +294,9 @@ Future<void> verifyNoTestImports(String workingDirectory) async {
   for (final File file in dartFiles) {
     for (final String line in file.readAsLinesSync()) {
       final Match match = _testImportPattern.firstMatch(line);
-      if (match != null && !_exemptTestImports.contains(match.group(2)))
+      if (match != null && !_exemptTestImports.contains(match.group(2))) {
         errors.add(file.path);
+      }
     }
   }
   // Fail if any errors
@@ -303,17 +318,20 @@ Future<void> verifyNoTestPackageImports(String workingDirectory) async {
           from: workingDirectory)).toFilePath(windows: false);
       if (name.startsWith('bin/cache') ||
           name == 'dev/bots/test.dart' ||
-          name.startsWith('.pub-cache'))
+          name.startsWith('.pub-cache')) {
         return null;
+      }
       final String data = file.readAsStringSync();
       if (data.contains("import 'package:test/test.dart'")) {
         if (data.contains("// Defines a 'package:test' shim.")) {
           shims.add('  $name');
-          if (!data.contains('https://github.com/dart-lang/matcher/issues/98'))
+          if (!data.contains('https://github.com/dart-lang/matcher/issues/98')) {
             return '  $name: Shims must link to the isInstanceOf issue.';
+          }
           if (data.contains("import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;") &&
-              data.contains("export 'package:test/test.dart' hide TypeMatcher, isInstanceOf;"))
+              data.contains("export 'package:test/test.dart' hide TypeMatcher, isInstanceOf;")) {
             return null;
+          }
           return '  $name: Shim seems to be missing the expected import/export lines.';
         }
         final int count = 'package:test'.allMatches(data).length;
@@ -329,11 +347,13 @@ Future<void> verifyNoTestPackageImports(String workingDirectory) async {
           // Driver tests aren't typically expected to use TypeMatcher and company.
           // The trivial tests don't typically do anything at all and it would be
           // a pain to have to give them a shim.
-          if (!data.contains("import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;"))
+          if (!data.contains("import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;")) {
             return '  $name: test does not hide TypeMatcher and isInstanceOf from package:test; consider using a shim instead.';
+          }
           assert(count > 0);
-          if (count == 1)
+          if (count == 1) {
             return null;
+          }
           return "  $name: uses 'package:test' $count times.";
         }
         if (name.startsWith('packages/flutter_test/')) {
@@ -342,8 +362,9 @@ Future<void> verifyNoTestPackageImports(String workingDirectory) async {
         }
         if (data.contains("import 'package:test/test.dart' as test_package;") ||
             data.contains("import 'package:test/test.dart' as test_package show ")) {
-          if (count == 1)
+          if (count == 1) {
             return null;
+          }
         }
         return "  $name: uses 'package:test' directly";
       }
@@ -407,8 +428,9 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
 
   for (final String key in dependencyMap.keys) {
     for (final String dependency in dependencyMap[key]) {
-      if (dependencyMap[dependency] != null)
+      if (dependencyMap[dependency] != null) {
         continue;
+      }
       // Sanity check before performing _deepSearch, to ensure there's no rogue
       // dependencies.
       final String validFilenames = dependencyMap.keys.map((String name) => name + '.dart').join(', ');
@@ -558,8 +580,9 @@ Future<void> verifyNoRuntimeTypeInToString(String workingDirectory) async {
       }
     }
   }
-  if (problems.isNotEmpty)
+  if (problems.isNotEmpty) {
     exitWithError(problems);
+  }
 }
 
 Future<void> verifyNoTrailingSpaces(String workingDirectory, { int minimumMatches = 4000 }) async {
@@ -583,11 +606,13 @@ Future<void> verifyNoTrailingSpaces(String workingDirectory, { int minimumMatche
         problems.add('${file.path}:${index + 1}: trailing U+0009 tab character');
       }
     }
-    if (lines.isNotEmpty && lines.last == '')
+    if (lines.isNotEmpty && lines.last == '') {
       problems.add('${file.path}:${lines.length}: trailing blank line');
+    }
   }
-  if (problems.isNotEmpty)
+  if (problems.isNotEmpty) {
     exitWithError(problems);
+  }
 }
 
 @immutable
@@ -639,8 +664,9 @@ class Hash256 {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is Hash256
         && other.a == a
         && other.b == b
@@ -1033,8 +1059,9 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256> legacyBina
         utf8.decode(bytes);
       } on FormatException catch (error) {
         final Digest digest = sha256.convert(bytes);
-        if (!legacyBinaries.contains(Hash256.fromDigest(digest)))
+        if (!legacyBinaries.contains(Hash256.fromDigest(digest))) {
           problems.add('${file.path}:${error.offset}: file is not valid UTF-8');
+        }
       }
     }
     if (problems.isNotEmpty) {
@@ -1056,11 +1083,13 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256> legacyBina
 bool _listEquals<T>(List<T> a, List<T> b) {
   assert(a != null);
   assert(b != null);
-  if (a.length != b.length)
+  if (a.length != b.length) {
     return false;
+  }
   for (int index = 0; index < a.length; index += 1) {
-    if (a[index] != b[index])
+    if (a[index] != b[index]) {
       return false;
+    }
   }
   return true;
 }
@@ -1100,38 +1129,51 @@ Stream<File> _allFiles(String workingDirectory, String extension, { @required in
   while (pending.isNotEmpty) {
     final FileSystemEntity entity = pending.first;
     pending.remove(entity);
-    if (path.extension(entity.path) == '.tmpl')
+    if (path.extension(entity.path) == '.tmpl') {
       continue;
+    }
     if (entity is File) {
-      if (!gitFileNamesSet.contains(path.canonicalize(entity.absolute.path)))
+      if (!gitFileNamesSet.contains(path.canonicalize(entity.absolute.path))) {
         continue;
-      if (_isGeneratedPluginRegistrant(entity))
+      }
+      if (_isGeneratedPluginRegistrant(entity)) {
         continue;
-      if (path.basename(entity.path) == 'flutter_export_environment.sh')
+      }
+      if (path.basename(entity.path) == 'flutter_export_environment.sh') {
         continue;
-      if (path.basename(entity.path) == 'gradlew.bat')
+      }
+      if (path.basename(entity.path) == 'gradlew.bat') {
         continue;
-      if (path.basename(entity.path) == '.DS_Store')
+      }
+      if (path.basename(entity.path) == '.DS_Store') {
         continue;
+      }
       if (extension == null || path.extension(entity.path) == '.$extension') {
         matches += 1;
         yield entity;
       }
     } else if (entity is Directory) {
-      if (File(path.join(entity.path, '.dartignore')).existsSync())
+      if (File(path.join(entity.path, '.dartignore')).existsSync()) {
         continue;
-      if (path.basename(entity.path) == '.git')
+      }
+      if (path.basename(entity.path) == '.git') {
         continue;
-      if (path.basename(entity.path) == '.idea')
+      }
+      if (path.basename(entity.path) == '.idea') {
         continue;
-      if (path.basename(entity.path) == '.gradle')
+      }
+      if (path.basename(entity.path) == '.gradle') {
         continue;
-      if (path.basename(entity.path) == '.dart_tool')
+      }
+      if (path.basename(entity.path) == '.dart_tool') {
         continue;
-      if (path.basename(entity.path) == '.idea')
+      }
+      if (path.basename(entity.path) == '.idea') {
         continue;
-      if (path.basename(entity.path) == 'build')
+      }
+      if (path.basename(entity.path) == 'build') {
         continue;
+      }
       pending.addAll(entity.listSync());
     }
   }
@@ -1219,8 +1261,9 @@ Future<Set<String>> _findFlutterDependencies(String srcPath, List<String> errors
       final Set<String> result = <String>{};
       for (final String line in file.readAsLinesSync()) {
         Match match = _importPattern.firstMatch(line);
-        if (match != null)
+        if (match != null) {
           result.add(match.group(2));
+        }
         if (checkForMeta) {
           match = _importMetaPattern.firstMatch(line);
           if (match != null) {
@@ -1241,14 +1284,17 @@ Future<Set<String>> _findFlutterDependencies(String srcPath, List<String> errors
 }
 
 List<T> _deepSearch<T>(Map<T, Set<T>> map, T start, [ Set<T> seen ]) {
-  if (map[start] == null)
-    return null; // We catch these separately.
+  if (map[start] == null) {
+    return null;
+  } // We catch these separately.
 
   for (final T key in map[start]) {
-    if (key == start)
-      continue; // we catch these separately
-    if (seen != null && seen.contains(key))
+    if (key == start) {
+      continue;
+    } // we catch these separately
+    if (seen != null && seen.contains(key)) {
       return <T>[start, key];
+    }
     final List<T> result = _deepSearch<T>(
       map,
       key,
@@ -1263,8 +1309,9 @@ List<T> _deepSearch<T>(Map<T, Set<T>> map, T start, [ Set<T> seen ]) {
       // For example a->b->a, rather than c->a->b->a.
       // Since we visit every node, we know the shortest chains are those
       // that start and end on the loop.
-      if (result.first == result.last)
+      if (result.first == result.last) {
         return result;
+      }
     }
   }
   return null;

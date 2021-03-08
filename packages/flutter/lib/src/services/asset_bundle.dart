@@ -69,8 +69,9 @@ abstract class AssetBundle {
     // Note: data has a non-nullable type, but might be null when running with
     // weak checking, so we need to null check it anyway (and ignore the warning
     // that the null-handling logic is dead code).
-    if (data == null)
-      throw FlutterError('Unable to load asset: $key'); // ignore: dead_code
+    if (data == null) {
+      throw FlutterError('Unable to load asset: $key');
+    } // ignore: dead_code
     // 50 KB of data should take 2-3 ms to parse on a Moto G4, and about 400 μs
     // on a Pixel 4.
     if (data.lengthInBytes < 50 * 1024) {
@@ -121,11 +122,12 @@ class NetworkAssetBundle extends AssetBundle {
   Future<ByteData> load(String key) async {
     final HttpClientRequest request = await _httpClient.getUrl(_urlFromKey(key));
     final HttpClientResponse response = await request.close();
-    if (response.statusCode != HttpStatus.ok)
+    if (response.statusCode != HttpStatus.ok) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('Unable to load asset: $key'),
         IntProperty('HTTP status code', response.statusCode),
       ]);
+    }
     final Uint8List bytes = await consolidateHttpClientResponseBytes(response);
     return bytes.buffer.asByteData();
   }
@@ -164,8 +166,9 @@ abstract class CachingAssetBundle extends AssetBundle {
 
   @override
   Future<String> loadString(String key, { bool cache = true }) {
-    if (cache)
+    if (cache) {
       return _stringCache.putIfAbsent(key, () => super.loadString(key));
+    }
     return super.loadString(key);
   }
 
@@ -183,8 +186,9 @@ abstract class CachingAssetBundle extends AssetBundle {
   Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser) {
     assert(key != null);
     assert(parser != null);
-    if (_structuredDataCache.containsKey(key))
+    if (_structuredDataCache.containsKey(key)) {
       return _structuredDataCache[key]! as Future<T>;
+    }
     Completer<T>? completer;
     Future<T>? result;
     loadString(key, cache: false).then<T>(parser).then<void>((T value) {
@@ -223,8 +227,9 @@ class PlatformAssetBundle extends CachingAssetBundle {
     final Uint8List encoded = utf8.encoder.convert(Uri(path: Uri.encodeFull(key)).path);
     final ByteData? asset =
         await ServicesBinding.instance!.defaultBinaryMessenger.send('flutter/assets', encoded.buffer.asByteData());
-    if (asset == null)
+    if (asset == null) {
       throw FlutterError('Unable to load asset: $key');
+    }
     return asset;
   }
 }

@@ -71,8 +71,9 @@ abstract class MultiDragPointerState {
 
   void _move(PointerMoveEvent event) {
     assert(_arenaEntry != null);
-    if (!event.synthesized)
+    if (!event.synthesized) {
       _velocityTracker.addPosition(event.timeStamp, event.position);
+    }
     if (_client != null) {
       assert(pendingDelta == null);
       // Call client last to avoid reentrancy.
@@ -262,8 +263,9 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
   void acceptGesture(int pointer) {
     assert(_pointers != null);
     final T? state = _pointers![pointer];
-    if (state == null)
-      return; // We might already have canceled this drag if the up comes before the accept.
+    if (state == null) {
+      return;
+    } // We might already have canceled this drag if the up comes before the accept.
     state.accepted((Offset initialPosition) => _startDrag(initialPosition, pointer));
   }
 
@@ -273,8 +275,9 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
     assert(state != null);
     assert(state._pendingDelta != null);
     Drag? drag;
-    if (onStart != null)
+    if (onStart != null) {
       drag = invokeCallback<Drag?>('onStart', () => onStart!(initialPosition));
+    }
     if (drag != null) {
       state._startDrag(drag);
     } else {
@@ -320,8 +323,9 @@ class _ImmediatePointerState extends MultiDragPointerState {
   @override
   void checkForResolutionAfterMove() {
     assert(pendingDelta != null);
-    if (pendingDelta!.distance > computeHitSlop(kind))
+    if (pendingDelta!.distance > computeHitSlop(kind)) {
       resolve(GestureDisposition.accepted);
+    }
   }
 
   @override
@@ -369,8 +373,9 @@ class _HorizontalPointerState extends MultiDragPointerState {
   @override
   void checkForResolutionAfterMove() {
     assert(pendingDelta != null);
-    if (pendingDelta!.dx.abs() > computeHitSlop(kind))
+    if (pendingDelta!.dx.abs() > computeHitSlop(kind)) {
       resolve(GestureDisposition.accepted);
+    }
   }
 
   @override
@@ -418,8 +423,9 @@ class _VerticalPointerState extends MultiDragPointerState {
   @override
   void checkForResolutionAfterMove() {
     assert(pendingDelta != null);
-    if (pendingDelta!.dy.abs() > computeHitSlop(kind))
+    if (pendingDelta!.dy.abs() > computeHitSlop(kind)) {
       resolve(GestureDisposition.accepted);
+    }
   }
 
   @override
@@ -492,10 +498,11 @@ class _DelayedPointerState extends MultiDragPointerState {
   @override
   void accepted(GestureMultiDragStartCallback starter) {
     assert(_starter == null);
-    if (_timer == null)
+    if (_timer == null) {
       starter(initialPosition);
-    else
+    } else {
       _starter = starter;
+    }
   }
 
   @override

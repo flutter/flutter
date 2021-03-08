@@ -143,8 +143,9 @@ class ContinuousRectangleBorder extends OutlinedBorder {
 
   @override
   void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
-    if (rect.isEmpty)
+    if (rect.isEmpty) {
       return;
+    }
     switch (side.style) {
       case BorderStyle.none:
         break;
@@ -158,8 +159,9 @@ class ContinuousRectangleBorder extends OutlinedBorder {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ContinuousRectangleBorder
         && other.side == side
         && other.borderRadius == borderRadius;

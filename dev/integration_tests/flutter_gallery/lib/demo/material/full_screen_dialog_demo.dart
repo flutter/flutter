@@ -47,8 +47,9 @@ class DateTimeItem extends StatelessWidget {
                     lastDate: date.add(const Duration(days: 30)),
                   )
                   .then((DateTime? value) {
-                    if (value != null)
+                    if (value != null) {
                       onChanged(DateTime(value.year, value.month, value.day, time.hour, time.minute));
+                    }
                   });
                 },
                 child: Row(
@@ -74,8 +75,9 @@ class DateTimeItem extends StatelessWidget {
                   initialTime: time,
                 )
                 .then((TimeOfDay? value) {
-                  if (value != null)
+                  if (value != null) {
                     onChanged(DateTime(date.year, date.month, date.day, value.hour, value.minute));
+                  }
                 });
               },
               child: Row(
@@ -110,8 +112,9 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
 
   Future<bool> _onWillPop() async {
     _saveNeeded = _hasLocation || _hasName || _saveNeeded;
-    if (!_saveNeeded)
+    if (!_saveNeeded) {
       return true;
+    }
 
     final ThemeData theme = Theme.of(context);
     final TextStyle dialogTextStyle = theme.textTheme.subtitle1!.copyWith(color: theme.textTheme.caption!.color);

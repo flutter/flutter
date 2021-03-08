@@ -76,8 +76,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// Always call [prepareInitialFrame] before changing the configuration.
   set configuration(ViewConfiguration value) {
     assert(value != null);
-    if (configuration == value)
+    if (configuration == value) {
       return;
+    }
     _configuration = value;
     replaceRootLayer(_updateMatricesAndCreateNewRootLayer());
     assert(_rootTransform != null);
@@ -149,8 +150,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     _size = configuration.size;
     assert(_size.isFinite);
 
-    if (child != null)
+    if (child != null) {
       child!.layout(BoxConstraints.tight(_size));
+    }
   }
 
   @override
@@ -169,8 +171,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// coordinate system as that expected by the root [Layer], which will
   /// normally be in physical (device) pixels.
   bool hitTest(HitTestResult result, { required Offset position }) {
-    if (child != null)
+    if (child != null) {
       child!.hitTest(BoxHitTestResult.wrap(result), position: position);
+    }
     result.add(HitTestEntry(this));
     return true;
   }
@@ -196,8 +199,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null)
+    if (child != null) {
       context.paintChild(child!, offset);
+    }
   }
 
   @override
@@ -215,13 +219,15 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     try {
       final ui.SceneBuilder builder = ui.SceneBuilder();
       final ui.Scene scene = layer!.buildScene(builder);
-      if (automaticSystemUiAdjustment)
+      if (automaticSystemUiAdjustment) {
         _updateSystemChrome();
+      }
       _window.render(scene);
       scene.dispose();
       assert(() {
-        if (debugRepaintRainbowEnabled || debugRepaintTextRainbowEnabled)
+        if (debugRepaintRainbowEnabled || debugRepaintTextRainbowEnabled) {
           debugCurrentRepaintColor = debugCurrentRepaintColor.withHue((debugCurrentRepaintColor.hue + 2.0) % 360.0);
+        }
         return true;
       }());
     } finally {
@@ -320,7 +326,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     properties.add(DiagnosticsProperty<Size>('window size', _window.physicalSize, tooltip: 'in physical pixels'));
     properties.add(DoubleProperty('device pixel ratio', _window.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
     properties.add(DiagnosticsProperty<ViewConfiguration>('configuration', configuration, tooltip: 'in logical pixels'));
-    if (_window.platformDispatcher.semanticsEnabled)
+    if (_window.platformDispatcher.semanticsEnabled) {
       properties.add(DiagnosticsNode.message('semantics enabled'));
+    }
   }
 }

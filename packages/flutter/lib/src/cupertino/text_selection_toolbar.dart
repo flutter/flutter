@@ -583,8 +583,9 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   void visitChildren(ElementVisitor visitor) {
     slotToChild.values.forEach(visitor);
     for (final Element child in _children) {
-      if (!_forgottenChildren.contains(child))
+      if (!_forgottenChildren.contains(child)) {
         visitor(child);
+      }
     }
   }
 

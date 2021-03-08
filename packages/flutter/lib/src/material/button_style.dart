@@ -297,8 +297,9 @@ class ButtonStyle with Diagnosticable {
   /// In other words, [style] is used to fill in unspecified (null) fields
   /// this ButtonStyle.
   ButtonStyle merge(ButtonStyle? style) {
-    if (style == null)
+    if (style == null) {
       return this;
+    }
     return copyWith(
       textStyle: textStyle ?? style.textStyle,
       backgroundColor: backgroundColor ?? style.backgroundColor,
@@ -347,10 +348,12 @@ class ButtonStyle with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ButtonStyle
         && other.textStyle == textStyle
         && other.backgroundColor == backgroundColor
@@ -397,8 +400,9 @@ class ButtonStyle with Diagnosticable {
   /// Linearly interpolate between two [ButtonStyle]s.
   static ButtonStyle? lerp(ButtonStyle? a, ButtonStyle? b, double t) {
     assert (t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     return ButtonStyle(
       textStyle: _lerpProperties<TextStyle?>(a?.textStyle, b?.textStyle, t, TextStyle.lerp),
       backgroundColor: _lerpProperties<Color?>(a?.backgroundColor, b?.backgroundColor, t, Color.lerp),
@@ -423,22 +427,25 @@ class ButtonStyle with Diagnosticable {
 
   static MaterialStateProperty<T?>? _lerpProperties<T>(MaterialStateProperty<T>? a, MaterialStateProperty<T>? b, double t, T? Function(T?, T?, double) lerpFunction ) {
     // Avoid creating a _LerpProperties object for a common case.
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     return _LerpProperties<T>(a, b, t, lerpFunction);
   }
 
   // Special case because BorderSide.lerp() doesn't support null arguments
   static MaterialStateProperty<BorderSide?>? _lerpSides(MaterialStateProperty<BorderSide?>? a, MaterialStateProperty<BorderSide?>? b, double t) {
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     return _LerpSides(a, b, t);
   }
 
   // TODO(hansmuller): OutlinedBorder needs a lerp method - https://github.com/flutter/flutter/issues/60555.
   static MaterialStateProperty<OutlinedBorder?>? _lerpShapes(MaterialStateProperty<OutlinedBorder?>? a, MaterialStateProperty<OutlinedBorder?>? b, double t) {
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     return _LerpShapes(a, b, t);
   }
 }
@@ -470,12 +477,15 @@ class _LerpSides implements MaterialStateProperty<BorderSide?> {
   BorderSide? resolve(Set<MaterialState> states) {
     final BorderSide? resolvedA = a?.resolve(states);
     final BorderSide? resolvedB = b?.resolve(states);
-    if (resolvedA == null && resolvedB == null)
+    if (resolvedA == null && resolvedB == null) {
       return null;
-    if (resolvedA == null)
+    }
+    if (resolvedA == null) {
       return BorderSide.lerp(BorderSide(width: 0, color: resolvedB!.color.withAlpha(0)), resolvedB, t);
-    if (resolvedB == null)
+    }
+    if (resolvedB == null) {
       return BorderSide.lerp(BorderSide(width: 0, color: resolvedA.color.withAlpha(0)), resolvedA, t);
+    }
     return BorderSide.lerp(resolvedA, resolvedB, t);
   }
 }

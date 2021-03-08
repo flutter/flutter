@@ -425,8 +425,9 @@ Future<void> _runGradleTask({String workingDirectory, String task, List<String> 
     print('stderr:');
     print(result.stderr);
   }
-  if (result.exitCode != 0)
+  if (result.exitCode != 0) {
     throw 'Gradle exited with error';
+  }
 }
 
 Future<ProcessResult> _resultOfGradleTask({String workingDirectory, String task,
@@ -434,8 +435,9 @@ Future<ProcessResult> _resultOfGradleTask({String workingDirectory, String task,
   section('Find Java');
   final String javaHome = await findJavaHome();
 
-  if (javaHome == null)
+  if (javaHome == null) {
     throw TaskResult.failure('Could not find Java');
+  }
 
   print('\nUsing JAVA_HOME=$javaHome');
 

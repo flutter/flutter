@@ -131,8 +131,9 @@ class RenderParagraph extends RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! TextParentData)
+    if (child.parentData is! TextParentData) {
       child.parentData = TextParentData();
+    }
   }
 
   final TextPainter _textPainter;
@@ -175,8 +176,9 @@ class RenderParagraph extends RenderBox
   TextAlign get textAlign => _textPainter.textAlign;
   set textAlign(TextAlign value) {
     assert(value != null);
-    if (_textPainter.textAlign == value)
+    if (_textPainter.textAlign == value) {
       return;
+    }
     _textPainter.textAlign = value;
     markNeedsPaint();
   }
@@ -197,8 +199,9 @@ class RenderParagraph extends RenderBox
   TextDirection get textDirection => _textPainter.textDirection!;
   set textDirection(TextDirection value) {
     assert(value != null);
-    if (_textPainter.textDirection == value)
+    if (_textPainter.textDirection == value) {
       return;
+    }
     _textPainter.textDirection = value;
     markNeedsLayout();
   }
@@ -214,8 +217,9 @@ class RenderParagraph extends RenderBox
   bool _softWrap;
   set softWrap(bool value) {
     assert(value != null);
-    if (_softWrap == value)
+    if (_softWrap == value) {
       return;
+    }
     _softWrap = value;
     markNeedsLayout();
   }
@@ -225,8 +229,9 @@ class RenderParagraph extends RenderBox
   TextOverflow _overflow;
   set overflow(TextOverflow value) {
     assert(value != null);
-    if (_overflow == value)
+    if (_overflow == value) {
       return;
+    }
     _overflow = value;
     _textPainter.ellipsis = value == TextOverflow.ellipsis ? _kEllipsis : null;
     markNeedsLayout();
@@ -239,8 +244,9 @@ class RenderParagraph extends RenderBox
   double get textScaleFactor => _textPainter.textScaleFactor;
   set textScaleFactor(double value) {
     assert(value != null);
-    if (_textPainter.textScaleFactor == value)
+    if (_textPainter.textScaleFactor == value) {
       return;
+    }
     _textPainter.textScaleFactor = value;
     _overflowShader = null;
     markNeedsLayout();
@@ -254,8 +260,9 @@ class RenderParagraph extends RenderBox
   /// zero.
   set maxLines(int? value) {
     assert(value == null || value > 0);
-    if (_textPainter.maxLines == value)
+    if (_textPainter.maxLines == value) {
       return;
+    }
     _textPainter.maxLines = value;
     _overflowShader = null;
     markNeedsLayout();
@@ -271,8 +278,9 @@ class RenderParagraph extends RenderBox
   Locale? get locale => _textPainter.locale;
   /// The value may be null.
   set locale(Locale? value) {
-    if (_textPainter.locale == value)
+    if (_textPainter.locale == value) {
       return;
+    }
     _textPainter.locale = value;
     _overflowShader = null;
     markNeedsLayout();
@@ -282,8 +290,9 @@ class RenderParagraph extends RenderBox
   StrutStyle? get strutStyle => _textPainter.strutStyle;
   /// The value may be null.
   set strutStyle(StrutStyle? value) {
-    if (_textPainter.strutStyle == value)
+    if (_textPainter.strutStyle == value) {
       return;
+    }
     _textPainter.strutStyle = value;
     _overflowShader = null;
     markNeedsLayout();
@@ -293,8 +302,9 @@ class RenderParagraph extends RenderBox
   TextWidthBasis get textWidthBasis => _textPainter.textWidthBasis;
   set textWidthBasis(TextWidthBasis value) {
     assert(value != null);
-    if (_textPainter.textWidthBasis == value)
+    if (_textPainter.textWidthBasis == value) {
       return;
+    }
     _textPainter.textWidthBasis = value;
     _overflowShader = null;
     markNeedsLayout();
@@ -303,8 +313,9 @@ class RenderParagraph extends RenderBox
   /// {@macro flutter.dart:ui.textHeightBehavior}
   ui.TextHeightBehavior? get textHeightBehavior => _textPainter.textHeightBehavior;
   set textHeightBehavior(ui.TextHeightBehavior? value) {
-    if (_textPainter.textHeightBehavior == value)
+    if (_textPainter.textHeightBehavior == value) {
       return;
+    }
     _textPainter.textHeightBehavior = value;
     _overflowShader = null;
     markNeedsLayout();
@@ -486,8 +497,9 @@ class RenderParagraph extends RenderBox
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
-    if (event is! PointerDownEvent)
+    if (event is! PointerDownEvent) {
       return;
+    }
     _layoutTextWithConstraints(constraints);
     final Offset offset = entry.localPosition;
     final TextPosition position = _textPainter.getPositionForOffset(offset);

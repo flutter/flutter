@@ -33,10 +33,11 @@ Future<String> dataHandler(String message) async {
       });
       completer.complete(json.encode(result));
     }
-    if (SchedulerBinding.instance.hasScheduledFrame)
+    if (SchedulerBinding.instance.hasScheduledFrame) {
       SchedulerBinding.instance.addPostFrameCallback(completeSemantics);
-    else
+    } else {
       completeSemantics();
+    }
     return completer.future;
   }
   throw UnimplementedError();

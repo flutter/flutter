@@ -17,8 +17,9 @@ Future<bool> runTests({
   int shardIndex = 0,
   List<File> files,
 }) async {
-  if (verbose)
+  if (verbose) {
     print('Starting run_tests.dart...');
+  }
 
   // Best attempt at evenly splitting tests among the shards
   final List<File> shardedFiles = <File>[];
@@ -38,14 +39,16 @@ Future<bool> runTests({
 
   if (verbose) {
     print('Tests in this shard:');
-    for (final File file in shardedFiles)
+    for (final File file in shardedFiles) {
       print(file.path);
+    }
   }
   print('');
 
   for (final File file in shardedFiles) {
-    if (verbose)
+    if (verbose) {
       print('Processing ${file.path}...');
+    }
     CustomerTest instructions;
     try {
       instructions = CustomerTest(file);
@@ -63,8 +66,9 @@ Future<bool> runTests({
     }
 
     final Directory checkout = Directory.systemTemp.createTempSync('flutter_customer_testing.${path.basenameWithoutExtension(file.path)}.');
-    if (verbose)
+    if (verbose) {
       print('Created temporary directory: ${checkout.path}');
+    }
     try {
       bool success;
       bool showContacts = false;
@@ -87,13 +91,15 @@ Future<bool> runTests({
       }
       assert(success != null);
       if (success) {
-        if (verbose)
+        if (verbose) {
           print('Running tests...');
+        }
         final Directory tests = Directory(path.join(checkout.path, 'tests'));
         // TODO(ianh): Once we have a way to update source code, run that command in each directory of instructions.update
         for (int iteration = 0; iteration < repeat; iteration += 1) {
-          if (verbose && repeat > 1)
+          if (verbose && repeat > 1) {
             print('Round ${iteration + 1} of $repeat.');
+          }
           for (final String testCommand in instructions.tests) {
             testCount += 1;
             success = await shell(testCommand, tests, verbose: verbose);
@@ -105,24 +111,27 @@ Future<bool> runTests({
             }
           }
         }
-        if (verbose && success)
+        if (verbose && success) {
           print('Tests finished.');
+        }
       }
       if (showContacts) {
         final String s = instructions.contacts.length == 1 ? '' : 's';
         print('Contact$s: ${instructions.contacts.join(", ")}');
       }
     } finally {
-      if (verbose)
+      if (verbose) {
         print('Deleting temporary directory...');
+      }
       try {
         checkout.deleteSync(recursive: true);
       } on FileSystemException {
         print('Failed to delete "${checkout.path}".');
       }
     }
-    if (verbose)
+    if (verbose) {
       print('');
+    }
   }
   if (failures > 0) {
     final String s = failures == 1 ? '' : 's';
@@ -136,8 +145,9 @@ Future<bool> runTests({
 final RegExp _spaces = RegExp(r' +');
 
 Future<bool> shell(String command, Directory directory, { bool verbose = false, bool silentFailure = false }) async {
-  if (verbose)
+  if (verbose) {
     print('>> $command');
+  }
   Process process;
   if (Platform.isWindows) {
     process = await Process.start('CMD.EXE', <String>['/S', '/C', command], workingDirectory: directory.path);
@@ -149,8 +159,9 @@ Future<bool> shell(String command, Directory directory, { bool verbose = false, 
   utf8.decoder.bind(process.stdout).transform(const LineSplitter()).listen(verbose ? printLog : output.add);
   utf8.decoder.bind(process.stderr).transform(const LineSplitter()).listen(verbose ? printLog : output.add);
   final bool success = await process.exitCode == 0;
-  if (success || silentFailure)
+  if (success || silentFailure) {
     return success;
+  }
   if (!verbose) {
     print('>> $command');
     output.forEach(printLog);

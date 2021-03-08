@@ -383,8 +383,9 @@ class FadeInImage extends StatelessWidget {
       image: image,
       errorBuilder: imageErrorBuilder,
       frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
-        if (wasSynchronouslyLoaded)
+        if (wasSynchronouslyLoaded) {
           return child;
+        }
         return _AnimatedFadeOutFadeIn(
           target: child,
           placeholder: _image(image: placeholder, errorBuilder: placeholderErrorBuilder),

@@ -82,8 +82,9 @@ class TestPointer {
     int? buttons,
   }) {
     _location = newLocation;
-    if (buttons != null)
+    if (buttons != null) {
       _buttons = buttons;
+    }
     switch (event.runtimeType) {
       case PointerDownEvent:
         assert(!isDown);
@@ -115,8 +116,9 @@ class TestPointer {
     assert(!isDown);
     _isDown = true;
     _location = newLocation;
-    if (buttons != null)
+    if (buttons != null) {
       _buttons = buttons;
+    }
     return PointerDownEvent(
       timeStamp: timeStamp,
       kind: kind,
@@ -149,8 +151,9 @@ class TestPointer {
         'up, use hover() instead.');
     final Offset delta = newLocation - location!;
     _location = newLocation;
-    if (buttons != null)
+    if (buttons != null) {
       _buttons = buttons;
+    }
     return PointerMoveEvent(
       timeStamp: timeStamp,
       kind: kind,

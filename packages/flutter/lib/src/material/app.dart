@@ -701,8 +701,9 @@ class _MaterialAppState extends State<MaterialApp> {
   // localizationsDelegate parameter can be used to override
   // _MaterialLocalizationsDelegate.
   Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates sync* {
-    if (widget.localizationsDelegates != null)
+    if (widget.localizationsDelegates != null) {
       yield* widget.localizationsDelegates!;
+    }
     yield DefaultMaterialLocalizations.delegate;
     yield DefaultCupertinoLocalizations.delegate;
   }

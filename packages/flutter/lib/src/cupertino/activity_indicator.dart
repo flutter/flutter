@@ -97,10 +97,11 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
   void didUpdateWidget(CupertinoActivityIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.animating != oldWidget.animating) {
-      if (widget.animating)
+      if (widget.animating) {
         _controller.repeat();
-      else
+      } else {
         _controller.stop();
+      }
     }
   }
 

@@ -164,8 +164,9 @@ class DayPicker extends StatelessWidget {
       result.add(ExcludeSemantics(
         child: Center(child: Text(weekday, style: headerStyle)),
       ));
-      if (i == (localizations.firstDayOfWeekIndex - 1) % 7)
+      if (i == (localizations.firstDayOfWeekIndex - 1) % 7) {
         break;
+      }
     }
     return result;
   }
@@ -181,8 +182,9 @@ class DayPicker extends StatelessWidget {
   static int getDaysInMonth(int year, int month) {
     if (month == DateTime.february) {
       final bool isLeapYear = (year % 4 == 0) && (year % 100 != 0) || (year % 400 == 0);
-      if (isLeapYear)
+      if (isLeapYear) {
         return 29;
+      }
       return 28;
     }
     return _daysInMonth[month - 1];
@@ -247,8 +249,9 @@ class DayPicker extends StatelessWidget {
       // 1-based day of month, e.g. 1-31 for January, and 1-29 for February on
       // a leap year.
       final int day = i - firstDayOffset + 1;
-      if (day > daysInMonth)
+      if (day > daysInMonth) {
         break;
+      }
       if (day < 1) {
         labels.add(Container());
       } else {

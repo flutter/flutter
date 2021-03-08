@@ -119,8 +119,9 @@ abstract class Notification {
     if (element is StatelessElement) {
       final StatelessWidget widget = element.widget;
       if (widget is NotificationListener<Notification>) {
-        if (widget._dispatch(this, element)) // that function checks the type dynamically
+        if (widget._dispatch(this, element)) {
           return false;
+        }
       }
     }
     return true;

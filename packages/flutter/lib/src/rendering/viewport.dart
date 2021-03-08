@@ -42,8 +42,9 @@ abstract class RenderAbstractViewport extends RenderObject {
   /// this function returns null.
   static RenderAbstractViewport? of(RenderObject? object) {
     while (object != null) {
-      if (object is RenderAbstractViewport)
+      if (object is RenderAbstractViewport) {
         return object;
+      }
       object = object.parent as RenderObject?;
     }
     return null;
@@ -232,8 +233,9 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   AxisDirection _axisDirection;
   set axisDirection(AxisDirection value) {
     assert(value != null);
-    if (value == _axisDirection)
+    if (value == _axisDirection) {
       return;
+    }
     _axisDirection = value;
     markNeedsLayout();
   }
@@ -248,8 +250,9 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   AxisDirection _crossAxisDirection;
   set crossAxisDirection(AxisDirection value) {
     assert(value != null);
-    if (value == _crossAxisDirection)
+    if (value == _crossAxisDirection) {
       return;
+    }
     _crossAxisDirection = value;
     markNeedsLayout();
   }
@@ -270,13 +273,16 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   ViewportOffset _offset;
   set offset(ViewportOffset value) {
     assert(value != null);
-    if (value == _offset)
+    if (value == _offset) {
       return;
-    if (attached)
+    }
+    if (attached) {
       _offset.removeListener(markNeedsLayout);
+    }
     _offset = value;
-    if (attached)
+    if (attached) {
       _offset.addListener(markNeedsLayout);
+    }
     // We need to go through layout even if the new offset has the same pixels
     // value as the old offset so that we will apply our viewport and content
     // dimensions.
@@ -320,8 +326,9 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   set cacheExtent(double? value) {
     value ??= RenderAbstractViewport.defaultCacheExtent;
     assert(value != null);
-    if (value == _cacheExtent)
+    if (value == _cacheExtent) {
       return;
+    }
     _cacheExtent = value;
     markNeedsLayout();
   }
@@ -527,8 +534,9 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       assert(childLayoutGeometry.debugAssertIsValid());
 
       // If there is a correction to apply, we'll have to start over.
-      if (childLayoutGeometry.scrollOffsetCorrection != null)
+      if (childLayoutGeometry.scrollOffsetCorrection != null) {
         return childLayoutGeometry.scrollOffsetCorrection!;
+      }
 
       // We use the child's paint origin in our coordinate system as the
       // layoutOffset we store in the child's parent data.
@@ -630,8 +638,9 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (firstChild == null)
+    if (firstChild == null) {
       return;
+    }
     if (hasVisualOverflow && clipBehavior != Clip.none) {
       _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintContents,
           clipBehavior: clipBehavior, oldLayer: _clipRectLayer);
@@ -645,8 +654,9 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 
   void _paintContents(PaintingContext context, Offset offset) {
     for (final RenderSliver child in childrenInPaintOrder) {
-      if (child.geometry!.visible)
+      if (child.geometry!.visible) {
         context.paintChild(child, offset + paintOffsetOf(child));
+      }
     }
   }
 
@@ -864,13 +874,15 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 
     switch (sliver.constraints.growthDirection) {
       case GrowthDirection.forward:
-        if (isPinned && alignment <= 0)
+        if (isPinned && alignment <= 0) {
           return RevealedOffset(offset: double.infinity, rect: targetRect);
+        }
         leadingScrollOffset -= extentOfPinnedSlivers;
         break;
       case GrowthDirection.reverse:
-        if (isPinned && alignment >= 1)
+        if (isPinned && alignment >= 1) {
           return RevealedOffset(offset: double.negativeInfinity, rect: targetRect);
+        }
         // If child's growth direction is reverse, when viewport.offset is
         // `leadingScrollOffset`, it is positioned just outside of the leading
         // edge of the viewport.
@@ -957,14 +969,16 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   List<DiagnosticsNode> debugDescribeChildren() {
     final List<DiagnosticsNode> children = <DiagnosticsNode>[];
     RenderSliver? child = firstChild;
-    if (child == null)
+    if (child == null) {
       return children;
+    }
 
     int count = indexOfFirstChild;
     while (true) {
       children.add(child!.toDiagnosticsNode(name: labelForChild(count)));
-      if (child == lastChild)
+      if (child == lastChild) {
         break;
+      }
       count += 1;
       child = childAfter(child);
     }
@@ -1269,8 +1283,9 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
          clipBehavior: clipBehavior,
        ) {
     addAll(children);
-    if (center == null && firstChild != null)
+    if (center == null && firstChild != null) {
       _center = firstChild;
+    }
   }
 
   /// If a [RenderAbstractViewport] overrides
@@ -1310,8 +1325,9 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
 
   @override
   void setupParentData(RenderObject child) {
-    if (child.parentData is! SliverPhysicalContainerParentData)
+    if (child.parentData is! SliverPhysicalContainerParentData) {
       child.parentData = SliverPhysicalContainerParentData();
+    }
   }
 
   /// The relative position of the zero scroll offset.
@@ -1326,8 +1342,9 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   set anchor(double value) {
     assert(value != null);
     assert(value >= 0.0 && value <= 1.0);
-    if (value == _anchor)
+    if (value == _anchor) {
       return;
+    }
     _anchor = value;
     markNeedsLayout();
   }
@@ -1345,8 +1362,9 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   RenderSliver? get center => _center;
   RenderSliver? _center;
   set center(RenderSliver? value) {
-    if (value == _center)
+    if (value == _center) {
       return;
+    }
     _center = value;
     markNeedsLayout();
   }
@@ -1482,8 +1500,9 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
         if (offset.applyContentDimensions(
               math.min(0.0, _minScrollExtent + mainAxisExtent * anchor),
               math.max(0.0, _maxScrollExtent - mainAxisExtent * (1.0 - anchor)),
-           ))
+           )) {
           break;
+        }
       }
       count += 1;
     } while (count < _maxLayoutCycles);
@@ -1561,8 +1580,9 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
         remainingCacheExtent: reverseDirectionRemainingCacheExtent,
         cacheOrigin: (mainAxisExtent - centerOffset).clamp(-_calculatedCacheExtent!, 0.0),
       );
-      if (result != 0.0)
+      if (result != 0.0) {
         return -result;
+      }
     }
 
     // positive scroll offsets
@@ -1594,8 +1614,9 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
         _minScrollExtent -= childLayoutGeometry.scrollExtent;
         break;
     }
-    if (childLayoutGeometry.hasVisualOverflow)
+    if (childLayoutGeometry.hasVisualOverflow) {
       _hasVisualOverflow = true;
+    }
   }
 
   @override
@@ -1701,15 +1722,17 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
 
   @override
   String labelForChild(int index) {
-    if (index == 0)
+    if (index == 0) {
       return 'center child';
+    }
     return 'child $index';
   }
 
   @override
   Iterable<RenderSliver> get childrenInPaintOrder sync* {
-    if (firstChild == null)
+    if (firstChild == null) {
       return;
+    }
     RenderSliver? child = firstChild;
     while (child != center) {
       yield child!;
@@ -1718,16 +1741,18 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     child = lastChild;
     while (true) {
       yield child!;
-      if (child == center)
+      if (child == center) {
         return;
+      }
       child = childBefore(child);
     }
   }
 
   @override
   Iterable<RenderSliver> get childrenInHitTestOrder sync* {
-    if (firstChild == null)
+    if (firstChild == null) {
       return;
+    }
     RenderSliver? child = center;
     while (child != null) {
       yield child;
@@ -1795,8 +1820,9 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
 
   @override
   void setupParentData(RenderObject child) {
-    if (child.parentData is! SliverLogicalContainerParentData)
+    if (child.parentData is! SliverLogicalContainerParentData) {
       child.parentData = SliverLogicalContainerParentData();
+    }
   }
 
   @override
@@ -1881,8 +1907,9 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
         }
         final bool didAcceptViewportDimension = offset.applyViewportDimension(effectiveExtent);
         final bool didAcceptContentDimension = offset.applyContentDimensions(0.0, math.max(0.0, _maxScrollExtent - effectiveExtent));
-        if (didAcceptViewportDimension && didAcceptContentDimension)
+        if (didAcceptViewportDimension && didAcceptContentDimension) {
           break;
+        }
       }
     } while (true);
     switch (axis) {
@@ -1931,8 +1958,9 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
   void updateOutOfBandData(GrowthDirection growthDirection, SliverGeometry childLayoutGeometry) {
     assert(growthDirection == GrowthDirection.forward);
     _maxScrollExtent += childLayoutGeometry.scrollExtent;
-    if (childLayoutGeometry.hasVisualOverflow)
+    if (childLayoutGeometry.hasVisualOverflow) {
       _hasVisualOverflow = true;
+    }
     _shrinkWrapExtent += childLayoutGeometry.maxPaintExtent;
   }
 

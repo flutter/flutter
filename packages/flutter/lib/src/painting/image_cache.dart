@@ -100,8 +100,9 @@ class ImageCache {
   set maximumSize(int value) {
     assert(value != null);
     assert(value >= 0);
-    if (value == maximumSize)
+    if (value == maximumSize) {
       return;
+    }
     TimelineTask? timelineTask;
     if (!kReleaseMode) {
        timelineTask = TimelineTask()..start(
@@ -139,8 +140,9 @@ class ImageCache {
   set maximumSizeBytes(int value) {
     assert(value != null);
     assert(value >= 0);
-    if (value == _maximumSizeBytes)
+    if (value == _maximumSizeBytes) {
       return;
+    }
     TimelineTask? timelineTask;
     if (!kReleaseMode) {
       timelineTask = TimelineTask()..start(

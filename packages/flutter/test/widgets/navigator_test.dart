@@ -3587,22 +3587,25 @@ class RouteAnnouncementSpy extends Route<void> {
   @override
   void didChangeNext(Route<dynamic>? nextRoute) {
     super.didChangeNext(nextRoute);
-    if (onDidChangeNext != null)
+    if (onDidChangeNext != null) {
       onDidChangeNext!(nextRoute);
+    }
   }
 
   @override
   void didChangePrevious(Route<dynamic>? previousRoute) {
     super.didChangePrevious(previousRoute);
-    if (onDidChangePrevious != null)
+    if (onDidChangePrevious != null) {
       onDidChangePrevious!(previousRoute);
+    }
   }
 
   @override
   void didPopNext(Route<dynamic> nextRoute) {
     super.didPopNext(nextRoute);
-    if (onDidPopNext != null)
+    if (onDidPopNext != null) {
       onDidPopNext!(nextRoute);
+    }
   }
 }
 
@@ -3647,8 +3650,9 @@ class AlwaysRemoveTransitionDelegate extends TransitionDelegate<void> {
   }) {
     final List<RouteTransitionRecord> results = <RouteTransitionRecord>[];
     void handleExitingRoute(RouteTransitionRecord? location) {
-      if (!locationToExitingPageRoute.containsKey(location))
+      if (!locationToExitingPageRoute.containsKey(location)) {
         return;
+      }
 
       final RouteTransitionRecord exitingPageRoute = locationToExitingPageRoute[location]!;
       if (exitingPageRoute.isWaitingForExitingDecision) {

@@ -99,10 +99,11 @@ class ModalBarrier extends StatelessWidget {
         excluding: !semanticsDismissible || !modalBarrierSemanticsDismissible,
         child: _ModalBarrierGestureDetector(
           onDismiss: () {
-            if (dismissible)
+            if (dismissible) {
               Navigator.maybePop(context);
-            else
+            } else {
               SystemSound.play(SystemSoundType.alert);
+            }
           },
           child: Semantics(
             label: semanticsDismissible ? semanticsLabel : null,
@@ -208,8 +209,9 @@ class _AnyTapGestureRecognizer extends BaseTapGestureRecognizer {
   @protected
   @override
   bool isPointerAllowed(PointerDownEvent event) {
-    if (onAnyTapUp == null)
+    if (onAnyTapUp == null) {
       return false;
+    }
     return super.isPointerAllowed(event);
   }
 
@@ -222,8 +224,9 @@ class _AnyTapGestureRecognizer extends BaseTapGestureRecognizer {
   @protected
   @override
   void handleTapUp({PointerDownEvent? down, PointerUpEvent? up}) {
-    if (onAnyTapUp != null)
+    if (onAnyTapUp != null) {
       onAnyTapUp!();
+    }
   }
 
   @protected

@@ -338,24 +338,27 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
             onLongPress == null &&
             onLongPressMoveUpdate == null &&
             onLongPressEnd == null &&
-            onLongPressUp == null)
+            onLongPressUp == null) {
           return false;
+        }
         break;
       case kSecondaryButton:
         if (onSecondaryLongPressStart == null &&
             onSecondaryLongPress == null &&
             onSecondaryLongPressMoveUpdate == null &&
             onSecondaryLongPressEnd == null &&
-            onSecondaryLongPressUp == null)
+            onSecondaryLongPressUp == null) {
           return false;
+        }
         break;
       case kTertiaryButton:
         if (onTertiaryLongPressStart == null &&
             onTertiaryLongPress == null &&
             onTertiaryLongPressMoveUpdate == null &&
             onTertiaryLongPressEnd == null &&
-            onTertiaryLongPressUp == null)
+            onTertiaryLongPressUp == null) {
           return false;
+        }
         break;
       default:
         return false;

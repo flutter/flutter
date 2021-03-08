@@ -270,19 +270,22 @@ Future<void> main() async {
           ]);
         });
 
-        if (result.exitCode == 0)
+        if (result.exitCode == 0) {
           throw failure(
               'Gradle did not exit with error as expected', result);
+        }
         final String output = '${result.stdout}\n${result.stderr}';
         if (output.contains('GradleException') ||
             output.contains('Failed to notify') ||
-            output.contains('at org.gradle'))
+            output.contains('at org.gradle')) {
           throw failure(
               'Gradle output should not contain stacktrace', result);
-        if (!output.contains('Build failed'))
+        }
+        if (!output.contains('Build failed')) {
           throw failure(
               'Gradle output should contain a readable error message',
               result);
+        }
       });
 
       await runProjectTest((FlutterProject project) async {
@@ -294,12 +297,14 @@ Future<void> main() async {
             '--release',
           ]);
         });
-        if (result.exitCode == 0)
+        if (result.exitCode == 0) {
           throw failure(
               'Gradle did not exit with error as expected', result);
+        }
         final String output = '${result.stdout}\n${result.stderr}';
-        if (!output.contains('No file or variants found for asset: lib/gallery/example_code.dart.'))
+        if (!output.contains('No file or variants found for asset: lib/gallery/example_code.dart.')) {
           throw failure(output, result);
+        }
       });
 
       await runProjectTest((FlutterProject project) async {
@@ -311,18 +316,21 @@ Future<void> main() async {
             '--release',
           ]);
         });
-        if (result.exitCode == 0)
+        if (result.exitCode == 0) {
           throw failure(
               'flutter build apk should fail when Gradle does', result);
+        }
         final String output = '${result.stdout}\n${result.stderr}';
-        if (!output.contains('Build failed'))
+        if (!output.contains('Build failed')) {
           throw failure(
               'flutter build apk output should contain a readable Gradle error message',
               result);
-        if (hasMultipleOccurrences(output, 'Build failed'))
+        }
+        if (hasMultipleOccurrences(output, 'Build failed')) {
           throw failure(
               'flutter build apk should not invoke Gradle repeatedly on error',
               result);
+        }
       });
 
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
@@ -336,9 +344,10 @@ Future<void> main() async {
             ],
           );
         });
-        if (!File(pluginProject.debugApkPath).existsSync())
+        if (!File(pluginProject.debugApkPath).existsSync()) {
           throw TaskResult.failure(
               'Gradle did not produce an apk file at the expected place');
+        }
       });
 
       return TaskResult.success(null);

@@ -1155,8 +1155,9 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   /// If this is never called, then the actions are not filtered. If the list of
   /// actions to filter changes, it must be called again.
   void replaceSemanticsActions(Set<SemanticsAction> actions) {
-    if (widget.excludeFromSemantics)
+    if (widget.excludeFromSemantics) {
       return;
+    }
 
     final RenderSemanticsGestureHandler? semanticsGestureHandler = context.findRenderObject() as RenderSemanticsGestureHandler?;
     assert(() {
@@ -1174,8 +1175,9 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
 
   @override
   void dispose() {
-    for (final GestureRecognizer recognizer in _recognizers!.values)
+    for (final GestureRecognizer recognizer in _recognizers!.values) {
       recognizer.dispose();
+    }
     _recognizers = null;
     super.dispose();
   }
@@ -1193,15 +1195,17 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       gestures[type]!.initializer(_recognizers![type]!);
     }
     for (final Type type in oldRecognizers.keys) {
-      if (!_recognizers!.containsKey(type))
+      if (!_recognizers!.containsKey(type)) {
         oldRecognizers[type]!.dispose();
+      }
     }
   }
 
   void _handlePointerDown(PointerDownEvent event) {
     assert(_recognizers != null);
-    for (final GestureRecognizer recognizer in _recognizers!.values)
+    for (final GestureRecognizer recognizer in _recognizers!.values) {
       recognizer.addPointer(event);
+    }
   }
 
   HitTestBehavior get _defaultBehavior {
@@ -1326,36 +1330,45 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
 
   GestureTapCallback? _getTapHandler(Map<Type, GestureRecognizer> recognizers) {
     final TapGestureRecognizer? tap = recognizers[TapGestureRecognizer] as TapGestureRecognizer?;
-    if (tap == null)
+    if (tap == null) {
       return null;
+    }
     assert(tap is TapGestureRecognizer);
 
     return () {
       assert(tap != null);
-      if (tap.onTapDown != null)
+      if (tap.onTapDown != null) {
         tap.onTapDown!(TapDownDetails());
-      if (tap.onTapUp != null)
+      }
+      if (tap.onTapUp != null) {
         tap.onTapUp!(TapUpDetails(kind: PointerDeviceKind.unknown));
-      if (tap.onTap != null)
+      }
+      if (tap.onTap != null) {
         tap.onTap!();
+      }
     };
   }
 
   GestureLongPressCallback? _getLongPressHandler(Map<Type, GestureRecognizer> recognizers) {
     final LongPressGestureRecognizer? longPress = recognizers[LongPressGestureRecognizer] as LongPressGestureRecognizer?;
-    if (longPress == null)
+    if (longPress == null) {
       return null;
+    }
 
     return () {
       assert(longPress is LongPressGestureRecognizer);
-      if (longPress.onLongPressStart != null)
+      if (longPress.onLongPressStart != null) {
         longPress.onLongPressStart!(const LongPressStartDetails());
-      if (longPress.onLongPress != null)
+      }
+      if (longPress.onLongPress != null) {
         longPress.onLongPress!();
-      if (longPress.onLongPressEnd != null)
+      }
+      if (longPress.onLongPressEnd != null) {
         longPress.onLongPressEnd!(const LongPressEndDetails());
-      if (longPress.onLongPressUp != null)
+      }
+      if (longPress.onLongPressUp != null) {
         longPress.onLongPressUp!();
+      }
     };
   }
 
@@ -1367,37 +1380,48 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
       null :
       (DragUpdateDetails details) {
         assert(horizontal is HorizontalDragGestureRecognizer);
-        if (horizontal.onDown != null)
+        if (horizontal.onDown != null) {
           horizontal.onDown!(DragDownDetails());
-        if (horizontal.onStart != null)
+        }
+        if (horizontal.onStart != null) {
           horizontal.onStart!(DragStartDetails());
-        if (horizontal.onUpdate != null)
+        }
+        if (horizontal.onUpdate != null) {
           horizontal.onUpdate!(details);
-        if (horizontal.onEnd != null)
+        }
+        if (horizontal.onEnd != null) {
           horizontal.onEnd!(DragEndDetails(primaryVelocity: 0.0));
+        }
       };
 
     final GestureDragUpdateCallback? panHandler = pan == null ?
       null :
       (DragUpdateDetails details) {
         assert(pan is PanGestureRecognizer);
-        if (pan.onDown != null)
+        if (pan.onDown != null) {
           pan.onDown!(DragDownDetails());
-        if (pan.onStart != null)
+        }
+        if (pan.onStart != null) {
           pan.onStart!(DragStartDetails());
-        if (pan.onUpdate != null)
+        }
+        if (pan.onUpdate != null) {
           pan.onUpdate!(details);
-        if (pan.onEnd != null)
+        }
+        if (pan.onEnd != null) {
           pan.onEnd!(DragEndDetails());
+        }
       };
 
-    if (horizontalHandler == null && panHandler == null)
+    if (horizontalHandler == null && panHandler == null) {
       return null;
+    }
     return (DragUpdateDetails details) {
-      if (horizontalHandler != null)
+      if (horizontalHandler != null) {
         horizontalHandler(details);
-      if (panHandler != null)
+      }
+      if (panHandler != null) {
         panHandler(details);
+      }
     };
   }
 
@@ -1409,37 +1433,48 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
       null :
       (DragUpdateDetails details) {
         assert(vertical is VerticalDragGestureRecognizer);
-        if (vertical.onDown != null)
+        if (vertical.onDown != null) {
           vertical.onDown!(DragDownDetails());
-        if (vertical.onStart != null)
+        }
+        if (vertical.onStart != null) {
           vertical.onStart!(DragStartDetails());
-        if (vertical.onUpdate != null)
+        }
+        if (vertical.onUpdate != null) {
           vertical.onUpdate!(details);
-        if (vertical.onEnd != null)
+        }
+        if (vertical.onEnd != null) {
           vertical.onEnd!(DragEndDetails(primaryVelocity: 0.0));
+        }
       };
 
     final GestureDragUpdateCallback? panHandler = pan == null ?
       null :
       (DragUpdateDetails details) {
         assert(pan is PanGestureRecognizer);
-        if (pan.onDown != null)
+        if (pan.onDown != null) {
           pan.onDown!(DragDownDetails());
-        if (pan.onStart != null)
+        }
+        if (pan.onStart != null) {
           pan.onStart!(DragStartDetails());
-        if (pan.onUpdate != null)
+        }
+        if (pan.onUpdate != null) {
           pan.onUpdate!(details);
-        if (pan.onEnd != null)
+        }
+        if (pan.onEnd != null) {
           pan.onEnd!(DragEndDetails());
+        }
       };
 
-    if (verticalHandler == null && panHandler == null)
+    if (verticalHandler == null && panHandler == null) {
       return null;
+    }
     return (DragUpdateDetails details) {
-      if (verticalHandler != null)
+      if (verticalHandler != null) {
         verticalHandler(details);
-      if (panHandler != null)
+      }
+      if (panHandler != null) {
         panHandler(details);
+      }
     };
   }
 }

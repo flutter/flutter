@@ -166,8 +166,9 @@ void main() {
     final List<String> playedSystemSounds = <String>[];
     try {
       SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
-        if (methodCall.method == 'SystemSound.play')
+        if (methodCall.method == 'SystemSound.play') {
           playedSystemSounds.add(methodCall.arguments as String);
+        }
       });
 
       final Widget subject = Stack(

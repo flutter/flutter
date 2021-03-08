@@ -114,10 +114,12 @@ Key? _firstNonUniqueKey(Iterable<Widget> widgets) {
   final Set<Key> keySet = HashSet<Key>();
   for (final Widget widget in widgets) {
     assert(widget != null);
-    if (widget.key == null)
+    if (widget.key == null) {
       continue;
-    if (!keySet.add(widget.key!))
+    }
+    if (!keySet.add(widget.key!)) {
       return widget.key;
+    }
   }
   return null;
 }
@@ -166,8 +168,9 @@ bool debugChildrenHaveDuplicateKeys(Widget parent, Iterable<Widget> children) {
 bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
   assert(() {
     final Key? nonUniqueKey = _firstNonUniqueKey(items);
-    if (nonUniqueKey != null)
+    if (nonUniqueKey != null) {
       throw FlutterError('Duplicate key found: $nonUniqueKey.');
+    }
     return true;
   }());
   return false;

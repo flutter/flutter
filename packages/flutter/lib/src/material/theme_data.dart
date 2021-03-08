@@ -1466,8 +1466,9 @@ class ThemeData with Diagnosticable {
     // Design spec shows for its color palette on
     // <https://material.io/go/design-theming#color-color-palette>.
     const double kThreshold = 0.15;
-    if ((relativeLuminance + 0.05) * (relativeLuminance + 0.05) > kThreshold)
+    if ((relativeLuminance + 0.05) * (relativeLuminance + 0.05) > kThreshold) {
       return Brightness.light;
+    }
     return Brightness.dark;
   }
 
@@ -1566,8 +1567,9 @@ class ThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     // Warning: make sure these properties are in the exact same order as in
     // hashValues() and in the raw constructor and in the order of fields in
     // the class and in the lerp() method.
@@ -1982,10 +1984,12 @@ class _FifoCache<K, V> {
     assert(key != null);
     assert(loader != null);
     final V? result = _cache[key];
-    if (result != null)
+    if (result != null) {
       return result;
-    if (_cache.length == _maximumSize)
+    }
+    if (_cache.length == _maximumSize) {
       _cache.remove(_cache.keys.first);
+    }
     return _cache[key] = loader();
   }
 }

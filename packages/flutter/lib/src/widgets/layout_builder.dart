@@ -67,8 +67,9 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
 
   @override
   void visitChildren(ElementVisitor visitor) {
-    if (_child != null)
+    if (_child != null) {
       visitor(_child!);
+    }
   }
 
   @override
@@ -182,8 +183,9 @@ mixin RenderConstrainedLayoutBuilder<ConstraintType extends Constraints, ChildTy
   LayoutCallback<ConstraintType>? _callback;
   /// Change the layout callback.
   void updateCallback(LayoutCallback<ConstraintType>? value) {
-    if (value == _callback)
+    if (value == _callback) {
       return;
+    }
     _callback = value;
     markNeedsLayout();
   }
@@ -368,8 +370,9 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
 
   @override
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
-    if (child != null)
+    if (child != null) {
       return child!.getDistanceToActualBaseline(baseline);
+    }
     return super.computeDistanceToActualBaseline(baseline);
   }
 
@@ -380,8 +383,9 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null)
+    if (child != null) {
       context.paintChild(child!, offset);
+    }
   }
 
   bool _debugThrowIfNotCheckingIntrinsics() {

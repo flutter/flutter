@@ -79,8 +79,9 @@ class TestAsyncUtils {
       final List<DiagnosticsNode> information = <DiagnosticsNode>[];
       while (_scopeStack.isNotEmpty) {
         closedScope = _scopeStack.removeLast();
-        if (closedScope == scope)
+        if (closedScope == scope) {
           break;
+        }
         if (!leaked) {
           information.add(ErrorSummary('Asynchronous call to guarded function leaked.'));
           information.add(ErrorHint('You must use "await" with all Future-returning test APIs.'));
@@ -108,8 +109,9 @@ class TestAsyncUtils {
         }
         throw FlutterError.fromParts(information);
       }
-      if (error != null)
+      if (error != null) {
         return Future<T>.error(error! as Object, stack);
+      }
       return Future<T>.value(resultValue);
     }
     return result.then<T>(
@@ -124,8 +126,9 @@ class TestAsyncUtils {
   static Zone? get _currentScopeZone {
     Zone? zone = Zone.current;
     while (zone != null) {
-      if (zone[_scopeStack] == true)
+      if (zone[_scopeStack] == true) {
         return zone;
+      }
       zone = zone.parent;
     }
     return null;
@@ -175,8 +178,9 @@ class TestAsyncUtils {
       skipCount += 1;
       scope = candidateScope;
       if (skipCount >= _scopeStack.length) {
-        if (zone == null)
+        if (zone == null) {
           break;
+        }
         // Some people have reported reaching this point, but it's not clear
         // why. For now, just silently return.
         // TODO(ianh): If we ever get a test case that shows how we reach

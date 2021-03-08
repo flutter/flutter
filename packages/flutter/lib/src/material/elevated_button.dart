@@ -313,8 +313,9 @@ class _ElevatedButtonDefaultBackground extends MaterialStateProperty<Color?> wit
 
   @override
   Color? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled))
+    if (states.contains(MaterialState.disabled)) {
       return onSurface?.withOpacity(0.12);
+    }
     return primary;
   }
 }
@@ -328,8 +329,9 @@ class _ElevatedButtonDefaultForeground extends MaterialStateProperty<Color?> wit
 
   @override
   Color? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled))
+    if (states.contains(MaterialState.disabled)) {
       return onSurface?.withOpacity(0.38);
+    }
     return onPrimary;
   }
 }
@@ -342,10 +344,12 @@ class _ElevatedButtonDefaultOverlay extends MaterialStateProperty<Color?> with D
 
   @override
   Color? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.hovered))
+    if (states.contains(MaterialState.hovered)) {
       return onPrimary.withOpacity(0.08);
-    if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed))
+    }
+    if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
       return onPrimary.withOpacity(0.24);
+    }
     return null;
   }
 }
@@ -358,14 +362,18 @@ class _ElevatedButtonDefaultElevation extends MaterialStateProperty<double> with
 
   @override
   double resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled))
+    if (states.contains(MaterialState.disabled)) {
       return 0;
-    if (states.contains(MaterialState.hovered))
+    }
+    if (states.contains(MaterialState.hovered)) {
       return elevation + 2;
-    if (states.contains(MaterialState.focused))
+    }
+    if (states.contains(MaterialState.focused)) {
       return elevation + 2;
-    if (states.contains(MaterialState.pressed))
+    }
+    if (states.contains(MaterialState.pressed)) {
       return elevation + 6;
+    }
     return elevation;
   }
 }
@@ -379,8 +387,9 @@ class _ElevatedButtonDefaultMouseCursor extends MaterialStateProperty<MouseCurso
 
   @override
   MouseCursor? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled))
+    if (states.contains(MaterialState.disabled)) {
       return disabledCursor;
+    }
     return enabledCursor;
   }
 }

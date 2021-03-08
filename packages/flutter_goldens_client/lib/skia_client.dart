@@ -81,8 +81,9 @@ class SkiaGoldClient {
   /// Used by the [FlutterPostSubmitFileComparator] and the
   /// [FlutterPreSubmitFileComparator].
   Future<void> auth() async {
-    if (await clientIsAuthorized())
+    if (await clientIsAuthorized()) {
       return;
+    }
     final List<String> authCommand = <String>[
       _goldctl,
       'auth',
@@ -296,8 +297,9 @@ class SkiaGoldClient {
         final io.HttpClientResponse response = await request.close();
         rawResponse = await utf8.decodeStream(response);
         final dynamic jsonResponse = json.decode(rawResponse);
-        if (jsonResponse is! Map<String, dynamic>)
+        if (jsonResponse is! Map<String, dynamic>) {
           throw const FormatException('Skia gold expectations do not match expected format.');
+        }
         expectation = jsonResponse['digest'] as String?;
       } on FormatException catch (error) {
         print(

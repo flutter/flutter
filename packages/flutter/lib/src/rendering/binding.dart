@@ -73,8 +73,9 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         name: 'debugPaint',
         getter: () async => debugPaintSizeEnabled,
         setter: (bool value) {
-          if (debugPaintSizeEnabled == value)
+          if (debugPaintSizeEnabled == value) {
             return Future<void>.value();
+          }
           debugPaintSizeEnabled = value;
           return _forceRepaint();
         },
@@ -83,8 +84,9 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         name: 'debugPaintBaselinesEnabled',
         getter: () async => debugPaintBaselinesEnabled,
         setter: (bool value) {
-          if (debugPaintBaselinesEnabled == value)
+          if (debugPaintBaselinesEnabled == value) {
             return Future<void>.value();
+          }
           debugPaintBaselinesEnabled = value;
           return _forceRepaint();
         },
@@ -95,8 +97,9 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         setter: (bool value) {
           final bool repaint = debugRepaintRainbowEnabled && !value;
           debugRepaintRainbowEnabled = value;
-          if (repaint)
+          if (repaint) {
             return _forceRepaint();
+          }
           return Future<void>.value();
         },
       );
@@ -390,8 +393,9 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     // Always schedule a warm up frame even if the deferral count is not down to
     // zero yet since the removal of a deferral may uncover new deferrals that
     // are lower in the widget tree.
-    if (!_firstFrameSent)
+    if (!_firstFrameSent) {
       scheduleWarmUpFrame();
+    }
   }
 
   /// Call this to pretend that no frames have been sent to the engine yet.

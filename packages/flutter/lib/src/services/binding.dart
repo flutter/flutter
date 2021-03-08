@@ -303,8 +303,9 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
   @override
   Future<ByteData?>? send(String channel, ByteData? message) {
     final MessageHandler? handler = _mockHandlers[channel];
-    if (handler != null)
+    if (handler != null) {
       return handler(message);
+    }
     return _sendPlatformMessage(channel, message);
   }
 
@@ -325,10 +326,11 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
 
   @override
   void setMockMessageHandler(String channel, MessageHandler? handler) {
-    if (handler == null)
+    if (handler == null) {
       _mockHandlers.remove(channel);
-    else
+    } else {
       _mockHandlers[channel] = handler;
+    }
   }
 
   @override

@@ -237,8 +237,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
               onStart == null &&
               onUpdate == null &&
               onEnd == null &&
-              onCancel == null)
+              onCancel == null) {
             return false;
+          }
           break;
         default:
           return false;
@@ -304,8 +305,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
           untransformedDelta: movedLocally,
           untransformedEndPosition: event.localPosition,
         ).distance * (_getPrimaryValueFromOffset(movedLocally) ?? 1).sign;
-        if (_hasSufficientGlobalDistanceToAccept(event.kind))
+        if (_hasSufficientGlobalDistanceToAccept(event.kind)) {
           resolve(GestureDisposition.accepted);
+        }
       }
     }
     if (event is PointerUpEvent || event is PointerCancelEvent) {
@@ -389,8 +391,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     stopTrackingPointer(pointer);
     // If we never accepted the pointer, we reject it since we are no longer
     // interested in winning the gesture arena for it.
-    if (!_acceptedActivePointers.remove(pointer))
+    if (!_acceptedActivePointers.remove(pointer)) {
       resolvePointer(pointer, GestureDisposition.rejected);
+    }
   }
 
   void _checkDown() {
@@ -439,8 +442,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   void _checkEnd(int pointer) {
     assert(_initialButtons == kPrimaryButton);
-    if (onEnd == null)
+    if (onEnd == null) {
       return;
+    }
 
     final VelocityTracker tracker = _velocityTrackers[pointer]!;
     assert(tracker != null);
@@ -465,8 +469,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         primaryVelocity: 0.0,
       );
       debugReport = () {
-        if (estimate == null)
+        if (estimate == null) {
           return 'Could not estimate velocity.';
+        }
         return '$estimate; judged to not be a fling.';
       };
     }
@@ -475,8 +480,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   void _checkCancel() {
     assert(_initialButtons == kPrimaryButton);
-    if (onCancel != null)
+    if (onCancel != null) {
       invokeCallback<void>('onCancel', onCancel!);
+    }
   }
 
   @override

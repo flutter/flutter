@@ -35,8 +35,9 @@ void loadDateIntlDataIfNotLoaded() {
           countryCode = codes[1].length < codes[2].length ? codes[1] : codes[2];
         }
         locale = codes[0] + (countryCode != null ? '_' + countryCode : '');
-        if (initializedLocales.contains(locale))
+        if (initializedLocales.contains(locale)) {
           return;
+        }
         initializedLocales.add(locale);
         // Perform initialization.
         assert(date_localizations.datePatterns.containsKey(locale));

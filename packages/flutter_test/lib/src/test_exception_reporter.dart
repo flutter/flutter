@@ -36,8 +36,9 @@ void _defaultTestExceptionReporter(FlutterErrorDetails errorDetails, String test
   // get the same effect here by calling that error handler directly or indeed just throwing.
   // However, we call registerException because that's the semantically correct thing...
   String additional = '';
-  if (testDescription.isNotEmpty)
+  if (testDescription.isNotEmpty) {
     additional = '\nThe test description was: $testDescription';
+  }
   test_package.registerException('Test failed. See exception logs above.$additional', _emptyStackTrace);
 }
 

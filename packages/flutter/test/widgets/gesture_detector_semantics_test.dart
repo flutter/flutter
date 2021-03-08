@@ -723,8 +723,9 @@ class _RenderTestLayoutPerformer extends RenderBox {
   @override
   void performLayout() {
     size = const Size(1, 1);
-    if (_performLayout != null)
+    if (_performLayout != null) {
       _performLayout();
+    }
   }
 }
 
@@ -732,8 +733,9 @@ Map<Type, GestureRecognizerFactory> _buildGestureMap<T extends GestureRecognizer
   GestureRecognizerFactoryConstructor<T>? constructor,
   GestureRecognizerFactoryInitializer<T>? initializer,
 ) {
-  if (constructor == null)
+  if (constructor == null) {
     return <Type, GestureRecognizerFactory>{};
+  }
   return <Type, GestureRecognizerFactory>{
     T: GestureRecognizerFactoryWithHandlers<T>(
       constructor,

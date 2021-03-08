@@ -90,8 +90,9 @@ class ListWheelChildListDelegate extends ListWheelChildDelegate {
 
   @override
   Widget? build(BuildContext context, int index) {
-    if (index < 0 || index >= children.length)
+    if (index < 0 || index >= children.length) {
       return null;
+    }
     return IndexedSemantics(child: children[index], index: index);
   }
 
@@ -136,8 +137,9 @@ class ListWheelChildLoopingListDelegate extends ListWheelChildDelegate {
 
   @override
   Widget? build(BuildContext context, int index) {
-    if (children.isEmpty)
+    if (children.isEmpty) {
       return null;
+    }
     return IndexedSemantics(child: children[index % children.length], index: index);
   }
 
@@ -183,8 +185,9 @@ class ListWheelChildBuilderDelegate extends ListWheelChildDelegate {
       final Widget? child = builder(context, index);
       return child == null ? null : IndexedSemantics(child: child, index: index);
     }
-    if (index < 0 || index >= childCount!)
+    if (index < 0 || index >= childCount!) {
       return null;
+    }
     return IndexedSemantics(child: builder(context, index), index: index);
   }
 
@@ -822,8 +825,9 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
     final ListWheelChildDelegate newDelegate = newWidget.childDelegate;
     final ListWheelChildDelegate oldDelegate = oldWidget.childDelegate;
     if (newDelegate != oldDelegate &&
-        (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRebuild(oldDelegate)))
+        (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRebuild(oldDelegate))) {
       performRebuild();
+    }
   }
 
   @override
@@ -833,8 +837,9 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
   void performRebuild() {
     _childWidgets.clear();
     super.performRebuild();
-    if (_childElements.isEmpty)
+    if (_childElements.isEmpty) {
       return;
+    }
 
     final int firstIndex = _childElements.firstKey()!;
     final int lastIndex = _childElements.lastKey()!;
@@ -895,8 +900,9 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
     final ListWheelParentData? newParentData = newChild?.renderObject?.parentData as ListWheelParentData?;
     if (newParentData != null) {
       newParentData.index = newSlot as int;
-      if (oldParentData != null)
+      if (oldParentData != null) {
         newParentData.offset = oldParentData.offset;
+      }
     }
 
     return newChild;

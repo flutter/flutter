@@ -824,16 +824,18 @@ abstract class AndroidViewController extends PlatformViewController {
     assert(_state != _AndroidViewState.disposed,
         'trying to set a layout direction for a disposed UIView. View id: $viewId');
 
-    if (layoutDirection == _layoutDirection)
+    if (layoutDirection == _layoutDirection) {
       return;
+    }
 
     assert(layoutDirection != null);
     _layoutDirection = layoutDirection;
 
     // If the view was not yet created we just update _layoutDirection and return, as the new
     // direction will be used in _create.
-    if (_state == _AndroidViewState.waitingForSize)
+    if (_state == _AndroidViewState.waitingForSize) {
       return;
+    }
 
     await SystemChannels.platform_views
         .invokeMethod<void>('setDirection', <String, dynamic>{
@@ -895,8 +897,9 @@ abstract class AndroidViewController extends PlatformViewController {
   /// disposed.
   @override
   Future<void> dispose() async {
-    if (_state == _AndroidViewState.creating || _state == _AndroidViewState.created)
+    if (_state == _AndroidViewState.creating || _state == _AndroidViewState.created) {
       await _sendDisposeMessage();
+    }
     _platformViewCreatedCallbacks.clear();
     _state = _AndroidViewState.disposed;
     PlatformViewsService._instance._focusCallbacks.remove(viewId);
@@ -1080,8 +1083,9 @@ class UiKitViewController {
   Future<void> setLayoutDirection(TextDirection layoutDirection) async {
     assert(!_debugDisposed, 'trying to set a layout direction for a disposed iOS UIView. View id: $id');
 
-    if (layoutDirection == _layoutDirection)
+    if (layoutDirection == _layoutDirection) {
       return;
+    }
 
     assert(layoutDirection != null);
     _layoutDirection = layoutDirection;

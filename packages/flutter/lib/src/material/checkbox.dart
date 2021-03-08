@@ -597,10 +597,11 @@ class _CheckboxPainter extends ToggleablePainter {
         canvas.drawPath(emptyCheckboxPath, paint);
 
         final double tShrink = (t - 0.5) * 2.0;
-        if (previousValue == null || value == null)
+        if (previousValue == null || value == null) {
           _drawDash(canvas, origin, tShrink, strokePaint);
-        else
+        } else {
           _drawCheck(canvas, origin, tShrink, strokePaint);
+        }
       }
     } else { // Two cases: null to true, true to null
       final Rect outer = _outerRectAt(origin, 1.0);
@@ -609,16 +610,18 @@ class _CheckboxPainter extends ToggleablePainter {
 
       if (tNormalized <= 0.5) {
         final double tShrink = 1.0 - tNormalized * 2.0;
-        if (previousValue == true)
+        if (previousValue == true) {
           _drawCheck(canvas, origin, tShrink, strokePaint);
-        else
+        } else {
           _drawDash(canvas, origin, tShrink, strokePaint);
+        }
       } else {
         final double tExpand = (tNormalized - 0.5) * 2.0;
-        if (value == true)
+        if (value == true) {
           _drawCheck(canvas, origin, tExpand, strokePaint);
-        else
+        } else {
           _drawDash(canvas, origin, tExpand, strokePaint);
+        }
       }
     }
   }

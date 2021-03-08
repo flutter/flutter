@@ -79,8 +79,9 @@ class CupertinoThumbPainter {
       Radius.circular(rect.shortestSide / 2.0),
     );
 
-    for (final BoxShadow shadow in shadows)
+    for (final BoxShadow shadow in shadows) {
       canvas.drawRRect(rrect.shift(shadow.offset), shadow.toPaint());
+    }
 
     canvas.drawRRect(
       rrect.inflate(0.5),

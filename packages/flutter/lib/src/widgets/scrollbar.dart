@@ -102,8 +102,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   Color _color;
   set color(Color value) {
     assert(value != null);
-    if (color == value)
+    if (color == value) {
       return;
+    }
 
     _color = value;
     notifyListeners();
@@ -114,8 +115,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   Color _trackColor;
   set trackColor(Color value) {
     assert(value != null);
-    if (trackColor == value)
+    if (trackColor == value) {
       return;
+    }
 
     _trackColor = value;
     notifyListeners();
@@ -126,8 +128,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   Color _trackBorderColor;
   set trackBorderColor(Color value) {
     assert(value != null);
-    if (trackBorderColor == value)
+    if (trackBorderColor == value) {
       return;
+    }
 
     _trackBorderColor = value;
     notifyListeners();
@@ -140,8 +143,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   TextDirection? _textDirection;
   set textDirection(TextDirection? value) {
     assert(value != null);
-    if (textDirection == value)
+    if (textDirection == value) {
       return;
+    }
 
     _textDirection = value;
     notifyListeners();
@@ -152,8 +156,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   double _thickness;
   set thickness(double value) {
     assert(value != null);
-    if (thickness == value)
+    if (thickness == value) {
       return;
+    }
 
     _thickness = value;
     notifyListeners();
@@ -172,8 +177,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   double _mainAxisMargin;
   set mainAxisMargin(double value) {
     assert(value != null);
-    if (mainAxisMargin == value)
+    if (mainAxisMargin == value) {
       return;
+    }
 
     _mainAxisMargin = value;
     notifyListeners();
@@ -186,8 +192,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   double _crossAxisMargin;
   set crossAxisMargin(double value) {
     assert(value != null);
-    if (crossAxisMargin == value)
+    if (crossAxisMargin == value) {
       return;
+    }
 
     _crossAxisMargin = value;
     notifyListeners();
@@ -199,8 +206,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   Radius? get radius => _radius;
   Radius? _radius;
   set radius(Radius? value) {
-    if (radius == value)
+    if (radius == value) {
       return;
+    }
 
     _radius = value;
     notifyListeners();
@@ -219,8 +227,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   EdgeInsets _padding;
   set padding(EdgeInsets value) {
     assert(value != null);
-    if (padding == value)
+    if (padding == value) {
       return;
+    }
 
     _padding = value;
     notifyListeners();
@@ -242,8 +251,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   double _minLength;
   set minLength(double value) {
     assert(value != null);
-    if (minLength == value)
+    if (minLength == value) {
       return;
+    }
 
     _minLength = value;
     notifyListeners();
@@ -263,8 +273,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   double _minOverscrollLength;
   set minOverscrollLength(double value) {
     assert(value != null);
-    if (minOverscrollLength == value)
+    if (minOverscrollLength == value) {
       return;
+    }
 
     _minOverscrollLength = value;
     notifyListeners();
@@ -365,10 +376,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     );
 
     _thumbRect = Offset(x, y) & thumbSize;
-    if (radius == null)
+    if (radius == null) {
       canvas.drawRect(_thumbRect!, _paintThumb);
-    else
+    } else {
       canvas.drawRRect(RRect.fromRectAndRadius(_thumbRect!, radius!), _paintThumb);
+    }
   }
 
   double _thumbExtent() {
@@ -457,8 +469,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (_lastAxisDirection == null
         || _lastMetrics == null
-        || fadeoutOpacityAnimation.value == 0.0)
+        || fadeoutOpacityAnimation.value == 0.0) {
       return;
+    }
 
     // Skip painting if there's not enough space.
     if (_lastMetrics!.viewportDimension <= _mainAxisPadding || _trackExtent <= 0) {
@@ -472,8 +485,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
     // Do not paint a scrollbar if the scroll view is infinitely long.
     // TODO(Piinks): Special handling for infinite scroll views, https://github.com/flutter/flutter/issues/41434
-    if (_lastMetrics!.maxScrollExtent.isInfinite)
+    if (_lastMetrics!.maxScrollExtent.isInfinite) {
       return;
+    }
 
     return _paintScrollbar(canvas, size, thumbExtent, _lastAxisDirection!);
   }
@@ -969,8 +983,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @protected
   Axis? getScrollbarDirection() {
     assert(_currentController != null);
-    if (_currentController!.hasClients)
+    if (_currentController!.hasClients) {
       return _currentController!.position.axis;
+    }
     return null;
   }
 
@@ -1036,8 +1051,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @mustCallSuper
   void handleThumbPressEnd(Offset localPosition, Velocity velocity) {
     final Axis? direction = getScrollbarDirection();
-    if (direction == null)
+    if (direction == null) {
       return;
+    }
     _maybeStartFadeoutTimer();
     _dragScrollbarAxisPosition = null;
     _currentController = null;
@@ -1067,20 +1083,24 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     // Adjust scrollIncrement for direction
     switch (_currentController!.position.axisDirection) {
       case AxisDirection.up:
-        if (details.localPosition.dy > scrollbarPainter._thumbOffset)
+        if (details.localPosition.dy > scrollbarPainter._thumbOffset) {
           scrollIncrement = -scrollIncrement;
+        }
         break;
       case AxisDirection.down:
-        if (details.localPosition.dy < scrollbarPainter._thumbOffset)
+        if (details.localPosition.dy < scrollbarPainter._thumbOffset) {
           scrollIncrement = -scrollIncrement;
+        }
         break;
       case AxisDirection.right:
-        if (details.localPosition.dx < scrollbarPainter._thumbOffset)
+        if (details.localPosition.dx < scrollbarPainter._thumbOffset) {
           scrollIncrement = -scrollIncrement;
+        }
         break;
       case AxisDirection.left:
-        if (details.localPosition.dx > scrollbarPainter._thumbOffset)
+        if (details.localPosition.dx > scrollbarPainter._thumbOffset) {
           scrollIncrement = -scrollIncrement;
+        }
         break;
     }
 
@@ -1092,24 +1112,28 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
-    if (!widget.notificationPredicate(notification))
+    if (!widget.notificationPredicate(notification)) {
       return false;
+    }
 
     final ScrollMetrics metrics = notification.metrics;
-    if (metrics.maxScrollExtent <= metrics.minScrollExtent)
+    if (metrics.maxScrollExtent <= metrics.minScrollExtent) {
       return false;
+    }
 
     if (notification is ScrollUpdateNotification ||
       notification is OverscrollNotification) {
       // Any movements always makes the scrollbar start showing up.
-      if (_fadeoutAnimationController.status != AnimationStatus.forward)
+      if (_fadeoutAnimationController.status != AnimationStatus.forward) {
         _fadeoutAnimationController.forward();
+      }
 
       _fadeoutTimer?.cancel();
       scrollbarPainter.update(notification.metrics, notification.metrics.axisDirection);
     } else if (notification is ScrollEndNotification) {
-      if (_dragScrollbarAxisPosition == null)
+      if (_dragScrollbarAxisPosition == null) {
         _maybeStartFadeoutTimer();
+      }
     }
     return false;
   }
@@ -1117,8 +1141,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   Map<Type, GestureRecognizerFactory> get _gestures {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
     final ScrollController? controller = widget.controller ?? PrimaryScrollController.of(context);
-    if (controller == null || !enableGestures)
+    if (controller == null || !enableGestures) {
       return gestures;
+    }
 
     gestures[_ThumbPressGestureRecognizer] =
       GestureRecognizerFactoryWithHandlers<_ThumbPressGestureRecognizer>(
@@ -1236,8 +1261,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
             onExit: (PointerExitEvent event) {
               switch(event.kind) {
                 case PointerDeviceKind.mouse:
-                  if (enableGestures)
+                  if (enableGestures) {
                     handleHoverExit(event);
+                  }
                   break;
                 case PointerDeviceKind.stylus:
                 case PointerDeviceKind.invertedStylus:
@@ -1249,8 +1275,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
             onHover: (PointerHoverEvent event) {
               switch(event.kind) {
                 case PointerDeviceKind.mouse:
-                  if (enableGestures)
+                  if (enableGestures) {
                     handleHover(event);
+                  }
                   break;
                 case PointerDeviceKind.stylus:
                 case PointerDeviceKind.invertedStylus:

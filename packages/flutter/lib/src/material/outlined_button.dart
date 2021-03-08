@@ -296,8 +296,9 @@ class _OutlinedButtonDefaultForeground extends MaterialStateProperty<Color?>  wi
 
   @override
   Color? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled))
+    if (states.contains(MaterialState.disabled)) {
       return onSurface?.withOpacity(0.38);
+    }
     return primary;
   }
 }
@@ -310,10 +311,12 @@ class _OutlinedButtonDefaultOverlay extends MaterialStateProperty<Color?> with D
 
   @override
   Color? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.hovered))
+    if (states.contains(MaterialState.hovered)) {
       return primary.withOpacity(0.04);
-    if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed))
+    }
+    if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
       return primary.withOpacity(0.12);
+    }
     return null;
   }
 }
@@ -327,8 +330,9 @@ class _OutlinedButtonDefaultMouseCursor extends MaterialStateProperty<MouseCurso
 
   @override
   MouseCursor resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled))
+    if (states.contains(MaterialState.disabled)) {
       return disabledCursor;
+    }
     return enabledCursor;
   }
 }

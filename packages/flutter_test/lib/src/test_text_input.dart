@@ -102,8 +102,9 @@ class TestTextInput {
       case 'TextInput.clearClient':
         _client = 0;
         _isVisible = false;
-        if (onCleared != null)
+        if (onCleared != null) {
           onCleared!();
+        }
         break;
       case 'TextInput.setEditingState':
         editingState = methodCall.arguments as Map<String, dynamic>;
@@ -129,8 +130,9 @@ class TestTextInput {
     assert(isRegistered);
     // Not using the `expect` function because in the case of a FlutterDriver
     // test this code does not run in a package:test test zone.
-    if (_client == 0)
+    if (_client == 0) {
       throw TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
+    }
     _binaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
@@ -152,8 +154,9 @@ class TestTextInput {
     assert(isRegistered);
     // Not using the `expect` function because in the case of a FlutterDriver
     // test this code does not run in a package:test test zone.
-    if (_client == 0)
+    if (_client == 0) {
       throw TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
+    }
     _binaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(

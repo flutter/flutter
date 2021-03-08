@@ -571,8 +571,9 @@ abstract class BindingBase {
     developer.registerExtension(methodName, (String method, Map<String, String> parameters) async {
       assert(method == methodName);
       assert(() {
-        if (debugInstrumentationEnabled)
+        if (debugInstrumentationEnabled) {
           debugPrint('service extension method received: $method($parameters)');
+        }
         return true;
       }());
 

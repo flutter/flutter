@@ -19,8 +19,9 @@ void main() {
     });
 
     tearDownAll(() async {
-      if (driver != null)
+      if (driver != null) {
         driver.close();
+      }
     });
 
     test('inital tree creation', () async {
@@ -34,8 +35,9 @@ void main() {
       });
 
       final Iterable<TimelineEvent> semanticsEvents = timeline.events.where((TimelineEvent event) => event.name == 'Semantics');
-      if (semanticsEvents.length != 2)
+      if (semanticsEvents.length != 2) {
         fail('Expected exactly two semantics events, got ${semanticsEvents.length}');
+      }
       final Duration semanticsTreeCreation = Duration(microseconds: semanticsEvents.last.timestampMicros - semanticsEvents.first.timestampMicros);
 
       final String jsonEncoded = json.encode(<String, dynamic>{'initialSemanticsTreeCreation': semanticsTreeCreation.inMilliseconds});

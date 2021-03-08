@@ -212,10 +212,11 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
               // The following is a wild heuristic for guessing the indentation level.
               // It happens to work for common variants of the BSD and LGPL licenses.
               if (currentParagraphIndentation == null) {
-                if (currentLineIndent > 10)
+                if (currentLineIndent > 10) {
                   currentParagraphIndentation = LicenseParagraph.centeredIndent;
-                else
+                } else {
                   currentParagraphIndentation = currentLineIndent ~/ 3;
+                }
               }
               state = _LicenseEntryWithLineBreaksParserState.inParagraph;
           }
@@ -309,10 +310,12 @@ class LicenseRegistry {
   ///
   /// Generating the list of licenses is expensive.
   static Stream<LicenseEntry> get licenses async* {
-    if (_collectors == null)
+    if (_collectors == null) {
       return;
-    for (final LicenseEntryCollector collector in _collectors!)
+    }
+    for (final LicenseEntryCollector collector in _collectors!) {
       yield* collector();
+    }
   }
 
   /// Resets the internal state of [LicenseRegistry]. Intended for use in

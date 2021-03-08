@@ -24,8 +24,9 @@ const String _kShowDartPad = 'dartpad';
 String getChannelName() {
   final RegExp gitBranchRegexp = RegExp(r'^## (.*)');
   final ProcessResult gitResult = Process.runSync('git', <String>['status', '-b', '--porcelain']);
-  if (gitResult.exitCode != 0)
+  if (gitResult.exitCode != 0) {
     throw 'git status exit with non-zero exit code: ${gitResult.exitCode}';
+  }
   final Match gitBranchMatch = gitBranchRegexp.firstMatch(
       (gitResult.stdout as String).trim().split('\n').first);
   return gitBranchMatch == null ? '<unknown>' : gitBranchMatch.group(1).split('...').first;

@@ -104,10 +104,12 @@ abstract class BoxBorder extends ShapeBorder {
   /// {@macro dart.ui.shadow.lerp}
   static BoxBorder? lerp(BoxBorder? a, BoxBorder? b, double t) {
     assert(t != null);
-    if ((a is Border?) && (b is Border?))
+    if ((a is Border?) && (b is Border?)) {
       return Border.lerp(a, b, t);
-    if ((a is BorderDirectional?) && (b is BorderDirectional?))
+    }
+    if ((a is BorderDirectional?) && (b is BorderDirectional?)) {
       return BorderDirectional.lerp(a, b, t);
+    }
     if (b is Border && a is BorderDirectional) {
       final BoxBorder c = b;
       b = a;
@@ -435,15 +437,17 @@ class Border extends BoxBorder {
 
   @override
   ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
-    if (a is Border)
+    if (a is Border) {
       return Border.lerp(a, this, t);
+    }
     return super.lerpFrom(a, t);
   }
 
   @override
   ShapeBorder? lerpTo(ShapeBorder? b, double t) {
-    if (b is Border)
+    if (b is Border) {
       return Border.lerp(this, b, t);
+    }
     return super.lerpTo(b, t);
   }
 
@@ -455,12 +459,15 @@ class Border extends BoxBorder {
   /// {@macro dart.ui.shadow.lerp}
   static Border? lerp(Border? a, Border? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
-    if (a == null)
+    }
+    if (a == null) {
       return b!.scale(t);
-    if (b == null)
+    }
+    if (b == null) {
       return a.scale(1.0 - t);
+    }
     return Border(
       top: BorderSide.lerp(a.top, b.top, t),
       right: BorderSide.lerp(a.right, b.right, t),
@@ -548,10 +555,12 @@ class Border extends BoxBorder {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is Border
         && other.top == top
         && other.right == right
@@ -564,8 +573,9 @@ class Border extends BoxBorder {
 
   @override
   String toString() {
-    if (isUniform)
+    if (isUniform) {
       return '${objectRuntimeType(this, 'Border')}.all($top)';
+    }
     final List<String> arguments = <String>[
       if (top != BorderSide.none) 'top: $top',
       if (right != BorderSide.none) 'right: $right',
@@ -673,20 +683,23 @@ class BorderDirectional extends BoxBorder {
     final Color topColor = top.color;
     if (start.color != topColor ||
         end.color != topColor ||
-        bottom.color != topColor)
+        bottom.color != topColor) {
       return false;
+    }
 
     final double topWidth = top.width;
     if (start.width != topWidth ||
         end.width != topWidth ||
-        bottom.width != topWidth)
+        bottom.width != topWidth) {
       return false;
+    }
 
     final BorderStyle topStyle = top.style;
     if (start.style != topStyle ||
         end.style != topStyle ||
-        bottom.style != topStyle)
+        bottom.style != topStyle) {
       return false;
+    }
 
     return true;
   }
@@ -706,13 +719,15 @@ class BorderDirectional extends BoxBorder {
     if (other is Border) {
       final Border typedOther = other;
       if (!BorderSide.canMerge(typedOther.top, top) ||
-          !BorderSide.canMerge(typedOther.bottom, bottom))
+          !BorderSide.canMerge(typedOther.bottom, bottom)) {
         return null;
+      }
       if (start != BorderSide.none ||
           end != BorderSide.none) {
         if (typedOther.left != BorderSide.none ||
-            typedOther.right != BorderSide.none)
+            typedOther.right != BorderSide.none) {
           return null;
+        }
         assert(typedOther.left == BorderSide.none);
         assert(typedOther.right == BorderSide.none);
         return BorderDirectional(
@@ -746,15 +761,17 @@ class BorderDirectional extends BoxBorder {
 
   @override
   ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
-    if (a is BorderDirectional)
+    if (a is BorderDirectional) {
       return BorderDirectional.lerp(a, this, t);
+    }
     return super.lerpFrom(a, t);
   }
 
   @override
   ShapeBorder? lerpTo(ShapeBorder? b, double t) {
-    if (b is BorderDirectional)
+    if (b is BorderDirectional) {
       return BorderDirectional.lerp(this, b, t);
+    }
     return super.lerpTo(b, t);
   }
 
@@ -766,12 +783,15 @@ class BorderDirectional extends BoxBorder {
   /// {@macro dart.ui.shadow.lerp}
   static BorderDirectional? lerp(BorderDirectional? a, BorderDirectional? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
-    if (a == null)
+    }
+    if (a == null) {
       return b!.scale(t);
-    if (b == null)
+    }
+    if (b == null) {
       return a.scale(1.0 - t);
+    }
     return BorderDirectional(
       top: BorderSide.lerp(a.top, b.top, t),
       end: BorderSide.lerp(a.end, b.end, t),
@@ -852,10 +872,12 @@ class BorderDirectional extends BoxBorder {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is BorderDirectional
         && other.top == top
         && other.start == start

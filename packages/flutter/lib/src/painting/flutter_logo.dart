@@ -110,8 +110,9 @@ class FlutterLogoDecoration extends Decoration {
     assert(t != null);
     assert(a == null || a.debugAssertIsValid());
     assert(b == null || b.debugAssertIsValid());
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     if (a == null) {
       return FlutterLogoDecoration._(
         b!.textColor,
@@ -130,10 +131,12 @@ class FlutterLogoDecoration extends Decoration {
         a._opacity * (1.0 - t).clamp(0.0, 1.0),
       );
     }
-    if (t == 0.0)
+    if (t == 0.0) {
       return a;
-    if (t == 1.0)
+    }
+    if (t == 1.0) {
       return b;
+    }
     return FlutterLogoDecoration._(
       Color.lerp(a.textColor, b.textColor, t)!,
       t < 0.5 ? a.style : b.style,
@@ -181,8 +184,9 @@ class FlutterLogoDecoration extends Decoration {
   @override
   bool operator ==(Object other) {
     assert(debugAssertIsValid());
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
+    }
     return other is FlutterLogoDecoration
         && other.textColor == textColor
         && other._position == _position
@@ -204,8 +208,9 @@ class FlutterLogoDecoration extends Decoration {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('textColor', textColor));
     properties.add(EnumProperty<FlutterLogoStyle>('style', style));
-    if (_inTransition)
+    if (_inTransition) {
       properties.add(DiagnosticsNode.message('transition ${debugFormatDouble(_position)}:${debugFormatDouble(_opacity)}'));
+    }
   }
 }
 
@@ -328,8 +333,9 @@ class _FlutterLogoPainter extends BoxPainter {
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
     offset += _config.margin.topLeft;
     final Size canvasSize = _config.margin.deflateSize(configuration.size!);
-    if (canvasSize.isEmpty)
+    if (canvasSize.isEmpty) {
       return;
+    }
     final Size logoSize;
     if (_config._position > 0.0) {
       // horizontal style
@@ -440,7 +446,8 @@ class _FlutterLogoPainter extends BoxPainter {
       }
     }
     _paintLogo(canvas, logoSquare);
-    if (_config._opacity < 1.0)
+    if (_config._opacity < 1.0) {
       canvas.restore();
+    }
   }
 }

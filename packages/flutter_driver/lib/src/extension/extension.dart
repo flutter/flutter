@@ -372,8 +372,9 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory,
       assert(WidgetsBinding.instance!.isRootWidgetAttached || !command.requiresRootWidgetAttached,
           'No root widget is attached; have you remembered to call runApp()?');
       Future<Result?> responseFuture = handleCommand(command, _prober, this);
-      if (command.timeout != null)
+      if (command.timeout != null) {
         responseFuture = responseFuture.timeout(command.timeout ?? Duration.zero);
+      }
       final Result? response = await responseFuture;
       return _makeResponse(response?.toJson());
     } on TimeoutException catch (error, stackTrace) {
@@ -382,8 +383,9 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory,
       return _makeResponse(message, isError: true);
     } catch (error, stackTrace) {
       final String message = 'Uncaught extension error while executing $commandKind: $error\n$stackTrace';
-      if (!_silenceErrors)
+      if (!_silenceErrors) {
         _log(message);
+      }
       return _makeResponse(message, isError: true);
     }
   }

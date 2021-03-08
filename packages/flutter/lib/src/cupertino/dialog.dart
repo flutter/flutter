@@ -610,8 +610,9 @@ class _RenderCupertinoDialog extends RenderBox {
     final bool hasDivider = contentHeight > 0.0 && actionsHeight > 0.0;
     final double height = contentHeight + (hasDivider ? _dividerThickness : 0.0) + actionsHeight;
 
-    if (height.isFinite)
+    if (height.isFinite) {
       return height;
+    }
     return 0.0;
   }
 
@@ -622,8 +623,9 @@ class _RenderCupertinoDialog extends RenderBox {
     final bool hasDivider = contentHeight > 0.0 && actionsHeight > 0.0;
     final double height = contentHeight + (hasDivider ? _dividerThickness : 0.0) + actionsHeight;
 
-    if (height.isFinite)
+    if (height.isFinite) {
       return height;
+    }
     return 0.0;
   }
 
@@ -1013,8 +1015,9 @@ class _ActionButtonParentDataWidget extends ParentDataWidget<_ActionButtonParent
 
       // Force a repaint.
       final AbstractNode? targetParent = renderObject.parent;
-      if (targetParent is RenderObject)
+      if (targetParent is RenderObject) {
         targetParent.markNeedsPaint();
+      }
     }
   }
 
@@ -1333,8 +1336,9 @@ class _RenderCupertinoDialogActions extends RenderBox
 
   final Paint _buttonBackgroundPaint;
   set dialogColor(Color value) {
-    if (value == _buttonBackgroundPaint.color)
+    if (value == _buttonBackgroundPaint.color) {
       return;
+    }
 
     _buttonBackgroundPaint.color = value;
     markNeedsPaint();
@@ -1342,8 +1346,9 @@ class _RenderCupertinoDialogActions extends RenderBox
 
   final Paint _pressedButtonBackgroundPaint;
   set dialogPressedColor(Color value) {
-    if (value == _pressedButtonBackgroundPaint.color)
+    if (value == _pressedButtonBackgroundPaint.color) {
       return;
+    }
 
     _pressedButtonBackgroundPaint.color = value;
     markNeedsPaint();
@@ -1351,8 +1356,9 @@ class _RenderCupertinoDialogActions extends RenderBox
 
   final Paint _dividerPaint;
   set dividerColor(Color value) {
-    if (value == _dividerPaint.color)
+    if (value == _dividerPaint.color) {
       return;
+    }
 
     _dividerPaint.color = value;
     markNeedsPaint();
@@ -1385,8 +1391,9 @@ class _RenderCupertinoDialogActions extends RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! _ActionButtonParentData)
+    if (child.parentData is! _ActionButtonParentData) {
       child.parentData = _ActionButtonParentData();
+    }
   }
 
   @override

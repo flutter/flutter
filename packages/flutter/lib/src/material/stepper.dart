@@ -306,8 +306,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       (int i) => GlobalKey(),
     );
 
-    for (int i = 0; i < widget.steps.length; i += 1)
+    for (int i = 0; i < widget.steps.length; i += 1) {
       _oldStates[i] = widget.steps[i].state;
+    }
   }
 
   @override
@@ -315,8 +316,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     super.didUpdateWidget(oldWidget);
     assert(widget.steps.length == oldWidget.steps.length);
 
-    for (int i = 0; i < oldWidget.steps.length; i += 1)
+    for (int i = 0; i < oldWidget.steps.length; i += 1) {
       _oldStates[i] = oldWidget.steps[i].state;
+    }
   }
 
   bool _isFirst(int index) {
@@ -434,16 +436,18 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         duration: kThemeAnimationDuration,
       );
     } else {
-      if (widget.steps[index].state != StepState.error)
+      if (widget.steps[index].state != StepState.error) {
         return _buildCircle(index, false);
-      else
+      } else {
         return _buildTriangle(index, false);
+      }
     }
   }
 
   Widget _buildVerticalControls() {
-    if (widget.controlsBuilder != null)
+    if (widget.controlsBuilder != null) {
       return widget.controlsBuilder!(context, onStepContinue: widget.onStepContinue, onStepCancel: widget.onStepCancel);
+    }
 
     final Color cancelColor;
     switch (Theme.of(context).brightness) {
@@ -658,8 +662,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                     duration: kThemeAnimationDuration,
                   );
 
-                  if (widget.onStepTapped != null)
+                  if (widget.onStepTapped != null) {
                     widget.onStepTapped!(i);
+                  }
                 } : null,
                 canRequestFocus: widget.steps[i].state != StepState.disabled,
                 child: _buildVerticalHeader(i),
@@ -676,8 +681,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       for (int i = 0; i < widget.steps.length; i += 1) ...<Widget>[
         InkResponse(
           onTap: widget.steps[i].state != StepState.disabled ? () {
-            if (widget.onStepTapped != null)
+            if (widget.onStepTapped != null) {
               widget.onStepTapped!(i);
+            }
           } : null,
           canRequestFocus: widget.steps[i].state != StepState.disabled,
           child: Row(
@@ -741,13 +747,14 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
     assert(() {
-      if (context.findAncestorWidgetOfExactType<Stepper>() != null)
+      if (context.findAncestorWidgetOfExactType<Stepper>() != null) {
         throw FlutterError(
           'Steppers must not be nested.\n'
           'The material specification advises that one should avoid embedding '
           'steppers within steppers. '
           'https://material.io/archive/guidelines/components/steppers.html#steppers-usage'
         );
+      }
       return true;
     }());
     assert(widget.type != null);

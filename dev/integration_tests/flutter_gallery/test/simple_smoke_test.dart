@@ -8,8 +8,9 @@ import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
 
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
-  if (binding is LiveTestWidgetsFlutterBinding)
+  if (binding is LiveTestWidgetsFlutterBinding) {
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
+  }
 
   testWidgets('Flutter Gallery app simple smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(

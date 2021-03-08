@@ -153,10 +153,12 @@ class DecorationImage {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is DecorationImage
         && other.image == image
         && other.colorFilter == colorFilter
@@ -251,8 +253,9 @@ class DecorationImagePainter {
         }
         return true;
       }());
-      if (configuration.textDirection == TextDirection.rtl)
+      if (configuration.textDirection == TextDirection.rtl) {
         flipHorizontally = true;
+      }
     }
 
     final ImageStream newImageStream = _details.image.resolve(configuration);
@@ -265,8 +268,9 @@ class DecorationImagePainter {
       _imageStream = newImageStream;
       _imageStream!.addListener(listener);
     }
-    if (_image == null)
+    if (_image == null) {
       return;
+    }
 
     if (clipPath != null) {
       canvas.save();
@@ -288,13 +292,15 @@ class DecorationImagePainter {
       filterQuality: FilterQuality.low,
     );
 
-    if (clipPath != null)
+    if (clipPath != null) {
       canvas.restore();
+    }
   }
 
   void _handleImage(ImageInfo value, bool synchronousCall) {
-    if (_image == value)
+    if (_image == value) {
       return;
+    }
     if (_image != null && _image!.isCloneOf(value)) {
       value.dispose();
       return;
@@ -302,8 +308,9 @@ class DecorationImagePainter {
     _image?.dispose();
     _image = value;
     assert(_onChanged != null);
-    if (!synchronousCall)
+    if (!synchronousCall) {
       _onChanged();
+    }
   }
 
   /// Releases the resources used by this painter.
@@ -442,8 +449,9 @@ void paintImage({
     'The caller of paintImage is expected to wait to dispose the image until '
     'after painting has completed.'
   );
-  if (rect.isEmpty)
+  if (rect.isEmpty) {
     return;
+  }
   Size outputSize = rect.size;
   Size inputSize = Size(image.width.toDouble(), image.height.toDouble());
   Offset? sliceBorder;
@@ -471,8 +479,9 @@ void paintImage({
     repeat = ImageRepeat.noRepeat;
   }
   final Paint paint = Paint()..isAntiAlias = isAntiAlias;
-  if (colorFilter != null)
+  if (colorFilter != null) {
     paint.colorFilter = colorFilter;
+  }
   paint.filterQuality = filterQuality;
   paint.invertColors = invertColors;
   final double halfWidthDelta = (outputSize.width - destinationSize.width) / 2.0;
@@ -555,10 +564,12 @@ void paintImage({
   }
 
   final bool needSave = centerSlice != null || repeat != ImageRepeat.noRepeat || flipHorizontally;
-  if (needSave)
+  if (needSave) {
     canvas.save();
-  if (repeat != ImageRepeat.noRepeat)
+  }
+  if (repeat != ImageRepeat.noRepeat) {
     canvas.clipRect(rect);
+  }
   if (flipHorizontally) {
     final double dx = -(rect.left + rect.width / 2.0);
     canvas.translate(-dx, 0.0);
@@ -572,20 +583,23 @@ void paintImage({
     if (repeat == ImageRepeat.noRepeat) {
       canvas.drawImageRect(image, sourceRect, destinationRect, paint);
     } else {
-      for (final Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
+      for (final Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat)) {
         canvas.drawImageRect(image, sourceRect, tileRect, paint);
+      }
     }
   } else {
     canvas.scale(1 / scale);
     if (repeat == ImageRepeat.noRepeat) {
       canvas.drawImageNine(image, _scaleRect(centerSlice, scale), _scaleRect(destinationRect, scale), paint);
     } else {
-      for (final Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
+      for (final Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat)) {
         canvas.drawImageNine(image, _scaleRect(centerSlice, scale), _scaleRect(tileRect, scale), paint);
+      }
     }
   }
-  if (needSave)
+  if (needSave) {
     canvas.restore();
+  }
 
   if (invertedCanvas) {
     canvas.restore();
@@ -611,8 +625,9 @@ Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, Im
   }
 
   for (int i = startX; i <= stopX; ++i) {
-    for (int j = startY; j <= stopY; ++j)
+    for (int j = startY; j <= stopY; ++j) {
       yield fundamentalRect.shift(Offset(i * strideX, j * strideY));
+    }
   }
 }
 

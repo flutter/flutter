@@ -33,10 +33,11 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
       curve: const Interval(0.0, 0.9, curve: Curves.fastOutSlowIn),
       reverseCurve: Curves.fastOutSlowIn,
     )..addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.dismissed)
+      if (status == AnimationStatus.dismissed) {
         _controller.forward();
-      else if (status == AnimationStatus.completed)
+      } else if (status == AnimationStatus.completed) {
         _controller.reverse();
+      }
     });
   }
 

@@ -738,8 +738,9 @@ class TextEditingValue {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
+    }
     return other is TextEditingValue
         && other.text == text
         && other.selection == selection
@@ -1013,8 +1014,9 @@ class TextInputConnection {
   /// The information is currently only used on iOS, for positioning the IME bar.
   void setComposingRect(Rect rect) {
     assert(rect != null);
-    if (rect == _cachedRect)
+    if (rect == _cachedRect) {
       return;
+    }
     _cachedRect = rect;
     final Rect validRect = rect.isFinite ? rect : Offset.zero & const Size(-1, -1);
     TextInput._instance._setComposingTextRect(
@@ -1289,8 +1291,9 @@ class TextInput {
   late TextInputConfiguration _currentConfiguration;
 
   Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
-    if (_currentConnection == null)
+    if (_currentConnection == null) {
       return;
+    }
     final String method = methodCall.method;
 
     // The requestExistingInputState request needs to be handled regardless of
@@ -1324,8 +1327,9 @@ class TextInput {
 
     final int client = args[0] as int;
     // The incoming message was for a different client.
-    if (client != _currentConnection!._id)
+    if (client != _currentConnection!._id) {
       return;
+    }
     switch (method) {
       case 'TextInputClient.updateEditingState':
         _currentConnection!._client.updateEditingValue(TextEditingValue.fromJSON(args[1] as Map<String, dynamic>));
@@ -1357,8 +1361,9 @@ class TextInput {
   bool _hidePending = false;
 
   void _scheduleHide() {
-    if (_hidePending)
+    if (_hidePending) {
       return;
+    }
     _hidePending = true;
 
     // Schedule a deferred task that hides the text input. If someone else
@@ -1366,8 +1371,9 @@ class TextInput {
     // nothing.
     scheduleMicrotask(() {
       _hidePending = false;
-      if (_currentConnection == null)
+      if (_currentConnection == null) {
         _channel.invokeMethod<void>('TextInput.hide');
+      }
     });
   }
 

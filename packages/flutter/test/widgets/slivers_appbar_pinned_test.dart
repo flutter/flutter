@@ -340,8 +340,9 @@ class RenderBigSliver extends RenderSliver {
   double get height => _height;
   double _height;
   set height(double value) {
-    if (value == _height)
+    if (value == _height) {
       return;
+    }
     _height = value;
     markNeedsLayout();
   }

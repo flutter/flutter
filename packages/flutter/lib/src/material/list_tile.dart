@@ -982,8 +982,9 @@ class ListTile extends StatelessWidget {
     assert(tiles != null);
     assert(color != null || context != null);
 
-    if (tiles.isEmpty)
+    if (tiles.isEmpty) {
       return;
+    }
 
     final Iterator<Widget> iterator = tiles.iterator;
     final bool isNotEmpty = iterator.moveNext();
@@ -1003,19 +1004,23 @@ class ListTile extends StatelessWidget {
       );
       tile = iterator.current;
     }
-    if (isNotEmpty)
+    if (isNotEmpty) {
       yield tile;
+    }
   }
 
   Color? _iconColor(ThemeData theme, ListTileTheme? tileTheme) {
-    if (!enabled)
+    if (!enabled) {
       return theme.disabledColor;
+    }
 
-    if (selected && tileTheme?.selectedColor != null)
+    if (selected && tileTheme?.selectedColor != null) {
       return tileTheme!.selectedColor;
+    }
 
-    if (!selected && tileTheme?.iconColor != null)
+    if (!selected && tileTheme?.iconColor != null) {
       return tileTheme!.iconColor;
+    }
 
     switch (theme.brightness) {
       case Brightness.light:
@@ -1026,14 +1031,17 @@ class ListTile extends StatelessWidget {
   }
 
   Color? _textColor(ThemeData theme, ListTileTheme? tileTheme, Color? defaultColor) {
-    if (!enabled)
+    if (!enabled) {
       return theme.disabledColor;
+    }
 
-    if (selected && tileTheme?.selectedColor != null)
+    if (selected && tileTheme?.selectedColor != null) {
       return tileTheme!.selectedColor;
+    }
 
-    if (!selected && tileTheme?.textColor != null)
+    if (!selected && tileTheme?.textColor != null) {
       return tileTheme!.textColor;
+    }
 
     if (selected) {
       switch (theme.brightness) {
@@ -1086,17 +1094,21 @@ class ListTile extends StatelessWidget {
 
   Color _tileBackgroundColor(ListTileTheme? tileTheme) {
     if (!selected) {
-      if (tileColor != null)
+      if (tileColor != null) {
         return tileColor!;
-      if (tileTheme?.tileColor != null)
+      }
+      if (tileTheme?.tileColor != null) {
         return tileTheme!.tileColor!;
+      }
     }
 
     if (selected) {
-      if (selectedTileColor != null)
+      if (selectedTileColor != null) {
         return selectedTileColor!;
-      if (tileTheme?.selectedTileColor != null)
+      }
+      if (tileTheme?.selectedTileColor != null) {
         return tileTheme!.selectedTileColor!;
+      }
     }
 
     return Colors.transparent;
@@ -1470,22 +1482,27 @@ class _RenderListTile extends RenderBox {
 
   // The returned list is ordered for hit testing.
   Iterable<RenderBox> get _children sync* {
-    if (leading != null)
+    if (leading != null) {
       yield leading!;
-    if (title != null)
+    }
+    if (title != null) {
       yield title!;
-    if (subtitle != null)
+    }
+    if (subtitle != null) {
       yield subtitle!;
-    if (trailing != null)
+    }
+    if (trailing != null) {
       yield trailing!;
+    }
   }
 
   bool get isDense => _isDense;
   bool _isDense;
   set isDense(bool value) {
     assert(value != null);
-    if (_isDense == value)
+    if (_isDense == value) {
       return;
+    }
     _isDense = value;
     markNeedsLayout();
   }
@@ -1494,8 +1511,9 @@ class _RenderListTile extends RenderBox {
   VisualDensity _visualDensity;
   set visualDensity(VisualDensity value) {
     assert(value != null);
-    if (_visualDensity == value)
+    if (_visualDensity == value) {
       return;
+    }
     _visualDensity = value;
     markNeedsLayout();
   }
@@ -1504,8 +1522,9 @@ class _RenderListTile extends RenderBox {
   bool _isThreeLine;
   set isThreeLine(bool value) {
     assert(value != null);
-    if (_isThreeLine == value)
+    if (_isThreeLine == value) {
       return;
+    }
     _isThreeLine = value;
     markNeedsLayout();
   }
@@ -1514,8 +1533,9 @@ class _RenderListTile extends RenderBox {
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
     assert(value != null);
-    if (_textDirection == value)
+    if (_textDirection == value) {
       return;
+    }
     _textDirection = value;
     markNeedsLayout();
   }
@@ -1524,8 +1544,9 @@ class _RenderListTile extends RenderBox {
   TextBaseline _titleBaselineType;
   set titleBaselineType(TextBaseline value) {
     assert(value != null);
-    if (_titleBaselineType == value)
+    if (_titleBaselineType == value) {
       return;
+    }
     _titleBaselineType = value;
     markNeedsLayout();
   }
@@ -1533,8 +1554,9 @@ class _RenderListTile extends RenderBox {
   TextBaseline? get subtitleBaselineType => _subtitleBaselineType;
   TextBaseline? _subtitleBaselineType;
   set subtitleBaselineType(TextBaseline? value) {
-    if (_subtitleBaselineType == value)
+    if (_subtitleBaselineType == value) {
       return;
+    }
     _subtitleBaselineType = value;
     markNeedsLayout();
   }
@@ -1545,8 +1567,9 @@ class _RenderListTile extends RenderBox {
 
   set horizontalTitleGap(double value) {
     assert(value != null);
-    if (_horizontalTitleGap == value)
+    if (_horizontalTitleGap == value) {
       return;
+    }
     _horizontalTitleGap = value;
     markNeedsLayout();
   }
@@ -1556,8 +1579,9 @@ class _RenderListTile extends RenderBox {
 
   set minVerticalPadding(double value) {
     assert(value != null);
-    if (_minVerticalPadding == value)
+    if (_minVerticalPadding == value) {
       return;
+    }
     _minVerticalPadding = value;
     markNeedsLayout();
   }
@@ -1567,8 +1591,9 @@ class _RenderListTile extends RenderBox {
 
   set minLeadingWidth(double value) {
     assert(value != null);
-    if (_minLeadingWidth == value)
+    if (_minLeadingWidth == value) {
       return;
+    }
     _minLeadingWidth = value;
     markNeedsLayout();
   }
@@ -1576,15 +1601,17 @@ class _RenderListTile extends RenderBox {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    for (final RenderBox child in _children)
+    for (final RenderBox child in _children) {
       child.attach(owner);
+    }
   }
 
   @override
   void detach() {
     super.detach();
-    for (final RenderBox child in _children)
+    for (final RenderBox child in _children) {
       child.detach();
+    }
   }
 
   @override
@@ -1601,8 +1628,9 @@ class _RenderListTile extends RenderBox {
   List<DiagnosticsNode> debugDescribeChildren() {
     final List<DiagnosticsNode> value = <DiagnosticsNode>[];
     void add(RenderBox? child, String name) {
-      if (child != null)
+      if (child != null) {
         value.add(child.toDiagnosticsNode(name: name));
+      }
     }
     add(leading, 'leading');
     add(title, 'title');
@@ -1648,10 +1676,12 @@ class _RenderListTile extends RenderBox {
     final bool isOneLine = !isThreeLine && !hasSubtitle;
 
     final Offset baseDensity = visualDensity.baseSizeAdjustment;
-    if (isOneLine)
+    if (isOneLine) {
       return (isDense ? 48.0 : 56.0) + baseDensity.dy;
-    if (isTwoLine)
+    }
+    if (isTwoLine) {
       return (isDense ? 64.0 : 72.0) + baseDensity.dy;
+    }
     return (isDense ? 76.0 : 88.0) + baseDensity.dy;
   }
 
@@ -1680,8 +1710,9 @@ class _RenderListTile extends RenderBox {
   }
 
   static Size _layoutBox(RenderBox? box, BoxConstraints constraints) {
-    if (box == null)
+    if (box == null) {
       return Size.zero;
+    }
     box.layout(constraints, parentUsesSize: true);
     return box.size;
   }
@@ -1817,23 +1848,29 @@ class _RenderListTile extends RenderBox {
 
     switch (textDirection) {
       case TextDirection.rtl: {
-        if (hasLeading)
+        if (hasLeading) {
           _positionBox(leading!, Offset(tileWidth - leadingSize.width, leadingY));
+        }
         _positionBox(title!, Offset(adjustedTrailingWidth, titleY));
-        if (hasSubtitle)
+        if (hasSubtitle) {
           _positionBox(subtitle!, Offset(adjustedTrailingWidth, subtitleY!));
-        if (hasTrailing)
+        }
+        if (hasTrailing) {
           _positionBox(trailing!, Offset(0.0, trailingY));
+        }
         break;
       }
       case TextDirection.ltr: {
-        if (hasLeading)
+        if (hasLeading) {
           _positionBox(leading!, Offset(0.0, leadingY));
+        }
         _positionBox(title!, Offset(titleStart, titleY));
-        if (hasSubtitle)
+        if (hasSubtitle) {
           _positionBox(subtitle!, Offset(titleStart, subtitleY!));
-        if (hasTrailing)
+        }
+        if (hasTrailing) {
           _positionBox(trailing!, Offset(tileWidth - trailingSize.width, trailingY));
+        }
         break;
       }
     }
@@ -1873,8 +1910,9 @@ class _RenderListTile extends RenderBox {
           return child.hitTest(result, position: transformed);
         },
       );
-      if (isHit)
+      if (isHit) {
         return true;
+      }
     }
     return false;
   }

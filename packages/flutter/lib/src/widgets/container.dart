@@ -371,11 +371,13 @@ class Container extends StatelessWidget {
   final Clip clipBehavior;
 
   EdgeInsetsGeometry? get _paddingIncludingDecoration {
-    if (decoration == null || decoration!.padding == null)
+    if (decoration == null || decoration!.padding == null) {
       return padding;
+    }
     final EdgeInsetsGeometry? decorationPadding = decoration!.padding;
-    if (padding == null)
+    if (padding == null) {
       return decorationPadding;
+    }
     return padding!.add(decorationPadding!);
   }
 
@@ -391,15 +393,18 @@ class Container extends StatelessWidget {
       );
     }
 
-    if (alignment != null)
+    if (alignment != null) {
       current = Align(alignment: alignment!, child: current);
+    }
 
     final EdgeInsetsGeometry? effectivePadding = _paddingIncludingDecoration;
-    if (effectivePadding != null)
+    if (effectivePadding != null) {
       current = Padding(padding: effectivePadding, child: current);
+    }
 
-    if (color != null)
+    if (color != null) {
       current = ColoredBox(color: color!, child: current);
+    }
 
     if (clipBehavior != Clip.none) {
       assert(decoration != null);
@@ -413,8 +418,9 @@ class Container extends StatelessWidget {
       );
     }
 
-    if (decoration != null)
+    if (decoration != null) {
       current = DecoratedBox(decoration: decoration!, child: current);
+    }
 
     if (foregroundDecoration != null) {
       current = DecoratedBox(
@@ -424,14 +430,17 @@ class Container extends StatelessWidget {
       );
     }
 
-    if (constraints != null)
+    if (constraints != null) {
       current = ConstrainedBox(constraints: constraints!, child: current);
+    }
 
-    if (margin != null)
+    if (margin != null) {
       current = Padding(padding: margin!, child: current);
+    }
 
-    if (transform != null)
+    if (transform != null) {
       current = Transform(transform: transform!, child: current, alignment: transformAlignment);
+    }
 
     return current!;
   }
@@ -442,10 +451,11 @@ class Container extends StatelessWidget {
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, showName: false, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.none));
-    if (color != null)
+    if (color != null) {
       properties.add(DiagnosticsProperty<Color>('bg', color));
-    else
+    } else {
       properties.add(DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
+    }
     properties.add(DiagnosticsProperty<Decoration>('fg', foregroundDecoration, defaultValue: null));
     properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));

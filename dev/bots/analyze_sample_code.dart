@@ -305,11 +305,13 @@ class SampleChecker {
       '--input=${inputFile.absolute.path}',
       ...sample.args,
     ];
-    if (verbose)
+    if (verbose) {
       print('Generating sample for ${sample.start?.filename}:${sample.start?.line}');
+    }
     final ProcessResult process = _runSnippetsScript(args);
-    if (verbose)
+    if (verbose) {
       stderr.write('${process.stderr}');
+    }
     if (process.exitCode != 0) {
       throw SampleCheckerException(
         'Unable to create sample for ${sample.start.filename}:${sample.start.line} '
@@ -454,12 +456,14 @@ class SampleChecker {
         }
       }
     }
-    if (!silent)
+    if (!silent) {
       print('Found ${sections.length} sample code sections.');
+    }
     for (final Section section in sections) {
       final String path = _writeSection(section).path;
-      if (sectionMap != null)
+      if (sectionMap != null) {
         sectionMap[path] = section;
+      }
     }
     for (final Sample sample in samples) {
       final File snippetFile = _writeSample(sample);
@@ -549,8 +553,9 @@ linter:
 
   /// Invokes the analyzer on the given [directory] and returns the stdout.
   List<String> _runAnalyzer(Directory directory, {bool silent}) {
-    if (!silent)
+    if (!silent) {
       print('Starting analysis of code samples.');
+    }
     _createConfigurationFiles(directory);
     final ProcessResult result = Process.runSync(
       _flutter,
@@ -734,8 +739,9 @@ linter:
       _exitCode = 0;
     }
     if (_exitCode == 0) {
-      if (!silent)
+      if (!silent) {
         print('No analysis errors in samples!');
+      }
       assert(analysisErrors.isEmpty);
     }
     return analysisErrors;
@@ -769,17 +775,19 @@ linter:
         // Each section of the dart code that is either split by a blank line, or with '// ...' is
         // treated as a separate code block.
         if (block[index] == '' || block[index] == '// ...') {
-          if (subline == null)
+          if (subline == null) {
             throw SampleCheckerException('${Line('', filename: line.filename, line: line.line + index, indent: line.indent)}: '
                 'Unexpected blank line or "// ..." line near start of subblock in sample code.');
+          }
           subblocks += 1;
           subsections.add(_processBlock(subline, buffer));
           buffer.clear();
           assert(buffer.isEmpty);
           subline = null;
         } else if (block[index].startsWith('// ')) {
-          if (buffer.length > 1) // don't include leading comments
-            buffer.add('/${block[index]}'); // so that it doesn't start with "// " and get caught in this again
+          if (buffer.length > 1) {
+            buffer.add('/${block[index]}');
+          } // so that it doesn't start with "// " and get caught in this again
         } else {
           subline ??= Line(
             block[index],

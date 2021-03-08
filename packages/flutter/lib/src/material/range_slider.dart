@@ -453,8 +453,9 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
   @override
   void didUpdateWidget(RangeSlider oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.onChanged == widget.onChanged)
+    if (oldWidget.onChanged == widget.onChanged) {
       return;
+    }
     final bool wasEnabled = oldWidget.onChanged != null;
     final bool isEnabled = widget.onChanged != null;
     if (wasEnabled != isEnabled) {
@@ -554,16 +555,20 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
           towardsEnd = dx < 0;
           break;
       }
-      if (towardsStart)
+      if (towardsStart) {
         return Thumb.start;
-      if (towardsEnd)
+      }
+      if (towardsEnd) {
         return Thumb.end;
+      }
     } else {
       // Snap position on the track if its in the inactive range.
-      if (tapValue < values.start || inStartTouchTarget)
+      if (tapValue < values.start || inStartTouchTarget) {
         return Thumb.start;
-      if (tapValue > values.end || inEndTouchTarget)
+      }
+      if (tapValue > values.end || inEndTouchTarget) {
         return Thumb.end;
+      }
     }
     return null;
   }
@@ -893,8 +898,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   TargetPlatform _platform;
   TargetPlatform get platform => _platform;
   set platform(TargetPlatform value) {
-    if (_platform == value)
+    if (_platform == value) {
       return;
+    }
     _platform = value;
     markNeedsSemanticsUpdate();
   }
@@ -902,8 +908,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   SemanticFormatterCallback? _semanticFormatterCallback;
   SemanticFormatterCallback? get semanticFormatterCallback => _semanticFormatterCallback;
   set semanticFormatterCallback(SemanticFormatterCallback? value) {
-    if (_semanticFormatterCallback == value)
+    if (_semanticFormatterCallback == value) {
       return;
+    }
     _semanticFormatterCallback = value;
     markNeedsSemanticsUpdate();
   }
@@ -921,8 +928,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   RangeLabels? get labels => _labels;
   RangeLabels? _labels;
   set labels(RangeLabels? labels) {
-    if (labels == _labels)
+    if (labels == _labels) {
       return;
+    }
     _labels = labels;
     _updateLabelPainters();
   }
@@ -930,8 +938,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   SliderThemeData get sliderTheme => _sliderTheme;
   SliderThemeData _sliderTheme;
   set sliderTheme(SliderThemeData value) {
-    if (value == _sliderTheme)
+    if (value == _sliderTheme) {
       return;
+    }
     _sliderTheme = value;
     markNeedsPaint();
   }
@@ -939,8 +948,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   ThemeData? get theme => _theme;
   ThemeData? _theme;
   set theme(ThemeData? value) {
-    if (value == _theme)
+    if (value == _theme) {
       return;
+    }
     _theme = value;
     markNeedsPaint();
   }
@@ -948,8 +958,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   double get textScaleFactor => _textScaleFactor;
   double _textScaleFactor;
   set textScaleFactor(double value) {
-    if (value == _textScaleFactor)
+    if (value == _textScaleFactor) {
       return;
+    }
     _textScaleFactor = value;
     _updateLabelPainters();
   }
@@ -957,8 +968,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   Size get screenSize => _screenSize;
   Size _screenSize;
   set screenSize(Size value) {
-    if (value == screenSize)
+    if (value == screenSize) {
       return;
+    }
     _screenSize = value;
     markNeedsPaint();
   }
@@ -966,8 +978,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   ValueChanged<RangeValues>? get onChanged => _onChanged;
   ValueChanged<RangeValues>? _onChanged;
   set onChanged(ValueChanged<RangeValues>? value) {
-    if (value == _onChanged)
+    if (value == _onChanged) {
       return;
+    }
     final bool wasEnabled = isEnabled;
     _onChanged = value;
     if (wasEnabled != isEnabled) {
@@ -983,8 +996,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
     assert(value != null);
-    if (value == _textDirection)
+    if (value == _textDirection) {
       return;
+    }
     _textDirection = value;
     _updateLabelPainters();
   }
@@ -1025,8 +1039,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   }
 
   void _updateLabelPainter(Thumb thumb) {
-    if (labels == null)
+    if (labels == null) {
       return;
+    }
 
     final String text;
     final TextPainter labelPainter;

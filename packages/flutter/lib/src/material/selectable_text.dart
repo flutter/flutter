@@ -94,8 +94,9 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
           break;
       }
     }
-    if (_state.widget.onTap != null)
+    if (_state.widget.onTap != null) {
       _state.widget.onTap!();
+    }
   }
 
   @override
@@ -535,20 +536,25 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
   bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
     // When the text field is activated by something that doesn't trigger the
     // selection overlay, we shouldn't show the handles either.
-    if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar)
+    if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar) {
       return false;
+    }
 
-    if (_controller.selection.isCollapsed)
+    if (_controller.selection.isCollapsed) {
       return false;
+    }
 
-    if (cause == SelectionChangedCause.keyboard)
+    if (cause == SelectionChangedCause.keyboard) {
       return false;
+    }
 
-    if (cause == SelectionChangedCause.longPress)
+    if (cause == SelectionChangedCause.longPress) {
       return true;
+    }
 
-    if (_controller.text.isNotEmpty)
+    if (_controller.text.isNotEmpty) {
       return true;
+    }
 
     return false;
   }
@@ -630,10 +636,12 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
 
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
     TextStyle? effectiveTextStyle = widget.style;
-    if (effectiveTextStyle == null || effectiveTextStyle.inherit)
+    if (effectiveTextStyle == null || effectiveTextStyle.inherit) {
       effectiveTextStyle = defaultTextStyle.style.merge(widget.style);
-    if (MediaQuery.boldTextOverride(context))
+    }
+    if (MediaQuery.boldTextOverride(context)) {
       effectiveTextStyle = effectiveTextStyle.merge(const TextStyle(fontWeight: FontWeight.bold));
+    }
     final Widget child = RepaintBoundary(
       child: EditableText(
         key: editableTextKey,

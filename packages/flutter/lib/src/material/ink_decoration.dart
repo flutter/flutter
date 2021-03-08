@@ -216,11 +216,13 @@ class Ink extends StatefulWidget {
   final double? height;
 
   EdgeInsetsGeometry get _paddingIncludingDecoration {
-    if (decoration == null || decoration!.padding == null)
+    if (decoration == null || decoration!.padding == null) {
       return padding ?? EdgeInsets.zero;
+    }
     final EdgeInsetsGeometry decorationPadding = decoration!.padding!;
-    if (padding == null)
+    if (padding == null) {
       return decorationPadding;
+    }
     return padding!.add(decorationPadding);
   }
 
@@ -326,8 +328,9 @@ class InkDecoration extends InkFeature {
   Decoration? get decoration => _decoration;
   Decoration? _decoration;
   set decoration(Decoration? value) {
-    if (value == _decoration)
+    if (value == _decoration) {
       return;
+    }
     _decoration = value;
     _painter?.dispose();
     _painter = _decoration?.createBoxPainter(_handleChanged);
@@ -343,8 +346,9 @@ class InkDecoration extends InkFeature {
   ImageConfiguration _configuration;
   set configuration(ImageConfiguration value) {
     assert(value != null);
-    if (value == _configuration)
+    if (value == _configuration) {
       return;
+    }
     _configuration = value;
     controller.markNeedsPaint();
   }
@@ -361,8 +365,9 @@ class InkDecoration extends InkFeature {
 
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
-    if (_painter == null)
+    if (_painter == null) {
       return;
+    }
     final Offset? originOffset = MatrixUtils.getAsTranslation(transform);
     final ImageConfiguration sizedConfiguration = configuration.copyWith(
       size: referenceBox.size,

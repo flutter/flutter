@@ -107,8 +107,9 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
   set viewController(AndroidViewController viewController) {
     assert(_viewController != null);
     assert(viewController != null);
-    if (_viewController == viewController)
+    if (_viewController == viewController) {
       return;
+    }
     _viewController.removeOnPlatformViewCreatedListener(_onPlatformViewCreated);
     _viewController = viewController;
     _sizePlatformView();
@@ -205,8 +206,9 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_viewController.textureId == null)
+    if (_viewController.textureId == null) {
       return;
+    }
 
     // Clip the texture if it's going to paint out of the bounds of the renter box
     // (see comment in _paintTexture for an explanation of when this happens).
@@ -351,8 +353,9 @@ class RenderUiKitView extends RenderBox {
 
   @override
   bool hitTest(BoxHitTestResult result, { Offset? position }) {
-    if (hitTestBehavior == PlatformViewHitTestBehavior.transparent || !size.contains(position!))
+    if (hitTestBehavior == PlatformViewHitTestBehavior.transparent || !size.contains(position!)) {
       return false;
+    }
     result.add(BoxHitTestEntry(this, position));
     return hitTestBehavior == PlatformViewHitTestBehavior.opaque;
   }
@@ -688,8 +691,9 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
   set hitTestBehavior(PlatformViewHitTestBehavior value) {
     if (value != _hitTestBehavior) {
       _hitTestBehavior = value;
-      if (owner != null)
+      if (owner != null) {
         markNeedsPaint();
+      }
     }
   }
   PlatformViewHitTestBehavior? _hitTestBehavior;

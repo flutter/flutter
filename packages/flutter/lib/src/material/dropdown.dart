@@ -495,8 +495,9 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
 
     double menuTop = (buttonTop - selectedItemOffset) - (itemHeights[selectedIndex] - buttonRect.height) / 2.0;
     double preferredMenuHeight = kMaterialListPadding.vertical;
-    if (items.isNotEmpty)
+    if (items.isNotEmpty) {
       preferredMenuHeight += itemHeights.reduce((double total, double height) => total + height);
+    }
 
     // If there are too many elements in the menu, we need to shrink it down
     // so it is at most the maxMenuHeight.
@@ -508,8 +509,9 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     // than the button height and the button is at the very bottom or top of the
     // screen, the menu will be aligned with the bottom or top of the button
     // respectively.
-    if (menuTop < topLimit)
+    if (menuTop < topLimit) {
       menuTop = math.min(buttonTop, topLimit);
+    }
 
     if (menuBottom > bottomLimit) {
       menuBottom = math.max(buttonBottom, bottomLimit);
@@ -1217,8 +1219,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           // of each menu item before laying them out, not having the _DropdownRoute
           // collect each item's height to lay out is fine since the route is
           // already on its way out.
-          if (_dropdownRoute == null)
+          if (_dropdownRoute == null) {
             return;
+          }
 
           _dropdownRoute!.itemHeights[index] = size.height;
         },
@@ -1244,10 +1247,12 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     navigator.push(_dropdownRoute!).then<void>((_DropdownRouteResult<T>? newValue) {
       _removeDropdownRoute();
-      if (!mounted || newValue == null)
+      if (!mounted || newValue == null) {
         return;
-      if (widget.onChanged != null)
+      }
+      if (widget.onChanged != null) {
         widget.onChanged!(newValue.result);
+      }
     });
 
     if (widget.onTap != null) {
@@ -1267,8 +1272,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   Color get _iconColor {
     // These colors are not defined in the Material Design spec.
     if (_enabled) {
-      if (widget.iconEnabledColor != null)
+      if (widget.iconEnabledColor != null) {
         return widget.iconEnabledColor!;
+      }
 
       switch (Theme.of(context).brightness) {
         case Brightness.light:
@@ -1277,8 +1283,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           return Colors.white70;
       }
     } else {
-      if (widget.iconDisabledColor != null)
+      if (widget.iconDisabledColor != null) {
         return widget.iconDisabledColor!;
+      }
 
       switch (Theme.of(context).brightness) {
         case Brightness.light:
@@ -1334,8 +1341,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     int? hintIndex;
     if (widget.hint != null || (!_enabled && widget.disabledHint != null)) {
       Widget displayedHint = _enabled ? widget.hint! : widget.disabledHint ?? widget.hint!;
-      if (widget.selectedItemBuilder == null)
+      if (widget.selectedItemBuilder == null) {
         displayedHint = _DropdownMenuItemContainer(child: displayedHint);
+      }
 
       hintIndex = items.length;
       items.add(DefaultTextStyle(

@@ -157,12 +157,15 @@ class SliverPersistentHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (floating && pinned)
+    if (floating && pinned) {
       return _SliverFloatingPinnedPersistentHeader(delegate: delegate);
-    if (pinned)
+    }
+    if (pinned) {
       return _SliverPinnedPersistentHeader(delegate: delegate);
-    if (floating)
+    }
+    if (floating) {
       return _SliverFloatingPersistentHeader(delegate: delegate);
+    }
     return _SliverScrollingPersistentHeader(delegate: delegate);
   }
 
@@ -179,8 +182,9 @@ class SliverPersistentHeader extends StatelessWidget {
       if (pinned) 'pinned',
       if (floating) 'floating',
     ];
-    if (flags.isEmpty)
+    if (flags.isEmpty) {
       flags.add('normal');
+    }
     properties.add(IterableProperty<String>('mode', flags));
   }
 }
@@ -213,8 +217,9 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
     final SliverPersistentHeaderDelegate newDelegate = newWidget.delegate;
     final SliverPersistentHeaderDelegate oldDelegate = oldWidget.delegate;
     if (newDelegate != oldDelegate &&
-        (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRebuild(oldDelegate)))
+        (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRebuild(oldDelegate))) {
       renderObject.triggerRebuild();
+    }
   }
 
   @override
@@ -264,8 +269,9 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
 
   @override
   void visitChildren(ElementVisitor visitor) {
-    if (child != null)
+    if (child != null) {
       visitor(child!);
+    }
   }
 }
 

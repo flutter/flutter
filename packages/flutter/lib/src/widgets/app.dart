@@ -1208,8 +1208,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         'The pageRouteBuilder for WidgetsApp must return a valid non-null Route.');
       return route;
     }
-    if (widget.onGenerateRoute != null)
+    if (widget.onGenerateRoute != null) {
       return widget.onGenerateRoute!(settings);
+    }
     return null;
   }
 
@@ -1253,12 +1254,14 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     assert(mounted);
     // The back button dispatcher should handle the pop route if we use a
     // router.
-    if (_usesRouter)
+    if (_usesRouter) {
       return false;
+    }
 
     final NavigatorState? navigator = _navigator?.currentState;
-    if (navigator == null)
+    if (navigator == null) {
       return false;
+    }
     return navigator.maybePop();
   }
 
@@ -1267,12 +1270,14 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     assert(mounted);
     // The route name provider should handle the push route if we uses a
     // router.
-    if (_usesRouter)
+    if (_usesRouter) {
       return false;
+    }
 
     final NavigatorState? navigator = _navigator?.currentState;
-    if (navigator == null)
+    if (navigator == null) {
       return false;
+    }
     navigator.pushNamed(route);
     return true;
   }
@@ -1286,8 +1291,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     // Attempt to use localeListResolutionCallback.
     if (widget.localeListResolutionCallback != null) {
       final Locale? locale = widget.localeListResolutionCallback!(preferredLocales, widget.supportedLocales);
-      if (locale != null)
+      if (locale != null) {
         return locale;
+      }
     }
     // localeListResolutionCallback failed, falling back to localeResolutionCallback.
     if (widget.localeResolutionCallback != null) {
@@ -1295,8 +1301,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         preferredLocales != null && preferredLocales.isNotEmpty ? preferredLocales.first : null,
         widget.supportedLocales,
       );
-      if (locale != null)
+      if (locale != null) {
         return locale;
+      }
     }
     // Both callbacks failed, falling back to default algorithm.
     return basicLocaleListResolution(preferredLocales, supportedLocales);
@@ -1446,8 +1453,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   // localizationsDelegate parameter can be used to override
   // WidgetsLocalizations.delegate.
   Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates sync* {
-    if (widget.localizationsDelegates != null)
+    if (widget.localizationsDelegates != null) {
       yield* widget.localizationsDelegates!;
+    }
     yield DefaultWidgetsLocalizations.delegate;
   }
 
@@ -1458,19 +1466,23 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       final Set<Type> unsupportedTypes =
         _localizationsDelegates.map<Type>((LocalizationsDelegate<dynamic> delegate) => delegate.type).toSet();
       for (final LocalizationsDelegate<dynamic> delegate in _localizationsDelegates) {
-        if (!unsupportedTypes.contains(delegate.type))
+        if (!unsupportedTypes.contains(delegate.type)) {
           continue;
-        if (delegate.isSupported(appLocale))
+        }
+        if (delegate.isSupported(appLocale)) {
           unsupportedTypes.remove(delegate.type);
+        }
       }
-      if (unsupportedTypes.isEmpty)
+      if (unsupportedTypes.isEmpty) {
         return true;
+      }
 
       // Currently the Cupertino library only provides english localizations.
       // Remove this when https://github.com/flutter/flutter/issues/23847
       // is fixed.
-      if (listEquals(unsupportedTypes.map((Type type) => type.toString()).toList(), <String>['CupertinoLocalizations']))
+      if (listEquals(unsupportedTypes.map((Type type) => type.toString()).toList(), <String>['CupertinoLocalizations'])) {
         return true;
+      }
 
       final StringBuffer message = StringBuffer();
       message.writeln('\u2550' * 8);
@@ -1482,8 +1494,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         // Currently the Cupertino library only provides english localizations.
         // Remove this when https://github.com/flutter/flutter/issues/23847
         // is fixed.
-        if (unsupportedType.toString() == 'CupertinoLocalizations')
+        if (unsupportedType.toString() == 'CupertinoLocalizations') {
           continue;
+        }
         message.writeln(
           '> A $unsupportedType delegate that supports the $appLocale locale was not found.'
         );

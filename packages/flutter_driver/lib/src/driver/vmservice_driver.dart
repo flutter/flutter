@@ -319,14 +319,16 @@ class VMServiceFlutterDriver extends FlutterDriver {
         stackTrace,
       );
     }
-    if ((response['isError'] as bool?) == true)
+    if ((response['isError'] as bool?) == true) {
       throw DriverError('Error in Flutter application: ${response['response']}');
+    }
     return response['response'] as Map<String, dynamic>;
   }
 
   void _logCommunication(String message) {
-    if (_printCommunication)
+    if (_printCommunication) {
       _log(message);
+    }
     if (_logCommunicationToFile) {
       final f.File file = fs.file(p.join(testOutputsDirectory, 'flutter_driver_commands_$_driverId.log'));
       file.createSync(recursive: true); // no-op if file exists
@@ -544,8 +546,9 @@ String _getWebSocketUrl(String url) {
     if (uri.pathSegments.isNotEmpty) uri.pathSegments.first,
     'ws',
   ];
-  if (uri.scheme == 'http')
+  if (uri.scheme == 'http') {
     uri = uri.replace(scheme: 'ws', pathSegments: pathSegments);
+  }
   return uri.toString();
 }
 

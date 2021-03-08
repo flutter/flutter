@@ -96,8 +96,9 @@ class NoTransientCallbacks extends SerializableWaitCondition {
   /// The [json] argument must not be null.
   factory NoTransientCallbacks.deserialize(Map<String, String> json) {
     assert(json != null);
-    if (json['conditionName'] != 'NoTransientCallbacksCondition')
+    if (json['conditionName'] != 'NoTransientCallbacksCondition') {
       throw SerializationException('Error occurred during deserializing the NoTransientCallbacksCondition JSON string: $json');
+    }
     return const NoTransientCallbacks();
   }
 
@@ -116,8 +117,9 @@ class NoPendingFrame extends SerializableWaitCondition {
   /// The [json] argument must not be null.
   factory NoPendingFrame.deserialize(Map<String, String> json) {
     assert(json != null);
-    if (json['conditionName'] != 'NoPendingFrameCondition')
+    if (json['conditionName'] != 'NoPendingFrameCondition') {
       throw SerializationException('Error occurred during deserializing the NoPendingFrameCondition JSON string: $json');
+    }
     return const NoPendingFrame();
   }
 
@@ -136,8 +138,9 @@ class FirstFrameRasterized extends SerializableWaitCondition {
   /// The [json] argument must not be null.
   factory FirstFrameRasterized.deserialize(Map<String, String> json) {
     assert(json != null);
-    if (json['conditionName'] != 'FirstFrameRasterizedCondition')
+    if (json['conditionName'] != 'FirstFrameRasterizedCondition') {
       throw SerializationException('Error occurred during deserializing the FirstFrameRasterizedCondition JSON string: $json');
+    }
     return const FirstFrameRasterized();
   }
 
@@ -159,8 +162,9 @@ class NoPendingPlatformMessages extends SerializableWaitCondition {
   /// The [json] argument must not be null.
   factory NoPendingPlatformMessages.deserialize(Map<String, String> json) {
     assert(json != null);
-    if (json['conditionName'] != 'NoPendingPlatformMessagesCondition')
+    if (json['conditionName'] != 'NoPendingPlatformMessagesCondition') {
       throw SerializationException('Error occurred during deserializing the NoPendingPlatformMessagesCondition JSON string: $json');
+    }
     return const NoPendingPlatformMessages();
   }
 
@@ -182,8 +186,9 @@ class CombinedCondition extends SerializableWaitCondition {
   /// The [jsonMap] argument must not be null.
   factory CombinedCondition.deserialize(Map<String, String> jsonMap) {
     assert(jsonMap != null);
-    if (jsonMap['conditionName'] != 'CombinedCondition')
+    if (jsonMap['conditionName'] != 'CombinedCondition') {
       throw SerializationException('Error occurred during deserializing the CombinedCondition JSON string: $jsonMap');
+    }
     if (jsonMap['conditions'] == null) {
       return const CombinedCondition(<SerializableWaitCondition>[]);
     }

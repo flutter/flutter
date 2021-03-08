@@ -65,8 +65,9 @@ abstract class OverlayRoute<T> extends Route<T> {
   bool didPop(T? result) {
     final bool returnValue = super.didPop(result);
     assert(returnValue);
-    if (finishedWhenPopped)
+    if (finishedWhenPopped) {
       navigator!.finalizeRoute(this);
+    }
     return returnValue;
   }
 
@@ -174,13 +175,15 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   void _handleStatusChanged(AnimationStatus status) {
     switch (status) {
       case AnimationStatus.completed:
-        if (overlayEntries.isNotEmpty)
+        if (overlayEntries.isNotEmpty) {
           overlayEntries.first.opaque = opaque;
+        }
         break;
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
-        if (overlayEntries.isNotEmpty)
+        if (overlayEntries.isNotEmpty) {
           overlayEntries.first.opaque = false;
+        }
         break;
       case AnimationStatus.dismissed:
         // We might still be an active route if a subclass is controlling the
@@ -228,8 +231,9 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   void didReplace(Route<dynamic>? oldRoute) {
     assert(_controller != null, '$runtimeType.didReplace called before calling install() or after calling dispose().');
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
-    if (oldRoute is TransitionRoute)
+    if (oldRoute is TransitionRoute) {
       _controller!.value = oldRoute._controller!.value;
+    }
     super.didReplace(oldRoute);
   }
 
@@ -445,8 +449,9 @@ class LocalHistoryEntry {
   }
 
   void _notifyRemoved() {
-    if (onRemove != null)
+    if (onRemove != null) {
       onRemove!();
+    }
   }
 }
 
@@ -593,8 +598,9 @@ mixin LocalHistoryRoute<T> on Route<T> {
     _localHistory ??= <LocalHistoryEntry>[];
     final bool wasEmpty = _localHistory!.isEmpty;
     _localHistory!.add(entry);
-    if (wasEmpty)
+    if (wasEmpty) {
       changedInternalState();
+    }
   }
 
   /// Remove a local history entry from this route.
@@ -624,8 +630,9 @@ mixin LocalHistoryRoute<T> on Route<T> {
 
   @override
   Future<RoutePopDisposition> willPop() async {
-    if (willHandlePopInternally)
+    if (willHandlePopInternally) {
       return RoutePopDisposition.pop;
+    }
     return super.willPop();
   }
 
@@ -636,8 +643,9 @@ mixin LocalHistoryRoute<T> on Route<T> {
       assert(entry._owner == this);
       entry._owner = null;
       entry._notifyRemoved();
-      if (_localHistory!.isEmpty)
+      if (_localHistory!.isEmpty) {
         changedInternalState();
+      }
       return false;
     }
     return super.didPop(result);
@@ -1308,8 +1316,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   bool get offstage => _offstage;
   bool _offstage = false;
   set offstage(bool value) {
-    if (_offstage == value)
+    if (_offstage == value) {
       return;
+    }
     setState(() {
       _offstage = value;
     });
@@ -1354,8 +1363,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     final _ModalScopeState<T>? scope = _scopeKey.currentState;
     assert(scope != null);
     for (final WillPopCallback callback in List<WillPopCallback>.from(_willPopCallbacks)) {
-      if (await callback() != true)
+      if (await callback() != true) {
         return RoutePopDisposition.doNotPop;
+      }
     }
     return super.willPop();
   }
@@ -1477,8 +1487,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   void changedExternalState() {
     super.changedExternalState();
     _modalBarrier.markNeedsBuild();
-    if (_scopeKey.currentState != null)
+    if (_scopeKey.currentState != null) {
       _scopeKey.currentState!._forceRebuildPage();
+    }
   }
 
   /// Whether this route can be popped.

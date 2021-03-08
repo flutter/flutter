@@ -62,10 +62,12 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
        ) {
     // If oldPosition is not null, the superclass will first call absorb(),
     // which may set _pixels and _activity.
-    if (!hasPixels && initialPixels != null)
+    if (!hasPixels && initialPixels != null) {
       correctPixels(initialPixels);
-    if (activity == null)
+    }
+    if (activity == null) {
       goIdle();
+    }
     assert(activity != null);
   }
 
@@ -108,14 +110,16 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   @override
   void beginActivity(ScrollActivity? newActivity) {
     _heldPreviousVelocity = 0.0;
-    if (newActivity == null)
+    if (newActivity == null) {
       return;
+    }
     assert(newActivity.delegate == this);
     super.beginActivity(newActivity);
     _currentDrag?.dispose();
     _currentDrag = null;
-    if (!activity!.isScrolling)
+    if (!activity!.isScrolling) {
       updateUserScrollDirection(ScrollDirection.idle);
+    }
   }
 
   @override
@@ -160,8 +164,9 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   @visibleForTesting
   void updateUserScrollDirection(ScrollDirection value) {
     assert(value != null);
-    if (userScrollDirection == value)
+    if (userScrollDirection == value) {
       return;
+    }
     _userScrollDirection = value;
     didUpdateScrollDirection(value);
   }

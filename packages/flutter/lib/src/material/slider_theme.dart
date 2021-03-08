@@ -1567,11 +1567,13 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     );
 
     final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left, trackRect.top, thumbCenter.dx, trackRect.bottom);
-    if (!leftTrackSegment.isEmpty)
+    if (!leftTrackSegment.isEmpty) {
       context.canvas.drawRect(leftTrackSegment, leftTrackPaint);
+    }
     final Rect rightTrackSegment = Rect.fromLTRB(thumbCenter.dx, trackRect.top, trackRect.right, trackRect.bottom);
-    if (!rightTrackSegment.isEmpty)
+    if (!rightTrackSegment.isEmpty) {
       context.canvas.drawRect(rightTrackSegment, rightTrackPaint);
+    }
   }
 }
 
@@ -1806,14 +1808,17 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape {
       isDiscrete: isDiscrete,
     );
     final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left, trackRect.top, leftThumbOffset.dx, trackRect.bottom);
-    if (!leftTrackSegment.isEmpty)
+    if (!leftTrackSegment.isEmpty) {
       context.canvas.drawRect(leftTrackSegment, inactivePaint);
+    }
     final Rect middleTrackSegment = Rect.fromLTRB(leftThumbOffset.dx, trackRect.top, rightThumbOffset.dx, trackRect.bottom);
-    if (!middleTrackSegment.isEmpty)
+    if (!middleTrackSegment.isEmpty) {
       context.canvas.drawRect(middleTrackSegment, activePaint);
+    }
     final Rect rightTrackSegment = Rect.fromLTRB(rightThumbOffset.dx, trackRect.top, trackRect.right, trackRect.bottom);
-    if (!rightTrackSegment.isEmpty)
+    if (!rightTrackSegment.isEmpty) {
       context.canvas.drawRect(rightTrackSegment, inactivePaint);
+    }
   }
 }
 
@@ -3272,8 +3277,9 @@ class RangeValues {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is RangeValues
         && other.start == start
         && other.end == end;
@@ -3312,8 +3318,9 @@ class RangeLabels {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is RangeLabels
         && other.start == start
         && other.end == end;

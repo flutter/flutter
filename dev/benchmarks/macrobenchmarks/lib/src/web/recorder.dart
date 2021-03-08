@@ -377,8 +377,9 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
     if (shouldContinue()) {
       window.scheduleFrame();
     } else {
-      for (final VoidCallback fn in _didStopCallbacks)
+      for (final VoidCallback fn in _didStopCallbacks) {
         fn();
+      }
       _runCompleter.complete();
     }
   }
@@ -492,8 +493,9 @@ abstract class WidgetBuildRecorder extends Recorder implements FrameRecorder {
       showWidget = !showWidget;
       _hostState._setStateTrampoline();
     } else {
-      for (final VoidCallback fn in _didStopCallbacks)
+      for (final VoidCallback fn in _didStopCallbacks) {
         fn();
+      }
       _runCompleter.complete();
     }
   }

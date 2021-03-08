@@ -204,12 +204,15 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   }
 
   NotchedShape? _selectNotch() {
-    if (!_showNotch.value!)
+    if (!_showNotch.value!) {
       return null;
-    if (_fabShape == kCircularFab)
+    }
+    if (_fabShape == kCircularFab) {
       return const CircularNotchedRectangle();
-    if (_fabShape == kDiamondFab)
+    }
+    if (_fabShape == kDiamondFab) {
       return const _DiamondNotchedRectangle();
+    }
     return null;
   }
 }
@@ -452,8 +455,9 @@ class _DiamondNotchedRectangle implements NotchedShape {
 
   @override
   Path getOuterPath(Rect host, Rect? guest) {
-    if (!host.overlaps(guest!))
+    if (!host.overlaps(guest!)) {
       return Path()..addRect(host);
+    }
     assert(guest.width > 0.0);
 
     final Rect intersection = guest.intersect(host);

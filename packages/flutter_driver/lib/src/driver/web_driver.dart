@@ -95,8 +95,9 @@ class WebFlutterDriver extends FlutterDriver {
           stackTrace
       );
     }
-    if (response['isError'] == true)
+    if (response['isError'] == true) {
       throw DriverError('Error in Flutter application: ${response['response']}');
+    }
     return response['response'] as Map<String, dynamic>;
   }
 
