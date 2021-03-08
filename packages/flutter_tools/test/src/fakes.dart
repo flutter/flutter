@@ -552,6 +552,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isIOSEnabled = true,
     this.isFuchsiaEnabled = false,
     this.isExperimentalInvalidationStrategyEnabled = false,
+    this.isWindowsUwpEnabled = false,
   });
 
   @override
@@ -582,6 +583,9 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isExperimentalInvalidationStrategyEnabled;
 
   @override
+  final bool isWindowsUwpEnabled;
+
+  @override
   bool isEnabled(Feature feature) {
     switch (feature) {
       case flutterWebFeature:
@@ -602,6 +606,8 @@ class TestFeatureFlags implements FeatureFlags {
         return isFuchsiaEnabled;
       case experimentalInvalidationStrategy:
         return isExperimentalInvalidationStrategyEnabled;
+      case windowsUwpEmbedding:
+        return isWindowsUwpEnabled;
     }
     return false;
   }
