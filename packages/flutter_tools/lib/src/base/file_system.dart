@@ -8,7 +8,6 @@ import 'package:file/file.dart';
 import 'package:file/local.dart' as local_fs;
 import 'package:meta/meta.dart';
 
-import 'common.dart' show throwToolExit;
 import 'io.dart';
 import 'platform.dart';
 import 'process.dart';
@@ -40,19 +39,6 @@ class FileSystemUtils {
   final FileSystem _fileSystem;
 
   final Platform _platform;
-
-  /// Create the ancestor directories of a file path if they do not already exist.
-  void ensureDirectoryExists(String filePath) {
-    final String dirPath = _fileSystem.path.dirname(filePath);
-    if (_fileSystem.isDirectorySync(dirPath)) {
-      return;
-    }
-    try {
-      _fileSystem.directory(dirPath).createSync(recursive: true);
-    } on FileSystemException catch (e) {
-      throwToolExit('Failed to create directory "$dirPath": ${e.osError.message}');
-    }
-  }
 
   /// Appends a number to a filename in order to make it unique under a
   /// directory.
@@ -137,8 +123,8 @@ class FileSystemUtils {
 void copyDirectory(
   Directory srcDir,
   Directory destDir, {
-  bool shouldCopyFile(File srcFile, File destFile),
-  void onFileCopied(File srcFile, File destFile),
+  bool Function(File srcFile, File destFile) shouldCopyFile,
+  void Function(File srcFile, File destFile) onFileCopied,
 }) {
   if (!srcDir.existsSync()) {
     throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');

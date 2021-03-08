@@ -616,18 +616,18 @@ void main() {
     config.isFocused = true;
     config.isTextField = true;
 
-    final VoidCallback onShowOnScreen = () { };
-    final VoidCallback onScrollDown = () { };
-    final VoidCallback onScrollUp = () { };
-    final VoidCallback onScrollLeft = () { };
-    final VoidCallback onScrollRight = () { };
-    final VoidCallback onLongPress = () { };
-    final VoidCallback onDecrease = () { };
-    final VoidCallback onIncrease = () { };
-    final MoveCursorHandler onMoveCursorForwardByCharacter = (bool _) { };
-    final MoveCursorHandler onMoveCursorBackwardByCharacter = (bool _) { };
-    final VoidCallback onTap = () { };
-    final VoidCallback onCustomAction = () { };
+    void onShowOnScreen() { }
+    void onScrollDown() { }
+    void onScrollUp() { }
+    void onScrollLeft() { }
+    void onScrollRight() { }
+    void onLongPress() { }
+    void onDecrease() { }
+    void onIncrease() { }
+    void onMoveCursorForwardByCharacter(bool _) { }
+    void onMoveCursorBackwardByCharacter(bool _) { }
+    void onTap() { }
+    void onCustomAction() { }
 
     config.onShowOnScreen = onShowOnScreen;
     config.onScrollDown = onScrollDown;

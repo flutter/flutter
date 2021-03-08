@@ -30,12 +30,12 @@ class Tracing {
 
   static const String firstUsefulFrameEventName = kFirstFrameRasterizedEventName;
 
-  final vm_service.VmService vmService;
+  final FlutterVmService vmService;
   final Logger _logger;
 
   Future<void> startTracing() async {
     await vmService.setTimelineFlags(<String>['Compiler', 'Dart', 'Embedder', 'GC']);
-    await vmService.clearVMTimeline();
+    await vmService.service.clearVMTimeline();
   }
 
   /// Stops tracing; optionally wait for first frame.
@@ -49,12 +49,12 @@ class Tracing {
       try {
         final Completer<void> whenFirstFrameRendered = Completer<void>();
         try {
-          await vmService.streamListen(vm_service.EventStreams.kExtension);
+          await vmService.service.streamListen(vm_service.EventStreams.kExtension);
         } on vm_service.RPCError {
           // It is safe to ignore this error because we expect an error to be
           // thrown if we're already subscribed.
         }
-        vmService.onExtensionEvent.listen((vm_service.Event event) {
+        vmService.service.onExtensionEvent.listen((vm_service.Event event) {
           if (event.extensionKind == 'Flutter.FirstFrame') {
             whenFirstFrameRendered.complete();
           }
@@ -93,7 +93,7 @@ class Tracing {
 
 /// Download the startup trace information from the given observatory client and
 /// store it to build/start_up_info.json.
-Future<void> downloadStartupTrace(vm_service.VmService vmService, {
+Future<void> downloadStartupTrace(FlutterVmService vmService, {
   bool awaitFirstFrame = true,
   @required Logger logger,
   @required Directory output,

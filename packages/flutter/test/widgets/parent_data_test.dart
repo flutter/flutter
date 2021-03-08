@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -179,8 +180,8 @@ void main() {
             right: 10.0,
             child: Container(child: kDecoratedBoxB),
           ),
-          Container(
-            child: const Positioned(
+          const DummyWidget(
+            child: Positioned(
               top: 8.0,
               child: kDecoratedBoxC,
             ),
@@ -293,7 +294,7 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Container(
+        child: DummyWidget(
           child: Row(
             children: const <Widget>[
               Positioned(
@@ -319,7 +320,7 @@ void main() {
         'Typically, Positioned widgets are placed directly inside Stack widgets.\n'
         'The offending Positioned is currently placed inside a Row widget.\n'
         'The ownership chain for the RenderObject that received the incompatible parent data was:\n'
-        '  DecoratedBox ← Positioned ← Row ← Container ← Directionality ← [root]'
+        '  DecoratedBox ← Positioned ← Row ← DummyWidget ← Directionality ← [root]'
       ),
     );
 
@@ -514,4 +515,13 @@ class RenderAnother extends RenderProxyBox {
     if (child.parentData is! DummyParentData)
       child.parentData = DummyParentData();
   }
+}
+
+class DummyWidget extends StatelessWidget {
+  const DummyWidget({ Key? key, required this.child }) : super(key: key);
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => child;
 }

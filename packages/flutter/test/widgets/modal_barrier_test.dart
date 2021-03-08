@@ -426,9 +426,7 @@ class FirstWidget extends StatelessWidget {
       onTap: () {
         Navigator.pushNamed(context, '/modal');
       },
-      child: Container(
-        child: const Text('X'),
-      ),
+      child: const Text('X'),
     );
   }
 }

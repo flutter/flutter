@@ -33,6 +33,6 @@ Future<void> main() async {
     });
 
     final TaskFunction taskFunction = createPlatformViewStartupTest();
-    return await taskFunction();
+    return taskFunction();
   });
 }
