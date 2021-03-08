@@ -106,7 +106,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   final List<ProjectMigrator> migrators = <ProjectMigrator>[
-    RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.xcode, globals.flutterUsage),
+    RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.flutterUsage),
     XcodeBuildSystemMigration(app.project, globals.logger),
     ProjectBaseConfigurationMigration(app.project, globals.logger),
     ProjectBuildLocationMigration(app.project, globals.logger),
@@ -255,7 +255,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     if (buildForDevice) {
       buildCommands.addAll(<String>['-sdk', 'iphoneos']);
     } else {
-      buildCommands.addAll(<String>['-sdk', 'iphonesimulator', '-arch', 'x86_64']);
+      buildCommands.addAll(<String>['-sdk', 'iphonesimulator']);
     }
   }
 

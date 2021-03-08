@@ -13,55 +13,57 @@ import 'test_utils.dart';
 void main() {
   /// Verifies that `dart migrate` will run successfully on the default `flutter create`
   /// template.
-  testWithoutContext('dart migrate succeeds on flutter create template', () async {
-    Directory tempDir;
-    try {
-      tempDir = await _createProject(tempDir);
-      await _migrate(tempDir);
-      await _analyze(tempDir);
-    } finally {
-      tempDir?.deleteSync(recursive: true);
-    }
-  });
+  group('dart migrate', () {
+    testWithoutContext('dart migrate succeeds on flutter create template', () async {
+      Directory tempDir;
+      try {
+        tempDir = await _createProject(tempDir);
+        await _migrate(tempDir);
+        await _analyze(tempDir);
+      } finally {
+        tempDir?.deleteSync(recursive: true);
+      }
+    });
 
-  /// Verifies that `dart migrate` will run successfully on the module template
-  /// used by `flutter create --template=module`.
-  testWithoutContext('dart migrate succeeds on module template', () async {
-    Directory tempDir;
-    try {
-      tempDir = await _createProject(tempDir, <String>['--template=module']);
-      await _migrate(tempDir);
-      await _analyze(tempDir);
-    } finally {
-      tempDir?.deleteSync(recursive: true);
-    }
-  }, timeout: const Timeout(Duration(minutes: 1)));
+    /// Verifies that `dart migrate` will run successfully on the module template
+    /// used by `flutter create --template=module`.
+    testWithoutContext('dart migrate succeeds on module template', () async {
+      Directory tempDir;
+      try {
+        tempDir = await _createProject(tempDir, <String>['--template=module']);
+        await _migrate(tempDir);
+        await _analyze(tempDir);
+      } finally {
+        tempDir?.deleteSync(recursive: true);
+      }
+    });
 
-  /// Verifies that `dart migrate` will run successfully on the module template
-  /// used by `flutter create --template=plugin`.
-  testWithoutContext('dart migrate succeeds on plugin template', () async {
-    Directory tempDir;
-    try {
-      tempDir = await _createProject(tempDir, <String>['--template=plugin']);
-      await _migrate(tempDir);
-      await _analyze(tempDir);
-    } finally {
-      tempDir?.deleteSync(recursive: true);
-    }
-  });
+    /// Verifies that `dart migrate` will run successfully on the module template
+    /// used by `flutter create --template=plugin`.
+    testWithoutContext('dart migrate succeeds on plugin template', () async {
+      Directory tempDir;
+      try {
+        tempDir = await _createProject(tempDir, <String>['--template=plugin']);
+        await _migrate(tempDir);
+        await _analyze(tempDir);
+      } finally {
+        tempDir?.deleteSync(recursive: true);
+      }
+    });
 
-  /// Verifies that `dart migrate` will run successfully on the module template
-  /// used by `flutter create --template=package`.
-  testWithoutContext('dart migrate succeeds on package template', () async {
-    Directory tempDir;
-    try {
-      tempDir = await _createProject(tempDir, <String>['--template=package']);
-      await _migrate(tempDir);
-      await _analyze(tempDir);
-    } finally {
-      tempDir?.deleteSync(recursive: true);
-    }
-  });
+    /// Verifies that `dart migrate` will run successfully on the module template
+    /// used by `flutter create --template=package`.
+    testWithoutContext('dart migrate succeeds on package template', () async {
+      Directory tempDir;
+      try {
+        tempDir = await _createProject(tempDir, <String>['--template=package']);
+        await _migrate(tempDir);
+        await _analyze(tempDir);
+      } finally {
+        tempDir?.deleteSync(recursive: true);
+      }
+    });
+  }, timeout: const Timeout(Duration(seconds: 90)));
 }
 
 Future<Directory> _createProject(Directory tempDir, [List<String> extraAgs]) async {

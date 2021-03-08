@@ -52,7 +52,7 @@ void main() {
     return path.replaceAll('/', fs.path.separator);
   }
 
-  void test(String description, FutureOr<void> body()) {
+  void test(String description, FutureOr<void> Function() body) {
     test_package.test(description, () async {
       await io.IOOverrides.runZoned<FutureOr<void>>(
         body,

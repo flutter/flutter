@@ -54,6 +54,9 @@ abstract class FeatureFlags {
   /// Whether the CFE experimental invalidation strategy is enabled.
   bool get isExperimentalInvalidationStrategyEnabled => true;
 
+  /// Whether the windows UWP embedding is enabled.
+  bool get isWindowsUwpEnabled => false;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -99,6 +102,9 @@ class FlutterFeatureFlags implements FeatureFlags {
 
   @override
   bool get isExperimentalInvalidationStrategyEnabled => isEnabled(experimentalInvalidationStrategy);
+
+  @override
+  bool get isWindowsUwpEnabled => isEnabled(windowsUwpEmbedding);
 
   @override
   bool isEnabled(Feature feature) {
@@ -333,6 +339,16 @@ const Feature experimentalInvalidationStrategy = Feature(
   stable: FeatureChannelSetting(
     available: true,
     enabledByDefault: true,
+  ),
+);
+
+/// The feature for enabling the Windows UWP embeding.
+const Feature windowsUwpEmbedding = Feature(
+  name: 'Flutter for Windows UWP',
+  configSetting: 'enable-windows-uwp-desktop',
+  master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
   ),
 );
 

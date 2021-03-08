@@ -228,7 +228,7 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
       alignment: Alignment.topLeft,
       child: Material(
         elevation: 4.0,
-        child: Container(
+        child: SizedBox(
           height: 200.0,
           child: ListView.builder(
             padding: EdgeInsets.zero,

@@ -22,7 +22,7 @@ void main() {
   Environment env;
 
   Environment createEnvironment() {
-    final Map<String, String> defines = <String, String>{ kSplitAot: 'true' };
+    final Map<String, String> defines = <String, String>{ kDeferredComponents: 'true' };
     final Environment result = Environment(
       outputDir: fileSystem.directory('/output'),
       buildDir: fileSystem.directory('/build'),

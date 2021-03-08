@@ -14,7 +14,6 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/io.dart' as io;
-import '../base/signals.dart';
 import '../base/terminal.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
@@ -120,6 +119,7 @@ class FlutterOptions {
   static const String kAnalyzeSize = 'analyze-size';
   static const String kNullAssertions = 'null-assertions';
   static const String kAndroidGradleDaemon = 'android-gradle-daemon';
+  static const String kDeferredComponents = 'deferred-components';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -1067,7 +1067,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void _registerSignalHandlers(String commandPath, DateTime startTime) {
-    final SignalHandler handler = (io.ProcessSignal s) {
+    void handler(io.ProcessSignal s) {
       globals.cache.releaseLock();
       _sendPostUsage(
         commandPath,
@@ -1075,7 +1075,7 @@ abstract class FlutterCommand extends Command<void> {
         startTime,
         globals.systemClock.now(),
       );
-    };
+    }
     globals.signals.addHandler(io.ProcessSignal.SIGTERM, handler);
     globals.signals.addHandler(io.ProcessSignal.SIGINT, handler);
   }
@@ -1183,7 +1183,7 @@ abstract class FlutterCommand extends Command<void> {
       Usage.command(commandPath, parameters: additionalUsageValues);
     }
 
-    return await runCommand();
+    return runCommand();
   }
 
   Future<void> _sendNullSafetyAnalyticsEvents(FlutterProject project) async {
@@ -1430,6 +1430,7 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.fuchsia_arm64:
     case TargetPlatform.fuchsia_x64:
     case TargetPlatform.tester:
+    case TargetPlatform.windows_uwp_x64:
       // No artifacts currently supported.
       return null;
   }

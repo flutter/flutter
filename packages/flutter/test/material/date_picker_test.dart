@@ -56,7 +56,7 @@ void main() {
 
   Future<void> prepareDatePicker(
     WidgetTester tester,
-    Future<void> callback(Future<DateTime?> date),
+    Future<void> Function(Future<DateTime?> date) callback,
     { TextDirection textDirection = TextDirection.ltr }
   ) async {
     late BuildContext buttonContext;

@@ -272,7 +272,7 @@ class FlutterTesterTestDevice extends TestDevice {
 
   void _pipeStandardStreamsToConsole({
     @required Process process,
-    @required Future<void> reportObservatoryUri(Uri uri),
+    @required Future<void> Function(Uri uri) reportObservatoryUri,
   }) {
     const String observatoryString = 'Observatory listening on ';
     for (final Stream<List<int>> stream in <Stream<List<int>>>[

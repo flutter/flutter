@@ -1203,7 +1203,7 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
 Future<void> _runFlutterAnalyze(String workingDirectory, {
   List<String> options = const <String>[],
 }) async {
-  return await runCommand(
+  return runCommand(
     flutter,
     <String>['analyze', '--dartdocs', ...options],
     workingDirectory: workingDirectory,
@@ -1214,7 +1214,7 @@ final RegExp _importPattern = RegExp(r'''^\s*import (['"])package:flutter/([^.]+
 final RegExp _importMetaPattern = RegExp(r'''^\s*import (['"])package:meta/meta\.dart\1''');
 
 Future<Set<String>> _findFlutterDependencies(String srcPath, List<String> errors, { bool checkForMeta = false }) async {
-  return await _allFiles(srcPath, 'dart', minimumMatches: 1)
+  return _allFiles(srcPath, 'dart', minimumMatches: 1)
     .map<Set<String>>((File file) {
       final Set<String> result = <String>{};
       for (final String line in file.readAsLinesSync()) {
