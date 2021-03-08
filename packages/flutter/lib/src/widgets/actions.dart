@@ -655,7 +655,7 @@ class ActionDispatcher with Diagnosticable {
 ///                 IconButton(
 ///                   icon: const Icon(Icons.exposure_plus_1),
 ///                   onPressed: () {
-///                     Actions.invoke(context, ModifyIntent(count++));
+///                     Actions.invoke(context, ModifyIntent(++count));
 ///                   },
 ///                 ),
 ///                 AnimatedBuilder(
@@ -670,7 +670,7 @@ class ActionDispatcher with Diagnosticable {
 ///                 IconButton(
 ///                   icon: const Icon(Icons.exposure_minus_1),
 ///                   onPressed: () {
-///                     Actions.invoke(context, ModifyIntent(count--));
+///                     Actions.invoke(context, ModifyIntent(--count));
 ///                   },
 ///                 ),
 ///               ],
