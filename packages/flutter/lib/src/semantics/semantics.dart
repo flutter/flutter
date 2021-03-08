@@ -1210,7 +1210,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   }) : _id = _generateNewId(),
        _showOnScreen = showOnScreen;
 
-
   /// Creates a semantic node to represent the root of the semantics tree.
   ///
   /// The root node is assigned an identifier of zero.
