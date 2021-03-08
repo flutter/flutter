@@ -85,7 +85,7 @@ import 'text_editing_intents.dart';
 ///     // then DefaultTextEditingShortcuts is already being inserted into the
 ///     // widget tree.
 ///     return DefaultTextEditingShortcuts(
-///       body: Center(
+///       child: Center(
 ///         child: Column(
 ///           mainAxisAlignment: MainAxisAlignment.center,
 ///           children: <Widget>[
