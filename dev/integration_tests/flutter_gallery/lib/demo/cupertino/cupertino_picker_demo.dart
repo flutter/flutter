@@ -12,6 +12,8 @@ const double _kPickerSheetHeight = 216.0;
 const double _kPickerItemHeight = 32.0;
 
 class CupertinoPickerDemo extends StatefulWidget {
+  const CupertinoPickerDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/cupertino/picker';
 
   @override

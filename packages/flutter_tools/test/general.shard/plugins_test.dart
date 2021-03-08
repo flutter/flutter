@@ -44,7 +44,7 @@ void main() {
     MockWindowsProject windowsProject;
     MockLinuxProject linuxProject;
     FakeSystemClock systemClock;
-    FlutterVersion mockVersion;
+    FlutterVersion flutterVersion;
     // A Windows-style filesystem. This is not populated by default, so tests
     // using it instead of fs must re-run any necessary setup (e.g.,
     // setUpProject).
@@ -126,15 +126,11 @@ void main() {
       fsWindows = MemoryFileSystem(style: FileSystemStyle.windows);
       systemClock = FakeSystemClock()
         ..currentTime = DateTime(1970, 1, 1);
-      mockVersion = MockFlutterVersion();
+      flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0');
 
       // Add basic properties to the Flutter project and subprojects
       setUpProject(fs);
       flutterProject.directory.childFile('.packages').createSync(recursive: true);
-
-      when(mockVersion.frameworkVersion).thenAnswer(
-        (Invocation _) => '1.0.0'
-      );
     });
 
     // Makes fake plugin packages for each plugin, adds them to flutterProject,
@@ -436,10 +432,6 @@ dependencies:
 
         final DateTime dateCreated = DateTime(1970, 1, 1);
         systemClock.currentTime = dateCreated;
-        const String version = '1.0.0';
-        when(mockVersion.frameworkVersion).thenAnswer(
-          (Invocation _) => version
-        );
 
         await refreshPluginsList(flutterProject);
 
@@ -510,7 +502,7 @@ dependencies:
 
         expect(jsonContent['dependencyGraph'], expectedDependencyGraph);
         expect(jsonContent['date_created'], dateCreated.toString());
-        expect(jsonContent['version'], version);
+        expect(jsonContent['version'], '1.0.0');
 
         // Make sure tests are updated if a new object is added/removed.
         final List<String> expectedKeys = <String>[
@@ -525,7 +517,7 @@ dependencies:
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         SystemClock: () => systemClock,
-        FlutterVersion: () => mockVersion
+        FlutterVersion: () => flutterVersion
       });
 
       testUsingContext('Changes to the plugin list invalidates the Cocoapod lockfiles', () async {
@@ -542,7 +534,7 @@ dependencies:
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         SystemClock: () => systemClock,
-        FlutterVersion: () => mockVersion
+        FlutterVersion: () => flutterVersion
       });
 
       testUsingContext('No changes to the plugin list does not invalidate the Cocoapod lockfiles', () async {
@@ -565,7 +557,7 @@ dependencies:
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         SystemClock: () => systemClock,
-        FlutterVersion: () => mockVersion
+        FlutterVersion: () => flutterVersion
       });
     });
 

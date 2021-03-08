@@ -625,7 +625,7 @@ class KeyEventSimulator {
   ///
   ///  - [simulateKeyUpEvent] to simulate the corresponding key up event.
   static Future<bool> simulateKeyDownEvent(LogicalKeyboardKey key, {String? platform, PhysicalKeyboardKey? physicalKey}) async {
-    return await TestAsyncUtils.guard<bool>(() async {
+    return TestAsyncUtils.guard<bool>(() async {
       platform ??= Platform.operatingSystem;
       assert(_osIsSupported(platform!), 'Platform $platform not supported for key simulation');
 

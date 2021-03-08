@@ -1357,7 +1357,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       if (await callback() != true)
         return RoutePopDisposition.doNotPop;
     }
-    return await super.willPop();
+    return super.willPop();
   }
 
   /// Enables this route to veto attempts by the user to dismiss it.

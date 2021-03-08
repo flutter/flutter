@@ -40,8 +40,8 @@ void main() {
   group('syslog stream', () {
     testWithoutContext('decodeSyslog decodes a syslog-encoded line', () {
       final String decoded = decodeSyslog(
-          r'I \M-b\M^]\M-$\M-o\M-8\M^O syslog \M-B\M-/\'
-          r'134_(\M-c\M^C\M^D)_/\M-B\M-/ \M-l\M^F\240!');
+          r'I \M-b\M^]\M-$\M-o\M-8\M^O syslog '
+          r'\M-B\M-/\134_(\M-c\M^C\M^D)_/\M-B\M-/ \M-l\M^F\240!');
 
       expect(decoded, r'I ❤️ syslog ¯\_(ツ)_/¯ 솠!');
     });

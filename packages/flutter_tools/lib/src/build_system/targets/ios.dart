@@ -277,6 +277,24 @@ abstract class UnpackIOS extends Target {
     if (environment.defines[kSdkRoot] == null) {
       throw MissingDefineException(kSdkRoot, name);
     }
+    if (environment.defines[kIosArchs] == null) {
+      throw MissingDefineException(kIosArchs, name);
+    }
+    if (environment.defines[kBitcodeFlag] == null) {
+      throw MissingDefineException(kBitcodeFlag, name);
+    }
+    await _copyFramework(environment);
+
+    final File frameworkBinary = environment.outputDir.childDirectory('Flutter.framework').childFile('Flutter');
+    final String frameworkBinaryPath = frameworkBinary.path;
+    if (!frameworkBinary.existsSync()) {
+      throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
+    }
+    await _thinFramework(environment, frameworkBinaryPath);
+    await _bitcodeStripFramework(environment, frameworkBinaryPath);
+  }
+
+  Future<void> _copyFramework(Environment environment) async {
     final Directory sdkRoot = environment.fileSystem.directory(environment.defines[kSdkRoot]);
     final EnvironmentType environmentType = environmentTypeFromSdkroot(sdkRoot);
     final String basePath = environment.artifacts.getArtifactPath(
@@ -300,6 +318,71 @@ abstract class UnpackIOS extends Target {
         'Failed to copy framework (exit ${result.exitCode}:\n'
         '${result.stdout}\n---\n${result.stderr}',
       );
+    }
+  }
+
+  /// Destructively thin Flutter.framework to include only the specified architectures.
+  Future<void> _thinFramework(Environment environment, String frameworkBinaryPath) async {
+    final String archs = environment.defines[kIosArchs];
+    final List<String> archList = archs.split(' ').toList();
+    final ProcessResult infoResult = environment.processManager.runSync(<String>[
+      'lipo',
+      '-info',
+      frameworkBinaryPath,
+    ]);
+    final String lipoInfo = infoResult.stdout as String;
+
+    final ProcessResult verifyResult = environment.processManager.runSync(<String>[
+      'lipo',
+      frameworkBinaryPath,
+      '-verify_arch',
+      ...archList
+    ]);
+
+    if (verifyResult.exitCode != 0) {
+      throw Exception('Binary $frameworkBinaryPath does not contain $archs. Running lipo -info:\n$lipoInfo');
+    }
+
+    // Skip thinning for non-fat executables.
+    if (lipoInfo.startsWith('Non-fat file:')) {
+      environment.logger.printTrace('Skipping lipo for non-fat file $frameworkBinaryPath');
+      return;
+    }
+
+    // Thin in-place.
+    final ProcessResult extractResult = environment.processManager.runSync(<String>[
+      'lipo',
+      '-output',
+      frameworkBinaryPath,
+      for (final String arch in archList)
+        ...<String>[
+          '-extract',
+          arch,
+        ],
+      ...<String>[frameworkBinaryPath],
+    ]);
+
+    if (extractResult.exitCode != 0) {
+      throw Exception('Failed to extract $archs for $frameworkBinaryPath.\n${extractResult.stderr}\nRunning lipo -info:\n$lipoInfo');
+    }
+  }
+
+  /// Destructively strip bitcode from the framework, if needed.
+  Future<void> _bitcodeStripFramework(Environment environment, String frameworkBinaryPath) async {
+    if (environment.defines[kBitcodeFlag] == 'true') {
+      return;
+    }
+    final ProcessResult stripResult = environment.processManager.runSync(<String>[
+      'xcrun',
+      'bitcode_strip',
+      frameworkBinaryPath,
+      '-m', // leave the bitcode marker.
+      '-o',
+      frameworkBinaryPath,
+    ]);
+
+    if (stripResult.exitCode != 0) {
+      throw Exception('Failed to strip bitcode for $frameworkBinaryPath.\n${stripResult.stderr}');
     }
   }
 }
@@ -531,81 +614,6 @@ Future<RunResult> createStubAppFramework(File outputFile, String sdkRoot,
       // Best effort. Sometimes we can't delete things from system temp.
     } on Exception catch (e) {
       throwToolExit('Failed to create App.framework stub at ${outputFile.path}: $e');
-    }
-  }
-}
-
-/// Destructively thins the Flutter.framework to include only the specified architectures.
-///
-/// This target is not fingerprinted and will always run.
-class ThinIosApplicationFrameworks extends Target {
-  const ThinIosApplicationFrameworks();
-
-  @override
-  String get name => 'thin_ios_application_frameworks';
-
-  @override
-  List<Target> get dependencies => const <Target>[];
-
-  @override
-  List<Source> get inputs => const <Source>[];
-
-  @override
-  List<Source> get outputs => const <Source>[];
-
-  @override
-  Future<void> build(Environment environment) async {
-    if (environment.defines[kIosArchs] == null) {
-      throw MissingDefineException(kIosArchs, 'thin_ios_application_frameworks');
-    }
-    final Directory frameworkDirectory = environment.outputDir;
-
-    final File flutterFramework = frameworkDirectory.childDirectory('Flutter.framework').childFile('Flutter');
-    final String binaryPath = flutterFramework.path;
-    if (!flutterFramework.existsSync()) {
-      throw Exception('Binary $binaryPath does not exist, cannot thin');
-    }
-    final String archs = environment.defines[kIosArchs];
-    final List<String> archList = archs.split(' ').toList();
-    final ProcessResult infoResult = environment.processManager.runSync(<String>[
-      'lipo',
-      '-info',
-      binaryPath,
-    ]);
-    final String lipoInfo = infoResult.stdout as String;
-
-    final ProcessResult verifyResult = environment.processManager.runSync(<String>[
-      'lipo',
-      binaryPath,
-      '-verify_arch',
-      ...archList
-    ]);
-
-    if (verifyResult.exitCode != 0) {
-      throw Exception('Binary $binaryPath does not contain $archs. Running lipo -info:\n$lipoInfo');
-    }
-
-    // Skip this step for non-fat executables.
-    if (lipoInfo.startsWith('Non-fat file:')) {
-      environment.logger.printTrace('Skipping lipo for non-fat file $binaryPath');
-      return;
-    }
-
-    // Thin in-place.
-    final ProcessResult extractResult = environment.processManager.runSync(<String>[
-      'lipo',
-      '-output',
-      binaryPath,
-      for (final String arch in archList)
-        ...<String>[
-          '-extract',
-          arch,
-        ],
-      ...<String>[binaryPath],
-    ]);
-
-    if (extractResult.exitCode != 0) {
-      throw Exception('Failed to extract $archs for $binaryPath.\n${extractResult.stderr}\nRunning lipo -info:\n$lipoInfo');
     }
   }
 }

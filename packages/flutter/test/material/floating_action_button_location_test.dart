@@ -624,9 +624,9 @@ void main() {
           data: data,
           child: Scaffold(
             resizeToAvoidBottomInset: resizeToAvoidBottomInset,
-            bottomSheet: bottomSheet ? Container(
+            bottomSheet: bottomSheet ? const SizedBox(
               height: 100,
-              child: const Center(child: Text('BottomSheet')),
+              child: Center(child: Text('BottomSheet')),
             ) : null,
             appBar: appBar ? AppBar(title: const Text('Demo')) : null,
             bottomNavigationBar: bottomNavigationBar ? BottomNavigationBar(

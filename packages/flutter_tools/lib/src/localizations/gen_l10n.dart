@@ -420,13 +420,13 @@ String _generateLookupBody(
   bool useDeferredLoading,
   String fileName,
 ) {
-  final String Function(LocaleInfo) generateSwitchClauseTemplate = (LocaleInfo locale) {
+  String generateSwitchClauseTemplate(LocaleInfo locale) {
     return (useDeferredLoading ?
       switchClauseDeferredLoadingTemplate : switchClauseTemplate)
       .replaceAll('@(localeClass)', '$className${locale.camelCase()}')
       .replaceAll('@(appClass)', className)
       .replaceAll('@(library)', '${fileName}_${locale.languageCode}');
-  };
+  }
   return lookupBodyTemplate
     .replaceAll('@(lookupAllCodesSpecified)', _generateLookupByAllCodes(
       allBundles,

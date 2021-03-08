@@ -181,8 +181,11 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
     if (!_fuchsiaWorkflow.canListDevices) {
       return <Device>[];
     }
-    final List<String> text = (await _fuchsiaSdk.listDevices(timeout: timeout))
-      ?.split('\n');
+    // TODO(omerlevran): Remove once soft transition is complete fxb/67602.
+    final List<String> text = (await _fuchsiaSdk.listDevices(
+      timeout: timeout,
+      useDeviceFinder: _fuchsiaWorkflow.shouldUseDeviceFinder,
+    ))?.split('\n');
     if (text == null || text.isEmpty) {
       return <Device>[];
     }
@@ -208,9 +211,18 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
       return null;
     }
     final String name = words[1];
-    final String resolvedHost = await _fuchsiaSdk.fuchsiaDevFinder.resolve(
-      name,
-    );
+    String resolvedHost;
+
+    // TODO(omerlevran): Remove once soft transition is complete fxb/67602.
+    if (_fuchsiaWorkflow.shouldUseDeviceFinder) {
+      // TODO(omerlevran): Add support for resolve on the FuchsiaSdk Object.
+      resolvedHost = await _fuchsiaSdk.fuchsiaDevFinder.resolve(
+        name,
+      );
+    } else {
+      // TODO(omerlevran): Add support for resolve on the FuchsiaSdk Object.
+      resolvedHost = await _fuchsiaSdk.fuchsiaFfx.resolve(name);
+    }
     if (resolvedHost == null) {
       _logger.printError('Failed to resolve host for Fuchsia device `$name`');
       return null;
@@ -649,7 +661,7 @@ class FuchsiaDevice extends Device {
       throwToolExit('Cannot interact with device. No ssh config.\n'
                     'Try setting FUCHSIA_SSH_CONFIG or FUCHSIA_BUILD_DIR.');
     }
-    return await globals.processUtils.run(<String>[
+    return globals.processUtils.run(<String>[
       'ssh',
       '-F',
       globals.fuchsiaArtifacts.sshConfig.absolute.path,
@@ -664,7 +676,7 @@ class FuchsiaDevice extends Device {
       throwToolExit('Cannot interact with device. No ssh config.\n'
                     'Try setting FUCHSIA_SSH_CONFIG or FUCHSIA_BUILD_DIR.');
     }
-    return await globals.processUtils.run(<String>[
+    return globals.processUtils.run(<String>[
       'scp',
       '-F',
       globals.fuchsiaArtifacts.sshConfig.absolute.path,

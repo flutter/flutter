@@ -212,7 +212,7 @@ void main() {
     late Iterable<User> lastOptions;
     late AutocompleteOnSelected<User> lastOnSelected;
     late User lastUserSelected;
-    late final AutocompleteOptionToString<User> displayStringForOption = (User option) => option.name;
+    String displayStringForOption(User option) => option.name;
     late FocusNode focusNode;
     late TextEditingController textEditingController;
 

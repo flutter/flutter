@@ -22,7 +22,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
 
-final Generator _kNoColorTerminalPlatform = () => FakePlatform(stdoutSupportsAnsi: false);
+FakePlatform _kNoColorTerminalPlatform() => FakePlatform(stdoutSupportsAnsi: false);
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
 };
@@ -79,7 +79,7 @@ void main() {
           logger: logger,
         );
 
-        expect(() async => await iMobileDevice.takeScreenshot(
+        expect(() async => iMobileDevice.takeScreenshot(
           outputFile,
           '1234',
           IOSDeviceInterface.usb,

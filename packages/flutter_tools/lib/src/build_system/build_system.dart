@@ -205,7 +205,7 @@ abstract class Target {
   }
 
   /// Performs a fold across this target and its dependencies.
-  T fold<T>(T initialValue, T combine(T previousValue, Target target)) {
+  T fold<T>(T initialValue, T Function(T previousValue, Target target) combine) {
     final T dependencyResult = dependencies.fold(
         initialValue, (T prev, Target t) => t.fold(prev, combine));
     return combine(dependencyResult, this);

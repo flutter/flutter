@@ -9,7 +9,7 @@
 void test1() { }
 
 @Deprecated(
-  'Missing space ->.'
+  'Missing space ->.' //ignore: missing_whitespace_between_adjacent_strings
   'This feature was deprecated after v1.2.3.'
 )
 void test2() { }
@@ -26,7 +26,7 @@ void test3() { }
 )
 void test4() { }
 
-@deprecated // no message
+@deprecated // ignore: provide_deprecation_message
 void test5() { }
 
 @Deprecated('Not the right syntax. This feature was deprecated after v1.2.3.')

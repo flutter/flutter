@@ -851,7 +851,7 @@ void main() {
           child: ListView(
             controller: controller,
             children: kStates.map<Widget>((String state) {
-              return Container(
+              return SizedBox(
                 height: 200.0,
                 child: Text(state),
               );
