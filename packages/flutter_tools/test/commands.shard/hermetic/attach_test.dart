@@ -799,6 +799,9 @@ class StreamLogger extends Logger {
 
   @override
   void clear() => _log('[stdout] ${globals.terminal.clearScreen()}\n');
+
+  @override
+  Terminal get terminal => Terminal.test();
 }
 
 class LoggerInterrupted implements Exception {
