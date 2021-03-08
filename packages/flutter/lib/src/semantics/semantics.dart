@@ -1230,7 +1230,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   // reserved for framework generated IDs(generated with _generateNewId), and most significant 32
   // bits are reserved for engine generated IDs.
   static const int _maxFrameworkAccessibilityIdentifier = (1<<16) - 1;
-  
+
   static int _lastIdentifier = 0;
   static int _generateNewId() {
     _lastIdentifier = (_lastIdentifier + 1) % _maxFrameworkAccessibilityIdentifier;
