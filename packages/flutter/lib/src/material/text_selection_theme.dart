@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -16,11 +15,6 @@ import 'theme.dart';
 ///
 /// Use [TextSelectionTheme.of] to access the closest ancestor
 /// [TextSelectionTheme] of the current [BuildContext].
-///
-/// Note, on iOS [TextField] and [SelectableText] cannot access
-/// [TextSelectionThemeData.selectionHandleColor]. To set the
-/// `selectionHandleColor` you can change the [CupertinoThemeData.primaryColor]
-/// in [ThemeData.cupertinoOverrideTheme].
 ///
 /// See also:
 ///
@@ -50,6 +44,10 @@ class TextSelectionThemeData with Diagnosticable {
   ///
   /// Selection handles are used to indicate the bounds of the selected text,
   /// or as a handle to drag the cursor to a new location in the text.
+  ///
+  /// On iOS [TextField] and [SelectableText] cannot access [selectionHandleColor].
+  /// To set the [selectionHandleColor] on iOS, you can change the
+  /// [CupertinoThemeData.primaryColor] in [ThemeData.cupertinoOverrideTheme].
   final Color? selectionHandleColor;
 
   /// Creates a copy of this object with the given fields replaced with the
