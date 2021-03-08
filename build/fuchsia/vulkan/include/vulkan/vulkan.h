@@ -2,19 +2,9 @@
 #define VULKAN_H_ 1
 
 /*
-** Copyright (c) 2015-2018 The Khronos Group Inc.
+** Copyright (c) 2015-2020 The Khronos Group Inc.
 **
-** Licensed under the Apache License, Version 2.0 (the "License");
-** you may not use this file except in compliance with the License.
-** You may obtain a copy of the License at
-**
-**     http://www.apache.org/licenses/LICENSE-2.0
-**
-** Unless required by applicable law or agreed to in writing, software
-** distributed under the License is distributed on an "AS IS" BASIS,
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-** See the License for the specific language governing permissions and
-** limitations under the License.
+** SPDX-License-Identifier: Apache-2.0
 */
 
 #include "vk_platform.h"
@@ -24,7 +14,7 @@
 #include "vulkan_android.h"
 #endif
 
-#if defined(VK_USE_PLATFORM_FUCHSIA) || defined(VK_USE_PLATFORM_MAGMA_KHR)
+#ifdef VK_USE_PLATFORM_FUCHSIA
 #include <zircon/types.h>
 #include "vulkan_fuchsia.h"
 #endif
@@ -38,12 +28,9 @@
 #include "vulkan_macos.h"
 #endif
 
-
-#ifdef VK_USE_PLATFORM_MIR_KHR
-#include <mir_toolkit/client_types.h>
-#include "vulkan_mir.h"
+#ifdef VK_USE_PLATFORM_METAL_EXT
+#include "vulkan_metal.h"
 #endif
-
 
 #ifdef VK_USE_PLATFORM_VI_NN
 #include "vulkan_vi.h"
@@ -74,10 +61,27 @@
 #endif
 
 
+#ifdef VK_USE_PLATFORM_DIRECTFB_EXT
+#include <directfb.h>
+#include "vulkan_directfb.h"
+#endif
+
+
 #ifdef VK_USE_PLATFORM_XLIB_XRANDR_EXT
 #include <X11/Xlib.h>
 #include <X11/extensions/Xrandr.h>
 #include "vulkan_xlib_xrandr.h"
+#endif
+
+
+#ifdef VK_USE_PLATFORM_GGP
+#include <ggp_c/vulkan_types.h>
+#include "vulkan_ggp.h"
+#endif
+
+
+#ifdef VK_ENABLE_BETA_EXTENSIONS
+#include "vulkan_beta.h"
 #endif
 
 #endif // VULKAN_H_
