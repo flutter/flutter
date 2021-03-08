@@ -307,14 +307,20 @@ class SlideTransition extends AnimatedWidget {
 /// above:
 ///
 /// ```dart
-/// late AnimationController _controller = AnimationController(
-///   duration: const Duration(seconds: 2),
-///   vsync: this,
+/// late AnimationController _controller;
+/// late Animation _animation;
+///
+/// @override
+/// void initState() {
+/// super.initState();
+/// _controller = AnimationController(
+/// duration: const Duration(seconds: 2),
+/// vsync: this,
 /// )..repeat(reverse: true);
-/// late Animation<double> _animation = CurvedAnimation(
-///   parent: _controller,
-///   curve: Curves.fastOutSlowIn,
-/// );
+/// _animation = CurvedAnimation(
+/// parent: _controller,
+/// curve: Curves.fastOutSlowIn,);
+/// }
 ///
 /// @override
 /// void dispose() {
