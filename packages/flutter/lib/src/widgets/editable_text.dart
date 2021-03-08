@@ -397,6 +397,18 @@ class ToolbarOptions {
 /// methods such as [RenderEditable.selectPosition],
 /// [RenderEditable.selectWord], etc. programmatically.
 ///
+/// {@template flutter.widgets.editableText.showCaretOnScreen}
+/// ## Keep the caret visisble when focused
+///
+/// When focused, this widget will make attempts to keep the text area and its
+/// caret (even when [showCursor] is `false`) visible, on these occasions:
+///
+///  * When the user focuses this text field and it is not [readOnly].
+///  * When the user changes the selection of the text field, or changes the
+///    text when the text field is not [readOnly].
+///  * When the virtual keyboard pops up.
+/// {@endtemplate}
+///
 /// See also:
 ///
 ///  * [TextField], which is a full-featured, material-design text input field
@@ -1720,7 +1732,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _currentPromptRectRange = null;
 
       if (_hasInputConnection) {
-        _showCaretOnScreen();
         if (widget.obscureText && value.text.length == _value.text.length + 1) {
           _obscureShowCharTicksPending = _kObscureShowLatestCharCursorTicks;
           _obscureLatestCharIndex = _value.selection.baseOffset;
@@ -1730,6 +1741,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _formatAndSetValue(value, SelectionChangedCause.keyboard);
     }
 
+    // Wherever the value is changed by the user, schedule a showCaretOnScreen
+    // to make sure the user can see the changes they just made. Programmatical
+    // changes to `textEditingValue` do not trigger the behavior even if the
+    // text field is focused.
+    _scheduleShowCaretOnScreen();
     if (_hasInputConnection) {
       // To keep the cursor from blinking while typing, we want to restart the
       // cursor timer every time a new character is typed.
@@ -2159,17 +2175,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  bool _textChangedSinceLastCaretUpdate = false;
   Rect? _currentCaretRect;
-
   void _handleCaretChanged(Rect caretRect) {
     _currentCaretRect = caretRect;
-    // If the caret location has changed due to an update to the text or
-    // selection, then scroll the caret into view.
-    if (_textChangedSinceLastCaretUpdate) {
-      _textChangedSinceLastCaretUpdate = false;
-      _showCaretOnScreen();
-    }
   }
 
   // Animation configuration for scrolling the caret back on screen.
@@ -2178,7 +2186,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   bool _showCaretOnScreenScheduled = false;
 
-  void _showCaretOnScreen() {
+  void _scheduleShowCaretOnScreen() {
     if (_showCaretOnScreenScheduled) {
       return;
     }
@@ -2237,7 +2245,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void didChangeMetrics() {
     if (_lastBottomViewInset < WidgetsBinding.instance!.window.viewInsets.bottom) {
-      _showCaretOnScreen();
+      _scheduleShowCaretOnScreen();
     }
     _lastBottomViewInset = WidgetsBinding.instance!.window.viewInsets.bottom;
   }
@@ -2392,7 +2400,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _updateRemoteEditingValueIfNeeded();
     _startOrStopCursorTimerIfNeeded();
     _updateOrDisposeSelectionOverlayIfNeeded();
-    _textChangedSinceLastCaretUpdate = true;
     // TODO(abarth): Teach RenderEditable about ValueNotifier<TextEditingValue>
     // to avoid this setState().
     setState(() { /* We use widget.controller.value in build(). */ });
@@ -2406,7 +2413,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // Listen for changing viewInsets, which indicates keyboard showing up.
       WidgetsBinding.instance!.addObserver(this);
       _lastBottomViewInset = WidgetsBinding.instance!.window.viewInsets.bottom;
-      _showCaretOnScreen();
+      if (!widget.readOnly) {
+        _scheduleShowCaretOnScreen();
+      }
       if (!_value.selection.isValid) {
         // Place cursor at the end if the selection is invalid when we receive focus.
         _handleSelectionChanged(TextSelection.collapsed(offset: _value.text.length), null);
@@ -2472,6 +2481,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause? cause) {
+    // Compare the current TextEditingValue with the pre-format new
+    // TextEditingValue value, in case the formatter would reject the change.
+    final bool shouldShowCaret = widget.readOnly
+      ? _value.selection != value.selection
+      : _value != value;
+    if (shouldShowCaret) {
+      _scheduleShowCaretOnScreen();
+    }
     _formatAndSetValue(value, cause, userInteraction: true);
   }
 
@@ -2506,8 +2523,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   @override
-  void hideToolbar() {
-    _selectionOverlay?.hide();
+  void hideToolbar([bool hideHandles = true]) {
+    if (hideHandles) {
+      // Hide the handles and the toolbar.
+      _selectionOverlay?.hide();
+    } else {
+      // Hide only the toolbar but not the handles.
+      _selectionOverlay?.hideToolbar();
+    }
   }
 
   /// Toggles the visibility of the toolbar.

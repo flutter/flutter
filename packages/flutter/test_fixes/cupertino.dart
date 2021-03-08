@@ -123,4 +123,8 @@ void main() {
   CupertinoTextField.borderless(maxLengthEnforced: false);
   final CupertinoTextField textField;
   textField.maxLengthEnforced;
+
+  // Changes made in https://github.com/flutter/flutter/pull/59127
+  const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem(title: myTitle);
+  bottomNavigationBarItem.title;
 }

@@ -115,7 +115,7 @@ class FakeProcessManager extends Mock implements ProcessManager {
 
 /// A fake process that can be used to interact with a process "started" by the FakeProcessManager.
 class FakeProcess extends Mock implements Process {
-  FakeProcess(ProcessResult result, {void stdinResults(String input)})
+  FakeProcess(ProcessResult result, {void Function(String input) stdinResults})
       : stdoutStream = Stream<List<int>>.value((result.stdout as String).codeUnits),
         stderrStream = Stream<List<int>>.value((result.stderr as String).codeUnits),
         desiredExitCode = result.exitCode,

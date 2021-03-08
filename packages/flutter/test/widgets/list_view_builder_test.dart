@@ -22,7 +22,7 @@ void main() {
             itemExtent: 100.0,
             itemBuilder: (BuildContext context, int index) {
               callbackTracker.add(index);
-              return Container(
+              return SizedBox(
                 key: ValueKey<int>(index),
                 height: 100.0,
                 child: Text('$index'),
@@ -68,15 +68,15 @@ void main() {
     // so if our widget is 200 pixels tall, it should fit exactly 3 times.
     // but if we are offset by 300 pixels, there will be 4, numbered 1-4.
 
-    final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
+    Widget itemBuilder(BuildContext context, int index) {
       callbackTracker.add(index);
-      return Container(
+      return SizedBox(
         key: ValueKey<int>(index),
         width: 500.0, // this should be ignored
         height: 400.0, // should be overridden by itemExtent
         child: Text('$index', textDirection: TextDirection.ltr),
       );
-    };
+    }
 
     Widget buildWidget() {
       return Directionality(
@@ -141,15 +141,15 @@ void main() {
     // so if our widget is 200 pixels wide, it should fit exactly 4 times.
     // but if we are offset by 300 pixels, there will be 5, numbered 1-5.
 
-    final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
+    Widget itemBuilder(BuildContext context, int index) {
       callbackTracker.add(index);
-      return Container(
+      return SizedBox(
         key: ValueKey<int>(index),
         width: 400.0, // this should be overridden by itemExtent
         height: 500.0, // this should be ignored
         child: Text('$index'),
       );
-    };
+    }
 
     Widget buildWidget() {
       return Directionality(
@@ -215,10 +215,10 @@ void main() {
     // items are 300 tall. Scrolling should cause two or three items
     // to be built.
 
-    final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
+    Widget itemBuilder(BuildContext context, int index) {
       callbackTracker.add(index);
       return Text('$index', key: ValueKey<int>(index), textDirection: TextDirection.ltr);
-    };
+    }
 
     final Widget testWidget = Directionality(
       textDirection: TextDirection.ltr,

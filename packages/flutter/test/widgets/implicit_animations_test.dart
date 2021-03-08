@@ -547,7 +547,7 @@ class _TestTweenAnimationBuilderWidgetState extends _TestAnimatedWidgetState {
       duration: duration,
       onEnd: widget.callback,
       builder: (BuildContext context, double? size, Widget? child) {
-        return Container(
+        return SizedBox(
           child: child,
           width: size,
           height: size,

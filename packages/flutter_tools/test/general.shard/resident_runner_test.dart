@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/resident_devtools_handler.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -38,6 +39,7 @@ import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 import '../src/testbed.dart';
 
 final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
@@ -1584,7 +1586,7 @@ void main() {
     expect(json.decode(globals.fs.file('flutter_01.sksl.json').readAsStringSync()), <String, Object>{
       'platform': 'android',
       'name': 'FakeDevice',
-      'engineRevision': '42.2', // From FakeFlutterVersion
+      'engineRevision': 'abcdefg',
       'data': <String, Object>{'A': 'B'}
     });
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
@@ -1592,7 +1594,8 @@ void main() {
     FileSystemUtils: () => FileSystemUtils(
       fileSystem: globals.fs,
       platform: globals.platform,
-    )
+    ),
+    FlutterVersion: () => FakeFlutterVersion(engineRevision: 'abcdefg')
   }));
 
   testUsingContext('ResidentRunner ignores DevToolsLauncher when attaching with enableDevTools: false', () => testbed.run(() async {
@@ -2246,8 +2249,7 @@ void main() {
       listViews,
       listViews,
       setAssetBundlePath,
-    ]);
-    setWsAddress(testUri, fakeVmServiceHost.vmService);
+    ], wsAddress: testUri);
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
       <FlutterDevice>[
@@ -2277,8 +2279,7 @@ void main() {
       listViews,
       listViews,
       setAssetBundlePath,
-    ]);
-    setWsAddress(testUri, fakeVmServiceHost.vmService);
+    ], wsAddress: testUri);
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
       <FlutterDevice>[
@@ -2308,8 +2309,7 @@ void main() {
       listViews,
       listViews,
       setAssetBundlePath,
-    ]);
-    setWsAddress(testUri, fakeVmServiceHost.vmService);
+    ], wsAddress: testUri);
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
       <FlutterDevice>[
@@ -2347,8 +2347,7 @@ void main() {
       listViews,
       listViews,
       setAssetBundlePath,
-    ]);
-    setWsAddress(testUri, fakeVmServiceHost.vmService);
+    ], wsAddress: testUri);
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
       <FlutterDevice>[
@@ -2386,8 +2385,7 @@ void main() {
       listViews,
       listViews,
       setAssetBundlePath,
-    ]);
-    setWsAddress(testUri, fakeVmServiceHost.vmService);
+    ], wsAddress: testUri);
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
       <FlutterDevice>[
@@ -2418,8 +2416,7 @@ void main() {
       listViews,
       listViews,
       setAssetBundlePath,
-    ]);
-    setWsAddress(testUri, fakeVmServiceHost.vmService);
+    ], wsAddress: testUri);
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
       <FlutterDevice>[
@@ -2454,7 +2451,7 @@ void main() {
       listViews,
       listViews,
       setAssetBundlePath,
-    ]);
+    ], wsAddress: testUri);
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
       <FlutterDevice>[
@@ -2514,9 +2511,8 @@ void main() {
   testUsingContext('ColdRunner writes vm service file when providing debugging option', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
-    ]);
+    ], wsAddress: testUri);
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-    setWsAddress(testUri, fakeVmServiceHost.vmService);
     residentRunner = ColdRunner(
       <FlutterDevice>[
         mockFlutterDevice,
@@ -2804,7 +2800,7 @@ void main() {
 
 class MockFlutterDevice extends Mock implements FlutterDevice {}
 class MockDartDevelopmentService extends Mock implements DartDevelopmentService {}
-class MockVMService extends Mock implements vm_service.VmService {}
+class MockVMService extends Mock implements FlutterVmService {}
 class MockDevFS extends Mock implements DevFS {}
 class MockDeviceLogReader extends Mock implements DeviceLogReader {}
 class MockDevtoolsLauncher extends Mock implements DevtoolsLauncher {}

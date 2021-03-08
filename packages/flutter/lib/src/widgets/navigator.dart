@@ -3171,9 +3171,9 @@ class _RouteEntry extends RouteTransitionRecord {
     );
   }
 
-  static final _RouteEntryPredicate isPresentPredicate = (_RouteEntry entry) => entry.isPresent;
-  static final _RouteEntryPredicate suitableForTransitionAnimationPredicate = (_RouteEntry entry) => entry.suitableForTransitionAnimation;
-  static final _RouteEntryPredicate willBePresentPredicate = (_RouteEntry entry) => entry.willBePresent;
+  static bool isPresentPredicate(_RouteEntry entry) => entry.isPresent;
+  static bool suitableForTransitionAnimationPredicate(_RouteEntry entry) => entry.suitableForTransitionAnimation;
+  static bool willBePresentPredicate(_RouteEntry entry) => entry.willBePresent;
 
   static _RouteEntryPredicate isRoutePredicate(Route<dynamic> route) {
     return (_RouteEntry entry) => entry.route == route;

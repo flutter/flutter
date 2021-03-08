@@ -402,7 +402,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// current timeout, if any. See [AutomatedTestWidgetsFlutterBinding.addTime]
   /// for details.
   Future<T?> runAsync<T>(
-    Future<T> callback(), {
+    Future<T> Function() callback, {
     Duration additionalTime = const Duration(milliseconds: 1000),
   });
 
@@ -600,7 +600,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// The `timeout` argument sets the initial timeout, if any. It can
   /// be increased with [addTime]. By default there is no timeout.
-  Future<void> runTest(Future<void> testBody(), VoidCallback invariantTester, { String description = '', Duration? timeout });
+  Future<void> runTest(Future<void> Function() testBody, VoidCallback invariantTester, { String description = '', Duration? timeout });
 
   /// This is called during test execution before and after the body has been
   /// executed.
@@ -641,7 +641,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   Future<void> _runTest(
-    Future<void> testBody(),
+    Future<void> Function() testBody,
     VoidCallback invariantTester,
     String description, {
     Future<void>? timeout,
@@ -774,7 +774,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     return testCompleter.future;
   }
 
-  Future<void> _runTestBody(Future<void> testBody(), VoidCallback invariantTester) async {
+  Future<void> _runTestBody(Future<void> Function() testBody, VoidCallback invariantTester) async {
     assert(inTest);
     // So that we can assert that it remains the same after the test finishes.
     _beforeTestCheckIntrinsicSizes = debugCheckIntrinsicSizes;
@@ -979,7 +979,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   Future<T?> runAsync<T>(
-    Future<T> callback(), {
+    Future<T> Function() callback, {
     Duration additionalTime = const Duration(milliseconds: 1000),
   }) {
     assert(additionalTime != null);
@@ -996,13 +996,13 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
     final Zone realAsyncZone = Zone.current.fork(
       specification: ZoneSpecification(
-        scheduleMicrotask: (Zone self, ZoneDelegate parent, Zone zone, void f()) {
+        scheduleMicrotask: (Zone self, ZoneDelegate parent, Zone zone, void Function() f) {
           Zone.root.scheduleMicrotask(f);
         },
-        createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void f()) {
+        createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void Function() f) {
           return Zone.root.createTimer(duration, f);
         },
-        createPeriodicTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration period, void f(Timer timer)) {
+        createPeriodicTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration period, void Function(Timer timer) f) {
           return Zone.root.createPeriodicTimer(period, f);
         },
       ),
@@ -1166,7 +1166,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   Future<void> runTest(
-    Future<void> testBody(),
+    Future<void> Function() testBody,
     VoidCallback invariantTester, {
     String description = '',
     Duration? timeout,
@@ -1582,7 +1582,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   Future<T?> runAsync<T>(
-    Future<T> callback(), {
+    Future<T> Function() callback, {
     Duration additionalTime = const Duration(milliseconds: 1000),
   }) async {
     assert(() {
@@ -1615,7 +1615,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Future<void> runTest(Future<void> testBody(), VoidCallback invariantTester, { String description = '', Duration? timeout }) async {
+  Future<void> runTest(Future<void> Function() testBody, VoidCallback invariantTester, { String description = '', Duration? timeout }) async {
     assert(description != null);
     assert(!inTest);
     _inTest = true;

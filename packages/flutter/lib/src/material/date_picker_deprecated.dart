@@ -314,7 +314,7 @@ class DayPicker extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Column(
         children: <Widget>[
-          Container(
+          SizedBox(
             height: _kDayPickerRowHeight,
             child: Center(
               child: ExcludeSemantics(

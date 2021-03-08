@@ -428,7 +428,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   static const String _productBundleIdVariable = r'$(PRODUCT_BUNDLE_IDENTIFIER)';
   static const String _hostAppProjectName = 'Runner';
 
-  Directory get ephemeralDirectory => parent.directory.childDirectory('.ios');
+  Directory get ephemeralModuleDirectory => parent.directory.childDirectory('.ios');
   Directory get _editableDirectory => parent.directory.childDirectory('ios');
 
   /// This parent folder of `Runner.xcodeproj`.
@@ -436,7 +436,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
     if (!isModule || _editableDirectory.existsSync()) {
       return _editableDirectory;
     }
-    return ephemeralDirectory;
+    return ephemeralModuleDirectory;
   }
 
   /// The root directory of the iOS wrapping of Flutter and plugins. This is the
@@ -445,13 +445,16 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   ///
   /// This is the same as [hostAppRoot] except when the project is
   /// a Flutter module with an editable host app.
-  Directory get _flutterLibRoot => isModule ? ephemeralDirectory : _editableDirectory;
+  Directory get _flutterLibRoot => isModule ? ephemeralModuleDirectory : _editableDirectory;
 
   /// True, if the parent Flutter project is a module project.
   bool get isModule => parent.isModule;
 
   /// Whether the flutter application has an iOS project.
   bool get exists => hostAppRoot.existsSync();
+
+  /// Put generated files here.
+  Directory get ephemeralDirectory => _flutterLibRoot.childDirectory('Flutter').childDirectory('ephemeral');
 
   @override
   File xcodeConfigFor(String mode) => _flutterLibRoot.childDirectory('Flutter').childFile('$mode.xcconfig');
@@ -664,29 +667,29 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
       return;
     }
     final bool pubspecChanged = globals.fsUtils.isOlderThanReference(
-      entity: ephemeralDirectory,
+      entity: ephemeralModuleDirectory,
       referenceFile: parent.pubspecFile,
     );
-    final bool toolingChanged = globals.cache.isOlderThanToolsStamp(ephemeralDirectory);
+    final bool toolingChanged = globals.cache.isOlderThanToolsStamp(ephemeralModuleDirectory);
     if (!pubspecChanged && !toolingChanged) {
       return;
     }
 
-    _deleteIfExistsSync(ephemeralDirectory);
+    _deleteIfExistsSync(ephemeralModuleDirectory);
     await _overwriteFromTemplate(
       globals.fs.path.join('module', 'ios', 'library'),
-      ephemeralDirectory,
+      ephemeralModuleDirectory,
     );
     // Add ephemeral host app, if a editable host app does not already exist.
     if (!_editableDirectory.existsSync()) {
       await _overwriteFromTemplate(
         globals.fs.path.join('module', 'ios', 'host_app_ephemeral'),
-        ephemeralDirectory,
+        ephemeralModuleDirectory,
       );
       if (hasPlugins(parent)) {
         await _overwriteFromTemplate(
           globals.fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'),
-          ephemeralDirectory,
+          ephemeralModuleDirectory,
         );
       }
       // Use release mode so host project can link on bitcode variant.
@@ -759,7 +762,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
 
   Directory get engineCopyDirectory {
     return isModule
-        ? ephemeralDirectory.childDirectory('Flutter').childDirectory('engine')
+        ? ephemeralModuleDirectory.childDirectory('Flutter').childDirectory('engine')
         : hostAppRoot.childDirectory('Flutter');
   }
 

@@ -59,12 +59,12 @@ typedef DragEndCallback = void Function(DraggableDetails details);
 /// Signature for when a [Draggable] leaves a [DragTarget].
 ///
 /// Used by [DragTarget.onLeave].
-typedef DragTargetLeave = void Function(Object? data);
+typedef DragTargetLeave<T> = void Function(T? data);
 
 /// Signature for when a [Draggable] moves within a [DragTarget].
 ///
 /// Used by [DragTarget.onMove].
-typedef DragTargetMove = void Function(DragTargetDetails<dynamic> details);
+typedef DragTargetMove<T> = void Function(DragTargetDetails<T> details);
 
 /// Where the [Draggable] should be anchored during a drag.
 enum DragAnchor {
@@ -653,12 +653,12 @@ class DragTarget<T extends Object> extends StatefulWidget {
 
   /// Called when a given piece of data being dragged over this target leaves
   /// the target.
-  final DragTargetLeave? onLeave;
+  final DragTargetLeave<T>? onLeave;
 
   /// Called when a [Draggable] moves within this [DragTarget].
   ///
   /// Note that this includes entering and leaving the target.
-  final DragTargetMove? onMove;
+  final DragTargetMove<T>? onMove;
 
   /// How to behave during hit testing.
   ///
@@ -712,7 +712,7 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
       _rejectedAvatars.remove(avatar);
     });
     if (widget.onLeave != null)
-      widget.onLeave!(avatar.data);
+      widget.onLeave!(avatar.data as T?);
   }
 
   void didDrop(_DragAvatar<Object> avatar) {
@@ -732,7 +732,7 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
     if (!mounted)
       return;
     if (widget.onMove != null)
-      widget.onMove!(DragTargetDetails<dynamic>(data: avatar.data, offset: avatar._lastOffset!));
+      widget.onMove!(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
   }
 
   @override

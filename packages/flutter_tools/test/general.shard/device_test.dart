@@ -334,7 +334,7 @@ void main() {
         terminal: mockTerminal,
       );
       await expectLater(
-        () async => await deviceManager.findTargetDevices(FakeFlutterProject()),
+        () async => deviceManager.findTargetDevices(FakeFlutterProject()),
         throwsA(isA<ToolExit>())
       );
     });

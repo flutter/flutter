@@ -235,12 +235,10 @@ class CupertinoActionSheet extends StatelessWidget {
         height: 0.0,
       );
     }
-    return Container(
-      child: _CupertinoAlertActionSection(
-        children: actions!,
-        scrollController: actionScrollController,
-        hasCancelButton: cancelButton != null,
-      ),
+    return _CupertinoAlertActionSection(
+      children: actions!,
+      scrollController: actionScrollController,
+      hasCancelButton: cancelButton != null,
     );
   }
 

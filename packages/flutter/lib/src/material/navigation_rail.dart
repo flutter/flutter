@@ -123,6 +123,7 @@ class NavigationRail extends StatefulWidget {
   ///
   /// Typically used within a [Row] that defines the [Scaffold.body] property.
   const NavigationRail({
+    Key? key,
     this.backgroundColor,
     this.extended = false,
     this.leading,
@@ -147,7 +148,8 @@ class NavigationRail extends StatefulWidget {
         assert(minExtendedWidth == null || minExtendedWidth > 0),
         assert((minWidth == null || minExtendedWidth == null) || minExtendedWidth >= minWidth),
         assert(extended != null),
-        assert(!extended || (labelType == null || labelType == NavigationRailLabelType.none));
+        assert(!extended || (labelType == null || labelType == NavigationRailLabelType.none)),
+        super(key: key);
 
   /// Sets the color of the Container that holds all of the [NavigationRail]'s
   /// contents.
