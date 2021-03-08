@@ -395,6 +395,7 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): DoNothingAndStopPropagationIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.end): DoNothingAndStopPropagationIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.home): DoNothingAndStopPropagationIntent(),
+    LogicalKeySet(LogicalKeyboardKey.space): DoNothingAndStopPropagationIntent(),
   };
 
   static Map<LogicalKeySet, Intent> get _shortcuts {
