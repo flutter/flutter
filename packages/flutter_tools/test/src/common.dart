@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:path/path.dart' as path; // ignore: package_path_import
 
@@ -87,6 +88,15 @@ String getFlutterRoot() {
   }
   final String toolsPath = path.joinAll(parts.sublist(0, toolsIndex + 1));
   return path.normalize(path.join(toolsPath, '..', '..'));
+}
+
+/// Gets the path to the root of the Android SDK from the environment variable.
+String getAndroidSdkRoot() {
+  const Platform platform = LocalPlatform();
+  if (platform.environment.containsKey('ANDROID_SDK_ROOT')) {
+    return platform.environment['ANDROID_SDK_ROOT'];
+  }
+  throw StateError('ANDROID_SDK_ROOT environment varible not set');
 }
 
 CommandRunner<void> createTestCommandRunner([ FlutterCommand command ]) {
@@ -178,7 +188,7 @@ Matcher containsIgnoringWhitespace(String toSearch) {
 /// system temporary directory are deleted after each test by calling
 /// `LocalFileSystem.dispose()`.
 @isTest
-void test(String description, FutureOr<void> body(), {
+void test(String description, FutureOr<void> Function() body, {
   String testOn,
   Timeout timeout,
   dynamic skip,
@@ -212,7 +222,7 @@ void test(String description, FutureOr<void> body(), {
 ///
 /// For more information, see https://github.com/flutter/flutter/issues/47161
 @isTest
-void testWithoutContext(String description, FutureOr<void> body(), {
+void testWithoutContext(String description, FutureOr<void> Function() body, {
   String testOn,
   Timeout timeout,
   dynamic skip,
@@ -287,11 +297,13 @@ class NoContext implements AppContext {
 class FakeVmServiceHost {
   FakeVmServiceHost({
     @required List<VmServiceExpectation> requests,
+    Uri httpAddress,
+    Uri wsAddress,
   }) : _requests = requests {
-    _vmService = vm_service.VmService(
+    _vmService = FlutterVmService(vm_service.VmService(
       _input.stream,
       _output.add,
-    );
+    ), httpAddress: httpAddress, wsAddress: wsAddress);
     _applyStreamListen();
     _output.stream.listen((String data) {
       final Map<String, Object> request = json.decode(data) as Map<String, Object>;
@@ -331,8 +343,9 @@ class FakeVmServiceHost {
   final StreamController<String> _input = StreamController<String>();
   final StreamController<String> _output = StreamController<String>();
 
-  vm_service.VmService get vmService => _vmService;
-  vm_service.VmService _vmService;
+  FlutterVmService get vmService => _vmService;
+  FlutterVmService _vmService;
+
 
   bool get hasRemainingExpectations => _requests.isNotEmpty;
 

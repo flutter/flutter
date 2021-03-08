@@ -292,7 +292,7 @@ class MethodChannel {
   ///     NSArray* items = [BWPlayApi items];
   ///     NSMutableArray* json = [NSMutableArray arrayWithCapacity:items.count];
   ///     for (final BWPlayItem* item in items) {
-  ///       [json addObject:@{@"id":item.itemId, @"title":item.name, @"artist":item.artist}];
+  ///       [json addObject:@{ @"id":item.itemId, @"title":item.name, @"artist":item.artist }];
   ///     }
   ///     result(json);
   ///   } else if ([@"play" isEqualToString:call.method]) {
@@ -429,7 +429,7 @@ class MethodChannel {
   /// is not set.
   bool checkMockMethodCallHandler(Future<dynamic> Function(MethodCall call)? handler) => _methodChannelMockHandlers[this] == handler;
 
-  Future<ByteData?> _handleAsMethodCall(ByteData? message, Future<dynamic>? handler(MethodCall call)) async {
+  Future<ByteData?> _handleAsMethodCall(ByteData? message, Future<dynamic>? Function(MethodCall call) handler) async {
     final MethodCall call = codec.decodeMethodCall(message);
     try {
       return codec.encodeSuccessEnvelope(await handler(call));

@@ -222,7 +222,7 @@ void main() {
     );
 
     expect(
-      () async => await iconTreeShaker.subsetFont(
+      () async => iconTreeShaker.subsetFont(
         input: fileSystem.file(inputPath),
         outputPath: outputPath,
         relativePath: relativePath,
@@ -362,7 +362,7 @@ void main() {
     _addConstFinderInvocation(appDill.path, stdout: constFinderResultWithInvalid);
 
     await expectLater(
-      () async => await iconTreeShaker.subsetFont(
+      () async => iconTreeShaker.subsetFont(
         input: fileSystem.file(inputPath),
         outputPath: outputPath,
         relativePath: relativePath,
@@ -401,7 +401,7 @@ void main() {
     _resetFontSubsetInvocation(exitCode: -1, stdinSink: stdinSink);
 
     await expectLater(
-      () async => await iconTreeShaker.subsetFont(
+      () async => iconTreeShaker.subsetFont(
         input: fileSystem.file(inputPath),
         outputPath: outputPath,
         relativePath: relativePath,
@@ -435,7 +435,7 @@ void main() {
     _resetFontSubsetInvocation(exitCode: -1, stdinSink: stdinSink);
 
     await expectLater(
-      () async => await iconTreeShaker.subsetFont(
+      () async => iconTreeShaker.subsetFont(
         input: fileSystem.file(inputPath),
         outputPath: outputPath,
         relativePath: relativePath,
@@ -469,7 +469,7 @@ void main() {
     _addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
 
     await expectLater(
-      () async => await iconTreeShaker.subsetFont(
+      () async => iconTreeShaker.subsetFont(
         input: fileSystem.file(inputPath),
         outputPath: outputPath,
         relativePath: relativePath,
@@ -503,7 +503,7 @@ void main() {
     _addConstFinderInvocation(appDill.path, exitCode: -1);
 
     await expectLater(
-      () async => await iconTreeShaker.subsetFont(
+      () async => iconTreeShaker.subsetFont(
         input: fileSystem.file(inputPath),
         outputPath: outputPath,
         relativePath: relativePath,

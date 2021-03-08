@@ -1398,7 +1398,7 @@ class PubDependencyTree {
 
 // Produces a 16-bit checksum from the codePoints of the package name and
 // version strings using Fletcher's algorithm.
-String _computeChecksum(Iterable<String> names, String getVersion(String name)) {
+String _computeChecksum(Iterable<String> names, String Function(String name) getVersion) {
   int lowerCheck = 0;
   int upperCheck = 0;
   final List<String> sortedNames = names.toList()..sort();

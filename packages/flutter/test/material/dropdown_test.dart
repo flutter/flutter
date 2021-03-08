@@ -14,7 +14,7 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
-final ValueChanged<String?> onChanged = (_) { };
+void onChanged<T>(T _) { }
 
 final Type dropdownButtonType = DropdownButton<String>(
   onChanged: (_) { },
@@ -54,9 +54,7 @@ Widget buildDropdown({
     Color? focusColor,
     Color? dropdownColor,
   }) {
-  final List<DropdownMenuItem<String>>? listItems = items == null
-      ? null
-      : items.map<DropdownMenuItem<String>>((String item) {
+  final List<DropdownMenuItem<String>>? listItems = items?.map<DropdownMenuItem<String>>((String item) {
     return DropdownMenuItem<String>(
       key: ValueKey<String>(item),
       value: item,
@@ -1603,7 +1601,7 @@ void main() {
       itemHeight: null,
       selectedItemBuilder: (BuildContext context) {
         return items.map<Widget>((String item) {
-          return Container(
+          return SizedBox(
             height: double.parse(item),
             width: double.parse(item),
             child: Center(child: Text(item)),
@@ -1631,16 +1629,16 @@ void main() {
       await tester.pumpWidget(buildFrame(
         value: null,
         // [hint] widget is smaller than largest selected item widget
-        hint: Container(
+        hint: const SizedBox(
           height: 50,
           width: 50,
-          child: const Text('hint')
+          child: Text('hint')
         ),
         items: items,
         itemHeight: null,
         selectedItemBuilder: (BuildContext context) {
           return items.map<Widget>((String item) {
-            return Container(
+            return SizedBox(
               height: double.parse(item),
               width: double.parse(item),
               child: Center(child: Text(item)),
@@ -1673,16 +1671,16 @@ void main() {
         // to the largest item regardless of which one is selected.
         value: selectedItem,
         // [hint] widget is larger than largest selected item widget
-        hint: Container(
+        hint: const SizedBox(
           height: 125,
           width: 125,
-          child: const Text('hint')
+          child: Text('hint'),
         ),
         items: items,
         itemHeight: null,
         selectedItemBuilder: (BuildContext context) {
           return items.map<Widget>((String item) {
-            return Container(
+            return SizedBox(
               height: double.parse(item),
               width: double.parse(item),
               child: Center(child: Text(item)),
@@ -1711,16 +1709,16 @@ void main() {
       await tester.pumpWidget(buildFrame(
         value: null,
         // [hint] widget is smaller than largest selected item widget
-        hint: Container(
+        hint: const SizedBox(
           height: 50,
           width: 50,
-          child: const Text('hint')
+          child: Text('hint'),
         ),
         items: items,
         itemHeight: null,
         selectedItemBuilder: (BuildContext context) {
           return items.map<Widget>((String item) {
-            return Container(
+            return SizedBox(
               height: double.parse(item),
               width: double.parse(item),
               child: Center(child: Text(item)),
@@ -1749,16 +1747,16 @@ void main() {
       await tester.pumpWidget(buildFrame(
         value: null,
         // [hint] widget is larger than largest selected item widget
-        hint: Container(
+        hint: const SizedBox(
           height: 125,
           width: 125,
-          child: const Text('hint')
+          child: Text('hint')
         ),
         items: items,
         itemHeight: null,
         selectedItemBuilder: (BuildContext context) {
           return items.map<Widget>((String item) {
-            return Container(
+            return SizedBox(
               height: double.parse(item),
               width: double.parse(item),
               child: Center(child: Text(item)),
@@ -1787,16 +1785,16 @@ void main() {
       await tester.pumpWidget(buildFrame(
         value: null,
         // [hint] widget is smaller than largest selected item widget
-        disabledHint: Container(
+        disabledHint: const SizedBox(
           height: 50,
           width: 50,
-          child: const Text('hint')
+          child: Text('hint')
         ),
         items: items,
         itemHeight: null,
         selectedItemBuilder: (BuildContext context) {
           return items.map<Widget>((String item) {
-            return Container(
+            return SizedBox(
               height: double.parse(item),
               width: double.parse(item),
               child: Center(child: Text(item)),
@@ -1825,16 +1823,16 @@ void main() {
       await tester.pumpWidget(buildFrame(
         value: null,
         // [hint] widget is larger than largest selected item widget
-        disabledHint: Container(
+        disabledHint: const SizedBox(
           height: 125,
           width: 125,
-          child: const Text('hint')
+          child: Text('hint')
         ),
         items: items,
         itemHeight: null,
         selectedItemBuilder: (BuildContext context) {
           return items.map<Widget>((String item) {
-            return Container(
+            return SizedBox(
               height: double.parse(item),
               width: double.parse(item),
               child: Center(child: Text(item)),
@@ -2601,7 +2599,7 @@ void main() {
     final Element element = tester.element(find.byKey(const ValueKey<String>('two')).last);
     final FocusNode node = Focus.of(element);
     expect(node.hasFocus, isTrue);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55320
+  });
 
   testWidgets('Selected element is correctly focused with dropdown that more items than fit on the screen', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
@@ -2664,7 +2662,7 @@ void main() {
     final Element element = tester.element(find.byKey(const ValueKey<int>(42)).last);
     final FocusNode node = Focus.of(element);
     expect(node.hasFocus, isTrue);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55320
+  });
 
   testWidgets("Having a focused element doesn't interrupt scroll when flung by touch", (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
@@ -2738,7 +2736,66 @@ void main() {
     // Scrolling to the top again has removed the one the focus was on from the
     // tree, causing it to lose focus.
     expect(Focus.of(tester.element(find.byKey(const ValueKey<int>(91)).last)).hasPrimaryFocus, isFalse);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55320
+  });
+
+  testWidgets('DropdownButton changes selected item with arrow keys', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    String? value = 'one';
+
+    Widget buildFrame() {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return DropdownButton<String>(
+                  focusNode: focusNode,
+                  autofocus: true,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
+                  value: value,
+                  itemHeight: null,
+                  items: menuItems.map<DropdownMenuItem<String>>((String item) {
+                    return DropdownMenuItem<String>(
+                      key: ValueKey<String>(item),
+                      value: item,
+                      child: Text(item, key: ValueKey<String>(item + 'Text')),
+                    );
+                  }).toList(),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    await tester.pump(); // Pump a frame for autofocus to take effect.
+    expect(focusNode.hasPrimaryFocus, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the menu animation
+    expect(value, equals('one'));
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown); // Focus 'two'.
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown); // Focus 'three'.
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp); // Back to 'two'.
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter); // Select 'two'.
+    await tester.pump();
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the menu animation
+
+    expect(value, equals('two'));
+  });
 
   testWidgets('DropdownButton onTap callback is called when defined', (WidgetTester tester) async {
     int dropdownButtonTapCounter = 0;
@@ -2948,5 +3005,62 @@ void main() {
     // The scrollbar is shown when the list is longer than the height of the screen.
     expect(scrollController.position.maxScrollExtent > 0, isTrue);
     expect(find.byType(Scrollbar), paints..rect());
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/76614
+  testWidgets('Do not crash if used in very short screen', (WidgetTester tester) async {
+    // The default item height is 48.0 pixels and needs two items padding since
+    // the menu requires empty space surrounding the menu. Finally, the constraint height
+    // is 47.0 pixels for the menu rendering.
+    tester.binding.window.physicalSizeTestValue = const Size(800.0, 48.0 * 3 - 1.0);
+    tester.binding.window.devicePixelRatioTestValue = 1;
+    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
+
+    const String value = 'foo';
+    final UniqueKey itemKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: DropdownButton<String>(
+              value: value,
+              items: <DropdownMenuItem<String>>[
+                DropdownMenuItem<String>(
+                  key: itemKey,
+                  value: value,
+                  child: const Text(value),
+                ),
+              ],
+              onChanged: (_) { },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text(value));
+    await tester.pumpAndSettle();
+
+    final List<RenderBox> itemBoxes = tester.renderObjectList<RenderBox>(find.byKey(itemKey)).toList();
+    expect(itemBoxes[0].localToGlobal(Offset.zero).dx, 364.0);
+    expect(itemBoxes[0].localToGlobal(Offset.zero).dy, 47.5);
+
+    expect(itemBoxes[1].localToGlobal(Offset.zero).dx, 364.0);
+    expect(itemBoxes[1].localToGlobal(Offset.zero).dy, 47.5);
+
+    expect(
+      find.ancestor(
+        of: find.text(value).last,
+        matching: find.byType(CustomPaint),
+      ).at(2),
+      paints
+        ..save()
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        // The height of menu is 47.0.
+        ..rrect(rrect: const RRect.fromLTRBXY(0.0, 0.0, 112.0, 47.0, 2.0, 2.0), color: Colors.grey[50], hasMaskFilter: false)
+    );
   });
 }

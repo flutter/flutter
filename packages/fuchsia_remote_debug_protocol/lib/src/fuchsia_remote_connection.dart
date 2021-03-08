@@ -206,7 +206,7 @@ class FuchsiaRemoteConnection {
       interface = addressAndInterface[1];
     }
 
-    return await FuchsiaRemoteConnection.connectWithSshCommandRunner(
+    return FuchsiaRemoteConnection.connectWithSshCommandRunner(
       SshCommandRunner(
         address: address,
         interface: interface,
@@ -356,7 +356,7 @@ class FuchsiaRemoteConnection {
     }
     final List<List<FlutterView>> flutterViewLists =
         await _invokeForAllVms<List<FlutterView>>((DartVm vmService) async {
-      return await vmService.getAllFlutterViews();
+      return vmService.getAllFlutterViews();
     });
     final List<FlutterView> results = flutterViewLists.fold<List<FlutterView>>(
         <FlutterView>[], (List<FlutterView> acc, List<FlutterView> element) {
@@ -372,7 +372,7 @@ class FuchsiaRemoteConnection {
   // will be updated in the event that ports are found to be broken/stale: they
   // will be shut down and removed from tracking.
   Future<List<E>> _invokeForAllVms<E>(
-    Future<E> vmFunction(DartVm vmService), [
+    Future<E> Function(DartVm vmService) vmFunction, [
     bool queueEvents = true,
   ]) async {
     final List<E> result = <E>[];
