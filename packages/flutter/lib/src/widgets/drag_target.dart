@@ -297,7 +297,7 @@ class Draggable<T extends Object> extends StatefulWidget {
   ///
   /// The anchor offset refers to the distance between the users' fingers and the [feedback] widget when this draggable is dragged.
   ///
-  /// Defaults to [defaultDragAnchorStrategy].
+  /// Defaults to [childDragAnchorStrategy] if the [dragAnchor] is set to [DragAnchor.child] or [pointerDragAnchorStrategy] if the [dragAnchor] is set to [DragAnchor.pointer].
   final DragAnchorStrategy? dragAnchorStrategy;
 
   /// Whether the semantics of the [feedback] widget is ignored when building
