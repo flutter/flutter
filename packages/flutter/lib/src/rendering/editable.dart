@@ -661,9 +661,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       // as the _handleKeyEvent method
       _handleShortcuts(key);
     } else if (key == LogicalKeyboardKey.delete) {
-      _handleDelete(forward: true);
+      _handleDelete(forward: true, wordModifier: isWordModifierPressed);
     } else if (key == LogicalKeyboardKey.backspace) {
-      _handleDelete(forward: false);
+      _handleDelete(forward: false, wordModifier: isWordModifierPressed);
     }
   }
 
@@ -956,12 +956,25 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
   }
 
-  void _handleDelete({ required bool forward }) {
-    final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
+  void _handleDelete({ required bool forward, required bool wordModifier }) {
+    TextSelection selection = textSelectionDelegate.textEditingValue.selection;
     final String text = textSelectionDelegate.textEditingValue.text;
     assert(_selection != null);
     if (_readOnly || !selection.isValid) {
       return;
+    }
+    // Deleting by word is only possible with collapsed selection
+    if (wordModifier && selection.isCollapsed) {
+      // extend selection same way as if moving by word
+      if (forward) {
+        final int startPoint = nextCharacter(selection.extentOffset, _plainText, false);
+        final TextSelection textSelection = _selectWordAtOffset(TextPosition(offset: startPoint));
+        selection = selection.copyWith(extentOffset: textSelection.extentOffset);
+      } else {
+        final int startPoint = previousCharacter(selection.extentOffset, _plainText, false);
+        final TextSelection textSelection = _selectWordAtOffset(TextPosition(offset: startPoint));
+        selection = selection.copyWith(extentOffset: textSelection.baseOffset);
+      }
     }
     String textBefore = selection.textBefore(text);
     String textAfter = selection.textAfter(text);
