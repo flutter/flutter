@@ -916,7 +916,8 @@ class WidgetsApp extends StatefulWidget {
   /// specific bindings for a widget subtree, by adding your own [Actions]
   /// widget.
   ///
-  /// Passing this will not replace [DefaultTextEditingActions].
+  /// Passing this will not replace [DefaultTextEditingActions]. These can be
+  /// overridden by placing an [Actions] widget lower in the widget tree.
   /// {@endtemplate}
   ///
   /// {@tool snippet}
@@ -1637,9 +1638,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         // DefaultTextEditingShortcuts is nested inside Shortcuts so that it can
         // fall through to the defaultShortcuts.
         child: DefaultTextEditingShortcuts(
-          child: DefaultTextEditingActions(
-            child: Actions(
-              actions: widget.actions ?? WidgetsApp.defaultActions,
+          child: Actions(
+            actions: widget.actions ?? WidgetsApp.defaultActions,
+            child: DefaultTextEditingActions(
               child: FocusTraversalGroup(
                 policy: ReadingOrderTraversalPolicy(),
                 child: _MediaQueryFromWindow(
