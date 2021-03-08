@@ -86,8 +86,8 @@ class FuchsiaExternalViewEmbedder final : public flutter::ExternalViewEmbedder {
   bool SupportsDynamicThreadMerging() override { return false; }
 
   // View manipulation.
-  // |SetViewProperties| doesn't manipulate the view directly -- it sets
-  // prending properties for the next |UpdateView| call.
+  // |SetViewProperties| doesn't manipulate the view directly -- it sets pending
+  // properties for the next |UpdateView| call.
   void EnableWireframe(bool enable);
   void CreateView(int64_t view_id);
   void DestroyView(int64_t view_id);
@@ -119,6 +119,7 @@ class FuchsiaExternalViewEmbedder final : public flutter::ExternalViewEmbedder {
     scenic::ViewHolder view_holder;
 
     SkPoint offset = SkPoint::Make(0.f, 0.f);
+    SkSize scale = SkSize::MakeEmpty();
     SkSize size = SkSize::MakeEmpty();
     float elevation = 0.f;
     float opacity = 1.f;
