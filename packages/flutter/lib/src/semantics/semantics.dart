@@ -1207,8 +1207,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   SemanticsNode({
     this.key,
     VoidCallback? showOnScreen,
-  }) : id = _generateNewId(),
+  }) : _id = _generateNewId(),
        _showOnScreen = showOnScreen;
+
 
   /// Creates a semantic node to represent the root of the semantics tree.
   ///
@@ -1217,7 +1218,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     this.key,
     VoidCallback? showOnScreen,
     required SemanticsOwner owner,
-  }) : id = 0,
+  }) : _id = 0,
        _showOnScreen = showOnScreen {
     attach(owner);
   }
@@ -1229,12 +1230,13 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   // reserved for framework generated IDs(generated with _generateNewId), and most significant 32
   // bits are reserved for engine generated IDs.
   static const int _maxFrameworkAccessibilityIdentifier = (1<<16) - 1;
-
   static int _lastIdentifier = 0;
   static int _generateNewId() {
     _lastIdentifier = (_lastIdentifier + 1) % _maxFrameworkAccessibilityIdentifier;
     return _lastIdentifier;
   }
+
+
 
   /// Uniquely identifies this node in the list of sibling nodes.
   ///
@@ -1244,9 +1246,15 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   /// The unique identifier for this node.
   ///
-  /// The root node has an id of zero. Other nodes are given a unique id when
-  /// they are created.
-  final int id;
+  /// The root node has an id of zero. Other nodes are given a unique id
+  /// when they are attached to a [SemanticsOwner]. If they are detached, their
+  /// ids are invalid and should not be used.
+  ///
+  /// In rare circumstances, id may change if this node is detached and
+  /// re-attached to the [SemanticsOwner]. This should only happen when the
+  /// application has generated too many semantics nodes.
+  int get id => _id;
+  int _id;
 
   final VoidCallback? _showOnScreen;
 
@@ -1541,8 +1549,12 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   @override
   void attach(SemanticsOwner owner) {
     super.attach(owner);
-    assert(!owner._nodes.containsKey(id));
-    owner._nodes[id] = this;
+    while (owner._nodes.containsKey(id)) {
+      // Ids may repeat if the Flutter has generated > 2^16 ids. We need to keep
+      // regenerating the id until we found an id that is not used.
+      _id = _generateNewId();
+    }
+    owner._nodes[_id] = this;
     owner._detachedNodes.remove(this);
     if (_dirty) {
       _dirty = false;
@@ -1556,9 +1568,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   @override
   void detach() {
-    assert(owner!._nodes.containsKey(id));
+    assert(owner!._nodes.containsKey(_id));
     assert(!owner!._detachedNodes.contains(this));
-    owner!._nodes.remove(id);
+    owner!._nodes.remove(_id);
     owner!._detachedNodes.add(this);
     super.detach();
     assert(owner == null);
