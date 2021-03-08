@@ -79,7 +79,7 @@ Offset childDragAnchorStrategy(Draggable<Object> draggable, BuildContext context
   return renderObject.globalToLocal(position);
 }
 
-/// The DragAnchorStrategy used when [Draggable.dragAnchor] set to
+/// The [DragAnchorStrategy] used when [Draggable.dragAnchor] set to
 /// [DragAnchor.pointer]
 Offset pointerDragAnchorStrategy(Draggable<Object> draggable, BuildContext context, Offset position) {
   return Offset.zero;
