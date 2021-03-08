@@ -72,7 +72,7 @@ typedef DragTargetMove = void Function(DragTargetDetails<dynamic> details);
 /// injectable [Draggable.dragAnchorStrategy]
 typedef DragAnchorStrategy = Offset Function(Draggable<Object> draggable, BuildContext context, Offset position);
 
-/// The default DragAnchorStrategy used when [Draggable.dragAnchor] is not set
+/// The default [DragAnchorStrategy] used when [Draggable.dragAnchor] is not set
 /// or set to [DragAnchor.child]
 Offset childDragAnchorStrategy(Draggable<Object> draggable, BuildContext context, Offset position) {
   final RenderBox renderObject = context.findRenderObject()! as RenderBox;
