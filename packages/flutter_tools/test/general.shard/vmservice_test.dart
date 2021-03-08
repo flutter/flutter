@@ -439,13 +439,13 @@ void main() {
 
     testWithoutContext('returns an isolate with the registered extensionRPC', () async {
       final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-        listViewsRequest,
         const FakeVmServiceRequest(
           method: 'streamListen',
           args: <String, Object>{
             'streamId': 'Isolate',
           },
         ),
+        listViewsRequest,
         FakeVmServiceRequest(
           method: 'getIsolate',
           jsonResponse: (isolate..extensionRPCs = <String>[extensionName]).toJson(),
@@ -467,7 +467,6 @@ void main() {
 
     testWithoutContext('when the isolate stream is already subscribed, returns an isolate with the registered extensionRPC', () async {
       final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-        listViewsRequest,
         const FakeVmServiceRequest(
           method: 'streamListen',
           args: <String, Object>{
@@ -476,6 +475,7 @@ void main() {
           // Stream already subscribed - https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#streamlisten
           errorCode: 103,
         ),
+        listViewsRequest,
         FakeVmServiceRequest(
           method: 'getIsolate',
           jsonResponse: (isolate..extensionRPCs = <String>[extensionName]).toJson(),
@@ -497,13 +497,13 @@ void main() {
 
     testWithoutContext('returns an isolate with a extensionRPC that is registered later', () async {
       final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-        listViewsRequest,
         const FakeVmServiceRequest(
           method: 'streamListen',
           args: <String, Object>{
             'streamId': 'Isolate',
           },
         ),
+        listViewsRequest,
         FakeVmServiceRequest(
           method: 'getIsolate',
           jsonResponse: isolate.toJson(),

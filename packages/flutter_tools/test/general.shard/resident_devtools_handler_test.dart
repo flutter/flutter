@@ -127,13 +127,13 @@ void main() {
       BufferLogger.test(),
     );
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      listViews,
       const FakeVmServiceRequest(
         method: 'streamListen',
         args: <String, Object>{
           'streamId': 'Isolate',
         }
       ),
+      listViews,
       FakeVmServiceRequest(
         method: 'getIsolate',
         jsonResponse: isolate.toJson(),

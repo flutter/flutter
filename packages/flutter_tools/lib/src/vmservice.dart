@@ -791,28 +791,34 @@ class FlutterVmService {
   /// Looks at the list of loaded extensions for first Flutter view, as well as
   /// the stream of added extensions to avoid races.
   Future<vm_service.IsolateRef> findExtensionIsolate(String extensionName) async {
-    final vm_service.IsolateRef isolateRef = (await getFlutterViews()).first.uiIsolate;
     try {
       await service.streamListen(vm_service.EventStreams.kIsolate);
     } on vm_service.RPCError {
       // Do nothing, since the tool is already subscribed.
     }
 
+    final Completer<void> extensionAdded = Completer<void>();
+    StreamSubscription<vm_service.Event> isolateEvents;
+    isolateEvents = service.onIsolateEvent.listen((vm_service.Event event) {
+      if (event.kind == vm_service.EventKind.kServiceExtensionAdded
+          && event.extensionRPC == extensionName) {
+        isolateEvents.cancel();
+        extensionAdded.complete();
+      }
+    });
+
     try {
-      await Future.any(<Future<void>>[
-        service.getIsolate(isolateRef.id).then(
-          (vm_service.Isolate isolate) async => isolate.extensionRPCs.contains(extensionName)
-            ? null
-            // Never complete.
-            : Completer<void>().future,
-        ),
-        service.onIsolateEvent.firstWhere(
-          (vm_service.Event event) => event.kind == vm_service.EventKind.kServiceExtensionAdded
-              && event.extensionRPC == extensionName,
-        ),
-      ]);
+      final vm_service.IsolateRef isolateRef = (await getFlutterViews()).first.uiIsolate;
+
+      final vm_service.Isolate isolate = await service.getIsolate(isolateRef.id);
+      if (isolate.extensionRPCs.contains(extensionName)) {
+        return isolateRef;
+      }
+
+      await extensionAdded.future;
       return isolateRef;
     } finally {
+      await isolateEvents.cancel();
       await service.streamCancel(vm_service.EventStreams.kIsolate);
     }
   }
