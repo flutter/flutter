@@ -218,6 +218,9 @@ class EmbeddedViewParams {
     final_bounding_rect_ = other.final_bounding_rect_;
   };
 
+  // The trasnformation Matrix corresponding to the sum of all the
+  // transformations in the platform view's mutator stack.
+  const SkMatrix& transformMatrix() const { return matrix_; };
   // The original size of the platform view before any mutation matrix is
   // applied.
   const SkSize& sizePoints() const { return size_points_; };
