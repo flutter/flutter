@@ -152,7 +152,7 @@ void main() {
           addSemanticIndexes: false,
           crossAxisCount: 2,
           childAspectRatio: 400.0 / 24.6, // about 50 widgets visible
-          children: generateList(Container(child: const Placeholder())),
+          children: generateList(const Placeholder()),
         ),
       ),
     );

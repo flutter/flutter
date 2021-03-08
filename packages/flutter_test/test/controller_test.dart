@@ -61,11 +61,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: Container(
-              child: OutlinedButton(
-                  onPressed: () { },
-                  child: const Text('hello'),
-              ),
+            body: OutlinedButton(
+                onPressed: () { },
+                child: const Text('hello'),
             ),
           ),
         ),
@@ -83,11 +81,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: Container(
-              child: OutlinedButton(
-                  onPressed: () { },
-                  child: const Text('hello'),
-              ),
+            body: OutlinedButton(
+                onPressed: () { },
+                child: const Text('hello'),
             ),
           ),
         ),
@@ -717,7 +713,7 @@ void main() {
                 shrinkWrap: true,
                 scrollDirection: Axis.horizontal,
                 // ListTile does not support horizontal list
-                itemBuilder: (BuildContext context, int i) => Container(child: Text('Item $i')),
+                itemBuilder: (BuildContext context, int i) => Text('Item $i'),
               ),
             ),
           ),

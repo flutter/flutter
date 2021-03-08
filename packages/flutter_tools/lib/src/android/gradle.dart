@@ -12,6 +12,7 @@ import 'package:xml/xml.dart';
 import '../artifacts.dart';
 import '../base/analyze_size.dart';
 import '../base/common.dart';
+import '../base/deferred_component.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -242,6 +243,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
     @required FlutterProject project,
     @required AndroidBuildInfo androidBuildInfo,
     @required String target,
+    bool validateDeferredComponents = true,
+    bool deferredComponentsEnabled = false,
   }) async {
     await buildGradleApp(
       project: project,
@@ -249,6 +252,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
       target: target,
       isBuildingBundle: true,
       localGradleErrors: gradleErrors,
+      validateDeferredComponents: validateDeferredComponents,
+      deferredComponentsEnabled: deferredComponentsEnabled,
     );
   }
 
@@ -270,6 +275,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
     @required bool isBuildingBundle,
     @required List<GradleHandledError> localGradleErrors,
     bool shouldBuildPluginAsAar = false,
+    bool validateDeferredComponents = true,
+    bool deferredComponentsEnabled = false,
     int retries = 1,
   }) async {
     assert(project != null);
@@ -355,8 +362,29 @@ class AndroidGradleBuilder implements AndroidBuilder {
     if (target != null) {
       command.add('-Ptarget=$target');
     }
+    if (project.manifest.deferredComponents != null) {
+      if (deferredComponentsEnabled) {
+        command.add('-Pdeferred-components=true');
+        androidBuildInfo.buildInfo.dartDefines.add('validate-deferred-components=$validateDeferredComponents');
+      }
+      // Pass in deferred components regardless of building split aot to satisfy
+      // android dynamic features registry in build.gradle.
+      final List<String> componentNames = <String>[];
+      for (final DeferredComponent component in project.manifest.deferredComponents) {
+        componentNames.add(component.name);
+      }
+      if (componentNames.isNotEmpty) {
+        command.add('-Pdeferred-component-names=${componentNames.join(',')}');
+        // Multi-apk applications cannot use shrinking. This is only relevant when using
+        // android dynamic feature modules.
+        _logger.printStatus(
+          'Shrinking has been disabled for this build due to deferred components. Shrinking is '
+          'not available for multi-apk applications. This limitation is expected to be removed '
+          'when Gradle plugin 4.2+ is available in Flutter.', color: TerminalColor.yellow);
+        command.add('-Pshrink=false');
+      }
+    }
     command.addAll(androidBuildInfo.buildInfo.toGradleConfig());
-
     if (buildInfo.fileSystemRoots != null && buildInfo.fileSystemRoots.isNotEmpty) {
       command.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
     }

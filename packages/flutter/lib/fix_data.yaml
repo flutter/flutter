@@ -899,7 +899,7 @@ transforms:
             name: 'autovalidateMode'
             style: optional_named
             argumentValue:
-              expression: 'AutoValidateMode.always'
+              expression: 'AutovalidateMode.always'
               requiredIf: "autovalidate == 'true'"
           - kind: 'removeParameter'
             name: 'autovalidate'
@@ -910,7 +910,7 @@ transforms:
             name: 'autovalidateMode'
             style: optional_named
             argumentValue:
-              expression: 'AutoValidateMode.disabled'
+              expression: 'AutovalidateMode.disabled'
               requiredIf: "autovalidate == 'false'"
           - kind: 'removeParameter'
             name: 'autovalidate'
@@ -945,7 +945,7 @@ transforms:
             name: 'autovalidateMode'
             style: optional_named
             argumentValue:
-              expression: 'AutoValidateMode.always'
+              expression: 'AutovalidateMode.always'
               requiredIf: "autovalidate == 'true'"
           - kind: 'removeParameter'
             name: 'autovalidate'
@@ -956,7 +956,7 @@ transforms:
             name: 'autovalidateMode'
             style: optional_named
             argumentValue:
-              expression: 'AutoValidateMode.disabled'
+              expression: 'AutovalidateMode.disabled'
               requiredIf: "autovalidate == 'false'"
           - kind: 'removeParameter'
             name: 'autovalidate'
@@ -980,7 +980,7 @@ transforms:
             name: 'autovalidateMode'
             style: optional_named
             argumentValue:
-              expression: 'AutoValidateMode.always'
+              expression: 'AutovalidateMode.always'
               requiredIf: "autovalidate == 'true'"
           - kind: 'removeParameter'
             name: 'autovalidate'
@@ -991,7 +991,7 @@ transforms:
             name: 'autovalidateMode'
             style: optional_named
             argumentValue:
-              expression: 'AutoValidateMode.disabled'
+              expression: 'AutovalidateMode.disabled'
               requiredIf: "autovalidate == 'false'"
           - kind: 'removeParameter'
             name: 'autovalidate'
@@ -1015,7 +1015,7 @@ transforms:
             name: 'autovalidateMode'
             style: optional_named
             argumentValue:
-              expression: 'AutoValidateMode.always'
+              expression: 'AutovalidateMode.always'
               requiredIf: "autovalidate == 'true'"
           - kind: 'removeParameter'
             name: 'autovalidate'
@@ -1026,7 +1026,7 @@ transforms:
             name: 'autovalidateMode'
             style: optional_named
             argumentValue:
-              expression: 'AutoValidateMode.disabled'
+              expression: 'AutovalidateMode.disabled'
               requiredIf: "autovalidate == 'false'"
           - kind: 'removeParameter'
             name: 'autovalidate'

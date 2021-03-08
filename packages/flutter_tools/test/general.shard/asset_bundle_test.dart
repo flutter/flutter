@@ -176,6 +176,129 @@ flutter:
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
+
+    testUsingContext('deferred assets are parsed', () async {
+      globals.fs.file('.packages').createSync();
+      globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
+      globals.fs.file(globals.fs.path.join('assets', 'bar', 'barbie.txt')).createSync(recursive: true);
+      globals.fs.file(globals.fs.path.join('assets', 'wild', 'dash.txt')).createSync(recursive: true);
+      globals.fs.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
+name: example
+flutter:
+  assets:
+    - assets/foo/
+  deferred-components:
+    - name: component1
+      assets:
+        - assets/bar/barbie.txt
+        - assets/wild/
+''');
+      final AssetBundle bundle = AssetBundleFactory.defaultInstance(
+        logger: globals.logger,
+        fileSystem: globals.fs,
+        platform: globals.platform,
+        splitDeferredAssets: true,
+      ).createBundle();
+      await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages', deferredComponentsEnabled: true);
+      // Expected assets:
+      //  - asset manifest
+      //  - font manifest
+      //  - license file
+      //  - assets/foo/bar.txt
+      expect(bundle.entries.length, 4);
+      expect(bundle.deferredComponentsEntries.length, 1);
+      expect(bundle.deferredComponentsEntries['component1'].length, 2);
+      expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), false);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('deferred assets are parsed regularly when splitDeferredAssets Disabled', () async {
+      globals.fs.file('.packages').createSync();
+      globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
+      globals.fs.file(globals.fs.path.join('assets', 'bar', 'barbie.txt')).createSync(recursive: true);
+      globals.fs.file(globals.fs.path.join('assets', 'wild', 'dash.txt')).createSync(recursive: true);
+      globals.fs.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
+name: example
+flutter:
+  assets:
+    - assets/foo/
+  deferred-components:
+    - name: component1
+      assets:
+        - assets/bar/barbie.txt
+        - assets/wild/
+''');
+      final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+      await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages', deferredComponentsEnabled: false);
+      // Expected assets:
+      //  - asset manifest
+      //  - font manifest
+      //  - license file
+      //  - assets/foo/bar.txt
+      expect(bundle.entries.length, 6);
+      expect(bundle.deferredComponentsEntries.isEmpty, true);
+      expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), false);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('deferred assets wildcard parsed', () async {
+      final File packageFile = globals.fs.file('.packages')..createSync();
+      globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
+      globals.fs.file(globals.fs.path.join('assets', 'bar', 'barbie.txt')).createSync(recursive: true);
+      globals.fs.file(globals.fs.path.join('assets', 'wild', 'dash.txt')).createSync(recursive: true);
+      globals.fs.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
+name: example
+flutter:
+  assets:
+    - assets/foo/
+  deferred-components:
+    - name: component1
+      assets:
+        - assets/bar/barbie.txt
+        - assets/wild/
+''');
+      final AssetBundle bundle = AssetBundleFactory.defaultInstance(
+        logger: globals.logger,
+        fileSystem: globals.fs,
+        platform: globals.platform,
+        splitDeferredAssets: true,
+      ).createBundle();
+      await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages', deferredComponentsEnabled: true);
+      // Expected assets:
+      //  - asset manifest
+      //  - font manifest
+      //  - license file
+      //  - assets/foo/bar.txt
+      expect(bundle.entries.length, 4);
+      expect(bundle.deferredComponentsEntries.length, 1);
+      expect(bundle.deferredComponentsEntries['component1'].length, 2);
+      expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), false);
+
+      // Simulate modifying the files by updating the filestat time manually.
+      globals.fs.file(globals.fs.path.join('assets', 'wild', 'fizz.txt'))
+        ..createSync(recursive: true)
+        ..setLastModifiedSync(packageFile.lastModifiedSync().add(const Duration(hours: 1)));
+
+      expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), true);
+      await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages', deferredComponentsEnabled: true);
+
+      expect(bundle.entries.length, 4);
+      expect(bundle.deferredComponentsEntries.length, 1);
+      expect(bundle.deferredComponentsEntries['component1'].length, 3);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
   });
 
   testUsingContext('Failed directory delete shows message', () async {

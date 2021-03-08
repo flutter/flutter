@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -59,9 +60,11 @@ void main() {
         textDirection: TextDirection.ltr,
         children: <Widget>[
           Container(
+            color: Colors.green,
             child: StateMarker(key: left),
           ),
           Container(
+            color: Colors.green,
             child: StateMarker(
               key: right,
               child: grandchild,
@@ -86,12 +89,14 @@ void main() {
         textDirection: TextDirection.ltr,
         children: <Widget>[
           Container(
+            color: Colors.green,
             child: StateMarker(
               key: right,
               child: newGrandchild,
             ),
           ),
           Container(
+            color: Colors.green,
             child: StateMarker(key: left),
           ),
         ],
@@ -111,6 +116,7 @@ void main() {
     await tester.pumpWidget(
       Center(
         child: Container(
+          color: Colors.green,
           child: StateMarker(
             key: left,
             child: Container(),
@@ -178,6 +184,7 @@ void main() {
     await tester.pumpWidget(
       Center(
         child: Container(
+          color: Colors.green,
           child: StateMarker(
             key: left,
             child: Container(),

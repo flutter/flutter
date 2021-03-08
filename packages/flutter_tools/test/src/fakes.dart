@@ -448,14 +448,67 @@ class FakePub extends Fake implements Pub {
 }
 
 class FakeFlutterVersion implements FlutterVersion {
-  @override
-  void fetchTagsAndUpdate() {  }
+  FakeFlutterVersion({
+    this.channel = 'unknown',
+    this.dartSdkVersion = '12',
+    this.engineRevision = 'abcdefghijklmnopqrstuvwxyz',
+    this.engineRevisionShort = 'abcde',
+    this.repositoryUrl = 'https://github.com/flutter/flutter.git',
+    this.frameworkVersion = '0.0.0',
+    this.frameworkRevision = '11111111111111111111',
+    this.frameworkRevisionShort = '11111',
+    this.frameworkAge = '0 hours ago',
+    this.frameworkCommitDate = '12/01/01'
+  });
+
+  bool get didFetchTagsAndUpdate => _didFetchTagsAndUpdate;
+  bool _didFetchTagsAndUpdate = false;
+
+  bool get didCheckFlutterVersionFreshness => _didCheckFlutterVersionFreshness;
+  bool _didCheckFlutterVersionFreshness = false;
 
   @override
-  String get channel => 'master';
+  final String channel;
 
   @override
-  Future<void> checkFlutterVersionFreshness() async { }
+  final String dartSdkVersion;
+
+  @override
+  final String engineRevision;
+
+  @override
+  final String engineRevisionShort;
+
+  @override
+  final String repositoryUrl;
+
+  @override
+  final String frameworkVersion;
+
+  @override
+  final String frameworkRevision;
+
+  @override
+  final String frameworkRevisionShort;
+
+  @override
+  final String frameworkAge;
+
+  @override
+  final String frameworkCommitDate;
+
+  @override
+  String get frameworkDate => frameworkCommitDate;
+
+  @override
+  void fetchTagsAndUpdate() {
+    _didFetchTagsAndUpdate = true;
+  }
+
+  @override
+  Future<void> checkFlutterVersionFreshness() async {
+    _didCheckFlutterVersionFreshness = true;
+  }
 
   @override
   bool checkRevisionAncestry({String tentativeDescendantRevision, String tentativeAncestorRevision}) {
@@ -463,37 +516,12 @@ class FakeFlutterVersion implements FlutterVersion {
   }
 
   @override
-  String get dartSdkVersion => '12';
-
-  @override
-  String get engineRevision => '42.2';
-
-  @override
-  String get engineRevisionShort => '42';
+  GitTagVersion get gitTagVersion {
+    throw UnimplementedError();
+  }
 
   @override
   Future<void> ensureVersionFile() async { }
-
-  @override
-  String get frameworkAge => null;
-
-  @override
-  String get frameworkCommitDate => null;
-
-  @override
-  String get frameworkDate => null;
-
-  @override
-  String get frameworkRevision => null;
-
-  @override
-  String get frameworkRevisionShort => null;
-
-  @override
-  String get frameworkVersion => null;
-
-  @override
-  GitTagVersion get gitTagVersion => null;
 
   @override
   String getBranchName({bool redactUnknownBranches = false}) {
@@ -506,11 +534,8 @@ class FakeFlutterVersion implements FlutterVersion {
   }
 
   @override
-  String get repositoryUrl => null;
-
-  @override
   Map<String, Object> toJson() {
-    return null;
+    return <String, Object>{};
   }
 }
 

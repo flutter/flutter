@@ -87,7 +87,7 @@ linter:
     - avoid_type_to_string
     - avoid_types_as_parameter_names
     # - avoid_types_on_closure_parameters # conflicts with always_specify_types
-    # - avoid_unnecessary_containers # not yet tested
+    - avoid_unnecessary_containers
     - avoid_unused_constructor_parameters
     - avoid_void_async
     # - avoid_web_libraries_in_flutter # not yet tested
@@ -159,7 +159,7 @@ linter:
     - prefer_final_locals
     - prefer_for_elements_to_map_fromIterable
     - prefer_foreach
-    # - prefer_function_declarations_over_variables # not yet tested
+    - prefer_function_declarations_over_variables
     - prefer_generic_function_type_aliases
     - prefer_if_elements_to_conditional_expressions
     - prefer_if_null_operators
@@ -173,7 +173,7 @@ linter:
     - prefer_iterable_whereType
     # - prefer_mixin # https://github.com/dart-lang/language/issues/32
     - prefer_null_aware_operators
-    # - prefer_relative_imports # not yet tested
+    # - prefer_relative_imports # incompatible with sub-package imports
     - prefer_single_quotes
     - prefer_spread_collections
     - prefer_typing_uninitialized_variables
@@ -193,7 +193,7 @@ linter:
     # - type_annotate_public_apis # subset of always_specify_types
     - type_init_formals
     # - unawaited_futures # too many false positives
-    # - unnecessary_await_in_return # not yet tested
+    - unnecessary_await_in_return
     - unnecessary_brace_in_string_interps
     - unnecessary_const
     # - unnecessary_final # conflicts with prefer_final_locals
@@ -214,7 +214,7 @@ linter:
     - unrelated_type_equality_checks
     # - unsafe_html # not yet tested
     - use_full_hex_values_for_flutter_colors
-    # - use_function_type_syntax_for_parameters # not yet tested
+    - use_function_type_syntax_for_parameters
     # - use_if_null_to_convert_nulls_to_bools # not yet tested
     - use_is_even_rather_than_modulo
     - use_key_in_widget_constructors

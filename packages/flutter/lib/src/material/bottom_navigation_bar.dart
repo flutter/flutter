@@ -657,11 +657,9 @@ class _TileIcon extends StatelessWidget {
     return Align(
       alignment: Alignment.topCenter,
       heightFactor: 1.0,
-      child: Container(
-        child: IconTheme(
-          data: iconThemeData,
-          child: selected ? item.activeIcon : item.icon,
-        ),
+      child: IconTheme(
+        data: iconThemeData,
+        child: selected ? item.activeIcon : item.icon,
       ),
     );
   }

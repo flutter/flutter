@@ -182,7 +182,7 @@ class CardCollectionState extends State<CardCollection> {
     });
   }
 
-  Widget buildDrawerCheckbox(String label, bool value, void callback(), { bool enabled = true }) {
+  Widget buildDrawerCheckbox(String label, bool value, void Function() callback, { bool enabled = true }) {
     return ListTile(
       onTap: enabled ? callback : null,
       title: Text(label),

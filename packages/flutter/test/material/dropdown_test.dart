@@ -14,7 +14,7 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
-final ValueChanged<String?> onChanged = (_) { };
+void onChanged<T>(T _) { }
 
 final Type dropdownButtonType = DropdownButton<String>(
   onChanged: (_) { },

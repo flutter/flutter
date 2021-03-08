@@ -2690,7 +2690,7 @@ void main() {
     const Key iconKey = Key('test icon');
     const Key avatarKey = Key('test avatar');
     Future<void> buildTest(VisualDensity visualDensity) async {
-      return await tester.pumpWidget(
+      return tester.pumpWidget(
         MaterialApp(
           home: Material(
             child: Center(

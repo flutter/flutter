@@ -16,13 +16,11 @@ void main() {
     await tester.pumpWidget(
       Semantics(
         container: true,
-        child: Container(
-          child: Semantics(
-            label: 'test1',
-            textDirection: TextDirection.ltr,
-            child: Container(),
-            selected: true,
-          ),
+        child: Semantics(
+          label: 'test1',
+          textDirection: TextDirection.ltr,
+          child: Container(),
+          selected: true,
         ),
       ),
     );

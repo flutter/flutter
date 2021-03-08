@@ -35,7 +35,7 @@ const List<int> _kFailPngBytes =
   120, 1, 99, 249, 207, 240, 255, 63, 0, 7, 18, 3, 2, 164, 147, 160, 197, 0,
   0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130];
 
-Future<void> testWithOutput(String name, Future<void> body(), String expectedOutput) async {
+Future<void> testWithOutput(String name, Future<void> Function() body, String expectedOutput) async {
   test(name, () async {
     final StringBuffer output = StringBuffer();
     void _recordPrint(Zone self, ZoneDelegate parent, Zone zone, String line) {
@@ -780,9 +780,9 @@ class FakeHttpClientResponse extends Fake implements HttpClientResponse {
 
   @override
   StreamSubscription<List<int>> listen(
-    void onData(List<int> event)?, {
+    void Function(List<int> event)? onData, {
       Function? onError,
-      void onDone()?,
+      void Function()? onDone,
       bool? cancelOnError,
     }) {
     return Stream<List<int>>.fromFuture(Future<List<int>>.value(response))
@@ -796,7 +796,7 @@ class FakeHttpImageResponse extends Fake implements HttpClientResponse {
   final List<List<int>> response;
 
   @override
-  Future<void> forEach(void action(List<int> element)) async {
+  Future<void> forEach(void Function(List<int> element) action) async {
     response.forEach(action);
   }
 }

@@ -429,7 +429,7 @@ class MethodChannel {
   /// is not set.
   bool checkMockMethodCallHandler(Future<dynamic> Function(MethodCall call)? handler) => _methodChannelMockHandlers[this] == handler;
 
-  Future<ByteData?> _handleAsMethodCall(ByteData? message, Future<dynamic>? handler(MethodCall call)) async {
+  Future<ByteData?> _handleAsMethodCall(ByteData? message, Future<dynamic>? Function(MethodCall call) handler) async {
     final MethodCall call = codec.decodeMethodCall(message);
     try {
       return codec.encodeSuccessEnvelope(await handler(call));

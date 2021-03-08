@@ -38,7 +38,7 @@ void main() {
         processManager: FakeProcessManager.any(),
       );
 
-      expect(() async => await fuchsiaFfx.list(),
+      expect(() async => fuchsiaFfx.list(),
           throwsToolExit(message: 'Fuchsia ffx tool not found.'));
     });
 
