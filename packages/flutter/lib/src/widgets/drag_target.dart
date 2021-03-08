@@ -283,10 +283,11 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// is transformed compared to the child.
   final Offset feedbackOffset;
 
-  /// Where this widget should be anchored during a drag. Overridable by
-  /// providing a strategy following the [DragAnchoStrategy] interface like the
-  /// built-in [childDragAnchorStrategy] and [pointerDragAnchorStrategy] or a
-  /// custom implementation.
+  /// Where this widget should be anchored during a drag.
+  ///
+  /// This property is overridden by the [dragAnchorStrategy] if the latter is provided.
+  ///
+  /// Defaults to [DragAnchor.child].
   @Deprecated(
     'Use dragAnchorStrategy instead. '
     'This feature was deprecated after 1.27.0-8.0.pre'
