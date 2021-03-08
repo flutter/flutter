@@ -64,6 +64,7 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
         Platform: () => platform,
         FlutterVersion: () => FakeFlutterVersion(),
+        BotDetector: () => const FakeBotDetector(false),
       });
 
       testUsingContext('does not check that Flutter installation is up-to-date with --machine flag', () async {
