@@ -35,12 +35,12 @@ void main() {
 
   group('analytics', () {
     Directory tempDir;
-    MockFlutterConfig mockFlutterConfig;
+    Config testConfig;
 
     setUp(() {
       Cache.flutterRoot = '../..';
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_analytics_test.');
-      mockFlutterConfig = MockFlutterConfig();
+      testConfig = Config.test();
     });
 
     tearDown(() {
@@ -105,8 +105,7 @@ void main() {
     });
 
     testUsingContext('Usage records one feature in experiment setting', () async {
-      when<bool>(mockFlutterConfig.getValue(flutterWebFeature.configSetting) as bool)
-          .thenReturn(true);
+      testConfig.setValue(flutterWebFeature.configSetting, true);
       final Usage usage = Usage(runningOnBot: true);
       usage.sendCommand('test');
 
@@ -115,7 +114,7 @@ void main() {
       expect(globals.fs.file('test').readAsStringSync(), contains('$featuresKey: enable-web'));
     }, overrides: <Type, Generator>{
       FlutterVersion: () => FlutterVersion(clock: const SystemClock()),
-      Config: () => mockFlutterConfig,
+      Config: () => testConfig,
       Platform: () => FakePlatform(environment: <String, String>{
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
       }),
@@ -124,12 +123,9 @@ void main() {
     });
 
     testUsingContext('Usage records multiple features in experiment setting', () async {
-      when<bool>(mockFlutterConfig.getValue(flutterWebFeature.configSetting) as bool)
-          .thenReturn(true);
-      when<bool>(mockFlutterConfig.getValue(flutterLinuxDesktopFeature.configSetting) as bool)
-          .thenReturn(true);
-      when<bool>(mockFlutterConfig.getValue(flutterMacOSDesktopFeature.configSetting) as bool)
-          .thenReturn(true);
+      testConfig.setValue(flutterWebFeature.configSetting, true);
+      testConfig.setValue(flutterLinuxDesktopFeature.configSetting, true);
+      testConfig.setValue(flutterMacOSDesktopFeature.configSetting, true);
       final Usage usage = Usage(runningOnBot: true);
       usage.sendCommand('test');
 
@@ -141,7 +137,7 @@ void main() {
       );
     }, overrides: <Type, Generator>{
       FlutterVersion: () => FlutterVersion(clock: const SystemClock()),
-      Config: () => mockFlutterConfig,
+      Config: () => testConfig,
       Platform: () => FakePlatform(environment: <String, String>{
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
       }),
@@ -369,8 +365,6 @@ class FakeFlutterCommand extends FlutterCommand {
 }
 
 class MockDoctor extends Mock implements Doctor {}
-
-class MockFlutterConfig extends Mock implements Config {}
 
 class FakeClock extends Fake implements SystemClock {
   List<int> times = <int>[];

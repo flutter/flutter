@@ -30,7 +30,7 @@ void main() {
     } on PreparePackageException catch (e) {
       expect(
         e.message,
-        contains('Invalid argument(s): Cannot find executable for this_executable_better_not_exist_2857632534321.'),
+        contains('Invalid argument(s): Failed to resolve this_executable_better_not_exist_2857632534321 to an executable.'),
       );
     }
   });
@@ -70,6 +70,7 @@ void main() {
       ArchiveCreator creator;
       Directory tempDir;
       Directory flutterDir;
+      Directory cacheDir;
       FakeProcessManager processManager;
       final List<List<String>> args = <List<String>>[];
       final List<Map<Symbol, dynamic>> namedArgs = <Map<Symbol, dynamic>>[];
@@ -86,6 +87,8 @@ void main() {
         tempDir = Directory.systemTemp.createTempSync('flutter_prepage_package_test.');
         flutterDir = Directory(path.join(tempDir.path, 'flutter'));
         flutterDir.createSync(recursive: true);
+        cacheDir = Directory(path.join(flutterDir.path, 'bin', 'cache'));
+        cacheDir.createSync(recursive: true);
         creator = ArchiveCreator(
           tempDir,
           tempDir,
@@ -120,11 +123,11 @@ void main() {
           '$flutter create --template=app ${createBase}app': null,
           '$flutter create --template=package ${createBase}package': null,
           '$flutter create --template=plugin ${createBase}plugin': null,
-          'git clean -f -X **/.packages': null,
-          'git clean -f -X **/.dart_tool': null,
+          'git clean -f -x -- **/.packages': null,
+          'git clean -f -x -- **/.dart_tool/': null,
           if (platform.isWindows) 'attrib -h .git': null,
           if (platform.isWindows) '7za a -tzip -mx=9 $archiveName flutter': null
-          else if (platform.isMacOS) 'zip -r -9 $archiveName flutter': null
+          else if (platform.isMacOS) 'zip -r -9 --symlinks $archiveName flutter': null
           else if (platform.isLinux) 'tar cJf $archiveName flutter': null,
         };
         await creator.initializeRepo();
@@ -156,11 +159,11 @@ void main() {
           '$flutter create --template=app ${createBase}app': null,
           '$flutter create --template=package ${createBase}package': null,
           '$flutter create --template=plugin ${createBase}plugin': null,
-          'git clean -f -X **/.packages': null,
-          'git clean -f -X **/.dart_tool': null,
+          'git clean -f -x -- **/.packages': null,
+          'git clean -f -x -- **/.dart_tool/': null,
           if (platform.isWindows) 'attrib -h .git': null,
           if (platform.isWindows) '7za a -tzip -mx=9 $archiveName flutter': null
-          else if (platform.isMacOS) 'zip -r -9 $archiveName flutter': null
+          else if (platform.isMacOS) 'zip -r -9 --symlinks $archiveName flutter': null
           else if (platform.isLinux) 'tar cJf $archiveName flutter': null,
         };
         processManager.fakeResults = calls;
@@ -206,11 +209,11 @@ void main() {
           '$flutter create --template=app ${createBase}app': null,
           '$flutter create --template=package ${createBase}package': null,
           '$flutter create --template=plugin ${createBase}plugin': null,
-          'git clean -f -X **/.packages': null,
-          'git clean -f -X **/.dart_tool': null,
+          'git clean -f -x -- **/.packages': null,
+          'git clean -f -x -- **/.dart_tool/': null,
           if (platform.isWindows) 'attrib -h .git': null,
           if (platform.isWindows) '7za a -tzip -mx=9 $archiveName flutter': null
-          else if (platform.isMacOS) 'zip -r -9 $archiveName flutter': null
+          else if (platform.isMacOS) 'zip -r -9 --symlinks $archiveName flutter': null
           else if (platform.isLinux) 'tar cJf $archiveName flutter': null,
         };
         processManager.fakeResults = calls;
@@ -241,6 +244,7 @@ void main() {
       final String archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
       final String archiveMime = platform.isLinux ? 'application/x-gtar' : 'application/zip';
       final String gsArchivePath = 'gs://flutter_infra/releases/stable/$platformName/$archiveName';
+      final String newGsArchivePath = 'gs://flutter_infra_release/releases/stable/$platformName/$archiveName';
 
       setUp(() async {
         processManager = FakeProcessManager();
@@ -255,6 +259,7 @@ void main() {
         final String archivePath = path.join(tempDir.absolute.path, archiveName);
         final String jsonPath = path.join(tempDir.absolute.path, releasesName);
         final String gsJsonPath = 'gs://flutter_infra/releases/$releasesName';
+        final String newGsJsonPath = 'gs://flutter_infra_release/releases/$releasesName';
         final String releasesJson = '''
 {
   "base_url": "https://storage.googleapis.com/flutter_infra/releases",
@@ -300,9 +305,16 @@ void main() {
           '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
           '$gsutilCall -- rm $gsJsonPath': null,
           '$gsutilCall -- -h Content-Type:application/json cp $jsonPath $gsJsonPath': null,
+          '$gsutilCall -- stat $newGsArchivePath': <ProcessResult>[ProcessResult(0, 1, '', '')],
+          '$gsutilCall -- rm $newGsArchivePath': null,
+          '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $newGsArchivePath': null,
+          '$gsutilCall -- cp $newGsJsonPath $jsonPath': null,
+          '$gsutilCall -- rm $newGsJsonPath': null,
+          '$gsutilCall -- -h Content-Type:application/json cp $jsonPath $newGsJsonPath': null,
         };
         processManager.fakeResults = calls;
         final File outputFile = File(path.join(tempDir.absolute.path, archiveName));
+        outputFile.createSync();
         assert(tempDir.existsSync());
         final ArchivePublisher publisher = ArchivePublisher(
           tempDir,
@@ -310,6 +322,7 @@ void main() {
           Branch.stable,
           'v1.2.3',
           outputFile,
+          false,
           processManager: processManager,
           subprocessOutput: false,
           platform: platform,
@@ -354,6 +367,7 @@ void main() {
           Branch.stable,
           'v1.2.3',
           outputFile,
+          false,
           processManager: processManager,
           subprocessOutput: false,
           platform: platform,
@@ -363,7 +377,7 @@ void main() {
           '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 0, '', '')],
         };
         processManager.fakeResults = calls;
-        expect(() async => await publisher.publishArchive(false), throwsException);
+        expect(() async => publisher.publishArchive(false), throwsException);
         processManager.verifyCalls(calls.keys.toList());
       });
 
@@ -376,6 +390,7 @@ void main() {
           Branch.stable,
           'v1.2.3',
           outputFile,
+          false,
           processManager: processManager,
           subprocessOutput: false,
           platform: platform,
@@ -383,6 +398,7 @@ void main() {
         final String archivePath = path.join(tempDir.absolute.path, archiveName);
         final String jsonPath = path.join(tempDir.absolute.path, releasesName);
         final String gsJsonPath = 'gs://flutter_infra/releases/$releasesName';
+        final String newGsJsonPath = 'gs://flutter_infra_release/releases/$releasesName';
         final String releasesJson = '''
 {
   "base_url": "https://storage.googleapis.com/flutter_infra/releases",
@@ -426,6 +442,11 @@ void main() {
           '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
           '$gsutilCall -- rm $gsJsonPath': null,
           '$gsutilCall -- -h Content-Type:application/json cp $jsonPath $gsJsonPath': null,
+          '$gsutilCall -- rm $newGsArchivePath': null,
+          '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $newGsArchivePath': null,
+          '$gsutilCall -- cp $newGsJsonPath $jsonPath': null,
+          '$gsutilCall -- rm $newGsJsonPath': null,
+          '$gsutilCall -- -h Content-Type:application/json cp $jsonPath $newGsJsonPath': null,
         };
         processManager.fakeResults = calls;
         assert(tempDir.existsSync());

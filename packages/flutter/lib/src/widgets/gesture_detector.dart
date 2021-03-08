@@ -1221,11 +1221,13 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       behavior: widget.behavior ?? _defaultBehavior,
       child: widget.child,
     );
-    if (!widget.excludeFromSemantics)
+    if (!widget.excludeFromSemantics) {
       result = _GestureSemantics(
-        child: result,
+        behavior: widget.behavior ?? _defaultBehavior,
         assignSemantics: _updateSemanticsForRenderObject,
+        child: result,
       );
+    }
     return result;
   }
 
@@ -1253,21 +1255,25 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
   const _GestureSemantics({
     Key? key,
     Widget? child,
+    required this.behavior,
     required this.assignSemantics,
   }) : assert(assignSemantics != null),
        super(key: key, child: child);
 
+  final HitTestBehavior behavior;
   final _AssignSemantics assignSemantics;
 
   @override
   RenderSemanticsGestureHandler createRenderObject(BuildContext context) {
-    final RenderSemanticsGestureHandler renderObject = RenderSemanticsGestureHandler();
+    final RenderSemanticsGestureHandler renderObject = RenderSemanticsGestureHandler()
+      ..behavior = behavior;
     assignSemantics(renderObject);
     return renderObject;
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderSemanticsGestureHandler renderObject) {
+    renderObject.behavior = behavior;
     assignSemantics(renderObject);
   }
 }

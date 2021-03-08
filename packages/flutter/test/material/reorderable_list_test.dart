@@ -4,7 +4,6 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
@@ -1277,7 +1276,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: ReorderableListView.builder(
         itemBuilder: (BuildContext context, int index) {
-          return Container(
+          return SizedBox(
             key: ValueKey<int>(items[index]),
             height: 100,
             child: ReorderableDragStartListener(
@@ -1351,7 +1350,7 @@ class _StatefulState extends State<_Stateful> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: 48.0,
       height: 48.0,
       child: Material(

@@ -332,7 +332,7 @@ void main() {
     itemBuilderCalled = false;
 
     // Close the popup.
-    await tester.tap(find.byKey(popupButtonKey));
+    await tester.tap(find.byKey(popupButtonKey), warnIfMissed: false);
     await tester.pumpAndSettle();
 
     await tester.pumpWidget(
@@ -466,12 +466,12 @@ void main() {
         child: Text('XXX'),
       ),
     );
-    final WidgetPredicate popupMenu = (Widget widget) {
+    bool popupMenu(Widget widget) {
       final String widgetType = widget.runtimeType.toString();
       // TODO(mraleph): Remove the old case below.
       return widgetType == '_PopupMenu<int?>' // normal case
           || widgetType == '_PopupMenu'; // for old versions of Dart that don't reify method type arguments
-    };
+    }
 
     Future<void> openMenu(TextDirection textDirection, Alignment alignment) async {
       return TestAsyncUtils.guard<void>(() async {
@@ -764,7 +764,7 @@ void main() {
 
   testWidgets('Popup Menu Offset Test', (WidgetTester tester) async {
     PopupMenuButton<int> buildMenuButton({Offset offset = Offset.zero}) {
-      return  PopupMenuButton<int>(
+      return PopupMenuButton<int>(
         offset: offset,
         itemBuilder: (BuildContext context) {
           return <PopupMenuItem<int>>[
@@ -800,7 +800,7 @@ void main() {
     expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(8.0, 8.0));
 
     // Collapse the menu.
-    await tester.tap(find.byType(IconButton));
+    await tester.tap(find.byType(IconButton), warnIfMissed: false);
     await tester.pumpAndSettle();
 
     // Popup a new menu with Offset(50.0, 50.0).
@@ -1151,26 +1151,24 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: Container(
-            child: Center(
-              child: PopupMenuButton<String>(
-                onSelected: (String result) {
-                  selectedValue = result;
-                },
-                child: const Text('Menu Button'),
-                initialValue: '1',
-                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  const PopupMenuItem<String>(
-                    child: Text('1'),
-                    value: '1',
-                  ),
-                  const PopupMenuDivider(),
-                  const PopupMenuItem<String>(
-                    child: Text('2'),
-                    value: '2',
-                  ),
-                ],
-              ),
+          body: Center(
+            child: PopupMenuButton<String>(
+              onSelected: (String result) {
+                selectedValue = result;
+              },
+              child: const Text('Menu Button'),
+              initialValue: '1',
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  child: Text('1'),
+                  value: '1',
+                ),
+                const PopupMenuDivider(),
+                const PopupMenuItem<String>(
+                  child: Text('2'),
+                  value: '2',
+                ),
+              ],
             ),
           ),
         ),
@@ -1840,35 +1838,46 @@ void main() {
     }
 
     testWidgets('PopupMenuButton enableFeedback works properly', (WidgetTester tester) async {
-      //PopupMenuButton with enabled feedback
+      expect(feedback.clickSoundCount, 0);
+      expect(feedback.hapticCount, 0);
+
+      // PopupMenuButton with enabled feedback.
       await tester.pumpWidget(buildFrame(widgetEnableFeedack: true));
       await tester.tap(find.text('Show Menu'));
       await tester.pumpAndSettle();
       expect(feedback.clickSoundCount, 1);
       expect(feedback.hapticCount, 0);
 
-      //PopupMenuButton with disabled feedback
+      await tester.pumpWidget(Container());
+
+      // PopupMenuButton with disabled feedback.
       await tester.pumpWidget(buildFrame(widgetEnableFeedack: false));
       await tester.tap(find.text('Show Menu'));
       await tester.pumpAndSettle();
       expect(feedback.clickSoundCount, 1);
       expect(feedback.hapticCount, 0);
 
-      //PopupMenuButton with enabled feedback by default
+      await tester.pumpWidget(Container());
+
+      // PopupMenuButton with enabled feedback by default.
       await tester.pumpWidget(buildFrame());
       await tester.tap(find.text('Show Menu'));
       await tester.pumpAndSettle();
       expect(feedback.clickSoundCount, 2);
       expect(feedback.hapticCount, 0);
 
-      //PopupMenu with disabled feedback using PopupMenuButtonTheme
+      await tester.pumpWidget(Container());
+
+      // PopupMenu with disabled feedback using PopupMenuButtonTheme.
       await tester.pumpWidget(buildFrame(themeEnableFeedback: false));
       await tester.tap(find.text('Show Menu'));
       await tester.pumpAndSettle();
       expect(feedback.clickSoundCount, 2);
       expect(feedback.hapticCount, 0);
 
-      //PopupMenu enableFeedback property overrides PopupMenuButtonTheme
+      await tester.pumpWidget(Container());
+
+      // PopupMenu enableFeedback property overrides PopupMenuButtonTheme.
       await tester.pumpWidget(buildFrame(widgetEnableFeedack: false,themeEnableFeedback: true));
       await tester.tap(find.text('Show Menu'));
       await tester.pumpAndSettle();
@@ -1903,6 +1912,46 @@ void main() {
 
     await buildFrame(iconSize: 50);
     expect(tester.widget<IconButton>(find.byType(IconButton)).iconSize, 50);
+  });
+
+  testWidgets('does not crash in small overlay', (WidgetTester tester) async {
+    final GlobalKey navigator = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: <Widget>[
+              OutlinedButton(
+                onPressed: () {
+                  showMenu<void>(
+                    context: navigator.currentContext!,
+                    position: const RelativeRect.fromLTRB(0, 0, 0, 0),
+                    items: const <PopupMenuItem<void>>[
+                      PopupMenuItem<void>(child: Text('foo')),
+                    ],
+                  );
+                },
+                child: const Text('press'),
+              ),
+              SizedBox(
+                height: 10,
+                width: 10,
+                child: Navigator(
+                  key: navigator,
+                  onGenerateRoute: (RouteSettings settings) => MaterialPageRoute<void>(
+                    builder: (BuildContext context) => Container(color: Colors.red),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('press'));
+    await tester.pumpAndSettle();
+    expect(find.text('foo'), findsOneWidget);
   });
 }
 

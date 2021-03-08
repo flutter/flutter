@@ -20,7 +20,7 @@ import 'package:http/testing.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/testbed.dart';
+import '../src/fake_http_client.dart';
 
 void main() {
   BufferLogger logger;
@@ -79,7 +79,7 @@ void main() {
       fileSystem: fs,
       logger: logger,
       flutterProjectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
-      client: FakeHttpClient(),
+      client: FakeHttpClient.any(),
     );
 
     final File file = fs.file('flutter_00.log');

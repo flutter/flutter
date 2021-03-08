@@ -144,8 +144,6 @@ class FlutterVersion {
   String _frameworkVersion;
   String get frameworkVersion => _frameworkVersion;
 
-  String get frameworkDate => frameworkCommitDate;
-
   String get dartSdkVersion => globals.cache.dartSdkVersion;
 
   String get engineRevision => globals.cache.engineRevision;
@@ -180,6 +178,8 @@ class FlutterVersion {
     'engineRevision': engineRevision,
     'dartSdkVersion': dartSdkVersion,
   };
+
+  String get frameworkDate => frameworkCommitDate;
 
   /// A date String describing the last framework commit.
   ///

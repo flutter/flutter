@@ -9,7 +9,6 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -21,26 +20,10 @@ import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:mockito/mockito.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
-
-const FakeCommand kDeployCommand = FakeCommand(
-  command: <String>[
-    'Artifact.iosDeploy.TargetPlatform.ios',
-    '--id',
-    '123',
-    '--bundle',
-    '/',
-    '--no-wifi',
-  ],
-  environment: <String, String>{
-    'PATH': '/usr/bin:null',
-    'DYLD_LIBRARY_PATH': '/path/to/libraries',
-  }
-);
 
 // The command used to actually launch the app with args in release/profile.
 const FakeCommand kLaunchReleaseCommand = FakeCommand(
@@ -123,7 +106,6 @@ void main() {
   testWithoutContext('IOSDevice.startApp attaches in debug mode via log reading on iOS 13+', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      kDeployCommand,
       kAttachDebuggerCommand,
     ]);
     final IOSDevice device = setUpIOSDevice(
@@ -160,7 +142,6 @@ void main() {
   testWithoutContext('IOSDevice.startApp launches in debug mode via log reading on <iOS 13', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      kDeployCommand,
       kLaunchDebugCommand,
     ]);
     final IOSDevice device = setUpIOSDevice(
@@ -198,7 +179,6 @@ void main() {
   testWithoutContext('IOSDevice.startApp succeeds in release mode', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      kDeployCommand,
       kLaunchReleaseCommand,
     ]);
     final IOSDevice device = setUpIOSDevice(
@@ -226,7 +206,6 @@ void main() {
   testWithoutContext('IOSDevice.startApp forwards all supported debugging options', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      kDeployCommand,
       FakeCommand(
         command: <String>[
           'script',
@@ -363,7 +342,3 @@ IOSDevice setUpIOSDevice({
 
 class MockDevicePortForwarder extends Mock implements DevicePortForwarder {}
 class MockDeviceLogReader extends Mock implements DeviceLogReader {}
-class MockVmService extends Mock implements VmService {}
-class MockDartDevelopmentService extends Mock implements DartDevelopmentService {}
-class MockIOSDeployDebugger extends Mock implements IOSDeployDebugger {}
-class MockIOSDeploy extends Mock implements IOSDeploy {}

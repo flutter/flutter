@@ -42,7 +42,8 @@ BuildContext _getParent(BuildContext context) {
 ///    [BuildContext].
 @immutable
 abstract class Intent with Diagnosticable {
-  /// A const constructor for an [Intent].
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const Intent();
 
   /// An intent that is mapped to a [DoNothingAction], which, as the name
@@ -485,7 +486,7 @@ class CallbackAction<T extends Intent> extends Action<T> {
 ///  - [Actions] widget, which defines a mapping between a in [Intent] type and
 ///    an [Action].
 class ActionDispatcher with Diagnosticable {
-  /// Const constructor so that subclasses can be immutable.
+  /// Creates an action dispatcher that invokes actions directly.
   const ActionDispatcher();
 
   /// Invokes the given `action`, passing it the given `intent`.
@@ -732,7 +733,7 @@ class Actions extends StatefulWidget {
   // Visits the Actions widget ancestors of the given element using
   // getElementForInheritedWidgetOfExactType. Returns true if the visitor found
   // what it was looking for.
-  static bool _visitActionsAncestors(BuildContext context, bool visitor(InheritedElement element)) {
+  static bool _visitActionsAncestors(BuildContext context, bool Function(InheritedElement element) visitor) {
     InheritedElement? actionsElement = context.getElementForInheritedWidgetOfExactType<_ActionsMarker>();
     while (actionsElement != null) {
       if (visitor(actionsElement) == true) {
@@ -848,11 +849,13 @@ class Actions extends StatefulWidget {
     // This allows this function to be called by code that doesn't know the
     // concrete type of the intent at compile time.
     final Type type = intent?.runtimeType ?? T;
-    assert(type != Intent,
-      'The type passed to "find" resolved to "Intent": either a non-Intent'
-      'generic type argument or an example intent derived from Intent must be'
-      'specified. Intent may be used as the generic type as long as the optional'
-      '"intent" argument is passed.');
+    assert(
+      type != Intent,
+      'The type passed to "find" resolved to "Intent": either a non-Intent '
+      'generic type argument or an example intent derived from Intent must be '
+      'specified. Intent may be used as the generic type as long as the optional '
+      '"intent" argument is passed.'
+    );
 
     _visitActionsAncestors(context, (InheritedElement element) {
       final _ActionsMarker actions = element.widget as _ActionsMarker;
@@ -1561,7 +1564,7 @@ class DoNothingAction extends Action<Intent> {
 ///  * [WidgetsApp.shortcuts], which defines the shortcuts to use in an
 ///    application (and defaults to [WidgetsApp.defaultShortcuts]).
 class ActivateIntent extends Intent {
-  /// Creates a const [ActivateIntent] so subclasses can be const.
+  /// Creates an intent that activates the currently focused control.
   const ActivateIntent();
 }
 
@@ -1578,7 +1581,7 @@ class ActivateIntent extends Intent {
 ///  * [WidgetsApp.shortcuts], which defines the shortcuts to use in an
 ///    application (and defaults to [WidgetsApp.defaultShortcuts]).
 class ButtonActivateIntent extends Intent {
-  /// Creates a const [ButtonActivateIntent] so subclasses can be const.
+  /// Creates an intent that the currently focused control, if it's a button.
   const ButtonActivateIntent();
 }
 
@@ -1608,7 +1611,7 @@ abstract class SelectAction extends Action<SelectIntent> {}
 ///  - [ModalRoute] which listens for this intent to dismiss modal routes
 ///    (dialogs, pop-up menus, drawers, etc).
 class DismissIntent extends Intent {
-  /// Creates a const [DismissIntent].
+  /// Creates an intent that dismisses the currently focused widget.
   const DismissIntent();
 }
 
@@ -1619,8 +1622,11 @@ abstract class DismissAction extends Action<DismissIntent> {}
 
 /// An [Intent] that evaluates a series of specified [orderedIntents] for
 /// execution.
+///
+/// The first intent that matches an enabled action is used.
 class PrioritizedIntents extends Intent {
-  /// Creates a set of const [PrioritizedIntents].
+  /// Creates an intent that is used with [PrioritizedAction] to specify a list
+  /// of intents, the first available of which will be used.
   const PrioritizedIntents({
     required this.orderedIntents,
   })  : assert(orderedIntents != null);

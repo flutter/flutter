@@ -427,6 +427,8 @@ class AppDomain extends Domain {
     registerHandler('detach', detach);
   }
 
+  // TODO(jonahwilliams): update after google3 uuid is updated.
+  // ignore: prefer_const_constructors
   static final Uuid _uuidGenerator = Uuid();
 
   static String _getNewAppId() => _uuidGenerator.v4();
@@ -515,6 +517,7 @@ class AppDomain extends Domain {
         return runner.run(
           connectionInfoCompleter: connectionInfoCompleter,
           appStartedCompleter: appStartedCompleter,
+          enableDevTools: true,
           route: route,
         );
       },
@@ -1072,7 +1075,7 @@ class AppInstance {
     _logger.close();
   }
 
-  Future<T> _runInZone<T>(AppDomain domain, FutureOr<T> method()) async {
+  Future<T> _runInZone<T>(AppDomain domain, FutureOr<T> Function() method) async {
     return method();
   }
 }

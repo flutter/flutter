@@ -16,6 +16,7 @@ void main() {
         body: Builder(
           builder: (BuildContext context) {
             return GestureDetector(
+              key: tapTarget,
               onTap: () {
                 Scaffold.of(context).showSnackBar(const SnackBar(
                   content: Text(helloSnackBar),
@@ -23,10 +24,9 @@ void main() {
                 ));
               },
               behavior: HitTestBehavior.opaque,
-              child: Container(
+              child: const SizedBox(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget,
               ),
             );
           }
@@ -61,6 +61,7 @@ void main() {
         body: Builder(
           builder: (BuildContext context) {
             return GestureDetector(
+              key: tapTarget,
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                   content: Text(helloSnackBar),
@@ -68,10 +69,9 @@ void main() {
                 ));
               },
               behavior: HitTestBehavior.opaque,
-              child: Container(
+              child: const SizedBox(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget,
               ),
             );
           }
@@ -106,6 +106,7 @@ void main() {
         body: Builder(
           builder: (BuildContext context) {
             return GestureDetector(
+              key: tapTarget,
               onTap: () {
                 snackBarCount += 1;
                 Scaffold.of(context).showSnackBar(SnackBar(
@@ -114,10 +115,9 @@ void main() {
                 ));
               },
               behavior: HitTestBehavior.opaque,
-              child: Container(
+              child: const SizedBox(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget,
               ),
             );
           }
@@ -181,6 +181,7 @@ void main() {
         body: Builder(
           builder: (BuildContext context) {
             return GestureDetector(
+              key: tapTarget,
               onTap: () {
                 snackBarCount += 1;
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -189,10 +190,9 @@ void main() {
                 ));
               },
               behavior: HitTestBehavior.opaque,
-              child: Container(
+              child: const SizedBox(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget,
               ),
             );
           }
@@ -258,6 +258,7 @@ void main() {
         body: Builder(
           builder: (BuildContext context) {
             return GestureDetector(
+              key: tapTarget,
               onTap: () {
                 snackBarCount += 1;
                 lastController = Scaffold.of(context).showSnackBar(SnackBar(
@@ -266,10 +267,9 @@ void main() {
                 ));
               },
               behavior: HitTestBehavior.opaque,
-              child: Container(
+              child: const SizedBox(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget,
               ),
             );
           }
@@ -344,6 +344,7 @@ void main() {
         body: Builder(
           builder: (BuildContext context) {
             return GestureDetector(
+              key: tapTarget,
               onTap: () {
                 snackBarCount += 1;
                 lastController = ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -352,10 +353,9 @@ void main() {
                 ));
               },
               behavior: HitTestBehavior.opaque,
-              child: Container(
+              child: const SizedBox(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget,
               ),
             );
           }
@@ -428,6 +428,7 @@ void main() {
         body: Builder(
           builder: (BuildContext context) {
             return GestureDetector(
+              key: tapTarget,
               onTap: () {
                 snackBarCount += 1;
                 Scaffold.of(context).showSnackBar(SnackBar(
@@ -436,10 +437,9 @@ void main() {
                 ));
               },
               behavior: HitTestBehavior.opaque,
-              child: Container(
+              child: const SizedBox(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget,
               ),
             );
           }
@@ -473,6 +473,7 @@ void main() {
         body: Builder(
           builder: (BuildContext context) {
             return GestureDetector(
+              key: tapTarget,
               onTap: () {
                 snackBarCount += 1;
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -481,10 +482,9 @@ void main() {
                 ));
               },
               behavior: HitTestBehavior.opaque,
-              child: Container(
+              child: const SizedBox(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget,
               ),
             );
           }
@@ -1592,25 +1592,25 @@ void main() {
     const String helloSnackBar = 'Hello SnackBar';
     const Key tapTarget = Key('tap-target');
     await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-            body: Builder(
-                builder: (BuildContext context) {
-                  return GestureDetector(
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                            content: Text(helloSnackBar),
-                        ));
-                      },
-                      behavior: HitTestBehavior.opaque,
-                      child: Container(
-                          height: 100.0,
-                          width: 100.0,
-                          key: tapTarget,
-                      ),
-                  );
-                }
-            ),
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              key: tapTarget,
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text(helloSnackBar),
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: const SizedBox(
+                height: 100.0,
+                width: 100.0,
+              ),
+            );
+          }
         ),
+      ),
     ));
     expect(find.text(helloSnackBar), findsNothing);
     await tester.tap(find.byKey(tapTarget));
@@ -1740,6 +1740,7 @@ void main() {
         body: Builder(
           builder: (BuildContext context) {
             return GestureDetector(
+              key: tapTarget,
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: const Text('hello'),
@@ -1750,10 +1751,9 @@ void main() {
                 ));
               },
               behavior: HitTestBehavior.opaque,
-              child: Container(
+              child: const SizedBox(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget,
               ),
             );
           },
@@ -1777,6 +1777,7 @@ void main() {
         body: Builder(
           builder: (BuildContext context) {
             return GestureDetector(
+              key: tapTarget,
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: const Text('hello'),
@@ -1794,10 +1795,9 @@ void main() {
                 ));
               },
               behavior: HitTestBehavior.opaque,
-              child: Container(
+              child: const SizedBox(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget,
               ),
             );
           },
@@ -1981,8 +1981,7 @@ void main() {
     );
 
     testWidgets(
-      '${SnackBarBehavior.floating} should align SnackBar with the top of FloatingActionButton'
-      'when Scaffold has a FloatingActionButton',
+      '${SnackBarBehavior.floating} should align SnackBar with the top of FloatingActionButton when Scaffold has a FloatingActionButton',
       (WidgetTester tester) async {
         await tester.pumpWidget(MaterialApp(
           home: Scaffold(
@@ -2322,5 +2321,55 @@ void main() {
     );
     final Offset snackBarTopRight = tester.getTopRight(find.byType(SnackBar));
     expect(snackBarTopRight.dy, 465.0);
+  });
+
+  testWidgets('ScaffoldMessengerState clearSnackBars works as expected', (WidgetTester tester) async {
+    final List<String> snackBars = <String>['Hello Snackbar', 'Hi Snackbar', 'Bye Snackbar'];
+    int snackBarCounter = 0;
+    const Key tapTarget = Key('tap-target');
+    final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey();
+
+    await tester.pumpWidget(MaterialApp(
+      home: ScaffoldMessenger(
+        key: scaffoldMessengerKey,
+        child: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                key: tapTarget,
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(snackBars[snackBarCounter++]),
+                    duration: const Duration(seconds: 2),
+                  ));
+                },
+                behavior: HitTestBehavior.opaque,
+                child: const SizedBox(
+                  height: 100.0,
+                  width: 100.0,
+                ),
+              );
+            }
+          ),
+        ),
+      ),
+    ));
+    expect(find.text(snackBars[0]), findsNothing);
+    expect(find.text(snackBars[1]), findsNothing);
+    expect(find.text(snackBars[2]), findsNothing);
+    await tester.tap(find.byKey(tapTarget));
+    await tester.tap(find.byKey(tapTarget));
+    await tester.tap(find.byKey(tapTarget));
+    expect(find.text(snackBars[0]), findsNothing);
+    expect(find.text(snackBars[1]), findsNothing);
+    expect(find.text(snackBars[2]), findsNothing);
+    await tester.pump(); // schedule animation
+    expect(find.text(snackBars[0]), findsOneWidget);
+    scaffoldMessengerKey.currentState!.clearSnackBars();
+    expect(find.text(snackBars[0]), findsOneWidget);
+    await tester.pump(const Duration(seconds: 2));
+    expect(find.text(snackBars[0]), findsNothing);
+    expect(find.text(snackBars[1]), findsNothing);
+    expect(find.text(snackBars[2]), findsNothing);
   });
 }

@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
 
+import 'base/deferred_component.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/user_messages.dart';
@@ -84,6 +85,13 @@ class FlutterManifest {
 
   /// The string value of the top-level `name` property in the `pubspec.yaml` file.
   String get appName => _descriptor['name'] as String ?? '';
+
+  /// Contains the name of the dependencies.
+  /// These are the keys specified in the `dependency` map.
+  Set<String> get dependencies {
+    final YamlMap dependencies = _descriptor['dependencies'] as YamlMap;
+    return dependencies != null ? <String>{...dependencies.keys.cast<String>()} : <String>{};
+  }
 
   // Flag to avoid printing multiple invalid version messages.
   bool _hasShowInvalidVersionMsg = false;
@@ -196,6 +204,50 @@ class FlutterManifest {
        return supportedPlatforms['android']['package'] as String;
     }
     return null;
+  }
+
+  /// Returns the deferred components configuration if declared. Returns
+  /// null if no deferred components are declared.
+  List<DeferredComponent> get deferredComponents => _deferredComponents ??= computeDeferredComponents();
+  List<DeferredComponent> _deferredComponents;
+  List<DeferredComponent> computeDeferredComponents() {
+    if (!_flutterDescriptor.containsKey('deferred-components')) {
+      return null;
+    }
+    final List<DeferredComponent> components = <DeferredComponent>[];
+    if (_flutterDescriptor['deferred-components'] == null) {
+      return components;
+    }
+    for (final dynamic componentData in _flutterDescriptor['deferred-components']) {
+      final YamlMap component = componentData as YamlMap;
+      List<Uri> assetsUri = <Uri>[];
+      final List<dynamic> assets = component['assets'] as List<dynamic>;
+      if (assets == null) {
+        assetsUri = const <Uri>[];
+      } else {
+        for (final Object asset in assets) {
+          if (asset is! String || asset == null || asset == '') {
+            _logger.printError('Deferred component asset manifest contains a null or empty uri.');
+            continue;
+          }
+          final String stringAsset = asset as String;
+          try {
+            assetsUri.add(Uri.parse(stringAsset));
+          } on FormatException {
+            _logger.printError('Asset manifest contains invalid uri: $asset.');
+          }
+        }
+      }
+      components.add(
+        DeferredComponent(
+          name: component['name'] as String,
+          libraries: component['libraries'] == null ?
+              <String>[] : component['libraries'].cast<String>() as List<String>,
+          assets: assetsUri,
+        )
+      );
+    }
+    return components;
   }
 
   /// Returns the iOS bundle identifier declared by this manifest in its
@@ -455,7 +507,7 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
       case 'licenses':
         final dynamic value = kvp.value;
         if (value is YamlList) {
-          _validateListType<String>(value, '${kvp.key}', errors);
+          _validateListType<String>(value, errors, '"${kvp.key}"', 'files');
         } else {
           errors.add('Expected "${kvp.key}" to be a list of files, but got $value (${value.runtimeType})');
         }
@@ -485,6 +537,9 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
         break;
       case 'generate':
         break;
+      case 'deferred-components':
+        _validateDeferredComponents(kvp, errors);
+        break;
       default:
         errors.add('Unexpected child "${kvp.key}" found under "flutter".');
         break;
@@ -492,10 +547,40 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
   }
 }
 
-void _validateListType<T>(YamlList yamlList, String context, List<String> errors) {
+void _validateListType<T>(YamlList yamlList, List<String> errors, String context, String typeAlias) {
   for (int i = 0; i < yamlList.length; i++) {
     if (yamlList[i] is! T) {
-      errors.add('Expected "$context" to be a list of files, but element $i was a ${yamlList[i].runtimeType}');
+      errors.add('Expected $context to be a list of $typeAlias, but element $i was a ${yamlList[i].runtimeType}');
+    }
+  }
+}
+
+void _validateDeferredComponents(MapEntry<dynamic, dynamic> kvp, List<String> errors) {
+  if (kvp.value != null && (kvp.value is! YamlList || kvp.value[0] is! YamlMap)) {
+    errors.add('Expected "${kvp.key}" to be a list, but got ${kvp.value} (${kvp.value.runtimeType}).');
+  } else if (kvp.value != null) {
+    for (int i = 0; i < (kvp.value as YamlList).length; i++) {
+      if (kvp.value[i] is! YamlMap) {
+        errors.add('Expected the $i element in "${kvp.key}" to be a map, but got ${kvp.value[i]} (${kvp.value[i].runtimeType}).');
+        continue;
+      }
+      if (!(kvp.value[i] as YamlMap).containsKey('name') || kvp.value[i]['name'] is! String) {
+        errors.add('Expected the $i element in "${kvp.key}" to have required key "name" of type String');
+      }
+      if ((kvp.value[i] as YamlMap).containsKey('libraries')) {
+        if (kvp.value[i]['libraries'] is! YamlList) {
+          errors.add('Expected "libraries" key in the $i element of "${kvp.key}" to be a list, but got ${kvp.value[i]['libraries']} (${kvp.value[i]['libraries'].runtimeType}).');
+        } else {
+          _validateListType<String>(kvp.value[i]['libraries'] as YamlList, errors, '"libraries" key in the $i element of "${kvp.key}"', 'dart library Strings');
+        }
+      }
+      if ((kvp.value[i] as YamlMap).containsKey('assets')) {
+        if (kvp.value[i]['assets'] is! YamlList) {
+          errors.add('Expected "assets" key in the $i element of "${kvp.key}" to be a list, but got ${kvp.value[i]['assets']} (${kvp.value[i]['assets'].runtimeType}).');
+        } else {
+          _validateListType<String>(kvp.value[i]['assets'] as YamlList, errors, '"assets" key in the $i element of "${kvp.key}"', 'file paths');
+        }
+      }
     }
   }
 }

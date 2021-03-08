@@ -240,17 +240,17 @@ class ThemeData with Diagnosticable {
     Color? secondaryHeaderColor,
     @Deprecated(
       'Use TextSelectionThemeData.selectionColor instead. '
-      'This feature was deprecated after v1.23.0-4.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.'
     )
     Color? textSelectionColor,
     @Deprecated(
       'Use TextSelectionThemeData.cursorColor instead. '
-      'This feature was deprecated after v1.23.0-4.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.'
     )
     Color? cursorColor,
     @Deprecated(
       'Use TextSelectionThemeData.selectionHandleColor instead. '
-      'This feature was deprecated after v1.23.0-4.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.'
     )
     Color? textSelectionHandleColor,
     Color? backgroundColor,
@@ -559,8 +559,20 @@ class ThemeData with Diagnosticable {
     required this.buttonColor,
     required this.toggleButtonsTheme,
     required this.secondaryHeaderColor,
+    @Deprecated(
+      'Use TextSelectionThemeData.selectionColor instead. '
+      'This feature was deprecated after v1.26.0-18.0.pre.'
+    )
     required this.textSelectionColor,
+    @Deprecated(
+      'Use TextSelectionThemeData.cursorColor instead. '
+      'This feature was deprecated after v1.26.0-18.0.pre.'
+    )
     required this.cursorColor,
+    @Deprecated(
+      'Use TextSelectionThemeData.selectionHandleColor instead. '
+      'This feature was deprecated after v1.26.0-18.0.pre.'
+    )
     required this.textSelectionHandleColor,
     required this.backgroundColor,
     required this.dialogBackgroundColor,
@@ -610,6 +622,10 @@ class ThemeData with Diagnosticable {
     required this.radioTheme,
     required this.switchTheme,
     required this.fixTextFieldOutlineLabel,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v1.23.0-4.0.pre.'
+    )
     required this.useTextSelectionTheme,
   }) : assert(visualDensity != null),
        assert(primaryColor != null),
@@ -932,21 +948,21 @@ class ThemeData with Diagnosticable {
   /// The color of text selections in text fields, such as [TextField].
   @Deprecated(
     'Use TextSelectionThemeData.selectionColor instead. '
-    'This feature was deprecated after v1.23.0-4.0.pre.'
+    'This feature was deprecated after v1.26.0-18.0.pre.'
   )
   final Color textSelectionColor;
 
   /// The color of cursors in Material-style text fields, such as [TextField].
   @Deprecated(
     'Use TextSelectionThemeData.cursorColor instead. '
-    'This feature was deprecated after v1.23.0-4.0.pre.'
+    'This feature was deprecated after v1.26.0-18.0.pre.'
   )
   final Color cursorColor;
 
   /// The color of the handles used to adjust what part of the text is currently selected.
   @Deprecated(
     'Use TextSelectionThemeData.selectionHandleColor instead. '
-    'This feature was deprecated after v1.23.0-4.0.pre.'
+    'This feature was deprecated after v1.26.0-18.0.pre.'
   )
   final Color textSelectionHandleColor;
 
@@ -1241,17 +1257,17 @@ class ThemeData with Diagnosticable {
     Color? secondaryHeaderColor,
     @Deprecated(
       'Use TextSelectionThemeData.selectionColor instead. '
-      'This feature was deprecated after v1.23.0-4.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.'
     )
     Color? textSelectionColor,
     @Deprecated(
       'Use TextSelectionThemeData.cursorColor instead. '
-      'This feature was deprecated after v1.23.0-4.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.'
     )
     Color? cursorColor,
     @Deprecated(
       'Use TextSelectionThemeData.selectionHandleColor instead. '
-      'This feature was deprecated after v1.23.0-4.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.'
     )
     Color? textSelectionHandleColor,
     Color? backgroundColor,
@@ -1962,7 +1978,7 @@ class _FifoCache<K, V> {
   /// if not, calls the given callback to obtain it first.
   ///
   /// The arguments must not be null.
-  V putIfAbsent(K key, V loader()) {
+  V putIfAbsent(K key, V Function() loader) {
     assert(key != null);
     assert(loader != null);
     final V? result = _cache[key];

@@ -65,12 +65,12 @@ class _DropdownMenuPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final double selectedItemOffset = getSelectedItemOffset();
     final Tween<double> top = Tween<double>(
-      begin: selectedItemOffset.clamp(0.0, size.height - _kMenuItemHeight),
+      begin: selectedItemOffset.clamp(0.0, math.max(size.height - _kMenuItemHeight, 0.0)),
       end: 0.0,
     );
 
     final Tween<double> bottom = Tween<double>(
-      begin: (top.begin! + _kMenuItemHeight).clamp(_kMenuItemHeight, size.height),
+      begin: (top.begin! + _kMenuItemHeight).clamp(math.min(_kMenuItemHeight, size.height), size.height),
       end: size.height,
     );
 
@@ -161,7 +161,10 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
   }
 
   static final Map<LogicalKeySet, Intent> _webShortcuts =<LogicalKeySet, Intent>{
-    LogicalKeySet(LogicalKeyboardKey.enter): const ActivateIntent(),
+    // On the web, up/down don't change focus, *except* in a <select>
+    // element, which is what a dropdown emulates.
+    LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
+    LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
   };
 
   @override
@@ -188,8 +191,6 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
       ),
     );
     if (kIsWeb) {
-      // On the web, enter doesn't select things, *except* in a <select>
-      // element, which is what a dropdown emulates.
       child = Shortcuts(
         shortcuts: _webShortcuts,
         child: child,
@@ -290,19 +291,13 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
               behavior: const _DropdownScrollBehavior(),
               child: PrimaryScrollController(
                 controller: widget.route.scrollController!,
-                child: LayoutBuilder(
-                  builder: (BuildContext context, BoxConstraints constraints) {
-                    final double menuTotalHeight = widget.route.itemHeights.reduce((double total, double height) => total + height);
-                    final bool isScrollable =  kMaterialListPadding.vertical + menuTotalHeight > constraints.maxHeight;
-                    return Scrollbar(
-                      isAlwaysShown: isScrollable,
-                      child: ListView(
-                        padding: kMaterialListPadding,
-                        shrinkWrap: true,
-                        children: children,
-                      ),
-                    );
-                  },
+                child: Scrollbar(
+                  isAlwaysShown: true,
+                  child: ListView(
+                    padding: kMaterialListPadding,
+                    shrinkWrap: true,
+                    children: children,
+                  ),
                 ),
               ),
             ),

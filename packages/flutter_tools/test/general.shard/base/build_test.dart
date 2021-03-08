@@ -666,5 +666,32 @@ void main() {
       expect(genSnapshotExitCode, 0);
       expect(processManager.hasRemainingExpectations, false);
     });
+
+    testWithoutContext('--no-strip in extraGenSnapshotOptions suppresses --strip', () async {
+      final String outputPath = fileSystem.path.join('build', 'foo');
+      processManager.addCommand(FakeCommand(
+        command: <String>[
+          artifacts.getArtifactPath(Artifact.genSnapshot, platform: TargetPlatform.android_arm64, mode: BuildMode.release),
+          '--deterministic',
+          '--snapshot_kind=app-aot-elf',
+          '--elf=build/foo/app.so',
+          'main.dill',
+        ]
+      ));
+
+      final int genSnapshotExitCode = await snapshotter.build(
+        platform: TargetPlatform.android_arm64,
+        buildMode: BuildMode.release,
+        mainPath: 'main.dill',
+        outputPath: outputPath,
+        bitcode: false,
+        splitDebugInfo: null,
+        dartObfuscation: false,
+        extraGenSnapshotOptions: const <String>['--no-strip'],
+      );
+
+      expect(genSnapshotExitCode, 0);
+      expect(processManager.hasRemainingExpectations, false);
+    });
   });
 }

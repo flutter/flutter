@@ -7,7 +7,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -31,12 +30,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Container(
-        child: Semantics(
-          label: 'test1',
-          textDirection: TextDirection.ltr,
-          child: Container(),
-        ),
+      Semantics(
+        label: 'test1',
+        textDirection: TextDirection.ltr,
+        child: Container(),
       ),
     );
 
@@ -70,15 +67,13 @@ void main() {
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: Container(
+      child: Semantics(
+        label: 'test1',
         child: Semantics(
-          label: 'test1',
-          child: Semantics(
-            key: key,
-            container: true,
-            label: 'test2a',
-            child: Container(),
-          ),
+          key: key,
+          container: true,
+          label: 'test2a',
+          child: Container(),
         ),
       ),
     ));
@@ -103,18 +98,16 @@ void main() {
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: Container(
+      child: Semantics(
+        label: 'test1',
         child: Semantics(
-          label: 'test1',
+          container: true,
+          label: 'middle',
           child: Semantics(
+            key: key,
             container: true,
-            label: 'middle',
-            child: Semantics(
-              key: key,
-              container: true,
-              label: 'test2b',
-              child: Container(),
-            ),
+            label: 'test2b',
+            child: Container(),
           ),
         ),
       ),
@@ -505,7 +498,7 @@ void main() {
     }
 
     semantics.dispose();
-  });
+  }, skip: true); // disable for soft transition https://github.com/flutter/flutter/issues/77271
 
   testWidgets('Semantics widget supports all flags', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);

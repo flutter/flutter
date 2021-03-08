@@ -170,11 +170,15 @@ class LocalComparisonOutput {
 /// [test] and [master] image bytes provided.
 Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async {
   if (identical(test, master))
-    return ComparisonResult(passed: true);
+    return ComparisonResult(
+      passed: true,
+      diffPercent: 0.0,
+    );
 
   if (test == null || master == null || test.isEmpty || master.isEmpty) {
     return ComparisonResult(
       passed: false,
+      diffPercent: 1.0,
       error: 'Pixel test failed, null image provided.',
     );
   }
@@ -195,6 +199,7 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
   if (width != masterImage.width || height != masterImage.height) {
     return ComparisonResult(
       passed: false,
+      diffPercent: 1.0,
       error: 'Pixel test failed, image sizes do not match.\n'
         'Master Image: ${masterImage.width} X ${masterImage.height}\n'
         'Test Image: ${testImage.width} X ${testImage.height}',
@@ -240,10 +245,12 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
   }
 
   if (pixelDiffCount > 0) {
+    final double diffPercent = pixelDiffCount / totalPixels;
     return ComparisonResult(
       passed: false,
+      diffPercent: diffPercent,
       error: 'Pixel test failed, '
-        '${((pixelDiffCount/totalPixels) * 100).toStringAsFixed(2)}% '
+        '${(diffPercent * 100).toStringAsFixed(2)}% '
         'diff detected.',
       diffs:  <String, Image>{
         'masterImage' : masterImage,
@@ -253,7 +260,7 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
       },
     );
   }
-  return ComparisonResult(passed: true);
+  return ComparisonResult(passed: true, diffPercent: 0.0);
 }
 
 /// Inverts [imageBytes], returning a new [ByteData] object.

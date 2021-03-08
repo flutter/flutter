@@ -702,7 +702,7 @@ void main() {
     const Key childKey = Key('test child');
 
     Future<void> buildTest(VisualDensity visualDensity, { bool useText = false }) async {
-      return await tester.pumpWidget(
+      return tester.pumpWidget(
         MaterialApp(
           home: Directionality(
             textDirection: TextDirection.rtl,
@@ -832,7 +832,7 @@ void main() {
       for (final TextDirection textDirection in textDirectionOptions) {
         for (final Widget? icon in iconOptions) {
           final String testName = 'TextButton'
-            ', text scale $textScaleFactor'
+            ', text scale $textScaleFactor' // ignore: missing_whitespace_between_adjacent_strings, https://github.com/dart-lang/linter/issues/2489
             '${icon != null ? ", with icon" : ""}'
             '${textDirection == TextDirection.rtl ? ", RTL" : ""}';
 
@@ -1043,6 +1043,46 @@ void main() {
     expect(tester.getSize(find.widgetWithText(TextButton, '100x100')), const Size(100, 100));
     expect(tester.getSize(find.widgetWithText(TextButton, '200xh')).width, 200);
     expect(tester.getSize(find.widgetWithText(TextButton, 'wx200')).height, 200);
+  });
+
+  testWidgets('TextButton with NoSplash splashFactory paints nothing', (WidgetTester tester) async {
+    Widget buildFrame({ InteractiveInkFeatureFactory? splashFactory }) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: TextButton(
+              style: TextButton.styleFrom(
+                splashFactory: splashFactory,
+              ),
+              onPressed: () { },
+              child: const Text('test'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // NoSplash.splashFactory, no splash circles drawn
+    await tester.pumpWidget(buildFrame(splashFactory: NoSplash.splashFactory));
+    {
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('test')));
+      final MaterialInkController material = Material.of(tester.element(find.text('test')))!;
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(material, paintsExactlyCountTimes(#drawCircle, 0));
+      await gesture.up();
+      await tester.pumpAndSettle();
+    }
+
+    // Default splashFactory (from Theme.of().splashFactory), one splash circle drawn.
+    await tester.pumpWidget(buildFrame());
+    {
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('test')));
+      final MaterialInkController material = Material.of(tester.element(find.text('test')))!;
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+      await gesture.up();
+      await tester.pumpAndSettle();
+    }
   });
 }
 

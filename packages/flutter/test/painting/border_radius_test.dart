@@ -536,4 +536,24 @@ void main() {
     expect((a.add(b.subtract(a) * 0.0)).resolve(TextDirection.ltr), a);
     expect((a.add(b.subtract(a) * 1.0)).resolve(TextDirection.rtl), b.resolve(TextDirection.rtl));
   });
+
+  test('BorderRadius copyWith, merge, ==, hashCode basics', () {
+    const BorderRadius firstRadius = BorderRadius.all(Radius.circular(5.0));
+    final BorderRadius secondRadius = firstRadius.copyWith();
+    expect(firstRadius, secondRadius);
+    expect(firstRadius.hashCode, secondRadius.hashCode);
+  });
+
+  test('BorderRadius copyWith parameters', () {
+    const Radius radius = Radius.circular(10);
+    const BorderRadius borderRadius = BorderRadius.all(radius);
+    expect(borderRadius.copyWith(topLeft: Radius.zero).topLeft, Radius.zero);
+    expect(borderRadius.copyWith(topLeft: Radius.zero).copyWith(topLeft: radius), borderRadius);
+    expect(borderRadius.copyWith(topRight: Radius.zero).topRight, Radius.zero);
+    expect(borderRadius.copyWith(topRight: Radius.zero).copyWith(topRight: radius), borderRadius);
+    expect(borderRadius.copyWith(bottomLeft: Radius.zero).bottomLeft, Radius.zero);
+    expect(borderRadius.copyWith(bottomLeft: Radius.zero).copyWith(bottomLeft: radius), borderRadius);
+    expect(borderRadius.copyWith(bottomRight: Radius.zero).bottomRight, Radius.zero);
+    expect(borderRadius.copyWith(bottomRight: Radius.zero).copyWith(bottomRight: radius), borderRadius);
+  });
 }

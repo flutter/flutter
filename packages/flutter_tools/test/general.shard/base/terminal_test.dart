@@ -8,7 +8,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 
@@ -111,7 +111,7 @@ void main() {
     AnsiTerminal terminalUnderTest;
 
     setUp(() {
-      terminalUnderTest = TestTerminal(stdio: MockStdio());
+      terminalUnderTest = TestTerminal(stdio: FakeStdio());
     });
 
     testWithoutContext('character prompt throws if usesTerminalUi is false', () async {
@@ -171,9 +171,8 @@ void main() {
     });
 
     testWithoutContext('Does not set single char mode when a terminal is not attached', () {
-      final Stdio stdio = MockStdio();
-      when(stdio.stdin).thenThrow(StateError('This should not be called'));
-      when(stdio.stdinHasTerminal).thenReturn(false);
+      final Stdio stdio = FakeStdio()
+        ..stdinHasTerminal = false;
       final AnsiTerminal ansiTerminal = AnsiTerminal(
         stdio: stdio,
         platform: const LocalPlatform()
@@ -200,4 +199,7 @@ class TestTerminal extends AnsiTerminal {
   bool singleCharMode = false;
 }
 
-class MockStdio extends Mock implements Stdio {}
+class FakeStdio extends Fake implements Stdio {
+  @override
+  bool stdinHasTerminal = false;
+}

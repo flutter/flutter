@@ -166,4 +166,16 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/68905
   MaterialBasedCupertinoThemeData.resolveFrom(context, nullOk: true);
   MaterialBasedCupertinoThemeData.resolveFrom(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/72043
+  TextField(maxLengthEnforced: true);
+  TextField(maxLengthEnforced: false);
+  final TextField textField;
+  textField.maxLengthEnforced;
+  TextFormField(maxLengthEnforced: true);
+  TextFormField(maxLengthEnforced: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/59127
+  const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem(title: myTitle);
+  bottomNavigationBarItem.title;
 }

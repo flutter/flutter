@@ -33,6 +33,7 @@ class FakeCommand {
     this.stderr = '',
     this.completer,
     this.stdin,
+    this.exception,
   }) : assert(command != null),
        assert(duration != null),
        assert(exitCode != null);
@@ -96,6 +97,9 @@ class FakeCommand {
   /// An optional stdin sink that will be exposed through the resulting
   /// [FakeProcess].
   final IOSink stdin;
+
+  /// If provided, this exception will be thrown when the fake command is run.
+  final dynamic exception;
 
   void _matches(
     List<String> command,
@@ -229,6 +233,9 @@ abstract class FakeProcessManager implements ProcessManager {
   ) {
     _pid += 1;
     final FakeCommand fakeCommand = findCommand(command, workingDirectory, environment, encoding);
+    if (fakeCommand.exception != null) {
+      throw fakeCommand.exception;
+    }
     if (fakeCommand.onRun != null) {
       fakeCommand.onRun();
     }
