@@ -10,13 +10,15 @@ import 'editable_text.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 
-/// An implementor of this must be focused for a [TextEditingAction] to be
-/// enabled.
+/// The recipient of a [TextEditingAction].
+///
+/// TextEditingActions will only be enabled when an implementer of this class is
+/// focused.
 ///
 /// See also:
 ///
-///   * [EditableText], which implements this and is the most typical target of
-///     a TextEditingAction.
+///   * [EditableTextState], which implements this and is the most typical
+///     target of a TextEditingAction.
 abstract class TextEditingActionTarget {
   /// The renderer that handles [TextEditingAction]s.
   ///
