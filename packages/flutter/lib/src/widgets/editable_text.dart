@@ -2439,9 +2439,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   void _updateCaretRectIfNeeded() {
     if (_hasInputConnection) {
-      final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection!.baseOffset);
-      final Rect caretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
-      _textInputConnection!.setCaretRect(caretRect);
+      if (renderEditable.selection != null && renderEditable.selection!.isValid &&
+          renderEditable.selection!.isCollapsed) {
+        final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection!.baseOffset);
+        final Rect caretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
+        _textInputConnection!.setCaretRect(caretRect);
+      }
       SchedulerBinding.instance!
           .addPostFrameCallback((Duration _) => _updateCaretRectIfNeeded());
     }
