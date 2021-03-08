@@ -72,14 +72,14 @@ typedef DragTargetMove<T> = void Function(DragTargetDetails<T> details);
 /// injectable [Draggable.dragAnchorStrategy]
 typedef DragAnchorStrategy = Offset Function(Draggable<Object> draggable, BuildContext context, Offset position);
 
-/// The default DragAnchorStrategy used when [Draggable.dragAnchor] is not set
+/// The default [DragAnchorStrategy] used when [Draggable.dragAnchor] is not set
 /// or set to [DragAnchor.child]
 Offset childDragAnchorStrategy(Draggable<Object> draggable, BuildContext context, Offset position) {
   final RenderBox renderObject = context.findRenderObject()! as RenderBox;
   return renderObject.globalToLocal(position);
 }
 
-/// The DragAnchorStrategy used when [Draggable.dragAnchor] set to
+/// The [DragAnchorStrategy] used when [Draggable.dragAnchor] set to
 /// [DragAnchor.pointer]
 Offset pointerDragAnchorStrategy(Draggable<Object> draggable, BuildContext context, Offset position) {
   return Offset.zero;
@@ -298,7 +298,7 @@ class Draggable<T extends Object> extends StatefulWidget {
   ///
   /// The anchor offset refers to the distance between the users' fingers and the [feedback] widget when this draggable is dragged.
   ///
-  /// Defaults to [defaultDragAnchorStrategy].
+  /// Defaults to [childDragAnchorStrategy] if the [dragAnchor] is set to [DragAnchor.child] or [pointerDragAnchorStrategy] if the [dragAnchor] is set to [DragAnchor.pointer].
   final DragAnchorStrategy? dragAnchorStrategy;
 
   /// Whether the semantics of the [feedback] widget is ignored when building
