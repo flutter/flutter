@@ -1334,6 +1334,49 @@ void main() {
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 0);
     }, skip: isBrowser);
+
+    test('entire word', () async {
+      final TextSelectionDelegate delegate = FakeEditableTextState()
+        ..textEditingValue = const TextEditingValue(
+            text: 'text with multiple words',
+            selection: TextSelection(baseOffset: 15, extentOffset: 15),
+          );
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) { },
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          text: 'text with multiple words',
+          style: TextStyle(
+            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          ),
+        ),
+        selection: const TextSelection(baseOffset: 15, extentOffset: 15),
+      );
+
+      layout(editable);
+      editable.hasFocus = true;
+      pumpFrame();
+
+      final LogicalKeyboardKey wordModifier =
+        Platform.isMacOS ? LogicalKeyboardKey.alt : LogicalKeyboardKey.control;
+
+      await simulateKeyDownEvent(wordModifier);
+      await simulateKeyDownEvent(LogicalKeyboardKey.delete);
+      await simulateKeyUpEvent(LogicalKeyboardKey.delete);
+      await simulateKeyUpEvent(wordModifier);
+
+      expect(delegate.textEditingValue.text, 'text with multi words');
+      expect(delegate.textEditingValue.selection.isCollapsed, true);
+      expect(delegate.textEditingValue.selection.baseOffset, 15);
+    }, skip: isBrowser);
   });
 
   group('backspace', () {
@@ -1373,6 +1416,92 @@ void main() {
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 1);
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
+
+    test('entire word', () async {
+      final TextSelectionDelegate delegate = FakeEditableTextState()
+        ..textEditingValue = const TextEditingValue(
+            text: 'text with multiple words',
+            selection: TextSelection(baseOffset: 15, extentOffset: 15),
+          );
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) { },
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          text: 'text with multiple words',
+          style: TextStyle(
+            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          ),
+        ),
+        selection: const TextSelection(baseOffset: 15, extentOffset: 15),
+      );
+
+      layout(editable);
+      editable.hasFocus = true;
+      pumpFrame();
+
+      final LogicalKeyboardKey wordModifier =
+        Platform.isMacOS ? LogicalKeyboardKey.alt : LogicalKeyboardKey.control;
+
+      await simulateKeyDownEvent(wordModifier);
+      await simulateKeyDownEvent(LogicalKeyboardKey.backspace);
+      await simulateKeyUpEvent(LogicalKeyboardKey.backspace);
+      await simulateKeyUpEvent(wordModifier);
+
+      expect(delegate.textEditingValue.text, 'text with ple words');
+      expect(delegate.textEditingValue.selection.isCollapsed, true);
+      expect(delegate.textEditingValue.selection.baseOffset, 10);
+    }, skip: isBrowser);
+
+    test('entire word respects selection', () async {
+      final TextSelectionDelegate delegate = FakeEditableTextState()
+        ..textEditingValue = const TextEditingValue(
+            text: 'text with multiple words',
+            selection: TextSelection(baseOffset: 15, extentOffset: 17),
+          );
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) { },
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          text: 'text with multiple words',
+          style: TextStyle(
+            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          ),
+        ),
+        selection: const TextSelection(baseOffset: 15, extentOffset: 17),
+      );
+
+      layout(editable);
+      editable.hasFocus = true;
+      pumpFrame();
+
+      final LogicalKeyboardKey wordModifier =
+        Platform.isMacOS ? LogicalKeyboardKey.alt : LogicalKeyboardKey.control;
+
+      await simulateKeyDownEvent(wordModifier);
+      await simulateKeyDownEvent(LogicalKeyboardKey.backspace);
+      await simulateKeyUpEvent(LogicalKeyboardKey.backspace);
+      await simulateKeyUpEvent(wordModifier);
+
+      expect(delegate.textEditingValue.text, 'text with multie words');
+      expect(delegate.textEditingValue.selection.isCollapsed, true);
+      expect(delegate.textEditingValue.selection.baseOffset, 15);
+    }, skip: isBrowser);
 
     test('handles simple text', () async {
       final TextSelectionDelegate delegate = FakeEditableTextState()
