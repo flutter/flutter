@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/resident_devtools_handler.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -1585,7 +1586,7 @@ void main() {
     expect(json.decode(globals.fs.file('flutter_01.sksl.json').readAsStringSync()), <String, Object>{
       'platform': 'android',
       'name': 'FakeDevice',
-      'engineRevision': '42.2', // From FakeFlutterVersion
+      'engineRevision': 'abcdefg',
       'data': <String, Object>{'A': 'B'}
     });
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
@@ -1593,7 +1594,8 @@ void main() {
     FileSystemUtils: () => FileSystemUtils(
       fileSystem: globals.fs,
       platform: globals.platform,
-    )
+    ),
+    FlutterVersion: () => FakeFlutterVersion(engineRevision: 'abcdefg')
   }));
 
   testUsingContext('ResidentRunner ignores DevToolsLauncher when attaching with enableDevTools: false', () => testbed.run(() async {

@@ -394,7 +394,7 @@ void main() {
     await tester.pumpWidget(
       listBuilder(
         (BuildContext context, int index) {
-          return Container(
+          return SizedBox(
             height: 200.0,
             child: Center(
               child: Text(index.toString()),
@@ -408,7 +408,7 @@ void main() {
     await tester.pump();
 
     expect(
-      tester.getRect(find.widgetWithText(Container, '2')),
+      tester.getRect(find.widgetWithText(SizedBox, '2')),
       const Rect.fromLTRB(0.0, 100.0, 800.0, 300.0),
     );
 
@@ -416,7 +416,7 @@ void main() {
     await tester.pumpWidget(
       listBuilder(
         (BuildContext context, int index) {
-          return Container(
+          return SizedBox(
             height: index == 0 ? 400.0 : 200.0,
             child: Center(
               child: Text(index.toString()),
@@ -431,7 +431,7 @@ void main() {
     await tester.pump();
 
     expect(
-      tester.getRect(find.widgetWithText(Container, '0')),
+      tester.getRect(find.widgetWithText(SizedBox, '0')),
       const Rect.fromLTRB(0.0, -200.0, 800.0, 200.0),
     );
   });

@@ -13,6 +13,8 @@ import 'package:flutter_gallery/demo/shrine/login.dart';
 import 'package:flutter_gallery/demo/shrine/supplemental/cut_corners_border.dart';
 
 class ShrineApp extends StatefulWidget {
+  const ShrineApp({Key? key}) : super(key: key);
+
   @override
   _ShrineAppState createState() => _ShrineAppState();
 }
@@ -62,7 +64,7 @@ Route<dynamic>? _getRoute(RouteSettings settings) {
 
   return MaterialPageRoute<void>(
     settings: settings,
-    builder: (BuildContext context) => LoginPage(),
+    builder: (BuildContext context) => const LoginPage(),
     fullscreenDialog: true,
   );
 }

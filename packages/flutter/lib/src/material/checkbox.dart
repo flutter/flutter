@@ -290,56 +290,39 @@ class Checkbox extends StatefulWidget {
   _CheckboxState createState() => _CheckboxState();
 }
 
-class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
-  bool get enabled => widget.onChanged != null;
-  late Map<Type, Action<Intent>> _actionMap;
+class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, ToggleableStateMixin {
+  final _CheckboxPainter _painter = _CheckboxPainter();
+  bool? _previousValue;
 
   @override
   void initState() {
     super.initState();
-    _actionMap = <Type, Action<Intent>>{
-      ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _actionHandler),
-    };
+    _previousValue = widget.value;
   }
 
-  void _actionHandler(ActivateIntent intent) {
-    if (widget.onChanged != null) {
-      switch (widget.value) {
-        case false:
-          widget.onChanged!(true);
-          break;
-        case true:
-          widget.onChanged!(widget.tristate ? null : false);
-          break;
-        case null:
-          widget.onChanged!(false);
-          break;
-      }
-    }
-    final RenderObject renderObject = context.findRenderObject()!;
-    renderObject.sendSemanticsEvent(const TapSemanticEvent());
-  }
-
-  bool _focused = false;
-  void _handleFocusHighlightChanged(bool focused) {
-    if (focused != _focused) {
-      setState(() { _focused = focused; });
+  @override
+  void didUpdateWidget(Checkbox oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.value != widget.value) {
+      _previousValue = oldWidget.value;
+      animateToValue();
     }
   }
 
-  bool _hovering = false;
-  void _handleHoverChanged(bool hovering) {
-    if (hovering != _hovering) {
-      setState(() { _hovering = hovering; });
-    }
+  @override
+  void dispose() {
+    _painter.dispose();
+    super.dispose();
   }
 
-  Set<MaterialState> get _states => <MaterialState>{
-    if (!enabled) MaterialState.disabled,
-    if (_hovering) MaterialState.hovered,
-    if (_focused) MaterialState.focused,
-    if (widget.value == null || widget.value!) MaterialState.selected,
-  };
+  @override
+  ValueChanged<bool?>? get onChanged => widget.onChanged;
+
+  @override
+  bool get tristate => widget.tristate;
+
+  @override
+  bool? get value => widget.value;
 
   MaterialStateProperty<Color?> get _widgetFillColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
@@ -386,14 +369,17 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
         break;
     }
     size += effectiveVisualDensity.baseSizeAdjustment;
-    final BoxConstraints additionalConstraints = BoxConstraints.tight(size);
-    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, _states)
-      ?? themeData.checkboxTheme.mouseCursor?.resolve(_states)
-      ?? MaterialStateProperty.resolveAs<MouseCursor>(MaterialStateMouseCursor.clickable, _states);
+
+    final MaterialStateProperty<MouseCursor> effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
+      return MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
+        ?? themeData.checkboxTheme.mouseCursor?.resolve(states)
+        ?? MaterialStateMouseCursor.clickable.resolve(states);
+    });
+
     // Colors need to be resolved in selected and non selected states separately
     // so that they can be lerped between.
-    final Set<MaterialState> activeStates = _states..add(MaterialState.selected);
-    final Set<MaterialState> inactiveStates = _states..remove(MaterialState.selected);
+    final Set<MaterialState> activeStates = states..add(MaterialState.selected);
+    final Set<MaterialState> inactiveStates = states..remove(MaterialState.selected);
     final Color effectiveActiveColor = widget.fillColor?.resolve(activeStates)
       ?? _widgetFillColor.resolve(activeStates)
       ?? themeData.checkboxTheme.fillColor?.resolve(activeStates)
@@ -403,13 +389,13 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
       ?? themeData.checkboxTheme.fillColor?.resolve(inactiveStates)
       ?? _defaultFillColor.resolve(inactiveStates);
 
-    final Set<MaterialState> focusedStates = _states..add(MaterialState.focused);
+    final Set<MaterialState> focusedStates = states..add(MaterialState.focused);
     final Color effectiveFocusOverlayColor = widget.overlayColor?.resolve(focusedStates)
       ?? widget.focusColor
       ?? themeData.checkboxTheme.overlayColor?.resolve(focusedStates)
       ?? themeData.focusColor;
 
-    final Set<MaterialState> hoveredStates = _states..add(MaterialState.hovered);
+    final Set<MaterialState> hoveredStates = states..add(MaterialState.hovered);
     final Color effectiveHoverOverlayColor = widget.overlayColor?.resolve(hoveredStates)
         ?? widget.hoverColor
         ?? themeData.checkboxTheme.overlayColor?.resolve(hoveredStates)
@@ -425,195 +411,96 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
         ?? themeData.checkboxTheme.overlayColor?.resolve(inactivePressedStates)
         ?? effectiveActiveColor.withAlpha(kRadialReactionAlpha);
 
-    final Color effectiveCheckColor =  widget.checkColor
-      ?? themeData.checkboxTheme.checkColor?.resolve(_states)
+    final Color effectiveCheckColor = widget.checkColor
+      ?? themeData.checkboxTheme.checkColor?.resolve(states)
       ?? const Color(0xFFFFFFFF);
 
-    return FocusableActionDetector(
-      actions: _actionMap,
-      focusNode: widget.focusNode,
-      autofocus: widget.autofocus,
-      enabled: enabled,
-      onShowFocusHighlight: _handleFocusHighlightChanged,
-      onShowHoverHighlight: _handleHoverChanged,
-      mouseCursor: effectiveMouseCursor,
-      child: Builder(
-        builder: (BuildContext context) {
-          return _CheckboxRenderObjectWidget(
-            value: widget.value,
-            tristate: widget.tristate,
-            activeColor: effectiveActiveColor,
-            checkColor: effectiveCheckColor,
-            inactiveColor: effectiveInactiveColor,
-            focusColor: effectiveFocusOverlayColor,
-            hoverColor: effectiveHoverOverlayColor,
-            reactionColor: effectiveActivePressedOverlayColor,
-            inactiveReactionColor: effectiveInactivePressedOverlayColor,
-            splashRadius: widget.splashRadius ?? themeData.checkboxTheme.splashRadius ?? kRadialReactionRadius,
-            onChanged: widget.onChanged,
-            additionalConstraints: additionalConstraints,
-            vsync: this,
-            hasFocus: _focused,
-            hovering: _hovering,
-            side: widget.side ?? themeData.checkboxTheme.side,
-            shape: widget.shape ?? themeData.checkboxTheme.shape ?? const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(1.0)),
-            ),
-          );
-        },
+    return Semantics(
+      checked: widget.value == true,
+      child: buildToggleable(
+        mouseCursor: effectiveMouseCursor,
+        focusNode: widget.focusNode,
+        autofocus: widget.autofocus,
+        size: size,
+        painter: _painter
+          ..position = position
+          ..reaction = reaction
+          ..reactionFocusFade = reactionFocusFade
+          ..reactionHoverFade = reactionHoverFade
+          ..inactiveReactionColor = effectiveInactivePressedOverlayColor
+          ..reactionColor = effectiveActivePressedOverlayColor
+          ..hoverColor = effectiveHoverOverlayColor
+          ..focusColor = effectiveFocusOverlayColor
+          ..splashRadius = widget.splashRadius ?? themeData.checkboxTheme.splashRadius ?? kRadialReactionRadius
+          ..downPosition = downPosition
+          ..isFocused = states.contains(MaterialState.focused)
+          ..isHovered = states.contains(MaterialState.hovered)
+          ..activeColor = effectiveActiveColor
+          ..inactiveColor = effectiveInactiveColor
+          ..checkColor = effectiveCheckColor
+          ..value = value
+          ..previousValue = _previousValue
+          ..shape = widget.shape ?? themeData.checkboxTheme.shape ?? const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(1.0))
+          )
+          ..side = widget.side ?? themeData.checkboxTheme.side,
       ),
     );
-  }
-}
-
-class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
-  const _CheckboxRenderObjectWidget({
-    Key? key,
-    required this.value,
-    required this.tristate,
-    required this.activeColor,
-    required this.checkColor,
-    required this.inactiveColor,
-    required this.focusColor,
-    required this.hoverColor,
-    required this.reactionColor,
-    required this.inactiveReactionColor,
-    required this.splashRadius,
-    required this.onChanged,
-    required this.vsync,
-    required this.additionalConstraints,
-    required this.hasFocus,
-    required this.hovering,
-    required this.shape,
-    required this.side,
-  }) : assert(tristate != null),
-       assert(tristate || value != null),
-       assert(activeColor != null),
-       assert(inactiveColor != null),
-       assert(vsync != null),
-       super(key: key);
-
-  final bool? value;
-  final bool tristate;
-  final bool hasFocus;
-  final bool hovering;
-  final Color activeColor;
-  final Color checkColor;
-  final Color inactiveColor;
-  final Color focusColor;
-  final Color hoverColor;
-  final Color reactionColor;
-  final Color inactiveReactionColor;
-  final double splashRadius;
-  final ValueChanged<bool?>? onChanged;
-  final TickerProvider vsync;
-  final BoxConstraints additionalConstraints;
-  final OutlinedBorder shape;
-  final BorderSide? side;
-
-  @override
-  _RenderCheckbox createRenderObject(BuildContext context) => _RenderCheckbox(
-    value: value,
-    tristate: tristate,
-    activeColor: activeColor,
-    checkColor: checkColor,
-    inactiveColor: inactiveColor,
-    focusColor: focusColor,
-    hoverColor: hoverColor,
-    reactionColor: reactionColor,
-    inactiveReactionColor: inactiveReactionColor,
-    splashRadius: splashRadius,
-    onChanged: onChanged,
-    vsync: vsync,
-    additionalConstraints: additionalConstraints,
-    hasFocus: hasFocus,
-    hovering: hovering,
-    shape: shape,
-    side: side,
-  );
-
-  @override
-  void updateRenderObject(BuildContext context, _RenderCheckbox renderObject) {
-    renderObject
-      // The `tristate` must be changed before `value` due to the assertion at
-      // the beginning of `set value`.
-      ..tristate = tristate
-      ..value = value
-      ..activeColor = activeColor
-      ..checkColor = checkColor
-      ..inactiveColor = inactiveColor
-      ..focusColor = focusColor
-      ..hoverColor = hoverColor
-      ..reactionColor = reactionColor
-      ..inactiveReactionColor = inactiveReactionColor
-      ..splashRadius = splashRadius
-      ..onChanged = onChanged
-      ..additionalConstraints = additionalConstraints
-      ..vsync = vsync
-      ..hasFocus = hasFocus
-      ..hovering = hovering
-      ..shape = shape
-      ..side = side;
   }
 }
 
 const double _kEdgeSize = Checkbox.width;
 const double _kStrokeWidth = 2.0;
 
-class _RenderCheckbox extends RenderToggleable {
-  _RenderCheckbox({
-    bool? value,
-    required bool tristate,
-    required Color activeColor,
-    required this.checkColor,
-    required Color inactiveColor,
-    Color? focusColor,
-    Color? hoverColor,
-    Color? reactionColor,
-    Color? inactiveReactionColor,
-    required double splashRadius,
-    required BoxConstraints additionalConstraints,
-    ValueChanged<bool?>? onChanged,
-    required bool hasFocus,
-    required bool hovering,
-    required this.shape,
-    required this.side,
-    required TickerProvider vsync,
-  }) : _oldValue = value,
-       super(
-         value: value,
-         tristate: tristate,
-         activeColor: activeColor,
-         inactiveColor: inactiveColor,
-         focusColor: focusColor,
-         hoverColor: hoverColor,
-         reactionColor: reactionColor,
-         inactiveReactionColor: inactiveReactionColor,
-         splashRadius: splashRadius,
-         onChanged: onChanged,
-         additionalConstraints: additionalConstraints,
-         vsync: vsync,
-         hasFocus: hasFocus,
-         hovering: hovering,
-       );
-
-  bool? _oldValue;
-  Color checkColor;
-  OutlinedBorder shape;
-  BorderSide? side;
-
-  @override
-  set value(bool? newValue) {
-    if (newValue == value)
+class _CheckboxPainter extends ToggleablePainter {
+  Color get checkColor => _checkColor!;
+  Color? _checkColor;
+  set checkColor(Color value) {
+    if (_checkColor == value) {
       return;
-    _oldValue = value;
-    super.value = newValue;
+    }
+    _checkColor = value;
+    notifyListeners();
   }
 
-  @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
-    super.describeSemanticsConfiguration(config);
-    config.isChecked = value == true;
+  bool? get value => _value;
+  bool? _value;
+  set value(bool? value) {
+    if (_value == value) {
+      return;
+    }
+    _value = value;
+    notifyListeners();
+  }
+
+  bool? get previousValue => _previousValue;
+  bool? _previousValue;
+  set previousValue(bool? value) {
+    if (_previousValue == value) {
+      return;
+    }
+    _previousValue = value;
+    notifyListeners();
+  }
+
+  OutlinedBorder get shape => _shape!;
+  OutlinedBorder? _shape;
+  set shape(OutlinedBorder value) {
+    if (_shape == value) {
+      return;
+    }
+    _shape = value;
+    notifyListeners();
+  }
+
+  BorderSide? get side => _side;
+  BorderSide? _side;
+  set side(BorderSide? value) {
+    if (_side == value) {
+      return;
+    }
+    _side = value;
+    notifyListeners();
   }
 
   // The square outer bounds of the checkbox at t, with the specified origin.
@@ -644,10 +531,11 @@ class _RenderCheckbox extends RenderToggleable {
 
   void _drawBorder(Canvas canvas, Rect outer, double t, Paint paint) {
     assert(t >= 0.0 && t <= 0.5);
+    OutlinedBorder resolvedShape = shape;
     if (side == null) {
-      shape = shape.copyWith(side: BorderSide(width: 2, color: paint.color));
+      resolvedShape = resolvedShape.copyWith(side: BorderSide(width: 2, color: paint.color));
     }
-    shape.copyWith(side: side).paint(canvas, outer);
+    resolvedShape.copyWith(side: side).paint(canvas, outer);
   }
 
   void _drawCheck(Canvas canvas, Offset origin, double t, Paint paint) {
@@ -686,19 +574,18 @@ class _RenderCheckbox extends RenderToggleable {
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
-    final Canvas canvas = context.canvas;
-    paintRadialReaction(canvas, offset, size.center(Offset.zero));
+  void paint(Canvas canvas, Size size) {
+    paintRadialReaction(canvas: canvas, origin: size.center(Offset.zero));
 
     final Paint strokePaint = _createStrokePaint();
-    final Offset origin = offset + (size / 2.0 - const Size.square(_kEdgeSize) / 2.0 as Offset);
+    final Offset origin = size / 2.0 - const Size.square(_kEdgeSize) / 2.0 as Offset;
     final AnimationStatus status = position.status;
     final double tNormalized = status == AnimationStatus.forward || status == AnimationStatus.completed
       ? position.value
       : 1.0 - position.value;
 
     // Four cases: false to null, false to true, null to false, true to false
-    if (_oldValue == false || value == false) {
+    if (previousValue == false || value == false) {
       final double t = value == false ? 1.0 - tNormalized : tNormalized;
       final Rect outer = _outerRectAt(origin, t);
       final Path emptyCheckboxPath = shape.copyWith(side: side).getOuterPath(outer);
@@ -710,7 +597,7 @@ class _RenderCheckbox extends RenderToggleable {
         canvas.drawPath(emptyCheckboxPath, paint);
 
         final double tShrink = (t - 0.5) * 2.0;
-        if (_oldValue == null || value == null)
+        if (previousValue == null || value == null)
           _drawDash(canvas, origin, tShrink, strokePaint);
         else
           _drawCheck(canvas, origin, tShrink, strokePaint);
@@ -722,7 +609,7 @@ class _RenderCheckbox extends RenderToggleable {
 
       if (tNormalized <= 0.5) {
         final double tShrink = 1.0 - tNormalized * 2.0;
-        if (_oldValue == true)
+        if (previousValue == true)
           _drawCheck(canvas, origin, tShrink, strokePaint);
         else
           _drawDash(canvas, origin, tShrink, strokePaint);

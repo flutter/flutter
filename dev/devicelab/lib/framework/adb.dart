@@ -72,8 +72,7 @@ abstract class DeviceDiscovery {
       case DeviceOperatingSystem.fuchsia:
         return FuchsiaDeviceDiscovery();
       case DeviceOperatingSystem.fake:
-        print('Looking for fake devices!'
-              'You should not see this in release builds.');
+        print('Looking for fake devices! You should not see this in release builds.');
         return FakeDeviceDiscovery();
       default:
         throw DeviceException('Unsupported device operating system: $deviceOperatingSystem');

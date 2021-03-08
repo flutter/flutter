@@ -494,6 +494,8 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
     });
   }
 
+  TextSelection? _lastSeenTextSelection;
+
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
     final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
     if (willShowSelectionHandles != _showSelectionHandles) {
@@ -501,10 +503,12 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
         _showSelectionHandles = willShowSelectionHandles;
       });
     }
-
-    if (widget.onSelectionChanged != null) {
+    // TODO(chunhtai): The selection may be the same. We should remove this
+    // check once this is fixed https://github.com/flutter/flutter/issues/76349.
+    if (widget.onSelectionChanged != null && _lastSeenTextSelection != selection) {
       widget.onSelectionChanged!(selection, cause);
     }
+    _lastSeenTextSelection = selection;
 
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:

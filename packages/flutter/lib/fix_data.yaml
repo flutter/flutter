@@ -2,7 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# TODO(Piinks): Add link to public user guide when available.
+# For details regarding *Flutter Fix* feature, see
+# https://flutter.dev/docs/development/tools/flutter-fix
 
 # Please add new fixes to the top of the file, separated by one blank line
 # from other fixes. In a comment, include a link to the PR where the change
@@ -899,7 +900,7 @@ transforms:
             name: 'autovalidateMode'
             style: optional_named
             argumentValue:
-              expression: 'AutoValidateMode.always'
+              expression: 'AutovalidateMode.always'
               requiredIf: "autovalidate == 'true'"
           - kind: 'removeParameter'
             name: 'autovalidate'
@@ -910,7 +911,7 @@ transforms:
             name: 'autovalidateMode'
             style: optional_named
             argumentValue:
-              expression: 'AutoValidateMode.disabled'
+              expression: 'AutovalidateMode.disabled'
               requiredIf: "autovalidate == 'false'"
           - kind: 'removeParameter'
             name: 'autovalidate'
@@ -945,7 +946,7 @@ transforms:
             name: 'autovalidateMode'
             style: optional_named
             argumentValue:
-              expression: 'AutoValidateMode.always'
+              expression: 'AutovalidateMode.always'
               requiredIf: "autovalidate == 'true'"
           - kind: 'removeParameter'
             name: 'autovalidate'
@@ -956,7 +957,7 @@ transforms:
             name: 'autovalidateMode'
             style: optional_named
             argumentValue:
-              expression: 'AutoValidateMode.disabled'
+              expression: 'AutovalidateMode.disabled'
               requiredIf: "autovalidate == 'false'"
           - kind: 'removeParameter'
             name: 'autovalidate'
@@ -980,7 +981,7 @@ transforms:
             name: 'autovalidateMode'
             style: optional_named
             argumentValue:
-              expression: 'AutoValidateMode.always'
+              expression: 'AutovalidateMode.always'
               requiredIf: "autovalidate == 'true'"
           - kind: 'removeParameter'
             name: 'autovalidate'
@@ -991,7 +992,7 @@ transforms:
             name: 'autovalidateMode'
             style: optional_named
             argumentValue:
-              expression: 'AutoValidateMode.disabled'
+              expression: 'AutovalidateMode.disabled'
               requiredIf: "autovalidate == 'false'"
           - kind: 'removeParameter'
             name: 'autovalidate'
@@ -1015,7 +1016,7 @@ transforms:
             name: 'autovalidateMode'
             style: optional_named
             argumentValue:
-              expression: 'AutoValidateMode.always'
+              expression: 'AutovalidateMode.always'
               requiredIf: "autovalidate == 'true'"
           - kind: 'removeParameter'
             name: 'autovalidate'
@@ -1026,7 +1027,7 @@ transforms:
             name: 'autovalidateMode'
             style: optional_named
             argumentValue:
-              expression: 'AutoValidateMode.disabled'
+              expression: 'AutovalidateMode.disabled'
               requiredIf: "autovalidate == 'false'"
           - kind: 'removeParameter'
             name: 'autovalidate'

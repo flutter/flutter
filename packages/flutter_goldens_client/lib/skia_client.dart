@@ -22,6 +22,10 @@ const String _kTestBrowserKey = 'FLUTTER_TEST_BROWSER';
 /// A client for uploading image tests and making baseline requests to the
 /// Flutter Gold Dashboard.
 class SkiaGoldClient {
+  /// Creates a [SkiaGoldClient] with the given [workDirectory].
+  ///
+  /// All other parameters are optional. They may be provided in tests to
+  /// override the defaults for [fs], [process], [platform], and [httpClient].
   SkiaGoldClient(
     this.workDirectory, {
     this.fs = const LocalFileSystem(),

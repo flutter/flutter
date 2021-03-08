@@ -127,7 +127,7 @@ void main() {
           'git clean -f -x -- **/.dart_tool/': null,
           if (platform.isWindows) 'attrib -h .git': null,
           if (platform.isWindows) '7za a -tzip -mx=9 $archiveName flutter': null
-          else if (platform.isMacOS) 'zip -r -9 $archiveName flutter': null
+          else if (platform.isMacOS) 'zip -r -9 --symlinks $archiveName flutter': null
           else if (platform.isLinux) 'tar cJf $archiveName flutter': null,
         };
         await creator.initializeRepo();
@@ -163,7 +163,7 @@ void main() {
           'git clean -f -x -- **/.dart_tool/': null,
           if (platform.isWindows) 'attrib -h .git': null,
           if (platform.isWindows) '7za a -tzip -mx=9 $archiveName flutter': null
-          else if (platform.isMacOS) 'zip -r -9 $archiveName flutter': null
+          else if (platform.isMacOS) 'zip -r -9 --symlinks $archiveName flutter': null
           else if (platform.isLinux) 'tar cJf $archiveName flutter': null,
         };
         processManager.fakeResults = calls;
@@ -213,7 +213,7 @@ void main() {
           'git clean -f -x -- **/.dart_tool/': null,
           if (platform.isWindows) 'attrib -h .git': null,
           if (platform.isWindows) '7za a -tzip -mx=9 $archiveName flutter': null
-          else if (platform.isMacOS) 'zip -r -9 $archiveName flutter': null
+          else if (platform.isMacOS) 'zip -r -9 --symlinks $archiveName flutter': null
           else if (platform.isLinux) 'tar cJf $archiveName flutter': null,
         };
         processManager.fakeResults = calls;
@@ -377,7 +377,7 @@ void main() {
           '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 0, '', '')],
         };
         processManager.fakeResults = calls;
-        expect(() async => await publisher.publishArchive(false), throwsException);
+        expect(() async => publisher.publishArchive(false), throwsException);
         processManager.verifyCalls(calls.keys.toList());
       });
 

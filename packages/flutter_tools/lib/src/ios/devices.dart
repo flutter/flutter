@@ -119,7 +119,7 @@ class IOSDevices extends PollingDeviceDiscovery {
       );
     }
 
-    return await _xcdevice.getAvailableIOSDevices(timeout: timeout);
+    return _xcdevice.getAvailableIOSDevices(timeout: timeout);
   }
 
   @override
@@ -130,7 +130,7 @@ class IOSDevices extends PollingDeviceDiscovery {
       ];
     }
 
-    return await _xcdevice.getDiagnostics();
+    return _xcdevice.getDiagnostics();
   }
 }
 

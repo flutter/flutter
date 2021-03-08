@@ -63,7 +63,7 @@ void main() {
           onRefresh: refresh,
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            child: Container(
+            child: SizedBox(
               width: 600.0,
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),

@@ -4,8 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:io' show Process, ProcessResult;
-
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
@@ -16,13 +14,13 @@ import 'package:flutter_tools/src/commands/build_aar.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:mockito/mockito.dart';
+import 'package:meta/meta.dart';
 import 'package:process/process.dart';
+import 'package:test/fake.dart';
 
 import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
 
 void main() {
   Cache.disableLocking();
@@ -112,10 +110,10 @@ void main() {
 
   group('flag parsing', () {
     Directory tempDir;
-    MockAndroidBuilder mockAndroidBuilder;
+    FakeAndroidBuilder fakeAndroidBuilder;
 
     setUp(() {
-      mockAndroidBuilder = MockAndroidBuilder();
+      fakeAndroidBuilder = FakeAndroidBuilder();
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_build_aar_test.');
     });
 
@@ -128,18 +126,11 @@ void main() {
         arguments: <String>['--no-pub']);
       await runCommandIn(projectPath);
 
-      final Set<AndroidBuildInfo> androidBuildInfos = verify(mockAndroidBuilder.buildAar(
-        project: anyNamed('project'),
-        target: anyNamed('target'),
-        androidBuildInfo: captureAnyNamed('androidBuildInfo'),
-        outputDirectoryPath: anyNamed('outputDirectoryPath'),
-        buildNumber: '1.0',
-      )).captured[0] as Set<AndroidBuildInfo>;
-
-      expect(androidBuildInfos.length, 3);
+      expect(fakeAndroidBuilder.buildNumber, '1.0');
+      expect(fakeAndroidBuilder.androidBuildInfo.length, 3);
 
       final List<BuildMode> buildModes = <BuildMode>[];
-      for (final AndroidBuildInfo androidBuildInfo in androidBuildInfos) {
+      for (final AndroidBuildInfo androidBuildInfo in fakeAndroidBuilder.androidBuildInfo) {
         final BuildInfo buildInfo = androidBuildInfo.buildInfo;
         buildModes.add(buildInfo.mode);
         if (buildInfo.mode.isPrecompiled) {
@@ -157,7 +148,7 @@ void main() {
       expect(buildModes.length, 3);
       expect(buildModes, containsAll(<BuildMode>[BuildMode.debug, BuildMode.profile, BuildMode.release]));
     }, overrides: <Type, Generator>{
-      AndroidBuilder: () => mockAndroidBuilder,
+      AndroidBuilder: () => fakeAndroidBuilder,
     });
 
     testUsingContext('parses flags', () async {
@@ -182,15 +173,9 @@ void main() {
         ],
       );
 
-      final Set<AndroidBuildInfo> androidBuildInfos = verify(mockAndroidBuilder.buildAar(
-        project: anyNamed('project'),
-        target: anyNamed('target'),
-        androidBuildInfo: captureAnyNamed('androidBuildInfo'),
-        outputDirectoryPath: anyNamed('outputDirectoryPath'),
-        buildNumber: '200',
-      )).captured[0] as Set<AndroidBuildInfo>;
+      expect(fakeAndroidBuilder.buildNumber, '200');
 
-      final AndroidBuildInfo androidBuildInfo = androidBuildInfos.single;
+      final AndroidBuildInfo androidBuildInfo = fakeAndroidBuilder.androidBuildInfo.single;
       expect(androidBuildInfo.targetArchs, <AndroidArch>[AndroidArch.x86]);
 
       final BuildInfo buildInfo = androidBuildInfo.buildInfo;
@@ -201,33 +186,15 @@ void main() {
       expect(buildInfo.dartObfuscation, isTrue);
       expect(buildInfo.dartDefines.contains('foo=bar'), isTrue);
     }, overrides: <Type, Generator>{
-      AndroidBuilder: () => mockAndroidBuilder,
+      AndroidBuilder: () => fakeAndroidBuilder,
     });
   });
 
   group('Gradle', () {
-    ProcessManager mockProcessManager;
     Directory tempDir;
-    AndroidSdk mockAndroidSdk;
 
     setUp(() {
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
-
-      mockProcessManager = MockProcessManager();
-      when(mockProcessManager.run(any,
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment')))
-        .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(0, 0, 'assembleRelease', '')));
-      // Fallback with error.
-      final Process process = createMockProcess(exitCode: 1);
-      when(mockProcessManager.start(any,
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment')))
-        .thenAnswer((_) => Future<Process>.value(process));
-      when(mockProcessManager.canRun(any)).thenReturn(false);
-
-      mockAndroidSdk = MockAndroidSdk();
-      when(mockAndroidSdk.directory).thenReturn(globals.fs.directory('irrelevant'));
     });
 
     tearDown(() {
@@ -251,7 +218,7 @@ void main() {
       overrides: <Type, Generator>{
         AndroidSdk: () => null,
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
-        ProcessManager: () => mockProcessManager,
+        ProcessManager: () => FakeProcessManager.any(),
       });
     });
   });
@@ -272,7 +239,25 @@ Future<BuildAarCommand> runBuildAarCommand(
   return command;
 }
 
-class MockAndroidBuilder extends Mock implements AndroidBuilder {}
-class MockAndroidSdk extends Mock implements AndroidSdk {}
-class MockProcessManager extends Mock implements ProcessManager {}
-class MockProcess extends Mock implements Process {}
+class FakeAndroidBuilder extends Fake implements AndroidBuilder {
+  FlutterProject project;
+  Set<AndroidBuildInfo> androidBuildInfo;
+  String target;
+  String outputDirectoryPath;
+  String buildNumber;
+
+  @override
+  Future<void> buildAar({
+    @required FlutterProject project,
+    @required Set<AndroidBuildInfo> androidBuildInfo,
+    @required String target,
+    @required String outputDirectoryPath,
+    @required String buildNumber,
+  }) async {
+    this.project = project;
+    this.androidBuildInfo = androidBuildInfo;
+    this.target = target;
+    this.outputDirectoryPath = outputDirectoryPath;
+    this.buildNumber = buildNumber;
+  }
+}
