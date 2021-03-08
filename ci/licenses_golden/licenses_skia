@@ -1,4 +1,4 @@
-Signature: 50d57ac28f486c3d7269c96d1047d0b7
+Signature: a83a79bedff1fd89b89bd84368638c40
 
 UNUSED LICENSES:
 
@@ -1968,9 +1968,7 @@ FILE: ../../../third_party/skia/src/sfnt/SkOTTable_gasp.h
 FILE: ../../../third_party/skia/src/shaders/SkLocalMatrixShader.cpp
 FILE: ../../../third_party/skia/src/shaders/SkLocalMatrixShader.h
 FILE: ../../../third_party/skia/src/shaders/SkPictureShader.cpp
-FILE: ../../../third_party/skia/src/shaders/SkPictureShader.cpp.legacy
 FILE: ../../../third_party/skia/src/shaders/SkPictureShader.h
-FILE: ../../../third_party/skia/src/shaders/SkPictureShader.h.legacy
 FILE: ../../../third_party/skia/src/utils/SkDashPath.cpp
 FILE: ../../../third_party/skia/src/utils/SkDashPathPriv.h
 FILE: ../../../third_party/skia/src/utils/SkEventTracer.cpp
