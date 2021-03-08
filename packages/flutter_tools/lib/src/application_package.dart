@@ -111,6 +111,8 @@ class ApplicationPackageFactory {
         return applicationBinary == null
             ? FuchsiaApp.fromFuchsiaProject(FlutterProject.current().fuchsia)
             : FuchsiaApp.fromPrebuiltApp(applicationBinary);
+      case TargetPlatform.windows_uwp_x64:
+        throw UnsupportedError('Cannot build for windows_uwp_x64');
     }
     assert(platform != null);
     return null;
