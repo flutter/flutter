@@ -1236,8 +1236,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     return _lastIdentifier;
   }
 
-
-
   /// Uniquely identifies this node in the list of sibling nodes.
   ///
   /// Keys are used during the construction of the semantics tree. They are not
