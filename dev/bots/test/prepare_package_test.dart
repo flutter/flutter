@@ -30,7 +30,7 @@ void main() {
     } on PreparePackageException catch (e) {
       expect(
         e.message,
-        contains('Invalid argument(s): Cannot find executable for this_executable_better_not_exist_2857632534321.'),
+        contains('Invalid argument(s): Failed to resolve this_executable_better_not_exist_2857632534321 to an executable.'),
       );
     }
   });
@@ -70,6 +70,7 @@ void main() {
       ArchiveCreator creator;
       Directory tempDir;
       Directory flutterDir;
+      Directory cacheDir;
       FakeProcessManager processManager;
       final List<List<String>> args = <List<String>>[];
       final List<Map<Symbol, dynamic>> namedArgs = <Map<Symbol, dynamic>>[];
@@ -86,6 +87,8 @@ void main() {
         tempDir = Directory.systemTemp.createTempSync('flutter_prepage_package_test.');
         flutterDir = Directory(path.join(tempDir.path, 'flutter'));
         flutterDir.createSync(recursive: true);
+        cacheDir = Directory(path.join(flutterDir.path, 'bin', 'cache'));
+        cacheDir.createSync(recursive: true);
         creator = ArchiveCreator(
           tempDir,
           tempDir,
@@ -120,11 +123,11 @@ void main() {
           '$flutter create --template=app ${createBase}app': null,
           '$flutter create --template=package ${createBase}package': null,
           '$flutter create --template=plugin ${createBase}plugin': null,
-          'git clean -f -X **/.packages': null,
-          'git clean -f -X **/.dart_tool': null,
+          'git clean -f -x -- **/.packages': null,
+          'git clean -f -x -- **/.dart_tool/': null,
           if (platform.isWindows) 'attrib -h .git': null,
           if (platform.isWindows) '7za a -tzip -mx=9 $archiveName flutter': null
-          else if (platform.isMacOS) 'zip -r -9 $archiveName flutter': null
+          else if (platform.isMacOS) 'zip -r -9 --symlinks $archiveName flutter': null
           else if (platform.isLinux) 'tar cJf $archiveName flutter': null,
         };
         await creator.initializeRepo();
@@ -156,11 +159,11 @@ void main() {
           '$flutter create --template=app ${createBase}app': null,
           '$flutter create --template=package ${createBase}package': null,
           '$flutter create --template=plugin ${createBase}plugin': null,
-          'git clean -f -X **/.packages': null,
-          'git clean -f -X **/.dart_tool': null,
+          'git clean -f -x -- **/.packages': null,
+          'git clean -f -x -- **/.dart_tool/': null,
           if (platform.isWindows) 'attrib -h .git': null,
           if (platform.isWindows) '7za a -tzip -mx=9 $archiveName flutter': null
-          else if (platform.isMacOS) 'zip -r -9 $archiveName flutter': null
+          else if (platform.isMacOS) 'zip -r -9 --symlinks $archiveName flutter': null
           else if (platform.isLinux) 'tar cJf $archiveName flutter': null,
         };
         processManager.fakeResults = calls;
@@ -206,11 +209,11 @@ void main() {
           '$flutter create --template=app ${createBase}app': null,
           '$flutter create --template=package ${createBase}package': null,
           '$flutter create --template=plugin ${createBase}plugin': null,
-          'git clean -f -X **/.packages': null,
-          'git clean -f -X **/.dart_tool': null,
+          'git clean -f -x -- **/.packages': null,
+          'git clean -f -x -- **/.dart_tool/': null,
           if (platform.isWindows) 'attrib -h .git': null,
           if (platform.isWindows) '7za a -tzip -mx=9 $archiveName flutter': null
-          else if (platform.isMacOS) 'zip -r -9 $archiveName flutter': null
+          else if (platform.isMacOS) 'zip -r -9 --symlinks $archiveName flutter': null
           else if (platform.isLinux) 'tar cJf $archiveName flutter': null,
         };
         processManager.fakeResults = calls;
@@ -374,7 +377,7 @@ void main() {
           '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 0, '', '')],
         };
         processManager.fakeResults = calls;
-        expect(() async => await publisher.publishArchive(false), throwsException);
+        expect(() async => publisher.publishArchive(false), throwsException);
         processManager.verifyCalls(calls.keys.toList());
       });
 

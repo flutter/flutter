@@ -16,8 +16,7 @@ import 'package:fake_async/fake_async.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
-import '../../src/mocks.dart' show MockProcess,
-                                   MockProcessManager,
+import '../../src/mocks.dart' show MockProcessManager,
                                    flakyProcessFactory;
 
 void main() {
@@ -41,7 +40,7 @@ void main() {
         exitCode: 1,
       ));
 
-      expect(() async => await processUtils.run(<String>['false'], throwOnError: true),
+      expect(() async => processUtils.run(<String>['false'], throwOnError: true),
              throwsA(isA<ProcessException>()));
     });
   });
@@ -101,7 +100,7 @@ void main() {
       );
     });
 
-    MockProcess Function(List<String>) processMetaFactory(List<String> stdout, {
+    FakeProcess Function(List<String>) processMetaFactory(List<String> stdout, {
       List<String> stderr = const <String>[],
     }) {
       final Stream<List<int>> stdoutStream = Stream<List<int>>.fromIterable(
@@ -110,7 +109,7 @@ void main() {
       final Stream<List<int>> stderrStream = Stream<List<int>>.fromIterable(
         stderr.map<List<int>>((String s) => s.codeUnits,
       ));
-      return (List<String> command) => MockProcess(stdout: stdoutStream, stderr: stderrStream);
+      return (List<String> command) => FakeProcess(stdout: stdoutStream, stderr: stderrStream);
     }
 
     testWithoutContext('Command output is not wrapped.', () async {
@@ -519,7 +518,7 @@ void main() {
         ArgumentError('Bad input'),
       );
       expect(
-        () async => await processUtils.exitsHappy(<String>['invalid']),
+        () async => processUtils.exitsHappy(<String>['invalid']),
         throwsArgumentError,
       );
     });

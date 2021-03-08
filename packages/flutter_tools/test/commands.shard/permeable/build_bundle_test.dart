@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/testbed.dart';
 
 void main() {
@@ -210,18 +211,6 @@ void main() {
     globals.fs.file('pubspec.yaml').createSync();
     globals.fs.file('.packages').createSync();
     final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand());
-    when(globals.buildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
-      final Environment environment = invocation.positionalArguments[1] as Environment;
-      expect(environment.defines, <String, String>{
-        kTargetFile: globals.fs.path.join('lib', 'main.dart'),
-        kBuildMode: 'debug',
-        kTargetPlatform: 'android-arm',
-        kTrackWidgetCreation: 'true',
-        kIconTreeShakerFlag: null,
-      });
-
-      return BuildResult(success: true);
-    });
 
     await runner.run(<String>[
       'bundle',
@@ -231,11 +220,18 @@ void main() {
       '--track-widget-creation'
     ]);
   }, overrides: <Type, Generator>{
-    BuildSystem: () => MockBuildSystem(),
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+      expect(environment.defines, <String, String>{
+        kTargetFile: globals.fs.path.join('lib', 'main.dart'),
+        kBuildMode: 'debug',
+        kTargetPlatform: 'android-arm',
+        kTrackWidgetCreation: 'true',
+        kIconTreeShakerFlag: null,
+      });
+    }),
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 }
 
 class MockBundleBuilder extends Mock implements BundleBuilder {}
-class MockBuildSystem extends Mock implements BuildSystem {}

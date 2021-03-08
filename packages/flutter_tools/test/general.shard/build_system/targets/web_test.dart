@@ -14,12 +14,10 @@ import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
-import '../../../src/mocks.dart';
 import '../../../src/testbed.dart';
 
 const List<String> kDart2jsLinuxArgs = <String>[
@@ -462,11 +460,21 @@ void main() {
 
   test('Dart2JSTarget produces expected depfile', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
-    when(globals.processManager.run(any)).thenAnswer((Invocation invocation) async {
-      environment.buildDir.childFile('app.dill.deps')
-        .writeAsStringSync('file:///a.dart');
-      return FakeProcessResult(exitCode: 0);
-    });
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ...kDart2jsLinuxArgs,
+        '-Ddart.vm.product=true',
+        '--no-source-maps',
+        '-o',
+        environment.buildDir.childFile('app.dill').absolute.path,
+        '--packages=.packages',
+        '--cfe-only',
+        environment.buildDir.childFile('main.dart').absolute.path,
+      ], onRun: () {
+        environment.buildDir.childFile('app.dill.deps')
+          .writeAsStringSync('file:///a.dart');
+      },
+    ));
     await const Dart2JSTarget().build(environment);
 
     expect(environment.buildDir.childFile('dart2js.d'), exists);
@@ -476,7 +484,7 @@ void main() {
     expect(depfile.outputs.single.path,
       environment.buildDir.childFile('main.dart.js').absolute.path);
   }, overrides: <Type, Generator>{
-    ProcessManager: () => MockProcessManager(),
+    ProcessManager: () => processManager,
   }));
 
   test('Dart2JSTarget calls dart2js with Dart defines in release mode', () => testbed.run(() async {
@@ -652,5 +660,3 @@ void main() {
       contains('"main.dart.js"'));
   }));
 }
-
-class MockProcessManager extends Mock implements ProcessManager {}

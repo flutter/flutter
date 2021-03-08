@@ -486,7 +486,7 @@ class StartupTest {
   final bool reportMetrics;
 
   Future<TaskResult> run() async {
-    return await inDirectory<TaskResult>(testDirectory, () async {
+    return inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
       const int iterations = 5;
       final List<Map<String, dynamic>> results = <Map<String, dynamic>>[];
@@ -500,6 +500,15 @@ class StartupTest {
             '-v',
             '--profile',
             '--target-platform=android-arm,android-arm64',
+          ]);
+          applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
+          break;
+        case DeviceOperatingSystem.androidArm:
+          await flutter('build', options: <String>[
+            'apk',
+            '-v',
+            '--profile',
+            '--target-platform=android-arm',
           ]);
           applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
           break;
@@ -714,8 +723,8 @@ class PerfTest {
           if (measureMemory && !isAndroid) ...<String>[
             // See https://github.com/flutter/flutter/issues/68888
             if (data['average_memory_usage'] != null) 'average_memory_usage',
-            '90th_percentile_memory_usage',
-            '99th_percentile_memory_usage',
+            if (data['90th_percentile_memory_usage'] != null) '90th_percentile_memory_usage',
+            if (data['99th_percentile_memory_usage'] != null) '99th_percentile_memory_usage',
           ],
         ],
       );
@@ -986,14 +995,26 @@ class CompileTest {
   final bool reportPackageContentSizes;
 
   Future<TaskResult> run() async {
-    return await inDirectory<TaskResult>(testDirectory, () async {
+    return inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
       await device.unlock();
       await flutter('packages', options: <String>['get']);
 
+      final Map<String, dynamic> compileRelease = await _compileApp(reportPackageContentSizes: reportPackageContentSizes);
+      final Map<String, dynamic> compileDebug = await _compileDebug(
+        clean: true,
+        metricKey: 'debug_full_compile_millis',
+      );
+      // Build again without cleaning, should be faster.
+      final Map<String, dynamic> compileSecondDebug = await _compileDebug(
+        clean: false,
+        metricKey: 'debug_second_compile_millis',
+      );
+
       final Map<String, dynamic> metrics = <String, dynamic>{
-        ...await _compileApp(reportPackageContentSizes: reportPackageContentSizes),
-        ...await _compileDebug(),
+        ...compileRelease,
+        ...compileDebug,
+        ...compileSecondDebug,
       };
 
       return TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
@@ -1031,6 +1052,7 @@ class CompileTest {
           metrics.addAll(await getSizesFromIosApp(appPath));
         break;
       case DeviceOperatingSystem.android:
+      case DeviceOperatingSystem.androidArm:
         options.insert(0, 'apk');
         options.add('--target-platform=android-arm');
         options.add('--tree-shake-icons');
@@ -1072,8 +1094,13 @@ class CompileTest {
     return metrics;
   }
 
-  static Future<Map<String, dynamic>> _compileDebug() async {
-    await flutter('clean');
+  static Future<Map<String, dynamic>> _compileDebug({
+    @required bool clean,
+    @required String metricKey,
+  }) async {
+    if (clean) {
+      await flutter('clean');
+    }
     final Stopwatch watch = Stopwatch();
     final List<String> options = <String>['--debug'];
     switch (deviceOperatingSystem) {
@@ -1081,6 +1108,7 @@ class CompileTest {
         options.insert(0, 'ios');
         break;
       case DeviceOperatingSystem.android:
+      case DeviceOperatingSystem.androidArm:
         options.insert(0, 'apk');
         options.add('--target-platform=android-arm');
         break;
@@ -1098,7 +1126,7 @@ class CompileTest {
     watch.stop();
 
     return <String, dynamic>{
-      'debug_full_compile_millis': watch.elapsedMilliseconds,
+      metricKey: watch.elapsedMilliseconds,
     };
   }
 

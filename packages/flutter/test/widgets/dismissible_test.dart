@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart' show DragStartBehavior;
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -47,7 +46,7 @@ Widget buildTest({
                 ? <DismissDirection, double>{}
                 : <DismissDirection, double>{DismissDirection.startToEnd: startToEndThreshold},
             crossAxisEndOffset: crossAxisEndOffset,
-            child: Container(
+            child: SizedBox(
               width: itemExtent,
               height: itemExtent,
               child: Text(item.toString()),
@@ -575,7 +574,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             width: 100.0,
             height: 1000.0,
             child: Column(
@@ -756,7 +755,7 @@ void main() {
                 background: background,
                 dismissThresholds: const <DismissDirection, double>{},
                 crossAxisEndOffset: crossAxisEndOffset,
-                child: Container(
+                child: SizedBox(
                   width: itemExtent,
                   height: itemExtent,
                   child: Text(1.toString()),

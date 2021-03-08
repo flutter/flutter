@@ -45,6 +45,10 @@ const String kExtraFrontEndOptions = 'ExtraFrontEndOptions';
 /// This is expected to be a comma separated list of strings.
 const String kExtraGenSnapshotOptions = 'ExtraGenSnapshotOptions';
 
+/// Whether the build should run gen_snapshot as a split aot build for deferred
+/// components.
+const String kDeferredComponents = 'DeferredComponents';
+
 /// Whether to strip source code information out of release builds and where to save it.
 const String kSplitDebugInfo = 'SplitDebugInfo';
 
@@ -127,6 +131,7 @@ class CopyFlutterBundle extends Target {
       environment,
       environment.outputDir,
       targetPlatform: TargetPlatform.android,
+      buildMode: buildMode,
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,
@@ -275,6 +280,8 @@ class KernelSnapshot extends Target {
       fileSystemScheme: fileSystemScheme,
       dartDefines: decodeDartDefines(environment.defines, kDartDefines),
       packageConfig: packageConfig,
+      buildDir: environment.buildDir,
+      generateDartPluginRegistry: environment.generateDartPluginRegistry,
     );
     if (output == null || output.errorCount != 0) {
       throw Exception();

@@ -24,6 +24,7 @@ import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/testbed.dart';
 
 class FakeXcodeProjectInterpreterWithProfile extends FakeXcodeProjectInterpreter {
@@ -118,7 +119,9 @@ void main() {
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'macos', '--no-pub']
-    ), throwsToolExit(message: 'No macOS desktop project configured'));
+    ), throwsToolExit(message: 'No macOS desktop project configured. See '
+      'https://flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'to learn about adding macOS support to a project.'));
   }, overrides: <Type, Generator>{
     Platform: () => macosPlatform,
     FileSystem: () => fileSystem,
@@ -271,7 +274,8 @@ void main() {
       'TRACK_WIDGET_CREATION=true',
       'TREE_SHAKE_ICONS=true',
       'BUNDLE_SKSL_PATH=foo/bar.sksl.json',
-      'PACKAGE_CONFIG=/.dart_tool/package_config.json'
+      'PACKAGE_CONFIG=/.dart_tool/package_config.json',
+      'COCOAPODS_PARALLEL_CODE_SIGN=true',
     ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,

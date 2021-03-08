@@ -14,7 +14,7 @@ void main() {
           appBar: AppBar(
             title: const Text('RenderFlex OverFlow'),
           ),
-          body: Container(
+          body: SizedBox(
             width: 400.0,
             child: Row(
               children: <Widget>[

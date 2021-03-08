@@ -125,7 +125,8 @@ typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 /// ```
 /// {@end-tool}
 abstract class MaterialStateColor extends Color implements MaterialStateProperty<Color> {
-  /// Creates a [MaterialStateColor].
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const MaterialStateColor(int defaultValue) : super(defaultValue);
 
   /// Creates a [MaterialStateColor] from a [MaterialPropertyResolver<Color>]
@@ -220,7 +221,8 @@ class _MaterialStateColor extends MaterialStateColor {
 ///  * [SystemMouseCursors], which defines cursors that are supported by
 ///    native platforms.
 abstract class MaterialStateMouseCursor extends MouseCursor implements MaterialStateProperty<MouseCursor> {
-  /// Creates a [MaterialStateMouseCursor].
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const MaterialStateMouseCursor();
 
   @protected
@@ -333,7 +335,8 @@ class _EnabledAndDisabledMouseCursor extends MaterialStateMouseCursor {
 /// This class should only be used for parameters which are documented to take
 /// [MaterialStateBorderSide], otherwise only the default state will be used.
 abstract class MaterialStateBorderSide extends BorderSide implements MaterialStateProperty<BorderSide?> {
-  /// Creates a [MaterialStateBorderSide].
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const MaterialStateBorderSide();
 
   /// Returns a [BorderSide] that's to be used when a Material component is
@@ -393,7 +396,8 @@ abstract class MaterialStateBorderSide extends BorderSide implements MaterialSta
 ///
 ///  * [ShapeBorder] the base class for shape outlines.
 abstract class MaterialStateOutlinedBorder extends OutlinedBorder implements MaterialStateProperty<OutlinedBorder?> {
-  /// Creates a [MaterialStateOutlinedBorder].
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const MaterialStateOutlinedBorder();
 
   /// Returns an [OutlinedBorder] that's to be used when a Material component is

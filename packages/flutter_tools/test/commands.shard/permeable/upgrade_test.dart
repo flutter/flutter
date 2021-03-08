@@ -20,6 +20,7 @@ import 'package:process/process.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/mocks.dart';
 
 void main() {
   group('UpgradeCommandRunner', () {
@@ -184,24 +185,22 @@ void main() {
     });
 
     testUsingContext('fetchLatestVersion throws toolExit if HEAD is detached', () async {
-      processManager.addCommands(<FakeCommand>[
-        const FakeCommand(command: <String>[
+      processManager.addCommands(const <FakeCommand>[
+        FakeCommand(command: <String>[
           'git', 'fetch', '--tags'
         ]),
         FakeCommand(
-          command: const <String>['git', 'rev-parse', '--verify', '@{u}'],
-          onRun: () {
-            throw const ProcessException(
-              'git',
-              <String>['rev-parse', '--verify', '@{u}'],
-              'fatal: HEAD does not point to a branch',
-            );
-          }
+          command: <String>['git', 'rev-parse', '--verify', '@{u}'],
+          exception: ProcessException(
+            'git',
+            <String>['rev-parse', '--verify', '@{u}'],
+            'fatal: HEAD does not point to a branch',
+          ),
         ),
       ]);
 
       await expectLater(
-            () async => await realCommandRunner.fetchLatestVersion(),
+            () async => realCommandRunner.fetchLatestVersion(),
         throwsToolExit(message: 'You are not currently on a release branch.'),
       );
       expect(processManager.hasRemainingExpectations, isFalse);
@@ -211,24 +210,22 @@ void main() {
     });
 
     testUsingContext('fetchRemoteRevision throws toolExit if no upstream configured', () async {
-      processManager.addCommands(<FakeCommand>[
-        const FakeCommand(command: <String>[
+      processManager.addCommands(const <FakeCommand>[
+        FakeCommand(command: <String>[
           'git', 'fetch', '--tags'
         ]),
         FakeCommand(
-          command: const <String>['git', 'rev-parse', '--verify', '@{u}'],
-          onRun: () {
-            throw const ProcessException(
-              'git',
-              <String>['rev-parse', '--verify', '@{u}'],
-              'fatal: no upstream configured for branch',
-            );
-          },
+          command: <String>['git', 'rev-parse', '--verify', '@{u}'],
+          exception: ProcessException(
+            'git',
+            <String>['rev-parse', '--verify', '@{u}'],
+            'fatal: no upstream configured for branch',
+          ),
         ),
       ]);
 
       await expectLater(
-            () async => await realCommandRunner.fetchLatestVersion(),
+            () async => realCommandRunner.fetchLatestVersion(),
         throwsToolExit(
           message: 'Unable to upgrade Flutter: no origin repository configured.',
         ),
@@ -242,21 +239,19 @@ void main() {
     testUsingContext('git exception during attemptReset throwsToolExit', () async {
       const String revision = 'abc123';
       const String errorMessage = 'fatal: Could not parse object ´$revision´';
-      processManager.addCommands(<FakeCommand>[
-        FakeCommand(
-          command: const <String>['git', 'reset', '--hard', revision],
-          onRun: () {
-            throw const ProcessException(
-              'git',
-              <String>['reset', '--hard', revision],
-              errorMessage,
-            );
-          },
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>['git', 'reset', '--hard', revision],
+          exception: ProcessException(
+            'git',
+            <String>['reset', '--hard', revision],
+            errorMessage,
+          ),
         ),
-      ]);
+      );
 
       await expectLater(
-            () async => await realCommandRunner.attemptReset(revision),
+            () async => realCommandRunner.attemptReset(revision),
         throwsToolExit(message: errorMessage),
       );
       expect(processManager.hasRemainingExpectations, isFalse);
@@ -440,7 +435,10 @@ void main() {
         });
 
         testUsingContext('upgrade continue prints welcome message', () async {
-          final UpgradeCommand upgradeCommand = UpgradeCommand(fakeCommandRunner);
+          final UpgradeCommand upgradeCommand = UpgradeCommand(
+            verboseHelp: false,
+            commandRunner: fakeCommandRunner,
+          );
 
           await createTestCommandRunner(upgradeCommand).run(
             <String>[

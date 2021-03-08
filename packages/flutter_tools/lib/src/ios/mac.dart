@@ -106,7 +106,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   final List<ProjectMigrator> migrators = <ProjectMigrator>[
-    RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.xcode, globals.flutterUsage),
+    RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.flutterUsage),
     XcodeBuildSystemMigration(app.project, globals.logger),
     ProjectBaseConfigurationMigration(app.project, globals.logger),
     ProjectBuildLocationMigration(app.project, globals.logger),
@@ -255,7 +255,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     if (buildForDevice) {
       buildCommands.addAll(<String>['-sdk', 'iphoneos']);
     } else {
-      buildCommands.addAll(<String>['-sdk', 'iphonesimulator', '-arch', 'x86_64']);
+      buildCommands.addAll(<String>['-sdk', 'iphonesimulator']);
     }
   }
 
@@ -346,10 +346,10 @@ Future<XcodeBuildResult> buildXcodeProject({
   initialBuildStatus?.cancel();
   initialBuildStatus = null;
   globals.printStatus(
-    'Xcode ${buildAction.name} done.'.padRight(kDefaultStatusPadding + 1)
+    'Xcode ${xcodeBuildActionToString(buildAction)} done.'.padRight(kDefaultStatusPadding + 1)
         + getElapsedAsSeconds(sw.elapsed).padLeft(5),
   );
-  globals.flutterUsage.sendTiming(buildAction.name, 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
+  globals.flutterUsage.sendTiming(xcodeBuildActionToString(buildAction), 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
 
   // Run -showBuildSettings again but with the exact same parameters as the
   // build. showBuildSettings is reported to occasionally timeout. Here, we give
@@ -435,7 +435,7 @@ Future<XcodeBuildResult> buildXcodeProject({
           // (for example, kernel binary files produced from previous run).
           globals.fs.directory(outputDir).deleteSync(recursive: true);
         }
-        globals.fsUtils.copyDirectorySync(
+        copyDirectory(
           globals.fs.directory(expectedOutputDirectory),
           globals.fs.directory(outputDir),
         );
@@ -592,9 +592,8 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsa
 /// `clean`, `test`, `analyze`, and `install` are not supported.
 enum XcodeBuildAction { build, archive }
 
-extension XcodeBuildActionExtension on XcodeBuildAction {
-  String get name {
-    switch (this) {
+String xcodeBuildActionToString(XcodeBuildAction action) {
+    switch (action) {
       case XcodeBuildAction.build:
         return 'build';
       case XcodeBuildAction.archive:
@@ -602,7 +601,6 @@ extension XcodeBuildActionExtension on XcodeBuildAction {
       default:
         throw UnsupportedError('Unknown Xcode build action');
     }
-  }
 }
 
 class XcodeBuildResult {

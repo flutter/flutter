@@ -374,24 +374,21 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 
     return AnimatedBuilder(
       animation: widget.route!.animation!,
-      child: Padding(
-        padding: MediaQuery.of(context).viewInsets,
-        child: BottomSheet(
-          animationController: widget.route!._animationController,
-          onClosing: () {
-            if (widget.route!.isCurrent) {
-              Navigator.pop(context);
-            }
-          },
-          builder: widget.route!.builder!,
-          backgroundColor: widget.backgroundColor,
-          elevation: widget.elevation,
-          shape: widget.shape,
-          clipBehavior: widget.clipBehavior,
-          enableDrag: widget.enableDrag,
-          onDragStart: handleDragStart,
-          onDragEnd: handleDragEnd,
-        ),
+      child: BottomSheet(
+        animationController: widget.route!._animationController,
+        onClosing: () {
+          if (widget.route!.isCurrent) {
+            Navigator.pop(context);
+          }
+        },
+        builder: widget.route!.builder!,
+        backgroundColor: widget.backgroundColor,
+        elevation: widget.elevation,
+        shape: widget.shape,
+        clipBehavior: widget.clipBehavior,
+        enableDrag: widget.enableDrag,
+        onDragStart: handleDragStart,
+        onDragEnd: handleDragEnd,
       ),
       builder: (BuildContext context, Widget? child) {
         // Disable the initial animation when accessible navigation is on so

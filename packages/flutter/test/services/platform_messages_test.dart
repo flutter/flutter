@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
-import 'dart:typed_data';
-
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 

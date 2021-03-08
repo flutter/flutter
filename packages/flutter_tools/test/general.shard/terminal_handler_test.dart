@@ -6,6 +6,8 @@
 
 import 'dart:async';
 
+import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -22,11 +24,15 @@ void main() {
     final Logger logger = BufferLogger.test();
     final Signals signals = Signals.test();
     final Terminal terminal = Terminal.test();
+    final MemoryFileSystem fs = MemoryFileSystem.test();
+    final ProcessInfo processInfo = ProcessInfo.test(fs);
     final TerminalHandler terminalHandler = TerminalHandler(
       testRunner,
       logger: logger,
       signals: signals,
       terminal: terminal,
+      processInfo: processInfo,
+      reportReady: false,
     );
 
     expect(testRunner.hasHelpBeenPrinted, false);
@@ -39,11 +45,15 @@ void main() {
     final Logger logger = BufferLogger.test();
     final Signals signals = Signals.test();
     final Terminal terminal = Terminal.test();
+    final MemoryFileSystem fs = MemoryFileSystem.test();
+    final ProcessInfo processInfo = ProcessInfo.test(fs);
     final TerminalHandler terminalHandler = TerminalHandler(
       testRunner,
       logger: logger,
       signals: signals,
       terminal: terminal,
+      processInfo: processInfo,
+      reportReady: false,
     );
 
     expect(testRunner.hasHelpBeenPrinted, false);
@@ -60,12 +70,16 @@ void main() {
       testLogger = BufferLogger.test();
       final Signals signals = Signals.test();
       final Terminal terminal = Terminal.test();
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final ProcessInfo processInfo = ProcessInfo.test(fs);
       mockResidentRunner = MockResidentRunner();
       terminalHandler = TerminalHandler(
         mockResidentRunner,
         logger: testLogger,
         signals: signals,
         terminal: terminal,
+        processInfo: processInfo,
+      reportReady: false,
       );
       when(mockResidentRunner.supportsServiceProtocol).thenReturn(true);
     });
@@ -310,6 +324,34 @@ void main() {
       verify(mockResidentRunner.debugToggleDebugCheckElevationsEnabled()).called(2);
     });
   });
+
+  testWithoutContext('pidfile creation', () {
+    final BufferLogger testLogger = BufferLogger.test();
+    final Signals signals = _TestSignals(Signals.defaultExitSignals);
+    final Terminal terminal = Terminal.test();
+    final MemoryFileSystem fs = MemoryFileSystem.test();
+    final ProcessInfo processInfo = ProcessInfo.test(fs);
+    final ResidentRunner mockResidentRunner = MockResidentRunner();
+    when(mockResidentRunner.stayResident).thenReturn(true);
+    when(mockResidentRunner.supportsServiceProtocol).thenReturn(true);
+    when(mockResidentRunner.supportsRestart).thenReturn(true);
+    const String filename = 'test.pid';
+    final TerminalHandler terminalHandler = TerminalHandler(
+      mockResidentRunner,
+      logger: testLogger,
+      signals: signals,
+      terminal: terminal,
+      processInfo: processInfo,
+      reportReady: false,
+      pidFile: filename,
+    );
+    expect(fs.file(filename).existsSync(), isFalse);
+    terminalHandler.setupTerminal();
+    terminalHandler.registerSignalHandlers();
+    expect(fs.file(filename).existsSync(), isTrue);
+    terminalHandler.stop();
+    expect(fs.file(filename).existsSync(), isFalse);
+  });
 }
 
 class MockDevice extends Mock implements Device {
@@ -320,9 +362,9 @@ class MockDevice extends Mock implements Device {
 
 class MockResidentRunner extends Mock implements ResidentRunner {}
 class MockFlutterDevice extends Mock implements FlutterDevice {}
-class MockResidentCompiler extends Mock implements ResidentCompiler {}
+class FakeResidentCompiler extends Fake implements ResidentCompiler {}
 
-class TestRunner extends Mock implements ResidentRunner {
+class TestRunner extends Fake implements ResidentRunner {
   bool hasHelpBeenPrinted = false;
   String receivedCommand;
 
@@ -352,4 +394,36 @@ class TestRunner extends Mock implements ResidentRunner {
     bool allowExistingDdsInstance = false,
     bool enableDevTools = false,
   }) async => null;
+}
+
+class _TestSignals implements Signals {
+  _TestSignals(this.exitSignals);
+
+  final List<ProcessSignal> exitSignals;
+
+  final Map<ProcessSignal, Map<Object, SignalHandler>> _handlersTable =
+      <ProcessSignal, Map<Object, SignalHandler>>{};
+
+  @override
+  Object addHandler(ProcessSignal signal, SignalHandler handler) {
+    final Object token = Object();
+    _handlersTable.putIfAbsent(signal, () => <Object, SignalHandler>{})[token] = handler;
+    return token;
+  }
+
+  @override
+  Future<bool> removeHandler(ProcessSignal signal, Object token) async {
+    if (!_handlersTable.containsKey(signal)) {
+      return false;
+    }
+    if (!_handlersTable[signal].containsKey(token)) {
+      return false;
+    }
+    _handlersTable[signal].remove(token);
+    return true;
+  }
+
+  @override
+  Stream<Object> get errors => _errors.stream;
+  final StreamController<Object> _errors = StreamController<Object>();
 }

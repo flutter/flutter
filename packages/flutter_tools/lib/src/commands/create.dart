@@ -23,26 +23,28 @@ import '../runner/flutter_command.dart';
 import 'create_base.dart';
 
 class CreateCommand extends CreateBase {
-  CreateCommand() {
+  CreateCommand({
+    bool verboseHelp = false,
+  }) : super(verboseHelp: verboseHelp) {
     addPlatformsOptions(customHelp: 'The platforms supported by this project. '
-        'This argument only works when the --template is set to app or plugin. '
         'Platform folders (e.g. android/) will be generated in the target project. '
+        'This argument only works when "--template" is set to app or plugin. '
         'When adding platforms to a plugin project, the pubspec.yaml will be updated with the requested platform. '
         'Adding desktop platforms requires the corresponding desktop config setting to be enabled.');
     argParser.addOption(
       'template',
       abbr: 't',
-      allowed: FlutterProjectType.values.map<String>((FlutterProjectType type) => type.name),
+      allowed: FlutterProjectType.values.map<String>(flutterProjectTypeToString),
       help: 'Specify the type of project to create.',
       valueHelp: 'type',
       allowedHelp: <String, String>{
-        FlutterProjectType.app.name: '(default) Generate a Flutter application.',
-        FlutterProjectType.package.name: 'Generate a shareable Flutter project containing modular '
+        flutterProjectTypeToString(FlutterProjectType.app): '(default) Generate a Flutter application.',
+        flutterProjectTypeToString(FlutterProjectType.package): 'Generate a shareable Flutter project containing modular '
             'Dart code.',
-        FlutterProjectType.plugin.name: 'Generate a shareable Flutter project containing an API '
+        flutterProjectTypeToString(FlutterProjectType.plugin): 'Generate a shareable Flutter project containing an API '
             'in Dart code with a platform-specific implementation for Android, for iOS code, or '
             'for both.',
-        FlutterProjectType.module.name: 'Generate a project to add a Flutter module to an '
+        flutterProjectTypeToString(FlutterProjectType.module): 'Generate a project to add a Flutter module to an '
             'existing Android or iOS application.',
       },
       defaultsTo: null,
@@ -50,17 +52,17 @@ class CreateCommand extends CreateBase {
     argParser.addOption(
       'sample',
       abbr: 's',
-      help: 'Specifies the Flutter code sample to use as the main.dart for an application. Implies '
-        '--template=app. The value should be the sample ID of the desired sample from the API '
-        'documentation website (http://docs.flutter.dev). An example can be found at '
-        'https://master-api.flutter.dev/flutter/widgets/SingleChildScrollView-class.html',
+      help: 'Specifies the Flutter code sample to use as the "main.dart" for an application. Implies '
+        '"--template=app". The value should be the sample ID of the desired sample from the API '
+        'documentation website (http://docs.flutter.dev/). An example can be found at: '
+        'https://api.flutter.dev/flutter/widgets/SingleChildScrollView-class.html',
       defaultsTo: null,
       valueHelp: 'id',
     );
     argParser.addOption(
       'list-samples',
       help: 'Specifies a JSON output file for a listing of Flutter code samples '
-        'that can be created with --sample.',
+        'that can be created with "--sample".',
       valueHelp: 'path',
     );
   }
@@ -166,8 +168,8 @@ class CreateCommand extends CreateBase {
     if (detectedProjectType != null && template != detectedProjectType && metadataExists) {
       // We can only be definitive that this is the wrong type if the .metadata file
       // exists and contains a type that doesn't match.
-      throwToolExit("The requested template type '${template.name}' doesn't match the "
-          "existing template type of '${detectedProjectType.name}'.");
+      throwToolExit("The requested template type '${flutterProjectTypeToString(template)}' doesn't match the "
+          "existing template type of '${flutterProjectTypeToString(detectedProjectType)}'.");
     }
     return template;
   }
@@ -187,7 +189,7 @@ class CreateCommand extends CreateBase {
       if (argResults['template'] != null &&
         stringToProjectType(stringArg('template') ?? 'app') != FlutterProjectType.app) {
         throwToolExit('Cannot specify --sample with a project type other than '
-          '"${FlutterProjectType.app.name}"');
+          '"${flutterProjectTypeToString(FlutterProjectType.app)}"');
       }
       // Fetch the sample from the server.
       sampleCode = await _fetchSampleFromServer(stringArg('sample'));
@@ -218,7 +220,7 @@ class CreateCommand extends CreateBase {
 
     if (boolArg('with-driver-test')) {
       globals.printError(
-        '--with-driver-test has been deprecated and will no longer add a flutter '
+        'The "--with-driver-test" argument has been deprecated and will no longer add a flutter '
         'driver template. Instead, learn how to use package:integration_test by '
         'visiting https://pub.dev/packages/integration_test .'
       );
@@ -308,7 +310,7 @@ class CreateCommand extends CreateBase {
       _printPluginAddPlatformMessage(relativePluginPath);
     } else  {
       // Tell the user the next steps.
-      final FlutterProject project = FlutterProject.fromPath(projectDirPath);
+      final FlutterProject project = FlutterProject.fromDirectory(globals.fs.directory(projectDirPath));
       final FlutterProject app = project.hasExampleApp ? project.example : project;
       final String relativeAppPath = globals.fs.path.normalize(globals.fs.path.relative(app.directory.path));
       final String relativeAppMain = globals.fs.path.join(relativeAppPath, 'lib', 'main.dart');

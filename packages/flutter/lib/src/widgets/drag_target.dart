@@ -59,12 +59,12 @@ typedef DragEndCallback = void Function(DraggableDetails details);
 /// Signature for when a [Draggable] leaves a [DragTarget].
 ///
 /// Used by [DragTarget.onLeave].
-typedef DragTargetLeave = void Function(Object? data);
+typedef DragTargetLeave<T> = void Function(T? data);
 
 /// Signature for when a [Draggable] moves within a [DragTarget].
 ///
 /// Used by [DragTarget.onMove].
-typedef DragTargetMove = void Function(DragTargetDetails<dynamic> details);
+typedef DragTargetMove<T> = void Function(DragTargetDetails<T> details);
 
 /// Where the [Draggable] should be anchored during a drag.
 enum DragAnchor {
@@ -199,6 +199,7 @@ class Draggable<T extends Object> extends StatefulWidget {
     this.onDragCompleted,
     this.ignoringFeedbackSemantics = true,
     this.rootOverlay = false,
+    this.hitTestBehavior = HitTestBehavior.deferToChild,
   }) : assert(child != null),
        assert(feedback != null),
        assert(ignoringFeedbackSemantics != null),
@@ -349,6 +350,11 @@ class Draggable<T extends Object> extends StatefulWidget {
   ///
   /// Defaults to false.
   final bool rootOverlay;
+
+  /// How to behave during hit test.
+  ///
+  /// Defaults to [HitTestBehavior.deferToChild].
+  final HitTestBehavior hitTestBehavior;
 
   /// Creates a gesture recognizer that recognizes the start of the drag.
   ///
@@ -539,6 +545,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
                          _activeCount < widget.maxSimultaneousDrags!;
     final bool showChild = _activeCount == 0 || widget.childWhenDragging == null;
     return Listener(
+      behavior: widget.hitTestBehavior,
       onPointerDown: canDrag ? _routePointer : null,
       child: showChild ? widget.child : widget.childWhenDragging,
     );
@@ -616,6 +623,7 @@ class DragTarget<T extends Object> extends StatefulWidget {
     this.onAcceptWithDetails,
     this.onLeave,
     this.onMove,
+    this.hitTestBehavior = HitTestBehavior.translucent,
   }) : super(key: key);
 
   /// Called to build the contents of this widget.
@@ -645,12 +653,17 @@ class DragTarget<T extends Object> extends StatefulWidget {
 
   /// Called when a given piece of data being dragged over this target leaves
   /// the target.
-  final DragTargetLeave? onLeave;
+  final DragTargetLeave<T>? onLeave;
 
   /// Called when a [Draggable] moves within this [DragTarget].
   ///
   /// Note that this includes entering and leaving the target.
-  final DragTargetMove? onMove;
+  final DragTargetMove<T>? onMove;
+
+  /// How to behave during hit testing.
+  ///
+  /// Defaults to [HitTestBehavior.translucent].
+  final HitTestBehavior hitTestBehavior;
 
   @override
   _DragTargetState<T> createState() => _DragTargetState<T>();
@@ -699,7 +712,7 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
       _rejectedAvatars.remove(avatar);
     });
     if (widget.onLeave != null)
-      widget.onLeave!(avatar.data);
+      widget.onLeave!(avatar.data as T?);
   }
 
   void didDrop(_DragAvatar<Object> avatar) {
@@ -719,7 +732,7 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
     if (!mounted)
       return;
     if (widget.onMove != null)
-      widget.onMove!(DragTargetDetails<dynamic>(data: avatar.data, offset: avatar._lastOffset!));
+      widget.onMove!(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
   }
 
   @override
@@ -727,7 +740,7 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
     assert(widget.builder != null);
     return MetaData(
       metaData: this,
-      behavior: HitTestBehavior.translucent,
+      behavior: widget.hitTestBehavior,
       child: widget.builder(context, _mapAvatarsToData<T>(_candidateAvatars), _mapAvatarsToData<Object>(_rejectedAvatars)),
     );
   }
