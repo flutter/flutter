@@ -46,7 +46,8 @@ abstract class TextEditingActionTarget {
 ///  * [CallbackAction], which is a similar Action type but unrelated to text
 ///    editing.
 abstract class TextEditingAction<T extends Intent> extends ContextAction<T> {
-  /// Returns the currently focused [TextEditingAction], if any.
+  /// Returns the currently focused [TextEditingAction], or null if none is
+  /// focused.
   @protected
   TextEditingActionTarget? get textEditingActionTarget {
     // If a TextEditingActionTarget is not focused, then ignore this action.

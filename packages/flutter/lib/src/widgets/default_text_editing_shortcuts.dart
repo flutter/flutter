@@ -21,13 +21,16 @@ import 'text_editing_intents.dart';
 ///
 /// This example shows how to use an additional [Shortcuts] widget to override
 /// some default text editing keyboard shortcuts to have new behavior. Instead
-/// of moving the cursor, alt + up/down will instead change the focused widget.
+/// of moving the cursor, alt + up/down will change the focused widget.
 ///
 /// ```dart
 /// @override
 /// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: Center(
+///   // If using WidgetsApp or its descendents MaterialApp or CupertinoApp,
+///   // then DefaultTextEditingShortcuts is already being inserted into the
+///   // widget tree.
+///   return DefaultTextEditingShortcuts(
+///     child: Center(
 ///       child: Shortcuts(
 ///         shortcuts: <LogicalKeySet, Intent>{
 ///           LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowDown): NextFocusIntent(),
@@ -57,9 +60,9 @@ import 'text_editing_intents.dart';
 /// {@tool snippet}
 ///
 /// This example shows how to use an additional [Shortcuts] widget to override
-/// default text editing shortcuts to have completely custom behavior. Here, the
-/// up/down arrow keys increment/decrement a counter instead of moving the
-/// cursor.
+/// default text editing shortcuts to have completely custom behavior defined by
+/// a custom Intent and Action. Here, the up/down arrow keys increment/decrement
+/// a counter instead of moving the cursor.
 ///
 /// ```dart
 /// class IncrementCounterIntent extends Intent {}
@@ -78,7 +81,10 @@ import 'text_editing_intents.dart';
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return Scaffold(
+///     // If using WidgetsApp or its descendents MaterialApp or CupertinoApp,
+///     // then DefaultTextEditingShortcuts is already being inserted into the
+///     // widget tree.
+///     return DefaultTextEditingShortcuts(
 ///       body: Center(
 ///         child: Column(
 ///           mainAxisAlignment: MainAxisAlignment.center,
@@ -137,9 +143,10 @@ import 'text_editing_intents.dart';
 ///
 /// See also:
 ///
-///  * [DefaultTextEditingActions], which contains all of the [Action]s that respond
-///    to the [Intent]s in these shortcuts with the default text editing
-///    behavior.
+///   * [DefaultTextEditingActions], which contains all of the [Action]s that
+///     respond to the [Intent]s in these shortcuts with the default text editing
+///     behavior.
+///   * [WidgetsApp], which creates a DefaultTextEditingShortcuts.
 class DefaultTextEditingShortcuts extends StatelessWidget {
   /// Creates an instance of DefaultTextEditingShortcuts.
   const DefaultTextEditingShortcuts({
@@ -171,18 +178,20 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): const ExtendSelectionLeftTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const ExtendSelectionRightTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): const ExtendSelectionUpTextIntent(),
-    // End has no effect on text editing on this platform.
-    // Home has no effect on text editing on this platform.
-    // Meta + arrow down has no effect on text editing on this platform.
-    // Meta + arrow left has no effect on text editing on this platform.
-    // Meta + arrow right has no effect on text editing on this platform.
-    // Meta + arrow up has no effect on text editing on this platform.
-    // Meta + shift + arrow down has no effect on text editing on this platform.
-    // Meta + shift + arrow left has no effect on text editing on this platform.
-    // Meta + shift + arrow right has no effect on text editing on this platform.
-    // Meta + shift + arrow up has no effect on text editing on this platform.
-    // Shift + end has no effect on text editing on this platform.
-    // Shift + home has no effect on text editing on this platform.
+    // The following key combinations have no effect on text edition on this
+    // platform:
+    //   * End
+    //   * Home
+    //   * Meta + arrow down
+    //   * Meta + arrow left
+    //   * Meta + arrow right
+    //   * Meta + arrow up
+    //   * Meta + shift + arrow down
+    //   * Meta + shift + arrow left
+    //   * Meta + shift + arrow right
+    //   * Meta + shift + arrow up
+    //   * Shift + end
+    //   * Shift + home
   };
 
   static final Map<LogicalKeySet, Intent> _fuchsiaShortcuts = <LogicalKeySet, Intent>{
@@ -206,18 +215,20 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): const ExtendSelectionLeftTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const ExtendSelectionRightTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): const ExtendSelectionUpTextIntent(),
-    // Meta + arrow down has no effect on text editing on this platform.
-    // End has no effect on text editing on this platform.
-    // Home has no effect on text editing on this platform.
-    // Meta + arrow left has no effect on text editing on this platform.
-    // Meta + arrow right has no effect on text editing on this platform.
-    // Meta + arrow up has no effect on text editing on this platform.
-    // Meta + shift + arrow down has no effect on text editing on this platform.
-    // Meta + shift + arrow left has no effect on text editing on this platform.
-    // Meta + shift + arrow right has no effect on text editing on this platform.
-    // Meta + shift + arrow up has no effect on text editing on this platform.
-    // Shift + end has no effect on text editing on this platform.
-    // Shift + home has no effect on text editing on this platform.
+    // The following key combinations have no effect on text edition on this
+    // platform:
+    //   * Meta + arrow down
+    //   * End
+    //   * Home
+    //   * Meta + arrow left
+    //   * Meta + arrow right
+    //   * Meta + arrow up
+    //   * Meta + shift + arrow down
+    //   * Meta + shift + arrow left
+    //   * Meta + shift + arrow right
+    //   * Meta + shift + arrow up
+    //   * Shift + end
+    //   * Shift + home
   };
 
   static final Map<LogicalKeySet, Intent> _iOSShortcuts = <LogicalKeySet, Intent>{
@@ -241,18 +252,20 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): const ExtendSelectionLeftTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const ExtendSelectionRightTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): const ExtendSelectionUpTextIntent(),
-    // Meta + arrow down has no effect on text editing on this platform.
-    // End has no effect on text editing on this platform.
-    // Home has no effect on text editing on this platform.
-    // Meta + arrow left has no effect on text editing on this platform.
-    // Meta + arrow right has no effect on text editing on this platform.
-    // Meta + arrow up has no effect on text editing on this platform.
-    // Meta + shift + arrow down has no effect on text editing on this platform.
-    // Meta + shift + arrow left has no effect on text editing on this platform.
-    // Meta + shift + arrow right has no effect on text editing on this platform.
-    // Meta + shift + arrow up has no effect on text editing on this platform.
-    // Shift + end has no effect on text editing on this platform.
-    // Shift + home has no effect on text editing on this platform.
+    // The following key combinations have no effect on text edition on this
+    // platform:
+    //   * Meta + arrow down
+    //   * End
+    //   * Home
+    //   * Meta + arrow left
+    //   * Meta + arrow right
+    //   * Meta + arrow up
+    //   * Meta + shift + arrow down
+    //   * Meta + shift + arrow left
+    //   * Meta + shift + arrow right
+    //   * Meta + shift + arrow up
+    //   * Shift + end
+    //   * Shift + home
   };
 
   static final Map<LogicalKeySet, Intent> _linuxShortcuts = <LogicalKeySet, Intent>{
@@ -276,18 +289,20 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): const ExtendSelectionLeftTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const ExtendSelectionRightTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): const ExtendSelectionUpTextIntent(),
-    // Meta + arrow down has no effect on text editing on this platform.
-    // End has no effect on text editing on this platform.
-    // Home has no effect on text editing on this platform.
-    // Meta + arrow left has no effect on text editing on this platform.
-    // Meta + arrow right has no effect on text editing on this platform.
-    // Meta + arrow up has no effect on text editing on this platform.
-    // Meta + shift + arrow down has no effect on text editing on this platform.
-    // Meta + shift + arrow left has no effect on text editing on this platform.
-    // Meta + shift + arrow right has no effect on text editing on this platform.
-    // Meta + shift + arrow up has no effect on text editing on this platform.
-    // Shift + end has no effect on text editing on this platform.
-    // Shift + home has no effect on text editing on this platform.
+    // The following key combinations have no effect on text edition on this
+    // platform:
+    //   * Meta + arrow down
+    //   * End
+    //   * Home
+    //   * Meta + arrow left
+    //   * Meta + arrow right
+    //   * Meta + arrow up
+    //   * Meta + shift + arrow down
+    //   * Meta + shift + arrow left
+    //   * Meta + shift + arrow right
+    //   * Meta + shift + arrow up
+    //   * Shift + end
+    //   * Shift + home
   };
 
   static final Map<LogicalKeySet, Intent> _macShortcuts = <LogicalKeySet, Intent>{
@@ -315,14 +330,16 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): const ExtendSelectionLeftTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const ExtendSelectionRightTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): const ExtendSelectionUpTextIntent(),
-    // Control + arrow left has no effect on text editing on this platform.
-    // Control + arrow right has no effect on text editing on this platform.
-    // Control + shift + arrow left has no effect on text editing on this platform.
-    // Control + shift + arrow right has no effect on text editing on this platform.
-    // End has no effect on text editing on this platform.
-    // Home has no effect on text editing on this platform.
-    // Shift + end has no effect on text editing on this platform.
-    // Shift + home has no effect on text editing on this platform.
+    // The following key combinations have no effect on text edition on this
+    // platform:
+    //   * Control + arrow left
+    //   * Control + arrow right
+    //   * Control + shift + arrow left
+    //   * Control + shift + arrow right
+    //   * End
+    //   * Home
+    //   * Shift + end
+    //   * Shift + home
   };
 
   static final Map<LogicalKeySet, Intent> _windowsShortcuts = <LogicalKeySet, Intent>{
@@ -350,14 +367,16 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): const ExtendSelectionUpTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.end): const ExpandSelectionRightByLineTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.home): const ExpandSelectionLeftByLineTextIntent(),
-    // Meta + arrow down has no effect on text editing on this platform.
-    // Meta + arrow left has no effect on text editing on this platform.
-    // Meta + arrow right has no effect on text editing on this platform.
-    // Meta + arrow up has no effect on text editing on this platform.
-    // Meta + shift + arrow down has no effect on text editing on this platform.
-    // Meta + shift + arrow left has no effect on text editing on this platform.
-    // Meta + shift + arrow right has no effect on text editing on this platform.
-    // Meta + shift + arrow up has no effect on text editing on this platform.
+    // The following key combinations have no effect on text edition on this
+    // platform:
+    //   * Meta + arrow down
+    //   * Meta + arrow left
+    //   * Meta + arrow right
+    //   * Meta + arrow up
+    //   * Meta + shift + arrow down
+    //   * Meta + shift + arrow left
+    //   * Meta + shift + arrow right
+    //   * Meta + shift + arrow up
   };
 
   // Web handles its text selection natively and doesn't use any of these
