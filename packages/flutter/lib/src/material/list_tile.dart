@@ -1016,9 +1016,9 @@ class ListTile extends StatelessWidget {
       case Brightness.light:
         // For the sake of backwards compatibility, the default for unselected
         // tiles is Colors.black45 rather than colorScheme.onSurface.withAlpha(0x73).
-      return selected ? theme.colorScheme.primary : Colors.black45;
+        return selected ? theme.colorScheme.primary : Colors.black45;
       case Brightness.dark:
-        return selected ? theme.colorScheme.secondary : null; // null - use current icon theme color
+        return selected ? theme.colorScheme.primary : null; // null - use current icon theme color
     }
   }
 
@@ -1032,14 +1032,9 @@ class ListTile extends StatelessWidget {
     if (!selected && tileTheme?.textColor != null)
       return tileTheme!.textColor;
 
-    if (selected) {
-      switch (theme.brightness) {
-        case Brightness.light:
-          return theme.colorScheme.primary;
-        case Brightness.dark:
-          return theme.colorScheme.secondary;
-      }
-    }
+    if (selected)
+      return theme.colorScheme.primary;
+
     return defaultColor;
   }
 

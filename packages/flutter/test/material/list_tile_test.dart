@@ -2324,8 +2324,8 @@ void main() {
 
     await tester.pumpWidget(buildFrame(brightness: Brightness.dark, selected: true));
     await tester.pumpAndSettle(); // Animated theme change
-    expect(iconColor(leadingKey), darkColorScheme.secondary);
-    expect(iconColor(trailingKey), darkColorScheme.secondary);
+    expect(iconColor(leadingKey), darkColorScheme.primary);
+    expect(iconColor(trailingKey), darkColorScheme.primary);
 
     // For this configuration, ListTile defers to the default IconTheme.
     // The default dark theme's IconTheme has color:white
