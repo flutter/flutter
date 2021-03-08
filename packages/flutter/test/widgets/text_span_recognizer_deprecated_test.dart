@@ -217,4 +217,3 @@ void main() {
     expect(spyLongPress, 1);
   });
 }
-
