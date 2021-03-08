@@ -5433,10 +5433,12 @@ void main() {
       'TextInput.show',
       'TextInput.setEditableSizeAndTransform',
       'TextInput.setMarkedTextRect',
+      'TextInput.setCaretRect',
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.setEditingState',
       'TextInput.show',
+      'TextInput.setCaretRect',
     ];
     expect(
       tester.testTextInput.log.map((MethodCall m) => m.method),
@@ -5476,10 +5478,12 @@ void main() {
       'TextInput.show',
       'TextInput.setEditableSizeAndTransform',
       'TextInput.setMarkedTextRect',
+      'TextInput.setCaretRect',
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.setEditingState',
       'TextInput.show',
+      'TextInput.setCaretRect',
       'TextInput.show',
     ];
     expect(tester.testTextInput.log.length, logOrder.length);
@@ -5525,10 +5529,12 @@ void main() {
       'TextInput.show',
       'TextInput.setEditableSizeAndTransform',
       'TextInput.setMarkedTextRect',
+      'TextInput.setCaretRect',
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.setEditingState',
       'TextInput.show',
+      'TextInput.setCaretRect',
       'TextInput.setEditingState',
     ];
 
