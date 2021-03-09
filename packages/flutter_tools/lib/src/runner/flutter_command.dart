@@ -1430,6 +1430,7 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.fuchsia_arm64:
     case TargetPlatform.fuchsia_x64:
     case TargetPlatform.tester:
+    case TargetPlatform.windows_uwp_x64:
       // No artifacts currently supported.
       return null;
   }
