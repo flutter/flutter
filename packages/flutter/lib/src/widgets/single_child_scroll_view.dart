@@ -4,14 +4,19 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
+import 'focus_manager.dart';
+import 'focus_scope.dart';
 import 'framework.dart';
+import 'notification_listener.dart';
 import 'primary_scroll_controller.dart';
 import 'scroll_controller.dart';
+import 'scroll_notification.dart';
 import 'scroll_physics.dart';
+import 'scroll_view.dart';
 import 'scrollable.dart';
 
 /// A box in which a single widget can be scrolled.
@@ -221,6 +226,7 @@ class SingleChildScrollView extends StatelessWidget {
     this.dragStartBehavior = DragStartBehavior.start,
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
+    this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual
   }) : assert(scrollDirection != null),
        assert(dragStartBehavior != null),
        assert(clipBehavior != null),
@@ -306,6 +312,9 @@ class SingleChildScrollView extends StatelessWidget {
   /// {@macro flutter.widgets.scrollable.restorationId}
   final String? restorationId;
 
+  /// {@macro flutter.widgets.scroll_view.keyboardDismissBehavior}
+  final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
+
   AxisDirection _getDirection(BuildContext context) {
     return getAxisDirectionFromAxisReverseAndDirectionality(context, scrollDirection, reverse);
   }
@@ -319,7 +328,7 @@ class SingleChildScrollView extends StatelessWidget {
     final ScrollController? scrollController = primary
         ? PrimaryScrollController.of(context)
         : controller;
-    final Scrollable scrollable = Scrollable(
+    Widget scrollable = Scrollable(
       dragStartBehavior: dragStartBehavior,
       axisDirection: axisDirection,
       controller: scrollController,
@@ -334,6 +343,20 @@ class SingleChildScrollView extends StatelessWidget {
         );
       },
     );
+
+    if (keyboardDismissBehavior == ScrollViewKeyboardDismissBehavior.onDrag) {
+      scrollable = NotificationListener<ScrollUpdateNotification>(
+        child: scrollable,
+        onNotification: (ScrollUpdateNotification notification) {
+          final FocusScopeNode focusNode = FocusScope.of(context);
+          if (notification.dragDetails != null && focusNode.hasFocus) {
+            focusNode.unfocus();
+          }
+          return false;
+        },
+      );
+    }
+
     return primary && scrollController != null
       ? PrimaryScrollController.none(child: scrollable)
       : scrollable;

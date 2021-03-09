@@ -91,4 +91,8 @@ void main() {
   AnimatedList.of(context, nullOk: false);
   SliverAnimatedList.of(context, nullOk: true);
   SliverAnimatedList.of(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/59127
+  const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem(title: myTitle);
+  bottomNavigationBarItem.title;
 }

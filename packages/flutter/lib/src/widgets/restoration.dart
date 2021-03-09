@@ -849,11 +849,11 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
 
     if (!property.isRegistered) {
       property._register(restorationId, this);
-      final VoidCallback listener = () {
+      void listener() {
         if (bucket == null)
           return;
         _updateProperty(property);
-      };
+      }
       property.addListener(listener);
       _properties[property] = listener;
     }

@@ -106,9 +106,9 @@ void main() {
       );
 
       final List<RenderObject> visitedChildren = <RenderObject>[];
-      final RenderObjectVisitor visitor = (RenderObject child) {
+      void visitor(RenderObject child) {
         visitedChildren.add(child);
-      };
+      }
 
       stack.visitChildrenForSemantics(visitor);
 

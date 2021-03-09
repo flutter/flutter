@@ -168,17 +168,13 @@ void main() {
 
   testWidgets('Open/close drawers by flinging', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           drawer: Drawer(
-            child: Container(
-              child: const Text('start drawer'),
-            ),
+            child: Text('start drawer'),
           ),
           endDrawer: Drawer(
-            child: Container(
-              child: const Text('end drawer'),
-            ),
+            child: Text('end drawer'),
           ),
         ),
       ),

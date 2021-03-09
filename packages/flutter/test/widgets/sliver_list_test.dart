@@ -283,14 +283,14 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200,
             child: ListView(
               controller: controller,
               children: <Widget>[
                 if (isShow)
                   for (int i = 0; i < 20; i++)
-                    Container(
+                    SizedBox(
                       height: 50,
                       child: Text('Tile $i'),
                     ),
@@ -340,7 +340,7 @@ Widget _buildSliverListRenderWidgetChild(List<String> items) {
     home: Directionality(
       textDirection: TextDirection.ltr,
       child: Material(
-        child: Container(
+        child: SizedBox(
           height: 500,
           child: CustomScrollView(
             controller: ScrollController(),
@@ -372,7 +372,7 @@ Widget _buildSliverList({
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Center(
-      child: Container(
+      child: SizedBox(
         height: viewportHeight,
         child: CustomScrollView(
           controller: controller,
@@ -380,7 +380,7 @@ Widget _buildSliverList({
             SliverList(
               delegate: SliverChildBuilderDelegate(
                 (BuildContext context, int i) {
-                  return Container(
+                  return SizedBox(
                     key: ValueKey<int>(items[i]),
                     height: itemHeight,
                     child: Text('Tile ${items[i]}'),

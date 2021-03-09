@@ -238,12 +238,7 @@ void main() {
 
       test('Checkbox has correct Android semantics', () async {
         Future<AndroidSemanticsNode> getCheckboxSemantics(String key) async {
-          return getSemantics(
-            find.descendant(
-              of: find.byValueKey(key),
-              matching: find.byType('_CheckboxRenderObjectWidget'),
-            ),
-          );
+          return getSemantics(find.byValueKey(key));
         }
         expect(
           await getCheckboxSemantics(checkboxKeyValue),
@@ -290,12 +285,7 @@ void main() {
       });
       test('Radio has correct Android semantics', () async {
         Future<AndroidSemanticsNode> getRadioSemantics(String key) async {
-          return getSemantics(
-            find.descendant(
-              of: find.byValueKey(key),
-              matching: find.byType('_RadioRenderObjectWidget'),
-            ),
-          );
+          return getSemantics(find.byValueKey(key));
         }
         expect(
           await getRadioSemantics(radio2KeyValue),
@@ -331,12 +321,7 @@ void main() {
       });
       test('Switch has correct Android semantics', () async {
         Future<AndroidSemanticsNode> getSwitchSemantics(String key) async {
-          return getSemantics(
-            find.descendant(
-              of: find.byValueKey(key),
-              matching: find.byType('_SwitchRenderObjectWidget'),
-            ),
-          );
+          return getSemantics(find.byValueKey(key));
         }
         expect(
           await getSwitchSemantics(switchKeyValue),
@@ -374,12 +359,7 @@ void main() {
       // Regression test for https://github.com/flutter/flutter/issues/20820.
       test('Switch can be labeled', () async {
         Future<AndroidSemanticsNode> getSwitchSemantics(String key) async {
-          return getSemantics(
-            find.descendant(
-              of: find.byValueKey(key),
-              matching: find.byType('_SwitchRenderObjectWidget'),
-            ),
-          );
+          return getSemantics(find.byValueKey(key));
         }
         expect(
           await getSwitchSemantics(labeledSwitchKeyValue),

@@ -45,9 +45,9 @@ const String kExtraFrontEndOptions = 'ExtraFrontEndOptions';
 /// This is expected to be a comma separated list of strings.
 const String kExtraGenSnapshotOptions = 'ExtraGenSnapshotOptions';
 
-/// Whether the app should run gen_snapshot as a split aot build for deferred
+/// Whether the build should run gen_snapshot as a split aot build for deferred
 /// components.
-const String kSplitAot = 'SplitAot';
+const String kDeferredComponents = 'DeferredComponents';
 
 /// Whether to strip source code information out of release builds and where to save it.
 const String kSplitDebugInfo = 'SplitDebugInfo';
@@ -131,6 +131,7 @@ class CopyFlutterBundle extends Target {
       environment,
       environment.outputDir,
       targetPlatform: TargetPlatform.android,
+      buildMode: buildMode,
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,

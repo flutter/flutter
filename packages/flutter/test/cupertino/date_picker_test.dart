@@ -1502,7 +1502,7 @@ Widget _buildPicker({
       onSelectedItemChanged: onSelectedItemChanged,
       children: List<Widget>.generate(100, (int index) {
         return Center(
-          child: Container(
+          child: SizedBox(
             width: 400.0,
             height: 100.0,
             child: Text(index.toString()),

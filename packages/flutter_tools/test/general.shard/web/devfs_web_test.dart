@@ -1022,7 +1022,7 @@ void main() {
 
     expect(await webAssetServer.metadataContents('foo/main_module.ddc_merged_metadata'), null);
     // Not base href.
-    expect(() async  => await webAssetServer.metadataContents('bar/main_module.ddc_merged_metadata'), throwsException);
+    expect(() async => webAssetServer.metadataContents('bar/main_module.ddc_merged_metadata'), throwsException);
   }));
 
   test('DevFS URI includes any specified base path.', () => testbed.run(() async {

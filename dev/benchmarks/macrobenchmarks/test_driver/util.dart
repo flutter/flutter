@@ -40,8 +40,8 @@ void macroPerfTest(
     { Duration pageDelay,
       Duration duration = const Duration(seconds: 3),
       Duration timeout = kTimeout,
-      Future<void> driverOps(FlutterDriver driver),
-      Future<void> setupOps(FlutterDriver driver),
+      Future<void> Function(FlutterDriver driver) driverOps,
+      Future<void> Function(FlutterDriver driver) setupOps,
     }) {
   test(testName, () async {
     Timeline timeline;

@@ -161,20 +161,20 @@ void main() {
               slivers: <Widget>[
                 SliverList(
                   delegate: SliverChildListDelegate(
-                    <Widget>[
-                      Container(height: 22.2, child: const Text('TOP')),
-                      Container(height: 22.2),
-                      Container(height: 22.2),
+                    const <Widget>[
+                      SizedBox(height: 22.2, child: Text('TOP')),
+                      SizedBox(height: 22.2),
+                      SizedBox(height: 22.2),
                     ],
                   ),
                 ),
                 SliverFixedExtentList(
                   itemExtent: 22.2,
                   delegate: SliverChildListDelegate(
-                    <Widget>[
-                      Container(),
-                      Container(child: const Text('A')),
-                      Container(),
+                    const <Widget>[
+                      SizedBox(),
+                      Text('A'),
+                      SizedBox(),
                     ],
                   ),
                 ),
@@ -183,19 +183,19 @@ void main() {
                     crossAxisCount: 2,
                   ),
                   delegate: SliverChildListDelegate(
-                    <Widget>[
-                      Container(),
-                      Container(child: const Text('B')),
-                      Container(),
+                    const <Widget>[
+                      SizedBox(),
+                      Text('B'),
+                      SizedBox(),
                     ],
                   ),
                 ),
                 SliverList(
                   delegate: SliverChildListDelegate(
-                    <Widget>[
-                      Container(height: 22.2),
-                      Container(height: 22.2),
-                      Container(height: 22.2, child: const Text('BOTTOM')),
+                    const <Widget>[
+                      SizedBox(height: 22.2),
+                      SizedBox(height: 22.2),
+                      SizedBox(height: 22.2, child: Text('BOTTOM')),
                     ],
                   ),
                 ),
@@ -389,10 +389,10 @@ void main() {
                     ),
                     delegate: SliverChildListDelegate(
                       <Widget>[
-                        Container(child: const Center(child: Text('A'))),
-                        Container(child: const Center(child: Text('B'))),
-                        Container(child: const Center(child: Text('C'))),
-                        Container(child: const Center(child: Text('D'))),
+                        const Center(child: Text('A')),
+                        const Center(child: Text('B')),
+                        const Center(child: Text('C')),
+                        const Center(child: Text('D')),
                       ],
                     ),
                   ),
@@ -952,15 +952,13 @@ void main() {
             SliverGrid(
               delegate: SliverChildBuilderDelegate(
                   (BuildContext context, int index) {
-                  return Container(
-                    child: Material(
-                      color: index.isEven ? Colors.yellow : Colors.red,
-                      child: InkWell(
-                        onTap: () {
-                          index.isEven ? firstTapped++ : secondTapped++;
-                        },
-                        child: Text('Index $index'),
-                      ),
+                  return Material(
+                    color: index.isEven ? Colors.yellow : Colors.red,
+                    child: InkWell(
+                      onTap: () {
+                        index.isEven ? firstTapped++ : secondTapped++;
+                      },
+                      child: Text('Index $index'),
                     ),
                   );
                 },
