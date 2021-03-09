@@ -313,10 +313,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     // call to ${super.debugFillProperties(description)} is omitted because the
     // root superclasses don't include any interesting information for this
     // class
-    assert(() {
-      properties.add(DiagnosticsNode.message('debug mode enabled - ${kIsWeb ? 'Web' :  Platform.operatingSystem}'));
-      return true;
-    }());
+    if (!kReleaseMode) {
+      properties.add(DiagnosticsNode.message('${kDebugMode ? 'debug' : 'profile'} mode enabled - ${kIsWeb ? 'Web' :  Platform.operatingSystem}'));
+    }
     properties.add(DiagnosticsProperty<Size>('window size', _window.physicalSize, tooltip: 'in physical pixels'));
     properties.add(DoubleProperty('device pixel ratio', _window.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
     properties.add(DiagnosticsProperty<ViewConfiguration>('configuration', configuration, tooltip: 'in logical pixels'));

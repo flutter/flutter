@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'constants.dart';
+
 /// Framework code should use this method in favor of calling `toString` on
 /// [Object.runtimeType].
 ///
@@ -10,9 +12,8 @@
 /// return `object.runtimeType.toString()`; otherwise, it will return the
 /// [optimizedValue], which must be a simple constant string.
 String objectRuntimeType(Object? object, String optimizedValue) {
-  assert(() {
+  if (!kReleaseMode) {
     optimizedValue = object.runtimeType.toString();
-    return true;
-  }());
+  }
   return optimizedValue;
 }

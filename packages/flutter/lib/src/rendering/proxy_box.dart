@@ -3147,9 +3147,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    bool inReleaseMode = true;
-    assert(() {
-      inReleaseMode = false;
+    if (!kReleaseMode) {
       if (debugSymmetricPaintCount + debugAsymmetricPaintCount == 0) {
         properties.add(MessageProperty('usefulness ratio', 'no metrics collected yet (never painted)'));
       } else {
@@ -3173,10 +3171,9 @@ class RenderRepaintBoundary extends RenderProxyBox {
         properties.add(PercentProperty('metrics', fraction, unit: 'useful', tooltip: '$debugSymmetricPaintCount bad vs $debugAsymmetricPaintCount good'));
         properties.add(MessageProperty('diagnosis', diagnosis));
       }
-      return true;
-    }());
-    if (inReleaseMode)
+    } else {
       properties.add(DiagnosticsNode.message('(run in checked mode to collect repaint boundary statistics)'));
+    }
   }
 }
 

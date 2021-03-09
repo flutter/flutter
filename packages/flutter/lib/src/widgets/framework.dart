@@ -5425,10 +5425,9 @@ abstract class RenderObjectElement extends Element {
       _debugDoingBuild = false;
       return true;
     }());
-    assert(() {
+    if (!kReleaseMode) {
       _debugUpdateRenderObjectOwner();
-      return true;
-    }());
+    }
     assert(_slot == newSlot);
     attachRenderObject(newSlot);
     _dirty = false;
@@ -5438,10 +5437,9 @@ abstract class RenderObjectElement extends Element {
   void update(covariant RenderObjectWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
-    assert(() {
+    if (!kReleaseMode) {
       _debugUpdateRenderObjectOwner();
-      return true;
-    }());
+    }
     assert(() {
       _debugDoingBuild = true;
       return true;
@@ -5455,10 +5453,9 @@ abstract class RenderObjectElement extends Element {
   }
 
   void _debugUpdateRenderObjectOwner() {
-    assert(() {
+    if (!kReleaseMode) {
       renderObject.debugCreator = DebugCreator(this);
-      return true;
-    }());
+    }
   }
 
   @override
