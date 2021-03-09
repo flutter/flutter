@@ -399,12 +399,12 @@ enum ListTileControlAffinity {
 ///     child: Container(
 ///       width: 48,
 ///       height: 48,
-///       padding: EdgeInsets.symmetric(vertical: 4.0),
+///       padding: const EdgeInsets.symmetric(vertical: 4.0),
 ///       alignment: Alignment.center,
-///       child: CircleAvatar(),
+///       child: const CircleAvatar(),
 ///     ),
 ///   ),
-///   title: Text('title'),
+///   title: const Text('title'),
 ///   dense: false,
 /// ),
 /// ```
@@ -426,11 +426,12 @@ enum ListTileControlAffinity {
 /// ```dart preamble
 /// class CustomListItem extends StatelessWidget {
 ///   const CustomListItem({
+///     Key? key,
 ///     required this.thumbnail,
 ///     required this.title,
 ///     required this.user,
 ///     required this.viewCount,
-///   });
+///   }) : super(key: key);
 ///
 ///   final Widget thumbnail;
 ///   final String title;
@@ -547,7 +548,7 @@ enum ListTileControlAffinity {
 ///
 /// ```dart preamble
 /// class _ArticleDescription extends StatelessWidget {
-///   _ArticleDescription({
+///   const _ArticleDescription({
 ///     Key? key,
 ///     required this.title,
 ///     required this.subtitle,
@@ -573,7 +574,7 @@ enum ListTileControlAffinity {
 ///             crossAxisAlignment: CrossAxisAlignment.start,
 ///             children: <Widget>[
 ///               Text(
-///                 '$title',
+///                 title,
 ///                 maxLines: 2,
 ///                 overflow: TextOverflow.ellipsis,
 ///                 style: const TextStyle(
@@ -582,7 +583,7 @@ enum ListTileControlAffinity {
 ///               ),
 ///               const Padding(padding: EdgeInsets.only(bottom: 2.0)),
 ///               Text(
-///                 '$subtitle',
+///                 subtitle,
 ///                 maxLines: 2,
 ///                 overflow: TextOverflow.ellipsis,
 ///                 style: const TextStyle(
@@ -600,7 +601,7 @@ enum ListTileControlAffinity {
 ///             mainAxisAlignment: MainAxisAlignment.end,
 ///             children: <Widget>[
 ///               Text(
-///                 '$author',
+///                 author,
 ///                 style: const TextStyle(
 ///                   fontSize: 12.0,
 ///                   color: Colors.black87,
@@ -622,7 +623,7 @@ enum ListTileControlAffinity {
 /// }
 ///
 /// class CustomListItemTwo extends StatelessWidget {
-///   CustomListItemTwo({
+///   const CustomListItemTwo({
 ///     Key? key,
 ///     required this.thumbnail,
 ///     required this.title,
@@ -683,7 +684,7 @@ enum ListTileControlAffinity {
 ///         ),
 ///         title: 'Flutter 1.0 Launch',
 ///         subtitle:
-///           'Flutter continues to improve and expand its horizons.'
+///           'Flutter continues to improve and expand its horizons. '
 ///           'This text should max out at two lines and clip',
 ///         author: 'Dash',
 ///         publishDate: 'Dec 28',

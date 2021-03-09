@@ -579,8 +579,8 @@ class _TabBarScrollController extends ScrollController {
 ///      length: 3,
 ///      child: Scaffold(
 ///        appBar: AppBar(
-///          title: Text('TabBar Widget'),
-///          bottom: TabBar(
+///          title: const Text('TabBar Widget'),
+///          bottom: const TabBar(
 ///            tabs: <Widget>[
 ///              Tab(
 ///                icon: Icon(Icons.cloud_outlined),
@@ -594,7 +594,7 @@ class _TabBarScrollController extends ScrollController {
 ///            ],
 ///          ),
 ///        ),
-///        body: TabBarView(
+///        body: const TabBarView(
 ///          children: <Widget>[
 ///            Center(
 ///              child: Text('It\'s cloudy here'),
@@ -628,13 +628,14 @@ class _TabBarScrollController extends ScrollController {
 ///    _tabController = TabController(length: 3, vsync: this);
 ///  }
 ///
+///  @override
 ///  Widget build(BuildContext context) {
 ///    return Scaffold(
 ///      appBar: AppBar(
-///        title: Text('TabBar Widget'),
+///        title: const Text('TabBar Widget'),
 ///        bottom: TabBar(
 ///          controller: _tabController,
-///          tabs: <Widget>[
+///          tabs: const <Widget>[
 ///            Tab(
 ///              icon: Icon(Icons.cloud_outlined),
 ///            ),
@@ -649,7 +650,7 @@ class _TabBarScrollController extends ScrollController {
 ///      ),
 ///      body: TabBarView(
 ///        controller: _tabController,
-///        children: <Widget>[
+///        children: const <Widget>[
 ///          Center(
 ///            child: Text('It\'s cloudy here'),
 ///          ),
