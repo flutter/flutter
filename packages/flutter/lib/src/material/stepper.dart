@@ -127,46 +127,32 @@ class Step {
 /// ```dart
 /// int _index = 0;
 /// Widget build(BuildContext context) {
-///   return Container(
-///     height: 300,
-///     width: 300,
-///     child: Stepper(
-///       currentStep: _index,
-///       onStepCancel: () {
-///         if (_index <= 0) {
-///          return;
-///         }
-///         setState(() {
-///           _index--;
-///         });
-///       },
-///       onStepContinue: () {
-///         if (_index >= 1) {
-///          return;
-///         }
-///         setState(() {
-///           _index++;
-///         });
-///       },
-///       onStepTapped: (index) {
-///         setState(() {
-///           _index = index;
-///         });
-///       },
-///       steps: [
-///         Step(
-///           title: Text("Step 1 title"),
-///           content: Container(
-///             alignment: Alignment.centerLeft,
-///             child: Text("Content for Step 1")
-///           ),
+///   return Stepper(
+///     currentStep: _index,
+///     onStepCancel: () {
+///       if (_index > 0)
+///         setState(() { _index -= 1; });
+///     },
+///     onStepContinue: () {
+///       if (_index <= 0)
+///         setState(() { _index += 1; });
+///     },
+///     onStepTapped: (index) {
+///       setState(() { _index = index; });
+///     },
+///     steps: <Step>[
+///       Step(
+///         title: Text('Step 1 title'),
+///         content: Container(
+///           alignment: Alignment.centerLeft,
+///           child: Text('Content for Step 1')
 ///         ),
-///         Step(
-///           title: Text("Step 2 title"),
-///           content: Text("Content for Step 2"),
-///         ),
-///       ],
-///     ),
+///       ),
+///       Step(
+///         title: Text('Step 2 title'),
+///         content: Text('Content for Step 2'),
+///       ),
+///     ],
 ///   );
 /// }
 /// ```
@@ -370,17 +356,6 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         return const Text('!', style: _kStepStyle);
     }
   }
-
-  /*
-  Color _circleColor(int index) {
-    final ThemeData themeData = Theme.of(context);
-    if (!_isDark()) {
-      return widget.steps[index].isActive ? themeData.primaryColor : Colors.black38;
-    } else {
-      return widget.steps[index].isActive ? themeData.accentColor : themeData.backgroundColor;
-    }
-  }
-  */
 
   Color _circleColor(int index) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
