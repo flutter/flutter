@@ -624,7 +624,7 @@ class CustomScrollView extends ScrollView {
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     String? restorationId,
-    bool autoScrollbar = true,
+    bool autoScrollbar = false,
     Clip clipBehavior = Clip.hardEdge,
   }) : super(
     key: key,
