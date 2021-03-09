@@ -3109,17 +3109,17 @@ void main() {
     expect(itemBoxes[1].localToGlobal(Offset.zero).dy, 47.5);
 
     expect(
-        find.ancestor(
-          of: find.text(value).last,
-          matching: find.byType(CustomPaint),
-        ).at(2),
-        paints
-          ..save()
-          ..rrect()
-          ..rrect()
-          ..rrect()
+      find.ancestor(
+        of: find.text(value).last,
+        matching: find.byType(CustomPaint),
+      ).at(2),
+      paints
+        ..save()
+        ..rrect()
+        ..rrect()
+        ..rrect()
         // The height of menu is 47.0.
-          ..rrect(rrect: const RRect.fromLTRBXY(0.0, 0.0, 112.0, 47.0, 2.0, 2.0), color: Colors.grey[50], hasMaskFilter: false)
+        ..rrect(rrect: const RRect.fromLTRBXY(0.0, 0.0, 112.0, 47.0, 2.0, 2.0), color: Colors.grey[50], hasMaskFilter: false)
     );
   });
 
