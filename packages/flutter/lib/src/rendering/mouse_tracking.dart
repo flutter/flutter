@@ -7,11 +7,12 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
-import 'mouse_cursor.dart';
 import 'object.dart';
+import 'system_mouse_cursor.dart';
 
 /// Signature for listening to [PointerEnterEvent] events.
 ///
@@ -521,6 +522,40 @@ mixin _MouseTrackerEventMixin on BaseMouseTracker {
   }
 }
 
+mixin _MouseTrackerCursorMixin on BaseMouseTracker {
+  final MouseTrackerCursorMixin _mouseCursorMixin = MouseTrackerCursorMixin(
+    SystemMouseCursors.basic
+  );
+
+  /// Returns the active mouse cursor of a device.
+  ///
+  /// The return value is the last [MouseCursor] activated onto this
+  /// device, even if the activation failed.
+  ///
+  /// Only valid when asserts are enabled. In release builds, always returns
+  /// null.
+  @visibleForTesting
+  MouseCursor? debugDeviceActiveCursor(int device) {
+    return _mouseCursorMixin.debugDeviceActiveCursor(device);
+  }
+
+  @protected
+  @override
+  void handleDeviceUpdate(MouseTrackerUpdateDetails details) {
+    super.handleDeviceUpdate(details);
+    _handleDeviceUpdateMouseCursor(details);
+  }
+
+  // Handles device update and changes mouse cursors.
+  void _handleDeviceUpdateMouseCursor(MouseTrackerUpdateDetails details) {
+    _mouseCursorMixin.handleDeviceUpdateMouseCursor(
+      details.device,
+      details.triggeringEvent,
+      details.nextAnnotations.keys.map((MouseTrackerAnnotation annotaion) => annotaion.cursor),
+    );
+  }
+}
+
 /// Tracks the relationship between mouse devices and annotations, and
 /// triggers mouse events and cursor changes accordingly.
 ///
@@ -542,5 +577,5 @@ mixin _MouseTrackerEventMixin on BaseMouseTracker {
 ///
 ///   * [BaseMouseTracker], which introduces more details about the timing of
 ///     device updates.
-class MouseTracker extends BaseMouseTracker with MouseTrackerCursorMixin, _MouseTrackerEventMixin {
+class MouseTracker extends BaseMouseTracker with _MouseTrackerCursorMixin, _MouseTrackerEventMixin {
 }

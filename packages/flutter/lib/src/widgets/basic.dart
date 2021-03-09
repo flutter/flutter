@@ -41,6 +41,8 @@ export 'package:flutter/rendering.dart' show
   LayerLink,
   MainAxisAlignment,
   MainAxisSize,
+  MouseCursor,
+  SystemMouseCursors,
   MultiChildLayoutDelegate,
   Overflow,
   PaintingContext,
