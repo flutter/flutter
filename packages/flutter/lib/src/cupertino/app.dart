@@ -406,7 +406,7 @@ class CupertinoApp extends StatefulWidget {
 }
 
 class _AlwaysCupertinoScrollBehavior extends ScrollBehavior {
-  const _AlwaysCupertinoScrollBehavior({ bool useDecoration = false }) : super(useDecoration: useDecoration);
+  const _AlwaysCupertinoScrollBehavior({ bool useDecoration = true }) : super(useDecoration: useDecoration);
 
   @Deprecated(
     'Migrate to buildViewportDecoration. '
@@ -440,7 +440,6 @@ class _AlwaysCupertinoScrollBehavior extends ScrollBehavior {
         return CupertinoScrollbar(
           child: child,
           controller: details.controller,
-          isAlwaysShown: true,
         );
     }
   }
@@ -556,7 +555,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
     final CupertinoThemeData effectiveThemeData = widget.theme ?? const CupertinoThemeData();
 
     return ScrollConfiguration(
-      behavior: const _AlwaysCupertinoScrollBehavior(useDecoration: true),
+      behavior: const _AlwaysCupertinoScrollBehavior(),
       child: CupertinoUserInterfaceLevel(
         data: CupertinoUserInterfaceLevelData.base,
         child: CupertinoTheme(

@@ -106,7 +106,6 @@ class ScrollBehavior {
           ? RawScrollbar(
             child: child,
             controller: details.controller,
-            isAlwaysShown: true,
           )
           : child;
     }

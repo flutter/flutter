@@ -125,22 +125,19 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
         ),
         body: TabBarView(
           children: demos!.map<Widget>((ComponentDemoTabData demo) {
-            return PrimaryScrollController(
-              controller: ScrollController(),
-              child: SafeArea(
-                top: false,
-                bottom: false,
-                child: Column(
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(demo.description!,
-                        style: Theme.of(context).textTheme.subtitle1,
-                      ),
+            return SafeArea(
+              top: false,
+              bottom: false,
+              child: Column(
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(demo.description!,
+                      style: Theme.of(context).textTheme.subtitle1,
                     ),
-                    Expanded(child: demo.demoWidget!),
-                  ],
-                ),
+                  ),
+                  Expanded(child: demo.demoWidget!),
+                ],
               ),
             );
           }).toList(),

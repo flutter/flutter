@@ -659,7 +659,7 @@ class MaterialApp extends StatefulWidget {
 }
 
 class _MaterialScrollBehavior extends ScrollBehavior {
-  const _MaterialScrollBehavior({ bool useDecoration = false }) : super(useDecoration: useDecoration);
+  const _MaterialScrollBehavior({ bool useDecoration = true }) : super(useDecoration: useDecoration);
 
   @override
   TargetPlatform getPlatform(BuildContext context) {
@@ -721,7 +721,6 @@ class _MaterialScrollBehavior extends ScrollBehavior {
         child = Scrollbar(
           child: child,
           controller: details.controller,
-          isAlwaysShown: theme.scrollbarTheme.isAlwaysShown ?? true,
         );
     }
     return child;
@@ -894,7 +893,7 @@ class _MaterialAppState extends State<MaterialApp> {
     }());
 
     return ScrollConfiguration(
-      behavior: const _MaterialScrollBehavior(useDecoration: true),
+      behavior: const _MaterialScrollBehavior(),
       child: HeroControllerScope(
         controller: _heroController,
         child: result,

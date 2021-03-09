@@ -85,27 +85,24 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
   }
 
   Widget buildTabView(_Page page) {
-    return PrimaryScrollController(
-      controller: ScrollController(),
-      child: Builder(
-        builder: (BuildContext context) {
-          return Container(
-            key: ValueKey<String?>(page.label),
-            padding: const EdgeInsets.fromLTRB(48.0, 48.0, 48.0, 96.0),
-            child: Card(
-              child: Center(
-                child: Text(page.label!,
-                  style: TextStyle(
-                    color: page.labelColor,
-                    fontSize: 32.0,
-                  ),
-                  textAlign: TextAlign.center,
+    return Builder(
+      builder: (BuildContext context) {
+        return Container(
+          key: ValueKey<String?>(page.label),
+          padding: const EdgeInsets.fromLTRB(48.0, 48.0, 48.0, 96.0),
+          child: Card(
+            child: Center(
+              child: Text(page.label!,
+                style: TextStyle(
+                  color: page.labelColor,
+                  fontSize: 32.0,
                 ),
+                textAlign: TextAlign.center,
               ),
             ),
-          );
-        }
-      ),
+          ),
+        );
+      }
     );
   }
 

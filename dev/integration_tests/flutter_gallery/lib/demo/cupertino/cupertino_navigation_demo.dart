@@ -72,10 +72,9 @@ class CupertinoNavigationDemo extends StatelessWidget {
             ],
           ),
           tabBuilder: (BuildContext context, int index) {
-            late CupertinoTabView tab;
             switch (index) {
               case 0:
-                tab = CupertinoTabView(
+                return CupertinoTabView(
                   builder: (BuildContext context) {
                     return CupertinoDemoTab1(
                       colorItems: colorItems,
@@ -85,26 +84,19 @@ class CupertinoNavigationDemo extends StatelessWidget {
                   },
                   defaultTitle: 'Colors',
                 );
-                break;
               case 1:
-                tab = CupertinoTabView(
+                return CupertinoTabView(
                   builder: (BuildContext context) => const CupertinoDemoTab2(),
                   defaultTitle: 'Support Chat',
                 );
-                break;
               case 2:
-                tab = CupertinoTabView(
+                return CupertinoTabView(
                   builder: (BuildContext context) => const CupertinoDemoTab3(),
                   defaultTitle: 'Account',
                 );
-                break;
-              default:
-                assert(false);
             }
-            return PrimaryScrollController(
-              controller: ScrollController(),
-              child: tab,
-            );
+            assert(false);
+            return const CupertinoTabView();
           },
         ),
       ),
