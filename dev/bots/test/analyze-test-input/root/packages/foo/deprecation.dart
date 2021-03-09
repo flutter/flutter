@@ -96,7 +96,7 @@ void test16() { }
 void test17() { }
 
 @Deprecated(
-  "Double quotes should be allowed in deprecations' messages (should be fine). "
+  "Double quotes' test (should fail). "
   'This feature was deprecated after v2.1.0-11.0.pre.'
 )
 void test18() { }

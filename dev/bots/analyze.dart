@@ -130,7 +130,7 @@ Future<void> run(List<String> arguments) async {
 
 final RegExp _findDeprecationPattern = RegExp(r'@[Dd]eprecated');
 final RegExp _deprecationPattern1 = RegExp(r'^( *)@Deprecated\($'); // ignore: flutter_deprecation_syntax (see analyze.dart)
-final RegExp _deprecationPattern2 = RegExp('^ *(?:\'(.+) \'|"(.+) ")\$');
+final RegExp _deprecationPattern2 = RegExp(r"^ *'(.+) '$");
 final RegExp _deprecationPattern3 = RegExp(r"^ *'This feature was deprecated after v([0-9]+)\.([0-9]+)\.([0-9]+)(\-[0-9]+\.[0-9]+\.pre)?\.'$");
 final RegExp _deprecationPattern4 = RegExp(r'^ *\)$');
 
@@ -171,17 +171,21 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
         String message;
         do {
           final Match match2 = _deprecationPattern2.firstMatch(lines[lineNumber]);
-          if (match2 == null)
-            throw 'Deprecation notice does not match required pattern.';
-          if (!lines[lineNumber].startsWith(RegExp('$indent  [\'"]')))
+          if (match2 == null) {
+            String possibleReason = '';
+            if (lines[lineNumber].trimLeft().startsWith('"')) {
+              possibleReason = ' You might have used double quotes (") for the string instead of single quotes (\').';
+            }
+            throw 'Deprecation notice does not match required pattern.$possibleReason';
+          }
+          if (!lines[lineNumber].startsWith("$indent  '"))
             throw 'Unexpected deprecation notice indent.';
-          final String thisMessage = match2[1] ?? match2[2];
           if (message == null) {
-            final String firstChar = String.fromCharCode(thisMessage.runes.first);
+            final String firstChar = String.fromCharCode(match2[1].runes.first);
             if (firstChar.toUpperCase() != firstChar)
               throw 'Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo';
           }
-          message = thisMessage;
+          message = match2[1];
           lineNumber += 1;
           if (lineNumber >= lines.length)
             throw 'Incomplete deprecation notice.';
