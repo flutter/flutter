@@ -458,7 +458,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     if (platformViewsChannel != null) {
       platformViewsChannel.setPlatformViewsHandler(null);
     }
-    destroyOverlaySurfaces();
     platformViewsChannel = null;
     context = null;
     textureRegistry = null;
@@ -762,9 +761,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   }
 
   public void onDisplayOverlaySurface(int id, int x, int y, int width, int height) {
-    if (overlayLayerViews.get(id) == null) {
-      throw new IllegalStateException("The overlay surface (id:" + id + ") doesn't exist");
-    }
     initializeRootImageViewIfNeeded();
 
     final FlutterImageView overlayView = overlayLayerViews.get(id);
