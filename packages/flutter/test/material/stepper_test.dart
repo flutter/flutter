@@ -867,7 +867,7 @@ void main() {
 
     Color? circleFillColor() {
       final Finder container = find.widgetWithText(AnimatedContainer, '1');
-      return (tester.widget<AnimatedContainer>(container).decoration as BoxDecoration).color;
+      return (tester.widget<AnimatedContainer>(container).decoration as BoxDecoration?)?.color;
     }
 
     // Light theme
