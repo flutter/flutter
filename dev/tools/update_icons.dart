@@ -245,7 +245,7 @@ Map<String, String> stringToTokenPairMap(String codepointData) {
 
 String regenerateIconsFile(String iconData, Map<String, String> tokenPairMap) {
   final List<_Icon> newIcons = tokenPairMap.entries.map((MapEntry<String, String> entry) => _Icon(entry)).toList();
-  newIcons.sort((_Icon a, _Icon b) => a.compareTo(b));
+  newIcons.sort((_Icon a, _Icon b) => a._compareTo(b));
 
   final StringBuffer buf = StringBuffer();
   bool generating = false;
@@ -347,10 +347,10 @@ class _Icon {
       htmlSuffix = '';
     }
 
-    flutterId = shortId;
+    flutterId = id;
     for (final MapEntry<String, String> rewritePair in _identifierRewrites.entries) {
-      if (shortId.startsWith(rewritePair.key)) {
-        flutterId = shortId.replaceFirst(rewritePair.key, _identifierRewrites[rewritePair.key]);
+      if (id.startsWith(rewritePair.key)) {
+        flutterId = id.replaceFirst(rewritePair.key, _identifierRewrites[rewritePair.key]);
       }
     }
 
@@ -373,7 +373,7 @@ class _Icon {
   String get dartDoc => '<i class="material-icons$htmlSuffix md-36">$shortId</i> &#x2014; material icon named "$name"';
 
   String get declaration =>
-      "static const IconData $fullFlutterId = IconData(0x$hexCodepoint, fontFamily: 'MaterialIcons'$mirroredInRTL);";
+      "static const IconData $flutterId = IconData(0x$hexCodepoint, fontFamily: 'MaterialIcons'$mirroredInRTL);";
 
   String get fullDeclaration => '''
 
@@ -387,16 +387,16 @@ class _Icon {
   IconData get $fullFlutterId => !_isCupertino() ? Icons.${agnosticIcon.flutterId} : Icons.${iOSIcon.flutterId};
 ''';
 
-  /// Analogous to [String.compareTo]
-  int compareTo(_Icon b) {
-    // Sort regular icons before their variants.
-    if (flutterId == b.flutterId && style == IconStyle.regular)
-      return -1;
-    return flutterId.compareTo(b.flutterId);
-  }
-
   @override
   String toString() => id;
+
+  /// Analogous to [String.compareTo]
+  int _compareTo(_Icon b) {
+    // Sort a regular icon before its variants.
+    if (shortId == b.shortId)
+      return id.length - b.id.length;
+    return flutterId.compareTo(b.flutterId);
+  }
 
   String _replaceLast(String string, String toReplace) {
     return string.replaceAll(RegExp('$toReplace\$'), '');
