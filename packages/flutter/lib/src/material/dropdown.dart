@@ -825,7 +825,7 @@ class DropdownButton<T> extends StatefulWidget {
   ///
   /// The [items] must have distinct values. If [value] isn't null then it
   /// must be equal to one of the [DropdownMenuItem] values. If [items] or
-  /// [onChanged] is null, the button will be disabled, tconst he down arrow
+  /// [onChanged] is null, the button will be disabled, the down arrow
   /// will be greyed out.
   ///
   /// If [value] is null and the button is enabled, [hint] will be displayed
@@ -874,10 +874,10 @@ class DropdownButton<T> extends StatefulWidget {
               items.where((DropdownMenuItem<T> item) {
                 return item.value == value;
               }).length == 1,
-                  "There should be exactly one item with [DropdownButton]'s value: "
-                  '$value. \n'
-                  'Either zero or 2 or more [DropdownMenuItem]s were detected '
-                  'with the same value',
+                "There should be exactly one item with [DropdownButton]'s value: "
+                '$value. \n'
+                'Either zero or 2 or more [DropdownMenuItem]s were detected '
+                'with the same value',
               ),
        assert(elevation != null),
        assert(iconSize != null),
@@ -1221,9 +1221,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       return;
     }
 
-    assert(widget.items!.where((DropdownMenuItem<T> item) => !item.disabled && item.value == widget.value).length == 1);
+    assert(widget.items!.where((DropdownMenuItem<T> item) => item.value == widget.value).length == 1);
     for (int itemIndex = 0; itemIndex < widget.items!.length; itemIndex++) {
-      if (!widget.items![itemIndex].disabled && widget.items![itemIndex].value == widget.value) {
+      if (widget.items![itemIndex].value == widget.value) {
         _selectedIndex = itemIndex;
         return;
       }

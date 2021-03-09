@@ -3124,8 +3124,7 @@ void main() {
   });
 
   testWidgets('Tapping a disabled item should not close DropdownButton', (WidgetTester tester) async {
-    final List<String> options = <String>['first', 'disabled'];
-    String? value = options.first;
+    String? value = 'first';
 
     await tester.pumpWidget(
       MaterialApp(
