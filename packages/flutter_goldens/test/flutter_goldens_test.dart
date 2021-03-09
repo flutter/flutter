@@ -577,6 +577,7 @@ void main() {
           await comparator.compare(
             Uint8List.fromList(_kTestPngBytes),
             Uri.parse('flutter.golden_test.1.png'),
+            0.0,
           ),
           isTrue,
         );
@@ -587,6 +588,7 @@ void main() {
           await comparator.compare(
             Uint8List.fromList(_kFailPngBytes),
             Uri.parse('flutter.new_golden_test.1'),
+            0.0,
           ),
           isTrue,
         );
@@ -600,6 +602,7 @@ void main() {
           await comparator.compare(
             Uint8List.fromList(_kFailPngBytes),
             Uri.parse('flutter.new_golden_test.2'),
+            0.0,
           ),
           isTrue,
         );
@@ -613,6 +616,7 @@ void main() {
         final Future<bool> result = comparator.compare(
           Uint8List.fromList(_kFailPngBytes),
           Uri.parse('flutter.golden_test.1.png'),
+          0.0,
         );
         bool shouldThrow = true;
         result.then((_) {

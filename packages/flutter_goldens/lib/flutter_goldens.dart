@@ -236,7 +236,7 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
   }
 
   @override
-  Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+  Future<bool> compare(Uint8List imageBytes, Uri golden, double epsilon) async {
     golden = _addPrefix(golden);
     await update(golden, imageBytes);
     final File goldenFile = getGoldenFile(golden);
@@ -322,7 +322,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     }
 
   @override
-  Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+  Future<bool> compare(Uint8List imageBytes, Uri golden, double epsilon) async {
     golden = _addPrefix(golden);
     await update(golden, imageBytes);
     final File goldenFile = getGoldenFile(golden);
@@ -388,7 +388,7 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
   }
 
   @override
-  Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+  Future<bool> compare(Uint8List imageBytes, Uri golden, double epsilon) async {
     print(
       'Skipping "$golden" test : $reason'
     );
@@ -500,7 +500,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
   }
 
   @override
-  Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+  Future<bool> compare(Uint8List imageBytes, Uri golden, double epsilon) async {
     golden = _addPrefix(golden);
     final String testName = skiaClient.cleanTestName(golden.path);
     late String? testExpectation;
@@ -523,6 +523,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     result = await GoldenFileComparator.compareLists(
       imageBytes,
       goldenBytes,
+      epsilon,
     );
 
     if (result.passed)
