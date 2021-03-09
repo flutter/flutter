@@ -277,7 +277,7 @@ class MouseTrackerUpdateDetails with Diagnosticable {
 ///
 ///   * [MouseTracker], which is a subclass of [BaseMouseTracker] with definition
 ///     of how to process mouse event callbacks and mouse cursors.
-///   * [MouseTrackerCursorMixin], which is a mixin for [BaseMouseTracker] that
+///   * [MouseCursorManager], which is a mixin for [BaseMouseTracker] that
 ///     defines how to process mouse cursors.
 abstract class BaseMouseTracker extends ChangeNotifier {
   /// Whether or not at least one mouse is connected and has produced events.
@@ -523,7 +523,7 @@ mixin _MouseTrackerEventMixin on BaseMouseTracker {
 }
 
 mixin _MouseTrackerCursorMixin on BaseMouseTracker {
-  final MouseTrackerCursorMixin _mouseCursorMixin = MouseTrackerCursorMixin(
+  final MouseCursorManager _mouseCursorMixin = MouseCursorManager(
     SystemMouseCursors.basic
   );
 
@@ -548,7 +548,7 @@ mixin _MouseTrackerCursorMixin on BaseMouseTracker {
 
   // Handles device update and changes mouse cursors.
   void _handleDeviceUpdateMouseCursor(MouseTrackerUpdateDetails details) {
-    _mouseCursorMixin.handleDeviceUpdateMouseCursor(
+    _mouseCursorMixin.handleDeviceCursorUpdate(
       details.device,
       details.triggeringEvent,
       details.nextAnnotations.keys.map((MouseTrackerAnnotation annotaion) => annotaion.cursor),

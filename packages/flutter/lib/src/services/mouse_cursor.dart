@@ -5,16 +5,24 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
-/// A mixin for [BaseMouseTracker] that sets the mouse pointer's cursors
-/// on device update.
+/// Maintains the state of mouse cursors and manages how cursors are
+/// searched.
 ///
-/// See also:
-///
-///  * [MouseTracker], which uses this mixin.
-class MouseTrackerCursorMixin {
-  MouseTrackerCursorMixin(this.defaultMouseCursor);
+/// This is typically created as a global singleton and owned by [MouseTracker].
+class MouseCursorManager {
+  /// Create a [MouseCursorManager] by specifying the fallback cursor.
+  ///
+  /// The `fallbackMouseCursor` must not be [MouseCursor.defer] (typically
+  /// [SystemMouseCursors.basic]).
+  MouseCursorManager(this.fallbackMouseCursor)
+    : assert(fallbackMouseCursor != MouseCursor.defer);
 
-  final MouseCursor defaultMouseCursor;
+  /// The mouse cursor to use if all cursor candidates choose to defer.
+  ///
+  /// See also:
+  ///
+  ///  * [MouseCursor.defer], the mouse cursor object to use to defer.
+  final MouseCursor fallbackMouseCursor;
 
   /// Returns the active mouse cursor of a device.
   ///
@@ -34,15 +42,28 @@ class MouseTrackerCursorMixin {
 
   final Map<int, MouseCursorSession> _lastSession = <int, MouseCursorSession>{};
 
-  /// Handles device update and changes mouse cursors.
-  void handleDeviceUpdateMouseCursor(int device, PointerEvent? triggeringEvent, Iterable<MouseCursor> cursors) {
+  /// Handles the changes that causes a pointer device to have a new list of
+  /// mouse cursor candidates.
+  ///
+  /// This change can be caused by a pointer event, in which case
+  /// `triggeringEvent` should not be null, or by other changes, such as a widget
+  /// has moved under a still mouse, which is detected after a frame. In either
+  /// case, `cursorCandidates` should be the list of cursors at the location of
+  /// the mouse in hit-test order.
+  void handleDeviceCursorUpdate(
+    int device,
+    PointerEvent? triggeringEvent,
+    Iterable<MouseCursor> cursorCandidates,
+  ) {
     if (triggeringEvent is PointerRemovedEvent) {
       _lastSession.remove(device);
       return;
     }
 
     final MouseCursorSession? lastSession = _lastSession[device];
-    final MouseCursor nextCursor = _DeferringMouseCursor.firstNonDeferred(cursors) ?? defaultMouseCursor;
+    final MouseCursor nextCursor = _DeferringMouseCursor.firstNonDeferred(cursorCandidates)
+      ?? defaultMouseCursor;
+    assert(nextCursor != _DeferringMouseCursor);
     if (lastSession?.cursor == nextCursor)
       return;
 
@@ -170,9 +191,9 @@ abstract class MouseCursorSession {
 /// a cursor, and defines the states and behaviors of the cursor. Every mouse
 /// cursor class usually has a corresponding [MouseCursorSession] class.
 ///
-/// [MouseTrackerCursorMixin] is a mixin that adds the feature of changing
+/// [MouseCursorManager] is a mixin that adds the feature of changing
 /// cursors to [BaseMouseTracker], which tracks the relationship between mouse
-/// devices and annotations. [MouseTrackerCursorMixin] is usually used as a part
+/// devices and annotations. [MouseCursorManager] is usually used as a part
 /// of [MouseTracker].
 @immutable
 abstract class MouseCursor with Diagnosticable {
