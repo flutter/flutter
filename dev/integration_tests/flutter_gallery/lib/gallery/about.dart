@@ -5,10 +5,11 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
-class _LinkTextSpan extends TextSpan {
+class _LinkTextSpan extends ReactiveTextSpan {
 
   // Beware!
   //

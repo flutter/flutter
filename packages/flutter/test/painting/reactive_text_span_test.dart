@@ -9,8 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('ReactiveTextSpan equals', () {
-    void callback1(PointerEnterEvent _) {};
-    void callback2(PointerEnterEvent _) {};
+    void callback1(PointerEnterEvent _) {}
+    void callback2(PointerEnterEvent _) {}
     const ReactiveTextSpan a1 = ReactiveTextSpan(text: 'a');
     final ReactiveTextSpan a2 = ReactiveTextSpan(text: 'a', onEnter: callback1);
     final ReactiveTextSpan a3 = ReactiveTextSpan(text: 'a', onEnter: callback1);
