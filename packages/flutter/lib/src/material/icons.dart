@@ -22,6 +22,7 @@ class _PlatformAdaptiveIcons {
 
   // Generated code: do not hand-edit.
   // See https://github.com/flutter/flutter/wiki/Updating-Material-Design-Fonts-&-Icons
+
   // BEGIN GENERATED PLATFORM ADAPTIVE ICONS
 
   /// Platform-adaptive icon for <i class="material-icons md-36">arrow_back</i> &#x2014; material icon named "arrow back" and <i class="material-icons md-36">arrow_back_ios</i> &#x2014; material icon named "arrow back ios".;
@@ -7682,7 +7683,7 @@ class Icons {
   /// <i class="material-icons md-36">insert_chart_outlined</i> &#x2014; material icon named "insert chart outlined".
   static const IconData insert_chart_outlined = IconData(0xe248, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">insert_chart</i> &#x2014; material icon named "insert chart outlined outlined".
+  /// <i class="material-icons-outlined md-36">insert_chart_outlined</i> &#x2014; material icon named "insert chart outlined outlined".
   static const IconData insert_chart_outlined_outlined = IconData(0xe249, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">insert_chart_outlined</i> &#x2014; material icon named "insert chart outlined rounded".

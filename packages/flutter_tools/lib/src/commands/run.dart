@@ -495,6 +495,10 @@ class RunCommand extends RunCommandBase {
         debuggingOptions: await createDebuggingOptions(webMode),
         stayResident: stayResident,
         urlTunneller: null,
+        fileSystem: globals.fs,
+        usage: globals.flutterUsage,
+        logger: globals.logger,
+        systemClock: globals.systemClock,
       );
     }
     return ColdRunner(

@@ -521,6 +521,9 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.android:
         assert(false, 'cannot use TargetPlatform.android to look up artifacts');
         return null;
+      case TargetPlatform.windows_uwp_x64:
+        assert(false, 'cannot use TargetPlatform.windows_uwp_x64 to look up artifacts');
+        return null;
     }
     assert(false, 'Invalid platform $platform.');
     return null;
