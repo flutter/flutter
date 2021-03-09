@@ -100,79 +100,8 @@ class TextSpan extends InlineSpan implements HitTestTarget {
 
   /// A gesture recognizer that will receive events that hit this span.
   ///
-  /// [TextSpan] itself does not implement hit testing or event dispatch. The
-  /// object that manages the [TextSpan] painting is also responsible for
-  /// dispatching events. In the rendering library, that is the
-  /// [RenderParagraph] object, which corresponds to the [RichText] widget in
-  /// the widgets layer; these objects do not bubble events in [InlineSpan]s,
-  /// so a [recognizer] is only effective for events that directly hit the
-  /// [text] of that [TextSpan], not any of its [children].
-  ///
-  /// [TextSpan] also does not manage the lifetime of the gesture recognizer.
-  /// The code that owns the [GestureRecognizer] object must call
-  /// [GestureRecognizer.dispose] when the [TextSpan] object is no longer
-  /// used.
-  ///
-  /// {@tool snippet}
-  ///
-  /// This example shows how to manage the lifetime of a gesture recognizer
-  /// provided to an [TextSpan] object. It defines a `BuzzingText` widget
-  /// which uses the [HapticFeedback] class to vibrate the device when the user
-  /// long-presses the "find the" span, which is underlined in wavy green. The
-  /// hit-testing is handled by the [RichText] widget.
-  ///
-  /// ```dart
-  /// class BuzzingText extends StatefulWidget {
-  ///   @override
-  ///   _BuzzingTextState createState() => _BuzzingTextState();
-  /// }
-  ///
-  /// class _BuzzingTextState extends State<BuzzingText> {
-  ///   late LongPressGestureRecognizer _longPressRecognizer;
-  ///
-  ///   @override
-  ///   void initState() {
-  ///     super.initState();
-  ///     _longPressRecognizer = LongPressGestureRecognizer()
-  ///       ..onLongPress = _handlePress;
-  ///   }
-  ///
-  ///   @override
-  ///   void dispose() {
-  ///     _longPressRecognizer.dispose();
-  ///     super.dispose();
-  ///   }
-  ///
-  ///   void _handlePress() {
-  ///     HapticFeedback.vibrate();
-  ///   }
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return Text.rich(
-  ///       TextSpan(
-  ///         text: 'Can you ',
-  ///         style: TextStyle(color: Colors.black),
-  ///         children: <InlineSpan>[
-  ///           TextSpan(
-  ///             text: 'find the',
-  ///             style: TextStyle(
-  ///               color: Colors.green,
-  ///               decoration: TextDecoration.underline,
-  ///               decorationStyle: TextDecorationStyle.wavy,
-  ///             ),
-  ///             recognizer: _longPressRecognizer,
-  ///           ),
-  ///           TextSpan(
-  ///             text: ' secret?',
-  ///           ),
-  ///         ],
-  ///       ),
-  ///     );
-  ///   }
-  /// }
-  /// ```
-  /// {@end-tool}
+  /// [TextSpan]'s support for recognizers has been moved to [ReactiveTextSpan].
+  /// For detailed explanation and examples, see [ReactiveTextSpan.recognizer].
   @Deprecated(
     'TextSpan\'s support for recognizers has been moved to ReactiveTextSpan. '
     'Use ReactiveTextSpan.recognizer instead. '

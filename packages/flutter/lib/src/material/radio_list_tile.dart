@@ -104,6 +104,7 @@ import 'theme_data.dart';
 ///
 /// ```dart imports
 /// import 'package:flutter/gestures.dart';
+/// import 'package:flutter/rendering.dart';
 /// ```
 /// ```dart preamble
 /// class LinkedLabelRadio extends StatelessWidget {
@@ -135,7 +136,7 @@ import 'theme_data.dart';
 ///             }
 ///           ),
 ///           RichText(
-///             text: TextSpan(
+///             text: ReactiveTextSpan(
 ///               text: label,
 ///               style: TextStyle(
 ///                 color: Colors.blueAccent,

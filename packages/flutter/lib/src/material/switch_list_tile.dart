@@ -98,6 +98,7 @@ enum _SwitchListTileType { material, adaptive }
 ///
 /// ```dart imports
 /// import 'package:flutter/gestures.dart';
+/// import 'package:flutter/rendering.dart';
 /// ```
 /// ```dart preamble
 /// class LinkedLabelSwitch extends StatelessWidget {
@@ -121,7 +122,7 @@ enum _SwitchListTileType { material, adaptive }
 ///         children: <Widget>[
 ///           Expanded(
 ///             child: RichText(
-///               text: TextSpan(
+///               text: ReactiveTextSpan(
 ///                 text: label,
 ///                 style: TextStyle(
 ///                   color: Colors.blueAccent,

@@ -33,7 +33,7 @@ import 'mouse_tracking.dart';
 /// ```
 ///
 /// ```dart
-/// LongPressGestureRecognizer _longPressRecognizer;
+/// late LongPressGestureRecognizer _longPressRecognizer;
 ///
 /// @override
 /// void initState() {
