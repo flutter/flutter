@@ -10,6 +10,7 @@ import 'framework.dart';
 import 'overscroll_indicator.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
+import 'scrollable.dart';
 import 'scrollbar.dart';
 
 const Color _kDefaultGlowColor = Color(0xFFFFFFFF);
@@ -21,7 +22,13 @@ const Color _kDefaultGlowColor = Color(0xFFFFFFFF);
 @immutable
 class ScrollBehavior {
   /// Creates a description of how [Scrollable] widgets should behave.
-  const ScrollBehavior({ this.useDecoration = false });
+  const ScrollBehavior({
+    @Deprecated(
+      'Set to true after migrating to buildViewportDecoration. '
+      'This feature was deprecated after v2.1.0-11.0.pre.'
+    )
+    this.useDecoration = false,
+  });
 
   /// The platform whose scroll physics should be implemented.
   ///
@@ -33,8 +40,8 @@ class ScrollBehavior {
   ///
   /// This is used as an opt-in during the deprecation period.
   @Deprecated(
-    'Set to true after migrating to buildViewportDecoration.'
-    'This feature was deprecated after v1.27.0-9.0.pre.'
+    'Set to true after migrating to buildViewportDecoration. '
+    'This feature was deprecated after v2.1.0-11.0.pre.'
   )
   final bool useDecoration;
 
@@ -44,8 +51,8 @@ class ScrollBehavior {
   /// [GlowingOverscrollIndicator] to provide visual feedback when the user
   /// overscrolls.
   @Deprecated(
-    'Migrate to buildViewportDecoration.'
-    'This feature was deprecated after v1.27.0-9.0.pre.'
+    'Migrate to buildViewportDecoration. '
+    'This feature was deprecated after v2.1.0-11.0.pre.'
   )
   Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
     // When modifying this function, consider modifying the implementation in
@@ -75,36 +82,30 @@ class ScrollBehavior {
   Widget buildViewportDecoration(
     BuildContext context,
     Widget child,
-    AxisDirection axisDirection,
-    ScrollController? controller,
+    ScrollableDetails details,
   ) {
     // When modifying this function, consider modifying the implementation in
     // _MaterialScrollBehavior and _AlwaysCupertinoScrollBehavior as well.
     // On Android and Fuchsia, we add a GlowingOverscrollIndicator.
-    // On Web and Desktop, when a controller is provided, we add a RawScrollbar.
+    // On Desktop platforms, when a controller is provided, we add a RawScrollbar.
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
-        if (kIsWeb)
-          continue isWeb;
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         child = GlowingOverscrollIndicator(
           child: child,
-          axisDirection: axisDirection,
+          axisDirection: details.direction,
           color: _kDefaultGlowColor,
         );
-        if (kIsWeb)
-          continue isWeb;
         break;
-      isWeb:
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-        child = controller != null
+        child = details.controller != null
           ? RawScrollbar(
             child: child,
-            controller: controller,
+            controller: details.controller,
             isAlwaysShown: true,
           )
           : child;

@@ -169,44 +169,47 @@ class TabsDemo extends StatelessWidget {
           },
           body: TabBarView(
             children: _allPages.keys.map<Widget>((_Page page) {
-              return SafeArea(
-                top: false,
-                bottom: false,
-                child: Builder(
-                  builder: (BuildContext context) {
-                    return CustomScrollView(
-                      key: PageStorageKey<_Page>(page),
-                      slivers: <Widget>[
-                        SliverOverlapInjector(
-                          handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                        ),
-                        SliverPadding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 8.0,
-                            horizontal: 16.0,
+              return PrimaryScrollController(
+                controller: ScrollController(),
+                child: SafeArea(
+                  top: false,
+                  bottom: false,
+                  child: Builder(
+                    builder: (BuildContext context) {
+                      return CustomScrollView(
+                        key: PageStorageKey<_Page>(page),
+                        slivers: <Widget>[
+                          SliverOverlapInjector(
+                            handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                           ),
-                          sliver: SliverFixedExtentList(
-                            itemExtent: _CardDataItem.height,
-                            delegate: SliverChildBuilderDelegate(
-                              (BuildContext context, int index) {
-                                final _CardData data = _allPages[page]![index];
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 8.0,
-                                  ),
-                                  child: _CardDataItem(
-                                    page: page,
-                                    data: data,
-                                  ),
-                                );
-                              },
-                              childCount: _allPages[page]!.length,
+                          SliverPadding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 8.0,
+                              horizontal: 16.0,
+                            ),
+                            sliver: SliverFixedExtentList(
+                              itemExtent: _CardDataItem.height,
+                              delegate: SliverChildBuilderDelegate(
+                                (BuildContext context, int index) {
+                                  final _CardData data = _allPages[page]![index];
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 8.0,
+                                    ),
+                                    child: _CardDataItem(
+                                      page: page,
+                                      data: data,
+                                    ),
+                                  );
+                                },
+                                childCount: _allPages[page]!.length,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    );
-                  },
+                        ],
+                      );
+                    },
+                  ),
                 ),
               );
             }).toList(),

@@ -29,14 +29,16 @@ void main() {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(autoScrollbars: false),
-        home: Scrollbar(
-          isAlwaysShown: true,
-          showTrackOnHover: true,
-          controller: scrollController,
-          child: SingleChildScrollView(
+        home: ScrollConfiguration(
+          behavior: NoScrollbarBehavior(),
+          child: Scrollbar(
+            isAlwaysShown: true,
+            showTrackOnHover: true,
             controller: scrollController,
-            child: const SizedBox(width: 4000.0, height: 4000.0)
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(width: 4000.0, height: 4000.0)
+            ),
           ),
         ),
       ),
@@ -120,14 +122,16 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
         scrollbarTheme: scrollbarTheme,
-        autoScrollbars: false,
       ),
-      home: Scrollbar(
-        isAlwaysShown: true,
-        controller: scrollController,
-        child: SingleChildScrollView(
+      home: ScrollConfiguration(
+        behavior: NoScrollbarBehavior(),
+        child: Scrollbar(
+          isAlwaysShown: true,
           controller: scrollController,
-          child: const SizedBox(width: 4000.0, height: 4000.0)
+          child: SingleChildScrollView(
+            controller: scrollController,
+            child: const SizedBox(width: 4000.0, height: 4000.0)
+          ),
         ),
       ),
     ));
@@ -310,18 +314,20 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           colorScheme: const ColorScheme.light(),
-          autoScrollbars: false,
         ),
-        home: Scrollbar(
-          thickness: thickness,
-          hoverThickness: hoverThickness,
-          isAlwaysShown: true,
-          showTrackOnHover: showTrackOnHover,
-          radius: radius,
-          controller: scrollController,
-          child: SingleChildScrollView(
+        home: ScrollConfiguration(
+          behavior: NoScrollbarBehavior(),
+          child: Scrollbar(
+            thickness: thickness,
+            hoverThickness: hoverThickness,
+            isAlwaysShown: true,
+            showTrackOnHover: showTrackOnHover,
+            radius: radius,
             controller: scrollController,
-            child: const SizedBox(width: 4000.0, height: 4000.0)
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(width: 4000.0, height: 4000.0)
+            ),
           ),
         ),
       ),
@@ -405,13 +411,16 @@ void main() {
       final ScrollController scrollController = ScrollController();
       return MaterialApp(
         theme: appTheme,
-        home: Scrollbar(
-          isAlwaysShown: true,
-          showTrackOnHover: true,
-          controller: scrollController,
-          child: SingleChildScrollView(
+        home: ScrollConfiguration(
+          behavior: NoScrollbarBehavior(),
+          child: Scrollbar(
+            isAlwaysShown: true,
+            showTrackOnHover: true,
             controller: scrollController,
-            child: const SizedBox(width: 4000.0, height: 4000.0)
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(width: 4000.0, height: 4000.0)
+            ),
           ),
         )
       );
@@ -421,7 +430,6 @@ void main() {
     // - coloring based on ColorScheme.onSurface
     await tester.pumpWidget(buildFrame(ThemeData(
       colorScheme: const ColorScheme.light(),
-      autoScrollbars: false,
     )));
     await tester.pumpAndSettle();
     // Idle scrollbar behavior
@@ -495,7 +503,6 @@ void main() {
     // - coloring slightly different based on ColorScheme.onSurface
     await tester.pumpWidget(buildFrame(ThemeData(
       colorScheme: const ColorScheme.dark(),
-      autoScrollbars: false,
     )));
     await tester.pumpAndSettle(); // Theme change animation
 
@@ -618,6 +625,16 @@ void main() {
     // one is used. This results in a difference for doubles in debugFillProperties between
     // the web and the rest of Flutter's target platforms.
   }, skip: kIsWeb);
+}
+
+class NoScrollbarBehavior extends ScrollBehavior {
+  @override
+  bool get useDecoration => true;
+
+  @override
+  Widget buildViewportDecoration(BuildContext context, Widget child, ScrollableDetails details) {
+    return child;
+  }
 }
 
 ScrollbarThemeData _scrollbarTheme({

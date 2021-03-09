@@ -139,7 +139,10 @@ class ColorsDemo extends StatelessWidget {
         ),
         body: TabBarView(
           children: allPalettes.map<Widget>((Palette colors) {
-            return PaletteTabView(colors: colors);
+            return PrimaryScrollController(
+              controller: ScrollController(),
+              child: PaletteTabView(colors: colors),
+            );
           }).toList(),
         ),
       ),

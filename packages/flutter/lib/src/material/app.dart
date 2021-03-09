@@ -667,8 +667,8 @@ class _MaterialScrollBehavior extends ScrollBehavior {
   }
 
   @Deprecated(
-    'Migrate to buildViewportDecoration.'
-    'This feature was deprecated after v1.27.0-9.0.pre.'
+    'Migrate to buildViewportDecoration. '
+    'This feature was deprecated after v2.1.0-11.0.pre.'
   )
   @override
   Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
@@ -694,38 +694,33 @@ class _MaterialScrollBehavior extends ScrollBehavior {
   Widget buildViewportDecoration(
     BuildContext context,
     Widget child,
-    AxisDirection axisDirection,
-    ScrollController? controller,
+    ScrollableDetails details,
   ) {
     final ThemeData theme = Theme.of(context);
     // When modifying this function, consider modifying the implementation in
     // the base class as well.
     // On Android and Fuchsia, we add a GlowingOverscrollIndicator.
-    // On Web and Desktop, when a controller is provided, we add a Scrollbar.
+    // On Desktop platforms, when a ScrollController is provided, we add a
+    // Scrollbar.
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
-        if (kIsWeb)
-          continue isWeb;
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         child = GlowingOverscrollIndicator(
           child: child,
-          axisDirection: axisDirection,
+          axisDirection: details.direction,
           color: theme.accentColor,
         );
-        if (kIsWeb)
-          continue isWeb;
         break;
-      isWeb:
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-        if (!theme.autoScrollbars || controller == null)
+        if (details.controller == null)
           break;
         child = Scrollbar(
           child: child,
-          controller: controller,
+          controller: details.controller,
           isAlwaysShown: theme.scrollbarTheme.isAlwaysShown ?? true,
         );
     }

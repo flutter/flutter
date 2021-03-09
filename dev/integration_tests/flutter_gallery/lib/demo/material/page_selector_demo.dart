@@ -55,11 +55,14 @@ class _PageSelector extends StatelessWidget {
               ),
               child: TabBarView(
                 children: icons!.map<Widget>((Icon icon) {
-                  return Container(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Card(
-                      child: Center(
-                        child: icon,
+                  return PrimaryScrollController(
+                    controller: ScrollController(),
+                    child: Container(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Card(
+                        child: Center(
+                          child: icon,
+                        ),
                       ),
                     ),
                   );

@@ -100,8 +100,7 @@ class _DropdownScrollBehavior extends ScrollBehavior {
   Widget buildViewportDecoration(
     BuildContext context,
     Widget child,
-    AxisDirection axisDirection,
-    ScrollController? controller,
+    ScrollableDetails details,
   ) {
     // No GlowingOverscrollIndicator or Scrollbar applied.
     return child;

@@ -45,16 +45,23 @@ Widget _buildBoilerplate({
   EdgeInsets padding = EdgeInsets.zero,
   required Widget child,
 }) {
-  return Theme(
-    data: ThemeData(autoScrollbars: false),
-    child: Directionality(
-      textDirection: textDirection,
-      child: MediaQuery(
-        data: MediaQueryData(padding: padding),
-        child: child,
-      ),
+  return Directionality(
+    textDirection: textDirection,
+    child: MediaQuery(
+      data: MediaQueryData(padding: padding),
+      child: ScrollConfiguration(behavior: NoScrollbarBehavior(), child: child),
     ),
   );
+}
+
+class NoScrollbarBehavior extends ScrollBehavior {
+  @override
+  bool get useDecoration => true;
+
+  @override
+  Widget buildViewportDecoration(BuildContext context, Widget child, ScrollableDetails details) {
+    return child;
+  }
 }
 
 void main() {
@@ -641,9 +648,8 @@ void main() {
 
   testWidgets('Scrollbar never goes away until finger lift', (WidgetTester tester) async {
     await tester.pumpWidget(
-       MaterialApp(
-        theme: ThemeData(autoScrollbars: false),
-        home: const Scrollbar(
+       const MaterialApp(
+        home: Scrollbar(
           child: SingleChildScrollView(
             child: SizedBox(width: 4000.0, height: 4000.0)
           ),
@@ -725,7 +731,6 @@ void main() {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(autoScrollbars: false),
         home: PrimaryScrollController(
           controller: scrollController,
           child: Scrollbar(
@@ -814,19 +819,10 @@ void main() {
   });
 
   testWidgets('Scrollbar thumb color completes a hover animation', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(autoScrollbars: false),
-        home: PrimaryScrollController(
-          controller: scrollController,
-          child: Scrollbar(
-            isAlwaysShown: true,
-            controller: scrollController,
-            child: const SingleChildScrollView(
-              child: SizedBox(width: 4000.0, height: 4000.0)
-            ),
-          ),
+      const MaterialApp(
+        home: SingleChildScrollView(
+          child: SizedBox(width: 4000.0, height: 4000.0)
         ),
       ),
     );
@@ -864,25 +860,15 @@ void main() {
       TargetPlatform.linux,
       TargetPlatform.macOS,
       TargetPlatform.windows,
-      TargetPlatform.fuchsia,
     }),
   );
 
   testWidgets('Hover animation is not triggered by tap gestures', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(autoScrollbars: false),
-        home: PrimaryScrollController(
-          controller: scrollController,
-          child: Scrollbar(
-            isAlwaysShown: true,
-            showTrackOnHover: true,
-            controller: scrollController,
-            child: const SingleChildScrollView(
-              child: SizedBox(width: 4000.0, height: 4000.0)
-            ),
-          ),
+        theme: ThemeData(scrollbarTheme: const ScrollbarThemeData(showTrackOnHover: true)),
+        home: const SingleChildScrollView(
+          child: SizedBox(width: 4000.0, height: 4000.0)
         ),
       ),
     );
@@ -943,28 +929,16 @@ void main() {
           color: const Color(0x80000000),
         ),
     );
-
   },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.linux,
-    }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux }),
   );
 
   testWidgets('Scrollbar showTrackOnHover', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(autoScrollbars: false),
-        home: PrimaryScrollController(
-          controller: scrollController,
-          child: Scrollbar(
-            isAlwaysShown: true,
-            showTrackOnHover: true,
-            controller: scrollController,
-            child: const SingleChildScrollView(
-              child: SizedBox(width: 4000.0, height: 4000.0)
-            ),
-          ),
+        theme: ThemeData(scrollbarTheme: const ScrollbarThemeData(showTrackOnHover: true)),
+        home: const SingleChildScrollView(
+          child: SizedBox(width: 4000.0, height: 4000.0)
         ),
       ),
     );
@@ -1014,7 +988,6 @@ void main() {
       TargetPlatform.linux,
       TargetPlatform.macOS,
       TargetPlatform.windows,
-      TargetPlatform.fuchsia,
     }),
   );
 

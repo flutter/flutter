@@ -409,8 +409,8 @@ class _AlwaysCupertinoScrollBehavior extends ScrollBehavior {
   const _AlwaysCupertinoScrollBehavior({ bool useDecoration = false }) : super(useDecoration: useDecoration);
 
   @Deprecated(
-    'Migrate to buildViewportDecoration.'
-    'This feature was deprecated after v1.27.0-9.0.pre.'
+    'Migrate to buildViewportDecoration. '
+    'This feature was deprecated after v2.1.0-11.0.pre.'
   )
   @override
   Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
@@ -422,29 +422,24 @@ class _AlwaysCupertinoScrollBehavior extends ScrollBehavior {
   Widget buildViewportDecoration(
     BuildContext context,
     Widget child,
-    AxisDirection axisDirection,
-    ScrollController? controller,
+    ScrollableDetails details,
   ) {
-    final CupertinoThemeData theme = CupertinoTheme.of(context);
     // GlowingOverscrollIndicator is not applicable.
-    // On Web and Desktop, when a controller is provided and the theme specifies,
-    // we add a CupertinoScrollbar.
+    // On Desktop, when a ScrollController is provided, we add a
+    // CupertinoScrollbar.
     switch (getPlatform(context)) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
-        if (kIsWeb)
-          continue isWeb;
         return child;
-      isWeb:
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-        if (!theme.autoScrollbars || controller == null)
+        if (details.controller == null)
           return child;
         return CupertinoScrollbar(
           child: child,
-          controller: controller,
+          controller: details.controller,
           isAlwaysShown: true,
         );
     }

@@ -257,7 +257,7 @@ class Scrollable extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   * [ScrollBehavior.buildViewportChrome], which builds a [Scrollbar],
+  ///   * [ScrollBehavior.buildViewportDecoration], which builds a [Scrollbar],
   ///     [CupertinoScrollbar] or [RawScrollbar] based on the current
   ///     configuration.
   /// {@endtemplate}
@@ -736,8 +736,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       ? _configuration.buildViewportDecoration(
           context,
           result,
-          widget.axisDirection,
-          widget.autoScrollbar ? widget.controller : null,
+          ScrollableDetails(
+            widget.axisDirection,
+            widget.autoScrollbar ? widget.controller : null,
+          ),
         )
       : _configuration.buildViewportChrome(context, result, widget.axisDirection);
   }
@@ -751,6 +753,27 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   @override
   String? get restorationId => widget.restorationId;
+}
+
+/// Describes the aspects of a Scrollable widget to inform inherited widgets
+/// like [ScrollBehavior] for decorating.
+///
+/// Decorations like [GlowingOverscrollIndicator]s and [Scrollbar]s require
+/// information about the Scrollable in order to be initialized.
+@immutable
+class ScrollableDetails {
+  /// Creates a set of details describing the [Scrollable]. The [direction]
+  /// cannot be null.
+  const ScrollableDetails(this.direction, this.controller);
+
+  /// The direction in which this widget scrolls.
+  ///
+  /// Cannot be null.
+  final AxisDirection direction;
+
+  /// A [ScrollController] that can be used to control the position of the
+  /// [Scrollable] widget.
+  final ScrollController? controller;
 }
 
 /// With [_ScrollSemantics] certain child [SemanticsNode]s can be

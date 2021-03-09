@@ -307,7 +307,6 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v1.23.0-4.0.pre.'
     )
     bool? useTextSelectionTheme,
-    bool? autoScrollbars,
   }) {
     assert(colorScheme?.brightness == null || brightness == null || colorScheme!.brightness == brightness);
     final Brightness _brightness = brightness ?? colorScheme?.brightness ?? Brightness.light;
@@ -442,7 +441,6 @@ class ThemeData with Diagnosticable {
 
     fixTextFieldOutlineLabel ??= false;
     useTextSelectionTheme ??= true;
-    autoScrollbars ??= true;
 
     return ThemeData.raw(
       visualDensity: visualDensity,
@@ -522,7 +520,6 @@ class ThemeData with Diagnosticable {
       switchTheme: switchTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
       useTextSelectionTheme: useTextSelectionTheme,
-      autoScrollbars: autoScrollbars,
     );
   }
 
@@ -630,7 +627,6 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v1.23.0-4.0.pre.'
     )
     required this.useTextSelectionTheme,
-    required this.autoScrollbars,
   }) : assert(visualDensity != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -704,8 +700,7 @@ class ThemeData with Diagnosticable {
        assert(radioTheme != null),
        assert(switchTheme != null),
        assert(fixTextFieldOutlineLabel != null),
-       assert(useTextSelectionTheme != null),
-       assert(autoScrollbars != null);
+       assert(useTextSelectionTheme != null);
 
   /// Create a [ThemeData] based on the colors in the given [colorScheme] and
   /// text styles of the optional [textTheme].
@@ -1230,11 +1225,6 @@ class ThemeData with Diagnosticable {
   )
   final bool useTextSelectionTheme;
 
-  /// Whether [Scrollbar]s on desktop and Web should automatically be applied.
-  ///
-  /// Defaults to true.
-  final bool autoScrollbars;
-
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ///
   /// The [brightness] value is applied to the [colorScheme].
@@ -1333,7 +1323,6 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v1.23.0-4.0.pre.'
     )
     bool? useTextSelectionTheme,
-    bool? autoScrollbars,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -1414,7 +1403,6 @@ class ThemeData with Diagnosticable {
       switchTheme: switchTheme ?? this.switchTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? this.fixTextFieldOutlineLabel,
       useTextSelectionTheme: useTextSelectionTheme ?? this.useTextSelectionTheme,
-      autoScrollbars: autoScrollbars ?? this.autoScrollbars,
     );
   }
 
@@ -1573,7 +1561,6 @@ class ThemeData with Diagnosticable {
       switchTheme: SwitchThemeData.lerp(a.switchTheme, b.switchTheme, t),
       fixTextFieldOutlineLabel: t < 0.5 ? a.fixTextFieldOutlineLabel : b.fixTextFieldOutlineLabel,
       useTextSelectionTheme: t < 0.5 ? a.useTextSelectionTheme : b.useTextSelectionTheme,
-      autoScrollbars: t < 0.5 ? a.autoScrollbars : b.autoScrollbars,
     );
   }
 
@@ -1659,8 +1646,7 @@ class ThemeData with Diagnosticable {
         && other.radioTheme == radioTheme
         && other.switchTheme == switchTheme
         && other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel
-        && other.useTextSelectionTheme == useTextSelectionTheme
-        && other.autoScrollbars == autoScrollbars;
+        && other.useTextSelectionTheme == useTextSelectionTheme;
   }
 
   @override
@@ -1746,7 +1732,6 @@ class ThemeData with Diagnosticable {
       switchTheme,
       fixTextFieldOutlineLabel,
       useTextSelectionTheme,
-      autoScrollbars,
     ];
     return hashList(values);
   }
@@ -1828,7 +1813,6 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<CheckboxThemeData>('checkboxTheme', checkboxTheme, defaultValue: defaultData.checkboxTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<RadioThemeData>('radioTheme', radioTheme, defaultValue: defaultData.radioTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<SwitchThemeData>('switchTheme', switchTheme, defaultValue: defaultData.switchTheme, level: DiagnosticLevel.debug));
-    properties.add(DiagnosticsProperty<bool>('autoScrollbars', autoScrollbars, defaultValue: defaultData.autoScrollbars, level: DiagnosticLevel.debug));
   }
 }
 
@@ -1888,7 +1872,6 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
         _cupertinoOverrideTheme.textTheme,
         _cupertinoOverrideTheme.barBackgroundColor,
         _cupertinoOverrideTheme.scaffoldBackgroundColor,
-        _cupertinoOverrideTheme.autoScrollbars,
       );
 
   final ThemeData _materialTheme;
@@ -1925,7 +1908,6 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
     CupertinoTextThemeData? textTheme,
     Color? barBackgroundColor,
     Color? scaffoldBackgroundColor,
-    bool? autoScrollbars,
   }) {
     return MaterialBasedCupertinoThemeData._(
       _materialTheme,
@@ -1936,7 +1918,6 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
         textTheme: textTheme,
         barBackgroundColor: barBackgroundColor,
         scaffoldBackgroundColor: scaffoldBackgroundColor,
-        autoScrollbars: autoScrollbars,
       ),
     );
   }
