@@ -244,7 +244,9 @@ Map<String, String> stringToTokenPairMap(String codepointData) {
 }
 
 String regenerateIconsFile(String iconData, Map<String, String> tokenPairMap) {
-  final Iterable<_Icon> newIcons = tokenPairMap.entries.map((MapEntry<String, String> entry) => _Icon(entry));
+  final List<_Icon> newIcons = tokenPairMap.entries.map((MapEntry<String, String> entry) => _Icon(entry)).toList();
+  newIcons.sort((_Icon a, _Icon b) => a._compareTo(b));
+
   final StringBuffer buf = StringBuffer();
   bool generating = false;
 
@@ -387,6 +389,16 @@ class _Icon {
 
   @override
   String toString() => id;
+
+  /// Analogous to [String.compareTo]
+  int _compareTo(_Icon b) {
+    // Sort a regular icon before its variants.
+    if (shortId == b.shortId) {
+      return id.length - b.id.length;
+    } else {
+      return flutterId.compareTo(b.flutterId);
+    }
+  }
 
   String _replaceLast(String string, String toReplace) {
     return string.replaceAll(RegExp('$toReplace\$'), '');
