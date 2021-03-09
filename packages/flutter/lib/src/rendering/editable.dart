@@ -1489,7 +1489,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     _semanticsInfo = _textPainter.text!.getSemanticsInformation();
-    if (_semanticsInfo!.any((InlineSpanSemanticsInformation info) => info.recognizer != null) && readOnly) {
+    if (_semanticsInfo!.any((InlineSpanSemanticsInformation info) => info.recognizer != null)) {
+      assert(readOnly && !obscureText);
       // For Selectable rich text with recognizer, we need to create semantics
       // node for each text fragments.
       config
