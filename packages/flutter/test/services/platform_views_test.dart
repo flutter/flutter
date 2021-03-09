@@ -148,7 +148,7 @@ void main() {
     test('OnPlatformViewCreated callback', () async {
       viewsController.registerViewType('webview');
       final List<int> createdViews = <int>[];
-      final PlatformViewCreatedCallback callback = (int id) { createdViews.add(id); };
+      void callback(int id) { createdViews.add(id); }
 
       final AndroidViewController controller1 = PlatformViewsService.initAndroidView(
         id: 0,

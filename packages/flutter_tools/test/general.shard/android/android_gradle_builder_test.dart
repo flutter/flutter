@@ -854,7 +854,7 @@ void main() {
       fileSystem.directory('build/outputs/repo').createSync(recursive: true);
 
       await expectLater(() async =>
-        await builder.buildGradleAar(
+        builder.buildGradleAar(
           androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
           project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           outputDirectory: fileSystem.directory('build/'),

@@ -123,6 +123,7 @@ class NavigationRail extends StatefulWidget {
   ///
   /// Typically used within a [Row] that defines the [Scaffold.body] property.
   const NavigationRail({
+    Key? key,
     this.backgroundColor,
     this.extended = false,
     this.leading,
@@ -147,7 +148,8 @@ class NavigationRail extends StatefulWidget {
         assert(minExtendedWidth == null || minExtendedWidth > 0),
         assert((minWidth == null || minExtendedWidth == null) || minExtendedWidth >= minWidth),
         assert(extended != null),
-        assert(!extended || (labelType == null || labelType == NavigationRailLabelType.none));
+        assert(!extended || (labelType == null || labelType == NavigationRailLabelType.none)),
+        super(key: key);
 
   /// Sets the color of the Container that holds all of the [NavigationRail]'s
   /// contents.
@@ -488,7 +490,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                           extendedTransitionAnimation: _extendedAnimation,
                           selected: widget.selectedIndex == i,
                           icon: widget.selectedIndex == i ? widget.destinations[i].selectedIcon : widget.destinations[i].icon,
-                          label: widget.destinations[i].label!,
+                          label: widget.destinations[i].label,
                           destinationAnimation: _destinationAnimations[i],
                           labelType: labelType,
                           iconTheme: widget.selectedIndex == i ? selectedIconTheme : unselectedIconTheme,
@@ -816,10 +818,11 @@ class NavigationRailDestination {
   const NavigationRailDestination({
     required this.icon,
     Widget? selectedIcon,
-    this.label,
+    required this.label,
     this.padding,
   }) : selectedIcon = selectedIcon ?? icon,
-       assert(icon != null);
+       assert(icon != null),
+       assert(label != null);
 
   /// The icon of the destination.
   ///
@@ -854,7 +857,7 @@ class NavigationRailDestination {
   /// [NavigationRail.labelType] is [NavigationRailLabelType.none], the label is
   /// still used for semantics, and may still be used if
   /// [NavigationRail.extended] is true.
-  final Widget? label;
+  final Widget label;
 
   /// The amount of space to inset the destination item.
   final EdgeInsetsGeometry? padding;
