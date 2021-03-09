@@ -111,7 +111,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     await Future.wait(<Future<void>>[
       for (final FlutterDevice device in flutterDevices)
         if (device.vmService != null)
-          waitForExtension(device.vmService, 'ext.flutter.connectedVmServiceUri'),
+          waitForExtension(device.vmService.service, 'ext.flutter.connectedVmServiceUri'),
     ]);
   }
 

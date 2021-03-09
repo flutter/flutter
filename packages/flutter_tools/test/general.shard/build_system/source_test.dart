@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -218,10 +217,10 @@ void main() {
   }));
 
   test('Non-local engine builds use the engine.version file as an Artifact dependency', () => testbed.run(() {
-    final MockArtifacts artifacts = MockArtifacts();
+    final Artifacts artifacts = Artifacts.test();
     final Environment environment = Environment.test(
       globals.fs.currentDirectory,
-      artifacts: artifacts, // using real artifacts
+      artifacts: artifacts,
       processManager: FakeProcessManager.any(),
       fileSystem: globals.fs,
       logger: globals.logger,
@@ -233,9 +232,5 @@ void main() {
     fizzSource.accept(visitor);
 
     expect(visitor.sources.single.path, contains('engine.version'));
-    verifyNever(artifacts.getArtifactPath(
-      any, platform: anyNamed('platform'), mode: anyNamed('mode')));
   }));
 }
-
-class MockArtifacts extends Mock implements Artifacts {}

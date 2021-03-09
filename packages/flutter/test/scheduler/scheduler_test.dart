@@ -117,7 +117,7 @@ void main() {
         scheduler.scheduleTask(() { taskExecuted = true; }, Priority.touch);
       },
       zoneSpecification: ZoneSpecification(
-        createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void f()) {
+        createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void Function() f) {
           // Don't actually run the tasks, just record that it was scheduled.
           timerQueueTasks.add(f);
           return DummyTimer();

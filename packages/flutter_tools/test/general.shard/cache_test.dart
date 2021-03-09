@@ -95,7 +95,7 @@ void main() {
       fileSystem.file(fileSystem.path.join('bin', 'cache', 'lockfile'))
         .createSync(recursive: true);
 
-      expect(() async => await cache.lock(), throwsToolExit());
+      expect(() async => cache.lock(), throwsToolExit());
     }, skip: true); // TODO(jonahwilliams): implement support for lock so this can be tested with the memory file system.
 
     testWithoutContext('should not throw when FLUTTER_ALREADY_LOCKED is set', () {
@@ -306,6 +306,33 @@ void main() {
     expect(dir, isNotNull);
     expect(dir.path, artifactDir.childDirectory('bin_dir').path);
     verify(operatingSystemUtils.chmod(argThat(hasPath(dir.path)), 'a+r,a+x'));
+  });
+
+  testWithoutContext('EngineCachedArtifact removes unzipped FlutterMacOS.framework before replacing', () async {
+    final OperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils();
+    final MockCache cache = MockCache();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_artifact.');
+    final Directory downloadDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_download.');
+
+    when(cache.getArtifactDirectory(any)).thenReturn(artifactDir);
+    when(cache.getDownloadDir()).thenReturn(downloadDir);
+    final Directory binDir = artifactDir.childDirectory('bin_dir')..createSync();
+    binDir.childFile('FlutterMacOS.framework.zip').createSync();
+    final Directory unzippedFramework = binDir.childDirectory('FlutterMacOS.framework');
+    final File staleFile = unzippedFramework.childFile('stale_file')..createSync(recursive: true);
+    artifactDir.childFile('unused_url_path').createSync();
+
+    final FakeCachedArtifact artifact = FakeCachedArtifact(
+      cache: cache,
+      binaryDirs: <List<String>>[
+        <String>['bin_dir', 'unused_url_path'],
+      ],
+      requiredArtifacts: DevelopmentArtifact.universal,
+    );
+    await artifact.updateInner(MockArtifactUpdater(), fileSystem, operatingSystemUtils);
+    expect(unzippedFramework, exists);
+    expect(staleFile, isNot(exists));
   });
 
   testWithoutContext('IosUsbArtifacts verifies executables for libimobiledevice in isUpToDateInner', () async {
@@ -767,6 +794,7 @@ void main() {
   group('AndroidMavenArtifacts', () {
     MemoryFileSystem memoryFileSystem;
     Cache cache;
+    FakeAndroidSdk fakeAndroidSdk;
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem.test();
@@ -774,6 +802,7 @@ void main() {
         fileSystem: memoryFileSystem,
         processManager: FakeProcessManager.any(),
       );
+      fakeAndroidSdk = FakeAndroidSdk();
     });
 
     testWithoutContext('AndroidMavenArtifacts has a specified development artifact', () async {
@@ -793,6 +822,7 @@ void main() {
       await mavenArtifacts.update(MockArtifactUpdater(), BufferLogger.test(), memoryFileSystem, MockOperatingSystemUtils());
 
       expect(await mavenArtifacts.isUpToDate(memoryFileSystem), isFalse);
+      expect(fakeAndroidSdk.reinitialized, true);
     }, overrides: <Type, Generator>{
       Cache: () => cache,
       FileSystem: () => memoryFileSystem,
@@ -806,7 +836,7 @@ void main() {
           'resolveDependencies',
         ])
       ]),
-      AndroidSdk: () => FakeAndroidSdk()
+      AndroidSdk: () => fakeAndroidSdk
     });
 
     testUsingContext('AndroidMavenArtifacts is a no-op if the Android SDK is absent', () async {
@@ -903,4 +933,11 @@ class FakeCache extends Cache {
     return stampFile;
   }
 }
-class FakeAndroidSdk extends Fake implements AndroidSdk {}
+class FakeAndroidSdk extends Fake implements AndroidSdk {
+  bool reinitialized = false;
+
+  @override
+  void reinitialize() {
+    reinitialized = true;
+  }
+}

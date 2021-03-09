@@ -21,10 +21,8 @@ class OnTapPage extends StatelessWidget {
       body: GestureDetector(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
-        child: Container(
-          child: Center(
-            child: Text(id, style: Theme.of(context).textTheme.headline3),
-          ),
+        child: Center(
+          child: Text(id, style: Theme.of(context).textTheme.headline3),
         ),
       ),
     );

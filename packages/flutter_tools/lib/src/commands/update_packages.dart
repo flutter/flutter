@@ -66,6 +66,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'connectivity': '">=3.0.0-nullsafety.1"',
   'device_info': '">=2.0.0-nullsafety.1"',
   'file': '">=6.0.0-nullsafety.4"',
+  'path_provider': '">=2.0.0-nullsafety.1"',
   'platform': '">=3.0.0-nullsafety.4"',
   'process': '">=4.0.0-nullsafety.4"',
   'process_runner': '">=4.0.0-nullsafety.5"',
@@ -1397,7 +1398,7 @@ class PubDependencyTree {
 
 // Produces a 16-bit checksum from the codePoints of the package name and
 // version strings using Fletcher's algorithm.
-String _computeChecksum(Iterable<String> names, String getVersion(String name)) {
+String _computeChecksum(Iterable<String> names, String Function(String name) getVersion) {
   int lowerCheck = 0;
   int upperCheck = 0;
   final List<String> sortedNames = names.toList()..sort();

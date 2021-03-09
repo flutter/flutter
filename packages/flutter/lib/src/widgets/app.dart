@@ -1259,7 +1259,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     final NavigatorState? navigator = _navigator?.currentState;
     if (navigator == null)
       return false;
-    return await navigator.maybePop();
+    return navigator.maybePop();
   }
 
   @override

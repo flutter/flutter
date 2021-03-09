@@ -25,7 +25,7 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fakes.dart';
 
-final Generator _kNoColorTerminalPlatform = () => FakePlatform(stdoutSupportsAnsi: false);
+FakePlatform _kNoColorTerminalPlatform() => FakePlatform(stdoutSupportsAnsi: false);
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
 };
@@ -96,10 +96,6 @@ void main() {
     testUsingContext('Licenses available, build tools not, apk exists', () async {
       when(sdk.latestVersion).thenReturn(null);
       final FlutterProject project = FlutterProject.fromDirectoryTest(fs.currentDirectory);
-      final File gradle = project.android.hostAppGradleRoot.childFile(
-        globals.platform.isWindows ? 'gradlew.bat' : 'gradlew',
-      )..createSync(recursive: true);
-
       project.android.hostAppGradleRoot
         .childFile('gradle.properties')
         .writeAsStringSync('irrelevant');
@@ -110,8 +106,6 @@ void main() {
           .createSync(recursive: true);
       gradleWrapperDir.childFile('gradlew').writeAsStringSync('irrelevant');
       gradleWrapperDir.childFile('gradlew.bat').writeAsStringSync('irrelevant');
-
-      fakeProcessManager.addCommand(FakeCommand(command: <String>[gradle.path, 'dependencies']));
 
       await ApplicationPackageFactory.instance.getPackageForPlatform(
         TargetPlatform.android_arm,

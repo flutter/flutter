@@ -232,9 +232,9 @@ void main() {
                 },
                 child: null,
               ),
-              Material(
+              const Material(
                 type: MaterialType.transparency,
-                child: Container(
+                child: SizedBox(
                   width: 400.0,
                   height: 500.0,
                 ),

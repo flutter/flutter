@@ -110,6 +110,17 @@ void main() {
         );
       });
 
+      _testInMemory('reads dependencies from pubspec.yaml', () async {
+        final Directory directory = globals.fs.directory('myproject');
+        directory.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(validPubspecWithDependencies);
+        expect(
+          FlutterProject.fromDirectory(directory).manifest.dependencies,
+          <String>{'plugin_a', 'plugin_b'},
+        );
+      });
+
       _testInMemory('sets up location', () async {
         final Directory directory = globals.fs.directory('myproject');
         expect(
@@ -173,6 +184,13 @@ void main() {
 
         await project.regeneratePlatformSpecificTooling();
         expect(testLogger.statusText, contains('https://flutter.dev/go/android-project-migration'));
+      });
+      _testInMemory('Android plugin without example app does not show a warning', () async {
+        final FlutterProject project = await aPluginProject();
+        project.example.directory.deleteSync();
+
+        await project.regeneratePlatformSpecificTooling();
+        expect(testLogger.statusText, isNot(contains('https://flutter.dev/go/android-project-migration')));
       });
       _testInMemory('updates local properties for Android', () async {
         final FlutterProject project = await someProject();
@@ -295,6 +313,7 @@ void main() {
     group('example', () {
       _testInMemory('exists for plugin in legacy format', () async {
         final FlutterProject project = await aPluginProject();
+        expect(project.isPlugin, isTrue);
         expect(project.hasExampleApp, isTrue);
       });
       _testInMemory('exists for plugin in multi-platform format', () async {
@@ -303,6 +322,7 @@ void main() {
       });
       _testInMemory('does not exist for non-plugin', () async {
         final FlutterProject project = await someProject();
+        expect(project.isPlugin, isFalse);
         expect(project.hasExampleApp, isFalse);
       });
     });
@@ -359,7 +379,7 @@ apply plugin: 'kotlin-android'
         );
       });
 
-      void testWithMocks(String description, Future<void> testMethod()) {
+      void testWithMocks(String description, Future<void> Function() testMethod) {
         testUsingContext(description, testMethod, overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
@@ -788,7 +808,7 @@ flutter:
 /// Executes the [testMethod] in a context where the file system
 /// is in memory.
 @isTest
-void _testInMemory(String description, Future<void> testMethod()) {
+void _testInMemory(String description, Future<void> Function() testMethod) {
   Cache.flutterRoot = getFlutterRoot();
   final FileSystem testFileSystem = MemoryFileSystem(
     style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
@@ -876,7 +896,7 @@ void expectNotExists(FileSystemEntity entity) {
   expect(entity.existsSync(), isFalse);
 }
 
-void addIosProjectFile(Directory directory, {String projectFileContent()}) {
+void addIosProjectFile(Directory directory, {String Function() projectFileContent}) {
   directory
       .childDirectory('ios')
       .childDirectory('Runner.xcodeproj')
@@ -885,7 +905,7 @@ void addIosProjectFile(Directory directory, {String projectFileContent()}) {
     ..writeAsStringSync(projectFileContent());
 }
 
-void addAndroidGradleFile(Directory directory, { String gradleFileContent() }) {
+void addAndroidGradleFile(Directory directory, { String Function() gradleFileContent }) {
   directory
       .childDirectory('android')
       .childDirectory('app')
@@ -904,6 +924,16 @@ String get validPubspec => '''
 name: hello
 flutter:
 ''';
+
+String get validPubspecWithDependencies => '''
+name: hello
+flutter:
+
+dependencies:
+  plugin_a:
+  plugin_b:
+''';
+
 
 String get invalidPubspec => '''
 name: hello
