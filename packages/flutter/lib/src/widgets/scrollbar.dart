@@ -567,7 +567,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 ///
 /// If the scrollbar is wrapped around multiple [ScrollView]s, it only responds to
 /// the nearest scrollView and shows the corresponding scrollbar thumb by default.
-/// Set [notificationPredicate] to something else for more complicated behaviors.
+/// The [notificationPredicate] allows the ability to customize which
+/// [ScrollNotification]s the Scrollbar should listen to.
 ///
 /// Scrollbars are interactive and will also use the [PrimaryScrollController] if
 /// a [controller] is not set. Scrollbar thumbs can be dragged along the main axis
@@ -579,6 +580,17 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// painted. In this case, the scrollbar cannot accurately represent the
 /// relative location of the visible area, or calculate the accurate delta to
 /// apply when  dragging on the thumb or tapping on the track.
+///
+/// Scrollbars are added to most [Scrollable] widgets by default on Desktop
+/// platforms in [ScrollBehavior.buildViewportDecoration] as part of an app's
+/// [ScrollConfiguration]. Scrollable widgets that do not have automatically
+/// applied Scrollbars are
+///
+///   * [EditableText]
+///   * [ListWheelScrollView]
+///   * [PageView]
+///   * [NestedScrollView]
+///   * [DropdownButton]
 /// {@endtemplate}
 ///
 // TODO(Piinks): Add code sample

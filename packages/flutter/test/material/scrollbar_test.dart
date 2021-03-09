@@ -648,7 +648,7 @@ void main() {
 
   testWidgets('Scrollbar never goes away until finger lift', (WidgetTester tester) async {
     await tester.pumpWidget(
-       const MaterialApp(
+      const MaterialApp(
         home: Scrollbar(
           child: SingleChildScrollView(
             child: SizedBox(width: 4000.0, height: 4000.0)
@@ -820,8 +820,9 @@ void main() {
 
   testWidgets('Scrollbar thumb color completes a hover animation', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: SingleChildScrollView(
+      MaterialApp(
+        theme: ThemeData(scrollbarTheme: const ScrollbarThemeData(isAlwaysShown: true)),
+        home: const SingleChildScrollView(
           child: SizedBox(width: 4000.0, height: 4000.0)
         ),
       ),
@@ -866,7 +867,10 @@ void main() {
   testWidgets('Hover animation is not triggered by tap gestures', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(scrollbarTheme: const ScrollbarThemeData(showTrackOnHover: true)),
+        theme: ThemeData(scrollbarTheme: const ScrollbarThemeData(
+          isAlwaysShown: true,
+          showTrackOnHover: true,
+        )),
         home: const SingleChildScrollView(
           child: SizedBox(width: 4000.0, height: 4000.0)
         ),
@@ -936,7 +940,10 @@ void main() {
   testWidgets('Scrollbar showTrackOnHover', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(scrollbarTheme: const ScrollbarThemeData(showTrackOnHover: true)),
+        theme: ThemeData(scrollbarTheme: const ScrollbarThemeData(
+          isAlwaysShown: true,
+          showTrackOnHover: true,
+        )),
         home: const SingleChildScrollView(
           child: SizedBox(width: 4000.0, height: 4000.0)
         ),
