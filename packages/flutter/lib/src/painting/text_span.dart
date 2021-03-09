@@ -169,7 +169,7 @@ class TextSpan extends InlineSpan implements HitTestTarget {
   /// ```
   /// {@end-tool}
   @Deprecated(
-    "TextSpan's support for recognizers has been moved to ReactiveTextSpan. "
+    'TextSpan\'s support for recognizers has been moved to ReactiveTextSpan. '
     'Use ReactiveTextSpan.recognizer instead. '
     'This feature was deprecated after v2.1.0-11.0.pre.'
   )
