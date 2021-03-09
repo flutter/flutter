@@ -60,7 +60,7 @@ abstract class GoldenFileComparator {
   /// is left up to the implementation class. For instance, some implementations
   /// may load files from the local file system, whereas others may load files
   /// over the network or from a remote repository.
-  Future<bool> compare(Uint8List imageBytes, Uri golden);
+  Future<bool> compare(Uint8List imageBytes, Uri golden, double epsilon);
 
   /// Updates the golden file identified by [golden] with [imageBytes].
   ///
@@ -94,8 +94,8 @@ abstract class GoldenFileComparator {
 
   /// Returns a [ComparisonResult] to describe the pixel differential of the
   /// [test] and [master] image bytes provided.
-  static Future<ComparisonResult> compareLists(List<int> test, List<int> master) {
-    return _goldens.compareLists(test, master);
+  static Future<ComparisonResult> compareLists(List<int> test, List<int> master, double epsilon) {
+    return _goldens.compareLists(test, master, epsilon);
   }
 }
 
@@ -274,7 +274,7 @@ class TrivialComparator implements GoldenFileComparator {
   const TrivialComparator._();
 
   @override
-  Future<bool> compare(Uint8List imageBytes, Uri golden) {
+  Future<bool> compare(Uint8List imageBytes, Uri golden, double epsilon) {
     print('Golden file comparison requested for "$golden"; skipping...');
     return Future<bool>.value(true);
   }
@@ -320,6 +320,7 @@ class ComparisonResult {
   ComparisonResult({
     required this.passed,
     required this.diffPercent,
+    required this.epsilon,
     this.error,
     this.diffs,
   });
@@ -339,4 +340,7 @@ class ComparisonResult {
 
   /// The calculated percentage of pixel difference between two images.
   final double diffPercent;
+
+  /// The acceptable golden diff tolerance.
+  final double epsilon;
 }

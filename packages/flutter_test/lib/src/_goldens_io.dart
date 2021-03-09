@@ -90,7 +90,7 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
   final path.Context _path;
 
   @override
-  Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+  Future<bool> compare(Uint8List imageBytes, Uri golden, double epsilon) async {
     final File goldenFile = _getGoldenFile(golden);
     if (!goldenFile.existsSync()) {
       throw test_package.TestFailure(
@@ -101,6 +101,7 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
     final ComparisonResult result = await GoldenFileComparator.compareLists(
       imageBytes,
       goldenBytes,
+      epsilon,
     );
 
     if (!result.passed) {
@@ -168,17 +169,19 @@ class LocalComparisonOutput {
 
 /// Returns a [ComparisonResult] to describe the pixel differential of the
 /// [test] and [master] image bytes provided.
-Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async {
+Future<ComparisonResult> compareLists(List<int>? test, List<int>? master, double epsilon) async {
   if (identical(test, master))
     return ComparisonResult(
       passed: true,
       diffPercent: 0.0,
+      epsilon: epsilon,
     );
 
   if (test == null || master == null || test.isEmpty || master.isEmpty) {
     return ComparisonResult(
       passed: false,
       diffPercent: 1.0,
+      epsilon: epsilon,
       error: 'Pixel test failed, null image provided.',
     );
   }
@@ -200,6 +203,7 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
     return ComparisonResult(
       passed: false,
       diffPercent: 1.0,
+      epsilon: epsilon,
       error: 'Pixel test failed, image sizes do not match.\n'
         'Master Image: ${masterImage.width} X ${masterImage.height}\n'
         'Test Image: ${testImage.width} X ${testImage.height}',
@@ -244,11 +248,13 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
     }
   }
 
-  if (pixelDiffCount > 0) {
-    final double diffPercent = pixelDiffCount / totalPixels;
+  final double diffPercent = pixelDiffCount / totalPixels;
+
+  if (diffPercent > epsilon) {
     return ComparisonResult(
       passed: false,
       diffPercent: diffPercent,
+      epsilon: epsilon,
       error: 'Pixel test failed, '
         '${(diffPercent * 100).toStringAsFixed(2)}% '
         'diff detected.',
@@ -260,7 +266,7 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
       },
     );
   }
-  return ComparisonResult(passed: true, diffPercent: 0.0);
+  return ComparisonResult(passed: true, diffPercent: diffPercent, epsilon: epsilon);
 }
 
 /// Inverts [imageBytes], returning a new [ByteData] object.

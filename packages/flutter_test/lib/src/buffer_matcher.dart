@@ -13,13 +13,16 @@ import 'goldens.dart';
 /// Matcher created by [bufferMatchesGoldenFile].
 class _BufferGoldenMatcher extends AsyncMatcher {
   /// Creates an instance of [BufferGoldenMatcher]. Called by [bufferMatchesGoldenFile].
-  const _BufferGoldenMatcher(this.key, this.version);
+  const _BufferGoldenMatcher(this.key, this.version, this.epsilon);
 
   /// The [key] to the golden image.
   final Uri key;
 
   /// The [version] of the golden image.
   final int? version;
+
+  /// The acceptable golden diff tolerance.
+  final double epsilon;
 
   @override
   Future<String?> matchAsync(dynamic item) async {
@@ -37,7 +40,7 @@ class _BufferGoldenMatcher extends AsyncMatcher {
       return null;
     }
     try {
-      final bool success = await goldenFileComparator.compare(buffer, testNameUri);
+      final bool success = await goldenFileComparator.compare(buffer, testNameUri, epsilon);
       return success ? null : 'does not match';
     } on TestFailure catch (ex) {
       return ex.message;
@@ -69,6 +72,6 @@ class _BufferGoldenMatcher extends AsyncMatcher {
 /// );
 /// ```
 /// {@end-tool}
-AsyncMatcher bufferMatchesGoldenFile(String key, {int? version}) {
-   return _BufferGoldenMatcher(Uri.parse(key), version);
+AsyncMatcher bufferMatchesGoldenFile(String key, {int? version, double epsilon = 0.0}) {
+   return _BufferGoldenMatcher(Uri.parse(key), version, epsilon);
 }

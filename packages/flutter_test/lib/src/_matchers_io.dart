@@ -36,16 +36,19 @@ Future<ui.Image> captureImage(Element element) {
 /// test is running on a VM using conditional import.
 class MatchesGoldenFile extends AsyncMatcher {
   /// Creates an instance of [MatchesGoldenFile]. Called by [matchesGoldenFile].
-  const MatchesGoldenFile(this.key, this.version);
+  const MatchesGoldenFile(this.key, this.version, this.epsilon);
 
   /// Creates an instance of [MatchesGoldenFile]. Called by [matchesGoldenFile].
-  MatchesGoldenFile.forStringPath(String path, this.version) : key = Uri.parse(path);
+  MatchesGoldenFile.forStringPath(String path, this.version, this.epsilon) : key = Uri.parse(path);
 
   /// The [key] to the golden image.
   final Uri key;
 
   /// The [version] of the golden image.
   final int? version;
+
+  /// The acceptable golden diff tolerance.
+  final double epsilon;
 
   @override
   Future<String?> matchAsync(dynamic item) async {
@@ -82,7 +85,7 @@ class MatchesGoldenFile extends AsyncMatcher {
         return null;
       }
       try {
-        final bool success = await goldenFileComparator.compare(bytes.buffer.asUint8List(), testNameUri);
+        final bool success = await goldenFileComparator.compare(bytes.buffer.asUint8List(), testNameUri, epsilon);
         return success ? null : 'does not match';
       } on TestFailure catch (ex) {
         return ex.message;
