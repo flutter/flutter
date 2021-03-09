@@ -152,7 +152,7 @@ int RunTester(const flutter::Settings& settings,
   );
 
   if (!shell || !shell->IsSetup()) {
-    FML_LOG(ERROR) << "Could not setup the shell.";
+    FML_LOG(ERROR) << "Could not set up the shell.";
     return EXIT_FAILURE;
   }
 

@@ -430,7 +430,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
    *     controller. This should be the context of the Activity hosting the Flutter application.
    * @param textureRegistry The texture registry which provides the output textures into which the
    *     embedded views will be rendered.
-   * @param dartExecutor The dart execution context, which is used to setup a system channel.
+   * @param dartExecutor The dart execution context, which is used to set up a system channel.
    */
   public void attach(
       Context context, TextureRegistry textureRegistry, @NonNull DartExecutor dartExecutor) {

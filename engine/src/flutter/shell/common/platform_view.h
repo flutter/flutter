@@ -60,7 +60,7 @@ class PlatformView {
     ///             with the given render surface. This surface is platform
     ///             (iOS, Android) and client-rendering API (OpenGL, Software,
     ///             Metal, Vulkan) specific. This is usually a sign to the
-    ///             rasterizer to setup and begin rendering to that surface.
+    ///             rasterizer to set up and begin rendering to that surface.
     ///
     /// @param[in]  surface  The surface
     ///

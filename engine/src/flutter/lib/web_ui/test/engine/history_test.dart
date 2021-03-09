@@ -60,7 +60,7 @@ void testMain() {
       // There should be two entries: origin and flutter.
       expect(strategy.history, hasLength(2));
 
-      // The origin entry is setup but its path should remain unchanged.
+      // The origin entry is set up but its path should remain unchanged.
       final TestHistoryEntry originEntry = strategy.history[0];
       expect(originEntry.state, _wrapOriginState('initial state'));
       expect(originEntry.url, '/initial');

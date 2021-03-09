@@ -454,7 +454,7 @@ flt-glass-pane * {
     if (html.window.visualViewport == null && isWebKit) {
       // Safari sometimes gives us bogus innerWidth/innerHeight values when the
       // page loads. When it changes the values to correct ones it does not
-      // notify of the change via `onResize`. As a workaround, we setup a
+      // notify of the change via `onResize`. As a workaround, we set up a
       // temporary periodic timer that polls innerWidth and triggers the
       // resizeListener so that the framework can react to the change.
       //
@@ -464,7 +464,7 @@ flt-glass-pane * {
       // VisualViewport API is not enabled in Firefox as well. On the other hand
       // Firefox returns correct values for innerHeight, innerWidth.
       // Firefox also triggers html.window.onResize therefore we don't need this
-      // timer setup for Firefox.
+      // timer to be set up for Firefox.
       final int initialInnerWidth = html.window.innerWidth!;
       // Counts how many times we checked screen size. We check up to 5 times.
       int checkCount = 0;

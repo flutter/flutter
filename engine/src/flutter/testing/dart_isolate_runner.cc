@@ -94,7 +94,7 @@ std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolateOnUITaskRunner(
     auto kernel_mapping = std::make_unique<fml::FileMapping>(kernel_file);
 
     if (kernel_mapping->GetMapping() == nullptr) {
-      FML_LOG(ERROR) << "Could not setup kernel mapping.";
+      FML_LOG(ERROR) << "Could not set up kernel mapping.";
       return nullptr;
     }
 

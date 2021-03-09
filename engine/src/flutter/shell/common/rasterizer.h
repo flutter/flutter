@@ -119,7 +119,7 @@ class Rasterizer final : public SnapshotDelegate {
   //----------------------------------------------------------------------------
   /// @brief      Destroys the rasterizer. This must happen on the raster task
   ///             runner. All GPU resources are collected before this call
-  ///             returns. Any context setup by the embedder to hold these
+  ///             returns. Any context set up by the embedder to hold these
   ///             resources can be immediately collected as well.
   ///
   ~Rasterizer();
@@ -132,7 +132,7 @@ class Rasterizer final : public SnapshotDelegate {
   ///             call. No rendering may occur before this call. The surface is
   ///             held till the balancing call to `Rasterizer::Teardown` is
   ///             made. Calling a setup before tearing down the previous surface
-  ///             (if this is not the first time the surface has been setup) is
+  ///             (if this is not the first time the surface has been set up) is
   ///             user error.
   ///
   /// @see        `Rasterizer::Teardown`
@@ -142,7 +142,7 @@ class Rasterizer final : public SnapshotDelegate {
   void Setup(std::unique_ptr<Surface> surface);
 
   //----------------------------------------------------------------------------
-  /// @brief      Releases the previously setup on-screen render surface and
+  /// @brief      Releases the previously set up on-screen render surface and
   ///             collects associated resources. No more rendering may occur
   ///             till the next call to `Rasterizer::Setup` with a new render
   ///             surface. Calling a teardown without a setup is user error.

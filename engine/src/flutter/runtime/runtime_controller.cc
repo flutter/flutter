@@ -429,7 +429,7 @@ bool RuntimeController::LaunchRootIsolate(
     tonic::DartState::Scope scope(strong_root_isolate);
     platform_configuration->DidCreateIsolate();
     if (!FlushRuntimeStateToIsolate()) {
-      FML_DLOG(ERROR) << "Could not setup initial isolate state.";
+      FML_DLOG(ERROR) << "Could not set up initial isolate state.";
     }
   } else {
     FML_DCHECK(false) << "RuntimeController created without window binding.";

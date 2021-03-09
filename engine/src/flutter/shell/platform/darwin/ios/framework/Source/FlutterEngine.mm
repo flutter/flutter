@@ -824,7 +824,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
     return _connections->AquireConnection(channel.UTF8String);
   } else {
     NSAssert(!handler, @"Setting a message handler before the FlutterEngine has been run.");
-    // Setting a handler to nil for a not setup channel is a noop.
+    // Setting a handler to nil for a channel that has not yet been set up is a no-op.
     return flutter::ConnectionCollection::MakeErrorConnection(-1);
   }
 }

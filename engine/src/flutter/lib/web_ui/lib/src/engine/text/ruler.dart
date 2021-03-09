@@ -361,7 +361,7 @@ class TextDimensions {
     _invalidateBoundsCache();
   }
 
-  /// Appends element and probe to hostElement that is setup for a specific
+  /// Appends element and probe to hostElement that is set up for a specific
   /// TextStyle.
   void appendToHost(html.HtmlElement hostElement) {
     hostElement.append(_element);

@@ -117,7 +117,7 @@ std::unique_ptr<AndroidSurface> PlatformViewAndroid::MakeSurface(
   auto surface = surface_factory->CreateSurface();
 
   FML_CHECK(surface && surface->IsValid())
-      << "Could not create an OpenGL, Vulkan or Software surface to setup "
+      << "Could not create an OpenGL, Vulkan or Software surface to set up "
          "rendering.";
   return surface;
 }

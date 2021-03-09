@@ -402,7 +402,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
     // --- Execute the behavior under test ---
-    // The FlutterEngine is setup in onAttach().
+    // The FlutterEngine is set up in onAttach().
     delegate.onAttach(RuntimeEnvironment.application);
 
     // Emulate the host and inform our delegate that the back button was pressed.
@@ -418,7 +418,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
     // --- Execute the behavior under test ---
-    // The FlutterEngine is setup in onAttach().
+    // The FlutterEngine is set up in onAttach().
     delegate.onAttach(RuntimeEnvironment.application);
 
     // Emulate the host and call the method that we expect to be forwarded.
@@ -446,7 +446,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
     // --- Execute the behavior under test ---
-    // The FlutterEngine is setup in onAttach().
+    // The FlutterEngine is set up in onAttach().
     delegate.onAttach(RuntimeEnvironment.application);
     // Emulate app start.
     delegate.onStart();
@@ -473,7 +473,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
     // --- Execute the behavior under test ---
-    // The FlutterEngine is setup in onAttach().
+    // The FlutterEngine is set up in onAttach().
     delegate.onAttach(RuntimeEnvironment.application);
     // Emulate app start.
     delegate.onStart();
@@ -498,7 +498,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
     // --- Execute the behavior under test ---
-    // The FlutterEngine is setup in onAttach().
+    // The FlutterEngine is set up in onAttach().
     delegate.onAttach(RuntimeEnvironment.application);
     // Emulate app start.
     delegate.onStart();
@@ -514,7 +514,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
     // --- Execute the behavior under test ---
-    // The FlutterEngine is setup in onAttach().
+    // The FlutterEngine is set up in onAttach().
     delegate.onAttach(RuntimeEnvironment.application);
 
     Intent mockIntent = mock(Intent.class);
@@ -534,7 +534,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
     // --- Execute the behavior under test ---
-    // The FlutterEngine is setup in onAttach().
+    // The FlutterEngine is set up in onAttach().
     delegate.onAttach(RuntimeEnvironment.application);
 
     Intent mockIntent = mock(Intent.class);
@@ -552,7 +552,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
     // --- Execute the behavior under test ---
-    // The FlutterEngine is setup in onAttach().
+    // The FlutterEngine is set up in onAttach().
     delegate.onAttach(RuntimeEnvironment.application);
 
     // Emulate the host and call the method that we expect to be forwarded.
@@ -568,7 +568,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
     // --- Execute the behavior under test ---
-    // The FlutterEngine is setup in onAttach().
+    // The FlutterEngine is set up in onAttach().
     delegate.onAttach(RuntimeEnvironment.application);
 
     // Emulate the host and call the method that we expect to be forwarded.
@@ -585,7 +585,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
     // --- Execute the behavior under test ---
-    // The FlutterEngine is setup in onAttach().
+    // The FlutterEngine is set up in onAttach().
     delegate.onAttach(RuntimeEnvironment.application);
 
     // Emulate the host and call the method that we expect to be forwarded.
@@ -601,7 +601,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
     // --- Execute the behavior under test ---
-    // The FlutterEngine is setup in onAttach().
+    // The FlutterEngine is set up in onAttach().
     delegate.onAttach(RuntimeEnvironment.application);
 
     // Emulate the host and call the method that we expect to be forwarded.
@@ -624,7 +624,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
     // --- Execute the behavior under test ---
-    // The FlutterEngine is setup in onAttach().
+    // The FlutterEngine is set up in onAttach().
     delegate.onAttach(RuntimeEnvironment.application);
 
     // Emulate the host and call the method that we expect to be forwarded.

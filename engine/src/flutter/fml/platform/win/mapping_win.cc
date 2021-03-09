@@ -88,7 +88,7 @@ FileMapping::FileMapping(const fml::UniqueFD& fd,
       MapViewOfFile(mapping_handle_.get(), desired_access, 0, 0, mapping_size));
 
   if (mapping == nullptr) {
-    FML_DLOG(ERROR) << "Could not setup file mapping. "
+    FML_DLOG(ERROR) << "Could not set up file mapping. "
                     << GetLastErrorMessage();
     return;
   }

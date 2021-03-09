@@ -43,7 +43,7 @@ void EmbedderTestContextSoftware::SetupSurface(SkISize surface_size) {
 }
 
 void EmbedderTestContextSoftware::SetupCompositor() {
-  FML_CHECK(!compositor_) << "Already setup a compositor in this context.";
+  FML_CHECK(!compositor_) << "Already set up a compositor in this context.";
   compositor_ = std::make_unique<EmbedderTestCompositorSoftware>(surface_size_);
 }
 

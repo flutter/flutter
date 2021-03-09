@@ -40,7 +40,7 @@ class TestIOManager final : public IOManager {
         weak_factory_(this) {
     FML_CHECK(task_runner->RunsTasksOnCurrentThread())
         << "The IO manager must be initialized its primary task runner. The "
-           "test harness may not be setup correctly/safely.";
+           "test harness may not be set up correctly/safely.";
     weak_prototype_ = weak_factory_.GetWeakPtr();
   }
 

@@ -174,8 +174,8 @@ FlutterTransformation EmbedderTestContext::GetRootSurfaceTransformation() {
 
 EmbedderTestCompositor& EmbedderTestContext::GetCompositor() {
   FML_CHECK(compositor_)
-      << "Accessed the compositor on a context where one was not setup. Use "
-         "the config builder to setup a context with a custom compositor.";
+      << "Accessed the compositor on a context where one was not set up. Use "
+         "the config builder to set up a context with a custom compositor.";
   return *compositor_;
 }
 

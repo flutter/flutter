@@ -1193,7 +1193,7 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
 
   if (!thread_host || !thread_host->IsValid()) {
     return LOG_EMBEDDER_ERROR(kInvalidArguments,
-                              "Could not setup or infer thread configuration "
+                              "Could not set up or infer thread configuration "
                               "to run the Flutter engine on.");
   }
 

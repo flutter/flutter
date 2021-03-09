@@ -254,7 +254,7 @@ std::shared_ptr<DartVM> DartVM::Create(
   );
 
   if (!vm_data) {
-    FML_LOG(ERROR) << "Could not setup VM data to bootstrap the VM from.";
+    FML_LOG(ERROR) << "Could not set up VM data to bootstrap the VM from.";
     return {};
   }
 

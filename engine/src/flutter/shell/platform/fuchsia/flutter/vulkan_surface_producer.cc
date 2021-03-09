@@ -73,9 +73,9 @@ bool VulkanSurfaceProducer::Initialize(scenic::Session* scenic_session) {
       VK_MAKE_VERSION(1, 1, 0), true /* enable_validation_layers */);
 
   if (!application_->IsValid() || !vk_->AreInstanceProcsSetup()) {
-    // Make certain the application instance was created and it setup the
+    // Make certain the application instance was created and it set up the
     // instance proc table entries.
-    FML_LOG(ERROR) << "Instance proc addresses have not been setup.";
+    FML_LOG(ERROR) << "Instance proc addresses have not been set up.";
     return false;
   }
 
@@ -85,9 +85,9 @@ bool VulkanSurfaceProducer::Initialize(scenic::Session* scenic_session) {
 
   if (logical_device_ == nullptr || !logical_device_->IsValid() ||
       !vk_->AreDeviceProcsSetup()) {
-    // Make certain the device was created and it setup the device proc table
+    // Make certain the device was created and it set up the device proc table
     // entries.
-    FML_LOG(ERROR) << "Device proc addresses have not been setup.";
+    FML_LOG(ERROR) << "Device proc addresses have not been set up.";
     return false;
   }
 

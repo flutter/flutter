@@ -79,7 +79,7 @@ public class FlutterEngineConnectionRegistryTest {
     Intent intent = mock(Intent.class);
     AtomicBoolean isFirstCall = new AtomicBoolean(true);
 
-    // setup the environment to get the required internal data
+    // Set up the environment to get the required internal data
     FlutterEngineConnectionRegistry registry =
         new FlutterEngineConnectionRegistry(context, flutterEngine, flutterLoader);
     FakeActivityAwareFlutterPlugin fakePlugin = new FakeActivityAwareFlutterPlugin();

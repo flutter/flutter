@@ -151,7 +151,7 @@ void InitBuiltinLibrariesForIsolate(
   // AOT: These steps already happened at compile time in gen_snapshot.
 
   // We need to ensure that all the scripts loaded so far are finalized
-  // as we are about to invoke some Dart code below to setup closures.
+  // as we are about to invoke some Dart code below to set up closures.
   result = Dart_FinalizeLoading(false);
   FML_CHECK(!tonic::LogIfError(result));
 #endif

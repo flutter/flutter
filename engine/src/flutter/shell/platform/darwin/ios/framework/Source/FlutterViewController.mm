@@ -84,7 +84,7 @@ typedef enum UIAccessibilityContrast : NSInteger {
   fml::scoped_nsobject<FlutterEngine> _engine;
 
   // We keep a separate reference to this and create it ahead of time because we want to be able to
-  // setup a shell along with its platform view before the view has to appear.
+  // set up a shell along with its platform view before the view has to appear.
   fml::scoped_nsobject<FlutterView> _flutterView;
   fml::scoped_nsobject<UIView> _splashScreenView;
   fml::ScopedBlock<void (^)(void)> _flutterViewRenderedCallback;

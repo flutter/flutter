@@ -351,7 +351,7 @@ class IntegrationTestsManager {
         print('ERROR: Test driver file named has ${expectedDriverName} '
             'not found under directory ${testDirectory.path}. Stopping the '
             'integration tests. Please add ${expectedDriverName}. Check to '
-            'README file on more details on how to setup integration tests.');
+            'README file on more details on how to set up integration tests.');
       }
       throw StateError('Error in test files. Check the logs for '
           'further instructions');

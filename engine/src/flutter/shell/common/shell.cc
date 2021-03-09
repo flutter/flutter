@@ -79,7 +79,7 @@ void Tokenize(const std::string& input,
 }
 
 // Though there can be multiple shells, some settings apply to all components in
-// the process. These have to be setup before the shell or any of its
+// the process. These have to be set up before the shell or any of its
 // sub-components can be initialized. In a perfect world, this would be empty.
 // TODO(chinmaygarde): The unfortunate side effect of this call is that settings
 // that cause shell initialization failures will still lead to some of their

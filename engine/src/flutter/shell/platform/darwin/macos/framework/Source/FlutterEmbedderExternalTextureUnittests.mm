@@ -21,19 +21,19 @@
 namespace flutter::testing {
 
 TEST(FlutterEmbedderExternalTextureUnittests, TestTextureResolution) {
-  // constants.
+  // Constants.
   const size_t width = 100;
   const size_t height = 100;
   const int64_t texture_id = 1;
 
-  // setup the surface.
+  // Set up the surface.
   FlutterDarwinContextMetal* darwinContextMetal =
       [[FlutterDarwinContextMetal alloc] initWithDefaultMTLDevice];
   SkImageInfo info = SkImageInfo::MakeN32Premul(width, height);
   GrDirectContext* grContext = darwinContextMetal.mainContext.get();
   sk_sp<SkSurface> gpuSurface(SkSurface::MakeRenderTarget(grContext, SkBudgeted::kNo, info));
 
-  // create a texture.
+  // Create a texture.
   MTLTextureDescriptor* textureDescriptor = [[MTLTextureDescriptor alloc] init];
   textureDescriptor.pixelFormat = MTLPixelFormatBGRA8Unorm;
   textureDescriptor.width = width;
@@ -45,7 +45,7 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestTextureResolution) {
       (__bridge FlutterMetalTextureHandle)mtlTexture,
   };
 
-  // callback to resolve the texture.
+  // Callback to resolve the texture.
   EmbedderExternalTextureMetal::ExternalTextureCallback callback = [&](int64_t texture_id, size_t w,
                                                                        size_t h) {
     EXPECT_TRUE(w == width);
@@ -62,7 +62,7 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestTextureResolution) {
     return std::unique_ptr<FlutterMetalExternalTexture>(texture);
   };
 
-  // render the texture.
+  // Render the texture.
   std::unique_ptr<flutter::Texture> texture =
       std::make_unique<EmbedderExternalTextureMetal>(texture_id, callback);
   SkRect bounds = SkRect::MakeWH(info.width(), info.height());

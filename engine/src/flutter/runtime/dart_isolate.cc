@@ -1076,9 +1076,10 @@ bool DartIsolate::InitializeIsolate(
     return false;
   }
 
-  // Root isolates will be setup by the engine and the service isolate (which is
-  // also a root isolate) by the utility routines in the VM. However, secondary
-  // isolates will be run by the VM if they are marked as runnable.
+  // Root isolates will be set up by the engine and the service isolate
+  // (which is also a root isolate) by the utility routines in the VM.
+  // However, secondary isolates will be run by the VM if they are
+  // marked as runnable.
   if (!embedder_isolate->IsRootIsolate()) {
     auto child_isolate_preparer =
         embedder_isolate->GetIsolateGroupData().GetChildIsolatePreparer();

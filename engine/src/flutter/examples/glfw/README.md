@@ -24,6 +24,6 @@ In order to **build** and **run** the example you should be able to go into this
 
 ## Troubleshooting
 There are a few things you might have to tweak in order to get your build working:
- * Flutter Engine Location - Inside the `CMakeList.txt` file you will see that it is setup to search for the header and library for the Flutter Engine in specific locations, those might not be the location of your Flutter Engine.
+ * Flutter Engine Location - Inside the `CMakeList.txt` file you will see that it is set up to search for the header and library for the Flutter Engine in specific locations, those might not be the location of your Flutter Engine.
  * Pixel Ratio - If the project runs but is drawing at the wrong scale you may have to tweak the `kPixelRatio` variable in `FlutterEmbedderGLFW.cc` file.
  * GLFW Location - Inside the `CMakeLists.txt` we are searching for the GLFW library, if CMake can't find it you may have to edit that.

@@ -110,9 +110,9 @@ uint32_t EmbedderTestContextGL::GetWindowFBOId() const {
 }
 
 void EmbedderTestContextGL::SetupCompositor() {
-  FML_CHECK(!compositor_) << "Already ssetup a compositor in this context.";
+  FML_CHECK(!compositor_) << "Already set up a compositor in this context.";
   FML_CHECK(gl_surface_)
-      << "Setup the GL surface before setting up a compositor.";
+      << "Set up the GL surface before setting up a compositor.";
   compositor_ = std::make_unique<EmbedderTestCompositorGL>(
       gl_surface_->GetSurfaceSize(), gl_surface_->GetGrContext());
 }

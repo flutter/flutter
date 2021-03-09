@@ -217,8 +217,8 @@ class SingleEntryBrowserHistory extends BrowserHistory {
     if (!_isFlutterEntry(html.window.history.state)) {
       // An entry may not have come from Flutter, for example, when the user
       // refreshes the page. They land directly on the "flutter" entry, so
-      // there's no need to setup the "origin" and "flutter" entries, we can
-      // safely assume they are already setup.
+      // there's no need to set up the "origin" and "flutter" entries, we can
+      // safely assume they are already set up.
       _setupOriginEntry(strategy);
       _setupFlutterEntry(strategy, replace: false, path: path);
     }
