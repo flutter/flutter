@@ -62,7 +62,7 @@ class MouseCursorManager {
 
     final MouseCursorSession? lastSession = _lastSession[device];
     final MouseCursor nextCursor = _DeferringMouseCursor.firstNonDeferred(cursorCandidates)
-      ?? defaultMouseCursor;
+      ?? fallbackMouseCursor;
     assert(nextCursor != _DeferringMouseCursor);
     if (lastSession?.cursor == nextCursor)
       return;
