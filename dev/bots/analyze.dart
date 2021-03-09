@@ -171,8 +171,13 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
         String message;
         do {
           final Match match2 = _deprecationPattern2.firstMatch(lines[lineNumber]);
-          if (match2 == null)
-            throw 'Deprecation notice does not match required pattern.';
+          if (match2 == null) {
+            String possibleReason = '';
+            if (lines[lineNumber].trimLeft().startsWith('"')) {
+              possibleReason = ' You might have used double quotes (") for the string instead of single quotes (\').';
+            }
+            throw 'Deprecation notice does not match required pattern.$possibleReason';
+          }
           if (!lines[lineNumber].startsWith("$indent  '"))
             throw 'Unexpected deprecation notice indent.';
           if (message == null) {
