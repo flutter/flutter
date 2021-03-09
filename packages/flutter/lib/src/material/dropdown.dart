@@ -698,22 +698,26 @@ class DropdownMenuItem<T> extends _DropdownMenuItemContainer {
     this.disabled = false,
     required Widget child,
   })   : assert(child != null),
+          assert(!disabled || (disabled && value == null), 'if disabled is true, value should be null'),
+          assert(!disabled || (disabled && onTap == null), 'if disabled is true, onTap should be null'),
         super(key: key, child: child);
 
-  /// Called when the dropdown menu item is tapped, provided [disabled] is false.
+  /// Called when the dropdown menu item is tapped.
+  /// If disabled is `true`, it should be `null`.
   final VoidCallback? onTap;
 
-  /// The value to return if the user selects this menu item, provided [disabled] is false.
+  /// The value to return if the user selects this menu item.
+  /// If disabled is `true`, it should be `null`.
   ///
   /// Eventually returned in a call to [DropdownButton.onChanged].
   final T? value;
 
-  /// If `true`:
-  /// * [value] and [onTap] won't be used.
-  /// * the item will not be clickable / focusable.
-  /// * tapping won't close drop down list.
+  /// Whether a user can select this menu item. Defaults to `false`.
   ///
-  /// defaults to `false`
+  /// If `true`: [value] and [onTap] should be `null`
+  /// and user will **not** be able to select this item.
+  ///
+  /// if `false`: user will be able to select this item.
   final bool disabled;
 }
 
@@ -821,7 +825,7 @@ class DropdownButton<T> extends StatefulWidget {
   ///
   /// The [items] must have distinct values. If [value] isn't null then it
   /// must be equal to one of the [DropdownMenuItem] values. If [items] or
-  /// [onChanged] is null, the button will be disabled, the down arrow
+  /// [onChanged] is null, the button will be disabled, tconst he down arrow
   /// will be greyed out.
   ///
   /// If [value] is null and the button is enabled, [hint] will be displayed
@@ -868,13 +872,12 @@ class DropdownButton<T> extends StatefulWidget {
     // DropdownButtonFormField.
   }) : assert(items == null || items.isEmpty || value == null ||
               items.where((DropdownMenuItem<T> item) {
-                // a disabled item's value should not be taken into account
-                return !item.disabled && item.value == value;
+                return item.value == value;
               }).length == 1,
-                'There should be exactly one enabled '
-                "item with [DropdownButton]'s value: $value. \n "
-                'Either zero or 2 or more [DropdownMenuItem]s were detected '
-                'with the same value',
+                  "There should be exactly one item with [DropdownButton]'s value: "
+                  '$value. \n'
+                  'Either zero or 2 or more [DropdownMenuItem]s were detected '
+                  'with the same value',
               ),
        assert(elevation != null),
        assert(iconSize != null),

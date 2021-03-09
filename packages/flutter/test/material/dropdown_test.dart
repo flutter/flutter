@@ -460,7 +460,7 @@ void main() {
     } on AssertionError catch (error) {
       expect(
         error.toString(),
-        contains("There should be exactly one enabled item with [DropdownButton]'s value"),
+        contains("There should be exactly one item with [DropdownButton]'s value"),
       );
     }
   });
@@ -491,7 +491,7 @@ void main() {
     } on AssertionError catch (error) {
       expect(
         error.toString(),
-        contains("There should be exactly one enabled item with [DropdownButton]'s value"),
+        contains("There should be exactly one item with [DropdownButton]'s value"),
       );
     }
   });
@@ -3123,8 +3123,8 @@ void main() {
     );
   });
 
-  testWidgets('tapping a disabled item should not close DropdownButton', (WidgetTester tester) async {
-    final List<String> options = <String>['first', 'second', 'disabled'];
+  testWidgets('Tapping a disabled item should not close DropdownButton', (WidgetTester tester) async {
+    final List<String> options = <String>['first', 'disabled'];
     String? value = options.first;
 
     await tester.pumpWidget(
@@ -3133,11 +3133,20 @@ void main() {
           body: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) => DropdownButton<String>(
               value: value,
-              items: options.map((String s) => DropdownMenuItem<String>(
-                value: s,
-                disabled: s == 'disabled',
-                child: Text(s),
-              )).toList(),
+              items: const <DropdownMenuItem<String>>[
+                DropdownMenuItem<String>(
+                  disabled: true,
+                  child: Text('disabled'),
+                ),
+                DropdownMenuItem<String>(
+                  value: 'first',
+                  child: Text('first'),
+                ),
+                DropdownMenuItem<String>(
+                  value: 'second',
+                  child: Text('second'),
+                ),
+              ],
               onChanged: (String? v) => setState(() => value = v),
             ),
           ),
@@ -3157,132 +3166,108 @@ void main() {
     expect(find.text('second').hitTestable(), findsOneWidget);
   });
 
-  testWidgets('disabled item should not be focusable when tapped', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
-    final List<String> options = <String>['first', 'disabled'];
-    String? value = options.first;
-
+  testWidgets('Disabled item should not be focusable', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) => DropdownButton<String>(
-              autofocus: true,
-              value: value,
-              items: options.map((String s) => DropdownMenuItem<String>(
-                value: s,
-                disabled: s == 'disabled',
-                child: Text(s),
-              )).toList(),
-              onChanged: (String? v) => setState(() => value = v),
-              focusNode: focusNode,
-            ),
+          body: DropdownButton<String>(
+            value: 'enabled',
+            items: const <DropdownMenuItem<String>>[
+              DropdownMenuItem<String>(
+                disabled: true,
+                child: Text('disabled'),
+              ),
+              DropdownMenuItem<String>(
+                value: 'enabled',
+                child: Text('enabled'),
+              )
+            ],
+            onChanged: onChanged,
           ),
         ),
       ),
     );
-
-    // Pump a frame for autofocus to take effect.
-    await tester.pump();
-    expect(focusNode.hasPrimaryFocus, isTrue);
 
     // Open dropdown.
-    await tester.tap(find.text('first').hitTestable());
-    await tester.pumpAndSettle();
-
-    // The first element should have the focus
-    expect(Focus.of(tester.element(find.text('first').hitTestable())).hasPrimaryFocus, isTrue);
-
-    // Tap on a disabled item.
-    await tester.tap(find.text('disabled').hitTestable());
-    await tester.pump();
-
-    // The first element of the dropdown list should retain the focus
-    expect(Focus.of(tester.element(find.text('first').hitTestable())).hasPrimaryFocus, isTrue);
-  });
-
-  testWidgets('disabled item should not be focusable when navigated using arrow keys', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
-    final List<String> options = <String>['first', 'disabled', 'second'];
-    String? value = options.first;
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) => DropdownButton<String>(
-              autofocus: true,
-              value: value,
-              items: options.map((String s) => DropdownMenuItem<String>(
-                value: s,
-                disabled: s == 'disabled',
-                child: Text(s),
-              )).toList(),
-              onChanged: (String? v) => setState(() => value = v),
-              focusNode: focusNode,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    // Pump a frame for autofocus to take effect.
-    await tester.pump();
-    expect(focusNode.hasPrimaryFocus, isTrue);
-
-    // Open dropdown.
-    await tester.tap(find.text('first').hitTestable());
-    await tester.pumpAndSettle();
-
-    // Moving focus one down.
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pump();
-    // second should have the focus.
-    expect(Focus.of(tester.element(find.text('second').hitTestable())).hasPrimaryFocus, isTrue);
-
-    // Moving focus one up.
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-    await tester.pump();
-    // now first should have the focus.
-    expect(Focus.of(tester.element(find.text('first').hitTestable())).hasPrimaryFocus, isTrue);
-  });
-
-  testWidgets('an enabled and a disabled item can have the same value', (WidgetTester tester) async {
-    String? value = 'common value';
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) => DropdownButton<String>(
-              value: value,
-              items: const <DropdownMenuItem<String>>[
-                DropdownMenuItem<String>(
-                  value: 'common value',
-                  disabled: true,
-                  child: Text('disabled'),
-                ),
-                DropdownMenuItem<String>(
-                  value: 'common value',
-                  child: Text('enabled'),
-                )
-              ],
-              onChanged: (String? v) => setState(() => value = v),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    // rending of DropdownButton proves that there are no errors (like AssertionError) thrown
-    expect(find.byType(dropdownButtonType), findsOneWidget);
-
-    // opening and closing the dropdown widget
-    await tester.tap(find.text('enabled').hitTestable());
-    await tester.pumpAndSettle();
     await tester.tap(find.text('enabled').hitTestable());
     await tester.pumpAndSettle();
 
-    expect(find.byType(dropdownButtonType), findsOneWidget);
+    try {
+      // try to get the focus node for disabled item
+      Focus.of(tester.element(find.text('disabled').hitTestable()));
+      // if it is possible to get it, means this disabled item is focusable, which it shouldn't be.
+      fail('Disabled menu item should not be able to request focus');
+    } on AssertionError catch (error) {
+      expect(
+        error.toString(),
+        contains('Focus.of() was called with a context that does not contain a '
+            'Focus between the given context and the nearest FocusScope widget'),
+      );
+    }
+  });
+
+  testWidgets('value should be null if disabled is true', (WidgetTester tester) async {
+    final List<String> values = <String>['enabled', 'disabled'];
+
+    try {
+      // trying to assign [value] and [onTap] non-null values irrespective of
+      // if the menu item is disabled or now
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownButton<String>(
+              value: values[0],
+              items: values.map<DropdownMenuItem<String>>((String e) => DropdownMenuItem<String>(
+                value: e,
+                child: Text(e),
+                disabled: e == 'disabled',
+              )).toList(),
+              onChanged: onChanged,
+            ),
+          ),
+        ),
+      );
+
+      // disabled item should not be allowed to have non-null values for [value] and [onTap]
+      fail('for disabled menu item, value should be null');
+    } on AssertionError catch (error) {
+      expect(
+        error.toString(),
+        matches('if disabled is true, value should be null'),
+      );
+    }
+  });
+
+  testWidgets('onTap should be null if disabled is true', (WidgetTester tester) async {
+    final List<String> values = <String>['enabled', 'disabled'];
+
+    try {
+      // trying to assign [value] and [onTap] non-null values irrespective of
+      // if the menu item is disabled or now
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownButton<String>(
+              value: values[0],
+              items: values.map<DropdownMenuItem<String>>((String e) => DropdownMenuItem<String>(
+                value: e == 'disabled' ? null : e,
+                child: Text(e),
+                disabled: e == 'disabled',
+                onTap: () {},
+              )).toList(),
+              onChanged: onChanged,
+            ),
+          ),
+        ),
+      );
+
+      // disabled item should not be allowed to have non-null values for [value] and [onTap]
+      fail('for disabled menu item, onTap should be null');
+    } on AssertionError catch (error) {
+      expect(
+        error.toString(),
+        matches('if disabled is true, onTap should be null'),
+      );
+    }
   });
 }
