@@ -340,7 +340,7 @@ class Table extends RenderObjectWidget {
 }
 
 @immutable
-class _TableSlot {
+class _TableSlot with Diagnosticable {
   const _TableSlot(this.x, this.y);
 
   // The column that the child was in this table.
@@ -362,7 +362,11 @@ class _TableSlot {
   int get hashCode => hashValues(x, y);
 
   @override
-  String toString() => '${super.toString()}; "x" : "$x"; "y" : "$y"; }';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(IntProperty('x', x));
+    properties.add(IntProperty('y', y));
+  }
 }
 
 class _TableElement extends RenderObjectElement {
@@ -377,6 +381,8 @@ class _TableElement extends RenderObjectElement {
   // Instead of doing incremental updates to the child list, it replaces the entire list each frame.
   // This class ignores the child's slot during [_TableElement.mount] and [_TableElement.update]
   // phase, and then updates the slot to [_TableSlot] after completing the update of the child list.
+  @override
+  Object? createSlotForChild(int index, Element? value) => null;
 
   List<_TableElementRow> _children = const<_TableElementRow>[];
 
@@ -438,13 +444,13 @@ class _TableElement extends RenderObjectElement {
       }
       newChildren.add(_TableElementRow(
         key: row.key,
-        children: updateChildren(oldChildren, row.children!, forgottenChildren: _forgottenChildren, ignoreSlot: true),
+        children: updateChildren(oldChildren, row.children!, forgottenChildren: _forgottenChildren),
       ));
     }
     while (oldUnkeyedRows.moveNext())
-      updateChildren(oldUnkeyedRows.current.children, const <Widget>[], forgottenChildren: _forgottenChildren, ignoreSlot: true);
+      updateChildren(oldUnkeyedRows.current.children, const <Widget>[], forgottenChildren: _forgottenChildren);
     for (final List<Element> oldChildren in oldKeyedRows.values.where((List<Element> list) => !taken.contains(list)))
-      updateChildren(oldChildren, const <Widget>[], forgottenChildren: _forgottenChildren, ignoreSlot: true);
+      updateChildren(oldChildren, const <Widget>[], forgottenChildren: _forgottenChildren);
 
     _children = newChildren;
     _updateRenderObjectChildren();
