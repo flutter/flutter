@@ -7,18 +7,14 @@
 namespace fml {
 
 TaskRunnerChecker::TaskRunnerChecker()
-    : initialized_queue_id_(InitTaskQueueId()),
-      subsumed_queue_id_(
-          MessageLoopTaskQueues::GetInstance()->GetSubsumedTaskQueueId(
-              initialized_queue_id_)){};
+    : initialized_queue_id_(InitTaskQueueId()){};
 
 TaskRunnerChecker::~TaskRunnerChecker() = default;
 
 bool TaskRunnerChecker::RunsOnCreationTaskRunner() const {
   FML_CHECK(fml::MessageLoop::IsInitializedForCurrentThread());
   const auto current_queue_id = MessageLoop::GetCurrentTaskQueueId();
-  return RunsOnTheSameThread(current_queue_id, initialized_queue_id_) ||
-         RunsOnTheSameThread(current_queue_id, subsumed_queue_id_);
+  return RunsOnTheSameThread(current_queue_id, initialized_queue_id_);
 };
 
 bool TaskRunnerChecker::RunsOnTheSameThread(TaskQueueId queue_a,
