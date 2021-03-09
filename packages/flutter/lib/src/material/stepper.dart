@@ -371,12 +371,23 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     }
   }
 
+  /*
   Color _circleColor(int index) {
     final ThemeData themeData = Theme.of(context);
     if (!_isDark()) {
       return widget.steps[index].isActive ? themeData.primaryColor : Colors.black38;
     } else {
       return widget.steps[index].isActive ? themeData.accentColor : themeData.backgroundColor;
+    }
+  }
+  */
+
+  Color _circleColor(int index) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    if (!_isDark()) {
+      return widget.steps[index].isActive ? colorScheme.primary : colorScheme.onSurface.withOpacity(0.38);
+    } else {
+      return widget.steps[index].isActive ? colorScheme.secondary : colorScheme.background;
     }
   }
 
