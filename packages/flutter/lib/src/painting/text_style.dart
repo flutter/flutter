@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 
-import 'dart:ui' as ui show ParagraphStyle, TextStyle, StrutStyle, lerpDouble, Shadow, FontFeature, TextHeightBehavior;
+import 'dart:ui' as ui show ParagraphStyle, TextStyle, StrutStyle, lerpDouble, Shadow, FontFeature, TextHeightBehavior, TextLeadingDistribution;
 
 import 'package:flutter/foundation.dart';
 
@@ -425,6 +425,7 @@ class TextStyle with Diagnosticable {
     this.wordSpacing,
     this.textBaseline,
     this.height,
+    this.leadingDistribution,
     this.locale,
     this.foreground,
     this.background,
@@ -567,8 +568,24 @@ class TextStyle with Diagnosticable {
   ///
   /// ![Since the explicit line height is applied as a scale factor on the font-metrics-defined line height, the gap above the text grows faster, as the height grows, than the gap below the text.](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_comparison_diagram.png)
   ///
-  /// See [StrutStyle] for further control of line height at the paragraph level.
+  /// See [StrutStyle] and [TextHeightBehavior] for further control of line
+  /// height at the paragraph level.
   final double? height;
+
+  /// How the vertical space added by the [height] multiplier should be
+  /// distributed over and under the text.
+  ///
+  /// When a non-null [height] is specified, after accommodating the glyphs of
+  /// the text, the remaining vertical space from the allotted line height will
+  /// be distributed over and under the text, according to the
+  /// [leadingDistribution] property.
+  ///
+  /// When [height] is null, [leadingDistribution] does not affect the text
+  /// layout.
+  ///
+  /// Defaults to null, which defers to the paragraph's
+  /// `ParagraphStyle.textHeightBehavior`'s `leadingDistribution`.
+  final ui.TextLeadingDistribution? leadingDistribution;
 
   /// The locale used to select region-specific glyphs.
   ///
@@ -721,6 +738,7 @@ class TextStyle with Diagnosticable {
     double? wordSpacing,
     TextBaseline? textBaseline,
     double? height,
+    ui.TextLeadingDistribution? leadingDistribution,
     Locale? locale,
     Paint? foreground,
     Paint? background,
@@ -753,6 +771,7 @@ class TextStyle with Diagnosticable {
       wordSpacing: wordSpacing ?? this.wordSpacing,
       textBaseline: textBaseline ?? this.textBaseline,
       height: height ?? this.height,
+      leadingDistribution: leadingDistribution ?? this.leadingDistribution,
       locale: locale ?? this.locale,
       foreground: foreground ?? this.foreground,
       background: background ?? this.background,
@@ -816,6 +835,7 @@ class TextStyle with Diagnosticable {
     double heightFactor = 1.0,
     double heightDelta = 0.0,
     TextBaseline? textBaseline,
+    ui.TextLeadingDistribution? leadingDistribution,
     Locale? locale,
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
@@ -857,6 +877,7 @@ class TextStyle with Diagnosticable {
       wordSpacing: wordSpacing == null ? null : wordSpacing! * wordSpacingFactor + wordSpacingDelta,
       textBaseline: textBaseline ?? this.textBaseline,
       height: height == null ? null : height! * heightFactor + heightDelta,
+      leadingDistribution: leadingDistribution ?? this.leadingDistribution,
       locale: locale ?? this.locale,
       foreground: foreground,
       background: background,
@@ -916,6 +937,7 @@ class TextStyle with Diagnosticable {
       wordSpacing: other.wordSpacing,
       textBaseline: other.textBaseline,
       height: other.height,
+      leadingDistribution: other.leadingDistribution,
       locale: other.locale,
       foreground: other.foreground,
       background: other.background,
@@ -969,6 +991,7 @@ class TextStyle with Diagnosticable {
         wordSpacing: t < 0.5 ? null : b.wordSpacing,
         textBaseline: t < 0.5 ? null : b.textBaseline,
         height: t < 0.5 ? null : b.height,
+        leadingDistribution: t < 0.5 ? null : b.leadingDistribution,
         locale: t < 0.5 ? null : b.locale,
         foreground: t < 0.5 ? null : b.foreground,
         background: t < 0.5 ? null : b.background,
@@ -996,6 +1019,7 @@ class TextStyle with Diagnosticable {
         wordSpacing: t < 0.5 ? a.wordSpacing : null,
         textBaseline: t < 0.5 ? a.textBaseline : null,
         height: t < 0.5 ? a.height : null,
+        leadingDistribution: t < 0.5 ? a.leadingDistribution : null,
         locale: t < 0.5 ? a.locale : null,
         foreground: t < 0.5 ? a.foreground : null,
         background: t < 0.5 ? a.background : null,
@@ -1022,6 +1046,7 @@ class TextStyle with Diagnosticable {
       wordSpacing: ui.lerpDouble(a.wordSpacing ?? b.wordSpacing, b.wordSpacing ?? a.wordSpacing, t),
       textBaseline: t < 0.5 ? a.textBaseline : b.textBaseline,
       height: ui.lerpDouble(a.height ?? b.height, b.height ?? a.height, t),
+      leadingDistribution: t < 0.5 ? a.leadingDistribution : b.leadingDistribution,
       locale: t < 0.5 ? a.locale : b.locale,
       foreground: (a.foreground != null || b.foreground != null)
         ? t < 0.5
@@ -1054,6 +1079,7 @@ class TextStyle with Diagnosticable {
       fontWeight: fontWeight,
       fontStyle: fontStyle,
       textBaseline: textBaseline,
+      leadingDistribution: leadingDistribution,
       fontFamily: fontFamily,
       fontFamilyFallback: fontFamilyFallback,
       fontSize: fontSize == null ? null : fontSize! * textScaleFactor,
@@ -1096,6 +1122,9 @@ class TextStyle with Diagnosticable {
   }) {
     assert(textScaleFactor != null);
     assert(maxLines == null || maxLines > 0);
+    final ui.TextLeadingDistribution? leadingDistribution = this.leadingDistribution;
+    final ui.TextHeightBehavior? effectiveTextHeightBehavior = textHeightBehavior
+      ?? (leadingDistribution == null ? null : ui.TextHeightBehavior(leadingDistribution: leadingDistribution));
     return ui.ParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection,
@@ -1106,7 +1135,7 @@ class TextStyle with Diagnosticable {
       fontFamily: fontFamily ?? this.fontFamily,
       fontSize: (fontSize ?? this.fontSize ?? _kDefaultFontSize) * textScaleFactor,
       height: height ?? this.height,
-      textHeightBehavior: textHeightBehavior,
+      textHeightBehavior: effectiveTextHeightBehavior,
       strutStyle: strutStyle == null ? null : ui.StrutStyle(
         fontFamily: strutStyle.fontFamily,
         fontFamilyFallback: strutStyle.fontFamilyFallback,
@@ -1141,6 +1170,7 @@ class TextStyle with Diagnosticable {
         wordSpacing != other.wordSpacing ||
         textBaseline != other.textBaseline ||
         height != other.height ||
+        leadingDistribution != other.leadingDistribution ||
         locale != other.locale ||
         foreground != other.foreground ||
         background != other.background ||
@@ -1176,6 +1206,7 @@ class TextStyle with Diagnosticable {
         && other.wordSpacing == wordSpacing
         && other.textBaseline == textBaseline
         && other.height == height
+        && other.leadingDistribution == leadingDistribution
         && other.locale == locale
         && other.foreground == foreground
         && other.background == background
@@ -1190,7 +1221,7 @@ class TextStyle with Diagnosticable {
 
   @override
   int get hashCode {
-    return hashValues(
+    return hashList(<Object?>[
       inherit,
       color,
       backgroundColor,
@@ -1202,6 +1233,7 @@ class TextStyle with Diagnosticable {
       wordSpacing,
       textBaseline,
       height,
+      leadingDistribution,
       locale,
       foreground,
       background,
@@ -1211,7 +1243,7 @@ class TextStyle with Diagnosticable {
       hashList(shadows),
       hashList(fontFeatures),
       hashList(fontFamilyFallback),
-    );
+    ]);
   }
 
   @override
@@ -1248,6 +1280,7 @@ class TextStyle with Diagnosticable {
     styles.add(DoubleProperty('${prefix}wordSpacing', wordSpacing, defaultValue: null));
     styles.add(EnumProperty<TextBaseline>('${prefix}baseline', textBaseline, defaultValue: null));
     styles.add(DoubleProperty('${prefix}height', height, unit: 'x', defaultValue: null));
+    styles.add(EnumProperty<ui.TextLeadingDistribution>('${prefix}leadingDistribution', leadingDistribution, defaultValue: null));
     styles.add(DiagnosticsProperty<Locale>('${prefix}locale', locale, defaultValue: null));
     styles.add(DiagnosticsProperty<Paint>('${prefix}foreground', foreground, defaultValue: null));
     styles.add(DiagnosticsProperty<Paint>('${prefix}background', background, defaultValue: null));
