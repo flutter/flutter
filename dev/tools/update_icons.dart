@@ -393,9 +393,11 @@ class _Icon {
   /// Analogous to [String.compareTo]
   int _compareTo(_Icon b) {
     // Sort a regular icon before its variants.
-    if (shortId == b.shortId)
+    if (shortId == b.shortId) {
       return id.length - b.id.length;
-    return flutterId.compareTo(b.flutterId);
+    } else {
+      return flutterId.compareTo(b.flutterId);
+    }
   }
 
   String _replaceLast(String string, String toReplace) {
