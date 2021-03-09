@@ -36,7 +36,7 @@ class DoctorCommand extends FlutterCommand {
     globals.flutterVersion.fetchTagsAndUpdate();
     if (argResults.wasParsed('check-for-remote-artifacts')) {
       final String engineRevision = stringArg('check-for-remote-artifacts');
-      if (engineRevision.startsWith(RegExp(r'[a-f0-9]{1,40}'))) {
+      if (engineRevision.startsWith(RegExp('[a-f0-9]{1,40}'))) {
         final bool success = await globals.doctor.checkRemoteArtifacts(engineRevision);
         if (!success) {
           throwToolExit('Artifacts for engine $engineRevision are missing or are '

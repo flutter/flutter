@@ -6,7 +6,7 @@ import 'package:android_semantics_testing/android_semantics_testing.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // JSON matching a serialized Android AccessibilityNodeInfo.
-const String source = r'''
+const String source = '''
 {
   "id": 23,
   "flags": {

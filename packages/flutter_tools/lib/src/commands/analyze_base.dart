@@ -216,7 +216,7 @@ class PackageDependencyTracker {
       final Iterable<String> lines = dotPackages
         .readAsStringSync()
         .split('\n')
-        .where((String line) => !line.startsWith(RegExp(r'^ *#')));
+        .where((String line) => !line.startsWith(RegExp('^ *#')));
       for (final String line in lines) {
         final int colon = line.indexOf(':');
         if (colon > 0) {

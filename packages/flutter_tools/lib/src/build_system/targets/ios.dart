@@ -588,7 +588,7 @@ Future<RunResult> createStubAppFramework(File outputFile, String sdkRoot,
     .createTempSync('flutter_tools_stub_source.');
   try {
     final File stubSource = tempDir.childFile('debug_app.cc')
-      ..writeAsStringSync(r'''
+      ..writeAsStringSync('''
   static const int Moo = 88;
   ''');
 

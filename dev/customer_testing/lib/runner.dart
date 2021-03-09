@@ -133,7 +133,7 @@ Future<bool> runTests({
   return true;
 }
 
-final RegExp _spaces = RegExp(r' +');
+final RegExp _spaces = RegExp(' +');
 
 Future<bool> shell(String command, Directory directory, { bool verbose = false, bool silentFailure = false }) async {
   if (verbose)

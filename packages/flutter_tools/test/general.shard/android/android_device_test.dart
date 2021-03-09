@@ -185,7 +185,7 @@ void main() {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('pubspec.yaml')
       ..createSync()
-      ..writeAsStringSync(r'''
+      ..writeAsStringSync('''
 name: example
 
 flutter:
@@ -373,7 +373,7 @@ flutter:
   });
 
   testWithoutContext('Can parse adb shell dumpsys info', () {
-    const String exampleOutput = r'''
+    const String exampleOutput = '''
 Applications Memory Usage (in Kilobytes):
 Uptime: 441088659 Realtime: 521464097
 

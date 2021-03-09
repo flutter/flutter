@@ -346,7 +346,7 @@ class MockCrashReportSender extends MockClient {
       utf8.decode(request.bodyBytes)
         .split('--$boundary')
         .map<List<String>>((String part) {
-        final Match nameMatch = RegExp(r'name="(.*)"').firstMatch(part);
+        final Match nameMatch = RegExp('name="(.*)"').firstMatch(part);
         if (nameMatch == null) {
           return null;
         }

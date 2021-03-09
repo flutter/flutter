@@ -22,7 +22,7 @@ const String _kTypeOption = 'type';
 const String _kShowDartPad = 'dartpad';
 
 String getChannelName() {
-  final RegExp gitBranchRegexp = RegExp(r'^## (.*)');
+  final RegExp gitBranchRegexp = RegExp('^## (.*)');
   final ProcessResult gitResult = Process.runSync('git', <String>['status', '-b', '--porcelain']);
   if (gitResult.exitCode != 0)
     throw 'git status exit with non-zero exit code: ${gitResult.exitCode}';

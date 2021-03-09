@@ -60,7 +60,7 @@ Directory get localFlutterRoot {
         'Cannot determine path of script!\n${platform.script.path}',
       );
     }
-    filePath = Uri.parse(match.group(1)).path.replaceAll(r'%20', ' ');
+    filePath = Uri.parse(match.group(1)).path.replaceAll('%20', ' ');
   } else {
     filePath = platform.script.toFilePath();
   }

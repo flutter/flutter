@@ -214,8 +214,8 @@ Future<void> main(List<String> arguments) async {
   ));
   printStream(process.stdout, prefix: args['json'] as bool ? '' : 'dartdoc:stdout: ',
     filter: args['verbose'] as bool ? const <Pattern>[] : <Pattern>[
-      RegExp(r'^generating docs for library '), // unnecessary verbosity
-      RegExp(r'^pars'), // unnecessary verbosity
+      RegExp('^generating docs for library '), // unnecessary verbosity
+      RegExp('^pars'), // unnecessary verbosity
     ],
   );
   printStream(process.stderr, prefix: args['json'] as bool ? '' : 'dartdoc:stderr: ',
@@ -251,7 +251,7 @@ ArgParser _createArgsParser() {
   return parser;
 }
 
-final RegExp gitBranchRegexp = RegExp(r'^## (.*)');
+final RegExp gitBranchRegexp = RegExp('^## (.*)');
 
 String getBranchName() {
   final ProcessResult gitResult = Process.runSync('git', <String>['status', '-b', '--porcelain']);

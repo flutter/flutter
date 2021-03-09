@@ -773,7 +773,7 @@ class LocalizationsGenerator {
       return false;
     }
     // Dart class name must start with upper case character
-    if (className[0].contains(RegExp(r'[a-z]'))) {
+    if (className[0].contains(RegExp('[a-z]'))) {
       return false;
     }
     // Dart class name cannot start with a number
@@ -875,7 +875,7 @@ class LocalizationsGenerator {
       return false;
     }
     // Dart method name must start with lower case character
-    if (name[0].contains(RegExp(r'[A-Z]'))) {
+    if (name[0].contains(RegExp('[A-Z]'))) {
       return false;
     }
     // Dart class name cannot start with a number

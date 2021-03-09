@@ -1600,17 +1600,17 @@ class IosUsbArtifacts extends CachedArtifact {
 
 // Many characters are problematic in filenames, especially on Windows.
 final Map<int, List<int>> _flattenNameSubstitutions = <int, List<int>>{
-  r'@'.codeUnitAt(0): '@@'.codeUnits,
-  r'/'.codeUnitAt(0): '@s@'.codeUnits,
+  '@'.codeUnitAt(0): '@@'.codeUnits,
+  '/'.codeUnitAt(0): '@s@'.codeUnits,
   r'\'.codeUnitAt(0): '@bs@'.codeUnits,
-  r':'.codeUnitAt(0): '@c@'.codeUnits,
-  r'%'.codeUnitAt(0): '@per@'.codeUnits,
-  r'*'.codeUnitAt(0): '@ast@'.codeUnits,
-  r'<'.codeUnitAt(0): '@lt@'.codeUnits,
-  r'>'.codeUnitAt(0): '@gt@'.codeUnits,
-  r'"'.codeUnitAt(0): '@q@'.codeUnits,
-  r'|'.codeUnitAt(0): '@pip@'.codeUnits,
-  r'?'.codeUnitAt(0): '@ques@'.codeUnits,
+  ':'.codeUnitAt(0): '@c@'.codeUnits,
+  '%'.codeUnitAt(0): '@per@'.codeUnits,
+  '*'.codeUnitAt(0): '@ast@'.codeUnits,
+  '<'.codeUnitAt(0): '@lt@'.codeUnits,
+  '>'.codeUnitAt(0): '@gt@'.codeUnits,
+  '"'.codeUnitAt(0): '@q@'.codeUnits,
+  '|'.codeUnitAt(0): '@pip@'.codeUnits,
+  '?'.codeUnitAt(0): '@ques@'.codeUnits,
 };
 
 /// Given a name containing slashes, colons, and backslashes, expand it into

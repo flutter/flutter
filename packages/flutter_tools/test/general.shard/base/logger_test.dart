@@ -376,7 +376,7 @@ void main() {
         executableArguments: <String>[],
       ),
     ];
-    final RegExp secondDigits = RegExp(r'[0-9,.]*[0-9]m?s');
+    final RegExp secondDigits = RegExp('[0-9,.]*[0-9]m?s');
 
     setUp(() {
       mockStopwatch = FakeStopwatch();

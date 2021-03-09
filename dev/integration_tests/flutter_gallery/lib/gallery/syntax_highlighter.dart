@@ -156,7 +156,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
       }
 
       // Raw r"String"
-      if (_scanner.scan(RegExp(r'r".*"'))) {
+      if (_scanner.scan(RegExp('r".*"'))) {
         _spans.add(_HighlightSpan(
           _HighlightType.string,
           _scanner.lastMatch!.start,
@@ -166,7 +166,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
       }
 
       // Raw r'String'
-      if (_scanner.scan(RegExp(r"r'.*'"))) {
+      if (_scanner.scan(RegExp("r'.*'"))) {
         _spans.add(_HighlightSpan(
           _HighlightType.string,
           _scanner.lastMatch!.start,

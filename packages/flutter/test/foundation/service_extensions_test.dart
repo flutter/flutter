@@ -239,7 +239,7 @@ void main() {
 
     expect(result, <String, dynamic>{
       'data': matches(
-        r'^'
+        '^'
         r'RenderView#[0-9a-f]{5}\n'
         r'   debug mode enabled - [a-zA-Z]+\n'
         r'   window size: Size\(2400\.0, 1800\.0\) \(in physical pixels\)\n'
@@ -256,7 +256,7 @@ void main() {
 
     expect(result, <String, dynamic>{
       'data': matches(
-        r'^'
+        '^'
         r'TransformLayer#[0-9a-f]{5}\n'
         r'   owner: RenderView#[0-9a-f]{5}\n'
         r'   creator: RenderView\n'

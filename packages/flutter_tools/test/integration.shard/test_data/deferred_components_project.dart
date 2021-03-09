@@ -75,7 +75,7 @@ class DeferredComponentsProject extends Project {
 /// Contains the necessary files for a bare-bones deferred component release app.
 class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
   @override
-  String get deferredLibrary => r'''
+  String get deferredLibrary => '''
   library DeferredLibrary;
 
   int add(int i, int j) {
@@ -84,7 +84,7 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
   ''';
 
   @override
-  String get deferredComponentsGolden => r'''
+  String get deferredComponentsGolden => '''
   loading-units:
     - id: 2
       libraries:
@@ -482,7 +482,7 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
   ];
 
   @override
-  String get appManifest => r'''
+  String get appManifest => '''
   <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.example.splitaot">
       <!-- io.flutter.app.FlutterApplication is an android.app.Application that
@@ -536,7 +536,7 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
   ''';
 
   @override
-  String get appStrings => r'''
+  String get appStrings => '''
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="component1Name">component1</string>
@@ -544,7 +544,7 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
   ''';
 
   @override
-  String get appStyles => r'''
+  String get appStyles => '''
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Theme applied to the Android Window while the process is starting -->
@@ -566,7 +566,7 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
   ''';
 
   @override
-  String get appLaunchBackground => r'''
+  String get appLaunchBackground => '''
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Modify this file to customize your launch splash screen -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
@@ -582,12 +582,12 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
   ''';
 
   @override
-  String get asset1 => r'''
+  String get asset1 => '''
 asset 1 contents
   ''';
 
   @override
-  String get asset2 => r'''
+  String get asset2 => '''
 asset 2 contents
   ''';
 
@@ -610,7 +610,7 @@ class NoGoldenDeferredComponentsConfig extends BasicDeferredComponentsConfig {
 /// Missing golden
 class MismatchedGoldenDeferredComponentsConfig extends BasicDeferredComponentsConfig {
   @override
-  String get deferredComponentsGolden => r'''
+  String get deferredComponentsGolden => '''
   loading-units:
     - id: 2
       libraries:

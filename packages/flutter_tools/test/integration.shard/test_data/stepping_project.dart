@@ -18,7 +18,7 @@ class SteppingProject extends Project {
   ''';
 
   @override
-  final String main = r'''
+  final String main = '''
   import 'dart:async';
 
   import 'package:flutter/material.dart';
@@ -74,7 +74,7 @@ class WebSteppingProject extends Project {
   ''';
 
   @override
-  final String main = r'''
+  final String main = '''
   import 'dart:async';
 
   import 'package:flutter/material.dart';

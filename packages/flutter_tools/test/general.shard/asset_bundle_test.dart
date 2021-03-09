@@ -63,7 +63,7 @@ void main() {
       globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
       globals.fs.file('pubspec.yaml')
         ..createSync()
-        ..writeAsStringSync(r'''
+        ..writeAsStringSync('''
 name: example
 flutter:
   assets:
@@ -102,7 +102,7 @@ flutter:
       globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
       final File pubspec = globals.fs.file('pubspec.yaml')
         ..createSync()
-        ..writeAsStringSync(r'''
+        ..writeAsStringSync('''
 name: example
 flutter:
   assets:
@@ -124,7 +124,7 @@ flutter:
       globals.fs.directory(globals.fs.path.join('assets', 'foo')).deleteSync(recursive: true);
       globals.fs.file('pubspec.yaml')
         ..createSync()
-        ..writeAsStringSync(r'''
+        ..writeAsStringSync('''
 name: example''')
         ..setLastModifiedSync(modifiedTime);
 
@@ -156,7 +156,7 @@ name: example''')
       globals.fs.directory(globals.fs.path.join('assets', 'foo', 'bar')).createSync();
       globals.fs.file('pubspec.yaml')
         ..createSync()
-        ..writeAsStringSync(r'''
+        ..writeAsStringSync('''
 name: example
 flutter:
   assets:
@@ -184,7 +184,7 @@ flutter:
       globals.fs.file(globals.fs.path.join('assets', 'wild', 'dash.txt')).createSync(recursive: true);
       globals.fs.file('pubspec.yaml')
         ..createSync()
-        ..writeAsStringSync(r'''
+        ..writeAsStringSync('''
 name: example
 flutter:
   assets:
@@ -223,7 +223,7 @@ flutter:
       globals.fs.file(globals.fs.path.join('assets', 'wild', 'dash.txt')).createSync(recursive: true);
       globals.fs.file('pubspec.yaml')
         ..createSync()
-        ..writeAsStringSync(r'''
+        ..writeAsStringSync('''
 name: example
 flutter:
   assets:
@@ -256,7 +256,7 @@ flutter:
       globals.fs.file(globals.fs.path.join('assets', 'wild', 'dash.txt')).createSync(recursive: true);
       globals.fs.file('pubspec.yaml')
         ..createSync()
-        ..writeAsStringSync(r'''
+        ..writeAsStringSync('''
 name: example
 flutter:
   assets:
@@ -319,7 +319,7 @@ flutter:
     globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml')
       ..createSync()
-      ..writeAsStringSync(r'''
+      ..writeAsStringSync('''
 name: example
 flutter:
 assets:
@@ -351,7 +351,7 @@ assets:
     globals.fs.file(globals.fs.path.join('assets', 'bar.txt')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml')
       ..createSync()
-      ..writeAsStringSync(r'''
+      ..writeAsStringSync('''
 name: example
 flutter:
   assets:
@@ -372,7 +372,7 @@ flutter:
     globals.fs.file(globals.fs.path.join('assets', 'bar.txt')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml')
       ..createSync()
-      ..writeAsStringSync(r'''
+      ..writeAsStringSync('''
 name: example
 flutter:
   assets:
@@ -389,7 +389,7 @@ flutter:
 
   testUsingContext('Does not insert dummy file into additionalDependencies '
     'when wildcards are used by dependencies', () async {
-    globals.fs.file('.packages').writeAsStringSync(r'''
+    globals.fs.file('.packages').writeAsStringSync('''
 example:lib/
 foo:foo/lib/
 ''');
@@ -397,14 +397,14 @@ foo:foo/lib/
       .createSync(recursive: true);
     globals.fs.file('pubspec.yaml')
       ..createSync()
-      ..writeAsStringSync(r'''
+      ..writeAsStringSync('''
 name: example
 dependencies:
   foo: any
 ''');
     globals.fs.file('foo/pubspec.yaml')
       ..createSync(recursive: true)
-      ..writeAsStringSync(r'''
+      ..writeAsStringSync('''
 name: foo
 
 flutter:
@@ -423,7 +423,7 @@ flutter:
   });
 
   testUsingContext('does not track wildcard directories from dependencies', () async {
-    globals.fs.file('.packages').writeAsStringSync(r'''
+    globals.fs.file('.packages').writeAsStringSync('''
 example:lib/
 foo:foo/lib/
 ''');
@@ -431,14 +431,14 @@ foo:foo/lib/
       .createSync(recursive: true);
     globals.fs.file('pubspec.yaml')
       ..createSync()
-      ..writeAsStringSync(r'''
+      ..writeAsStringSync('''
 name: example
 dependencies:
   foo: any
 ''');
     globals.fs.file('foo/pubspec.yaml')
       ..createSync(recursive: true)
-      ..writeAsStringSync(r'''
+      ..writeAsStringSync('''
 name: foo
 
 flutter:
@@ -466,7 +466,7 @@ flutter:
 
   testUsingContext('reports package that causes asset bundle error when it is '
     'a dependency', () async {
-    globals.fs.file('.packages').writeAsStringSync(r'''
+    globals.fs.file('.packages').writeAsStringSync('''
 example:lib/
 foo:foo/lib/
 ''');
@@ -474,14 +474,14 @@ foo:foo/lib/
       .createSync(recursive: true);
     globals.fs.file('pubspec.yaml')
       ..createSync()
-      ..writeAsStringSync(r'''
+      ..writeAsStringSync('''
 name: example
 dependencies:
   foo: any
 ''');
     globals.fs.file('foo/pubspec.yaml')
       ..createSync(recursive: true)
-      ..writeAsStringSync(r'''
+      ..writeAsStringSync('''
 name: foo
 
 flutter:
@@ -500,12 +500,12 @@ flutter:
 
   testUsingContext('does not report package that causes asset bundle error '
     'when it is from own pubspec', () async {
-    globals.fs.file('.packages').writeAsStringSync(r'''
+    globals.fs.file('.packages').writeAsStringSync('''
 example:lib/
 ''');
     globals.fs.file('pubspec.yaml')
       ..createSync()
-      ..writeAsStringSync(r'''
+      ..writeAsStringSync('''
 name: example
 flutter:
   assets:
@@ -523,13 +523,13 @@ flutter:
 
   testUsingContext('does not include material design assets if uses-material-design: true is '
     'specified only by a dependency', () async {
-    globals.fs.file('.packages').writeAsStringSync(r'''
+    globals.fs.file('.packages').writeAsStringSync('''
 example:lib/
 foo:foo/lib/
 ''');
     globals.fs.file('pubspec.yaml')
       ..createSync()
-      ..writeAsStringSync(r'''
+      ..writeAsStringSync('''
 name: example
 dependencies:
   foo: any
@@ -539,7 +539,7 @@ flutter:
 ''');
     globals.fs.file('foo/pubspec.yaml')
       ..createSync(recursive: true)
-      ..writeAsStringSync(r'''
+      ..writeAsStringSync('''
 name: foo
 
 flutter:
@@ -560,12 +560,12 @@ flutter:
   });
 
   testUsingContext('does not include assets in project directories as asset variants', () async {
-    globals.fs.file('.packages').writeAsStringSync(r'''
+    globals.fs.file('.packages').writeAsStringSync('''
 example:lib/
 ''');
     globals.fs.file('pubspec.yaml')
       ..createSync()
-      ..writeAsStringSync(r'''
+      ..writeAsStringSync('''
 name: example
 
 flutter:

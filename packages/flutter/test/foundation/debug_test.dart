@@ -45,7 +45,7 @@ void main() {
         fail('Error expected but not thrown');
       } on String catch (error) {
         expect(error, 'Error');
-        expect(printBuffer.toString(), matches(r'^Action "throws" took .+'));
+        expect(printBuffer.toString(), matches('^Action "throws" took .+'));
       }
     });
   });

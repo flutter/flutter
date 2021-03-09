@@ -845,7 +845,7 @@ class AndroidProject extends FlutterProjectPlatform {
       return false;
     }
     for (final String line in appGradle.readAsLinesSync()) {
-      if (line.contains(RegExp(r'apply from: .*/flutter.gradle')) ||
+      if (line.contains(RegExp('apply from: .*/flutter.gradle')) ||
           line.contains("def flutterPluginVersion = 'managed'")) {
         return true;
       }

@@ -39,8 +39,8 @@ enum LicensesAccepted {
 }
 
 final RegExp licenseCounts = RegExp(r'(\d+) of (\d+) SDK package licenses? not accepted.');
-final RegExp licenseNotAccepted = RegExp(r'licenses? not accepted', caseSensitive: false);
-final RegExp licenseAccepted = RegExp(r'All SDK package licenses accepted.');
+final RegExp licenseNotAccepted = RegExp('licenses? not accepted', caseSensitive: false);
+final RegExp licenseAccepted = RegExp('All SDK package licenses accepted.');
 
 class AndroidWorkflow implements Workflow {
   AndroidWorkflow({

@@ -268,7 +268,7 @@ void setMockSdkRegResponse(
   bool filesPresent = true,
 }) {
   const String registryPath = r'HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v10.0';
-  const String registryKey = r'InstallationFolder';
+  const String registryKey = 'InstallationFolder';
   const String installationPath = r'C:\Program Files (x86)\Windows Kits\10\';
   final String stdout = registryPresent
     ? '''

@@ -81,9 +81,9 @@ C:\\a.txt: C:\\b.txt
       logger: BufferLogger.test(),
       fileSystem: fileSystem,
     );
-    final File inputFile = fileSystem.directory(r'Hello Flutter').childFile('a.txt').absolute
+    final File inputFile = fileSystem.directory('Hello Flutter').childFile('a.txt').absolute
       ..createSync(recursive: true);
-    final File outputFile = fileSystem.directory(r'Hello Flutter').childFile('b.txt').absolute
+    final File outputFile = fileSystem.directory('Hello Flutter').childFile('b.txt').absolute
       ..createSync();
     final Depfile depfile = Depfile(<File>[inputFile], <File>[outputFile]);
     final File outputDepfile = fileSystem.file('depfile');
@@ -94,9 +94,9 @@ C:\\a.txt: C:\\b.txt
   });
 
   testWithoutContext('Can escape depfile with spaces in directory names', () {
-    final File inputFile = fileSystem.directory(r'Hello Flutter').childFile('a.txt').absolute
+    final File inputFile = fileSystem.directory('Hello Flutter').childFile('a.txt').absolute
       ..createSync(recursive: true);
-    final File outputFile = fileSystem.directory(r'Hello Flutter').childFile('b.txt').absolute
+    final File outputFile = fileSystem.directory('Hello Flutter').childFile('b.txt').absolute
       ..createSync();
     final Depfile depfile = Depfile(<File>[inputFile], <File>[outputFile]);
     final File outputDepfile = fileSystem.file('depfile');
@@ -108,7 +108,7 @@ C:\\a.txt: C:\\b.txt
 
 
   testWithoutContext('Resillient to weird whitespace', () {
-    final File depfileSource = fileSystem.file('example.d')..writeAsStringSync(r'''
+    final File depfileSource = fileSystem.file('example.d')..writeAsStringSync('''
 a.txt
   : b.txt    c.txt
 
@@ -121,7 +121,7 @@ a.txt
   });
 
   testWithoutContext('Resillient to duplicate files', () {
-    final File depfileSource = fileSystem.file('example.d')..writeAsStringSync(r'''
+    final File depfileSource = fileSystem.file('example.d')..writeAsStringSync('''
 a.txt: b.txt b.txt
 ''');
     final Depfile depfile = depfileService.parse(depfileSource);
@@ -131,7 +131,7 @@ a.txt: b.txt b.txt
   });
 
   testWithoutContext('Resillient to malformed file, missing :', () {
-    final File depfileSource = fileSystem.file('example.d')..writeAsStringSync(r'''
+    final File depfileSource = fileSystem.file('example.d')..writeAsStringSync('''
 a.text b.txt
 ''');
     final Depfile depfile = depfileService.parse(depfileSource);
@@ -141,7 +141,7 @@ a.text b.txt
   });
 
   testWithoutContext('Can parse dart2js output format', () {
-    final File dart2jsDependencyFile = fileSystem.file('main.dart.js.deps')..writeAsStringSync(r'''
+    final File dart2jsDependencyFile = fileSystem.file('main.dart.js.deps')..writeAsStringSync('''
 file:///Users/foo/collection.dart
 file:///Users/foo/algorithms.dart
 file:///Users/foo/canonicalized_map.dart

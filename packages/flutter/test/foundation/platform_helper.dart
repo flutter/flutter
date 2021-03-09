@@ -8,8 +8,8 @@ import 'dart:io' show Platform;
 /// regular expression.
 String get pathSeparatorForRegExp {
   switch (Platform.pathSeparator) {
-    case r'/':
-      return r'/';
+    case '/':
+      return '/';
     case r'\':
       return r'\\'; // because dividerRegExp gets inserted into regexps
     default:

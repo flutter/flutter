@@ -32,7 +32,7 @@ void main() {
     final IntelliJPlugins plugins = IntelliJPlugins(_kPluginsPath, fileSystem: fileSystem);
 
     final Archive dartJarArchive =
-        buildSingleFileArchive('META-INF/plugin.xml', r'''
+        buildSingleFileArchive('META-INF/plugin.xml', '''
 <idea-plugin version="2">
 <name>Dart</name>
 <version>162.2485</version>
@@ -43,7 +43,7 @@ void main() {
       ZipEncoder().encode(dartJarArchive),
     );
 
-    final Archive flutterJarArchive = buildSingleFileArchive('META-INF/plugin.xml', r'''
+    final Archive flutterJarArchive = buildSingleFileArchive('META-INF/plugin.xml', '''
 <idea-plugin version="2">
 <name>Flutter</name>
 <version>0.1.3</version>
@@ -74,7 +74,7 @@ void main() {
   testWithoutContext('IntelliJPlugins can read the package version of the flutter-intellij 50.0+/IntelliJ 2020.2+ layout', () async {
     final IntelliJPlugins plugins = IntelliJPlugins(_kPluginsPath, fileSystem: fileSystem);
 
-    final Archive flutterIdeaJarArchive = buildSingleFileArchive('META-INF/plugin.xml', r'''
+    final Archive flutterIdeaJarArchive = buildSingleFileArchive('META-INF/plugin.xml', '''
 <idea-plugin version="2">
 <name>Flutter</name>
 <version>50.0</version>
@@ -84,7 +84,7 @@ void main() {
       fileSystem.path.join(_kPluginsPath, 'flutter-intellij', 'lib', 'flutter-idea-50.0.jar'),
       ZipEncoder().encode(flutterIdeaJarArchive),
     );
-    final Archive flutterIntellijJarArchive = buildSingleFileArchive('META-INF/MANIFEST.MF', r'''
+    final Archive flutterIntellijJarArchive = buildSingleFileArchive('META-INF/MANIFEST.MF', '''
 Manifest-Version: 1.0
 ''');
     writeFileCreatingDirectories(
@@ -110,7 +110,7 @@ Manifest-Version: 1.0
   testWithoutContext('IntelliJPlugins can read the package version of the flutter-intellij 50.0+/IntelliJ 2020.2+ layout(priority is given to packages with the same prefix as packageName)', () async {
     final IntelliJPlugins plugins = IntelliJPlugins(_kPluginsPath, fileSystem: fileSystem);
 
-    final Archive flutterIdeaJarArchive = buildSingleFileArchive('META-INF/plugin.xml', r'''
+    final Archive flutterIdeaJarArchive = buildSingleFileArchive('META-INF/plugin.xml', '''
 <idea-plugin version="2">
 <name>Flutter</name>
 <version>50.0</version>
@@ -120,7 +120,7 @@ Manifest-Version: 1.0
       fileSystem.path.join(_kPluginsPath, 'flutter-intellij', 'lib', 'flutter-idea-50.0.jar'),
       ZipEncoder().encode(flutterIdeaJarArchive),
     );
-    final Archive flutterIntellijJarArchive = buildSingleFileArchive('META-INF/plugin.xml', r'''
+    final Archive flutterIntellijJarArchive = buildSingleFileArchive('META-INF/plugin.xml', '''
 <idea-plugin version="2">
 <name>Flutter</name>
 <version>51.0</version>
@@ -171,7 +171,7 @@ Manifest-Version: 1.0
     final IntelliJPlugins plugins = IntelliJPlugins(_kPluginsPath, fileSystem: fileSystem);
 
     final Archive dartJarArchive =
-    buildSingleFileArchive('META-INF/MANIFEST.MF', r'''
+    buildSingleFileArchive('META-INF/MANIFEST.MF', '''
 Manifest-Version: 1.0
 ''');
     writeFileCreatingDirectories(

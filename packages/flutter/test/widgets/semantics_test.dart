@@ -804,29 +804,29 @@ void main() {
                 children: <TestSemantics>[
                   TestSemantics(
                     id: 7,
-                    label: r'Label 5',
+                    label: 'Label 5',
                     textDirection: TextDirection.ltr,
                   ),
                   TestSemantics(
                     id: 6,
-                    label: r'Label 4',
+                    label: 'Label 4',
                     textDirection: TextDirection.ltr,
                   ),
                   TestSemantics(
                     id: 5,
-                    label: r'Label 3',
+                    label: 'Label 3',
                     textDirection: TextDirection.ltr,
                   ),
                 ],
               ),
               TestSemantics(
                 id: 3,
-                label: r'Label 2',
+                label: 'Label 2',
                 textDirection: TextDirection.ltr,
               ),
               TestSemantics(
                 id: 2,
-                label: r'Label 1',
+                label: 'Label 1',
                 textDirection: TextDirection.ltr,
               ),
             ],
@@ -874,17 +874,17 @@ void main() {
         children: <TestSemantics>[
           TestSemantics(
             id: 2,
-            label: r'Label 2',
+            label: 'Label 2',
             textDirection: TextDirection.ltr,
           ),
           TestSemantics(
             id: 3,
-            label: r'Label 3',
+            label: 'Label 3',
             textDirection: TextDirection.ltr,
           ),
           TestSemantics(
             id: 1,
-            label: r'Label 1',
+            label: 'Label 1',
             textDirection: TextDirection.ltr,
           ),
         ],
@@ -925,23 +925,23 @@ void main() {
       TestSemantics(
         children: <TestSemantics>[
           TestSemantics(
-            label: r'Label 1',
+            label: 'Label 1',
             textDirection: TextDirection.ltr,
           ),
           TestSemantics(
-            label: r'Label 2',
+            label: 'Label 2',
             textDirection: TextDirection.ltr,
           ),
           TestSemantics(
-            label: r'Label 3',
+            label: 'Label 3',
             textDirection: TextDirection.ltr,
           ),
           TestSemantics(
-            label: r'Label 4',
+            label: 'Label 4',
             textDirection: TextDirection.ltr,
           ),
           TestSemantics(
-            label: r'Label 5',
+            label: 'Label 5',
             textDirection: TextDirection.ltr,
           ),
         ],
@@ -986,23 +986,23 @@ void main() {
       TestSemantics(
         children: <TestSemantics>[
           TestSemantics(
-            label: r'Label 1',
+            label: 'Label 1',
             textDirection: TextDirection.ltr,
           ),
           TestSemantics(
-            label: r'Label 2',
+            label: 'Label 2',
             textDirection: TextDirection.ltr,
           ),
           TestSemantics(
-            label: r'Label 3',
+            label: 'Label 3',
             textDirection: TextDirection.ltr,
           ),
           TestSemantics(
-            label: r'Label 4',
+            label: 'Label 4',
             textDirection: TextDirection.ltr,
           ),
           TestSemantics(
-            label: r'Label 5',
+            label: 'Label 5',
             textDirection: TextDirection.ltr,
           ),
         ],

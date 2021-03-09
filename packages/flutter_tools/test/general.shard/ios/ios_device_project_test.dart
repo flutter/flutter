@@ -28,7 +28,7 @@ void main() {
   testUsingContext('IOSDevice.isSupportedForProject is true on module project', () async {
     fileSystem.file('pubspec.yaml')
       ..createSync()
-      ..writeAsStringSync(r'''
+      ..writeAsStringSync('''
 name: example
 flutter:
   module: {}

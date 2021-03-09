@@ -231,7 +231,7 @@ void main() {
 
     // This contains a mix of routine build output and various types of errors
     // (Dart error, compile error, link error), edited down for compactness.
-    const String stdout = r'''
+    const String stdout = '''
 ninja: Entering directory `build/linux/x64/release'
 [1/6] Generating /foo/linux/flutter/ephemeral/libflutter_linux_gtk.so, /foo/linux/flutter/ephemeral/flutter_linux/flutter_linux.h, _phony
 lib/main.dart:4:3: Error: Method not found: 'foo'.
@@ -261,7 +261,7 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
       const <String>['build', 'linux', '--no-pub']
     );
     // Just the warnings and errors should be surfaced.
-    expect(testLogger.errorText, r'''
+    expect(testLogger.errorText, '''
 lib/main.dart:4:3: Error: Method not found: 'foo'.
 /foo/linux/main.cc:6:2: error: expected ';' after class
 /foo/linux/main.cc:9:7: warning: unused variable 'unused_variable' [-Wunused-variable]
@@ -458,7 +458,7 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
   testUsingContext('linux can extract binary name from CMake file', () async {
     fileSystem.file('linux/CMakeLists.txt')
       ..createSync(recursive: true)
-      ..writeAsStringSync(r'''
+      ..writeAsStringSync('''
 cmake_minimum_required(VERSION 3.10)
 project(runner LANGUAGES CXX)
 

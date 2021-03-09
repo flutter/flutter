@@ -22,7 +22,7 @@ class BackgroundProject extends Project {
   ''';
 
   @override
-  final String main = r'''
+  final String main = '''
   import 'dart:async';
   import 'dart:isolate';
 
@@ -72,7 +72,7 @@ class RepeatingBackgroundProject extends Project {
   ''';
 
   @override
-  final String main = r'''
+  final String main = '''
   import 'dart:async';
   import 'dart:isolate';
 

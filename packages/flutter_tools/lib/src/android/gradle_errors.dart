@@ -179,8 +179,8 @@ final RegExp _androidXFailureRegex = RegExp(r'(AAPT|androidx|android\.support)')
 
 final RegExp androidXPluginWarningRegex = RegExp(r'\*{57}'
   r"|WARNING: This version of (\w+) will break your Android build if it or its dependencies aren't compatible with AndroidX."
-  r'|See https://goo.gl/CP92wY for more information on the problem and how to fix it.'
-  r'|This warning prints for all Android build failures. The real root cause of the error may be unrelated.');
+  '|See https://goo.gl/CP92wY for more information on the problem and how to fix it.'
+  '|This warning prints for all Android build failures. The real root cause of the error may be unrelated.');
 
 @visibleForTesting
 final GradleHandledError androidXFailureHandler = GradleHandledError(
@@ -276,7 +276,7 @@ final GradleHandledError licenseNotAcceptedHandler = GradleHandledError(
   eventLabel: 'license-not-accepted',
 );
 
-final RegExp _undefinedTaskPattern = RegExp(r'Task .+ not found in root project.');
+final RegExp _undefinedTaskPattern = RegExp('Task .+ not found in root project.');
 
 final RegExp _assembleTaskPattern = RegExp(r'assemble(\S+)');
 

@@ -30,7 +30,7 @@ class TestsProject extends Project {
   @override
   String get main => '// Unused';
 
-  final String testContent = r'''
+  final String testContent = '''
   import 'package:flutter_test/flutter_test.dart';
 
   void main() {

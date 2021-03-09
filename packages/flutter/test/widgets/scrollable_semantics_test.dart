@@ -355,18 +355,18 @@ void main() {
               actions: <SemanticsAction>[SemanticsAction.scrollUp],
               children: <TestSemantics>[
                 TestSemantics(
-                  label: r'item 0',
+                  label: 'item 0',
                   textDirection: TextDirection.ltr,
                 ),
                 TestSemantics(
-                  label: r'item 1',
+                  label: 'item 1',
                   textDirection: TextDirection.ltr,
                 ),
                 TestSemantics(
                   flags: <SemanticsFlag>[
                     SemanticsFlag.isHidden,
                   ],
-                  label: r'item 2',
+                  label: 'item 2',
                 ),
               ],
             ),

@@ -20,7 +20,7 @@ class BasicProject extends Project {
   ''';
 
   @override
-  final String main = r'''
+  final String main = '''
   import 'dart:async';
 
   import 'package:flutter/material.dart';
@@ -76,7 +76,7 @@ class BasicProjectWithFlutterGen extends Project {
   ''';
 
   @override
-  final String main = r'''
+  final String main = '''
   // @dart = 2.8
   // generated package does not support null safety.
   import 'dart:async';
@@ -99,7 +99,7 @@ class BasicProjectWithUnaryMain extends Project {
   ''';
 
   @override
-  final String main = r'''
+  final String main = '''
   import 'dart:async';
   import 'package:flutter/material.dart';
   Future<void> main(List<String> args) async {

@@ -468,7 +468,7 @@ Future<void> main(List<String> rawArguments) async {
     if (revision.length != 40) {
       errorExit('Invalid argument: --revision "$revision" must be the entire hash, not just a prefix.');
     }
-    if (revision.contains(RegExp(r'[^a-fA-F0-9]'))) {
+    if (revision.contains(RegExp('[^a-fA-F0-9]'))) {
       errorExit('Invalid argument: --revision "$revision" contains non-hex characters.');
     }
   }

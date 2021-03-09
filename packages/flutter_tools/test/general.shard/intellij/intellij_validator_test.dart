@@ -395,7 +395,7 @@ void createIntellijFlutterPluginJar(String pluginJarPath, FileSystem fileSystem,
 /// If more XML contents are needed, prefer modifying these contents over checking
 /// in another JAR.
 void createIntellijDartPluginJar(String pluginJarPath, FileSystem fileSystem) {
-  const String intellijDartPluginXml = r'''
+  const String intellijDartPluginXml = '''
 <idea-plugin version="2">
   <name>Dart</name>
   <version>162.2485</version>

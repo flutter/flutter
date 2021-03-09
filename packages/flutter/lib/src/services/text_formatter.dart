@@ -279,7 +279,7 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   static final TextInputFormatter singleLineFormatter = FilteringTextInputFormatter.deny('\n');
 
   /// A [TextInputFormatter] that takes in digits `[0-9]` only.
-  static final TextInputFormatter digitsOnly = FilteringTextInputFormatter.allow(RegExp(r'[0-9]'));
+  static final TextInputFormatter digitsOnly = FilteringTextInputFormatter.allow(RegExp('[0-9]'));
 }
 
 /// Old name for [FilteringTextInputFormatter.deny].

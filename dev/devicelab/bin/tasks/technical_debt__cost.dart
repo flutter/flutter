@@ -20,11 +20,11 @@ const double asDynamicCost = 2011.0; // a few days to refactor the code.
 const double deprecationCost = 233.0; // a few hours to remove the old code.
 const double legacyDeprecationCost = 9973.0; // a couple of weeks.
 
-final RegExp todoPattern = RegExp(r'(?://|#) *TODO');
-final RegExp ignorePattern = RegExp(r'// *ignore:');
-final RegExp ignoreForFilePattern = RegExp(r'// *ignore_for_file:');
+final RegExp todoPattern = RegExp('(?://|#) *TODO');
+final RegExp ignorePattern = RegExp('// *ignore:');
+final RegExp ignoreForFilePattern = RegExp('// *ignore_for_file:');
 final RegExp asDynamicPattern = RegExp(r'\bas dynamic\b');
-final RegExp deprecationPattern = RegExp(r'^ *@[dD]eprecated');
+final RegExp deprecationPattern = RegExp('^ *@[dD]eprecated');
 const Pattern globalsPattern = 'globals.';
 const String legacyDeprecationPattern = '// ignore: flutter_deprecation_syntax, https';
 

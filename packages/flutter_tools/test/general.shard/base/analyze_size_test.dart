@@ -58,8 +58,8 @@ void main() {
     expect(matchesPattern('foo', pattern: 'foo'), isNotNull);
     expect(matchesPattern('foo', pattern: 'foobar'), null);
     expect(matchesPattern('foobar', pattern: 'foo'), null);
-    expect(matchesPattern('foobar', pattern: RegExp(r'.*b.*')), isNotNull);
-    expect(matchesPattern('foobar', pattern: RegExp(r'.*b')), null);
+    expect(matchesPattern('foobar', pattern: RegExp('.*b.*')), isNotNull);
+    expect(matchesPattern('foobar', pattern: RegExp('.*b')), null);
   });
 
   test('builds APK analysis correctly', () async {

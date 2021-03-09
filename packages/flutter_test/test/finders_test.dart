@@ -34,7 +34,7 @@ void main() {
       await tester.pumpWidget(_boilerplate(
         const Text('this is a test'),
       ));
-      expect(find.textContaining(RegExp(r'test')), findsOneWidget);
+      expect(find.textContaining(RegExp('test')), findsOneWidget);
       expect(find.textContaining('test'), findsOneWidget);
       expect(find.textContaining('a'), findsOneWidget);
       expect(find.textContaining('s'), findsOneWidget);
@@ -51,7 +51,7 @@ void main() {
             ),
           )));
 
-      expect(find.textContaining(RegExp(r'isatest')), findsOneWidget);
+      expect(find.textContaining(RegExp('isatest')), findsOneWidget);
       expect(find.textContaining('isatest'), findsOneWidget);
     });
 
@@ -64,7 +64,7 @@ void main() {
         ),
       ));
 
-      expect(find.textContaining(RegExp(r'test')), findsOneWidget);
+      expect(find.textContaining(RegExp('test')), findsOneWidget);
       expect(find.textContaining('test'), findsOneWidget);
     });
   });
@@ -102,7 +102,7 @@ void main() {
         ),
       ));
       expect(find.bySemanticsLabel('Hello'), findsNothing);
-      expect(find.bySemanticsLabel(RegExp(r'^Hello')), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp('^Hello')), findsOneWidget);
       semanticsHandle.dispose();
     });
 

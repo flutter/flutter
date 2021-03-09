@@ -3344,7 +3344,7 @@ void main() {
         decoration: null,
         inputFormatters: <TextInputFormatter> [
           FilteringTextInputFormatter.deny(
-            RegExp(r'[a-z]'),
+            RegExp('[a-z]'),
             replacementString: '#',
           ),
         ],
@@ -3365,7 +3365,7 @@ void main() {
         decoration: null,
         inputFormatters: <TextInputFormatter> [
           FilteringTextInputFormatter.deny(
-            RegExp(r'[a-z]'),
+            RegExp('[a-z]'),
             replacementString: '#',
           ),
         ],
@@ -3387,7 +3387,7 @@ void main() {
         maxLines: 2,
         inputFormatters: <TextInputFormatter> [
           FilteringTextInputFormatter.deny(
-            RegExp(r'[a-z]'),
+            RegExp('[a-z]'),
             replacementString: '12\n',
           ),
           FilteringTextInputFormatter.allow(RegExp(r'\n[0-9]')),
@@ -3414,7 +3414,7 @@ void main() {
         maxLines: 2,
         inputFormatters: <TextInputFormatter> [
           FilteringTextInputFormatter.deny(
-            RegExp(r'[a-z]'),
+            RegExp('[a-z]'),
             replacementString: '12\n',
           ),
           FilteringTextInputFormatter.allow(RegExp(r'\n[0-9]')),
@@ -3806,7 +3806,7 @@ void main() {
         maxLength: 10,
         inputFormatters: <TextInputFormatter> [
           FilteringTextInputFormatter.deny(
-            RegExp(r'[a-z]'),
+            RegExp('[a-z]'),
             replacementString: '#',
           ),
         ],
@@ -3827,7 +3827,7 @@ void main() {
         maxLength: 10,
         inputFormatters: <TextInputFormatter> [
           FilteringTextInputFormatter.deny(
-            RegExp(r'[a-z]'),
+            RegExp('[a-z]'),
             replacementString: '#',
           ),
         ],

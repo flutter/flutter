@@ -425,7 +425,7 @@ class WebPlugin extends PluginPlatform {
   }
 }
 
-final RegExp _internalCapitalLetterRegex = RegExp(r'(?=(?!^)[A-Z])');
+final RegExp _internalCapitalLetterRegex = RegExp('(?=(?!^)[A-Z])');
 String _filenameForCppClass(String className) {
   return className.splitMapJoin(
     _internalCapitalLetterRegex,

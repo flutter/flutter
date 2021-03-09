@@ -45,10 +45,10 @@ void verifyCommand(Command<Object> runner) {
 final RegExp _allowedArgumentNamePattern = RegExp(r'^([-a-z0-9_]+|ExtraFrontEndOptions|ExtraGenSnapshotOptions|DartDefines)$');
 
 // Patterns for help messages.
-final RegExp _bannedLeadingPatterns = RegExp(r'^[-a-z]', multiLine: true);
+final RegExp _bannedLeadingPatterns = RegExp('^[-a-z]', multiLine: true);
 final RegExp _allowedTrailingPatterns = RegExp(r'([^ ][.!:]\)?|: https?://[^ ]+[^.]|^)$');
 final RegExp _bannedQuotePatterns = RegExp(r" '|' |'\.|\('|'\)|`");
-final RegExp _bannedArgumentReferencePatterns = RegExp(r'[^"=]--[^ ]');
+final RegExp _bannedArgumentReferencePatterns = RegExp('[^"=]--[^ ]');
 final RegExp _questionablePatterns = RegExp(r'[a-z]\.[A-Z]');
 const String _needHelp = 'Every option must have help explaining what it does, even if it\'s '
                          'for testing purposes, because this is the bare minimum of '

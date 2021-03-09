@@ -302,7 +302,7 @@ class TestAsyncUtils {
     final List<String> stack = rawStack.toString().split('\n').where(_stripAsynchronousSuspensions).toList();
     assert(stack.last == '');
     stack.removeLast();
-    final RegExp getClassPattern = RegExp(r'^#[0-9]+ +([^. ]+)');
+    final RegExp getClassPattern = RegExp('^#[0-9]+ +([^. ]+)');
     Match? lineMatch;
     int index = -1;
     do { // skip past frames that are from this class

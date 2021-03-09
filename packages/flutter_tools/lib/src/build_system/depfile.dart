@@ -86,11 +86,11 @@ class DepfileService {
         // platform separator is a backslash.
         final String path = outputFile.path
           .replaceAll(r'\', r'\\')
-          .replaceAll(r' ', r'\ ');
+          .replaceAll(' ', r'\ ');
         buffer.write(' $path');
       } else {
         final String path = outputFile.path
-          .replaceAll(r' ', r'\ ');
+          .replaceAll(' ', r'\ ');
         buffer.write(' $path');
       }
     }

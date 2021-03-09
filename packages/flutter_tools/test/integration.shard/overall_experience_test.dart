@@ -456,12 +456,12 @@ void main() {
         <String>['run', '-dflutter-tester', testScript],
         testDirectory,
         <Transition>[
-          Barrier(RegExp(r'^An Observatory debugger and profiler on Flutter test device is available at: ')),
-          Barrier(RegExp(r'^The Flutter DevTools debugger and profiler on Flutter test device is available at: '), handler: (String line) {
+          Barrier(RegExp('^An Observatory debugger and profiler on Flutter test device is available at: ')),
+          Barrier(RegExp('^The Flutter DevTools debugger and profiler on Flutter test device is available at: '), handler: (String line) {
             return 'r';
           }),
           Barrier(RegExp(r'^Performing hot reload\.\.\.'), logging: true),
-          Barrier(RegExp(r'^Reloaded 0 libraries in [0-9]+ms.'), handler: (String line) {
+          Barrier(RegExp('^Reloaded 0 libraries in [0-9]+ms.'), handler: (String line) {
             return 'q';
           }),
         ],
@@ -519,7 +519,7 @@ void main() {
     // The idea is to verify that we're not outputting spurious messages.
     // WHEN EDITING THIS TEST PLEASE CAREFULLY CONSIDER WHETHER THE NEW OUTPUT IS AN IMPROVEMENT.
     final String testDirectory = fileSystem.path.join(flutterRoot, 'examples', 'hello_world');
-    final RegExp finalLine = RegExp(r'^An Observatory'); /* RegExp(r'^The Flutter DevTools'); */ // TODO(ianh): use this when enabling devtools
+    final RegExp finalLine = RegExp('^An Observatory'); /* RegExp(r'^The Flutter DevTools'); */ // TODO(ianh): use this when enabling devtools
     final ProcessTestResult result = await runFlutter(
       <String>['run', '-dflutter-tester', '--no-devtools'], // TODO(ianh): enable devtools
       testDirectory,

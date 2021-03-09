@@ -25,7 +25,7 @@ String camelCase(String str) {
   return str;
 }
 
-final RegExp _upperRegex = RegExp(r'[A-Z]');
+final RegExp _upperRegex = RegExp('[A-Z]');
 
 /// Convert `fooBar` to `foo_bar`.
 String snakeCase(String str, [ String sep = '_' ]) {

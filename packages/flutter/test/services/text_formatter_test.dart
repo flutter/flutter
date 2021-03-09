@@ -85,7 +85,7 @@ void main() {
 
     test('test filtering formatter, deny mode', () {
       final TextEditingValue actualValue =
-          FilteringTextInputFormatter.deny(RegExp(r'[a-z]'))
+          FilteringTextInputFormatter.deny(RegExp('[a-z]'))
               .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting
@@ -102,7 +102,7 @@ void main() {
 
     test('test filtering formatter, deny mode (deprecated names)', () {
       final TextEditingValue actualValue =
-          FilteringTextInputFormatter.deny(RegExp(r'[a-z]'))
+          FilteringTextInputFormatter.deny(RegExp('[a-z]'))
               .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting
@@ -151,7 +151,7 @@ void main() {
 
     test('test filtering formatter, allow mode', () {
       final TextEditingValue actualValue =
-          FilteringTextInputFormatter.allow(RegExp(r'[a-c]'))
+          FilteringTextInputFormatter.allow(RegExp('[a-c]'))
               .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting
@@ -167,7 +167,7 @@ void main() {
 
     test('test filtering formatter, allow mode (deprecated names)', () {
       final TextEditingValue actualValue =
-          FilteringTextInputFormatter.allow(RegExp(r'[a-c]'))
+          FilteringTextInputFormatter.allow(RegExp('[a-c]'))
               .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting

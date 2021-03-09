@@ -20,7 +20,7 @@ class ProjectWithEarlyError extends Project {
   ''';
 
   @override
-  final String main = r'''
+  final String main = '''
   import 'dart:async';
 
   import 'package:flutter/material.dart';

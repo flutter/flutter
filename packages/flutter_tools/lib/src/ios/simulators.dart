@@ -398,7 +398,7 @@ class IOSSimulator extends Device {
 
     // Check if the device is part of a blocked category.
     // We do not yet support WatchOS or tvOS devices.
-    final RegExp blocklist = RegExp(r'Apple (TV|Watch)', caseSensitive: false);
+    final RegExp blocklist = RegExp('Apple (TV|Watch)', caseSensitive: false);
     if (blocklist.hasMatch(name)) {
       _supportMessage = 'Flutter does not support Apple TV or Apple Watch.';
       return false;
@@ -846,7 +846,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   }
 
   //   "eventMessage" : "flutter: 21",
-  static final RegExp _unifiedLoggingEventMessageRegex = RegExp(r'.*"eventMessage" : (".*")');
+  static final RegExp _unifiedLoggingEventMessageRegex = RegExp('.*"eventMessage" : (".*")');
   void _onUnifiedLoggingLine(String line) {
     // The log command predicate handles filtering, so every log eventMessage should be decoded and added.
     final Match eventMessageMatch = _unifiedLoggingEventMessageRegex.firstMatch(line);

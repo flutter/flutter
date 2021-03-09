@@ -116,8 +116,8 @@ void main() {
         expectSync(lines[1], 'You must use "await" with all Future-returning test APIs.');
         expectSync(
           lines[2],
-          matches(r'^The guarded method "generateFailureOutput" from class '
-            r'LocalComparisonOutput was called from .*goldens_test.dart on line '
+          matches('^The guarded method "generateFailureOutput" from class '
+            'LocalComparisonOutput was called from .*goldens_test.dart on line '
             r'[0-9]+, but never completed before its parent scope closed\.$'),
         );
         expectSync(lines.length, 3);

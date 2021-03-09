@@ -322,7 +322,7 @@ class XcodeProjectInterpreter {
   final Logger _logger;
   final Usage _usage;
 
-  static final RegExp _versionRegex = RegExp(r'Xcode ([0-9.]+)');
+  static final RegExp _versionRegex = RegExp('Xcode ([0-9.]+)');
 
   void _updateVersion() {
     if (!_platform.isMacOS || !_fileSystem.file('/usr/bin/xcodebuild').existsSync()) {

@@ -12,7 +12,7 @@ final Directory flutterRoot = Directory(path.dirname(Platform.script.toFilePath(
 
 /// Converts `FOO_BAR` to `fooBar`.
 String shoutingToLowerCamel(String shouting) {
-  final RegExp initialLetter = RegExp(r'_([^_])([^_]*)');
+  final RegExp initialLetter = RegExp('_([^_])([^_]*)');
   final String snake = shouting.toLowerCase();
   final String result = snake.replaceAllMapped(initialLetter, (Match match) {
     return match.group(1).toUpperCase() + match.group(2).toLowerCase();

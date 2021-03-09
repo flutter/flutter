@@ -912,7 +912,7 @@ class AnsiSpinner extends Status {
 
   // Windows console font has a limited set of Unicode characters.
   List<String> get _animation => !_terminal.supportsEmoji
-      ? const <String>[r'-', r'\', r'|', r'/']
+      ? const <String>['-', r'\', '|', '/']
       : const <String>['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'];
 
   String get _currentAnimationFrame => _animation[ticks % _animation.length];

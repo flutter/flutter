@@ -382,182 +382,182 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// Represents the logical "Key A" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyA = LogicalKeyboardKey(0x00000000061, keyLabel: r'a', debugName: kReleaseMode ? null : 'Key A');
+  static const LogicalKeyboardKey keyA = LogicalKeyboardKey(0x00000000061, keyLabel: 'a', debugName: kReleaseMode ? null : 'Key A');
 
   /// Represents the logical "Key B" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyB = LogicalKeyboardKey(0x00000000062, keyLabel: r'b', debugName: kReleaseMode ? null : 'Key B');
+  static const LogicalKeyboardKey keyB = LogicalKeyboardKey(0x00000000062, keyLabel: 'b', debugName: kReleaseMode ? null : 'Key B');
 
   /// Represents the logical "Key C" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyC = LogicalKeyboardKey(0x00000000063, keyLabel: r'c', debugName: kReleaseMode ? null : 'Key C');
+  static const LogicalKeyboardKey keyC = LogicalKeyboardKey(0x00000000063, keyLabel: 'c', debugName: kReleaseMode ? null : 'Key C');
 
   /// Represents the logical "Key D" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyD = LogicalKeyboardKey(0x00000000064, keyLabel: r'd', debugName: kReleaseMode ? null : 'Key D');
+  static const LogicalKeyboardKey keyD = LogicalKeyboardKey(0x00000000064, keyLabel: 'd', debugName: kReleaseMode ? null : 'Key D');
 
   /// Represents the logical "Key E" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyE = LogicalKeyboardKey(0x00000000065, keyLabel: r'e', debugName: kReleaseMode ? null : 'Key E');
+  static const LogicalKeyboardKey keyE = LogicalKeyboardKey(0x00000000065, keyLabel: 'e', debugName: kReleaseMode ? null : 'Key E');
 
   /// Represents the logical "Key F" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyF = LogicalKeyboardKey(0x00000000066, keyLabel: r'f', debugName: kReleaseMode ? null : 'Key F');
+  static const LogicalKeyboardKey keyF = LogicalKeyboardKey(0x00000000066, keyLabel: 'f', debugName: kReleaseMode ? null : 'Key F');
 
   /// Represents the logical "Key G" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyG = LogicalKeyboardKey(0x00000000067, keyLabel: r'g', debugName: kReleaseMode ? null : 'Key G');
+  static const LogicalKeyboardKey keyG = LogicalKeyboardKey(0x00000000067, keyLabel: 'g', debugName: kReleaseMode ? null : 'Key G');
 
   /// Represents the logical "Key H" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyH = LogicalKeyboardKey(0x00000000068, keyLabel: r'h', debugName: kReleaseMode ? null : 'Key H');
+  static const LogicalKeyboardKey keyH = LogicalKeyboardKey(0x00000000068, keyLabel: 'h', debugName: kReleaseMode ? null : 'Key H');
 
   /// Represents the logical "Key I" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyI = LogicalKeyboardKey(0x00000000069, keyLabel: r'i', debugName: kReleaseMode ? null : 'Key I');
+  static const LogicalKeyboardKey keyI = LogicalKeyboardKey(0x00000000069, keyLabel: 'i', debugName: kReleaseMode ? null : 'Key I');
 
   /// Represents the logical "Key J" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyJ = LogicalKeyboardKey(0x0000000006a, keyLabel: r'j', debugName: kReleaseMode ? null : 'Key J');
+  static const LogicalKeyboardKey keyJ = LogicalKeyboardKey(0x0000000006a, keyLabel: 'j', debugName: kReleaseMode ? null : 'Key J');
 
   /// Represents the logical "Key K" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyK = LogicalKeyboardKey(0x0000000006b, keyLabel: r'k', debugName: kReleaseMode ? null : 'Key K');
+  static const LogicalKeyboardKey keyK = LogicalKeyboardKey(0x0000000006b, keyLabel: 'k', debugName: kReleaseMode ? null : 'Key K');
 
   /// Represents the logical "Key L" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyL = LogicalKeyboardKey(0x0000000006c, keyLabel: r'l', debugName: kReleaseMode ? null : 'Key L');
+  static const LogicalKeyboardKey keyL = LogicalKeyboardKey(0x0000000006c, keyLabel: 'l', debugName: kReleaseMode ? null : 'Key L');
 
   /// Represents the logical "Key M" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyM = LogicalKeyboardKey(0x0000000006d, keyLabel: r'm', debugName: kReleaseMode ? null : 'Key M');
+  static const LogicalKeyboardKey keyM = LogicalKeyboardKey(0x0000000006d, keyLabel: 'm', debugName: kReleaseMode ? null : 'Key M');
 
   /// Represents the logical "Key N" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyN = LogicalKeyboardKey(0x0000000006e, keyLabel: r'n', debugName: kReleaseMode ? null : 'Key N');
+  static const LogicalKeyboardKey keyN = LogicalKeyboardKey(0x0000000006e, keyLabel: 'n', debugName: kReleaseMode ? null : 'Key N');
 
   /// Represents the logical "Key O" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyO = LogicalKeyboardKey(0x0000000006f, keyLabel: r'o', debugName: kReleaseMode ? null : 'Key O');
+  static const LogicalKeyboardKey keyO = LogicalKeyboardKey(0x0000000006f, keyLabel: 'o', debugName: kReleaseMode ? null : 'Key O');
 
   /// Represents the logical "Key P" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyP = LogicalKeyboardKey(0x00000000070, keyLabel: r'p', debugName: kReleaseMode ? null : 'Key P');
+  static const LogicalKeyboardKey keyP = LogicalKeyboardKey(0x00000000070, keyLabel: 'p', debugName: kReleaseMode ? null : 'Key P');
 
   /// Represents the logical "Key Q" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyQ = LogicalKeyboardKey(0x00000000071, keyLabel: r'q', debugName: kReleaseMode ? null : 'Key Q');
+  static const LogicalKeyboardKey keyQ = LogicalKeyboardKey(0x00000000071, keyLabel: 'q', debugName: kReleaseMode ? null : 'Key Q');
 
   /// Represents the logical "Key R" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyR = LogicalKeyboardKey(0x00000000072, keyLabel: r'r', debugName: kReleaseMode ? null : 'Key R');
+  static const LogicalKeyboardKey keyR = LogicalKeyboardKey(0x00000000072, keyLabel: 'r', debugName: kReleaseMode ? null : 'Key R');
 
   /// Represents the logical "Key S" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyS = LogicalKeyboardKey(0x00000000073, keyLabel: r's', debugName: kReleaseMode ? null : 'Key S');
+  static const LogicalKeyboardKey keyS = LogicalKeyboardKey(0x00000000073, keyLabel: 's', debugName: kReleaseMode ? null : 'Key S');
 
   /// Represents the logical "Key T" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyT = LogicalKeyboardKey(0x00000000074, keyLabel: r't', debugName: kReleaseMode ? null : 'Key T');
+  static const LogicalKeyboardKey keyT = LogicalKeyboardKey(0x00000000074, keyLabel: 't', debugName: kReleaseMode ? null : 'Key T');
 
   /// Represents the logical "Key U" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyU = LogicalKeyboardKey(0x00000000075, keyLabel: r'u', debugName: kReleaseMode ? null : 'Key U');
+  static const LogicalKeyboardKey keyU = LogicalKeyboardKey(0x00000000075, keyLabel: 'u', debugName: kReleaseMode ? null : 'Key U');
 
   /// Represents the logical "Key V" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyV = LogicalKeyboardKey(0x00000000076, keyLabel: r'v', debugName: kReleaseMode ? null : 'Key V');
+  static const LogicalKeyboardKey keyV = LogicalKeyboardKey(0x00000000076, keyLabel: 'v', debugName: kReleaseMode ? null : 'Key V');
 
   /// Represents the logical "Key W" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyW = LogicalKeyboardKey(0x00000000077, keyLabel: r'w', debugName: kReleaseMode ? null : 'Key W');
+  static const LogicalKeyboardKey keyW = LogicalKeyboardKey(0x00000000077, keyLabel: 'w', debugName: kReleaseMode ? null : 'Key W');
 
   /// Represents the logical "Key X" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyX = LogicalKeyboardKey(0x00000000078, keyLabel: r'x', debugName: kReleaseMode ? null : 'Key X');
+  static const LogicalKeyboardKey keyX = LogicalKeyboardKey(0x00000000078, keyLabel: 'x', debugName: kReleaseMode ? null : 'Key X');
 
   /// Represents the logical "Key Y" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyY = LogicalKeyboardKey(0x00000000079, keyLabel: r'y', debugName: kReleaseMode ? null : 'Key Y');
+  static const LogicalKeyboardKey keyY = LogicalKeyboardKey(0x00000000079, keyLabel: 'y', debugName: kReleaseMode ? null : 'Key Y');
 
   /// Represents the logical "Key Z" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey keyZ = LogicalKeyboardKey(0x0000000007a, keyLabel: r'z', debugName: kReleaseMode ? null : 'Key Z');
+  static const LogicalKeyboardKey keyZ = LogicalKeyboardKey(0x0000000007a, keyLabel: 'z', debugName: kReleaseMode ? null : 'Key Z');
 
   /// Represents the logical "Digit 1" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey digit1 = LogicalKeyboardKey(0x00000000031, keyLabel: r'1', debugName: kReleaseMode ? null : 'Digit 1');
+  static const LogicalKeyboardKey digit1 = LogicalKeyboardKey(0x00000000031, keyLabel: '1', debugName: kReleaseMode ? null : 'Digit 1');
 
   /// Represents the logical "Digit 2" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey digit2 = LogicalKeyboardKey(0x00000000032, keyLabel: r'2', debugName: kReleaseMode ? null : 'Digit 2');
+  static const LogicalKeyboardKey digit2 = LogicalKeyboardKey(0x00000000032, keyLabel: '2', debugName: kReleaseMode ? null : 'Digit 2');
 
   /// Represents the logical "Digit 3" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey digit3 = LogicalKeyboardKey(0x00000000033, keyLabel: r'3', debugName: kReleaseMode ? null : 'Digit 3');
+  static const LogicalKeyboardKey digit3 = LogicalKeyboardKey(0x00000000033, keyLabel: '3', debugName: kReleaseMode ? null : 'Digit 3');
 
   /// Represents the logical "Digit 4" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey digit4 = LogicalKeyboardKey(0x00000000034, keyLabel: r'4', debugName: kReleaseMode ? null : 'Digit 4');
+  static const LogicalKeyboardKey digit4 = LogicalKeyboardKey(0x00000000034, keyLabel: '4', debugName: kReleaseMode ? null : 'Digit 4');
 
   /// Represents the logical "Digit 5" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey digit5 = LogicalKeyboardKey(0x00000000035, keyLabel: r'5', debugName: kReleaseMode ? null : 'Digit 5');
+  static const LogicalKeyboardKey digit5 = LogicalKeyboardKey(0x00000000035, keyLabel: '5', debugName: kReleaseMode ? null : 'Digit 5');
 
   /// Represents the logical "Digit 6" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey digit6 = LogicalKeyboardKey(0x00000000036, keyLabel: r'6', debugName: kReleaseMode ? null : 'Digit 6');
+  static const LogicalKeyboardKey digit6 = LogicalKeyboardKey(0x00000000036, keyLabel: '6', debugName: kReleaseMode ? null : 'Digit 6');
 
   /// Represents the logical "Digit 7" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey digit7 = LogicalKeyboardKey(0x00000000037, keyLabel: r'7', debugName: kReleaseMode ? null : 'Digit 7');
+  static const LogicalKeyboardKey digit7 = LogicalKeyboardKey(0x00000000037, keyLabel: '7', debugName: kReleaseMode ? null : 'Digit 7');
 
   /// Represents the logical "Digit 8" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey digit8 = LogicalKeyboardKey(0x00000000038, keyLabel: r'8', debugName: kReleaseMode ? null : 'Digit 8');
+  static const LogicalKeyboardKey digit8 = LogicalKeyboardKey(0x00000000038, keyLabel: '8', debugName: kReleaseMode ? null : 'Digit 8');
 
   /// Represents the logical "Digit 9" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey digit9 = LogicalKeyboardKey(0x00000000039, keyLabel: r'9', debugName: kReleaseMode ? null : 'Digit 9');
+  static const LogicalKeyboardKey digit9 = LogicalKeyboardKey(0x00000000039, keyLabel: '9', debugName: kReleaseMode ? null : 'Digit 9');
 
   /// Represents the logical "Digit 0" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey digit0 = LogicalKeyboardKey(0x00000000030, keyLabel: r'0', debugName: kReleaseMode ? null : 'Digit 0');
+  static const LogicalKeyboardKey digit0 = LogicalKeyboardKey(0x00000000030, keyLabel: '0', debugName: kReleaseMode ? null : 'Digit 0');
 
   /// Represents the logical "Enter" key on the keyboard.
   ///
@@ -582,27 +582,27 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// Represents the logical "Space" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey space = LogicalKeyboardKey(0x00000000020, keyLabel: r' ', debugName: kReleaseMode ? null : 'Space');
+  static const LogicalKeyboardKey space = LogicalKeyboardKey(0x00000000020, keyLabel: ' ', debugName: kReleaseMode ? null : 'Space');
 
   /// Represents the logical "Minus" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey minus = LogicalKeyboardKey(0x0000000002d, keyLabel: r'-', debugName: kReleaseMode ? null : 'Minus');
+  static const LogicalKeyboardKey minus = LogicalKeyboardKey(0x0000000002d, keyLabel: '-', debugName: kReleaseMode ? null : 'Minus');
 
   /// Represents the logical "Equal" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey equal = LogicalKeyboardKey(0x0000000003d, keyLabel: r'=', debugName: kReleaseMode ? null : 'Equal');
+  static const LogicalKeyboardKey equal = LogicalKeyboardKey(0x0000000003d, keyLabel: '=', debugName: kReleaseMode ? null : 'Equal');
 
   /// Represents the logical "Bracket Left" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey bracketLeft = LogicalKeyboardKey(0x0000000005b, keyLabel: r'[', debugName: kReleaseMode ? null : 'Bracket Left');
+  static const LogicalKeyboardKey bracketLeft = LogicalKeyboardKey(0x0000000005b, keyLabel: '[', debugName: kReleaseMode ? null : 'Bracket Left');
 
   /// Represents the logical "Bracket Right" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey bracketRight = LogicalKeyboardKey(0x0000000005d, keyLabel: r']', debugName: kReleaseMode ? null : 'Bracket Right');
+  static const LogicalKeyboardKey bracketRight = LogicalKeyboardKey(0x0000000005d, keyLabel: ']', debugName: kReleaseMode ? null : 'Bracket Right');
 
   /// Represents the logical "Backslash" key on the keyboard.
   ///
@@ -612,32 +612,32 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// Represents the logical "Semicolon" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey semicolon = LogicalKeyboardKey(0x0000000003b, keyLabel: r';', debugName: kReleaseMode ? null : 'Semicolon');
+  static const LogicalKeyboardKey semicolon = LogicalKeyboardKey(0x0000000003b, keyLabel: ';', debugName: kReleaseMode ? null : 'Semicolon');
 
   /// Represents the logical "Quote" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey quote = LogicalKeyboardKey(0x00000000027, keyLabel: r"'", debugName: kReleaseMode ? null : 'Quote');
+  static const LogicalKeyboardKey quote = LogicalKeyboardKey(0x00000000027, keyLabel: "'", debugName: kReleaseMode ? null : 'Quote');
 
   /// Represents the logical "Backquote" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey backquote = LogicalKeyboardKey(0x00000000060, keyLabel: r'`', debugName: kReleaseMode ? null : 'Backquote');
+  static const LogicalKeyboardKey backquote = LogicalKeyboardKey(0x00000000060, keyLabel: '`', debugName: kReleaseMode ? null : 'Backquote');
 
   /// Represents the logical "Comma" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey comma = LogicalKeyboardKey(0x0000000002c, keyLabel: r',', debugName: kReleaseMode ? null : 'Comma');
+  static const LogicalKeyboardKey comma = LogicalKeyboardKey(0x0000000002c, keyLabel: ',', debugName: kReleaseMode ? null : 'Comma');
 
   /// Represents the logical "Period" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey period = LogicalKeyboardKey(0x0000000002e, keyLabel: r'.', debugName: kReleaseMode ? null : 'Period');
+  static const LogicalKeyboardKey period = LogicalKeyboardKey(0x0000000002e, keyLabel: '.', debugName: kReleaseMode ? null : 'Period');
 
   /// Represents the logical "Slash" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey slash = LogicalKeyboardKey(0x0000000002f, keyLabel: r'/', debugName: kReleaseMode ? null : 'Slash');
+  static const LogicalKeyboardKey slash = LogicalKeyboardKey(0x0000000002f, keyLabel: '/', debugName: kReleaseMode ? null : 'Slash');
 
   /// Represents the logical "Caps Lock" key on the keyboard.
   ///
@@ -777,22 +777,22 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// Represents the logical "Numpad Divide" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadDivide = LogicalKeyboardKey(0x00100070054, keyLabel: r'/', debugName: kReleaseMode ? null : 'Numpad Divide');
+  static const LogicalKeyboardKey numpadDivide = LogicalKeyboardKey(0x00100070054, keyLabel: '/', debugName: kReleaseMode ? null : 'Numpad Divide');
 
   /// Represents the logical "Numpad Multiply" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadMultiply = LogicalKeyboardKey(0x00100070055, keyLabel: r'*', debugName: kReleaseMode ? null : 'Numpad Multiply');
+  static const LogicalKeyboardKey numpadMultiply = LogicalKeyboardKey(0x00100070055, keyLabel: '*', debugName: kReleaseMode ? null : 'Numpad Multiply');
 
   /// Represents the logical "Numpad Subtract" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadSubtract = LogicalKeyboardKey(0x00100070056, keyLabel: r'-', debugName: kReleaseMode ? null : 'Numpad Subtract');
+  static const LogicalKeyboardKey numpadSubtract = LogicalKeyboardKey(0x00100070056, keyLabel: '-', debugName: kReleaseMode ? null : 'Numpad Subtract');
 
   /// Represents the logical "Numpad Add" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadAdd = LogicalKeyboardKey(0x00100070057, keyLabel: r'+', debugName: kReleaseMode ? null : 'Numpad Add');
+  static const LogicalKeyboardKey numpadAdd = LogicalKeyboardKey(0x00100070057, keyLabel: '+', debugName: kReleaseMode ? null : 'Numpad Add');
 
   /// Represents the logical "Numpad Enter" key on the keyboard.
   ///
@@ -802,57 +802,57 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// Represents the logical "Numpad 1" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad1 = LogicalKeyboardKey(0x00100070059, keyLabel: r'1', debugName: kReleaseMode ? null : 'Numpad 1');
+  static const LogicalKeyboardKey numpad1 = LogicalKeyboardKey(0x00100070059, keyLabel: '1', debugName: kReleaseMode ? null : 'Numpad 1');
 
   /// Represents the logical "Numpad 2" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad2 = LogicalKeyboardKey(0x0010007005a, keyLabel: r'2', debugName: kReleaseMode ? null : 'Numpad 2');
+  static const LogicalKeyboardKey numpad2 = LogicalKeyboardKey(0x0010007005a, keyLabel: '2', debugName: kReleaseMode ? null : 'Numpad 2');
 
   /// Represents the logical "Numpad 3" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad3 = LogicalKeyboardKey(0x0010007005b, keyLabel: r'3', debugName: kReleaseMode ? null : 'Numpad 3');
+  static const LogicalKeyboardKey numpad3 = LogicalKeyboardKey(0x0010007005b, keyLabel: '3', debugName: kReleaseMode ? null : 'Numpad 3');
 
   /// Represents the logical "Numpad 4" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad4 = LogicalKeyboardKey(0x0010007005c, keyLabel: r'4', debugName: kReleaseMode ? null : 'Numpad 4');
+  static const LogicalKeyboardKey numpad4 = LogicalKeyboardKey(0x0010007005c, keyLabel: '4', debugName: kReleaseMode ? null : 'Numpad 4');
 
   /// Represents the logical "Numpad 5" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad5 = LogicalKeyboardKey(0x0010007005d, keyLabel: r'5', debugName: kReleaseMode ? null : 'Numpad 5');
+  static const LogicalKeyboardKey numpad5 = LogicalKeyboardKey(0x0010007005d, keyLabel: '5', debugName: kReleaseMode ? null : 'Numpad 5');
 
   /// Represents the logical "Numpad 6" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad6 = LogicalKeyboardKey(0x0010007005e, keyLabel: r'6', debugName: kReleaseMode ? null : 'Numpad 6');
+  static const LogicalKeyboardKey numpad6 = LogicalKeyboardKey(0x0010007005e, keyLabel: '6', debugName: kReleaseMode ? null : 'Numpad 6');
 
   /// Represents the logical "Numpad 7" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad7 = LogicalKeyboardKey(0x0010007005f, keyLabel: r'7', debugName: kReleaseMode ? null : 'Numpad 7');
+  static const LogicalKeyboardKey numpad7 = LogicalKeyboardKey(0x0010007005f, keyLabel: '7', debugName: kReleaseMode ? null : 'Numpad 7');
 
   /// Represents the logical "Numpad 8" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad8 = LogicalKeyboardKey(0x00100070060, keyLabel: r'8', debugName: kReleaseMode ? null : 'Numpad 8');
+  static const LogicalKeyboardKey numpad8 = LogicalKeyboardKey(0x00100070060, keyLabel: '8', debugName: kReleaseMode ? null : 'Numpad 8');
 
   /// Represents the logical "Numpad 9" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad9 = LogicalKeyboardKey(0x00100070061, keyLabel: r'9', debugName: kReleaseMode ? null : 'Numpad 9');
+  static const LogicalKeyboardKey numpad9 = LogicalKeyboardKey(0x00100070061, keyLabel: '9', debugName: kReleaseMode ? null : 'Numpad 9');
 
   /// Represents the logical "Numpad 0" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad0 = LogicalKeyboardKey(0x00100070062, keyLabel: r'0', debugName: kReleaseMode ? null : 'Numpad 0');
+  static const LogicalKeyboardKey numpad0 = LogicalKeyboardKey(0x00100070062, keyLabel: '0', debugName: kReleaseMode ? null : 'Numpad 0');
 
   /// Represents the logical "Numpad Decimal" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadDecimal = LogicalKeyboardKey(0x00100070063, keyLabel: r'.', debugName: kReleaseMode ? null : 'Numpad Decimal');
+  static const LogicalKeyboardKey numpadDecimal = LogicalKeyboardKey(0x00100070063, keyLabel: '.', debugName: kReleaseMode ? null : 'Numpad Decimal');
 
   /// Represents the logical "Intl Backslash" key on the keyboard.
   ///
@@ -872,7 +872,7 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// Represents the logical "Numpad Equal" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadEqual = LogicalKeyboardKey(0x00100070067, keyLabel: r'=', debugName: kReleaseMode ? null : 'Numpad Equal');
+  static const LogicalKeyboardKey numpadEqual = LogicalKeyboardKey(0x00100070067, keyLabel: '=', debugName: kReleaseMode ? null : 'Numpad Equal');
 
   /// Represents the logical "F13" key on the keyboard.
   ///
@@ -997,7 +997,7 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// Represents the logical "Numpad Comma" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadComma = LogicalKeyboardKey(0x00100070085, keyLabel: r',', debugName: kReleaseMode ? null : 'Numpad Comma');
+  static const LogicalKeyboardKey numpadComma = LogicalKeyboardKey(0x00100070085, keyLabel: ',', debugName: kReleaseMode ? null : 'Numpad Comma');
 
   /// Represents the logical "Intl Ro" key on the keyboard.
   ///
@@ -1062,12 +1062,12 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// Represents the logical "Numpad Paren Left" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadParenLeft = LogicalKeyboardKey(0x001000700b6, keyLabel: r'(', debugName: kReleaseMode ? null : 'Numpad Paren Left');
+  static const LogicalKeyboardKey numpadParenLeft = LogicalKeyboardKey(0x001000700b6, keyLabel: '(', debugName: kReleaseMode ? null : 'Numpad Paren Left');
 
   /// Represents the logical "Numpad Paren Right" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadParenRight = LogicalKeyboardKey(0x001000700b7, keyLabel: r')', debugName: kReleaseMode ? null : 'Numpad Paren Right');
+  static const LogicalKeyboardKey numpadParenRight = LogicalKeyboardKey(0x001000700b7, keyLabel: ')', debugName: kReleaseMode ? null : 'Numpad Paren Right');
 
   /// Represents the logical "Numpad Backspace" key on the keyboard.
   ///

@@ -612,14 +612,14 @@ void main() {
 }
 ''';
 
-  final String appEnCa = r'''
+  final String appEnCa = '''
 {
   "@@locale": "en_CA",
   "helloWorld": "CA Hello World"
 }
 ''';
 
-  final String appEnGb = r'''
+  final String appEnGb = '''
 {
   "@@locale": "en_GB",
   "helloWorld": "GB Hello World"
@@ -656,7 +656,7 @@ void main() {
 }
 ''';
 
-  final String appEs419 = r'''
+  final String appEs419 = '''
 {
   "@@locale": "es_419",
   "helloWorld": "ES 419 - Hello World",
@@ -664,7 +664,7 @@ void main() {
 }
 ''';
 
-  final String appZh = r'''
+  final String appZh = '''
 {
   "@@locale": "zh",
   "helloWorld": "你好世界",
@@ -673,21 +673,21 @@ void main() {
 }
 ''';
 
-  final String appZhHans = r'''
+  final String appZhHans = '''
 {
   "@@locale": "zh_Hans",
   "helloWorld": "简体你好世界"
 }
   ''';
 
-  final String appZhHant = r'''
+  final String appZhHant = '''
 {
   "@@locale": "zh_Hant",
   "helloWorld": "繁體你好世界"
 }
   ''';
 
-  final String appZhHantTw = r'''
+  final String appZhHantTw = '''
 {
   "@@locale": "zh_Hant_TW",
   "helloWorld": "台灣繁體你好世界"

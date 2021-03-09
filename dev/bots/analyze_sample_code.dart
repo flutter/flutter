@@ -138,10 +138,10 @@ class SampleChecker {
   static const String _dartDocPrefixWithSpace = '$_dartDocPrefix ';
 
   /// A RegExp that matches the beginning of a dartdoc snippet or sample.
-  static final RegExp _dartDocSampleBeginRegex = RegExp(r'{@tool (sample|snippet|dartpad)(?:| ([^}]*))}');
+  static final RegExp _dartDocSampleBeginRegex = RegExp('{@tool (sample|snippet|dartpad)(?:| ([^}]*))}');
 
   /// A RegExp that matches the end of a dartdoc snippet or sample.
-  static final RegExp _dartDocSampleEndRegex = RegExp(r'{@end-tool}');
+  static final RegExp _dartDocSampleEndRegex = RegExp('{@end-tool}');
 
   /// A RegExp that matches the start of a code block within dartdoc.
   static final RegExp _codeBlockStartRegex = RegExp(r'///\s+```dart.*$');
@@ -488,9 +488,9 @@ class SampleChecker {
     // Match group 3 is a quoted arg, if any, without the quotes.
     // Match group 4 is the unquoted arg, if any.
     final RegExp argMatcher = RegExp(r'([a-zA-Z\-_0-9]+=)?' // option name
-        r'(?:' // Start a new non-capture group for the two possibilities.
+        '(?:' // Start a new non-capture group for the two possibilities.
         r'''(["'])((?:\\{2})*|(?:.*?[^\\](?:\\{2})*))\2|''' // with quotes.
-        r'([^ ]+))'); // without quotes.
+        '([^ ]+))'); // without quotes.
     final Iterable<Match> matches = argMatcher.allMatches(argsAsString);
 
     // Remove quotes around args, and if convertToArgs is true, then for any

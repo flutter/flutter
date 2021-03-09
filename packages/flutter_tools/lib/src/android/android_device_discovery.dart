@@ -136,7 +136,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
       }
 
       // Skip lines about adb server and client version not matching
-      if (line.startsWith(RegExp(r'adb server (version|is out of date)'))) {
+      if (line.startsWith(RegExp('adb server (version|is out of date)'))) {
         diagnostics?.add(line);
         continue;
       }

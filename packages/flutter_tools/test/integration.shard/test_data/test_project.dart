@@ -23,14 +23,14 @@ class TestProject extends Project {
   ''';
 
   @override
-  final String main = r'''
+  final String main = '''
 int foo(int bar) {
   return bar + 2;
 }
   ''';
 
   @override
-  final String test = r'''
+  final String test = '''
   import 'package:flutter_test/flutter_test.dart';
   import 'package:test/main.dart';
 

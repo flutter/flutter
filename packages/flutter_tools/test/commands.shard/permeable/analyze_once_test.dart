@@ -597,7 +597,7 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 ''';
 
-const String pubspecYamlSrc = r'''
+const String pubspecYamlSrc = '''
 name: flutter_project
 environment:
   sdk: ">=2.1.0 <3.0.0"

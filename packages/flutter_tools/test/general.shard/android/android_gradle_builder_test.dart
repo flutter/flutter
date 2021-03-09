@@ -533,7 +533,7 @@ void main() {
 
       fileSystem.file('foo/snapshot.arm64-v8a.json')
         ..createSync(recursive: true)
-        ..writeAsStringSync(r'''
+        ..writeAsStringSync('''
 [
   {
     "l": "dart:_internal",

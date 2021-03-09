@@ -509,21 +509,21 @@ void main() {
                           textDirection: TextDirection.ltr,
                           children: <TestSemantics>[
                             TestSemantics(
-                              label: r'B',
+                              label: 'B',
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
-                              label: r'C',
+                              label: 'C',
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
-                              label: r'D',
+                              label: 'D',
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
                               flags: <SemanticsFlag>[SemanticsFlag.isButton],
                               actions: <SemanticsAction>[SemanticsAction.tap],
-                              label: r'Show accounts',
+                              label: 'Show accounts',
                               textDirection: TextDirection.ltr,
                             ),
                           ],
@@ -590,15 +590,15 @@ void main() {
                           textDirection: TextDirection.ltr,
                           children: <TestSemantics>[
                             TestSemantics(
-                              label: r'B',
+                              label: 'B',
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
-                              label: r'C',
+                              label: 'C',
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
-                              label: r'D',
+                              label: 'D',
                               textDirection: TextDirection.ltr,
                             ),
                           ],

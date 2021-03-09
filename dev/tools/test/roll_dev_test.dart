@@ -120,7 +120,7 @@ void main() {
       } on Exception catch (e) {
         exception = e;
       }
-      const String pattern = r'Your git repository is not clean. Try running '
+      const String pattern = 'Your git repository is not clean. Try running '
           '"git clean -fd". Warning, this will delete files! Run with -n to find '
           'out which ones.';
       expect(exception?.toString(), contains(pattern));

@@ -75,7 +75,7 @@ class MockAndroidSdk extends Mock implements AndroidSdk {
     directory.createSync(recursive: true);
   }
 
-  static const String _buildProp = r'''
+  static const String _buildProp = '''
 ro.build.version.incremental=1624448
 ro.build.version.sdk=24
 ro.build.version.codename=REL

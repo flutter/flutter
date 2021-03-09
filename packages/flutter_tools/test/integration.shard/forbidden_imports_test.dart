@@ -26,11 +26,11 @@ void main() {
       .map(_asFile);
     for (final File file in files) {
       for (final String line in file.readAsLinesSync()) {
-        if (line.startsWith(RegExp(r'import.*package:'))) {
+        if (line.startsWith(RegExp('import.*package:'))) {
           continue;
         }
-        if (line.startsWith(RegExp(r'import.*commands/'))
-         || line.startsWith(RegExp(r'import.*test/'))) {
+        if (line.startsWith(RegExp('import.*commands/'))
+         || line.startsWith(RegExp('import.*test/'))) {
           final String relativePath = fileSystem.path.relative(file.path, from:flutterTools);
           fail('$relativePath imports $line. This import introduces a layering violation. '
                'Please find another way to access the information you are using.');
@@ -51,8 +51,8 @@ void main() {
       .map(_asFile);
     for (final File file in files) {
       for (final String line in file.readAsLinesSync()) {
-        if (line.startsWith(RegExp(r'import.*globals.dart'))
-         && !line.contains(r'as globals')) {
+        if (line.startsWith(RegExp('import.*globals.dart'))
+         && !line.contains('as globals')) {
           final String relativePath = fileSystem.path.relative(file.path, from:flutterTools);
           fail('$relativePath imports globals.dart without a globals prefix.');
         }
@@ -76,7 +76,7 @@ void main() {
         .map(_asFile);
       for (final File file in files) {
         for (final String line in file.readAsLinesSync()) {
-          if (line.startsWith(RegExp(r'import.*dart:io')) &&
+          if (line.startsWith(RegExp('import.*dart:io')) &&
               !line.contains('ignore: dart_io_import')) {
             final String relativePath = fileSystem.path.relative(file.path, from:flutterTools);
             fail("$relativePath imports 'dart:io'; import 'lib/src/base/io.dart' instead");
@@ -101,7 +101,7 @@ void main() {
         .map(_asFile);
       for (final File file in files) {
         for (final String line in file.readAsLinesSync()) {
-          if (line.startsWith(RegExp(r'import.*package:http/')) &&
+          if (line.startsWith(RegExp('import.*package:http/')) &&
               !line.contains('ignore: package_http_import')) {
             final String relativePath = fileSystem.path.relative(file.path, from:flutterTools);
             fail("$relativePath imports 'package:http'; import 'lib/src/base/io.dart' instead");
@@ -127,7 +127,7 @@ void main() {
         .map(_asFile);
       for (final File file in files) {
         for (final String line in file.readAsLinesSync()) {
-          if (line.startsWith(RegExp(r'import.*package:test_api')) &&
+          if (line.startsWith(RegExp('import.*package:test_api')) &&
               !line.contains('ignore: test_api_import')) {
             final String relativePath = fileSystem.path.relative(file.path, from:flutterTools);
             fail("$relativePath imports 'package:test_api/test_api.dart';");
@@ -150,7 +150,7 @@ void main() {
         .map(_asFile);
       for (final File file in files) {
         for (final String line in file.readAsLinesSync()) {
-          if (line.startsWith(RegExp(r'import.*package:path/path.dart')) &&
+          if (line.startsWith(RegExp('import.*package:path/path.dart')) &&
               !line.contains('ignore: package_path_import')) {
             final String relativePath = fileSystem.path.relative(file.path, from:flutterTools);
             fail("$relativePath imports 'package:path/path.dart'; use 'fileSystem.path' instead");
@@ -173,7 +173,7 @@ void main() {
         .map(_asFile);
       for (final File file in files) {
         for (final String line in file.readAsLinesSync()) {
-          if (line.startsWith(RegExp(r'import.*package:file/local.dart'))) {
+          if (line.startsWith(RegExp('import.*package:file/local.dart'))) {
             final String relativePath = fileSystem.path.relative(file.path, from:flutterTools);
             fail("$relativePath imports 'package:file/local.dart'; use 'lib/src/base/file_system.dart' instead");
           }
@@ -197,7 +197,7 @@ void main() {
         .map(_asFile);
       for (final File file in files) {
         for (final String line in file.readAsLinesSync()) {
-          if (line.startsWith(RegExp(r'import.*dart:convert')) &&
+          if (line.startsWith(RegExp('import.*dart:convert')) &&
               !line.contains('ignore: dart_convert_import')) {
             final String relativePath = fileSystem.path.relative(file.path, from:flutterTools);
             fail("$relativePath imports 'dart:convert'; import 'lib/src/convert.dart' instead");
@@ -225,12 +225,12 @@ void main() {
         .map(_asFile);
       for (final File file in files) {
         for (final String line in file.readAsLinesSync()) {
-          if (line.startsWith(RegExp(r'import.*package:build_runner_core/build_runner_core.dart')) ||
-              line.startsWith(RegExp(r'import.*package:build_runner/build_runner.dart')) ||
-              line.startsWith(RegExp(r'import.*package:build_config/build_config.dart')) ||
-              line.startsWith(RegExp(r'import.*dwds:*.dart')) ||
-              line.startsWith(RegExp(r'import.*devtools_server:*.dart')) ||
-              line.startsWith(RegExp(r'import.*build_runner/.*.dart'))) {
+          if (line.startsWith(RegExp('import.*package:build_runner_core/build_runner_core.dart')) ||
+              line.startsWith(RegExp('import.*package:build_runner/build_runner.dart')) ||
+              line.startsWith(RegExp('import.*package:build_config/build_config.dart')) ||
+              line.startsWith(RegExp('import.*dwds:*.dart')) ||
+              line.startsWith(RegExp('import.*devtools_server:*.dart')) ||
+              line.startsWith(RegExp('import.*build_runner/.*.dart'))) {
             final String relativePath = fileSystem.path.relative(file.path, from:flutterTools);
             fail('$relativePath imports a build_runner/dwds/devtools package');
           }
@@ -242,7 +242,7 @@ void main() {
   test('no import of packages in tool_backend.dart', () {
     final File file = fileSystem.file(fileSystem.path.join(flutterTools, 'bin', 'tool_backend.dart'));
     for (final String line in file.readAsLinesSync()) {
-      if (line.startsWith(RegExp(r'import.*package:.*'))) {
+      if (line.startsWith(RegExp('import.*package:.*'))) {
         final String relativePath = fileSystem.path.relative(file.path, from:flutterTools);
         fail('$relativePath imports a package');
       }

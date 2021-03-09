@@ -13,7 +13,7 @@ import 'package:flutter_tools/src/commands/update_packages.dart';
 import '../src/common.dart';
 
 // An example pubspec.yaml from flutter, not necessary for it to be up to date.
-const String kFlutterPubspecYaml = r'''
+const String kFlutterPubspecYaml = '''
 name: flutter
 author: Flutter Authors <flutter-dev@googlegroups.com>
 description: A framework for writing Flutter applications
@@ -49,7 +49,7 @@ dev_dependencies:
 # PUBSPEC CHECKSUM: 1437
 ''';
 
-const String kExtraPubspecYaml = r'''
+const String kExtraPubspecYaml = '''
 name: nodeps
 author: Flutter Authors <flutter-dev@googlegroups.com>
 description: A dummy pubspec with no dependencies

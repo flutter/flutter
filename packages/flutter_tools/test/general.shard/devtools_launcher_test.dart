@@ -82,7 +82,7 @@ void main() {
       pubExecutable: 'pub',
       logger: logger,
       platform: FakePlatform(environment: <String, String>{
-        'PUB_HOSTED_URL': r'not_an_http_url'
+        'PUB_HOSTED_URL': 'not_an_http_url'
       }),
       persistentToolState: persistentToolState,
       httpClient: FakeHttpClient.list(<FakeRequest>[]),

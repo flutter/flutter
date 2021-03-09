@@ -809,7 +809,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
 
       expect(
         () async => simControl.install(deviceId, appId),
-        throwsToolExit(message: r'Unable to install'),
+        throwsToolExit(message: 'Unable to install'),
       );
     });
 
@@ -827,7 +827,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
 
       expect(
         () async => simControl.uninstall(deviceId, appId),
-        throwsToolExit(message: r'Unable to uninstall'),
+        throwsToolExit(message: 'Unable to uninstall'),
       );
     });
 
@@ -845,7 +845,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
 
       expect(
         () async => simControl.launch(deviceId, appId),
-        throwsToolExit(message: r'Unable to launch'),
+        throwsToolExit(message: 'Unable to launch'),
       );
     });
   });
@@ -921,7 +921,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
     testUsingContext('is true on module project', () async {
       globals.fs.file('pubspec.yaml')
         ..createSync()
-        ..writeAsStringSync(r'''
+        ..writeAsStringSync('''
 name: example
 
 flutter:

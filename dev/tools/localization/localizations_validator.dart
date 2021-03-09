@@ -10,7 +10,7 @@ import 'localizations_utils.dart';
 // The first suffix in kPluralSuffixes must be "Other". "Other" is special
 // because it's the only one that is required.
 const List<String> kPluralSuffixes = <String>['Other', 'Zero', 'One', 'Two', 'Few', 'Many'];
-final RegExp kPluralRegexp = RegExp(r'(\w*)(' + kPluralSuffixes.skip(1).join(r'|') + r')$');
+final RegExp kPluralRegexp = RegExp(r'(\w*)(' + kPluralSuffixes.skip(1).join('|') + r')$');
 
 class ValidationError implements Exception {
   ValidationError(this. message);

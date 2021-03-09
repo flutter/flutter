@@ -129,7 +129,7 @@ class DebugMacOSFramework extends Target {
         environment.buildDir.path, 'App.framework', 'App'));
     outputFile.createSync(recursive: true);
     final File debugApp = environment.buildDir.childFile('debug_app.cc')
-        ..writeAsStringSync(r'''
+        ..writeAsStringSync('''
 static const int Moo = 88;
 ''');
     final RunResult result = await globals.xcode.clang(<String>[
@@ -305,7 +305,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
     // Copy Info.plist template.
     assetDirectory.parent.childFile('Info.plist')
       ..createSync()
-      ..writeAsStringSync(r'''
+      ..writeAsStringSync('''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">

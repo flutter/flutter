@@ -212,7 +212,7 @@ void main() {
         .writeAsStringSync(r'a.dart: foo\ bar.txt');
 
     visitor.visitDepfile('foo.d');
-    expect(visitor.sources.single.path, r'foo bar.txt');
+    expect(visitor.sources.single.path, 'foo bar.txt');
     expect(visitor.containsNewDepfile, false);
   }));
 

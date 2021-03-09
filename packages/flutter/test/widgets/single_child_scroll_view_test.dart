@@ -293,28 +293,28 @@ void main() {
             ],
             children: <TestSemantics>[
               TestSemantics(
-                label: r'Tile 0',
+                label: 'Tile 0',
                 textDirection: TextDirection.ltr,
               ),
               TestSemantics(
-                label: r'Tile 1',
+                label: 'Tile 1',
                 textDirection: TextDirection.ltr,
               ),
               TestSemantics(
-                label: r'Tile 2',
+                label: 'Tile 2',
                 textDirection: TextDirection.ltr,
               ),
               TestSemantics(
                 flags: <SemanticsFlag>[
                   SemanticsFlag.isHidden,
                 ],
-                label: r'Tile 3',
+                label: 'Tile 3',
                 textDirection: TextDirection.ltr,
               ),
               TestSemantics(
                 flags: <SemanticsFlag>[
                   SemanticsFlag.isHidden,],
-                label: r'Tile 4',
+                label: 'Tile 4',
                 textDirection: TextDirection.ltr,
               ),
             ],
@@ -343,40 +343,40 @@ void main() {
                 flags: <SemanticsFlag>[
                   SemanticsFlag.isHidden,
                 ],
-                label: r'Tile 13',
+                label: 'Tile 13',
                 textDirection: TextDirection.ltr,
               ),
               TestSemantics(
                 flags: <SemanticsFlag>[
                   SemanticsFlag.isHidden,
                 ],
-                label: r'Tile 14',
+                label: 'Tile 14',
                 textDirection: TextDirection.ltr,
               ),
               TestSemantics(
-                label: r'Tile 15',
+                label: 'Tile 15',
                 textDirection: TextDirection.ltr,
               ),
               TestSemantics(
-                label: r'Tile 16',
+                label: 'Tile 16',
                 textDirection: TextDirection.ltr,
               ),
               TestSemantics(
-                label: r'Tile 17',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isHidden,
-                ],
-                label: r'Tile 18',
+                label: 'Tile 17',
                 textDirection: TextDirection.ltr,
               ),
               TestSemantics(
                 flags: <SemanticsFlag>[
                   SemanticsFlag.isHidden,
                 ],
-                label: r'Tile 19',
+                label: 'Tile 18',
+                textDirection: TextDirection.ltr,
+              ),
+              TestSemantics(
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isHidden,
+                ],
+                label: 'Tile 19',
                 textDirection: TextDirection.ltr,
               ),
             ],
@@ -404,26 +404,26 @@ void main() {
                 flags: <SemanticsFlag>[
                   SemanticsFlag.isHidden,
                 ],
-                label: r'Tile 25',
+                label: 'Tile 25',
                 textDirection: TextDirection.ltr,
               ),
               TestSemantics(
                 flags: <SemanticsFlag>[
                   SemanticsFlag.isHidden,
                 ],
-                label: r'Tile 26',
+                label: 'Tile 26',
                 textDirection: TextDirection.ltr,
               ),
               TestSemantics(
-                label: r'Tile 27',
+                label: 'Tile 27',
                 textDirection: TextDirection.ltr,
               ),
               TestSemantics(
-                label: r'Tile 28',
+                label: 'Tile 28',
                 textDirection: TextDirection.ltr,
               ),
               TestSemantics(
-                label: r'Tile 29',
+                label: 'Tile 29',
                 textDirection: TextDirection.ltr,
               ),
             ],

@@ -496,7 +496,7 @@ void main() {
         .writeAsStringSync('name: example\n');
       globals.fs.file('.dart_tool/package_config.json')
         ..createSync(recursive: true)
-        ..writeAsStringSync(r'''
+        ..writeAsStringSync('''
 {
   "configVersion": 2,
   "packages": [
