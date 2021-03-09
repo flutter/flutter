@@ -1084,7 +1084,7 @@ void main() {
         tester.getRect(find.byKey(floatingActionButton)),
         rectMoreOrLessEquals(defaultRect.translate(
           0.0,
-          viewPadding - keyboardHeight + fabHeight / 2.0,
+          viewPadding - keyboardHeight - kFloatingActionButtonMargin,
         )),
       );
 
@@ -1136,7 +1136,7 @@ void main() {
         tester.getRect(find.byKey(floatingActionButton)),
         rectMoreOrLessEquals(bottomNavigationBarRect.translate(
           0.0,
-          -keyboardHeight + bottomNavHeight,
+          bottomNavHeight + fabHeight / 2.0 - keyboardHeight - kFloatingActionButtonMargin - fabHeight,
         )),
       );
 

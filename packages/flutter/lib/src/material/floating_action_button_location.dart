@@ -584,7 +584,13 @@ mixin FabDockedOffsetY on StandardFabLocation {
     final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
     final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
     final double snackBarHeight = scaffoldGeometry.snackBarSize.height;
-    final double safeMargin = bottomViewPadding > contentMargin ? bottomViewPadding : 0.0;
+    final double bottomMinInset = scaffoldGeometry.minInsets.bottom;
+
+    final double safeMargin = bottomMinInset + fabHeight / 2.0 < contentMargin
+        ? 0.0
+        : bottomMinInset == 0.0
+            ? bottomViewPadding
+            : fabHeight / 2.0 + kFloatingActionButtonMargin;
 
     double fabY = contentBottom - fabHeight / 2.0 - safeMargin;
     // The FAB should sit with a margin between it and the snack bar.
