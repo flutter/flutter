@@ -41,7 +41,7 @@ void main() {
             width: 400.0,
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              child: Container(
+              child: SizedBox(
                 width: 500.0,
                 child: ListView.builder(
                   controller: controller,

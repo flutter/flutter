@@ -151,7 +151,7 @@ void main() {
             onSelectedItemChanged: (_) { },
             childDelegate: ListWheelChildLoopingListDelegate(
               children: List<Widget>.generate(10, (int index) {
-                return Container(
+                return SizedBox(
                   width: 400.0,
                   height: 100.0,
                   child: Text(index.toString()),
@@ -164,13 +164,13 @@ void main() {
 
       // The first item is at the center of the viewport.
       expect(
-      tester.getTopLeft(find.widgetWithText(Container, '0')),
+      tester.getTopLeft(find.widgetWithText(SizedBox, '0')),
       const Offset(0.0, 250.0),
       );
 
       // The last item is just before the first item.
       expect(
-        tester.getTopLeft(find.widgetWithText(Container, '9')),
+        tester.getTopLeft(find.widgetWithText(SizedBox, '9')),
         const Offset(0.0, 150.0),
       );
 
@@ -179,7 +179,7 @@ void main() {
 
       // We have passed the end of the list, the list should have looped back.
       expect(
-        tester.getTopLeft(find.widgetWithText(Container, '0')),
+        tester.getTopLeft(find.widgetWithText(SizedBox, '0')),
         const Offset(0.0, 250.0),
       );
     });
@@ -197,7 +197,7 @@ void main() {
             onSelectedItemChanged: (_) { },
             childDelegate: ListWheelChildBuilderDelegate(
               builder: (BuildContext context, int index) {
-                return Container(
+                return SizedBox(
                   width: 400.0,
                   height: 100.0,
                   child: Text(index.toString()),
@@ -212,7 +212,7 @@ void main() {
       controller.jumpTo(-100000.0);
       await tester.pump();
       expect(
-        tester.getTopLeft(find.widgetWithText(Container, '-1000')),
+        tester.getTopLeft(find.widgetWithText(SizedBox, '-1000')),
         const Offset(0.0, 250.0),
       );
 
@@ -220,7 +220,7 @@ void main() {
       controller.jumpTo(100000.0);
       await tester.pump();
       expect(
-        tester.getTopLeft(find.widgetWithText(Container, '1000')),
+        tester.getTopLeft(find.widgetWithText(SizedBox, '1000')),
         const Offset(0.0, 250.0),
       );
     });
@@ -242,7 +242,7 @@ void main() {
               builder: (BuildContext context, int index) {
                 if (index < -15 || index > -5)
                   return null;
-                return Container(
+                return SizedBox(
                   width: 400.0,
                   height: 100.0,
                   child: CustomPaint(
@@ -362,7 +362,7 @@ void main() {
                 expect(builtChildren.contains(index), false);
                 builtChildren.add(index);
 
-                return Container(
+                return SizedBox(
                   width: 400.0,
                   height: 100.0,
                   child: Text(index.toString()),
@@ -616,10 +616,10 @@ void main() {
           textDirection: TextDirection.ltr,
           child: ListWheelScrollView(
             itemExtent: 100.0,
-            children: <Widget>[
-              Container(
+            children: const <Widget>[
+              SizedBox(
                 width: 200.0,
-                child: const Center(
+                child: Center(
                   child: Text('blah'),
                 ),
               ),
@@ -673,10 +673,10 @@ void main() {
           child: ListWheelScrollView(
             controller: controller,
             itemExtent: 100.0,
-            children: <Widget>[
-              Container(
+            children: const <Widget>[
+              SizedBox(
                 width: 200.0,
-                child: const Center(
+                child: Center(
                   child: Text('blah'),
                 ),
               ),
@@ -703,10 +703,10 @@ void main() {
             controller: controller,
             diameterRatio: 3.0,
             itemExtent: 100.0,
-            children: <Widget>[
-              Container(
+            children: const <Widget>[
+              SizedBox(
                 width: 200.0,
-                child: const Center(
+                child: Center(
                   child: Text('blah'),
                 ),
               ),
@@ -732,10 +732,10 @@ void main() {
             controller: controller,
             perspective: 0.0001,
             itemExtent: 100.0,
-            children: <Widget>[
-              Container(
+            children: const <Widget>[
+              SizedBox(
                 width: 200.0,
-                child: const Center(
+                child: Center(
                   child: Text('blah'),
                 ),
               ),
@@ -761,10 +761,10 @@ void main() {
           child: ListWheelScrollView(
             controller: controller,
             itemExtent: 100.0,
-            children: <Widget>[
-              Container(
+            children: const <Widget>[
+              SizedBox(
                 width: 200.0,
-                child: const Center(
+                child: Center(
                   child: Text('blah'),
                 ),
               ),
@@ -794,10 +794,10 @@ void main() {
             controller: controller,
             itemExtent: 100.0,
             offAxisFraction: 0.5,
-            children: <Widget>[
-              Container(
+            children: const <Widget>[
+              SizedBox(
                 width: 200.0,
-                child: const Center(
+                child: Center(
                   child: Text('blah'),
                 ),
               ),
@@ -840,10 +840,10 @@ void main() {
             offAxisFraction: 0.5,
             useMagnifier: true,
             magnification: 1.5,
-            children: <Widget>[
-              Container(
+            children: const <Widget>[
+              SizedBox(
                 width: 200.0,
-                child: const Center(
+                child: Center(
                   child: Text('blah'),
                 ),
               ),
@@ -880,7 +880,7 @@ void main() {
   group('scroll notifications', () {
     testWidgets('no onSelectedItemChanged callback on first build', (WidgetTester tester) async {
       bool itemChangeCalled = false;
-      final ValueChanged<int> onItemChange = (_) { itemChangeCalled = true; };
+      void onItemChange(int _) { itemChangeCalled = true; }
 
       await tester.pumpWidget(
         Directionality(
@@ -888,10 +888,10 @@ void main() {
           child: ListWheelScrollView(
             itemExtent: 100.0,
             onSelectedItemChanged: onItemChange,
-            children: <Widget>[
-              Container(
+            children: const <Widget>[
+              SizedBox(
                 width: 200.0,
-                child: const Center(
+                child: Center(
                   child: Text('blah'),
                 ),
               ),
@@ -1275,20 +1275,18 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 500.0,
             width: 300.0,
             child: ListWheelScrollView(
               controller: ScrollController(initialScrollOffset: 300.0),
               itemExtent: 100.0,
               children: outerChildren = List<Widget>.generate(10, (int i) {
-                return Container(
-                  child: Center(
-                    child: innerChildren[i] = Container(
-                      height: 50.0,
-                      width: 50.0,
-                      child: Text('Item $i'),
-                    ),
+                return Center(
+                  child: innerChildren[i] = SizedBox(
+                    height: 50.0,
+                    width: 50.0,
+                    child: Text('Item $i'),
                   ),
                 );
               }),
@@ -1346,7 +1344,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 500.0,
             width: 300.0,
             child: ListWheelScrollView(
@@ -1354,13 +1352,11 @@ void main() {
               itemExtent: 100.0,
               children:
               outerChildren = List<Widget>.generate(10, (int i) {
-                return Container(
-                  child: Center(
-                    child: innerChildren[i] = Container(
-                      height: 50.0,
-                      width: 50.0,
-                      child: Text('Item $i'),
-                    ),
+                return Center(
+                  child: innerChildren[i] = SizedBox(
+                    height: 50.0,
+                    width: 50.0,
+                    child: Text('Item $i'),
                   ),
                 );
               }),

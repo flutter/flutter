@@ -682,7 +682,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           canRequestFocus: widget.steps[i].state != StepState.disabled,
           child: Row(
             children: <Widget>[
-              Container(
+              SizedBox(
                 height: 72.0,
                 child: Center(
                   child: _buildIcon(i),

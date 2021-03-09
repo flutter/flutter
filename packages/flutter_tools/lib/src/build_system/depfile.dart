@@ -25,10 +25,12 @@ class DepfileService {
 
   /// Given an [depfile] File, write the depfile contents.
   ///
-  /// If either [inputs] or [outputs] is empty, ensures the file does not
-  /// exist.
-  void writeToFile(Depfile depfile, File output) {
-    if (depfile.inputs.isEmpty || depfile.outputs.isEmpty) {
+  /// If both [inputs] and [outputs] are empty, ensures the file does not
+  /// exist. This can be overriden with the [writeEmpty] parameter when
+  /// both static and runtime dependencies exist and it is not desired
+  /// to force a rerun due to no depfile.
+  void writeToFile(Depfile depfile, File output, {bool writeEmpty = false}) {
+    if (depfile.inputs.isEmpty && depfile.outputs.isEmpty && !writeEmpty) {
       ErrorHandlingFileSystem.deleteIfExists(output);
       return;
     }

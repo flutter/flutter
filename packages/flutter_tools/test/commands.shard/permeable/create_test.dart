@@ -31,6 +31,7 @@ import 'package:pubspec_parse/pubspec_parse.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_http_client.dart';
+import '../../src/fakes.dart';
 import '../../src/pubspec_schema.dart';
 import '../../src/testbed.dart';
 
@@ -39,7 +40,7 @@ const String frameworkRevision = '12345678';
 const String frameworkChannel = 'omega';
 const String _kDisabledPlatformRequestedMessage = 'currently not supported on your local environment.';
 // TODO(fujino): replace FakePlatform.fromPlatform() with FakePlatform()
-final Generator _kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
+FakePlatform _kNoColorTerminalPlatform() => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
 };
@@ -163,7 +164,7 @@ void main() {
   testUsingContext('cannot create a project if non-empty non-project directory exists with .metadata', () async {
     await projectDir.absolute.childDirectory('blag').create(recursive: true);
     await projectDir.absolute.childFile('.metadata').writeAsString('project_type: blag\n');
-    expect(() async => await _createAndAnalyzeProject(
+    expect(() async => _createAndAnalyzeProject(
         projectDir,
         <String>[],
         <String>[],
@@ -1055,6 +1056,7 @@ void main() {
     expect(xcodeConfig, contains('FLUTTER_ROOT='));
     expect(xcodeConfig, contains('FLUTTER_APPLICATION_PATH='));
     expect(xcodeConfig, contains('FLUTTER_TARGET='));
+    expect(xcodeConfig, contains('COCOAPODS_PARALLEL_CODE_SIGN=true'));
 
     // Generated export environment variables script
     final String buildPhaseScriptPath = globals.fs.path.join('.ios', 'Flutter', 'flutter_export_environment.sh');
@@ -1064,6 +1066,7 @@ void main() {
     expect(buildPhaseScript, contains('FLUTTER_ROOT='));
     expect(buildPhaseScript, contains('FLUTTER_APPLICATION_PATH='));
     expect(buildPhaseScript, contains('FLUTTER_TARGET='));
+    expect(buildPhaseScript, contains('COCOAPODS_PARALLEL_CODE_SIGN=true'));
 
     // Generated podspec
     final String podspecPath = globals.fs.path.join('.ios', 'Flutter', 'flutter_project.podspec');
@@ -1156,6 +1159,7 @@ void main() {
     final String xcodeConfig = xcodeConfigFile.readAsStringSync();
     expect(xcodeConfig, contains('FLUTTER_ROOT='));
     expect(xcodeConfig, contains('FLUTTER_APPLICATION_PATH='));
+    expect(xcodeConfig, contains('COCOAPODS_PARALLEL_CODE_SIGN=true'));
     // App identification
     final String xcodeProjectPath = globals.fs.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj');
     expectExists(xcodeProjectPath);

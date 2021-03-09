@@ -134,14 +134,10 @@ class ChromiumLauncher {
   final BrowserFinder _browserFinder;
   final Logger _logger;
 
-  bool get hasChromeInstance => _currentCompleter.isCompleted;
-
-  Completer<Chromium> _currentCompleter = Completer<Chromium>();
+  bool get hasChromeInstance => currentCompleter.isCompleted;
 
   @visibleForTesting
-  void testLaunchChromium(Chromium chromium) {
-    _currentCompleter.complete(chromium);
-  }
+  Completer<Chromium> currentCompleter = Completer<Chromium>();
 
   /// Whether we can locate the chrome executable.
   bool canFindExecutable() {
@@ -171,7 +167,7 @@ class ChromiumLauncher {
     bool skipCheck = false,
     Directory cacheDir,
   }) async {
-    if (_currentCompleter.isCompleted) {
+    if (currentCompleter.isCompleted) {
       throwToolExit('Only one instance of chrome can be started.');
     }
 
@@ -226,7 +222,7 @@ class ChromiumLauncher {
         _cacheUserSessionInformation(userDataDir, cacheDir);
       }));
     }
-    return _connect(Chromium._(
+    return _connect(Chromium(
       port,
       ChromeConnection('localhost', port),
       url: url,
@@ -358,16 +354,16 @@ class ChromiumLauncher {
             'Unable to connect to Chrome debug port: ${chrome.debugPort}\n $e');
       }
     }
-    _currentCompleter.complete(chrome);
+    currentCompleter.complete(chrome);
     return chrome;
   }
 
-  Future<Chromium> get connectedInstance => _currentCompleter.future;
+  Future<Chromium> get connectedInstance => currentCompleter.future;
 }
 
 /// A class for managing an instance of a Chromium browser.
 class Chromium {
-  Chromium._(
+  Chromium(
     this.debugPort,
     this.chromeConnection, {
     this.url,
@@ -386,7 +382,7 @@ class Chromium {
 
   Future<void> close() async {
     if (_chromiumLauncher.hasChromeInstance) {
-      _chromiumLauncher._currentCompleter = Completer<Chromium>();
+      _chromiumLauncher.currentCompleter = Completer<Chromium>();
     }
     chromeConnection.close();
     _process?.kill();

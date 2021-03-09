@@ -72,8 +72,7 @@ abstract class DeviceDiscovery {
       case DeviceOperatingSystem.fuchsia:
         return FuchsiaDeviceDiscovery();
       case DeviceOperatingSystem.fake:
-        print('Looking for fake devices!'
-              'You should not see this in release builds.');
+        print('Looking for fake devices! You should not see this in release builds.');
         return FakeDeviceDiscovery();
       default:
         throw DeviceException('Unsupported device operating system: $deviceOperatingSystem');
@@ -327,12 +326,12 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
 
  FuchsiaDevice _workingDevice;
 
- String get _devFinder {
-    final String devFinder = path.join(getArtifactPath(), 'fuchsia', 'tools', 'device-finder');
-    if (!File(devFinder).existsSync()) {
-      throw FileSystemException("Couldn't find device-finder at location $devFinder");
+ String get _ffx {
+    final String ffx = path.join(getArtifactPath(), 'fuchsia', 'tools','x64', 'ffx');
+    if (!File(ffx).existsSync()) {
+      throw FileSystemException("Couldn't find ffx at location $ffx");
     }
-    return devFinder;
+    return ffx;
  }
 
   @override
@@ -378,7 +377,7 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<List<String>> discoverDevices() async {
-    final List<String> output = (await eval(_devFinder, <String>['list', '-full']))
+    final List<String> output = (await eval(_ffx, <String>['target', 'list', '--format', 's']))
       .trim()
       .split('\n');
 
@@ -396,16 +395,20 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
     final Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
     for (final String deviceId in await discoverDevices()) {
       try {
+        StringBuffer stderr;
         final int resolveResult = await exec(
-          _devFinder,
+          _ffx,
           <String>[
-            'resolve',
-            '-device-limit',
-            '1',
+            'target',
+            'list',
+            '--format',
+            'a',
             deviceId,
-          ]
+          ],
+          stderr: stderr
         );
-        if (resolveResult == 0) {
+        final String stderrOutput = stderr.toString().trim();
+        if (resolveResult == 0 && ! stderrOutput.contains('No devices found')) {
           results['fuchsia-device-$deviceId'] = HealthCheckResult.success();
         } else {
           results['fuchsia-device-$deviceId'] = HealthCheckResult.failure('Cannot resolve device $deviceId');

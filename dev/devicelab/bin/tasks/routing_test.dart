@@ -22,7 +22,7 @@ void main() {
     final Directory appDir = dir(path.join(flutterDirectory.path, 'dev/integration_tests/ui'));
     section('TEST WHETHER `flutter drive --route` WORKS');
     await inDirectory(appDir, () async {
-      return await flutter(
+      return flutter(
         'drive',
         options: <String>['--verbose', '-d', device.deviceId, '--route', '/smuggle-it', 'lib/route.dart'],
         canFail: false,

@@ -179,7 +179,6 @@ class FakeDevice extends AndroidDevice {
   FakeDevice({String deviceId}) : super(deviceId: deviceId);
 
   static String output = '';
-  static ExitErrorFactory exitErrorFactory = () => null;
 
   static List<CommandArgs> commandLog = <CommandArgs>[];
 
@@ -222,8 +221,5 @@ class FakeDevice extends AndroidDevice {
       arguments: arguments,
       environment: environment,
     ));
-    final dynamic exitError = exitErrorFactory();
-    if (exitError != null)
-      throw exitError;
   }
 }

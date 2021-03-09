@@ -67,7 +67,7 @@ void _tests() {
           if (childSearch != null) {
             return childSearch;
           }
-        } else if (entity is File && entity.path.endsWith('semantics_tester_generateTestSemanticsExpressionForCurrentSemanticsTree_test.dart')) {
+        } else if (entity is File && entity.path.endsWith('semantics_tester_generate_test_semantics_expression_for_current_semantics_tree_test.dart')) {
           return entity;
         }
       }

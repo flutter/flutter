@@ -62,7 +62,7 @@ import 'windows/visual_studio_validator.dart';
 import 'windows/windows_workflow.dart';
 
 Future<T> runInContext<T>(
-  FutureOr<T> runner(), {
+  FutureOr<T> Function() runner, {
   Map<Type, Generator> overrides,
 }) async {
 
@@ -74,7 +74,7 @@ Future<T> runInContext<T>(
     return runner();
   }
 
-  return await context.run<T>(
+  return context.run<T>(
     name: 'global fallbacks',
     body: runnerWrapper,
     overrides: overrides,
