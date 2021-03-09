@@ -5682,10 +5682,10 @@ abstract class RenderObjectElement extends Element {
   ///
   /// The `index` argument is that the currently processed child corresponds to
   /// in the child list.
-  /// The `value` argument is the [Element] of the previous widget in that list (or null
+  /// The `previousChild` argument is the [Element] of the previous widget in that list (or null
   /// if it is the first child).
   @protected
-  Object? createSlotForChild(int index, Element? value) => IndexedSlot<Element?>(index, value);
+  Object? createSlotForChild(int index, Element? previousChild) => IndexedSlot<Element?>(index, previousChild);
 
   @override
   void deactivate() {

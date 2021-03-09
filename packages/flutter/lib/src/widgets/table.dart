@@ -382,7 +382,7 @@ class _TableElement extends RenderObjectElement {
   // This class ignores the child's slot during [_TableElement.mount] and [_TableElement.update]
   // phase, and then updates the slot to [_TableSlot] after completing the update of the child list.
   @override
-  Object? createSlotForChild(int index, Element? value) => null;
+  Object? createSlotForChild(int index, Element? previousChild) => null;
 
   List<_TableElementRow> _children = const<_TableElementRow>[];
 
