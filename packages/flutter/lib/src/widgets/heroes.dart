@@ -996,8 +996,8 @@ class HeroController extends NavigatorObserver {
             fromHero: fromHero,
             toHero: toHero,
             createRectTween: createRectTween,
-            shuttleBuilder: fromHero.widget.flightShuttleBuilder
-                          ?? toHero.widget.flightShuttleBuilder
+            shuttleBuilder: toHero.widget.flightShuttleBuilder
+                          ?? fromHero.widget.flightShuttleBuilder
                           ?? _defaultHeroFlightShuttleBuilder,
             isUserGestureTransition: isUserGestureTransition,
             isDiverted: existingFlight != null,
