@@ -664,10 +664,17 @@ class MaterialApp extends StatefulWidget {
   }
 }
 
-/// Describes how [Scrollable] widgets should behave in [MaterialApp]s.
+/// Describes how [Scrollable] widgets should behave for [MaterialApp]s.
 ///
-/// Used by [ScrollConfiguration] to configure the [Scrollable] widgets in a
-/// subtree.
+/// {@macro flutter.widgets.scrollBehavior}
+///
+/// Setting a [MaterialScrollBehavior] for your app will apply a
+/// [GlowingOverscrollIndicator] to [Scrollable] descendants when executing on
+/// [TargetPlatform.android] and [TargetPlatform.fuchsia].
+///
+/// See also:
+///
+///  * [ScrollBehavior], the default scrolling behavior extended by this class.
 class MaterialScrollBehavior extends ScrollBehavior {
   @override
   TargetPlatform getPlatform(BuildContext context) {

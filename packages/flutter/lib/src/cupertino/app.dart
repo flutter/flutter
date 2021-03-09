@@ -412,8 +412,15 @@ class CupertinoApp extends StatefulWidget {
 
 /// Describes how [Scrollable] widgets should behave for [CupertinoApp]s.
 ///
-/// Used by [ScrollConfiguration] to configure the [Scrollable] widgets in a
-/// subtree.
+/// {@macro flutter.widgets.scrollBehavior}
+///
+/// Setting a [CupertinoScrollBehavior] for your app will result in
+/// [BouncingScrollPhysics] by default. No [GlowingOverscrollIndicator] is applied
+/// when using a [CupertinoScrollBehavior] either, regardless of platform.
+///
+/// See also:
+///
+///  * [ScrollBehavior], the default scrolling behavior extended by this class.
 class CupertinoScrollBehavior extends ScrollBehavior {
   @override
   Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {

@@ -978,6 +978,11 @@ class WidgetsApp extends StatefulWidget {
   /// {@template flutter.widgets.widgetsApp.scrollBehavior}
   /// The default [ScrollBehavior] for the application.
   ///
+  /// [ScrollBehavior]s describe how [Scrollable] widgets behave. By providing
+  /// your own [ScrollBehavior], you can set the default [ScrollPhysics] across
+  /// your application, or manage [Scrollable] decorations like [Scrollbar]s and
+  /// [GlowingOverscrollIndicator]s.
+  ///
   /// See also:
   ///
   ///  * [ScrollConfiguration], which controls how [Scrollable] widgets behave
