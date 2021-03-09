@@ -68,6 +68,11 @@ class TextSpan extends InlineSpan implements HitTestTarget {
     this.text,
     this.children,
     TextStyle? style,
+    @Deprecated(
+      'TextSpan\'s support for recognizers has been moved to ReactiveTextSpan. '
+      'Use ReactiveTextSpan.recognizer instead. '
+      'This feature was deprecated after v2.1.0-11.0.pre.'
+    )
     this.recognizer,
     this.semanticsLabel,
   }) : assert(!(text == null && semanticsLabel != null)),
