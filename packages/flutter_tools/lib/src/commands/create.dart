@@ -34,17 +34,17 @@ class CreateCommand extends CreateBase {
     argParser.addOption(
       'template',
       abbr: 't',
-      allowed: FlutterProjectType.values.map<String>((FlutterProjectType type) => type.name),
+      allowed: FlutterProjectType.values.map<String>(flutterProjectTypeToString),
       help: 'Specify the type of project to create.',
       valueHelp: 'type',
       allowedHelp: <String, String>{
-        FlutterProjectType.app.name: '(default) Generate a Flutter application.',
-        FlutterProjectType.package.name: 'Generate a shareable Flutter project containing modular '
+        flutterProjectTypeToString(FlutterProjectType.app): '(default) Generate a Flutter application.',
+        flutterProjectTypeToString(FlutterProjectType.package): 'Generate a shareable Flutter project containing modular '
             'Dart code.',
-        FlutterProjectType.plugin.name: 'Generate a shareable Flutter project containing an API '
+        flutterProjectTypeToString(FlutterProjectType.plugin): 'Generate a shareable Flutter project containing an API '
             'in Dart code with a platform-specific implementation for Android, for iOS code, or '
             'for both.',
-        FlutterProjectType.module.name: 'Generate a project to add a Flutter module to an '
+        flutterProjectTypeToString(FlutterProjectType.module): 'Generate a project to add a Flutter module to an '
             'existing Android or iOS application.',
       },
       defaultsTo: null,
@@ -168,8 +168,8 @@ class CreateCommand extends CreateBase {
     if (detectedProjectType != null && template != detectedProjectType && metadataExists) {
       // We can only be definitive that this is the wrong type if the .metadata file
       // exists and contains a type that doesn't match.
-      throwToolExit("The requested template type '${template.name}' doesn't match the "
-          "existing template type of '${detectedProjectType.name}'.");
+      throwToolExit("The requested template type '${flutterProjectTypeToString(template)}' doesn't match the "
+          "existing template type of '${flutterProjectTypeToString(detectedProjectType)}'.");
     }
     return template;
   }
@@ -189,7 +189,7 @@ class CreateCommand extends CreateBase {
       if (argResults['template'] != null &&
         stringToProjectType(stringArg('template') ?? 'app') != FlutterProjectType.app) {
         throwToolExit('Cannot specify --sample with a project type other than '
-          '"${FlutterProjectType.app.name}"');
+          '"${flutterProjectTypeToString(FlutterProjectType.app)}"');
       }
       // Fetch the sample from the server.
       sampleCode = await _fetchSampleFromServer(stringArg('sample'));

@@ -167,7 +167,7 @@ class AnsiTerminal implements Terminal {
   static const String cyan = '\u001b[36m';
   static const String magenta = '\u001b[35m';
   static const String yellow = '\u001b[33m';
-  static const String grey = '\u001b[1;30m';
+  static const String grey = '\u001b[90m';
 
   static const Map<TerminalColor, String> _colorMap = <TerminalColor, String>{
     TerminalColor.red: red,

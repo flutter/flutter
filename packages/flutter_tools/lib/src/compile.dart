@@ -250,6 +250,8 @@ class KernelCompiler {
         mainUri,
         newMainDart,
         mainFile,
+        // TODO(egarciad): Turn this on when the plugins are fixed.
+        throwOnPluginPubspecError: false,
       )) {
         mainUri = newMainDart.path;
       }

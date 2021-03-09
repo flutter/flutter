@@ -344,4 +344,20 @@ class SystemChannels {
     'flutter/deferredcomponent',
     StandardMethodCodec(),
   );
+
+  /// A JSON [MethodChannel] for localization.
+  ///
+  /// The following outgoing methods are defined for this channel (invoked using
+  /// [OptionalMethodChannel.invokeMethod]):
+  ///
+  ///  * `Localization.getStringResource`: Obtains the native string resource
+  ///    for a specific locale. The argument is a [Map] with two keys, `key`
+  ///    giving a [String] which the resource is defined with, and an optional
+  ///    `locale` which is a [String] containing the BCP47 locale identifier of
+  ///    the locale requested. See [Locale.toLanguageTag]. When `locale` is not
+  ///    specified, the current system locale is used instead.
+  static const MethodChannel localization = OptionalMethodChannel(
+    'flutter/localization',
+    JSONMethodCodec(),
+  );
 }

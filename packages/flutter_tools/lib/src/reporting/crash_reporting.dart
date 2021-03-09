@@ -136,7 +136,7 @@ class CrashReportSender {
   Future<void> sendReport({
     @required dynamic error,
     @required StackTrace stackTrace,
-    @required String getFlutterVersion(),
+    @required String Function() getFlutterVersion,
     @required String command,
   }) async {
     // Only send one crash report per run.

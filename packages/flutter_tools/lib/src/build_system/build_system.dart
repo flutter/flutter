@@ -205,7 +205,7 @@ abstract class Target {
   }
 
   /// Performs a fold across this target and its dependencies.
-  T fold<T>(T initialValue, T combine(T previousValue, Target target)) {
+  T fold<T>(T initialValue, T Function(T previousValue, Target target) combine) {
     final T dependencyResult = dependencies.fold(
         initialValue, (T prev, Target t) => t.fold(prev, combine));
     return combine(dependencyResult, this);
@@ -248,6 +248,29 @@ abstract class Target {
     depfiles.forEach(collector.visitDepfile);
     return collector;
   }
+}
+
+/// Target that contains multiple other targets.
+///
+/// This target does not do anything in its own [build]
+/// and acts as a wrapper around multiple other targets.
+class CompositeTarget extends Target {
+  CompositeTarget(this.dependencies);
+
+  @override
+  final List<Target> dependencies;
+
+  @override
+  String get name => '_composite';
+
+  @override
+  Future<void> build(Environment environment) async { }
+
+  @override
+  List<Source> get inputs => <Source>[];
+
+  @override
+  List<Source> get outputs => <Source>[];
 }
 
 /// The [Environment] defines several constants for use during the build.
