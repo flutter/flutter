@@ -11,7 +11,9 @@ import 'dart:io' as io show ProcessSignal, Process, ProcessStartMode, ProcessRes
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
-import 'package:test/test.dart';
+
+import 'test_wrapper.dart';
+
 export 'package:process/process.dart' show ProcessManager;
 
 typedef VoidCallback = void Function();
