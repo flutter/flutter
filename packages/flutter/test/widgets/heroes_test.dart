@@ -1612,6 +1612,50 @@ Future<void> main() async {
     expect(tester.getTopLeft(find.byKey(firstKey)).dx, x0);
   });
 
+  testWidgets('Can override flight shuttle in to hero', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: ListView(
+          children: <Widget>[
+            const Hero(tag: 'a', child: Text('foo')),
+            Builder(builder: (BuildContext context) {
+              return TextButton(
+                child: const Text('two'),
+                onPressed: () => Navigator.push<void>(context, MaterialPageRoute<void>(
+                  builder: (BuildContext context) {
+                    return Material(
+                      child: Hero(
+                        tag: 'a',
+                        child: const Text('bar'),
+                        flightShuttleBuilder: (
+                          BuildContext flightContext,
+                          Animation<double> animation,
+                          HeroFlightDirection flightDirection,
+                          BuildContext fromHeroContext,
+                          BuildContext toHeroContext,
+                        ) {
+                          return const Text('baz');
+                        },
+                      ),
+                    );
+                  },
+                )),
+              );
+            }),
+          ],
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('two'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 10));
+
+    expect(find.text('foo'), findsNothing);
+    expect(find.text('bar'), findsNothing);
+    expect(find.text('baz'), findsOneWidget);
+  });
+
   testWidgets('Can override flight shuttle in from hero', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
