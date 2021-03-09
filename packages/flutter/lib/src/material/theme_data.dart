@@ -1978,7 +1978,7 @@ class _FifoCache<K, V> {
   /// if not, calls the given callback to obtain it first.
   ///
   /// The arguments must not be null.
-  V putIfAbsent(K key, V loader()) {
+  V putIfAbsent(K key, V Function() loader) {
     assert(key != null);
     assert(loader != null);
     final V? result = _cache[key];

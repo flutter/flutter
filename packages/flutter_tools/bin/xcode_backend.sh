@@ -137,9 +137,8 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
     local_engine_flag="--local-engine=${LOCAL_ENGINE}"
     flutter_framework="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.xcframework"
   fi
-
   local bitcode_flag=""
-  if [[ "$ENABLE_BITCODE" == "YES" ]]; then
+  if [[ "$ENABLE_BITCODE" == "YES" && "$ACTION" == "install" ]]; then
     bitcode_flag="true"
   fi
 
@@ -204,19 +203,6 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
   return 0
 }
 
-# Destructively thins the Flutter and App frameworks to include only the specified
-# architectures.
-ThinAppFrameworks() {
-  RunCommand "${FLUTTER_ROOT}/bin/flutter"                                \
-    ${verbose_flag}                                                       \
-    assemble                                                              \
-    --no-version-check                                                    \
-    --output="${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}"              \
-    -dTargetPlatform=ios                                                  \
-    -dIosArchs="${ARCHS}"                                                 \
-    "thin_ios_application_frameworks"
-}
-
 # Adds the App.framework as an embedded binary and the flutter_assets as
 # resources.
 EmbedFlutterFrameworks() {
@@ -231,10 +217,6 @@ EmbedFlutterFrameworks() {
 
   # Copy Xcode behavior and don't copy over headers or modules.
   RunCommand rsync -av --delete --filter "- .DS_Store" --filter "- Headers" --filter "- Modules" "${BUILT_PRODUCTS_DIR}/Flutter.framework" "${xcode_frameworks_dir}/"
-  if [[ "$ACTION" != "install" || "$ENABLE_BITCODE" == "NO" ]]; then
-    # Strip bitcode from the destination unless archiving, or if bitcode is disabled entirely.
-    RunCommand "${DT_TOOLCHAIN_DIR}"/usr/bin/bitcode_strip "${BUILT_PRODUCTS_DIR}/Flutter.framework/Flutter" -r -o "${xcode_frameworks_dir}/Flutter.framework/Flutter"
-  fi
 
   # Sign the binaries we moved.
   if [[ -n "${EXPANDED_CODE_SIGN_IDENTITY:-}" ]]; then
@@ -273,11 +255,6 @@ AddObservatoryBonjourService() {
   fi
 }
 
-EmbedAndThinFrameworks() {
-  EmbedFlutterFrameworks
-  ThinAppFrameworks
-}
-
 # Main entry point.
 if [[ $# == 0 ]]; then
   # Named entry points were introduced in Flutter v0.0.7.
@@ -288,11 +265,13 @@ else
     "build")
       BuildApp ;;
     "thin")
-      ThinAppFrameworks ;;
+      # No-op, thinning is handled during the bundle asset assemble build target.
+      ;;
     "embed")
       EmbedFlutterFrameworks ;;
     "embed_and_thin")
-      EmbedAndThinFrameworks ;;
+      # Thinning is handled during the bundle asset assemble build target, so just embed.
+      EmbedFlutterFrameworks ;;
     "test_observatory_bonjour_service")
       # Exposed for integration testing only.
       AddObservatoryBonjourService ;;

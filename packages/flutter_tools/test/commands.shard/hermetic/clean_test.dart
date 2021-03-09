@@ -53,6 +53,7 @@ void main() {
         projectUnderTest.android.ephemeralDirectory.createSync(recursive: true);
 
         projectUnderTest.ios.ephemeralDirectory.createSync(recursive: true);
+        projectUnderTest.ios.ephemeralModuleDirectory.createSync(recursive: true);
         projectUnderTest.ios.generatedXcodePropertiesFile.createSync(recursive: true);
         projectUnderTest.ios.generatedEnvironmentVariableExportScript.createSync(recursive: true);
         projectUnderTest.ios.deprecatedCompiledDartFramework.createSync(recursive: true);
@@ -77,6 +78,7 @@ void main() {
         expect(projectUnderTest.android.ephemeralDirectory.existsSync(), isFalse);
 
         expect(projectUnderTest.ios.ephemeralDirectory.existsSync(), isFalse);
+        expect(projectUnderTest.ios.ephemeralModuleDirectory.existsSync(), isFalse);
         expect(projectUnderTest.ios.generatedXcodePropertiesFile.existsSync(), isFalse);
         expect(projectUnderTest.ios.generatedEnvironmentVariableExportScript.existsSync(), isFalse);
         expect(projectUnderTest.ios.deprecatedCompiledDartFramework.existsSync(), isFalse);

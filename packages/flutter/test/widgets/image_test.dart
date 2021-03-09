@@ -477,13 +477,13 @@ void main() {
     dynamic capturedException;
     StackTrace? capturedStackTrace;
     ImageInfo? capturedImage;
-    final ImageErrorListener errorListener = (dynamic exception, StackTrace? stackTrace) {
+    void errorListener(dynamic exception, StackTrace? stackTrace) {
       capturedException = exception;
       capturedStackTrace = stackTrace;
-    };
-    final ImageListener listener = (ImageInfo info, bool synchronous) {
+    }
+    void listener(ImageInfo info, bool synchronous) {
       capturedImage = info;
-    };
+    }
 
     final Exception testException = Exception('cannot resolve host');
     final StackTrace testStack = StackTrace.current;
@@ -519,13 +519,13 @@ void main() {
     dynamic reportedException;
     StackTrace? reportedStackTrace;
     ImageInfo? capturedImage;
-    final ImageErrorListener errorListener = (dynamic exception, StackTrace? stackTrace) {
+    void errorListener(dynamic exception, StackTrace? stackTrace) {
       capturedException = exception;
       capturedStackTrace = stackTrace;
-    };
-    final ImageListener listener = (ImageInfo info, bool synchronous) {
+    }
+    void listener(ImageInfo info, bool synchronous) {
       capturedImage = info;
-    };
+    }
     FlutterError.onError = (FlutterErrorDetails flutterError) {
       reportedException = flutterError.exception;
       reportedStackTrace = flutterError.stack;
@@ -568,13 +568,13 @@ void main() {
     dynamic capturedException;
     StackTrace? capturedStackTrace;
     ImageInfo? capturedImage;
-    final ImageErrorListener errorListener = (dynamic exception, StackTrace? stackTrace) {
+    void errorListener(dynamic exception, StackTrace? stackTrace) {
       capturedException = exception;
       capturedStackTrace = stackTrace;
-    };
-    final ImageListener listener = (ImageInfo info, bool synchronous) {
+    }
+    void listener(ImageInfo info, bool synchronous) {
       capturedImage = info;
-    };
+    }
 
     final Exception testException = Exception('cannot resolve host');
     final StackTrace testStack = StackTrace.current;
@@ -611,14 +611,14 @@ void main() {
     StackTrace? capturedStackTrace;
     ImageInfo? capturedImage;
     int errorListenerCalled = 0;
-    final ImageErrorListener errorListener = (dynamic exception, StackTrace? stackTrace) {
+    void errorListener(dynamic exception, StackTrace? stackTrace) {
       capturedException = exception;
       capturedStackTrace = stackTrace;
       errorListenerCalled++;
-    };
-    final ImageListener listener = (ImageInfo info, bool synchronous) {
+    }
+    void listener(ImageInfo info, bool synchronous) {
       capturedImage = info;
-    };
+    }
 
     final Exception testException = Exception('cannot resolve host');
     final StackTrace testStack = StackTrace.current;
@@ -656,14 +656,14 @@ void main() {
     dynamic reportedException;
     StackTrace? reportedStackTrace;
     ImageInfo? capturedImage;
-    final ImageErrorListener errorListener = (dynamic exception, StackTrace? stackTrace) {
+    void errorListener(dynamic exception, StackTrace? stackTrace) {
       errorListenerCalled = true;
       reportedException = exception;
       reportedStackTrace = stackTrace;
-    };
-    final ImageListener listener = (ImageInfo info, bool synchronous) {
+    }
+    void listener(ImageInfo info, bool synchronous) {
       capturedImage = info;
-    };
+    }
 
     final Exception testException = Exception('cannot resolve host');
     final StackTrace testStack = StackTrace.current;
@@ -698,12 +698,12 @@ void main() {
   testWidgets('Removing listener removes one listener and error listener', (WidgetTester tester) async {
     int errorListenerCalled = 0;
     ImageInfo? capturedImage;
-    final ImageErrorListener errorListener = (dynamic exception, StackTrace? stackTrace) {
+    void errorListener(dynamic exception, StackTrace? stackTrace) {
       errorListenerCalled++;
-    };
-    final ImageListener listener = (ImageInfo info, bool synchronous) {
+    }
+    void listener(ImageInfo info, bool synchronous) {
       capturedImage = info;
-    };
+    }
 
     final Exception testException = Exception('cannot resolve host');
     final StackTrace testStack = StackTrace.current;
@@ -805,10 +805,10 @@ void main() {
   testWidgets('Precache completes with onError on error', (WidgetTester tester) async {
     dynamic capturedException;
     StackTrace? capturedStackTrace;
-    final ImageErrorListener errorListener = (dynamic exception, StackTrace? stackTrace) {
+    void errorListener(dynamic exception, StackTrace? stackTrace) {
       capturedException = exception;
       capturedStackTrace = stackTrace;
-    };
+    }
 
     final Exception testException = Exception('cannot resolve host');
     final StackTrace testStack = StackTrace.current;
@@ -1419,8 +1419,8 @@ void main() {
       ),
     ));
 
-    final bool Function(_TestImageProvider) loadCalled = (_TestImageProvider provider) => provider.loadCalled;
-    final bool Function(_TestImageProvider) loadNotCalled = (_TestImageProvider provider) => !provider.loadCalled;
+    bool loadCalled(_TestImageProvider provider) => provider.loadCalled;
+    bool loadNotCalled(_TestImageProvider provider) => !provider.loadCalled;
 
     expect(find.bySemanticsLabel('5'), findsOneWidget);
     expect(imageProviders.length, 12);

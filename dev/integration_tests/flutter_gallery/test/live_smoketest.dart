@@ -109,7 +109,7 @@ class _LiveWidgetController extends LiveWidgetController {
   bool frameSync = true;
 
   /// Waits until at the end of a frame the provided [condition] is [true].
-  Future<void> _waitUntilFrame(bool condition(), [Completer<void>? completer]) {
+  Future<void> _waitUntilFrame(bool Function() condition, [Completer<void>? completer]) {
     completer ??= Completer<void>();
     if (!condition()) {
       SchedulerBinding.instance!.addPostFrameCallback((Duration timestamp) {

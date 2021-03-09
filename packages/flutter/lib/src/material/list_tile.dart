@@ -11,6 +11,7 @@ import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'divider.dart';
+import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'material_state.dart';
 import 'theme.dart';
@@ -108,7 +109,7 @@ class ListTileTheme extends InheritedTheme {
   final bool dense;
 
   /// {@template flutter.material.ListTileTheme.shape}
-  /// If specified, [shape] defines the shape of the [ListTile]'s [InkWell] border.
+  /// If specified, [shape] defines the [ListTile]'s shape.
   /// {@endtemplate}
   final ShapeBorder? shape;
 
@@ -787,11 +788,6 @@ class ListTile extends StatelessWidget {
   ///
   /// When [enabled] is false, the text color is set to [ThemeData.disabledColor].
   ///
-  /// When [selected] is true, the text color is set to [ListTileTheme.selectedColor]
-  /// if it's not null. If [ListTileTheme.selectedColor] is null, the text color
-  /// is set to [ThemeData.primaryColor] when [ThemeData.brightness] is
-  /// [Brightness.light] and to [ThemeData.accentColor] when it is [Brightness.dark].
-  ///
   /// When [selected] is false, the text color is set to [ListTileTheme.textColor]
   /// if it's not null and to [TextTheme.caption]'s color if [ListTileTheme.textColor]
   /// is null.
@@ -837,13 +833,12 @@ class ListTile extends StatelessWidget {
   ///    widgets within a [Theme].
   final VisualDensity? visualDensity;
 
-  /// The shape of the tile's [InkWell].
+  /// The tile's shape.
   ///
-  /// Defines the tile's [InkWell.customBorder].
+  /// Defines the tile's [InkWell.customBorder] and [Ink.decoration] shape.
   ///
-  /// If this property is null then [CardTheme.shape] of [ThemeData.cardTheme]
-  /// is used. If that's null then the shape will be a [RoundedRectangleBorder]
-  /// with a circular corner radius of 4.0.
+  /// If this property is null then [ListTileTheme.shape] is used.
+  /// If that's null then a rectangular [Border] will be used.
   final ShapeBorder? shape;
 
   /// The tile's internal padding.
@@ -1019,9 +1014,11 @@ class ListTile extends StatelessWidget {
 
     switch (theme.brightness) {
       case Brightness.light:
-        return selected ? theme.primaryColor : Colors.black45;
+        // For the sake of backwards compatibility, the default for unselected
+        // tiles is Colors.black45 rather than colorScheme.onSurface.withAlpha(0x73).
+        return selected ? theme.colorScheme.primary : Colors.black45;
       case Brightness.dark:
-        return selected ? theme.accentColor : null; // null - use current icon theme color
+        return selected ? theme.colorScheme.primary : null; // null - use current icon theme color
     }
   }
 
@@ -1035,14 +1032,9 @@ class ListTile extends StatelessWidget {
     if (!selected && tileTheme?.textColor != null)
       return tileTheme!.textColor;
 
-    if (selected) {
-      switch (theme.brightness) {
-        case Brightness.light:
-          return theme.primaryColor;
-        case Brightness.dark:
-          return theme.accentColor;
-      }
-    }
+    if (selected)
+      return theme.colorScheme.primary;
+
     return defaultColor;
   }
 
@@ -1185,8 +1177,11 @@ class ListTile extends StatelessWidget {
       child: Semantics(
         selected: selected,
         enabled: enabled,
-        child: ColoredBox(
-          color: _tileBackgroundColor(tileTheme),
+        child: Ink(
+          decoration: ShapeDecoration(
+            shape: shape ?? tileTheme.shape ?? const Border(),
+            color: _tileBackgroundColor(tileTheme),
+          ),
           child: SafeArea(
             top: false,
             bottom: false,
