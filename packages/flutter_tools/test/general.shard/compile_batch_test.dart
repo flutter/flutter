@@ -70,7 +70,7 @@ void main() {
           'file:///path/to/main.dart'
         ], completer: completer),
       ]),
-      stdoutHandlerFactory: (Logger logger) => stdoutHandler,
+      stdoutHandler: stdoutHandler,
     );
     final Future<CompilerOutput> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
       mainPath: '/path/to/main.dart',
@@ -115,7 +115,7 @@ void main() {
           'file:///path/to/main.dart'
         ], completer: completer),
       ]),
-      stdoutHandlerFactory: (Logger logger) => stdoutHandler,
+      stdoutHandler: stdoutHandler,
     );
     final Future<CompilerOutput> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
       mainPath: '/path/to/main.dart',
@@ -160,7 +160,7 @@ void main() {
           'file:///path/to/main.dart'
         ], completer: completer, exitCode: 127),
       ]),
-      stdoutHandlerFactory: (Logger logger) => stdoutHandler,
+      stdoutHandler: stdoutHandler,
     );
     final Future<CompilerOutput> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
       mainPath: '/path/to/main.dart',
@@ -206,7 +206,7 @@ void main() {
           'file:///path/to/main.dart'
         ], completer: completer),
       ]),
-      stdoutHandlerFactory: (Logger logger) => stdoutHandler,
+      stdoutHandler: stdoutHandler,
     );
     final Future<CompilerOutput> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
       mainPath: '/path/to/main.dart',
@@ -253,7 +253,7 @@ void main() {
           'file:///path/to/main.dart'
         ], completer: completer),
       ]),
-      stdoutHandlerFactory: (Logger logger) => stdoutHandler,
+      stdoutHandler: stdoutHandler,
     );
     final Future<CompilerOutput> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
       mainPath: '/path/to/main.dart',
@@ -301,7 +301,7 @@ void main() {
           'file:///path/to/main.dart',
         ], completer: completer),
       ]),
-      stdoutHandlerFactory: (Logger logger) => stdoutHandler,
+      stdoutHandler: stdoutHandler,
     );
 
     final Future<CompilerOutput> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
@@ -350,7 +350,7 @@ void main() {
           'scheme:///main.dart',
         ], completer: completer),
       ]),
-      stdoutHandlerFactory: (Logger logger) => stdoutHandler,
+      stdoutHandler: stdoutHandler,
     );
 
     final Future<CompilerOutput> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',

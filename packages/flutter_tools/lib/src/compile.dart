@@ -175,10 +175,6 @@ List<String> buildModeOptions(BuildMode mode, List<String> dartDefines) {
   throw Exception('Unknown BuildMode: $mode');
 }
 
-StdoutHandler _defaultFactory(Logger logger) {
-  return StdoutHandler(logger: logger);
-}
-
 /// A compiler interface for producing single (non-incremental) kernel files.
 class KernelCompiler {
   KernelCompiler({
@@ -188,14 +184,14 @@ class KernelCompiler {
     @required Artifacts artifacts,
     @required List<String> fileSystemRoots,
     @required String fileSystemScheme,
-    @visibleForTesting StdoutHandler Function(Logger) stdoutHandlerFactory,
+    @visibleForTesting StdoutHandler stdoutHandler,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _artifacts = artifacts,
        _processManager = processManager,
        _fileSystemScheme = fileSystemScheme,
        _fileSystemRoots = fileSystemRoots,
-       _stdoutHandlerFactory = stdoutHandlerFactory ?? _defaultFactory;
+       _stdoutHandler = stdoutHandler ?? StdoutHandler(logger: logger);
 
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
@@ -203,7 +199,7 @@ class KernelCompiler {
   final Logger _logger;
   final String _fileSystemScheme;
   final List<String> _fileSystemRoots;
-  final StdoutHandler Function(Logger) _stdoutHandlerFactory;
+  final StdoutHandler _stdoutHandler;
 
   Future<CompilerOutput> compile({
     String sdkRoot,
@@ -317,7 +313,6 @@ class KernelCompiler {
     _logger.printTrace(command.join(' '));
     final Process server = await _processManager.start(command);
 
-    final StdoutHandler _stdoutHandler = _stdoutHandlerFactory(_logger);
     server.stderr
       .transform<String>(utf8.decoder)
       .listen(_logger.printError);
