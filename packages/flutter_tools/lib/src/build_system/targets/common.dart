@@ -80,6 +80,12 @@ const String kDartObfuscation = 'DartObfuscation';
 /// An output directory where one or more code-size measurements may be written.
 const String kCodeSizeDirectory = 'CodeSizeDirectory';
 
+/// SHA identifier of the Apple developer code signing identity.
+///
+/// Same as EXPANDED_CODE_SIGN_IDENTITY Xcode build setting.
+/// Also discoverable via `security find-identity -p codesigning`.
+const String kCodesignIdentity = 'CodesignIdentity';
+
 /// Copies the pre-built flutter bundle.
 // This is a one-off rule for implementing build bundle in terms of assemble.
 class CopyFlutterBundle extends Target {
