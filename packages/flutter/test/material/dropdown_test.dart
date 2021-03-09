@@ -3065,7 +3065,7 @@ void main() {
     menuHeight = tester.element(find.byType(ListView)).size!.height;
     expect(menuHeight, defaultMenuHeight);
   });
-  
+
   // Regression test for https://github.com/flutter/flutter/issues/76614
   testWidgets('Do not crash if used in very short screen', (WidgetTester tester) async {
     // The default item height is 48.0 pixels and needs two items padding since
