@@ -88,7 +88,7 @@ public final class EventChannel {
   }
 
   /**
-   * Handler of stream setup and tear-down requests.
+   * Handler of stream setup and teardown requests.
    *
    * <p>Implementations must be prepared to accept sequences of alternating calls to {@link
    * #onListen(Object, EventSink)} and {@link #onCancel(Object)}. Implementations should ideally

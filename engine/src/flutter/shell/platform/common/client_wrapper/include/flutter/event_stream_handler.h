@@ -25,7 +25,7 @@ struct StreamHandlerError {
         error_details(error_details) {}
 };
 
-// Handler of stream setup and tear-down requests.
+// Handler for stream setup and teardown requests.
 // Implementations must be prepared to accept sequences of alternating calls to
 // OnListen() and OnCancel(). Implementations should ideally consume no
 // resources when the last such call is not OnListen(). In typical situations,

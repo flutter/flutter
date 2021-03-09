@@ -70,7 +70,7 @@ class RulerManager extends RulerHost {
 
   /// The cache of rulers used to measure text.
   ///
-  /// Each ruler is keyed by paragraph style. This allows us to setup the
+  /// Each ruler is keyed by paragraph style. This allows us to set up the
   /// ruler's DOM structure once during the very first measurement of a given
   /// paragraph style. Subsequent measurements could reuse the same ruler and
   /// only swap the text contents. This minimizes the amount of work a browser

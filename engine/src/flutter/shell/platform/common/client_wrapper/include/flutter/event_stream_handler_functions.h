@@ -14,7 +14,7 @@ namespace flutter {
 
 class EncodableValue;
 
-// Handler types for each of the StreamHandler setup and tear-down
+// Handler types for each of the StreamHandler setup and teardown
 // requests.
 template <typename T>
 using StreamHandlerListen =

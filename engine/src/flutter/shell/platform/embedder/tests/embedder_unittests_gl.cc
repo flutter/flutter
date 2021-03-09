@@ -2493,7 +2493,7 @@ TEST_F(EmbedderTest, ClipsAreCorrectlyCalculated) {
               [&](const auto& mutation) {
                 FlutterRect clip = mutation.clip_rect;
 
-                // The test is only setup to supply one clip. Make sure it is
+                // The test is only set up to supply one clip. Make sure it is
                 // the one we expect.
                 const auto rect_to_compare =
                     SkRect::MakeLTRB(10.0, 10.0, 390, 290);

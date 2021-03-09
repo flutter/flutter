@@ -214,7 +214,7 @@ public class FlutterView extends SurfaceView
     systemChannel = new SystemChannel(dartExecutor);
     settingsChannel = new SettingsChannel(dartExecutor);
 
-    // Create and setup plugins
+    // Create and set up plugins
     PlatformPlugin platformPlugin = new PlatformPlugin(activity, platformChannel);
     addActivityLifecycleListener(
         new ActivityLifecycleListener() {

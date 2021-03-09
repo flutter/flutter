@@ -601,7 +601,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
   // -------- Start: Autofill -------
   // ### Setup and provide the initial text values and hints.
   //
-  // The TextInputConfiguration used to setup the current client is also used for populating
+  // The TextInputConfiguration used to set up the current client is also used for populating
   // "AutofillVirtualStructure" when requested by the autofill manager (AFM), See
   // #onProvideAutofillVirtualStructure.
   //
