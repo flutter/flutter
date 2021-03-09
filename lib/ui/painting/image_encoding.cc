@@ -172,7 +172,7 @@ sk_sp<SkData> CopyImageByteData(sk_sp<SkImage> raster_image,
                         color_type, kPremul_SkAlphaType, nullptr));
 
   if (!surface) {
-    FML_LOG(ERROR) << "Could not setup the surface for swizzle.";
+    FML_LOG(ERROR) << "Could not set up the surface for swizzle.";
     return nullptr;
   }
 

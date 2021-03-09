@@ -236,7 +236,7 @@ class _Channel {
 /// Messages for a channel are stored until a listener is provided for that channel,
 /// using [setListener]. Only one listener may be configured per channel.
 ///
-/// Typically these buffers are drained once a callback is setup on
+/// Typically these buffers are drained once a callback is set up on
 /// the [BinaryMessenger] in the Flutter framework. (See [setListener].)
 ///
 /// ## Buffer capacity and overflow
@@ -381,7 +381,7 @@ class ChannelBuffers {
   /// Remove and process all stored messages for a given channel.
   ///
   /// This should be called once a channel is prepared to handle messages
-  /// (i.e. when a message handler is setup in the framework).
+  /// (i.e. when a message handler is set up in the framework).
   ///
   /// The messages are processed by calling the given `callback`. Each message
   /// is processed in its own microtask.

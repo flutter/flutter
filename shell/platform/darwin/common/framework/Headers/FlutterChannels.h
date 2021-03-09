@@ -117,8 +117,8 @@ FLUTTER_DARWIN_EXPORT
 
 /**
  * Adjusts the number of messages that will get buffered when sending messages to
- * channels that aren't fully setup yet.  For example, the engine isn't running
- * yet or the channel's message handler isn't setup on the Dart side yet.
+ * channels that aren't fully set up yet.  For example, the engine isn't running
+ * yet or the channel's message handler isn't set up on the Dart side yet.
  */
 - (void)resizeChannelBuffer:(NSInteger)newSize;
 
@@ -255,8 +255,8 @@ FLUTTER_DARWIN_EXPORT
 
 /**
  * Adjusts the number of messages that will get buffered when sending messages to
- * channels that aren't fully setup yet.  For example, the engine isn't running
- * yet or the channel's message handler isn't setup on the Dart side yet.
+ * channels that aren't fully set up yet.  For example, the engine isn't running
+ * yet or the channel's message handler isn't set up on the Dart side yet.
  */
 - (void)resizeChannelBuffer:(NSInteger)newSize;
 

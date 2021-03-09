@@ -1,8 +1,8 @@
 This directory includes scripts to build the docker container image used for
 building flutter/engine in our CI system (currently [Cirrus](cirrus-ci.org)).
 
-In order to run the scripts, you have to setup `docker` and `gcloud`. Please
-refer to internal doc go/installdocker for how to setup `docker` on gLinux.
+In order to run the scripts, you have to set up `docker` and `gcloud`. Please
+refer to internal doc go/installdocker for how to set up `docker` on gLinux.
 
 Cirrus will build (and cache) a Docker image based on this `Dockerfile` for
 Linux tasks using its

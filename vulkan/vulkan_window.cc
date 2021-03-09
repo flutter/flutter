@@ -52,9 +52,9 @@ VulkanWindow::VulkanWindow(const sk_sp<GrDirectContext>& context,
                                                      std::move(extensions));
 
   if (!application_->IsValid() || !vk->AreInstanceProcsSetup()) {
-    // Make certain the application instance was created and it setup the
+    // Make certain the application instance was created and it set up the
     // instance proc table entries.
-    FML_DLOG(INFO) << "Instance proc addresses have not been setup.";
+    FML_DLOG(INFO) << "Instance proc addresses have not been set up.";
     return;
   }
 
@@ -64,9 +64,9 @@ VulkanWindow::VulkanWindow(const sk_sp<GrDirectContext>& context,
 
   if (logical_device_ == nullptr || !logical_device_->IsValid() ||
       !vk->AreDeviceProcsSetup()) {
-    // Make certain the device was created and it setup the device proc table
+    // Make certain the device was created and it set up the device proc table
     // entries.
-    FML_DLOG(INFO) << "Device proc addresses have not been setup.";
+    FML_DLOG(INFO) << "Device proc addresses have not been set up.";
     return;
   }
 
@@ -95,7 +95,7 @@ VulkanWindow::VulkanWindow(const sk_sp<GrDirectContext>& context,
   // Create the swapchain.
 
   if (!RecreateSwapchain()) {
-    FML_DLOG(INFO) << "Could not setup the swapchain initially.";
+    FML_DLOG(INFO) << "Could not set up the swapchain initially.";
     return;
   }
 

@@ -32,7 +32,7 @@ static void StartupAndShutdownShell(benchmark::State& state,
       aot_symbols = testing::LoadELFSymbolFromFixturesIfNeccessary();
       FML_CHECK(
           testing::PrepareSettingsForAOTWithSymbols(settings, aot_symbols))
-          << "Could not setup settings with AOT symbols.";
+          << "Could not set up settings with AOT symbols.";
     } else {
       settings.application_kernels = [&]() {
         std::vector<std::unique_ptr<const fml::Mapping>> kernel_mappings;

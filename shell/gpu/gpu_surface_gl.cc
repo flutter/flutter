@@ -39,7 +39,7 @@ sk_sp<GrDirectContext> GPUSurfaceGL::MakeGLContext(
   auto context_switch = delegate->GLContextMakeCurrent();
   if (!context_switch->GetResult()) {
     FML_LOG(ERROR)
-        << "Could not make the context current to setup the gr context.";
+        << "Could not make the context current to set up the Gr context.";
     return nullptr;
   }
 
@@ -64,7 +64,7 @@ sk_sp<GrDirectContext> GPUSurfaceGL::MakeGLContext(
   auto context = GrDirectContext::MakeGL(delegate->GetGLInterface(), options);
 
   if (!context) {
-    FML_LOG(ERROR) << "Failed to setup Skia Gr context.";
+    FML_LOG(ERROR) << "Failed to set up Skia Gr context.";
     return nullptr;
   }
 
@@ -99,7 +99,7 @@ GPUSurfaceGL::GPUSurfaceGL(sk_sp<GrDirectContext> gr_context,
   auto context_switch = delegate_->GLContextMakeCurrent();
   if (!context_switch->GetResult()) {
     FML_LOG(ERROR)
-        << "Could not make the context current to setup the gr context.";
+        << "Could not make the context current to set up the Gr context.";
     return;
   }
 
@@ -168,7 +168,7 @@ static sk_sp<SkSurface> WrapOnscreenSurface(GrDirectContext* context,
   SkSurfaceProps surface_props(0, kUnknown_SkPixelGeometry);
 
   return SkSurface::MakeFromBackendRenderTarget(
-      context,                                       // gr context
+      context,                                       // Gr context
       render_target,                                 // render target
       GrSurfaceOrigin::kBottomLeft_GrSurfaceOrigin,  // origin
       color_type,                                    // color type

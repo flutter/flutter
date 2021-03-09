@@ -107,7 +107,7 @@ VulkanDevice::VulkanDevice(VulkanProcTable& p_vk,
              [this](VkDevice device) { vk.DestroyDevice(device, nullptr); }};
 
   if (!vk.SetupDeviceProcAddresses(device_)) {
-    FML_DLOG(INFO) << "Could not setup device proc addresses.";
+    FML_DLOG(INFO) << "Could not set up device proc addresses.";
     return;
   }
 
@@ -326,7 +326,7 @@ bool VulkanDevice::ChoosePresentMode(const VulkanSurface& surface,
   // mentioned in the ticket w.r.t the application being faster that the refresh
   // rate of the screen should not be faced by any Flutter platforms as they are
   // powered by Vsync pulses instead of depending the submit to block.
-  // However, for platforms that don't have VSync providers setup, it is better
+  // However, for platforms that don't have VSync providers set up, it is better
   // to fall back to FIFO. For platforms that do have VSync providers, there
   // should be little difference. In case there is a need for a mode other than
   // FIFO, availability checks must be performed here before returning the

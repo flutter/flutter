@@ -115,7 +115,8 @@ class Engine final : public RuntimeDelegate,
     ///
     /// * AOT assets give to JIT/DBC mode VM's and vice-versa.
     /// * The assets could not be found in the asset manager. Callers must make
-    ///   sure their run configuration asset managers have been correctly setup.
+    ///   sure their run configuration asset managers have been correctly set
+    ///   up.
     /// * The assets themselves were corrupt or invalid. Callers must make sure
     ///   their asset delivery mechanisms are sound.
     /// * The application entry-point or the root library of the entry-point
