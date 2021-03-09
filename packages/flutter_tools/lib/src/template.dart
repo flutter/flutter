@@ -63,8 +63,10 @@ class Template {
        _templateManifest = templateManifest {
     _templateFilePaths = <String, String>{};
 
-    if (!templateSources.every((Directory directory) => directory.existsSync())) {
-      return;
+    for (final Directory sourceDirectory in templateSources) {
+      if (!sourceDirectory.existsSync()) {
+        throwToolExit('Template source directory does not exist: ${sourceDirectory.absolute.path}');
+      }
     }
 
     final Map<FileSystemEntity, Directory> templateFiles = <FileSystemEntity, Directory>{
