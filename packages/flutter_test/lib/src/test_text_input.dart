@@ -281,6 +281,7 @@ class TestTextInput {
     return response;
   }
 
+  /// Simulates iOS inserting a UITextPlaceholder during a long press with the pencil
   Future<void> scribbleInsertPlaceholder() async {
     assert(isRegistered);
     // Not using the `expect` function because in the case of a FlutterDriver
@@ -300,6 +301,7 @@ class TestTextInput {
     );
   }
 
+  /// Simulates iOS removing a UITextPlaceholder after a long press with the pencil is released
   Future<void> scribbleRemovePlaceholder() async {
     assert(isRegistered);
     // Not using the `expect` function because in the case of a FlutterDriver
