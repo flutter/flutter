@@ -52,6 +52,8 @@ source_set("flutter_framework_source") {
   visibility = [ ":*" ]
 
   sources = [
+    "framework/Source/AccessibilityBridgeMacDelegate.h",
+    "framework/Source/AccessibilityBridgeMacDelegate.mm",
     "framework/Source/FlutterAppDelegate.mm",
     "framework/Source/FlutterBackingStore.h",
     "framework/Source/FlutterBackingStore.mm",
@@ -81,6 +83,8 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterMouseCursorPlugin.mm",
     "framework/Source/FlutterOpenGLRenderer.h",
     "framework/Source/FlutterOpenGLRenderer.mm",
+    "framework/Source/FlutterPlatformNodeDelegateMac.h",
+    "framework/Source/FlutterPlatformNodeDelegateMac.mm",
     "framework/Source/FlutterRenderer.h",
     "framework/Source/FlutterRenderingBackend.h",
     "framework/Source/FlutterRenderingBackend.mm",
@@ -108,6 +112,7 @@ source_set("flutter_framework_source") {
     ":macos_gpu_configuration",
     "//flutter/flow:flow",
     "//flutter/fml",
+    "//flutter/shell/platform/common:common_cpp_accessibility",
     "//flutter/shell/platform/common:common_cpp_input",
     "//flutter/shell/platform/common:common_cpp_switches",
     "//flutter/shell/platform/darwin/common:framework_shared",
@@ -159,6 +164,7 @@ executable("flutter_desktop_darwin_unittests") {
     "framework/Source/FlutterMetalRendererTest.mm",
     "framework/Source/FlutterMetalSurfaceManagerTest.mm",
     "framework/Source/FlutterOpenGLRendererTest.mm",
+    "framework/Source/FlutterPlatformNodeDelegateMacTest.mm",
     "framework/Source/FlutterViewControllerTest.mm",
     "framework/Source/FlutterViewControllerTestUtils.h",
     "framework/Source/FlutterViewControllerTestUtils.mm",
@@ -171,6 +177,7 @@ executable("flutter_desktop_darwin_unittests") {
   deps = [
     ":flutter_desktop_darwin_fixtures",
     ":flutter_framework_source",
+    "//flutter/shell/platform/common:common_cpp_accessibility",
     "//flutter/shell/platform/darwin/common:framework_shared",
     "//flutter/shell/platform/darwin/graphics",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
