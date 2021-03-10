@@ -14,6 +14,7 @@ import 'gesture_detector.dart';
 import 'layout_builder.dart';
 import 'ticker_provider.dart';
 
+// TODO(justinmc): Docs.
 typedef TransformedWidgetBuilder = Widget Function(BuildContext context, Rect viewport);
 
 /// A widget that enables pan and zoom interactions with its child.
@@ -121,7 +122,6 @@ class InteractiveViewer extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.alignPanAxis = false,
     this.boundaryMargin = EdgeInsets.zero,
-    this.constrained = true,
     // These default scale values were eyeballed as reasonable limits for common
     // use cases.
     this.maxScale = 2.5,
@@ -135,7 +135,6 @@ class InteractiveViewer extends StatefulWidget {
     required this.builder,
   }) : assert(alignPanAxis != null),
        assert(builder != null),
-       assert(constrained != null),
        assert(minScale != null),
        assert(minScale > 0),
        assert(minScale.isFinite),
@@ -151,6 +150,7 @@ class InteractiveViewer extends StatefulWidget {
            && boundaryMargin.vertical.isInfinite) || (boundaryMargin.top.isFinite
            && boundaryMargin.right.isFinite && boundaryMargin.bottom.isFinite
            && boundaryMargin.left.isFinite)),
+       constrained = false,
        super(key: key);
 
   /// If set to [Clip.none], the child may extend beyond the size of the InteractiveViewer,
@@ -676,7 +676,6 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   double? _scaleStart; // Scale value at start of scaling gesture.
   double? _rotationStart = 0.0; // Rotation at start of rotation gesture.
   double _currentRotation = 0.0; // Rotation of _transformationController.value.
-  late Size _maxConstraints;
   _GestureType? _gestureType;
 
   // TODO(justinmc): Add rotateEnabled parameter to the widget and remove this
@@ -712,19 +711,9 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   // The Rect representing the child's parent.
   Rect get _viewport {
-    /*
     assert(_parentKey.currentContext != null);
     final RenderBox parentRenderBox = _parentKey.currentContext!.findRenderObject()! as RenderBox;
     return Offset.zero & parentRenderBox.size;
-    */
-    assert(_parentKey.currentContext != null);
-    if (_parentKey.currentContext != null) {
-      final RenderBox parentRenderBox = _parentKey.currentContext!.findRenderObject()! as RenderBox;
-      if (parentRenderBox.hasSize) {
-        return Offset.zero & parentRenderBox.size;
-      }
-    }
-    return Offset.zero & _maxConstraints;
   }
 
   // Return a new matrix representing the given matrix after applying the given
@@ -1201,11 +1190,12 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       onPointerSignal: _receivedPointerSignal,
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
-          _maxConstraints = Size(constraints.maxWidth, constraints.maxHeight);
-
           final Matrix4 matrix = _transformationController!.value;
+          // When constrained is false, such as when using
+          // InteractiveViewer.builder, then the viewport is the size of the
+          // constraints.
           final Rect transformedViewport = InteractiveViewer._axisAlignedQuadToRect(
-            _transformViewport(matrix, _viewport),
+            _transformViewport(matrix, Offset.zero & constraints.biggest),
           );
           Widget child = Transform(
             transform: matrix,
