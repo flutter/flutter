@@ -1648,6 +1648,93 @@ void main() {
 
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
+  testWidgets('single line Scribble fields can show a horizontal placeholder', (WidgetTester tester) async {
+    final TextEditingController controller =
+        TextEditingController(text: 'Lorem ipsum dolor sit amet');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          controller: controller,
+          backgroundCursorColor: Colors.grey,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(EditableText));
+
+    tester.testTextInput.updateEditingValue(TextEditingValue(
+      text: controller.text,
+      selection: const TextSelection(baseOffset: 5, extentOffset: 5),
+    ));
+    await tester.pumpAndSettle();
+
+    await tester.testTextInput.scribbleInsertPlaceholder();
+    await tester.pumpAndSettle();
+
+    TextSpan textSpan = findRenderEditable(tester).text!;
+    expect(textSpan.children!.length, 3);
+    expect((textSpan.children![0] as TextSpan).text, 'Lorem');
+    expect(textSpan.children![1] is WidgetSpan, true);
+    expect((textSpan.children![2] as TextSpan).text, ' ipsum dolor sit amet');
+
+    await tester.testTextInput.scribbleRemovePlaceholder();
+    await tester.pumpAndSettle();
+
+    textSpan = findRenderEditable(tester).text!;
+    expect(textSpan.children, null);
+    expect(textSpan.text, 'Lorem ipsum dolor sit amet');
+  }, skip: kIsWeb);
+
+  testWidgets('multiline Scribble fields can show a vertical placeholder', (WidgetTester tester) async {
+    final TextEditingController controller =
+        TextEditingController(text: 'Lorem ipsum dolor sit amet');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          controller: controller,
+          backgroundCursorColor: Colors.grey,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+          maxLines: 2,
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(EditableText));
+
+    tester.testTextInput.updateEditingValue(TextEditingValue(
+      text: controller.text,
+      selection: const TextSelection(baseOffset: 5, extentOffset: 5),
+    ));
+    await tester.pumpAndSettle();
+
+    await tester.testTextInput.scribbleInsertPlaceholder();
+    await tester.pumpAndSettle();
+
+    TextSpan textSpan = findRenderEditable(tester).text!;
+    expect(textSpan.children!.length, 4);
+    expect((textSpan.children![0] as TextSpan).text, 'Lorem');
+    expect(textSpan.children![1] is WidgetSpan, true);
+    expect(textSpan.children![2] is WidgetSpan, true);
+    expect((textSpan.children![3] as TextSpan).text, ' ipsum dolor sit amet');
+
+    await tester.testTextInput.scribbleRemovePlaceholder();
+    await tester.pumpAndSettle();
+
+    textSpan = findRenderEditable(tester).text!;
+    expect(textSpan.children, null);
+    expect(textSpan.text, 'Lorem ipsum dolor sit amet');
+  }, skip: kIsWeb);
+
+
   testWidgets('Sends "updateConfig" when read-only flag is flipped', (WidgetTester tester) async {
     bool readOnly = true;
     late StateSetter setState;
