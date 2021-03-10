@@ -36,6 +36,7 @@ class DefaultTextEditingActions extends StatelessWidget {
   // regardless of the platform; it's up to DefaultTextEditingShortcuts to decide which
   // are called on which platform.
   static final Map<Type, Action<Intent>> _shortcutsActions = <Type, Action<Intent>>{
+    DoNothingAndStopPropagationTextIntent: _DoNothingAndStopPropagationTextAction(),
     ExtendSelectionDownTextIntent: _ExtendSelectionDownTextAction(),
     ExtendSelectionLeftByLineTextIntent: _ExtendSelectionLeftByLineTextAction(),
     ExtendSelectionLeftByWordTextIntent: _ExtendSelectionLeftByWordTextAction(),
@@ -69,6 +70,19 @@ class DefaultTextEditingActions extends StatelessWidget {
       child: child,
     );
   }
+}
+
+// This allows the web engine to handle text editing events natively while using
+// the same TextEditingAction logic to only handle events from a
+// TextEditingTarget.
+class _DoNothingAndStopPropagationTextAction extends TextEditingAction<DoNothingAndStopPropagationTextIntent> {
+  _DoNothingAndStopPropagationTextAction();
+
+  @override
+  bool consumesKey(Intent intent) => true;
+
+  @override
+  void invoke(DoNothingAndStopPropagationTextIntent intent, [BuildContext? context]) {}
 }
 
 class _ExpandSelectionLeftByLineTextAction extends TextEditingAction<ExpandSelectionLeftByLineTextIntent> {

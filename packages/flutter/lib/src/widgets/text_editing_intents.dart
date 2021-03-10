@@ -4,8 +4,8 @@
 
 import 'actions.dart';
 
-/// An [Intent] to expand the selection left to the start/end of the current
-/// line.
+/// An [Intent] to send the event straight to the engine, but only if a
+/// TextEditingTarget is focused.
 ///
 /// {@template flutter.widgets.TextEditingIntents.seeAlso}
 /// See also:
@@ -13,6 +13,15 @@ import 'actions.dart';
 ///   * [DefaultTextEditingActions], which responds to this [Intent].
 ///   * [DefaultTextEditingShortcuts], which triggers this [Intent].
 /// {@endtemplate}
+class DoNothingAndStopPropagationTextIntent extends Intent{
+  /// Creates an instance of DoNothingAndStopPropagationTextIntent.
+  const DoNothingAndStopPropagationTextIntent();
+}
+
+/// An [Intent] to expand the selection left to the start/end of the current
+/// line.
+///
+/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
 class ExpandSelectionLeftByLineTextIntent extends Intent {
   /// Creates an instance of ExpandSelectionLeftByLineTextIntent.
   const ExpandSelectionLeftByLineTextIntent();
