@@ -128,6 +128,59 @@ void testMain() {
     expect(window.browserHistory.urlStrategy.getPath(), '/baz');
   });
 
+  test('initialize browser history with default url strategy (single)', () async {
+    // On purpose, we don't initialize history on the window. We want to let the
+    // window to self-initialize when it receives a navigation message.
+
+    // Without initializing history, the default route name should be
+    // initialized to "/" in tests.
+    expect(window.defaultRouteName, '/');
+
+    Completer<void> callback = Completer<void>();
+    window.sendPlatformMessage(
+      'flutter/navigation',
+      JSONMethodCodec().encodeMethodCall(MethodCall(
+        'routeUpdated',
+        <String, dynamic>{'routeName': '/bar'},
+      )),
+      (_) { callback.complete(); },
+    );
+    await callback.future;
+    expect(window.browserHistory is SingleEntryBrowserHistory, true);
+    // The url strategy should've been set to the default, and the path
+    // should've been correctly set to "/bar".
+    expect(window.browserHistory.urlStrategy, isNot(isNull));
+    expect(window.browserHistory.urlStrategy.getPath(), '/bar');
+  }, skip: browserEngine == BrowserEngine.webkit); // https://github.com/flutter/flutter/issues/50836
+
+  test('initialize browser history with default url strategy (multiple)', () async {
+    // On purpose, we don't initialize history on the window. We want to let the
+    // window to self-initialize when it receives a navigation message.
+
+    // Without initializing history, the default route name should be
+    // initialized to "/" in tests.
+    expect(window.defaultRouteName, '/');
+
+    Completer<void> callback = Completer<void>();
+    window.sendPlatformMessage(
+      'flutter/navigation',
+      JSONMethodCodec().encodeMethodCall(MethodCall(
+        'routeInformationUpdated',
+        <String, dynamic>{
+          'location': '/baz',
+          'state': null,
+        },
+      )),
+      (_) { callback.complete(); },
+    );
+    await callback.future;
+    expect(window.browserHistory is MultiEntriesBrowserHistory, true);
+    // The url strategy should've been set to the default, and the path
+    // should've been correctly set to "/baz".
+    expect(window.browserHistory.urlStrategy, isNot(isNull));
+    expect(window.browserHistory.urlStrategy.getPath(), '/baz');
+  }, skip: browserEngine == BrowserEngine.webkit); // https://github.com/flutter/flutter/issues/50836
+
   test('can disable location strategy', () async {
     // Disable URL strategy.
     expect(() => jsSetUrlStrategy(null), returnsNormally);
