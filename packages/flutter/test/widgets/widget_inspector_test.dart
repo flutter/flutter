@@ -1536,7 +1536,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       service.disposeAllGroups();
       await service.testExtension('setPubRootDirectories', <String, String>{});
       service.setSelection(elementA, 'my-group');
-      final Map<String, dynamic?> jsonA = (await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}))! as Map<String, dynamic?>;
+      final Map<String, dynamic> jsonA = (await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}))! as Map<String, dynamic>;
 
       await service.testExtension('setPubRootDirectories', <String, String>{});
       Map<String, Object?> rootJson = (await service.testExtension('getRootWidgetSummaryTree', <String, String>{'objectGroup': group}))! as Map<String, Object?>;
