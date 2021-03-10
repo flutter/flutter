@@ -591,6 +591,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 ///   * [PageView]
 ///   * [NestedScrollView]
 ///   * [DropdownButton]
+///
+/// [CustomScrollView] will also not apply a Scrollbar by default, but exposes
+/// the option in [CustomScrollView.autoScrollbar].
 /// {@endtemplate}
 ///
 // TODO(Piinks): Add code sample
