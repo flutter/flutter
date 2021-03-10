@@ -442,10 +442,12 @@ void main() {
       // Dragging for a bit less than half the width should reveal the previous month.
       await gesture.moveBy(const Offset(800 / 2 - 1, 0));
       await tester.pumpAndSettle();
+      expect(find.text('January 2016'), findsOneWidget);
       expect(find.text('1'), findsNWidgets(2));
       // Dragging a bit over the half should still show both.
       await gesture.moveBy(const Offset(2, 0));
       await tester.pumpAndSettle();
+      expect(find.text('December 2015'), findsOneWidget);
       expect(find.text('1'), findsNWidgets(2));
     });
 
