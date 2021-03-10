@@ -115,6 +115,7 @@ void EmbedderTestContextGL::SetupCompositor() {
       << "Set up the GL surface before setting up a compositor.";
   compositor_ = std::make_unique<EmbedderTestCompositorGL>(
       gl_surface_->GetSurfaceSize(), gl_surface_->GetGrContext());
+  GLClearCurrent();
 }
 
 }  // namespace testing
