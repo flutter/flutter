@@ -551,6 +551,16 @@ class FakeTextInputClient implements TextInputClient {
   }
 
   TextInputConfiguration get configuration => const TextInputConfiguration();
+
+  @override
+  void insertTextPlaceholder(Size size) {
+    latestMethodCall = 'insertTextPlaceholder';
+  }
+
+  @override
+  void removeTextPlaceholder() {
+    latestMethodCall = 'removeTextPlaceholder';
+  }
 }
 
 class FakeTextChannel implements MethodChannel {
