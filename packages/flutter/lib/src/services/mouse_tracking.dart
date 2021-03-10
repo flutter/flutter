@@ -25,9 +25,9 @@ typedef PointerHoverEventListener = void Function(PointerHoverEvent event);
 /// The annotation object used to annotate regions that are interested in mouse
 /// movements.
 ///
-/// To use an annotation, return this object as an [HitTestEntry] in a hit test
-/// ([HitTestTarget.hitTest]). Typically this is implemented by making a
-/// [RenderBox] implement this class (see [RenderMouseRegion]).
+/// To use an annotation, return this object as an [HitTestEntry] in a hit test.
+/// Typically this is implemented by making a [RenderBox] implement this class
+/// (see [RenderMouseRegion]).
 ///
 /// [MouseTracker] use this class as a label to filter the hit test result. Hit
 /// test entries that is also a [MouseTrackerAnnotation] is considered as a valid
