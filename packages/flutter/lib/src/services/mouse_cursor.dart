@@ -192,7 +192,7 @@ abstract class MouseCursorSession {
 /// cursor class usually has a corresponding [MouseCursorSession] class.
 ///
 /// [MouseCursorManager] is a mixin that adds the feature of changing
-/// cursors to [BaseMouseTracker], which tracks the relationship between mouse
+/// cursors to [MouseTracker], which tracks the relationship between mouse
 /// devices and annotations. [MouseCursorManager] is usually used as a part
 /// of [MouseTracker].
 @immutable

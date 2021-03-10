@@ -7,13 +7,6 @@ import 'package:flutter/services.dart';
 
 export 'package:flutter/services.dart' show MouseCursor;
 
-/// A mixin for [BaseMouseTracker] that sets the mouse pointer's cursors
-/// on device update.
-///
-/// See also:
-///
-///  * [MouseTracker], which uses this mixin.
-
 class _SystemMouseCursorSession extends MouseCursorSession {
   _SystemMouseCursorSession(SystemMouseCursor cursor, int device)
     : super(cursor, device);

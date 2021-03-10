@@ -32,22 +32,18 @@ typedef PointerHoverEventListener = void Function(PointerHoverEvent event);
 /// The annotation object used to annotate regions that are interested in mouse
 /// movements.
 ///
-/// To use an annotation, push it with [AnnotatedRegionLayer] during painting.
-/// The annotation's callbacks or configurations will be used depending on the
-/// relationship between annotations and mouse pointers.
+/// To use an annotation, return this object as an [HitTestEntry] in a hit test
+/// ([HitTestTarget.hitTest]). Typically this is implemented by making a
+/// [RenderBox] implement this class (see [RenderMouseRegion]).
 ///
-/// A [RenderObject] who uses this class must not dispose this class in its
-/// `detach`, even if it recreates a new one in `attach`, because the object
-/// might be detached and attached during the same frame during a reparent, and
-/// replacing the `MouseTrackerAnnotation` will cause an unnecessary `onExit` and
-/// `onEnter`.
-///
-/// This class is also the type parameter of the annotation search started by
-/// [BaseMouseTracker].
+/// [MouseTracker] use this class as a label to filter the hit test result. Hit
+/// test entries that is also a [MouseTrackerAnnotation] is considered as a valid
+/// target in terms of computing mouse related effects, such as enter events,
+/// exit events, and mouse cursor.
 ///
 /// See also:
 ///
-///  * [BaseMouseTracker], which uses [MouseTrackerAnnotation].
+///  * [MouseTracker], which uses [MouseTrackerAnnotation].
 class MouseTrackerAnnotation with Diagnosticable {
   /// Creates an immutable [MouseTrackerAnnotation].
   ///
@@ -128,11 +124,11 @@ class MouseTrackerAnnotation with Diagnosticable {
 
 /// Signature for searching for [MouseTrackerAnnotation]s at the given offset.
 ///
-/// It is used by the [BaseMouseTracker] to fetch annotations for the mouse
+/// It is used by the [MouseTracker] to fetch annotations for the mouse
 /// position.
 typedef MouseDetectorAnnotationFinder = HitTestResult Function(Offset offset);
 
-// Various states of a connected mouse device used by [BaseMouseTracker].
+// Various states of a connected mouse device used by [MouseTracker].
 class _MouseState {
   _MouseState({
     required PointerEvent initialEvent,
@@ -174,16 +170,12 @@ class _MouseState {
   }
 }
 
-/// Used by [BaseMouseTracker] to provide the details of an update of a mouse
-/// device.
-///
-/// An event (not necessarily a pointer event) that might change the relationship
-/// between mouse devices and [MouseTrackerAnnotation]s is called a _device
-/// update_.
-///
-/// This class contains the information needed to handle the update that might
-/// change the state of a mouse device, or the [MouseTrackerAnnotation]s that
-/// the mouse device is hovering.
+// The information in `MouseTracker._handleDeviceUpdate` to provide the details
+// of an update of a mouse device.
+//
+// This class contains the information needed to handle the update that might
+// change the state of a mouse device, or the [MouseTrackerAnnotation]s that
+// the mouse device is hovering.
 @immutable
 class _MouseTrackerUpdateDetails with Diagnosticable {
   /// When device update is triggered by a new frame.
@@ -267,16 +259,13 @@ class _MouseTrackerUpdateDetails with Diagnosticable {
 /// triggers mouse events and cursor changes accordingly.
 ///
 /// The [MouseTracker] tracks the relationship between mouse devices and
-/// [MouseTrackerAnnotation]s, and when such relationship changes, triggers
-/// the following changes if applicable:
+/// [MouseTrackerAnnotation], notified by [updateWithEvent] and
+/// [updateAllDevices]. At every update, [MouseTracker] triggers the following
+/// changes if applicable:
 ///
 ///  * Dispatches mouse-related pointer events (pointer enter, hover, and exit).
-///  * Notifies changes of [mouseIsConnected].
 ///  * Changes mouse cursors.
-///
-/// [MouseTracker] is notified of device updates by [updateWithEvent] or
-/// [updateAllDevices], and processes effects as defined in [_handleDeviceUpdate]
-/// by subclasses.
+///  * Notifies changes of [mouseIsConnected].
 ///
 /// This class is a [ChangeNotifier] that notifies its listeners if the value of
 /// [mouseIsConnected] changes.
@@ -284,21 +273,6 @@ class _MouseTrackerUpdateDetails with Diagnosticable {
 /// An instance of [MouseTracker] is owned by the global singleton of
 /// [RendererBinding].
 class MouseTracker extends ChangeNotifier {
-  /// Whether or not at least one mouse is connected and has produced events.
-  bool get mouseIsConnected => _mouseStates.isNotEmpty;
-
-  /// Returns the active mouse cursor of a device.
-  ///
-  /// The return value is the last [MouseCursor] activated onto this
-  /// device, even if the activation failed.
-  ///
-  /// Only valid when asserts are enabled. In release builds, always returns
-  /// null.
-  @visibleForTesting
-  MouseCursor? debugDeviceActiveCursor(int device) {
-    return _mouseCursorMixin.debugDeviceActiveCursor(device);
-  }
-
   final MouseCursorManager _mouseCursorMixin = MouseCursorManager(
     SystemMouseCursors.basic
   );
@@ -324,7 +298,7 @@ class MouseTracker extends ChangeNotifier {
   }
 
   bool _debugDuringDeviceUpdate = false;
-  // Used to wrap any procedure that might call [_handleDeviceUpdate].
+  // Used to wrap any procedure that might call `_handleDeviceUpdate`.
   //
   // In debug mode, this method uses `_debugDuringDeviceUpdate` to prevent
   // `_deviceUpdatePhase` being recursively called.
@@ -390,8 +364,9 @@ class MouseTracker extends ChangeNotifier {
 
   // A callback that is called on the update of a device.
   //
-  // This method should be called each time when the relationship between a
-  // device and annotations has changed.
+  // An event (not necessarily a pointer event) that might change the relationship
+  // between mouse devices and [MouseTrackerAnnotation]s is called a _device
+  // update_. This method should be called at each such update.
   //
   // The update can be caused by two kinds of triggers:
   //
@@ -402,7 +377,7 @@ class MouseTracker extends ChangeNotifier {
   //     Such calls occur after each new frame, during the post-frame callbacks,
   //     indicated by `details.triggeringEvent` being null.
   //
-  // Calling of this method must be wrapped in `_deviceUpdatePhase`.
+  // Calls of this method must be wrapped in `_deviceUpdatePhase`.
   void _handleDeviceUpdate(_MouseTrackerUpdateDetails details) {
     assert(_debugDuringDeviceUpdate);
     _handleDeviceUpdateMouseEvents(details);
@@ -413,15 +388,15 @@ class MouseTracker extends ChangeNotifier {
     );
   }
 
+  /// Whether or not at least one mouse is connected and has produced events.
+  bool get mouseIsConnected => _mouseStates.isNotEmpty;
+
   /// Trigger a device update with a new event and its corresponding hit test
   /// result.
   ///
   /// The [updateWithEvent] indicates that an event has been observed, and
   /// is called during the handler of the event. The `getResult` should return
   /// the hit test result at the position of the event.
-  ///
-  /// The [updateWithEvent] will generate the new state for the pointer based on
-  /// given information, and call [_handleDeviceUpdate] based on the state changes.
   void updateWithEvent(PointerEvent event, ValueGetter<HitTestResult> getResult) {
     assert(event != null);
     final HitTestResult result = event is PointerRemovedEvent ? HitTestResult() : getResult();
@@ -470,13 +445,12 @@ class MouseTracker extends ChangeNotifier {
   ///
   /// The [updateAllDevices] is typically called during the post frame phase,
   /// indicating a frame has passed and all objects have potentially moved. The
-  /// `hitTest` is a function that can acquire the hit test result at a given
-  /// position, and must not be empty.
+  /// `hitTest` is a function to acquire the hit test result at a given position,
+  /// and must not be empty.
   ///
   /// For each connected device, the [updateAllDevices] will make a hit test on
-  /// the device's last seen position, generate the new state for the pointer
-  /// based on given information, and call [_handleDeviceUpdate] based on the
-  /// state changes.
+  /// the device's last seen position, and check if necessary changes need to be
+  /// made.
   void updateAllDevices(MouseDetectorAnnotationFinder hitTest) {
     _deviceUpdatePhase(() {
       for (final _MouseState dirtyState in _mouseStates.values) {
@@ -491,6 +465,18 @@ class MouseTracker extends ChangeNotifier {
         ));
       }
     });
+  }
+
+  /// Returns the active mouse cursor of a device.
+  ///
+  /// The return value is the last [MouseCursor] activated onto this
+  /// device, even if the activation failed.
+  ///
+  /// Only valid when asserts are enabled. In release builds, always returns
+  /// null.
+  @visibleForTesting
+  MouseCursor? debugDeviceActiveCursor(int device) {
+    return _mouseCursorMixin.debugDeviceActiveCursor(device);
   }
 
   // Handles device update and dispatches mouse event callbacks.
