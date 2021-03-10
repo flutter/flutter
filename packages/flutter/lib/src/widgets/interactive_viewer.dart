@@ -14,7 +14,12 @@ import 'gesture_detector.dart';
 import 'layout_builder.dart';
 import 'ticker_provider.dart';
 
-// TODO(justinmc): Docs.
+/// A type for widget builders that take a [Rect] of the current viewport.
+///
+/// See also:
+///
+///   * [InteractiveViewer.builder], whose builder is of this type.
+///   * [WidgetBuilder], which is similar, but takes no Rect.
 typedef TransformedWidgetBuilder = Widget Function(BuildContext context, Rect viewport);
 
 /// A widget that enables pan and zoom interactions with its child.
