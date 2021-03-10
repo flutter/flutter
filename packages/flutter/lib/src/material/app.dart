@@ -659,7 +659,7 @@ class MaterialApp extends StatefulWidget {
 }
 
 class _MaterialScrollBehavior extends ScrollBehavior {
-  const _MaterialScrollBehavior({ bool useDecoration = true }) : super(useDecoration: useDecoration);
+  const _MaterialScrollBehavior() : super(useDecoration: true);
 
   @override
   TargetPlatform getPlatform(BuildContext context) {

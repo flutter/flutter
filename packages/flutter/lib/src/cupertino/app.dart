@@ -406,7 +406,7 @@ class CupertinoApp extends StatefulWidget {
 }
 
 class _AlwaysCupertinoScrollBehavior extends ScrollBehavior {
-  const _AlwaysCupertinoScrollBehavior({ bool useDecoration = true }) : super(useDecoration: useDecoration);
+  const _AlwaysCupertinoScrollBehavior() : super(useDecoration: true);
 
   @Deprecated(
     'Migrate to buildViewportDecoration. '
