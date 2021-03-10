@@ -790,6 +790,9 @@ class FlutterVmService {
   ///
   /// Looks at the list of loaded extensions for first Flutter view, as well as
   /// the stream of added extensions to avoid races.
+  ///
+  /// Throws a [VmServiceDisappearedException] should the VM Service disappear
+  /// while making calls to it.
   Future<vm_service.IsolateRef> findExtensionIsolate(String extensionName) async {
     try {
       await service.streamListen(vm_service.EventStreams.kIsolate);
@@ -797,29 +800,41 @@ class FlutterVmService {
       // Do nothing, since the tool is already subscribed.
     }
 
-    final Completer<void> extensionAdded = Completer<void>();
+    final Completer<vm_service.IsolateRef> extensionAdded = Completer<vm_service.IsolateRef>();
     StreamSubscription<vm_service.Event> isolateEvents;
     isolateEvents = service.onIsolateEvent.listen((vm_service.Event event) {
       if (event.kind == vm_service.EventKind.kServiceExtensionAdded
           && event.extensionRPC == extensionName) {
         isolateEvents.cancel();
-        extensionAdded.complete();
+        extensionAdded.complete(event.isolate);
       }
     });
 
     try {
-      final vm_service.IsolateRef isolateRef = (await getFlutterViews()).first.uiIsolate;
-
-      final vm_service.Isolate isolate = await service.getIsolate(isolateRef.id);
-      if (isolate.extensionRPCs.contains(extensionName)) {
-        return isolateRef;
+      final List<FlutterView> flutterViews = await getFlutterViews();
+      if (flutterViews.isEmpty) {
+        throw VmServiceDisappearedException();
       }
 
-      await extensionAdded.future;
-      return isolateRef;
+      for (final FlutterView flutterView in flutterViews) {
+        final vm_service.IsolateRef isolateRef = flutterView.uiIsolate;
+        if (isolateRef == null) {
+          continue;
+        }
+
+        final vm_service.Isolate isolate = await service.getIsolate(isolateRef.id);
+        if (isolate.extensionRPCs.contains(extensionName)) {
+          return isolateRef;
+        }
+      }
+      return await extensionAdded.future;
     } finally {
       await isolateEvents.cancel();
-      await service.streamCancel(vm_service.EventStreams.kIsolate);
+      try {
+        await service.streamCancel(vm_service.EventStreams.kIsolate);
+      } on vm_service.RPCError {
+        // It's ok for cleanup to fail, such as when the service disappears.
+      }
     }
   }
 
@@ -883,6 +898,9 @@ class FlutterVmService {
      await service.dispose();
   }
 }
+
+/// Thrown when the VM Service disappears while calls are being made to it.
+class VmServiceDisappearedException implements Exception {}
 
 /// Whether the event attached to an [Isolate.pauseEvent] should be considered
 /// a "pause" event.

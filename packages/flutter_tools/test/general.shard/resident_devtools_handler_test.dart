@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/devtools_launcher.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -172,6 +173,116 @@ void main() {
       flutterDevices: <FlutterDevice>[device],
     );
   });
+
+  testWithoutContext('serveAndAnnounceDevTools with skips calling service extensions when VM service disappears', () async {
+    final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
+      FakeDevtoolsLauncher()..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),
+      FakeResidentRunner(),
+      BufferLogger.test(),
+    );
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      const FakeVmServiceRequest(
+        method: 'streamListen',
+        args: <String, Object>{
+          'streamId': 'Isolate',
+        },
+      ),
+      const FakeVmServiceRequest(
+        method: kListViewsMethod,
+        errorCode: RPCErrorCodes.kServiceDisappeared,
+      ),
+      const FakeVmServiceRequest(
+        method: 'streamCancel',
+        args: <String, Object>{
+          'streamId': 'Isolate',
+        },
+        errorCode: RPCErrorCodes.kServiceDisappeared,
+      ),
+    ], httpAddress: Uri.parse('http://localhost:1234'));
+
+    final FakeFlutterDevice device = FakeFlutterDevice()
+      ..vmService = fakeVmServiceHost.vmService;
+
+    await handler.serveAndAnnounceDevTools(
+      flutterDevices: <FlutterDevice>[device],
+    );
+  });
+
+  testWithoutContext('serveAndAnnounceDevTools with multiple devices and VM service disappears on one', () async {
+    final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
+      FakeDevtoolsLauncher()..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),
+      FakeResidentRunner(),
+      BufferLogger.test(),
+    );
+
+    final FakeVmServiceHost vmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      const FakeVmServiceRequest(
+        method: 'streamListen',
+        args: <String, Object>{
+          'streamId': 'Isolate',
+        },
+      ),
+      listViews,
+      FakeVmServiceRequest(
+        method: 'getIsolate',
+        jsonResponse: isolate.toJson(),
+        args: <String, Object>{
+          'isolateId': '1',
+        },
+      ),
+      const FakeVmServiceRequest(
+        method: 'streamCancel',
+        args: <String, Object>{
+          'streamId': 'Isolate',
+        },
+      ),
+      listViews,
+      const FakeVmServiceRequest(
+        method: 'ext.flutter.activeDevToolsServerAddress',
+        args: <String, Object>{
+          'isolateId': '1',
+          'value': 'http://localhost:8080',
+        },
+      ),
+      listViews,
+      const FakeVmServiceRequest(
+        method: 'ext.flutter.connectedVmServiceUri',
+        args: <String, Object>{
+          'isolateId': '1',
+          'value': 'http://localhost:1234',
+        },
+      ),
+    ], httpAddress: Uri.parse('http://localhost:1234'));
+
+    final FakeVmServiceHost vmServiceHostThatDisappears = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      const FakeVmServiceRequest(
+        method: 'streamListen',
+        args: <String, Object>{
+          'streamId': 'Isolate',
+        },
+      ),
+      const FakeVmServiceRequest(
+        method: kListViewsMethod,
+        errorCode: RPCErrorCodes.kServiceDisappeared,
+      ),
+      const FakeVmServiceRequest(
+        method: 'streamCancel',
+        args: <String, Object>{
+          'streamId': 'Isolate',
+        },
+        errorCode: RPCErrorCodes.kServiceDisappeared,
+      ),
+    ], httpAddress: Uri.parse('http://localhost:5678'));
+
+    await handler.serveAndAnnounceDevTools(
+      flutterDevices: <FlutterDevice>[
+        FakeFlutterDevice()
+          ..vmService = vmServiceHostThatDisappears.vmService,
+        FakeFlutterDevice()
+          ..vmService = vmServiceHost.vmService,
+      ],
+    );
+  });
 }
 
 class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
@@ -197,5 +308,10 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
 
 class FakeFlutterDevice extends Fake implements FlutterDevice {
   @override
+  final Device device = FakeDevice();
+
+  @override
   FlutterVmService vmService;
 }
+
+class FakeDevice extends Fake implements Device {}
