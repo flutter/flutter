@@ -44,6 +44,10 @@
 
 @end
 
+/** A tokenizer used by `FlutterTextInputView` to customize string parsing. */
+@interface FlutterTokenizer : UITextInputStringTokenizer
+@end
+
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
 FLUTTER_DARWIN_EXPORT
 #endif
