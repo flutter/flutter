@@ -7,6 +7,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -23,10 +25,12 @@ import '../../src/fakes.dart';
 void main () {
   Artifacts artifacts;
   String iosDeployPath;
+  FileSystem fileSystem;
 
   setUp(() {
     artifacts = Artifacts.test();
     iosDeployPath = artifacts.getArtifactPath(Artifact.iosDeploy, platform: TargetPlatform.ios);
+    fileSystem = MemoryFileSystem.test();
   });
 
   testWithoutContext('IOSDeploy.iosDeployEnv returns path with /usr/bin first', () {
@@ -50,6 +54,8 @@ void main () {
             '123',
             '--bundle',
             '/',
+            '--app_deltas',
+            'app-delta',
             '--debug',
             '--args',
             <String>[
@@ -62,10 +68,12 @@ void main () {
           stdout: '(lldb)     run\nsuccess\nDid finish launching.',
         ),
       ]);
+      final Directory appDeltaDirectory = fileSystem.directory('app-delta');
       final IOSDeploy iosDeploy = setUpIOSDeploy(processManager, artifacts: artifacts);
       final IOSDeployDebugger iosDeployDebugger = iosDeploy.prepareDebuggerForLaunch(
         deviceId: '123',
         bundlePath: '/',
+        appDeltaDirectory: appDeltaDirectory,
         launchArguments: <String>['--enable-dart-profiling'],
         interfaceType: IOSDeviceInterface.network,
       );
@@ -73,6 +81,7 @@ void main () {
       expect(await iosDeployDebugger.launchAndAttach(), isTrue);
       expect(await iosDeployDebugger.logLines.toList(), <String>['Did finish launching.']);
       expect(processManager.hasRemainingExpectations, false);
+      expect(appDeltaDirectory, exists);
     });
   });
 
