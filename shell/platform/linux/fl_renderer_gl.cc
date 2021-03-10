@@ -61,6 +61,10 @@ static gboolean fl_renderer_gl_create_backing_store(
   backing_store_out->open_gl.framebuffer.user_data = provider;
   backing_store_out->open_gl.framebuffer.name = name;
   backing_store_out->open_gl.framebuffer.target = format;
+  backing_store_out->open_gl.framebuffer.destruction_callback = [](void* p) {
+    // Backing store destroyed in fl_renderer_gl_collect_backing_store(), set
+    // on FlutterCompositor.collect_backing_store_callback during engine start.
+  };
 
   return TRUE;
 }
