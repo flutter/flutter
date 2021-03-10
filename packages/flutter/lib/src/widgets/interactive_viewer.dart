@@ -204,24 +204,38 @@ class InteractiveViewer extends StatefulWidget {
   /// directly. This allows the child to be built in response to the current
   /// transformation.
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold}
+  /// {@tool dartpad --template=freeform}
+  ///
   /// This example shows how to use builder to create a [Table] whose cell
   /// contents are only built when they are visible. Built and remove cells are
   /// logged in the console for illustration.
   ///
-  /// ```dart
+  /// ```dart main
   /// import 'package:flutter/material.dart';
   /// import 'package:flutter/widgets.dart';
   ///
-  /// void main() => runApp(IVBuilderExample());
+  /// void main() => runApp(IVBuilderExampleApp());
   ///
-  /// class IVBuilderExample extends StatefulWidget {
-  ///   const IVBuilderExample({ Key key }) : super(key: key);
-  ///
-  ///   @override _IVBuilderExampleState createState() => _IVBuilderExampleState();
+  /// class IVBuilderExampleApp extends StatelessWidget {
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return MaterialApp(
+  ///       home: Scaffold(
+  ///         appBar: AppBar(
+  ///           title: const Text('IV Builder Example'),
+  ///         ),
+  ///         body: _IVBuilderExample(),
+  ///       ),
+  ///     );
+  ///   }
   /// }
   ///
-  /// class _IVBuilderExampleState extends State<IVBuilderExample> {
+  /// class _IVBuilderExample extends StatefulWidget {
+  ///   @override
+  ///   _IVBuilderExampleState createState() => _IVBuilderExampleState();
+  /// }
+  ///
+  /// class _IVBuilderExampleState extends State<_IVBuilderExample> {
   ///   final TransformationController _transformationController = TransformationController();
   ///
   ///   static const double _cellWidth = 200.0;
@@ -229,11 +243,11 @@ class InteractiveViewer extends StatefulWidget {
   ///
   ///   // Returns true iff the given cell is currently visible. Caches viewport
   ///   // calculations.
-  ///   Rect _cachedViewport;
-  ///   int _firstVisibleColumn;
-  ///   int _firstVisibleRow;
-  ///   int _lastVisibleColumn;
-  ///   int _lastVisibleRow;
+  ///   late Rect _cachedViewport;
+  ///   late int _firstVisibleRow;
+  ///   late int _firstVisibleColumn;
+  ///   late int _lastVisibleRow;
+  ///   late int _lastVisibleColumn;
   ///   bool _isCellVisible(int row, int column, Rect viewport) {
   ///     if (viewport != _cachedViewport) {
   ///       _cachedViewport = viewport;
@@ -264,45 +278,38 @@ class InteractiveViewer extends StatefulWidget {
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return MaterialApp(
-  ///       home: Scaffold(
-  ///         appBar: AppBar(
-  ///           title: const Text('IV Builder Example'),
-  ///         ),
-  ///         body: Center(
-  ///           child: LayoutBuilder(
-  ///             builder: (BuildContext context, BoxConstraints constraints) {
-  ///               return InteractiveViewer.builder(
-  ///                 alignPanAxis: true,
-  ///                 scaleEnabled: false,
-  ///                 transformationController: _transformationController,
-  ///                 builder: (BuildContext context, Rect viewport) {
-  ///                   // A simple extension of Table that builds cells.
-  ///                   return _TableBuilder(
-  ///                     rowCount: 60,
-  ///                     columnCount: 6,
-  ///                     cellWidth: _cellWidth,
-  ///                     builder: (BuildContext context, int row, int column) {
-  ///                       if (!_isCellVisible(row, column, viewport)) {
-  ///                         print('removing cell ($row, $column)');
-  ///                         return Container(height: _cellHeight);
-  ///                       }
-  ///                       print('building cell ($row, $column)');
-  ///                       return Container(
-  ///                         height: _cellHeight,
-  ///                         color: row % 2 + column % 2 == 1 ? Colors.white : Colors.grey.withOpacity(0.1),
-  ///                         child: Align(
-  ///                           alignment: Alignment.centerLeft,
-  ///                           child: Text('$row x $column'),
-  ///                         ),
-  ///                       );
-  ///                     }
+  ///     return Center(
+  ///       child: LayoutBuilder(
+  ///         builder: (BuildContext context, BoxConstraints constraints) {
+  ///           return InteractiveViewer.builder(
+  ///             alignPanAxis: true,
+  ///             scaleEnabled: false,
+  ///             transformationController: _transformationController,
+  ///             builder: (BuildContext context, Rect viewport) {
+  ///               // A simple extension of Table that builds cells.
+  ///               return _TableBuilder(
+  ///                 rowCount: 60,
+  ///                 columnCount: 6,
+  ///                 cellWidth: _cellWidth,
+  ///                 builder: (BuildContext context, int row, int column) {
+  ///                   if (!_isCellVisible(row, column, viewport)) {
+  ///                     print('removing cell ($row, $column)');
+  ///                     return Container(height: _cellHeight);
+  ///                   }
+  ///                   print('building cell ($row, $column)');
+  ///                   return Container(
+  ///                     height: _cellHeight,
+  ///                     color: row % 2 + column % 2 == 1 ? Colors.white : Colors.grey.withOpacity(0.1),
+  ///                     child: Align(
+  ///                       alignment: Alignment.centerLeft,
+  ///                       child: Text('$row x $column'),
+  ///                     ),
   ///                   );
-  ///                 },
+  ///                 }
   ///               );
   ///             },
-  ///           ),
-  ///         ),
+  ///           );
+  ///         },
   ///       ),
   ///     );
   ///   }
@@ -312,15 +319,12 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// class _TableBuilder extends StatelessWidget {
   ///   const _TableBuilder({
-  ///     @required this.rowCount,
-  ///     @required this.columnCount,
-  ///     @required this.cellWidth,
-  ///     this.builder,
-  ///   }) : assert(rowCount != null),
-  ///        assert(columnCount != null),
-  ///        assert(cellWidth != null),
-  ///        assert(rowCount != null && rowCount > 0),
-  ///        assert(columnCount != null && columnCount > 0);
+  ///     required this.rowCount,
+  ///     required this.columnCount,
+  ///     required this.cellWidth,
+  ///     required this.builder,
+  ///   }) : assert(rowCount > 0),
+  ///        assert(columnCount > 0);
   ///
   ///   final int rowCount;
   ///   final int columnCount;
@@ -350,7 +354,6 @@ class InteractiveViewer extends StatefulWidget {
   ///     );
   ///   }
   /// }
-  ///
   /// ```
   /// {@end-tool}
   ///
