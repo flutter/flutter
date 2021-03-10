@@ -53,12 +53,12 @@ void main() {
   });
 
   testUsingContext('androidComponentSetup build.gradle does not exist', () async {
-    final Directory templatesDir = flutterRootDir.childDirectory('templates').childDirectory('deferred_component');
-    final File buildGradleTemplate = templatesDir.childFile('build.gradle.tmpl');
-    final File androidManifestTemplate = templatesDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml.tmpl');
-    if (templatesDir.existsSync()) {
-      templatesDir.deleteSync(recursive: true);
-    }
+    final Directory templatesDir = flutterRootDir.childDirectory('templates');
+    final Directory deferredComponentDir = templatesDir.childDirectory('module').childDirectory('android').childDirectory('deferred_component');
+    final File buildGradleTemplate = deferredComponentDir.childFile('build.gradle.tmpl');
+    final File androidManifestTemplate = deferredComponentDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml.tmpl');
+
+    deferredComponentDir.createSync(recursive: true);
     buildGradleTemplate.createSync(recursive: true);
     androidManifestTemplate.createSync(recursive: true);
     buildGradleTemplate.writeAsStringSync('fake build.gradle template {{componentName}}', flush: true, mode: FileMode.append);
@@ -91,12 +91,12 @@ void main() {
   });
 
   testUsingContext('androidComponentSetup AndroidManifest.xml does not exist', () async {
-    final Directory templatesDir = flutterRootDir.childDirectory('templates').childDirectory('deferred_component');
-    final File buildGradleTemplate = templatesDir.childFile('build.gradle.tmpl');
-    final File androidManifestTemplate = templatesDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml.tmpl');
-    if (templatesDir.existsSync()) {
-      templatesDir.deleteSync(recursive: true);
-    }
+    final Directory templatesDir = flutterRootDir.childDirectory('templates');
+    final Directory deferredComponentDir = templatesDir.childDirectory('module').childDirectory('android').childDirectory('deferred_component');
+    final File buildGradleTemplate = deferredComponentDir.childFile('build.gradle.tmpl');
+    final File androidManifestTemplate = deferredComponentDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml.tmpl');
+
+    deferredComponentDir.createSync(recursive: true);
     buildGradleTemplate.createSync(recursive: true);
     androidManifestTemplate.createSync(recursive: true);
     buildGradleTemplate.writeAsStringSync('fake build.gradle template {{componentName}}', flush: true, mode: FileMode.append);
