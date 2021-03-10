@@ -322,23 +322,6 @@ void main() {
     );
     expect(ScrollConfiguration.of(capturedContext).runtimeType, ScrollBehavior);
   });
-
-  testWidgets('A ScrollBehavior can be set for WidgetsApp', (WidgetTester tester) async {
-    late BuildContext capturedContext;
-    await tester.pumpWidget(
-      WidgetsApp(
-        scrollBehavior: MockScrollBehavior(),
-        builder: (BuildContext context, Widget? child) {
-          capturedContext = context;
-          return const Placeholder();
-        },
-        color: const Color(0xFF123456),
-      ),
-    );
-    final ScrollBehavior scrollBehavior = ScrollConfiguration.of(capturedContext);
-    expect(scrollBehavior.runtimeType, MockScrollBehavior);
-    expect(scrollBehavior.getScrollPhysics(capturedContext).runtimeType, NeverScrollableScrollPhysics);
-  });
 }
 
 class MockScrollBehavior extends ScrollBehavior {
