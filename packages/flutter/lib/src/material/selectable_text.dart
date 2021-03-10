@@ -25,7 +25,7 @@ class _TextSpanEditingController extends TextEditingController {
   _TextSpanEditingController({required TextSpan textSpan}):
     assert(textSpan != null),
     _textSpan = textSpan,
-    super(text: textSpan.toPlainText());
+    super(text: textSpan.toPlainText(includeSemanticsLabels: false));
 
   final TextSpan _textSpan;
 
