@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <vector>
 
+#import "flutter/shell/platform/darwin/macos/framework/Source/AccessibilityBridgeMacDelegate.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTextureGL.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterGLCompositor.h"
@@ -15,7 +16,7 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterOpenGLRenderer.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderingBackend.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
-#import "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/embedder/embedder.h"
 
 /**
  * Constructs and returns a FlutterLocale struct corresponding to |locale|, which must outlive
@@ -120,6 +121,9 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   // The embedding-API-level engine object.
   FLUTTER_API_SYMBOL(FlutterEngine) _engine;
 
+  // The private member for accessibility.
+  std::shared_ptr<flutter::AccessibilityBridge> _bridge;
+
   // The project being run by this engine.
   FlutterDartProject* _project;
 
@@ -153,6 +157,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   _project = project ?: [[FlutterDartProject alloc] init];
   _messageHandlers = [[NSMutableDictionary alloc] init];
   _allowHeadlessExecution = allowHeadlessExecution;
+  _semanticsEnabled = NO;
 
   _embedderAPI.struct_size = sizeof(FlutterEngineProcTable);
   FlutterEngineGetProcAddresses(&_embedderAPI);
@@ -211,6 +216,16 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   flutterArguments.command_line_argc = static_cast<int>(argv.size());
   flutterArguments.command_line_argv = argv.size() > 0 ? argv.data() : nullptr;
   flutterArguments.platform_message_callback = (FlutterPlatformMessageCallback)OnPlatformMessage;
+  flutterArguments.update_semantics_node_callback = [](const FlutterSemanticsNode* node,
+                                                       void* user_data) {
+    FlutterEngine* engine = (__bridge FlutterEngine*)user_data;
+    [engine updateSemanticsNode:node];
+  };
+  flutterArguments.update_semantics_custom_action_callback =
+      [](const FlutterSemanticsCustomAction* action, void* user_data) {
+        FlutterEngine* engine = (__bridge FlutterEngine*)user_data;
+        [engine updateSemanticsCustomActions:action];
+      };
   flutterArguments.custom_dart_entrypoint = entrypoint.UTF8String;
   flutterArguments.shutdown_dart_vm_when_done = true;
   flutterArguments.dart_entrypoint_argc = dartEntrypointArgs.size();
@@ -397,6 +412,10 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   return _embedderAPI;
 }
 
+- (std::weak_ptr<flutter::AccessibilityBridge>)accessibilityBridge {
+  return _bridge;
+}
+
 - (void)updateWindowMetrics {
   if (!_engine) {
     return;
@@ -419,6 +438,29 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 
 - (void)sendPointerEvent:(const FlutterPointerEvent&)event {
   _embedderAPI.SendPointerEvent(_engine, &event, 1);
+}
+
+- (void)setSemanticsEnabled:(BOOL)enabled {
+  if (_semanticsEnabled == enabled) {
+    return;
+  }
+  _semanticsEnabled = enabled;
+  if (!_semanticsEnabled && _bridge) {
+    _bridge.reset();
+  } else if (_semanticsEnabled && !_bridge) {
+    _bridge = std::make_shared<flutter::AccessibilityBridge>(
+        std::make_unique<flutter::AccessibilityBridgeMacDelegate>(self));
+  }
+  if (!_semanticsEnabled) {
+    self.viewController.view.accessibilityChildren = nil;
+  }
+  _embedderAPI.UpdateSemanticsEnabled(_engine, _semanticsEnabled);
+}
+
+- (void)dispatchSemanticsAction:(FlutterSemanticsAction)action
+                       toTarget:(uint16_t)target
+                       withData:(const std::vector<uint8_t>&)data {
+  _embedderAPI.DispatchSemanticsAction(_engine, target, action, data.data(), data.size());
 }
 
 #pragma mark - Private methods
@@ -600,6 +642,35 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 
 - (BOOL)unregisterTextureWithID:(int64_t)textureID {
   return _embedderAPI.UnregisterExternalTexture(_engine, textureID) == kSuccess;
+}
+
+- (void)updateSemanticsNode:(const FlutterSemanticsNode*)node {
+  NSAssert(_bridge, @"The accessibility bridge must be initialized.");
+  if (node->id == kFlutterSemanticsNodeIdBatchEnd) {
+    return;
+  }
+  _bridge->AddFlutterSemanticsNodeUpdate(node);
+}
+
+- (void)updateSemanticsCustomActions:(const FlutterSemanticsCustomAction*)action {
+  NSAssert(_bridge, @"The accessibility bridge must be initialized.");
+  if (action->id == kFlutterSemanticsNodeIdBatchEnd) {
+    // Custom action with id = kFlutterSemanticsNodeIdBatchEnd indicates this is
+    // the end of the update batch.
+    _bridge->CommitUpdates();
+    // Attaches the accessibility root to the flutter view.
+    auto root = _bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+    if (root) {
+      if ([self.viewController.view.accessibilityChildren count] == 0) {
+        NSAccessibilityElement* native_root = root->GetNativeViewAccessible();
+        self.viewController.view.accessibilityChildren = @[ native_root ];
+      }
+    } else {
+      self.viewController.view.accessibilityChildren = nil;
+    }
+    return;
+  }
+  _bridge->AddFlutterSemanticsCustomActionUpdate(action);
 }
 
 #pragma mark - Task runner integration

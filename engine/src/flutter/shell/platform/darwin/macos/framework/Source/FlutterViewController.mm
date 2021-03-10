@@ -22,6 +22,11 @@ namespace {
 /// Clipboard plain text format.
 constexpr char kTextPlainFormat[] = "text/plain";
 
+/// The private notification for voice over.
+static NSString* const EnhancedUserInterfaceNotification =
+    @"NSApplicationDidChangeAccessibilityEnhancedUserInterfaceNotification";
+static NSString* const EnhancedUserInterfaceKey = @"AXEnhancedUserInterface";
+
 /**
  * State tracking for mouse events, to adapt between the events coming from the system and the
  * events that the embedding API expects.
@@ -166,6 +171,11 @@ struct KeyboardState {
 - (void)onSettingsChanged:(NSNotification*)notification;
 
 /**
+ * Responds to updates in accessibility.
+ */
+- (void)onAccessibilityStatusChanged:(NSNotification*)notification;
+
+/**
  * Handles messages received from the Flutter engine on the _*Channel channels.
  */
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
@@ -229,6 +239,13 @@ static void CommonInit(FlutterViewController* controller) {
   }
   controller->_additionalKeyResponders = [[NSMutableOrderedSet alloc] init];
   controller->_mouseTrackingMode = FlutterMouseTrackingModeInKeyWindow;
+
+  NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
+  // macOS fires this private message when voiceover turns on or off.
+  [center addObserver:controller
+             selector:@selector(onAccessibilityStatusChanged:)
+                 name:EnhancedUserInterfaceNotification
+               object:nil];
 }
 
 - (instancetype)initWithCoder:(NSCoder*)coder {
@@ -573,6 +590,13 @@ static void CommonInit(FlutterViewController* controller) {
     }
   };
   [_keyEventChannel sendMessage:keyMessage reply:replyHandler];
+}
+
+- (void)onAccessibilityStatusChanged:(NSNotification*)notification {
+  if (!_engine) {
+    return;
+  }
+  _engine.semanticsEnabled = !!notification.userInfo[EnhancedUserInterfaceKey];
 }
 
 - (void)onSettingsChanged:(NSNotification*)notification {

@@ -37,7 +37,7 @@ class FlutterPlatformNodeDelegate : public ui::AXPlatformNodeDelegateBase {
   /// delegate.
   class OwnerBridge {
    public:
-    ~OwnerBridge() = default;
+    virtual ~OwnerBridge() = default;
 
    protected:
     friend class FlutterPlatformNodeDelegate;
@@ -96,7 +96,7 @@ class FlutterPlatformNodeDelegate : public ui::AXPlatformNodeDelegateBase {
   FlutterPlatformNodeDelegate();
 
   // |ui::AXPlatformNodeDelegateBase|
-  ~FlutterPlatformNodeDelegate() override;
+  virtual ~FlutterPlatformNodeDelegate() override;
 
   // |ui::AXPlatformNodeDelegateBase|
   const ui::AXNodeData& GetData() const override;

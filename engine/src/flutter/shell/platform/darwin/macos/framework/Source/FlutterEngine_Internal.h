@@ -6,8 +6,10 @@
 
 #import <Cocoa/Cocoa.h>
 
+#include <memory>
+
+#include "flutter/shell/platform/common/accessibility_bridge.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.h"
-#include "flutter/shell/platform/embedder/embedder.h"
 
 @interface FlutterEngine ()
 
@@ -26,6 +28,14 @@
  * Function pointers for interacting with the embedder.h API.
  */
 @property(nonatomic) FlutterEngineProcTable& embedderAPI;
+
+@property(nonatomic, readonly) std::weak_ptr<flutter::AccessibilityBridge> accessibilityBridge;
+
+/**
+ * True if the semantics is enabled. The Flutter framework starts sending
+ * semantics update through the embedder as soon as it is set to YES.
+ */
+@property(nonatomic) BOOL semanticsEnabled;
 
 /**
  * Informs the engine that the associated view controller's view size has changed.
@@ -51,5 +61,15 @@
  * Unregisters an external texture with the given id. Returns YES on success.
  */
 - (BOOL)unregisterTextureWithID:(int64_t)textureID;
+
+// Accessibility API.
+
+/**
+ * Dispatches semantics action back to the framework. The semantics must be enabled by calling
+ * the updateSemanticsEnabled before dispatching semantics actions.
+ */
+- (void)dispatchSemanticsAction:(FlutterSemanticsAction)action
+                       toTarget:(uint16_t)target
+                       withData:(const std::vector<uint8_t>&)data;
 
 @end

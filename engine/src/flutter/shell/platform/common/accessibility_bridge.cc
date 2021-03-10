@@ -104,6 +104,13 @@ const ui::AXTreeData& AccessibilityBridge::GetAXTreeData() const {
   return tree_.data();
 }
 
+const std::vector<ui::AXEventGenerator::TargetedEvent>
+AccessibilityBridge::GetPendingEvents() {
+  std::vector<ui::AXEventGenerator::TargetedEvent> result(
+      event_generator_.begin(), event_generator_.end());
+  return result;
+}
+
 void AccessibilityBridge::OnNodeWillBeDeleted(ui::AXTree* tree,
                                               ui::AXNode* node) {}
 

@@ -119,5 +119,26 @@
 - (void)shutdown {
   [_resizeSynchronizer shutdown];
 }
+#pragma mark - NSAccessibility overrides
+
+- (BOOL)isAccessibilityElement {
+  return YES;
+}
+
+- (NSAccessibilityRole)accessibilityRole {
+  return NSAccessibilityGroupRole;
+}
+
+- (NSString*)accessibilityLabel {
+  // TODO(chunhtai): Provides a way to let developer customize the accessibility
+  // label.
+  // https://github.com/flutter/flutter/issues/75446
+  NSString* applicationName =
+      [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleDisplayName"];
+  if (!applicationName) {
+    applicationName = [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleName"];
+  }
+  return applicationName;
+}
 
 @end
