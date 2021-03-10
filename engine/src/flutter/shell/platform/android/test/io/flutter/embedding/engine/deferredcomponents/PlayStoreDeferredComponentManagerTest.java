@@ -74,10 +74,10 @@ public class PlayStoreDeferredComponentManagerTest {
     }
 
     @Override
-    public void installDeferredComponent(int loadingUnitId, String moduleName) {
+    public void installDeferredComponent(int loadingUnitId, String componentName) {
       // Override this to skip the online SplitInstallManager portion.
-      loadAssets(loadingUnitId, moduleName);
-      loadDartLibrary(loadingUnitId, moduleName);
+      loadAssets(loadingUnitId, componentName);
+      loadDartLibrary(loadingUnitId, componentName);
     }
   }
 

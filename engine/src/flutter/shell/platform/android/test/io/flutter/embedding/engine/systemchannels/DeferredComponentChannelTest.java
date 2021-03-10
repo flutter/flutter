@@ -18,7 +18,7 @@ import org.robolectric.annotation.Config;
 
 class TestDeferredComponentManager implements DeferredComponentManager {
   DeferredComponentChannel channel;
-  String moduleName;
+  String componentName;
 
   public void setJNI(FlutterJNI flutterJNI) {}
 
@@ -26,23 +26,23 @@ class TestDeferredComponentManager implements DeferredComponentManager {
     this.channel = channel;
   }
 
-  public void installDeferredComponent(int loadingUnitId, String moduleName) {
-    this.moduleName = moduleName;
+  public void installDeferredComponent(int loadingUnitId, String componentName) {
+    this.componentName = componentName;
   }
 
   public void completeInstall() {
-    channel.completeInstallSuccess(moduleName);
+    channel.completeInstallSuccess(componentName);
   }
 
-  public String getDeferredComponentInstallState(int loadingUnitId, String moduleName) {
+  public String getDeferredComponentInstallState(int loadingUnitId, String componentName) {
     return "installed";
   }
 
-  public void loadAssets(int loadingUnitId, String moduleName) {}
+  public void loadAssets(int loadingUnitId, String componentName) {}
 
-  public void loadDartLibrary(int loadingUnitId, String moduleName) {}
+  public void loadDartLibrary(int loadingUnitId, String componentName) {}
 
-  public boolean uninstallDeferredComponent(int loadingUnitId, String moduleName) {
+  public boolean uninstallDeferredComponent(int loadingUnitId, String componentName) {
     return true;
   }
 
@@ -65,7 +65,7 @@ public class DeferredComponentChannelTest {
 
     Map<String, Object> args = new HashMap<>();
     args.put("loadingUnitId", -1);
-    args.put("moduleName", "hello");
+    args.put("componentName", "hello");
     MethodCall methodCall = new MethodCall("installDeferredComponent", args);
     MethodChannel.Result mockResult = mock(MethodChannel.Result.class);
     fakeDeferredComponentChannel.parsingMethodHandler.onMethodCall(methodCall, mockResult);
@@ -87,7 +87,7 @@ public class DeferredComponentChannelTest {
 
     Map<String, Object> args = new HashMap<>();
     args.put("loadingUnitId", -1);
-    args.put("moduleName", "hello");
+    args.put("componentName", "hello");
     MethodCall methodCall = new MethodCall("installDeferredComponent", args);
     MethodChannel.Result mockResult1 = mock(MethodChannel.Result.class);
     MethodChannel.Result mockResult2 = mock(MethodChannel.Result.class);
@@ -112,7 +112,7 @@ public class DeferredComponentChannelTest {
 
     Map<String, Object> args = new HashMap<>();
     args.put("loadingUnitId", -1);
-    args.put("moduleName", "hello");
+    args.put("componentName", "hello");
     MethodCall methodCall = new MethodCall("getDeferredComponentInstallState", args);
     MethodChannel.Result mockResult = mock(MethodChannel.Result.class);
     fakeDeferredComponentChannel.parsingMethodHandler.onMethodCall(methodCall, mockResult);
