@@ -133,6 +133,16 @@ FLUTTER_ASSERT_ARC
                                                                    [FlutterTextInputView class]]];
 }
 
+- (FlutterTextRange*)getLineRangeFromTokenizer:(id<UITextInputTokenizer>)tokenizer
+                                       atIndex:(NSInteger)index {
+  UITextRange* range =
+      [tokenizer rangeEnclosingPosition:[FlutterTextPosition positionWithIndex:index]
+                        withGranularity:UITextGranularityLine
+                            inDirection:UITextLayoutDirectionRight];
+  XCTAssertTrue([range isKindOfClass:[FlutterTextRange class]]);
+  return (FlutterTextRange*)range;
+}
+
 #pragma mark - Tests
 
 - (void)testSecureInput {
@@ -816,6 +826,43 @@ FLUTTER_ASSERT_ARC
 
   XCTAssertEqual(inputView.receivedNotification, UIAccessibilityScreenChangedNotification);
   XCTAssertEqual(inputView.receivedNotificationTarget, backing);
+}
+
+- (void)testFlutterTokenizerCanParseLines {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
+  inputView.textInputDelegate = engine;
+  id<UITextInputTokenizer> tokenizer = [inputView tokenizer];
+
+  // The tokenizer returns zero range When text is empty.
+  FlutterTextRange* range = [self getLineRangeFromTokenizer:tokenizer atIndex:0];
+  XCTAssertEqual(range.range.location, 0u);
+  XCTAssertEqual(range.range.length, 0u);
+
+  [inputView insertText:@"how are you\nI am fine, Thank you"];
+
+  range = [self getLineRangeFromTokenizer:tokenizer atIndex:0];
+  XCTAssertEqual(range.range.location, 0u);
+  XCTAssertEqual(range.range.length, 11u);
+
+  range = [self getLineRangeFromTokenizer:tokenizer atIndex:2];
+  XCTAssertEqual(range.range.location, 0u);
+  XCTAssertEqual(range.range.length, 11u);
+
+  range = [self getLineRangeFromTokenizer:tokenizer atIndex:11];
+  XCTAssertEqual(range.range.location, 0u);
+  XCTAssertEqual(range.range.length, 11u);
+
+  range = [self getLineRangeFromTokenizer:tokenizer atIndex:12];
+  XCTAssertEqual(range.range.location, 12u);
+  XCTAssertEqual(range.range.length, 20u);
+
+  range = [self getLineRangeFromTokenizer:tokenizer atIndex:15];
+  XCTAssertEqual(range.range.location, 12u);
+  XCTAssertEqual(range.range.length, 20u);
+
+  range = [self getLineRangeFromTokenizer:tokenizer atIndex:32];
+  XCTAssertEqual(range.range.location, 12u);
+  XCTAssertEqual(range.range.length, 20u);
 }
 
 @end

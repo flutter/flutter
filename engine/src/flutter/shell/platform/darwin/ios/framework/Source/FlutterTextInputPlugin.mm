@@ -378,6 +378,73 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
 }
 @end
 
+#pragma mark - FlutterTokenizer
+
+@interface FlutterTokenizer ()
+
+@property(nonatomic, assign) FlutterTextInputView* textInputView;
+
+@end
+
+@implementation FlutterTokenizer
+
+- (instancetype)initWithTextInput:(UIResponder<UITextInput>*)textInput {
+  NSAssert([textInput isKindOfClass:[FlutterTextInputView class]],
+           @"The FlutterTokenizer can only be used in a FlutterTextInputView");
+  self = [super initWithTextInput:textInput];
+  if (self) {
+    _textInputView = (FlutterTextInputView*)textInput;
+  }
+  return self;
+}
+
+- (UITextRange*)rangeEnclosingPosition:(UITextPosition*)position
+                       withGranularity:(UITextGranularity)granularity
+                           inDirection:(UITextDirection)direction {
+  UITextRange* result;
+  switch (granularity) {
+    case UITextGranularityLine:
+      // The default UITextInputStringTokenizer does not handle line granularity
+      // correctly. We need to implement our own line tokenizer.
+      result = [self lineEnclosingPosition:position];
+      break;
+    case UITextGranularityCharacter:
+    case UITextGranularityWord:
+    case UITextGranularitySentence:
+    case UITextGranularityParagraph:
+    case UITextGranularityDocument:
+      // The UITextInputStringTokenizer can handle all these cases correctly.
+      result = [super rangeEnclosingPosition:position
+                             withGranularity:granularity
+                                 inDirection:direction];
+      break;
+  }
+  return result;
+}
+
+- (UITextRange*)lineEnclosingPosition:(UITextPosition*)position {
+  // Gets the first line break position after the input position.
+  NSString* textAfter = [_textInputView
+      textInRange:[_textInputView textRangeFromPosition:position
+                                             toPosition:[_textInputView endOfDocument]]];
+  NSArray<NSString*>* linesAfter = [textAfter componentsSeparatedByString:@"\n"];
+  NSInteger offSetToLineBreak = [linesAfter firstObject].length;
+  UITextPosition* lineBreakAfter = [_textInputView positionFromPosition:position
+                                                                 offset:offSetToLineBreak];
+  // Gets the first line break position before the input position.
+  NSString* textBefore = [_textInputView
+      textInRange:[_textInputView textRangeFromPosition:[_textInputView beginningOfDocument]
+                                             toPosition:position]];
+  NSArray<NSString*>* linesBefore = [textBefore componentsSeparatedByString:@"\n"];
+  NSInteger offSetFromLineBreak = [linesBefore lastObject].length;
+  UITextPosition* lineBreakBefore = [_textInputView positionFromPosition:position
+                                                                  offset:-offSetFromLineBreak];
+
+  return [_textInputView textRangeFromPosition:lineBreakBefore toPosition:lineBreakAfter];
+}
+
+@end
+
 // A FlutterTextInputView that masquerades as a UITextField, and forwards
 // selectors it can't respond to to a shared UITextField instance.
 //
@@ -629,7 +696,7 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
 
 - (id<UITextInputTokenizer>)tokenizer {
   if (_tokenizer == nil) {
-    _tokenizer = [[UITextInputStringTokenizer alloc] initWithTextInput:self];
+    _tokenizer = [[FlutterTokenizer alloc] initWithTextInput:self];
   }
   return _tokenizer;
 }
