@@ -122,6 +122,14 @@ abstract class Repository {
         'Cloning $name repo',
         workingDirectory: parentDirectory.path,
       );
+      // TODO test this
+      if (pushRemote != null) {
+        git.run(
+          <String>['remote', 'add', pushRemote.name, pushRemote.url],
+          'Adding remote ${pushRemote.url} as ${pushRemote.name}',
+          workingDirectory: _checkoutDirectory.path,
+        );
+      }
       if (localUpstream) {
         // These branches must exist locally for the repo that depends on it
         // to fetch and push to.
@@ -208,11 +216,14 @@ abstract class Repository {
 
   /// List commits in reverse chronological order.
   List<String> revList(List<String> args) {
-    return git.getOutput(
-      <String>['rev-list', ...args],
-      'rev-list with args ${args.join(' ')}',
-      workingDirectory: checkoutDirectory.path,
-    ).trim().split('\n');
+    return git
+        .getOutput(
+          <String>['rev-list', ...args],
+          'rev-list with args ${args.join(' ')}',
+          workingDirectory: checkoutDirectory.path,
+        )
+        .trim()
+        .split('\n');
   }
 
   /// Look up the commit for [ref].

@@ -98,7 +98,7 @@ bool assertsEnabled() {
 
 /// Either return the value from [env] or fall back to [argResults].
 ///
-/// If the key does not exist in either the CLI args or environment, throws a
+/// If the key does not exist in either the environment or CLI args, throws a
 /// [ConductorException].
 ///
 /// The environment is favored over CLI args since the latter can have a default
