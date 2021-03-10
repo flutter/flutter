@@ -1193,7 +1193,7 @@ void main() {
     await tester.pumpWidget(buildCheckbox(false));
     expect(find.byType(Checkbox), findsNothing);
     // Release pointer after widget disappeared.
-    gesture.up();
+    await gesture.up();
   });
 }
 
