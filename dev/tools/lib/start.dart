@@ -246,20 +246,31 @@ class StartCommand extends Command<void> {
     stdio.printStatus(presentState(state));
   }
 
+  // To minimize merge conflicts, sort the commits by rev-list order.
   List<String> _sortCherrypicks({
     @required Repository repository,
     @required List<String> cherrypicks,
     @required String upstreamRef,
     @required String releaseRef,
   }) {
-    final List<String> sortedCherrypicks = <String>[];
-    final List<String> validatedCherrypicks = cherrypicks.map<String>(
-        // Validate all hashes exist in the repo, and get the long version
-      (String cp) => repository.reverseParse(cp),
-    ).toList();
-
     if (cherrypicks.isEmpty) {
-      return sortedCherrypicks;
+      return cherrypicks;
+    }
+
+    // Input cherrypick hashes that failed to be parsed by git.
+    final List<String> unknownCherrypicks = <String>[];
+    // Full 40-char hashes parsed by git.
+    final List<String> validatedCherrypicks = <String>[];
+    // Final, validated, sorted list of cherrypicks to be applied.
+    final List<String> sortedCherrypicks = <String>[];
+    for (final String cherrypick in cherrypicks) {
+      try {
+        final String fullRef = repository.reverseParse(cherrypick);
+        validatedCherrypicks.add(fullRef);
+      } on GitException {
+        // Catch this exception so that we can validate the rest.
+        unknownCherrypicks.add(cherrypick);
+      }
     }
 
     final String branchPoint = repository.branchPoint(
@@ -279,7 +290,7 @@ class StartCommand extends Command<void> {
       if (validatedCherrypicks.contains(upstreamRevision)) {
         validatedCherrypicks.remove(upstreamRevision);
         sortedCherrypicks.add(upstreamRevision);
-        if (validatedCherrypicks.isEmpty) {
+        if (unknownCherrypicks.isEmpty && validatedCherrypicks.isEmpty) {
           return sortedCherrypicks;
         }
       }
@@ -288,9 +299,11 @@ class StartCommand extends Command<void> {
     // We were given input cherrypicks that were not present in the upstream
     // rev-list
     stdio.printError('The following cherrypicks were not found in the upstream $upstreamRef branch:');
-    for (final String cp in validatedCherrypicks) {
+    for (final String cp in <String>[...validatedCherrypicks, ...unknownCherrypicks]) {
       stdio.printError('\t$cp');
     }
-    throw ConductorException('${validatedCherrypicks.length} unknown cherrypicks provided!');
+    throw ConductorException(
+      '${validatedCherrypicks.length + unknownCherrypicks.length} unknown cherrypicks provided!',
+    );
   }
 }

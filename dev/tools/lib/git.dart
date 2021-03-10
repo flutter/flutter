@@ -19,6 +19,7 @@ class Git {
     List<String> args,
     String explanation, {
     @required String workingDirectory,
+    bool allowFailures = false,
   }) {
     final ProcessResult result = _run(args, workingDirectory);
     if (result.exitCode == 0) {
@@ -68,6 +69,15 @@ class Git {
       message.writeln('stdout from git:\n${result.stdout}\n');
     if ((result.stderr as String).isNotEmpty)
       message.writeln('stderr from git:\n${result.stderr}\n');
-    throw Exception(message);
+    throw GitException(message.toString());
   }
+}
+
+class GitException implements Exception {
+  GitException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => 'Exception: $message';
 }
