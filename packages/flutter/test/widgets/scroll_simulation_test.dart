@@ -24,7 +24,6 @@ void main() {
     checkInitialConditions(5469.0, 182.114534);
   });
 
-
   test('ClampingScrollSimulation velocity eventually reaches zero', () {
     void checkFinalConditions(double position, double velocity) {
       final ClampingScrollSimulation simulation = ClampingScrollSimulation(position: position, velocity: velocity);
