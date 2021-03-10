@@ -1,4 +1,4 @@
-Signature: aa176fdf80a96d9b164aadd9c35d03d9
+Signature: c4493a91c87df2b20cff4b1fecbb608c
 
 UNUSED LICENSES:
 
@@ -419,7 +419,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libm.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libpthread.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/librt.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libzircon.so
-FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fidl/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/meta.json
@@ -1137,7 +1136,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libm.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libpthread.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/librt.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libzircon.so
-FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fidl/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/meta.json
@@ -1752,7 +1750,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libm.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libpthread.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/librt.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libzircon.so
-FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fidl/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/meta.json
@@ -2659,7 +2656,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/iommu.
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/policy.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/system.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/tls.h
-FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/lib/src/surface/surface.dart
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth/auth_provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth/token_manager.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.control/control.fidl
@@ -2973,18 +2969,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/clock.
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/internal/cdecls.inc
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/scheduler.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/utc.h
-FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/lib/composition_delegate.dart
-FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/lib/src/composition_delegate/composition_delegate.dart
-FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/lib/src/internal/layout_logic/_layout_logic.dart
-FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/lib/src/internal/layout_logic/_layout_strategy.dart
-FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/lib/src/internal/layout_logic/archetype_strategy/archetype_strategy.dart
-FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/lib/src/internal/layout_logic/copresent_strategy/copresent_strategy.dart
-FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/lib/src/internal/layout_logic/split_evenly_strategy/split_evenly_strategy.dart
-FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/lib/src/internal/layout_logic/stack_strategy/stack_strategy.dart
-FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/lib/src/internal/tree/_surface_node.dart
-FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/lib/src/internal/tree/_surface_tree.dart
-FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/lib/src/layout/layout_types.dart
-FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/lib/src/surface/surface_relation.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fidl/lib/src/bits.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fidl/lib/src/xunion.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/inspect.dart
@@ -3389,6 +3373,7 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/reader.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/reader/diagnostic_config.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/reader/diagnostic_data.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/reader/reader.dart
+FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic/lib/src/scenic_context.dart
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/data_provider_controller.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish/goldfish_sync.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/inotify.fidl
