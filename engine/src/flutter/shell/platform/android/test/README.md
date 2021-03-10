@@ -14,7 +14,7 @@ integration tests in other repos.
    `shell/platform/android/**test**/io/flutter/util/Preconditions**Test**.java`.
 2. Add your file to the `sources` of the `robolectric_tests` build target in
    `/shell/platform/android/BUILD.gn`. This compiles the test class into the
-   test jar. 
+   test jar.
 3. Import your test class and add it to the `@SuiteClasses` annotation in
    `FlutterTestSuite.java`. This makes sure the test is actually executed at
    run time.
@@ -25,8 +25,8 @@ integration tests in other repos.
 
 ### My new test won't run. There's a "ClassNotFoundException".
 
-See [Updating Embedding Dependencies](../embedding_bundle).
+See [Updating Embedding Dependencies](/tools/cipd/android_embedding_bundle).
 
 ### My new test won't compile. It can't find one of my imports.
 
-See [Updating Embedding Dependencies](../embedding_bundle).
+See [Updating Embedding Dependencies](/tools/cipd/android_embedding_bundle).
