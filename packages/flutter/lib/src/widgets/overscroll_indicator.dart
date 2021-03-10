@@ -348,7 +348,7 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
 
 enum _GlowState { idle, absorb, pull, recede }
 
-class _GlowController extends ChangeNotifier {
+class _GlowController with ChangeNotifier {
   _GlowController({
     required TickerProvider vsync,
     required Color color,

@@ -316,7 +316,7 @@ class KeepAliveNotification extends Notification {
 /// For a more convenient way to interact with [AutomaticKeepAlive] widgets,
 /// consider using [AutomaticKeepAliveClientMixin], which uses a
 /// [KeepAliveHandle] internally.
-class KeepAliveHandle extends ChangeNotifier {
+class KeepAliveHandle with ChangeNotifier {
   /// Trigger the listeners to indicate that the widget
   /// no longer needs to be kept alive.
   void release() {

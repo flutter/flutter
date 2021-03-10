@@ -18,7 +18,7 @@ import 'data_table.dart';
 ///
 /// DataTableSource objects are expected to be long-lived, not recreated with
 /// each build.
-abstract class DataTableSource extends ChangeNotifier {
+abstract class DataTableSource with ChangeNotifier {
   /// Called to obtain the data about a particular row.
   ///
   /// The [new DataRow.byIndex] constructor provides a convenient way to construct

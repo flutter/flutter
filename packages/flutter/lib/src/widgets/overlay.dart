@@ -55,7 +55,7 @@ import 'ticker_provider.dart';
 ///  * [OverlayState]
 ///  * [WidgetsApp]
 ///  * [MaterialApp]
-class OverlayEntry extends ChangeNotifier {
+class OverlayEntry with ChangeNotifier {
   /// Creates an overlay entry.
   ///
   /// To insert the entry into an [Overlay], first find the overlay using

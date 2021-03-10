@@ -278,7 +278,7 @@ class MouseTrackerUpdateDetails with Diagnosticable {
 ///     of how to process mouse event callbacks and mouse cursors.
 ///   * [MouseTrackerCursorMixin], which is a mixin for [BaseMouseTracker] that
 ///     defines how to process mouse cursors.
-abstract class BaseMouseTracker extends ChangeNotifier {
+abstract class BaseMouseTracker with ChangeNotifier {
   /// Whether or not at least one mouse is connected and has produced events.
   bool get mouseIsConnected => _mouseStates.isNotEmpty;
 

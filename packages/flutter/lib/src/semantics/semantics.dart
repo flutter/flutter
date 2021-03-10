@@ -2592,7 +2592,7 @@ class _TraversalSortNode implements Comparable<_TraversalSortNode> {
 /// To listen for semantic updates, call [PipelineOwner.ensureSemantics] to
 /// obtain a [SemanticsHandle]. This will create a [SemanticsOwner] if
 /// necessary.
-class SemanticsOwner extends ChangeNotifier {
+class SemanticsOwner with ChangeNotifier {
   final Set<SemanticsNode> _dirtyNodes = <SemanticsNode>{};
   final Map<int, SemanticsNode> _nodes = <int, SemanticsNode>{};
   final Set<SemanticsNode> _detachedNodes = <SemanticsNode>{};

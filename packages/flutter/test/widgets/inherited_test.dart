@@ -440,7 +440,7 @@ void main() {
 
   testWidgets('InheritedNotifier', (WidgetTester tester) async {
     int buildCount = 0;
-    final ChangeNotifier notifier = ChangeNotifier();
+    final TestChangeNotifier notifier = TestChangeNotifier();
 
     final Widget builder = Builder(
       builder: (BuildContext context) {
@@ -477,3 +477,5 @@ void main() {
     expect(buildCount, equals(3));
   });
 }
+
+class TestChangeNotifier with ChangeNotifier { }

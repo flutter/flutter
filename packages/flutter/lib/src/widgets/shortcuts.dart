@@ -252,7 +252,7 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<LogicalKeySet, Intent>
 ///
 /// A [ShortcutManager] is obtained by calling [Shortcuts.of] on the context of
 /// the widget that you want to find a manager for.
-class ShortcutManager extends ChangeNotifier with Diagnosticable {
+class ShortcutManager with ChangeNotifier, Diagnosticable {
   /// Constructs a [ShortcutManager].
   ///
   /// The [shortcuts] argument must not  be null.

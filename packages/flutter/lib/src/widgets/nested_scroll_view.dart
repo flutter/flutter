@@ -1727,7 +1727,7 @@ class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
 ///  * [NestedScrollView], which uses a [NestedScrollViewViewport] and a
 ///    [SliverOverlapAbsorber] to align its children, and which shows sample
 ///    usage for this class.
-class SliverOverlapAbsorberHandle extends ChangeNotifier {
+class SliverOverlapAbsorberHandle with ChangeNotifier {
   // Incremented when a RenderSliverOverlapAbsorber takes ownership of this
   // object, decremented when it releases it. This allows us to find cases where
   // the same handle is being passed to two render objects.

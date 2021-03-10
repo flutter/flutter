@@ -136,7 +136,7 @@ import 'constants.dart';
 /// ```
 /// {@end-tool}
 ///
-class TabController extends ChangeNotifier {
+class TabController with ChangeNotifier {
   /// Creates an object that manages the state required by [TabBar] and a
   /// [TabBarView].
   ///

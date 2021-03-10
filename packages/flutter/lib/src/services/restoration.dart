@@ -150,7 +150,7 @@ typedef _BucketVisitor = void Function(RestorationBucket bucket);
 ///  * [RestorationBucket], which make up the restoration data hierarchy.
 ///  * [RestorationMixin], which uses [RestorationBucket]s behind the scenes
 ///    to make [State] objects of [StatefulWidget]s restorable.
-class RestorationManager extends ChangeNotifier {
+class RestorationManager with ChangeNotifier {
   /// Construct the restoration manager and set up the communications channels
   /// with the engine to get restoration messages (by calling [initChannels]).
   RestorationManager() {

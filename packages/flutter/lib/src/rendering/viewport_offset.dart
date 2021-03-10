@@ -63,7 +63,7 @@ ScrollDirection flipScrollDirection(ScrollDirection direction) {
 ///  * [ScrollPosition], which is a commonly used concrete subclass.
 ///  * [RenderViewportBase], which is a render object that uses viewport
 ///    offsets.
-abstract class ViewportOffset extends ChangeNotifier {
+abstract class ViewportOffset with ChangeNotifier {
   /// Default constructor.
   ///
   /// Allows subclasses to construct this object directly.

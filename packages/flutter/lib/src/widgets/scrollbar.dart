@@ -57,7 +57,7 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 ///    Material Design style.
 ///  * [CupertinoScrollbar] for a widget showing a scrollbar around a
 ///    [Scrollable] in the iOS style.
-class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
+class ScrollbarPainter with ChangeNotifier implements CustomPainter {
   /// Creates a scrollbar with customizations given by construction arguments.
   ScrollbarPainter({
     required Color color,

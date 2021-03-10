@@ -17,7 +17,7 @@ Future<void> endOfAnimation() async {
 
 int iteration = 0;
 
-class LifecycleObserver extends WidgetsBindingObserver {
+class LifecycleObserver with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     debugPrint('==== MEMORY BENCHMARK ==== $state ====');

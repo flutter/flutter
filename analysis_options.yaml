@@ -171,7 +171,7 @@ linter:
     - prefer_is_not_empty
     - prefer_is_not_operator
     - prefer_iterable_whereType
-    # - prefer_mixin # https://github.com/dart-lang/language/issues/32
+    - prefer_mixin
     - prefer_null_aware_operators
     # - prefer_relative_imports # incompatible with sub-package imports
     - prefer_single_quotes

@@ -21,7 +21,7 @@ const double _kFinalLabelScale = 0.75;
 
 // Defines the gap in the InputDecorator's outline border where the
 // floating label will appear.
-class _InputBorderGap extends ChangeNotifier {
+class _InputBorderGap with ChangeNotifier {
   double? _start;
   double? get start => _start;
   set start(double? value) {

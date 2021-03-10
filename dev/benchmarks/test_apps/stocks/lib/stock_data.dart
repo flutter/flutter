@@ -38,7 +38,7 @@ class Stock {
   double percentChange;
 }
 
-class StockData extends ChangeNotifier {
+class StockData with ChangeNotifier {
   StockData() {
     if (actuallyFetchData) {
       _httpClient = http.Client();

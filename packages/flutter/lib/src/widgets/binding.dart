@@ -23,11 +23,9 @@ export 'dart:ui' show AppLifecycleState, Locale;
 
 /// Interface for classes that register with the Widgets layer binding.
 ///
-/// When used as a mixin, provides no-op method implementations.
-///
 /// See [WidgetsBinding.addObserver] and [WidgetsBinding.removeObserver].
 ///
-/// This class can be extended directly, to get default behaviors for all of the
+/// This class can be mixed in directly, to get default behaviors for all of the
 /// handlers, or can used with the `implements` keyword, in which case all the
 /// handlers must be implemented (and the analyzer will list those that have
 /// been omitted).
@@ -76,7 +74,7 @@ export 'dart:ui' show AppLifecycleState, Locale;
 ///
 /// To respond to other notifications, replace the [didChangeAppLifecycleState]
 /// method above with other methods from this class.
-abstract class WidgetsBindingObserver {
+mixin WidgetsBindingObserver {
   /// Called when the system tells the app to pop the current route.
   /// For example, on Android, this is called when the user presses
   /// the back button.

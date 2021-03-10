@@ -41,7 +41,7 @@ import 'scroll_position_with_single_context.dart';
 ///    scrolling widget.
 ///  * [ScrollNotification] and [NotificationListener], which can be used to watch
 ///    the scroll position without using a [ScrollController].
-class ScrollController extends ChangeNotifier {
+class ScrollController with ChangeNotifier {
   /// Creates a controller for a scrollable widget.
   ///
   /// The values of `initialScrollOffset` and `keepScrollOffset` must not be null.

@@ -698,7 +698,7 @@ class ScaffoldGeometry {
   }
 }
 
-class _ScaffoldGeometryNotifier extends ChangeNotifier implements ValueListenable<ScaffoldGeometry> {
+class _ScaffoldGeometryNotifier with ChangeNotifier implements ValueListenable<ScaffoldGeometry> {
   _ScaffoldGeometryNotifier(this.geometry, this.context)
     : assert (context != null);
 

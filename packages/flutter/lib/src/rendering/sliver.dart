@@ -1597,8 +1597,7 @@ abstract class RenderSliver extends RenderObject {
 }
 
 /// Mixin for [RenderSliver] subclasses that provides some utility functions.
-abstract class RenderSliverHelpers implements RenderSliver {
-
+mixin RenderSliverHelpers implements RenderSliver {
   bool _getRightWayUp(SliverConstraints constraints) {
     assert(constraints != null);
     assert(constraints.axisDirection != null);

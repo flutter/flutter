@@ -400,7 +400,7 @@ class _RootRestorationScopeState extends State<RootRestorationScope> {
 ///  * [RestorationMixin], to which a [RestorableProperty] must be registered.
 ///  * [RestorationManager], which describes how state restoration works in
 ///    Flutter.
-abstract class RestorableProperty<T> extends ChangeNotifier {
+abstract class RestorableProperty<T> with ChangeNotifier {
   /// Called by the [RestorationMixin] if no restoration data is available to
   /// restore the value of the property from to obtain the default value for the
   /// property.

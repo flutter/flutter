@@ -111,6 +111,6 @@ void main() {
   printer.printToStdout();
 }
 
-class _Notifier extends ChangeNotifier {
+class _Notifier with ChangeNotifier {
   void notify() => notifyListeners();
 }

@@ -150,7 +150,7 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
 
 class ErrorHandlingFile
     extends ForwardingFileSystemEntity<File, io.File>
-    with ForwardingFile {
+    with ForwardingFile { // ignore: prefer_mixin
   ErrorHandlingFile({
     @required Platform platform,
     @required this.fileSystem,
@@ -352,7 +352,7 @@ class ErrorHandlingFile
 
 class ErrorHandlingDirectory
     extends ForwardingFileSystemEntity<Directory, io.Directory>
-    with ForwardingDirectory<Directory> {
+    with ForwardingDirectory<Directory> { // ignore: prefer_mixin
   ErrorHandlingDirectory({
     @required Platform platform,
     @required this.fileSystem,
@@ -483,7 +483,7 @@ class ErrorHandlingDirectory
 
 class ErrorHandlingLink
     extends ForwardingFileSystemEntity<Link, io.Link>
-    with ForwardingLink {
+    with ForwardingLink { // ignore: prefer_mixin
   ErrorHandlingLink({
     @required Platform platform,
     @required this.fileSystem,

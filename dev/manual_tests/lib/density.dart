@@ -44,7 +44,7 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class OptionModel extends ChangeNotifier {
+class OptionModel with ChangeNotifier {
   double get size => _size;
   double _size = 1.0;
   set size(double size) {

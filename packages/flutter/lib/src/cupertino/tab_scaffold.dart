@@ -62,7 +62,7 @@ import 'theme.dart';
 ///    controlled by a [CupertinoTabController].
 ///  * [RestorableCupertinoTabController], which is a restorable version
 ///    of this controller.
-class CupertinoTabController extends ChangeNotifier {
+class CupertinoTabController with ChangeNotifier {
   /// Creates a [CupertinoTabController] to control the tab index of [CupertinoTabScaffold]
   /// and [CupertinoTabBar].
   ///
