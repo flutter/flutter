@@ -484,6 +484,10 @@ class AppDomain extends Domain {
         stayResident: true,
         urlTunneller: options.webEnableExposeUrl ? daemon.daemonDomain.exposeUrl : null,
         machine: machine,
+        usage: globals.flutterUsage,
+        systemClock: globals.systemClock,
+        logger: globals.logger,
+        fileSystem: globals.fs,
       );
     } else if (enableHotReload) {
       runner = HotRunner(
