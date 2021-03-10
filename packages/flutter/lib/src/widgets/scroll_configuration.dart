@@ -18,8 +18,8 @@ const Color _kDefaultGlowColor = Color(0xFFFFFFFF);
 /// Used by [ScrollConfiguration] to configure the [Scrollable] widgets in a
 /// subtree.
 ///
-/// This class can be extended to further customize a [ScrollBehavior] across
-/// your app. For example, overriding [ScrollBehavior.getScrollPhysics] sets the
+/// This class can be extended to further customize a [ScrollBehavior] for a
+/// subtree. For example, overriding [ScrollBehavior.getScrollPhysics] sets the
 /// default [ScrollPhysics] for [Scrollable]s that inherit this [ScrollConfiguration].
 /// Overriding [ScrollBehavior.buildViewportChrome] can be used to add or change
 /// default decorations like [GlowingOverscrollIndicator]s.

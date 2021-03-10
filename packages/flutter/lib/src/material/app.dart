@@ -634,9 +634,21 @@ class MaterialApp extends StatefulWidget {
   /// {@macro flutter.widgets.widgetsApp.restorationScopeId}
   final String? restorationScopeId;
 
-  /// {@macro flutter.widgets.widgetsApp.scrollBehavior}
+  /// {@template flutter.material.materialApp.scrollBehavior}
+  /// The default [ScrollBehavior] for the application.
+  ///
+  /// [ScrollBehavior]s describe how [Scrollable] widgets behave. Providing
+  /// a [ScrollBehavior] can set the default [ScrollPhysics] across
+  /// an application, and manage [Scrollable] decorations like [Scrollbar]s and
+  /// [GlowingOverscrollIndicator]s.
+  /// {@endtemplate}
   ///
   /// When null, defaults to [MaterialScrollBehavior].
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollConfiguration], which controls how [Scrollable] widgets behave
+  ///    in a subtree.
   final ScrollBehavior? scrollBehavior;
 
   /// Turns on a [GridPaper] overlay that paints a baseline grid
@@ -664,11 +676,11 @@ class MaterialApp extends StatefulWidget {
   }
 }
 
-/// Describes how [Scrollable] widgets should behave for [MaterialApp]s.
+/// Describes how [Scrollable] widgets behave for [MaterialApp]s.
 ///
 /// {@macro flutter.widgets.scrollBehavior}
 ///
-/// Setting a [MaterialScrollBehavior] for your app will apply a
+/// Setting a [MaterialScrollBehavior] will apply a
 /// [GlowingOverscrollIndicator] to [Scrollable] descendants when executing on
 /// [TargetPlatform.android] and [TargetPlatform.fuchsia].
 ///

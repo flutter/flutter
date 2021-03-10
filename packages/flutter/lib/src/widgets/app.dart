@@ -21,7 +21,6 @@ import 'pages.dart';
 import 'performance_overlay.dart';
 import 'restoration.dart';
 import 'router.dart';
-import 'scroll_configuration.dart';
 import 'scrollable.dart';
 import 'semantics_debugger.dart';
 import 'shortcuts.dart';
@@ -198,7 +197,6 @@ class WidgetsApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
-    this.scrollBehavior,
   }) : assert(navigatorObservers != null),
        assert(routes != null),
        assert(
@@ -295,7 +293,6 @@ class WidgetsApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
-    this.scrollBehavior,
   }) : assert(
          routeInformationParser != null &&
          routerDelegate != null,
@@ -975,23 +972,6 @@ class WidgetsApp extends StatefulWidget {
   /// {@endtemplate}
   final String? restorationScopeId;
 
-  /// {@template flutter.widgets.widgetsApp.scrollBehavior}
-  /// The default [ScrollBehavior] for the application.
-  ///
-  /// [ScrollBehavior]s describe how [Scrollable] widgets behave. By providing
-  /// your own [ScrollBehavior], you can set the default [ScrollPhysics] across
-  /// your application, or manage [Scrollable] decorations like [Scrollbar]s and
-  /// [GlowingOverscrollIndicator]s.
-  ///
-  /// See also:
-  ///
-  ///  * [ScrollConfiguration], which controls how [Scrollable] widgets behave
-  ///    in a subtree.
-  /// {@endtemplate}
-  ///
-  /// When null, defaults to [ScrollBehavior].
-  final ScrollBehavior? scrollBehavior;
-
   /// If true, forces the performance overlay to be visible in all instances.
   ///
   /// Used by the `showPerformanceOverlay` observatory extension.
@@ -1641,7 +1621,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       : _locale!;
 
     assert(_debugCheckLocalizations(appLocale));
-    final Widget app =  RootRestorationScope(
+    return RootRestorationScope(
       restorationId: widget.restorationScopeId,
       child: Shortcuts(
         shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
@@ -1661,13 +1641,6 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         ),
       ),
     );
-    if (widget.scrollBehavior != null) {
-      return ScrollConfiguration(
-        behavior: widget.scrollBehavior!,
-        child: app,
-      );
-    }
-    return app;
   }
 }
 

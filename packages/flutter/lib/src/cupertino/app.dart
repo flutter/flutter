@@ -395,9 +395,14 @@ class CupertinoApp extends StatefulWidget {
   /// {@macro flutter.widgets.widgetsApp.restorationScopeId}
   final String? restorationScopeId;
 
-  /// {@macro flutter.widgets.widgetsApp.scrollBehavior}
+  /// {@macro flutter.material.materialApp.scrollBehavior}
   ///
   /// When null, defaults to [CupertinoScrollBehavior].
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollConfiguration], which controls how [Scrollable] widgets behave
+  ///    in a subtree.
   final ScrollBehavior? scrollBehavior;
 
   @override
@@ -410,13 +415,13 @@ class CupertinoApp extends StatefulWidget {
       HeroController(); // Linear tweening.
 }
 
-/// Describes how [Scrollable] widgets should behave for [CupertinoApp]s.
+/// Describes how [Scrollable] widgets behave for [CupertinoApp]s.
 ///
 /// {@macro flutter.widgets.scrollBehavior}
 ///
-/// Setting a [CupertinoScrollBehavior] for your app will result in
-/// [BouncingScrollPhysics] by default. No [GlowingOverscrollIndicator] is applied
-/// when using a [CupertinoScrollBehavior] either, regardless of platform.
+/// Setting a [CupertinoScrollBehavior] will result in descendant [Scrollable] widgets
+/// using [BouncingScrollPhysics] by default. No [GlowingOverscrollIndicator] is
+/// applied when using a [CupertinoScrollBehavior] either, regardless of platform.
 ///
 /// See also:
 ///
