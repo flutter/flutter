@@ -33,7 +33,7 @@ void main() {
           '   must have unique keys.\n'
           '   Flex(direction: vertical, mainAxisAlignment: start,\n'
           '   crossAxisAlignment: center) has multiple children with key\n'
-          '   [<\'key\'>].\n',
+          "   [<'key'>].\n",
         ),
       );
     }

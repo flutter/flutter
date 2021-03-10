@@ -2661,7 +2661,7 @@ void main() {
   });
 
   group('Tab overlayColor affects ink response', () {
-    testWidgets('Tab\'s ink well changes color on hover with Tab overlayColor',
+    testWidgets("Tab's ink well changes color on hover with Tab overlayColor",
     (WidgetTester tester) async {
       await tester.pumpWidget(
         boilerplate(
@@ -2693,7 +2693,7 @@ void main() {
       expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(0.0, 276.0, 800.0, 324.0), color: const Color(0xff00ff00)));
     });
 
-  testWidgets('Tab\'s ink response splashColor matches resolved Tab overlayColor for MaterialState.pressed',
+  testWidgets("Tab's ink response splashColor matches resolved Tab overlayColor for MaterialState.pressed",
   (WidgetTester tester) async {
     const Color splashColor = Color(0xf00fffff);
     await tester.pumpWidget(
@@ -3312,7 +3312,7 @@ void main() {
     // because we tried to send a notification on dispose.
   });
 
-  testWidgets('TabController\'s animation value should be in sync with TabBarView\'s scroll value when user interrupts ballistic scroll', (WidgetTester tester) async {
+  testWidgets("TabController's animation value should be in sync with TabBarView's scroll value when user interrupts ballistic scroll", (WidgetTester tester) async {
     final TabController tabController = TabController(
       vsync: const TestVSync(),
       length: 3,

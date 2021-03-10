@@ -50,7 +50,7 @@ void main() {
       Artifacts: () => Artifacts.test(),
     });
 
-    testUsingContext('get devices\' platform types', () async {
+    testUsingContext("get devices' platform types", () async {
       final List<String> platformTypes = Device.devicesPlatformTypes(
         await globals.deviceManager.getAllConnectedDevices(),
       );

@@ -197,7 +197,7 @@ void main() {
     });
 
     test(
-        'exits with exception if --skip-tagging is provided but commit isn\'t '
+        "exits with exception if --skip-tagging is provided but commit isn't "
         'already tagged', () {
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(command: <String>[

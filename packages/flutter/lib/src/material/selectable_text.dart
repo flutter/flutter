@@ -205,7 +205,7 @@ class SelectableText extends StatefulWidget {
         assert(minLines == null || minLines > 0),
         assert(
           (maxLines == null) || (minLines == null) || (maxLines >= minLines),
-          'minLines can\'t be greater than maxLines',
+          "minLines can't be greater than maxLines",
         ),
         assert(
           data != null,
@@ -258,7 +258,7 @@ class SelectableText extends StatefulWidget {
     assert(minLines == null || minLines > 0),
     assert(
       (maxLines == null) || (minLines == null) || (maxLines >= minLines),
-      'minLines can\'t be greater than maxLines',
+      "minLines can't be greater than maxLines",
     ),
     assert(
       textSpan != null,
