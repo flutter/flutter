@@ -12,7 +12,10 @@ import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'object.dart';
-import 'system_mouse_cursor.dart';
+
+export 'package:flutter/services.dart' show
+  MouseCursor,
+  SystemMouseCursors;
 
 /// Signature for listening to [PointerEnterEvent] events.
 ///

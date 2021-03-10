@@ -64,7 +64,6 @@ export 'src/rendering/sliver_multi_box_adaptor.dart';
 export 'src/rendering/sliver_padding.dart';
 export 'src/rendering/sliver_persistent_header.dart';
 export 'src/rendering/stack.dart';
-export 'src/rendering/system_mouse_cursor.dart';
 export 'src/rendering/table.dart';
 export 'src/rendering/table_border.dart';
 export 'src/rendering/texture.dart';
