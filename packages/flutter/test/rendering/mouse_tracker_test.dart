@@ -10,7 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 
 import '../flutter_test_alternative.dart';
-import './mouse_tracking_test_utils.dart';
+import 'mouse_tracker_test_utils.dart';
 
 MouseTracker get _mouseTracker => RendererBinding.instance!.mouseTracker;
 
@@ -75,32 +75,6 @@ void main() {
   });
 
   final Matrix4 translate10by20 = Matrix4.translationValues(10, 20, 0);
-
-  test('MouseTrackerAnnotation has correct toString', () {
-    final MouseTrackerAnnotation annotation1 = MouseTrackerAnnotation(
-      onEnter: (_) {},
-      onExit: (_) {},
-    );
-    expect(
-      annotation1.toString(),
-      equals('MouseTrackerAnnotation#${shortHash(annotation1)}(callbacks: [enter, exit])'),
-    );
-
-    const MouseTrackerAnnotation annotation2 = MouseTrackerAnnotation();
-    expect(
-      annotation2.toString(),
-      equals('MouseTrackerAnnotation#${shortHash(annotation2)}(callbacks: <none>)'),
-    );
-
-    final MouseTrackerAnnotation annotation3 = MouseTrackerAnnotation(
-      onEnter: (_) {},
-      cursor: SystemMouseCursors.grab,
-    );
-    expect(
-      annotation3.toString(),
-      equals('MouseTrackerAnnotation#${shortHash(annotation3)}(callbacks: [enter], cursor: SystemMouseCursor(grab))'),
-    );
-  });
 
   test('should detect enter, hover, and exit from Added, Hover, and Removed events', () {
     final List<PointerEvent> events = <PointerEvent>[];
