@@ -8,7 +8,6 @@
 
 import 'dart:async';
 import 'dart:html' as html;
-import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -31,8 +30,6 @@ const Map<String, bool> originState = <String, bool>{'origin': true};
 const Map<String, bool> flutterState = <String, bool>{'flutter': true};
 
 const MethodCodec codec = JSONMethodCodec();
-
-void emptyCallback(ByteData date) {}
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
