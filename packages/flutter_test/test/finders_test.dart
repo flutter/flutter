@@ -153,9 +153,7 @@ void main() {
             key: key1,
             child: const Text('1'),
           ),
-          Container(
-            child: const Text('2'),
-          ),
+          const Text('2'),
         ],
       )),
     );

@@ -16,8 +16,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/tester/flutter_tester.dart';
-import 'package:flutter_tools/src/version.dart';
-import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -100,7 +98,7 @@ void main() {
         artifacts: Artifacts.test(),
         buildDirectory: 'build',
         logger: BufferLogger.test(),
-        flutterVersion: MockFlutterVersion(),
+        flutterVersion: FakeFlutterVersion(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       );
       logLines = <String>[];
@@ -183,9 +181,7 @@ FlutterTesterDevices setUpFlutterTesterDevices() {
     processManager: FakeProcessManager.any(),
     fileSystem: MemoryFileSystem.test(),
     config: Config.test(),
-    flutterVersion: MockFlutterVersion(),
+    flutterVersion: FakeFlutterVersion(),
     operatingSystemUtils: FakeOperatingSystemUtils(),
   );
 }
-
-class MockFlutterVersion extends Mock implements FlutterVersion {}

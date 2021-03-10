@@ -56,7 +56,7 @@ typedef ContextInitializer = void Function(AppContext testContext);
 @isTest
 void testUsingContext(
   String description,
-  dynamic testMethod(), {
+  dynamic Function() testMethod, {
   Map<Type, Generator> overrides = const <Type, Generator>{},
   bool initializeFlutterRoot = true,
   String testOn,
@@ -112,7 +112,7 @@ void testUsingContext(
           Config: () => buildConfig(globals.fs),
           DeviceManager: () => FakeDeviceManager(),
           Doctor: () => FakeDoctor(globals.logger),
-          FlutterVersion: () => MockFlutterVersion(),
+          FlutterVersion: () => FakeFlutterVersion(),
           HttpClient: () => FakeHttpClient.any(),
           IOSSimulatorUtils: () {
             final MockIOSSimulatorUtils mock = MockIOSSimulatorUtils();
@@ -376,8 +376,6 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   @override
   List<String> xcrunCommand() => <String>['xcrun'];
 }
-
-class MockFlutterVersion extends Mock implements FlutterVersion {}
 
 class MockCrashReporter extends Mock implements CrashReporter {}
 

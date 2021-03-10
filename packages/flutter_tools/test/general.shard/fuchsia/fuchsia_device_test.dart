@@ -333,7 +333,7 @@ void main() {
         return ProcessResult(1, 1, '', '');
       });
       final FuchsiaDevice device = FuchsiaDevice('id');
-      expect(() async => await device.hostAddress, throwsToolExit());
+      expect(() async => device.hostAddress, throwsToolExit());
     }, overrides: <Type, Generator>{
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
       FuchsiaSdk: () => MockFuchsiaSdk(),
@@ -345,7 +345,7 @@ void main() {
         return ProcessResult(1, 0, '', '');
       });
       final FuchsiaDevice device = FuchsiaDevice('id');
-      expect(() async => await device.hostAddress, throwsToolExit());
+      expect(() async => device.hostAddress, throwsToolExit());
     }, overrides: <Type, Generator>{
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
       FuchsiaSdk: () => MockFuchsiaSdk(),
@@ -745,7 +745,7 @@ void main() {
         environment: anyNamed('environment'),
       )).thenAnswer((_) async => ProcessResult(0, 0, '', ''));
 
-      expect(() async => await device.takeScreenshot(globals.fs.file('file.ppm')),
+      expect(() async => device.takeScreenshot(globals.fs.file('file.ppm')),
         returnsNormally);
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
@@ -1013,7 +1013,7 @@ void main() {
       }
 
       final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(BuildInfo(mode, null, treeShakeIcons: false));
-      return await device.startApp(
+      return device.startApp(
         app,
         prebuiltApplication: prebuilt,
         debuggingOptions: debuggingOptions,
@@ -1123,7 +1123,7 @@ void main() {
 
     testUsingContext('fail when cant get ssh config', () async {
       expect(() async =>
-          await setupAndStartApp(prebuilt: true, mode: BuildMode.release),
+          setupAndStartApp(prebuilt: true, mode: BuildMode.release),
           throwsToolExit(message: 'Cannot interact with device. No ssh config.\n'
                                   'Try setting FUCHSIA_SSH_CONFIG or FUCHSIA_BUILD_DIR.'));
     }, overrides: <Type, Generator>{
@@ -1137,7 +1137,7 @@ void main() {
 
     testUsingContext('fail when cant get host address', () async {
       expect(() async =>
-        await setupAndStartApp(prebuilt: true, mode: BuildMode.release),
+        setupAndStartApp(prebuilt: true, mode: BuildMode.release),
           throwsToolExit(message: 'Failed to get local address, aborting.'));
     }, overrides: <Type, Generator>{
       Artifacts: () => artifacts,

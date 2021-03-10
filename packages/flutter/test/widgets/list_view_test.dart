@@ -65,9 +65,7 @@ class _StatefulListViewState extends State<_StatefulListView> {
           children: List<Widget>.generate(200, (int i) {
             return Builder(
               builder: (BuildContext context) {
-                return Container(
-                  child: Alive(widget.aliveCallback(i), i),
-                );
+                return Alive(widget.aliveCallback(i), i);
               },
             );
           }),
@@ -97,6 +95,7 @@ void main() {
           itemExtent: 200.0,
           children: List<Widget>.generate(20, (int i) {
             return Container(
+              color: Colors.green,
               child: Text('$i'),
             );
           }),
@@ -147,9 +146,7 @@ void main() {
             return Builder(
               builder: (BuildContext context) {
                 log.add(i);
-                return Container(
-                  child: Text('$i'),
-                );
+                return Text('$i');
               },
             );
           }),
@@ -239,9 +236,7 @@ void main() {
         child: ListView(
           itemExtent: 100.0,
           children: List<Widget>.generate(2, (int i) {
-            return Container(
-              child: Text('$i'),
-            );
+            return Text('$i');
           }),
         ),
       ),
@@ -260,9 +255,7 @@ void main() {
         child: ListView(
           itemExtent: 100.0,
           children: List<Widget>.generate(5, (int i) {
-            return Container(
-              child: Text('$i'),
-            );
+            return Text('$i');
           }),
         ),
       ),
@@ -306,9 +299,7 @@ void main() {
             itemExtent: 100.0,
             shrinkWrap: true,
             children: List<Widget>.generate(20, (int i) {
-              return Container(
-                child: Text('$i'),
-              );
+              return Text('$i');
             }),
           ),
         ),
@@ -324,9 +315,7 @@ void main() {
       List<Widget>.generate(
         20,
         (int i) {
-          return Container(
-            child: Text('$i', textDirection: TextDirection.ltr),
-          );
+          return Text('$i', textDirection: TextDirection.ltr);
         },
       ),
     );

@@ -340,8 +340,8 @@ void main() {
     logger.printStatus('message');
     logger.printError('error message');
 
-    expect(() async => await stdout.done, throwsA(isA<Exception>()));
-    expect(() async => await stderr.done, throwsA(isA<Exception>()));
+    expect(() async => stdout.done, throwsA(isA<Exception>()));
+    expect(() async => stderr.done, throwsA(isA<Exception>()));
   });
 
   group('Spinners', () {
@@ -388,7 +388,7 @@ void main() {
     List<String> outputStdout() => mockStdio.writtenToStdout.join('').split('\n');
     List<String> outputStderr() => mockStdio.writtenToStderr.join('').split('\n');
 
-    void doWhileAsync(FakeAsync time, bool doThis()) {
+    void doWhileAsync(FakeAsync time, bool Function() doThis) {
       do {
         mockStopwatch.elapsed += const Duration(milliseconds: 1);
         time.elapse(const Duration(milliseconds: 1));

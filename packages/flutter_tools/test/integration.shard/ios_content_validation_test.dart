@@ -119,9 +119,6 @@ void main() {
 
           expect(vmSnapshot.existsSync(), buildMode == BuildMode.debug);
 
-          expect(outputFlutterFramework.childDirectory('Headers'), isNot(exists));
-          expect(outputFlutterFramework.childDirectory('Modules'), isNot(exists));
-
           // Archiving should contain a bitcode blob, but not building.
           // This mimics Xcode behavior and prevents a developer from having to install a
           // 300+MB app.

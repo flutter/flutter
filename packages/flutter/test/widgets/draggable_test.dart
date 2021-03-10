@@ -408,14 +408,12 @@ void main() {
                 onTap: () {
                   events.add('tap');
                 },
-                child: Container(
-                  child: const Text('Button'),
-                ),
+                child: const Text('Button'),
               ),
               DragTarget<int>(
                 builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-                  return IgnorePointer(
-                    child: Container(child: const Text('Target')),
+                  return const IgnorePointer(
+                    child: Text('Target'),
                   );
                 },
                 onAccept: (int? data) {
@@ -498,7 +496,7 @@ void main() {
               onTap: () {
                 events.add('tap');
               },
-              child: Container(child: const Text('Button')),
+              child: const Text('Button'),
             ),
             feedback: const Text('Dragging'),
           ),

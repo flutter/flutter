@@ -48,14 +48,19 @@ void main() {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     globals.fs.file(globals.fs.path.join('web', 'index.html')).createSync(recursive: true);
     final FlutterProject project = FlutterProject.fromDirectoryTest(globals.fs.currentDirectory);
-    residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
+    residentWebRunner = ResidentWebRunner(
       mockFlutterDevice,
       flutterProject: project,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
       ipv6: true,
       stayResident: true,
       urlTunneller: null,
-    ) as ResidentWebRunner;
+      featureFlags: TestFeatureFlags(),
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      systemClock: globals.systemClock,
+      usage: globals.flutterUsage,
+    );
   }
 
   testUsingContext('Can successfully run and connect without vmservice', () async {
@@ -82,7 +87,7 @@ void main() {
   testUsingContext('ResidentWebRunner calls appFailedToStart if initial compilation fails', () async {
     _setupMocks();
 
-    expect(() async => await residentWebRunner.run(), throwsToolExit());
+    expect(() async => residentWebRunner.run(), throwsToolExit());
     expect(await residentWebRunner.waitForAppToFinish(), 1);
   }, overrides: <Type, Generator>{
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: false)),
@@ -94,7 +99,7 @@ void main() {
   testUsingContext('ResidentWebRunner calls appFailedToStart if error is thrown during startup', () async {
     _setupMocks();
 
-    expect(() async => await residentWebRunner.run(), throwsA(isA<Exception>()));
+    expect(() async => residentWebRunner.run(), throwsA(isA<Exception>()));
     expect(await residentWebRunner.waitForAppToFinish(), 1);
   }, overrides: <Type, Generator>{
     BuildSystem: () => TestBuildSystem.error(Exception('foo')),

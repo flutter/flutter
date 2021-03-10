@@ -965,7 +965,7 @@ void main() {
     final Key buildCounterKey = UniqueKey();
     const String counterText = 'I show instead of count';
     final Widget counter = Text('hello', key: counterKey);
-    final InputCounterWidgetBuilder buildCounter = (
+    Widget buildCounter(
       BuildContext context, {
       required int currentLength,
       required int? maxLength,
@@ -975,7 +975,7 @@ void main() {
         '${currentLength.toString()} of ${maxLength.toString()}',
         key: buildCounterKey,
       );
-    };
+    }
 
     await tester.pumpWidget(buildFrame(
       counterText: counterText,
@@ -3356,7 +3356,7 @@ void main() {
       bool enabled = true,
       bool filled = true,
     }) async {
-      return await tester.pumpWidget(
+      return tester.pumpWidget(
         buildInputDecorator(
           isHovering: hovering,
           decoration: InputDecoration(
@@ -3435,7 +3435,7 @@ void main() {
       bool enabled = true,
       bool filled = true,
     }) async {
-      return await tester.pumpWidget(
+      return tester.pumpWidget(
         buildInputDecorator(
           isFocused: focused,
           decoration: InputDecoration(
@@ -3486,7 +3486,7 @@ void main() {
       bool empty = true,
       bool directional = false,
     }) async {
-      return await tester.pumpWidget(
+      return tester.pumpWidget(
         buildInputDecorator(
           isEmpty: empty,
           isFocused: focused,

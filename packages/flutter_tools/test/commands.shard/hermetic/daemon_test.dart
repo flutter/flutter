@@ -250,7 +250,7 @@ void main() {
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(MockAndroidDevice());
 
-      return await responses.stream.skipWhile(_isConnectedEvent).first.then<void>((Map<String, dynamic> response) async {
+      return responses.stream.skipWhile(_isConnectedEvent).first.then<void>((Map<String, dynamic> response) async {
         expect(response['event'], 'device.added');
         expect(response['params'], isMap);
 

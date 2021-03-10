@@ -288,6 +288,24 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
+  testUsingContext('Does not discover Android Studio 4.1 location on Windows if LOCALAPPDATA is null', () {
+    windowsFileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.1\.home')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
+    windowsFileSystem
+      .directory(r'C:\Program Files\AndroidStudio')
+      .createSync(recursive: true);
+
+    expect(AndroidStudio.allInstalled(), isEmpty);
+  }, overrides: <Type, Generator>{
+    Platform: () => FakePlatform(
+      operatingSystem: 'windows',
+      environment: <String, String>{}, // Does not include LOCALAPPDATA
+    ),
+    FileSystem: () => windowsFileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
   group('Installation detection on Linux', () {
     FileSystemUtils fsUtils;
 

@@ -669,7 +669,7 @@ class ArchivePublisher {
     if (dest.endsWith('.json')) {
       mimeType = 'application/json';
     }
-    return await _runGsUtil(<String>[
+    return _runGsUtil(<String>[
       // Use our preferred MIME type for the files we care about
       // and let gsutil figure it out for anything else.
       if (mimeType != null) ...<String>['-h', 'Content-Type:$mimeType'],

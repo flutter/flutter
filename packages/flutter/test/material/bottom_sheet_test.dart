@@ -487,9 +487,7 @@ void main() {
 
 
     showModalBottomSheet<void>(context: scaffoldKey.currentContext!, builder: (BuildContext context) {
-      return Container(
-        child: const Text('BottomSheet'),
-      );
+      return const Text('BottomSheet');
     });
 
     await tester.pump(); // bottom sheet show animation starts
@@ -548,9 +546,7 @@ void main() {
       shape: shape,
       clipBehavior: clipBehavior,
       builder: (BuildContext context) {
-        return Container(
-          child: const Text('BottomSheet'),
-        );
+        return const Text('BottomSheet');
       },
     );
 
@@ -587,9 +583,7 @@ void main() {
           builder: (_, ScrollController controller) {
             return SingleChildScrollView(
               controller: controller,
-              child: Container(
-                child: const Text('BottomSheet'),
-              ),
+              child: const Text('BottomSheet'),
             );
           },
         );
@@ -713,9 +707,7 @@ void main() {
       routeSettings: routeSettings,
       builder: (BuildContext context) {
         retrievedRouteSettings = ModalRoute.of(context)!.settings;
-        return Container(
-          child: const Text('BottomSheet'),
-        );
+        return const Text('BottomSheet');
       },
     );
 
@@ -743,9 +735,7 @@ void main() {
                     reverseDuration: const Duration(seconds: 2),
                   ),
                   builder: (BuildContext context) {
-                    return Container(
-                      child: const Text('BottomSheet'),
-                    );
+                    return const Text('BottomSheet');
                   },
                 );
               },
@@ -842,41 +832,6 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1));
     // The bottom sheet should not be showing any longer.
     expect(find.text('BottomSheet'), findsNothing);
-  });
-
-  testWidgets('showModalBottomSheet should move along on-screen keyboard',
-          (WidgetTester tester) async {
-    late BuildContext savedContext;
-
-    // Show a keyboard (simulate by space at the bottom of the screen).
-    await tester.pumpWidget(
-      MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 200)),
-          child: Builder(
-            builder: (BuildContext context) {
-              savedContext = context;
-              return Container();
-            },
-          ),
-        ),
-      ),
-    );
-
-    await tester.pump();
-    expect(find.text('BottomSheet'), findsNothing);
-
-    showModalBottomSheet<void>(
-      context: savedContext,
-      builder: (BuildContext context) {
-        return const Text('BottomSheet');
-      },
-    );
-
-    await tester.pumpAndSettle();
-
-    expect(find.text('BottomSheet'), findsOneWidget);
-    expect(tester.getBottomLeft(find.text('BottomSheet')).dy, 600);
   });
 }
 

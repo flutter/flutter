@@ -2397,14 +2397,12 @@ void main() {
       required List<String> tabs,
     }) {
       return boilerplate(
-        child: Container(
-          child: TabBar(
-            controller: controller,
-            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
-            onTap: (int index) {
-              tabIndex = index;
-            },
-          ),
+        child: TabBar(
+          controller: controller,
+          tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+          onTap: (int index) {
+            tabIndex = index;
+          },
         ),
       );
     }

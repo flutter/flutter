@@ -676,7 +676,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
       PaintingBinding.instance!.imageCache!.evict(key);
       throw StateError('Unable to read data');
     }
-    return await decode(data.buffer.asUint8List());
+    return decode(data.buffer.asUint8List());
   }
 }
 
@@ -758,14 +758,14 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
 
   @override
   ImageStreamCompleter load(_SizeAwareCacheKey key, DecoderCallback decode) {
-    final DecoderCallback decodeResize = (Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
+    Future<ui.Codec> decodeResize(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
       assert(
         cacheWidth == null && cacheHeight == null && allowUpscaling == null,
         'ResizeImage cannot be composed with another ImageProvider that applies '
         'cacheWidth, cacheHeight, or allowUpscaling.'
       );
       return decode(bytes, cacheWidth: width, cacheHeight: height, allowUpscaling: this.allowUpscaling);
-    };
+    }
     final ImageStreamCompleter completer = imageProvider.load(key.providerCacheKey, decodeResize);
     if (!kReleaseMode) {
       completer.debugLabel = '${completer.debugLabel} - Resized(${key.width}×${key.height})';
@@ -887,7 +887,7 @@ class FileImage extends ImageProvider<FileImage> {
       throw StateError('$file is empty and cannot be loaded as an image.');
     }
 
-    return await decode(bytes);
+    return decode(bytes);
   }
 
   @override

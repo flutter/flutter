@@ -872,14 +872,12 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Center(
-              child: Container(
-                // Each word takes up more than a half of a line. Together they
-                // wrap onto two lines, but leave a lot of extra space.
-                child: Text(
-                  'twowordsthateachtakeupmorethanhalfof alineoftextsothattheywrapwithlotsofextraspace',
-                  textDirection: TextDirection.ltr,
-                  textWidthBasis: textWidthBasis,
-                ),
+              // Each word takes up more than a half of a line. Together they
+              // wrap onto two lines, but leave a lot of extra space.
+              child: Text(
+                'twowordsthateachtakeupmorethanhalfof alineoftextsothattheywrapwithlotsofextraspace',
+                textDirection: TextDirection.ltr,
+                textWidthBasis: textWidthBasis,
               ),
             ),
           ),

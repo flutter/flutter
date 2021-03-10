@@ -90,6 +90,15 @@ String getFlutterRoot() {
   return path.normalize(path.join(toolsPath, '..', '..'));
 }
 
+/// Gets the path to the root of the Android SDK from the environment variable.
+String getAndroidSdkRoot() {
+  const Platform platform = LocalPlatform();
+  if (platform.environment.containsKey('ANDROID_SDK_ROOT')) {
+    return platform.environment['ANDROID_SDK_ROOT'];
+  }
+  throw StateError('ANDROID_SDK_ROOT environment varible not set');
+}
+
 CommandRunner<void> createTestCommandRunner([ FlutterCommand command ]) {
   final FlutterCommandRunner runner = TestFlutterCommandRunner();
   if (command != null) {
@@ -179,7 +188,7 @@ Matcher containsIgnoringWhitespace(String toSearch) {
 /// system temporary directory are deleted after each test by calling
 /// `LocalFileSystem.dispose()`.
 @isTest
-void test(String description, FutureOr<void> body(), {
+void test(String description, FutureOr<void> Function() body, {
   String testOn,
   Timeout timeout,
   dynamic skip,
@@ -213,7 +222,7 @@ void test(String description, FutureOr<void> body(), {
 ///
 /// For more information, see https://github.com/flutter/flutter/issues/47161
 @isTest
-void testWithoutContext(String description, FutureOr<void> body(), {
+void testWithoutContext(String description, FutureOr<void> Function() body, {
   String testOn,
   Timeout timeout,
   dynamic skip,

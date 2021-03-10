@@ -1157,31 +1157,29 @@ void main() {
       home: Scaffold(
         body: SingleChildScrollView(
           controller: outerController,
-          child: Container(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Column(
-                  children: <Widget>[
-                    for (int i = 0; i < 100; i++)
-                      Text('SingleChildScrollView $i'),
-                  ]
-                ),
-                SizedBox(
-                  height: 3000,
-                  width: 400,
-                  child: ListView.builder(
-                    controller: innerController,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: 100,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Text('Nested NeverScrollable ListView $index');
-                    },
-                  )
-                ),
-              ]
-            )
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Column(
+                children: <Widget>[
+                  for (int i = 0; i < 100; i++)
+                    Text('SingleChildScrollView $i'),
+                ]
+              ),
+              SizedBox(
+                height: 3000,
+                width: 400,
+                child: ListView.builder(
+                  controller: innerController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: 100,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Text('Nested NeverScrollable ListView $index');
+                  },
+                )
+              ),
+            ]
           )
         )
       ),
