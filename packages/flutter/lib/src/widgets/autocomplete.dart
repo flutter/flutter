@@ -79,8 +79,8 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// [fieldViewBuilder] and [optionsViewBuilder] parameters.
 ///
 /// ```dart imports
-/// import 'package:flutter/widgets.dart';
 /// import 'package:flutter/material.dart';
+/// import 'package:flutter/widgets.dart';
 /// ```
 ///
 /// ```dart

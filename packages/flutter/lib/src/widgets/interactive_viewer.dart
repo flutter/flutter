@@ -121,7 +121,8 @@ class InteractiveViewer extends StatefulWidget {
   /// Can be used to render a child that changes in response to the current
   /// transformation.
   ///
-  /// The [builder] parameter must not be null.
+  /// The [builder] parameter must not be null. See its docs for an example of
+  /// using it to optimize a large child.
   InteractiveViewer.builder({
     Key? key,
     this.clipBehavior = Clip.hardEdge,
@@ -202,6 +203,156 @@ class InteractiveViewer extends StatefulWidget {
   /// If using the [InteractiveViewer.builder] constructor, this can be passed
   /// directly. This allows the child to be built in response to the current
   /// transformation.
+  ///
+  /// {@tool dartpad --template=stateless_widget_scaffold}
+  /// This example shows how to use builder to create a [Table] whose cell
+  /// contents are only built when they are visible. Built and remove cells are
+  /// logged in the console for illustration.
+  ///
+  /// ```dart
+  /// import 'package:flutter/material.dart';
+  /// import 'package:flutter/widgets.dart';
+  ///
+  /// void main() => runApp(IVBuilderExample());
+  ///
+  /// class IVBuilderExample extends StatefulWidget {
+  ///   const IVBuilderExample({ Key key }) : super(key: key);
+  ///
+  ///   @override _IVBuilderExampleState createState() => _IVBuilderExampleState();
+  /// }
+  ///
+  /// class _IVBuilderExampleState extends State<IVBuilderExample> {
+  ///   final TransformationController _transformationController = TransformationController();
+  ///
+  ///   static const double _cellWidth = 200.0;
+  ///   static const double _cellHeight = 26.0;
+  ///
+  ///   // Returns true iff the given cell is currently visible. Caches viewport
+  ///   // calculations.
+  ///   Rect _cachedViewport;
+  ///   int _firstVisibleColumn;
+  ///   int _firstVisibleRow;
+  ///   int _lastVisibleColumn;
+  ///   int _lastVisibleRow;
+  ///   bool _isCellVisible(int row, int column, Rect viewport) {
+  ///     if (viewport != _cachedViewport) {
+  ///       _cachedViewport = viewport;
+  ///       _firstVisibleRow = (viewport.top / _cellHeight).floor();
+  ///       _firstVisibleColumn = (viewport.left / _cellWidth).floor();
+  ///       _lastVisibleRow = (viewport.bottom / _cellHeight).floor();
+  ///       _lastVisibleColumn = (viewport.right / _cellWidth).floor();
+  ///     }
+  ///     return row >= _firstVisibleRow && row <= _lastVisibleRow
+  ///         && column >= _firstVisibleColumn && column <= _lastVisibleColumn;
+  ///   }
+  ///
+  ///   void _onChangeTransformation() {
+  ///     setState(() {});
+  ///   }
+  ///
+  ///   @override
+  ///   void initState() {
+  ///     super.initState();
+  ///     _transformationController.addListener(_onChangeTransformation);
+  ///   }
+  ///
+  ///   @override
+  ///   void dispose() {
+  ///     _transformationController.removeListener(_onChangeTransformation);
+  ///     super.dispose();
+  ///   }
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return MaterialApp(
+  ///       home: Scaffold(
+  ///         appBar: AppBar(
+  ///           title: const Text('IV Builder Example'),
+  ///         ),
+  ///         body: Center(
+  ///           child: LayoutBuilder(
+  ///             builder: (BuildContext context, BoxConstraints constraints) {
+  ///               return InteractiveViewer.builder(
+  ///                 alignPanAxis: true,
+  ///                 scaleEnabled: false,
+  ///                 transformationController: _transformationController,
+  ///                 builder: (BuildContext context, Rect viewport) {
+  ///                   // A simple extension of Table that builds cells.
+  ///                   return _TableBuilder(
+  ///                     rowCount: 60,
+  ///                     columnCount: 6,
+  ///                     cellWidth: _cellWidth,
+  ///                     builder: (BuildContext context, int row, int column) {
+  ///                       if (!_isCellVisible(row, column, viewport)) {
+  ///                         print('removing cell ($row, $column)');
+  ///                         return Container(height: _cellHeight);
+  ///                       }
+  ///                       print('building cell ($row, $column)');
+  ///                       return Container(
+  ///                         height: _cellHeight,
+  ///                         color: row % 2 + column % 2 == 1 ? Colors.white : Colors.grey.withOpacity(0.1),
+  ///                         child: Align(
+  ///                           alignment: Alignment.centerLeft,
+  ///                           child: Text('$row x $column'),
+  ///                         ),
+  ///                       );
+  ///                     }
+  ///                   );
+  ///                 },
+  ///               );
+  ///             },
+  ///           ),
+  ///         ),
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  ///
+  /// typedef _CellBuilder = Widget Function(BuildContext context, int row, int column);
+  ///
+  /// class _TableBuilder extends StatelessWidget {
+  ///   const _TableBuilder({
+  ///     @required this.rowCount,
+  ///     @required this.columnCount,
+  ///     @required this.cellWidth,
+  ///     this.builder,
+  ///   }) : assert(rowCount != null),
+  ///        assert(columnCount != null),
+  ///        assert(cellWidth != null),
+  ///        assert(rowCount != null && rowCount > 0),
+  ///        assert(columnCount != null && columnCount > 0);
+  ///
+  ///   final int rowCount;
+  ///   final int columnCount;
+  ///   final double cellWidth;
+  ///   final _CellBuilder builder;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Table(
+  ///       // ignore: prefer_const_literals_to_create_immutables
+  ///       columnWidths: <int, TableColumnWidth>{
+  ///         for (int column = 0; column < columnCount; column++)
+  ///           column: FixedColumnWidth(cellWidth),
+  ///       },
+  ///       // ignore: prefer_const_literals_to_create_immutables
+  ///       children: <TableRow>[
+  ///         for (int row = 0; row < rowCount; row++)
+  ///           // ignore: prefer_const_constructors
+  ///           TableRow(
+  ///             // ignore: prefer_const_literals_to_create_immutables
+  ///             children: <Widget>[
+  ///               for (int column = 0; column < columnCount; column++)
+  ///                 builder(context, row, column),
+  ///             ],
+  ///           ),
+  ///       ],
+  ///     );
+  ///   }
+  /// }
+  ///
+  /// ```
+  /// {@end-tool}
   ///
   /// See also:
   ///
