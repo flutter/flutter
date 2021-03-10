@@ -81,6 +81,7 @@ class SemanticsAction {
     _kDismissIndex: dismiss,
     _kMoveCursorForwardByWordIndex: moveCursorForwardByWord,
     _kMoveCursorBackwardByWordIndex: moveCursorBackwardByWord,
+    _kSetText: setText,
   };
 
   @override
@@ -128,6 +129,8 @@ class SemanticsAction {
         return 'SemanticsAction.moveCursorForwardByWord';
       case _kMoveCursorBackwardByWordIndex:
         return 'SemanticsAction.moveCursorBackwardByWord';
+      case _kSetText:
+        return 'SemanticsAction.setText';
     }
     assert(false, 'Unhandled index: $index');
     return '';
