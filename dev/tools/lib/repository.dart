@@ -95,6 +95,12 @@ abstract class Repository {
       return _checkoutDirectory;
     }
     _checkoutDirectory = parentDirectory.childDirectory(name);
+    lazilyInitialize();
+    return _checkoutDirectory;
+  }
+
+  /// Ensure the repository is cloned to disk and initialized with proper state.
+  void lazilyInitialize() {
     if (!useExistingCheckout && _checkoutDirectory.existsSync()) {
       stdio.printTrace('Deleting $name from ${_checkoutDirectory.path}...');
       _checkoutDirectory.deleteSync(recursive: true);
@@ -129,6 +135,11 @@ abstract class Repository {
           'Adding remote ${pushRemote.url} as ${pushRemote.name}',
           workingDirectory: _checkoutDirectory.path,
         );
+        git.run(
+          <String>['fetch', pushRemote.name],
+          'Fetching git remote ${pushRemote.name}',
+          workingDirectory: _checkoutDirectory.path,
+        );
       }
       if (localUpstream) {
         // These branches must exist locally for the repo that depends on it
@@ -152,7 +163,6 @@ abstract class Repository {
     stdio.printTrace(
       'Repository $name is checked out at revision "$revision".',
     );
-    return _checkoutDirectory;
   }
 
   /// The URL of the remote named [remoteName].
