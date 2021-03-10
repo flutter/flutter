@@ -40,7 +40,7 @@ typedef SetSelectionHandler = void Function(TextSelection selection);
 /// current text with the input `text`.
 typedef SetTextHandler = void Function(String text);
 
-typedef _SemanticsActionHandler = void Function(dynamic args);
+typedef _SemanticsActionHandler = void Function(Object? args);
 
 /// A tag for a [SemanticsNode].
 ///
@@ -2698,7 +2698,7 @@ class SemanticsOwner extends ChangeNotifier {
   ///
   /// If the given `action` requires arguments they need to be passed in via
   /// the `args` parameter.
-  void performAction(int id, SemanticsAction action, [ dynamic args ]) {
+  void performAction(int id, SemanticsAction action, [ Object? args ]) {
     assert(action != null);
     final _SemanticsActionHandler? handler = _getSemanticsActionHandlerForId(id, action);
     if (handler != null) {
@@ -2748,7 +2748,7 @@ class SemanticsOwner extends ChangeNotifier {
   ///
   /// If the given `action` requires arguments they need to be passed in via
   /// the `args` parameter.
-  void performActionAt(Offset position, SemanticsAction action, [ dynamic args ]) {
+  void performActionAt(Offset position, SemanticsAction action, [ Object? args ]) {
     assert(action != null);
     final SemanticsNode? node = rootSemanticsNode;
     if (node == null)
@@ -2862,7 +2862,7 @@ class SemanticsConfiguration {
   /// `action`.
   void _addArgumentlessAction(SemanticsAction action, VoidCallback handler) {
     assert(handler != null);
-    _addAction(action, (dynamic args) {
+    _addAction(action, (Object? args) {
       assert(args == null);
       handler();
     });
@@ -3100,8 +3100,7 @@ class SemanticsConfiguration {
   set onMoveCursorForwardByCharacter(MoveCursorHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorForwardByCharacter, (Object? args) {
-      final bool extentSelection = args as bool;
-      assert(extentSelection != null);
+      final bool extentSelection = args! as bool;
       value!(extentSelection);
     });
     _onMoveCursorForwardByCharacter = value;
@@ -3119,8 +3118,7 @@ class SemanticsConfiguration {
   set onMoveCursorBackwardByCharacter(MoveCursorHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorBackwardByCharacter, (Object? args) {
-      final bool extentSelection = args as bool;
-      assert(extentSelection != null);
+      final bool extentSelection = args! as bool;
       value!(extentSelection);
     });
     _onMoveCursorBackwardByCharacter = value;
@@ -3138,8 +3136,7 @@ class SemanticsConfiguration {
   set onMoveCursorForwardByWord(MoveCursorHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorForwardByWord, (Object? args) {
-      final bool extentSelection = args as bool;
-      assert(extentSelection != null);
+      final bool extentSelection = args! as bool;
       value!(extentSelection);
     });
     _onMoveCursorForwardByCharacter = value;
@@ -3157,8 +3154,7 @@ class SemanticsConfiguration {
   set onMoveCursorBackwardByWord(MoveCursorHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorBackwardByWord, (Object? args) {
-      final bool extentSelection = args as bool;
-      assert(extentSelection != null);
+      final bool extentSelection = args! as bool;
       value!(extentSelection);
     });
     _onMoveCursorBackwardByCharacter = value;
@@ -3177,7 +3173,7 @@ class SemanticsConfiguration {
     assert(value != null);
     _addAction(SemanticsAction.setSelection, (Object? args) {
       assert(args != null && args is Map);
-      final Map<String, int> selection = (args as Map<dynamic, dynamic>).cast<String, int>();
+      final Map<String, int> selection = (args! as Map<dynamic, dynamic>).cast<String, int>();
       assert(selection != null && selection['base'] != null && selection['extent'] != null);
       value!(TextSelection(
         baseOffset: selection['base']!,
@@ -3200,7 +3196,7 @@ class SemanticsConfiguration {
     assert(value != null);
     _addAction(SemanticsAction.setText, (Object? args) {
       assert(args != null && args is String);
-      final String text = args as String;
+      final String text = args! as String;
       value!(text);
     });
     _onSetText = value;
@@ -3390,8 +3386,8 @@ class SemanticsConfiguration {
     _actions[SemanticsAction.customAction] = _onCustomSemanticsAction;
   }
 
-  void _onCustomSemanticsAction(dynamic args) {
-    final CustomSemanticsAction? action = CustomSemanticsAction.getAction(args as int);
+  void _onCustomSemanticsAction(Object? args) {
+    final CustomSemanticsAction? action = CustomSemanticsAction.getAction(args! as int);
     if (action == null)
       return;
     final VoidCallback? callback = _customSemanticsActions[action];
