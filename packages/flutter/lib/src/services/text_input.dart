@@ -1010,7 +1010,8 @@ class TextInputConnection {
   /// The given `rect` can not be null. If any of the 4 coordinates of the given
   /// [Rect] is not finite, a [Rect] of size (-1, -1) will be sent instead.
   ///
-  /// The information is currently only used on iOS, for positioning the IME bar.
+  /// This information is used for positioning the IME candidates menu on each
+  /// platform.
   void setComposingRect(Rect rect) {
     assert(rect != null);
     if (rect == _cachedRect)
