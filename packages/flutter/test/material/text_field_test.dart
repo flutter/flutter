@@ -8817,14 +8817,14 @@ void main() {
         // Regression test for https://github.com/flutter/flutter/issues/54729
         // If the intrinsic height does not match that of the height after
         // performLayout, this will fail.
-        tester.pumpWidget(_buildTest(isDense: false));
+        await tester.pumpWidget(_buildTest(isDense: false));
       });
 
       testWidgets('When isDense, intrinsic height can go below kMinInteractiveDimension height', (WidgetTester tester) async {
         // Regression test for https://github.com/flutter/flutter/issues/54729
         // If the intrinsic height does not match that of the height after
         // performLayout, this will fail.
-        tester.pumpWidget(_buildTest(isDense: true));
+        await tester.pumpWidget(_buildTest(isDense: true));
       });
     });
   });
