@@ -25,3 +25,8 @@
 - (instancetype)initWithViewController:(FlutterViewController*)viewController;
 
 @end
+
+// Private methods made visible for testing
+@interface FlutterTextInputPlugin (TestMethods)
+- (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
+@end
