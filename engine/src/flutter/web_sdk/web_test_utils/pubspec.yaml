@@ -4,7 +4,7 @@ environment:
   sdk: ">=2.11.0-0 <3.0.0"
 
 dependencies:
-  path: 1.8.0-nullsafety.3
-  image: 2.1.13
-  js: 0.6.3-nullsafety.3
-  yaml: 2.2.1
+  path: 1.8.0
+  image: 3.0.1
+  js: 0.6.3
+  yaml: 3.0.0

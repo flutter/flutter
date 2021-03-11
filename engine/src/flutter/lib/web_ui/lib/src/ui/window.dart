@@ -32,8 +32,8 @@ abstract class SingletonFlutterWindow extends FlutterWindow {
     platformDispatcher.onMetricsChanged = callback;
   }
 
-  Locale? get locale => platformDispatcher.locale;
-  List<Locale>? get locales => platformDispatcher.locales;
+  Locale get locale => platformDispatcher.locale;
+  List<Locale> get locales => platformDispatcher.locales;
 
   Locale? computePlatformResolvedLocale(List<Locale> supportedLocales) {
     return platformDispatcher.computePlatformResolvedLocale(supportedLocales);

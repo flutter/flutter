@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+// @dart = 2.12
 @TestOn('!safari')
 // TODO(nurhan): https://github.com/flutter/flutter/issues/51169
 
@@ -471,14 +471,14 @@ void testMain() {
   });
 
   group('$HashUrlStrategy', () {
-    TestPlatformLocation location;
+    late TestPlatformLocation location;
 
     setUp(() {
       location = TestPlatformLocation();
     });
 
     tearDown(() {
-      location = null;
+      location = TestPlatformLocation();
     });
 
     test('leading slash is optional', () {
@@ -544,10 +544,14 @@ Future<void> systemNavigatorPop() {
 
 /// A mock implementation of [PlatformLocation] that doesn't access the browser.
 class TestPlatformLocation extends PlatformLocation {
-  String pathname;
-  String search;
-  String hash;
+  String? hash;
   dynamic state;
+
+  @override
+  String get pathname => throw UnimplementedError();
+
+  @override
+  String get search => throw UnimplementedError();
 
   @override
   void addPopStateListener(html.EventListener fn) {
