@@ -325,11 +325,11 @@ class FlutterPlatform extends PlatformPlugin {
     if (compiler == null || compiler.compiler == null) {
       throw 'Compiler is not set up properly to compile $expression';
     }
-    final CompilerOutput compilerOutput =
+    final ExpressionCompilerOutput compilerOutput =
       await compiler.compiler.compileExpression(expression, definitions,
         typeDefinitions, libraryUri, klass, isStatic);
-    if (compilerOutput != null && compilerOutput.outputFilename != null) {
-      return base64.encode(globals.fs.file(compilerOutput.outputFilename).readAsBytesSync());
+    if (compilerOutput != null && compilerOutput.data != null) {
+      return base64.encode(compilerOutput.data);
     }
     throw 'Failed to compile $expression';
   }

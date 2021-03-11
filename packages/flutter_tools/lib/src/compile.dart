@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
@@ -70,6 +71,12 @@ class CompilerOutput {
   final String outputFilename;
   final int errorCount;
   final List<Uri> sources;
+}
+
+class ExpressionCompilerOutput {
+  ExpressionCompilerOutput(this.data);
+
+  final Uint8List data;
 }
 
 enum StdoutState { CollectDiagnostic, CollectDependencies }
@@ -337,6 +344,8 @@ abstract class _CompilationRequest {
   Future<void> run(DefaultResidentCompiler compiler) async {
     completer.complete(await _run(compiler));
   }
+
+  Future<void> flush();
 }
 
 class _RecompileRequest extends _CompilationRequest {
@@ -358,6 +367,9 @@ class _RecompileRequest extends _CompilationRequest {
   @override
   Future<CompilerOutput> _run(DefaultResidentCompiler compiler) async =>
       compiler._recompile(this);
+
+  @override
+  Future<void> flush() async { }
 }
 
 class _CompileExpressionRequest extends _CompilationRequest {
@@ -371,6 +383,8 @@ class _CompileExpressionRequest extends _CompilationRequest {
     this.isStatic,
   ) : super(completer);
 
+  final Completer<void> fileRead = Completer<void>();
+
   String expression;
   List<String> definitions;
   List<String> typeDefinitions;
@@ -381,6 +395,11 @@ class _CompileExpressionRequest extends _CompilationRequest {
   @override
   Future<CompilerOutput> _run(DefaultResidentCompiler compiler) async =>
       compiler._compileExpression(this);
+
+  @override
+  Future<void> flush() {
+    return fileRead.future;
+  }
 }
 
 class _CompileExpressionToJsRequest extends _CompilationRequest {
@@ -406,6 +425,9 @@ class _CompileExpressionToJsRequest extends _CompilationRequest {
   @override
   Future<CompilerOutput> _run(DefaultResidentCompiler compiler) async =>
       compiler._compileExpressionToJs(this);
+
+  @override
+  Future<void> flush() async { }
 }
 
 class _RejectRequest extends _CompilationRequest {
@@ -414,6 +436,9 @@ class _RejectRequest extends _CompilationRequest {
   @override
   Future<CompilerOutput> _run(DefaultResidentCompiler compiler) async =>
       compiler._reject();
+
+  @override
+  Future<void> flush() async { }
 }
 
 /// Wrapper around incremental frontend server compiler, that communicates with
@@ -428,6 +453,7 @@ abstract class ResidentCompiler {
     @required ProcessManager processManager,
     @required Artifacts artifacts,
     @required Platform platform,
+    @required FileSystem fileSystem,
     bool testCompilation,
     bool trackWidgetCreation,
     String packagesPath,
@@ -462,7 +488,7 @@ abstract class ResidentCompiler {
     bool suppressErrors = false,
   });
 
-  Future<CompilerOutput> compileExpression(
+  Future<ExpressionCompilerOutput> compileExpression(
     String expression,
     List<String> definitions,
     List<String> typeDefinitions,
@@ -528,6 +554,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     @required ProcessManager processManager,
     @required Artifacts artifacts,
     @required Platform platform,
+    @required FileSystem fileSystem,
     this.testCompilation = false,
     this.trackWidgetCreation = true,
     this.packagesPath,
@@ -542,6 +569,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     this.librariesSpec,
   }) : assert(sdkRoot != null),
        _logger = logger,
+       _fileSystem = fileSystem,
        _processManager = processManager,
        _artifacts = artifacts,
        _stdoutHandler = StdoutHandler(logger: logger),
@@ -554,6 +582,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   final ProcessManager _processManager;
   final Artifacts _artifacts;
   final Platform _platform;
+  final FileSystem _fileSystem;
 
   final bool testCompilation;
   final BuildMode buildMode;
@@ -652,6 +681,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       while (_compilationQueue.isNotEmpty) {
         final _CompilationRequest request = _compilationQueue.first;
         await request.run(this);
+        await request.flush();
         _compilationQueue.removeAt(0);
       }
     }
@@ -752,24 +782,30 @@ class DefaultResidentCompiler implements ResidentCompiler {
   }
 
   @override
-  Future<CompilerOutput> compileExpression(
+  Future<ExpressionCompilerOutput> compileExpression(
     String expression,
     List<String> definitions,
     List<String> typeDefinitions,
     String libraryUri,
     String klass,
     bool isStatic,
-  ) {
+  ) async {
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
     }
 
     final Completer<CompilerOutput> completer = Completer<CompilerOutput>();
-    _controller.add(
-        _CompileExpressionRequest(
-            completer, expression, definitions, typeDefinitions, libraryUri, klass, isStatic)
-    );
-    return completer.future;
+    final _CompileExpressionRequest request =  _CompileExpressionRequest(
+        completer, expression, definitions, typeDefinitions, libraryUri, klass, isStatic);
+    _controller.add(request);
+    final CompilerOutput output = await completer.future;
+    if (output == null || output.errorCount > 0) {
+      request.fileRead.complete();
+      return ExpressionCompilerOutput(null);
+    }
+    final Uint8List bytes = _fileSystem.file(output.outputFilename).readAsBytesSync();
+    request.fileRead.complete();
+    return ExpressionCompilerOutput(bytes);
   }
 
   Future<CompilerOutput> _compileExpression(_CompileExpressionRequest request) async {
