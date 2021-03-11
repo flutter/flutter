@@ -41,8 +41,6 @@ typedef TransformedWidgetBuilder = Widget Function(BuildContext context, Rect vi
 /// robust positioning of an InteractiveViewer child that works for all screen
 /// sizes and child sizes.
 ///
-/// The [child] must not be null.
-///
 /// See also:
 ///   * The [Flutter Gallery's transformations demo](https://github.com/flutter/gallery/blob/master/lib/demos/reference/transformations_demo.dart),
 ///     which includes the use of InteractiveViewer.
@@ -76,7 +74,7 @@ typedef TransformedWidgetBuilder = Widget Function(BuildContext context, Rect vi
 class InteractiveViewer extends StatefulWidget {
   /// Create an InteractiveViewer.
   ///
-  /// The [child] parameter must not be null.
+  /// The child parameter must not be null.
   InteractiveViewer({
     Key? key,
     this.clipBehavior = Clip.hardEdge,
@@ -192,7 +190,7 @@ class InteractiveViewer extends StatefulWidget {
   /// No edge can be NaN.
   ///
   /// Defaults to [EdgeInsets.zero], which results in boundaries that are the
-  /// exact same size and position as the [child].
+  /// exact same size and position as the child.
   final EdgeInsets boundaryMargin;
 
   /// Builds the child of this widget.
