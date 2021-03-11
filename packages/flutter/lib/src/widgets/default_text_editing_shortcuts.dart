@@ -147,15 +147,18 @@ import 'text_editing_intents.dart';
 ///     respond to the [Intent]s in these shortcuts with the default text editing
 ///     behavior.
 ///   * [WidgetsApp], which creates a DefaultTextEditingShortcuts.
-class DefaultTextEditingShortcuts extends StatelessWidget {
-  /// Creates an instance of DefaultTextEditingShortcuts.
-  const DefaultTextEditingShortcuts({
+class DefaultTextEditingShortcuts extends Shortcuts {
+  /// Creates a [Shortcuts] widget that provides the default text editing
+  /// shortcuts on the current platform.
+  DefaultTextEditingShortcuts({
     Key? key,
-    required this.child,
-  }) : super(key: key);
-
-  /// The child [Widget].
-  final Widget child;
+    required Widget child,
+  }) : super(
+    key: key,
+    debugLabel: '<Default Text Editing Shortcuts>',
+    shortcuts: _shortcuts,
+    child: child,
+  );
 
   static final Map<LogicalKeySet, Intent> _androidShortcuts = <LogicalKeySet, Intent>{
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowDown): const MoveSelectionToEndTextIntent(),
@@ -436,14 +439,5 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
       case TargetPlatform.windows:
         return _windowsShortcuts;
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Shortcuts(
-      debugLabel: '<Default Text Editing Shortcuts>',
-      shortcuts: _shortcuts,
-      child: child,
-    );
   }
 }

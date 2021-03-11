@@ -22,15 +22,16 @@ import 'text_editing_intents.dart';
 ///   * [DefaultTextEditingShortcuts], which maps keyboard keys to many of the
 ///     [Intent]s that are handled here.
 ///   * [WidgetsApp], which creates a DefaultTextEditingShortcuts.
-class DefaultTextEditingActions extends StatelessWidget {
+class DefaultTextEditingActions extends Actions{
   /// Creates an instance of DefaultTextEditingActions.
-  const DefaultTextEditingActions({
+  DefaultTextEditingActions({
     Key? key,
-    required this.child,
-  }) : super(key: key);
-
-  /// The child [Widget] of DefaultTextEditingActions.
-  final Widget child;
+    required Widget child,
+  }) : super(
+    key: key,
+    actions: _shortcutsActions,
+    child: child,
+  );
 
   // These Intents are triggered by DefaultTextEditingShortcuts. They are included
   // regardless of the platform; it's up to DefaultTextEditingShortcuts to decide which
@@ -60,16 +61,6 @@ class DefaultTextEditingActions extends StatelessWidget {
     MoveSelectionToStartTextIntent: _MoveSelectionToStartTextAction(),
     MoveSelectionUpTextIntent: _MoveSelectionUpTextAction(),
   };
-
-  @override
-  Widget build(BuildContext context) {
-    return Actions(
-      actions: <Type, Action<Intent>>{
-        ..._shortcutsActions,
-      },
-      child: child,
-    );
-  }
 }
 
 // This allows the web engine to handle text editing events natively while using
