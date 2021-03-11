@@ -196,6 +196,7 @@ class MaterialApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
+    this.scrollBehavior,
   }) : assert(routes != null),
        assert(navigatorObservers != null),
        assert(title != null),
@@ -242,6 +243,7 @@ class MaterialApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
+    this.scrollBehavior,
   }) : assert(routeInformationParser != null),
        assert(routerDelegate != null),
        assert(title != null),
@@ -632,6 +634,23 @@ class MaterialApp extends StatefulWidget {
   /// {@macro flutter.widgets.widgetsApp.restorationScopeId}
   final String? restorationScopeId;
 
+  /// {@template flutter.material.materialApp.scrollBehavior}
+  /// The default [ScrollBehavior] for the application.
+  ///
+  /// [ScrollBehavior]s describe how [Scrollable] widgets behave. Providing
+  /// a [ScrollBehavior] can set the default [ScrollPhysics] across
+  /// an application, and manage [Scrollable] decorations like [Scrollbar]s and
+  /// [GlowingOverscrollIndicator]s.
+  /// {@endtemplate}
+  ///
+  /// When null, defaults to [MaterialScrollBehavior].
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollConfiguration], which controls how [Scrollable] widgets behave
+  ///    in a subtree.
+  final ScrollBehavior? scrollBehavior;
+
   /// Turns on a [GridPaper] overlay that paints a baseline grid
   /// Material apps.
   ///
@@ -657,7 +676,18 @@ class MaterialApp extends StatefulWidget {
   }
 }
 
-class _MaterialScrollBehavior extends ScrollBehavior {
+/// Describes how [Scrollable] widgets behave for [MaterialApp]s.
+///
+/// {@macro flutter.widgets.scrollBehavior}
+///
+/// Setting a [MaterialScrollBehavior] will apply a
+/// [GlowingOverscrollIndicator] to [Scrollable] descendants when executing on
+/// [TargetPlatform.android] and [TargetPlatform.fuchsia].
+///
+/// See also:
+///
+///  * [ScrollBehavior], the default scrolling behavior extended by this class.
+class MaterialScrollBehavior extends ScrollBehavior {
   @override
   TargetPlatform getPlatform(BuildContext context) {
     return Theme.of(context).platform;
@@ -850,7 +880,7 @@ class _MaterialAppState extends State<MaterialApp> {
     }());
 
     return ScrollConfiguration(
-      behavior: _MaterialScrollBehavior(),
+      behavior: widget.scrollBehavior ?? MaterialScrollBehavior(),
       child: HeroControllerScope(
         controller: _heroController,
         child: result,
