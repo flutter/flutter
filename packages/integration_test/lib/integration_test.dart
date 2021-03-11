@@ -162,7 +162,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
   /// The callback function to response the driver side input.
   @visibleForTesting
   Future<Map<String, dynamic>> callback(Map<String, String> params) async {
-    return await callbackManager.callback(
+    return callbackManager.callback(
         params, this /* as IntegrationTestResults */);
   }
 
@@ -239,14 +239,14 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
     await enableTimeline(streams: streams);
     if (retainPriorEvents) {
       await action();
-      return await _vmService!.getVMTimeline();
+      return _vmService!.getVMTimeline();
     }
 
     await _vmService!.clearVMTimeline();
     final vm.Timestamp startTime = await _vmService!.getVMTimelineMicros();
     await action();
     final vm.Timestamp endTime = await _vmService!.getVMTimelineMicros();
-    return await _vmService!.getVMTimeline(
+    return _vmService!.getVMTimeline(
       timeOriginMicros: startTime.timestamp,
       timeExtentMicros: endTime.timestamp,
     );

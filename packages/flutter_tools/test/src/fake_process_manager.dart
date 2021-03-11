@@ -6,13 +6,13 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io show ProcessSignal;
+import 'dart:io' as io show ProcessSignal, Process, ProcessStartMode, ProcessResult, systemEncoding;
 
-import 'package:flutter_tools/src/base/io.dart';
+import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
-import 'common.dart';
-import 'context.dart';
+
+import 'test_wrapper.dart';
 
 export 'package:process/process.dart' show ProcessManager;
 
@@ -120,7 +120,7 @@ class FakeCommand {
   }
 }
 
-class _FakeProcess implements Process {
+class _FakeProcess implements io.Process {
   _FakeProcess(
     this._exitCode,
     Duration duration,
@@ -251,37 +251,37 @@ abstract class FakeProcessManager implements ProcessManager {
   }
 
   @override
-  Future<Process> start(
+  Future<io.Process> start(
     List<dynamic> command, {
     String workingDirectory,
     Map<String, String> environment,
     bool includeParentEnvironment = true, // ignored
     bool runInShell = false, // ignored
-    ProcessStartMode mode = ProcessStartMode.normal, // ignored
+    io.ProcessStartMode mode = io.ProcessStartMode.normal, // ignored
   }) {
-    final _FakeProcess process = _runCommand(command.cast<String>(), workingDirectory, environment, systemEncoding);
+    final _FakeProcess process = _runCommand(command.cast<String>(), workingDirectory, environment, io.systemEncoding);
     if (process._completer != null) {
       _fakeRunningProcesses[process.pid] = process;
       process.exitCode.whenComplete(() {
         _fakeRunningProcesses.remove(process.pid);
       });
     }
-    return Future<Process>.value(process);
+    return Future<io.Process>.value(process);
   }
 
   @override
-  Future<ProcessResult> run(
+  Future<io.ProcessResult> run(
     List<dynamic> command, {
     String workingDirectory,
     Map<String, String> environment,
     bool includeParentEnvironment = true, // ignored
     bool runInShell = false, // ignored
-    Encoding stdoutEncoding = systemEncoding,
-    Encoding stderrEncoding = systemEncoding,
+    Encoding stdoutEncoding = io.systemEncoding,
+    Encoding stderrEncoding = io.systemEncoding,
   }) async {
     final _FakeProcess process = _runCommand(command.cast<String>(), workingDirectory, environment, stdoutEncoding);
     await process.exitCode;
-    return ProcessResult(
+    return io.ProcessResult(
       process.pid,
       process._exitCode,
       stdoutEncoding == null ? process.stdout : await stdoutEncoding.decodeStream(process.stdout),
@@ -290,17 +290,17 @@ abstract class FakeProcessManager implements ProcessManager {
   }
 
   @override
-  ProcessResult runSync(
+  io.ProcessResult runSync(
     List<dynamic> command, {
     String workingDirectory,
     Map<String, String> environment,
     bool includeParentEnvironment = true, // ignored
     bool runInShell = false, // ignored
-    Encoding stdoutEncoding = systemEncoding, // actual encoder is ignored
-    Encoding stderrEncoding = systemEncoding, // actual encoder is ignored
+    Encoding stdoutEncoding = io.systemEncoding, // actual encoder is ignored
+    Encoding stderrEncoding = io.systemEncoding, // actual encoder is ignored
   }) {
     final _FakeProcess process = _runCommand(command.cast<String>(), workingDirectory, environment, stdoutEncoding);
-    return ProcessResult(
+    return io.ProcessResult(
       process.pid,
       process._exitCode,
       stdoutEncoding == null ? utf8.encode(process._stdout) : process._stdout,

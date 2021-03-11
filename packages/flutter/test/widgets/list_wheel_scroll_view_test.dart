@@ -880,7 +880,7 @@ void main() {
   group('scroll notifications', () {
     testWidgets('no onSelectedItemChanged callback on first build', (WidgetTester tester) async {
       bool itemChangeCalled = false;
-      final ValueChanged<int> onItemChange = (_) { itemChangeCalled = true; };
+      void onItemChange(int _) { itemChangeCalled = true; }
 
       await tester.pumpWidget(
         Directionality(

@@ -325,7 +325,10 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
     // the view height. This ensures a tappable area outside of the simple menu
     // with which to dismiss the menu.
     //   -- https://material.io/design/components/menus.html#usage
-    final double maxHeight = math.max(0.0, constraints.maxHeight - 2 * _kMenuItemHeight);
+    double maxHeight = math.max(0.0, constraints.maxHeight - 2 * _kMenuItemHeight);
+    if (route.menuMaxHeight != null && route.menuMaxHeight! <= maxHeight) {
+      maxHeight = route.menuMaxHeight!;
+    }
     // The width of a menu should be at most the view width. This ensures that
     // the menu does not extend past the left and right edges of the screen.
     final double width = math.min(constraints.maxWidth, buttonRect.width);
@@ -411,6 +414,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     this.barrierLabel,
     this.itemHeight,
     this.dropdownColor,
+    this.menuMaxHeight,
   }) : assert(style != null),
        itemHeights = List<double>.filled(items.length, itemHeight ?? kMinInteractiveDimension);
 
@@ -423,6 +427,8 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   final TextStyle style;
   final double? itemHeight;
   final Color? dropdownColor;
+  final double? menuMaxHeight;
+
 
   final List<double> itemHeights;
   ScrollController? scrollController;
@@ -845,6 +851,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
     this.dropdownColor,
+    this.menuMaxHeight,
     // When adding new arguments, consider adding similar arguments to
     // DropdownButtonFormField.
   }) : assert(items == null || items.isEmpty || value == null ||
@@ -1094,6 +1101,17 @@ class DropdownButton<T> extends StatefulWidget {
   /// instead.
   final Color? dropdownColor;
 
+  /// The maximum height of the menu.
+  ///
+  /// The maximum height of the menu must be at least one row shorter than
+  /// the height of the app's view. This ensures that a tappable area
+  /// outside of the simple menu is present so the user can dismiss the menu.
+  ///
+  /// If this property is set above the maximum allowable height threshold
+  /// mentioned above, then the menu defaults to being padded at the top
+  /// and bottom of the menu by at one menu item's height.
+  final double? menuMaxHeight;
+
   @override
   _DropdownButtonState<T> createState() => _DropdownButtonState<T>();
 }
@@ -1240,6 +1258,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
       itemHeight: widget.itemHeight,
       dropdownColor: widget.dropdownColor,
+      menuMaxHeight: widget.menuMaxHeight,
     );
 
     navigator.push(_dropdownRoute!).then<void>((_DropdownRouteResult<T>? newValue) {
@@ -1488,6 +1507,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     )
     bool autovalidate = false,
     AutovalidateMode? autovalidateMode,
+    double? menuMaxHeight,
   }) : assert(items == null || items.isEmpty || value == null ||
               items.where((DropdownMenuItem<T> item) {
                 return item.value == value;
@@ -1556,6 +1576,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
                      focusNode: focusNode,
                      autofocus: autofocus,
                      dropdownColor: dropdownColor,
+                     menuMaxHeight: menuMaxHeight,
                    ),
                  ),
                );

@@ -565,7 +565,7 @@ class FlutterDevice {
     final bool prebuiltMode = hotRunner.applicationBinary != null;
     final String modeName = hotRunner.debuggingOptions.buildInfo.friendlyModeName;
     globals.printStatus(
-      'Launching ${globals.fsUtils.getDisplayPath(hotRunner.mainPath)} '
+      'Launching ${getDisplayPath(hotRunner.mainPath, globals.fs)} '
       'on ${device.name} in $modeName mode...',
     );
 
@@ -645,7 +645,7 @@ class FlutterDevice {
       );
     } else {
       globals.printStatus(
-        'Launching ${globals.fsUtils.getDisplayPath(coldRunner.mainPath)} '
+        'Launching ${getDisplayPath(coldRunner.mainPath, globals.fs)} '
         'on ${device.name} in $modeName mode...',
       );
     }

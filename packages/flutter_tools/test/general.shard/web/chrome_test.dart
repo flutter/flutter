@@ -61,7 +61,7 @@ void main() {
 
   testWithoutContext('can launch chrome and connect to the devtools', () async {
     expect(
-      () async => await _testLaunchChrome(
+      () async => _testLaunchChrome(
         '/.tmp_rand0/flutter_tools_chrome_device.rand0',
         processManager,
         chromeLauncher,
@@ -78,7 +78,7 @@ void main() {
     );
 
     expect(
-      () async => await _testLaunchChrome(
+      () async => _testLaunchChrome(
         '/.tmp_rand0/flutter_tools_chrome_device.rand1',
         processManager,
         chromeLauncher,
@@ -96,7 +96,7 @@ void main() {
     await chrome.close();
 
     expect(
-      () async => await _testLaunchChrome(
+      () async => _testLaunchChrome(
         '/.tmp_rand0/flutter_tools_chrome_device.rand1',
         processManager,
         chromeLauncher,
@@ -206,7 +206,7 @@ void main() {
     ));
 
     expect(
-      () async => await chromeLauncher.launch(
+      () async => chromeLauncher.launch(
         'example_url',
         skipCheck: true,
         debugPort: 10000,
@@ -232,7 +232,7 @@ void main() {
     ));
 
     expect(
-      () async => await chromeLauncher.launch(
+      () async => chromeLauncher.launch(
         'example_url',
         skipCheck: true,
         headless: true,
@@ -320,7 +320,7 @@ void main() {
     ));
 
     expect(
-      () async => await chromeLauncher.launch(
+      () async => chromeLauncher.launch(
         'example_url',
         skipCheck: true,
         headless: true,
@@ -346,7 +346,7 @@ void main() {
     ));
 
     expect(
-      () async => await chromeLauncher.launch(
+      () async => chromeLauncher.launch(
         'example_url',
         skipCheck: true,
         headless: true,

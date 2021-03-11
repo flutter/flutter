@@ -95,7 +95,7 @@ void main() {
       fileSystem.file(fileSystem.path.join('bin', 'cache', 'lockfile'))
         .createSync(recursive: true);
 
-      expect(() async => await cache.lock(), throwsToolExit());
+      expect(() async => cache.lock(), throwsToolExit());
     }, skip: true); // TODO(jonahwilliams): implement support for lock so this can be tested with the memory file system.
 
     testWithoutContext('should not throw when FLUTTER_ALREADY_LOCKED is set', () {

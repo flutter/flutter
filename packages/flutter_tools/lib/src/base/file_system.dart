@@ -73,13 +73,6 @@ class FileSystemUtils {
     }
   }
 
-  /// Return a relative path if [fullPath] is contained by the cwd, else return an
-  /// absolute path.
-  String getDisplayPath(String fullPath) {
-    final String cwd = _fileSystem.currentDirectory.path + _fileSystem.path.separator;
-    return fullPath.startsWith(cwd) ? fullPath.substring(cwd.length) : fullPath;
-  }
-
   /// Escapes [path].
   ///
   /// On Windows it replaces all '\' with '\\'. On other platforms, it returns the
@@ -113,6 +106,13 @@ class FileSystemUtils {
     }
     return path;
   }
+}
+
+/// Return a relative path if [fullPath] is contained by the cwd, else return an
+/// absolute path.
+String getDisplayPath(String fullPath, FileSystem fileSystem) {
+  final String cwd = fileSystem.currentDirectory.path + fileSystem.path.separator;
+  return fullPath.startsWith(cwd) ? fullPath.substring(cwd.length) : fullPath;
 }
 
 /// Creates `destDir` if needed, then recursively copies `srcDir` to

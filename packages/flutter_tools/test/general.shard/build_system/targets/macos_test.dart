@@ -94,7 +94,7 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('testing');
 
-    expect(() async => await const DebugMacOSBundleFlutterAssets().build(environment),
+    expect(() async => const DebugMacOSBundleFlutterAssets().build(environment),
         throwsException);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,

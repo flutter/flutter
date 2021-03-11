@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -86,10 +87,12 @@ typedef _ProcessFactory = Process Function(List<String> command);
 
 /// A ProcessManager that starts Processes by delegating to a ProcessFactory.
 class MockProcessManager extends Mock implements ProcessManager {
-  _ProcessFactory processFactory = (List<String> commands) => FakeProcess();
+  _ProcessFactory processFactory = _defaulProcessFactory;
   bool canRunSucceeds = true;
   bool runSucceeds = true;
   List<String> commands;
+
+  static Process _defaulProcessFactory(List<String> commands) => FakeProcess();
 
   @override
   bool canRun(dynamic command, { String workingDirectory }) => canRunSucceeds;
@@ -232,3 +235,4 @@ class MockStdIn extends Mock implements IOSink {
 }
 
 class MockStream extends Mock implements Stream<List<int>> {}
+class MockFlutterVersion extends Mock implements FlutterVersion {}

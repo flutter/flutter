@@ -1424,8 +1424,8 @@ void main() {
     await gesture.addPointer(location: const Offset(5, 5));
     addTearDown(gesture.removePointer);
 
-    final PointerHoverEventListener onHover = (_) {};
-    final VoidCallback onPaintChild = () { logs.add('paint'); };
+    void onHover(PointerHoverEvent _) {}
+    void onPaintChild() { logs.add('paint'); }
 
     await tester.pumpWidget(_Scaffold(
       topLeft: SizedBox(
@@ -1471,7 +1471,7 @@ void main() {
     await gesture.addPointer(location: const Offset(100, 100));
     addTearDown(gesture.removePointer);
 
-    final VoidCallback onPaintChild = () { logPaints.add('paint'); };
+    void onPaintChild() { logPaints.add('paint'); }
 
     await tester.pumpWidget(_Scaffold(
       topLeft: SizedBox(
@@ -1521,7 +1521,7 @@ void main() {
     await gesture.addPointer(location: const Offset(100, 100));
     addTearDown(gesture.removePointer);
 
-    final VoidCallback onPaintChild = () { logPaints.add('paint'); };
+    void onPaintChild() { logPaints.add('paint'); }
 
     await tester.pumpWidget(_Scaffold(
       topLeft: SizedBox(

@@ -870,10 +870,10 @@ void main() {
       viewsController.registerViewType('webview');
 
       int factoryInvocationCount = 0;
-      final ValueGetter<EagerGestureRecognizer> constructRecognizer = () {
+      EagerGestureRecognizer constructRecognizer() {
         factoryInvocationCount += 1;
         return EagerGestureRecognizer();
-      };
+      }
 
       await tester.pumpWidget(
         AndroidView(
@@ -1919,10 +1919,10 @@ void main() {
       viewsController.registerViewType('webview');
 
       int factoryInvocationCount = 0;
-      final ValueGetter<EagerGestureRecognizer> constructRecognizer = () {
+      EagerGestureRecognizer constructRecognizer() {
         factoryInvocationCount += 1;
         return EagerGestureRecognizer();
-      };
+      }
 
       await tester.pumpWidget(
         UiKitView(
@@ -2194,10 +2194,10 @@ void main() {
     testWidgets('PlatformViewRenderBox reconstructed with same gestureRecognizers', (WidgetTester tester) async {
 
       int factoryInvocationCount = 0;
-      final ValueGetter<EagerGestureRecognizer> constructRecognizer = () {
+      EagerGestureRecognizer constructRecognizer() {
         ++ factoryInvocationCount;
         return EagerGestureRecognizer();
-      };
+      }
 
       final PlatformViewSurface platformViewSurface = PlatformViewSurface(
               controller: controller,
@@ -2218,10 +2218,10 @@ void main() {
     testWidgets('PlatformViewSurface rebuilt with same gestureRecognizers', (WidgetTester tester) async {
 
       int factoryInvocationCount = 0;
-      final ValueGetter<EagerGestureRecognizer> constructRecognizer = () {
+      EagerGestureRecognizer constructRecognizer() {
         ++ factoryInvocationCount;
         return EagerGestureRecognizer();
-      };
+      }
 
       await tester.pumpWidget(
         PlatformViewSurface(

@@ -255,7 +255,8 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
     if (!result.success) {
       await diagnoseXcodeBuildFailure(result, globals.flutterUsage, globals.logger);
-      throwToolExit('Encountered error while ${xcodeBuildActionToString(xcodeBuildAction)}ing for $logTarget.');
+      final String presentParticiple = xcodeBuildAction == XcodeBuildAction.build ? 'building' : 'archiving';
+      throwToolExit('Encountered error while $presentParticiple for $logTarget.');
     }
 
     if (buildInfo.codeSizeDirectory != null) {
