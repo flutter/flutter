@@ -2516,20 +2516,20 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
 ///  * [OverflowBox], a widget that imposes different constraints on its child
 ///    than it gets from its parent, possibly allowing the child to overflow
 ///    the parent.
-class UnconstrainedBox extends StatelessWidget {
+class UnconstrainedBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that imposes no constraints on its child, allowing it to
   /// render at its "natural" size. If the child overflows the parents
   /// constraints, a warning will be given in debug mode.
   const UnconstrainedBox({
     Key? key,
-    this.child,
+    Widget? child,
     this.textDirection,
     this.alignment = Alignment.center,
     this.constrainedAxis,
     this.clipBehavior = Clip.none,
   }) : assert(alignment != null),
        assert(clipBehavior != null),
-       super(key: key);
+       super(key: key, child: child);
 
   /// The text direction to use when interpreting the [alignment] if it is an
   /// [AlignmentDirectional].
@@ -2559,36 +2559,37 @@ class UnconstrainedBox extends StatelessWidget {
   /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
-  /// The widget below this widget in the tree.
-  ///
-  /// {@macro flutter.widgets.child}
-  final Widget? child;
-
-  @override
-  Widget build(BuildContext context) {
-    final BoxConstraintsTransform constraintsTransform;
+  BoxConstraintsTransform get _constraintsTransform {
     final Axis? constrainedAxis = this.constrainedAxis;
-
     if (constrainedAxis != null) {
       switch (constrainedAxis) {
         case Axis.horizontal:
-          constraintsTransform = ConstraintsTransformBox._widthConstrained;
-          break;
+          return ConstraintsTransformBox._widthConstrained;
         case Axis.vertical:
-          constraintsTransform = ConstraintsTransformBox._heightConstrained;
-          break;
+          return ConstraintsTransformBox._heightConstrained;
       }
     } else {
-      constraintsTransform = ConstraintsTransformBox._unconstrained;
+      return ConstraintsTransformBox._unconstrained;
     }
+  }
 
-    return ConstraintsTransformBox(
-      child: child,
-      textDirection: textDirection,
+  @override
+  RenderConstraintsTransformBox createRenderObject(BuildContext context) {
+    return RenderConstraintsTransformBox(
+      textDirection: textDirection ?? Directionality.maybeOf(context),
       alignment: alignment,
+      constraintsTransform: _constraintsTransform,
       clipBehavior: clipBehavior,
-      constraintsTransform: constraintsTransform,
     );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant RenderConstraintsTransformBox renderObject) {
+    renderObject
+      ..textDirection = textDirection ?? Directionality.maybeOf(context)
+      ..constraintsTransform = _constraintsTransform
+      ..alignment = alignment
+      ..clipBehavior = clipBehavior;
   }
 
   @override
