@@ -2316,9 +2316,9 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
   }
 }
 
-/// A widget that applies an arbitrary transform to its constraints, and sizes
-/// its child using the resulting [BoxConstraints], treating any overflow
-/// as error.
+/// A container widget that applies an arbitrary transform to its constraints,
+/// and sizes its child using the resulting [BoxConstraints], treating any
+/// overflow as error.
 ///
 /// This container sizes its child using a [BoxConstraints] created by applying
 /// [constraintsTransform] to its own constraints. This container will then
@@ -2332,10 +2332,11 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 /// the overflow occurs.
 ///
 /// {@tool snippet}
-/// This snippet guarantees the child [Card] will be at least as tall as its
-/// intrinsic height. Unlike [UnconstrainedBox], the child can be taller if the
-/// the parent's minHeight is constrained. If parent container's maxHeight is
-/// less than [Card]'s intrinsic height, in debug mode a warning will be given.
+/// In the following snippet, the child [Card] is guaranteed to be at least as
+/// tall as its intrinsic height. Unlike [UnconstrainedBox], the child can be
+/// taller if the the parent's minHeight is constrained. If parent container's
+/// maxHeight is less than [Card]'s intrinsic height, in debug mode a warning
+/// will be given.
 ///
 /// ```dart
 /// ConstraintsTransformBox(
@@ -2459,11 +2460,11 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
   final AlignmentGeometry alignment;
 
   /// @{template flutter.widgets.constraintsTransform}
-  /// The function used to transform the incoming [BoxConstraints], to impose on
+  /// The function used to transform the incoming [BoxConstraints], to size
   /// [child].
   ///
-  /// Must not be null. The function must return a non-null and normalized
-  /// [BoxConstraints].
+  /// The function must return a [BoxConstraints] that is
+  /// [BoxConstraints.isNormalized].
   /// @{endtemplate}
   final BoxConstraintsTransform constraintsTransform;
 

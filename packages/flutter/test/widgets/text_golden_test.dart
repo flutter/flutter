@@ -630,11 +630,11 @@ void main() {
                       ),
                       children: <InlineSpan>[
                         WidgetSpan(
-                          child: SizedBox(width: 70, height: 55, child: TextField()),
+                          child: SizedBox(width: 70, child: TextField()),
                         ),
                         TextSpan(text: ', and my favorite city is: ', style: TextStyle(fontSize: 20)),
                         WidgetSpan(
-                          child: SizedBox(width: 70, height: 55, child: TextField()),
+                          child: SizedBox(width: 70, child: TextField()),
                         ),
                       ],
                     ),
@@ -741,7 +741,7 @@ void main() {
                         ),
                         TextSpan(text: 'outer', style: TextStyle(fontSize: 20)),
                         WidgetSpan(
-                          child: SizedBox(width: 70, height: 55, child: TextField()),
+                          child: SizedBox(width: 70, child: TextField()),
                         ),
                         WidgetSpan(
                           child: SizedBox(

@@ -13,8 +13,12 @@ import 'layer.dart';
 import 'object.dart';
 import 'stack.dart' show RelativeRect;
 
-/// Signature for an endofunction that transforms a [BoxConstraints] to another
+/// Signature for a function that transforms a [BoxConstraints] to another
 /// [BoxConstraints].
+///
+/// Used by [RenderConstraintsTransformBox] and [ConstraintsTransformBox].
+/// Typically the caller requires the returned [BoxConstraints] to be
+/// [BoxConstraints.isNormalized].
 typedef BoxConstraintsTransform = BoxConstraints Function(BoxConstraints);
 
 /// Abstract class for one-child-layout render boxes that provide control over
