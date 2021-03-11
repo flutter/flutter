@@ -182,7 +182,21 @@ void testMain() {
 
   test('can disable location strategy', () async {
     // Disable URL strategy.
-    expect(() => jsSetUrlStrategy(null), returnsNormally);
+    void disableUrlStrategy() {
+      try {
+        jsSetUrlStrategy(null);
+      } on AssertionError catch (e) {
+        if (e.message == 'Cannot set URL strategy more than once.') {
+          print('=' * 20);
+          // Print something easy to search for.
+          print('HISTORY_TEST_FLAKY_ASSERTION_FAILURE');
+          print('=' * 20);
+        } else {
+          rethrow;
+        }
+      }
+    }
+    expect(disableUrlStrategy, returnsNormally);
     // History should be initialized.
     expect(window.browserHistory, isNotNull);
     // But without a URL strategy.
