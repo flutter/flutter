@@ -140,7 +140,6 @@ const double _inputFormLandscapeHeight = 108.0;
 ///   }
 /// }
 ///
-///
 /// class MyHomePage extends StatefulWidget {
 ///   @override
 ///   _MyHomePageState createState() => _MyHomePageState();
