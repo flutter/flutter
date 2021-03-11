@@ -68,10 +68,10 @@ void main() {
   });
 
   testWithoutContext('compile expression fails if not previously compiled', () async {
-    final ExpressionCompilerOutput result = await generator.compileExpression(
+    final CompilerOutput result = await generator.compileExpression(
         '2+2', null, null, null, null, false);
 
-    expect(result.data, isNull);
+    expect(result, isNull);
   });
 
   testWithoutContext('compile expression can compile single expression', () async {
@@ -113,7 +113,7 @@ void main() {
           )));
       generator.compileExpression(
           '2+2', null, null, null, null, false).then(
-              (ExpressionCompilerOutput outputExpression) {
+              (CompilerOutput outputExpression) {
                 expect(outputExpression, isNotNull);
                 expect(outputExpression.data, <int>[1, 2, 3, 4]);
               }
@@ -160,7 +160,7 @@ void main() {
     final Completer<bool> lastExpressionCompleted = Completer<bool>();
     unawaited(
       generator.compileExpression('0+1', null, null, null, null, false).then(
-        (ExpressionCompilerOutput outputExpression) {
+        (CompilerOutput outputExpression) {
           expect(outputExpression, isNotNull);
           expect(outputExpression.data, <int>[0, 1, 2, 3]);
 
@@ -177,7 +177,7 @@ void main() {
     // The test manages timing via completers.
     unawaited(
       generator.compileExpression('1+1', null, null, null, null, false).then(
-        (ExpressionCompilerOutput outputExpression) {
+        (CompilerOutput outputExpression) {
           expect(outputExpression, isNotNull);
           expect(outputExpression.data, <int>[4, 5, 6, 7]);
           lastExpressionCompleted.complete(true);
