@@ -4,7 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 void main() {
   final TestWidgetsFlutterBinding binding =
@@ -104,10 +103,7 @@ void main() {
       Rect decoyChildRect = tester.getRect(_findDecoyChild(child));
       expect(childRect, equals(decoyChildRect));
 
-      // TODO(justinmc): When ShaderMask is supported on web, remove this
-      // conditional and just check for ShaderMask.
-      // https://github.com/flutter/flutter/issues/52967.
-      expect(find.byType(ShaderMask), kIsWeb ? findsNothing : findsOneWidget);
+      expect(find.byType(ShaderMask), findsOneWidget);
 
       // After a small delay, the _DecoyChild has begun to animate.
       await tester.pump(const Duration(milliseconds: 100));
