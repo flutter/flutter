@@ -201,9 +201,17 @@ Future<DateTime?> showDatePicker({
   );
 }
 
-/// TODO(shihaohong): Documentation.
+/// A Material-style date picker dialog.
+///
+/// It is used internally by [showDatePicker] or can be directly pushed
+/// onto the [Navigator] stack to enable state restoration. See
+/// [showDatePicker] for a state restoration app example.
+///
+/// See also:
+///
+///  * [showDatePicker], which is a way to display the date picker.
 class DatePickerDialog extends StatefulWidget {
-  /// TODO(shihaohong): Documentation.
+  /// A Material-style date picker dialog.
   DatePickerDialog({
     Key? key,
     required DateTime initialDate,
@@ -260,7 +268,10 @@ class DatePickerDialog extends StatefulWidget {
   /// The [DateTime] representing today. It will be highlighted in the day grid.
   final DateTime currentDate;
 
-  /// TODO(shihaohong): Documentation.
+  /// The initial mode of date entry method for the date picker dialog.
+  ///
+  /// See [DatePickerEntryMode] for more details on the different data entry
+  /// modes available.
   final DatePickerEntryMode initialEntryMode;
 
   /// Function to provide full control over which [DateTime] can be selected.
@@ -280,33 +291,42 @@ class DatePickerDialog extends StatefulWidget {
   /// The initial display of the calendar picker.
   final DatePickerMode initialCalendarMode;
 
-  /// TODO(shihaohong): Documentation.
+  /// The error text displayed if the entered date is not in the correct format.
   final String? errorFormatText;
 
-  /// TODO(shihaohong): Documentation.
+  /// The error text displayed if the date is not valid.
+  ///
+  /// A date is not valid if it is earlier than [firstDate], later than
+  /// [lastDate], or doesn't pass the [selectableDayPredicate].
   final String? errorInvalidText;
 
-  /// TODO(shihaohong): Documentation.
+  /// The hint text displayed in the [TextField].
+  ///
+  /// If this is null, it will default to the date format string. For example,
+  /// 'mm/dd/yyyy' for en_US.
   final String? fieldHintText;
 
-  /// TODO(shihaohong): Documentation.
+  /// The label text displayed in the [TextField].
+  ///
+  /// If this is null, it will default to the words representing the date format
+  /// string. For example, 'Month, Day, Year' for en_US.
   final String? fieldLabelText;
 
   @override
   _DatePickerDialogState createState() => _DatePickerDialogState();
 }
 
+// A restorable data structure to save and restore dates. It only accounts
+// for the year, month and day.
 class _RestorableDate extends RestorableProperty<DateTime?> {
   DateTime? _date;
 
-  /// TODO(shihaohong): Document.
-  void setDate(DateTime dateTime) {
+  void _setDate(DateTime dateTime) {
     _date = dateTime;
     notifyListeners();
   }
 
-  /// TODO(shihaohong): Document.
-  DateTime? getDate() => _date;
+  DateTime? _getDate() => _date;
 
   @override
   DateTime? createDefaultValue() => null;
@@ -355,9 +375,9 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     registerForRestoration(_autoValidate, 'autovalidate');
     registerForRestoration(_entryMode, 'calendar_entry_mode');
 
-    final DateTime? tempDate = _restorableSelectedDate.getDate();
+    final DateTime? tempDate = _restorableSelectedDate._getDate();
     if (tempDate == null) {
-      _restorableSelectedDate.setDate(widget.initialDate);
+      _restorableSelectedDate._setDate(widget.initialDate);
     }
 
     _entryMode.value ??= widget.initialEntryMode.index;
@@ -375,7 +395,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
       }
       form.save();
     }
-    Navigator.pop(context, _restorableSelectedDate.getDate());
+    Navigator.pop(context, _restorableSelectedDate._getDate());
   }
 
   void _handleCancel() {
@@ -402,7 +422,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
   }
 
   void _handleDateChanged(DateTime date) {
-    setState(() => _restorableSelectedDate.setDate(date));
+    setState(() => _restorableSelectedDate._setDate(date));
   }
 
   Size _dialogSize(BuildContext context) {
@@ -443,7 +463,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     // layout issues.
     final double textScaleFactor = math.min(MediaQuery.of(context).textScaleFactor, 1.3);
 
-    final String dateText = localizations.formatMediumDate(_restorableSelectedDate.getDate()!);
+    final String dateText = localizations.formatMediumDate(_restorableSelectedDate._getDate()!);
     final Color onPrimarySurface = colorScheme.brightness == Brightness.light
       ? colorScheme.onPrimary
       : colorScheme.onSurface;
@@ -473,7 +493,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     CalendarDatePicker calendarDatePicker() {
       return CalendarDatePicker(
         key: _calendarPickerKey,
-        initialDate: _restorableSelectedDate.getDate()!,
+        initialDate: _restorableSelectedDate._getDate()!,
         firstDate: widget.firstDate,
         lastDate: widget.lastDate,
         currentDate: widget.currentDate,
@@ -496,7 +516,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
               children: <Widget>[
                 const Spacer(),
                 InputDatePickerFormField(
-                  initialDate: _restorableSelectedDate.getDate(),
+                  initialDate: _restorableSelectedDate._getDate(),
                   firstDate: widget.firstDate,
                   lastDate: widget.lastDate,
                   onDateSubmitted: _handleDateChanged,
