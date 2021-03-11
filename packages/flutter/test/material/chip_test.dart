@@ -521,7 +521,7 @@ void main() {
       expect(tester.getSize(find.byType(Chip).last), const Size(38.0, 32.0));
     },
   );
-  
+
   testWidgets('Chip elements are ordered horizontally for locale', (WidgetTester tester) async {
     final UniqueKey iconKey = UniqueKey();
     final Widget test = Overlay(
