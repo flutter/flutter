@@ -1902,7 +1902,7 @@ void main() {
           logger: globals.logger,
           throwOnError: false,
         );
-        final bool didGenerate = await generateMainDartWithPluginRegistrant(
+        await generateMainDartWithPluginRegistrant(
           flutterProject,
           packageConfig,
           'package:app/main.dart',
@@ -1910,7 +1910,6 @@ void main() {
           mainFile,
           throwOnPluginPubspecError: true,
         );
-        expect(didGenerate, isTrue);
         expect(flutterBuild.readAsStringSync(),
             '//\n'
             '// Generated file. Do not edit.\n'

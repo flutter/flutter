@@ -932,14 +932,14 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
 ///
 /// [mainFile] is the main entrypoint file. e.g. /<app>/lib/main.dart.
 ///
-/// Returns [true] if it's necessary to create a plugin registrant, and
-/// if the new entrypoint was written to disk.
+/// A successful run will create a new generate_main.dart file or update the existing file.
+/// Throws [ToolExit] if unable to generate the file.
 ///
 /// This method also validates each plugin's pubspec.yaml, but errors are only
 /// reported if [throwOnPluginPubspecError] is [true].
 ///
 /// For more details, see https://flutter.dev/go/federated-plugins.
-Future<bool> generateMainDartWithPluginRegistrant(
+Future<void> generateMainDartWithPluginRegistrant(
   FlutterProject rootProject,
   PackageConfig packageConfig,
   String currentMainUri,
@@ -963,14 +963,9 @@ Future<bool> generateMainDartWithPluginRegistrant(
     MacOSPlugin.kConfigKey: <dynamic>[],
     WindowsPlugin.kConfigKey: <dynamic>[],
   };
-  bool didFindPlugin = false;
   for (final PluginInterfaceResolution resolution in resolutions) {
     assert(templateContext.containsKey(resolution.platform));
     (templateContext[resolution.platform] as List<dynamic>).add(resolution.toMap());
-    didFindPlugin = true;
-  }
-  if (!didFindPlugin) {
-    return false;
   }
   try {
     _renderTemplateToFile(
@@ -978,10 +973,8 @@ Future<bool> generateMainDartWithPluginRegistrant(
       templateContext,
       newMainDart.path,
     );
-    return true;
   } on FileSystemException catch (error) {
     throwToolExit('Unable to write ${newMainDart.path}, received error: $error');
-    return false;
   }
 }
 

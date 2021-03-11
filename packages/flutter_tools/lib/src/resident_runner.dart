@@ -7,6 +7,7 @@
 import 'dart:async';
 
 import 'package:dds/dds.dart' as dds;
+import 'package:flutter_tools/src/build_system/targets/dart_plugin_registraint.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -919,8 +920,14 @@ abstract class ResidentRunner {
       projectDir: globals.fs.currentDirectory,
       generateDartPluginRegistry: true,
     );
-    _lastBuild = await globals.buildSystem.buildIncremental(
+
+    final CompositeTarget compositeTarget = CompositeTarget(<Target>[
       const GenerateLocalizationsTarget(),
+      const DartPluginRegistrantTarget(),
+    ]);
+
+    _lastBuild = await globals.buildSystem.buildIncremental(
+      compositeTarget,
       _environment,
       _lastBuild,
     );
