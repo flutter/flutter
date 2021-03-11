@@ -1489,10 +1489,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     _semanticsInfo = _textPainter.text!.getSemanticsInformation();
-    if (_semanticsInfo!.any((InlineSpanSemanticsInformation info) => info.recognizer != null)) {
+    // TODO(chunhtai): the macOS does not provide a public API to support text
+    // selections across multiple semantics nodes. Remove this platform check
+    // once we can support it.
+    // https://github.com/flutter/flutter/issues/77957
+    if (_semanticsInfo!.any((InlineSpanSemanticsInformation info) => info.recognizer != null) &&
+        defaultTargetPlatform != TargetPlatform.macOS) {
       assert(readOnly && !obscureText);
-      // For Selectable rich text with recognizer, we need to create semantics
-      // node for each text fragments.
+      // For Selectable rich text with recognizer, we need to create a semantics
+      // node for each text fragment.
       config
         ..isSemanticBoundary = true
         ..explicitChildNodes = true;
@@ -1576,7 +1581,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         math.min(rect.width, constraints.maxWidth),
         math.min(rect.height, constraints.maxHeight),
       );
-      // round the current rectangle to make this API testable and add some
+      // Round the current rectangle to make this API testable and add some
       // padding so that the accessibility rects do not overlap with the text.
       currentRect = Rect.fromLTRB(
         rect.left.floorToDouble() - 4.0,
