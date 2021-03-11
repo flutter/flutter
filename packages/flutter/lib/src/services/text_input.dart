@@ -1029,8 +1029,8 @@ class TextInputConnection {
     );
   }
 
-  /// Sends the coordinates of caret rect. This is only used on macOS for
-  /// positioning the accent selection menu
+  /// Sends the coordinates of caret rect. This is used on macOS for positioning
+  /// the accent selection menu.
   void setCaretRect(Rect rect) {
     assert(rect != null);
     if (rect == _cachedCaretRect)
