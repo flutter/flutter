@@ -284,20 +284,22 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Text.rich(
-          TextSpan(
-            text: 'xxxxx',
-            children: <InlineSpan>[
-              TextSpan(
-                text: 'yyyyy',
-                mouseCursor: SystemMouseCursors.forbidden,
-              ),
-              TextSpan(
-                text: 'xxxxx',
-              ),
-            ],
+        child: Center(
+          child: Text.rich(
+            TextSpan(
+              text: 'xxxxx',
+              children: <InlineSpan>[
+                TextSpan(
+                  text: 'yyyyy',
+                  mouseCursor: SystemMouseCursors.forbidden,
+                ),
+                TextSpan(
+                  text: 'xxxxx',
+                ),
+              ],
+            ),
+            textAlign: TextAlign.center,
           ),
-          textAlign: TextAlign.center,
         ),
       ),
     );
