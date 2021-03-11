@@ -7,8 +7,8 @@ import 'package:flutter/gestures.dart';
 
 import 'system_channels.dart';
 
-/// Maintains the state of mouse cursors and manages how cursors are
-/// searched for.
+/// Maintains the state of mouse cursors and manages how cursors are searched
+/// for.
 ///
 /// This is typically created as a global singleton and owned by [MouseTracker].
 class MouseCursorManager {
@@ -44,14 +44,14 @@ class MouseCursorManager {
 
   final Map<int, MouseCursorSession> _lastSession = <int, MouseCursorSession>{};
 
-  /// Handles the changes that cause a pointer device to have a new list of
-  /// mouse cursor candidates.
+  /// Handles the changes that cause a pointer device to have a new list of mouse
+  /// cursor candidates.
   ///
   /// This change can be caused by a pointer event, in which case
-  /// `triggeringEvent` should not be null, or by other changes, such as when a widget
-  /// has moved under a still mouse, which is detected after the current frame is complete. In either
-  /// case, `cursorCandidates` should be the list of cursors at the location of
-  /// the mouse in hit-test order.
+  /// `triggeringEvent` should not be null, or by other changes, such as when a
+  /// widget has moved under a still mouse, which is detected after the current
+  /// frame is complete. In either case, `cursorCandidates` should be the list of
+  /// cursors at the location of the mouse in hit-test order.
   void handleDeviceCursorUpdate(
     int device,
     PointerEvent? triggeringEvent,

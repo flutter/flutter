@@ -91,13 +91,16 @@ class MouseTrackerAnnotation with Diagnosticable {
   ///  * [MouseRegion.cursor], which provide values to this field.
   final MouseCursor cursor;
 
-  /// Whether this is included when [MouseTracker] collects the list of annotations.
+  /// Whether this is included when [MouseTracker] collects the list of
+  /// annotations.
   ///
-  /// If [validForMouseTracker] is false, this object is excluded from the current annotation list
-  /// even if it's included in the hit test, affecting mouse-related behavior such as enter events,
-  /// exit events, and mouse cursors. The [validForMouseTracker] does not affect hit testing.
+  /// If [validForMouseTracker] is false, this object is excluded from the
+  /// current annotation list even if it's included in the hit test, affecting
+  /// mouse-related behavior such as enter events, exit events, and mouse
+  /// cursors. The [validForMouseTracker] does not affect hit testing.
   ///
-  /// The [validForMouseTracker] is true for [MouseTrackerAnnotation]s built by the constructor.
+  /// The [validForMouseTracker] is true for [MouseTrackerAnnotation]s built by
+  /// the constructor.
   final bool validForMouseTracker;
 
   @override
