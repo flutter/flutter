@@ -102,6 +102,134 @@ const double _inputFormLandscapeHeight = 108.0;
 /// [DatePickerMode.day] mode. It defaults to [DatePickerMode.day], and
 /// must be non-null.
 ///
+/// ### State Restoration
+///
+/// Using this method will not enable state restoration for the date picker.
+/// In order to enable state restoration for a date picker, use
+/// [Navigator.restorablePush] or [Navigator.restorablePushNamed] with
+/// [DatePickerDialog].
+///
+/// For more information about state restoration, see [RestorationManager].
+///
+/// {@tool sample --template=freeform}
+///
+/// This sample demonstrates how to create a restorable Material date picker.
+/// This is accomplished by enabling state restoration by specifying
+/// [MaterialApp.restorationScopeId] and using [Navigator.restorablePush] to
+/// push [DatePickerDialog] when the button is tapped.
+///
+/// {@macro flutter.widgets.RestorationManager}
+///
+/// ```dart imports
+/// import 'package:flutter/material.dart';
+/// ```
+///
+/// ```dart
+/// void main() {
+///   runApp(MyApp());
+/// }
+///
+/// class MyApp extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       restorationScopeId: 'app',
+///       title: 'Restorable Date Picker Demo',
+///       home: MyHomePage(),
+///     );
+///   }
+/// }
+///
+///
+/// class MyHomePage extends StatefulWidget {
+///   @override
+///   _MyHomePageState createState() => _MyHomePageState();
+/// }
+///
+/// class _MyHomePageState extends State<MyHomePage> with RestorationMixin {
+///   @override
+///   String get restorationId => 'scaffold_state';
+///
+///   final RestorableIntN selectedYear = RestorableIntN(DateTime.now().year);
+///   final RestorableIntN selectedMonth = RestorableIntN(DateTime.now().month);
+///   final RestorableIntN selectedDay = RestorableIntN(DateTime.now().day);
+///   RestorableRouteFuture<DateTime> _restorableDatePickerRouteFuture;
+///
+///   static Route<DateTime> _datePickerRoute(
+///     BuildContext context,
+///     Object arguments,
+///   ) {
+///     Map<dynamic, dynamic> argumentMap = arguments as Map<dynamic, dynamic>;
+///     Map<dynamic, dynamic> initialDate = argumentMap['initialDate'] as Map<dynamic, dynamic>;
+///
+///     return MaterialPageRoute<DateTime>(
+///       builder: (context) {
+///         return DatePickerDialog(
+///           initialEntryMode: DatePickerEntryMode.calendarOnly,
+///           initialDate: DateTime(initialDate['year'], initialDate['month'], initialDate['day']),
+///           firstDate: DateTime(2021, 1, 1),
+///           lastDate: DateTime(2022, 1, 1),
+///         );
+///       },
+///     );
+///   }
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     _restorableDatePickerRouteFuture = RestorableRouteFuture<DateTime>(
+///       onPresent: (navigator, arguments) {
+///         return navigator.restorablePush(
+///           _datePickerRoute,
+///           arguments: {
+///             'initialDate': {
+///               'year': selectedYear.value,
+///               'month': selectedMonth.value,
+///               'day': selectedDay.value,
+///             },
+///           },
+///         );
+///       },
+///       onComplete: _selectDate,
+///     );
+///   }
+///
+///   @override
+///   void restoreState(RestorationBucket oldBucket, bool initialRestore) {
+///     registerForRestoration(selectedYear, 'selected_year');
+///     registerForRestoration(selectedMonth, 'selected_month');
+///     registerForRestoration(selectedDay, 'selected_day');
+///     registerForRestoration(_restorableDatePickerRouteFuture, 'date_picker_route_future');
+///   }
+///
+///   void _selectDate(DateTime newSelectedDate) {
+///     if (newSelectedDate != null) {
+///       setState(() {
+///         selectedYear.value = newSelectedDate.year;
+///         selectedMonth.value = newSelectedDate.month;
+///         selectedDay.value = newSelectedDate.day;
+///       });
+///     }
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Scaffold(
+///       body: Center(
+///         child: OutlinedButton(
+///           onPressed: () {
+///             _restorableDatePickerRouteFuture.present();
+///           },
+///           child: const Text('Open Date Picker'),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+///
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [showDateRangePicker], which shows a material design date range picker
