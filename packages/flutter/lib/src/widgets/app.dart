@@ -12,6 +12,8 @@ import 'actions.dart';
 import 'banner.dart';
 import 'basic.dart';
 import 'binding.dart';
+import 'default_text_editing_actions.dart';
+import 'default_text_editing_shortcuts.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
 import 'localizations.dart';
@@ -861,6 +863,9 @@ class WidgetsApp extends StatefulWidget {
   /// The default map of keyboard shortcuts to intents for the application.
   ///
   /// By default, this is set to [WidgetsApp.defaultShortcuts].
+  ///
+  /// Passing this will not replace [DefaultTextEditingShortcuts]. These can be
+  /// overridden by using a [Shortcuts] widget lower in the widget tree.
   /// {@endtemplate}
   ///
   /// {@tool snippet}
@@ -910,6 +915,9 @@ class WidgetsApp extends StatefulWidget {
   /// the [actions] for this app. You may also add to the bindings, or override
   /// specific bindings for a widget subtree, by adding your own [Actions]
   /// widget.
+  ///
+  /// Passing this will not replace [DefaultTextEditingActions]. These can be
+  /// overridden by placing an [Actions] widget lower in the widget tree.
   /// {@endtemplate}
   ///
   /// {@tool snippet}
@@ -1621,20 +1629,27 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       : _locale!;
 
     assert(_debugCheckLocalizations(appLocale));
+
     return RootRestorationScope(
       restorationId: widget.restorationScopeId,
       child: Shortcuts(
-        shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
         debugLabel: '<Default WidgetsApp Shortcuts>',
-        child: Actions(
-          actions: widget.actions ?? WidgetsApp.defaultActions,
-          child: FocusTraversalGroup(
-            policy: ReadingOrderTraversalPolicy(),
-            child: _MediaQueryFromWindow(
-              child: Localizations(
-                locale: appLocale,
-                delegates: _localizationsDelegates.toList(),
-                child: title,
+        shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
+        // DefaultTextEditingShortcuts is nested inside Shortcuts so that it can
+        // fall through to the defaultShortcuts.
+        child: DefaultTextEditingShortcuts(
+          child: Actions(
+            actions: widget.actions ?? WidgetsApp.defaultActions,
+            child: DefaultTextEditingActions(
+              child: FocusTraversalGroup(
+                policy: ReadingOrderTraversalPolicy(),
+                child: _MediaQueryFromWindow(
+                  child: Localizations(
+                    locale: appLocale,
+                    delegates: _localizationsDelegates.toList(),
+                    child: title,
+                  ),
+                ),
               ),
             ),
           ),

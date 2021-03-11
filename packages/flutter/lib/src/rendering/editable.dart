@@ -652,12 +652,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     // all the keyboard handling functions assume it is not.
     assert(selection != null);
 
-    final bool isWordModifierPressed = isMacOS ? keyEvent.isAltPressed : keyEvent.isControlPressed;
-    final bool isLineModifierPressed = isMacOS ? keyEvent.isMetaPressed : keyEvent.isAltPressed;
     final bool isShortcutModifierPressed = isMacOS ? keyEvent.isMetaPressed : keyEvent.isControlPressed;
-    if (_movementKeys.contains(key)) {
-      _handleMovement(key, wordModifier: isWordModifierPressed, lineModifier: isLineModifierPressed, shift: keyEvent.isShiftPressed);
-    } else if (isShortcutModifierPressed && _shortcutKeys.contains(key)) {
+    if (isShortcutModifierPressed && _shortcutKeys.contains(key)) {
       // _handleShortcuts depends on being started in the same stack invocation
       // as the _handleKeyEvent method
       _handleShortcuts(key);
@@ -733,176 +729,993 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return 0;
   }
 
-  void _handleMovement(
-    LogicalKeyboardKey key, {
-    required bool wordModifier,
-    required bool lineModifier,
-    required bool shift,
-  }){
-    if (wordModifier && lineModifier) {
-      // If both modifiers are down, nothing happens on any of the platforms.
+  // Return a new selection that has been moved left once.
+  //
+  // If it can't be moved left, the original TextSelection is returned.
+  static TextSelection _moveGivenSelectionLeft(TextSelection selection, String text) {
+    // If the selection is already all the way left, there is nothing to do.
+    if (selection.isCollapsed && selection.extentOffset <= 0) {
+      return selection;
+    }
+
+    int previousExtent;
+    if (selection.start != selection.end) {
+      previousExtent = selection.start;
+    } else {
+      previousExtent = previousCharacter(selection.extentOffset, text);
+    }
+    final TextSelection newSelection = selection.copyWith(
+      extentOffset: previousExtent,
+    );
+
+    final int newOffset = newSelection.extentOffset;
+    return TextSelection.fromPosition(TextPosition(offset: newOffset));
+  }
+
+  // Return a new selection that has been moved right once.
+  //
+  // If it can't be moved right, the original TextSelection is returned.
+  static TextSelection _moveGivenSelectionRight(TextSelection selection, String text) {
+    // If the selection is already all the way right, there is nothing to do.
+    if (selection.isCollapsed && selection.extentOffset >= text.length) {
+      return selection;
+    }
+
+    int nextExtent;
+    if (selection.start != selection.end) {
+      nextExtent = selection.end;
+    } else {
+      nextExtent = nextCharacter(selection.extentOffset, text);
+    }
+    final TextSelection nextSelection = selection.copyWith(extentOffset: nextExtent);
+
+    int newOffset = nextSelection.extentOffset;
+    newOffset = nextSelection.baseOffset > nextSelection.extentOffset
+        ? nextSelection.baseOffset : nextSelection.extentOffset;
+    return TextSelection.fromPosition(TextPosition(offset: newOffset));
+  }
+
+  // Return the offset at the start of the nearest word to the left of the given
+  // offset.
+  static int _getLeftByWord(TextPainter textPainter, int offset, [bool includeWhitespace = true]) {
+    // If the offset is already all the way left, there is nothing to do.
+    if (offset <= 0) {
+      return offset;
+    }
+
+    // If we can just return the start of the text without checking for a word.
+    if (offset == 1) {
+      return 0;
+    }
+
+    final String text = textPainter.text!.toPlainText();
+    final int startPoint = previousCharacter(offset, text, includeWhitespace);
+    final TextRange word = textPainter.getWordBoundary(TextPosition(offset: startPoint));
+    return word.start;
+  }
+
+  // Return the offset at the end of the nearest word to the right of the given
+  // offset.
+  static int _getRightByWord(TextPainter textPainter, int offset, [bool includeWhitespace = true]) {
+    // If the selection is already all the way right, there is nothing to do.
+    final String text = textPainter.text!.toPlainText();
+    if (offset == text.length) {
+      return offset;
+    }
+
+    // If we can just return the end of the text without checking for a word.
+    if (offset == text.length - 1 || offset == text.length) {
+      return text.length;
+    }
+
+    final int startPoint = includeWhitespace || !_isWhitespace(text.codeUnitAt(offset))
+        ? offset
+        : nextCharacter(offset, text, includeWhitespace);
+    final TextRange nextWord = textPainter.getWordBoundary(TextPosition(offset: startPoint));
+    return nextWord.end;
+  }
+
+  // Return the given TextSelection extended left to the beginning of the
+  // nearest word.
+  static TextSelection _extendGivenSelectionLeftByWord(TextPainter textPainter, TextSelection selection, [bool includeWhitespace = true]) {
+    // If the selection is already all the way left, there is nothing to do.
+    if (selection.isCollapsed && selection.extentOffset <= 0) {
+      return selection;
+    }
+
+    final int leftOffset = _getLeftByWord(textPainter, selection.extentOffset, includeWhitespace);
+    return selection.copyWith(
+      extentOffset: leftOffset,
+    );
+  }
+
+  // Return the given TextSelection extended right to the end of the nearest
+  // word.
+  static TextSelection _extendGivenSelectionRightByWord(TextPainter textPainter, TextSelection selection, [bool includeWhitespace = true]) {
+    // If the selection is already all the way right, there is nothing to do.
+    final String text = textPainter.text!.toPlainText();
+    if (selection.isCollapsed && selection.extentOffset == text.length) {
+      return selection;
+    }
+
+    final int rightOffset = _getRightByWord(textPainter, selection.extentOffset, includeWhitespace);
+    return selection.copyWith(
+      extentOffset: rightOffset,
+    );
+  }
+
+  // Return the given TextSelection moved left to the end of the nearest word.
+  //
+  // A TextSelection that isn't collapsed will be collapsed and moved from the
+  // extentOffset.
+  static TextSelection _moveGivenSelectionLeftByWord(TextPainter textPainter, TextSelection selection, [bool includeWhitespace = true]) {
+    // If the selection is already all the way left, there is nothing to do.
+    if (selection.isCollapsed && selection.extentOffset <= 0) {
+      return selection;
+    }
+
+    final int leftOffset = _getLeftByWord(textPainter, selection.extentOffset, includeWhitespace);
+    return selection.copyWith(
+      baseOffset: leftOffset,
+      extentOffset: leftOffset,
+    );
+  }
+
+  // Return the given TextSelection moved right to the end of the nearest word.
+  //
+  // A TextSelection that isn't collapsed will be collapsed and moved from the
+  // extentOffset.
+  static TextSelection _moveGivenSelectionRightByWord(TextPainter textPainter, TextSelection selection, [bool includeWhitespace = true]) {
+    // If the selection is already all the way right, there is nothing to do.
+    final String text = textPainter.text!.toPlainText();
+    if (selection.isCollapsed && selection.extentOffset == text.length) {
+      return selection;
+    }
+
+    final int rightOffset = _getRightByWord(textPainter, selection.extentOffset, includeWhitespace);
+    return selection.copyWith(
+      baseOffset: rightOffset,
+      extentOffset: rightOffset,
+    );
+  }
+
+  static TextSelection _extendGivenSelectionLeft(TextSelection selection, String text, [bool includeWhitespace = true]) {
+    // If the selection is already all the way left, there is nothing to do.
+    if (selection.extentOffset <= 0) {
+      return selection;
+    }
+    final int previousExtent = previousCharacter(selection.extentOffset, text, includeWhitespace);
+    return selection.copyWith(extentOffset: previousExtent);
+  }
+
+  static TextSelection _extendGivenSelectionRight(TextSelection selection, String text, [bool includeWhitespace = true]) {
+    // If the selection is already all the way right, there is nothing to do.
+    if (selection.extentOffset >= text.length) {
+      return selection;
+    }
+    final int nextExtent = nextCharacter(selection.extentOffset, text, includeWhitespace);
+    return selection.copyWith(extentOffset: nextExtent);
+  }
+
+  // Extend the current selection to the end of the field.
+  //
+  // If selectionEnabled is false, keeps the selection collapsed and moves it to
+  // the end.
+  //
+  // The given [SelectionChangedCause] indicates the cause of this change and
+  // will be passed to [onSelectionChanged].
+  //
+  // See also:
+  //
+  //   * _extendSelectionToStart
+  void _extendSelectionToEnd(SelectionChangedCause cause) {
+    if (selection!.extentOffset == _plainText.length) {
       return;
     }
+    if (!selectionEnabled) {
+      return moveSelectionToEnd(cause);
+    }
+
+    final TextSelection nextSelection = selection!.copyWith(
+      extentOffset: _plainText.length,
+    );
+    _setSelection(nextSelection, cause);
+  }
+
+  // Extend the current selection to the start of the field.
+  //
+  // If selectionEnabled is false, keeps the selection collapsed and moves it to
+  // the start.
+  //
+  // The given [SelectionChangedCause] indicates the cause of this change and
+  // will be passed to [onSelectionChanged].
+  //
+  // See also:
+  //
+  //   * _expandSelectionToEnd
+  void _extendSelectionToStart(SelectionChangedCause cause) {
+    if (selection!.extentOffset == 0) {
+      return;
+    }
+    if (!selectionEnabled) {
+      return moveSelectionToStart(cause);
+    }
+
+    final TextSelection nextSelection = selection!.copyWith(
+      extentOffset: 0,
+    );
+    _setSelection(nextSelection, cause);
+  }
+
+  // Returns the TextPosition above or below the given offset.
+  TextPosition _getTextPositionVertical(int textOffset, double verticalOffset) {
+    final Offset caretOffset = _textPainter.getOffsetForCaret(TextPosition(offset: textOffset), _caretPrototype);
+    final Offset caretOffsetTranslated = caretOffset.translate(0.0, verticalOffset);
+    return _textPainter.getPositionForOffset(caretOffsetTranslated);
+  }
+
+  // Returns the TextPosition above the given offset into _plainText.
+  //
+  // If the offset is already on the first line, the given offset will be
+  // returned.
+  TextPosition _getTextPositionAbove(int offset) {
+    // The caret offset gives a location in the upper left hand corner of
+    // the caret so the middle of the line above is a half line above that
+    // point and the line below is 1.5 lines below that point.
+    final double preferredLineHeight = _textPainter.preferredLineHeight;
+    final double verticalOffset = -0.5 * preferredLineHeight;
+    return _getTextPositionVertical(offset, verticalOffset);
+  }
+
+  // Returns the TextPosition below the given offset into _plainText.
+  //
+  // If the offset is already on the last line, the given offset will be
+  // returned.
+  TextPosition _getTextPositionBelow(int offset) {
+    // The caret offset gives a location in the upper left hand corner of
+    // the caret so the middle of the line above is a half line above that
+    // point and the line below is 1.5 lines below that point.
+    final double preferredLineHeight = _textPainter.preferredLineHeight;
+    final double verticalOffset = 1.5 * preferredLineHeight;
+    return _getTextPositionVertical(offset, verticalOffset);
+  }
+
+  /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
+  /// [TextSelection.extentOffset] down by one line.
+  ///
+  /// If [selectionEnabled] is false, keeps the selection collapsed and just
+  /// moves it down.
+  ///
+  /// {@template flutter.rendering.RenderEditable.cause}
+  /// The given [SelectionChangedCause] indicates the cause of this change and
+  /// will be passed to [onSelectionChanged].
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///   * [extendSelectionUp], which is same but in the opposite direction.
+  void extendSelectionDown(SelectionChangedCause cause) {
     assert(selection != null);
 
-    TextSelection newSelection = selection!;
-
-    final bool rightArrow = key == LogicalKeyboardKey.arrowRight;
-    final bool leftArrow = key == LogicalKeyboardKey.arrowLeft;
-    final bool upArrow = key == LogicalKeyboardKey.arrowUp;
-    final bool downArrow = key == LogicalKeyboardKey.arrowDown;
-
-    if ((rightArrow || leftArrow) && !(rightArrow && leftArrow)) {
-      // Jump to begin/end of word.
-      if (wordModifier) {
-        // If control/option is pressed, we will decide which way to look for a
-        // word based on which arrow is pressed.
-        if (leftArrow) {
-          // When going left, we want to skip over any whitespace before the word,
-          // so we go back to the first non-whitespace before asking for the word
-          // boundary, since _selectWordAtOffset finds the word boundaries without
-          // including whitespace.
-          final int startPoint = previousCharacter(newSelection.extentOffset, _plainText, false);
-          final TextSelection textSelection = _selectWordAtOffset(TextPosition(offset: startPoint));
-          newSelection = newSelection.copyWith(extentOffset: textSelection.baseOffset);
-        } else {
-          // When going right, we want to skip over any whitespace after the word,
-          // so we go forward to the first non-whitespace character before asking
-          // for the word bounds, since _selectWordAtOffset finds the word
-          // boundaries without including whitespace.
-          final int startPoint = nextCharacter(newSelection.extentOffset, _plainText, false);
-          final TextSelection textSelection = _selectWordAtOffset(TextPosition(offset: startPoint));
-          newSelection = newSelection.copyWith(extentOffset: textSelection.extentOffset);
-        }
-      } else if (lineModifier) {
-        // If control/command is pressed, we will decide which way to expand to
-        // the beginning/end of the line based on which arrow is pressed.
-        if (leftArrow) {
-          // When going left, we want to skip over any whitespace before the line,
-          // so we go back to the first non-whitespace before asking for the line
-          // bounds, since _selectLineAtOffset finds the line boundaries without
-          // including whitespace (like the newline).
-          final int startPoint = previousCharacter(newSelection.extentOffset, _plainText, false);
-          final TextSelection textSelection = _selectLineAtOffset(TextPosition(offset: startPoint));
-          newSelection = newSelection.copyWith(extentOffset: textSelection.baseOffset);
-        } else {
-          // When going right, we want to skip over any whitespace after the line,
-          // so we go forward to the first non-whitespace character before asking
-          // for the line bounds, since _selectLineAtOffset finds the line
-          // boundaries without including whitespace (like the newline).
-          final int startPoint = nextCharacter(newSelection.extentOffset, _plainText, false);
-          final TextSelection textSelection = _selectLineAtOffset(TextPosition(offset: startPoint));
-          newSelection = newSelection.copyWith(extentOffset: textSelection.extentOffset);
-        }
-      } else {
-        // The directional arrows move the TextSelection.extentOffset, while the
-        // base remains fixed.
-        if (rightArrow && newSelection.extentOffset < _plainText.length) {
-          int nextExtent;
-          if (!shift && !wordModifier && !lineModifier && newSelection.start != newSelection.end) {
-            nextExtent = newSelection.end;
-          } else {
-            nextExtent = nextCharacter(newSelection.extentOffset, _plainText);
-          }
-          final int distance = nextExtent - newSelection.extentOffset;
-          newSelection = newSelection.copyWith(extentOffset: nextExtent);
-          if (shift) {
-            _cursorResetLocation += distance;
-          }
-        } else if (leftArrow && newSelection.extentOffset > 0) {
-          int previousExtent;
-          if (!shift && !wordModifier && !lineModifier && newSelection.start != newSelection.end) {
-            previousExtent = newSelection.start;
-          } else {
-            previousExtent = previousCharacter(newSelection.extentOffset, _plainText);
-          }
-          final int distance = newSelection.extentOffset - previousExtent;
-          newSelection = newSelection.copyWith(extentOffset: previousExtent);
-          if (shift) {
-            _cursorResetLocation -= distance;
-          }
-        }
-      }
+    // If the selection is collapsed at the end of the field already, then
+    // nothing happens.
+    if (selection!.isCollapsed && selection!.extentOffset >= _plainText.length) {
+      return;
+    }
+    if (!selectionEnabled) {
+      return moveSelectionDown(cause);
     }
 
-    // Handles moving the cursor vertically as well as taking care of the
-    // case where the user moves the cursor to the end or beginning of the text
-    // and then back up or down.
-    if (downArrow || upArrow) {
-      if (lineModifier) {
-        if (upArrow) {
-          // Extend the selection to the beginning of the field.
-          final int upperOffset = math.max(0, math.max(
-            newSelection.baseOffset,
-            newSelection.extentOffset,
-          ));
-          newSelection = TextSelection(
-            baseOffset: shift ? upperOffset : 0,
-            extentOffset: 0,
-          );
-        } else {
-          // Extend the selection to the end of the field.
-          final int lowerOffset = math.max(0, math.min(
-            newSelection.baseOffset,
-            newSelection.extentOffset,
-          ));
-          newSelection = TextSelection(
-            baseOffset: shift ? lowerOffset : _plainText.length,
-            extentOffset: _plainText.length,
-          );
-        }
-      } else {
-        // The caret offset gives a location in the upper left hand corner of
-        // the caret so the middle of the line above is a half line above that
-        // point and the line below is 1.5 lines below that point.
-        final double preferredLineHeight = _textPainter.preferredLineHeight;
-        final double verticalOffset = upArrow ? -0.5 * preferredLineHeight : 1.5 * preferredLineHeight;
-
-        final Offset caretOffset = _textPainter.getOffsetForCaret(TextPosition(offset: newSelection.extentOffset), _caretPrototype);
-        final Offset caretOffsetTranslated = caretOffset.translate(0.0, verticalOffset);
-        final TextPosition position = _textPainter.getPositionForOffset(caretOffsetTranslated);
-
-        // To account for the possibility where the user vertically highlights
-        // all the way to the top or bottom of the text, we hold the previous
-        // cursor location. This allows us to restore to this position in the
-        // case that the user wants to unhighlight some text.
-        if (position.offset == newSelection.extentOffset) {
-          if (downArrow) {
-            newSelection = newSelection.copyWith(extentOffset: _plainText.length);
-          } else if (upArrow) {
-            newSelection = newSelection.copyWith(extentOffset: 0);
-          }
-          _wasSelectingVerticallyWithKeyboard = shift;
-        } else if (_wasSelectingVerticallyWithKeyboard && shift) {
-          newSelection = newSelection.copyWith(extentOffset: _cursorResetLocation);
-          _wasSelectingVerticallyWithKeyboard = false;
-        } else {
-          newSelection = newSelection.copyWith(extentOffset: position.offset);
-          _cursorResetLocation = newSelection.extentOffset;
-        }
-      }
+    final TextPosition positionBelow = _getTextPositionBelow(selection!.extentOffset);
+    late final TextSelection nextSelection;
+    if (positionBelow.offset == selection!.extentOffset) {
+      nextSelection = selection!.copyWith(
+        extentOffset: _plainText.length,
+      );
+      _wasSelectingVerticallyWithKeyboard = true;
+    } else if (_wasSelectingVerticallyWithKeyboard) {
+      nextSelection = selection!.copyWith(
+        extentOffset: _cursorResetLocation,
+      );
+      _wasSelectingVerticallyWithKeyboard = false;
+    } else {
+      nextSelection = selection!.copyWith(
+        extentOffset: positionBelow.offset,
+      );
+      _cursorResetLocation = nextSelection.extentOffset;
     }
 
-    // Just place the collapsed selection at the end or beginning of the region
-    // if shift isn't down or selection isn't enabled.
-    if (!shift || !selectionEnabled) {
-      // We want to put the cursor at the correct location depending on which
-      // arrow is used while there is a selection.
-      int newOffset = newSelection.extentOffset;
-      if (!selection!.isCollapsed) {
-        if (leftArrow) {
-          newOffset = newSelection.baseOffset < newSelection.extentOffset ? newSelection.baseOffset : newSelection.extentOffset;
-        } else if (rightArrow) {
-          newOffset = newSelection.baseOffset > newSelection.extentOffset ? newSelection.baseOffset : newSelection.extentOffset;
-        }
-      }
-      newSelection = TextSelection.fromPosition(TextPosition(offset: newOffset));
+    _setSelection(nextSelection, cause);
+  }
+
+  /// Expand the current [selection] to the end of the field.
+  ///
+  /// The selection will never shrink. The [TextSelection.extentOffset] will
+  // always be at the end of the field, regardless of the original order of
+  /// [TextSelection.baseOffset] and [TextSelection.extentOffset].
+  ///
+  /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
+  /// to the end.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  ///
+  /// See also:
+  ///
+  ///   * [expandSelectionToStart], which is same but in the opposite direction.
+  void expandSelectionToEnd(SelectionChangedCause cause) {
+    assert(selection != null);
+
+    if (selection!.extentOffset == _plainText.length) {
+      return;
+    }
+    if (!selectionEnabled) {
+      return moveSelectionToEnd(cause);
     }
 
-    _setSelection(
-      newSelection,
-      SelectionChangedCause.keyboard,
+    final int firstOffset = math.max(0, math.min(
+      selection!.baseOffset,
+      selection!.extentOffset,
+    ));
+    final TextSelection nextSelection = TextSelection(
+      baseOffset: firstOffset,
+      extentOffset: _plainText.length,
     );
+    _setSelection(nextSelection, cause);
+  }
+
+  /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
+  /// [TextSelection.extentOffset] left.
+  ///
+  /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
+  /// left.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  ///
+  /// See also:
+  ///
+  ///   * [extendSelectionRight], which is same but in the opposite direction.
+  void extendSelectionLeft(SelectionChangedCause cause) {
+    assert(selection != null);
+
+    if (!selectionEnabled) {
+      return moveSelectionLeft(cause);
+    }
+
+    final TextSelection nextSelection = _extendGivenSelectionLeft(
+      selection!,
+      _plainText,
+    );
+    if (nextSelection == selection) {
+      return;
+    }
+    final int distance = selection!.extentOffset - nextSelection.extentOffset;
+    _cursorResetLocation -= distance;
+    _setSelection(nextSelection, cause);
+  }
+
+  /// Extend the current [selection] to the start of
+  /// [TextSelection.extentOffset]'s line.
+  ///
+  /// Uses [TextSelection.baseOffset] as a pivot point and doesn't change it.
+  /// If [TextSelection.extentOffset] is right of [TextSelection.baseOffset],
+  /// then collapses the selection.
+  ///
+  /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
+  /// left by line.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  ///
+  /// See also:
+  ///
+  ///   * [extendSelectionRightByLine], which is same but in the opposite
+  ///     direction.
+  ///   * [expandSelectionRightByLine], which strictly grows the selection
+  ///     regardless of the order.
+  void extendSelectionLeftByLine(SelectionChangedCause cause) {
+    assert(selection != null);
+
+    if (!selectionEnabled) {
+      return moveSelectionLeftByLine(cause);
+    }
+
+    // When going left, we want to skip over any whitespace before the line,
+    // so we go back to the first non-whitespace before asking for the line
+    // bounds, since _getLineAtOffset finds the line boundaries without
+    // including whitespace (like the newline).
+    final int startPoint = previousCharacter(selection!.extentOffset, _plainText, false);
+    final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
+
+    late final TextSelection nextSelection;
+    if (selection!.extentOffset > selection!.baseOffset) {
+      nextSelection = selection!.copyWith(
+        extentOffset: selection!.baseOffset,
+      );
+    } else {
+      nextSelection = selection!.copyWith(
+        extentOffset: selectedLine.baseOffset,
+      );
+    }
+
+    _setSelection(nextSelection, cause);
+  }
+
+  /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
+  /// [TextSelection.extentOffset] right.
+  ///
+  /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
+  /// right.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  ///
+  /// See also:
+  ///
+  ///   * [extendSelectionLeft], which is same but in the opposite direction.
+  void extendSelectionRight(SelectionChangedCause cause) {
+    assert(selection != null);
+
+    if (!selectionEnabled) {
+      return moveSelectionRight(cause);
+    }
+
+    final TextSelection nextSelection = _extendGivenSelectionRight(
+      selection!,
+      _plainText,
+    );
+    if (nextSelection == selection) {
+      return;
+    }
+    final int distance = nextSelection.extentOffset - selection!.extentOffset;
+    _cursorResetLocation += distance;
+    _setSelection(nextSelection, cause);
+  }
+
+  /// Extend the current [selection] to the end of [TextSelection.extentOffset]'s
+  /// line.
+  ///
+  /// Uses [TextSelection.baseOffset] as a pivot point and doesn't change it. If
+  /// [TextSelection.extentOffset] is left of [TextSelection.baseOffset], then
+  /// collapses the selection.
+  ///
+  /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
+  /// right by line.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  ///
+  /// See also:
+  ///
+  ///   * [extendSelectionLeftByLine], which is same but in the opposite
+  ///     direction.
+  ///   * [expandSelectionRightByLine], which strictly grows the selection
+  ///     regardless of the order.
+  void extendSelectionRightByLine(SelectionChangedCause cause) {
+    assert(selection != null);
+
+    if (!selectionEnabled) {
+      return moveSelectionRightByLine(cause);
+    }
+
+    final int startPoint = nextCharacter(selection!.extentOffset, _plainText, false);
+    final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
+
+    late final TextSelection nextSelection;
+    if (selection!.extentOffset < selection!.baseOffset) {
+      nextSelection = selection!.copyWith(
+        extentOffset: selection!.baseOffset,
+      );
+    } else {
+      nextSelection = selection!.copyWith(
+        extentOffset: selectedLine.extentOffset,
+      );
+    }
+
+    _setSelection(nextSelection, cause);
+  }
+
+  /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
+  /// [TextSelection.extentOffset] up by one
+  /// line.
+  ///
+  /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
+  /// up.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  ///
+  /// See also:
+  ///
+  ///   * [extendSelectionDown], which is the same but in the opposite
+  ///     direction.
+  void extendSelectionUp(SelectionChangedCause cause) {
+    assert(selection != null);
+
+    // If the selection is collapsed at the beginning of the field already, then
+    // nothing happens.
+    if (selection!.isCollapsed && selection!.extentOffset <= 0.0) {
+      return;
+    }
+    if (!selectionEnabled) {
+      return moveSelectionUp(cause);
+    }
+
+    final TextPosition positionAbove = _getTextPositionAbove(selection!.extentOffset);
+    late final TextSelection nextSelection;
+    if (positionAbove.offset == selection!.extentOffset) {
+      nextSelection = selection!.copyWith(
+        extentOffset: 0,
+      );
+      _wasSelectingVerticallyWithKeyboard = true;
+    } else if (_wasSelectingVerticallyWithKeyboard) {
+      nextSelection = selection!.copyWith(
+        baseOffset: selection!.baseOffset,
+        extentOffset: _cursorResetLocation,
+      );
+      _wasSelectingVerticallyWithKeyboard = false;
+    } else {
+      nextSelection = selection!.copyWith(
+        baseOffset: selection!.baseOffset,
+        extentOffset: positionAbove.offset,
+      );
+      _cursorResetLocation = nextSelection.extentOffset;
+    }
+
+    _setSelection(nextSelection, cause);
+  }
+
+  /// Expand the current [selection] to the start of the field.
+  ///
+  /// The selection will never shrink. The [TextSelection.extentOffset] will
+  /// always be at the start of the field, regardless of the original order of
+  /// [TextSelection.baseOffset] and [TextSelection.extentOffset].
+  ///
+  /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
+  /// to the start.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  ///
+  /// See also:
+  ///
+  ///   * [expandSelectionToEnd], which is the same but in the opposite
+  ///     direction.
+  void expandSelectionToStart(SelectionChangedCause cause) {
+    assert(selection != null);
+
+    if (selection!.extentOffset == 0) {
+      return;
+    }
+    if (!selectionEnabled) {
+      return moveSelectionToStart(cause);
+    }
+
+    final int lastOffset = math.max(0, math.max(
+      selection!.baseOffset,
+      selection!.extentOffset,
+    ));
+    final TextSelection nextSelection = TextSelection(
+      baseOffset: lastOffset,
+      extentOffset: 0,
+    );
+    _setSelection(nextSelection, cause);
+  }
+
+  /// Expand the current [selection] to the start of the line.
+  ///
+  /// The selection will never shrink. The upper offset will be expanded to the
+  /// beginning of its line, and the original order of baseOffset and
+  /// [TextSelection.extentOffset] will be preserved.
+  ///
+  /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
+  /// left by line.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  ///
+  /// See also:
+  ///
+  ///   * [expandSelectionRightByLine], which is the same but in the opposite
+  ///     direction.
+  void expandSelectionLeftByLine(SelectionChangedCause cause) {
+    assert(selection != null);
+
+    if (!selectionEnabled) {
+      return moveSelectionLeftByLine(cause);
+    }
+
+    final int firstOffset = math.min(selection!.baseOffset, selection!.extentOffset);
+    final int startPoint = previousCharacter(firstOffset, _plainText, false);
+    final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
+
+    late final TextSelection nextSelection;
+    if (selection!.extentOffset <= selection!.baseOffset) {
+      nextSelection = selection!.copyWith(
+        extentOffset: selectedLine.baseOffset,
+      );
+    } else {
+      nextSelection = selection!.copyWith(
+        baseOffset: selectedLine.baseOffset,
+      );
+    }
+
+    _setSelection(nextSelection, cause);
+  }
+
+  /// Extend the current [selection] to the previous start of a word.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  ///
+  /// By default, includeWhitespace is set to true, meaning that whitespace can
+  /// be considered a word in itself.  If set to false, the selection will be
+  /// extended past any whitespace and the first word following the whitespace.
+  ///
+  /// See also:
+  ///
+  ///   * [extendSelectionRightByWord], which is the same but in the opposite
+  ///     direction.
+  void extendSelectionLeftByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
+    assert(selection != null);
+
+    // When the text is obscured, the whole thing is treated as one big word.
+    if (obscureText) {
+      return _extendSelectionToStart(cause);
+    }
+
+    assert(_textLayoutLastMaxWidth == constraints.maxWidth &&
+           _textLayoutLastMinWidth == constraints.minWidth,
+      'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');
+    final TextSelection nextSelection = _extendGivenSelectionLeftByWord(
+      _textPainter,
+      selection!,
+      includeWhitespace,
+    );
+    if (nextSelection == selection) {
+      return;
+    }
+    _setSelection(nextSelection, cause);
+  }
+
+  /// Extend the current [selection] to the next end of a word.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  ///
+  /// By default, includeWhitespace is set to true, meaning that whitespace can
+  /// be considered a word in itself.  If set to false, the selection will be
+  /// extended past any whitespace and the first word following the whitespace.
+  ///
+  /// See also:
+  ///
+  ///   * [extendSelectionLeftByWord], which is the same but in the opposite
+  ///     direction.
+  void extendSelectionRightByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
+    assert(selection != null);
+
+    // When the text is obscured, the whole thing is treated as one big word.
+    if (obscureText) {
+      return _extendSelectionToEnd(cause);
+    }
+
+    assert(_textLayoutLastMaxWidth == constraints.maxWidth &&
+           _textLayoutLastMinWidth == constraints.minWidth,
+      'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');
+    final TextSelection nextSelection = _extendGivenSelectionRightByWord(
+      _textPainter,
+      selection!,
+      includeWhitespace,
+    );
+    if (nextSelection == selection) {
+      return;
+    }
+    _setSelection(nextSelection, cause);
+  }
+
+  /// Expand the current [selection] to the end of the line.
+  ///
+  /// The selection will never shrink. The lower offset will be expanded to the
+  /// end of its line and the original order of [TextSelection.baseOffset] and
+  /// [TextSelection.extentOffset] will be preserved.
+  ///
+  /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
+  /// right by line.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  ///
+  /// See also:
+  ///
+  ///   * [expandSelectionLeftByLine], which is the same but in the opposite
+  ///     direction.
+  void expandSelectionRightByLine(SelectionChangedCause cause) {
+    assert(selection != null);
+
+    if (!selectionEnabled) {
+      return moveSelectionRightByLine(cause);
+    }
+
+    final int lastOffset = math.max(selection!.baseOffset, selection!.extentOffset);
+    final int startPoint = nextCharacter(lastOffset, _plainText, false);
+    final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
+
+    late final TextSelection nextSelection;
+    if (selection!.extentOffset >= selection!.baseOffset) {
+      nextSelection = selection!.copyWith(
+        extentOffset: selectedLine.extentOffset,
+      );
+    } else {
+      nextSelection = selection!.copyWith(
+        baseOffset: selectedLine.extentOffset,
+      );
+    }
+
+    _setSelection(nextSelection, cause);
+  }
+
+  /// Move the current [selection] to the next line.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  ///
+  /// See also:
+  ///
+  ///   * [moveSelectionUp], which is the same but in the opposite direction.
+  void moveSelectionDown(SelectionChangedCause cause) {
+    assert(selection != null);
+
+    // If the selection is collapsed at the end of the field already, then
+    // nothing happens.
+    if (selection!.isCollapsed && selection!.extentOffset >= _plainText.length) {
+      return;
+    }
+
+    final TextPosition positionBelow = _getTextPositionBelow(selection!.extentOffset);
+
+    late final TextSelection nextSelection;
+    if (positionBelow.offset == selection!.extentOffset) {
+      nextSelection = selection!.copyWith(
+        baseOffset: _plainText.length,
+        extentOffset: _plainText.length,
+      );
+      _wasSelectingVerticallyWithKeyboard = false;
+    } else {
+      nextSelection = TextSelection.fromPosition(positionBelow);
+      _cursorResetLocation = nextSelection.extentOffset;
+    }
+
+    _setSelection(nextSelection, cause);
+  }
+
+  /// Move the current [selection] left by one character.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  ///
+  /// See also:
+  ///
+  ///   * [moveSelectionRight], which is the same but in the opposite direction.
+  void moveSelectionLeft(SelectionChangedCause cause) {
+    assert(selection != null);
+
+    final TextSelection nextSelection = _moveGivenSelectionLeft(
+      selection!,
+      _plainText,
+    );
+    if (nextSelection == selection) {
+      return;
+    }
+    _cursorResetLocation -= selection!.extentOffset - nextSelection.extentOffset;
+    _setSelection(nextSelection, cause);
+  }
+
+  /// Move the current [selection] to the leftmost of the current line.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  ///
+  /// See also:
+  ///
+  ///   * [moveSelectionRightByLine], which is the same but in the opposite
+  ///     direction.
+  void moveSelectionLeftByLine(SelectionChangedCause cause) {
+    assert(selection != null);
+
+    // If the previous character is the edge of a line, don't do anything.
+    final int previousPoint = previousCharacter(selection!.extentOffset, _plainText, true);
+    final TextSelection line = _getLineAtOffset(TextPosition(offset: previousPoint));
+    if (line.extentOffset == previousPoint) {
+      return;
+    }
+
+    // When going left, we want to skip over any whitespace before the line,
+    // so we go back to the first non-whitespace before asking for the line
+    // bounds, since _getLineAtOffset finds the line boundaries without
+    // including whitespace (like the newline).
+    final int startPoint = previousCharacter(selection!.extentOffset, _plainText, false);
+    final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
+    final TextSelection nextSelection = TextSelection.collapsed(
+      offset: selectedLine.baseOffset,
+    );
+
+    _setSelection(nextSelection, cause);
+  }
+
+  /// Move the current [selection] to the previous start of a word.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  ///
+  /// By default, includeWhitespace is set to true, meaning that whitespace can
+  /// be considered a word in itself.  If set to false, the selection will be
+  /// moved past any whitespace and the first word following the whitespace.
+  ///
+  /// See also:
+  ///
+  ///   * [moveSelectionRightByWord], which is the same but in the opposite
+  ///     direction.
+  void moveSelectionLeftByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
+    assert(selection != null);
+
+    // When the text is obscured, the whole thing is treated as one big word.
+    if (obscureText) {
+      return moveSelectionToStart(cause);
+    }
+
+    assert(_textLayoutLastMaxWidth == constraints.maxWidth &&
+           _textLayoutLastMinWidth == constraints.minWidth,
+      'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');
+    final TextSelection nextSelection = _moveGivenSelectionLeftByWord(
+      _textPainter,
+      selection!,
+      includeWhitespace,
+    );
+    if (nextSelection == selection) {
+      return;
+    }
+    _setSelection(nextSelection, cause);
+  }
+
+  /// Move the current [selection] to the right by one character.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  ///
+  /// See also:
+  ///
+  ///   * [moveSelectionLeft], which is the same but in the opposite direction.
+  void moveSelectionRight(SelectionChangedCause cause) {
+    assert(selection != null);
+
+    final TextSelection nextSelection = _moveGivenSelectionRight(
+      selection!,
+      _plainText,
+    );
+    if (nextSelection == selection) {
+      return;
+    }
+    _setSelection(nextSelection, cause);
+  }
+
+  /// Move the current [selection] to the rightmost point of the current line.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  ///
+  /// See also:
+  ///
+  ///   * [moveSelectionLeftByLine], which is the same but in the opposite
+  ///     direction.
+  void moveSelectionRightByLine(SelectionChangedCause cause) {
+    assert(selection != null);
+
+    // If already at the right edge of the line, do nothing.
+    final TextSelection currentLine = _getLineAtOffset(TextPosition(
+      offset: selection!.extentOffset,
+    ));
+    if (currentLine.extentOffset == selection!.extentOffset) {
+      return;
+    }
+
+    // When going right, we want to skip over any whitespace after the line,
+    // so we go forward to the first non-whitespace character before asking
+    // for the line bounds, since _getLineAtOffset finds the line
+    // boundaries without including whitespace (like the newline).
+    final int startPoint = nextCharacter(selection!.extentOffset, _plainText, false);
+    final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
+    final TextSelection nextSelection = TextSelection.collapsed(
+      offset: selectedLine.extentOffset,
+    );
+
+    _setSelection(nextSelection, cause);
+  }
+
+  /// Move the current [selection] to the next end of a word.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  ///
+  /// By default, includeWhitespace is set to true, meaning that whitespace can
+  /// be considered a word in itself.  If set to false, the selection will be
+  /// moved past any whitespace and the first word following the whitespace.
+  ///
+  /// See also:
+  ///
+  ///   * [moveSelectionLeftByWord], which is the same but in the opposite
+  ///     direction.
+  void moveSelectionRightByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
+    assert(selection != null);
+
+    // When the text is obscured, the whole thing is treated as one big word.
+    if (obscureText) {
+      return moveSelectionToEnd(cause);
+    }
+
+    assert(_textLayoutLastMaxWidth == constraints.maxWidth &&
+           _textLayoutLastMinWidth == constraints.minWidth,
+      'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');
+    final TextSelection nextSelection = _moveGivenSelectionRightByWord(
+      _textPainter,
+      selection!,
+      includeWhitespace,
+    );
+    if (nextSelection == selection) {
+      return;
+    }
+    _setSelection(nextSelection, cause);
+  }
+
+  /// Move the current [selection] to the end of the field.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  ///
+  /// See also:
+  ///
+  ///   * [moveSelectionToStart], which is the same but in the opposite
+  ///     direction.
+  void moveSelectionToEnd(SelectionChangedCause cause) {
+    assert(selection != null);
+
+    if (selection!.isCollapsed && selection!.extentOffset == _plainText.length) {
+      return;
+    }
+    final TextSelection nextSelection = TextSelection.collapsed(
+      offset: _plainText.length,
+    );
+    _setSelection(nextSelection, cause);
+  }
+
+  /// Move the current [selection] to the start of the field.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  ///
+  /// See also:
+  ///
+  ///   * [moveSelectionToEnd], which is the same but in the opposite direction.
+  void moveSelectionToStart(SelectionChangedCause cause) {
+    assert(selection != null);
+
+    if (selection!.isCollapsed && selection!.extentOffset == 0) {
+      return;
+    }
+    const TextSelection nextSelection = TextSelection.collapsed(offset: 0);
+    _setSelection(nextSelection, cause);
+  }
+
+  /// Move the current [selection] up by one line.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  ///
+  /// See also:
+  ///
+  ///   * [moveSelectionDown], which is the same but in the opposite direction.
+  void moveSelectionUp(SelectionChangedCause cause) {
+    assert(selection != null);
+
+    // If the selection is collapsed at the beginning of the field already, then
+    // nothing happens.
+    if (selection!.isCollapsed && selection!.extentOffset <= 0.0) {
+      return;
+    }
+
+    final TextPosition positionAbove = _getTextPositionAbove(selection!.extentOffset);
+    late final TextSelection nextSelection;
+    if (positionAbove.offset == selection!.extentOffset) {
+      nextSelection = selection!.copyWith(baseOffset: 0, extentOffset: 0);
+      _wasSelectingVerticallyWithKeyboard = false;
+    } else {
+      nextSelection = selection!.copyWith(
+        baseOffset: positionAbove.offset,
+        extentOffset: positionAbove.offset,
+      );
+      _cursorResetLocation = nextSelection.extentOffset;
+    }
+
+    _setSelection(nextSelection, cause);
   }
 
   // Handles shortcut functionality including cut, copy, paste and select all
@@ -1150,10 +1963,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _hasFocus = value;
     if (_hasFocus) {
       assert(!_listenerAttached);
+      // TODO(justinmc): This listener should be ported to Actions and removed.
+      // https://github.com/flutter/flutter/issues/75004
       RawKeyboard.instance.addListener(_handleKeyEvent);
       _listenerAttached = true;
     } else {
       assert(_listenerAttached);
+      // TODO(justinmc): This listener should be ported to Actions and removed.
+      // https://github.com/flutter/flutter/issues/75004
       RawKeyboard.instance.removeListener(_handleKeyEvent);
       _listenerAttached = false;
     }
@@ -1752,6 +2569,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _longPress.dispose();
     _offset.removeListener(markNeedsPaint);
     _showCursor.removeListener(_showHideCursor);
+    // TODO(justinmc): This listener should be ported to Actions and removed.
+    // https://github.com/flutter/flutter/issues/75004
     if (_listenerAttached)
       RawKeyboard.instance.removeListener(_handleKeyEvent);
     super.detach();
@@ -2129,15 +2948,18 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     assert(from != null);
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     final TextPosition firstPosition = _textPainter.getPositionForOffset(globalToLocal(from - _paintOffset));
-    final TextSelection firstWord = _selectWordAtOffset(firstPosition);
+    final TextSelection firstWord = _getWordAtOffset(firstPosition);
     final TextSelection lastWord = to == null ?
-      firstWord : _selectWordAtOffset(_textPainter.getPositionForOffset(globalToLocal(to - _paintOffset)));
-    final TextSelection newSelection = TextSelection(
-      baseOffset: firstWord.base.offset,
-      extentOffset: lastWord.extent.offset,
-      affinity: firstWord.affinity,
+      firstWord : _getWordAtOffset(_textPainter.getPositionForOffset(globalToLocal(to - _paintOffset)));
+
+    _setSelection(
+      TextSelection(
+        baseOffset: firstWord.base.offset,
+        extentOffset: lastWord.extent.offset,
+        affinity: firstWord.affinity,
+      ),
+      cause,
     );
-    _setSelection(newSelection, cause);
   }
 
   /// Move the selection to the beginning or end of a word.
@@ -2158,7 +2980,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _setSelection(newSelection, cause);
   }
 
-  TextSelection _selectWordAtOffset(TextPosition position) {
+  TextSelection _getWordAtOffset(TextPosition position) {
     assert(_textLayoutLastMaxWidth == constraints.maxWidth &&
            _textLayoutLastMinWidth == constraints.minWidth,
       'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');
@@ -2201,7 +3023,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return TextSelection(baseOffset: word.start, extentOffset: word.end);
   }
 
-  TextSelection _selectLineAtOffset(TextPosition position) {
+  TextSelection _getLineAtOffset(TextPosition position) {
     assert(_textLayoutLastMaxWidth == constraints.maxWidth &&
         _textLayoutLastMinWidth == constraints.minWidth,
     'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');

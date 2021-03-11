@@ -78,14 +78,18 @@ Widget overlayWithEntry(OverlayEntry entry) {
       WidgetsLocalizationsDelegate(),
       MaterialLocalizationsDelegate(),
     ],
-    child: Directionality(
-      textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(size: Size(800.0, 600.0)),
-        child: Overlay(
-          initialEntries: <OverlayEntry>[
-            entry,
-          ],
+    child: DefaultTextEditingShortcuts(
+      child: DefaultTextEditingActions(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(size: Size(800.0, 600.0)),
+            child: Overlay(
+              initialEntries: <OverlayEntry>[
+                entry,
+              ],
+            ),
+          ),
         ),
       ),
     ),

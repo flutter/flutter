@@ -884,7 +884,7 @@ class _MaterialAppState extends State<MaterialApp> {
       child: HeroControllerScope(
         controller: _heroController,
         child: result,
-      )
+      ),
     );
   }
 }
