@@ -360,7 +360,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
       _restorableSelectedDate.setDate(widget.initialDate);
     }
 
-    _entryMode.value ??= widget.initialCalendarMode.index;
+    _entryMode.value ??= widget.initialEntryMode.index;
   }
 
   final GlobalKey _calendarPickerKey = GlobalKey();
@@ -387,11 +387,11 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
       switch (DatePickerEntryMode.values[_entryMode.value!]) {
         case DatePickerEntryMode.calendar:
           _autoValidate.value = false;
-          DatePickerEntryMode.values[_entryMode.value!] = DatePickerEntryMode.input;
+          _entryMode.value = DatePickerEntryMode.input.index;
           break;
         case DatePickerEntryMode.input:
           _formKey.currentState!.save();
-          DatePickerEntryMode.values[_entryMode.value!] = DatePickerEntryMode.calendar;
+          _entryMode.value = DatePickerEntryMode.calendar.index;
           break;
         case DatePickerEntryMode.calendarOnly:
         case DatePickerEntryMode.inputOnly:
