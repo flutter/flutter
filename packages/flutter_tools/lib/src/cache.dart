@@ -927,6 +927,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
       final File frameworkZip = fileSystem.file(fileSystem.path.join(dir.path, 'FlutterMacOS.framework.zip'));
       if (frameworkZip.existsSync()) {
         final Directory framework = fileSystem.directory(fileSystem.path.join(dir.path, 'FlutterMacOS.framework'));
+        ErrorHandlingFileSystem.deleteIfExists(framework, recursive: true);
         framework.createSync();
         operatingSystemUtils.unzip(frameworkZip, framework);
       }
