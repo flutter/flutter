@@ -510,9 +510,6 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
       : _mask.value;
     return Positioned.fromRect(
       rect: _rect.value!,
-      // TODO(justinmc): When ShaderMask is supported on web, remove this
-      // conditional and use ShaderMask everywhere.
-      // https://github.com/flutter/flutter/issues/52967.
       child: ShaderMask(
         key: _childGlobalKey,
         shaderCallback: (Rect bounds) {
