@@ -1,4 +1,4 @@
-Signature: 08e9d3032695becaf5690a7036805049
+Signature: c80a42c54b06bf12d424c14926b1858c
 
 UNUSED LICENSES:
 
@@ -1223,7 +1223,6 @@ FILE: ../../../third_party/skia/infra/bots/recipes/recreate_skps.expected/Housek
 FILE: ../../../third_party/skia/infra/bots/recipes/recreate_skps.expected/failed_upload.json
 FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/Perf-Android-Clang-GalaxyS20-GPU-MaliG77-arm64-Release-All-Android_AllPathsVolatile_Skpbench.json
 FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/Perf-Android-Clang-GalaxyS20-GPU-MaliG77-arm64-Release-All-Android_Vulkan_AllPathsVolatile_Skpbench.json
-FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/Perf-Android-Clang-Pixel-GPU-Adreno530-arm64-Release-All-Android_CCPR_Skpbench.json
 FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/Perf-Android-Clang-Pixel-GPU-Adreno530-arm64-Release-All-Android_Skpbench_Mskp.json
 FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/Perf-Win10-Clang-Golo-GPU-QuadroP400-x86_64-Release-All-AllPathsVolatile_Skpbench.json
 FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/Perf-Win10-Clang-Golo-GPU-QuadroP400-x86_64-Release-All-Vulkan_Skpbench.json
@@ -3103,10 +3102,6 @@ FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPerFlushResources.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPerFlushResources.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPerOpsTaskPaths.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCSTLList.h
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCStrokeGeometry.cpp
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCStrokeGeometry.h
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCStroker.cpp
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCStroker.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrAARectEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrAlphaThresholdFragmentProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrCircleBlurFragmentProcessor.fp
@@ -3464,8 +3459,6 @@ FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCQuadraticShader.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCQuadraticShader.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCoverageCountingPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCoverageCountingPathRenderer.h
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrGSCoverageProcessor.cpp
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrVSCoverageProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrAtlasedShaderHelpers.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrBlurredEdgeFragmentProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrCircleEffect.fp
@@ -5651,11 +5644,9 @@ FILE: ../../../third_party/skia/src/gpu/GrSPIRVVaryingHandler.cpp
 FILE: ../../../third_party/skia/src/gpu/GrSPIRVVaryingHandler.h
 FILE: ../../../third_party/skia/src/gpu/GrSamplePatternDictionary.cpp
 FILE: ../../../third_party/skia/src/gpu/GrSamplePatternDictionary.h
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrGSCoverageProcessor.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrOctoBounds.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrOctoBounds.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrStencilAtlasOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrVSCoverageProcessor.h
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnAttachment.cpp
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnAttachment.h
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnBuffer.cpp
