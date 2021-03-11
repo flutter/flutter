@@ -407,13 +407,13 @@ static void fl_view_size_allocate(GtkWidget* widget,
   fl_view_geometry_changed(self);
 }
 
-struct _DrawData {
+struct _ReorderData {
   GdkWindow* parent_window;
   GdkWindow* last_window;
 };
 
-static void fl_view_draw_forall(GtkWidget* widget, gpointer user_data) {
-  _DrawData* data = reinterpret_cast<_DrawData*>(user_data);
+static void fl_view_reorder_forall(GtkWidget* widget, gpointer user_data) {
+  _ReorderData* data = reinterpret_cast<_ReorderData*>(user_data);
   GdkWindow* window = gtk_widget_get_window(widget);
   if (window && window != data->parent_window) {
     if (data->last_window) {
@@ -421,20 +421,6 @@ static void fl_view_draw_forall(GtkWidget* widget, gpointer user_data) {
     }
     data->last_window = window;
   }
-}
-
-// Implements GtkWidget::draw.
-static gboolean fl_view_draw(GtkWidget* widget, cairo_t* cr) {
-  FlView* self = FL_VIEW(widget);
-
-  struct _DrawData data = {
-      .parent_window = gtk_widget_get_window(GTK_WIDGET(self)),
-      .last_window = nullptr,
-  };
-
-  gtk_container_forall(GTK_CONTAINER(self), fl_view_draw_forall, &data);
-
-  return GTK_WIDGET_CLASS(fl_view_parent_class)->draw(widget, cr);
 }
 
 static gboolean event_box_button_press_event(GtkWidget* widget,
@@ -613,7 +599,6 @@ static void fl_view_class_init(FlViewClass* klass) {
   widget_class->get_preferred_width = fl_view_get_preferred_width;
   widget_class->get_preferred_height = fl_view_get_preferred_height;
   widget_class->size_allocate = fl_view_size_allocate;
-  widget_class->draw = fl_view_draw;
   widget_class->key_press_event = fl_view_key_press_event;
   widget_class->key_release_event = fl_view_key_release_event;
 
@@ -740,5 +725,13 @@ void fl_view_end_frame(FlView* view) {
   g_list_free(view->children_list);
   view->children_list = view->pending_children_list;
   view->pending_children_list = nullptr;
+
+  struct _ReorderData data = {
+      .parent_window = gtk_widget_get_window(GTK_WIDGET(view)),
+      .last_window = nullptr,
+  };
+
+  gtk_container_forall(GTK_CONTAINER(view), fl_view_reorder_forall, &data);
+
   gtk_widget_queue_draw(GTK_WIDGET(view));
 }
