@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+// @dart = 2.12
 import 'dart:async';
 import 'dart:html' as html;
 import 'dart:js_util' as js_util;
@@ -22,7 +22,7 @@ void main() {
 }
 
 void testMain() {
-  EngineSingletonFlutterWindow window;
+  late EngineSingletonFlutterWindow window;
 
   setUp(() {
     ui.webOnlyInitializeEngine();
@@ -31,7 +31,6 @@ void testMain() {
 
   tearDown(() async {
     await window.resetHistory();
-    window = null;
   });
 
   test('window.defaultRouteName should not change', () async {
@@ -42,7 +41,7 @@ void testMain() {
     expect(window.defaultRouteName, '/initial');
 
     // Changing the URL in the address bar later shouldn't affect [window.defaultRouteName].
-    strategy.replaceState(null, null, '/newpath');
+    strategy.replaceState(null, '', '/newpath');
     expect(window.defaultRouteName, '/initial');
   });
 
@@ -86,7 +85,7 @@ void testMain() {
     );
     await callback.future;
     expect(window.browserHistory is SingleEntryBrowserHistory, true);
-    expect(window.browserHistory.urlStrategy.getPath(), '/bar');
+    expect(window.browserHistory.urlStrategy!.getPath(), '/bar');
 
     // We can still receive nav2 update.
     callback = Completer<void>();
@@ -103,10 +102,10 @@ void testMain() {
     );
     await callback.future;
     expect(window.browserHistory is MultiEntriesBrowserHistory, true);
-    expect(window.browserHistory.urlStrategy.getPath(), '/baz');
+    expect(window.browserHistory.urlStrategy!.getPath(), '/baz');
 
     // Throws assertion error if it receives nav1 update after nav2 update.
-    AssertionError caughtAssertion;
+    late AssertionError caughtAssertion;
     await window.handleNavigationMessage(
       JSONMethodCodec().encodeMethodCall(MethodCall(
         'routeUpdated',
@@ -124,7 +123,7 @@ void testMain() {
     );
     // The history does not change.
     expect(window.browserHistory is MultiEntriesBrowserHistory, true);
-    expect(window.browserHistory.urlStrategy.getPath(), '/baz');
+    expect(window.browserHistory.urlStrategy!.getPath(), '/baz');
   });
 
   test('initialize browser history with default url strategy (single)', () async {
@@ -149,7 +148,7 @@ void testMain() {
     // The url strategy should've been set to the default, and the path
     // should've been correctly set to "/bar".
     expect(window.browserHistory.urlStrategy, isNot(isNull));
-    expect(window.browserHistory.urlStrategy.getPath(), '/bar');
+    expect(window.browserHistory.urlStrategy!.getPath(), '/bar');
   }, skip: browserEngine == BrowserEngine.webkit); // https://github.com/flutter/flutter/issues/50836
 
   test('initialize browser history with default url strategy (multiple)', () async {
@@ -177,7 +176,7 @@ void testMain() {
     // The url strategy should've been set to the default, and the path
     // should've been correctly set to "/baz".
     expect(window.browserHistory.urlStrategy, isNot(isNull));
-    expect(window.browserHistory.urlStrategy.getPath(), '/baz');
+    expect(window.browserHistory.urlStrategy!.getPath(), '/baz');
   }, skip: browserEngine == BrowserEngine.webkit); // https://github.com/flutter/flutter/issues/50836
 
   test('can disable location strategy', () async {
@@ -230,6 +229,13 @@ void testMain() {
     expect(() => jsSetUrlStrategy(null), returnsNormally);
     // Second time is not allowed.
     expect(() => jsSetUrlStrategy(null), throwsA(isAssertionError));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/77817
+  test('window.locale(s) are not nullable', () {
+    // If the getters were nullable, these expressions would result in compiler errors.
+    ui.window.locale.countryCode;
+    ui.window.locales.first.countryCode;
   });
 }
 
