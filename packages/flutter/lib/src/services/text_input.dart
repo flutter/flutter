@@ -791,7 +791,7 @@ enum SelectionChangedCause {
   drag,
 }
 
-/// An interface for manipulating the selection, to be used by the implementor
+/// An interface for manipulating the selection, to be used by the implementer
 /// of the toolbar widget.
 abstract class TextSelectionDelegate {
   /// Gets the current text input.
