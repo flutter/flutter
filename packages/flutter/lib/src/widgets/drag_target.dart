@@ -290,7 +290,7 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// Defaults to [DragAnchor.child].
   @Deprecated(
     'Use dragAnchorStrategy instead. '
-    'This feature was deprecated after 2.1.0-10.0.pre.'
+    'This feature was deprecated after v2.1.0-10.0.pre.'
   )
   final DragAnchor dragAnchor;
 
