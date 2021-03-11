@@ -18,13 +18,13 @@ void main() {
     expect(process.exitCode, isNot(equals(0)));
     expect(stderrLines, <String>[
       'In sample starting at known_broken_documentation.dart:117:      child: Text(title),',
-      '>>> The final variable \'title\' can\'t be read because it is potentially unassigned at this point (read_potentially_unassigned_final)',
+      ">>> The final variable 'title' can't be read because it is potentially unassigned at this point (read_potentially_unassigned_final)",
       'known_broken_documentation.dart:30:9: new Opacity(',
       '>>> Unnecessary new keyword (unnecessary_new)',
       'known_broken_documentation.dart:62:9: new Opacity(',
       '>>> Unnecessary new keyword (unnecessary_new)',
       'known_broken_documentation.dart:112:25: final int foo = null;',
-      '>>> A value of type \'Null\' can\'t be assigned to a variable of type \'int\' (invalid_assignment)',
+      ">>> A value of type 'Null' can't be assigned to a variable of type 'int' (invalid_assignment)",
       '',
       'Found 2 sample code errors.',
       ''

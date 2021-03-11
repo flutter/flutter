@@ -48,7 +48,7 @@ Future<void> main() async {
         );
       });
 
-      section('Create plugin that doesn\'t support android project');
+      section("Create plugin that doesn't support android project");
 
       await inDirectory(tempDir, () async {
         await flutter(
