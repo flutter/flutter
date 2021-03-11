@@ -282,6 +282,7 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
   _activeModel->AddText([string UTF8String]);
   if (_activeModel->composing()) {
     _activeModel->CommitComposing();
+    _activeModel->EndComposing();
   }
   [self updateEditState];
 }
