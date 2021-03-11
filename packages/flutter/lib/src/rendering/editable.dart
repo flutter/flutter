@@ -599,13 +599,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     LogicalKeyboardKey.keyC,
     LogicalKeyboardKey.keyV,
     LogicalKeyboardKey.keyX,
-    LogicalKeyboardKey.delete,
-    LogicalKeyboardKey.backspace,
   };
 
   static final Set<LogicalKeyboardKey> _nonModifierKeys = <LogicalKeyboardKey>{
     ..._shortcutKeys,
     ..._movementKeys,
+    LogicalKeyboardKey.backspace,
+    LogicalKeyboardKey.delete,
   };
 
   static final Set<LogicalKeyboardKey> _modifierKeys = <LogicalKeyboardKey>{
