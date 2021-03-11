@@ -1610,8 +1610,8 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 /// be given with their type arguments. Since the [Route] class and its
 /// subclasses have a type argument, this includes the arguments passed to this
 /// class. Consider using `dynamic` to specify the entire class of routes rather
-/// than only specific subtypes. For example, to watch for all [PageRoute]
-/// variants, the `RouteObserver<PageRoute<dynamic>>` type may be used.
+/// than only specific subtypes. For example, to watch for all [ModalRoute]
+/// variants, the `RouteObserver<ModalRoute<dynamic>>` type may be used.
 ///
 /// {@tool snippet}
 ///
@@ -1620,7 +1620,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 ///
 /// ```dart
 /// // Register the RouteObserver as a navigation observer.
-/// final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
+/// final RouteObserver<ModalRoute> routeObserver = RouteObserver<ModalRoute>();
 /// void main() {
 ///   runApp(MaterialApp(
 ///     home: Container(),
@@ -1638,7 +1638,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 ///   @override
 ///   void didChangeDependencies() {
 ///     super.didChangeDependencies();
-///     routeObserver.subscribe(this, ModalRoute.of(context));
+///     routeObserver.subscribe(this, ModalRoute.of(context)!);
 ///   }
 ///
 ///   @override

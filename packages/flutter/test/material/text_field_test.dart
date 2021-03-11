@@ -1198,7 +1198,7 @@ void main() {
             flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isFocused],
             actions: <SemanticsAction>[SemanticsAction.tap,
               SemanticsAction.moveCursorBackwardByCharacter, SemanticsAction.setSelection, SemanticsAction.paste,
-              SemanticsAction.moveCursorBackwardByWord],
+              SemanticsAction.setText, SemanticsAction.moveCursorBackwardByWord],
             value: 'abcdefghi',
             textDirection: TextDirection.ltr,
             textSelection: const TextSelection.collapsed(offset: 9),
@@ -5325,6 +5325,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
@@ -5352,6 +5353,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.moveCursorForwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
@@ -5378,6 +5380,7 @@ void main() {
             SemanticsAction.moveCursorForwardByCharacter,
             SemanticsAction.moveCursorForwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
@@ -5416,6 +5419,7 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.setText,
             // Absent the following because enableInteractiveSelection: false
             // SemanticsAction.moveCursorBackwardByCharacter,
             // SemanticsAction.moveCursorBackwardByWord,
@@ -5480,6 +5484,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
@@ -5507,6 +5512,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.moveCursorForwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.paste,
             SemanticsAction.cut,
             SemanticsAction.copy,
@@ -5557,6 +5563,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
@@ -5602,6 +5609,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.paste,
             SemanticsAction.cut,
             SemanticsAction.copy,
@@ -5671,6 +5679,7 @@ void main() {
               SemanticsAction.moveCursorBackwardByCharacter,
               SemanticsAction.moveCursorBackwardByWord,
               SemanticsAction.setSelection,
+              SemanticsAction.setText,
               SemanticsAction.paste,
             ],
             value: textInTextField,
@@ -5743,6 +5752,7 @@ void main() {
               SemanticsAction.moveCursorBackwardByCharacter,
               SemanticsAction.moveCursorBackwardByWord,
               SemanticsAction.setSelection,
+              SemanticsAction.setText,
               // No paste option.
             ],
             value: textInTextField,
@@ -5939,6 +5949,7 @@ void main() {
           actions: <SemanticsAction>[
             SemanticsAction.tap,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
