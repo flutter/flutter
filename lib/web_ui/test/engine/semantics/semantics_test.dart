@@ -338,17 +338,21 @@ void _testContainer() {
     final html.Element container =
         html.document.querySelector('flt-semantics-container');
 
-    if (operatingSystem == OperatingSystem.macOs) {
-      expect(parentElement.style.transform, 'translate(0px, 0px)');
-      expect(parentElement.style.transformOrigin, '0px 0px 0px');
-      expect(container.style.transform, 'translate(0px, 0px)');
-      expect(container.style.transformOrigin, '0px 0px 0px');
+    if (isMacOrIOS) {
+      expect(parentElement.style.top, '0px');
+      expect(parentElement.style.left, '0px');
+      expect(container.style.top, '0px');
+      expect(container.style.left, '0px');
     } else {
-      expect(parentElement.style.transform, '');
-      expect(parentElement.style.transformOrigin, '');
-      expect(container.style.transform, '');
-      expect(container.style.transformOrigin, '');
+      expect(parentElement.style.top, '');
+      expect(parentElement.style.left, '');
+      expect(container.style.top, '');
+      expect(container.style.left, '');
     }
+    expect(parentElement.style.transform, '');
+    expect(parentElement.style.transformOrigin, '');
+    expect(container.style.transform, '');
+    expect(container.style.transformOrigin, '');
     semantics().semanticsEnabled = false;
   });
 
@@ -382,17 +386,10 @@ void _testContainer() {
     final html.Element container =
         html.document.querySelector('flt-semantics-container');
 
-    if (isDesktop) {
-      expect(parentElement.style.transform, 'matrix(1, 0, 0, 1, 10, 10)');
-      expect(parentElement.style.transformOrigin, '0px 0px 0px');
-      expect(container.style.transform, 'translate(-10px, -10px)');
-      expect(container.style.transformOrigin, '0px 0px 0px');
-    } else {
-      expect(parentElement.style.top, '20px');
-      expect(parentElement.style.left, '20px');
-      expect(container.style.top, '-10px');
-      expect(container.style.left, '-10px');
-    }
+    expect(parentElement.style.transform, 'matrix(1, 0, 0, 1, 10, 10)');
+    expect(parentElement.style.transformOrigin, '0px 0px 0px');
+    expect(container.style.top, '-10px');
+    expect(container.style.left, '-10px');
     semantics().semanticsEnabled = false;
   });
 
@@ -433,20 +430,22 @@ void _testContainer() {
         html.document.querySelector('flt-semantics');
     final html.Element container =
         html.document.querySelector('flt-semantics-container');
-    if (operatingSystem == OperatingSystem.macOs ||
-        operatingSystem == OperatingSystem.iOs) {
-      if (isDesktop) {
-        expect(parentElement.style.transform, 'translate(0px, 0px)');
-        expect(parentElement.style.transformOrigin, '0px 0px 0px');
-        expect(container.style.transform, 'translate(0px, 0px)');
-        expect(container.style.transformOrigin, '0px 0px 0px');
-      } else {
-        expect(parentElement.style.top, '0px');
-        expect(parentElement.style.left, '0px');
-        expect(container.style.top, '0px');
-        expect(container.style.left, '0px');
-      }
+    if (isMacOrIOS) {
+      expect(parentElement.style.top, '0px');
+      expect(parentElement.style.left, '0px');
+      expect(container.style.top, '0px');
+      expect(container.style.left, '0px');
+    } else {
+      expect(parentElement.style.top, '');
+      expect(parentElement.style.left, '');
+      expect(container.style.top, '');
+      expect(container.style.left, '');
     }
+    expect(parentElement.style.transform, '');
+    expect(parentElement.style.transformOrigin, '');
+    expect(container.style.transform, '');
+    expect(container.style.transformOrigin, '');
+
     semantics().semanticsEnabled = false;
   });
 }
