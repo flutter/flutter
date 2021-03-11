@@ -4475,6 +4475,198 @@ void main() {
       reason: 'on $platform',
     );
     expect(controller.text, isEmpty, reason: 'on $platform');
+
+    // Delete whole words
+
+    controller.text = 'text with multiple words';
+    controller.selection = const TextSelection(baseOffset: 9, extentOffset: 9);
+
+    // setting text calls setState, need wait for rebuild to update RenderEditable
+    await tester.pump();
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.delete,
+      ],
+      wordModifier: true,
+      platform: platform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 9,
+          extentOffset: 9,
+          affinity: TextAffinity.downstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+    expect(controller.text, 'text with words', reason: 'on $platform');
+
+    controller.text = 'text with multiple words';
+    controller.selection = const TextSelection(baseOffset: 10, extentOffset: 10);
+
+    await tester.pump();
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.backspace,
+      ],
+      wordModifier: true,
+      platform: platform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 5,
+          extentOffset: 5,
+          affinity: TextAffinity.downstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+    expect(controller.text, 'text multiple words', reason: 'on $platform');
+
+    controller.text = 'text with     multiple words';
+    controller.selection = const TextSelection(baseOffset: 9, extentOffset: 9);
+
+    await tester.pump();
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.delete,
+      ],
+      wordModifier: true,
+      platform: platform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 9,
+          extentOffset: 9,
+          affinity: TextAffinity.downstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+    expect(controller.text, 'text with words', reason: 'on $platform');
+
+    controller.text = 'text with     multiple words';
+    controller.selection = const TextSelection(baseOffset: 14, extentOffset: 14);
+
+    await tester.pump();
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.backspace,
+      ],
+      wordModifier: true,
+      platform: platform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 5,
+          extentOffset: 5,
+          affinity: TextAffinity.downstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+    expect(controller.text, 'text multiple words', reason: 'on $platform');
+
+    controller.text = 'text with multiple words';
+    controller.selection = const TextSelection(baseOffset: 24, extentOffset: 24);
+
+    await tester.pump();
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.backspace,
+      ],
+      wordModifier: true,
+      platform: platform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 19,
+          extentOffset: 19,
+          affinity: TextAffinity.downstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+    expect(controller.text, 'text with multiple ', reason: 'on $platform');
+
+    controller.text = 'text with multiple words';
+    controller.selection = const TextSelection(baseOffset: 18, extentOffset: 18);
+
+    await tester.pump();
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.backspace,
+      ],
+      wordModifier: true,
+      platform: platform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 10,
+          extentOffset: 10,
+          affinity: TextAffinity.downstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+    expect(controller.text, 'text with  words', reason: 'on $platform');
+
+    controller.text = 'text with multiple\nwords';
+    controller.selection = const TextSelection(baseOffset: 19, extentOffset: 19);
+
+    await tester.pump();
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.backspace,
+      ],
+      wordModifier: true,
+      platform: platform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 10,
+          extentOffset: 10,
+          affinity: TextAffinity.downstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+    expect(controller.text, 'text with words', reason: 'on $platform');
   }
 
   testWidgets('keyboard text selection works as expected on linux', (WidgetTester tester) async {
