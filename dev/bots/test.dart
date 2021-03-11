@@ -369,8 +369,8 @@ Future<void> _runDeviceLabBuildTask(String task) async {
     return;
   }
 
-  await runCommand(flutter, <String>[
-    'pub', 'run', path.join('dev', 'devicelab', 'bin', 'test_runner.dart'),
+  await runCommand(dart, <String>[
+    'run', path.join('dev', 'devicelab', 'bin', 'test_runner.dart'),
     'test',
     '--task', task,
     '--task-args', 'build',
