@@ -36,7 +36,6 @@ import 'dart:io' as io
     IOSink,
     NetworkInterface,
     pid,
-    Platform,
     Process,
     ProcessInfo,
     ProcessSignal,
@@ -52,6 +51,7 @@ import 'package:meta/meta.dart';
 import 'package:file/file.dart';
 
 import 'async_guard.dart';
+import 'platform.dart';
 import 'process.dart';
 
 export 'dart:io'
@@ -164,16 +164,18 @@ void restoreExitFunction() {
 /// [ProcessSignal] instances are available on this class (e.g. "send").
 class ProcessSignal {
   @visibleForTesting
-  const ProcessSignal(this._delegate);
+  const ProcessSignal(this._delegate, {@visibleForTesting Platform platform = const LocalPlatform()})
+    : _platform = platform;
 
-  static const ProcessSignal sigwinch = _PosixProcessSignal._(io.ProcessSignal.sigwinch);
-  static const ProcessSignal sigterm = _PosixProcessSignal._(io.ProcessSignal.sigterm);
-  static const ProcessSignal sigusr1 = _PosixProcessSignal._(io.ProcessSignal.sigusr1);
-  static const ProcessSignal sigusr2 = _PosixProcessSignal._(io.ProcessSignal.sigusr2);
-  static const ProcessSignal sigint =  ProcessSignal(io.ProcessSignal.sigint);
-  static const ProcessSignal sigkill =  ProcessSignal(io.ProcessSignal.sigkill);
+  static const ProcessSignal sigwinch = PosixProcessSignal(io.ProcessSignal.sigwinch);
+  static const ProcessSignal sigterm = PosixProcessSignal(io.ProcessSignal.sigterm);
+  static const ProcessSignal sigusr1 = PosixProcessSignal(io.ProcessSignal.sigusr1);
+  static const ProcessSignal sigusr2 = PosixProcessSignal(io.ProcessSignal.sigusr2);
+  static const ProcessSignal sigint = ProcessSignal(io.ProcessSignal.sigint);
+  static const ProcessSignal sigkill = ProcessSignal(io.ProcessSignal.sigkill);
 
   final io.ProcessSignal _delegate;
+  final Platform _platform;
 
   Stream<ProcessSignal> watch() {
     return _delegate.watch().map<ProcessSignal>((io.ProcessSignal signal) => this);
@@ -188,7 +190,7 @@ class ProcessSignal {
   ///
   /// This is implemented by sending the signal using [Process.killPid].
   bool send(int pid) {
-    assert(!io.Platform.isWindows || this == ProcessSignal.sigterm);
+    assert(!_platform.isWindows || this == ProcessSignal.sigterm);
     return io.Process.killPid(pid, _delegate);
   }
 
@@ -199,14 +201,16 @@ class ProcessSignal {
 /// A [ProcessSignal] that is only available on Posix platforms.
 ///
 /// Listening to a [_PosixProcessSignal] is a no-op on Windows.
-class _PosixProcessSignal extends ProcessSignal {
+@visibleForTesting
+class PosixProcessSignal extends ProcessSignal {
 
-  const _PosixProcessSignal._(io.ProcessSignal wrappedSignal) : super(wrappedSignal);
+  const PosixProcessSignal(io.ProcessSignal wrappedSignal, {@visibleForTesting Platform platform = const LocalPlatform()})
+    : super(wrappedSignal, platform: platform);
 
   @override
   Stream<ProcessSignal> watch() {
     // This uses the real platform since it invokes dart:io functionality directly.
-    if (io.Platform.isWindows) {
+    if (_platform.isWindows) {
       return const Stream<ProcessSignal>.empty();
     }
     return super.watch();
