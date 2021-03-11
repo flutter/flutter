@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
@@ -25,6 +26,25 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/testbed.dart';
 
+const String _pubspecContents = '''
+dev_dependencies:
+  flutter_test:
+    sdk: flutter''';
+final String _packageConfigContents = json.encode(<String, Object>{
+  'configVersion': 2,
+  'packages': <Map<String, Object>>[
+    <String, String>{
+      'name': 'test_api',
+      'rootUri': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
+      'packageUri': 'lib/',
+      'languageVersion': '2.12'
+    }
+  ],
+  'generated': '2021-02-24T07:55:20.084834Z',
+  'generator': 'pub',
+  'generatorVersion': '2.13.0-68.0.dev'
+});
+
 void main() {
   Cache.disableLocking();
   MemoryFileSystem fs;
@@ -32,8 +52,32 @@ void main() {
   setUp(() {
     fs = MemoryFileSystem.test();
     fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
+    fs.file('pubspec.yaml').writeAsStringSync(_pubspecContents);
+    (fs.directory('.dart_tool')
+        .childFile('package_config.json')
+      ..createSync(recursive: true))
+        .writeAsString(_packageConfigContents);
     fs.directory('test').childFile('some_test.dart').createSync(recursive: true);
+  });
+
+  testUsingContext('Missing dependencies in pubspec',
+      () async {
+    // Clear the dependencies already added in [setUp].
+    fs.file('pubspec.yaml').writeAsStringSync('');
+    fs.directory('.dart_tool').childFile('package_config.json').writeAsStringSync('');
+
+    final FakePackageTest fakePackageTest = FakePackageTest();
+    final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+    final CommandRunner<void> commandRunner =
+    createTestCommandRunner(testCommand);
+
+    expect(() => commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+    ]), throwsToolExit());
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('Pipes test-randomize-ordering-seed to package:test',
@@ -56,7 +100,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
-    Cache: () => FakeCache(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
   });
 
   group('shard-index and total-shards', () {
@@ -80,7 +124,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
-      Cache: () => FakeCache(),
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     });
 
     testUsingContext('without the params they not Piped to package:test',
@@ -101,7 +145,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
-      Cache: () => FakeCache(),
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     });
   });
 
@@ -124,7 +168,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
-    Cache: () => FakeCache(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
   });
 
   testUsingContext('Pipes start-paused to package:test',
@@ -149,7 +193,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
-    Cache: () => FakeCache(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
   });
 
   testUsingContext('Pipes run-skipped to package:test',
@@ -174,7 +218,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
-    Cache: () => FakeCache(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
   });
 
   testUsingContext('Pipes enable-observatory', () async {
@@ -222,7 +266,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
-    Cache: () => FakeCache(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
   });
 }
 

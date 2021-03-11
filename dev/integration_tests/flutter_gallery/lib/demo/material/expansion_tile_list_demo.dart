@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 class ExpansionTileListDemo extends StatelessWidget {
+  const ExpansionTileListDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/material/expansion-tile-list';
 
   @override

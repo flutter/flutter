@@ -175,7 +175,7 @@ void main() {
         ..createSync(),
     );
 
-    await expectLater(() async => await artifactUpdater.downloadZipArchive(
+    await expectLater(() async => artifactUpdater.downloadZipArchive(
       'test message',
       Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
@@ -230,7 +230,7 @@ void main() {
         ..createSync(),
     );
 
-    await expectLater(() async => await artifactUpdater.downloadZipArchive(
+    await expectLater(() async => artifactUpdater.downloadZipArchive(
       'test message',
       Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
@@ -260,7 +260,7 @@ void main() {
         ..createSync(),
     );
 
-    await expectLater(() async => await artifactUpdater.downloadZipArchive(
+    await expectLater(() async => artifactUpdater.downloadZipArchive(
       'test message',
       Uri.parse('http:///foo-bar/test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
@@ -286,7 +286,7 @@ void main() {
         ..createSync(),
     );
 
-    await expectLater(() async => await artifactUpdater.downloadZipArchive(
+    await expectLater(() async => artifactUpdater.downloadZipArchive(
       'test message',
       Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
@@ -437,6 +437,38 @@ void main() {
 
     expect(fileSystem.file('a/b/c/d'), isNot(exists));
     expect(logger.errorText, isEmpty);
+  });
+
+  testWithoutContext('ArtifactUpdater will tool exit if deleting the existing artifacts fails with 32 on windows', () async {
+    const int kSharingViolation = 32;
+    final FileExceptionHandler handler = FileExceptionHandler();
+    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
+    final BufferLogger logger = BufferLogger.test();
+    final ArtifactUpdater artifactUpdater = ArtifactUpdater(
+      fileSystem: fileSystem,
+      logger: logger,
+      operatingSystemUtils: operatingSystemUtils,
+      platform: FakePlatform(operatingSystem: 'windows'),
+      httpClient: FakeHttpClient.any(),
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')
+        ..createSync(),
+    );
+
+    final Directory errorDirectory = fileSystem.currentDirectory
+      .childDirectory('out')
+      .childDirectory('test')
+      ..createSync(recursive: true);
+    handler.addError(errorDirectory, FileSystemOp.delete, const FileSystemException('', '', OSError('', kSharingViolation)));
+
+    await expectLater(() async => artifactUpdater.downloadZippedTarball(
+      'test message',
+      Uri.parse('http://test.zip'),
+      fileSystem.currentDirectory.childDirectory('out'),
+    ), throwsToolExit(
+      message: 'Failed to delete /out/test because the local file/directory is in use by another process'
+    ));
+    expect(fileSystem.file('out/test'), isNot(exists));
   });
 }
 

@@ -990,6 +990,8 @@ const String _objcPluginRegistryHeaderTemplate = '''
 //  Generated file. Do not edit.
 //
 
+// clang-format off
+
 #ifndef GeneratedPluginRegistrant_h
 #define GeneratedPluginRegistrant_h
 
@@ -1009,6 +1011,8 @@ const String _objcPluginRegistryImplementationTemplate = '''
 //
 //  Generated file. Do not edit.
 //
+
+// clang-format off
 
 #import "GeneratedPluginRegistrant.h"
 
@@ -1035,6 +1039,8 @@ const String _swiftPluginRegistryTemplate = '''
 //
 //  Generated file. Do not edit.
 //
+
+// clang-format off
 
 import {{framework}}
 import Foundation
@@ -1146,6 +1152,8 @@ const String _cppPluginRegistryHeaderTemplate = '''
 //  Generated file. Do not edit.
 //
 
+// clang-format off
+
 #ifndef GENERATED_PLUGIN_REGISTRANT_
 #define GENERATED_PLUGIN_REGISTRANT_
 
@@ -1161,6 +1169,8 @@ const String _cppPluginRegistryImplementationTemplate = '''
 //
 //  Generated file. Do not edit.
 //
+
+// clang-format off
 
 #include "generated_plugin_registrant.h"
 
@@ -1181,6 +1191,8 @@ const String _linuxPluginRegistryHeaderTemplate = '''
 //  Generated file. Do not edit.
 //
 
+// clang-format off
+
 #ifndef GENERATED_PLUGIN_REGISTRANT_
 #define GENERATED_PLUGIN_REGISTRANT_
 
@@ -1196,6 +1208,8 @@ const String _linuxPluginRegistryImplementationTemplate = '''
 //
 //  Generated file. Do not edit.
 //
+
+// clang-format off
 
 #include "generated_plugin_registrant.h"
 

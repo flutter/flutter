@@ -8,7 +8,6 @@ import 'package:file/file.dart';
 import 'package:file/local.dart' as local_fs;
 import 'package:meta/meta.dart';
 
-import 'common.dart' show throwToolExit;
 import 'io.dart';
 import 'platform.dart';
 import 'process.dart';
@@ -41,19 +40,6 @@ class FileSystemUtils {
 
   final Platform _platform;
 
-  /// Create the ancestor directories of a file path if they do not already exist.
-  void ensureDirectoryExists(String filePath) {
-    final String dirPath = _fileSystem.path.dirname(filePath);
-    if (_fileSystem.isDirectorySync(dirPath)) {
-      return;
-    }
-    try {
-      _fileSystem.directory(dirPath).createSync(recursive: true);
-    } on FileSystemException catch (e) {
-      throwToolExit('Failed to create directory "$dirPath": ${e.osError.message}');
-    }
-  }
-
   /// Appends a number to a filename in order to make it unique under a
   /// directory.
   File getUniqueFile(Directory dir, String baseName, String ext) {
@@ -85,13 +71,6 @@ class FileSystemUtils {
       }
       i += 1;
     }
-  }
-
-  /// Return a relative path if [fullPath] is contained by the cwd, else return an
-  /// absolute path.
-  String getDisplayPath(String fullPath) {
-    final String cwd = _fileSystem.currentDirectory.path + _fileSystem.path.separator;
-    return fullPath.startsWith(cwd) ? fullPath.substring(cwd.length) : fullPath;
   }
 
   /// Escapes [path].
@@ -129,6 +108,13 @@ class FileSystemUtils {
   }
 }
 
+/// Return a relative path if [fullPath] is contained by the cwd, else return an
+/// absolute path.
+String getDisplayPath(String fullPath, FileSystem fileSystem) {
+  final String cwd = fileSystem.currentDirectory.path + fileSystem.path.separator;
+  return fullPath.startsWith(cwd) ? fullPath.substring(cwd.length) : fullPath;
+}
+
 /// Creates `destDir` if needed, then recursively copies `srcDir` to
 /// `destDir`, invoking [onFileCopied], if specified, for each
 /// source/destination file pair.
@@ -137,8 +123,8 @@ class FileSystemUtils {
 void copyDirectory(
   Directory srcDir,
   Directory destDir, {
-  bool shouldCopyFile(File srcFile, File destFile),
-  void onFileCopied(File srcFile, File destFile),
+  bool Function(File srcFile, File destFile) shouldCopyFile,
+  void Function(File srcFile, File destFile) onFileCopied,
 }) {
   if (!srcDir.existsSync()) {
     throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');

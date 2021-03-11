@@ -220,21 +220,19 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: Container(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: <Widget>[
-                  Text('big text',
-                    key: key1,
-                    style: const TextStyle(fontSize: fontSize1),
-                  ),
-                  Text('one\ntwo\nthree\nfour\nfive\nsix\nseven',
-                    key: key2,
-                    style: const TextStyle(fontSize: fontSize2),
-                  ),
-                ],
-              ),
+            body: Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: <Widget>[
+                Text('big text',
+                  key: key1,
+                  style: const TextStyle(fontSize: fontSize1),
+                ),
+                Text('one\ntwo\nthree\nfour\nfive\nsix\nseven',
+                  key: key2,
+                  style: const TextStyle(fontSize: fontSize2),
+                ),
+              ],
             ),
           ),
         ),
@@ -277,22 +275,20 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: Container(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: <Widget>[
-                  Text('big text',
-                    key: key1,
-                    style: const TextStyle(fontSize: fontSize1),
-                  ),
-                  Text('one\ntwo\nthree\nfour\nfive\nsix\nseven',
-                    key: key2,
-                    style: const TextStyle(fontSize: fontSize2),
-                  ),
-                  const FlutterLogo(size: 250),
-                ],
-              ),
+            body: Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: <Widget>[
+                Text('big text',
+                  key: key1,
+                  style: const TextStyle(fontSize: fontSize1),
+                ),
+                Text('one\ntwo\nthree\nfour\nfive\nsix\nseven',
+                  key: key2,
+                  style: const TextStyle(fontSize: fontSize2),
+                ),
+                const FlutterLogo(size: 250),
+              ],
             ),
           ),
         ),

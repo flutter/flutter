@@ -353,6 +353,13 @@
       "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
     },
     {
+      "name": "Mac dart_plugin_registry_test",
+      "repo": "flutter",
+      "task_name": "dart_plugin_registry_test",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
       "name": "Mac tool_tests",
       "repo": "flutter",
       "task_name": "mac_tool_tests",

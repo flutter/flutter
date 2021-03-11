@@ -655,7 +655,7 @@ class ActionDispatcher with Diagnosticable {
 ///                 IconButton(
 ///                   icon: const Icon(Icons.exposure_plus_1),
 ///                   onPressed: () {
-///                     Actions.invoke(context, ModifyIntent(count++));
+///                     Actions.invoke(context, ModifyIntent(++count));
 ///                   },
 ///                 ),
 ///                 AnimatedBuilder(
@@ -670,7 +670,7 @@ class ActionDispatcher with Diagnosticable {
 ///                 IconButton(
 ///                   icon: const Icon(Icons.exposure_minus_1),
 ///                   onPressed: () {
-///                     Actions.invoke(context, ModifyIntent(count--));
+///                     Actions.invoke(context, ModifyIntent(--count));
 ///                   },
 ///                 ),
 ///               ],
@@ -733,7 +733,7 @@ class Actions extends StatefulWidget {
   // Visits the Actions widget ancestors of the given element using
   // getElementForInheritedWidgetOfExactType. Returns true if the visitor found
   // what it was looking for.
-  static bool _visitActionsAncestors(BuildContext context, bool visitor(InheritedElement element)) {
+  static bool _visitActionsAncestors(BuildContext context, bool Function(InheritedElement element) visitor) {
     InheritedElement? actionsElement = context.getElementForInheritedWidgetOfExactType<_ActionsMarker>();
     while (actionsElement != null) {
       if (visitor(actionsElement) == true) {
@@ -849,11 +849,13 @@ class Actions extends StatefulWidget {
     // This allows this function to be called by code that doesn't know the
     // concrete type of the intent at compile time.
     final Type type = intent?.runtimeType ?? T;
-    assert(type != Intent,
-      'The type passed to "find" resolved to "Intent": either a non-Intent'
-      'generic type argument or an example intent derived from Intent must be'
-      'specified. Intent may be used as the generic type as long as the optional'
-      '"intent" argument is passed.');
+    assert(
+      type != Intent,
+      'The type passed to "find" resolved to "Intent": either a non-Intent '
+      'generic type argument or an example intent derived from Intent must be '
+      'specified. Intent may be used as the generic type as long as the optional '
+      '"intent" argument is passed.'
+    );
 
     _visitActionsAncestors(context, (InheritedElement element) {
       final _ActionsMarker actions = element.widget as _ActionsMarker;

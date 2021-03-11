@@ -184,12 +184,14 @@ class KernelCompiler {
     @required Artifacts artifacts,
     @required List<String> fileSystemRoots,
     @required String fileSystemScheme,
+    @visibleForTesting StdoutHandler stdoutHandler,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _artifacts = artifacts,
        _processManager = processManager,
        _fileSystemScheme = fileSystemScheme,
-       _fileSystemRoots = fileSystemRoots;
+       _fileSystemRoots = fileSystemRoots,
+       _stdoutHandler = stdoutHandler ?? StdoutHandler(logger: logger);
 
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
@@ -197,6 +199,7 @@ class KernelCompiler {
   final Logger _logger;
   final String _fileSystemScheme;
   final List<String> _fileSystemRoots;
+  final StdoutHandler _stdoutHandler;
 
   Future<CompilerOutput> compile({
     String sdkRoot,
@@ -310,7 +313,6 @@ class KernelCompiler {
     _logger.printTrace(command.join(' '));
     final Process server = await _processManager.start(command);
 
-    final StdoutHandler _stdoutHandler = StdoutHandler(logger: _logger);
     server.stderr
       .transform<String>(utf8.decoder)
       .listen(_logger.printError);
@@ -540,11 +542,12 @@ class DefaultResidentCompiler implements ResidentCompiler {
     this.platformDill,
     List<String> dartDefines,
     this.librariesSpec,
+    @visibleForTesting StdoutHandler stdoutHandler,
   }) : assert(sdkRoot != null),
        _logger = logger,
        _processManager = processManager,
        _artifacts = artifacts,
-       _stdoutHandler = StdoutHandler(logger: logger),
+       _stdoutHandler = stdoutHandler ?? StdoutHandler(logger: logger),
        _platform = platform,
        dartDefines = dartDefines ?? const <String>[],
        // This is a URI, not a file path, so the forward slash is correct even on Windows.

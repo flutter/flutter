@@ -147,7 +147,6 @@ class CodesignCommand extends Command<void> {
       'artifacts/engine/ios-release/gen_snapshot_armv7',
       'artifacts/engine/ios/gen_snapshot_arm64',
       'artifacts/engine/ios/gen_snapshot_armv7',
-      'artifacts/ios-deploy/ios-deploy',
       'artifacts/libimobiledevice/idevicescreenshot',
       'artifacts/libimobiledevice/idevicesyslog',
       'artifacts/libimobiledevice/libimobiledevice-1.0.6.dylib',
@@ -178,6 +177,7 @@ class CodesignCommand extends Command<void> {
       'artifacts/engine/ios-release/Flutter.xcframework/ios-x86_64-simulator/Flutter.framework/Flutter',
       'artifacts/engine/ios/Flutter.xcframework/ios-armv7_arm64/Flutter.framework/Flutter',
       'artifacts/engine/ios/Flutter.xcframework/ios-x86_64-simulator/Flutter.framework/Flutter',
+      'artifacts/ios-deploy/ios-deploy',
     ].map((String relativePath) => fileSystem.path.join(framework.cacheDirectory, relativePath)).toList();
   }
 

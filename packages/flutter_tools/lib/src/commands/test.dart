@@ -270,8 +270,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     final BuildInfo buildInfo = await getBuildInfo(forcedBuildMode: BuildMode.debug);
 
     if (buildInfo.packageConfig['test_api'] == null) {
-      globals.printError(
-        '\n'
+      throwToolExit(
         'Error: cannot run without a dependency on either "package:flutter_test" or "package:test". '
         'Ensure the following lines are present in your pubspec.yaml:'
         '\n\n'

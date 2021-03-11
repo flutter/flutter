@@ -16,6 +16,7 @@ import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 import '../src/mocks.dart';
 import '../src/testbed.dart';
 
@@ -82,7 +83,7 @@ void main() {
         ),
       );
 
-      await expectLater(() async => await emulatorManager.getAllAvailableEmulators(),
+      await expectLater(() async => emulatorManager.getAllAvailableEmulators(),
         returnsNormally);
     });
 
@@ -105,7 +106,7 @@ void main() {
         ),
       );
 
-      await expectLater(() async => await emulatorManager.getAllAvailableEmulators(),
+      await expectLater(() async => emulatorManager.getAllAvailableEmulators(),
         returnsNormally);
     });
 
