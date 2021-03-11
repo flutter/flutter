@@ -64,13 +64,13 @@ class IntegrationTestTestDevice implements TestDevice {
     _gotProcessObservatoryUri.complete(launchResult.observatoryUri);
 
     globals.printTrace('test $id: Connecting to vm service');
-    final vm_service.VmService vmService = await connectToVmService(launchResult.observatoryUri);
+    final FlutterVmService vmService = await connectToVmService(launchResult.observatoryUri);
 
     globals.printTrace('test $id: Finding the correct isolate with the integration test service extension');
-    final vm_service.IsolateRef isolateRef = await _findExtensionIsolate(vmService);
+    final vm_service.IsolateRef isolateRef = await vmService.findExtensionIsolate(kIntegrationTestMethod);
 
-    await vmService.streamListen(vm_service.EventStreams.kExtension);
-    final Stream<String> remoteMessages = vmService.onExtensionEvent
+    await vmService.service.streamListen(vm_service.EventStreams.kExtension);
+    final Stream<String> remoteMessages = vmService.service.onExtensionEvent
         .where((vm_service.Event e) => e.extensionKind == kIntegrationTestExtension)
         .map((vm_service.Event e) => e.extensionData.data[kIntegrationTestData] as String);
 
@@ -78,7 +78,7 @@ class IntegrationTestTestDevice implements TestDevice {
 
     controller.local.stream
       .listen((String event) {
-        vmService.callServiceExtension(
+        vmService.service.callServiceExtension(
           kIntegrationTestMethod,
           isolateId: isolateRef.id,
           args: <String, String>{
@@ -109,32 +109,4 @@ class IntegrationTestTestDevice implements TestDevice {
 
   @override
   Future<void> get finished => _finished.future;
-}
-
-/// Finds the Flutter isolate that with the test service extensions registered.
-Future<vm_service.IsolateRef> _findExtensionIsolate(vm_service.VmService vmService) async {
-  final FlutterView flutterView = (await vmService.getFlutterViews()).first;
-  final vm_service.IsolateRef isolateRef = flutterView.uiIsolate;
-
-  await vmService.streamListen(vm_service.EventStreams.kIsolate);
-
-  final Future<void> neverComplete = Completer<void>().future;
-
-  await Future.any(<Future<void>>[
-    vmService.getIsolate(isolateRef.id).then(
-          (vm_service.Isolate isolate) async => isolate.extensionRPCs.contains(kIntegrationTestMethod)
-          ? null
-          : neverComplete,
-    ),
-    vmService.onIsolateEvent.map(
-          (vm_service.Event event) =>
-      event.kind == vm_service.EventKind.kServiceExtensionAdded &&
-          event.extensionRPC == kIntegrationTestMethod,
-    ).firstWhere(
-          (bool found) => found,
-      orElse: () => false,
-    ).then((bool found) => found ? null : neverComplete),
-  ]);
-
-  return isolateRef;
 }

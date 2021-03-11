@@ -23,6 +23,34 @@ import '../test/runner.dart';
 import '../test/test_wrapper.dart';
 import '../test/watcher.dart';
 
+/// A command to run tests.
+///
+/// This command has two modes of execution:
+///
+/// ## Unit / Widget Tests
+///
+/// These tests run in the Flutter Tester, which is a desktop-based Flutter
+/// embedder. In this mode, tests are quick to compile and run.
+///
+/// By default, if no flags are passed to the `flutter test` command, the Tool
+/// will recursively find all files within the `test/` directory that end with
+/// the `*_test.dart` suffix, and run them in a single invocation.
+///
+/// See:
+/// - https://flutter.dev/docs/cookbook/testing/unit/introduction
+/// - https://flutter.dev/docs/cookbook/testing/widget/introduction
+///
+/// ## Integration Tests
+///
+/// These tests run in a connected Flutter Device, similar to `flutter run`. As
+/// a result, iteration is slower because device-based artifacts have to be
+/// built.
+///
+/// Integration tests should be placed in the `integration_test/` directory of
+/// your package. To run these tests, use `flutter test integration_test`.
+///
+/// See:
+/// - https://flutter.dev/docs/testing/integration-tests
 class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   TestCommand({
     bool verboseHelp = false,
@@ -222,8 +250,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       _testFiles = _findTests(testDir).toList();
       if (_testFiles.isEmpty) {
         throwToolExit(
-            'Test directory "${testDir.path}" does not appear to contain any test files.\n'
-                'Test files must be in that directory and end with the pattern "_test.dart".'
+          'Test directory "${testDir.path}" does not appear to contain any test files.\n'
+          'Test files must be in that directory and end with the pattern "_test.dart".'
         );
       }
     } else {
@@ -245,8 +273,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     if (_isIntegrationTest && !_testFiles.every((String file) => file.startsWith('$currentDirectory/integration_test/'))) {
       throwToolExit(
         'Integration tests and unit tests cannot be run in a single invocation.'
-          ' Use separate invocations of `flutter test` to run integration tests'
-          ' and unit tests.'
+        ' Use separate invocations of `flutter test` to run integration tests'
+        ' and unit tests.'
       );
     }
     return super.verifyThenRunCommand(commandPath);
