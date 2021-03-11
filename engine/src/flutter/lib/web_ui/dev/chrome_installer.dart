@@ -270,7 +270,7 @@ Future<String> fetchLatestChromeVersion() async {
   final Client client = Client();
   try {
     final Response response = await client.get(
-        'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Linux_x64%2FLAST_CHANGE?alt=media');
+        Uri.parse('https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Linux_x64%2FLAST_CHANGE?alt=media'));
     if (response.statusCode != 200) {
       throw BrowserInstallerException(
           'Failed to fetch latest Chrome version. Server returned status code ${response.statusCode}');

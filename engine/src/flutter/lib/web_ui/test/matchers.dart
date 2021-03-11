@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 /// Provides utilities for testing engine code.
-// @dart = 2.6
+// @dart = 2.12
 library matchers;
 
 import 'dart:html' as html;
@@ -12,7 +12,6 @@ import 'dart:math' as math;
 import 'package:html/parser.dart' as html_package;
 import 'package:html/dom.dart' as html_package;
 
-import 'package:meta/meta.dart';
 import 'package:test/test.dart';
 
 import 'package:ui/ui.dart';
@@ -23,9 +22,9 @@ import 'package:ui/src/engine.dart';
 /// If [root] is `null` returns all surfaces from the last rendered scene.
 ///
 /// Surfaces are returned in a depth-first order.
-Iterable<PersistedSurface> enumerateSurfaces([PersistedSurface root]) {
+Iterable<PersistedSurface> enumerateSurfaces([PersistedSurface? root]) {
   root ??= SurfaceSceneBuilder.debugLastFrameScene;
-  final List<PersistedSurface> surfaces = <PersistedSurface>[root];
+  final List<PersistedSurface> surfaces = <PersistedSurface>[root!];
 
   root.visitChildren((PersistedSurface surface) {
     surfaces.addAll(enumerateSurfaces(surface));
@@ -37,7 +36,7 @@ Iterable<PersistedSurface> enumerateSurfaces([PersistedSurface root]) {
 /// Enumerates all pictures nested under [root].
 ///
 /// If [root] is `null` returns all pictures from the last rendered scene.
-Iterable<PersistedPicture> enumeratePictures([PersistedSurface root]) {
+Iterable<PersistedPicture> enumeratePictures([PersistedSurface? root]) {
   root ??= SurfaceSceneBuilder.debugLastFrameScene;
   return enumerateSurfaces(root).whereType<PersistedPicture>();
 }
@@ -45,7 +44,7 @@ Iterable<PersistedPicture> enumeratePictures([PersistedSurface root]) {
 /// Enumerates all offset surfaces nested under [root].
 ///
 /// If [root] is `null` returns all pictures from the last rendered scene.
-Iterable<PersistedOffset> enumerateOffsets([PersistedSurface root]) {
+Iterable<PersistedOffset> enumerateOffsets([PersistedSurface? root]) {
   root ??= SurfaceSceneBuilder.debugLastFrameScene;
   return enumerateSurfaces(root).whereType<PersistedOffset>();
 }
@@ -76,7 +75,7 @@ typedef DistanceFunction<T> = num Function(T a, T b);
 ///
 /// Calling an instance of this type must either be done dynamically, or by
 /// first casting it to a [DistanceFunction<T>] for some concrete T.
-typedef AnyDistanceFunction = num Function(Null a, Null b);
+typedef AnyDistanceFunction = num Function(Never a, Never b);
 
 const Map<Type, AnyDistanceFunction> _kStandardDistanceFunctions =
     <Type, AnyDistanceFunction>{
@@ -108,7 +107,7 @@ double _rectDistance(Rect a, Rect b) {
 }
 
 double _sizeDistance(Size a, Size b) {
-  final Offset delta = b - a;
+  final Offset delta = (b - a) as Offset;
   return delta.distance;
 }
 
@@ -134,11 +133,11 @@ double _sizeDistance(Size a, Size b) {
 ///    [double]s and has an optional `epsilon` parameter.
 ///  * [closeTo], which specializes in numbers only.
 Matcher within<T>({
-  @required num distance,
-  @required T from,
-  DistanceFunction<T> distanceFunction,
+  required num distance,
+  required T from,
+  DistanceFunction<T>? distanceFunction,
 }) {
-  distanceFunction ??= _kStandardDistanceFunctions[T];
+  distanceFunction ??= _kStandardDistanceFunctions[T] as DistanceFunction<T>?;
 
   if (distanceFunction == null) {
     throw ArgumentError(
@@ -158,7 +157,7 @@ class _IsWithinDistance<T> extends Matcher {
   final num epsilon;
 
   @override
-  bool matches(Object object, Map<dynamic, dynamic> matchState) {
+  bool matches(Object? object, Map<dynamic, dynamic> matchState) {
     if (object is! T) {
       return false;
     }
@@ -183,7 +182,7 @@ class _IsWithinDistance<T> extends Matcher {
 
   @override
   Description describeMismatch(
-    Object object,
+    Object? object,
     Description mismatchDescription,
     Map<dynamic, dynamic> matchState,
     bool verbose,
@@ -230,11 +229,11 @@ enum HtmlComparisonMode {
 String canonicalizeHtml(String htmlContent,
     {HtmlComparisonMode mode = HtmlComparisonMode.nonLayoutOnly,
     bool throwOnUnusedAttributes = false}) {
-  if (htmlContent == null || htmlContent.trim().isEmpty) {
+  if (htmlContent.trim().isEmpty) {
     return '';
   }
 
-  String _unusedAttribute(String name) {
+  String? _unusedAttribute(String name) {
     if (throwOnUnusedAttributes) {
       fail('Provided HTML contains style attribute "$name" which '
           'is not used for comparison in the test. The HTML was:\n\n$htmlContent');
@@ -244,7 +243,7 @@ String canonicalizeHtml(String htmlContent,
   }
 
   html_package.Element _cleanup(html_package.Element original) {
-    String replacementTag = original.localName;
+    String replacementTag = original.localName!;
     switch (replacementTag) {
       case 'flt-scene':
         replacementTag = 's';
@@ -256,7 +255,7 @@ String canonicalizeHtml(String htmlContent,
         replacementTag = 'o';
         break;
       case 'flt-clip':
-        final String clipType = original.attributes['clip-type'];
+        final String? clipType = original.attributes['clip-type'];
         switch (clipType) {
           case 'rect':
             replacementTag = 'clip';
@@ -314,7 +313,7 @@ String canonicalizeHtml(String htmlContent,
       });
 
       if (original.attributes.containsKey('style')) {
-        final String styleValue = original.attributes['style'];
+        final String styleValue = original.attributes['style']!;
 
         int attrCount = 0;
         final String processedAttributes = styleValue
@@ -368,7 +367,7 @@ String canonicalizeHtml(String htmlContent,
               attrCount++;
               return attr.trim();
             })
-            .where((String attr) => attr != null && attr.isNotEmpty)
+            .where((String? attr) => attr != null && attr.isNotEmpty)
             .join('; ');
 
         if (attrCount > 0) {
@@ -412,7 +411,7 @@ void expectHtml(html.Element element, String expectedHtml,
     {HtmlComparisonMode mode = HtmlComparisonMode.nonLayoutOnly}) {
   expectedHtml =
       canonicalizeHtml(expectedHtml, mode: mode, throwOnUnusedAttributes: true);
-  final String actualHtml = canonicalizeHtml(element.outerHtml, mode: mode);
+  final String actualHtml = canonicalizeHtml(element.outerHtml!, mode: mode);
   expect(actualHtml, expectedHtml);
 }
 
@@ -462,7 +461,7 @@ class SceneTester {
   final SurfaceScene scene;
 
   void expectSceneHtml(String expectedHtml) {
-    expectHtml(scene.webOnlyRootElement, expectedHtml,
+    expectHtml(scene.webOnlyRootElement!, expectedHtml,
         mode: HtmlComparisonMode.noAttributes);
   }
 }
