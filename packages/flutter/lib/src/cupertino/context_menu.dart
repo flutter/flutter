@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart' show kMinFlingVelocity, kLongPressTimeout;
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -511,22 +510,17 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
       : _mask.value;
     return Positioned.fromRect(
       rect: _rect.value!,
-      // TODO(justinmc): When ShaderMask is supported on web, remove this
-      // conditional and use ShaderMask everywhere.
-      // https://github.com/flutter/flutter/issues/52967.
-      child: kIsWeb
-          ? Container(key: _childGlobalKey, child: widget.child)
-          : ShaderMask(
-            key: _childGlobalKey,
-            shaderCallback: (Rect bounds) {
-              return LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: <Color>[color, color],
-              ).createShader(bounds);
-            },
-            child: widget.child,
-          ),
+      child: ShaderMask(
+        key: _childGlobalKey,
+        shaderCallback: (Rect bounds) {
+          return LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: <Color>[color, color],
+          ).createShader(bounds);
+        },
+        child: widget.child,
+      ),
     );
   }
 
