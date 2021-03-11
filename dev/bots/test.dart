@@ -332,12 +332,19 @@ Future<void> _runBuildTests() async {
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ios_platform_view_tests')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ui')));
+  
+  final List<String> devicelabBuildTasks = <String>[
+    'flutter_gallery__transition_perf',
+    'flutter_gallery_ios__transition_perf',
+  ];
 
   // The tests are randomly distributed into subshards so as to get a uniform
   // distribution of costs, but the seed is fixed so that issues are reproducible.
   final List<ShardRunner> tests = <ShardRunner>[
     for (final FileSystemEntity exampleDirectory in exampleDirectories)
       () => _runExampleProjectBuildTests(exampleDirectory),
+    for (String devicelabBuildTask in devicelabBuildTasks)
+      () => _runDeviceLabBuildTask(devicelabBuildTask),
     ...<ShardRunner>[
       // Web compilation tests.
       () => _flutterBuildDart2js(
@@ -354,6 +361,22 @@ Future<void> _runBuildTests() async {
 
   await _runShardRunnerIndexOfTotalSubshard(tests);
 }
+
+
+Future<void> _runDeviceLabBuildTask(String task) async {
+  // Run the ios tasks
+  if (!Platform.isMacOS && task.contains('_ios_')) {
+    return;
+  }
+
+  await runCommand(flutter, <String>[
+    'pub', 'run', path.join('dev', 'devicelab', 'bin', 'test_runner.dart'),
+    'test',
+    '--task', task,
+    '--task-args', 'build',
+  ]);
+}
+
 
 Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) async {
   // Only verify caching with flutter gallery.
