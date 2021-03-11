@@ -370,11 +370,12 @@ Future<void> _runDeviceLabBuildTask(String task) async {
   }
 
   await runCommand(dart, <String>[
-    'run', path.join('dev', 'devicelab', 'bin', 'test_runner.dart'),
+    'run', path.join('bin', 'test_runner.dart'),
     'test',
     '--task', task,
     '--task-args', 'build',
-  ]);
+  ],
+  workingDirectory: path.join('dev', 'devicelab'));
 }
 
 
