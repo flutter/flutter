@@ -1612,7 +1612,7 @@ Future<void> main() async {
     expect(tester.getTopLeft(find.byKey(firstKey)).dx, x0);
   });
 
-  testWidgets('Can override flight shuttle', (WidgetTester tester) async {
+  testWidgets('Can override flight shuttle in to hero', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: ListView(
@@ -1654,6 +1654,102 @@ Future<void> main() async {
     expect(find.text('foo'), findsNothing);
     expect(find.text('bar'), findsNothing);
     expect(find.text('baz'), findsOneWidget);
+  });
+
+  testWidgets('Can override flight shuttle in from hero', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: ListView(
+          children: <Widget>[
+            Hero(
+              tag: 'a',
+              child: const Text('foo'),
+              flightShuttleBuilder: (
+                BuildContext flightContext,
+                Animation<double> animation,
+                HeroFlightDirection flightDirection,
+                BuildContext fromHeroContext,
+                BuildContext toHeroContext,
+              ) { return const Text('baz'); },
+            ),
+            Builder(builder: (BuildContext context) {
+              return TextButton(
+                child: const Text('two'),
+                onPressed: () => Navigator.push<void>(context, MaterialPageRoute<void>(
+                  builder: (BuildContext context) {
+                    return const Material(
+                      child: Hero(tag: 'a', child: Text('bar')),
+                    );
+                  },
+                )),
+              );
+            }),
+          ],
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('two'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 10));
+
+    expect(find.text('foo'), findsNothing);
+    expect(find.text('bar'), findsNothing);
+    expect(find.text('baz'), findsOneWidget);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/77720.
+  testWidgets("toHero's shuttle builder over fromHero's shuttle builder", (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: ListView(
+          children: <Widget>[
+            Hero(
+              tag: 'a',
+              child: const Text('foo'),
+              flightShuttleBuilder: (
+                BuildContext flightContext,
+                Animation<double> animation,
+                HeroFlightDirection flightDirection,
+                BuildContext fromHeroContext,
+                BuildContext toHeroContext,
+              ) { return const Text('fromHero text'); },
+            ),
+            Builder(builder: (BuildContext context) {
+              return TextButton(
+                child: const Text('two'),
+                onPressed: () => Navigator.push<void>(context, MaterialPageRoute<void>(
+                  builder: (BuildContext context) {
+                    return Material(
+                      child: Hero(
+                        tag: 'a',
+                        child: const Text('bar'),
+                        flightShuttleBuilder: (
+                          BuildContext flightContext,
+                          Animation<double> animation,
+                          HeroFlightDirection flightDirection,
+                          BuildContext fromHeroContext,
+                          BuildContext toHeroContext,
+                        ) { return const Text('toHero text'); },
+                      ),
+                    );
+                  },
+                )),
+              );
+            }),
+          ],
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('two'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 10));
+
+    expect(find.text('foo'), findsNothing);
+    expect(find.text('bar'), findsNothing);
+    expect(find.text('fromHero text'), findsNothing);
+    expect(find.text('toHero text'), findsOneWidget);
   });
 
   testWidgets('Can override flight launch pads', (WidgetTester tester) async {

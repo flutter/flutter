@@ -987,6 +987,9 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.onSetSelection != null) {
       config.onSetSelection = properties.onSetSelection;
     }
+    if (properties.onSetText != null) {
+      config.onSetText = properties.onSetText;
+    }
     if (properties.onDidGainAccessibilityFocus != null) {
       config.onDidGainAccessibilityFocus = properties.onDidGainAccessibilityFocus;
     }

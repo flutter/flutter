@@ -1409,11 +1409,16 @@ class DevToolsMemoryTest {
   }
 
   Future<void> _launchDevTools() async {
+    // The version of devtools is pinned. If we pub global activate devtools and an
+    // upstream devtools release breaks our CI, it will manifest on an unrelated
+    // commit, making it more difficult to determine the cause.
+    //
+    // Also, for release branches, all external test dependencies need to be pinned.
     await exec(pubBin, <String>[
       'global',
       'activate',
       'devtools',
-      '0.2.5',
+      '2.0.0',
     ]);
     _devToolsProcess = await startProcess(
       pubBin,

@@ -36,7 +36,11 @@ typedef MoveCursorHandler = void Function(bool extendSelection);
 /// text selection (or re-position the cursor) to `selection`.
 typedef SetSelectionHandler = void Function(TextSelection selection);
 
-typedef _SemanticsActionHandler = void Function(dynamic args);
+/// Signature for the [SemanticsAction.setText] handlers to replace the
+/// current text with the input `text`.
+typedef SetTextHandler = void Function(String text);
+
+typedef _SemanticsActionHandler = void Function(Object? args);
 
 /// A tag for a [SemanticsNode].
 ///
@@ -626,6 +630,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onMoveCursorForwardByWord,
     this.onMoveCursorBackwardByWord,
     this.onSetSelection,
+    this.onSetText,
     this.onDidGainAccessibilityFocus,
     this.onDidLoseAccessibilityFocus,
     this.onDismiss,
@@ -1096,6 +1101,15 @@ class SemanticsProperties extends DiagnosticableTree {
   /// TalkBack users can trigger this handler by selecting "Move cursor to
   /// beginning/end" or "Select all" from the local context menu.
   final SetSelectionHandler? onSetSelection;
+
+  /// The handler for [SemanticsAction.setText].
+  ///
+  /// This handler is invoked when the user wants to replace the current text in
+  /// the text field with a new text.
+  ///
+  /// Voice access users can trigger this handler by speaking "type <text>" to
+  /// their Android devices.
+  final SetTextHandler? onSetText;
 
   /// The handler for [SemanticsAction.didGainAccessibilityFocus].
   ///
@@ -2684,7 +2698,7 @@ class SemanticsOwner extends ChangeNotifier {
   ///
   /// If the given `action` requires arguments they need to be passed in via
   /// the `args` parameter.
-  void performAction(int id, SemanticsAction action, [ dynamic args ]) {
+  void performAction(int id, SemanticsAction action, [ Object? args ]) {
     assert(action != null);
     final _SemanticsActionHandler? handler = _getSemanticsActionHandlerForId(id, action);
     if (handler != null) {
@@ -2734,7 +2748,7 @@ class SemanticsOwner extends ChangeNotifier {
   ///
   /// If the given `action` requires arguments they need to be passed in via
   /// the `args` parameter.
-  void performActionAt(Offset position, SemanticsAction action, [ dynamic args ]) {
+  void performActionAt(Offset position, SemanticsAction action, [ Object? args ]) {
     assert(action != null);
     final SemanticsNode? node = rootSemanticsNode;
     if (node == null)
@@ -2848,7 +2862,7 @@ class SemanticsConfiguration {
   /// `action`.
   void _addArgumentlessAction(SemanticsAction action, VoidCallback handler) {
     assert(handler != null);
-    _addAction(action, (dynamic args) {
+    _addAction(action, (Object? args) {
       assert(args == null);
       handler();
     });
@@ -3085,9 +3099,8 @@ class SemanticsConfiguration {
   MoveCursorHandler? _onMoveCursorForwardByCharacter;
   set onMoveCursorForwardByCharacter(MoveCursorHandler? value) {
     assert(value != null);
-    _addAction(SemanticsAction.moveCursorForwardByCharacter, (dynamic args) {
-      final bool extentSelection = args as bool;
-      assert(extentSelection != null);
+    _addAction(SemanticsAction.moveCursorForwardByCharacter, (Object? args) {
+      final bool extentSelection = args! as bool;
       value!(extentSelection);
     });
     _onMoveCursorForwardByCharacter = value;
@@ -3104,9 +3117,8 @@ class SemanticsConfiguration {
   MoveCursorHandler? _onMoveCursorBackwardByCharacter;
   set onMoveCursorBackwardByCharacter(MoveCursorHandler? value) {
     assert(value != null);
-    _addAction(SemanticsAction.moveCursorBackwardByCharacter, (dynamic args) {
-      final bool extentSelection = args as bool;
-      assert(extentSelection != null);
+    _addAction(SemanticsAction.moveCursorBackwardByCharacter, (Object? args) {
+      final bool extentSelection = args! as bool;
       value!(extentSelection);
     });
     _onMoveCursorBackwardByCharacter = value;
@@ -3123,9 +3135,8 @@ class SemanticsConfiguration {
   MoveCursorHandler? _onMoveCursorForwardByWord;
   set onMoveCursorForwardByWord(MoveCursorHandler? value) {
     assert(value != null);
-    _addAction(SemanticsAction.moveCursorForwardByWord, (dynamic args) {
-      final bool extentSelection = args as bool;
-      assert(extentSelection != null);
+    _addAction(SemanticsAction.moveCursorForwardByWord, (Object? args) {
+      final bool extentSelection = args! as bool;
       value!(extentSelection);
     });
     _onMoveCursorForwardByCharacter = value;
@@ -3142,9 +3153,8 @@ class SemanticsConfiguration {
   MoveCursorHandler? _onMoveCursorBackwardByWord;
   set onMoveCursorBackwardByWord(MoveCursorHandler? value) {
     assert(value != null);
-    _addAction(SemanticsAction.moveCursorBackwardByWord, (dynamic args) {
-      final bool extentSelection = args as bool;
-      assert(extentSelection != null);
+    _addAction(SemanticsAction.moveCursorBackwardByWord, (Object? args) {
+      final bool extentSelection = args! as bool;
       value!(extentSelection);
     });
     _onMoveCursorBackwardByCharacter = value;
@@ -3161,9 +3171,9 @@ class SemanticsConfiguration {
   SetSelectionHandler? _onSetSelection;
   set onSetSelection(SetSelectionHandler? value) {
     assert(value != null);
-    _addAction(SemanticsAction.setSelection, (dynamic args) {
+    _addAction(SemanticsAction.setSelection, (Object? args) {
       assert(args != null && args is Map);
-      final Map<String, int> selection = (args as Map<dynamic, dynamic>).cast<String, int>();
+      final Map<String, int> selection = (args! as Map<dynamic, dynamic>).cast<String, int>();
       assert(selection != null && selection['base'] != null && selection['extent'] != null);
       value!(TextSelection(
         baseOffset: selection['base']!,
@@ -3171,6 +3181,25 @@ class SemanticsConfiguration {
       ));
     });
     _onSetSelection = value;
+  }
+
+  /// The handler for [SemanticsAction.setText].
+  ///
+  /// This handler is invoked when the user wants to replace the current text in
+  /// the text field with a new text.
+  ///
+  /// Voice access users can trigger this handler by speaking "type <text>" to
+  /// their Android devices.
+  SetTextHandler? get onSetText => _onSetText;
+  SetTextHandler? _onSetText;
+  set onSetText(SetTextHandler? value) {
+    assert(value != null);
+    _addAction(SemanticsAction.setText, (Object? args) {
+      assert(args != null && args is String);
+      final String text = args! as String;
+      value!(text);
+    });
+    _onSetText = value;
   }
 
   /// The handler for [SemanticsAction.didGainAccessibilityFocus].
@@ -3357,8 +3386,8 @@ class SemanticsConfiguration {
     _actions[SemanticsAction.customAction] = _onCustomSemanticsAction;
   }
 
-  void _onCustomSemanticsAction(dynamic args) {
-    final CustomSemanticsAction? action = CustomSemanticsAction.getAction(args as int);
+  void _onCustomSemanticsAction(Object? args) {
+    final CustomSemanticsAction? action = CustomSemanticsAction.getAction(args! as int);
     if (action == null)
       return;
     final VoidCallback? callback = _customSemanticsActions[action];
