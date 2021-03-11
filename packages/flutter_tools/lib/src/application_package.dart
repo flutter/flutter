@@ -414,6 +414,10 @@ abstract class IOSApp extends ApplicationPackage {
   String get simulatorBundlePath;
 
   String get deviceBundlePath;
+
+  /// Directory used by ios-deploy to store incremental installation metadata for
+  /// faster second installs.
+  Directory get appDeltaDirectory;
 }
 
 class BuildableIOSApp extends IOSApp {
@@ -439,6 +443,9 @@ class BuildableIOSApp extends IOSApp {
 
   @override
   String get deviceBundlePath => _buildAppPath('iphoneos');
+
+  @override
+  Directory get appDeltaDirectory => globals.fs.directory(globals.fs.path.join(getIosBuildDirectory(), 'app-delta'));
 
   // Xcode uses this path for the final archive bundle location,
   // not a top-level output directory.
@@ -467,6 +474,9 @@ class PrebuiltIOSApp extends IOSApp {
 
   final Directory bundleDir;
   final String bundleName;
+
+  @override
+  final Directory appDeltaDirectory = null;
 
   @override
   String get name => bundleName;

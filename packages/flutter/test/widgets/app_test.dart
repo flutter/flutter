@@ -308,6 +308,25 @@ void main() {
     ));
     expect(find.text('/'), findsOneWidget);
   });
+
+  testWidgets('WidgetsApp has correct default ScrollBehavior', (WidgetTester tester) async {
+    late BuildContext capturedContext;
+    await tester.pumpWidget(
+      WidgetsApp(
+        builder: (BuildContext context, Widget? child) {
+          capturedContext = context;
+          return const Placeholder();
+        },
+        color: const Color(0xFF123456),
+      ),
+    );
+    expect(ScrollConfiguration.of(capturedContext).runtimeType, ScrollBehavior);
+  });
+}
+
+class MockScrollBehavior extends ScrollBehavior {
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) => const NeverScrollableScrollPhysics();
 }
 
 typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);
