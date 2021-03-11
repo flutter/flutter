@@ -152,11 +152,11 @@ const double _inputFormLandscapeHeight = 108.0;
 ///   final RestorableIntN selectedYear = RestorableIntN(DateTime.now().year);
 ///   final RestorableIntN selectedMonth = RestorableIntN(DateTime.now().month);
 ///   final RestorableIntN selectedDay = RestorableIntN(DateTime.now().day);
-///   RestorableRouteFuture<DateTime> _restorableDatePickerRouteFuture;
+///   late RestorableRouteFuture<DateTime> _restorableDatePickerRouteFuture;
 ///
 ///   static Route<DateTime> _datePickerRoute(
 ///     BuildContext context,
-///     Object arguments,
+///     Object? arguments,
 ///   ) {
 ///     Map<dynamic, dynamic> argumentMap = arguments as Map<dynamic, dynamic>;
 ///     Map<dynamic, dynamic> initialDate = argumentMap['initialDate'] as Map<dynamic, dynamic>;
@@ -194,7 +194,7 @@ const double _inputFormLandscapeHeight = 108.0;
 ///   }
 ///
 ///   @override
-///   void restoreState(RestorationBucket oldBucket, bool initialRestore) {
+///   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
 ///     registerForRestoration(selectedYear, 'selected_year');
 ///     registerForRestoration(selectedMonth, 'selected_month');
 ///     registerForRestoration(selectedDay, 'selected_day');
@@ -202,13 +202,11 @@ const double _inputFormLandscapeHeight = 108.0;
 ///   }
 ///
 ///   void _selectDate(DateTime newSelectedDate) {
-///     if (newSelectedDate != null) {
-///       setState(() {
-///         selectedYear.value = newSelectedDate.year;
-///         selectedMonth.value = newSelectedDate.month;
-///         selectedDay.value = newSelectedDate.day;
-///       });
-///     }
+///     setState(() {
+///       selectedYear.value = newSelectedDate.year;
+///       selectedMonth.value = newSelectedDate.month;
+///       selectedDay.value = newSelectedDate.day;
+///     });
 ///   }
 ///
 ///   @override
