@@ -3750,6 +3750,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     MoveCursorHandler? onMoveCursorForwardByWord,
     MoveCursorHandler? onMoveCursorBackwardByWord,
     SetSelectionHandler? onSetSelection,
+    SetTextHandler? onSetText,
     VoidCallback? onDidGainAccessibilityFocus,
     VoidCallback? onDidLoseAccessibilityFocus,
     Map<CustomSemanticsAction, VoidCallback>? customSemanticsActions,
@@ -3805,6 +3806,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _onMoveCursorForwardByWord = onMoveCursorForwardByWord,
        _onMoveCursorBackwardByWord = onMoveCursorBackwardByWord,
        _onSetSelection = onSetSelection,
+       _onSetText = onSetText,
        _onDidGainAccessibilityFocus = onDidGainAccessibilityFocus,
        _onDidLoseAccessibilityFocus = onDidLoseAccessibilityFocus,
        _customSemanticsActions = customSemanticsActions,
@@ -4540,6 +4542,24 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
+  /// The handler for [SemanticsAction.setText].
+  ///
+  /// This handler is invoked when the user wants to replace the current text in
+  /// the text field with a new text.
+  ///
+  /// Voice access users can trigger this handler by speaking "type <text>" to
+  /// their Android devices.
+  SetTextHandler? get onSetText => _onSetText;
+  SetTextHandler? _onSetText;
+  set onSetText(SetTextHandler? handler) {
+    if (_onSetText == handler)
+      return;
+    final bool hadValue = _onSetText != null;
+    _onSetText = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate();
+  }
+
   /// The handler for [SemanticsAction.didGainAccessibilityFocus].
   ///
   /// This handler is invoked when the node annotated with this handler gains
@@ -4732,6 +4752,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.onMoveCursorBackwardByWord = _performMoveCursorBackwardByWord;
     if (onSetSelection != null)
       config.onSetSelection = _performSetSelection;
+    if (onSetText != null)
+      config.onSetText = _performSetText;
     if (onDidGainAccessibilityFocus != null)
       config.onDidGainAccessibilityFocus = _performDidGainAccessibilityFocus;
     if (onDidLoseAccessibilityFocus != null)
@@ -4823,6 +4845,11 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   void _performSetSelection(TextSelection selection) {
     if (onSetSelection != null)
       onSetSelection!(selection);
+  }
+
+  void _performSetText(String text) {
+    if (onSetText != null)
+      onSetText!(text);
   }
 
   void _performDidGainAccessibilityFocus() {

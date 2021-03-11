@@ -29,6 +29,42 @@ import 'toggleable.dart';
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
+///
+/// This example shows how you can override the default theme of
+/// of a [Checkbox] with a [MaterialStateProperty].
+/// In this example, the checkbox's color will be `Colors.blue` when the [Checkbox]
+/// is being pressed, hovered, or focused. Otherwise, the checkbox's color will
+/// be `Colors.red`.
+///
+/// ```dart
+/// bool isChecked = false;
+/// Widget build(BuildContext context) {
+///   Color getColor(Set<MaterialState> states) {
+///     const Set<MaterialState> interactiveStates = <MaterialState>{
+///       MaterialState.pressed,
+///       MaterialState.hovered,
+///       MaterialState.focused,
+///     };
+///     if (states.any(interactiveStates.contains)) {
+///       return Colors.blue;
+///     }
+///     return Colors.red;
+///   }
+///   return Checkbox(
+///     checkColor: Colors.white,
+///     fillColor: MaterialStateProperty.resolveWith(getColor),
+///     value: isChecked,
+///     onChanged: (val) {
+///       setState(() {
+///         isChecked = !isChecked;
+///       });
+///     },
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CheckboxListTile], which combines this widget with a [ListTile] so that

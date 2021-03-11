@@ -709,6 +709,42 @@ void main() {
     expect(refreshCalled, false);
   });
 
+  testWidgets('RefreshIndicator color defaults to ColorScheme.primary', (WidgetTester tester) async {
+    const Color primaryColor = Color(0xff4caf50);
+    final ThemeData theme = ThemeData.from(colorScheme: const ColorScheme.light().copyWith(primary: primaryColor));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter stateSetter) {
+            return RefreshIndicator(
+              triggerMode: RefreshIndicatorTriggerMode.anywhere,
+              onRefresh: holdRefresh,
+              child: ListView(
+                reverse: true,
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: const <Widget>[
+                  SizedBox(
+                    height: 200.0,
+                    child: Text('X'),
+                  ),
+                  SizedBox(
+                    height: 800.0,
+                    child: Text('Y'),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.fling(find.text('X'), const Offset(0.0, -300.0), 1000.0);
+    await tester.pump();
+    expect(tester.widget<RefreshProgressIndicator>(find.byType(RefreshProgressIndicator)).valueColor!.value, primaryColor);
+  });
+
   testWidgets('RefreshIndicator.color can be updated at runtime', (WidgetTester tester) async {
     refreshCalled = false;
     Color refreshIndicatorColor = Colors.green;
