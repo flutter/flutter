@@ -327,6 +327,8 @@ class SampleChecker {
   void _extractSamples(List<File> files, {Map<String, Section> sectionMap, Map<String, Sample> sampleMap, bool silent = false}) {
     final List<Section> sections = <Section>[];
     final List<Sample> samples = <Sample>[];
+    int dartpadCount = 0;
+    int sampleCount = 0;
 
     for (final File file in files) {
       final String relativeFilePath = path.relative(file.path, from: _flutterPackage.path);
@@ -431,6 +433,12 @@ class SampleChecker {
           } else if (sampleMatch != null) {
             inSnippet = sampleMatch != null && (sampleMatch[1] == 'sample' || sampleMatch[1] == 'dartpad');
             if (inSnippet) {
+              if (sampleMatch[1] == 'sample') {
+                sampleCount++;
+              }
+              if (sampleMatch[1] == 'dartpad') {
+                dartpadCount++;
+              }
               startLine = Line(
                 '',
                 filename: relativeFilePath,
@@ -456,7 +464,7 @@ class SampleChecker {
       }
     }
     if (!silent)
-      print('Found ${sections.length} snippet code blocks and ${samples.length} sample code sections.');
+      print('Found ${sections.length} snippet code blocks and $sampleCount sample code sections, and $dartpadCount dartpad sections.');
     for (final Section section in sections) {
       final String path = _writeSection(section).path;
       if (sectionMap != null)
