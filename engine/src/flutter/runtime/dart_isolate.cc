@@ -34,6 +34,8 @@ namespace flutter {
 
 namespace {
 
+constexpr std::string_view kFileUriPrefix = "file://";
+
 class DartErrorString {
  public:
   DartErrorString() : str_(nullptr) {}
@@ -928,6 +930,14 @@ Dart_Isolate DartIsolate::DartIsolateGroupCreateCallback(
 
   DartIsolateGroupData& parent_group_data =
       (*parent_isolate_data)->GetIsolateGroupData();
+
+  if (strncmp(advisory_script_uri, kFileUriPrefix.data(),
+              kFileUriPrefix.size())) {
+    std::string error_msg =
+        std::string("Unsupported isolate URI: ") + advisory_script_uri;
+    *error = fml::strdup(error_msg.c_str());
+    return nullptr;
+  }
 
   auto isolate_group_data =
       std::make_unique<std::shared_ptr<DartIsolateGroupData>>(
