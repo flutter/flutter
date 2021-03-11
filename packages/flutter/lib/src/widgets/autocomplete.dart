@@ -310,10 +310,10 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///   AutocompleteFormExample({Key? key}) : super(key: key);
 ///
 ///   @override
-///   AutocompleteFormExample createState() => AutocompleteFormExample();
+///   AutocompleteFormExampleState createState() => AutocompleteFormExampleState();
 /// }
 ///
-/// class AutocompleteFormExample extends State<AutocompleteFormExample> {
+/// class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
 ///   final _formKey = GlobalKey<FormState>();
 ///   final TextEditingController _textEditingController = TextEditingController();
 ///   String? _dropdownValue;
