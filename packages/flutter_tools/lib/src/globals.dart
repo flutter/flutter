@@ -106,8 +106,7 @@ XcodeProjectInterpreter get xcodeProjectInterpreter => context.get<XcodeProjectI
 
 XCDevice get xcdevice => context.get<XCDevice>();
 
-final OutputPreferences _defaultOutputPreferences = OutputPreferences();
-OutputPreferences get outputPreferences => context.get<OutputPreferences>() ?? _defaultOutputPreferences;
+OutputPreferences get outputPreferences => context.get<OutputPreferences>();
 
 final BotDetector _defaultBotDetector = BotDetector(
   httpClientFactory: context.get<HttpClientFactory>() ?? () => HttpClient(),

@@ -6,6 +6,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:process/process.dart';
 
 import 'android/android_builder.dart';
@@ -274,6 +275,11 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
         processManager: globals.processManager,
+      ),
+      OutputPreferences: () => OutputPreferences(
+        wrapText: globals.stdio.hasTerminal ?? false,
+        showColor:  globals.platform.stdoutSupportsAnsi,
+        stdio: globals.stdio,
       ),
       PersistentToolState: () => PersistentToolState(
         fileSystem: globals.fs,
