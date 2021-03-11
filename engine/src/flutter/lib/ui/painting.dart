@@ -5273,7 +5273,7 @@ typedef _Callback<T> = void Function(T result);
 ///
 /// Return value should be null on success, and a string error message on
 /// failure.
-typedef _Callbacker<T> = String? Function(_Callback<T> callback);
+typedef _Callbacker<T> = String? Function(_Callback<T?> callback);
 
 /// Converts a method that receives a value-returning callback to a method that
 /// returns a Future.
@@ -5298,7 +5298,7 @@ typedef _Callbacker<T> = String? Function(_Callback<T> callback);
 /// ```
 Future<T> _futurize<T>(_Callbacker<T> callbacker) {
   final Completer<T> completer = Completer<T>.sync();
-  final String? error = callbacker((T t) {
+  final String? error = callbacker((T? t) {
     if (t == null) {
       completer.completeError(Exception('operation failed'));
     } else {
