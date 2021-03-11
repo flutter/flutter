@@ -106,7 +106,7 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
 }
 
 /// An interface for building the selection UI, to be provided by the
-/// implementor of the toolbar widget.
+/// implementer of the toolbar widget.
 ///
 /// Override text operations such as [handleCut] if needed.
 abstract class TextSelectionControls {
