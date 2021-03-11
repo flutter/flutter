@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:matcher/matcher.dart';
 import 'package:meta/meta.dart';
-import 'package:vm_service_client/vm_service_client.dart';
+import 'package:vm_service/vm_service.dart' as vms;
 import 'package:webdriver/async_io.dart' as async_io;
 import 'package:webdriver/support/async.dart';
 
@@ -30,24 +29,29 @@ class WebFlutterDriver extends FlutterDriver {
 
   final FlutterWebConnection _connection;
   DateTime _startTime;
+  bool _accessibilityEnabled = false;
 
   /// Start time for tracing.
   @visibleForTesting
   DateTime get startTime => _startTime;
 
   @override
-  VMIsolate get appIsolate => throw UnsupportedError('WebFlutterDriver does not support appIsolate');
+  vms.Isolate get appIsolate => throw UnsupportedError('WebFlutterDriver does not support appIsolate');
 
   @override
-  VMServiceClient get serviceClient => throw UnsupportedError('WebFlutterDriver does not support serviceClient');
+  vms.VmService get serviceClient => throw UnsupportedError('WebFlutterDriver does not support serviceClient');
+
+  @override
+  async_io.WebDriver get webDriver => _connection._driver;
 
   /// Creates a driver that uses a connection provided by the given
   /// [hostUrl] which would fallback to environment variable VM_SERVICE_URL.
   /// Driver also depends on environment variables DRIVER_SESSION_ID,
-  /// BROWSER_SUPPORTS_TIMELINE, DRIVER_SESSION_URI, DRIVER_SESSION_SPEC
-  /// and ANDROID_CHROME_ON_EMULATOR for configurations.
+  /// BROWSER_SUPPORTS_TIMELINE, DRIVER_SESSION_URI, DRIVER_SESSION_SPEC,
+  /// DRIVER_SESSION_CAPABILITIES and ANDROID_CHROME_ON_EMULATOR for
+  /// configurations.
   static Future<FlutterDriver> connectWeb(
-      {String hostUrl, Duration timeout}) async {
+      {String? hostUrl, Duration? timeout}) async {
     hostUrl ??= Platform.environment['VM_SERVICE_URL'];
     final Map<String, dynamic> settings = <String, dynamic>{
       'support-timeline-action': Platform.environment['SUPPORT_TIMELINE_ACTION'] == 'true',
@@ -55,10 +59,27 @@ class WebFlutterDriver extends FlutterDriver {
       'session-uri': Platform.environment['DRIVER_SESSION_URI'],
       'session-spec': Platform.environment['DRIVER_SESSION_SPEC'],
       'android-chrome-on-emulator': Platform.environment['ANDROID_CHROME_ON_EMULATOR'] == 'true',
+      'session-capabilities': Platform.environment['DRIVER_SESSION_CAPABILITIES'],
     };
     final FlutterWebConnection connection = await FlutterWebConnection.connect
-      (hostUrl, settings, timeout: timeout);
+      (hostUrl!, settings, timeout: timeout);
     return WebFlutterDriver.connectedTo(connection);
+  }
+
+  @override
+  Future<void> enableAccessibility() async {
+    if (!_accessibilityEnabled) {
+      // Clicks the button to enable accessibility via Javascript for Desktop Web.
+      //
+      // The tag used in the script is based on
+      // https://github.com/flutter/engine/blob/master/lib/web_ui/lib/src/engine/semantics/semantics_helper.dart#L193
+      //
+      // TODO(angjieli): Support Mobile Web. (https://github.com/flutter/flutter/issues/65192)
+      await webDriver.execute(
+          'document.querySelector(\'flt-semantics-placeholder\').click();',
+          <String>[]);
+      _accessibilityEnabled = true;
+    }
   }
 
   @override
@@ -67,7 +88,7 @@ class WebFlutterDriver extends FlutterDriver {
     final Map<String, String> serialized = command.serialize();
     try {
       final dynamic data = await _connection.sendCommand("window.\$flutterDriver('${jsonEncode(serialized)}')", command.timeout);
-      response = data != null ? json.decode(data as String) as Map<String, dynamic> : <String, dynamic>{};
+      response = data != null ? (json.decode(data as String) as Map<String, dynamic>?)! : <String, dynamic>{};
     } catch (error, stackTrace) {
       throw DriverError("Failed to respond to $command due to remote error\n : \$flutterDriver('${jsonEncode(serialized)}')",
           error,
@@ -109,7 +130,7 @@ class WebFlutterDriver extends FlutterDriver {
     final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
     for (final async_io.LogEntry entry in await _connection.logs.toList()) {
       if (_startTime.isBefore(entry.timestamp)) {
-        final Map<String, dynamic> data = jsonDecode(entry.message)['message'] as Map<String, dynamic>;
+        final Map<String, dynamic> data = jsonDecode(entry.message!)['message'] as Map<String, dynamic>;
         if (data['method'] == 'Tracing.dataCollected') {
           // 'ts' data collected from Chrome is in double format, conversion needed
           try {
@@ -119,7 +140,7 @@ class WebFlutterDriver extends FlutterDriver {
             // data is corrupted, skip
             continue;
           }
-          events.add(data['params'] as Map<String, dynamic>);
+          events.add(data['params']! as Map<String, dynamic>);
         }
       }
     }
@@ -164,7 +185,11 @@ class WebFlutterDriver extends FlutterDriver {
 class FlutterWebConnection {
   /// Creates a FlutterWebConnection with WebDriver
   /// and whether the WebDriver supports timeline action.
-  FlutterWebConnection(this._driver, this.supportsTimelineAction);
+  FlutterWebConnection(this._driver, this.supportsTimelineAction) {
+    _driver.logs.get(async_io.LogType.browser).listen((async_io.LogEntry entry) {
+      print('[${entry.level}]: ${entry.message}');
+    });
+  }
 
   final async_io.WebDriver _driver;
 
@@ -176,13 +201,15 @@ class FlutterWebConnection {
   static Future<FlutterWebConnection> connect(
       String url,
       Map<String, dynamic> settings,
-      {Duration timeout}) async {
-    // Use sync WebDriver because async version will create a 15 seconds
-    // overhead when quitting.
-    final async_io.WebDriver driver = await async_io.fromExistingSession(
-        settings['session-id'].toString(),
-        uri: Uri.parse(settings['session-uri'].toString()),
-        spec: _convertToSpec(settings['session-spec'].toString().toLowerCase()));
+      {Duration? timeout}) async {
+    final String sessionId = settings['session-id'].toString();
+    final Uri sessionUri = Uri.parse(settings['session-uri'].toString());
+    final async_io.WebDriver driver = async_io.WebDriver(
+        sessionUri,
+        sessionId,
+        json.decode(settings['session-capabilities'] as String) as Map<String, dynamic>,
+        async_io.AsyncIoRequestClient(sessionUri.resolve('session/$sessionId/')),
+        _convertToSpec(settings['session-spec'].toString().toLowerCase()));
     if (settings['android-chrome-on-emulator'] == true) {
       final Uri localUri = Uri.parse(url);
       // Converts to Android Emulator Uri.
@@ -197,7 +224,7 @@ class FlutterWebConnection {
   }
 
   /// Sends command via WebDriver to Flutter web application.
-  Future<dynamic> sendCommand(String script, Duration duration) async {
+  Future<dynamic> sendCommand(String script, Duration? duration) async {
     dynamic result;
     try {
       await _driver.execute(script, <void>[]);
@@ -236,7 +263,7 @@ class FlutterWebConnection {
 }
 
 /// Waits until extension is installed.
-Future<void> waitUntilExtensionInstalled(async_io.WebDriver driver, Duration timeout) async {
+Future<void> waitUntilExtensionInstalled(async_io.WebDriver driver, Duration? timeout) async {
   await waitFor<void>(() =>
       driver.execute(r'return typeof(window.$flutterDriver)', <String>[]),
       matcher: 'function',

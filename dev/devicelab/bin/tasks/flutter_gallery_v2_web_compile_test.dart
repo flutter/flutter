@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:flutter_devicelab/versions/gallery.dart' show galleryVersion;
 
@@ -37,7 +38,7 @@ class NewGalleryWebCompileTest {
       () async {
         await flutter('doctor');
 
-        return await WebCompileTest.runSingleBuildTest(
+        return WebCompileTest.runSingleBuildTest(
           directory: galleryDir.path,
           metric: metricKeyPrefix,
           measureBuildTime: true,

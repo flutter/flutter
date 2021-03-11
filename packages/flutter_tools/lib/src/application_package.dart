@@ -2,17 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+// @dart = 2.8
+
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 import 'package:xml/xml.dart';
 
+import 'android/android_sdk.dart';
 import 'android/gradle.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
+import 'base/logger.dart';
 import 'base/process.dart';
 import 'base/user_messages.dart';
 import 'build_info.dart';
@@ -27,7 +31,27 @@ import 'web/web_device.dart';
 import 'windows/application_package.dart';
 
 class ApplicationPackageFactory {
+  ApplicationPackageFactory({
+    @required AndroidSdk androidSdk,
+    @required ProcessManager processManager,
+    @required Logger logger,
+    @required UserMessages userMessages,
+    @required FileSystem fileSystem,
+  }) : _androidSdk = androidSdk,
+       _processManager = processManager,
+       _logger = logger,
+       _userMessages = userMessages,
+       _fileSystem = fileSystem,
+       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+
   static ApplicationPackageFactory get instance => context.get<ApplicationPackageFactory>();
+
+  final AndroidSdk _androidSdk;
+  final ProcessManager _processManager;
+  final Logger _logger;
+  final ProcessUtils _processUtils;
+  final UserMessages _userMessages;
+  final FileSystem _fileSystem;
 
   Future<ApplicationPackage> getPackageForPlatform(
     TargetPlatform platform, {
@@ -40,12 +64,24 @@ class ApplicationPackageFactory {
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
-        if (globals.androidSdk?.licensesAvailable == true  && globals.androidSdk?.latestVersion == null) {
-          await checkGradleDependencies();
+        if (applicationBinary == null) {
+          return AndroidApk.fromAndroidProject(
+            FlutterProject.current().android,
+            processManager: _processManager,
+            processUtils: _processUtils,
+            logger: _logger,
+            androidSdk: _androidSdk,
+            userMessages: _userMessages,
+            fileSystem: _fileSystem,
+          );
         }
-        return applicationBinary == null
-            ? await AndroidApk.fromAndroidProject(FlutterProject.current().android)
-            : AndroidApk.fromApk(applicationBinary);
+        return AndroidApk.fromApk(
+          applicationBinary,
+          processManager: _processManager,
+          logger: _logger,
+          androidSdk: _androidSdk,
+          userMessages: _userMessages,
+        );
       case TargetPlatform.ios:
         return applicationBinary == null
             ? await IOSApp.fromIosProject(FlutterProject.current().ios, buildInfo)
@@ -62,6 +98,7 @@ class ApplicationPackageFactory {
         }
         return WebApplicationPackage(FlutterProject.current());
       case TargetPlatform.linux_x64:
+      case TargetPlatform.linux_arm64:
         return applicationBinary == null
             ? LinuxApp.fromLinuxProject(FlutterProject.current().linux)
             : LinuxApp.fromPrebuiltApp(applicationBinary);
@@ -74,6 +111,8 @@ class ApplicationPackageFactory {
         return applicationBinary == null
             ? FuchsiaApp.fromFuchsiaProject(FlutterProject.current().fuchsia)
             : FuchsiaApp.fromPrebuiltApp(applicationBinary);
+      case TargetPlatform.windows_uwp_x64:
+        throw UnsupportedError('Cannot build for windows_uwp_x64');
     }
     assert(platform != null);
     return null;
@@ -97,6 +136,7 @@ abstract class ApplicationPackage {
   String toString() => displayName ?? id;
 }
 
+/// An application package created from an already built Android APK.
 class AndroidApk extends ApplicationPackage {
   AndroidApk({
     String id,
@@ -108,16 +148,23 @@ class AndroidApk extends ApplicationPackage {
        super(id: id);
 
   /// Creates a new AndroidApk from an existing APK.
-  factory AndroidApk.fromApk(File apk) {
-    final String aaptPath = globals.androidSdk?.latestVersion?.aaptPath;
-    if (aaptPath == null) {
-      globals.printError(userMessages.aaptNotFound);
+  ///
+  /// Returns `null` if the APK was invalid or any required tooling was missing.
+  factory AndroidApk.fromApk(File apk, {
+    @required AndroidSdk androidSdk,
+    @required ProcessManager processManager,
+    @required UserMessages userMessages,
+    @required Logger logger,
+  }) {
+    final String aaptPath = androidSdk?.latestVersion?.aaptPath;
+    if (aaptPath == null || !processManager.canRun(aaptPath)) {
+      logger.printError(userMessages.aaptNotFound);
       return null;
     }
 
     String apptStdout;
     try {
-      apptStdout = processUtils.runSync(
+      apptStdout = globals.processUtils.runSync(
         <String>[
           aaptPath,
           'dump',
@@ -132,15 +179,15 @@ class AndroidApk extends ApplicationPackage {
       return null;
     }
 
-    final ApkManifestData data = ApkManifestData.parseFromXmlDump(apptStdout);
+    final ApkManifestData data = ApkManifestData.parseFromXmlDump(apptStdout, logger);
 
     if (data == null) {
-      globals.printError('Unable to read manifest info from ${apk.path}.');
+      logger.printError('Unable to read manifest info from ${apk.path}.');
       return null;
     }
 
     if (data.packageName == null || data.launchableActivityName == null) {
-      globals.printError('Unable to read manifest info from ${apk.path}.');
+      logger.printError('Unable to read manifest info from ${apk.path}.');
       return null;
     }
 
@@ -162,28 +209,41 @@ class AndroidApk extends ApplicationPackage {
   final int versionCode;
 
   /// Creates a new AndroidApk based on the information in the Android manifest.
-  static Future<AndroidApk> fromAndroidProject(AndroidProject androidProject) async {
+  static Future<AndroidApk> fromAndroidProject(AndroidProject androidProject, {
+    @required AndroidSdk androidSdk,
+    @required ProcessManager processManager,
+    @required UserMessages userMessages,
+    @required ProcessUtils processUtils,
+    @required Logger logger,
+    @required FileSystem fileSystem,
+  }) async {
     File apkFile;
 
-    if (androidProject.isUsingGradle) {
-      apkFile = await getGradleAppOut(androidProject);
+    if (androidProject.isUsingGradle && androidProject.isSupportedVersion) {
+      apkFile = getApkDirectory(androidProject.parent).childFile('app.apk');
       if (apkFile.existsSync()) {
         // Grab information from the .apk. The gradle build script might alter
         // the application Id, so we need to look at what was actually built.
-        return AndroidApk.fromApk(apkFile);
+        return AndroidApk.fromApk(
+          apkFile,
+          androidSdk: androidSdk,
+          processManager: processManager,
+          logger: logger,
+          userMessages: userMessages,
+        );
       }
       // The .apk hasn't been built yet, so we work with what we have. The run
       // command will grab a new AndroidApk after building, to get the updated
       // IDs.
     } else {
-      apkFile = globals.fs.file(globals.fs.path.join(getAndroidBuildDirectory(), 'app.apk'));
+      apkFile = fileSystem.file(fileSystem.path.join(getAndroidBuildDirectory(), 'app.apk'));
     }
 
     final File manifest = androidProject.appManifestFile;
 
     if (!manifest.existsSync()) {
-      globals.printError('AndroidManifest.xml could not be found.');
-      globals.printError('Please check ${manifest.path} for errors.');
+      logger.printError('AndroidManifest.xml could not be found.');
+      logger.printError('Please check ${manifest.path} for errors.');
       return null;
     }
 
@@ -194,19 +254,19 @@ class AndroidApk extends ApplicationPackage {
     } on XmlParserException catch (exception) {
       String manifestLocation;
       if (androidProject.isUsingGradle) {
-        manifestLocation = globals.fs.path.join(androidProject.hostAppGradleRoot.path, 'app', 'src', 'main', 'AndroidManifest.xml');
+        manifestLocation = fileSystem.path.join(androidProject.hostAppGradleRoot.path, 'app', 'src', 'main', 'AndroidManifest.xml');
       } else {
-        manifestLocation = globals.fs.path.join(androidProject.hostAppGradleRoot.path, 'AndroidManifest.xml');
+        manifestLocation = fileSystem.path.join(androidProject.hostAppGradleRoot.path, 'AndroidManifest.xml');
       }
-      globals.printError('AndroidManifest.xml is not a valid XML document.');
-      globals.printError('Please check $manifestLocation for errors.');
+      logger.printError('AndroidManifest.xml is not a valid XML document.');
+      logger.printError('Please check $manifestLocation for errors.');
       throwToolExit('XML Parser error message: ${exception.toString()}');
     }
 
     final Iterable<XmlElement> manifests = document.findElements('manifest');
     if (manifests.isEmpty) {
-      globals.printError('AndroidManifest.xml has no manifest element.');
-      globals.printError('Please check ${manifest.path} for errors.');
+      logger.printError('AndroidManifest.xml has no manifest element.');
+      logger.printError('Please check ${manifest.path} for errors.');
       return null;
     }
     final String packageId = manifests.first.getAttribute('package');
@@ -242,8 +302,8 @@ class AndroidApk extends ApplicationPackage {
     }
 
     if (packageId == null || launchActivity == null) {
-      globals.printError('package identifier or launch activity not found.');
-      globals.printError('Please check ${manifest.path} for errors.');
+      logger.printError('package identifier or launch activity not found.');
+      logger.printError('Please check ${manifest.path} for errors.');
       return null;
     }
 
@@ -329,7 +389,7 @@ abstract class IOSApp extends ApplicationPackage {
   }
 
   static Future<IOSApp> fromIosProject(IosProject project, BuildInfo buildInfo) {
-    if (getCurrentHostPlatform() != HostPlatform.darwin_x64) {
+    if (!globals.platform.isMacOS) {
       return null;
     }
     if (!project.exists) {
@@ -354,6 +414,10 @@ abstract class IOSApp extends ApplicationPackage {
   String get simulatorBundlePath;
 
   String get deviceBundlePath;
+
+  /// Directory used by ios-deploy to store incremental installation metadata for
+  /// faster second installs.
+  Directory get appDeltaDirectory;
 }
 
 class BuildableIOSApp extends IOSApp {
@@ -380,6 +444,22 @@ class BuildableIOSApp extends IOSApp {
   @override
   String get deviceBundlePath => _buildAppPath('iphoneos');
 
+  @override
+  Directory get appDeltaDirectory => globals.fs.directory(globals.fs.path.join(getIosBuildDirectory(), 'app-delta'));
+
+  // Xcode uses this path for the final archive bundle location,
+  // not a top-level output directory.
+  // Specifying `build/ios/archive/Runner` will result in `build/ios/archive/Runner.xcarchive`.
+  String get archiveBundlePath
+    => globals.fs.path.join(getIosBuildDirectory(), 'archive', globals.fs.path.withoutExtension(_hostAppBundleName));
+
+  // The output xcarchive bundle path `build/ios/archive/Runner.xcarchive`.
+  String get archiveBundleOutputPath =>
+      globals.fs.path.setExtension(archiveBundlePath, '.xcarchive');
+
+  String get ipaOutputPath =>
+      globals.fs.path.join(getIosBuildDirectory(), 'ipa');
+
   String _buildAppPath(String type) {
     return globals.fs.path.join(getIosBuildDirectory(), type, _hostAppBundleName);
   }
@@ -396,6 +476,9 @@ class PrebuiltIOSApp extends IOSApp {
   final String bundleName;
 
   @override
+  final Directory appDeltaDirectory = null;
+
+  @override
   String get name => bundleName;
 
   @override
@@ -405,52 +488,6 @@ class PrebuiltIOSApp extends IOSApp {
   String get deviceBundlePath => _bundlePath;
 
   String get _bundlePath => bundleDir.path;
-}
-
-class ApplicationPackageStore {
-  ApplicationPackageStore({ this.android, this.iOS, this.fuchsia });
-
-  AndroidApk android;
-  IOSApp iOS;
-  FuchsiaApp fuchsia;
-  LinuxApp linux;
-  MacOSApp macOS;
-  WindowsApp windows;
-
-  Future<ApplicationPackage> getPackageForPlatform(
-    TargetPlatform platform,
-    BuildInfo buildInfo,
-  ) async {
-    switch (platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
-        android ??= await AndroidApk.fromAndroidProject(FlutterProject.current().android);
-        return android;
-      case TargetPlatform.ios:
-        iOS ??= await IOSApp.fromIosProject(FlutterProject.current().ios, buildInfo);
-        return iOS;
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
-        fuchsia ??= FuchsiaApp.fromFuchsiaProject(FlutterProject.current().fuchsia);
-        return fuchsia;
-      case TargetPlatform.darwin_x64:
-        macOS ??= MacOSApp.fromMacOSProject(FlutterProject.current().macos);
-        return macOS;
-      case TargetPlatform.linux_x64:
-        linux ??= LinuxApp.fromLinuxProject(FlutterProject.current().linux);
-        return linux;
-      case TargetPlatform.windows_x64:
-        windows ??= WindowsApp.fromWindowsProject(FlutterProject.current().windows);
-        return windows;
-      case TargetPlatform.tester:
-      case TargetPlatform.web_javascript:
-        return null;
-    }
-    return null;
-  }
 }
 
 class _Entry {
@@ -529,7 +566,7 @@ class ApkManifestData {
     return false;
   }
 
-  static ApkManifestData parseFromXmlDump(String data) {
+  static ApkManifestData parseFromXmlDump(String data, Logger logger) {
     if (data == null || data.trim().isEmpty) {
       return null;
     }
@@ -606,7 +643,7 @@ class ApkManifestData {
     final String packageName = package.value.substring(1, package.value.indexOf('" '));
 
     if (launchActivity == null) {
-      globals.printError('Error running $packageName. Default activity not found');
+      logger.printError('Error running $packageName. Default activity not found');
       return null;
     }
 
@@ -618,16 +655,16 @@ class ApkManifestData {
     // Example format: (type 0x10)0x1
     final _Attribute versionCodeAttr = manifest.firstAttribute('android:versionCode');
     if (versionCodeAttr == null) {
-      globals.printError('Error running $packageName. Manifest versionCode not found');
+      logger.printError('Error running $packageName. Manifest versionCode not found');
       return null;
     }
     if (!versionCodeAttr.value.startsWith('(type 0x10)')) {
-      globals.printError('Error running $packageName. Manifest versionCode invalid');
+      logger.printError('Error running $packageName. Manifest versionCode invalid');
       return null;
     }
     final int versionCode = int.tryParse(versionCodeAttr.value.substring(11));
     if (versionCode == null) {
-      globals.printError('Error running $packageName. Manifest versionCode invalid');
+      logger.printError('Error running $packageName. Manifest versionCode invalid');
       return null;
     }
 

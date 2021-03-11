@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -12,7 +14,6 @@ import 'common.dart';
 import 'context.dart';
 import 'io.dart';
 import 'logger.dart';
-import 'utils.dart';
 
 typedef StringConverter = String Function(String string);
 
@@ -180,8 +181,6 @@ class RunResult {
 
 typedef RunResultChecker = bool Function(int);
 
-ProcessUtils get processUtils => ProcessUtils.instance;
-
 abstract class ProcessUtils {
   factory ProcessUtils({
     @required ProcessManager processManager,
@@ -190,8 +189,6 @@ abstract class ProcessUtils {
     processManager: processManager,
     logger: logger,
   );
-
-  static ProcessUtils get instance => context.get<ProcessUtils>();
 
   /// Spawns a child process to run the command [cmd].
   ///
@@ -533,7 +530,7 @@ class _DefaultProcessUtils implements ProcessUtils {
 
     // Wait for stdout to be fully processed
     // because process.exitCode may complete first causing flaky tests.
-    await waitGroup<void>(<Future<void>>[
+    await Future.wait<void>(<Future<void>>[
       stdoutSubscription.asFuture<void>(),
       stderrSubscription.asFuture<void>(),
     ]);
@@ -546,7 +543,7 @@ class _DefaultProcessUtils implements ProcessUtils {
     unawaited(stdoutSubscription.cancel());
     unawaited(stderrSubscription.cancel());
 
-    return await process.exitCode;
+    return process.exitCode;
   }
 
   @override

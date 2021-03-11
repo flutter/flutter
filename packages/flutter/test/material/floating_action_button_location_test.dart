@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -79,11 +77,11 @@ void main() {
     });
 
     group('interrupts in-progress animations without jumps', () {
-      _GeometryListener geometryListener;
-      ScaffoldGeometry geometry;
-      _GeometryListenerState listenerState;
-      Size previousRect;
-      Iterable<double> previousRotations;
+      _GeometryListener? geometryListener;
+      ScaffoldGeometry? geometry;
+      _GeometryListenerState? listenerState;
+      Size? previousRect;
+      Iterable<double>? previousRotations;
 
       // The maximum amounts we expect the fab width and height to change
       // during one step of a transition.
@@ -100,13 +98,13 @@ void main() {
         // Measure the delta in width and height of the fab, and check that it never grows
         // by more than the expected maximum deltas.
         void check() {
-          geometry = listenerState.cache.value;
-          final Size currentRect = geometry.floatingActionButtonArea?.size;
+          geometry = listenerState?.cache.value;
+          final Size? currentRect = geometry?.floatingActionButtonArea?.size;
           // Measure the delta in width and height of the rect, and check that
           // it never grows by more than a safe amount.
           if (previousRect != null && currentRect != null) {
-            final double deltaWidth = currentRect.width - previousRect.width;
-            final double deltaHeight = currentRect.height - previousRect.height;
+            final double deltaWidth = currentRect.width - previousRect!.width;
+            final double deltaHeight = currentRect.height - previousRect!.height;
             expect(
               deltaWidth.abs(),
               lessThanOrEqualTo(maxDeltaWidth),
@@ -135,15 +133,15 @@ void main() {
           final Iterable<double> currentRotations = rotationTransitions.map(
               (RotationTransition t) => t.turns.value);
 
-          if (previousRotations != null && previousRotations.isNotEmpty
+          if (previousRotations != null && previousRotations!.isNotEmpty
               && currentRotations != null && currentRotations.isNotEmpty
               && previousRect != null && currentRect != null) {
             final List<double> deltas = <double>[];
             for (final double currentRotation in currentRotations) {
-              double minDelta;
-              for (final double previousRotation in previousRotations) {
+              late double minDelta;
+              for (final double previousRotation in previousRotations!) {
                 final double delta = (previousRotation - currentRotation).abs();
-                minDelta ??= delta;
+                minDelta = delta;
                 minDelta = min(delta, minDelta);
               }
               deltas.add(minDelta);
@@ -161,7 +159,7 @@ void main() {
         }
 
         listenerState = tester.state(find.byType(_GeometryListener));
-        listenerState.geometryListenable.addListener(check);
+        listenerState!.geometryListenable!.addListener(check);
       }
 
       setUp(() {
@@ -626,20 +624,20 @@ void main() {
           data: data,
           child: Scaffold(
             resizeToAvoidBottomInset: resizeToAvoidBottomInset,
-            bottomSheet: bottomSheet ? Container(
+            bottomSheet: bottomSheet ? const SizedBox(
               height: 100,
-              child: const Center(child: Text('BottomSheet')),
+              child: Center(child: Text('BottomSheet')),
             ) : null,
             appBar: appBar ? AppBar(title: const Text('Demo')) : null,
             bottomNavigationBar: bottomNavigationBar ? BottomNavigationBar(
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: Icon(Icons.star),
-                  title: Text('0'),
+                  label: '0',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.star_border),
-                  title: Text('1'),
+                  label: '1',
                 ),
               ],
               currentIndex: 0,
@@ -649,7 +647,7 @@ void main() {
               builder: (BuildContext context) {
                 return FloatingActionButton(
                   onPressed: () {
-                    Scaffold.of(context).showSnackBar(
+                    ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Snacky!')),
                     );
                   },
@@ -677,16 +675,16 @@ void main() {
     Future<void> _runFloatTests(
       WidgetTester tester,
       FloatingActionButtonLocation location, {
-      Rect defaultRect,
-      Rect bottomNavigationBarRect,
-      Rect bottomSheetRect,
-      Rect snackBarRect,
+      required Rect defaultRect,
+      required Rect bottomNavigationBarRect,
+      required Rect bottomSheetRect,
+      required Rect snackBarRect,
       bool mini = false,
     }) async  {
       const double keyboardHeight = 200.0;
       const double viewPadding = 50.0;
       final Key floatingActionButton = UniqueKey();
-      const double bottomNavHeight = 99.0;
+      const double bottomNavHeight = 106.0;
       // Default
       await tester.pumpWidget(_buildTest(
         location,
@@ -712,7 +710,7 @@ void main() {
         tester.getRect(find.byKey(floatingActionButton)),
         rectMoreOrLessEquals(defaultRect.translate(
           0.0,
-          viewPadding - keyboardHeight - kFloatingActionButtonMargin,
+          viewPadding - keyboardHeight,
         )),
       );
 
@@ -924,18 +922,18 @@ void main() {
       await tester.pumpAndSettle(); // Show SnackBar
       expect(
         tester.getRect(find.byKey(floatingActionButton)),
-        rectMoreOrLessEquals(snackBarRect.translate(0.0, -keyboardHeight)),
+        rectMoreOrLessEquals(snackBarRect.translate(0.0, -keyboardHeight + kFloatingActionButtonMargin/2)),
       );
     }
 
     testWidgets('startFloat', (WidgetTester tester) async {
-      const Rect defaultRect = Rect.fromLTRB(16.0, 494.0, 72.0, 550.0);
+      const Rect defaultRect = Rect.fromLTRB(16.0, 478.0, 72.0, 534.0);
       // Positioned relative to BottomNavigationBar
-      const Rect bottomNavigationBarRect = Rect.fromLTRB(16.0, 429.0, 72.0, 485.0);
+      const Rect bottomNavigationBarRect = Rect.fromLTRB(16.0, 422.0, 72.0, 478.0);
       // Position relative to BottomSheet
       const Rect bottomSheetRect = Rect.fromLTRB(16.0, 472.0, 72.0, 528.0);
       // Positioned relative to SnackBar
-      const Rect snackBarRect = Rect.fromLTRB(16.0, 486.0, 72.0, 542.0);
+      const Rect snackBarRect = Rect.fromLTRB(16.0, 478.0, 72.0, 534.0);
       await _runFloatTests(
         tester,
         FloatingActionButtonLocation.startFloat,
@@ -947,13 +945,13 @@ void main() {
     });
 
     testWidgets('miniStartFloat', (WidgetTester tester) async {
-      const Rect defaultRect = Rect.fromLTRB(12.0, 506.0, 60.0, 554.0);
+      const Rect defaultRect = Rect.fromLTRB(12.0, 490.0, 60.0, 538.0);
       // Positioned relative to BottomNavigationBar
-      const Rect bottomNavigationBarRect = Rect.fromLTRB(12.0, 441.0, 60.0, 489.0);
+      const Rect bottomNavigationBarRect = Rect.fromLTRB(12.0, 434.0, 60.0, 482.0);
       // Positioned relative to BottomSheet
       const Rect bottomSheetRect = Rect.fromLTRB(12.0, 480.0, 60.0, 528.0);
       // Positioned relative to SnackBar
-      const Rect snackBarRect = Rect.fromLTRB(12.0, 498.0, 60.0, 546.0);
+      const Rect snackBarRect = Rect.fromLTRB(12.0, 490.0, 60.0, 538.0);
       await _runFloatTests(
         tester,
         FloatingActionButtonLocation.miniStartFloat,
@@ -966,13 +964,13 @@ void main() {
     });
 
     testWidgets('centerFloat', (WidgetTester tester) async {
-      const Rect defaultRect = Rect.fromLTRB(372.0, 494.0, 428.0, 550.0);
+      const Rect defaultRect = Rect.fromLTRB(372.0, 478.0, 428.0, 534.0);
       // Positioned relative to BottomNavigationBar
-      const Rect bottomNavigationBarRect = Rect.fromLTRB(372.0, 429.0, 428.0, 485.0);
+      const Rect bottomNavigationBarRect = Rect.fromLTRB(372.0, 422.0, 428.0, 478.0);
       // Positioned relative to BottomSheet
       const Rect bottomSheetRect = Rect.fromLTRB(372.0, 472.0, 428.0, 528.0);
       // Positioned relative to SnackBar
-      const Rect snackBarRect = Rect.fromLTRB(372.0, 486.0, 428.0, 542.0);
+      const Rect snackBarRect = Rect.fromLTRB(372.0, 478.0, 428.0, 534.0);
       await _runFloatTests(
         tester,
         FloatingActionButtonLocation.centerFloat,
@@ -984,13 +982,13 @@ void main() {
     });
 
     testWidgets('miniCenterFloat', (WidgetTester tester) async {
-      const Rect defaultRect = Rect.fromLTRB(376.0, 506.0, 424.0, 554.0);
+      const Rect defaultRect = Rect.fromLTRB(376.0, 490.0, 424.0, 538.0);
       // Positioned relative to BottomNavigationBar
-      const Rect bottomNavigationBarRect = Rect.fromLTRB(376.0, 441.0, 424.0, 489.0);
+      const Rect bottomNavigationBarRect = Rect.fromLTRB(376.0, 434.0, 424.0, 482.0);
       // Positioned relative to BottomSheet
       const Rect bottomSheetRect = Rect.fromLTRB(376.0, 480.0, 424.0, 528.0);
       // Positioned relative to SnackBar
-      const Rect snackBarRect = Rect.fromLTRB(376.0, 498.0, 424.0, 546.0);
+      const Rect snackBarRect = Rect.fromLTRB(376.0, 490.0, 424.0, 538.0);
       await _runFloatTests(
         tester,
         FloatingActionButtonLocation.miniCenterFloat,
@@ -1003,13 +1001,13 @@ void main() {
     });
 
     testWidgets('endFloat', (WidgetTester tester) async {
-      const Rect defaultRect = Rect.fromLTRB(728.0, 494.0, 784.0, 550.0);
+      const Rect defaultRect = Rect.fromLTRB(728.0, 478.0, 784.0, 534.0);
       // Positioned relative to BottomNavigationBar
-      const Rect bottomNavigationBarRect = Rect.fromLTRB(728.0, 429.0, 784.0, 485.0);
+      const Rect bottomNavigationBarRect = Rect.fromLTRB(728.0, 422.0, 784.0, 478.0);
       // Positioned relative to BottomSheet
       const Rect bottomSheetRect = Rect.fromLTRB(728.0, 472.0, 784.0, 528.0);
       // Positioned relative to SnackBar
-      const Rect snackBarRect = Rect.fromLTRB(728.0, 486.0, 784.0, 542.0);
+      const Rect snackBarRect = Rect.fromLTRB(728.0, 478.0, 784.0, 534.0);
       await _runFloatTests(
         tester,
         FloatingActionButtonLocation.endFloat,
@@ -1021,13 +1019,13 @@ void main() {
     });
 
     testWidgets('miniEndFloat', (WidgetTester tester) async {
-      const Rect defaultRect = Rect.fromLTRB(740.0, 506.0, 788.0, 554.0);
+      const Rect defaultRect = Rect.fromLTRB(740.0, 490.0, 788.0, 538.0);
       // Positioned relative to BottomNavigationBar
-      const Rect bottomNavigationBarRect = Rect.fromLTRB(740.0, 441.0, 788.0, 489.0);
+      const Rect bottomNavigationBarRect = Rect.fromLTRB(740.0, 434.0, 788.0, 482.0);
       // Positioned relative to BottomSheet
       const Rect bottomSheetRect = Rect.fromLTRB(740.0, 480.0, 788.0, 528.0);
       // Positioned relative to SnackBar
-      const Rect snackBarRect = Rect.fromLTRB(740.0, 498.0, 788.0, 546.0);
+      const Rect snackBarRect = Rect.fromLTRB(740.0, 490.0, 788.0, 538.0);
       await _runFloatTests(
         tester,
         FloatingActionButtonLocation.miniEndFloat,
@@ -1050,15 +1048,15 @@ void main() {
     Future<void> _runDockedTests(
       WidgetTester tester,
       FloatingActionButtonLocation location, {
-      Rect defaultRect,
-      Rect bottomNavigationBarRect,
-      Rect bottomSheetRect,
-      Rect snackBarRect,
+      required Rect defaultRect,
+      required Rect bottomNavigationBarRect,
+      required Rect bottomSheetRect,
+      required Rect snackBarRect,
       bool mini = false,
     }) async  {
       const double keyboardHeight = 200.0;
       const double viewPadding = 50.0;
-      const double bottomNavHeight = 99.0;
+      const double bottomNavHeight = 106.0;
       final Key floatingActionButton = UniqueKey();
       final double fabHeight = mini ? 48.0 : 56.0;
       // Default
@@ -1271,9 +1269,9 @@ void main() {
     testWidgets('startDocked', (WidgetTester tester) async {
       const Rect defaultRect = Rect.fromLTRB(16.0, 494.0, 72.0, 550.0);
       // Positioned relative to BottomNavigationBar
-      const Rect bottomNavigationBarRect = Rect.fromLTRB(16.0, 473.0, 72.0, 529.0);
+      const Rect bottomNavigationBarRect = Rect.fromLTRB(16.0, 466.0, 72.0, 522.0);
       // Positioned relative to BottomNavigationBar & BottomSheet
-      const Rect bottomSheetRect = Rect.fromLTRB(16.0, 373.0, 72.0, 429.0);
+      const Rect bottomSheetRect = Rect.fromLTRB(16.0, 366.0, 72.0, 422.0);
       // Positioned relative to SnackBar
       const Rect snackBarRect = Rect.fromLTRB(16.0, 486.0, 72.0, 542.0);
       await _runDockedTests(
@@ -1289,9 +1287,9 @@ void main() {
     testWidgets('miniStartDocked', (WidgetTester tester) async {
       const Rect defaultRect = Rect.fromLTRB(12.0, 502.0, 60.0, 550.0);
       // Positioned relative to BottomNavigationBar
-      const Rect bottomNavigationBarRect = Rect.fromLTRB(12.0, 477.0, 60.0, 525.0);
+      const Rect bottomNavigationBarRect = Rect.fromLTRB(12.0, 470.0, 60.0, 518.0);
       // Positioned relative to BottomNavigationBar & BottomSheet
-      const Rect bottomSheetRect = Rect.fromLTRB(12.0, 377.0, 60.0, 425.0);
+      const Rect bottomSheetRect = Rect.fromLTRB(12.0, 370.0, 60.0, 418.0);
       // Positioned relative to SnackBar
       const Rect snackBarRect = Rect.fromLTRB(12.0, 494.0, 60.0, 542.0);
       await _runDockedTests(
@@ -1308,9 +1306,9 @@ void main() {
     testWidgets('centerDocked', (WidgetTester tester) async {
       const Rect defaultRect = Rect.fromLTRB(372.0, 494.0, 428.0, 550.0);
       // Positioned relative to BottomNavigationBar
-      const Rect bottomNavigationBarRect = Rect.fromLTRB(372.0, 473.0, 428.0, 529.0);
+      const Rect bottomNavigationBarRect = Rect.fromLTRB(372.0, 466.0, 428.0, 522.0);
       // Positioned relative to BottomNavigationBar & BottomSheet
-      const Rect bottomSheetRect = Rect.fromLTRB(372.0, 373.0, 428.0, 429.0);
+      const Rect bottomSheetRect = Rect.fromLTRB(372.0, 366.0, 428.0, 422.0);
       // Positioned relative to SnackBar
       const Rect snackBarRect = Rect.fromLTRB(372.0, 486.0, 428.0, 542.0);
       await _runDockedTests(
@@ -1326,9 +1324,9 @@ void main() {
     testWidgets('miniCenterDocked', (WidgetTester tester) async {
       const Rect defaultRect = Rect.fromLTRB(376.0, 502.0, 424.0, 550.0);
       // Positioned relative to BottomNavigationBar
-      const Rect bottomNavigationBarRect = Rect.fromLTRB(376.0, 477.0, 424.0, 525.0);
+      const Rect bottomNavigationBarRect = Rect.fromLTRB(376.0, 470.0, 424.0, 518.0);
       // Positioned relative to BottomNavigationBar & BottomSheet
-      const Rect bottomSheetRect = Rect.fromLTRB(376.0, 377.0, 424.0, 425.0);
+      const Rect bottomSheetRect = Rect.fromLTRB(376.0, 370.0, 424.0, 418.0);
       // Positioned relative to SnackBar
       const Rect snackBarRect = Rect.fromLTRB(376.0, 494.0, 424.0, 542.0);
       await _runDockedTests(
@@ -1345,9 +1343,9 @@ void main() {
     testWidgets('endDocked', (WidgetTester tester) async {
       const Rect defaultRect = Rect.fromLTRB(728.0, 494.0, 784.0, 550.0);
       // Positioned relative to BottomNavigationBar
-      const Rect bottomNavigationBarRect = Rect.fromLTRB(728.0, 473.0, 784.0, 529.0);
+      const Rect bottomNavigationBarRect = Rect.fromLTRB(728.0, 466.0, 784.0, 522.0);
       // Positioned relative to BottomNavigationBar & BottomSheet
-      const Rect bottomSheetRect = Rect.fromLTRB(728.0, 373.0, 784.0, 429.0);
+      const Rect bottomSheetRect = Rect.fromLTRB(728.0, 366.0, 784.0, 422.0);
       // Positioned relative to SnackBar
       const Rect snackBarRect = Rect.fromLTRB(728.0, 486.0, 784.0, 542.0);
       await _runDockedTests(
@@ -1363,9 +1361,9 @@ void main() {
     testWidgets('miniEndDocked', (WidgetTester tester) async {
       const Rect defaultRect = Rect.fromLTRB(740.0, 502.0, 788.0, 550.0);
       // Positioned relative to BottomNavigationBar
-      const Rect bottomNavigationBarRect = Rect.fromLTRB(740.0, 477.0, 788.0, 525.0);
+      const Rect bottomNavigationBarRect = Rect.fromLTRB(740.0, 470.0, 788.0, 518.0);
       // Positioned relative to BottomNavigationBar & BottomSheet
-      const Rect bottomSheetRect = Rect.fromLTRB(740.0, 377.0, 788.0, 425.0);
+      const Rect bottomSheetRect = Rect.fromLTRB(740.0, 370.0, 788.0, 418.0);
       // Positioned relative to SnackBar
       const Rect snackBarRect = Rect.fromLTRB(740.0, 494.0, 788.0, 542.0);
       await _runDockedTests(
@@ -1385,8 +1383,8 @@ void main() {
     Future<void> _runTopTests(
       WidgetTester tester,
       FloatingActionButtonLocation location, {
-      Rect defaultRect,
-      Rect appBarRect,
+      required Rect defaultRect,
+      required Rect appBarRect,
       bool mini = false,
     }) async  {
       const double viewPadding = 50.0;
@@ -1508,8 +1506,8 @@ class _GeometryListenerState extends State<_GeometryListener> {
   }
 
   int numNotifications = 0;
-  ValueListenable<ScaffoldGeometry> geometryListenable;
-  _GeometryCachePainter cache;
+  ValueListenable<ScaffoldGeometry>? geometryListenable;
+  late _GeometryCachePainter cache;
 
   @override
   void didChangeDependencies() {
@@ -1519,11 +1517,11 @@ class _GeometryListenerState extends State<_GeometryListener> {
       return;
 
     if (geometryListenable != null)
-      geometryListenable.removeListener(onGeometryChanged);
+      geometryListenable!.removeListener(onGeometryChanged);
 
     geometryListenable = newListenable;
-    geometryListenable.addListener(onGeometryChanged);
-    cache = _GeometryCachePainter(geometryListenable);
+    geometryListenable!.addListener(onGeometryChanged);
+    cache = _GeometryCachePainter(geometryListenable!);
   }
 
   void onGeometryChanged() {
@@ -1545,7 +1543,7 @@ const double _miniFloatOffsetY = _floatOffsetY + kMiniButtonOffsetAdjustment;
 Widget _singleFabScaffold(
   FloatingActionButtonLocation location,
   {
-    FloatingActionButtonAnimator animator,
+    FloatingActionButtonAnimator? animator,
     bool mini = false,
     TextDirection textDirection = TextDirection.ltr,
   }
@@ -1561,11 +1559,11 @@ Widget _singleFabScaffold(
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
-              title: Text('Home'),
+              label: 'Home',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.school),
-              title: Text('School'),
+              label: 'School',
             ),
           ],
         ),
@@ -1589,7 +1587,7 @@ class _GeometryCachePainter extends CustomPainter {
 
   final ValueListenable<ScaffoldGeometry> geometryListenable;
 
-  ScaffoldGeometry value;
+  late ScaffoldGeometry value;
   @override
   void paint(Canvas canvas, Size size) {
     value = geometryListenable.value;
@@ -1602,15 +1600,15 @@ class _GeometryCachePainter extends CustomPainter {
 }
 
 Widget buildFrame({
-  FloatingActionButton fab = const FloatingActionButton(
+  FloatingActionButton? fab = const FloatingActionButton(
     onPressed: null,
     child: Text('1'),
   ),
-  FloatingActionButtonLocation location,
-  _GeometryListener listener,
+  FloatingActionButtonLocation? location,
+  _GeometryListener? listener,
   TextDirection textDirection = TextDirection.ltr,
   EdgeInsets viewInsets = const EdgeInsets.only(bottom: 200.0),
-  Widget bab,
+  Widget? bab,
 }) {
   return Localizations(
     locale: const Locale('en', 'us'),
@@ -1677,17 +1675,17 @@ class _QuarterEndTopFabLocation extends StandardFabLocation
 
 class _LinearMovementFabAnimator extends FloatingActionButtonAnimator {
   @override
-  Offset getOffset({@required Offset begin, @required Offset end, @required double progress}) {
-    return Offset.lerp(begin, end, progress);
+  Offset getOffset({required Offset begin, required Offset end, required double progress}) {
+    return Offset.lerp(begin, end, progress)!;
   }
 
   @override
-  Animation<double> getScaleAnimation({@required Animation<double> parent}) {
+  Animation<double> getScaleAnimation({required Animation<double> parent}) {
     return const AlwaysStoppedAnimation<double>(1.0);
   }
 
   @override
-  Animation<double> getRotationAnimation({@required Animation<double> parent}) {
+  Animation<double> getRotationAnimation({required Animation<double> parent}) {
     return const AlwaysStoppedAnimation<double>(1.0);
   }
 }

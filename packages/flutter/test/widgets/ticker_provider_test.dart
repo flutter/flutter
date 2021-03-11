@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -100,19 +98,17 @@ void main() {
 
     testWidgets('SingleTickerProviderStateMixin dispose while active', (WidgetTester tester) async {
       final GlobalKey<_SingleTickerTestState> key = GlobalKey<_SingleTickerTestState>();
-      final Widget widget = Container(
-        child: _SingleTickerTest(key: key),
-      );
+      final Widget widget = _SingleTickerTest(key: key);
       await tester.pumpWidget(widget);
-      FlutterError error;
-      key.currentState.controller.repeat();
+      FlutterError? error;
+      key.currentState!.controller.repeat();
       try {
-        key.currentState.dispose();
+        key.currentState!.dispose();
       } on FlutterError catch (e) {
         error = e;
       } finally {
         expect(error, isNotNull);
-        expect(error.diagnostics.length, 4);
+        expect(error!.diagnostics.length, 4);
         expect(error.diagnostics[2].level, DiagnosticLevel.hint);
         expect(
           error.diagnostics[2].toStringDeep(),
@@ -137,25 +133,23 @@ void main() {
             '     created))\n'
             '     The stack trace when the Ticker was actually created was:'
         ));
-        key.currentState.controller.stop();
+        key.currentState!.controller.stop();
       }
     });
 
     testWidgets('SingleTickerProviderStateMixin dispose while active', (WidgetTester tester) async {
       final GlobalKey<_SingleTickerTestState> key = GlobalKey<_SingleTickerTestState>();
-      final Widget widget = Container(
-        child: _SingleTickerTest(key: key),
-      );
+      final Widget widget = _SingleTickerTest(key: key);
       await tester.pumpWidget(widget);
-      FlutterError error;
-      key.currentState.controller.repeat();
+      FlutterError? error;
+      key.currentState!.controller.repeat();
       try {
-        key.currentState.dispose();
+        key.currentState!.dispose();
       } on FlutterError catch (e) {
         error = e;
       } finally {
         expect(error, isNotNull);
-        expect(error.diagnostics.length, 4);
+        expect(error!.diagnostics.length, 4);
         expect(error.diagnostics[2].level, DiagnosticLevel.hint);
         expect(
           error.diagnostics[2].toStringDeep(),
@@ -180,25 +174,23 @@ void main() {
           '     created))\n'
           '     The stack trace when the Ticker was actually created was:'
         ));
-        key.currentState.controller.stop();
+        key.currentState!.controller.stop();
       }
     });
 
     testWidgets('ProviderStateMixin dispose while any ticker is active', (WidgetTester tester) async {
       final GlobalKey<_MultipleTickerTestState> key = GlobalKey<_MultipleTickerTestState>();
-      final Widget widget = Container(
-        child: _MultipleTickerTest(key: key),
-      );
+      final Widget widget = _MultipleTickerTest(key: key);
       await tester.pumpWidget(widget);
-      FlutterError error;
-      key.currentState.controllers.first.repeat();
+      FlutterError? error;
+      key.currentState!.controllers.first.repeat();
       try {
-        key.currentState.dispose();
+        key.currentState!.dispose();
       } on FlutterError catch (e) {
         error = e;
       } finally {
         expect(error, isNotNull);
-        expect(error.diagnostics.length, 4);
+        expect(error!.diagnostics.length, 4);
         expect(error.diagnostics[2].level, DiagnosticLevel.hint);
         expect(
           error.diagnostics[2].toStringDeep(),
@@ -223,14 +215,14 @@ void main() {
           '     _MultipleTickerTestState#00000(lifecycle state: created,\n'
           '     tickers: tracking 0 tickers))'
         ));
-        key.currentState.controllers.first.stop();
+        key.currentState!.controllers.first.stop();
       }
     });
   });
 }
 
 class BoringTickerTest extends StatefulWidget {
-  const BoringTickerTest({ Key key }) : super(key: key);
+  const BoringTickerTest({ Key? key }) : super(key: key);
   @override
   _BoringTickerTestState createState() => _BoringTickerTestState();
 }
@@ -241,14 +233,14 @@ class _BoringTickerTestState extends State<BoringTickerTest> with SingleTickerPr
 }
 
 class _SingleTickerTest extends StatefulWidget {
-  const _SingleTickerTest({Key key}) : super(key: key);
+  const _SingleTickerTest({Key? key}) : super(key: key);
 
   @override
   _SingleTickerTestState createState() => _SingleTickerTestState();
 }
 
 class _SingleTickerTestState extends State<_SingleTickerTest> with SingleTickerProviderStateMixin {
-  AnimationController controller;
+  late AnimationController controller;
 
   @override
   void initState() {
@@ -266,7 +258,7 @@ class _SingleTickerTestState extends State<_SingleTickerTest> with SingleTickerP
 }
 
 class _MultipleTickerTest extends StatefulWidget {
-  const _MultipleTickerTest({Key key}) : super(key: key);
+  const _MultipleTickerTest({Key? key}) : super(key: key);
 
   @override
   _MultipleTickerTestState createState() => _MultipleTickerTestState();

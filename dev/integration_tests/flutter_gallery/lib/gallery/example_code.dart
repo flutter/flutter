@@ -9,13 +9,13 @@ import 'package:flutter/material.dart';
 
 class ButtonsDemo {
   void setState(VoidCallback callback) { }
-  BuildContext context;
+  late BuildContext context;
 
   void buttons() {
 
-// START buttons_raised
-// Create a raised button.
-RaisedButton(
+// START buttons_elevated
+// Create an elevated button.
+ElevatedButton(
   child: const Text('BUTTON TITLE'),
   onPressed: () {
     // Perform some action
@@ -25,14 +25,14 @@ RaisedButton(
 // Create a disabled button.
 // Buttons are disabled when onPressed isn't
 // specified or is null.
-const RaisedButton(
+const ElevatedButton(
   child: Text('BUTTON TITLE'),
   onPressed: null,
 );
 
 // Create a button with an icon and a
 // title.
-RaisedButton.icon(
+ElevatedButton.icon(
   icon: const Icon(Icons.add, size: 18.0),
   label: const Text('BUTTON TITLE'),
   onPressed: () {
@@ -41,9 +41,9 @@ RaisedButton.icon(
 );
 // END
 
-// START buttons_outline
-// Create an outline button.
-OutlineButton(
+// START buttons_outlined
+// Create an outlined button.
+OutlinedButton(
   child: const Text('BUTTON TITLE'),
   onPressed: () {
     // Perform some action
@@ -53,14 +53,14 @@ OutlineButton(
 // Create a disabled button.
 // Buttons are disabled when onPressed isn't
 // specified or is null.
-const OutlineButton(
+const OutlinedButton(
   child: Text('BUTTON TITLE'),
   onPressed: null,
 );
 
 // Create a button with an icon and a
 // title.
-OutlineButton.icon(
+OutlinedButton.icon(
   icon: const Icon(Icons.add, size: 18.0),
   label: const Text('BUTTON TITLE'),
   onPressed: () {
@@ -69,9 +69,9 @@ OutlineButton.icon(
 );
 // END
 
-// START buttons_flat
-// Create a flat button.
-FlatButton(
+// START buttons_text
+// Create a text button.
+TextButton(
   child: const Text('BUTTON TITLE'),
   onPressed: () {
     // Perform some action
@@ -81,7 +81,7 @@ FlatButton(
 // Create a disabled button.
 // Buttons are disabled when onPressed isn't
 // specified or is null.
-const FlatButton(
+const TextButton(
   child: Text('BUTTON TITLE'),
   onPressed: null,
 );
@@ -90,12 +90,12 @@ const FlatButton(
 
 // START buttons_dropdown
 // Member variable holding value.
-String dropdownValue;
+String? dropdownValue;
 
 // Dropdown button with string values.
 DropdownButton<String>(
   value: dropdownValue,
-  onChanged: (String newValue) {
+  onChanged: (String? newValue) {
     // null indicates the user didn't select a
     // new value.
     setState(() {
@@ -116,7 +116,7 @@ DropdownButton<String>(
 
 // START buttons_icon
 // Member variable holding toggle value.
-bool value;
+late bool value;
 
 // Toggleable icon button.
 IconButton(
@@ -152,12 +152,12 @@ class SelectionControls {
 
 // START selectioncontrols_checkbox
 // Member variable holding the checkbox's value.
-bool checkboxValue = false;
+bool? checkboxValue = false;
 
 // Create a checkbox.
 Checkbox(
   value: checkboxValue,
-  onChanged: (bool value) {
+  onChanged: (bool? value) {
     setState(() {
       checkboxValue = value;
     });
@@ -168,7 +168,7 @@ Checkbox(
 Checkbox(
   tristate: true,
   value: checkboxValue,
-  onChanged: (bool value) {
+  onChanged: (bool? value) {
     setState(() {
       checkboxValue = value;
     });
@@ -184,10 +184,10 @@ const Checkbox(value: false, onChanged: null);
 
 // START selectioncontrols_radio
 // Member variable holding value.
-int radioValue = 0;
+int? radioValue = 0;
 
 // Method setting value.
-void handleRadioValueChanged(int value) {
+void handleRadioValueChanged(int? value) {
   setState(() {
     radioValue = value;
   });

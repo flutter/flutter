@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'stock_types.dart';
 
 class StockSettings extends StatefulWidget {
-  const StockSettings(this.configuration, this.updater);
+  const StockSettings(this.configuration, this.updater, {Key key}) : super(key: key);
 
   final StockConfiguration configuration;
   final ValueChanged<StockConfiguration> updater;
@@ -72,13 +72,13 @@ class StockSettingsState extends State<StockSettings> {
               title: const Text('Change mode?'),
               content: const Text('Optimistic mode means everything is awesome. Are you sure you can handle that?'),
               actions: <Widget>[
-                FlatButton(
+                TextButton(
                   child: const Text('NO THANKS'),
                   onPressed: () {
                     Navigator.pop(context, false);
                   },
                 ),
-                FlatButton(
+                TextButton(
                   child: const Text('AGREE'),
                   onPressed: () {
                     Navigator.pop(context, true);

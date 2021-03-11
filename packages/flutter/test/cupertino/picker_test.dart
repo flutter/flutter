@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -25,7 +22,7 @@ void main() {
               itemExtent: 50.0,
               onSelectedItemChanged: (_) { },
               children: List<Widget>.generate(3, (int index) {
-                return Container(
+                return SizedBox(
                   height: 50.0,
                   width: 300.0,
                   child: Text(index.toString()),
@@ -39,13 +36,13 @@ void main() {
 
     final RenderParagraph paragraph = tester.renderObject(find.text('1'));
 
-    expect(paragraph.text.style.color, isSameColorAs(CupertinoColors.black));
-    expect(paragraph.text.style.copyWith(color: CupertinoColors.black), const TextStyle(
+    expect(paragraph.text.style!.color, isSameColorAs(CupertinoColors.black));
+    expect(paragraph.text.style!.copyWith(color: CupertinoColors.black), const TextStyle(
       inherit: false,
       fontFamily: '.SF Pro Display',
       fontSize: 21.0,
       fontWeight: FontWeight.w400,
-      letterSpacing: -0.41,
+      letterSpacing: -0.6,
       color: CupertinoColors.black,
     ));
   });
@@ -68,7 +65,7 @@ void main() {
                 itemExtent: 50.0,
                 onSelectedItemChanged: (_) { },
                 children: List<Widget>.generate(3, (int index) {
-                  return Container(
+                  return SizedBox(
                     height: 50.0,
                     width: 300.0,
                     child: Text(index.toString()),
@@ -81,7 +78,7 @@ void main() {
       );
 
       expect(
-        tester.getTopLeft(find.widgetWithText(Container, '1')),
+        tester.getTopLeft(find.widgetWithText(SizedBox, '1').first),
         const Offset(0.0, 125.0),
       );
 
@@ -89,11 +86,11 @@ void main() {
       await tester.pump();
 
       expect(
-        tester.getTopLeft(find.widgetWithText(Container, '1')),
+        tester.getTopLeft(find.widgetWithText(SizedBox, '1').first),
         const Offset(0.0, 175.0),
       );
       expect(
-        tester.getTopLeft(find.widgetWithText(Container, '0')),
+        tester.getTopLeft(find.widgetWithText(SizedBox, '0').first),
         const Offset(0.0, 125.0),
       );
     });
@@ -122,7 +119,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(CupertinoPicker), paints..path(color: const Color(0x33000000), style: PaintingStyle.stroke));
+    expect(find.byType(CupertinoPicker), paints..rrect(color: const Color.fromARGB(30, 118, 118, 128)));
     expect(find.byType(CupertinoPicker), paints..rect(color: const Color(0xFF123456)));
 
     await tester.pumpWidget(
@@ -147,8 +144,32 @@ void main() {
       ),
     );
 
-    expect(find.byType(CupertinoPicker), paints..path(color: const Color(0x33FFFFFF), style: PaintingStyle.stroke));
+    expect(find.byType(CupertinoPicker), paints..rrect(color: const Color.fromARGB(61,118, 118, 128)));
     expect(find.byType(CupertinoPicker), paints..rect(color: const Color(0xFF654321)));
+  });
+
+  testWidgets('picker selectionOverlay', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.light),
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            height: 300.0,
+            width: 300.0,
+            child: CupertinoPicker(
+              itemExtent: 15.0,
+              children: const <Widget>[Text('1'), Text('1')],
+              onSelectedItemChanged: (int i) {},
+              selectionOverlay: const CupertinoPickerDefaultSelectionOverlay(
+                  background: Color(0x12345678)),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoPicker), paints..rrect(color: const Color(0x12345678)));
   });
 
   group('scroll', () {
@@ -170,7 +191,7 @@ void main() {
               onSelectedItemChanged: (int index) { selectedItems.add(index); },
               children: List<Widget>.generate(100, (int index) {
                 return Center(
-                  child: Container(
+                  child: SizedBox(
                     width: 400.0,
                     height: 100.0,
                     child: Text(index.toString()),
@@ -181,7 +202,7 @@ void main() {
           ),
         );
 
-        await tester.drag(find.text('0'), const Offset(0.0, -100.0));
+        await tester.drag(find.text('0'), const Offset(0.0, -100.0), warnIfMissed: false); // has an IgnorePointer
         expect(selectedItems, <int>[1]);
         expect(
           systemCalls.single,
@@ -191,7 +212,7 @@ void main() {
           ),
         );
 
-        await tester.drag(find.text('0'), const Offset(0.0, 100.0));
+        await tester.drag(find.text('0'), const Offset(0.0, 100.0), warnIfMissed: false); // has an IgnorePointer
         expect(selectedItems, <int>[1, 0]);
         expect(systemCalls, hasLength(2));
         expect(
@@ -221,7 +242,7 @@ void main() {
               onSelectedItemChanged: (int index) { selectedItems.add(index); },
               children: List<Widget>.generate(100, (int index) {
                 return Center(
-                  child: Container(
+                  child: SizedBox(
                     width: 400.0,
                     height: 100.0,
                     child: Text(index.toString()),
@@ -232,7 +253,7 @@ void main() {
           ),
         );
 
-        await tester.drag(find.text('0'), const Offset(0.0, -100.0));
+        await tester.drag(find.text('0'), const Offset(0.0, -100.0), warnIfMissed: false); // has an IgnorePointer
         expect(selectedItems, <int>[1]);
         expect(systemCalls, isEmpty);
     }, variant: TargetPlatformVariant(TargetPlatform.values.where((TargetPlatform platform) => platform != TargetPlatform.iOS).toSet()));
@@ -251,7 +272,7 @@ void main() {
             onSelectedItemChanged: (int index) { selectedItems.add(index); },
             children: List<Widget>.generate(100, (int index) {
               return Center(
-                child: Container(
+                child: SizedBox(
                   width: 400.0,
                   height: 100.0,
                   child: Text(index.toString()),
@@ -263,29 +284,29 @@ void main() {
       );
 
       // Drag it by a bit but not enough to move to the next item.
-      await tester.drag(find.text('10'), const Offset(0.0, 30.0), touchSlopY: 0.0);
+      await tester.drag(find.text('10'), const Offset(0.0, 30.0), touchSlopY: 0.0, warnIfMissed: false); // has an IgnorePointer
 
       // The item that was in the center now moved a bit.
       expect(
-        tester.getTopLeft(find.widgetWithText(Container, '10')),
+        tester.getTopLeft(find.widgetWithText(SizedBox, '10')),
         const Offset(200.0, 280.0),
       );
 
       await tester.pumpAndSettle();
 
       expect(
-        tester.getTopLeft(find.widgetWithText(Container, '10')).dy,
+        tester.getTopLeft(find.widgetWithText(SizedBox, '10')).dy,
         moreOrLessEquals(250.0, epsilon: 0.5),
       );
       expect(selectedItems.isEmpty, true);
 
       // Drag it by enough to move to the next item.
-      await tester.drag(find.text('10'), const Offset(0.0, 70.0), touchSlopY: 0.0);
+      await tester.drag(find.text('10'), const Offset(0.0, 70.0), touchSlopY: 0.0, warnIfMissed: false); // has an IgnorePointer
 
       await tester.pumpAndSettle();
 
       expect(
-        tester.getTopLeft(find.widgetWithText(Container, '10')).dy,
+        tester.getTopLeft(find.widgetWithText(SizedBox, '10')).dy,
         // It's down by 100.0 now.
         moreOrLessEquals(350.0, epsilon: 0.5),
       );
@@ -306,7 +327,7 @@ void main() {
             onSelectedItemChanged: (int index) { selectedItems.add(index); },
             children: List<Widget>.generate(100, (int index) {
               return Center(
-                child: Container(
+                child: SizedBox(
                   width: 400.0,
                   height: 100.0,
                   child: Text(index.toString()),
@@ -322,11 +343,12 @@ void main() {
         find.text('10'),
         const Offset(0.0, 10000.0),
         1000.0,
+        warnIfMissed: false, // has an IgnorePointer
       );
 
       // Should have been flung far enough that even the first item goes off
       // screen and gets removed.
-      expect(find.widgetWithText(Container, '0').evaluate().isEmpty, true);
+      expect(find.widgetWithText(SizedBox, '0').evaluate().isEmpty, true);
 
       expect(
         selectedItems,
@@ -339,7 +361,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
+        tester.getTopLeft(find.widgetWithText(SizedBox, '0')).dy,
         // Should have sprung back to the middle now.
         moreOrLessEquals(250.0),
       );

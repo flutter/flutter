@@ -2,19 +2,59 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' as ui show TextBox;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
 const String _kText = "I polished up that handle so carefullee\nThat now I am the Ruler of the Queen's Navee!";
+
+// A subclass of RenderParagraph that returns an empty list in getBoxesForSelection
+// for a given TextSelection.
+// This is intended to simulate SkParagraph's implementation of Paragraph.getBoxesForRange,
+// which may return an empty list in some situations where Libtxt would return a list
+// containing an empty box.
+class RenderParagraphWithEmptySelectionBoxList extends RenderParagraph {
+  RenderParagraphWithEmptySelectionBoxList(
+    InlineSpan text, {
+    required TextDirection textDirection,
+    required this.emptyListSelection,
+  }) : super(text, textDirection: textDirection);
+
+  TextSelection emptyListSelection;
+
+  @override
+  List<ui.TextBox> getBoxesForSelection(TextSelection selection) {
+    if (selection == emptyListSelection) {
+      return <ui.TextBox>[];
+    }
+    return super.getBoxesForSelection(selection);
+  }
+}
+
+// A subclass of RenderParagraph that returns an empty list in getBoxesForSelection
+// for a selection representing a WidgetSpan.
+// This is intended to simulate how SkParagraph's implementation of Paragraph.getBoxesForRange
+// can return an empty list for a WidgetSpan with empty dimensions.
+class RenderParagraphWithEmptyBoxListForWidgetSpan extends RenderParagraph {
+  RenderParagraphWithEmptyBoxListForWidgetSpan(
+    InlineSpan text, {
+    required List<RenderBox> children,
+    required TextDirection textDirection,
+  }) : super(text, children: children, textDirection: textDirection);
+
+  @override
+  List<ui.TextBox> getBoxesForSelection(TextSelection selection) {
+    if (text.getSpanForPosition(selection.base) is WidgetSpan) {
+      return <ui.TextBox>[];
+    }
+    return super.getBoxesForSelection(selection);
+  }
+}
 
 void main() {
   test('getOffsetForCaret control test', () {
@@ -34,6 +74,17 @@ void main() {
 
     final Offset offset50 = paragraph.getOffsetForCaret(const TextPosition(offset: 50), caret);
     expect(offset50.dy, greaterThan(offset5.dy));
+  });
+
+  test('getFullHeightForCaret control test', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(text: _kText,style: TextStyle(fontSize: 10.0)),
+      textDirection: TextDirection.ltr,
+    );
+    layout(paragraph);
+
+    final double height5 = paragraph.getFullHeightForCaret(const TextPosition(offset: 5))!;
+    expect(height5, equals(10.0));
   });
 
   test('getPositionForOffset control test', () {
@@ -103,7 +154,11 @@ void main() {
       softWrap: true,
     );
 
-    void relayoutWith({ int maxLines, bool softWrap, TextOverflow overflow }) {
+    void relayoutWith({
+      int? maxLines,
+      required bool softWrap,
+      required TextOverflow overflow,
+    }) {
       paragraph
         ..maxLines = maxLines
         ..softWrap = softWrap
@@ -178,7 +233,7 @@ void main() {
       textDirection: TextDirection.ltr,
     );
     layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
-    void layoutAt(int maxLines) {
+    void layoutAt(int? maxLines) {
       paragraph.maxLines = maxLines;
       pumpFrame();
     }
@@ -274,13 +329,13 @@ void main() {
     // rendering widths in tests.
     // TODO(gspencergoog): Figure out why this is, and fix it. https://github.com/flutter/flutter/issues/12357
     expect(boxes[0].toRect().width, anyOf(14.0, 13.0));
-    expect(boxes[0].toRect().height, closeTo(13.0, 0.0001));
+    expect(boxes[0].toRect().height, moreOrLessEquals(13.0, epsilon: 0.0001));
     expect(boxes[1].toRect().width, anyOf(27.0, 26.0));
-    expect(boxes[1].toRect().height, closeTo(26.0, 0.0001));
+    expect(boxes[1].toRect().height, moreOrLessEquals(26.0, epsilon: 0.0001));
     expect(boxes[2].toRect().width, anyOf(27.0, 26.0));
-    expect(boxes[2].toRect().height, closeTo(26.0, 0.0001));
+    expect(boxes[2].toRect().height, moreOrLessEquals(26.0, epsilon: 0.0001));
     expect(boxes[3].toRect().width, anyOf(14.0, 13.0));
-    expect(boxes[3].toRect().height, closeTo(13.0, 0.0001));
+    expect(boxes[3].toRect().height, moreOrLessEquals(13.0, epsilon: 0.0001));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61016
 
   test('toStringDeep', () {
@@ -529,10 +584,48 @@ void main() {
     bool failed = false;
     try {
       paragraph.assembleSemanticsNode(SemanticsNode(), SemanticsConfiguration(), <SemanticsNode>[]);
-    } catch(e) {
+    } on AssertionError catch (e) {
       failed = true;
       expect(e.message, 'MultiTapGestureRecognizer is not supported.');
     }
     expect(failed, true);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+
+  test('assembleSemanticsNode handles text spans that do not yield selection boxes', () {
+    final RenderParagraph paragraph = RenderParagraphWithEmptySelectionBoxList(
+      TextSpan(text: '', children: <InlineSpan>[
+        TextSpan(text: 'A', recognizer: TapGestureRecognizer()..onTap = () {}),
+        TextSpan(text: 'B', recognizer: TapGestureRecognizer()..onTap = () {}),
+        TextSpan(text: 'C', recognizer: TapGestureRecognizer()..onTap = () {}),
+      ]),
+      textDirection: TextDirection.rtl,
+      emptyListSelection: const TextSelection(baseOffset: 0, extentOffset: 1),
+    );
+    layout(paragraph);
+
+    final SemanticsNode node = SemanticsNode();
+    paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
+    expect(node.childrenCount, 2);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+
+  test('assembleSemanticsNode handles empty WidgetSpans that do not yield selection boxes', () {
+    final TextSpan text = TextSpan(text: '', children: <InlineSpan>[
+      TextSpan(text: 'A', recognizer: TapGestureRecognizer()..onTap = () {}),
+      const WidgetSpan(child: SizedBox(width: 0, height: 0)),
+      TextSpan(text: 'C', recognizer: TapGestureRecognizer()..onTap = () {}),
+    ]);
+    final List<RenderBox> renderBoxes = <RenderBox>[
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+    ];
+    final RenderParagraph paragraph = RenderParagraphWithEmptyBoxListForWidgetSpan(
+      text,
+      children: renderBoxes,
+      textDirection: TextDirection.ltr,
+    );
+    layout(paragraph);
+
+    final SemanticsNode node = SemanticsNode();
+    paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
+    expect(node.childrenCount, 2);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
 }

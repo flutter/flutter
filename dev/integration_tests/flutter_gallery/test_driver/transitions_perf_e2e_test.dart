@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+// @dart = 2.9
 
-import 'package:e2e/e2e_driver.dart' as driver;
+import 'package:integration_test/integration_test_driver.dart' as driver;
 
-Future<void> main() => driver.e2eDriver(
+Future<void> main() => driver.integrationDriver(
   timeout: const Duration(minutes: 5),
   responseDataCallback: (Map<String, dynamic> data) async {
     await driver.writeResponseData(

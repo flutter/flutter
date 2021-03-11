@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'box.dart';
 import 'layer.dart';
 import 'object.dart';
@@ -164,8 +162,8 @@ class RenderPerformanceOverlay extends RenderBox {
   }
 
   @override
-  void performResize() {
-    size = constraints.constrain(Size(double.infinity, _intrinsicHeight));
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.constrain(Size(double.infinity, _intrinsicHeight));
   }
 
   @override

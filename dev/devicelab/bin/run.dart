@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -12,14 +11,18 @@ import 'package:path/path.dart' as path;
 import 'package:flutter_devicelab/framework/ab.dart';
 import 'package:flutter_devicelab/framework/manifest.dart';
 import 'package:flutter_devicelab/framework/runner.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
 ArgResults args;
 
 List<String> _taskNames = <String>[];
 
-/// Suppresses standard output, prints only standard error output.
-bool silent;
+/// The device-id to run test on.
+String deviceId;
+
+/// The git branch being tested on.
+String gitBranch;
 
 /// The build of the local engine to use.
 ///
@@ -29,11 +32,25 @@ String localEngine;
 /// The path to the engine "src/" directory.
 String localEngineSrcPath;
 
+/// Name of the LUCI builder this test is currently running on.
+///
+/// This is only passed on CI runs for Cocoon to be able to uniquely identify
+/// this test run.
+String luciBuilder;
+
 /// Whether to exit on first test failure.
 bool exitOnFirstTestFailure;
 
-/// The device-id to run test on.
-String deviceId;
+/// Path to write test results to.
+String resultsPath;
+
+/// File containing a service account token.
+///
+/// If passed, the test run results will be uploaded to Flutter infrastructure.
+String serviceAccountTokenFile;
+
+/// Suppresses standard output, prints only standard error output.
+bool silent;
 
 /// Runs tasks.
 ///
@@ -49,6 +66,16 @@ Future<void> main(List<String> rawArgs) async {
     exitCode = 1;
     return;
   }
+
+  deviceId = args['device-id'] as String;
+  exitOnFirstTestFailure = args['exit'] as bool;
+  gitBranch = args['git-branch'] as String;
+  localEngine = args['local-engine'] as String;
+  localEngineSrcPath = args['local-engine-src-path'] as String;
+  luciBuilder = args['luci-builder'] as String;
+  resultsPath = args['results-file'] as String;
+  serviceAccountTokenFile = args['service-account-token-file'] as String;
+  silent = args['silent'] as bool;
 
   if (!args.wasParsed('task')) {
     if (args.wasParsed('stage') || args.wasParsed('all')) {
@@ -74,40 +101,17 @@ Future<void> main(List<String> rawArgs) async {
     return;
   }
 
-  silent = args['silent'] as bool;
-  localEngine = args['local-engine'] as String;
-  localEngineSrcPath = args['local-engine-src-path'] as String;
-  exitOnFirstTestFailure = args['exit'] as bool;
-  deviceId = args['device-id'] as String;
-
   if (args.wasParsed('ab')) {
     await _runABTest();
   } else {
-    await _runTasks();
-  }
-}
-
-Future<void> _runTasks() async {
-  for (final String taskName in _taskNames) {
-    section('Running task "$taskName"');
-    final Map<String, dynamic> result = await runTask(
-      taskName,
+    await runTasks(_taskNames,
       silent: silent,
-      localEngine: localEngine,
-      localEngineSrcPath: localEngineSrcPath,
       deviceId: deviceId,
+      exitOnFirstTestFailure: exitOnFirstTestFailure,
+      gitBranch: gitBranch,
+      luciBuilder: luciBuilder,
+      resultsPath: resultsPath,
     );
-
-    print('Task result:');
-    print(const JsonEncoder.withIndent('  ').convert(result));
-    section('Finished task "$taskName"');
-
-    if (!(result['success'] as bool)) {
-      exitCode = 1;
-      if (exitOnFirstTestFailure) {
-        return;
-      }
-    }
   }
 }
 
@@ -135,7 +139,7 @@ Future<void> _runABTest() async {
     section('Run #$i');
 
     print('Running with the default engine (A)');
-    final Map<String, dynamic> defaultEngineResult = await runTask(
+    final TaskResult defaultEngineResult = await runTask(
       taskName,
       silent: silent,
       deviceId: deviceId,
@@ -144,7 +148,7 @@ Future<void> _runABTest() async {
     print('Default engine result:');
     print(const JsonEncoder.withIndent('  ').convert(defaultEngineResult));
 
-    if (!(defaultEngineResult['success'] as bool)) {
+    if (!defaultEngineResult.succeeded) {
       stderr.writeln('Task failed on the default engine.');
       exit(1);
     }
@@ -152,7 +156,7 @@ Future<void> _runABTest() async {
     abTest.addAResult(defaultEngineResult);
 
     print('Running with the local engine (B)');
-    final Map<String, dynamic> localEngineResult = await runTask(
+    final TaskResult localEngineResult = await runTask(
       taskName,
       silent: silent,
       localEngine: localEngine,
@@ -163,7 +167,7 @@ Future<void> _runABTest() async {
     print('Task localEngineResult:');
     print(const JsonEncoder.withIndent('  ').convert(localEngineResult));
 
-    if (!(localEngineResult['success'] as bool)) {
+    if (!localEngineResult.succeeded) {
       stderr.writeln('Task failed on the local engine.');
       exit(1);
     }
@@ -200,7 +204,7 @@ File _uniqueFile(String filenameTemplate) {
   File file = File(parts[0] + parts[1]);
   int i = 1;
   while (file.existsSync()) {
-    file = File(parts[0]+i.toString()+parts[1]);
+    file = File(parts[0] + i.toString() + parts[1]);
     i++;
   }
   return file;
@@ -307,6 +311,11 @@ final ArgParser _argParser = ArgParser()
     help: 'Exit on the first test failure.',
   )
   ..addOption(
+    'git-branch',
+    help: '[Flutter infrastructure] Git branch of the current commit. LUCI\n'
+          'checkouts run in detached HEAD state, so the branch must be passed.',
+  )
+  ..addOption(
     'local-engine',
     help: 'Name of a build output within the engine out directory, if you\n'
           'are building Flutter locally. Use this to select a specific\n'
@@ -326,6 +335,7 @@ final ArgParser _argParser = ArgParser()
           'locally. Defaults to \$FLUTTER_ENGINE if set, or tries to guess at\n'
           'the location based on the value of the --flutter-root option.',
   )
+  ..addOption('luci-builder', help: '[Flutter infrastructure] Name of the LUCI builder being run on.')
   ..addFlag(
     'match-host-platform',
     defaultsTo: true,
@@ -333,6 +343,15 @@ final ArgParser _argParser = ArgParser()
           'test with a `required_agent_capabilities` value of "mac/android"\n'
           'on a windows host). Each test publishes its '
           '`required_agent_capabilities`\nin the `manifest.yaml` file.',
+  )
+  ..addOption(
+    'results-file',
+    help: '[Flutter infrastructure] File path for test results. If passed with\n'
+          'task, will write test results to the file.'
+  )
+  ..addOption(
+    'service-account-token-file',
+    help: '[Flutter infrastructure] Authentication for uploading results.',
   )
   ..addOption(
     'stage',

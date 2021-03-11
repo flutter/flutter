@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -67,30 +65,30 @@ class SnackBarThemeData with Diagnosticable {
   /// Default value for [SnackBar.backgroundColor].
   ///
   /// If null, [SnackBar] defaults to dark grey: `Color(0xFF323232)`.
-  final Color backgroundColor;
+  final Color? backgroundColor;
 
   /// Default value for [SnackBarAction.textColor].
   ///
   /// If null, [SnackBarAction] defaults to [ColorScheme.secondary] of
   /// [ThemeData.colorScheme] .
-  final Color actionTextColor;
+  final Color? actionTextColor;
 
   /// Default value for [SnackBarAction.disabledTextColor].
   ///
   /// If null, [SnackBarAction] defaults to [ColorScheme.onSurface] with its
   /// opacity set to 0.30 if the [Theme]'s brightness is [Brightness.dark], 0.38
   /// otherwise.
-  final Color disabledActionTextColor;
+  final Color? disabledActionTextColor;
 
   /// Used to configure the [DefaultTextStyle] for the [SnackBar.content] widget.
   ///
   /// If null, [SnackBar] defines its default.
-  final TextStyle contentTextStyle;
+  final TextStyle? contentTextStyle;
 
   /// Default value for [SnackBar.elevation].
   ///
   /// If null, [SnackBar] uses a default of 6.0.
-  final double elevation;
+  final double? elevation;
 
   /// Default value for [SnackBar.shape].
   ///
@@ -99,23 +97,23 @@ class SnackBarThemeData with Diagnosticable {
   /// specified, so the [SnackBar] is rectangular. For
   /// [SnackBarBehavior.floating], it uses a [RoundedRectangleBorder] with a
   /// circular corner radius of 4.0.
-  final ShapeBorder shape;
+  final ShapeBorder? shape;
 
   /// Default value for [SnackBar.behavior].
   ///
   /// If null, [SnackBar] will default to [SnackBarBehavior.fixed].
-  final SnackBarBehavior behavior;
+  final SnackBarBehavior? behavior;
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   SnackBarThemeData copyWith({
-    Color backgroundColor,
-    Color actionTextColor,
-    Color disabledActionTextColor,
-    TextStyle contentTextStyle,
-    double elevation,
-    ShapeBorder shape,
-    SnackBarBehavior behavior,
+    Color? backgroundColor,
+    Color? actionTextColor,
+    Color? disabledActionTextColor,
+    TextStyle? contentTextStyle,
+    double? elevation,
+    ShapeBorder? shape,
+    SnackBarBehavior? behavior,
   }) {
     return SnackBarThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -133,7 +131,7 @@ class SnackBarThemeData with Diagnosticable {
   /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static SnackBarThemeData lerp(SnackBarThemeData a, SnackBarThemeData b, double t) {
+  static SnackBarThemeData lerp(SnackBarThemeData? a, SnackBarThemeData? b, double t) {
     assert(t != null);
     return SnackBarThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
@@ -142,7 +140,7 @@ class SnackBarThemeData with Diagnosticable {
       contentTextStyle: TextStyle.lerp(a?.contentTextStyle, b?.contentTextStyle, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
-      behavior: t < 0.5 ? a.behavior : b.behavior,
+      behavior: t < 0.5 ? a?.behavior : b?.behavior,
     );
   }
 

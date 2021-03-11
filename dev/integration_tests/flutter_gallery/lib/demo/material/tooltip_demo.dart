@@ -12,6 +12,7 @@ const String _introText =
   'apps accessible, like screen readers.';
 
 class TooltipDemo extends StatelessWidget {
+  const TooltipDemo({Key? key}) : super(key: key);
 
   static const String routeName = '/material/tooltips';
 
@@ -52,7 +53,7 @@ class TooltipDemo extends StatelessWidget {
                     color: theme.iconTheme.color,
                     tooltip: 'Place a phone call',
                     onPressed: () {
-                      Scaffold.of(context).showSnackBar(const SnackBar(
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                          content: Text('That was an ordinary tap.'),
                       ));
                     },

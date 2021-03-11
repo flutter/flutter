@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+// @dart = 2.8
 
 import 'package:async/async.dart';
 import 'package:convert/convert.dart';
@@ -12,6 +12,7 @@ import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
@@ -162,9 +163,7 @@ abstract class Target {
   /// Invoke to remove the stamp file if the [buildAction] threw an exception.
   void clearStamp(Environment environment) {
     final File stamp = _findStampFile(environment);
-    if (stamp.existsSync()) {
-      stamp.deleteSync();
-    }
+    ErrorHandlingFileSystem.deleteIfExists(stamp);
   }
 
   void _writeStamp(
@@ -206,7 +205,7 @@ abstract class Target {
   }
 
   /// Performs a fold across this target and its dependencies.
-  T fold<T>(T initialValue, T combine(T previousValue, Target target)) {
+  T fold<T>(T initialValue, T Function(T previousValue, Target target) combine) {
     final T dependencyResult = dependencies.fold(
         initialValue, (T prev, Target t) => t.fold(prev, combine));
     return combine(dependencyResult, this);
@@ -249,6 +248,29 @@ abstract class Target {
     depfiles.forEach(collector.visitDepfile);
     return collector;
   }
+}
+
+/// Target that contains multiple other targets.
+///
+/// This target does not do anything in its own [build]
+/// and acts as a wrapper around multiple other targets.
+class CompositeTarget extends Target {
+  CompositeTarget(this.dependencies);
+
+  @override
+  final List<Target> dependencies;
+
+  @override
+  String get name => '_composite';
+
+  @override
+  Future<void> build(Environment environment) async { }
+
+  @override
+  List<Source> get inputs => <Source>[];
+
+  @override
+  List<Source> get outputs => <Source>[];
 }
 
 /// The [Environment] defines several constants for use during the build.
@@ -309,6 +331,7 @@ class Environment {
     @required Artifacts artifacts,
     @required ProcessManager processManager,
     @required String engineVersion,
+    @required bool generateDartPluginRegistry,
     Directory buildDir,
     Map<String, String> defines = const <String, String>{},
     Map<String, String> inputs = const <String, String>{},
@@ -348,6 +371,7 @@ class Environment {
       processManager: processManager,
       engineVersion: engineVersion,
       inputs: inputs,
+      generateDartPluginRegistry: generateDartPluginRegistry,
     );
   }
 
@@ -364,6 +388,7 @@ class Environment {
     Map<String, String> defines = const <String, String>{},
     Map<String, String> inputs = const <String, String>{},
     String engineVersion,
+    bool generateDartPluginRegistry = false,
     @required FileSystem fileSystem,
     @required Logger logger,
     @required Artifacts artifacts,
@@ -382,6 +407,7 @@ class Environment {
       artifacts: artifacts,
       processManager: processManager,
       engineVersion: engineVersion,
+      generateDartPluginRegistry: generateDartPluginRegistry,
     );
   }
 
@@ -399,6 +425,7 @@ class Environment {
     @required this.artifacts,
     @required this.engineVersion,
     @required this.inputs,
+    @required this.generateDartPluginRegistry,
   });
 
   /// The [Source] value which is substituted with the path to [projectDir].
@@ -476,6 +503,11 @@ class Environment {
 
   /// The version of the current engine, or `null` if built with a local engine.
   final String engineVersion;
+
+  /// Whether to generate the Dart plugin registry.
+  /// When [true], the main entrypoint is wrapped and the wrapper becomes
+  /// the new entrypoint.
+  final bool generateDartPluginRegistry;
 }
 
 /// The result information from the build system.
@@ -670,6 +702,7 @@ class FlutterBuildSystem extends BuildSystem {
     final String currentBuildId = fileSystem.path.basename(environment.buildDir.path);
     final File lastBuildIdFile = environment.outputDir.childFile('.last_build_id');
     if (!lastBuildIdFile.existsSync()) {
+      lastBuildIdFile.parent.createSync(recursive: true);
       lastBuildIdFile.writeAsStringSync(currentBuildId);
       // No config file, either output was cleaned or this is the first build.
       return;
@@ -698,14 +731,11 @@ class FlutterBuildSystem extends BuildSystem {
     for (final String lastOutput in lastOutputs) {
       if (!currentOutputs.containsKey(lastOutput)) {
         final File lastOutputFile = fileSystem.file(lastOutput);
-        if (lastOutputFile.existsSync()) {
-          lastOutputFile.deleteSync();
-        }
+        ErrorHandlingFileSystem.deleteIfExists(lastOutputFile);
       }
     }
   }
 }
-
 
 /// An active instance of a build.
 class _BuildInstance {
@@ -777,7 +807,7 @@ class _BuildInstance {
       // If we're missing a depfile, wait until after evaluating the target to
       // compute changes.
       final bool canSkip = !node.missingDepfile &&
-        await node.computeChanges(environment, fileCache, fileSystem, logger);
+        node.computeChanges(environment, fileCache, fileSystem, logger);
 
       if (canSkip) {
         skipped = true;
@@ -807,11 +837,11 @@ class _BuildInstance {
       // If we were missing the depfile, resolve input files after executing the
       // target so that all file hashes are up to date on the next run.
       if (node.missingDepfile) {
-        await fileCache.diffFileList(node.inputs);
+        fileCache.diffFileList(node.inputs);
       }
 
       // Always update hashes for output files.
-      await fileCache.diffFileList(node.outputs);
+      fileCache.diffFileList(node.outputs);
       node.target._writeStamp(node.inputs, node.outputs, environment);
       updateGraph();
 
@@ -822,9 +852,7 @@ class _BuildInstance {
           continue;
         }
         final File previousFile = fileSystem.file(previousOutput);
-        if (previousFile.existsSync()) {
-          previousFile.deleteSync();
-        }
+        ErrorHandlingFileSystem.deleteIfExists(previousFile);
       }
     } on Exception catch (exception, stackTrace) {
       // TODO(jonahwilliams): throw specific exception for expected errors to mark
@@ -842,7 +870,7 @@ class _BuildInstance {
         elapsedMilliseconds: stopwatch.elapsedMilliseconds,
         skipped: skipped,
         succeeded: succeeded,
-        analyicsName: node.target.analyticsName,
+        analyticsName: node.target.analyticsName,
       );
     }
     return succeeded;
@@ -871,14 +899,14 @@ class PerformanceMeasurement {
     @required this.elapsedMilliseconds,
     @required this.skipped,
     @required this.succeeded,
-    @required this.analyicsName,
+    @required this.analyticsName,
   });
 
   final int elapsedMilliseconds;
   final String target;
   final bool skipped;
   final bool succeeded;
-  final String analyicsName;
+  final String analyticsName;
 }
 
 /// Check if there are any dependency cycles in the target.
@@ -1008,12 +1036,12 @@ class Node {
   /// Collect hashes for all inputs to determine if any have changed.
   ///
   /// Returns whether this target can be skipped.
-  Future<bool> computeChanges(
+  bool computeChanges(
     Environment environment,
     FileStore fileStore,
     FileSystem fileSystem,
     Logger logger,
-  ) async {
+  ) {
     final Set<String> currentOutputPaths = <String>{
       for (final File file in outputs) file.path,
     };
@@ -1069,7 +1097,7 @@ class Node {
       }
     }
 
-    // If we depend on a file that doesnt exist on disk, mark the build as
+    // If we depend on a file that doesn't exist on disk, mark the build as
     // dirty. if the rule is not correctly specified, this will result in it
     // always being rerun.
     if (missingInputs.isNotEmpty) {
@@ -1082,7 +1110,7 @@ class Node {
     // If we have files to diff, compute them asynchronously and then
     // update the result.
     if (sourcesToDiff.isNotEmpty) {
-      final List<File> dirty = await fileStore.diffFileList(sourcesToDiff);
+      final List<File> dirty = fileStore.diffFileList(sourcesToDiff);
       if (dirty.isNotEmpty) {
         invalidatedReasons.add(InvalidatedReason.inputChanged);
         _dirty = true;

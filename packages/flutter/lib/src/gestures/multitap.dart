@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' show Offset;
 import 'package:vector_math/vector_math_64.dart';
 
 import 'arena.dart';
@@ -114,7 +113,7 @@ class _TapTracker {
 class DoubleTapGestureRecognizer extends GestureRecognizer {
   /// Create a gesture recognizer for double taps.
   ///
-  /// {@macro flutter.gestures.gestureRecognizer.kind}
+  /// {@macro flutter.gestures.GestureRecognizer.kind}
   DoubleTapGestureRecognizer({
     Object? debugOwner,
     PointerDeviceKind? kind,
@@ -398,7 +397,7 @@ class _TapGesture extends _TapTracker {
   void handleEvent(PointerEvent event) {
     assert(event.pointer == pointer);
     if (event is PointerMoveEvent) {
-      if (!isWithinGlobalTolerance(event, kTouchSlop))
+      if (!isWithinGlobalTolerance(event, computeHitSlop(event.kind)))
         cancel();
       else
         _lastPosition = OffsetPair.fromEventPosition(event);

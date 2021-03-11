@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'dart:async';
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
@@ -96,7 +92,7 @@ class Feedback {
   ///  * [wrapForTap] to trigger platform-specific feedback before executing a
   ///    [GestureTapCallback].
   static Future<void> forTap(BuildContext context) async {
-    context.findRenderObject().sendSemanticsEvent(const TapSemanticEvent());
+    context.findRenderObject()!.sendSemanticsEvent(const TapSemanticEvent());
     switch (_platform(context)) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -106,10 +102,7 @@ class Feedback {
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         return Future<void>.value();
-        break;
     }
-    assert(false, 'Unhandled TargetPlatform ${_platform(context)}');
-    return Future<void>.value();
   }
 
   /// Wraps a [GestureTapCallback] to provide platform specific feedback for a
@@ -122,7 +115,7 @@ class Feedback {
   ///
   ///  * [forTap] to just trigger the platform-specific feedback without wrapping
   ///    a [GestureTapCallback].
-  static GestureTapCallback wrapForTap(GestureTapCallback callback, BuildContext context) {
+  static GestureTapCallback? wrapForTap(GestureTapCallback? callback, BuildContext context) {
     if (callback == null)
       return null;
     return () {
@@ -141,7 +134,7 @@ class Feedback {
   ///  * [wrapForLongPress] to trigger platform-specific feedback before
   ///    executing a [GestureLongPressCallback].
   static Future<void> forLongPress(BuildContext context) {
-    context.findRenderObject().sendSemanticsEvent(const LongPressSemanticsEvent());
+    context.findRenderObject()!.sendSemanticsEvent(const LongPressSemanticsEvent());
     switch (_platform(context)) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -151,10 +144,7 @@ class Feedback {
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         return Future<void>.value();
-        break;
     }
-    assert(false, 'Unhandled TargetPlatform ${_platform(context)}');
-    return Future<void>.value();
   }
 
   /// Wraps a [GestureLongPressCallback] to provide platform specific feedback
@@ -168,7 +158,7 @@ class Feedback {
   ///
   ///  * [forLongPress] to just trigger the platform-specific feedback without
   ///    wrapping a [GestureLongPressCallback].
-  static GestureLongPressCallback wrapForLongPress(GestureLongPressCallback callback, BuildContext context) {
+  static GestureLongPressCallback? wrapForLongPress(GestureLongPressCallback? callback, BuildContext context) {
     if (callback == null)
       return null;
     return () {

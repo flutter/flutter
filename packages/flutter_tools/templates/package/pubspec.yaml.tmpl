@@ -1,12 +1,11 @@
 name: {{projectName}}
 description: {{description}}
 version: 0.0.1
-author:
 homepage:
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
-  flutter: ">=1.17.0 <2.0.0"
+  sdk: {{dartSdkVersionBounds}}
+  flutter: ">=1.17.0"
 
 dependencies:
   flutter:
@@ -15,10 +14,6 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  {{#withDriverTest}}
-  flutter_driver:
-    sdk: flutter
-  {{/withDriverTest}}
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

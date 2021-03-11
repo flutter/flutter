@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -382,30 +380,29 @@ void main() {
       canceledPressed = true;
     }
 
-    final ControlsWidgetBuilder builder =
-      (BuildContext context, { VoidCallback onStepContinue, VoidCallback onStepCancel }) {
-        return Container(
-          margin: const EdgeInsets.only(top: 16.0),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints.tightFor(height: 48.0),
-            child: Row(
-              children: <Widget>[
-                TextButton(
-                  onPressed: onStepContinue,
-                  child: const Text('Let us continue!'),
+    Widget builder(BuildContext context, { VoidCallback? onStepContinue, VoidCallback? onStepCancel }) {
+      return Container(
+        margin: const EdgeInsets.only(top: 16.0),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints.tightFor(height: 48.0),
+          child: Row(
+            children: <Widget>[
+              TextButton(
+                onPressed: onStepContinue,
+                child: const Text('Let us continue!'),
+              ),
+              Container(
+                margin: const EdgeInsetsDirectional.only(start: 8.0),
+                child: TextButton(
+                  onPressed: onStepCancel,
+                  child: const Text('Cancel This!'),
                 ),
-                Container(
-                  margin: const EdgeInsetsDirectional.only(start: 8.0),
-                  child: TextButton(
-                    onPressed: onStepCancel,
-                    child: const Text('Cancel This!'),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        );
-      };
+        ),
+      );
+    }
 
     await tester.pumpWidget(
       MaterialApp(
@@ -477,8 +474,8 @@ void main() {
   });
 
   testWidgets('Nested stepper error test', (WidgetTester tester) async {
-    FlutterErrorDetails errorDetails;
-    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    late FlutterErrorDetails errorDetails;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails details) {
       errorDetails = details;
     };
@@ -518,7 +515,6 @@ void main() {
       FlutterError.onError = oldHandler;
     }
 
-    expect(errorDetails, isNotNull);
     expect(errorDetails.stack, isNotNull);
     // Check the ErrorDetails without the stack trace
     final String fullErrorMessage = errorDetails.toString();
@@ -627,7 +623,7 @@ void main() {
     );
     await tester.pump();
 
-    final FocusNode disabledNode = Focus.of(tester.element(find.text('Step 0')), nullOk: true, scopeOk: true);
+    final FocusNode disabledNode = Focus.of(tester.element(find.text('Step 0')), scopeOk: true);
     disabledNode.requestFocus();
     await tester.pump();
     expect(disabledNode.hasPrimaryFocus, isFalse);
@@ -653,7 +649,7 @@ void main() {
     );
     await tester.pump();
 
-    final FocusNode disabledNode = Focus.of(tester.element(find.text('Step 0')), nullOk: true, scopeOk: true);
+    final FocusNode disabledNode = Focus.of(tester.element(find.text('Step 0')), scopeOk: true);
     disabledNode.requestFocus();
     await tester.pump();
     expect(disabledNode.hasPrimaryFocus, isFalse);
@@ -748,26 +744,26 @@ void main() {
 
     await tester.pumpWidget(buildFrame(ThemeData.light()));
 
-    expect(buttonMaterial('CONTINUE').color.value, 0xff2196f3);
-    expect(buttonMaterial('CONTINUE').textStyle.color.value, 0xffffffff);
+    expect(buttonMaterial('CONTINUE').color!.value, 0xff2196f3);
+    expect(buttonMaterial('CONTINUE').textStyle!.color!.value, 0xffffffff);
     expect(buttonMaterial('CONTINUE').shape, buttonShape);
     expect(tester.getRect(find.widgetWithText(TextButton, 'CONTINUE')), continueButtonRect);
 
-    expect(buttonMaterial('CANCEL').color.value, 0);
-    expect(buttonMaterial('CANCEL').textStyle.color.value, 0x8a000000);
+    expect(buttonMaterial('CANCEL').color!.value, 0);
+    expect(buttonMaterial('CANCEL').textStyle!.color!.value, 0x8a000000);
     expect(buttonMaterial('CANCEL').shape, buttonShape);
     expect(tester.getRect(find.widgetWithText(TextButton, 'CANCEL')), cancelButtonRect);
 
     await tester.pumpWidget(buildFrame(ThemeData.dark()));
     await tester.pumpAndSettle(); // Complete the theme animation.
 
-    expect(buttonMaterial('CONTINUE').color.value, 0);
-    expect(buttonMaterial('CONTINUE').textStyle.color.value,  0xffffffff);
+    expect(buttonMaterial('CONTINUE').color!.value, 0);
+    expect(buttonMaterial('CONTINUE').textStyle!.color!.value,  0xffffffff);
     expect(buttonMaterial('CONTINUE').shape, buttonShape);
     expect(tester.getRect(find.widgetWithText(TextButton, 'CONTINUE')), continueButtonRect);
 
-    expect(buttonMaterial('CANCEL').color.value, 0);
-    expect(buttonMaterial('CANCEL').textStyle.color.value, 0xb3ffffff);
+    expect(buttonMaterial('CANCEL').color!.value, 0);
+    expect(buttonMaterial('CANCEL').textStyle!.color!.value, 0xb3ffffff);
     expect(buttonMaterial('CANCEL').shape, buttonShape);
     expect(tester.getRect(find.widgetWithText(TextButton, 'CANCEL')), cancelButtonRect);
   });
@@ -802,20 +798,20 @@ void main() {
 
     await tester.pumpWidget(buildFrame(ThemeData.light()));
 
-    expect(buttonMaterial('CONTINUE').color.value, 0);
-    expect(buttonMaterial('CONTINUE').textStyle.color.value, 0x61000000);
+    expect(buttonMaterial('CONTINUE').color!.value, 0);
+    expect(buttonMaterial('CONTINUE').textStyle!.color!.value, 0x61000000);
 
-    expect(buttonMaterial('CANCEL').color.value, 0);
-    expect(buttonMaterial('CANCEL').textStyle.color.value, 0x61000000);
+    expect(buttonMaterial('CANCEL').color!.value, 0);
+    expect(buttonMaterial('CANCEL').textStyle!.color!.value, 0x61000000);
 
     await tester.pumpWidget(buildFrame(ThemeData.dark()));
     await tester.pumpAndSettle(); // Complete the theme animation.
 
-    expect(buttonMaterial('CONTINUE').color.value, 0);
-    expect(buttonMaterial('CONTINUE').textStyle.color.value, 0x61ffffff);
+    expect(buttonMaterial('CONTINUE').color!.value, 0);
+    expect(buttonMaterial('CONTINUE').textStyle!.color!.value, 0x61ffffff);
 
-    expect(buttonMaterial('CANCEL').color.value, 0);
-    expect(buttonMaterial('CANCEL').textStyle.color.value, 0x61ffffff);
+    expect(buttonMaterial('CANCEL').color!.value, 0);
+    expect(buttonMaterial('CANCEL').textStyle!.color!.value, 0x61ffffff);
   });
 
   testWidgets('Vertical and Horizontal Stepper physics test', (WidgetTester tester) async {
@@ -845,5 +841,50 @@ void main() {
       final ListView listView = tester.widget<ListView>(find.descendant(of: find.byType(Stepper), matching: find.byType(ListView)));
       expect(listView.physics, physics);
     }
+  });
+
+  testWidgets('Stepper horizontal size test', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/pull/77732
+    Widget buildFrame({ bool isActive = true, Brightness? brightness }) {
+      return MaterialApp(
+        theme: brightness == Brightness.dark ? ThemeData.dark() : ThemeData.light(),
+        home: Scaffold(
+          body: Center(
+            child: Stepper(
+              type: StepperType.horizontal,
+              steps: <Step>[
+                Step(
+                  title: const Text('step'),
+                  content: const Text('content'),
+                  isActive: isActive,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    Color? circleFillColor() {
+      final Finder container = find.widgetWithText(AnimatedContainer, '1');
+      return (tester.widget<AnimatedContainer>(container).decoration as BoxDecoration?)?.color;
+    }
+
+    // Light theme
+    final ColorScheme light = ThemeData.light().colorScheme;
+    await tester.pumpWidget(buildFrame(isActive: true, brightness: Brightness.light));
+    expect(circleFillColor(), light.primary);
+    await tester.pumpWidget(buildFrame(isActive: false, brightness: Brightness.light));
+    await tester.pumpAndSettle();
+    expect(circleFillColor(), light.onSurface.withOpacity(0.38));
+
+    // Dark theme
+    final ColorScheme dark = ThemeData.dark().colorScheme;
+    await tester.pumpWidget(buildFrame(isActive: true, brightness: Brightness.dark));
+    await tester.pumpAndSettle();
+    expect(circleFillColor(), dark.secondary);
+    await tester.pumpWidget(buildFrame(isActive: false, brightness: Brightness.dark));
+    await tester.pumpAndSettle();
+    expect(circleFillColor(), dark.background);
   });
 }

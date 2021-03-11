@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 final Matcher _matchesCommit = isMethodCall('TextInput.finishAutofillContext', arguments: true);
@@ -57,7 +54,7 @@ void main() {
     const TextField client1 = TextField(autofillHints: <String>['1']);
     TextField client2 = const TextField(autofillHints: <String>[]);
 
-    StateSetter setState;
+    late StateSetter setState;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -170,7 +167,7 @@ void main() {
   });
 
   testWidgets('disposing AutofillGroups', (WidgetTester tester) async {
-    StateSetter setState;
+    late StateSetter setState;
     const Key group1 = Key('group1');
     const Key group2 = Key('group2');
     const Key group3 = Key('group3');

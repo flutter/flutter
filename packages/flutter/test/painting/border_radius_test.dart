@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -59,7 +57,7 @@ void main() {
       bottomRight: radius2,
     ));
 
-    borderRadius = const BorderRadius.only();
+    borderRadius = BorderRadius.zero;
     expect(borderRadius, hasOneLineDescription);
     expect(borderRadius.topLeft, Radius.zero);
     expect(borderRadius.topRight, Radius.zero);
@@ -230,7 +228,7 @@ void main() {
       bottomRight: radius1,
     ));
 
-    borderRadius = const BorderRadiusDirectional.only();
+    borderRadius = BorderRadiusDirectional.zero;
     expect(borderRadius, hasOneLineDescription);
     expect(borderRadius.topStart, Radius.zero);
     expect(borderRadius.topEnd, Radius.zero);
@@ -365,10 +363,10 @@ void main() {
       bottomLeft: Radius.elliptical(95.0, 105.0), // 50,60 -> 140,150
       bottomRight: Radius.elliptical(60.0, 65.0), // 0,0 -> 120,130
     );
-    expect(BorderRadiusGeometry.lerp(a, b, 0.5).resolve(TextDirection.ltr), ltr);
-    expect(BorderRadiusGeometry.lerp(a, b, 0.5).resolve(TextDirection.rtl), rtl);
-    expect(BorderRadiusGeometry.lerp(a, b, 0.0).resolve(TextDirection.ltr), a);
-    expect(BorderRadiusGeometry.lerp(a, b, 1.0).resolve(TextDirection.rtl), b.resolve(TextDirection.rtl));
+    expect(BorderRadiusGeometry.lerp(a, b, 0.5)!.resolve(TextDirection.ltr), ltr);
+    expect(BorderRadiusGeometry.lerp(a, b, 0.5)!.resolve(TextDirection.rtl), rtl);
+    expect(BorderRadiusGeometry.lerp(a, b, 0.0)!.resolve(TextDirection.ltr), a);
+    expect(BorderRadiusGeometry.lerp(a, b, 1.0)!.resolve(TextDirection.rtl), b.resolve(TextDirection.rtl));
   });
 
   test('BorderRadiusGeometry subtract', () {
@@ -537,5 +535,25 @@ void main() {
     expect((a.add(b.subtract(a) * 0.5)).resolve(TextDirection.rtl), rtl);
     expect((a.add(b.subtract(a) * 0.0)).resolve(TextDirection.ltr), a);
     expect((a.add(b.subtract(a) * 1.0)).resolve(TextDirection.rtl), b.resolve(TextDirection.rtl));
+  });
+
+  test('BorderRadius copyWith, merge, ==, hashCode basics', () {
+    const BorderRadius firstRadius = BorderRadius.all(Radius.circular(5.0));
+    final BorderRadius secondRadius = firstRadius.copyWith();
+    expect(firstRadius, secondRadius);
+    expect(firstRadius.hashCode, secondRadius.hashCode);
+  });
+
+  test('BorderRadius copyWith parameters', () {
+    const Radius radius = Radius.circular(10);
+    const BorderRadius borderRadius = BorderRadius.all(radius);
+    expect(borderRadius.copyWith(topLeft: Radius.zero).topLeft, Radius.zero);
+    expect(borderRadius.copyWith(topLeft: Radius.zero).copyWith(topLeft: radius), borderRadius);
+    expect(borderRadius.copyWith(topRight: Radius.zero).topRight, Radius.zero);
+    expect(borderRadius.copyWith(topRight: Radius.zero).copyWith(topRight: radius), borderRadius);
+    expect(borderRadius.copyWith(bottomLeft: Radius.zero).bottomLeft, Radius.zero);
+    expect(borderRadius.copyWith(bottomLeft: Radius.zero).copyWith(bottomLeft: radius), borderRadius);
+    expect(borderRadius.copyWith(bottomRight: Radius.zero).bottomRight, Radius.zero);
+    expect(borderRadius.copyWith(bottomRight: Radius.zero).copyWith(bottomRight: radius), borderRadius);
   });
 }

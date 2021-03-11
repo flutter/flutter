@@ -2,18 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import '../artifacts.dart';
 import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/process.dart';
+import '../base/project_migrator.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../cmake.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
+import '../migrations/cmake_custom_command_migration.dart';
 import '../plugins.dart';
 import '../project.dart';
 import 'visual_studio.dart';
@@ -31,26 +34,21 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
 }) async {
   if (!windowsProject.cmakeFile.existsSync()) {
     throwToolExit(
-      'No Windows desktop project configured. '
-      'See https://github.com/flutter/flutter/wiki/Desktop-shells#create '
+      'No Windows desktop project configured. See '
+      'https://flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
       'to learn about adding Windows support to a project.');
   }
 
-  // Check for incompatibility between the Flutter tool version and the project
-  // template version, since the tempalte isn't stable yet.
-  final int templateCompareResult = _compareTemplateVersions(windowsProject);
-  if (templateCompareResult < 0) {
-    throwToolExit('The Windows runner was created with an earlier version of '
-      'the template, which is not yet stable.\n\n'
-      'Delete the windows/ directory and re-run \'flutter create .\', '
-      're-applying any previous changes.');
-  } else if (templateCompareResult > 0) {
-    throwToolExit('The Windows runner was created with a newer version of the '
-      'template, which is not yet stable.\n\n'
-      'Upgrade Flutter and try again.');
+  final List<ProjectMigrator> migrators = <ProjectMigrator>[
+    CmakeCustomCommandMigration(windowsProject, globals.logger),
+  ];
+
+  final ProjectMigration migration = ProjectMigration(migrators);
+  if (!migration.run()) {
+    throwToolExit('Unable to migrate project files');
   }
 
-  // Ensure that necessary emphemeral files are generated and up to date.
+  // Ensure that necessary ephemeral files are generated and up to date.
   _writeGeneratedFlutterConfig(windowsProject, buildInfo, target);
   createPluginSymlinks(windowsProject.parent);
 
@@ -70,7 +68,6 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   final Directory buildDirectory = globals.fs.directory(getWindowsBuildDirectory());
   final Status status = globals.logger.startProgress(
     'Building Windows application...',
-    timeout: null,
   );
   try {
     await _runCmakeGeneration(cmakePath, buildDirectory, windowsProject.cmakeFile.parent);
@@ -94,11 +91,21 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
       type: 'windows',
     );
     final File outputFile = globals.fsUtils.getUniqueFile(
-      globals.fs.directory(getBuildDirectory()),'windows-code-size-analysis', 'json',
+      globals.fs
+        .directory(globals.fsUtils.homeDirPath)
+        .childDirectory('.flutter-devtools'), 'windows-code-size-analysis', 'json',
     )..writeAsStringSync(jsonEncode(output));
     // This message is used as a sentinel in analyze_apk_size_test.dart
     globals.printStatus(
       'A summary of your Windows bundle analysis can be found at: ${outputFile.path}',
+    );
+
+    // DevTools expects a file path relative to the .flutter-devtools/ dir.
+    final String relativeAppSizePath = outputFile.path.split('.flutter-devtools/').last.trim();
+    globals.printStatus(
+      '\nTo analyze your app size in Dart DevTools, run the following command:\n'
+      'flutter pub global activate devtools; flutter pub global run devtools '
+      '--appSizeBase=$relativeAppSizePath'
     );
   }
 }
@@ -109,7 +116,7 @@ Future<void> _runCmakeGeneration(String cmakePath, Directory buildDir, Directory
   await buildDir.create(recursive: true);
   int result;
   try {
-    result = await processUtils.stream(
+    result = await globals.processUtils.stream(
       <String>[
         cmakePath,
         '-S',
@@ -139,7 +146,7 @@ Future<void> _runBuild(String cmakePath, Directory buildDir, String buildModeNam
 
   int result;
   try {
-    result = await processUtils.stream(
+    result = await globals.processUtils.stream(
       <String>[
         cmakePath,
         '--build',
@@ -188,26 +195,4 @@ void _writeGeneratedFlutterConfig(
     environment['LOCAL_ENGINE'] = globals.fs.path.basename(engineOutPath);
   }
   writeGeneratedCmakeConfig(Cache.flutterRoot, windowsProject, environment);
-}
-
-// Checks the template version of [project] against the current template
-// version. Returns < 0 if the project is older than the current template, > 0
-// if it's newer, and 0 if they match.
-int _compareTemplateVersions(WindowsProject project) {
-  const String projectVersionBasename = '.template_version';
-  final int expectedVersion = int.parse(globals.fs.file(globals.fs.path.join(
-    globals.fs.path.absolute(Cache.flutterRoot),
-    'packages',
-    'flutter_tools',
-    'templates',
-    'app',
-    'windows.tmpl',
-    'flutter',
-    projectVersionBasename,
-  )).readAsStringSync());
-  final File projectVersionFile = project.managedDirectory.childFile(projectVersionBasename);
-  final int version = projectVersionFile.existsSync()
-      ? int.tryParse(projectVersionFile.readAsStringSync())
-      : 0;
-  return version.compareTo(expectedVersion);
 }

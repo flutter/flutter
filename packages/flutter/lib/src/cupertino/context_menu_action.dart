@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'colors.dart';
 
@@ -16,8 +13,8 @@ import 'colors.dart';
 class CupertinoContextMenuAction extends StatefulWidget {
   /// Construct a CupertinoContextMenuAction.
   const CupertinoContextMenuAction({
-    Key key,
-    @required this.child,
+    Key? key,
+    required this.child,
     this.isDefaultAction = false,
     this.isDestructiveAction = false,
     this.onPressed,
@@ -39,13 +36,13 @@ class CupertinoContextMenuAction extends StatefulWidget {
   final bool isDestructiveAction;
 
   /// Called when the action is pressed.
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   /// An optional icon to display to the right of the child.
   ///
   /// Will be colored in the same way as the [TextStyle] used for [child] (for
   /// example, if using [isDestructiveAction]).
-  final IconData trailingIcon;
+  final IconData? trailingIcon;
 
   @override
   _CupertinoContextMenuActionState createState() => _CupertinoContextMenuActionState();

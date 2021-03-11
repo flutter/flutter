@@ -5,8 +5,6 @@
 /// Measure application memory usage after pausing and resuming the app
 /// with the Android back button.
 
-import 'dart:async';
-
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import '../base/common.dart';
@@ -18,6 +20,7 @@ class LogsCommand extends FlutterCommand {
       abbr: 'c',
       help: 'Clear log history before reading from logs.',
     );
+    usesDeviceTimeoutOption();
   }
 
   @override
@@ -33,7 +36,7 @@ class LogsCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
-    device = await findTargetDevice();
+    device = await findTargetDevice(includeUnsupportedDevices: true);
     if (device == null) {
       throwToolExit(null);
     }

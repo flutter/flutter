@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';
 import 'basic_types.dart';
 import 'diagnostics.dart';
-import 'observer_list.dart';
 
 /// An object that maintains a list of listeners.
 ///
@@ -93,18 +94,22 @@ abstract class ValueListenable<T> extends Listenable {
   T get value;
 }
 
+class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
+  _ListenerEntry(this.listener);
+  final VoidCallback listener;
+}
+
 /// A class that can be extended or mixed in that provides a change notification
 /// API using [VoidCallback] for notifications.
 ///
-/// [ChangeNotifier] is optimized for small numbers (one or two) of listeners.
-/// It is O(N) for adding and removing listeners and O(N²) for dispatching
+/// It is O(1) for adding listeners and O(N) for removing listeners and dispatching
 /// notifications (where N is the number of listeners).
 ///
 /// See also:
 ///
 ///  * [ValueNotifier], which is a [ChangeNotifier] that wraps a single value.
 class ChangeNotifier implements Listenable {
-  ObserverList<VoidCallback>? _listeners = ObserverList<VoidCallback>();
+  LinkedList<_ListenerEntry>? _listeners = LinkedList<_ListenerEntry>();
 
   bool _debugAssertNotDisposed() {
     assert(() {
@@ -142,11 +147,34 @@ class ChangeNotifier implements Listenable {
 
   /// Register a closure to be called when the object changes.
   ///
+  /// If the given closure is already registered, an additional instance is
+  /// added, and must be removed the same number of times it is added before it
+  /// will stop being called.
+  ///
   /// This method must not be called after [dispose] has been called.
+  ///
+  /// {@template flutter.foundation.ChangeNotifier.addListener}
+  /// If a listener is added twice, and is removed once during an iteration
+  /// (e.g. in response to a notification), it will still be called again. If,
+  /// on the other hand, it is removed as many times as it was registered, then
+  /// it will no longer be called. This odd behavior is the result of the
+  /// [ChangeNotifier] not being able to determine which listener is being
+  /// removed, since they are identical, therefore it will conservatively still
+  /// call all the listeners when it knows that any are still registered.
+  ///
+  /// This surprising behavior can be unexpectedly observed when registering a
+  /// listener on two separate objects which are both forwarding all
+  /// registrations to a common upstream object.
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///  * [removeListener], which removes a previously registered closure from
+  ///    the list of closures that are notified when the object changes.
   @override
   void addListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed());
-    _listeners!.add(listener);
+    _listeners!.add(_ListenerEntry(listener));
   }
 
   /// Remove a previously registered closure from the list of closures that are
@@ -156,22 +184,21 @@ class ChangeNotifier implements Listenable {
   ///
   /// This method must not be called after [dispose] has been called.
   ///
-  /// If a listener had been added twice, and is removed once during an
-  /// iteration (i.e. in response to a notification), it will still be called
-  /// again. If, on the other hand, it is removed as many times as it was
-  /// registered, then it will no longer be called. This odd behavior is the
-  /// result of the [ChangeNotifier] not being able to determine which listener
-  /// is being removed, since they are identical, and therefore conservatively
-  /// still calling all the listeners when it knows that any are still
-  /// registered.
+  /// {@macro flutter.foundation.ChangeNotifier.addListener}
   ///
-  /// This surprising behavior can be unexpectedly observed when registering a
-  /// listener on two separate objects which are both forwarding all
-  /// registrations to a common upstream object.
+  /// See also:
+  ///
+  ///  * [addListener], which registers a closure to be called when the object
+  ///    changes.
   @override
   void removeListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed());
-    _listeners!.remove(listener);
+    for (final _ListenerEntry entry in _listeners!) {
+      if (entry.listener == listener) {
+        entry.unlink();
+        return;
+      }
+    }
   }
 
   /// Discards any resources used by the object. After this is called, the
@@ -198,34 +225,36 @@ class ChangeNotifier implements Listenable {
   ///
   /// This method must not be called after [dispose] has been called.
   ///
-  /// Surprising behavior can result when reentrantly removing a listener (i.e.
+  /// Surprising behavior can result when reentrantly removing a listener (e.g.
   /// in response to a notification) that has been registered multiple times.
   /// See the discussion at [removeListener].
   @protected
   @visibleForTesting
   void notifyListeners() {
     assert(_debugAssertNotDisposed());
-    if (_listeners != null) {
-      final List<VoidCallback> localListeners = List<VoidCallback>.from(_listeners!);
-      for (final VoidCallback listener in localListeners) {
-        try {
-          if (_listeners!.contains(listener))
-            listener();
-        } catch (exception, stack) {
-          FlutterError.reportError(FlutterErrorDetails(
-            exception: exception,
-            stack: stack,
-            library: 'foundation library',
-            context: ErrorDescription('while dispatching notifications for $runtimeType'),
-            informationCollector: () sync* {
-              yield DiagnosticsProperty<ChangeNotifier>(
-                'The $runtimeType sending notification was',
-                this,
-                style: DiagnosticsTreeStyle.errorProperty,
-              );
-            },
-          ));
-        }
+    if (_listeners!.isEmpty)
+      return;
+
+    final List<_ListenerEntry> localListeners = List<_ListenerEntry>.from(_listeners!);
+
+    for (final _ListenerEntry entry in localListeners) {
+      try {
+        if (entry.list != null)
+          entry.listener();
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'foundation library',
+          context: ErrorDescription('while dispatching notifications for $runtimeType'),
+          informationCollector: () sync* {
+            yield DiagnosticsProperty<ChangeNotifier>(
+              'The $runtimeType sending notification was',
+              this,
+              style: DiagnosticsTreeStyle.errorProperty,
+            );
+          },
+        ));
       }
     }
   }

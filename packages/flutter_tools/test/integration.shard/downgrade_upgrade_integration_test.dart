@@ -2,31 +2,31 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:process/process.dart';
 
 import '../src/common.dart';
+import 'test_utils.dart';
 
 const String _kInitialVersion = 'v1.9.1';
 const String _kBranch = 'dev';
-final FileSystem fileSystem = LocalFileSystem.instance;
-const ProcessManager processManager = LocalProcessManager();
+
 final Stdio stdio = Stdio();
 final ProcessUtils processUtils = ProcessUtils(processManager: processManager, logger: StdoutLogger(
   terminal: AnsiTerminal(
-    platform: const LocalPlatform(),
+    platform: platform,
     stdio: stdio,
   ),
   stdio: stdio,
   outputPreferences: OutputPreferences.test(wrapText: true),
-  timeoutConfiguration: const TimeoutConfiguration(),
 ));
-final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
+final String dartBin = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'dart.bat' : 'dart');
 
 /// A test for flutter upgrade & downgrade that checks out a parallel flutter repo.
 void main() {
@@ -46,7 +46,7 @@ void main() {
     }
   });
 
-  test('Can upgrade and downgrade a Flutter checkout', () async {
+  testWithoutContext('Can upgrade and downgrade a Flutter checkout', () async {
     final Directory testDirectory = parentDirectory.childDirectory('flutter');
     testDirectory.createSync(recursive: true);
 
@@ -101,7 +101,6 @@ void main() {
       'describe',
       '--match',
       'v*.*.*',
-      '--first-parent',
       '--long',
       '--tags',
     ], workingDirectory: testDirectory.path);
@@ -125,7 +124,6 @@ void main() {
       'describe',
       '--match',
       'v*.*.*',
-      '--first-parent',
       '--long',
       '--tags',
     ], workingDirectory: testDirectory.path);

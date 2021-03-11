@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+// @dart = 2.8
 
 import '../android/android_device.dart';
 import '../application_package.dart';
@@ -16,6 +16,7 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
   InstallCommand() {
     requiresPubspecYaml();
     usesDeviceUserOption();
+    usesDeviceTimeoutOption();
     argParser.addFlag('uninstall-only',
       negatable: true,
       defaultsTo: false,
@@ -50,7 +51,6 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
   Future<FlutterCommandResult> runCommand() async {
     final ApplicationPackage package = await applicationPackages.getPackageForPlatform(
       await device.targetPlatform,
-      null, // Build info isn't relevant for install, will use whatever bundle was built last.
     );
 
     if (uninstallOnly) {

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert' show JsonEncoder;
 
 import 'package:flutter_driver/driver_extension.dart';
@@ -25,20 +24,20 @@ List<String> _allDemos = kAllGalleryDemos.map(
 Set<String> _unTestedDemos = Set<String>.from(_allDemos);
 
 class _MessageHandler {
-  static LiveWidgetController controller;
+  static LiveWidgetController? controller;
   Future<String> call(String message) async {
     switch(message) {
       case 'demoNames':
         return const JsonEncoder.withIndent('  ').convert(_allDemos);
       case 'profileDemos':
-        controller ??= LiveWidgetController(WidgetsBinding.instance);
-        await runDemos(kProfiledDemos, controller);
+        controller ??= LiveWidgetController(WidgetsBinding.instance!);
+        await runDemos(kProfiledDemos, controller!);
         _unTestedDemos.removeAll(kProfiledDemos);
         return const JsonEncoder.withIndent('  ').convert(kProfiledDemos);
       case 'restDemos':
-        controller ??= LiveWidgetController(WidgetsBinding.instance);
+        controller ??= LiveWidgetController(WidgetsBinding.instance!);
         final List<String> restDemos =  _unTestedDemos.toList();
-        await runDemos(restDemos, controller);
+        await runDemos(restDemos, controller!);
         return const JsonEncoder.withIndent('  ').convert(restDemos);
       default:
         throw ArgumentError;
@@ -47,7 +46,7 @@ class _MessageHandler {
 }
 
 void main() {
-  enableFlutterDriverExtension(handler: _MessageHandler());
+  enableFlutterDriverExtension(handler: (String? message) => _MessageHandler().call(message!));
   // As in lib/main.dart: overriding https://github.com/flutter/flutter/issues/13736
   // for better visual effect at the cost of performance.
   runApp(const GalleryApp(testMode: true));

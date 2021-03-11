@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 class ProgressIndicatorDemo extends StatefulWidget {
+  const ProgressIndicatorDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/material/progress-indicator';
 
   @override
@@ -14,8 +16,8 @@ class ProgressIndicatorDemo extends StatefulWidget {
 }
 
 class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with SingleTickerProviderStateMixin {
-  AnimationController _controller;
-  Animation<double> _animation;
+  late AnimationController _controller;
+  late Animation<double> _animation;
 
   @override
   void initState() {
@@ -64,7 +66,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
     });
   }
 
-  Widget _buildIndicators(BuildContext context, Widget child) {
+  Widget _buildIndicators(BuildContext context, Widget? child) {
     final List<Widget> indicators = <Widget>[
       const SizedBox(
         width: 200.0,
@@ -109,7 +111,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
       body: Center(
         child: SingleChildScrollView(
           child: DefaultTextStyle(
-            style: Theme.of(context).textTheme.headline6,
+            style: Theme.of(context).textTheme.headline6!,
             child: GestureDetector(
               onTap: _handleTap,
               behavior: HitTestBehavior.opaque,

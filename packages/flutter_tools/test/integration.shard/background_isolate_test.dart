@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 
 import '../src/common.dart';
 import 'test_data/background_project.dart';
@@ -23,7 +24,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  test('Hot restart kills background isolates', () async {
+  testWithoutContext('Hot restart kills background isolates', () async {
     final BackgroundProject project = BackgroundProject();
     await project.setUpIn(tempDir);
     final FlutterRunTestDriver flutter = FlutterRunTestDriver(tempDir);
@@ -58,7 +59,7 @@ void main() {
     await flutter?.stop();
   });
 
-  test('Hot reload updates background isolates', () async {
+  testWithoutContext('Hot reload updates background isolates', () async {
     final RepeatingBackgroundProject project = RepeatingBackgroundProject();
     await project.setUpIn(tempDir);
     final FlutterRunTestDriver flutter = FlutterRunTestDriver(tempDir);

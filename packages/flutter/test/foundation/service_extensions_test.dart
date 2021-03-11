@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -31,9 +28,10 @@ class TestServiceExtensionsBinding extends BindingBase
   final Map<String, List<Map<String, dynamic>>> eventsDispatched = <String, List<Map<String, dynamic>>>{};
 
   @override
+  @protected
   void registerServiceExtension({
-    @required String name,
-    @required ServiceExtensionCallback callback,
+    required String name,
+    required ServiceExtensionCallback callback,
   }) {
     expect(extensions.containsKey(name), isFalse);
     extensions[name] = callback;
@@ -55,7 +53,7 @@ class TestServiceExtensionsBinding extends BindingBase
 
   Future<Map<String, dynamic>> testExtension(String name, Map<String, String> arguments) {
     expect(extensions.containsKey(name), isTrue);
-    return extensions[name](arguments);
+    return extensions[name]!(arguments);
   }
 
   int reassembled = 0;
@@ -75,13 +73,10 @@ class TestServiceExtensionsBinding extends BindingBase
   }
   Future<void> doFrame() async {
     frameScheduled = false;
-    if (ui.window.onBeginFrame != null)
-      ui.window.onBeginFrame(Duration.zero);
+    ui.window.onBeginFrame?.call(Duration.zero);
     await flushMicrotasks();
-    if (ui.window.onDrawFrame != null)
-      ui.window.onDrawFrame();
-    if (ui.window.onReportTimings != null)
-      ui.window.onReportTimings(<ui.FrameTiming>[]);
+    ui.window.onDrawFrame?.call();
+    ui.window.onReportTimings?.call(<ui.FrameTiming>[]);
   }
 
   @override
@@ -102,7 +97,7 @@ class TestServiceExtensionsBinding extends BindingBase
   }
 }
 
-TestServiceExtensionsBinding binding;
+late TestServiceExtensionsBinding binding;
 
 Future<Map<String, dynamic>> hasReassemble(Future<Map<String, dynamic>> pendingResult) async {
   bool completed = false;
@@ -120,7 +115,7 @@ Future<Map<String, dynamic>> hasReassemble(Future<Map<String, dynamic>> pendingR
 }
 
 void main() {
-  final List<String> console = <String>[];
+  final List<String?> console = <String?>[];
 
   setUpAll(() async {
     binding = TestServiceExtensionsBinding()..scheduleFrame();
@@ -150,7 +145,7 @@ void main() {
     expect(binding.frameScheduled, isFalse);
 
     expect(debugPrint, equals(debugPrintThrottled));
-    debugPrint = (String message, { int wrapWidth }) {
+    debugPrint = (String? message, { int? wrapWidth }) {
       console.add(message);
     };
   });
@@ -171,7 +166,7 @@ void main() {
     const int disabledExtensions = kIsWeb ? 2 : 0;
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 29 + widgetInspectorExtensionCount - disabledExtensions);
+    expect(binding.extensions.length, 31 + widgetInspectorExtensionCount - disabledExtensions);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;
@@ -208,7 +203,7 @@ void main() {
 
     bool lastValue = false;
     Future<void> _updateAndCheck(bool newValue) async {
-      Map<String, dynamic> result;
+      Map<String, dynamic>? result;
       binding.testExtension(
         'debugCheckElevationsEnabled',
         <String, String>{'enabled': '$newValue'},
@@ -231,22 +226,19 @@ void main() {
   });
 
   test('Service extensions - debugDumpApp', () async {
-    Map<String, dynamic> result;
+    final Map<String, dynamic> result = await binding.testExtension('debugDumpApp', <String, String>{});
 
-    result = await binding.testExtension('debugDumpApp', <String, String>{});
-    expect(result, <String, String>{});
-    expect(console, <String>['TestServiceExtensionsBinding - CHECKED MODE', '<no tree currently mounted>']);
-    console.clear();
+    expect(result, <String, dynamic>{
+      'data': matches('TestServiceExtensionsBinding - DEBUG MODE\n<no tree currently mounted>'),
+    });
   });
 
   test('Service extensions - debugDumpRenderTree', () async {
-    Map<String, dynamic> result;
-
     await binding.doFrame();
-    result = await binding.testExtension('debugDumpRenderTree', <String, String>{});
-    expect(result, <String, String>{});
-    expect(console, <Matcher>[
-      matches(
+    final Map<String, dynamic> result = await binding.testExtension('debugDumpRenderTree', <String, String>{});
+
+    expect(result, <String, dynamic>{
+      'data': matches(
         r'^'
         r'RenderView#[0-9a-f]{5}\n'
         r'   debug mode enabled - [a-zA-Z]+\n'
@@ -255,18 +247,15 @@ void main() {
         r'   configuration: Size\(800\.0, 600\.0\) at 3\.0x \(in logical pixels\)\n'
         r'$'
       ),
-    ]);
-    console.clear();
+    });
   });
 
   test('Service extensions - debugDumpLayerTree', () async {
-    Map<String, dynamic> result;
-
     await binding.doFrame();
-    result = await binding.testExtension('debugDumpLayerTree', <String, String>{});
-    expect(result, <String, String>{});
-    expect(console, <Matcher>[
-      matches(
+    final Map<String, dynamic> result = await binding.testExtension('debugDumpLayerTree', <String, String>{});
+
+    expect(result, <String, dynamic>{
+      'data': matches(
         r'^'
         r'TransformLayer#[0-9a-f]{5}\n'
         r'   owner: RenderView#[0-9a-f]{5}\n'
@@ -280,28 +269,25 @@ void main() {
         r'     \[3] 0\.0,0\.0,0\.0,1\.0\n'
         r'$'
       ),
-    ]);
-    console.clear();
+    });
   });
 
   test('Service extensions - debugDumpSemanticsTreeInTraversalOrder', () async {
-    Map<String, dynamic> result;
-
     await binding.doFrame();
-    result = await binding.testExtension('debugDumpSemanticsTreeInTraversalOrder', <String, String>{});
-    expect(result, <String, String>{});
-    expect(console, <String>['Semantics not collected.']);
-    console.clear();
+    final Map<String, dynamic> result = await binding.testExtension('debugDumpSemanticsTreeInTraversalOrder', <String, String>{});
+
+    expect(result, <String, String>{
+      'data': 'Semantics not collected.'
+    });
   });
 
   test('Service extensions - debugDumpSemanticsTreeInInverseHitTestOrder', () async {
-    Map<String, dynamic> result;
-
     await binding.doFrame();
-    result = await binding.testExtension('debugDumpSemanticsTreeInInverseHitTestOrder', <String, String>{});
-    expect(result, <String, String>{});
-    expect(console, <String>['Semantics not collected.']);
-    console.clear();
+    final Map<String, dynamic> result = await binding.testExtension('debugDumpSemanticsTreeInInverseHitTestOrder', <String, String>{});
+
+    expect(result, <String, String>{
+      'data': 'Semantics not collected.'
+    });
   });
 
   test('Service extensions - debugPaint', () async {
@@ -403,21 +389,44 @@ void main() {
 
   test('Service extensions - invertOversizedImages', () async {
     Map<String, dynamic> result;
+    Future<Map<String, dynamic>> pendingResult;
+    bool completed;
 
     expect(binding.frameScheduled, isFalse);
     expect(debugInvertOversizedImages, false);
     result = await binding.testExtension('invertOversizedImages', <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugInvertOversizedImages, false);
-    result = await binding.testExtension('invertOversizedImages', <String, String>{'enabled': 'true'});
+    expect(binding.frameScheduled, isFalse);
+
+    pendingResult = binding.testExtension('invertOversizedImages', <String, String>{'enabled': 'true'});
+    completed = false;
+    pendingResult.whenComplete(() { completed = true; });
+    await binding.flushMicrotasks();
+    expect(binding.frameScheduled, isTrue);
+    expect(completed, isFalse);
+    await binding.doFrame();
+    await binding.flushMicrotasks();
+    expect(completed, isTrue);
+    expect(binding.frameScheduled, isFalse);
+    result = await pendingResult;
     expect(result, <String, String>{'enabled': 'true'});
     expect(debugInvertOversizedImages, true);
+
     result = await binding.testExtension('invertOversizedImages', <String, String>{});
     expect(result, <String, String>{'enabled': 'true'});
     expect(debugInvertOversizedImages, true);
-    result = await binding.testExtension('invertOversizedImages', <String, String>{'enabled': 'false'});
+    expect(binding.frameScheduled, isFalse);
+
+    pendingResult = binding.testExtension('invertOversizedImages', <String, String>{'enabled': 'false'});
+    await binding.flushMicrotasks();
+    expect(binding.frameScheduled, isTrue);
+    await binding.doFrame();
+    expect(binding.frameScheduled, isFalse);
+    result = await pendingResult;
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugInvertOversizedImages, false);
+
     result = await binding.testExtension('invertOversizedImages', <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugInvertOversizedImages, false);
@@ -458,8 +467,8 @@ void main() {
     bool completed;
 
     completed = false;
-    ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData message) async {
-      expect(utf8.decode(message.buffer.asUint8List()), 'test');
+    ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) async {
+      expect(utf8.decode(message!.buffer.asUint8List()), 'test');
       completed = true;
       return ByteData(5); // 0x0000000000
     });
@@ -472,8 +481,7 @@ void main() {
     expect(completed, isTrue);
     completed = false;
     data = await rootBundle.loadStructuredData('test', (String value) async {
-      expect(true, isFalse);
-      return null;
+      throw Error();
     });
     expect(data, isTrue);
     expect(completed, isFalse);
@@ -486,7 +494,7 @@ void main() {
     });
     expect(data, isFalse);
     expect(completed, isTrue);
-    ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', null);
+    ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', null);
   });
 
   test('Service extensions - exit', () async {
@@ -741,7 +749,29 @@ void main() {
     expect(brightnessValue, 'Brightness.light');
   });
 
-  test('Service extensions - fastReassemble', () async {
-    expect(binding.testExtension('fastReassemble', <String, String>{}), throwsA(isA<FlutterError>()));
+  test('Service extensions - activeDevToolsServerAddress', () async {
+    Map<String, dynamic> result;
+    result = await binding.testExtension('activeDevToolsServerAddress', <String, String>{});
+    String serverAddress = result['value'] as String;
+    expect(serverAddress, '');
+    result = await binding.testExtension('activeDevToolsServerAddress', <String, String>{'value': 'http://127.0.0.1:9101'});
+    serverAddress = result['value'] as String;
+    expect(serverAddress, 'http://127.0.0.1:9101');
+    result = await binding.testExtension('activeDevToolsServerAddress', <String, String>{'value': 'http://127.0.0.1:9102'});
+    serverAddress = result['value'] as String;
+    expect(serverAddress, 'http://127.0.0.1:9102');
+  });
+
+  test('Service extensions - connectedVmServiceUri', () async {
+    Map<String, dynamic> result;
+    result = await binding.testExtension('connectedVmServiceUri', <String, String>{});
+    String serverAddress = result['value'] as String;
+    expect(serverAddress, '');
+    result = await binding.testExtension('connectedVmServiceUri', <String, String>{'value': 'http://127.0.0.1:54669/kMUMseKAnog=/'});
+    serverAddress = result['value'] as String;
+    expect(serverAddress, 'http://127.0.0.1:54669/kMUMseKAnog=/');
+    result = await binding.testExtension('connectedVmServiceUri', <String, String>{'value': 'http://127.0.0.1:54000/kMUMseKAnog=/'});
+    serverAddress = result['value'] as String;
+    expect(serverAddress, 'http://127.0.0.1:54000/kMUMseKAnog=/');
   });
 }

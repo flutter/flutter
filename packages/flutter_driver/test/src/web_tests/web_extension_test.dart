@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('test web_extension', () {
-    Future<Map<String, dynamic>> Function(Map<String, String>) call;
+    late Future<Map<String, dynamic>> Function(Map<String, String>) call;
 
     setUp(() {
       call = (Map<String, String> args) async {

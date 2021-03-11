@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -23,7 +21,7 @@ class MockOnPressedFunction {
 }
 
 void main() {
-  MockOnPressedFunction mockOnPressedFunction;
+  late MockOnPressedFunction mockOnPressedFunction;
 
   setUp(() {
     mockOnPressedFunction = MockOnPressedFunction();
@@ -537,14 +535,14 @@ void main() {
   });
 
   group('feedback', () {
-    FeedbackTester feedback;
+    late FeedbackTester feedback;
 
     setUp(() {
       feedback = FeedbackTester();
     });
 
     tearDown(() {
-      feedback?.dispose();
+      feedback.dispose();
     });
 
     testWidgets('IconButton with disabled feedback', (WidgetTester tester) async {
@@ -607,7 +605,7 @@ void main() {
   testWidgets('IconButton responds to density changes.', (WidgetTester tester) async {
     const Key key = Key('test');
     Future<void> buildTest(VisualDensity visualDensity) async {
-      return await tester.pumpWidget(
+      return tester.pumpWidget(
         MaterialApp(
           home: Material(
             child: Center(
@@ -623,7 +621,7 @@ void main() {
       );
     }
 
-    await buildTest(const VisualDensity());
+    await buildTest(VisualDensity.standard);
     final RenderBox box = tester.renderObject(find.byKey(key));
     await tester.pumpAndSettle();
     expect(box.size, equals(const Size(48, 48)));
@@ -664,7 +662,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
 
     // Test default is click
     await tester.pumpWidget(
@@ -681,11 +679,11 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
 }
 
-Widget wrap({ Widget child }) {
+Widget wrap({ required Widget child }) {
   return FocusTraversalGroup(
     policy: ReadingOrderTraversalPolicy(),
     child: Directionality(

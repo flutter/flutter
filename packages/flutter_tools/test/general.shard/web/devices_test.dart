@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -13,7 +15,7 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/testbed.dart';
+import '../../src/fakes.dart';
 
 void main() {
   testWithoutContext('No web devices listed if feature is disabled', () async {
@@ -159,7 +161,8 @@ void main() {
       isNot(contains(isA<MicrosoftEdgeDevice>())));
   });
 
-  testWithoutContext('Web Server device is listed by default', () async {
+  testWithoutContext('Web Server device is listed if enabled via showWebServerDevice', () async {
+    WebServerDevice.showWebServerDevice = true;
     final WebDevices webDevices = WebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
@@ -173,6 +176,23 @@ void main() {
 
     expect(await webDevices.pollingGetDevices(),
       contains(isA<WebServerDevice>()));
+  });
+
+  testWithoutContext('Web Server device is not listed if disabled via showWebServerDevice', () async {
+    WebServerDevice.showWebServerDevice = false;
+    final WebDevices webDevices = WebDevices(
+      featureFlags: TestFeatureFlags(isWebEnabled: true),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      platform: FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{}
+      ),
+      processManager: FakeProcessManager.any(),
+    );
+
+    expect(await webDevices.pollingGetDevices(),
+      isNot(contains(isA<WebServerDevice>())));
   });
 
   testWithoutContext('Chrome invokes version command on non-Windows platforms', () async {

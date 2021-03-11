@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.10
-import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:path/path.dart' as path;
@@ -321,6 +319,7 @@ class ComparisonResult {
   /// Creates a new [ComparisonResult] for the current test.
   ComparisonResult({
     required this.passed,
+    required this.diffPercent,
     this.error,
     this.diffs,
   });
@@ -337,4 +336,7 @@ class ComparisonResult {
   /// values in the execution of the pixel test.
   // TODO(jonahwilliams): fix type signature when image is updated to support web.
   final Map<String, Object>? diffs;
+
+  /// The calculated percentage of pixel difference between two images.
+  final double diffPercent;
 }

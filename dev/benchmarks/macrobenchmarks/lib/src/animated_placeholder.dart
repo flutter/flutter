@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui show Codec;
 
@@ -25,6 +24,8 @@ const String kBlueSquare = 'iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAASEl'
 /// A 10x10 grid of animated looping placeholder gifts that fade into a
 /// blue square.
 class AnimatedPlaceholderPage extends StatelessWidget {
+  const AnimatedPlaceholderPage({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return GridView.builder(

@@ -6,11 +6,59 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
+import 'package:meta/meta.dart';
 import 'package:vm_service_client/vm_service_client.dart';
 
-import 'package:flutter_devicelab/framework/utils.dart';
-import 'package:flutter_devicelab/framework/adb.dart' show DeviceIdEnvName;
+import 'adb.dart';
+import 'cocoon.dart';
+import 'task_result.dart';
+import 'utils.dart';
+
+Future<void> runTasks(
+  List<String> taskNames, {
+  bool exitOnFirstTestFailure = false,
+  bool silent = false,
+  String deviceId,
+  String gitBranch,
+  String localEngine,
+  String localEngineSrcPath,
+  String luciBuilder,
+  String resultsPath,
+  List<String> taskArgs,
+}) async {
+  for (final String taskName in taskNames) {
+    section('Running task "$taskName"');
+    final TaskResult result = await runTask(
+      taskName,
+      deviceId: deviceId,
+      localEngine: localEngine,
+      localEngineSrcPath: localEngineSrcPath,
+      silent: silent,
+      taskArgs: taskArgs,
+    );
+
+    print('Task result:');
+    print(const JsonEncoder.withIndent('  ').convert(result));
+    section('Finished task "$taskName"');
+
+    if (resultsPath != null) {
+      final Cocoon cocoon = Cocoon();
+      await cocoon.writeTaskResultToFile(
+        builderName: luciBuilder,
+        gitBranch: gitBranch,
+        result: result,
+        resultsPath: resultsPath,
+      );
+    }
+
+    if (!result.succeeded) {
+      exitCode = 1;
+      if (exitOnFirstTestFailure) {
+        return;
+      }
+    }
+  }
+}
 
 /// Runs a task in a separate Dart VM and collects the result using the VM
 /// service protocol.
@@ -20,12 +68,16 @@ import 'package:flutter_devicelab/framework/adb.dart' show DeviceIdEnvName;
 ///
 /// Running the task in [silent] mode will suppress standard output from task
 /// processes and only print standard errors.
-Future<Map<String, dynamic>> runTask(
+///
+/// [taskArgs] are passed to the task executable for additional configuration.
+Future<TaskResult> runTask(
   String taskName, {
   bool silent = false,
   String localEngine,
   String localEngineSrcPath,
   String deviceId,
+  List<String> taskArgs,
+  @visibleForTesting Map<String, String> isolateParams,
 }) async {
   final String taskExecutable = 'bin/tasks/$taskName.dart';
 
@@ -41,6 +93,7 @@ Future<Map<String, dynamic>> runTask(
       if (localEngine != null) '-DlocalEngine=$localEngine',
       if (localEngineSrcPath != null) '-DlocalEngineSrcPath=$localEngineSrcPath',
       taskExecutable,
+      ...?taskArgs,
     ],
     environment: <String, String>{
       if (deviceId != null)
@@ -79,13 +132,13 @@ Future<Map<String, dynamic>> runTask(
 
   try {
     final VMIsolateRef isolate = await _connectToRunnerIsolate(await uri.future);
-    final Map<String, dynamic> taskResult = await isolate.invokeExtension('ext.cocoonRunTask') as Map<String, dynamic>;
+    final Map<String, dynamic> taskResultJson = await isolate.invokeExtension('ext.cocoonRunTask', isolateParams) as Map<String, dynamic>;
+    final TaskResult taskResult = TaskResult.fromJson(taskResultJson);
     await runner.exitCode;
     return taskResult;
   } finally {
     if (!runnerFinished)
       runner.kill(ProcessSignal.sigkill);
-    await cleanupSystem();
     await stdoutSub.cancel();
     await stderrSub.cancel();
   }
@@ -119,42 +172,5 @@ Future<VMIsolateRef> _connectToRunnerIsolate(Uri vmServiceUri) async {
         print('VM service still not ready after ${stopwatch.elapsed}: $error\nContinuing to retry...');
       await Future<void>.delayed(const Duration(milliseconds: 50));
     }
-  }
-}
-
-Future<void> cleanupSystem() async {
-  print('\n\nCleaning up system after task...');
-  final String javaHome = await findJavaHome();
-  if (javaHome != null) {
-    // To shut gradle down, we have to call "gradlew --stop".
-    // To call gradlew, we need to have a gradle-wrapper.properties file along
-    // with a shell script, a .jar file, etc. We get these from various places
-    // as you see in the code below, and we save them all into a temporary dir
-    // which we can then delete after.
-    // All the steps below are somewhat tolerant of errors, because it doesn't
-    // really matter if this succeeds every time or not.
-    print('\nTelling Gradle to shut down (JAVA_HOME=$javaHome)');
-    final String gradlewBinaryName = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
-    final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_shutdown_gradle.');
-    recursiveCopy(Directory(path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'gradle_wrapper')), tempDir);
-    copy(File(path.join(path.join(flutterDirectory.path, 'packages', 'flutter_tools'), 'templates', 'app', 'android.tmpl', 'gradle', 'wrapper', 'gradle-wrapper.properties')), Directory(path.join(tempDir.path, 'gradle', 'wrapper')));
-    if (!Platform.isWindows) {
-      await exec(
-        'chmod',
-        <String>['a+x', path.join(tempDir.path, gradlewBinaryName)],
-        canFail: true,
-      );
-    }
-    await exec(
-      path.join(tempDir.path, gradlewBinaryName),
-      <String>['--stop'],
-      environment: <String, String>{ 'JAVA_HOME': javaHome },
-      workingDirectory: tempDir.path,
-      canFail: true,
-    );
-    rmTree(tempDir);
-    print('\n');
-  } else {
-    print('Could not determine JAVA_HOME; not shutting down Gradle.');
   }
 }

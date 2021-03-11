@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -15,7 +17,7 @@ import '../../src/io.dart';
 
 void main() {
   test('IOOverrides can inject a memory file system', () async {
-    final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+    final MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
     final FlutterIOOverrides flutterIOOverrides = FlutterIOOverrides(fileSystem: memoryFileSystem);
     await io.IOOverrides.runWithIOOverrides(() async {
       // statics delegate correctly.
@@ -55,12 +57,10 @@ void main() {
     }, flutterIOOverrides);
   });
   testUsingContext('ProcessSignal signals are properly delegated', () async {
-    final MockIoProcessSignal mockSignal = MockIoProcessSignal();
-    final ProcessSignal signalUnderTest = ProcessSignal(mockSignal);
-    final StreamController<io.ProcessSignal> controller = StreamController<io.ProcessSignal>();
+    final FakeProcessSignal signal = FakeProcessSignal();
+    final ProcessSignal signalUnderTest = ProcessSignal(signal);
 
-    when(mockSignal.watch()).thenAnswer((Invocation invocation) => controller.stream);
-    controller.add(mockSignal);
+    signal.controller.add(signal);
 
     expect(signalUnderTest, await signalUnderTest.watch().first);
   });
@@ -102,4 +102,9 @@ void main() {
   });
 }
 
-class MockIoProcessSignal extends Mock implements io.ProcessSignal {}
+class FakeProcessSignal extends Fake implements io.ProcessSignal {
+  final StreamController<io.ProcessSignal> controller = StreamController<io.ProcessSignal>();
+
+  @override
+  Stream<io.ProcessSignal> watch() => controller.stream;
+}

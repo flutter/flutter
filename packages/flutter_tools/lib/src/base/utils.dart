@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'dart:async';
-import 'dart:math' show max;
+import 'dart:math' as math;
 
 import 'package:intl/intl.dart';
-import 'package:meta/meta.dart';
+import 'package:file/file.dart';
 
 import '../convert.dart';
-import 'file_system.dart';
 
 /// Convert `foo_bar` to `fooBar`.
 String camelCase(String str) {
@@ -28,7 +28,7 @@ final RegExp _upperRegex = RegExp(r'[A-Z]');
 /// Convert `fooBar` to `foo_bar`.
 String snakeCase(String str, [ String sep = '_' ]) {
   return str.replaceAllMapped(_upperRegex,
-      (Match m) => '${m.start == 0 ? '' : sep}${m[0].toLowerCase()}');
+      (Match m) => '${m.start == 0 ? '' : sep}${m[0]!.toLowerCase()}');
 }
 
 String toTitleCase(String str) {
@@ -73,13 +73,9 @@ String getSizeAsMB(int bytesLength) {
 /// removed, and calculate a diff of changes when a new list of items is
 /// available.
 class ItemListNotifier<T> {
-  ItemListNotifier() {
-    _items = <T>{};
-  }
+  ItemListNotifier(): _items = <T>{};
 
-  ItemListNotifier.from(List<T> items) {
-    _items = Set<T>.of(items);
-  }
+  ItemListNotifier.from(List<T> items) : _items = Set<T>.of(items);
 
   Set<T> _items;
 
@@ -148,22 +144,9 @@ class SettingsFile {
 
 /// Given a data structure which is a Map of String to dynamic values, return
 /// the same structure (`Map<String, dynamic>`) with the correct runtime types.
-Map<String, dynamic> castStringKeyedMap(dynamic untyped) {
-  final Map<dynamic, dynamic> map = untyped as Map<dynamic, dynamic>;
+Map<String, dynamic>? castStringKeyedMap(dynamic untyped) {
+  final Map<dynamic, dynamic>? map = untyped as Map<dynamic, dynamic>?;
   return map?.cast<String, dynamic>();
-}
-
-typedef AsyncCallback = Future<void> Function();
-
-/// Returns a [Future] that completes when all given [Future]s complete.
-///
-/// Uses [Future.wait] but removes null elements from the provided
-/// `futures` iterable first.
-///
-/// The returned [Future<List>] will be shorter than the given `futures` if
-/// it contains nulls.
-Future<List<T>> waitGroup<T>(Iterable<Future<T>> futures) {
-  return Future.wait<T>(futures.where((Future<T> future) => future != null));
 }
 
 /// Smallest column that will be used for text wrapping. If the requested column
@@ -172,9 +155,10 @@ const int kMinColumnWidth = 10;
 
 /// Wraps a block of text into lines no longer than [columnWidth].
 ///
-/// Tries to split at whitespace, but if that's not good enough to keep it
-/// under the limit, then it splits in the middle of a word. If [columnWidth] is
-/// smaller than 10 columns, will wrap at 10 columns.
+/// Tries to split at whitespace, but if that's not good enough to keep it under
+/// the limit, then it splits in the middle of a word. If [columnWidth] (minus
+/// any indent) is smaller than [kMinColumnWidth], the text is wrapped at that
+/// [kMinColumnWidth] instead.
 ///
 /// Preserves indentation (leading whitespace) for each line (delimited by '\n')
 /// in the input, and will indent wrapped lines that same amount, adding
@@ -203,21 +187,20 @@ const int kMinColumnWidth = 10;
 /// unchanged. If [shouldWrap] is specified, then it overrides the
 /// [outputPreferences.wrapText] setting.
 ///
-/// The [indent] and [hangingIndent] must be smaller than [columnWidth] when
-/// added together.
+/// If the amount of indentation (from the text, [indent], and [hangingIndent])
+/// is such that less than [kMinColumnWidth] characters can fit in the
+/// [columnWidth], then the indent is truncated to allow the text to fit.
 String wrapText(String text, {
-  @required int columnWidth,
-  @required bool shouldWrap,
-  int hangingIndent,
-  int indent,
+  required int columnWidth,
+  required bool shouldWrap,
+  int? hangingIndent,
+  int? indent,
 }) {
+  assert(columnWidth >= 0);
   if (text == null || text.isEmpty) {
     return '';
   }
   indent ??= 0;
-  columnWidth -= indent;
-  assert(columnWidth >= 0);
-
   hangingIndent ??= 0;
   final List<String> splitText = text.split('\n');
   final List<String> result = <String>[];
@@ -231,35 +214,39 @@ String wrapText(String text, {
       // them twice and recombine.
       final List<String> firstLineWrap = _wrapTextAsLines(
         trimmedText,
-        columnWidth: columnWidth - leadingWhitespace.length,
+        columnWidth: columnWidth - leadingWhitespace.length - indent,
         shouldWrap: shouldWrap,
       );
       notIndented = <String>[firstLineWrap.removeAt(0)];
       trimmedText = trimmedText.substring(notIndented[0].length).trimLeft();
-      if (firstLineWrap.isNotEmpty) {
+      if (trimmedText.isNotEmpty) {
         notIndented.addAll(_wrapTextAsLines(
           trimmedText,
-          columnWidth: columnWidth - leadingWhitespace.length - hangingIndent,
+          columnWidth: columnWidth - leadingWhitespace.length - indent - hangingIndent,
           shouldWrap: shouldWrap,
         ));
       }
     } else {
       notIndented = _wrapTextAsLines(
         trimmedText,
-        columnWidth: columnWidth - leadingWhitespace.length,
+        columnWidth: columnWidth - leadingWhitespace.length - indent,
         shouldWrap: shouldWrap,
       );
     }
-    String hangingIndentString;
+    String? hangingIndentString;
     final String indentString = ' ' * indent;
-    result.addAll(notIndented.map(
+    result.addAll(notIndented.map<String>(
       (String line) {
         // Don't return any lines with just whitespace on them.
         if (line.isEmpty) {
           return '';
         }
-        final String result = '$indentString${hangingIndentString ?? ''}$leadingWhitespace$line';
-        hangingIndentString ??= ' ' * hangingIndent;
+        String truncatedIndent = '$indentString${hangingIndentString ?? ''}$leadingWhitespace';
+        if (truncatedIndent.length > columnWidth - kMinColumnWidth) {
+          truncatedIndent = truncatedIndent.substring(0, math.max(columnWidth - kMinColumnWidth, 0));
+        }
+        final String result = '$truncatedIndent$line';
+        hangingIndentString ??= ' ' * hangingIndent!;
         return result;
       },
     ));
@@ -287,19 +274,20 @@ class _AnsiRun {
 /// terminal window by default. If the stdout is not a terminal window, then the
 /// default will be [outputPreferences.wrapColumn].
 ///
+/// The [columnWidth] is clamped to [kMinColumnWidth] at minimum (so passing negative
+/// widths is fine, for instance).
+///
 /// If [outputPreferences.wrapText] is false, then the text will be returned
 /// simply split at the newlines, but not wrapped. If [shouldWrap] is specified,
 /// then it overrides the [outputPreferences.wrapText] setting.
 List<String> _wrapTextAsLines(String text, {
   int start = 0,
-  int columnWidth,
-  @required bool shouldWrap,
+  required int columnWidth,
+  required bool shouldWrap,
 }) {
   if (text == null || text.isEmpty) {
     return <String>[''];
   }
-  assert(columnWidth != null);
-  assert(columnWidth >= 0);
   assert(start >= 0);
 
   // Splits a string so that the resulting list has the same number of elements
@@ -313,9 +301,9 @@ List<String> _wrapTextAsLines(String text, {
     final StringBuffer current = StringBuffer();
     for (final Match match in characterOrCode.allMatches(input)) {
       current.write(match[0]);
-      if (match[0].length < 4) {
+      if (match[0]!.length < 4) {
         // This is a regular character, write it out.
-        result.add(_AnsiRun(current.toString(), match[0]));
+        result.add(_AnsiRun(current.toString(), match[0]!));
         current.clear();
       }
     }
@@ -333,12 +321,12 @@ List<String> _wrapTextAsLines(String text, {
     return result;
   }
 
-  String joinRun(List<_AnsiRun> list, int start, [ int end ]) {
+  String joinRun(List<_AnsiRun> list, int start, [ int? end ]) {
     return list.sublist(start, end).map<String>((_AnsiRun run) => run.original).join().trim();
   }
 
   final List<String> result = <String>[];
-  final int effectiveLength = max(columnWidth - start, kMinColumnWidth);
+  final int effectiveLength = math.max(columnWidth - start, kMinColumnWidth);
   for (final String line in text.split('\n')) {
     // If the line is short enough, even with ANSI codes, then we can just add
     // add it and move on.
@@ -353,7 +341,7 @@ List<String> _wrapTextAsLines(String text, {
     }
 
     int currentLineStart = 0;
-    int lastWhitespace;
+    int? lastWhitespace;
     // Find the start of the current line.
     for (int index = 0; index < splitLine.length; ++index) {
       if (splitLine[index].character.isNotEmpty && isWhitespace(splitLine[index])) {

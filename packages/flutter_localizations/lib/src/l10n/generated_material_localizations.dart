@@ -8,7 +8,6 @@
 
 import 'dart:collection';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 
@@ -28,15 +27,15 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationAf({
     String localeName = 'af',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -51,7 +50,7 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Meer oor \$applicationName';
+  String get aboutListTileTitleRaw => r'Meer oor $applicationName';
 
   @override
   String get alertDialogLabel => 'Opletberig';
@@ -99,7 +98,7 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'KIES DATUM';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Einddatum \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Einddatum $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Einddatum';
@@ -108,13 +107,13 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'KIES REEKS';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Begindatum \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Begindatum $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Begindatum';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '-';
 
   @override
   String get deleteButtonTooltip => 'Vee uit';
@@ -132,6 +131,9 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Vou in';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'Versteek rekeninge';
 
   @override
@@ -147,25 +149,28 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Ongeldige reeks.';
 
   @override
-  String get invalidTimeLabel => 'Voer \'n geldige tyd in';
+  String get invalidTimeLabel => "Voer 'n geldige tyd in";
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 lisensie';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount lisensies';
+  String? get licensesPackageDetailTextOne => '1 lisensie';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount lisensies';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Lisensies';
@@ -189,10 +194,10 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Maak navigasiekieslys oop';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow van \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow van $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow van ongeveer \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow van ongeveer $rowCount';
 
   @override
   String get pasteButtonLabel => 'Plak';
@@ -213,22 +218,22 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Herlaai';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 karakter oor';
+  String? get remainingTextFieldCharacterCountOne => '1 karakter oor';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount karakters oor';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount karakters oor';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => null;
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Skuif af';
@@ -267,22 +272,22 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Kies jaar';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 item is gekies';
+  String? get selectedRowCountTitleOne => '1 item is gekies';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount items is gekies';
+  String get selectedRowCountTitleOther => r'$selectedRowCount items is gekies';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Wys rekeninge';
@@ -294,7 +299,7 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Aangemeld';
 
   @override
-  String get tabLabelRaw => 'Oortjie \$tabIndex van \$tabCount';
+  String get tabLabelRaw => r'Oortjie $tabIndex van $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -334,15 +339,15 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationAm({
     String localeName = 'am',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -357,7 +362,7 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'ስለ \$applicationName';
+  String get aboutListTileTitleRaw => r'ስለ $applicationName';
 
   @override
   String get alertDialogLabel => 'ማንቂያ';
@@ -405,7 +410,7 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'ቀን ይምረጡ';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'የማብቂያ ቀን \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'የማብቂያ ቀን $fullDate';
 
   @override
   String get dateRangeEndLabel => 'የመጨረሻ ቀን';
@@ -414,7 +419,7 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'ክልል ይምረጡ';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'የመጀመሪያ ቀን \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'የመጀመሪያ ቀን $fullDate';
 
   @override
   String get dateRangeStartLabel => 'የመጀመሪያ ቀን';
@@ -438,6 +443,9 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'ሰብስብ';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'መለያዎችን ደብቅ';
 
   @override
@@ -456,22 +464,25 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'የሚሠራ ሰዓት ያስገቡ';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 ፈቃድ';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount ፈቃዶች';
+  String? get licensesPackageDetailTextOne => '1 ፈቃድ';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount ፈቃዶች';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'ፈቃዶች';
@@ -495,10 +506,10 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'የዳሰሳ ምናሌን ክፈት';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow ከ\$rowCount ውስጥ';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow ከ$rowCount ውስጥ';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow ከ\$rowCount ያህል ውስጥ';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow ከ$rowCount ያህል ውስጥ';
 
   @override
   String get pasteButtonLabel => 'ለጥፍ';
@@ -519,22 +530,22 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'አድስ';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 ቁምፊ ይቀራል';
+  String? get remainingTextFieldCharacterCountOne => '1 ቁምፊ ይቀራል';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount ቁምፊዎች ይቀራሉ';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount ቁምፊዎች ይቀራሉ';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => null;
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'ወደ ታች ውሰድ';
@@ -573,22 +584,22 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'ዓመት ይምረጡ';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 ንጥል ተመርጧል';
+  String? get selectedRowCountTitleOne => '1 ንጥል ተመርጧል';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount ንጥሎች ተመርጠዋል';
+  String get selectedRowCountTitleOther => r'$selectedRowCount ንጥሎች ተመርጠዋል';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'መለያዎችን አሳይ';
@@ -600,7 +611,7 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get signedInLabel => 'በመለያ ገብቷል';
 
   @override
-  String get tabLabelRaw => 'ትር \$tabIndex ከ\$tabCount';
+  String get tabLabelRaw => r'ትር $tabIndex ከ$tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -640,15 +651,15 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationAr({
     String localeName = 'ar',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -663,7 +674,7 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'لمحة عن \"\$applicationName\"';
+  String get aboutListTileTitleRaw => r'لمحة عن "$applicationName"';
 
   @override
   String get alertDialogLabel => 'تنبيه';
@@ -699,7 +710,7 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'قص';
 
   @override
-  String get dateHelpText => 'dd/mm/yyyy';
+  String get dateHelpText => 'yyyy/mm/dd';
 
   @override
   String get dateInputLabel => 'إدخال التاريخ';
@@ -711,7 +722,7 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'اختيار التاريخ';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'تاريخ الانتهاء \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'تاريخ الانتهاء $fullDate';
 
   @override
   String get dateRangeEndLabel => 'تاريخ الانتهاء';
@@ -720,7 +731,7 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'اختيار النطاق';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'تاريخ البدء \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'تاريخ البدء $fullDate';
 
   @override
   String get dateRangeStartLabel => 'تاريخ البدء';
@@ -732,7 +743,7 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'حذف';
 
   @override
-  String get dialModeButtonLabel => 'التبديل إلى وضع \"منتقي قُرص الساعة\"';
+  String get dialModeButtonLabel => 'التبديل إلى وضع "منتقي قُرص الساعة"';
 
   @override
   String get dialogLabel => 'مربع حوار';
@@ -744,13 +755,16 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'تصغير';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'إخفاء الحسابات';
 
   @override
   String get inputDateModeButtonLabel => 'التبديل إلى الإدخال';
 
   @override
-  String get inputTimeModeButtonLabel => 'التبديل إلى وضع \"إدخال النص\"';
+  String get inputTimeModeButtonLabel => 'التبديل إلى وضع "إدخال النص"';
 
   @override
   String get invalidDateFormatLabel => 'التنسيق غير صالح.';
@@ -762,22 +776,25 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'يُرجى إدخال وقت صالح.';
 
   @override
-  String get licensesPackageDetailTextFew => '\$licenseCount تراخيص';
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => '\$licenseCount ترخيصًا';
+  String? get licensesPackageDetailTextFew => r'$licenseCount تراخيص';
 
   @override
-  String get licensesPackageDetailTextOne => 'ترخيص واحد';
+  String? get licensesPackageDetailTextMany => r'$licenseCount ترخيصًا';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount ترخيص';
+  String? get licensesPackageDetailTextOne => 'ترخيص واحد';
 
   @override
-  String get licensesPackageDetailTextTwo => 'ترخيصان (\$licenseCount)';
+  String get licensesPackageDetailTextOther => r'$licenseCount ترخيص';
 
   @override
-  String get licensesPackageDetailTextZero => 'ما مِن تراخيص';
+  String? get licensesPackageDetailTextTwo => r'ترخيصان ($licenseCount)';
+
+  @override
+  String? get licensesPackageDetailTextZero => 'ما مِن تراخيص';
 
   @override
   String get licensesPageTitle => 'التراخيص';
@@ -801,10 +818,10 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'فتح قائمة التنقل';
 
   @override
-  String get pageRowsInfoTitleRaw => 'من \$firstRow إلى \$lastRow من إجمالي \$rowCount';
+  String get pageRowsInfoTitleRaw => r'من $firstRow إلى $lastRow من إجمالي $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => 'من \$firstRow إلى \$lastRow من إجمالي \$rowCount تقريبًا';
+  String get pageRowsInfoTitleApproximateRaw => r'من $firstRow إلى $lastRow من إجمالي $rowCount تقريبًا';
 
   @override
   String get pasteButtonLabel => 'لصق';
@@ -825,22 +842,22 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'إعادة تحميل';
 
   @override
-  String get remainingTextFieldCharacterCountFew => '\$remainingCount أحرف متبقية';
+  String? get remainingTextFieldCharacterCountFew => r'$remainingCount أحرف متبقية';
 
   @override
-  String get remainingTextFieldCharacterCountMany => '\$remainingCount حرفًا متبقيًا';
+  String? get remainingTextFieldCharacterCountMany => r'$remainingCount حرفًا متبقيًا';
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'حرف واحد متبقٍ';
+  String? get remainingTextFieldCharacterCountOne => 'حرف واحد متبقٍ';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount حرف متبقٍ';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount حرف متبقٍ';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => 'حرفان (\$remainingCount) متبقيان';
+  String? get remainingTextFieldCharacterCountTwo => r'حرفان ($remainingCount) متبقيان';
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'لا أحرف متبقية';
+  String? get remainingTextFieldCharacterCountZero => 'لا أحرف متبقية';
 
   @override
   String get reorderItemDown => 'نقل لأسفل';
@@ -879,22 +896,22 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'اختيار العام';
 
   @override
-  String get selectedRowCountTitleFew => 'تم اختيار \$selectedRowCount عنصر';
+  String? get selectedRowCountTitleFew => r'تم اختيار $selectedRowCount عنصر';
 
   @override
-  String get selectedRowCountTitleMany => 'تم اختيار \$selectedRowCount عنصرًا';
+  String? get selectedRowCountTitleMany => r'تم اختيار $selectedRowCount عنصرًا';
 
   @override
-  String get selectedRowCountTitleOne => 'تم اختيار عنصر واحد';
+  String? get selectedRowCountTitleOne => 'تم اختيار عنصر واحد';
 
   @override
-  String get selectedRowCountTitleOther => 'تم اختيار \$selectedRowCount عنصر';
+  String get selectedRowCountTitleOther => r'تم اختيار $selectedRowCount عنصر';
 
   @override
-  String get selectedRowCountTitleTwo => 'تم اختيار عنصرين (\$selectedRowCount)';
+  String? get selectedRowCountTitleTwo => r'تم اختيار عنصرين ($selectedRowCount)';
 
   @override
-  String get selectedRowCountTitleZero => 'لم يتم اختيار أي عنصر';
+  String? get selectedRowCountTitleZero => 'لم يتم اختيار أي عنصر';
 
   @override
   String get showAccountsLabel => 'إظهار الحسابات';
@@ -906,7 +923,7 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get signedInLabel => 'تم تسجيل الدخول';
 
   @override
-  String get tabLabelRaw => 'علامة التبويب \$tabIndex من \$tabCount';
+  String get tabLabelRaw => r'علامة التبويب $tabIndex من $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
@@ -946,15 +963,15 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationAs({
     String localeName = 'as',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -969,7 +986,7 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => '\$applicationNameৰ বিষয়ে';
+  String get aboutListTileTitleRaw => r'$applicationNameৰ বিষয়ে';
 
   @override
   String get alertDialogLabel => 'সতৰ্কবাৰ্তা';
@@ -1017,7 +1034,7 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'তাৰিখ বাছনি কৰক';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'সমাপ্তিৰ তাৰিখ \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'সমাপ্তিৰ তাৰিখ $fullDate';
 
   @override
   String get dateRangeEndLabel => 'সমাপ্তিৰ তাৰিখ';
@@ -1026,7 +1043,7 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'পৰিসৰ বাছনি কৰক';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'আৰম্ভণিৰ তাৰিখ \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'আৰম্ভণিৰ তাৰিখ $fullDate';
 
   @override
   String get dateRangeStartLabel => 'আৰম্ভণিৰ তাৰিখ';
@@ -1041,13 +1058,16 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get dialModeButtonLabel => 'ডায়েল বাছনিকৰ্তাৰ ম’ডলৈ সলনি কৰক';
 
   @override
-  String get dialogLabel => 'ডায়ল\'গ';
+  String get dialogLabel => "ডায়ল'গ";
 
   @override
   String get drawerLabel => 'নেভিগেশ্বন মেনু';
 
   @override
   String get expandedIconTapHint => 'সংকোচন কৰক';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'একাউণ্টসমূহ লুকুৱাওক';
@@ -1068,22 +1088,25 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'এটা মান্য সময় দিয়ক';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '১ খন অনুজ্ঞাপত্ৰ';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount খন অনুজ্ঞাপত্ৰ';
+  String? get licensesPackageDetailTextOne => '১ খন অনুজ্ঞাপত্ৰ';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount খন অনুজ্ঞাপত্ৰ';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'অনুজ্ঞাপত্ৰসমূহ';
@@ -1107,16 +1130,16 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'নেভিগেশ্বন মেনু খোলক';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$rowCountৰ \$firstRow–\$lastRow';
+  String get pageRowsInfoTitleRaw => r'$rowCountৰ $firstRow–$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$rowCountৰ \$firstRow–\$lastRow';
+  String get pageRowsInfoTitleApproximateRaw => r'$rowCountৰ $firstRow–$lastRow';
 
   @override
-  String get pasteButtonLabel => 'পে\'ষ্ট কৰক';
+  String get pasteButtonLabel => "পে'ষ্ট কৰক";
 
   @override
-  String get popupMenuLabel => 'প\'পআপ মেনু';
+  String get popupMenuLabel => "প'পআপ মেনু";
 
   @override
   String get postMeridiemAbbreviation => 'অপৰাহ্ন';
@@ -1131,22 +1154,22 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'ৰিফ্ৰেশ্ব কৰক';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '১টা বর্ণ বাকী আছে';
+  String? get remainingTextFieldCharacterCountOne => '১টা বর্ণ বাকী আছে';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCountটা বর্ণ বাকী আছে';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCountটা বর্ণ বাকী আছে';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => null;
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'তললৈ স্থানান্তৰ কৰক';
@@ -1185,22 +1208,22 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'বছৰ বাছনি কৰক';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '১টা বস্তু বাছনি কৰা হ\'ল';
+  String? get selectedRowCountTitleOne => "১টা বস্তু বাছনি কৰা হ'ল";
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCountটা বস্তু বাছনি কৰা হ’ল';
+  String get selectedRowCountTitleOther => r'$selectedRowCountটা বস্তু বাছনি কৰা হ’ল';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'একাউণ্টসমূহ দেখুৱাওক';
@@ -1212,7 +1235,7 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get signedInLabel => 'ছাইন ইন কৰা হ’ল';
 
   @override
-  String get tabLabelRaw => '\$tabCountৰ \$tabIndexটা টেব';
+  String get tabLabelRaw => r'$tabCountৰ $tabIndexটা টেব';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -1252,15 +1275,15 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationAz({
     String localeName = 'az',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -1275,7 +1298,7 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => '\$applicationName haqqında';
+  String get aboutListTileTitleRaw => r'$applicationName haqqında';
 
   @override
   String get alertDialogLabel => 'Bildiriş';
@@ -1311,7 +1334,7 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Kəsin';
 
   @override
-  String get dateHelpText => 'aa/gg/iiii';
+  String get dateHelpText => 'aa.gg.iiii';
 
   @override
   String get dateInputLabel => 'Tarix daxil edin';
@@ -1323,7 +1346,7 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'TARİX SEÇİN';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Bitmə tarixi: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Bitmə tarixi: $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Bitmə tarixi';
@@ -1332,13 +1355,13 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'ARALIQ SEÇİN';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Başlama tarixi: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Başlama tarixi: $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Başlama tarixi';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Silin';
@@ -1354,6 +1377,9 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'Yığcamlaşdırın';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'Hesabları gizlədin';
@@ -1374,22 +1400,25 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Düzgün vaxt daxil edin';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 lisenziya';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount lisenziya';
+  String? get licensesPackageDetailTextOne => '1 lisenziya';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount lisenziya';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Lisenziyalar';
@@ -1413,10 +1442,10 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Naviqasiya menyusunu açın';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow/\$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow/$rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow/ təxminən \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow/ təxminən $rowCount';
 
   @override
   String get pasteButtonLabel => 'Yerləşdirin';
@@ -1437,22 +1466,22 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Yeniləyin';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 simvol qalır';
+  String? get remainingTextFieldCharacterCountOne => '1 simvol qalır';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount simvol qalır';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount simvol qalır';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => null;
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Aşağı köçürün';
@@ -1491,22 +1520,22 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'İl seçin';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 element seçildi';
+  String? get selectedRowCountTitleOne => '1 element seçildi';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount element seçildi';
+  String get selectedRowCountTitleOther => r'$selectedRowCount element seçildi';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Hesabları göstərin';
@@ -1518,7 +1547,7 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Daxil olundu';
 
   @override
-  String get tabLabelRaw => '\$tabIndex/\$tabCount tab';
+  String get tabLabelRaw => r'$tabIndex/$tabCount tab';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -1558,15 +1587,15 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationBe({
     String localeName = 'be',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -1581,7 +1610,7 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Інфармацыя пра праграму \"\$applicationName\"';
+  String get aboutListTileTitleRaw => r'Інфармацыя пра праграму "$applicationName"';
 
   @override
   String get alertDialogLabel => 'Абвестка';
@@ -1617,7 +1646,7 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Выразаць';
 
   @override
-  String get dateHelpText => 'мм/дд/гггг';
+  String get dateHelpText => 'дд.мм.гггг';
 
   @override
   String get dateInputLabel => 'Увядзіце дату';
@@ -1629,7 +1658,7 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'ВЫБАР ДАТЫ';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Дата заканчэння: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Дата заканчэння: $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Дата заканчэння';
@@ -1638,13 +1667,13 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'ВЫБАР ДЫЯПАЗОНУ';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Дата пачатку: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Дата пачатку: $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Дата пачатку';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Выдаліць';
@@ -1660,6 +1689,9 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'Згарнуць';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'Схаваць уліковыя запісы';
@@ -1680,22 +1712,25 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Увядзіце дапушчальны час';
 
   @override
-  String get licensesPackageDetailTextFew => '\$licenseCount ліцэнзіі';
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => '\$licenseCount ліцэнзій';
+  String? get licensesPackageDetailTextFew => r'$licenseCount ліцэнзіі';
 
   @override
-  String get licensesPackageDetailTextOne => '1 ліцэнзія';
+  String? get licensesPackageDetailTextMany => r'$licenseCount ліцэнзій';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount ліцэнзіі';
+  String? get licensesPackageDetailTextOne => '1 ліцэнзія';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount ліцэнзіі';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Ліцэнзіі';
@@ -1719,10 +1754,10 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Адкрыць меню навігацыі';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow з \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow з $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow з прыблізна \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow з прыблізна $rowCount';
 
   @override
   String get pasteButtonLabel => 'Уставіць';
@@ -1743,22 +1778,22 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Абнавіць';
 
   @override
-  String get remainingTextFieldCharacterCountFew => 'Засталося \$remainingCount сімвалы';
+  String? get remainingTextFieldCharacterCountFew => r'Засталося $remainingCount сімвалы';
 
   @override
-  String get remainingTextFieldCharacterCountMany => 'Засталося \$remainingCount сімвалаў';
+  String? get remainingTextFieldCharacterCountMany => r'Засталося $remainingCount сімвалаў';
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'Застаўся 1 сімвал';
+  String? get remainingTextFieldCharacterCountOne => 'Застаўся 1 сімвал';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'Засталося \$remainingCount сімвала';
+  String get remainingTextFieldCharacterCountOther => r'Засталося $remainingCount сімвала';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => null;
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Перамясціць уніз';
@@ -1797,22 +1832,22 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Выберыце год';
 
   @override
-  String get selectedRowCountTitleFew => 'Выбрана \$selectedRowCount элементы';
+  String? get selectedRowCountTitleFew => r'Выбрана $selectedRowCount элементы';
 
   @override
-  String get selectedRowCountTitleMany => 'Выбрана \$selectedRowCount элементаў';
+  String? get selectedRowCountTitleMany => r'Выбрана $selectedRowCount элементаў';
 
   @override
-  String get selectedRowCountTitleOne => 'Выбраны 1 элемент';
+  String? get selectedRowCountTitleOne => 'Выбраны 1 элемент';
 
   @override
-  String get selectedRowCountTitleOther => 'Выбрана \$selectedRowCount элемента';
+  String get selectedRowCountTitleOther => r'Выбрана $selectedRowCount элемента';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Паказаць уліковыя запісы';
@@ -1824,7 +1859,7 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Уваход выкананы';
 
   @override
-  String get tabLabelRaw => 'Укладка \$tabIndex з \$tabCount';
+  String get tabLabelRaw => r'Укладка $tabIndex з $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -1864,15 +1899,15 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationBg({
     String localeName = 'bg',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -1887,7 +1922,7 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Всичко за \$applicationName';
+  String get aboutListTileTitleRaw => r'Всичко за $applicationName';
 
   @override
   String get alertDialogLabel => 'Сигнал';
@@ -1923,7 +1958,7 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Изрязване';
 
   @override
-  String get dateHelpText => 'дд/мм/гггг';
+  String get dateHelpText => 'дд.мм.гггг';
 
   @override
   String get dateInputLabel => 'Въвеждане на дата';
@@ -1935,7 +1970,7 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'ИЗБИРАНЕ НА ДАТА';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Крайна дата: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Крайна дата: $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Крайна дата';
@@ -1944,13 +1979,13 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'ИЗБИРАНЕ НА ПЕРИОД ОТ ВРЕМЕ';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Начална дата: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Начална дата: $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Начална дата';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Изтриване';
@@ -1966,6 +2001,9 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'Свиване';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'Скриване на профилите';
@@ -1986,22 +2024,25 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Въведете валиден час';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 лиценз';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount лиценза';
+  String? get licensesPackageDetailTextOne => '1 лиценз';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount лиценза';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Лицензи';
@@ -2025,10 +2066,10 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Отваряне на менюто за навигация';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow – \$lastRow от \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow – $lastRow от $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow – \$lastRow от около \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow – $lastRow от около $rowCount';
 
   @override
   String get pasteButtonLabel => 'Поставяне';
@@ -2049,22 +2090,22 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Опресняване';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'Остава 1 знак';
+  String? get remainingTextFieldCharacterCountOne => 'Остава 1 знак';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'Остават \$remainingCount знака';
+  String get remainingTextFieldCharacterCountOther => r'Остават $remainingCount знака';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Преместване надолу';
@@ -2103,22 +2144,22 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Избиране на година';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => 'Избран е 1 елемент';
+  String? get selectedRowCountTitleOne => 'Избран е 1 елемент';
 
   @override
-  String get selectedRowCountTitleOther => 'Избрани са \$selectedRowCount елемента';
+  String get selectedRowCountTitleOther => r'Избрани са $selectedRowCount елемента';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Показване на профилите';
@@ -2130,7 +2171,7 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get signedInLabel => 'В профила си сте';
 
   @override
-  String get tabLabelRaw => 'Раздел \$tabIndex от \$tabCount';
+  String get tabLabelRaw => r'Раздел $tabIndex от $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -2170,15 +2211,15 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationBn({
     String localeName = 'bn',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -2193,7 +2234,7 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => '\$applicationName সম্পর্কে';
+  String get aboutListTileTitleRaw => r'$applicationName সম্পর্কে';
 
   @override
   String get alertDialogLabel => 'সতর্কতা';
@@ -2241,7 +2282,7 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'তারিখ বেছে নিন';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'শেষ হওয়ার তারিখ \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'শেষ হওয়ার তারিখ $fullDate';
 
   @override
   String get dateRangeEndLabel => 'শেষ হওয়ার তারিখ';
@@ -2250,7 +2291,7 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'তারিখের ব্যাপ্তি বেছে নিন';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'শুরুর তারিখ \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'শুরুর তারিখ $fullDate';
 
   @override
   String get dateRangeStartLabel => 'শুরুর তারিখ';
@@ -2274,6 +2315,9 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'আড়াল করুন';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'অ্যাকাউন্টগুলি লুকান';
 
   @override
@@ -2292,22 +2336,25 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'সঠিক সময় লিখুন';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '১টি লাইসেন্স';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCountটি লাইসেন্স';
+  String? get licensesPackageDetailTextOne => '১টি লাইসেন্স';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCountটি লাইসেন্স';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'লাইসেন্স';
@@ -2331,10 +2378,10 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'নেভিগেশন মেনু খুলুন';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$rowCountটির মধ্যে \$firstRow-\$lastRow';
+  String get pageRowsInfoTitleRaw => r'$rowCountটির মধ্যে $firstRow-$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => 'প্রায় \$rowCountটির মধ্যে \$firstRow-\$lastRow নম্বর';
+  String get pageRowsInfoTitleApproximateRaw => r'প্রায় $rowCountটির মধ্যে $firstRow-$lastRow নম্বর';
 
   @override
   String get pasteButtonLabel => 'পেস্ট করুন';
@@ -2355,22 +2402,22 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'রিফ্রেশ করুন';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'আর ১টি অক্ষর লেখা যাবে';
+  String? get remainingTextFieldCharacterCountOne => 'আর ১টি অক্ষর লেখা যাবে';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'আর \$remainingCountটি অক্ষর লেখা যাবে';
+  String get remainingTextFieldCharacterCountOther => r'আর $remainingCountটি অক্ষর লেখা যাবে';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => null;
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'নিচের দিকে সরান';
@@ -2400,7 +2447,7 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
-  String get searchFieldLabel => 'সার্চ';
+  String get searchFieldLabel => 'খুঁজুন';
 
   @override
   String get selectAllButtonLabel => 'সব বেছে নিন';
@@ -2409,22 +2456,22 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'বছর বেছে নিন';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '১টি আইটেম বেছে নেওয়া হয়েছে';
+  String? get selectedRowCountTitleOne => '১টি আইটেম বেছে নেওয়া হয়েছে';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCountটি আইটেম বেছে নেওয়া হয়েছে';
+  String get selectedRowCountTitleOther => r'$selectedRowCountটি আইটেম বেছে নেওয়া হয়েছে';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'অ্যাকাউন্টগুলি দেখান';
@@ -2436,7 +2483,7 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get signedInLabel => 'সাইন-ইন করা হয়েছে';
 
   @override
-  String get tabLabelRaw => '\$tabCount-এর মধ্যে \$tabIndexটি ট্যাব';
+  String get tabLabelRaw => r'$tabCount-এর মধ্যে $tabIndexটি ট্যাব';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -2476,15 +2523,15 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationBs({
     String localeName = 'bs',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -2499,7 +2546,7 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'O aplikaciji \$applicationName';
+  String get aboutListTileTitleRaw => r'O aplikaciji $applicationName';
 
   @override
   String get alertDialogLabel => 'Upozorenje';
@@ -2535,7 +2582,7 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Izreži';
 
   @override
-  String get dateHelpText => 'mm/dd/gggg';
+  String get dateHelpText => 'dd. mm. gggg.';
 
   @override
   String get dateInputLabel => 'Unesite datum';
@@ -2547,7 +2594,7 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'ODABERITE DATUM';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Datum završetka: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Datum završetka: $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Datum završetka';
@@ -2556,13 +2603,13 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'ODABERITE RASPON';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Datum početka: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Datum početka: $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Datum početka';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Brisanje';
@@ -2578,6 +2625,9 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'Suzi';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'Sakrij račune';
@@ -2598,22 +2648,25 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Unesite ispravno vrijeme';
 
   @override
-  String get licensesPackageDetailTextFew => '\$licenseCount licence';
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => r'$licenseCount licence';
 
   @override
-  String get licensesPackageDetailTextOne => '1 licenca';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licenci';
+  String? get licensesPackageDetailTextOne => '1 licenca';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount licenci';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licence';
@@ -2637,10 +2690,10 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Otvorite meni za navigaciju';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow od \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow od $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow od oko \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow od oko $rowCount';
 
   @override
   String get pasteButtonLabel => 'Zalijepi';
@@ -2661,25 +2714,25 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Osvježi';
 
   @override
-  String get remainingTextFieldCharacterCountFew => 'Još \$remainingCount znaka';
+  String? get remainingTextFieldCharacterCountFew => r'Još $remainingCount znaka';
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'Još jedan znak';
+  String? get remainingTextFieldCharacterCountOne => 'Još jedan znak';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'Još \$remainingCount znakova';
+  String get remainingTextFieldCharacterCountOther => r'Još $remainingCount znakova';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
-  String get reorderItemDown => 'Pomjeri prema dolje';
+  String get reorderItemDown => 'Pomjeri nadolje';
 
   @override
   String get reorderItemLeft => 'Pomjeri lijevo';
@@ -2694,7 +2747,7 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get reorderItemToStart => 'Pomjerite na početak';
 
   @override
-  String get reorderItemUp => 'Pomjeri prema gore';
+  String get reorderItemUp => 'Pomjeri nagore';
 
   @override
   String get rowsPerPageTitle => 'Broj redova po stranici:';
@@ -2715,22 +2768,22 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Odaberite godinu';
 
   @override
-  String get selectedRowCountTitleFew => 'Odabrane su \$selectedRowCount stavke';
+  String? get selectedRowCountTitleFew => r'Odabrane su $selectedRowCount stavke';
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => 'Odabrana je jedna stavka';
+  String? get selectedRowCountTitleOne => 'Odabrana je jedna stavka';
 
   @override
-  String get selectedRowCountTitleOther => 'Odabrano je \$selectedRowCount stavki';
+  String get selectedRowCountTitleOther => r'Odabrano je $selectedRowCount stavki';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Prikaži račune';
@@ -2742,7 +2795,7 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Prijavljeni ste';
 
   @override
-  String get tabLabelRaw => '\$tabIndex. kartica od \$tabCount';
+  String get tabLabelRaw => r'$tabIndex. kartica od $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -2782,15 +2835,15 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationCa({
     String localeName = 'ca',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -2805,7 +2858,7 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Sobre \$applicationName';
+  String get aboutListTileTitleRaw => r'Sobre $applicationName';
 
   @override
   String get alertDialogLabel => 'Alerta';
@@ -2847,25 +2900,25 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get dateInputLabel => 'Introdueix una data';
 
   @override
-  String get dateOutOfRangeLabel => 'Fora de l\'abast.';
+  String get dateOutOfRangeLabel => "Fora de l'abast.";
 
   @override
   String get datePickerHelpText => 'SELECCIONA LA DATA';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Data de finalització \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Data de finalització $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Data de finalització';
 
   @override
-  String get dateRangePickerHelpText => 'SELECCIONA L\'INTERVAL';
+  String get dateRangePickerHelpText => "SELECCIONA L'INTERVAL";
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Data d\'inici \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r"Data d'inici $fullDate";
 
   @override
-  String get dateRangeStartLabel => 'Data d\'inici';
+  String get dateRangeStartLabel => "Data d'inici";
 
   @override
   String get dateSeparator => '/';
@@ -2886,40 +2939,46 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Replega';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'Amaga els comptes';
 
   @override
   String get inputDateModeButtonLabel => 'Canvia a introducció de text';
 
   @override
-  String get inputTimeModeButtonLabel => 'Canvia al mode d\'introducció de text';
+  String get inputTimeModeButtonLabel => "Canvia al mode d'introducció de text";
 
   @override
   String get invalidDateFormatLabel => 'El format no és vàlid.';
 
   @override
-  String get invalidDateRangeLabel => 'L\'interval no és vàlid.';
+  String get invalidDateRangeLabel => "L'interval no és vàlid.";
 
   @override
   String get invalidTimeLabel => 'Introdueix una hora vàlida';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 llicència';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount llicències';
+  String? get licensesPackageDetailTextOne => '1 llicència';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount llicències';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Llicències';
@@ -2937,16 +2996,16 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get nextPageTooltip => 'Pàgina següent';
 
   @override
-  String get okButtonLabel => 'D\'ACORD';
+  String get okButtonLabel => "D'ACORD";
 
   @override
   String get openAppDrawerTooltip => 'Obre el menú de navegació';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow-\$lastRow de \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow-$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow-\$lastRow d\'aproximadament \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r"$firstRow-$lastRow d'aproximadament $rowCount";
 
   @override
   String get pasteButtonLabel => 'Enganxa';
@@ -2967,28 +3026,28 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Actualitza';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'Queda 1 caràcter';
+  String? get remainingTextFieldCharacterCountOne => 'Queda 1 caràcter';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'Queden \$remainingCount caràcters';
+  String get remainingTextFieldCharacterCountOther => r'Queden $remainingCount caràcters';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Mou avall';
 
   @override
-  String get reorderItemLeft => 'Mou cap a l\'esquerra';
+  String get reorderItemLeft => "Mou cap a l'esquerra";
 
   @override
   String get reorderItemRight => 'Mou cap a la dreta';
@@ -3021,22 +3080,22 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Selecciona un any';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => 'S\'ha seleccionat 1 element';
+  String? get selectedRowCountTitleOne => "S'ha seleccionat 1 element";
 
   @override
-  String get selectedRowCountTitleOther => 'S\'han seleccionat \$selectedRowCount elements';
+  String get selectedRowCountTitleOther => r"S'han seleccionat $selectedRowCount elements";
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Mostra els comptes';
@@ -3048,13 +3107,13 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Sessió iniciada';
 
   @override
-  String get tabLabelRaw => 'Pestanya \$tabIndex de \$tabCount';
+  String get tabLabelRaw => r'Pestanya $tabIndex de $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'SELECCIONA L\'HORA';
+  String get timePickerDialHelpText => "SELECCIONA L'HORA";
 
   @override
   String get timePickerHourLabel => 'Hora';
@@ -3063,7 +3122,7 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Selecciona les hores';
 
   @override
-  String get timePickerInputHelpText => 'INTRODUEIX L\'HORA';
+  String get timePickerInputHelpText => "INTRODUEIX L'HORA";
 
   @override
   String get timePickerMinuteLabel => 'Minut';
@@ -3088,15 +3147,15 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationCs({
     String localeName = 'cs',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -3111,7 +3170,7 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'O aplikaci \$applicationName';
+  String get aboutListTileTitleRaw => r'O aplikaci $applicationName';
 
   @override
   String get alertDialogLabel => 'Upozornění';
@@ -3147,7 +3206,7 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Vyjmout';
 
   @override
-  String get dateHelpText => 'mm/dd/rrrr';
+  String get dateHelpText => 'mm.dd.rrrr';
 
   @override
   String get dateInputLabel => 'Zadejte datum';
@@ -3159,7 +3218,7 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'VYBERTE DATUM';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Datum ukončení \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Datum ukončení $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Datum ukončení';
@@ -3168,13 +3227,13 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'VYBERTE ROZSAH';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Datum zahájení \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Datum zahájení $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Datum zahájení';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Smazat';
@@ -3190,6 +3249,9 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'Sbalit';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'Skrýt účty';
@@ -3210,22 +3272,25 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Zadejte platný čas';
 
   @override
-  String get licensesPackageDetailTextFew => '\$licenseCount licence';
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => '\$licenseCount licence';
+  String? get licensesPackageDetailTextFew => r'$licenseCount licence';
 
   @override
-  String get licensesPackageDetailTextOne => '1 licence';
+  String? get licensesPackageDetailTextMany => r'$licenseCount licence';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licencí';
+  String? get licensesPackageDetailTextOne => '1 licence';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount licencí';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licence';
@@ -3249,10 +3314,10 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Otevřít navigační nabídku';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow z \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow z $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow z asi \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow z asi $rowCount';
 
   @override
   String get pasteButtonLabel => 'Vložit';
@@ -3273,22 +3338,22 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Obnovit';
 
   @override
-  String get remainingTextFieldCharacterCountFew => 'Zbývají \$remainingCount znaky';
+  String? get remainingTextFieldCharacterCountFew => r'Zbývají $remainingCount znaky';
 
   @override
-  String get remainingTextFieldCharacterCountMany => 'Zbývá \$remainingCount znaku';
+  String? get remainingTextFieldCharacterCountMany => r'Zbývá $remainingCount znaku';
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'Zbývá 1 znak';
+  String? get remainingTextFieldCharacterCountOne => 'Zbývá 1 znak';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'Zbývá \$remainingCount znaků';
+  String get remainingTextFieldCharacterCountOther => r'Zbývá $remainingCount znaků';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Přesunout dolů';
@@ -3327,22 +3392,22 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Vyberte rok';
 
   @override
-  String get selectedRowCountTitleFew => 'Jsou vybrány \$selectedRowCount položky';
+  String? get selectedRowCountTitleFew => r'Jsou vybrány $selectedRowCount položky';
 
   @override
-  String get selectedRowCountTitleMany => 'Je vybráno \$selectedRowCount položky';
+  String? get selectedRowCountTitleMany => r'Je vybráno $selectedRowCount položky';
 
   @override
-  String get selectedRowCountTitleOne => 'Je vybrána 1 položka';
+  String? get selectedRowCountTitleOne => 'Je vybrána 1 položka';
 
   @override
-  String get selectedRowCountTitleOther => 'Je vybráno \$selectedRowCount položek';
+  String get selectedRowCountTitleOther => r'Je vybráno $selectedRowCount položek';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Zobrazit účty';
@@ -3354,7 +3419,7 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Uživatel přihlášen';
 
   @override
-  String get tabLabelRaw => 'Karta \$tabIndex z \$tabCount';
+  String get tabLabelRaw => r'Karta $tabIndex z $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -3394,15 +3459,15 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationDa({
     String localeName = 'da',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -3417,7 +3482,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Om \$applicationName';
+  String get aboutListTileTitleRaw => r'Om $applicationName';
 
   @override
   String get alertDialogLabel => 'Underretning';
@@ -3453,7 +3518,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Klip';
 
   @override
-  String get dateHelpText => 'mm/dd/åååå';
+  String get dateHelpText => 'dd/mm/åååå';
 
   @override
   String get dateInputLabel => 'Angiv en dato';
@@ -3465,7 +3530,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'VÆLG DATO';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Slutdato \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Slutdato $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Slutdato';
@@ -3474,13 +3539,13 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'VÆLG OMRÅDE';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Startdato \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Startdato $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Startdato';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Slet';
@@ -3496,6 +3561,9 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'Skjul';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'Skjul konti';
@@ -3516,22 +3584,25 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Angiv et gyldigt tidspunkt';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 licens';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licenser';
+  String? get licensesPackageDetailTextOne => '1 licens';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount licenser';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licenser';
@@ -3555,10 +3626,10 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Åbn navigationsmenuen';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow-\$lastRow af \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow-$lastRow af $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow-\$lastRow af ca. \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow-$lastRow af ca. $rowCount';
 
   @override
   String get pasteButtonLabel => 'Sæt ind';
@@ -3579,22 +3650,22 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Opdater';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'Ét tegn tilbage';
+  String? get remainingTextFieldCharacterCountOne => 'Ét tegn tilbage';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount tegn tilbage';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount tegn tilbage';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Flyt ned';
@@ -3633,22 +3704,22 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Vælg år';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 element er valgt';
+  String? get selectedRowCountTitleOne => '1 element er valgt';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount elementer er valgt';
+  String get selectedRowCountTitleOther => r'$selectedRowCount elementer er valgt';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Vis konti';
@@ -3660,7 +3731,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Logget ind';
 
   @override
-  String get tabLabelRaw => 'Fane \$tabIndex af \$tabCount';
+  String get tabLabelRaw => r'Fane $tabIndex af $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -3700,15 +3771,15 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationDe({
     String localeName = 'de',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -3723,7 +3794,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Über \$applicationName';
+  String get aboutListTileTitleRaw => r'Über $applicationName';
 
   @override
   String get alertDialogLabel => 'Benachrichtigung';
@@ -3771,7 +3842,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'DATUM AUSWÄHLEN';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Enddatum \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Enddatum $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Enddatum';
@@ -3780,7 +3851,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'ZEITRAUM AUSWÄHLEN';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Startdatum \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Startdatum $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Startdatum';
@@ -3804,6 +3875,9 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Minimieren';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'Konten ausblenden';
 
   @override
@@ -3822,22 +3896,25 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Gib eine gültige Uhrzeit ein';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 Lizenz';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount Lizenzen';
+  String? get licensesPackageDetailTextOne => '1 Lizenz';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount Lizenzen';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Lizenzen';
@@ -3861,10 +3938,10 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Navigationsmenü öffnen';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow von \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow von $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow von etwa \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow von etwa $rowCount';
 
   @override
   String get pasteButtonLabel => 'Einsetzen';
@@ -3885,22 +3962,22 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Aktualisieren';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'Noch 1 Zeichen';
+  String? get remainingTextFieldCharacterCountOne => 'Noch 1 Zeichen';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'Noch \$remainingCount Zeichen';
+  String get remainingTextFieldCharacterCountOther => r'Noch $remainingCount Zeichen';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Nach unten verschieben';
@@ -3939,22 +4016,22 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Jahr auswählen';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 Element ausgewählt';
+  String? get selectedRowCountTitleOne => '1 Element ausgewählt';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount Elemente ausgewählt';
+  String get selectedRowCountTitleOther => r'$selectedRowCount Elemente ausgewählt';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => 'Keine Objekte ausgewählt';
+  String? get selectedRowCountTitleZero => 'Keine Objekte ausgewählt';
 
   @override
   String get showAccountsLabel => 'Konten anzeigen';
@@ -3966,7 +4043,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Angemeldet';
 
   @override
-  String get tabLabelRaw => 'Tab \$tabIndex von \$tabCount';
+  String get tabLabelRaw => r'Tab $tabIndex von $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -4006,15 +4083,15 @@ class MaterialLocalizationDeCh extends MaterialLocalizationDe {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationDeCh({
     String localeName = 'de_CH',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -4045,15 +4122,15 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEl({
     String localeName = 'el',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -4068,7 +4145,7 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Σχετικά με την εφαρμογή \$applicationName';
+  String get aboutListTileTitleRaw => r'Σχετικά με την εφαρμογή $applicationName';
 
   @override
   String get alertDialogLabel => 'Ειδοποίηση';
@@ -4116,7 +4193,7 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'ΕΠΙΛΟΓΗ ΗΜΕΡΟΜΗΝΙΑΣ';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Ημερομηνία λήξης \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Ημερομηνία λήξης $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Ημερομηνία λήξης';
@@ -4125,7 +4202,7 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'ΕΠΙΛΟΓΗ ΕΥΡΟΥΣ';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Ημερομηνία έναρξης \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Ημερομηνία έναρξης $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Ημερομηνία έναρξης';
@@ -4149,6 +4226,9 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Σύμπτυξη';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'Απόκρυψη λογαριασμών';
 
   @override
@@ -4167,22 +4247,25 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Εισαγάγετε μια έγκυρη ώρα';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 άδεια';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount άδειες';
+  String? get licensesPackageDetailTextOne => '1 άδεια';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount άδειες';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Άδειες';
@@ -4206,10 +4289,10 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Άνοιγμα μενού πλοήγησης';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow-\$lastRow από \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow-$lastRow από $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow-\$lastRow από περίπου \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow-$lastRow από περίπου $rowCount';
 
   @override
   String get pasteButtonLabel => 'Επικόλληση';
@@ -4230,22 +4313,22 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Ανανέωση';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'απομένει 1 χαρακτήρας';
+  String? get remainingTextFieldCharacterCountOne => 'απομένει 1 χαρακτήρας';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'απομένουν \$remainingCount χαρακτήρες';
+  String get remainingTextFieldCharacterCountOther => r'απομένουν $remainingCount χαρακτήρες';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Μετακίνηση προς τα κάτω';
@@ -4284,22 +4367,22 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Επιλογή έτους';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => 'Επιλέχθηκε 1 στοιχείο';
+  String? get selectedRowCountTitleOne => 'Επιλέχθηκε 1 στοιχείο';
 
   @override
-  String get selectedRowCountTitleOther => 'Επιλέχθηκαν \$selectedRowCount στοιχεία';
+  String get selectedRowCountTitleOther => r'Επιλέχθηκαν $selectedRowCount στοιχεία';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Εμφάνιση λογαριασμών';
@@ -4311,7 +4394,7 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Σε σύνδεση';
 
   @override
-  String get tabLabelRaw => 'Καρτέλα \$tabIndex από \$tabCount';
+  String get tabLabelRaw => r'Καρτέλα $tabIndex από $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -4351,15 +4434,15 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEn({
     String localeName = 'en',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -4374,7 +4457,7 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'About \$applicationName';
+  String get aboutListTileTitleRaw => r'About $applicationName';
 
   @override
   String get alertDialogLabel => 'Alert';
@@ -4422,7 +4505,7 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'SELECT DATE';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'End date \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'End date $fullDate';
 
   @override
   String get dateRangeEndLabel => 'End Date';
@@ -4431,7 +4514,7 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'SELECT RANGE';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Start date \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Start date $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Start Date';
@@ -4455,6 +4538,9 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Collapse';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'Hide accounts';
 
   @override
@@ -4473,22 +4559,25 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Enter a valid time';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 license';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+  String? get licensesPackageDetailTextOne => '1 license';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licenses';
@@ -4512,10 +4601,10 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Open navigation menu';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow of \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow of $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow of about \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow of about $rowCount';
 
   @override
   String get pasteButtonLabel => 'Paste';
@@ -4536,22 +4625,22 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Refresh';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 character remaining';
+  String? get remainingTextFieldCharacterCountOne => '1 character remaining';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount characters remaining';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount characters remaining';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'No characters remaining';
+  String? get remainingTextFieldCharacterCountZero => 'No characters remaining';
 
   @override
   String get reorderItemDown => 'Move down';
@@ -4590,22 +4679,22 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Select year';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 item selected';
+  String? get selectedRowCountTitleOne => '1 item selected';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount items selected';
+  String get selectedRowCountTitleOther => r'$selectedRowCount items selected';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => 'No items selected';
+  String? get selectedRowCountTitleZero => 'No items selected';
 
   @override
   String get showAccountsLabel => 'Show accounts';
@@ -4617,7 +4706,7 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Signed in';
 
   @override
-  String get tabLabelRaw => 'Tab \$tabIndex of \$tabCount';
+  String get tabLabelRaw => r'Tab $tabIndex of $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
@@ -4657,15 +4746,15 @@ class MaterialLocalizationEnAu extends MaterialLocalizationEn {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEnAu({
     String localeName = 'en_AU',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -4695,13 +4784,13 @@ class MaterialLocalizationEnAu extends MaterialLocalizationEn {
   String get licensesPageTitle => 'Licences';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licences';
+  String? get licensesPackageDetailTextZero => 'No licences';
 
   @override
-  String get licensesPackageDetailTextOne => '1 licence';
+  String? get licensesPackageDetailTextOne => '1 licence';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licences';
+  String get licensesPackageDetailTextOther => r'$licenseCount licences';
 
   @override
   String get viewLicensesButtonLabel => 'VIEW LICENCES';
@@ -4726,15 +4815,15 @@ class MaterialLocalizationEnCa extends MaterialLocalizationEn {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEnCa({
     String localeName = 'en_CA',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -4764,13 +4853,13 @@ class MaterialLocalizationEnCa extends MaterialLocalizationEn {
   String get licensesPageTitle => 'Licences';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licences';
+  String? get licensesPackageDetailTextZero => 'No licences';
 
   @override
-  String get licensesPackageDetailTextOne => '1 licence';
+  String? get licensesPackageDetailTextOne => '1 licence';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licences';
+  String get licensesPackageDetailTextOther => r'$licenseCount licences';
 
   @override
   String get viewLicensesButtonLabel => 'VIEW LICENCES';
@@ -4795,15 +4884,15 @@ class MaterialLocalizationEnGb extends MaterialLocalizationEn {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEnGb({
     String localeName = 'en_GB',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -4839,13 +4928,13 @@ class MaterialLocalizationEnGb extends MaterialLocalizationEn {
   String get licensesPageTitle => 'Licences';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licences';
+  String? get licensesPackageDetailTextZero => 'No licences';
 
   @override
-  String get licensesPackageDetailTextOne => '1 licence';
+  String? get licensesPackageDetailTextOne => '1 licence';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licences';
+  String get licensesPackageDetailTextOther => r'$licenseCount licences';
 
   @override
   String get popupMenuLabel => 'Pop-up menu';
@@ -4867,15 +4956,15 @@ class MaterialLocalizationEnIe extends MaterialLocalizationEn {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEnIe({
     String localeName = 'en_IE',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -4911,13 +5000,13 @@ class MaterialLocalizationEnIe extends MaterialLocalizationEn {
   String get licensesPageTitle => 'Licences';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licences';
+  String? get licensesPackageDetailTextZero => 'No licences';
 
   @override
-  String get licensesPackageDetailTextOne => '1 licence';
+  String? get licensesPackageDetailTextOne => '1 licence';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licences';
+  String get licensesPackageDetailTextOther => r'$licenseCount licences';
 
   @override
   String get popupMenuLabel => 'Pop-up menu';
@@ -4939,15 +5028,15 @@ class MaterialLocalizationEnIn extends MaterialLocalizationEn {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEnIn({
     String localeName = 'en_IN',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -4977,13 +5066,13 @@ class MaterialLocalizationEnIn extends MaterialLocalizationEn {
   String get licensesPageTitle => 'Licences';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licences';
+  String? get licensesPackageDetailTextZero => 'No licences';
 
   @override
-  String get licensesPackageDetailTextOne => '1 licence';
+  String? get licensesPackageDetailTextOne => '1 licence';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licences';
+  String get licensesPackageDetailTextOther => r'$licenseCount licences';
 
   @override
   String get viewLicensesButtonLabel => 'VIEW LICENCES';
@@ -5008,15 +5097,15 @@ class MaterialLocalizationEnNz extends MaterialLocalizationEn {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEnNz({
     String localeName = 'en_NZ',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -5046,13 +5135,13 @@ class MaterialLocalizationEnNz extends MaterialLocalizationEn {
   String get licensesPageTitle => 'Licences';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licences';
+  String? get licensesPackageDetailTextZero => 'No licences';
 
   @override
-  String get licensesPackageDetailTextOne => '1 licence';
+  String? get licensesPackageDetailTextOne => '1 licence';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licences';
+  String get licensesPackageDetailTextOther => r'$licenseCount licences';
 
   @override
   String get viewLicensesButtonLabel => 'VIEW LICENCES';
@@ -5077,15 +5166,15 @@ class MaterialLocalizationEnSg extends MaterialLocalizationEn {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEnSg({
     String localeName = 'en_SG',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -5115,13 +5204,13 @@ class MaterialLocalizationEnSg extends MaterialLocalizationEn {
   String get licensesPageTitle => 'Licences';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licences';
+  String? get licensesPackageDetailTextZero => 'No licences';
 
   @override
-  String get licensesPackageDetailTextOne => '1 licence';
+  String? get licensesPackageDetailTextOne => '1 licence';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licences';
+  String get licensesPackageDetailTextOther => r'$licenseCount licences';
 
   @override
   String get viewLicensesButtonLabel => 'VIEW LICENCES';
@@ -5146,15 +5235,15 @@ class MaterialLocalizationEnZa extends MaterialLocalizationEn {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEnZa({
     String localeName = 'en_ZA',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -5190,13 +5279,13 @@ class MaterialLocalizationEnZa extends MaterialLocalizationEn {
   String get licensesPageTitle => 'Licences';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licences';
+  String? get licensesPackageDetailTextZero => 'No licences';
 
   @override
-  String get licensesPackageDetailTextOne => '1 licence';
+  String? get licensesPackageDetailTextOne => '1 licence';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licences';
+  String get licensesPackageDetailTextOther => r'$licenseCount licences';
 
   @override
   String get popupMenuLabel => 'Pop-up menu';
@@ -5218,15 +5307,15 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEs({
     String localeName = 'es',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -5241,7 +5330,7 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Sobre \$applicationName';
+  String get aboutListTileTitleRaw => r'Sobre $applicationName';
 
   @override
   String get alertDialogLabel => 'Alerta';
@@ -5289,7 +5378,7 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'SELECCIONAR FECHA';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Fecha de finalización \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Fecha de finalización';
@@ -5298,7 +5387,7 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'SELECCIONAR PERIODO';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Fecha de inicio \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Fecha de inicio';
@@ -5322,6 +5411,9 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Ocultar';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'Ocultar cuentas';
 
   @override
@@ -5340,22 +5432,25 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Indica una hora válida';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 licencia';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licencias';
+  String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount licencias';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licencias';
@@ -5379,10 +5474,10 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Abrir el menú de navegación';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow‑\$lastRow de \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow‑$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow‑\$lastRow de aproximadamente \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow‑$lastRow de aproximadamente $rowCount';
 
   @override
   String get pasteButtonLabel => 'Pegar';
@@ -5403,22 +5498,22 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Actualizar';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'Queda 1 carácter.';
+  String? get remainingTextFieldCharacterCountOne => 'Queda 1 carácter.';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'Quedan \$remainingCount caracteres';
+  String get remainingTextFieldCharacterCountOther => r'Quedan $remainingCount caracteres';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Mover hacia abajo';
@@ -5457,22 +5552,22 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Seleccionar año';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 elemento seleccionado';
+  String? get selectedRowCountTitleOne => '1 elemento seleccionado';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount elementos seleccionados';
+  String get selectedRowCountTitleOther => r'$selectedRowCount elementos seleccionados';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => 'No se han seleccionado elementos';
+  String? get selectedRowCountTitleZero => 'No se han seleccionado elementos';
 
   @override
   String get showAccountsLabel => 'Mostrar cuentas';
@@ -5484,7 +5579,7 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Sesión iniciada';
 
   @override
-  String get tabLabelRaw => 'Pestaña \$tabIndex de \$tabCount';
+  String get tabLabelRaw => r'Pestaña $tabIndex de $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -5524,15 +5619,15 @@ class MaterialLocalizationEs419 extends MaterialLocalizationEs {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEs419({
     String localeName = 'es_419',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -5547,7 +5642,7 @@ class MaterialLocalizationEs419 extends MaterialLocalizationEs {
   );
 
   @override
-  String get licensesPackageDetailTextOne => '1 licencia';
+  String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
   String get timePickerInputHelpText => 'INGRESAR HORA';
@@ -5556,7 +5651,7 @@ class MaterialLocalizationEs419 extends MaterialLocalizationEs {
   String get invalidTimeLabel => 'Ingresa una hora válida';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licencias';
+  String get licensesPackageDetailTextOther => r'$licenseCount licencias';
 
   @override
   String get inputTimeModeButtonLabel => 'Cambiar al modo de entrada de texto';
@@ -5580,10 +5675,10 @@ class MaterialLocalizationEs419 extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Fecha de finalización: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Fecha de inicio: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -5613,19 +5708,19 @@ class MaterialLocalizationEs419 extends MaterialLocalizationEs {
   String get nextPageTooltip => 'Próxima página';
 
   @override
-  String get aboutListTileTitleRaw => 'Acerca de \$applicationName';
+  String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow de \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow de aproximadamente \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
-  String get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
+  String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => 'Se seleccionaron \$selectedRowCount elementos';
+  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -5653,15 +5748,15 @@ class MaterialLocalizationEsAr extends MaterialLocalizationEs {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsAr({
     String localeName = 'es_AR',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -5676,7 +5771,7 @@ class MaterialLocalizationEsAr extends MaterialLocalizationEs {
   );
 
   @override
-  String get licensesPackageDetailTextOne => '1 licencia';
+  String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
   String get timePickerInputHelpText => 'INGRESAR HORA';
@@ -5685,7 +5780,7 @@ class MaterialLocalizationEsAr extends MaterialLocalizationEs {
   String get invalidTimeLabel => 'Ingresa una hora válida';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licencias';
+  String get licensesPackageDetailTextOther => r'$licenseCount licencias';
 
   @override
   String get inputTimeModeButtonLabel => 'Cambiar al modo de entrada de texto';
@@ -5709,10 +5804,10 @@ class MaterialLocalizationEsAr extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Fecha de finalización: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Fecha de inicio: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -5742,19 +5837,19 @@ class MaterialLocalizationEsAr extends MaterialLocalizationEs {
   String get nextPageTooltip => 'Próxima página';
 
   @override
-  String get aboutListTileTitleRaw => 'Acerca de \$applicationName';
+  String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow de \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow de aproximadamente \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
-  String get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
+  String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => 'Se seleccionaron \$selectedRowCount elementos';
+  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -5782,15 +5877,15 @@ class MaterialLocalizationEsBo extends MaterialLocalizationEs {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsBo({
     String localeName = 'es_BO',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -5805,7 +5900,7 @@ class MaterialLocalizationEsBo extends MaterialLocalizationEs {
   );
 
   @override
-  String get licensesPackageDetailTextOne => '1 licencia';
+  String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
   String get timePickerInputHelpText => 'INGRESAR HORA';
@@ -5814,7 +5909,7 @@ class MaterialLocalizationEsBo extends MaterialLocalizationEs {
   String get invalidTimeLabel => 'Ingresa una hora válida';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licencias';
+  String get licensesPackageDetailTextOther => r'$licenseCount licencias';
 
   @override
   String get inputTimeModeButtonLabel => 'Cambiar al modo de entrada de texto';
@@ -5838,10 +5933,10 @@ class MaterialLocalizationEsBo extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Fecha de finalización: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Fecha de inicio: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -5874,19 +5969,19 @@ class MaterialLocalizationEsBo extends MaterialLocalizationEs {
   String get nextPageTooltip => 'Próxima página';
 
   @override
-  String get aboutListTileTitleRaw => 'Acerca de \$applicationName';
+  String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow de \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow de aproximadamente \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
-  String get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
+  String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => 'Se seleccionaron \$selectedRowCount elementos';
+  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -5911,15 +6006,15 @@ class MaterialLocalizationEsCl extends MaterialLocalizationEs {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsCl({
     String localeName = 'es_CL',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -5934,7 +6029,7 @@ class MaterialLocalizationEsCl extends MaterialLocalizationEs {
   );
 
   @override
-  String get licensesPackageDetailTextOne => '1 licencia';
+  String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
   String get timePickerInputHelpText => 'INGRESAR HORA';
@@ -5943,7 +6038,7 @@ class MaterialLocalizationEsCl extends MaterialLocalizationEs {
   String get invalidTimeLabel => 'Ingresa una hora válida';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licencias';
+  String get licensesPackageDetailTextOther => r'$licenseCount licencias';
 
   @override
   String get inputTimeModeButtonLabel => 'Cambiar al modo de entrada de texto';
@@ -5967,10 +6062,10 @@ class MaterialLocalizationEsCl extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Fecha de finalización: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Fecha de inicio: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -6003,19 +6098,19 @@ class MaterialLocalizationEsCl extends MaterialLocalizationEs {
   String get nextPageTooltip => 'Próxima página';
 
   @override
-  String get aboutListTileTitleRaw => 'Acerca de \$applicationName';
+  String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow de \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow de aproximadamente \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
-  String get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
+  String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => 'Se seleccionaron \$selectedRowCount elementos';
+  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -6040,15 +6135,15 @@ class MaterialLocalizationEsCo extends MaterialLocalizationEs {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsCo({
     String localeName = 'es_CO',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -6063,7 +6158,7 @@ class MaterialLocalizationEsCo extends MaterialLocalizationEs {
   );
 
   @override
-  String get licensesPackageDetailTextOne => '1 licencia';
+  String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
   String get timePickerInputHelpText => 'INGRESAR HORA';
@@ -6072,7 +6167,7 @@ class MaterialLocalizationEsCo extends MaterialLocalizationEs {
   String get invalidTimeLabel => 'Ingresa una hora válida';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licencias';
+  String get licensesPackageDetailTextOther => r'$licenseCount licencias';
 
   @override
   String get inputTimeModeButtonLabel => 'Cambiar al modo de entrada de texto';
@@ -6096,10 +6191,10 @@ class MaterialLocalizationEsCo extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Fecha de finalización: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Fecha de inicio: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -6132,19 +6227,19 @@ class MaterialLocalizationEsCo extends MaterialLocalizationEs {
   String get nextPageTooltip => 'Próxima página';
 
   @override
-  String get aboutListTileTitleRaw => 'Acerca de \$applicationName';
+  String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow de \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow de aproximadamente \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
-  String get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
+  String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => 'Se seleccionaron \$selectedRowCount elementos';
+  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -6169,15 +6264,15 @@ class MaterialLocalizationEsCr extends MaterialLocalizationEs {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsCr({
     String localeName = 'es_CR',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -6192,7 +6287,7 @@ class MaterialLocalizationEsCr extends MaterialLocalizationEs {
   );
 
   @override
-  String get licensesPackageDetailTextOne => '1 licencia';
+  String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
   String get timePickerInputHelpText => 'INGRESAR HORA';
@@ -6201,7 +6296,7 @@ class MaterialLocalizationEsCr extends MaterialLocalizationEs {
   String get invalidTimeLabel => 'Ingresa una hora válida';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licencias';
+  String get licensesPackageDetailTextOther => r'$licenseCount licencias';
 
   @override
   String get inputTimeModeButtonLabel => 'Cambiar al modo de entrada de texto';
@@ -6225,10 +6320,10 @@ class MaterialLocalizationEsCr extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Fecha de finalización: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Fecha de inicio: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -6261,19 +6356,19 @@ class MaterialLocalizationEsCr extends MaterialLocalizationEs {
   String get nextPageTooltip => 'Próxima página';
 
   @override
-  String get aboutListTileTitleRaw => 'Acerca de \$applicationName';
+  String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow de \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow de aproximadamente \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
-  String get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
+  String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => 'Se seleccionaron \$selectedRowCount elementos';
+  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -6298,15 +6393,15 @@ class MaterialLocalizationEsDo extends MaterialLocalizationEs {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsDo({
     String localeName = 'es_DO',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -6321,7 +6416,7 @@ class MaterialLocalizationEsDo extends MaterialLocalizationEs {
   );
 
   @override
-  String get licensesPackageDetailTextOne => '1 licencia';
+  String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
   String get timePickerInputHelpText => 'INGRESAR HORA';
@@ -6330,7 +6425,7 @@ class MaterialLocalizationEsDo extends MaterialLocalizationEs {
   String get invalidTimeLabel => 'Ingresa una hora válida';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licencias';
+  String get licensesPackageDetailTextOther => r'$licenseCount licencias';
 
   @override
   String get inputTimeModeButtonLabel => 'Cambiar al modo de entrada de texto';
@@ -6354,10 +6449,10 @@ class MaterialLocalizationEsDo extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Fecha de finalización: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Fecha de inicio: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -6390,19 +6485,19 @@ class MaterialLocalizationEsDo extends MaterialLocalizationEs {
   String get nextPageTooltip => 'Próxima página';
 
   @override
-  String get aboutListTileTitleRaw => 'Acerca de \$applicationName';
+  String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow de \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow de aproximadamente \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
-  String get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
+  String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => 'Se seleccionaron \$selectedRowCount elementos';
+  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -6427,15 +6522,15 @@ class MaterialLocalizationEsEc extends MaterialLocalizationEs {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsEc({
     String localeName = 'es_EC',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -6450,7 +6545,7 @@ class MaterialLocalizationEsEc extends MaterialLocalizationEs {
   );
 
   @override
-  String get licensesPackageDetailTextOne => '1 licencia';
+  String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
   String get timePickerInputHelpText => 'INGRESAR HORA';
@@ -6459,7 +6554,7 @@ class MaterialLocalizationEsEc extends MaterialLocalizationEs {
   String get invalidTimeLabel => 'Ingresa una hora válida';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licencias';
+  String get licensesPackageDetailTextOther => r'$licenseCount licencias';
 
   @override
   String get inputTimeModeButtonLabel => 'Cambiar al modo de entrada de texto';
@@ -6483,10 +6578,10 @@ class MaterialLocalizationEsEc extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Fecha de finalización: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Fecha de inicio: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -6519,19 +6614,19 @@ class MaterialLocalizationEsEc extends MaterialLocalizationEs {
   String get nextPageTooltip => 'Próxima página';
 
   @override
-  String get aboutListTileTitleRaw => 'Acerca de \$applicationName';
+  String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow de \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow de aproximadamente \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
-  String get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
+  String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => 'Se seleccionaron \$selectedRowCount elementos';
+  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -6556,15 +6651,15 @@ class MaterialLocalizationEsGt extends MaterialLocalizationEs {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsGt({
     String localeName = 'es_GT',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -6579,7 +6674,7 @@ class MaterialLocalizationEsGt extends MaterialLocalizationEs {
   );
 
   @override
-  String get licensesPackageDetailTextOne => '1 licencia';
+  String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
   String get timePickerInputHelpText => 'INGRESAR HORA';
@@ -6588,7 +6683,7 @@ class MaterialLocalizationEsGt extends MaterialLocalizationEs {
   String get invalidTimeLabel => 'Ingresa una hora válida';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licencias';
+  String get licensesPackageDetailTextOther => r'$licenseCount licencias';
 
   @override
   String get inputTimeModeButtonLabel => 'Cambiar al modo de entrada de texto';
@@ -6612,10 +6707,10 @@ class MaterialLocalizationEsGt extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Fecha de finalización: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Fecha de inicio: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -6648,19 +6743,19 @@ class MaterialLocalizationEsGt extends MaterialLocalizationEs {
   String get nextPageTooltip => 'Próxima página';
 
   @override
-  String get aboutListTileTitleRaw => 'Acerca de \$applicationName';
+  String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow de \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow de aproximadamente \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
-  String get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
+  String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => 'Se seleccionaron \$selectedRowCount elementos';
+  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -6685,15 +6780,15 @@ class MaterialLocalizationEsHn extends MaterialLocalizationEs {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsHn({
     String localeName = 'es_HN',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -6708,7 +6803,7 @@ class MaterialLocalizationEsHn extends MaterialLocalizationEs {
   );
 
   @override
-  String get licensesPackageDetailTextOne => '1 licencia';
+  String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
   String get timePickerInputHelpText => 'INGRESAR HORA';
@@ -6717,7 +6812,7 @@ class MaterialLocalizationEsHn extends MaterialLocalizationEs {
   String get invalidTimeLabel => 'Ingresa una hora válida';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licencias';
+  String get licensesPackageDetailTextOther => r'$licenseCount licencias';
 
   @override
   String get inputTimeModeButtonLabel => 'Cambiar al modo de entrada de texto';
@@ -6741,10 +6836,10 @@ class MaterialLocalizationEsHn extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Fecha de finalización: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Fecha de inicio: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -6777,19 +6872,19 @@ class MaterialLocalizationEsHn extends MaterialLocalizationEs {
   String get nextPageTooltip => 'Próxima página';
 
   @override
-  String get aboutListTileTitleRaw => 'Acerca de \$applicationName';
+  String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow de \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow de aproximadamente \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
-  String get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
+  String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => 'Se seleccionaron \$selectedRowCount elementos';
+  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -6814,15 +6909,15 @@ class MaterialLocalizationEsMx extends MaterialLocalizationEs {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsMx({
     String localeName = 'es_MX',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -6837,7 +6932,7 @@ class MaterialLocalizationEsMx extends MaterialLocalizationEs {
   );
 
   @override
-  String get licensesPackageDetailTextOne => '1 licencia';
+  String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
   String get timePickerInputHelpText => 'INGRESAR HORA';
@@ -6846,7 +6941,7 @@ class MaterialLocalizationEsMx extends MaterialLocalizationEs {
   String get invalidTimeLabel => 'Ingresa una hora válida';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licencias';
+  String get licensesPackageDetailTextOther => r'$licenseCount licencias';
 
   @override
   String get inputTimeModeButtonLabel => 'Cambiar al modo de entrada de texto';
@@ -6870,10 +6965,10 @@ class MaterialLocalizationEsMx extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Fecha de finalización: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Fecha de inicio: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -6906,19 +7001,19 @@ class MaterialLocalizationEsMx extends MaterialLocalizationEs {
   String get nextPageTooltip => 'Próxima página';
 
   @override
-  String get aboutListTileTitleRaw => 'Acerca de \$applicationName';
+  String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow de \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow de aproximadamente \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
-  String get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
+  String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => 'Se seleccionaron \$selectedRowCount elementos';
+  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -6943,15 +7038,15 @@ class MaterialLocalizationEsNi extends MaterialLocalizationEs {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsNi({
     String localeName = 'es_NI',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -6966,7 +7061,7 @@ class MaterialLocalizationEsNi extends MaterialLocalizationEs {
   );
 
   @override
-  String get licensesPackageDetailTextOne => '1 licencia';
+  String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
   String get timePickerInputHelpText => 'INGRESAR HORA';
@@ -6975,7 +7070,7 @@ class MaterialLocalizationEsNi extends MaterialLocalizationEs {
   String get invalidTimeLabel => 'Ingresa una hora válida';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licencias';
+  String get licensesPackageDetailTextOther => r'$licenseCount licencias';
 
   @override
   String get inputTimeModeButtonLabel => 'Cambiar al modo de entrada de texto';
@@ -6999,10 +7094,10 @@ class MaterialLocalizationEsNi extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Fecha de finalización: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Fecha de inicio: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -7035,19 +7130,19 @@ class MaterialLocalizationEsNi extends MaterialLocalizationEs {
   String get nextPageTooltip => 'Próxima página';
 
   @override
-  String get aboutListTileTitleRaw => 'Acerca de \$applicationName';
+  String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow de \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow de aproximadamente \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
-  String get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
+  String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => 'Se seleccionaron \$selectedRowCount elementos';
+  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -7072,15 +7167,15 @@ class MaterialLocalizationEsPa extends MaterialLocalizationEs {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsPa({
     String localeName = 'es_PA',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -7095,7 +7190,7 @@ class MaterialLocalizationEsPa extends MaterialLocalizationEs {
   );
 
   @override
-  String get licensesPackageDetailTextOne => '1 licencia';
+  String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
   String get timePickerInputHelpText => 'INGRESAR HORA';
@@ -7104,7 +7199,7 @@ class MaterialLocalizationEsPa extends MaterialLocalizationEs {
   String get invalidTimeLabel => 'Ingresa una hora válida';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licencias';
+  String get licensesPackageDetailTextOther => r'$licenseCount licencias';
 
   @override
   String get inputTimeModeButtonLabel => 'Cambiar al modo de entrada de texto';
@@ -7128,10 +7223,10 @@ class MaterialLocalizationEsPa extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Fecha de finalización: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Fecha de inicio: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -7164,19 +7259,19 @@ class MaterialLocalizationEsPa extends MaterialLocalizationEs {
   String get nextPageTooltip => 'Próxima página';
 
   @override
-  String get aboutListTileTitleRaw => 'Acerca de \$applicationName';
+  String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow de \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow de aproximadamente \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
-  String get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
+  String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => 'Se seleccionaron \$selectedRowCount elementos';
+  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -7201,15 +7296,15 @@ class MaterialLocalizationEsPe extends MaterialLocalizationEs {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsPe({
     String localeName = 'es_PE',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -7224,7 +7319,7 @@ class MaterialLocalizationEsPe extends MaterialLocalizationEs {
   );
 
   @override
-  String get licensesPackageDetailTextOne => '1 licencia';
+  String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
   String get timePickerInputHelpText => 'INGRESAR HORA';
@@ -7233,7 +7328,7 @@ class MaterialLocalizationEsPe extends MaterialLocalizationEs {
   String get invalidTimeLabel => 'Ingresa una hora válida';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licencias';
+  String get licensesPackageDetailTextOther => r'$licenseCount licencias';
 
   @override
   String get inputTimeModeButtonLabel => 'Cambiar al modo de entrada de texto';
@@ -7257,10 +7352,10 @@ class MaterialLocalizationEsPe extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Fecha de finalización: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Fecha de inicio: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -7293,19 +7388,19 @@ class MaterialLocalizationEsPe extends MaterialLocalizationEs {
   String get nextPageTooltip => 'Próxima página';
 
   @override
-  String get aboutListTileTitleRaw => 'Acerca de \$applicationName';
+  String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow de \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow de aproximadamente \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
-  String get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
+  String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => 'Se seleccionaron \$selectedRowCount elementos';
+  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -7330,15 +7425,15 @@ class MaterialLocalizationEsPr extends MaterialLocalizationEs {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsPr({
     String localeName = 'es_PR',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -7353,7 +7448,7 @@ class MaterialLocalizationEsPr extends MaterialLocalizationEs {
   );
 
   @override
-  String get licensesPackageDetailTextOne => '1 licencia';
+  String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
   String get timePickerInputHelpText => 'INGRESAR HORA';
@@ -7362,7 +7457,7 @@ class MaterialLocalizationEsPr extends MaterialLocalizationEs {
   String get invalidTimeLabel => 'Ingresa una hora válida';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licencias';
+  String get licensesPackageDetailTextOther => r'$licenseCount licencias';
 
   @override
   String get inputTimeModeButtonLabel => 'Cambiar al modo de entrada de texto';
@@ -7386,10 +7481,10 @@ class MaterialLocalizationEsPr extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Fecha de finalización: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Fecha de inicio: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -7422,19 +7517,19 @@ class MaterialLocalizationEsPr extends MaterialLocalizationEs {
   String get nextPageTooltip => 'Próxima página';
 
   @override
-  String get aboutListTileTitleRaw => 'Acerca de \$applicationName';
+  String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow de \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow de aproximadamente \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
-  String get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
+  String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => 'Se seleccionaron \$selectedRowCount elementos';
+  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -7459,15 +7554,15 @@ class MaterialLocalizationEsPy extends MaterialLocalizationEs {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsPy({
     String localeName = 'es_PY',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -7482,7 +7577,7 @@ class MaterialLocalizationEsPy extends MaterialLocalizationEs {
   );
 
   @override
-  String get licensesPackageDetailTextOne => '1 licencia';
+  String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
   String get timePickerInputHelpText => 'INGRESAR HORA';
@@ -7491,7 +7586,7 @@ class MaterialLocalizationEsPy extends MaterialLocalizationEs {
   String get invalidTimeLabel => 'Ingresa una hora válida';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licencias';
+  String get licensesPackageDetailTextOther => r'$licenseCount licencias';
 
   @override
   String get inputTimeModeButtonLabel => 'Cambiar al modo de entrada de texto';
@@ -7515,10 +7610,10 @@ class MaterialLocalizationEsPy extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Fecha de finalización: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Fecha de inicio: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -7551,19 +7646,19 @@ class MaterialLocalizationEsPy extends MaterialLocalizationEs {
   String get nextPageTooltip => 'Próxima página';
 
   @override
-  String get aboutListTileTitleRaw => 'Acerca de \$applicationName';
+  String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow de \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow de aproximadamente \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
-  String get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
+  String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => 'Se seleccionaron \$selectedRowCount elementos';
+  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -7588,15 +7683,15 @@ class MaterialLocalizationEsSv extends MaterialLocalizationEs {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsSv({
     String localeName = 'es_SV',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -7611,7 +7706,7 @@ class MaterialLocalizationEsSv extends MaterialLocalizationEs {
   );
 
   @override
-  String get licensesPackageDetailTextOne => '1 licencia';
+  String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
   String get timePickerInputHelpText => 'INGRESAR HORA';
@@ -7620,7 +7715,7 @@ class MaterialLocalizationEsSv extends MaterialLocalizationEs {
   String get invalidTimeLabel => 'Ingresa una hora válida';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licencias';
+  String get licensesPackageDetailTextOther => r'$licenseCount licencias';
 
   @override
   String get inputTimeModeButtonLabel => 'Cambiar al modo de entrada de texto';
@@ -7644,10 +7739,10 @@ class MaterialLocalizationEsSv extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Fecha de finalización: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Fecha de inicio: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -7680,19 +7775,19 @@ class MaterialLocalizationEsSv extends MaterialLocalizationEs {
   String get nextPageTooltip => 'Próxima página';
 
   @override
-  String get aboutListTileTitleRaw => 'Acerca de \$applicationName';
+  String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow de \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow de aproximadamente \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
-  String get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
+  String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => 'Se seleccionaron \$selectedRowCount elementos';
+  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -7717,15 +7812,15 @@ class MaterialLocalizationEsUs extends MaterialLocalizationEs {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsUs({
     String localeName = 'es_US',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -7740,7 +7835,7 @@ class MaterialLocalizationEsUs extends MaterialLocalizationEs {
   );
 
   @override
-  String get licensesPackageDetailTextOne => '1 licencia';
+  String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
   String get timePickerInputHelpText => 'INGRESAR HORA';
@@ -7749,7 +7844,7 @@ class MaterialLocalizationEsUs extends MaterialLocalizationEs {
   String get invalidTimeLabel => 'Ingresa una hora válida';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licencias';
+  String get licensesPackageDetailTextOther => r'$licenseCount licencias';
 
   @override
   String get inputTimeModeButtonLabel => 'Cambiar al modo de entrada de texto';
@@ -7773,10 +7868,10 @@ class MaterialLocalizationEsUs extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Fecha de finalización: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Fecha de inicio: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -7803,10 +7898,10 @@ class MaterialLocalizationEsUs extends MaterialLocalizationEs {
   String get nextMonthTooltip => 'Próximo mes';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow de aproximadamente \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
-  String get aboutListTileTitleRaw => 'Acerca de \$applicationName';
+  String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
   String get nextPageTooltip => 'Próxima página';
@@ -7815,13 +7910,13 @@ class MaterialLocalizationEsUs extends MaterialLocalizationEs {
   String get openAppDrawerTooltip => 'Abrir menú de navegación';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow de \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
+  String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => 'Se seleccionaron \$selectedRowCount elementos';
+  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
@@ -7849,15 +7944,15 @@ class MaterialLocalizationEsUy extends MaterialLocalizationEs {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsUy({
     String localeName = 'es_UY',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -7872,7 +7967,7 @@ class MaterialLocalizationEsUy extends MaterialLocalizationEs {
   );
 
   @override
-  String get licensesPackageDetailTextOne => '1 licencia';
+  String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
   String get timePickerInputHelpText => 'INGRESAR HORA';
@@ -7881,7 +7976,7 @@ class MaterialLocalizationEsUy extends MaterialLocalizationEs {
   String get invalidTimeLabel => 'Ingresa una hora válida';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licencias';
+  String get licensesPackageDetailTextOther => r'$licenseCount licencias';
 
   @override
   String get inputTimeModeButtonLabel => 'Cambiar al modo de entrada de texto';
@@ -7905,10 +8000,10 @@ class MaterialLocalizationEsUy extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Fecha de finalización: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Fecha de inicio: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -7941,19 +8036,19 @@ class MaterialLocalizationEsUy extends MaterialLocalizationEs {
   String get nextPageTooltip => 'Próxima página';
 
   @override
-  String get aboutListTileTitleRaw => 'Acerca de \$applicationName';
+  String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow de \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow de aproximadamente \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
-  String get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
+  String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => 'Se seleccionaron \$selectedRowCount elementos';
+  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -7978,15 +8073,15 @@ class MaterialLocalizationEsVe extends MaterialLocalizationEs {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsVe({
     String localeName = 'es_VE',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -8001,7 +8096,7 @@ class MaterialLocalizationEsVe extends MaterialLocalizationEs {
   );
 
   @override
-  String get licensesPackageDetailTextOne => '1 licencia';
+  String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
   String get timePickerInputHelpText => 'INGRESAR HORA';
@@ -8010,7 +8105,7 @@ class MaterialLocalizationEsVe extends MaterialLocalizationEs {
   String get invalidTimeLabel => 'Ingresa una hora válida';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licencias';
+  String get licensesPackageDetailTextOther => r'$licenseCount licencias';
 
   @override
   String get inputTimeModeButtonLabel => 'Cambiar al modo de entrada de texto';
@@ -8034,10 +8129,10 @@ class MaterialLocalizationEsVe extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Fecha de finalización: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Fecha de inicio: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -8070,19 +8165,19 @@ class MaterialLocalizationEsVe extends MaterialLocalizationEs {
   String get nextPageTooltip => 'Próxima página';
 
   @override
-  String get aboutListTileTitleRaw => 'Acerca de \$applicationName';
+  String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow de \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow de aproximadamente \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
-  String get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
+  String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => 'Se seleccionaron \$selectedRowCount elementos';
+  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -8107,15 +8202,15 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEt({
     String localeName = 'et',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -8130,7 +8225,7 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Teave rakenduse \$applicationName kohta';
+  String get aboutListTileTitleRaw => r'Teave rakenduse $applicationName kohta';
 
   @override
   String get alertDialogLabel => 'Märguanne';
@@ -8166,7 +8261,7 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Lõika';
 
   @override
-  String get dateHelpText => 'kk/pp/aaaa';
+  String get dateHelpText => 'pp.kk.aaaa';
 
   @override
   String get dateInputLabel => 'Sisestage kuupäev';
@@ -8178,7 +8273,7 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'VALIGE KUUPÄEV';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Lõppkuupäev: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Lõppkuupäev: $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Lõppkuupäev';
@@ -8187,13 +8282,13 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'VALIGE VAHEMIK';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Alguskuupäev: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Alguskuupäev: $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Alguskuupäev';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Kustuta';
@@ -8209,6 +8304,9 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'Ahenda';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'Peida kontod';
@@ -8229,22 +8327,25 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Sisestage sobiv kellaaeg';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 litsents';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount litsentsi';
+  String? get licensesPackageDetailTextOne => '1 litsents';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount litsentsi';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Litsentsid';
@@ -8268,10 +8369,10 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Ava navigeerimismenüü';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow \$rowCount-st';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow $rowCount-st';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow umbes \$rowCount-st';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow umbes $rowCount-st';
 
   @override
   String get pasteButtonLabel => 'Kleebi';
@@ -8292,22 +8393,22 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Värskendamine';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'Jäänud on 1 tähemärk';
+  String? get remainingTextFieldCharacterCountOne => 'Jäänud on 1 tähemärk';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'Jäänud on \$remainingCount tähemärki';
+  String get remainingTextFieldCharacterCountOther => r'Jäänud on $remainingCount tähemärki';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Teisalda alla';
@@ -8346,22 +8447,22 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Valige aasta';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => 'Valitud on 1 üksus';
+  String? get selectedRowCountTitleOne => 'Valitud on 1 üksus';
 
   @override
-  String get selectedRowCountTitleOther => 'Valitud on \$selectedRowCount üksust';
+  String get selectedRowCountTitleOther => r'Valitud on $selectedRowCount üksust';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Kuva kontod';
@@ -8373,7 +8474,7 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Sisse logitud';
 
   @override
-  String get tabLabelRaw => '\$tabIndex. vahekaart \$tabCount-st';
+  String get tabLabelRaw => r'$tabIndex. vahekaart $tabCount-st';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -8413,15 +8514,15 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEu({
     String localeName = 'eu',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -8436,7 +8537,7 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => '\$applicationName aplikazioari buruz';
+  String get aboutListTileTitleRaw => r'$applicationName aplikazioari buruz';
 
   @override
   String get alertDialogLabel => 'Alerta';
@@ -8472,7 +8573,7 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Ebaki';
 
   @override
-  String get dateHelpText => 'hh/ee/uuuu';
+  String get dateHelpText => 'uuuu/hh/ee';
 
   @override
   String get dateInputLabel => 'Idatzi data';
@@ -8484,7 +8585,7 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'HAUTATU DATA';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Amaiera-data: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Amaiera-data: $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Amaiera-data';
@@ -8493,7 +8594,7 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'HAUTATU BARRUTIA';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Hasiera-data: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Hasiera-data: $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Hasiera-data';
@@ -8517,6 +8618,9 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Tolestu';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'Ezkutatu kontuak';
 
   @override
@@ -8535,22 +8639,25 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Idatzi balio duen ordu bat';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 lizentzia';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount lizentzia';
+  String? get licensesPackageDetailTextOne => '1 lizentzia';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount lizentzia';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Lizentziak';
@@ -8574,10 +8681,10 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Ireki nabigazio-menua';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow - \$lastRow / \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow - $lastRow / $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow - \$lastRow / \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow - $lastRow / $rowCount';
 
   @override
   String get pasteButtonLabel => 'Itsatsi';
@@ -8598,22 +8705,22 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Freskatu';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 karaktere geratzen da';
+  String? get remainingTextFieldCharacterCountOne => '1 karaktere geratzen da';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount karaktere geratzen dira';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount karaktere geratzen dira';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => null;
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Eraman behera';
@@ -8652,22 +8759,22 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Hautatu urtea';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 elementu hautatu da';
+  String? get selectedRowCountTitleOne => '1 elementu hautatu da';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount elementu hautatu dira';
+  String get selectedRowCountTitleOther => r'$selectedRowCount elementu hautatu dira';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Erakutsi kontuak';
@@ -8679,7 +8786,7 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Hasi da saioa';
 
   @override
-  String get tabLabelRaw => '\$tabIndex/\$tabCount fitxa';
+  String get tabLabelRaw => r'$tabIndex/$tabCount fitxa';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -8719,15 +8826,15 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationFa({
     String localeName = 'fa',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -8742,7 +8849,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'درباره \$applicationName';
+  String get aboutListTileTitleRaw => r'درباره $applicationName';
 
   @override
   String get alertDialogLabel => 'هشدار';
@@ -8790,7 +8897,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'انتخاب تاریخ';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'تاریخ پایان \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'تاریخ پایان $fullDate';
 
   @override
   String get dateRangeEndLabel => 'تاریخ پایان';
@@ -8799,7 +8906,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'انتخاب محدوده';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'تاریخ شروع \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'تاریخ شروع $fullDate';
 
   @override
   String get dateRangeStartLabel => 'تاریخ شروع';
@@ -8823,6 +8930,9 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'کوچک کردن';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'پنهان کردن حساب‌ها';
 
   @override
@@ -8841,22 +8951,25 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'زمان معتبری وارد کنید';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '۱ پروانه';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount پروانه';
+  String? get licensesPackageDetailTextOne => '۱ پروانه';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount پروانه';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'مجوزها';
@@ -8880,10 +8993,10 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'باز کردن منوی پیمایش';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow از \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow از $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow از حدود \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow از حدود $rowCount';
 
   @override
   String get pasteButtonLabel => 'جای‌گذاری';
@@ -8904,22 +9017,22 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'بازخوانی';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '۱ نویسه باقی مانده است';
+  String? get remainingTextFieldCharacterCountOne => '۱ نویسه باقی مانده است';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount نویسه باقی مانده است';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount نویسه باقی مانده است';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'انتقال به پایین';
@@ -8958,22 +9071,22 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'انتخاب سال';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '۱ مورد انتخاب شد';
+  String? get selectedRowCountTitleOne => '۱ مورد انتخاب شد';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount مورد انتخاب شدند';
+  String get selectedRowCountTitleOther => r'$selectedRowCount مورد انتخاب شدند';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'نشان دادن حساب‌ها';
@@ -8985,7 +9098,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get signedInLabel => 'واردشده به سیستم';
 
   @override
-  String get tabLabelRaw => 'برگه \$tabIndex از \$tabCount';
+  String get tabLabelRaw => r'برگه $tabIndex از $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -9025,15 +9138,15 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationFi({
     String localeName = 'fi',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -9048,7 +9161,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Tietoja: \$applicationName';
+  String get aboutListTileTitleRaw => r'Tietoja: $applicationName';
 
   @override
   String get alertDialogLabel => 'Ilmoitus';
@@ -9084,7 +9197,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Leikkaa';
 
   @override
-  String get dateHelpText => 'kk/pp/vvvv';
+  String get dateHelpText => 'pp/kk/vvvv';
 
   @override
   String get dateInputLabel => 'Lisää päivämäärä';
@@ -9096,7 +9209,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'VALITSE PÄIVÄMÄÄRÄ';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Päättymispäivä \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Päättymispäivä $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Päättymispäivä';
@@ -9105,7 +9218,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'VALITSE PÄIVÄMÄÄRÄVÄLI';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Alkamispäivä \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Alkamispäivä $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Alkamispäivä';
@@ -9129,6 +9242,9 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Tiivistä';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'Piilota tilit';
 
   @override
@@ -9147,22 +9263,25 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Lisää kelvollinen aika';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 lisenssi';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount lisenssiä';
+  String? get licensesPackageDetailTextOne => '1 lisenssi';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount lisenssiä';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Lisenssit';
@@ -9186,10 +9305,10 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Avaa navigointivalikko';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow/\$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow/$rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow/~\$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow/~$rowCount';
 
   @override
   String get pasteButtonLabel => 'Liitä';
@@ -9210,22 +9329,22 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Päivitys';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 merkki jäljellä';
+  String? get remainingTextFieldCharacterCountOne => '1 merkki jäljellä';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount merkkiä jäljellä';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount merkkiä jäljellä';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Siirrä alas';
@@ -9264,22 +9383,22 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Valitse vuosi';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 kohde valittu';
+  String? get selectedRowCountTitleOne => '1 kohde valittu';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount kohdetta valittu';
+  String get selectedRowCountTitleOther => r'$selectedRowCount kohdetta valittu';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Näytä tilit';
@@ -9291,7 +9410,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Kirjautunut sisään';
 
   @override
-  String get tabLabelRaw => 'Välilehti \$tabIndex/\$tabCount';
+  String get tabLabelRaw => r'Välilehti $tabIndex/$tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -9331,15 +9450,15 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationFil({
     String localeName = 'fil',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -9354,7 +9473,7 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Tungkol sa \$applicationName';
+  String get aboutListTileTitleRaw => r'Tungkol sa $applicationName';
 
   @override
   String get alertDialogLabel => 'Alerto';
@@ -9402,7 +9521,7 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'PUMILI NG PETSA';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Petsa ng pagtatapos \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Petsa ng pagtatapos $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Petsa ng Pagtatapos';
@@ -9411,7 +9530,7 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'PUMILI NG HANAY';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Petsa ng pagsisimula \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Petsa ng pagsisimula $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Petsa ng Pagsisimula';
@@ -9435,6 +9554,9 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'I-collapse';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'Itago ang mga account';
 
   @override
@@ -9453,22 +9575,25 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Maglagay ng valid na oras';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 lisensya';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount na lisensya';
+  String? get licensesPackageDetailTextOne => '1 lisensya';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount na lisensya';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Mga Lisensya';
@@ -9492,10 +9617,10 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Buksan ang menu ng navigation';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow ng \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow ng $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow ng humigit kumulang \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow ng humigit kumulang $rowCount';
 
   @override
   String get pasteButtonLabel => 'I-paste';
@@ -9516,22 +9641,22 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Nagre-refresh';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 character ang natitira';
+  String? get remainingTextFieldCharacterCountOne => '1 character ang natitira';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount na character ang natitira';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount na character ang natitira';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Ilipat pababa';
@@ -9570,22 +9695,22 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Pumili ng taon';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 item ang napili';
+  String? get selectedRowCountTitleOne => '1 item ang napili';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount na item ang napili';
+  String get selectedRowCountTitleOther => r'$selectedRowCount na item ang napili';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Ipakita ang mga account';
@@ -9597,7 +9722,7 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Naka-sign in';
 
   @override
-  String get tabLabelRaw => 'Tab \$tabIndex ng \$tabCount';
+  String get tabLabelRaw => r'Tab $tabIndex ng $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -9637,15 +9762,15 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationFr({
     String localeName = 'fr',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -9660,7 +9785,7 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'À propos de \$applicationName';
+  String get aboutListTileTitleRaw => r'À propos de $applicationName';
 
   @override
   String get alertDialogLabel => 'Alerte';
@@ -9672,7 +9797,7 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Retour';
 
   @override
-  String get calendarModeButtonLabel => 'Passer à l\'agenda';
+  String get calendarModeButtonLabel => "Passer à l'agenda";
 
   @override
   String get cancelButtonLabel => 'ANNULER';
@@ -9696,7 +9821,7 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Couper';
 
   @override
-  String get dateHelpText => 'mm/jj/aaaa';
+  String get dateHelpText => 'jj/mm/aaaa';
 
   @override
   String get dateInputLabel => 'Saisir une date';
@@ -9708,7 +9833,7 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'SÉLECTIONNER UNE DATE';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Date de fin : \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Date de fin : $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Date de fin';
@@ -9717,7 +9842,7 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'SÉLECTIONNER UNE PLAGE';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Date de début : \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Date de début : $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Date de début';
@@ -9741,6 +9866,9 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Réduire';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'Masquer les comptes';
 
   @override
@@ -9759,22 +9887,25 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Veuillez indiquer une heure valide';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 licence';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licences';
+  String? get licensesPackageDetailTextOne => '1 licence';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount licences';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licences';
@@ -9798,10 +9929,10 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Ouvrir le menu de navigation';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow – \$lastRow sur \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow – $lastRow sur $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow – \$lastRow sur environ \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow – $lastRow sur environ $rowCount';
 
   @override
   String get pasteButtonLabel => 'Coller';
@@ -9822,22 +9953,22 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Actualiser';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 caractère restant';
+  String? get remainingTextFieldCharacterCountOne => '1 caractère restant';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount caractères restants';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount caractères restants';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Déplacer vers le bas';
@@ -9876,22 +10007,22 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Sélectionner une année';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 élément sélectionné';
+  String? get selectedRowCountTitleOne => '1 élément sélectionné';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount éléments sélectionnés';
+  String get selectedRowCountTitleOther => r'$selectedRowCount éléments sélectionnés';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => 'Aucun élément sélectionné';
+  String? get selectedRowCountTitleZero => 'Aucun élément sélectionné';
 
   @override
   String get showAccountsLabel => 'Afficher les comptes';
@@ -9903,7 +10034,7 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Connecté';
 
   @override
-  String get tabLabelRaw => 'Onglet \$tabIndex sur \$tabCount';
+  String get tabLabelRaw => r'Onglet $tabIndex sur $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -9943,15 +10074,15 @@ class MaterialLocalizationFrCa extends MaterialLocalizationFr {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationFrCa({
     String localeName = 'fr_CA',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -9969,10 +10100,10 @@ class MaterialLocalizationFrCa extends MaterialLocalizationFr {
   String get invalidTimeLabel => 'Entrez une heure valide';
 
   @override
-  String get timePickerDialHelpText => 'SÉLECTIONNER L\'HEURE';
+  String get timePickerDialHelpText => "SÉLECTIONNER L'HEURE";
 
   @override
-  String get timePickerInputHelpText => 'ENTRER L\'HEURE';
+  String get timePickerInputHelpText => "ENTRER L'HEURE";
 
   @override
   String get timePickerMinuteLabel => 'Minutes';
@@ -9981,7 +10112,7 @@ class MaterialLocalizationFrCa extends MaterialLocalizationFr {
   String get dialModeButtonLabel => 'Passer au mode de sélection du cadran';
 
   @override
-  String get inputTimeModeButtonLabel => 'Passer au mode d\'entrée Texte';
+  String get inputTimeModeButtonLabel => "Passer au mode d'entrée Texte";
 
   @override
   String get dateRangePickerHelpText => 'SÉLECTIONNER LA PLAGE';
@@ -9996,7 +10127,7 @@ class MaterialLocalizationFrCa extends MaterialLocalizationFr {
   String get invalidDateFormatLabel => 'Format incorrect';
 
   @override
-  String get inputDateModeButtonLabel => 'Passer à l\'entrée';
+  String get inputDateModeButtonLabel => "Passer à l'entrée";
 
   @override
   String get dateInputLabel => 'Entrer une date';
@@ -10008,13 +10139,13 @@ class MaterialLocalizationFrCa extends MaterialLocalizationFr {
   String get dateHelpText => 'jj-mm-aaaa';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow à \$lastRow sur \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow à $lastRow sur $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow à \$lastRow sur environ \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow à $lastRow sur environ $rowCount';
 
   @override
-  String get tabLabelRaw => 'Onglet \$tabIndex sur \$tabCount';
+  String get tabLabelRaw => r'Onglet $tabIndex sur $tabCount';
 
   @override
   String get anteMeridiemAbbreviation => 'am';
@@ -10045,15 +10176,15 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationGl({
     String localeName = 'gl',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -10068,7 +10199,7 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Acerca de: \$applicationName';
+  String get aboutListTileTitleRaw => r'Acerca de: $applicationName';
 
   @override
   String get alertDialogLabel => 'Alerta';
@@ -10116,7 +10247,7 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'SELECCIONAR UNHA DATA';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Data de finalización: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Data de finalización: $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Data de finalización';
@@ -10125,7 +10256,7 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'SELECCIONAR UN INTERVALO DE DATAS';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Data de inicio: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Data de inicio: $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Data de inicio';
@@ -10149,6 +10280,9 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Contraer';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'Ocultar contas';
 
   @override
@@ -10167,22 +10301,25 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Escribe unha hora válida';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 licenza';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licenzas';
+  String? get licensesPackageDetailTextOne => '1 licenza';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount licenzas';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licenzas';
@@ -10206,10 +10343,10 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Abrir menú de navegación';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow-\$lastRow de \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow-$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow-\$lastRow de aproximadamente \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow-$lastRow de aproximadamente $rowCount';
 
   @override
   String get pasteButtonLabel => 'Pegar';
@@ -10230,22 +10367,22 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Actualizar';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 carácter restante';
+  String? get remainingTextFieldCharacterCountOne => '1 carácter restante';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount caracteres restantes';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount caracteres restantes';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Mover cara abaixo';
@@ -10284,22 +10421,22 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Seleccionar ano';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => 'Seleccionouse 1 elemento';
+  String? get selectedRowCountTitleOne => 'Seleccionouse 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => 'Seleccionáronse \$selectedRowCount elementos';
+  String get selectedRowCountTitleOther => r'Seleccionáronse $selectedRowCount elementos';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => 'Non se seleccionaron elementos';
+  String? get selectedRowCountTitleZero => 'Non se seleccionaron elementos';
 
   @override
   String get showAccountsLabel => 'Mostrar contas';
@@ -10311,7 +10448,7 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Sesión iniciada';
 
   @override
-  String get tabLabelRaw => 'Pestana \$tabIndex de \$tabCount';
+  String get tabLabelRaw => r'Pestana $tabIndex de $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -10351,15 +10488,15 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationGsw({
     String localeName = 'gsw',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -10374,7 +10511,7 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Über \$applicationName';
+  String get aboutListTileTitleRaw => r'Über $applicationName';
 
   @override
   String get alertDialogLabel => 'Benachrichtigung';
@@ -10422,7 +10559,7 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'DATUM AUSWÄHLEN';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Enddatum \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Enddatum $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Enddatum';
@@ -10431,7 +10568,7 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'ZEITRAUM AUSWÄHLEN';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Startdatum \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Startdatum $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Startdatum';
@@ -10455,6 +10592,9 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Minimieren';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'Konten ausblenden';
 
   @override
@@ -10473,22 +10613,25 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Gib eine gültige Uhrzeit ein';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 Lizenz';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount Lizenzen';
+  String? get licensesPackageDetailTextOne => '1 Lizenz';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount Lizenzen';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Lizenzen';
@@ -10512,10 +10655,10 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Navigationsmenü öffnen';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow von \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow von $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow von etwa \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow von etwa $rowCount';
 
   @override
   String get pasteButtonLabel => 'Einsetzen';
@@ -10536,22 +10679,22 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Aktualisieren';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'Noch 1 Zeichen';
+  String? get remainingTextFieldCharacterCountOne => 'Noch 1 Zeichen';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'Noch \$remainingCount Zeichen';
+  String get remainingTextFieldCharacterCountOther => r'Noch $remainingCount Zeichen';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Nach unten verschieben';
@@ -10590,22 +10733,22 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Jahr auswählen';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 Element ausgewählt';
+  String? get selectedRowCountTitleOne => '1 Element ausgewählt';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount Elemente ausgewählt';
+  String get selectedRowCountTitleOther => r'$selectedRowCount Elemente ausgewählt';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Konten anzeigen';
@@ -10617,7 +10760,7 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Angemeldet';
 
   @override
-  String get tabLabelRaw => 'Tab \$tabIndex von \$tabCount';
+  String get tabLabelRaw => r'Tab $tabIndex von $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -10657,15 +10800,15 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationGu({
     String localeName = 'gu',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -10680,7 +10823,7 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => '\$applicationName વિશે';
+  String get aboutListTileTitleRaw => r'$applicationName વિશે';
 
   @override
   String get alertDialogLabel => 'અલર્ટ';
@@ -10728,7 +10871,7 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'તારીખ પસંદ કરો';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'સમાપ્તિની તારીખ \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'સમાપ્તિની તારીખ $fullDate';
 
   @override
   String get dateRangeEndLabel => 'સમાપ્તિની તારીખ';
@@ -10737,7 +10880,7 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'રેંજ પસંદ કરો';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'શરૂ કરવાની તારીખ \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'શરૂ કરવાની તારીખ $fullDate';
 
   @override
   String get dateRangeStartLabel => 'શરૂ કરવાની તારીખ';
@@ -10761,6 +10904,9 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'સંકુચિત કરો';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'એકાઉન્ટ છુપાવો';
 
   @override
@@ -10779,22 +10925,25 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'માન્ય સમય દાખલ કરો';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 લાઇસન્સ';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount લાઇસન્સ';
+  String? get licensesPackageDetailTextOne => '1 લાઇસન્સ';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount લાઇસન્સ';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'લાઇસન્સ';
@@ -10818,10 +10967,10 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'નૅવિગેશન મેનૂ ખોલો';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$rowCountમાંથી \$firstRow–\$lastRow';
+  String get pageRowsInfoTitleRaw => r'$rowCountમાંથી $firstRow–$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => 'આશરે \$rowCountમાંથી \$firstRow–\$lastRow';
+  String get pageRowsInfoTitleApproximateRaw => r'આશરે $rowCountમાંથી $firstRow–$lastRow';
 
   @override
   String get pasteButtonLabel => 'પેસ્ટ કરો';
@@ -10842,22 +10991,22 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'રિફ્રેશ કરો';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 અક્ષર બાકી';
+  String? get remainingTextFieldCharacterCountOne => '1 અક્ષર બાકી';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount અક્ષર બાકી';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount અક્ષર બાકી';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => null;
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'નીચે ખસેડો';
@@ -10896,22 +11045,22 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'વર્ષ પસંદ કરો';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 આઇટમ પસંદ કરી';
+  String? get selectedRowCountTitleOne => '1 આઇટમ પસંદ કરી';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount આઇટમ પસંદ કરી';
+  String get selectedRowCountTitleOther => r'$selectedRowCount આઇટમ પસંદ કરી';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'એકાઉન્ટ બતાવો';
@@ -10923,7 +11072,7 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get signedInLabel => 'આમાં સાઇન ઇન કર્યું છે';
 
   @override
-  String get tabLabelRaw => '\$tabCountમાંથી \$tabIndex ટૅબ';
+  String get tabLabelRaw => r'$tabCountમાંથી $tabIndex ટૅબ';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -10963,15 +11112,15 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationHe({
     String localeName = 'he',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -10986,7 +11135,7 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'מידע על \$applicationName';
+  String get aboutListTileTitleRaw => r'מידע על $applicationName';
 
   @override
   String get alertDialogLabel => 'התראה';
@@ -11022,7 +11171,7 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'גזירה';
 
   @override
-  String get dateHelpText => 'dd/mm/yyyy';
+  String get dateHelpText => 'dd.mm.yyyy';
 
   @override
   String get dateInputLabel => 'יש להזין תאריך';
@@ -11034,7 +11183,7 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'בחירת תאריך';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'תאריך סיום: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'תאריך סיום: $fullDate';
 
   @override
   String get dateRangeEndLabel => 'תאריך סיום';
@@ -11043,13 +11192,13 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'בחירת טווח';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'תאריך התחלה: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'תאריך התחלה: $fullDate';
 
   @override
   String get dateRangeStartLabel => 'תאריך התחלה';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'מחיקה';
@@ -11065,6 +11214,9 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'כיווץ';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'הסתרת החשבונות';
@@ -11085,22 +11237,25 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'יש להזין שעה תקינה';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => '\$licenseCount רישיונות';
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => 'רישיון אחד';
+  String? get licensesPackageDetailTextMany => r'$licenseCount רישיונות';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount רישיונות';
+  String? get licensesPackageDetailTextOne => 'רישיון אחד';
 
   @override
-  String get licensesPackageDetailTextTwo => '\$licenseCount רישיונות';
+  String get licensesPackageDetailTextOther => r'$licenseCount רישיונות';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => r'$licenseCount רישיונות';
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'רישיונות';
@@ -11124,10 +11279,10 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'פתיחה של תפריט הניווט';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$lastRow–\$firstRow מתוך \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$lastRow–$firstRow מתוך $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$lastRow–\$firstRow מתוך כ-\$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$lastRow–$firstRow מתוך כ-$rowCount';
 
   @override
   String get pasteButtonLabel => 'הדבקה';
@@ -11148,22 +11303,22 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'רענון';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => 'נותרו \$remainingCount תווים';
+  String? get remainingTextFieldCharacterCountMany => r'נותרו $remainingCount תווים';
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'נותר תו אחד';
+  String? get remainingTextFieldCharacterCountOne => 'נותר תו אחד';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'נותרו \$remainingCount תווים';
+  String get remainingTextFieldCharacterCountOther => r'נותרו $remainingCount תווים';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => 'נותרו \$remainingCount תווים';
+  String? get remainingTextFieldCharacterCountTwo => r'נותרו $remainingCount תווים';
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'העברה למטה';
@@ -11202,22 +11357,22 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'בחירת שנה';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => '\$selectedRowCount פריטים נבחרו';
+  String? get selectedRowCountTitleMany => r'$selectedRowCount פריטים נבחרו';
 
   @override
-  String get selectedRowCountTitleOne => 'פריט אחד נבחר';
+  String? get selectedRowCountTitleOne => 'פריט אחד נבחר';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount פריטים נבחרו';
+  String get selectedRowCountTitleOther => r'$selectedRowCount פריטים נבחרו';
 
   @override
-  String get selectedRowCountTitleTwo => '\$selectedRowCount פריטים נבחרו';
+  String? get selectedRowCountTitleTwo => r'$selectedRowCount פריטים נבחרו';
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'הצגת החשבונות';
@@ -11229,7 +11384,7 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get signedInLabel => 'מחובר';
 
   @override
-  String get tabLabelRaw => 'כרטיסייה \$tabIndex מתוך \$tabCount';
+  String get tabLabelRaw => r'כרטיסייה $tabIndex מתוך $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -11269,15 +11424,15 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationHi({
     String localeName = 'hi',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -11292,7 +11447,7 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => '\$applicationName के बारे में जानकारी';
+  String get aboutListTileTitleRaw => r'$applicationName के बारे में जानकारी';
 
   @override
   String get alertDialogLabel => 'अलर्ट';
@@ -11340,7 +11495,7 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'तारीख चुनें';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'खत्म होने की तारीख \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'खत्म होने की तारीख $fullDate';
 
   @override
   String get dateRangeEndLabel => 'खत्म होने की तारीख';
@@ -11349,7 +11504,7 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'सीमा चुनें';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'शुरू होने की तारीख \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'शुरू होने की तारीख $fullDate';
 
   @override
   String get dateRangeStartLabel => 'शुरू होने की तारीख';
@@ -11373,6 +11528,9 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'छोटा करें';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'खाते छिपाएं';
 
   @override
@@ -11391,22 +11549,25 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'मान्य समय डालें';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 लाइसेंस';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount लाइसेंस';
+  String? get licensesPackageDetailTextOne => '1 लाइसेंस';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount लाइसेंस';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'लाइसेंस';
@@ -11430,10 +11591,10 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'नेविगेशन मेन्यू खोलें';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$rowCount का \$firstRow–\$lastRow';
+  String get pageRowsInfoTitleRaw => r'$rowCount का $firstRow–$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$rowCount में से करीब \$firstRow–\$lastRow';
+  String get pageRowsInfoTitleApproximateRaw => r'$rowCount में से करीब $firstRow–$lastRow';
 
   @override
   String get pasteButtonLabel => 'चिपकाएं';
@@ -11454,22 +11615,22 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'रीफ़्रेश करें';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'एक वर्ण आैर डाला जा सकता है';
+  String? get remainingTextFieldCharacterCountOne => 'एक वर्ण आैर डाला जा सकता है';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount वर्ण आैर डाले जा सकते हैं';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount वर्ण आैर डाले जा सकते हैं';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'नीचे ले जाएं';
@@ -11508,22 +11669,22 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'साल चुनें';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 चीज़ चुनी गई';
+  String? get selectedRowCountTitleOne => '1 चीज़ चुनी गई';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount चीज़ें चुनी गईं';
+  String get selectedRowCountTitleOther => r'$selectedRowCount चीज़ें चुनी गईं';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'खाते दिखाएं';
@@ -11535,7 +11696,7 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get signedInLabel => 'साइन इन किया हुआ है';
 
   @override
-  String get tabLabelRaw => '\$tabCount का टैब \$tabIndex';
+  String get tabLabelRaw => r'$tabCount का टैब $tabIndex';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.a_space_h_colon_mm;
@@ -11575,15 +11736,15 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationHr({
     String localeName = 'hr',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -11598,7 +11759,7 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'O aplikaciji \$applicationName';
+  String get aboutListTileTitleRaw => r'O aplikaciji $applicationName';
 
   @override
   String get alertDialogLabel => 'Upozorenje';
@@ -11634,7 +11795,7 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Izreži';
 
   @override
-  String get dateHelpText => 'mm/dd/gggg';
+  String get dateHelpText => 'dd. mm. gggg.';
 
   @override
   String get dateInputLabel => 'Unesite datum';
@@ -11646,7 +11807,7 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'ODABERITE DATUM';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Datum završetka \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Datum završetka $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Datum završetka';
@@ -11655,13 +11816,13 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'ODABERITE RASPON';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Datum početka \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Datum početka $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Datum početka';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Brisanje';
@@ -11677,6 +11838,9 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'Sažmi';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'Sakrijte račune';
@@ -11697,22 +11861,25 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Unesite važeće vrijeme';
 
   @override
-  String get licensesPackageDetailTextFew => '\$licenseCount licence';
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => r'$licenseCount licence';
 
   @override
-  String get licensesPackageDetailTextOne => '1 licenca';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licenci';
+  String? get licensesPackageDetailTextOne => '1 licenca';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount licenci';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licence';
@@ -11736,10 +11903,10 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Otvaranje izbornika za navigaciju';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow – \$lastRow od \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow – $lastRow od $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow – \$lastRow od otprilike \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow – $lastRow od otprilike $rowCount';
 
   @override
   String get pasteButtonLabel => 'Zalijepi';
@@ -11760,22 +11927,22 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Osvježi';
 
   @override
-  String get remainingTextFieldCharacterCountFew => 'Preostala su \$remainingCount znaka';
+  String? get remainingTextFieldCharacterCountFew => r'Preostala su $remainingCount znaka';
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'Preostao je 1 znak';
+  String? get remainingTextFieldCharacterCountOne => 'Preostao je 1 znak';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'Preostalo je \$remainingCount znakova';
+  String get remainingTextFieldCharacterCountOther => r'Preostalo je $remainingCount znakova';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Pomakni prema dolje';
@@ -11814,22 +11981,22 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Odaberite godinu';
 
   @override
-  String get selectedRowCountTitleFew => 'Odabrane su \$selectedRowCount stavke';
+  String? get selectedRowCountTitleFew => r'Odabrane su $selectedRowCount stavke';
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => 'Odabrana je jedna stavka';
+  String? get selectedRowCountTitleOne => 'Odabrana je jedna stavka';
 
   @override
-  String get selectedRowCountTitleOther => 'Odabrano je \$selectedRowCount stavki';
+  String get selectedRowCountTitleOther => r'Odabrano je $selectedRowCount stavki';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Prikažite račune';
@@ -11841,7 +12008,7 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Prijavljeni korisnik';
 
   @override
-  String get tabLabelRaw => 'Kartica \$tabIndex od \$tabCount';
+  String get tabLabelRaw => r'Kartica $tabIndex od $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -11881,15 +12048,15 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationHu({
     String localeName = 'hu',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -11904,7 +12071,7 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'A(z) \$applicationName névjegye';
+  String get aboutListTileTitleRaw => r'A(z) $applicationName névjegye';
 
   @override
   String get alertDialogLabel => 'Értesítés';
@@ -11940,7 +12107,7 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Kivágás';
 
   @override
-  String get dateHelpText => 'hh/nn/éééé';
+  String get dateHelpText => 'éééé. hh. nn.';
 
   @override
   String get dateInputLabel => 'Adja meg a dátumot';
@@ -11952,7 +12119,7 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'DÁTUM KIVÁLASZTÁSA';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Befejezés dátuma: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Befejezés dátuma: $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Befejezés dátuma';
@@ -11961,13 +12128,13 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'TARTOMÁNY KIJELÖLÉSE';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Kezdés dátuma: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Kezdés dátuma: $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Kezdés dátuma';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Törlés';
@@ -11983,6 +12150,9 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'Összecsukás';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'Fiókok elrejtése';
@@ -12003,22 +12173,25 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Érvényes formátumban adja meg az időt';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 licenc';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licenc';
+  String? get licensesPackageDetailTextOne => '1 licenc';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount licenc';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licencek';
@@ -12042,10 +12215,10 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Navigációs menü megnyitása';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$rowCount/\$firstRow–\$lastRow.';
+  String get pageRowsInfoTitleRaw => r'$rowCount/$firstRow–$lastRow.';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => 'Körülbelül \$rowCount/\$firstRow–\$lastRow.';
+  String get pageRowsInfoTitleApproximateRaw => r'Körülbelül $rowCount/$firstRow–$lastRow.';
 
   @override
   String get pasteButtonLabel => 'Beillesztés';
@@ -12066,22 +12239,22 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Frissítés';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 karakter maradt';
+  String? get remainingTextFieldCharacterCountOne => '1 karakter maradt';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount karakter maradt';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount karakter maradt';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Áthelyezés lefelé';
@@ -12120,22 +12293,22 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Válassza ki az évet';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 elem kiválasztva';
+  String? get selectedRowCountTitleOne => '1 elem kiválasztva';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount elem kiválasztva';
+  String get selectedRowCountTitleOther => r'$selectedRowCount elem kiválasztva';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Fiókok megjelenítése';
@@ -12147,7 +12320,7 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Bejelentkezve';
 
   @override
-  String get tabLabelRaw => '\$tabCount/\$tabIndex. lap';
+  String get tabLabelRaw => r'$tabCount/$tabIndex. lap';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -12187,15 +12360,15 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationHy({
     String localeName = 'hy',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -12210,7 +12383,7 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => '\$applicationName հավելվածի մասին';
+  String get aboutListTileTitleRaw => r'$applicationName հավելվածի մասին';
 
   @override
   String get alertDialogLabel => 'Ծանուցում';
@@ -12258,7 +12431,7 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'ԸՆՏՐԵԼ ԱՄՍԱԹԻՎ';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Ավարտի ամսաթիվը՝ \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Ավարտի ամսաթիվը՝ $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Ավարտի ամսաթիվը';
@@ -12267,13 +12440,13 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'ԸՆՏՐԵԼ ԺԱՄԱՆԱԿԱՀԱՏՎԱԾ';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Մեկնարկի ամսաթիվը՝ \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Մեկնարկի ամսաթիվը՝ $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Մեկնարկի ամսաթիվը';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Ջնջել';
@@ -12289,6 +12462,9 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'Ծալել';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'Թաքցնել հաշիվները';
@@ -12309,22 +12485,25 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Մուտքագրեք վավեր ժամ';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 լիցենզիա';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount լիցենզիա';
+  String? get licensesPackageDetailTextOne => '1 լիցենզիա';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount լիցենզիա';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Արտոնագրեր';
@@ -12348,10 +12527,10 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Բացել նավարկման ընտրացանկը';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow \$rowCount-ից';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow $rowCount-ից';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow մոտավորապես \$rowCount-ից';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow մոտավորապես $rowCount-ից';
 
   @override
   String get pasteButtonLabel => 'Տեղադրել';
@@ -12372,22 +12551,22 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Թարմացնել';
 
   @override
-  String get remainingTextFieldCharacterCountFew => 'Մնաց \$remainingCount նիշ';
+  String? get remainingTextFieldCharacterCountFew => r'Մնաց $remainingCount նիշ';
 
   @override
-  String get remainingTextFieldCharacterCountMany => 'Մնաց \$remainingCount նիշ';
+  String? get remainingTextFieldCharacterCountMany => r'Մնաց $remainingCount նիշ';
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'Մնացել է 1 նիշ';
+  String? get remainingTextFieldCharacterCountOne => 'Մնացել է 1 նիշ';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'Մնացել է \$remainingCount նիշ';
+  String get remainingTextFieldCharacterCountOther => r'Մնացել է $remainingCount նիշ';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'Նիշի հնարավորություն չկա';
+  String? get remainingTextFieldCharacterCountZero => 'Նիշի հնարավորություն չկա';
 
   @override
   String get reorderItemDown => 'Տեղափոխել ներքև';
@@ -12426,22 +12605,22 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Ընտրել տարին';
 
   @override
-  String get selectedRowCountTitleFew => 'Ընտրված է \$selectedRowCount օբյեկտ';
+  String? get selectedRowCountTitleFew => r'Ընտրված է $selectedRowCount օբյեկտ';
 
   @override
-  String get selectedRowCountTitleMany => 'Ընտրված է \$selectedRowCount օբյեկտ';
+  String? get selectedRowCountTitleMany => r'Ընտրված է $selectedRowCount օբյեկտ';
 
   @override
-  String get selectedRowCountTitleOne => 'Ընտրվել է 1 տարր';
+  String? get selectedRowCountTitleOne => 'Ընտրվել է 1 տարր';
 
   @override
-  String get selectedRowCountTitleOther => 'Ընտրվել է \$selectedRowCount տարր';
+  String get selectedRowCountTitleOther => r'Ընտրվել է $selectedRowCount տարր';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => 'Տողերը ընտրված չեն';
+  String? get selectedRowCountTitleZero => 'Տողերը ընտրված չեն';
 
   @override
   String get showAccountsLabel => 'Ցույց տալ հաշիվները';
@@ -12453,7 +12632,7 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Դուք մուտք եք գործել';
 
   @override
-  String get tabLabelRaw => 'Ներդիր \$tabIndex՝ \$tabCount-ից';
+  String get tabLabelRaw => r'Ներդիր $tabIndex՝ $tabCount-ից';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -12493,15 +12672,15 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationId({
     String localeName = 'id',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -12516,7 +12695,7 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Tentang \$applicationName';
+  String get aboutListTileTitleRaw => r'Tentang $applicationName';
 
   @override
   String get alertDialogLabel => 'Notifikasi';
@@ -12564,7 +12743,7 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'PILIH TANGGAL';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Tanggal akhir \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Tanggal akhir $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Tanggal Akhir';
@@ -12573,7 +12752,7 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'PILIH RENTANG';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Tanggal mulai \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Tanggal mulai $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Tanggal Mulai';
@@ -12597,6 +12776,9 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Ciutkan';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'Sembunyikan akun';
 
   @override
@@ -12615,22 +12797,25 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Masukkan waktu yang valid';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 lisensi';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount lisensi';
+  String? get licensesPackageDetailTextOne => '1 lisensi';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount lisensi';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Lisensi';
@@ -12654,10 +12839,10 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Buka menu navigasi';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow dari \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow dari $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow dari kira-kira \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow dari kira-kira $rowCount';
 
   @override
   String get pasteButtonLabel => 'Tempel';
@@ -12678,22 +12863,22 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Memuat ulang';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'Sisa 1 karakter';
+  String? get remainingTextFieldCharacterCountOne => 'Sisa 1 karakter';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'Sisa \$remainingCount karakter';
+  String get remainingTextFieldCharacterCountOther => r'Sisa $remainingCount karakter';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Turunkan';
@@ -12732,22 +12917,22 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Pilih tahun';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 item dipilih';
+  String? get selectedRowCountTitleOne => '1 item dipilih';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount item dipilih';
+  String get selectedRowCountTitleOther => r'$selectedRowCount item dipilih';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Tampilkan akun';
@@ -12759,7 +12944,7 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Telah login';
 
   @override
-  String get tabLabelRaw => 'Tab \$tabIndex dari \$tabCount';
+  String get tabLabelRaw => r'Tab $tabIndex dari $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -12799,15 +12984,15 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationIs({
     String localeName = 'is',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -12822,7 +13007,7 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Um \$applicationName';
+  String get aboutListTileTitleRaw => r'Um $applicationName';
 
   @override
   String get alertDialogLabel => 'Tilkynning';
@@ -12858,7 +13043,7 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Klippa';
 
   @override
-  String get dateHelpText => 'mm/dd/áááá';
+  String get dateHelpText => 'dd.mm.áááá';
 
   @override
   String get dateInputLabel => 'Slá inn dagsetningu';
@@ -12870,7 +13055,7 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'VELJA DAGSETNINGU';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Lokadagur \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Lokadagur $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Lokadagur';
@@ -12879,7 +13064,7 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'VELJA SVIÐ';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Upphafsdagur \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Upphafsdagur $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Upphafsdagur';
@@ -12903,6 +13088,9 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Draga saman';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'Fela reikninga';
 
   @override
@@ -12921,22 +13109,25 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Færðu inn gildan tíma';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 leyfi';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount leyfi';
+  String? get licensesPackageDetailTextOne => '1 leyfi';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount leyfi';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Leyfi';
@@ -12960,10 +13151,10 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Opna yfirlitsvalmynd';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow – \$lastRow af \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow – $lastRow af $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow – \$lastRow af um það bil \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow – $lastRow af um það bil $rowCount';
 
   @override
   String get pasteButtonLabel => 'Líma';
@@ -12984,22 +13175,22 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Endurnýja';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 stafur eftir';
+  String? get remainingTextFieldCharacterCountOne => '1 stafur eftir';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount stafir eftir';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount stafir eftir';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => null;
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Færa niður';
@@ -13038,22 +13229,22 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Velja ár';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 atriði valið';
+  String? get selectedRowCountTitleOne => '1 atriði valið';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount atriði valin';
+  String get selectedRowCountTitleOther => r'$selectedRowCount atriði valin';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Sýna reikninga';
@@ -13065,7 +13256,7 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Innskráð(ur)';
 
   @override
-  String get tabLabelRaw => 'Flipi \$tabIndex af \$tabCount';
+  String get tabLabelRaw => r'Flipi $tabIndex af $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -13105,15 +13296,15 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationIt({
     String localeName = 'it',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -13128,7 +13319,7 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Informazioni su \$applicationName';
+  String get aboutListTileTitleRaw => r'Informazioni su $applicationName';
 
   @override
   String get alertDialogLabel => 'Avviso';
@@ -13176,7 +13367,7 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'SELEZIONA DATA';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Data di fine \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Data di fine $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Data di fine';
@@ -13185,7 +13376,7 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'SELEZIONA INTERVALLO';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Data di inizio \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Data di inizio $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Data di inizio';
@@ -13209,6 +13400,9 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Comprimi';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'Nascondi account';
 
   @override
@@ -13227,22 +13421,25 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Inserisci un orario valido';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 licenza';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licenze';
+  String? get licensesPackageDetailTextOne => '1 licenza';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount licenze';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licenze';
@@ -13266,10 +13463,10 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Apri il menu di navigazione';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow-\$lastRow di \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow-$lastRow di $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow-\$lastRow di circa \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow-$lastRow di circa $rowCount';
 
   @override
   String get pasteButtonLabel => 'Incolla';
@@ -13290,22 +13487,22 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Aggiorna';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 carattere rimanente';
+  String? get remainingTextFieldCharacterCountOne => '1 carattere rimanente';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount caratteri rimanenti';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount caratteri rimanenti';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Sposta giù';
@@ -13320,7 +13517,7 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get reorderItemToEnd => 'Sposta alla fine';
 
   @override
-  String get reorderItemToStart => 'Sposta all\'inizio';
+  String get reorderItemToStart => "Sposta all'inizio";
 
   @override
   String get reorderItemUp => 'Sposta su';
@@ -13344,22 +13541,22 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Seleziona anno';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 elemento selezionato';
+  String? get selectedRowCountTitleOne => '1 elemento selezionato';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount elementi selezionati';
+  String get selectedRowCountTitleOther => r'$selectedRowCount elementi selezionati';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Mostra account';
@@ -13371,13 +13568,13 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Connesso';
 
   @override
-  String get tabLabelRaw => 'Scheda \$tabIndex di \$tabCount';
+  String get tabLabelRaw => r'Scheda $tabIndex di $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'SELEZIONA L\'ORA';
+  String get timePickerDialHelpText => "SELEZIONA L'ORA";
 
   @override
   String get timePickerHourLabel => 'Ora';
@@ -13386,7 +13583,7 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Seleziona le ore';
 
   @override
-  String get timePickerInputHelpText => 'INSERISCI L\'ORA';
+  String get timePickerInputHelpText => "INSERISCI L'ORA";
 
   @override
   String get timePickerMinuteLabel => 'Minuto';
@@ -13411,15 +13608,15 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationJa({
     String localeName = 'ja',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -13434,7 +13631,7 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => '\$applicationName について';
+  String get aboutListTileTitleRaw => r'$applicationName について';
 
   @override
   String get alertDialogLabel => '通知';
@@ -13482,7 +13679,7 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get datePickerHelpText => '日付の選択';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => '終了日 \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'終了日 $fullDate';
 
   @override
   String get dateRangeEndLabel => '終了日';
@@ -13491,7 +13688,7 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => '期間の選択';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => '開始日 \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'開始日 $fullDate';
 
   @override
   String get dateRangeStartLabel => '開始日';
@@ -13515,6 +13712,9 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => '折りたたむ';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'アカウントを非表示';
 
   @override
@@ -13533,22 +13733,25 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => '有効な時刻を入力してください';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => 'ライセンス: 1 件';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => 'ライセンス: \$licenseCount 件';
+  String? get licensesPackageDetailTextOne => 'ライセンス: 1 件';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'ライセンス: $licenseCount 件';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'ライセンス';
@@ -13572,10 +13775,10 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'ナビゲーション メニューを開く';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow - \$lastRow 行（合計 \$rowCount 行）';
+  String get pageRowsInfoTitleRaw => r'$firstRow - $lastRow 行（合計 $rowCount 行）';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow – \$lastRow 行（合計約 \$rowCount 行）';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow – $lastRow 行（合計約 $rowCount 行）';
 
   @override
   String get pasteButtonLabel => '貼り付け';
@@ -13596,22 +13799,22 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => '更新';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '残り 1 文字（半角相当）';
+  String? get remainingTextFieldCharacterCountOne => '残り 1 文字（半角相当）';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '残り \$remainingCount 文字（半角相当）';
+  String get remainingTextFieldCharacterCountOther => r'残り $remainingCount 文字（半角相当）';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => '下に移動';
@@ -13650,22 +13853,22 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => '年を選択';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 件のアイテムを選択中';
+  String? get selectedRowCountTitleOne => '1 件のアイテムを選択中';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount 件のアイテムを選択中';
+  String get selectedRowCountTitleOther => r'$selectedRowCount 件のアイテムを選択中';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'アカウントを表示';
@@ -13677,7 +13880,7 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get signedInLabel => 'ログイン中';
 
   @override
-  String get tabLabelRaw => 'タブ: \$tabIndex/\$tabCount';
+  String get tabLabelRaw => r'タブ: $tabIndex/$tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -13717,15 +13920,15 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationKa({
     String localeName = 'ka',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -13740,7 +13943,7 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => '\$applicationName-ის შესახებ';
+  String get aboutListTileTitleRaw => r'$applicationName-ის შესახებ';
 
   @override
   String get alertDialogLabel => 'გაფრთხილება';
@@ -13776,7 +13979,7 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'ამოჭრა';
 
   @override
-  String get dateHelpText => 'დდ/თთ/წწწწ';
+  String get dateHelpText => 'დდ.თთ.წწწწ';
 
   @override
   String get dateInputLabel => 'შეიყვანეთ თარიღი';
@@ -13788,7 +13991,7 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'აირჩიეთ თარიღი';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'დასრულების თარიღია \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'დასრულების თარიღია $fullDate';
 
   @override
   String get dateRangeEndLabel => 'დასრულების თარიღი';
@@ -13797,13 +14000,13 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'აირჩიეთ დიაპაზონი';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'დაწყების თარიღია \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'დაწყების თარიღია $fullDate';
 
   @override
   String get dateRangeStartLabel => 'დაწყების თარიღი';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'წაშლა';
@@ -13819,6 +14022,9 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'ჩაკეცვა';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'ანგარიშების დამალვა';
@@ -13839,22 +14045,25 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'შეიყვანეთ სწორი დრო';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 ლიცენზია';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount ლიცენზია';
+  String? get licensesPackageDetailTextOne => '1 ლიცენზია';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount ლიცენზია';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'ლიცენზიები';
@@ -13878,10 +14087,10 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'სანავიგაციო მენიუს გახსნა';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow-\$lastRow / \$rowCount-დან';
+  String get pageRowsInfoTitleRaw => r'$firstRow-$lastRow / $rowCount-დან';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow-\$lastRow / დაახლოებით \$rowCount-დან';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow-$lastRow / დაახლოებით $rowCount-დან';
 
   @override
   String get pasteButtonLabel => 'ჩასმა';
@@ -13902,22 +14111,22 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'განახლება';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'დარჩა 1 სიმბოლო';
+  String? get remainingTextFieldCharacterCountOne => 'დარჩა 1 სიმბოლო';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'დარჩა \$remainingCount სიმბოლო';
+  String get remainingTextFieldCharacterCountOther => r'დარჩა $remainingCount სიმბოლო';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => null;
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'ქვემოთ გადატანა';
@@ -13956,22 +14165,22 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'აირჩიეთ წელი';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => 'არჩეულია 1 ერთეული';
+  String? get selectedRowCountTitleOne => 'არჩეულია 1 ერთეული';
 
   @override
-  String get selectedRowCountTitleOther => 'არჩეულია \$selectedRowCount ერთეული';
+  String get selectedRowCountTitleOther => r'არჩეულია $selectedRowCount ერთეული';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'ანგარიშების ჩვენება';
@@ -13983,7 +14192,7 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get signedInLabel => 'შესული';
 
   @override
-  String get tabLabelRaw => 'ჩანართი \$tabIndex / \$tabCount-დან';
+  String get tabLabelRaw => r'ჩანართი $tabIndex / $tabCount-დან';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -14023,15 +14232,15 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationKk({
     String localeName = 'kk',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -14046,7 +14255,7 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => '\$applicationName туралы';
+  String get aboutListTileTitleRaw => r'$applicationName туралы';
 
   @override
   String get alertDialogLabel => 'Дабыл';
@@ -14082,7 +14291,7 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Қию';
 
   @override
-  String get dateHelpText => 'ай/күн/жыл';
+  String get dateHelpText => 'кк.аа.жжжж';
 
   @override
   String get dateInputLabel => 'Күнді енгізу';
@@ -14094,7 +14303,7 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'КҮНДІ ТАҢДАУ';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Аяқталу күні \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Аяқталу күні $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Аяқталу күні';
@@ -14103,13 +14312,13 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'АУҚЫМДЫ ТАҢДАУ';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Басталу күні \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Басталу күні $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Басталу күні';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Жою';
@@ -14125,6 +14334,9 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'Жию';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'Есептік жазбаларды жасыру';
@@ -14145,22 +14357,25 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Жарамды уақыт мәліметін енгізіңіз.';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 лицензия';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount лицензия';
+  String? get licensesPackageDetailTextOne => '1 лицензия';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount лицензия';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Лицензиялар';
@@ -14184,10 +14399,10 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Навигация мәзірін ашу';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$rowCount ішінен \$firstRow–\$lastRow';
+  String get pageRowsInfoTitleRaw => r'$rowCount ішінен $firstRow–$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => 'Шамамен \$rowCount ішінен \$firstRow–\$lastRow';
+  String get pageRowsInfoTitleApproximateRaw => r'Шамамен $rowCount ішінен $firstRow–$lastRow';
 
   @override
   String get pasteButtonLabel => 'Қою';
@@ -14208,22 +14423,22 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Жаңарту';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 таңба қалды.';
+  String? get remainingTextFieldCharacterCountOne => '1 таңба қалды.';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount таңба қалды.';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount таңба қалды.';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'Таңбалар қалмады';
+  String? get remainingTextFieldCharacterCountZero => 'Таңбалар қалмады';
 
   @override
   String get reorderItemDown => 'Төменге жылжыту';
@@ -14262,22 +14477,22 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Жылды таңдау';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 элемент таңдалды.';
+  String? get selectedRowCountTitleOne => '1 элемент таңдалды.';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount элемент таңдалды.';
+  String get selectedRowCountTitleOther => r'$selectedRowCount элемент таңдалды.';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => 'Тармақ таңдалмаған';
+  String? get selectedRowCountTitleZero => 'Тармақ таңдалмаған';
 
   @override
   String get showAccountsLabel => 'Есептік жазбаларды көрсету';
@@ -14289,7 +14504,7 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Есептік жазбаға кірген';
 
   @override
-  String get tabLabelRaw => '\$tabCount/\$tabIndex қойынды';
+  String get tabLabelRaw => r'$tabCount/$tabIndex қойынды';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -14329,15 +14544,15 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationKm({
     String localeName = 'km',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -14352,7 +14567,7 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'អំពី \$applicationName';
+  String get aboutListTileTitleRaw => r'អំពី $applicationName';
 
   @override
   String get alertDialogLabel => 'ជូនដំណឹង';
@@ -14388,7 +14603,7 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'កាត់';
 
   @override
-  String get dateHelpText => 'ខែ/ថ្ងៃ/ឆ្នាំ';
+  String get dateHelpText => 'ថ្ងៃ/ខែ/ឆ្នាំ';
 
   @override
   String get dateInputLabel => 'បញ្ចូល​កាលបរិច្ឆេទ';
@@ -14400,7 +14615,7 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'ជ្រើសរើស​កាល​បរិច្ឆេទ';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'កាលបរិច្ឆេទ​បញ្ចប់ \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'កាលបរិច្ឆេទ​បញ្ចប់ $fullDate';
 
   @override
   String get dateRangeEndLabel => 'កាលបរិច្ឆេទ​បញ្ចប់';
@@ -14409,7 +14624,7 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'ជ្រើស​រើស​ចន្លោះ';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'កាលបរិច្ឆេទ​ចាប់ផ្ដើម \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'កាលបរិច្ឆេទ​ចាប់ផ្ដើម $fullDate';
 
   @override
   String get dateRangeStartLabel => 'កាលបរិច្ឆេទ​ចាប់ផ្ដើម';
@@ -14433,6 +14648,9 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'បង្រួម';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'លាក់គណនី';
 
   @override
@@ -14451,22 +14669,25 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'បញ្ចូលពេលវេលា​ដែល​ត្រឹមត្រូវ';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => 'អាជ្ញាបណ្ណ 1';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => 'អាជ្ញាបណ្ណ \$licenseCount';
+  String? get licensesPackageDetailTextOne => 'អាជ្ញាបណ្ណ 1';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'អាជ្ញាបណ្ណ $licenseCount';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'អាជ្ញាបណ្ណ';
@@ -14490,10 +14711,10 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'បើក​ម៉ឺនុយរុករក';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow ក្នុង​ចំណោម​ \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow ក្នុង​ចំណោម​ $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow ក្នុង​ចំណោម​ប្រហែល \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow ក្នុង​ចំណោម​ប្រហែល $rowCount';
 
   @override
   String get pasteButtonLabel => 'ដាក់​ចូល';
@@ -14514,22 +14735,22 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'ផ្ទុកឡើងវិញ';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'នៅសល់​ 1 តួ​ទៀត';
+  String? get remainingTextFieldCharacterCountOne => 'នៅសល់​ 1 តួ​ទៀត';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'នៅសល់ \$remainingCount តួ​ទៀត';
+  String get remainingTextFieldCharacterCountOther => r'នៅសល់ $remainingCount តួ​ទៀត';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'ផ្លាស់ទី​ចុះ​ក្រោម';
@@ -14568,22 +14789,22 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'ជ្រើសរើសឆ្នាំ';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => 'បាន​ជ្រើស​រើស​ធាតុ 1';
+  String? get selectedRowCountTitleOne => 'បាន​ជ្រើស​រើស​ធាតុ 1';
 
   @override
-  String get selectedRowCountTitleOther => 'បាន​ជ្រើស​រើស​ធាតុ \$selectedRowCount';
+  String get selectedRowCountTitleOther => r'បាន​ជ្រើស​រើស​ធាតុ $selectedRowCount';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'បង្ហាញគណនី';
@@ -14595,7 +14816,7 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get signedInLabel => 'បានចូល​គណនី';
 
   @override
-  String get tabLabelRaw => 'ផ្ទាំង \$tabIndex ក្នុង​ចំណោម​ \$tabCount';
+  String get tabLabelRaw => r'ផ្ទាំង $tabIndex ក្នុង​ចំណោម​ $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
@@ -14635,15 +14856,15 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationKn({
     String localeName = 'kn',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -14739,6 +14960,9 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => '\u{c95}\u{cc1}\u{c97}\u{ccd}\u{c97}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
+  String get firstPageTooltip => 'First Page';
+
+  @override
   String get hideAccountsLabel => '\u{c96}\u{cbe}\u{ca4}\u{cc6}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{cae}\u{cb0}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
@@ -14757,22 +14981,25 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => '\u{cae}\u{cbe}\u{ca8}\u{ccd}\u{caf}\u{cb5}\u{cbe}\u{ca6}\u{20}\u{cb8}\u{cae}\u{caf}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{ca8}\u{cae}\u{cc2}\u{ca6}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last Page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '\u{31}\u{20}\u{caa}\u{cb0}\u{cb5}\u{cbe}\u{ca8}\u{c97}\u{cbf}';
+  String? get licensesPackageDetailTextMany => null;
+
+  @override
+  String? get licensesPackageDetailTextOne => '\u{31}\u{20}\u{caa}\u{cb0}\u{cb5}\u{cbe}\u{ca8}\u{c97}\u{cbf}';
 
   @override
   String get licensesPackageDetailTextOther => '\u{24}\u{6c}\u{69}\u{63}\u{65}\u{6e}\u{73}\u{65}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{caa}\u{cb0}\u{cb5}\u{cbe}\u{ca8}\u{c97}\u{cbf}\u{c97}\u{cb3}\u{cc1}';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String? get licensesPackageDetailTextTwo => null;
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => '\u{caa}\u{cb0}\u{cb5}\u{cbe}\u{ca8}\u{c97}\u{cbf}\u{c97}\u{cb3}\u{cc1}';
@@ -14820,22 +15047,22 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => '\u{cb0}\u{cbf}\u{cab}\u{ccd}\u{cb0}\u{cc6}\u{cb6}\u{ccd}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '\u{31}\u{20}\u{c85}\u{c95}\u{ccd}\u{cb7}\u{cb0}\u{20}\u{c89}\u{cb3}\u{cbf}\u{ca6}\u{cbf}\u{ca6}\u{cc6}';
+  String? get remainingTextFieldCharacterCountOne => '\u{31}\u{20}\u{c85}\u{c95}\u{ccd}\u{cb7}\u{cb0}\u{20}\u{c89}\u{cb3}\u{cbf}\u{ca6}\u{cbf}\u{ca6}\u{cc6}';
 
   @override
   String get remainingTextFieldCharacterCountOther => '\u{24}\u{72}\u{65}\u{6d}\u{61}\u{69}\u{6e}\u{69}\u{6e}\u{67}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{c85}\u{c95}\u{ccd}\u{cb7}\u{cb0}\u{c97}\u{cb3}\u{cc1}\u{20}\u{c89}\u{cb3}\u{cbf}\u{ca6}\u{cbf}\u{cb5}\u{cc6}';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => null;
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => '\u{c95}\u{cc6}\u{cb3}\u{c97}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
@@ -14874,22 +15101,22 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => '\u{cb5}\u{cb0}\u{ccd}\u{cb7}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '\u{31}\u{20}\u{c90}\u{c9f}\u{c82}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cb2}\u{cbe}\u{c97}\u{cbf}\u{ca6}\u{cc6}';
+  String? get selectedRowCountTitleOne => '\u{31}\u{20}\u{c90}\u{c9f}\u{c82}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cb2}\u{cbe}\u{c97}\u{cbf}\u{ca6}\u{cc6}';
 
   @override
   String get selectedRowCountTitleOther => '\u{24}\u{73}\u{65}\u{6c}\u{65}\u{63}\u{74}\u{65}\u{64}\u{52}\u{6f}\u{77}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{c90}\u{c9f}\u{c82}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cb2}\u{cbe}\u{c97}\u{cbf}\u{ca6}\u{cc6}';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => '\u{c96}\u{cbe}\u{ca4}\u{cc6}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{ca4}\u{ccb}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
@@ -14941,15 +15168,15 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationKo({
     String localeName = 'ko',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -14964,7 +15191,7 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => '\$applicationName 정보';
+  String get aboutListTileTitleRaw => r'$applicationName 정보';
 
   @override
   String get alertDialogLabel => '알림';
@@ -15000,7 +15227,7 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get cutButtonLabel => '잘라냄';
 
   @override
-  String get dateHelpText => 'yyyy/mm/dd';
+  String get dateHelpText => 'yyyy.mm.dd';
 
   @override
   String get dateInputLabel => '날짜 입력';
@@ -15012,7 +15239,7 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get datePickerHelpText => '날짜 선택';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => '종료일 \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'종료일 $fullDate';
 
   @override
   String get dateRangeEndLabel => '종료일';
@@ -15021,13 +15248,13 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => '범위 선택';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => '시작일 \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'시작일 $fullDate';
 
   @override
   String get dateRangeStartLabel => '시작일';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => '삭제';
@@ -15043,6 +15270,9 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => '접기';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => '계정 숨기기';
@@ -15063,22 +15293,25 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => '유효한 시간을 입력하세요.';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '라이선스 1개';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '라이선스 \$licenseCount개';
+  String? get licensesPackageDetailTextOne => '라이선스 1개';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'라이선스 $licenseCount개';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => '라이선스';
@@ -15102,10 +15335,10 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => '탐색 메뉴 열기';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$rowCount행 중 \$firstRow~\$lastRow행';
+  String get pageRowsInfoTitleRaw => r'$rowCount행 중 $firstRow~$lastRow행';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '약 \$rowCount행 중 \$firstRow~\$lastRow행';
+  String get pageRowsInfoTitleApproximateRaw => r'약 $rowCount행 중 $firstRow~$lastRow행';
 
   @override
   String get pasteButtonLabel => '붙여넣기';
@@ -15126,22 +15359,22 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => '새로고침';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1자 남음';
+  String? get remainingTextFieldCharacterCountOne => '1자 남음';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount자 남음';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount자 남음';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => '아래로 이동';
@@ -15180,22 +15413,22 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => '연도 선택';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '항목 1개 선택됨';
+  String? get selectedRowCountTitleOne => '항목 1개 선택됨';
 
   @override
-  String get selectedRowCountTitleOther => '항목 \$selectedRowCount개 선택됨';
+  String get selectedRowCountTitleOther => r'항목 $selectedRowCount개 선택됨';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => '계정 표시';
@@ -15207,7 +15440,7 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get signedInLabel => '로그인됨';
 
   @override
-  String get tabLabelRaw => '탭 \$tabCount개 중 \$tabIndex번째';
+  String get tabLabelRaw => r'탭 $tabCount개 중 $tabIndex번째';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.a_space_h_colon_mm;
@@ -15247,15 +15480,15 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationKy({
     String localeName = 'ky',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -15270,7 +15503,7 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => '\$applicationName каналы жөнүндө';
+  String get aboutListTileTitleRaw => r'$applicationName каналы жөнүндө';
 
   @override
   String get alertDialogLabel => 'Эскертүү';
@@ -15306,7 +15539,7 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Кесүү';
 
   @override
-  String get dateHelpText => 'аа/кк/жжжж';
+  String get dateHelpText => 'кк.аа.жжжж';
 
   @override
   String get dateInputLabel => 'Күндү киргизүү';
@@ -15318,7 +15551,7 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'КҮНДҮ ТАНДОО';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Аяктоо күнү \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Аяктоо күнү $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Аяктоо күнү';
@@ -15327,13 +15560,13 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'ДИАПАЗОНДУ ТАНДОО';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Баштоо күнү \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Баштоо күнү $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Баштоо күнү';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Жок кылуу';
@@ -15349,6 +15582,9 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'Жыйыштыруу';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'Аккаунттарды жашыруу';
@@ -15369,22 +15605,25 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Убакытты туура көрсөтүңүз';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 уруксаттама';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount уруксаттама';
+  String? get licensesPackageDetailTextOne => '1 уруксаттама';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount уруксаттама';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Уруксаттамалар';
@@ -15408,10 +15647,10 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Чабыттоо менюсун ачуу';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$rowCount ичинен \$firstRow–\$lastRow';
+  String get pageRowsInfoTitleRaw => r'$rowCount ичинен $firstRow–$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => 'Болжол менен \$rowCount ичинен \$firstRow–\$lastRow';
+  String get pageRowsInfoTitleApproximateRaw => r'Болжол менен $rowCount ичинен $firstRow–$lastRow';
 
   @override
   String get pasteButtonLabel => 'Чаптоо';
@@ -15432,22 +15671,22 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Жаңыртуу';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 белги калды';
+  String? get remainingTextFieldCharacterCountOne => '1 белги калды';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount белги калды';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount белги калды';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => null;
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Төмөн жылдыруу';
@@ -15486,22 +15725,22 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Жылды тандоо';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 нерсе тандалды';
+  String? get selectedRowCountTitleOne => '1 нерсе тандалды';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount нерсе тандалды';
+  String get selectedRowCountTitleOther => r'$selectedRowCount нерсе тандалды';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Аккаунттарды көрсөтүү';
@@ -15513,7 +15752,7 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Аккаунтуңузга кирдиңиз';
 
   @override
-  String get tabLabelRaw => '\$tabCount кыналма ичинен \$tabIndex';
+  String get tabLabelRaw => r'$tabCount кыналма ичинен $tabIndex';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -15553,15 +15792,15 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationLo({
     String localeName = 'lo',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -15576,7 +15815,7 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'ກ່ຽວກັບ \$applicationName';
+  String get aboutListTileTitleRaw => r'ກ່ຽວກັບ $applicationName';
 
   @override
   String get alertDialogLabel => 'ການເຕືອນ';
@@ -15624,7 +15863,7 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'ເລືອກວັນທີ';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'ວັນທີສິ້ນສຸດ \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'ວັນທີສິ້ນສຸດ $fullDate';
 
   @override
   String get dateRangeEndLabel => 'ວັນທີສິ້ນສຸດ';
@@ -15633,7 +15872,7 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'ເລືອກໄລຍະ';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'ວັນທີເລີ່ມຕົ້ນ \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'ວັນທີເລີ່ມຕົ້ນ $fullDate';
 
   @override
   String get dateRangeStartLabel => 'ວັນທີເລີ່ມຕົ້ນ';
@@ -15657,6 +15896,9 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'ຫຍໍ້ເຂົ້າ';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'ເຊື່ອງບັນຊີ';
 
   @override
@@ -15675,22 +15917,25 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'ລະບຸເວລາທີ່ຖືກຕ້ອງ';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 ໃບອະນຸຍາດ';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount ໃບອະນຸຍາດ';
+  String? get licensesPackageDetailTextOne => '1 ໃບອະນຸຍາດ';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount ໃບອະນຸຍາດ';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'ໃບອະນຸຍາດ';
@@ -15714,10 +15959,10 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'ເປີດເມນູການນຳທາງ';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow ຈາກທັງໝົດ \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow ຈາກທັງໝົດ $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow ຈາກປະມານ \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow ຈາກປະມານ $rowCount';
 
   @override
   String get pasteButtonLabel => 'ວາງ';
@@ -15738,22 +15983,22 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'ໂຫຼດຄືນໃໝ່';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'ຍັງອີກ 1 ຕົວອັກສອນ';
+  String? get remainingTextFieldCharacterCountOne => 'ຍັງອີກ 1 ຕົວອັກສອນ';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'ຍັງອີກ \$remainingCount ຕົວອັກສອນ';
+  String get remainingTextFieldCharacterCountOther => r'ຍັງອີກ $remainingCount ຕົວອັກສອນ';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => null;
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'ຍ້າຍລົງ';
@@ -15792,22 +16037,22 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'ເລືອກ​ປີ';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => 'ເລືອກ 1 ລາຍການແລ້ວ';
+  String? get selectedRowCountTitleOne => 'ເລືອກ 1 ລາຍການແລ້ວ';
 
   @override
-  String get selectedRowCountTitleOther => 'ເລືອກ \$selectedRowCount ລາຍການແລ້ວ';
+  String get selectedRowCountTitleOther => r'ເລືອກ $selectedRowCount ລາຍການແລ້ວ';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'ສະແດງບັນຊີ';
@@ -15819,7 +16064,7 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get signedInLabel => 'ເຂົ້າສູ່ລະບົບແລ້ວ';
 
   @override
-  String get tabLabelRaw => 'ແຖບທີ \$tabIndex ຈາກທັງໝົດ \$tabCount';
+  String get tabLabelRaw => r'ແຖບທີ $tabIndex ຈາກທັງໝົດ $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -15859,15 +16104,15 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationLt({
     String localeName = 'lt',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -15882,7 +16127,7 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Apie „\$applicationName“';
+  String get aboutListTileTitleRaw => r'Apie „$applicationName“';
 
   @override
   String get alertDialogLabel => 'Įspėjimas';
@@ -15918,7 +16163,7 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Iškirpti';
 
   @override
-  String get dateHelpText => 'mm/dd/yyyy';
+  String get dateHelpText => 'yyyy/mm/dd/';
 
   @override
   String get dateInputLabel => 'Įveskite datą';
@@ -15930,7 +16175,7 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'PASIRINKITE DATĄ';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Pabaigos data: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Pabaigos data: $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Pabaigos data';
@@ -15939,13 +16184,13 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'PASIRINKITE DIAPAZONĄ';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Pradžios data: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Pradžios data: $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Pradžios data';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Ištrinti';
@@ -15961,6 +16206,9 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'Sutraukti';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'Slėpti paskyras';
@@ -15981,22 +16229,25 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Įveskite tinkamą laiką';
 
   @override
-  String get licensesPackageDetailTextFew => '\$licenseCount licencijos';
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => '\$licenseCount licencijos';
+  String? get licensesPackageDetailTextFew => r'$licenseCount licencijos';
 
   @override
-  String get licensesPackageDetailTextOne => '1 licencija';
+  String? get licensesPackageDetailTextMany => r'$licenseCount licencijos';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licencijų';
+  String? get licensesPackageDetailTextOne => '1 licencija';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount licencijų';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licencijos';
@@ -16020,10 +16271,10 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Atidaryti naršymo meniu';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow iš \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow iš $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow iš maždaug \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow iš maždaug $rowCount';
 
   @override
   String get pasteButtonLabel => 'Įklijuoti';
@@ -16044,22 +16295,22 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Atnaujinti';
 
   @override
-  String get remainingTextFieldCharacterCountFew => 'Liko \$remainingCount simboliai';
+  String? get remainingTextFieldCharacterCountFew => r'Liko $remainingCount simboliai';
 
   @override
-  String get remainingTextFieldCharacterCountMany => 'Liko \$remainingCount simbolio';
+  String? get remainingTextFieldCharacterCountMany => r'Liko $remainingCount simbolio';
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'Liko 1 simbolis';
+  String? get remainingTextFieldCharacterCountOne => 'Liko 1 simbolis';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'Liko \$remainingCount simbolių';
+  String get remainingTextFieldCharacterCountOther => r'Liko $remainingCount simbolių';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Perkelti žemyn';
@@ -16098,22 +16349,22 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Pasirinkite metus';
 
   @override
-  String get selectedRowCountTitleFew => 'Pasirinkti \$selectedRowCount elementai';
+  String? get selectedRowCountTitleFew => r'Pasirinkti $selectedRowCount elementai';
 
   @override
-  String get selectedRowCountTitleMany => 'Pasirinkta \$selectedRowCount elemento';
+  String? get selectedRowCountTitleMany => r'Pasirinkta $selectedRowCount elemento';
 
   @override
-  String get selectedRowCountTitleOne => 'Pasirinktas 1 elementas';
+  String? get selectedRowCountTitleOne => 'Pasirinktas 1 elementas';
 
   @override
-  String get selectedRowCountTitleOther => 'Pasirinkta \$selectedRowCount elementų';
+  String get selectedRowCountTitleOther => r'Pasirinkta $selectedRowCount elementų';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Rodyti paskyras';
@@ -16125,7 +16376,7 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Prisijungta';
 
   @override
-  String get tabLabelRaw => '\$tabIndex skirtukas iš \$tabCount';
+  String get tabLabelRaw => r'$tabIndex skirtukas iš $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -16165,15 +16416,15 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationLv({
     String localeName = 'lv',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -16188,7 +16439,7 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Par \$applicationName';
+  String get aboutListTileTitleRaw => r'Par $applicationName';
 
   @override
   String get alertDialogLabel => 'Brīdinājums';
@@ -16236,7 +16487,7 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'ATLASIET DATUMU';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Beigu datums: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Beigu datums: $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Beigu datums';
@@ -16245,13 +16496,13 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'ATLASIET DIAPAZONU';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Sākuma datums: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Sākuma datums: $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Sākuma datums';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Dzēst';
@@ -16267,6 +16518,9 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'Sakļaut';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'Slēpt kontus';
@@ -16287,22 +16541,25 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Ievadiet derīgu laiku.';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 licence';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licences';
+  String? get licensesPackageDetailTextOne => '1 licence';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount licences';
 
   @override
-  String get licensesPackageDetailTextZero => 'Nav licenču';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'Nav licenču';
 
   @override
   String get licensesPageTitle => 'Licences';
@@ -16326,10 +16583,10 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Atvērt navigācijas izvēlni';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow.–\$lastRow. no \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow.–$lastRow. no $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow.–\$lastRow. no aptuveni \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow.–$lastRow. no aptuveni $rowCount';
 
   @override
   String get pasteButtonLabel => 'Ielīmēt';
@@ -16350,22 +16607,22 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Atsvaidzināt';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'Atlikusi 1 rakstzīme.';
+  String? get remainingTextFieldCharacterCountOne => 'Atlikusi 1 rakstzīme.';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'Atlikušas \$remainingCount rakstzīmes.';
+  String get remainingTextFieldCharacterCountOther => r'Atlikušas $remainingCount rakstzīmes.';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'Nav atlikusi neviena rakstzīme.';
+  String? get remainingTextFieldCharacterCountZero => 'Nav atlikusi neviena rakstzīme.';
 
   @override
   String get reorderItemDown => 'Pārvietot uz leju';
@@ -16404,22 +16661,22 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Atlasiet gadu';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => 'Atlasīts 1 vienums';
+  String? get selectedRowCountTitleOne => 'Atlasīts 1 vienums';
 
   @override
-  String get selectedRowCountTitleOther => 'Atlasīti \$selectedRowCount vienumi';
+  String get selectedRowCountTitleOther => r'Atlasīti $selectedRowCount vienumi';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => 'Nav atlasītu vienumu';
+  String? get selectedRowCountTitleZero => 'Nav atlasītu vienumu';
 
   @override
   String get showAccountsLabel => 'Rādīt kontus';
@@ -16431,7 +16688,7 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Esat pierakstījies';
 
   @override
-  String get tabLabelRaw => '\$tabIndex. cilne no \$tabCount';
+  String get tabLabelRaw => r'$tabIndex. cilne no $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -16471,15 +16728,15 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationMk({
     String localeName = 'mk',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -16494,7 +16751,7 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'За \$applicationName';
+  String get aboutListTileTitleRaw => r'За $applicationName';
 
   @override
   String get alertDialogLabel => 'Предупредување';
@@ -16530,7 +16787,7 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Исечи';
 
   @override
-  String get dateHelpText => 'mm/dd/yyyy';
+  String get dateHelpText => 'dd.mm.yyyy';
 
   @override
   String get dateInputLabel => 'Внесете датум';
@@ -16542,7 +16799,7 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'ИЗБЕРЕТЕ ДАТУМ';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Краен датум \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Краен датум $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Краен датум';
@@ -16551,13 +16808,13 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'ИЗБЕРЕТЕ ОПСЕГ';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Датум на започнување \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Датум на започнување $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Датум на започнување';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Избриши';
@@ -16573,6 +16830,9 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'Собери';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'Сокриј сметки';
@@ -16593,22 +16853,25 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Внесете важечко време';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 лиценца';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount лиценци';
+  String? get licensesPackageDetailTextOne => '1 лиценца';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount лиценци';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Лиценци';
@@ -16632,10 +16895,10 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Отворете го менито за навигација';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow - \$lastRow од \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow - $lastRow од $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow - \$lastRow од приближно \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow - $lastRow од приближно $rowCount';
 
   @override
   String get pasteButtonLabel => 'Залепи';
@@ -16656,22 +16919,22 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Освежи';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'Преостанува уште 1 знак';
+  String? get remainingTextFieldCharacterCountOne => 'Преостанува уште 1 знак';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'Преостануваат уште \$remainingCount знаци';
+  String get remainingTextFieldCharacterCountOther => r'Преостануваат уште $remainingCount знаци';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => null;
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Преместете надолу';
@@ -16710,22 +16973,22 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Изберете година';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => 'Избрана е 1 ставка';
+  String? get selectedRowCountTitleOne => 'Избрана е 1 ставка';
 
   @override
-  String get selectedRowCountTitleOther => 'Избрани се \$selectedRowCount ставки';
+  String get selectedRowCountTitleOther => r'Избрани се $selectedRowCount ставки';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Прикажи сметки';
@@ -16737,7 +17000,7 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Најавени сте';
 
   @override
-  String get tabLabelRaw => 'Картичка \$tabIndex од \$tabCount';
+  String get tabLabelRaw => r'Картичка $tabIndex од $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -16777,15 +17040,15 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationMl({
     String localeName = 'ml',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -16800,7 +17063,7 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => '\$applicationName എന്നതിനെക്കുറിച്ച്';
+  String get aboutListTileTitleRaw => r'$applicationName എന്നതിനെക്കുറിച്ച്';
 
   @override
   String get alertDialogLabel => 'മുന്നറിയിപ്പ്';
@@ -16848,7 +17111,7 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'തീയതി തിരഞ്ഞെടുക്കുക';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'അവസാനിക്കുന്ന തീയതി \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'അവസാനിക്കുന്ന തീയതി $fullDate';
 
   @override
   String get dateRangeEndLabel => 'അവസാനിക്കുന്ന തീയതി';
@@ -16857,7 +17120,7 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'ശ്രേണി തിരഞ്ഞെടുക്കുക';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'ആരംഭിക്കുന്ന തീയതി \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'ആരംഭിക്കുന്ന തീയതി $fullDate';
 
   @override
   String get dateRangeStartLabel => 'ആരംഭിക്കുന്ന തീയതി';
@@ -16881,6 +17144,9 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'ചുരുക്കുക';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'അക്കൗണ്ടുകൾ മറയ്‌ക്കുക';
 
   @override
@@ -16899,22 +17165,25 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'സാധുവായ സമയം നൽകുക';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => 'ഒരു ലൈസൻസ്';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount ലൈസൻസുകൾ';
+  String? get licensesPackageDetailTextOne => 'ഒരു ലൈസൻസ്';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount ലൈസൻസുകൾ';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'ലൈസൻസുകൾ';
@@ -16938,10 +17207,10 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'നാവിഗേഷൻ മെനു തുറക്കുക';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$rowCount-ൽ \$firstRow –\$lastRow';
+  String get pageRowsInfoTitleRaw => r'$rowCount-ൽ $firstRow –$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => 'ഏകദേശം \$rowCount-ൽ \$firstRow –\$lastRow';
+  String get pageRowsInfoTitleApproximateRaw => r'ഏകദേശം $rowCount-ൽ $firstRow –$lastRow';
 
   @override
   String get pasteButtonLabel => 'ഒട്ടിക്കുക';
@@ -16962,22 +17231,22 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'പുതുക്കിയെടുക്കുക';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'ഒരു പ്രതീകം ശേഷിക്കുന്നു';
+  String? get remainingTextFieldCharacterCountOne => 'ഒരു പ്രതീകം ശേഷിക്കുന്നു';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount പ്രതീകങ്ങൾ ശേഷിക്കുന്നു';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount പ്രതീകങ്ങൾ ശേഷിക്കുന്നു';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => null;
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'താഴോട്ട് നീക്കുക';
@@ -17016,22 +17285,22 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'വർഷം തിരഞ്ഞെടുക്കുക';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => 'ഒരു ഇനം തിരഞ്ഞെടുത്തു';
+  String? get selectedRowCountTitleOne => 'ഒരു ഇനം തിരഞ്ഞെടുത്തു';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount ഇനങ്ങൾ തിരഞ്ഞെടുത്തു';
+  String get selectedRowCountTitleOther => r'$selectedRowCount ഇനങ്ങൾ തിരഞ്ഞെടുത്തു';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'അക്കൗണ്ടുകൾ കാണിക്കുക';
@@ -17043,7 +17312,7 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get signedInLabel => 'സൈൻ ഇൻ ചെയ്‌തു';
 
   @override
-  String get tabLabelRaw => '\$tabCount-ൽ \$tabIndex';
+  String get tabLabelRaw => r'$tabCount-ൽ $tabIndex';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -17083,15 +17352,15 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationMn({
     String localeName = 'mn',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -17106,7 +17375,7 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => '\$applicationName-н тухай';
+  String get aboutListTileTitleRaw => r'$applicationName-н тухай';
 
   @override
   String get alertDialogLabel => 'Сэрэмжлүүлэг';
@@ -17142,7 +17411,7 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Таслах';
 
   @override
-  String get dateHelpText => 'сар/өдөр/жил';
+  String get dateHelpText => 'жжжж.сс.өө';
 
   @override
   String get dateInputLabel => 'Огноо оруулах';
@@ -17154,7 +17423,7 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'ОГНОО СОНГОХ';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Дуусах огноо \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Дуусах огноо $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Дуусах огноо';
@@ -17163,13 +17432,13 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'ИНТЕРВАЛ СОНГОХ';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Эхлэх огноо \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Эхлэх огноо $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Эхлэх огноо';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Устгах';
@@ -17181,10 +17450,13 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get dialogLabel => 'Харилцах цонх';
 
   @override
-  String get drawerLabel => 'Навигацийн цэс';
+  String get drawerLabel => 'Навигацын цэс';
 
   @override
   String get expandedIconTapHint => 'Буулгах';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'Бүртгэлүүдийг нуух';
@@ -17205,22 +17477,25 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Цагийг зөв оруулна уу';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 лиценз';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount лиценз';
+  String? get licensesPackageDetailTextOne => '1 лиценз';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount лиценз';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Лиценз';
@@ -17241,13 +17516,13 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get okButtonLabel => 'OK';
 
   @override
-  String get openAppDrawerTooltip => 'Навигацийн цэсийг нээх';
+  String get openAppDrawerTooltip => 'Навигацын цэсийг нээх';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$rowCount-н \$firstRow–\$lastRow';
+  String get pageRowsInfoTitleRaw => r'$rowCount-н $firstRow–$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => 'Ойролцоогоор \$rowCount-н \$firstRow–\$lastRow';
+  String get pageRowsInfoTitleApproximateRaw => r'Ойролцоогоор $rowCount-н $firstRow–$lastRow';
 
   @override
   String get pasteButtonLabel => 'Буулгах';
@@ -17268,22 +17543,22 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Сэргээх';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 тэмдэгт үлдсэн';
+  String? get remainingTextFieldCharacterCountOne => '1 тэмдэгт үлдсэн';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount тэмдэгт үлдсэн';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount тэмдэгт үлдсэн';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'No characters remaining';
+  String? get remainingTextFieldCharacterCountZero => 'No characters remaining';
 
   @override
   String get reorderItemDown => 'Доош зөөх';
@@ -17322,22 +17597,22 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Жил сонгох';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 зүйл сонгосон';
+  String? get selectedRowCountTitleOne => '1 зүйл сонгосон';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount зүйл сонгосон';
+  String get selectedRowCountTitleOther => r'$selectedRowCount зүйл сонгосон';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => 'Бичлэг сонгоогүй байна';
+  String? get selectedRowCountTitleZero => 'Бичлэг сонгоогүй байна';
 
   @override
   String get showAccountsLabel => 'Бүртгэлүүдийг харуулах';
@@ -17349,7 +17624,7 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Нэвтэрсэн';
 
   @override
-  String get tabLabelRaw => '\$tabCount-н \$tabIndex-р таб';
+  String get tabLabelRaw => r'$tabCount-н $tabIndex-р таб';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -17389,15 +17664,15 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationMr({
     String localeName = 'mr',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -17412,7 +17687,7 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => '\$applicationName बद्दल';
+  String get aboutListTileTitleRaw => r'$applicationName बद्दल';
 
   @override
   String get alertDialogLabel => 'सूचना';
@@ -17460,7 +17735,7 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'तारीख निवडा';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'संपण्याची तारीख \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'संपण्याची तारीख $fullDate';
 
   @override
   String get dateRangeEndLabel => 'संपण्याची तारीख';
@@ -17469,7 +17744,7 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'श्रेणी निवडा';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'सुरू होण्याची तारीख \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'सुरू होण्याची तारीख $fullDate';
 
   @override
   String get dateRangeStartLabel => 'सुरू होण्याची तारीख';
@@ -17493,6 +17768,9 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'कोलॅप्स करा';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'खाती लपवा';
 
   @override
@@ -17511,22 +17789,25 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'योग्य वेळ एंटर करा';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => 'एक परवाना';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount परवाने';
+  String? get licensesPackageDetailTextOne => 'एक परवाना';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount परवाने';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'परवाने';
@@ -17550,10 +17831,10 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'नेव्हिगेशन मेनू उघडा';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$rowCount पैकी \$firstRow–\$lastRow';
+  String get pageRowsInfoTitleRaw => r'$rowCount पैकी $firstRow–$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$rowCount च्या बद्दल \$firstRow–\$lastRow';
+  String get pageRowsInfoTitleApproximateRaw => r'$rowCount च्या बद्दल $firstRow–$lastRow';
 
   @override
   String get pasteButtonLabel => 'पेस्ट करा';
@@ -17574,22 +17855,22 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'रिफ्रेश करा';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'एक वर्ण शिल्लक';
+  String? get remainingTextFieldCharacterCountOne => 'एक वर्ण शिल्लक';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount वर्ण शिल्लक';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount वर्ण शिल्लक';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'कोणतेही वर्ण शिल्लक नाहीत';
+  String? get remainingTextFieldCharacterCountZero => 'कोणतेही वर्ण शिल्लक नाहीत';
 
   @override
   String get reorderItemDown => 'खाली हलवा';
@@ -17628,22 +17909,22 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'वर्ष निवडा';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => 'एक आयटम निवडला';
+  String? get selectedRowCountTitleOne => 'एक आयटम निवडला';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount आयटम निवडले';
+  String get selectedRowCountTitleOther => r'$selectedRowCount आयटम निवडले';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => 'कोणतेही आयटम निवडलेले नाहीत';
+  String? get selectedRowCountTitleZero => 'कोणतेही आयटम निवडलेले नाहीत';
 
   @override
   String get showAccountsLabel => 'खाती दर्शवा';
@@ -17655,7 +17936,7 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get signedInLabel => 'साइन इन केले आहे';
 
   @override
-  String get tabLabelRaw => '\$tabCount पैकी \$tabIndex टॅब';
+  String get tabLabelRaw => r'$tabCount पैकी $tabIndex टॅब';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
@@ -17695,15 +17976,15 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationMs({
     String localeName = 'ms',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -17718,7 +17999,7 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Perihal \$applicationName';
+  String get aboutListTileTitleRaw => r'Perihal $applicationName';
 
   @override
   String get alertDialogLabel => 'Makluman';
@@ -17766,7 +18047,7 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'PILIH TARIKH';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Tarikh tamat ialah \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Tarikh tamat ialah $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Tarikh Tamat';
@@ -17775,7 +18056,7 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'PILIH JULAT';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Tarikh mula ialah \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Tarikh mula ialah $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Tarikh Mula';
@@ -17799,6 +18080,9 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Runtuhkan';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'Sembunyikan akaun';
 
   @override
@@ -17817,22 +18101,25 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Masukkan masa yang sah';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 lesen';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount lesen';
+  String? get licensesPackageDetailTextOne => '1 lesen';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount lesen';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Lesen';
@@ -17856,10 +18143,10 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Buka menu navigasi';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow dari \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow dari $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow dari kira-kira \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow dari kira-kira $rowCount';
 
   @override
   String get pasteButtonLabel => 'Tampal';
@@ -17880,22 +18167,22 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Muat semula';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 aksara lagi';
+  String? get remainingTextFieldCharacterCountOne => '1 aksara lagi';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount aksara lagi';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount aksara lagi';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Alih ke bawah';
@@ -17934,22 +18221,22 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Pilih tahun';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 item dipilih';
+  String? get selectedRowCountTitleOne => '1 item dipilih';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount item dipilih';
+  String get selectedRowCountTitleOther => r'$selectedRowCount item dipilih';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => 'Tiada item dipilih';
+  String? get selectedRowCountTitleZero => 'Tiada item dipilih';
 
   @override
   String get showAccountsLabel => 'Tunjukkan akaun';
@@ -17961,7 +18248,7 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Dilog masuk';
 
   @override
-  String get tabLabelRaw => 'Tab \$tabIndex dari \$tabCount';
+  String get tabLabelRaw => r'Tab $tabIndex dari $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
@@ -18001,15 +18288,15 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationMy({
     String localeName = 'my',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -18024,7 +18311,7 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => '\$applicationName အကြောင်း';
+  String get aboutListTileTitleRaw => r'$applicationName အကြောင်း';
 
   @override
   String get alertDialogLabel => 'သတိပေးချက်';
@@ -18060,7 +18347,7 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'ဖြတ်ယူရန်';
 
   @override
-  String get dateHelpText => 'mm/dd/yyyy';
+  String get dateHelpText => 'dd-mm-yyyy';
 
   @override
   String get dateInputLabel => 'ရက်စွဲ ထည့်ရန်';
@@ -18072,7 +18359,7 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'ရက်စွဲရွေးပါ';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'ပြီးဆုံးရက်စွဲ \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'ပြီးဆုံးရက်စွဲ $fullDate';
 
   @override
   String get dateRangeEndLabel => 'ပြီးဆုံးရက်စွဲ';
@@ -18081,13 +18368,13 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'အပိုင်းအခြား ရွေးရန်';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'စတင်သည့် ရက်စွဲ \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'စတင်သည့် ရက်စွဲ $fullDate';
 
   @override
   String get dateRangeStartLabel => 'စတင်သည့် ရက်စွဲ';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '-';
 
   @override
   String get deleteButtonTooltip => 'ဖျက်ရန်';
@@ -18103,6 +18390,9 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'လျှော့ပြရန်';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'အကောင့်များကို ဝှက်ရန်';
@@ -18123,22 +18413,25 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'မှန်ကန်သည့်အချိန် ထည့်ပါ';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => 'လိုင်စင် 1 ခု';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => 'လိုင်စင် \$licenseCount ခု';
+  String? get licensesPackageDetailTextOne => 'လိုင်စင် 1 ခု';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'လိုင်စင် $licenseCount ခု';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'လိုင်စင်များ';
@@ -18162,10 +18455,10 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'လမ်းညွှန်မီနူးကို ဖွင့်ရန်';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$rowCount အနက် \$firstRow–\$lastRow';
+  String get pageRowsInfoTitleRaw => r'$rowCount အနက် $firstRow–$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$rowCount ခန့်မှ \$firstRow–\$lastRow';
+  String get pageRowsInfoTitleApproximateRaw => r'$rowCount ခန့်မှ $firstRow–$lastRow';
 
   @override
   String get pasteButtonLabel => 'ကူးထည့်ရန်';
@@ -18186,22 +18479,22 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'ပြန်လည်စတင်ရန်';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'အက္ခရာ ၁ လုံးကျန်သည်';
+  String? get remainingTextFieldCharacterCountOne => 'အက္ခရာ ၁ လုံးကျန်သည်';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'အက္ခရာ \$remainingCount လုံးကျန်သည်';
+  String get remainingTextFieldCharacterCountOther => r'အက္ခရာ $remainingCount လုံးကျန်သည်';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => null;
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'အောက်သို့ရွှေ့ရန်';
@@ -18240,22 +18533,22 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'ခုနှစ် ရွေးရန်';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '၁ ခု ရွေးထားသည်';
+  String? get selectedRowCountTitleOne => '၁ ခု ရွေးထားသည်';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount ခု ရွေးထားသည်';
+  String get selectedRowCountTitleOther => r'$selectedRowCount ခု ရွေးထားသည်';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'အကောင့်များကို ပြရန်';
@@ -18267,7 +18560,7 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get signedInLabel => 'လက်မှတ်ထိုး ဝင်ထားသည်';
 
   @override
-  String get tabLabelRaw => 'တဘ် \$tabCount အနက် \$tabIndex ခု';
+  String get tabLabelRaw => r'တဘ် $tabCount အနက် $tabIndex ခု';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -18307,15 +18600,15 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationNb({
     String localeName = 'nb',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -18330,7 +18623,7 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Om \$applicationName';
+  String get aboutListTileTitleRaw => r'Om $applicationName';
 
   @override
   String get alertDialogLabel => 'Varsel';
@@ -18366,7 +18659,7 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Klipp ut';
 
   @override
-  String get dateHelpText => 'mm/dd/åååå';
+  String get dateHelpText => 'dd.mm.åååå';
 
   @override
   String get dateInputLabel => 'Skriv inn datoen';
@@ -18378,7 +18671,7 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'VELG DATOEN';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Sluttdato \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Sluttdato $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Sluttdato';
@@ -18387,13 +18680,13 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'VELG PERIODEN';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Startdato \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Startdato $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Startdato';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Slett';
@@ -18409,6 +18702,9 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'Skjul';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'Skjul kontoer';
@@ -18429,22 +18725,25 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Angi et gyldig klokkeslett';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 lisens';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount lisenser';
+  String? get licensesPackageDetailTextOne => '1 lisens';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount lisenser';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => null;
 
   @override
   String get licensesPageTitle => 'Lisenser';
@@ -18468,10 +18767,10 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Åpne navigasjonsmenyen';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow av \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow av $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow av omtrent \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow av omtrent $rowCount';
 
   @override
   String get pasteButtonLabel => 'Lim inn';
@@ -18492,22 +18791,22 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Laster inn på nytt';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 tegn gjenstår';
+  String? get remainingTextFieldCharacterCountOne => '1 tegn gjenstår';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount tegn gjenstår';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount tegn gjenstår';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => null;
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Flytt ned';
@@ -18546,22 +18845,22 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Velg året';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 element er valgt';
+  String? get selectedRowCountTitleOne => '1 element er valgt';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount elementer er valgt';
+  String get selectedRowCountTitleOther => r'$selectedRowCount elementer er valgt';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Vis kontoer';
@@ -18573,7 +18872,7 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Pålogget';
 
   @override
-  String get tabLabelRaw => 'Fane \$tabIndex av \$tabCount';
+  String get tabLabelRaw => r'Fane $tabIndex av $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -18613,15 +18912,15 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationNe({
     String localeName = 'ne',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -18636,7 +18935,7 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => '\$applicationName बारे';
+  String get aboutListTileTitleRaw => r'$applicationName बारे';
 
   @override
   String get alertDialogLabel => 'अलर्ट';
@@ -18672,7 +18971,7 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'काट्नुहोस्';
 
   @override
-  String get dateHelpText => 'mm/dd/yyyy';
+  String get dateHelpText => 'yyyy/mm/dd';
 
   @override
   String get dateInputLabel => 'मिति प्रविष्टि गर्नुहोस्';
@@ -18684,7 +18983,7 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'मिति चयन गर्नुहोस्';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'समाप्त हुने मिति \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'समाप्त हुने मिति $fullDate';
 
   @override
   String get dateRangeEndLabel => 'समाप्त हुने मिति';
@@ -18693,13 +18992,13 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'दायरा चयन गर्नुहोस्';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'सुरु हुने मिति \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'सुरु हुने मिति $fullDate';
 
   @override
   String get dateRangeStartLabel => 'सुरु हुने मिति';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'मेट्नुहोस्';
@@ -18715,6 +19014,9 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'संक्षिप्त गर्नुहोस्';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'खाताहरू लुकाउनुहोस्';
@@ -18735,22 +19037,25 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'वैध समय प्रविष्टि गर्नुहोस्';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => 'एउटा इजाजतपत्र';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount वटा इजाजतपत्र';
+  String? get licensesPackageDetailTextOne => 'एउटा इजाजतपत्र';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount वटा इजाजतपत्र';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'इजाजतपत्रहरू';
@@ -18774,10 +19079,10 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'नेभिगेसन मेनु खोल्नुहोस्';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$rowCount मध्ये \$firstRow–\$lastRow';
+  String get pageRowsInfoTitleRaw => r'$rowCount मध्ये $firstRow–$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => 'लगभग \$rowCount को \$firstRow–\$lastRow';
+  String get pageRowsInfoTitleApproximateRaw => r'लगभग $rowCount को $firstRow–$lastRow';
 
   @override
   String get pasteButtonLabel => 'टाँस्नुहोस्';
@@ -18798,22 +19103,22 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'पुनः ताजा गर्नुहोस्';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '१ वर्ण बाँकी';
+  String? get remainingTextFieldCharacterCountOne => '१ वर्ण बाँकी';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount वर्णहरू बाँकी';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount वर्णहरू बाँकी';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => null;
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'तल सार्नुहोस्';
@@ -18852,22 +19157,22 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'वर्ष छान्नुहोस्';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '१ वस्तु चयन गरियो';
+  String? get selectedRowCountTitleOne => '१ वस्तु चयन गरियो';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount वस्तुहरू चयन गरिए';
+  String get selectedRowCountTitleOther => r'$selectedRowCount वस्तुहरू चयन गरिए';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'खाताहरू देखाउनुहोस्';
@@ -18879,7 +19184,7 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get signedInLabel => 'साइन इन गरियो';
 
   @override
-  String get tabLabelRaw => '\$tabCount मध्ये \$tabIndex ट्याब';
+  String get tabLabelRaw => r'$tabCount मध्ये $tabIndex ट्याब';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -18919,15 +19224,15 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationNl({
     String localeName = 'nl',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -18942,7 +19247,7 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Over \$applicationName';
+  String get aboutListTileTitleRaw => r'Over $applicationName';
 
   @override
   String get alertDialogLabel => 'Melding';
@@ -18990,7 +19295,7 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'DATUM SELECTEREN';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Einddatum \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Einddatum $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Einddatum';
@@ -18999,13 +19304,13 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'PERIODE SELECTEREN';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Startdatum \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Startdatum $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Startdatum';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '-';
 
   @override
   String get deleteButtonTooltip => 'Verwijderen';
@@ -19021,6 +19326,9 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'Samenvouwen';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'Accounts verbergen';
@@ -19041,22 +19349,25 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Geef een geldige tijd op';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 licentie';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licenties';
+  String? get licensesPackageDetailTextOne => '1 licentie';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount licenties';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licenties';
@@ -19080,10 +19391,10 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Navigatiemenu openen';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow-\$lastRow van \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow-$lastRow van $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow-\$lastRow van ongeveer \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow-$lastRow van ongeveer $rowCount';
 
   @override
   String get pasteButtonLabel => 'Plakken';
@@ -19104,22 +19415,22 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Vernieuwen';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 teken resterend';
+  String? get remainingTextFieldCharacterCountOne => '1 teken resterend';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount tekens resterend';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount tekens resterend';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Omlaag verplaatsen';
@@ -19158,22 +19469,22 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Jaar selecteren';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 item geselecteerd';
+  String? get selectedRowCountTitleOne => '1 item geselecteerd';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount items geselecteerd';
+  String get selectedRowCountTitleOther => r'$selectedRowCount items geselecteerd';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Accounts weergeven';
@@ -19185,7 +19496,7 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Ingelogd';
 
   @override
-  String get tabLabelRaw => 'Tabblad \$tabIndex van \$tabCount';
+  String get tabLabelRaw => r'Tabblad $tabIndex van $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -19225,15 +19536,15 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationNo({
     String localeName = 'no',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -19248,7 +19559,7 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Om \$applicationName';
+  String get aboutListTileTitleRaw => r'Om $applicationName';
 
   @override
   String get alertDialogLabel => 'Varsel';
@@ -19284,7 +19595,7 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Klipp ut';
 
   @override
-  String get dateHelpText => 'mm/dd/åååå';
+  String get dateHelpText => 'dd.mm.åååå';
 
   @override
   String get dateInputLabel => 'Skriv inn datoen';
@@ -19296,7 +19607,7 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'VELG DATOEN';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Sluttdato \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Sluttdato $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Sluttdato';
@@ -19305,13 +19616,13 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'VELG PERIODEN';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Startdato \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Startdato $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Startdato';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Slett';
@@ -19327,6 +19638,9 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'Skjul';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'Skjul kontoer';
@@ -19347,22 +19661,25 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Angi et gyldig klokkeslett';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 lisens';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount lisenser';
+  String? get licensesPackageDetailTextOne => '1 lisens';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount lisenser';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => null;
 
   @override
   String get licensesPageTitle => 'Lisenser';
@@ -19386,10 +19703,10 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Åpne navigasjonsmenyen';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow av \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow av $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow av omtrent \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow av omtrent $rowCount';
 
   @override
   String get pasteButtonLabel => 'Lim inn';
@@ -19410,22 +19727,22 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Laster inn på nytt';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 tegn gjenstår';
+  String? get remainingTextFieldCharacterCountOne => '1 tegn gjenstår';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount tegn gjenstår';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount tegn gjenstår';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => null;
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Flytt ned';
@@ -19464,22 +19781,22 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Velg året';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 element er valgt';
+  String? get selectedRowCountTitleOne => '1 element er valgt';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount elementer er valgt';
+  String get selectedRowCountTitleOther => r'$selectedRowCount elementer er valgt';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Vis kontoer';
@@ -19491,7 +19808,7 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Pålogget';
 
   @override
-  String get tabLabelRaw => 'Fane \$tabIndex av \$tabCount';
+  String get tabLabelRaw => r'Fane $tabIndex av $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -19531,15 +19848,15 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationOr({
     String localeName = 'or',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -19554,7 +19871,7 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => '\$applicationName ବିଷୟରେ';
+  String get aboutListTileTitleRaw => r'$applicationName ବିଷୟରେ';
 
   @override
   String get alertDialogLabel => 'ଆଲର୍ଟ';
@@ -19602,7 +19919,7 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'ତାରିଖ ଚୟନ କରନ୍ତୁ';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'ଶେଷ ତାରିଖ \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'ଶେଷ ତାରିଖ $fullDate';
 
   @override
   String get dateRangeEndLabel => 'ଶେଷ ତାରିଖ';
@@ -19611,7 +19928,7 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'ସୀମା ଚୟନ କରନ୍ତୁ';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'ଆରମ୍ଭ ତାରିଖ \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'ଆରମ୍ଭ ତାରିଖ $fullDate';
 
   @override
   String get dateRangeStartLabel => 'ଆରମ୍ଭ ତାରିଖ';
@@ -19635,6 +19952,9 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'ସଙ୍କୁଚିତ କରନ୍ତୁ';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'ଆକାଉଣ୍ଟଗୁଡ଼ିକୁ ଲୁଚାନ୍ତୁ';
 
   @override
@@ -19653,22 +19973,25 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'ଏକ ବୈଧ ସମୟ ଲେଖନ୍ତୁ';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1ଟି ଲାଇସେନ୍ସ';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCountଟି ଲାଇସେନ୍ସ';
+  String? get licensesPackageDetailTextOne => '1ଟି ଲାଇସେନ୍ସ';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCountଟି ଲାଇସେନ୍ସ';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'ଲାଇସେନ୍ସଗୁଡ଼କ';
@@ -19692,10 +20015,10 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'ନାଭିଗେସନ୍ ମେନୁ ଖୋଲନ୍ତୁ';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$rowCountର \$firstRow–\$lastRow';
+  String get pageRowsInfoTitleRaw => r'$rowCountର $firstRow–$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => 'ପାଖାପାଖି \$rowCountର \$firstRow–\$lastRow';
+  String get pageRowsInfoTitleApproximateRaw => r'ପାଖାପାଖି $rowCountର $firstRow–$lastRow';
 
   @override
   String get pasteButtonLabel => 'ପେଷ୍ଟ କରନ୍ତୁ';
@@ -19716,22 +20039,22 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'ରିଫ୍ରେସ୍ କରନ୍ତୁ';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1ଟି ଅକ୍ଷର ବାକି ଅଛି';
+  String? get remainingTextFieldCharacterCountOne => '1ଟି ଅକ୍ଷର ବାକି ଅଛି';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCountଟି ଅକ୍ଷର ବାକି ଅଛି';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCountଟି ଅକ୍ଷର ବାକି ଅଛି';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => null;
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'ତଳକୁ ଯାଆନ୍ତୁ';
@@ -19761,7 +20084,7 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
-  String get searchFieldLabel => 'ଖୋଜନ୍ତୁ';
+  String get searchFieldLabel => 'ସନ୍ଧାନ କରନ୍ତୁ';
 
   @override
   String get selectAllButtonLabel => 'ସବୁ ଚୟନ କରନ୍ତୁ';
@@ -19770,22 +20093,22 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'ବର୍ଷ ଚୟନ କରନ୍ତୁ';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1ଟି ଆଇଟମ୍ ଚୟନ କରାଯାଇଛି';
+  String? get selectedRowCountTitleOne => '1ଟି ଆଇଟମ୍ ଚୟନ କରାଯାଇଛି';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCountଟି ଆଇଟମ୍ ଚୟନ କରାଯାଇଛି';
+  String get selectedRowCountTitleOther => r'$selectedRowCountଟି ଆଇଟମ୍ ଚୟନ କରାଯାଇଛି';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'ଆକାଉଣ୍ଟ ଦେଖାନ୍ତୁ';
@@ -19797,7 +20120,7 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get signedInLabel => 'ସାଇନ୍ ଇନ୍ କରାଯାଇଛି';
 
   @override
-  String get tabLabelRaw => '\$tabCountର \$tabIndex ଟାବ୍';
+  String get tabLabelRaw => r'$tabCountର $tabIndex ଟାବ୍';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -19837,15 +20160,15 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationPa({
     String localeName = 'pa',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -19860,7 +20183,7 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => '\$applicationName ਬਾਰੇ';
+  String get aboutListTileTitleRaw => r'$applicationName ਬਾਰੇ';
 
   @override
   String get alertDialogLabel => 'ਸੁਚੇਤਨਾ';
@@ -19872,7 +20195,7 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'ਪਿੱਛੇ';
 
   @override
-  String get calendarModeButtonLabel => 'ਕੈਲੰਡਰ \'ਤੇ ਜਾਓ';
+  String get calendarModeButtonLabel => "ਕੈਲੰਡਰ 'ਤੇ ਜਾਓ";
 
   @override
   String get cancelButtonLabel => 'ਰੱਦ ਕਰੋ';
@@ -19908,7 +20231,7 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'ਤਾਰੀਖ ਚੁਣੋ';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'ਸਮਾਪਤੀ ਦੀ ਤਾਰੀਖ \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'ਸਮਾਪਤੀ ਦੀ ਤਾਰੀਖ $fullDate';
 
   @override
   String get dateRangeEndLabel => 'ਸਮਾਪਤੀ ਦੀ ਤਾਰੀਖ';
@@ -19917,7 +20240,7 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'ਰੇਂਜ ਚੁਣੋ';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'ਸ਼ੁਰੂਆਤੀ ਤਾਰੀਖ \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'ਸ਼ੁਰੂਆਤੀ ਤਾਰੀਖ $fullDate';
 
   @override
   String get dateRangeStartLabel => 'ਸ਼ੁਰੂਆਤੀ ਤਾਰੀਖ';
@@ -19929,7 +20252,7 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'ਮਿਟਾਓ';
 
   @override
-  String get dialModeButtonLabel => 'ਡਾਇਲ ਚੋਣਕਾਰ ਮੋਡ \'ਤੇ ਜਾਓ';
+  String get dialModeButtonLabel => "ਡਾਇਲ ਚੋਣਕਾਰ ਮੋਡ 'ਤੇ ਜਾਓ";
 
   @override
   String get dialogLabel => 'ਵਿੰਡੋ';
@@ -19941,13 +20264,16 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'ਸਮੇਟੋ';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'ਖਾਤੇ ਲੁਕਾਓ';
 
   @override
-  String get inputDateModeButtonLabel => 'ਇਨਪੁੱਟ \'ਤੇ ਜਾਓ';
+  String get inputDateModeButtonLabel => "ਇਨਪੁੱਟ 'ਤੇ ਜਾਓ";
 
   @override
-  String get inputTimeModeButtonLabel => 'ਲਿਖਤ ਇਨਪੁੱਟ ਮੋਡ \'ਤੇ ਜਾਓ';
+  String get inputTimeModeButtonLabel => "ਲਿਖਤ ਇਨਪੁੱਟ ਮੋਡ 'ਤੇ ਜਾਓ";
 
   @override
   String get invalidDateFormatLabel => 'ਅਵੈਧ ਫਾਰਮੈਟ।';
@@ -19959,22 +20285,25 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'ਵੈਧ ਸਮਾਂ ਦਾਖਲ ਕਰੋ';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 ਲਾਇਸੰਸ';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount ਲਾਇਸੰਸ';
+  String? get licensesPackageDetailTextOne => '1 ਲਾਇਸੰਸ';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount ਲਾਇਸੰਸ';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'ਲਾਇਸੰਸ';
@@ -19998,10 +20327,10 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'ਨੈਵੀਗੇਸ਼ਨ ਮੀਨੂ ਖੋਲ੍ਹੋ';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$rowCount ਵਿੱਚੋਂ \$firstRow–\$lastRow';
+  String get pageRowsInfoTitleRaw => r'$rowCount ਵਿੱਚੋਂ $firstRow–$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => 'ਲਗਭਗ \$rowCount ਵਿੱਚੋਂ \$firstRow–\$lastRow';
+  String get pageRowsInfoTitleApproximateRaw => r'ਲਗਭਗ $rowCount ਵਿੱਚੋਂ $firstRow–$lastRow';
 
   @override
   String get pasteButtonLabel => 'ਪੇਸਟ ਕਰੋ';
@@ -20022,22 +20351,22 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'ਰਿਫ੍ਰੈਸ਼ ਕਰੋ';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 ਅੱਖਰ-ਚਿੰਨ੍ਹ ਬਾਕੀ';
+  String? get remainingTextFieldCharacterCountOne => '1 ਅੱਖਰ-ਚਿੰਨ੍ਹ ਬਾਕੀ';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount ਅੱਖਰ-ਚਿੰਨ੍ਹ ਬਾਕੀ';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount ਅੱਖਰ-ਚਿੰਨ੍ਹ ਬਾਕੀ';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => null;
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'ਹੇਠਾਂ ਲਿਜਾਓ';
@@ -20058,7 +20387,7 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get reorderItemUp => 'ਉੱਪਰ ਲਿਜਾਓ';
 
   @override
-  String get rowsPerPageTitle => 'ਹਰ ਪੰਨੇ \'ਤੇ ਕਤਾਰਾਂ:';
+  String get rowsPerPageTitle => "ਹਰ ਪੰਨੇ 'ਤੇ ਕਤਾਰਾਂ:";
 
   @override
   String get saveButtonLabel => 'ਰੱਖਿਅਤ ਕਰੋ';
@@ -20076,22 +20405,22 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'ਸਾਲ ਚੁਣੋ';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 ਆਈਟਮ ਚੁਣੀ ਗਈ';
+  String? get selectedRowCountTitleOne => '1 ਆਈਟਮ ਚੁਣੀ ਗਈ';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount ਆਈਟਮਾਂ ਚੁਣੀਆਂ ਗਈਆਂ';
+  String get selectedRowCountTitleOther => r'$selectedRowCount ਆਈਟਮਾਂ ਚੁਣੀਆਂ ਗਈਆਂ';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'ਖਾਤੇ ਦਿਖਾਓ';
@@ -20103,7 +20432,7 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get signedInLabel => 'ਸਾਈਨ-ਇਨ ਕੀਤਾ ਗਿਆ';
 
   @override
-  String get tabLabelRaw => '\$tabCount ਵਿੱਚੋਂ \$tabIndex ਟੈਬ';
+  String get tabLabelRaw => r'$tabCount ਵਿੱਚੋਂ $tabIndex ਟੈਬ';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -20143,15 +20472,15 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationPl({
     String localeName = 'pl',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -20166,7 +20495,7 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => '\$applicationName – informacje';
+  String get aboutListTileTitleRaw => r'$applicationName – informacje';
 
   @override
   String get alertDialogLabel => 'Alert';
@@ -20214,7 +20543,7 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'WYBIERZ DATĘ';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Data zakończenia: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Data zakończenia: $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Data zakończenia';
@@ -20223,7 +20552,7 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'WYBIERZ ZAKRES';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Data rozpoczęcia: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Data rozpoczęcia: $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Data rozpoczęcia';
@@ -20247,6 +20576,9 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Zwiń';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'Ukryj konta';
 
   @override
@@ -20265,22 +20597,25 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Wpisz prawidłową godzinę';
 
   @override
-  String get licensesPackageDetailTextFew => '\$licenseCount licencje';
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => '\$licenseCount licencji';
+  String? get licensesPackageDetailTextFew => r'$licenseCount licencje';
 
   @override
-  String get licensesPackageDetailTextOne => '1 licencja';
+  String? get licensesPackageDetailTextMany => r'$licenseCount licencji';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licencji';
+  String? get licensesPackageDetailTextOne => '1 licencja';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount licencji';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licencje';
@@ -20304,10 +20639,10 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Otwórz menu nawigacyjne';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow z \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow z $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow z około \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow z około $rowCount';
 
   @override
   String get pasteButtonLabel => 'Wklej';
@@ -20328,22 +20663,22 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Odśwież';
 
   @override
-  String get remainingTextFieldCharacterCountFew => 'Pozostały \$remainingCount znaki';
+  String? get remainingTextFieldCharacterCountFew => r'Pozostały $remainingCount znaki';
 
   @override
-  String get remainingTextFieldCharacterCountMany => 'Pozostało \$remainingCount znaków';
+  String? get remainingTextFieldCharacterCountMany => r'Pozostało $remainingCount znaków';
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'Jeszcze 1 znak';
+  String? get remainingTextFieldCharacterCountOne => 'Jeszcze 1 znak';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'Pozostało \$remainingCount znaków';
+  String get remainingTextFieldCharacterCountOther => r'Pozostało $remainingCount znaków';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Przenieś w dół';
@@ -20382,22 +20717,22 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Wybierz rok';
 
   @override
-  String get selectedRowCountTitleFew => '\$selectedRowCount wybrane elementy';
+  String? get selectedRowCountTitleFew => r'$selectedRowCount wybrane elementy';
 
   @override
-  String get selectedRowCountTitleMany => '\$selectedRowCount wybranych elementów';
+  String? get selectedRowCountTitleMany => r'$selectedRowCount wybranych elementów';
 
   @override
-  String get selectedRowCountTitleOne => '1 wybrany element';
+  String? get selectedRowCountTitleOne => '1 wybrany element';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount wybranych elementów';
+  String get selectedRowCountTitleOther => r'$selectedRowCount wybranych elementów';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Pokaż konta';
@@ -20409,7 +20744,7 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Zalogowani użytkownicy';
 
   @override
-  String get tabLabelRaw => 'Karta \$tabIndex z \$tabCount';
+  String get tabLabelRaw => r'Karta $tabIndex z $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -20449,15 +20784,15 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationPs({
     String localeName = 'ps',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -20472,13 +20807,13 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'د \$applicationName په اړه';
+  String get aboutListTileTitleRaw => r'د $applicationName په اړه';
 
   @override
   String get alertDialogLabel => 'خبرتیا';
 
   @override
-  String get anteMeridiemAbbreviation => null;
+  String get anteMeridiemAbbreviation => 'AM';
 
   @override
   String get backButtonTooltip => 'شاته';
@@ -20520,7 +20855,7 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'SELECT DATE';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'End date \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'End date $fullDate';
 
   @override
   String get dateRangeEndLabel => 'End Date';
@@ -20529,7 +20864,7 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'SELECT RANGE';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Start date \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Start date $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Start Date';
@@ -20553,6 +20888,9 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Collapse';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'حسابونه پټ کړئ';
 
   @override
@@ -20571,22 +20909,25 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Enter a valid time';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 license';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+  String? get licensesPackageDetailTextOne => '1 license';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'جوازونه';
@@ -20610,10 +20951,10 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'د پرانیستی نیینګ مینو';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow د \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow د $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow څخه \$rowCount د';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow څخه $rowCount د';
 
   @override
   String get pasteButtonLabel => 'پیټ کړئ';
@@ -20622,7 +20963,7 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get popupMenuLabel => 'د پاپ اپ مینو';
 
   @override
-  String get postMeridiemAbbreviation => null;
+  String get postMeridiemAbbreviation => 'PM';
 
   @override
   String get previousMonthTooltip => 'تیره میاشت';
@@ -20634,22 +20975,22 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Refresh';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 character remaining';
+  String? get remainingTextFieldCharacterCountOne => '1 character remaining';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount characters remaining';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount characters remaining';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'No characters remaining';
+  String? get remainingTextFieldCharacterCountZero => 'No characters remaining';
 
   @override
   String get reorderItemDown => 'Move down';
@@ -20688,22 +21029,22 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Select year';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => null;
+  String? get selectedRowCountTitleOne => null;
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount توکي غوره شوي';
+  String get selectedRowCountTitleOther => r'$selectedRowCount توکي غوره شوي';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'حسابونه ښکاره کړئ';
@@ -20715,7 +21056,7 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get signedInLabel => 'ننوتل';
 
   @override
-  String get tabLabelRaw => '\$tabIndex د \$tabCount';
+  String get tabLabelRaw => r'$tabIndex د $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -20755,15 +21096,15 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationPt({
     String localeName = 'pt',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -20778,7 +21119,7 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Sobre o app \$applicationName';
+  String get aboutListTileTitleRaw => r'Sobre o app $applicationName';
 
   @override
   String get alertDialogLabel => 'Alerta';
@@ -20826,7 +21167,7 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'SELECIONAR DATA';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Data de término \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Data de término $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Data de término';
@@ -20835,7 +21176,7 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'SELECIONAR INTERVALO';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Data de início \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Data de início $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Data de início';
@@ -20859,6 +21200,9 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Recolher';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'Ocultar contas';
 
   @override
@@ -20877,22 +21221,25 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Insira um horário válido';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 licença';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licenças';
+  String? get licensesPackageDetailTextOne => '1 licença';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount licenças';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licenças';
@@ -20916,10 +21263,10 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Abrir menu de navegação';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow – \$lastRow de \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow – $lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow – \$lastRow de aproximadamente \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow – $lastRow de aproximadamente $rowCount';
 
   @override
   String get pasteButtonLabel => 'Colar';
@@ -20940,22 +21287,22 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Atualizar';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 caractere restante';
+  String? get remainingTextFieldCharacterCountOne => '1 caractere restante';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount caracteres restantes';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount caracteres restantes';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Mover para baixo';
@@ -20994,22 +21341,22 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Selecione o ano';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 item selecionado';
+  String? get selectedRowCountTitleOne => '1 item selecionado';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount itens selecionados';
+  String get selectedRowCountTitleOther => r'$selectedRowCount itens selecionados';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Mostrar contas';
@@ -21021,7 +21368,7 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Conectado a';
 
   @override
-  String get tabLabelRaw => 'Guia \$tabIndex de \$tabCount';
+  String get tabLabelRaw => r'Guia $tabIndex de $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -21061,15 +21408,15 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationPtPt({
     String localeName = 'pt_PT',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -21111,10 +21458,10 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
   String get dateOutOfRangeLabel => 'Fora do intervalo.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Data de conclusão: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Data de conclusão: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Data de início: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Data de início: $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Data de conclusão';
@@ -21129,7 +21476,7 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
   String get selectYearSemanticsLabel => 'Selecionar ano';
 
   @override
-  String get tabLabelRaw => 'Separador \$tabIndex de \$tabCount';
+  String get tabLabelRaw => r'Separador $tabIndex de $tabCount';
 
   @override
   String get signedInLabel => 'Com sessão iniciada';
@@ -21150,13 +21497,13 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
   String get nextPageTooltip => 'Página seguinte';
 
   @override
-  String get aboutListTileTitleRaw => 'Acerca de \$applicationName';
+  String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow a \$lastRow de \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow a $lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow a \$lastRow de cerca de \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow a $lastRow de cerca de $rowCount';
 
   @override
   String get okButtonLabel => 'OK';
@@ -21174,10 +21521,10 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
   String get expandedIconTapHint => 'Reduzir';
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'Resta 1 caráter';
+  String? get remainingTextFieldCharacterCountOne => 'Resta 1 caráter';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'Restam \$remainingCount carateres';
+  String get remainingTextFieldCharacterCountOther => r'Restam $remainingCount carateres';
 }
 
 /// The translations for Romanian Moldavian Moldovan (`ro`).
@@ -21187,15 +21534,15 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationRo({
     String localeName = 'ro',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -21210,7 +21557,7 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Despre \$applicationName';
+  String get aboutListTileTitleRaw => r'Despre $applicationName';
 
   @override
   String get alertDialogLabel => 'Alertă';
@@ -21246,7 +21593,7 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Decupați';
 
   @override
-  String get dateHelpText => 'zz/ll/aaaa';
+  String get dateHelpText => 'zz.ll.aaaa';
 
   @override
   String get dateInputLabel => 'Introduceți data';
@@ -21258,7 +21605,7 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'SELECTAȚI DATA';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Data de încheiere: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Data de încheiere: $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Data de încheiere';
@@ -21267,13 +21614,13 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'SELECTAȚI UN INTERVAL';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Data de începere: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Data de începere: $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Data de începere';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Ștergeți';
@@ -21289,6 +21636,9 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'Restrângeți';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'Ascundeți conturile';
@@ -21309,22 +21659,25 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Introduceți o oră validă';
 
   @override
-  String get licensesPackageDetailTextFew => '\$licenseCount licențe';
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => r'$licenseCount licențe';
 
   @override
-  String get licensesPackageDetailTextOne => 'O licență';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount de licențe';
+  String? get licensesPackageDetailTextOne => 'O licență';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount de licențe';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licențe';
@@ -21348,10 +21701,10 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Deschideți meniul de navigare';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow din \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow din $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow din aproximativ \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow din aproximativ $rowCount';
 
   @override
   String get pasteButtonLabel => 'Inserați';
@@ -21372,22 +21725,22 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Actualizați';
 
   @override
-  String get remainingTextFieldCharacterCountFew => '\$remainingCount caractere rămase';
+  String? get remainingTextFieldCharacterCountFew => r'$remainingCount caractere rămase';
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'un caracter rămas';
+  String? get remainingTextFieldCharacterCountOne => 'un caracter rămas';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount de caractere rămase';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount de caractere rămase';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Mutați în jos';
@@ -21426,22 +21779,22 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Selectați anul';
 
   @override
-  String get selectedRowCountTitleFew => '\$selectedRowCount articole selectate';
+  String? get selectedRowCountTitleFew => r'$selectedRowCount articole selectate';
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => 'Un articol selectat';
+  String? get selectedRowCountTitleOne => 'Un articol selectat';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount de articole selectate';
+  String get selectedRowCountTitleOther => r'$selectedRowCount de articole selectate';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => 'Nu există elemente selectate';
+  String? get selectedRowCountTitleZero => 'Nu există elemente selectate';
 
   @override
   String get showAccountsLabel => 'Afișați conturile';
@@ -21453,7 +21806,7 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get signedInLabel => 'V-ați conectat';
 
   @override
-  String get tabLabelRaw => 'Fila \$tabIndex din \$tabCount';
+  String get tabLabelRaw => r'Fila $tabIndex din $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -21493,15 +21846,15 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationRu({
     String localeName = 'ru',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -21516,7 +21869,7 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => '\$applicationName: сведения';
+  String get aboutListTileTitleRaw => r'$applicationName: сведения';
 
   @override
   String get alertDialogLabel => 'Оповещение';
@@ -21564,7 +21917,7 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'ВЫБЕРИТЕ ДАТУ';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Дата окончания: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Дата окончания: $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Дата окончания';
@@ -21573,7 +21926,7 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'ВЫБЕРИТЕ ДИАПАЗОН ДАТ';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Дата начала: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Дата начала: $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Дата начала';
@@ -21597,6 +21950,9 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Свернуть';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'Скрыть аккаунты';
 
   @override
@@ -21615,22 +21971,25 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Указано недопустимое время.';
 
   @override
-  String get licensesPackageDetailTextFew => '\$licenseCount лицензии';
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => '\$licenseCount лицензий';
+  String? get licensesPackageDetailTextFew => r'$licenseCount лицензии';
 
   @override
-  String get licensesPackageDetailTextOne => '1 лицензия';
+  String? get licensesPackageDetailTextMany => r'$licenseCount лицензий';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount лицензии';
+  String? get licensesPackageDetailTextOne => '1 лицензия';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount лицензии';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Лицензии';
@@ -21654,10 +22013,10 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Открыть меню навигации';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow из \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow из $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow из примерно \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow из примерно $rowCount';
 
   @override
   String get pasteButtonLabel => 'Вставить';
@@ -21678,22 +22037,22 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Обновление';
 
   @override
-  String get remainingTextFieldCharacterCountFew => 'Осталось \$remainingCount символа';
+  String? get remainingTextFieldCharacterCountFew => r'Осталось $remainingCount символа';
 
   @override
-  String get remainingTextFieldCharacterCountMany => 'Осталось \$remainingCount символов';
+  String? get remainingTextFieldCharacterCountMany => r'Осталось $remainingCount символов';
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'Остался 1 символ';
+  String? get remainingTextFieldCharacterCountOne => 'Остался 1 символ';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'Осталось \$remainingCount символа';
+  String get remainingTextFieldCharacterCountOther => r'Осталось $remainingCount символа';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Переместить вниз';
@@ -21732,22 +22091,22 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Выберите год';
 
   @override
-  String get selectedRowCountTitleFew => 'Выбрано \$selectedRowCount объекта';
+  String? get selectedRowCountTitleFew => r'Выбрано $selectedRowCount объекта';
 
   @override
-  String get selectedRowCountTitleMany => 'Выбрано \$selectedRowCount объектов';
+  String? get selectedRowCountTitleMany => r'Выбрано $selectedRowCount объектов';
 
   @override
-  String get selectedRowCountTitleOne => 'Выбран 1 объект';
+  String? get selectedRowCountTitleOne => 'Выбран 1 объект';
 
   @override
-  String get selectedRowCountTitleOther => 'Выбрано \$selectedRowCount объекта';
+  String get selectedRowCountTitleOther => r'Выбрано $selectedRowCount объекта';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => 'Строки не выбраны';
+  String? get selectedRowCountTitleZero => 'Строки не выбраны';
 
   @override
   String get showAccountsLabel => 'Показать аккаунты';
@@ -21759,7 +22118,7 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Вход выполнен';
 
   @override
-  String get tabLabelRaw => 'Вкладка \$tabIndex из \$tabCount';
+  String get tabLabelRaw => r'Вкладка $tabIndex из $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -21799,15 +22158,15 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationSi({
     String localeName = 'si',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -21822,7 +22181,7 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => '\$applicationName ගැන';
+  String get aboutListTileTitleRaw => r'$applicationName ගැන';
 
   @override
   String get alertDialogLabel => 'ඇඟවීම';
@@ -21858,7 +22217,7 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'කපන්න';
 
   @override
-  String get dateHelpText => 'mm/dd/yyyy';
+  String get dateHelpText => 'mm.dd.yyyy';
 
   @override
   String get dateInputLabel => 'දිනය ඇතුළු කරන්න';
@@ -21870,7 +22229,7 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'දිනය තෝරන්න';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'අවසන් වන දිනය \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'අවසන් වන දිනය $fullDate';
 
   @override
   String get dateRangeEndLabel => 'අවසන් වන දිනය';
@@ -21879,13 +22238,13 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'පරාසය තෝරන්න';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'ආරම්භක දිනය \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'ආරම්භක දිනය $fullDate';
 
   @override
   String get dateRangeStartLabel => 'ආරම්භක දිනය';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'මකන්න';
@@ -21901,6 +22260,9 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'හකුළන්න';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'ගිණුම් සඟවන්න';
@@ -21921,22 +22283,25 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'වලංගු වේලාවක් ඇතුළු කරන්න';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => 'බලපත්‍ර 1';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => 'බලපත්‍ර \$licenseCount';
+  String? get licensesPackageDetailTextOne => 'බලපත්‍ර 1';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'බලපත්‍ර $licenseCount';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'බලපත්‍ර';
@@ -21960,10 +22325,10 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'සංචාලන මෙනුව විවෘත කරන්න';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$rowCountන් \$firstRow–\$lastRow';
+  String get pageRowsInfoTitleRaw => r'$rowCountන් $firstRow–$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$rowCountකින් පමණ \$firstRow–\$lastRow';
+  String get pageRowsInfoTitleApproximateRaw => r'$rowCountකින් පමණ $firstRow–$lastRow';
 
   @override
   String get pasteButtonLabel => 'අලවන්න';
@@ -21984,22 +22349,22 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'නැවුම් කරන්න';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'අනුලකුණු 1ක් ඉතිරිය';
+  String? get remainingTextFieldCharacterCountOne => 'අනුලකුණු 1ක් ඉතිරිය';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'අනුලකුණු \$remainingCountක් ඉතිරිය';
+  String get remainingTextFieldCharacterCountOther => r'අනුලකුණු $remainingCountක් ඉතිරිය';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => null;
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'පහළට ගෙන යන්න';
@@ -22038,22 +22403,22 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'වර්ෂය තෝරන්න';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => 'අයිතම 1ක් තෝරන ලදී';
+  String? get selectedRowCountTitleOne => 'අයිතම 1ක් තෝරන ලදී';
 
   @override
-  String get selectedRowCountTitleOther => 'අයිතම \$selectedRowCountක් තෝරන ලදී';
+  String get selectedRowCountTitleOther => r'අයිතම $selectedRowCountක් තෝරන ලදී';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'ගිණුම් පෙන්වන්න';
@@ -22065,7 +22430,7 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get signedInLabel => 'පුරන ලදී';
 
   @override
-  String get tabLabelRaw => 'ටැබ \$tabIndexකින් \$tabCount';
+  String get tabLabelRaw => r'ටැබ $tabIndexකින් $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -22105,15 +22470,15 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationSk({
     String localeName = 'sk',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -22128,7 +22493,7 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => '\$applicationName – informácie';
+  String get aboutListTileTitleRaw => r'$applicationName – informácie';
 
   @override
   String get alertDialogLabel => 'Upozornenie';
@@ -22164,7 +22529,7 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Vystrihnúť';
 
   @override
-  String get dateHelpText => 'mm/dd/yyyy';
+  String get dateHelpText => 'mm.dd.yyyy';
 
   @override
   String get dateInputLabel => 'Zadajte dátum';
@@ -22176,7 +22541,7 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'VYBERTE DÁTUM';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Dátum ukončenia \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Dátum ukončenia $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Dátum ukončenia';
@@ -22185,13 +22550,13 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'VYBERTE ROZSAH';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Dátum začatia \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Dátum začatia $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Dátum začatia';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Odstrániť';
@@ -22207,6 +22572,9 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'Zbaliť';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'Skryť účty';
@@ -22227,22 +22595,25 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Zadajte platný čas';
 
   @override
-  String get licensesPackageDetailTextFew => '\$licenseCount licencie';
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => '\$licenseCount licenses';
+  String? get licensesPackageDetailTextFew => r'$licenseCount licencie';
 
   @override
-  String get licensesPackageDetailTextOne => '1 licencia';
+  String? get licensesPackageDetailTextMany => r'$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licencií';
+  String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount licencií';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licencie';
@@ -22266,10 +22637,10 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Otvoriť navigačnú ponuku';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow – \$lastRow z \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow – $lastRow z $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow – \$lastRow z približne \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow – $lastRow z približne $rowCount';
 
   @override
   String get pasteButtonLabel => 'Prilepiť';
@@ -22290,22 +22661,22 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Obnoviť';
 
   @override
-  String get remainingTextFieldCharacterCountFew => 'Zostávajú \$remainingCount znaky';
+  String? get remainingTextFieldCharacterCountFew => r'Zostávajú $remainingCount znaky';
 
   @override
-  String get remainingTextFieldCharacterCountMany => '\$remainingCount characters remaining';
+  String? get remainingTextFieldCharacterCountMany => r'$remainingCount characters remaining';
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'Zostáva 1 znak';
+  String? get remainingTextFieldCharacterCountOne => 'Zostáva 1 znak';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'Zostáva \$remainingCount znakov';
+  String get remainingTextFieldCharacterCountOther => r'Zostáva $remainingCount znakov';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Presunúť nadol';
@@ -22344,22 +22715,22 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Vyberte rok';
 
   @override
-  String get selectedRowCountTitleFew => '\$selectedRowCount vybraté položky';
+  String? get selectedRowCountTitleFew => r'$selectedRowCount vybraté položky';
 
   @override
-  String get selectedRowCountTitleMany => '\$selectedRowCount items selected';
+  String? get selectedRowCountTitleMany => r'$selectedRowCount items selected';
 
   @override
-  String get selectedRowCountTitleOne => '1 vybratá položka';
+  String? get selectedRowCountTitleOne => '1 vybratá položka';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount vybratých položiek';
+  String get selectedRowCountTitleOther => r'$selectedRowCount vybratých položiek';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Zobraziť účty';
@@ -22371,7 +22742,7 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Prihlásili ste sa';
 
   @override
-  String get tabLabelRaw => 'Karta \$tabIndex z \$tabCount';
+  String get tabLabelRaw => r'Karta $tabIndex z $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -22411,15 +22782,15 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationSl({
     String localeName = 'sl',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -22434,7 +22805,7 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'O aplikaciji \$applicationName';
+  String get aboutListTileTitleRaw => r'O aplikaciji $applicationName';
 
   @override
   String get alertDialogLabel => 'Opozorilo';
@@ -22470,7 +22841,7 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Izreži';
 
   @override
-  String get dateHelpText => 'dd/mm/llll';
+  String get dateHelpText => 'dd. mm. llll';
 
   @override
   String get dateInputLabel => 'Vnesite datum';
@@ -22482,7 +22853,7 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'IZBIRA DATUMA';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Končni datum \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Končni datum $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Končni datum';
@@ -22491,13 +22862,13 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'IZBIRA OBDOBJA';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Začetni datum \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Začetni datum $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Začetni datum';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '. ';
 
   @override
   String get deleteButtonTooltip => 'Brisanje';
@@ -22513,6 +22884,9 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'Strniti';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'Skrivanje računov';
@@ -22533,22 +22907,25 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Vnesite veljaven čas';
 
   @override
-  String get licensesPackageDetailTextFew => '\$licenseCount licence';
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => r'$licenseCount licence';
 
   @override
-  String get licensesPackageDetailTextOne => '1 licenca';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licenc';
+  String? get licensesPackageDetailTextOne => '1 licenca';
 
   @override
-  String get licensesPackageDetailTextTwo => '\$licenseCount licenci';
+  String get licensesPackageDetailTextOther => r'$licenseCount licenc';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => r'$licenseCount licenci';
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licence';
@@ -22572,10 +22949,10 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Odpiranje menija za krmarjenje';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow od \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow od $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow od približno \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow od približno $rowCount';
 
   @override
   String get pasteButtonLabel => 'Prilepi';
@@ -22596,22 +22973,22 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Osveži';
 
   @override
-  String get remainingTextFieldCharacterCountFew => 'Še \$remainingCount znaki';
+  String? get remainingTextFieldCharacterCountFew => r'Še $remainingCount znaki';
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'Še 1 znak';
+  String? get remainingTextFieldCharacterCountOne => 'Še 1 znak';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'Še \$remainingCount znakov';
+  String get remainingTextFieldCharacterCountOther => r'Še $remainingCount znakov';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => 'Še \$remainingCount znaka';
+  String? get remainingTextFieldCharacterCountTwo => r'Še $remainingCount znaka';
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Premakni navzdol';
@@ -22650,22 +23027,22 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Izberite leto';
 
   @override
-  String get selectedRowCountTitleFew => 'Izbrani so \$selectedRowCount elementi';
+  String? get selectedRowCountTitleFew => r'Izbrani so $selectedRowCount elementi';
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => 'Izbran je 1 element';
+  String? get selectedRowCountTitleOne => 'Izbran je 1 element';
 
   @override
-  String get selectedRowCountTitleOther => 'Izbranih je \$selectedRowCount elementov';
+  String get selectedRowCountTitleOther => r'Izbranih je $selectedRowCount elementov';
 
   @override
-  String get selectedRowCountTitleTwo => 'Izbrana sta \$selectedRowCount elementa';
+  String? get selectedRowCountTitleTwo => r'Izbrana sta $selectedRowCount elementa';
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Prikaz računov';
@@ -22677,7 +23054,7 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Prijavljen';
 
   @override
-  String get tabLabelRaw => 'Zavihek \$tabIndex od \$tabCount';
+  String get tabLabelRaw => r'Zavihek $tabIndex od $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -22717,15 +23094,15 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationSq({
     String localeName = 'sq',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -22740,7 +23117,7 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Rreth \$applicationName';
+  String get aboutListTileTitleRaw => r'Rreth $applicationName';
 
   @override
   String get alertDialogLabel => 'Sinjalizim';
@@ -22788,7 +23165,7 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'ZGJIDH DATËN';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Data e mbarimit: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Data e mbarimit: $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Data e mbarimit';
@@ -22797,7 +23174,7 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'ZGJIDH GAMËN';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Data e fillimit: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Data e fillimit: $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Data e fillimit';
@@ -22821,6 +23198,9 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Palos';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'Fshih llogaritë';
 
   @override
@@ -22839,22 +23219,25 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Fut një kohë të vlefshme';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 licencë';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licenca';
+  String? get licensesPackageDetailTextOne => '1 licencë';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount licenca';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licencat';
@@ -22878,10 +23261,10 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Hap menynë e navigimit';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow nga \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow nga $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow nga rreth \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow nga rreth $rowCount';
 
   @override
   String get pasteButtonLabel => 'Ngjit';
@@ -22902,22 +23285,22 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Rifresko';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 karakter i mbetur';
+  String? get remainingTextFieldCharacterCountOne => '1 karakter i mbetur';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount karaktere të mbetura';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount karaktere të mbetura';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => null;
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Lëvize poshtë';
@@ -22956,22 +23339,22 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Zgjidh vitin';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => 'U zgjodh 1 artikull';
+  String? get selectedRowCountTitleOne => 'U zgjodh 1 artikull';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount artikuj u zgjodhën';
+  String get selectedRowCountTitleOther => r'$selectedRowCount artikuj u zgjodhën';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Shfaq llogaritë';
@@ -22983,7 +23366,7 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Je identifikuar';
 
   @override
-  String get tabLabelRaw => 'Skeda \$tabIndex nga \$tabCount';
+  String get tabLabelRaw => r'Skeda $tabIndex nga $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -23023,15 +23406,15 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationSr({
     String localeName = 'sr',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -23046,7 +23429,7 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'О апликацији \$applicationName';
+  String get aboutListTileTitleRaw => r'О апликацији $applicationName';
 
   @override
   String get alertDialogLabel => 'Обавештење';
@@ -23082,7 +23465,7 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Исеци';
 
   @override
-  String get dateHelpText => 'дд/мм/гггг';
+  String get dateHelpText => 'дд.мм.гггг.';
 
   @override
   String get dateInputLabel => 'Унесите датум';
@@ -23094,7 +23477,7 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'ИЗАБЕРИТЕ ДАТУМ';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Датум завршетка: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Датум завршетка: $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Датум завршетка';
@@ -23103,13 +23486,13 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'ИЗАБЕРИТЕ ПЕРИОД';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Датум почетка: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Датум почетка: $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Датум почетка';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Избришите';
@@ -23125,6 +23508,9 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'Скупи';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'Сакриј налоге';
@@ -23145,22 +23531,25 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Унесите важеће време';
 
   @override
-  String get licensesPackageDetailTextFew => '\$licenseCount лиценце';
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => r'$licenseCount лиценце';
 
   @override
-  String get licensesPackageDetailTextOne => '1 лиценца';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount лиценци';
+  String? get licensesPackageDetailTextOne => '1 лиценца';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount лиценци';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Лиценце';
@@ -23184,10 +23573,10 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Отворите мени за навигацију';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow – \$lastRow oд \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow – $lastRow oд $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow – \$lastRow oд приближно \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow – $lastRow oд приближно $rowCount';
 
   @override
   String get pasteButtonLabel => 'Налепи';
@@ -23208,22 +23597,22 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Освежи';
 
   @override
-  String get remainingTextFieldCharacterCountFew => 'Преостала су \$remainingCount знака';
+  String? get remainingTextFieldCharacterCountFew => r'Преостала су $remainingCount знака';
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'Преостао је 1 знак';
+  String? get remainingTextFieldCharacterCountOne => 'Преостао је 1 знак';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'Преостало је \$remainingCount знакова';
+  String get remainingTextFieldCharacterCountOther => r'Преостало је $remainingCount знакова';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Померите надоле';
@@ -23262,22 +23651,22 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Изаберите годину';
 
   @override
-  String get selectedRowCountTitleFew => 'Изабране су \$selectedRowCount ставке';
+  String? get selectedRowCountTitleFew => r'Изабране су $selectedRowCount ставке';
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => 'Изабрана је 1 ставка';
+  String? get selectedRowCountTitleOne => 'Изабрана је 1 ставка';
 
   @override
-  String get selectedRowCountTitleOther => 'Изабрано је \$selectedRowCount ставки';
+  String get selectedRowCountTitleOther => r'Изабрано је $selectedRowCount ставки';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Прикажи налоге';
@@ -23289,7 +23678,7 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Пријављени сте';
 
   @override
-  String get tabLabelRaw => '\$tabIndex. картица од \$tabCount';
+  String get tabLabelRaw => r'$tabIndex. картица од $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -23329,15 +23718,15 @@ class MaterialLocalizationSrCyrl extends MaterialLocalizationSr {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationSrCyrl({
     String localeName = 'sr_Cyrl',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -23359,15 +23748,15 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationSrLatn({
     String localeName = 'sr_Latn',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -23382,7 +23771,7 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'O aplikaciji \$applicationName';
+  String get aboutListTileTitleRaw => r'O aplikaciji $applicationName';
 
   @override
   String get alertDialogLabel => 'Obaveštenje';
@@ -23418,7 +23807,7 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get cutButtonLabel => 'Iseci';
 
   @override
-  String get dateHelpText => 'dd/mm/gggg';
+  String get dateHelpText => 'dd.mm.gggg.';
 
   @override
   String get dateInputLabel => 'Unesite datum';
@@ -23430,7 +23819,7 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get datePickerHelpText => 'IZABERITE DATUM';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Datum završetka: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Datum završetka: $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Datum završetka';
@@ -23439,7 +23828,7 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get dateRangePickerHelpText => 'IZABERITE PERIOD';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Datum početka: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Datum početka: $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Datum početka';
@@ -23478,13 +23867,13 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get invalidTimeLabel => 'Unesite važeće vreme';
 
   @override
-  String get licensesPackageDetailTextFew => '\$licenseCount licence';
+  String? get licensesPackageDetailTextFew => r'$licenseCount licence';
 
   @override
-  String get licensesPackageDetailTextOne => '1 licenca';
+  String? get licensesPackageDetailTextOne => '1 licenca';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licenci';
+  String get licensesPackageDetailTextOther => r'$licenseCount licenci';
 
   @override
   String get licensesPageTitle => 'Licence';
@@ -23508,10 +23897,10 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get openAppDrawerTooltip => 'Otvorite meni za navigaciju';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow – \$lastRow od \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow – $lastRow od $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow – \$lastRow od približno \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow – $lastRow od približno $rowCount';
 
   @override
   String get pasteButtonLabel => 'Nalepi';
@@ -23532,13 +23921,13 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get refreshIndicatorSemanticLabel => 'Osveži';
 
   @override
-  String get remainingTextFieldCharacterCountFew => 'Preostala su \$remainingCount znaka';
+  String? get remainingTextFieldCharacterCountFew => r'Preostala su $remainingCount znaka';
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'Preostao je 1 znak';
+  String? get remainingTextFieldCharacterCountOne => 'Preostao je 1 znak';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'Preostalo je \$remainingCount znakova';
+  String get remainingTextFieldCharacterCountOther => r'Preostalo je $remainingCount znakova';
 
   @override
   String get reorderItemDown => 'Pomerite nadole';
@@ -23574,13 +23963,13 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get selectYearSemanticsLabel => 'Izaberite godinu';
 
   @override
-  String get selectedRowCountTitleFew => 'Izabrane su \$selectedRowCount stavke';
+  String? get selectedRowCountTitleFew => r'Izabrane su $selectedRowCount stavke';
 
   @override
-  String get selectedRowCountTitleOne => 'Izabrana je 1 stavka';
+  String? get selectedRowCountTitleOne => 'Izabrana je 1 stavka';
 
   @override
-  String get selectedRowCountTitleOther => 'Izabrano je \$selectedRowCount stavki';
+  String get selectedRowCountTitleOther => r'Izabrano je $selectedRowCount stavki';
 
   @override
   String get showAccountsLabel => 'Prikaži naloge';
@@ -23592,7 +23981,7 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get signedInLabel => 'Prijavljeni ste';
 
   @override
-  String get tabLabelRaw => '\$tabIndex. kartica od \$tabCount';
+  String get tabLabelRaw => r'$tabIndex. kartica od $tabCount';
 
   @override
   String get timePickerDialHelpText => 'IZABERITE VREME';
@@ -23629,15 +24018,15 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationSv({
     String localeName = 'sv',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -23652,7 +24041,7 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Om \$applicationName';
+  String get aboutListTileTitleRaw => r'Om $applicationName';
 
   @override
   String get alertDialogLabel => 'Varning';
@@ -23688,7 +24077,7 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Klipp ut';
 
   @override
-  String get dateHelpText => 'mm/dd/åååå';
+  String get dateHelpText => 'åååå-mm-dd';
 
   @override
   String get dateInputLabel => 'Ange datum';
@@ -23700,7 +24089,7 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'VÄLJ DATUM';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Slutdatum \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Slutdatum $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Slutdatum';
@@ -23709,13 +24098,13 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'VÄLJ INTERVALL';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Startdatum \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Startdatum $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Startdatum';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Radera';
@@ -23731,6 +24120,9 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'Dölj';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'Dölj konton';
@@ -23751,22 +24143,25 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Ange en giltig tid';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 licens';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount licenser';
+  String? get licensesPackageDetailTextOne => '1 licens';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount licenser';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licenser';
@@ -23790,10 +24185,10 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Öppna navigeringsmenyn';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow av \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow av $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow av ungefär \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow av ungefär $rowCount';
 
   @override
   String get pasteButtonLabel => 'Klistra in';
@@ -23814,22 +24209,22 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Uppdatera';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 tecken kvar';
+  String? get remainingTextFieldCharacterCountOne => '1 tecken kvar';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount tecken kvar';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount tecken kvar';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Flytta nedåt';
@@ -23868,22 +24263,22 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Välj år';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 objekt har markerats';
+  String? get selectedRowCountTitleOne => '1 objekt har markerats';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount objekt har markerats';
+  String get selectedRowCountTitleOther => r'$selectedRowCount objekt har markerats';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Visa konton';
@@ -23895,7 +24290,7 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Inloggad';
 
   @override
-  String get tabLabelRaw => 'Flik \$tabIndex av \$tabCount';
+  String get tabLabelRaw => r'Flik $tabIndex av $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -23935,15 +24330,15 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationSw({
     String localeName = 'sw',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -23958,7 +24353,7 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Kuhusu \$applicationName';
+  String get aboutListTileTitleRaw => r'Kuhusu $applicationName';
 
   @override
   String get alertDialogLabel => 'Arifa';
@@ -24006,7 +24401,7 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'CHAGUA TAREHE';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Tarehe ya kumalizika \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Tarehe ya kumalizika $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Tarehe ya Kumalizika';
@@ -24015,7 +24410,7 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'CHAGUA KIPINDI';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Tarehe ya kuanza \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Tarehe ya kuanza $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Tarehe ya Kuanza';
@@ -24039,6 +24434,9 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Kunja';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'Ficha akaunti';
 
   @override
@@ -24057,22 +24455,25 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Weka saa sahihi';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => 'Leseni moja';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => 'Leseni \$licenseCount';
+  String? get licensesPackageDetailTextOne => 'Leseni moja';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'Leseni $licenseCount';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Leseni';
@@ -24096,10 +24497,10 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Fungua menyu ya kusogeza';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow hadi \$lastRow kati ya \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow hadi $lastRow kati ya $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow hadi \$lastRow kati ya takriban \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow hadi $lastRow kati ya takriban $rowCount';
 
   @override
   String get pasteButtonLabel => 'Bandika';
@@ -24120,22 +24521,22 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Onyesha upya';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'Imesalia herufi 1';
+  String? get remainingTextFieldCharacterCountOne => 'Imesalia herufi 1';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'Zimesalia herufi \$remainingCount';
+  String get remainingTextFieldCharacterCountOther => r'Zimesalia herufi $remainingCount';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'Hapana herufi zilizo baki';
+  String? get remainingTextFieldCharacterCountZero => 'Hapana herufi zilizo baki';
 
   @override
   String get reorderItemDown => 'Sogeza chini';
@@ -24174,22 +24575,22 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Chagua mwaka';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => 'Umechagua kipengee 1';
+  String? get selectedRowCountTitleOne => 'Umechagua kipengee 1';
 
   @override
-  String get selectedRowCountTitleOther => 'Umechagua vipengee \$selectedRowCount';
+  String get selectedRowCountTitleOther => r'Umechagua vipengee $selectedRowCount';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => 'Hamna kilicho chaguliwa';
+  String? get selectedRowCountTitleZero => 'Hamna kilicho chaguliwa';
 
   @override
   String get showAccountsLabel => 'Onyesha akaunti';
@@ -24201,7 +24602,7 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Umeingia katika akaunti';
 
   @override
-  String get tabLabelRaw => 'Kichupo cha \$tabIndex kati ya \$tabCount';
+  String get tabLabelRaw => r'Kichupo cha $tabIndex kati ya $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
@@ -24241,15 +24642,15 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationTa({
     String localeName = 'ta',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -24264,7 +24665,7 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => '\$applicationName பற்றி';
+  String get aboutListTileTitleRaw => r'$applicationName பற்றி';
 
   @override
   String get alertDialogLabel => 'விழிப்பூட்டல்';
@@ -24312,7 +24713,7 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'தேதியைத் தேர்ந்தெடுக்கவும்';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'முடிவுத் தேதி \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'முடிவுத் தேதி $fullDate';
 
   @override
   String get dateRangeEndLabel => 'முடிவுத் தேதி';
@@ -24321,7 +24722,7 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'வரம்பைத் தேர்ந்தெடுக்கவும்';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'தொடங்கும் தேதி \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'தொடங்கும் தேதி $fullDate';
 
   @override
   String get dateRangeStartLabel => 'தொடங்கும் தேதி';
@@ -24345,6 +24746,9 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'சுருக்கும்';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'கணக்குகளை மறைக்கும்';
 
   @override
@@ -24363,22 +24767,25 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'சரியான நேரத்தை உள்ளிடவும்';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 உரிமம்';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount உரிமங்கள்';
+  String? get licensesPackageDetailTextOne => '1 உரிமம்';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount உரிமங்கள்';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'உரிமங்கள்';
@@ -24402,10 +24809,10 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'வழிசெலுத்தல் மெனுவைத் திற';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow / \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow / $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow / \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow / $rowCount';
 
   @override
   String get pasteButtonLabel => 'ஒட்டு';
@@ -24426,22 +24833,22 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'ரெஃப்ரெஷ் செய்யும்';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 எழுத்து மீதமுள்ளது';
+  String? get remainingTextFieldCharacterCountOne => '1 எழுத்து மீதமுள்ளது';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount எழுத்துகள் மீதமுள்ளன';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount எழுத்துகள் மீதமுள்ளன';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'எழுத்துக்கள் எதுவும் இல்லை';
+  String? get remainingTextFieldCharacterCountZero => 'எழுத்துக்கள் எதுவும் இல்லை';
 
   @override
   String get reorderItemDown => 'கீழே நகர்த்தவும்';
@@ -24480,22 +24887,22 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'ஆண்டைத் தேர்ந்தெடுக்கவும்';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 வரிசை தேர்ந்தெடுக்கப்பட்டது';
+  String? get selectedRowCountTitleOne => '1 வரிசை தேர்ந்தெடுக்கப்பட்டது';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount வரிசைகள் தேர்ந்தெடுக்கப்பட்டன';
+  String get selectedRowCountTitleOther => r'$selectedRowCount வரிசைகள் தேர்ந்தெடுக்கப்பட்டன';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => 'எந்த வரிசையும் தேர்ந்தெடுக்கவில்லை';
+  String? get selectedRowCountTitleZero => 'எந்த வரிசையும் தேர்ந்தெடுக்கவில்லை';
 
   @override
   String get showAccountsLabel => 'கணக்குகளைக் காட்டும்';
@@ -24507,7 +24914,7 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get signedInLabel => 'உள்நுழைந்துள்ளீர்கள்';
 
   @override
-  String get tabLabelRaw => 'தாவல் \$tabIndex / \$tabCount';
+  String get tabLabelRaw => r'தாவல் $tabIndex / $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.a_space_h_colon_mm;
@@ -24547,15 +24954,15 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationTe({
     String localeName = 'te',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -24570,7 +24977,7 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => '\$applicationName గురించి';
+  String get aboutListTileTitleRaw => r'$applicationName గురించి';
 
   @override
   String get alertDialogLabel => 'అలర్ట్';
@@ -24618,7 +25025,7 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'తేదీని ఎంచుకోండి';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'ముగింపు తేదీ \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'ముగింపు తేదీ $fullDate';
 
   @override
   String get dateRangeEndLabel => 'ముగింపు తేదీ';
@@ -24627,7 +25034,7 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'పరిధిని ఎంచుకోండి';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'ప్రారంభ తేదీ \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'ప్రారంభ తేదీ $fullDate';
 
   @override
   String get dateRangeStartLabel => 'ప్రారంభ తేదీ';
@@ -24645,10 +25052,13 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get dialogLabel => 'డైలాగ్';
 
   @override
-  String get drawerLabel => 'నావిగేషన్ మెను';
+  String get drawerLabel => 'నావిగేషన్ మెనూ';
 
   @override
   String get expandedIconTapHint => 'కుదించు';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'ఖాతాలను దాచు';
@@ -24669,22 +25079,25 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'చెల్లుబాటు అయ్యే సమయాన్ని ఎంటర్ చేయండి';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 లైసెన్స్';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount లైసెన్స్‌లు';
+  String? get licensesPackageDetailTextOne => '1 లైసెన్స్';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount లైసెన్స్‌లు';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'లైసెన్స్‌లు';
@@ -24708,16 +25121,16 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'నావిగేషన్ మెనూను తెరువు';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$rowCountలో \$firstRow - \$lastRow';
+  String get pageRowsInfoTitleRaw => r'$rowCountలో $firstRow - $lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$rowCountలో \$firstRow–\$lastRow';
+  String get pageRowsInfoTitleApproximateRaw => r'$rowCountలో $firstRow–$lastRow';
 
   @override
   String get pasteButtonLabel => 'అతికించు';
 
   @override
-  String get popupMenuLabel => 'పాప్‌అప్ మెను';
+  String get popupMenuLabel => 'పాప్‌అప్ మెనూ';
 
   @override
   String get postMeridiemAbbreviation => 'PM';
@@ -24732,22 +25145,22 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'రిఫ్రెష్ చేయి';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 అక్షరం మిగిలి ఉంది';
+  String? get remainingTextFieldCharacterCountOne => '1 అక్షరం మిగిలి ఉంది';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount అక్షరాలు మిగిలి ఉన్నాయి';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount అక్షరాలు మిగిలి ఉన్నాయి';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => null;
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'కిందికు జరుపు';
@@ -24786,22 +25199,22 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'సంవత్సరాన్ని ఎంచుకోండి';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 అంశం ఎంచుకోబడింది';
+  String? get selectedRowCountTitleOne => '1 అంశం ఎంచుకోబడింది';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount అంశాలు ఎంచుకోబడ్డాయి';
+  String get selectedRowCountTitleOther => r'$selectedRowCount అంశాలు ఎంచుకోబడ్డాయి';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'ఖాతాలను చూపు';
@@ -24813,7 +25226,7 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get signedInLabel => 'సైన్ ఇన్ చేసారు';
 
   @override
-  String get tabLabelRaw => '\$tabCountలో \$tabIndexవ ట్యాబ్';
+  String get tabLabelRaw => r'$tabCountలో $tabIndexవ ట్యాబ్';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -24853,15 +25266,15 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationTh({
     String localeName = 'th',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -24876,7 +25289,7 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'เกี่ยวกับ \$applicationName';
+  String get aboutListTileTitleRaw => r'เกี่ยวกับ $applicationName';
 
   @override
   String get alertDialogLabel => 'การแจ้งเตือน';
@@ -24924,7 +25337,7 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'เลือกวันที่';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'วันที่สิ้นสุด \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'วันที่สิ้นสุด $fullDate';
 
   @override
   String get dateRangeEndLabel => 'วันที่สิ้นสุด';
@@ -24933,7 +25346,7 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'เลือกช่วง';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'วันที่เริ่มต้น \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'วันที่เริ่มต้น $fullDate';
 
   @override
   String get dateRangeStartLabel => 'วันที่เริ่มต้น';
@@ -24957,6 +25370,9 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'ยุบ';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'ซ่อนบัญชี';
 
   @override
@@ -24975,22 +25391,25 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'ป้อนเวลาที่ถูกต้อง';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => 'ใบอนุญาต 1 ใบ';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => 'ใบอนุญาต \$licenseCount ใบ';
+  String? get licensesPackageDetailTextOne => 'ใบอนุญาต 1 ใบ';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'ใบอนุญาต $licenseCount ใบ';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'ใบอนุญาต';
@@ -25014,10 +25433,10 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'เปิดเมนูการนำทาง';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow-\$lastRow จาก \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow-$lastRow จาก $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow จากประมาณ \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow จากประมาณ $rowCount';
 
   @override
   String get pasteButtonLabel => 'วาง';
@@ -25038,22 +25457,22 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'รีเฟรช';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'เหลือ 1 อักขระ';
+  String? get remainingTextFieldCharacterCountOne => 'เหลือ 1 อักขระ';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'เหลือ \$remainingCount อักขระ';
+  String get remainingTextFieldCharacterCountOther => r'เหลือ $remainingCount อักขระ';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'ย้ายลง';
@@ -25092,22 +25511,22 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'เลือกปี';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => 'เลือกแล้ว 1 รายการ';
+  String? get selectedRowCountTitleOne => 'เลือกแล้ว 1 รายการ';
 
   @override
-  String get selectedRowCountTitleOther => 'เลือกแล้ว \$selectedRowCount รายการ';
+  String get selectedRowCountTitleOther => r'เลือกแล้ว $selectedRowCount รายการ';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'แสดงบัญชี';
@@ -25119,7 +25538,7 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get signedInLabel => 'ลงชื่อเข้าใช้';
 
   @override
-  String get tabLabelRaw => 'แท็บที่ \$tabIndex จาก \$tabCount';
+  String get tabLabelRaw => r'แท็บที่ $tabIndex จาก $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.a_space_h_colon_mm;
@@ -25159,15 +25578,15 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationTl({
     String localeName = 'tl',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -25182,7 +25601,7 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Tungkol sa \$applicationName';
+  String get aboutListTileTitleRaw => r'Tungkol sa $applicationName';
 
   @override
   String get alertDialogLabel => 'Alerto';
@@ -25230,7 +25649,7 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'PUMILI NG PETSA';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Petsa ng pagtatapos \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Petsa ng pagtatapos $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Petsa ng Pagtatapos';
@@ -25239,7 +25658,7 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'PUMILI NG HANAY';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Petsa ng pagsisimula \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Petsa ng pagsisimula $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Petsa ng Pagsisimula';
@@ -25263,6 +25682,9 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'I-collapse';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'Itago ang mga account';
 
   @override
@@ -25281,22 +25703,25 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Maglagay ng valid na oras';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 lisensya';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount na lisensya';
+  String? get licensesPackageDetailTextOne => '1 lisensya';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount na lisensya';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Mga Lisensya';
@@ -25320,10 +25745,10 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Buksan ang menu ng navigation';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow ng \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow ng $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow ng humigit kumulang \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow ng humigit kumulang $rowCount';
 
   @override
   String get pasteButtonLabel => 'I-paste';
@@ -25344,22 +25769,22 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Nagre-refresh';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 character ang natitira';
+  String? get remainingTextFieldCharacterCountOne => '1 character ang natitira';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount na character ang natitira';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount na character ang natitira';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Ilipat pababa';
@@ -25398,22 +25823,22 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Pumili ng taon';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 item ang napili';
+  String? get selectedRowCountTitleOne => '1 item ang napili';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount na item ang napili';
+  String get selectedRowCountTitleOther => r'$selectedRowCount na item ang napili';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Ipakita ang mga account';
@@ -25425,7 +25850,7 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Naka-sign in';
 
   @override
-  String get tabLabelRaw => 'Tab \$tabIndex ng \$tabCount';
+  String get tabLabelRaw => r'Tab $tabIndex ng $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -25465,15 +25890,15 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationTr({
     String localeName = 'tr',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -25488,7 +25913,7 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => '\$applicationName Hakkında';
+  String get aboutListTileTitleRaw => r'$applicationName Hakkında';
 
   @override
   String get alertDialogLabel => 'Uyarı';
@@ -25524,7 +25949,7 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Kes';
 
   @override
-  String get dateHelpText => 'aa/gg/yyyy';
+  String get dateHelpText => 'gg.aa.yyyy';
 
   @override
   String get dateInputLabel => 'Tarih Girin';
@@ -25536,7 +25961,7 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'TARİH SEÇİN';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Bitiş tarihi \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Bitiş tarihi $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Bitiş Tarihi';
@@ -25545,13 +25970,13 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'ARALIK SEÇİN';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Başlangıç tarihi \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Başlangıç tarihi $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Başlangıç Tarihi';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Sil';
@@ -25567,6 +25992,9 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'Daralt';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'Hesapları gizle';
@@ -25587,22 +26015,25 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Geçerli bir saat girin';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 lisans';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount lisans';
+  String? get licensesPackageDetailTextOne => '1 lisans';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount lisans';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Lisanslar';
@@ -25626,10 +26057,10 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Gezinme menüsünü aç';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow-\$lastRow / \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow-$lastRow / $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow-\$lastRow / \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow-$lastRow / $rowCount';
 
   @override
   String get pasteButtonLabel => 'Yapıştır';
@@ -25650,22 +26081,22 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Yenile';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 karakter kaldı';
+  String? get remainingTextFieldCharacterCountOne => '1 karakter kaldı';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount karakter kaldı';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount karakter kaldı';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Aşağı taşı';
@@ -25704,22 +26135,22 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Yılı seçin';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 öğe seçildi';
+  String? get selectedRowCountTitleOne => '1 öğe seçildi';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount öğe seçildi';
+  String get selectedRowCountTitleOther => r'$selectedRowCount öğe seçildi';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Hesapları göster';
@@ -25731,7 +26162,7 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Oturum açıldı';
 
   @override
-  String get tabLabelRaw => 'Sekme \$tabIndex / \$tabCount';
+  String get tabLabelRaw => r'Sekme $tabIndex / $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -25771,15 +26202,15 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationUk({
     String localeName = 'uk',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -25794,7 +26225,7 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Про додаток \$applicationName';
+  String get aboutListTileTitleRaw => r'Про додаток $applicationName';
 
   @override
   String get alertDialogLabel => 'Сповіщення';
@@ -25830,7 +26261,7 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Вирізати';
 
   @override
-  String get dateHelpText => 'дд/мм/рррр';
+  String get dateHelpText => 'дд.мм.рррр';
 
   @override
   String get dateInputLabel => 'Введіть дату';
@@ -25842,7 +26273,7 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'ВИБРАТИ ДАТУ';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Дата завершення \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Дата завершення $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Дата завершення';
@@ -25851,13 +26282,13 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'ВИБРАТИ ДІАПАЗОН';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Дата початку \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Дата початку $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Дата початку';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Видалити';
@@ -25873,6 +26304,9 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'Згорнути';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'Сховати облікові записи';
@@ -25893,22 +26327,25 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Введіть дійсний час';
 
   @override
-  String get licensesPackageDetailTextFew => '\$licenseCount ліцензії';
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => '\$licenseCount ліцензій';
+  String? get licensesPackageDetailTextFew => r'$licenseCount ліцензії';
 
   @override
-  String get licensesPackageDetailTextOne => '1 ліцензія';
+  String? get licensesPackageDetailTextMany => r'$licenseCount ліцензій';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount ліцензії';
+  String? get licensesPackageDetailTextOne => '1 ліцензія';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount ліцензії';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Ліцензії';
@@ -25932,10 +26369,10 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Відкрити меню навігації';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow з \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow з $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow з приблизно \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow з приблизно $rowCount';
 
   @override
   String get pasteButtonLabel => 'Вставити';
@@ -25956,22 +26393,22 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Оновити';
 
   @override
-  String get remainingTextFieldCharacterCountFew => 'Залишилося \$remainingCount символи';
+  String? get remainingTextFieldCharacterCountFew => r'Залишилося $remainingCount символи';
 
   @override
-  String get remainingTextFieldCharacterCountMany => 'Залишилося \$remainingCount символів';
+  String? get remainingTextFieldCharacterCountMany => r'Залишилося $remainingCount символів';
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'Залишився 1 символ';
+  String? get remainingTextFieldCharacterCountOne => 'Залишився 1 символ';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'Залишилося \$remainingCount символу';
+  String get remainingTextFieldCharacterCountOther => r'Залишилося $remainingCount символу';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Перемістити вниз';
@@ -26010,22 +26447,22 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Виберіть рік';
 
   @override
-  String get selectedRowCountTitleFew => 'Вибрано \$selectedRowCount елементи';
+  String? get selectedRowCountTitleFew => r'Вибрано $selectedRowCount елементи';
 
   @override
-  String get selectedRowCountTitleMany => 'Вибрано \$selectedRowCount елементів';
+  String? get selectedRowCountTitleMany => r'Вибрано $selectedRowCount елементів';
 
   @override
-  String get selectedRowCountTitleOne => 'Вибрано 1 елемент';
+  String? get selectedRowCountTitleOne => 'Вибрано 1 елемент';
 
   @override
-  String get selectedRowCountTitleOther => 'Вибрано \$selectedRowCount елемента';
+  String get selectedRowCountTitleOther => r'Вибрано $selectedRowCount елемента';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Показати облікові записи';
@@ -26037,7 +26474,7 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Ви ввійшли';
 
   @override
-  String get tabLabelRaw => 'Вкладка \$tabIndex з \$tabCount';
+  String get tabLabelRaw => r'Вкладка $tabIndex з $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -26077,15 +26514,15 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationUr({
     String localeName = 'ur',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -26100,7 +26537,7 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => '\$applicationName کے بارے میں';
+  String get aboutListTileTitleRaw => r'$applicationName کے بارے میں';
 
   @override
   String get alertDialogLabel => 'الرٹ';
@@ -26136,7 +26573,7 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'کٹ کریں';
 
   @override
-  String get dateHelpText => 'dd/mm/yy';
+  String get dateHelpText => 'dd/mm/yyyy';
 
   @override
   String get dateInputLabel => 'تاریخ درج کریں';
@@ -26148,7 +26585,7 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'تاریخ منتخب کریں';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'تاریخ اختتام \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'تاریخ اختتام $fullDate';
 
   @override
   String get dateRangeEndLabel => 'تاریخ اختتام';
@@ -26157,7 +26594,7 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'حد منتخب کریں';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'تاریخ آغاز \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'تاریخ آغاز $fullDate';
 
   @override
   String get dateRangeStartLabel => 'تاریخ آغاز';
@@ -26181,6 +26618,9 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'سکیڑیں';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'اکاؤنٹس چھپائیں';
 
   @override
@@ -26199,22 +26639,25 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'درست وقت درج کریں';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 لائسنس';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount لائسنسز';
+  String? get licensesPackageDetailTextOne => '1 لائسنس';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount لائسنسز';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'لائسنسز';
@@ -26238,10 +26681,10 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'نیویگیشن مینو کھولیں';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow از \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow از $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow \$rowCount میں سے تقریباً';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow $rowCount میں سے تقریباً';
 
   @override
   String get pasteButtonLabel => 'پیسٹ کریں';
@@ -26262,22 +26705,22 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'ریفریش کریں';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 حرف باقی ہے';
+  String? get remainingTextFieldCharacterCountOne => '1 حرف باقی ہے';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount حروف باقی ہیں';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount حروف باقی ہیں';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'نیچے منتقل کریں';
@@ -26316,22 +26759,22 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'سال منتخب کریں';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 آئٹم منتخب کیا گیا';
+  String? get selectedRowCountTitleOne => '1 آئٹم منتخب کیا گیا';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount آئٹمز منتخب کیے گئے';
+  String get selectedRowCountTitleOther => r'$selectedRowCount آئٹمز منتخب کیے گئے';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'اکاؤنٹس دکھائیں';
@@ -26343,7 +26786,7 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get signedInLabel => 'سائن ان کردہ ہے';
 
   @override
-  String get tabLabelRaw => '\$tabCount میں سے \$tabIndex ٹیب';
+  String get tabLabelRaw => r'$tabCount میں سے $tabIndex ٹیب';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
@@ -26383,15 +26826,15 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationUz({
     String localeName = 'uz',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -26406,7 +26849,7 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => '\$applicationName haqida';
+  String get aboutListTileTitleRaw => r'$applicationName haqida';
 
   @override
   String get alertDialogLabel => 'Ogohlantirish';
@@ -26454,7 +26897,7 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'SANANI TANLANG';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Tugash sanasi: \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Tugash sanasi: $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Tugash sanasi';
@@ -26463,7 +26906,7 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'ORALIQNI TANLANG';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Boshlanish sanasi: \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Boshlanish sanasi: $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Boshlanish sanasi';
@@ -26487,6 +26930,9 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Kichraytirish';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'Hisoblarni berkitish';
 
   @override
@@ -26505,22 +26951,25 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Vaqt xato kiritildi';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 ta litsenziya';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount ta litsenziya';
+  String? get licensesPackageDetailTextOne => '1 ta litsenziya';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount ta litsenziya';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Litsenziyalar';
@@ -26544,10 +26993,10 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Navigatsiya menyusini ochish';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow, jami: \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow, jami: $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow, jami: \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow, jami: $rowCount';
 
   @override
   String get pasteButtonLabel => 'Joylash';
@@ -26568,22 +27017,22 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Yangilash';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 ta belgi qoldi';
+  String? get remainingTextFieldCharacterCountOne => '1 ta belgi qoldi';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount ta belgi qoldi';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount ta belgi qoldi';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => null;
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Pastga siljitish';
@@ -26622,22 +27071,22 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Yilni tanlang';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 ta element tanlandi';
+  String? get selectedRowCountTitleOne => '1 ta element tanlandi';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount ta element tanlandi';
+  String get selectedRowCountTitleOther => r'$selectedRowCount ta element tanlandi';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Hisoblarni koʻrsatish';
@@ -26649,7 +27098,7 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Hisobingizga kirgansiz';
 
   @override
-  String get tabLabelRaw => '\$tabCount varaqdan \$tabIndex';
+  String get tabLabelRaw => r'$tabCount varaqdan $tabIndex';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -26689,15 +27138,15 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationVi({
     String localeName = 'vi',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -26712,7 +27161,7 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Giới thiệu về \$applicationName';
+  String get aboutListTileTitleRaw => r'Giới thiệu về $applicationName';
 
   @override
   String get alertDialogLabel => 'Thông báo';
@@ -26760,7 +27209,7 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'CHỌN NGÀY';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Ngày kết thúc \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Ngày kết thúc $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Ngày kết thúc';
@@ -26769,7 +27218,7 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'CHỌN PHẠM VI';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Ngày bắt đầu \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Ngày bắt đầu $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Ngày bắt đầu';
@@ -26793,6 +27242,9 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Thu gọn';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => 'Ẩn tài khoản';
 
   @override
@@ -26811,22 +27263,25 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Nhập thời gian hợp lệ';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 giấy phép';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount giấy phép';
+  String? get licensesPackageDetailTextOne => '1 giấy phép';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount giấy phép';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Giấy phép';
@@ -26850,10 +27305,10 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Mở menu di chuyển';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow trong tổng số \$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow trong tổng số $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow trong tổng số khoảng \$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow trong tổng số khoảng $rowCount';
 
   @override
   String get pasteButtonLabel => 'Dán';
@@ -26874,22 +27329,22 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Làm mới';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'Còn lại 1 ký tự';
+  String? get remainingTextFieldCharacterCountOne => 'Còn lại 1 ký tự';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'Còn lại \$remainingCount ký tự';
+  String get remainingTextFieldCharacterCountOther => r'Còn lại $remainingCount ký tự';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Di chuyển xuống';
@@ -26928,22 +27383,22 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Chọn năm';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => 'Đã chọn 1 mục';
+  String? get selectedRowCountTitleOne => 'Đã chọn 1 mục';
 
   @override
-  String get selectedRowCountTitleOther => 'Đã chọn \$selectedRowCount mục';
+  String get selectedRowCountTitleOther => r'Đã chọn $selectedRowCount mục';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Hiển thị tài khoản';
@@ -26955,7 +27410,7 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Đã đăng nhập';
 
   @override
-  String get tabLabelRaw => 'Tab \$tabIndex trong tổng số \$tabCount';
+  String get tabLabelRaw => r'Tab $tabIndex trong tổng số $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -26995,15 +27450,15 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationZh({
     String localeName = 'zh',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -27018,7 +27473,7 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => '关于\$applicationName';
+  String get aboutListTileTitleRaw => r'关于$applicationName';
 
   @override
   String get alertDialogLabel => '提醒';
@@ -27054,7 +27509,7 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get cutButtonLabel => '剪切';
 
   @override
-  String get dateHelpText => 'mm/dd/yyyy';
+  String get dateHelpText => 'yyyy/mm/dd';
 
   @override
   String get dateInputLabel => '输入日期';
@@ -27066,7 +27521,7 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get datePickerHelpText => '选择日期';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => '结束日期为 \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'结束日期为 $fullDate';
 
   @override
   String get dateRangeEndLabel => '结束日期';
@@ -27075,7 +27530,7 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => '选择范围';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => '开始日期为 \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'开始日期为 $fullDate';
 
   @override
   String get dateRangeStartLabel => '开始日期';
@@ -27099,6 +27554,9 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => '收起';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
   String get hideAccountsLabel => '隐藏帐号';
 
   @override
@@ -27117,22 +27575,25 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => '请输入有效的时间';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => '1 份许可';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount 份许可';
+  String? get licensesPackageDetailTextOne => '1 份许可';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'$licenseCount 份许可';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => '许可';
@@ -27156,10 +27617,10 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => '打开导航菜单';
 
   @override
-  String get pageRowsInfoTitleRaw => '第 \$firstRow-\$lastRow 行（共 \$rowCount 行）';
+  String get pageRowsInfoTitleRaw => r'第 $firstRow-$lastRow 行（共 $rowCount 行）';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '第 \$firstRow-\$lastRow 行（共约 \$rowCount 行）';
+  String get pageRowsInfoTitleApproximateRaw => r'第 $firstRow-$lastRow 行（共约 $rowCount 行）';
 
   @override
   String get pasteButtonLabel => '粘贴';
@@ -27180,22 +27641,22 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => '刷新';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '还可输入 1 个字符';
+  String? get remainingTextFieldCharacterCountOne => '还可输入 1 个字符';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '还可输入 \$remainingCount 个字符';
+  String get remainingTextFieldCharacterCountOther => r'还可输入 $remainingCount 个字符';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => '下移';
@@ -27234,22 +27695,22 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => '选择年份';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '已选择 1 项内容';
+  String? get selectedRowCountTitleOne => '已选择 1 项内容';
 
   @override
-  String get selectedRowCountTitleOther => '已选择 \$selectedRowCount 项内容';
+  String get selectedRowCountTitleOther => r'已选择 $selectedRowCount 项内容';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => '显示帐号';
@@ -27261,7 +27722,7 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get signedInLabel => '已登录';
 
   @override
-  String get tabLabelRaw => '第 \$tabIndex 个标签，共 \$tabCount 个';
+  String get tabLabelRaw => r'第 $tabIndex 个标签，共 $tabCount 个';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.a_space_h_colon_mm;
@@ -27301,15 +27762,15 @@ class MaterialLocalizationZhHans extends MaterialLocalizationZh {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationZhHans({
     String localeName = 'zh_Hans',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -27331,15 +27792,15 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationZhHant({
     String localeName = 'zh_Hant',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -27354,7 +27815,7 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   );
 
   @override
-  String get aboutListTileTitleRaw => '關於\$applicationName';
+  String get aboutListTileTitleRaw => r'關於$applicationName';
 
   @override
   String get alertDialogLabel => '通知';
@@ -27381,7 +27842,7 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get cutButtonLabel => '剪下';
 
   @override
-  String get dateHelpText => 'yyyy/mm/dd';
+  String get dateHelpText => 'dd/mm/yyyy';
 
   @override
   String get dateInputLabel => '輸入日期';
@@ -27393,7 +27854,7 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get datePickerHelpText => '選取日期';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => '結束日期係 \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'結束日期係 $fullDate';
 
   @override
   String get dateRangeEndLabel => '結束日期';
@@ -27402,7 +27863,7 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get dateRangePickerHelpText => '選取範圍';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => '開始日期係 \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'開始日期係 $fullDate';
 
   @override
   String get dateRangeStartLabel => '開始日期';
@@ -27441,10 +27902,10 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get invalidTimeLabel => '請輸入有效的時間';
 
   @override
-  String get licensesPackageDetailTextOne => '1 項授權';
+  String? get licensesPackageDetailTextOne => '1 項授權';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount 項授權';
+  String get licensesPackageDetailTextOther => r'$licenseCount 項授權';
 
   @override
   String get licensesPageTitle => '授權';
@@ -27465,10 +27926,10 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get openAppDrawerTooltip => '開啟導覽選單';
 
   @override
-  String get pageRowsInfoTitleRaw => '第 \$firstRow 至 \$lastRow 列，共 \$rowCount 列';
+  String get pageRowsInfoTitleRaw => r'第 $firstRow 至 $lastRow 列，共 $rowCount 列';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '第 \$firstRow 至 \$lastRow 列，共約 \$rowCount 列';
+  String get pageRowsInfoTitleApproximateRaw => r'第 $firstRow 至 $lastRow 列，共約 $rowCount 列';
 
   @override
   String get pasteButtonLabel => '貼上';
@@ -27486,10 +27947,10 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get refreshIndicatorSemanticLabel => '重新整理';
 
   @override
-  String get remainingTextFieldCharacterCountOne => '尚餘 1 個字元';
+  String? get remainingTextFieldCharacterCountOne => '尚餘 1 個字元';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '尚餘 \$remainingCount 個字元';
+  String get remainingTextFieldCharacterCountOther => r'尚餘 $remainingCount 個字元';
 
   @override
   String get reorderItemDown => '向下移';
@@ -27525,10 +27986,10 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get selectYearSemanticsLabel => '揀年份';
 
   @override
-  String get selectedRowCountTitleOne => '已選取 1 個項目';
+  String? get selectedRowCountTitleOne => '已選取 1 個項目';
 
   @override
-  String get selectedRowCountTitleOther => '已選取 \$selectedRowCount 個項目';
+  String get selectedRowCountTitleOther => r'已選取 $selectedRowCount 個項目';
 
   @override
   String get showAccountsLabel => '顯示帳戶';
@@ -27540,7 +28001,7 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get signedInLabel => '已登入';
 
   @override
-  String get tabLabelRaw => '第 \$tabIndex 個標籤，總共 \$tabCount 個';
+  String get tabLabelRaw => r'第 $tabIndex 個標籤，總共 $tabCount 個';
 
   @override
   String get timePickerDialHelpText => '選取時間';
@@ -27574,15 +28035,15 @@ class MaterialLocalizationZhHantHk extends MaterialLocalizationZhHant {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationZhHantHk({
     String localeName = 'zh_Hant_HK',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -27604,15 +28065,15 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationZhHantTw({
     String localeName = 'zh_Hant_TW',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -27630,7 +28091,7 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
   String get dialModeButtonLabel => '切換至鐘面挑選器模式';
 
   @override
-  String get licensesPackageDetailTextOne => '1 個授權';
+  String? get licensesPackageDetailTextOne => '1 個授權';
 
   @override
   String get timePickerHourLabel => '時';
@@ -27639,16 +28100,16 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
   String get timePickerMinuteLabel => '分';
 
   @override
-  String get licensesPackageDetailTextOther => '\$licenseCount 個授權';
+  String get licensesPackageDetailTextOther => r'$licenseCount 個授權';
 
   @override
   String get calendarModeButtonLabel => '切換到日曆模式';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => '結束日期為 \$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'結束日期為 $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => '開始日期為 \$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'開始日期為 $fullDate';
 
   @override
   String get inputDateModeButtonLabel => '切換到輸入模式';
@@ -27657,10 +28118,10 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
   String get selectYearSemanticsLabel => '選取年份';
 
   @override
-  String get dateHelpText => 'mm/dd/yyyy';
+  String get dateHelpText => 'yyyy/mm/dd';
 
   @override
-  String get tabLabelRaw => '第 \$tabIndex 個分頁 (共 \$tabCount 個)';
+  String get tabLabelRaw => r'第 $tabIndex 個分頁 (共 $tabCount 個)';
 
   @override
   String get modalBarrierDismissLabel => '關閉';
@@ -27669,13 +28130,13 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
   String get signedInLabel => '已登入帳戶';
 
   @override
-  String get aboutListTileTitleRaw => '關於「\$applicationName」';
+  String get aboutListTileTitleRaw => r'關於「$applicationName」';
 
   @override
-  String get pageRowsInfoTitleRaw => '第 \$firstRow - \$lastRow 列 (總共 \$rowCount 列)';
+  String get pageRowsInfoTitleRaw => r'第 $firstRow - $lastRow 列 (總共 $rowCount 列)';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '第 \$firstRow - \$lastRow 列 (總共約 \$rowCount 列)';
+  String get pageRowsInfoTitleApproximateRaw => r'第 $firstRow - $lastRow 列 (總共約 $rowCount 列)';
 
   @override
   String get selectAllButtonLabel => '全選';
@@ -27696,10 +28157,10 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
   String get reorderItemToEnd => '移至結尾';
 
   @override
-  String get remainingTextFieldCharacterCountOne => '還可輸入 1 個字元';
+  String? get remainingTextFieldCharacterCountOne => '還可輸入 1 個字元';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '還可輸入 \$remainingCount 個字元';
+  String get remainingTextFieldCharacterCountOther => r'還可輸入 $remainingCount 個字元';
 }
 
 /// The translations for Zulu (`zu`).
@@ -27709,15 +28170,15 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationZu({
     String localeName = 'zu',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -27732,7 +28193,7 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Mayelana no-\$applicationName';
+  String get aboutListTileTitleRaw => r'Mayelana no-$applicationName';
 
   @override
   String get alertDialogLabel => 'Isexwayiso';
@@ -27780,7 +28241,7 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'KHETHA IDETHI';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => 'Idethi yokuphela umhla ka-\$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Idethi yokuphela umhla ka-$fullDate';
 
   @override
   String get dateRangeEndLabel => 'Idethi yokugcina';
@@ -27789,13 +28250,13 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'KHETHA IBANGA';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => 'Idethi yokuqala umhla ka-\$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Idethi yokuqala umhla ka-$fullDate';
 
   @override
   String get dateRangeStartLabel => 'Idethi yokuqala';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Susa';
@@ -27811,6 +28272,9 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
 
   @override
   String get expandedIconTapHint => 'Goqa';
+
+  @override
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'Fihla ama-akhawunti';
@@ -27831,22 +28295,25 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Faka igama elivumelekile';
 
   @override
-  String get licensesPackageDetailTextFew => null;
+  String get lastPageTooltip => 'Last page';
 
   @override
-  String get licensesPackageDetailTextMany => null;
+  String? get licensesPackageDetailTextFew => null;
 
   @override
-  String get licensesPackageDetailTextOne => 'ilayisense e-1';
+  String? get licensesPackageDetailTextMany => null;
 
   @override
-  String get licensesPackageDetailTextOther => 'amalayisense angu-\$licenseCount';
+  String? get licensesPackageDetailTextOne => 'ilayisense e-1';
 
   @override
-  String get licensesPackageDetailTextTwo => null;
+  String get licensesPackageDetailTextOther => r'amalayisense angu-$licenseCount';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Amalayisense';
@@ -27870,10 +28337,10 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Vula imenyu yokuzulazula';
 
   @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow kokungu-\$rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow kokungu-$rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow cishe kokungu-\$rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow cishe kokungu-$rowCount';
 
   @override
   String get pasteButtonLabel => 'Namathisela';
@@ -27894,22 +28361,22 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Vuselela';
 
   @override
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => '1 uhlamvu olusele';
+  String? get remainingTextFieldCharacterCountOne => '1 uhlamvu olusele';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount izinhlamvu ezisele';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount izinhlamvu ezisele';
 
   @override
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => null;
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Iya phansi';
@@ -27948,22 +28415,22 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Khetha unyaka';
 
   @override
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   @override
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => '1 into ekhethiwe';
+  String? get selectedRowCountTitleOne => '1 into ekhethiwe';
 
   @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount izinto ezikhethiwe';
+  String get selectedRowCountTitleOther => r'$selectedRowCount izinto ezikhethiwe';
 
   @override
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => 'Bonisa ama-akhawunti';
@@ -27975,7 +28442,7 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Ungene ngemvume';
 
   @override
-  String get tabLabelRaw => 'Ithebhu \$tabIndex kwangu-\$tabCount';
+  String get tabLabelRaw => r'Ithebhu $tabIndex kwangu-$tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -28192,7 +28659,7 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
 ///
 /// Generally speaking, this method is only intended to be used by
 /// [GlobalMaterialLocalizations.delegate].
-GlobalMaterialLocalizations getMaterialTranslation(
+GlobalMaterialLocalizations? getMaterialTranslation(
   Locale locale,
   intl.DateFormat fullYearFormat,
   intl.DateFormat compactDateFormat,

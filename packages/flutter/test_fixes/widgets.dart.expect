@@ -1,0 +1,98 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter/widgets.dart';
+
+void main() {
+  // Generic reference variables.
+  BuildContext context;
+
+  // Changes made in https://github.com/flutter/flutter/pull/44189
+  const Element element = Element(myWidget);
+  element.dependOnInheritedElement(ancestor);
+  element.dependOnInheritedWidgetOfExactType<targetType>();
+  element.getElementForInheritedWidgetOfExactType<targetType>();
+  element.findAncestorWidgetOfExactType<targetType>();
+  element.findAncestorStateOfType<targetType>();
+  element.findRootAncestorStateOfType<targetType>();
+  element.findAncestorRenderObjectOfType<targetType>();
+
+  // Changes made in https://github.com/flutter/flutter/pull/45941
+  final WidgetsBinding binding = WidgetsBinding.instance!;
+  binding.deferFirstFrame();
+  binding.allowFirstFrame();
+
+  // Changes made in https://github.com/flutter/flutter/pull/44189
+  const StatefulElement statefulElement = StatefulElement(myWidget);
+  statefulElement.dependOnInheritedElement(ancestor);
+
+  // Changes made in https://github.com/flutter/flutter/pull/44189
+  const BuildContext buildContext = Element(myWidget);
+  buildContext.dependOnInheritedElement(ancestor);
+  buildContext.dependOnInheritedWidgetOfExactType<targetType>();
+  buildContext.getElementForInheritedWidgetOfExactType<targetType>();
+  buildContext.findAncestorWidgetOfExactType<targetType>();
+  buildContext.findAncestorStateOfType<targetType>();
+  buildContext.findRootAncestorStateOfType<targetType>();
+  buildContext.findAncestorRenderObjectOfType<targetType>();
+
+  // Changes made in https://github.com/flutter/flutter/pull/61648
+  const Form form = Form(autovalidateMode: AutovalidateMode.always);
+  const Form form = Form(autovalidateMode: AutovalidateMode.disabled);
+  final autoMode = form.autovalidateMode;
+
+  // Changes made in https://github.com/flutter/flutter/pull/61648
+  const FormField formField = FormField(autovalidateMode: AutovalidateMode.always);
+  const FormField formField = FormField(autovalidateMode: AutovalidateMode.disabled);
+  final autoMode = formField.autovalidateMode;
+
+  // Changes made in https://github.com/flutter/flutter/pull/66305
+  const Stack stack = Stack(clipBehavior: Clip.none);
+  const Stack stack = Stack(clipBehavior: Clip.hardEdge);
+  final behavior = stack.clipBehavior;
+
+  // Changes made in https://github.com/flutter/flutter/pull/68736
+  MediaQuery.maybeOf(context);
+  MediaQuery.of(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/70726
+  Navigator.maybeOf(context);
+  Navigator.of(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68910
+  Router.maybeOf(context);
+  Router.of(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68911
+  Localizations.maybeLocaleOf(context);
+  Localizations.localeOf(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68917
+  FocusTraversalOrder.maybeOf(context);
+  FocusTraversalOrder.of(context);
+  FocusTraversalGroup.maybeOf(context);
+  FocusTraversalGroup.of(context);
+  Focus.maybeOf(context);
+  Focus.of(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68921
+  Shortcuts.maybeOf(context);
+  Shortcuts.of(context);
+  Actions.maybeFind(context);
+  Actions.find(context);
+  Actions.handler(context);
+  Actions.handler(context);
+  Actions.maybeInvoke(context);
+  Actions.invoke(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68925
+  AnimatedList.maybeOf(context);
+  AnimatedList.of(context);
+  SliverAnimatedList.maybeOf(context);
+  SliverAnimatedList.of(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/59127
+  const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem(label: myTitle);
+  bottomNavigationBarItem.label;
+}

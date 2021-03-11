@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
+import 'package:file/file.dart';
+import 'package:file/local.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:platform/platform.dart';
 
 void main() {
   testWidgets('IconData object test', (WidgetTester tester) async {
@@ -18,4 +21,88 @@ void main() {
     expect(Icons.clear.fontFamily, 'MaterialIcons');
     expect(Icons.search.fontFamily, 'MaterialIcons');
   });
+
+  testWidgets('Certain icons (and their variants) match text direction', (WidgetTester tester) async {
+    expect(Icons.arrow_back.matchTextDirection, true);
+    expect(Icons.arrow_back_rounded.matchTextDirection, true);
+    expect(Icons.arrow_back_outlined.matchTextDirection, true);
+    expect(Icons.arrow_back_sharp.matchTextDirection, true);
+
+    expect(Icons.access_time.matchTextDirection, false);
+    expect(Icons.access_time_rounded.matchTextDirection, false);
+    expect(Icons.access_time_outlined.matchTextDirection, false);
+    expect(Icons.access_time_sharp.matchTextDirection, false);
+  });
+
+  testWidgets('Adaptive icons are correct on cupertino platforms', (WidgetTester tester) async {
+      expect(Icons.adaptive.arrow_back, Icons.arrow_back_ios);
+      expect(Icons.adaptive.arrow_back_outlined, Icons.arrow_back_ios_outlined);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    }),
+  );
+
+  testWidgets('Adaptive icons are correct on non-cupertino platforms', (WidgetTester tester) async {
+      expect(Icons.adaptive.arrow_back, Icons.arrow_back);
+      expect(Icons.adaptive.arrow_back_outlined, Icons.arrow_back_outlined);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+      TargetPlatform.windows,
+      TargetPlatform.linux,
+    }),
+  );
+
+  testWidgets('A sample of icons look as expected', (WidgetTester tester) async {
+    await _loadIconFont();
+
+    await tester.pumpWidget(MaterialApp(
+      home: IconTheme(
+        data: const IconThemeData(size: 200),
+        child: Wrap(
+          children: const <Icon>[
+            Icon(Icons.ten_k),
+            Icon(Icons.ac_unit),
+            Icon(Icons.local_taxi),
+            Icon(Icons.local_taxi_outlined),
+            Icon(Icons.local_taxi_rounded),
+            Icon(Icons.local_taxi_sharp),
+            Icon(Icons.zoom_out_sharp),
+          ],
+        ),
+      ),
+    ));
+
+    await expectLater(find.byType(Wrap), matchesGoldenFile('test.icons.sample.png'));
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
+}
+
+// Loads the cached material icon font.
+// Only necessary for golden tests. Relies on the tool updating cached assets before
+// running tests.
+Future<void> _loadIconFont() async {
+  const FileSystem fs = LocalFileSystem();
+  const Platform platform = LocalPlatform();
+  final Directory flutterRoot = fs.directory(platform.environment['FLUTTER_ROOT']);
+
+  final File iconFont = flutterRoot.childFile(
+    fs.path.join(
+      'bin',
+      'cache',
+      'artifacts',
+      'material_fonts',
+      'MaterialIcons-Regular.otf',
+    ),
+  );
+
+  final Future<ByteData> bytes = Future<ByteData>.value(
+      iconFont.readAsBytesSync()
+      .buffer
+      .asByteData()
+  );
+
+  await (FontLoader('MaterialIcons')..addFont(bytes)).load();
 }

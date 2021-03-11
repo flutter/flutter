@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart' show TestWidgetsFlutterBinding;
@@ -15,7 +13,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('Android', () {
-    FakeAndroidPlatformViewsController viewsController;
+    late FakeAndroidPlatformViewsController viewsController;
     setUp(() {
       viewsController = FakeAndroidPlatformViewsController();
     });
@@ -150,7 +148,7 @@ void main() {
     test('OnPlatformViewCreated callback', () async {
       viewsController.registerViewType('webview');
       final List<int> createdViews = <int>[];
-      final PlatformViewCreatedCallback callback = (int id) { createdViews.add(id); };
+      void callback(int id) { createdViews.add(id); }
 
       final AndroidViewController controller1 = PlatformViewsService.initAndroidView(
         id: 0,
@@ -202,7 +200,7 @@ void main() {
   });
 
   group('iOS', () {
-    FakeIosPlatformViewsController viewsController;
+    late FakeIosPlatformViewsController viewsController;
     setUp(() {
       viewsController = FakeIosPlatformViewsController();
     });

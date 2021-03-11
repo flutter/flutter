@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -37,10 +35,13 @@ void main() {
     expect(material.elevation, 0.0);
     expect(material.shadowColor, const Color(0xff000000));
     expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)));
-    expect(material.textStyle.color, colorScheme.primary);
-    expect(material.textStyle.fontFamily, 'Roboto');
-    expect(material.textStyle.fontSize, 14);
-    expect(material.textStyle.fontWeight, FontWeight.w500);
+    expect(material.textStyle!.color, colorScheme.primary);
+    expect(material.textStyle!.fontFamily, 'Roboto');
+    expect(material.textStyle!.fontSize, 14);
+    expect(material.textStyle!.fontWeight, FontWeight.w500);
+
+    final Align align = tester.firstWidget<Align>(find.ancestor(of: find.text('button'), matching: find.byType(Align)));
+    expect(align.alignment, Alignment.center);
   });
 
   group('[Theme, TextTheme, TextButton style overrides]', () {
@@ -59,6 +60,7 @@ void main() {
     const MaterialTapTargetSize tapTargetSize = MaterialTapTargetSize.shrinkWrap;
     const Duration animationDuration = Duration(milliseconds: 25);
     const bool enableFeedback = false;
+    const AlignmentGeometry alignment = Alignment.centerLeft;
 
     final ButtonStyle style = TextButton.styleFrom(
       primary: primaryColor,
@@ -76,9 +78,10 @@ void main() {
       tapTargetSize: tapTargetSize,
       animationDuration: animationDuration,
       enableFeedback: enableFeedback,
+      alignment: alignment,
     );
 
-    Widget buildFrame({ ButtonStyle buttonStyle, ButtonStyle themeStyle, ButtonStyle overallStyle }) {
+    Widget buildFrame({ ButtonStyle? buttonStyle, ButtonStyle? themeStyle, ButtonStyle? overallStyle }) {
       final Widget child = Builder(
         builder: (BuildContext context) {
           return TextButton(
@@ -123,20 +126,22 @@ void main() {
     void checkButton(WidgetTester tester) {
       final Material material = tester.widget<Material>(findMaterial);
       final InkWell inkWell = tester.widget<InkWell>(findInkWell);
-      expect(material.textStyle.color, primaryColor);
-      expect(material.textStyle.fontSize, 12);
+      expect(material.textStyle!.color, primaryColor);
+      expect(material.textStyle!.fontSize, 12);
       expect(material.color, backgroundColor);
       expect(material.shadowColor, shadowColor);
       expect(material.elevation, elevation);
-      expect(MaterialStateProperty.resolveAs<MouseCursor>(inkWell.mouseCursor, enabled), enabledMouseCursor);
-      expect(MaterialStateProperty.resolveAs<MouseCursor>(inkWell.mouseCursor, disabled), disabledMouseCursor);
-      expect(inkWell.overlayColor.resolve(hovered), primaryColor.withOpacity(0.04));
-      expect(inkWell.overlayColor.resolve(focused), primaryColor.withOpacity(0.12));
+      expect(MaterialStateProperty.resolveAs<MouseCursor?>(inkWell.mouseCursor, enabled), enabledMouseCursor);
+      expect(MaterialStateProperty.resolveAs<MouseCursor?>(inkWell.mouseCursor, disabled), disabledMouseCursor);
+      expect(inkWell.overlayColor!.resolve(hovered), primaryColor.withOpacity(0.04));
+      expect(inkWell.overlayColor!.resolve(focused), primaryColor.withOpacity(0.12));
       expect(inkWell.enableFeedback, enableFeedback);
       expect(material.borderRadius, null);
       expect(material.shape, shape);
       expect(material.animationDuration, animationDuration);
       expect(tester.getSize(find.byType(TextButton)), const Size(200, 200));
+      final Align align = tester.firstWidget<Align>(find.ancestor(of: find.text('button'), matching: find.byType(Align)));
+      expect(align.alignment, alignment);
     }
 
     testWidgets('Button style overrides defaults', (WidgetTester tester) async {
@@ -183,7 +188,7 @@ void main() {
     const Color shadowColor = Color(0xff000001);
     const Color overiddenColor = Color(0xff000002);
 
-    Widget buildFrame({ Color overallShadowColor, Color themeShadowColor, Color shadowColor }) {
+    Widget buildFrame({ Color? overallShadowColor, Color? themeShadowColor, Color? shadowColor }) {
       return MaterialApp(
         theme: ThemeData.from(colorScheme: colorScheme).copyWith(
           shadowColor: overallShadowColor,

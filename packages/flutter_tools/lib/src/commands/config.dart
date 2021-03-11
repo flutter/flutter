@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+// @dart = 2.8
 
 import '../android/android_studio.dart';
 import '../base/common.dart';
@@ -22,7 +22,7 @@ class ConfigCommand extends FlutterCommand {
       help: 'Clear the saved development certificate choice used to sign apps for iOS device deployment.');
     argParser.addOption('android-sdk', help: 'The Android SDK directory.');
     argParser.addOption('android-studio-dir', help: 'The Android Studio install directory.');
-    argParser.addOption('build-dir', help: 'The relative path to override a projects build directory',
+    argParser.addOption('build-dir', help: 'The relative path to override a projects build directory.',
         valueHelp: 'out/');
     argParser.addFlag('machine',
       negatable: false,
@@ -86,9 +86,11 @@ class ConfigCommand extends FlutterCommand {
     if (values.isEmpty) {
       values = '  No settings have been configured.';
     }
+    final bool analyticsEnabled = globals.flutterUsage.enabled &&
+                                  !globals.flutterUsage.suppressAnalytics;
     return
       '\nSettings:\n$values\n\n'
-      'Analytics reporting is currently ${globals.flutterUsage.enabled ? 'enabled' : 'disabled'}.';
+      'Analytics reporting is currently ${analyticsEnabled ? 'enabled' : 'disabled'}.';
   }
 
   /// Return null to disable analytics recording of the `config` command.
@@ -178,7 +180,7 @@ class ConfigCommand extends FlutterCommand {
       results['android-studio-dir'] = androidStudio.directory;
     }
     if (results['android-sdk'] == null && globals.androidSdk != null) {
-      results['android-sdk'] = globals.androidSdk.directory;
+      results['android-sdk'] = globals.androidSdk.directory.path;
     }
 
     globals.printStatus(const JsonEncoder.withIndent('  ').convert(results));

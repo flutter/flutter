@@ -2,23 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
 import '../services/fake_platform_views.dart';
 import 'rendering_tester.dart';
 
 void main() {
 
   group('PlatformViewRenderBox', () {
-    FakePlatformViewController fakePlatformViewController;
-    PlatformViewRenderBox platformViewRenderBox;
+    late FakePlatformViewController fakePlatformViewController;
+    late PlatformViewRenderBox platformViewRenderBox;
     setUp(() {
       renderer; // Initialize bindings
       fakePlatformViewController = FakePlatformViewController(0);
@@ -78,8 +75,21 @@ void main() {
       layout(platformViewRenderBox);
       pumpFrame(phase: EnginePhase.flushSemantics);
 
-      ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
-        _pointerData(ui.PointerChange.add, const Offset(0, 0)),
+      ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+        _pointerData(ui.PointerChange.add, Offset.zero),
+        _pointerData(ui.PointerChange.hover, const Offset(10, 10)),
+        _pointerData(ui.PointerChange.remove, const Offset(10, 10)),
+      ]));
+
+      expect(fakePlatformViewController.dispatchedPointerEvents, isNotEmpty);
+    });
+
+    test('touch hover events are dispatched via PlatformViewController.dispatchPointerEvent', () {
+      layout(platformViewRenderBox);
+      pumpFrame(phase: EnginePhase.flushSemantics);
+
+      ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+        _pointerData(ui.PointerChange.add, Offset.zero),
         _pointerData(ui.PointerChange.hover, const Offset(10, 10)),
         _pointerData(ui.PointerChange.remove, const Offset(10, 10)),
       ]));

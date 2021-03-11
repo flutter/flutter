@@ -25,5 +25,6 @@
   "pasteButtonLabel": "Ielīmēt",
   "selectAllButtonLabel": "Atlasīt visu",
   "tabSemanticsLabel": "$tabIndex. cilne no $tabCount",
-  "modalBarrierDismissLabel": "Nerādīt"
+  "modalBarrierDismissLabel": "Nerādīt",
+  "searchTextFieldPlaceholderLabel": "Meklēšana"
 }

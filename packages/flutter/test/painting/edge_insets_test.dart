@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -56,6 +54,8 @@ void main() {
   test('EdgeInsets.resolve()', () {
     expect(const EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0).resolve(TextDirection.ltr), const EdgeInsets.fromLTRB(10.0, 20.0, 30.0, 40.0));
     expect(const EdgeInsetsDirectional.fromSTEB(99.0, 98.0, 97.0, 96.0).resolve(TextDirection.rtl), const EdgeInsets.fromLTRB(97.0, 98.0, 99.0, 96.0));
+    expect(const EdgeInsetsDirectional.all(50.0).resolve(TextDirection.ltr), const EdgeInsets.fromLTRB(50.0, 50.0, 50.0, 50.0));
+    expect(const EdgeInsetsDirectional.all(50.0).resolve(TextDirection.rtl), const EdgeInsets.fromLTRB(50.0, 50.0, 50.0, 50.0));
     expect(const EdgeInsetsDirectional.only(start: 963.25).resolve(TextDirection.ltr), const EdgeInsets.fromLTRB(963.25, 0.0, 0.0, 0.0));
     expect(const EdgeInsetsDirectional.only(top: 963.25).resolve(TextDirection.ltr), const EdgeInsets.fromLTRB(0.0, 963.25, 0.0, 0.0));
     expect(const EdgeInsetsDirectional.only(end: 963.25).resolve(TextDirection.ltr), const EdgeInsets.fromLTRB(0.0, 0.0, 963.25, 0.0));
@@ -90,8 +90,6 @@ void main() {
     expect(EdgeInsets.only(right: $5), EdgeInsets.only(right: $5));
     expect(const EdgeInsetsDirectional.only(end: 5.0).add(const EdgeInsets.only(right: 5.0)), const EdgeInsetsDirectional.only(end: 5.0).add(const EdgeInsets.only(right: 5.0)));
     expect(const EdgeInsetsDirectional.only(end: 5.0).add(const EdgeInsets.only(right: 5.0)), isNot(const EdgeInsetsDirectional.only(end: 5.0).add(const EdgeInsets.only(left: 5.0))));
-    expect(const EdgeInsetsDirectional.only(top: 1.0).add(const EdgeInsets.only(top: 2.0)), const EdgeInsetsDirectional.only(top: 3.0).add(const EdgeInsets.only(top: 0.0)));
-    expect(const EdgeInsetsDirectional.only(top: 1.0).add(const EdgeInsets.only(top: 2.0)), const EdgeInsets.only(top: 3.0).add(const EdgeInsetsDirectional.only(top: 0.0)));
     expect(const EdgeInsetsDirectional.only(top: 1.0).add(const EdgeInsets.only(top: 2.0)), const EdgeInsetsDirectional.only(top: 3.0));
     expect(const EdgeInsetsDirectional.only(top: 1.0).add(const EdgeInsets.only(top: 2.0)), const EdgeInsets.only(top: 3.0));
   });
@@ -188,9 +186,8 @@ void main() {
   });
 
   test('EdgeInsetsGeometry toString', () {
-    expect(const EdgeInsets.only().toString(), 'EdgeInsets.zero');
+    expect(EdgeInsets.zero.toString(), 'EdgeInsets.zero');
     expect(const EdgeInsets.only(top: 1.01, left: 1.01, right: 1.01, bottom: 1.01).toString(), 'EdgeInsets.all(1.0)');
-    expect(const EdgeInsetsDirectional.only().toString(), 'EdgeInsets.zero');
     expect(const EdgeInsetsDirectional.only(start: 1.01, end: 1.01, top: 1.01, bottom: 1.01).toString(), 'EdgeInsetsDirectional(1.0, 1.0, 1.0, 1.0)');
     expect((const EdgeInsetsDirectional.only(start: 4.0).add(const EdgeInsets.only(top: 3.0))).toString(), 'EdgeInsetsDirectional(4.0, 3.0, 0.0, 0.0)');
     expect((const EdgeInsetsDirectional.only(top: 4.0).add(const EdgeInsets.only(right: 3.0))).toString(), 'EdgeInsets(0.0, 4.0, 3.0, 0.0)');

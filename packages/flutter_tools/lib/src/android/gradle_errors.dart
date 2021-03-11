@@ -2,14 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
 import 'package:meta/meta.dart';
 
+import '../base/error_handling_io.dart';
+import '../base/file_system.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
-import 'gradle_utils.dart';
+import 'android_studio.dart';
 
 typedef GradleErrorTest = bool Function(String);
 
@@ -96,8 +99,14 @@ final GradleHandledError permissionDeniedErrorHandler = GradleHandledError(
   eventLabel: 'permission-denied',
 );
 
-// Gradle crashes for several known reasons when downloading that are not
-// actionable by flutter.
+/// Gradle crashes for several known reasons when downloading that are not
+/// actionable by Flutter.
+///
+/// The Gradle cache directory must be deleted, otherwise it may attempt to
+/// re-use the bad zip file.
+///
+/// See also:
+///  * https://docs.gradle.org/current/userguide/directory_layout.html#dir:gradle_user_home
 @visibleForTesting
 final GradleHandledError networkErrorHandler = GradleHandledError(
   test: _lineMatcher(const <String>[
@@ -120,6 +129,15 @@ final GradleHandledError networkErrorHandler = GradleHandledError(
       '$warningMark Gradle threw an error while downloading artifacts from the network. '
       'Retrying to download...'
     );
+    try {
+      final String homeDir = globals.platform.environment['HOME'];
+      if (homeDir != null) {
+        final Directory directory = globals.fs.directory(globals.fs.path.join(homeDir, '.gradle'));
+        ErrorHandlingFileSystem.deleteIfExists(directory, recursive: true);
+      }
+    } on FileSystemException catch (err) {
+      globals.printTrace('Failed to delete Gradle cache: $err');
+    }
     return GradleBuildStatus.retry;
   },
   eventLabel: 'network',
@@ -211,8 +229,8 @@ final GradleHandledError androidXFailureHandler = GradleHandledError(
     }
     if (hasPlugins && usesAndroidX && !shouldBuildPluginAsAar) {
       globals.printStatus(
-        'The built failed likely due to AndroidX incompatibilities in a plugin. '
-        'The tool is about to try using Jetfier to solve the incompatibility.'
+        'The build failed likely due to AndroidX incompatibilities in a plugin. '
+        'The tool is about to try using Jetifier to solve the incompatibility.'
       );
       BuildEvent(
         'gradle-android-x-failure',
@@ -274,16 +292,19 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
     bool usesAndroidX,
     bool shouldBuildPluginAsAar,
   }) async {
-    final RunResult tasksRunResult = await processUtils.run(
+    final RunResult tasksRunResult = await globals.processUtils.run(
       <String>[
-        gradleUtils.getExecutable(project),
+        globals.gradleUtils.getExecutable(project),
         'app:tasks' ,
         '--all',
         '--console=auto',
       ],
       throwOnError: true,
       workingDirectory: project.android.hostAppGradleRoot.path,
-      environment: gradleEnvironment,
+      environment: <String, String>{
+        if (javaPath != null)
+          'JAVA_HOME': javaPath,
+      },
     );
     // Extract build types and product flavors.
     final Set<String> variants = <String>{};

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+// @dart = 2.8
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -83,10 +83,10 @@ void main() {
       List<String> unexpectedPaths = const <String>[],
     }) async {
       dir ??= tempDir;
+      Cache.flutterRoot = tempDir.absolute.path;
       final IdeConfigCommand command = IdeConfigCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>[
-        '--flutter-root=${tempDir.absolute.path}',
         'ide-config',
         ...args,
       ]);

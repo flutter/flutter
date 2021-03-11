@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
 import 'package:flutter/rendering.dart';
@@ -32,7 +29,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1));
 
     FadeTransition widget2Opacity =
-        tester.element(find.text('Page 2')).findAncestorWidgetOfExactType<FadeTransition>();
+        tester.element(find.text('Page 2')).findAncestorWidgetOfExactType<FadeTransition>()!;
     Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
     final Size widget2Size = tester.getSize(find.text('Page 2'));
 
@@ -56,7 +53,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1));
 
     widget2Opacity =
-        tester.element(find.text('Page 2')).findAncestorWidgetOfExactType<FadeTransition>();
+        tester.element(find.text('Page 2')).findAncestorWidgetOfExactType<FadeTransition>()!;
     widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
 
     // Page 2 starts to move down.
@@ -96,7 +93,7 @@ void main() {
     Offset widget1TransientTopLeft = tester.getTopLeft(find.text('Page 1'));
     Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
     final RenderDecoratedBox box = tester.element(find.byKey(page2Key))
-        .findAncestorRenderObjectOfType<RenderDecoratedBox>();
+        .findAncestorRenderObjectOfType<RenderDecoratedBox>()!;
 
     // Page 1 is moving to the left.
     expect(widget1TransientTopLeft.dx < widget1InitialTopLeft.dx, true);
@@ -106,14 +103,17 @@ void main() {
     expect(widget1InitialTopLeft.dy == widget2TopLeft.dy, true);
     // Page 2 is coming in from the right.
     expect(widget2TopLeft.dx > widget1InitialTopLeft.dx, true);
-    // The shadow should be drawn to one screen width to the left of where
-    // the page 2 box is. `paints` tests relative to the painter's given canvas
-    // rather than relative to the screen so assert that it's one screen
-    // width to the left of 0 offset box rect and nothing is drawn inside the
-    // box's rect.
-    expect(box, paints..rect(
-      rect: const Rect.fromLTWH(-800.0, 0.0, 800.0, 600.0)
-    ));
+    // As explained in _CupertinoEdgeShadowPainter.paint the shadow is drawn
+    // as a bunch of rects. The rects are covering an area to the left of
+    // where the page 2 box is and a width of 5% of the page 2 box width.
+    // `paints` tests relative to the painter's given canvas
+    // rather than relative to the screen so assert that the shadow starts at
+    // offset.dx = 0.
+    final PaintPattern paintsShadow = paints;
+    for (int i = 0; i < 0.05 * 800; i += 1) {
+      paintsShadow.rect(rect: Rect.fromLTWH(-i.toDouble() - 1.0 , 0.0, 1.0, 600));
+    }
+    expect(box, paintsShadow);
 
     await tester.pumpAndSettle();
 
@@ -287,7 +287,7 @@ void main() {
           onPressed: () { Navigator.of(context).pushNamed('/b'); },
         ),
       ),
-      '/b': (BuildContext context) => Container(child: const Text('HELLO')),
+      '/b': (BuildContext context) => const Text('HELLO'),
     };
     await tester.pumpWidget(
       MaterialApp(
@@ -481,30 +481,6 @@ void main() {
     expect(widget1InitialTopLeft == widget1TransientTopLeft, true);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('throws when builder returns null', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(
-      home: Text('Home'),
-    ));
-    // No exceptions yet.
-    expect(tester.takeException(), isNull);
-
-    tester
-        .state<NavigatorState>(find.byType(Navigator))
-        .push(MaterialPageRoute<void>(
-          settings: const RouteSettings(name: 'broken'),
-          builder: (BuildContext context) => null,
-        ));
-    await tester.pumpAndSettle();
-    // An exception should've been thrown because the `builder` returned null.
-    final dynamic exception = tester.takeException();
-    expect(exception, isFlutterError);
-    expect(exception.toStringDeep(), equalsIgnoringHashCodes(
-      'FlutterError\n'
-      '   The builder for route "broken" returned null.\n'
-      '   Route builders must never return null.\n'
-    ));
-  });
-
   testWidgets('test edge swipe then drop back at starting point works', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -584,7 +560,7 @@ void main() {
           body: Center(
             child: ElevatedButton(
               onPressed: () {
-                Navigator.push<void>(scaffoldKey.currentContext, MaterialPageRoute<void>(
+                Navigator.push<void>(scaffoldKey.currentContext!, MaterialPageRoute<void>(
                   builder: (BuildContext context) {
                     return const Scaffold(
                       body: Center(child: Text('route')),
@@ -655,7 +631,7 @@ void main() {
     // Use the navigator to push a route instead of tapping the 'push' button.
     // The topmost route (the one that's animating away), ignores input while
     // the pop is underway because route.navigator.userGestureInProgress.
-    Navigator.push<void>(scaffoldKey.currentContext, MaterialPageRoute<void>(
+    Navigator.push<void>(scaffoldKey.currentContext!, MaterialPageRoute<void>(
       builder: (BuildContext context) {
         return const Scaffold(
           body: Center(child: Text('route')),
@@ -693,7 +669,7 @@ void main() {
     expect(homeTapCount, 1);
     expect(pageTapCount, 0);
 
-    Navigator.push<void>(homeScaffoldKey.currentContext, MaterialPageRoute<void>(
+    Navigator.push<void>(homeScaffoldKey.currentContext!, MaterialPageRoute<void>(
       builder: (BuildContext context) {
         return Scaffold(
           key: pageScaffoldKey,
@@ -727,12 +703,12 @@ void main() {
 
     // Tapping on the "page" route doesn't trigger the GestureDetector because
     // it's being dragged.
-    await tester.tap(find.byKey(pageScaffoldKey));
+    await tester.tap(find.byKey(pageScaffoldKey), warnIfMissed: false);
     expect(homeTapCount, 1);
     expect(pageTapCount, 1);
 
     // Tapping the "page" route's back button doesn't do anything either.
-    await tester.tap(find.byTooltip('Back'));
+    await tester.tap(find.byTooltip('Back'), warnIfMissed: false);
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.byKey(pageScaffoldKey)), const Offset(400, 0));
     expect(tester.getTopLeft(find.byKey(homeScaffoldKey)).dx, lessThan(0));
@@ -763,10 +739,10 @@ void main() {
     expect(homeTapCount, 1);
     expect(pageTapCount, 0);
 
-    final ValueNotifier<bool> notifier = Navigator.of(homeScaffoldKey.currentContext).userGestureInProgressNotifier;
+    final ValueNotifier<bool> notifier = Navigator.of(homeScaffoldKey.currentContext!).userGestureInProgressNotifier;
     expect(notifier.value, false);
 
-    Navigator.push<void>(homeScaffoldKey.currentContext, MaterialPageRoute<void>(
+    Navigator.push<void>(homeScaffoldKey.currentContext!, MaterialPageRoute<void>(
       builder: (BuildContext context) {
         return Scaffold(
           key: pageScaffoldKey,
@@ -841,12 +817,15 @@ void main() {
     final LocalKey pageKey = UniqueKey();
     final TransitionDetector detector = TransitionDetector();
     List<Page<void>> myPages = <Page<void>>[
-      MaterialPage<void>(key: pageKey, builder: (BuildContext context) => const Text('first')),
+      MaterialPage<void>(key: pageKey, child: const Text('first')),
     ];
     await tester.pumpWidget(
       buildNavigator(
         pages: myPages,
-        onPopPage: (Route<dynamic> route, dynamic result) => null,
+        onPopPage: (Route<dynamic> route, dynamic result) {
+          assert(false); // The test should never execute this.
+          return true;
+        },
         transitionDelegate: detector,
       )
     );
@@ -855,13 +834,16 @@ void main() {
     expect(find.text('first'), findsOneWidget);
 
     myPages = <Page<void>>[
-      MaterialPage<void>(key: pageKey, builder: (BuildContext context) => const Text('second')),
+      MaterialPage<void>(key: pageKey, child: const Text('second')),
     ];
 
     await tester.pumpWidget(
       buildNavigator(
         pages: myPages,
-        onPopPage: (Route<dynamic> route, dynamic result) => null,
+        onPopPage: (Route<dynamic> route, dynamic result) {
+          assert(false); // The test should never execute this.
+          return true;
+        },
         transitionDelegate: detector,
       )
     );
@@ -877,13 +859,16 @@ void main() {
     final LocalKey pageKeyTwo = UniqueKey();
     final TransitionDetector detector = TransitionDetector();
     List<Page<void>> myPages = <Page<void>>[
-      MaterialPage<void>(key: pageKeyOne, maintainState: false, builder: (BuildContext context) => const Text('first')),
-      MaterialPage<void>(key: pageKeyTwo, builder: (BuildContext context) => const Text('second')),
+      MaterialPage<void>(key: pageKeyOne, maintainState: false, child: const Text('first')),
+      MaterialPage<void>(key: pageKeyTwo, child: const Text('second')),
     ];
     await tester.pumpWidget(
       buildNavigator(
         pages: myPages,
-        onPopPage: (Route<dynamic> route, dynamic result) => null,
+        onPopPage: (Route<dynamic> route, dynamic result) {
+          assert(false); // The test should never execute this.
+          return true;
+        },
         transitionDelegate: detector,
       )
     );
@@ -894,14 +879,17 @@ void main() {
     expect(find.text('second'), findsOneWidget);
 
     myPages = <Page<void>>[
-      MaterialPage<void>(key: pageKeyOne, maintainState: true, builder: (BuildContext context) => const Text('first')),
-      MaterialPage<void>(key: pageKeyTwo, builder: (BuildContext context) => const Text('second')),
+      MaterialPage<void>(key: pageKeyOne, maintainState: true, child: const Text('first')),
+      MaterialPage<void>(key: pageKeyTwo, child: const Text('second')),
     ];
 
     await tester.pumpWidget(
       buildNavigator(
         pages: myPages,
-        onPopPage: (Route<dynamic> route, dynamic result) => null,
+        onPopPage: (Route<dynamic> route, dynamic result) {
+          assert(false); // The test should never execute this.
+          return true;
+        },
         transitionDelegate: detector,
       )
     );
@@ -912,15 +900,28 @@ void main() {
     expect(find.text('first', skipOffstage: false), findsOneWidget);
     expect(find.text('second'), findsOneWidget);
   });
+
+  testWidgets('MaterialPage does not lose its state when transitioning out', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(KeepsStateTestWidget(navigatorKey: navigator));
+    expect(find.text('subpage'), findsOneWidget);
+    expect(find.text('home'), findsNothing);
+
+    navigator.currentState!.pop();
+    await tester.pump();
+
+    expect(find.text('subpage'), findsOneWidget);
+    expect(find.text('home'), findsOneWidget);
+  });
 }
 
 class TransitionDetector extends DefaultTransitionDelegate<void> {
   bool hasTransition = false;
   @override
   Iterable<RouteTransitionRecord> resolve({
-    List<RouteTransitionRecord> newPageRouteHistory,
-    Map<RouteTransitionRecord, RouteTransitionRecord> locationToExitingPageRoute,
-    Map<RouteTransitionRecord, List<RouteTransitionRecord>> pageRouteToPagelessRoutes
+    required List<RouteTransitionRecord> newPageRouteHistory,
+    required Map<RouteTransitionRecord?, RouteTransitionRecord> locationToExitingPageRoute,
+    required Map<RouteTransitionRecord?, List<RouteTransitionRecord>> pageRouteToPagelessRoutes
   }) {
     hasTransition = true;
     return super.resolve(
@@ -932,13 +933,13 @@ class TransitionDetector extends DefaultTransitionDelegate<void> {
 }
 
 Widget buildNavigator({
-  List<Page<dynamic>> pages,
-  PopPageCallback onPopPage,
-  GlobalKey<NavigatorState> key,
-  TransitionDelegate<dynamic> transitionDelegate
+  required List<Page<dynamic>> pages,
+  required PopPageCallback onPopPage,
+  GlobalKey<NavigatorState>? key,
+  TransitionDelegate<dynamic>? transitionDelegate
 }) {
   return MediaQuery(
-    data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+    data: MediaQueryData.fromWindow(WidgetsBinding.instance!.window),
     child: Localizations(
       locale: const Locale('en', 'US'),
       delegates: const <LocalizationsDelegate<dynamic>>[
@@ -956,4 +957,39 @@ Widget buildNavigator({
       ),
     ),
   );
+}
+
+class KeepsStateTestWidget extends StatefulWidget {
+  const KeepsStateTestWidget({Key? key, this.navigatorKey}) : super(key: key);
+
+  final Key? navigatorKey;
+
+  @override
+  State<KeepsStateTestWidget> createState() => _KeepsStateTestWidgetState();
+}
+
+class _KeepsStateTestWidgetState extends State<KeepsStateTestWidget> {
+  String? _subpage = 'subpage';
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Navigator(
+        key: widget.navigatorKey,
+        pages: <Page<void>>[
+          const MaterialPage<void>(child: Text('home')),
+          if (_subpage != null) MaterialPage<void>(child: Text(_subpage!)),
+        ],
+        onPopPage: (Route<dynamic> route, dynamic result) {
+          if (!route.didPop(result)) {
+            return false;
+          }
+          setState(() {
+            _subpage = null;
+          });
+          return true;
+        },
+      ),
+    );
+  }
 }

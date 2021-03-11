@@ -162,12 +162,12 @@ abstract class EdgeInsetsGeometry {
   /// or equal to `min`, and less than or equal to `max`.
   EdgeInsetsGeometry clamp(EdgeInsetsGeometry min, EdgeInsetsGeometry max) {
     return _MixedEdgeInsets.fromLRSETB(
-      _left.clamp(min._left, max._left) as double, // ignore: unnecessary_cast
-      _right.clamp(min._right, max._right) as double, // ignore: unnecessary_cast
-      _start.clamp(min._start, max._start) as double, // ignore: unnecessary_cast
-      _end.clamp(min._end, max._end) as double, // ignore: unnecessary_cast
-      _top.clamp(min._top, max._top) as double, // ignore: unnecessary_cast
-      _bottom.clamp(min._bottom, max._bottom) as double, // ignore: unnecessary_cast
+      _left.clamp(min._left, max._left),
+      _right.clamp(min._right, max._right),
+      _start.clamp(min._start, max._start),
+      _end.clamp(min._end, max._end),
+      _top.clamp(min._top, max._top),
+      _bottom.clamp(min._bottom, max._bottom),
     );
   }
 
@@ -506,10 +506,10 @@ class EdgeInsets extends EdgeInsetsGeometry {
   @override
   EdgeInsetsGeometry clamp(EdgeInsetsGeometry min, EdgeInsetsGeometry max) {
     return EdgeInsets.fromLTRB(
-      _left.clamp(min._left, max._left) as double, // ignore: unnecessary_cast
-      _top.clamp(min._top, max._top) as double, // ignore: unnecessary_cast
-      _right.clamp(min._right, max._right) as double, // ignore: unnecessary_cast
-      _bottom.clamp(min._bottom, max._bottom) as double, // ignore: unnecessary_cast
+      _left.clamp(min._left, max._left),
+      _top.clamp(min._top, max._top),
+      _right.clamp(min._right, max._right),
+      _bottom.clamp(min._bottom, max._bottom),
     );
   }
 
@@ -662,6 +662,22 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
     this.end = 0.0,
     this.bottom = 0.0,
   });
+
+  /// Creates insets where all the offsets are `value`.
+  ///
+  /// {@tool snippet}
+  ///
+  /// Typical eight-pixel margin on all sides:
+  ///
+  /// ```dart
+  /// const EdgeInsetsDirectional.all(8.0)
+  /// ```
+  /// {@end-tool}
+  const EdgeInsetsDirectional.all(double value)
+    : start = value,
+      top = value,
+      end = value,
+      bottom = value;
 
   /// An [EdgeInsetsDirectional] with zero offsets in each direction.
   ///

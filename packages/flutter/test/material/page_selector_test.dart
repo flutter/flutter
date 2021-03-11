@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 const Color kSelectedColor = Color(0xFF00FF00);
 const Color kUnselectedColor = Colors.transparent;
 
-Widget buildFrame(TabController tabController, { Color color, Color selectedColor, double indicatorSize = 12.0 }) {
+Widget buildFrame(TabController tabController, { Color? color, Color? selectedColor, double indicatorSize = 12.0 }) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Theme(
@@ -92,7 +90,7 @@ void main() {
     tabController.animateTo(1, duration: const Duration(milliseconds: 200));
     await tester.pump();
     // Verify that indicator 0's color is becoming increasingly transparent,
-    /// and indicator 1's color is becoming increasingly opaque during the
+    // and indicator 1's color is becoming increasingly opaque during the
     // 200ms animation. Indicator 2 remains transparent throughout.
     await tester.pump(const Duration(milliseconds: 10));
     List<Color> colors = indicatorColors(tester);

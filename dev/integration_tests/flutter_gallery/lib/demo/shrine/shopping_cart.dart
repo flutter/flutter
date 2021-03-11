@@ -14,6 +14,8 @@ import 'package:flutter_gallery/demo/shrine/model/product.dart';
 const double _leftColumnWidth = 60.0;
 
 class ShoppingCartPage extends StatefulWidget {
+  const ShoppingCartPage({Key? key}) : super(key: key);
+
   @override
   _ShoppingCartPageState createState() => _ShoppingCartPageState();
 }
@@ -39,62 +41,61 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
     return Scaffold(
       backgroundColor: kShrinePink50,
       body: SafeArea(
-        child: Container(
-          child: ScopedModelDescendant<AppStateModel>(
-            builder: (BuildContext context, Widget child, AppStateModel model) {
-              return Stack(
-                children: <Widget>[
-                  ListView(
-                    children: <Widget>[
-                      Row(
-                        children: <Widget>[
-                          SizedBox(
-                            width: _leftColumnWidth,
-                            child: IconButton(
-                              icon: const Icon(Icons.keyboard_arrow_down),
-                              onPressed: () => ExpandingBottomSheet.of(context).close(),
-                            ),
+        child: ScopedModelDescendant<AppStateModel>(
+          builder: (BuildContext context, Widget? child, AppStateModel model) {
+            return Stack(
+              children: <Widget>[
+                ListView(
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        SizedBox(
+                          width: _leftColumnWidth,
+                          child: IconButton(
+                            icon: const Icon(Icons.keyboard_arrow_down),
+                            onPressed: () => ExpandingBottomSheet.of(context)!.close(),
                           ),
-                          Text(
-                            'CART',
-                            style: localTheme.textTheme.subtitle1.copyWith(fontWeight: FontWeight.w600),
-                          ),
-                          const SizedBox(width: 16.0),
-                          Text('${model.totalCartQuantity} ITEMS'),
-                        ],
-                      ),
-                      const SizedBox(height: 16.0),
-                      Column(
-                        children: _createShoppingCartRows(model),
-                      ),
-                      ShoppingCartSummary(model: model),
-                      const SizedBox(height: 100.0),
-                    ],
-                  ),
-                  Positioned(
-                    bottom: 16.0,
-                    left: 16.0,
-                    right: 16.0,
-                    child: RaisedButton(
+                        ),
+                        Text(
+                          'CART',
+                          style: localTheme.textTheme.subtitle1!.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(width: 16.0),
+                        Text('${model.totalCartQuantity} ITEMS'),
+                      ],
+                    ),
+                    const SizedBox(height: 16.0),
+                    Column(
+                      children: _createShoppingCartRows(model),
+                    ),
+                    ShoppingCartSummary(model: model),
+                    const SizedBox(height: 100.0),
+                  ],
+                ),
+                Positioned(
+                  bottom: 16.0,
+                  left: 16.0,
+                  right: 16.0,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: kShrinePink100,
                       shape: const BeveledRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(7.0)),
                       ),
-                      color: kShrinePink100,
-                      splashColor: kShrineBrown600,
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 12.0),
-                        child: Text('CLEAR CART'),
-                      ),
-                      onPressed: () {
-                        model.clearCart();
-                        ExpandingBottomSheet.of(context).close();
-                      },
                     ),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12.0),
+                      child: Text('CLEAR CART'),
+                    ),
+                    onPressed: () {
+                      model.clearCart();
+                      ExpandingBottomSheet.of(context)!.close();
+                    },
                   ),
-                ],
-              );
-            },
-          ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -102,14 +103,14 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
 }
 
 class ShoppingCartSummary extends StatelessWidget {
-  const ShoppingCartSummary({this.model});
+  const ShoppingCartSummary({Key? key, this.model}) : super(key: key);
 
-  final AppStateModel model;
+  final AppStateModel? model;
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle smallAmountStyle = Theme.of(context).textTheme.bodyText2.copyWith(color: kShrineBrown600);
-    final TextStyle largeAmountStyle = Theme.of(context).textTheme.headline4;
+    final TextStyle smallAmountStyle = Theme.of(context).textTheme.bodyText2!.copyWith(color: kShrineBrown600);
+    final TextStyle? largeAmountStyle = Theme.of(context).textTheme.headline4;
     final NumberFormat formatter = NumberFormat.simpleCurrency(
       decimalDigits: 2,
       locale: Localizations.localeOf(context).toString(),
@@ -130,7 +131,7 @@ class ShoppingCartSummary extends StatelessWidget {
                       child: Text('TOTAL'),
                     ),
                     Text(
-                      formatter.format(model.totalCost),
+                      formatter.format(model!.totalCost),
                       style: largeAmountStyle,
                     ),
                   ],
@@ -142,7 +143,7 @@ class ShoppingCartSummary extends StatelessWidget {
                       child: Text('Subtotal:'),
                     ),
                     Text(
-                      formatter.format(model.subtotalCost),
+                      formatter.format(model!.subtotalCost),
                       style: smallAmountStyle,
                     ),
                   ],
@@ -154,7 +155,7 @@ class ShoppingCartSummary extends StatelessWidget {
                       child: Text('Shipping:'),
                     ),
                     Text(
-                      formatter.format(model.shippingCost),
+                      formatter.format(model!.shippingCost),
                       style: smallAmountStyle,
                     ),
                   ],
@@ -166,7 +167,7 @@ class ShoppingCartSummary extends StatelessWidget {
                       child: Text('Tax:'),
                     ),
                     Text(
-                      formatter.format(model.tax),
+                      formatter.format(model!.tax),
                       style: smallAmountStyle,
                     ),
                   ],
@@ -182,14 +183,15 @@ class ShoppingCartSummary extends StatelessWidget {
 
 class ShoppingCartRow extends StatelessWidget {
   const ShoppingCartRow({
-    @required this.product,
-    @required this.quantity,
+    Key? key,
+    required this.product,
+    required this.quantity,
     this.onPressed,
-  });
+  }) : super(key: key);
 
   final Product product;
-  final int quantity;
-  final VoidCallback onPressed;
+  final int? quantity;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -242,7 +244,7 @@ class ShoppingCartRow extends StatelessWidget {
                             ),
                             Text(
                               product.name,
-                              style: localTheme.textTheme.subtitle1.copyWith(fontWeight: FontWeight.w600),
+                              style: localTheme.textTheme.subtitle1!.copyWith(fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),

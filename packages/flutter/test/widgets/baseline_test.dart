@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
@@ -93,10 +91,30 @@ void main() {
     await tester.pump();
     expect(calls, 2);
   });
+
+  testWidgets('LayoutBuilder returns child\'s baseline', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Baseline(
+            baseline: 180.0,
+            baselineType: TextBaseline.alphabetic,
+            child: LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                return BaselineDetector(() {});
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(BaselineDetector)).top, 160.0);
+  });
 }
 
 class BaselineDetector extends LeafRenderObjectWidget {
-  const BaselineDetector(this.callback, { Key key }) : super(key: key);
+  const BaselineDetector(this.callback, { Key? key }) : super(key: key);
 
   final VoidCallback callback;
 
@@ -133,7 +151,7 @@ class RenderBaselineDetector extends RenderBox {
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     if (callback != null)
       callback();
-    return 0.0;
+    return 20.0;
   }
 
   void dirty() {
@@ -141,8 +159,8 @@ class RenderBaselineDetector extends RenderBox {
   }
 
   @override
-  void performResize() {
-    size = constraints.smallest;
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.smallest;
   }
 
   @override

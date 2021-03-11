@@ -10,6 +10,7 @@ import 'package:path/path.dart' as path;
 
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
 Future<String> runFlutterAndQuit(List<String> args, Device device) async {
@@ -17,7 +18,7 @@ Future<String> runFlutterAndQuit(List<String> args, Device device) async {
   print('run: starting...');
   final Process run = await startProcess(
     path.join(flutterDirectory.path, 'bin', 'flutter'),
-    <String>['run', '--suppress-analytics', ...args],
+    <String>['run', '--suppress-analytics', '--no-publish-port', ...args],
     isBot: false, // we just want to test the output, not have any debugging info
   );
   final List<String> stdout = <String>[];

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+// @dart = 2.8
 
 import '../base/common.dart';
 import '../base/utils.dart';
@@ -19,7 +19,7 @@ class EmulatorsCommand extends FlutterCommand {
         help: 'Creates a new Android emulator based on a Pixel device.',
         negatable: false);
     argParser.addOption('name',
-        help: 'Used with flag --create. Specifies a name for the emulator being created.');
+        help: 'Used with the "--create" flag. Specifies a name for the emulator being created.');
   }
 
   @override

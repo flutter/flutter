@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -13,7 +11,7 @@ import '../rendering/mock_canvas.dart';
 
 const double _defaultBorderWidth = 1.0;
 
-Widget boilerplate({Widget child}) {
+Widget boilerplate({required Widget child}) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Center(child: child),
@@ -170,50 +168,6 @@ void main() {
     },
   );
 
-  testWidgets('children property cannot be null', (WidgetTester tester) async {
-    try {
-      await tester.pumpWidget(
-        Material(
-          child: boilerplate(
-            child: ToggleButtons(
-              isSelected: const <bool>[false, true],
-              onPressed: (int index) {},
-              children: null,
-            ),
-          ),
-        ),
-      );
-      fail('Should not be possible to create a toggle button with no children.');
-    } on AssertionError catch (e) {
-      expect(e.toString(), contains('children != null'));
-    }
-  });
-
-  testWidgets(
-    'isSelected property cannot be null',
-    (WidgetTester tester) async {
-      try {
-        await tester.pumpWidget(
-          Material(
-            child: boilerplate(
-              child: ToggleButtons(
-                isSelected: null,
-                onPressed: (int index) {},
-                children: const <Widget>[
-                  Text('First child'),
-                  Text('Second child'),
-                ],
-              ),
-            ),
-          ),
-        );
-        fail('Should not be possible to create a toggle button with no isSelected.');
-      } on AssertionError catch (e) {
-        expect(e.toString(), contains('isSelected != null'));
-      }
-    },
-  );
-
   testWidgets(
     'children and isSelected properties have to be the same length',
     (WidgetTester tester) async {
@@ -262,15 +216,15 @@ void main() {
         of: find.widgetWithText(RawMaterialButton, 'First child'),
         matching: find.byType(DefaultTextStyle),
     )).style;
-    expect(textStyle.fontFamily, theme.textTheme.bodyText2.fontFamily);
-    expect(textStyle.decoration, theme.textTheme.bodyText2.decoration);
+    expect(textStyle.fontFamily, theme.textTheme.bodyText2!.fontFamily);
+    expect(textStyle.decoration, theme.textTheme.bodyText2!.decoration);
 
     textStyle = tester.widget<DefaultTextStyle>(find.descendant(
         of: find.widgetWithText(RawMaterialButton, 'Second child'),
         matching: find.byType(DefaultTextStyle),
     )).style;
-    expect(textStyle.fontFamily, theme.textTheme.bodyText2.fontFamily);
-    expect(textStyle.decoration, theme.textTheme.bodyText2.decoration);
+    expect(textStyle.fontFamily, theme.textTheme.bodyText2!.fontFamily);
+    expect(textStyle.decoration, theme.textTheme.bodyText2!.decoration);
   });
 
   testWidgets('Custom text style except color is applied', (WidgetTester tester) async {
@@ -753,6 +707,7 @@ void main() {
     await hoverGesture.addPointer();
     await hoverGesture.moveTo(center);
     await tester.pumpAndSettle();
+    await hoverGesture.moveTo(Offset.zero);
 
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
       return object.runtimeType.toString() == '_RenderInkFeatures';
@@ -761,7 +716,6 @@ void main() {
       inkFeatures,
       paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.04)),
     );
-    await hoverGesture.removePointer();
 
     // focusColor
     focusNode.requestFocus();
@@ -770,6 +724,8 @@ void main() {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
     expect(inkFeatures, paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.12)));
+
+    await hoverGesture.removePointer();
   });
 
   testWidgets('Default InkWell colors - selected', (WidgetTester tester) async {
@@ -825,7 +781,7 @@ void main() {
       inkFeatures,
       paints..rect(color: theme.colorScheme.primary.withOpacity(0.04)),
     );
-    await hoverGesture.removePointer();
+    await hoverGesture.moveTo(Offset.zero);
 
     // focusColor
     focusNode.requestFocus();
@@ -834,6 +790,8 @@ void main() {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
     expect(inkFeatures, paints..rect(color: theme.colorScheme.primary.withOpacity(0.12)));
+
+    await hoverGesture.removePointer();
   });
 
   testWidgets('Custom InkWell colors', (WidgetTester tester) async {
@@ -894,7 +852,7 @@ void main() {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
     expect(inkFeatures, paints..rect(color: hoverColor));
-    await hoverGesture.removePointer();
+    await hoverGesture.moveTo(Offset.zero);
 
     // focusColor
     focusNode.requestFocus();
@@ -903,6 +861,8 @@ void main() {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
     expect(inkFeatures, paints..rect(color: focusColor));
+
+    await hoverGesture.removePointer();
   });
 
   testWidgets(
@@ -931,13 +891,6 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-          // trailing side
-          ..path(
-            style: PaintingStyle.stroke,
-            color: theme.colorScheme.onSurface.withOpacity(0.12),
-            strokeWidth: defaultBorderWidth,
-          )
-          // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
@@ -965,13 +918,6 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-          // trailing side
-          ..path(
-            style: PaintingStyle.stroke,
-            color: theme.colorScheme.onSurface.withOpacity(0.12),
-            strokeWidth: defaultBorderWidth,
-          )
-          // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
@@ -998,13 +944,6 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-          // trailing side
-          ..path(
-            style: PaintingStyle.stroke,
-            color: theme.colorScheme.onSurface.withOpacity(0.12),
-            strokeWidth: defaultBorderWidth,
-          )
-          // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
@@ -1045,13 +984,6 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-          // trailing side
-          ..path(
-            style: PaintingStyle.stroke,
-            color: borderColor,
-            strokeWidth: customWidth,
-          )
-          // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
             color: borderColor,
@@ -1081,13 +1013,6 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-          // trailing side
-          ..path(
-            style: PaintingStyle.stroke,
-            color: selectedBorderColor,
-            strokeWidth: customWidth,
-          )
-          // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
             color: selectedBorderColor,
@@ -1116,13 +1041,6 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-          // trailing side
-          ..path(
-            style: PaintingStyle.stroke,
-            color: disabledBorderColor,
-            strokeWidth: customWidth,
-          )
-          // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
             color: disabledBorderColor,
@@ -1310,8 +1228,8 @@ void main() {
     final double textDy = tester.getBottomLeft(find.text('Text')).dy;
 
     expect(firstToggleButtonDy, secondToggleButtonDy);
-    expect(firstToggleButtonDy, closeTo(materialButtonDy - 2.0, 0.001));
-    expect(firstToggleButtonDy, closeTo(textDy - 4.0, 0.001));
+    expect(firstToggleButtonDy, moreOrLessEquals(materialButtonDy - 2.0, epsilon: 0.001));
+    expect(firstToggleButtonDy, moreOrLessEquals(textDy - 4.0, epsilon: 0.001));
   });
 
   testWidgets('Directionality test', (WidgetTester tester) async {
@@ -1438,6 +1356,230 @@ void main() {
     },
   );
 
+  testWidgets(
+    'Properly draws borders based on state when direction is vertical and verticalDirection is down.',
+        (WidgetTester tester) async {
+      final ThemeData theme = ThemeData();
+      await tester.pumpWidget(
+        Material(
+          child: boilerplate(
+            child: ToggleButtons(
+              direction: Axis.vertical,
+              verticalDirection: VerticalDirection.down,
+              isSelected: const <bool>[false, true, false],
+              onPressed: (int index) {},
+              children: const <Widget>[
+                Text('First child'),
+                Text('Second child'),
+                Text('Third child'),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // The children should be laid out along vertical and the first child at top.
+      // The item height is icon height + default border width (48.0 + 1.0) pixels.
+      expect(tester.getCenter(find.text('First child')), const Offset(400.0, 251.0));
+      expect(tester.getCenter(find.text('Second child')), const Offset(400.0, 300.0));
+      expect(tester.getCenter(find.text('Third child')), const Offset(400.0, 349.0));
+
+      final List<RenderObject> toggleButtonRenderObject = tester.allRenderObjects.where((RenderObject object) {
+        return object.runtimeType.toString() == '_SelectToggleButtonRenderObject';
+      }).toSet().toList();
+
+      // The first button paints the left, top and right sides with a path.
+      expect(
+        toggleButtonRenderObject[0],
+        paints
+        // left side, top and right - enabled.
+          ..path(
+            style: PaintingStyle.stroke,
+            color: theme.colorScheme.onSurface.withOpacity(0.12),
+            strokeWidth: _defaultBorderWidth,
+          ),
+      );
+
+      // The middle buttons paint a top side path first, followed by a
+      // left and right side path.
+      expect(
+        toggleButtonRenderObject[1],
+        paints
+        // top side - selected.
+          ..path(
+            style: PaintingStyle.stroke,
+            color: theme.colorScheme.onSurface.withOpacity(0.12),
+            strokeWidth: _defaultBorderWidth,
+          )
+        // left and right - selected.
+          ..path(
+            style: PaintingStyle.stroke,
+            color: theme.colorScheme.onSurface.withOpacity(0.12),
+            strokeWidth: _defaultBorderWidth,
+          ),
+      );
+
+      // The last button paints a top side path first, followed by
+      // a left, bottom and right side path
+      expect(
+        toggleButtonRenderObject[2],
+        paints
+        // top side - selected, since previous button is selected.
+          ..path(
+            style: PaintingStyle.stroke,
+            color: theme.colorScheme.onSurface.withOpacity(0.12),
+            strokeWidth: _defaultBorderWidth,
+          )
+        // left side, bottom and right - enabled.
+          ..path(
+            style: PaintingStyle.stroke,
+            color: theme.colorScheme.onSurface.withOpacity(0.12),
+            strokeWidth: _defaultBorderWidth,
+          ),
+      );
+    },
+  );
+
+  testWidgets(
+    'VerticalDirection test when direction is vertical.',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Material(
+          child: boilerplate(
+            child: ToggleButtons(
+              direction: Axis.vertical,
+              verticalDirection: VerticalDirection.up,
+              isSelected: const <bool>[false, true, false],
+              onPressed: (int index) {},
+              children: const <Widget>[
+                Text('First child'),
+                Text('Second child'),
+                Text('Third child'),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // The children should be laid out along vertical and the last child at top.
+      expect(tester.getCenter(find.text('Third child')), const Offset(400.0, 251.0));
+      expect(tester.getCenter(find.text('Second child')), const Offset(400.0, 300.0));
+      expect(tester.getCenter(find.text('First child')), const Offset(400.0, 349.0));
+    },
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/73725
+  testWidgets('Border radius paint test when there is only one button', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: RepaintBoundary(
+            child: ToggleButtons(
+              borderRadius: const BorderRadius.all(Radius.circular(7.0)),
+              isSelected: const <bool>[true],
+              onPressed: (int index) {},
+              children: const <Widget>[
+                Text('First child'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // The only button should be laid out at the center of the screen.
+    expect(tester.getCenter(find.text('First child')), const Offset(400.0, 300.0));
+
+    final List<RenderObject> toggleButtonRenderObject = tester.allRenderObjects.where((RenderObject object) {
+      return object.runtimeType.toString() == '_SelectToggleButtonRenderObject';
+    }).toSet().toList();
+
+    // The first button paints the left, top and right sides with a path.
+    expect(
+      toggleButtonRenderObject[0],
+      paints
+      // left side, top and right - enabled.
+        ..path(
+          style: PaintingStyle.stroke,
+          color: theme.colorScheme.onSurface.withOpacity(0.12),
+          strokeWidth: _defaultBorderWidth,
+        ),
+    );
+
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('toggle_buttons.oneButton.boardsPaint.png'),
+    );
+  });
+
+  testWidgets('Border radius paint test when Radius.x or Radius.y equal 0.0', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: RepaintBoundary(
+            child: ToggleButtons(
+              borderRadius: const BorderRadius.only(
+                topRight: Radius.elliptical(10, 0),
+                topLeft: Radius.elliptical(0, 10),
+                bottomRight: Radius.elliptical(0, 10),
+                bottomLeft: Radius.elliptical(10, 0),
+              ),
+              isSelected: const <bool>[true],
+              onPressed: (int index) {},
+              children: const <Widget>[
+                Text('First child'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('toggle_buttons.oneButton.boardsPaint2.png'),
+    );
+  });
+
+  testWidgets('ToggleButtons implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+
+    ToggleButtons(
+      direction: Axis.vertical,
+      verticalDirection: VerticalDirection.up,
+      borderWidth: 3.0,
+      color: Colors.green,
+      selectedBorderColor: Colors.pink,
+      disabledColor: Colors.blue,
+      disabledBorderColor: Colors.yellow,
+      borderRadius: const BorderRadius.all(Radius.circular(7.0)),
+      isSelected: const <bool>[false, true, false],
+      onPressed: (int index) {},
+      children: const <Widget>[
+        Text('First child'),
+        Text('Second child'),
+        Text('Third child'),
+      ],
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString()).toList();
+
+    expect(description, <String>[
+      'Buttons are enabled',
+      'color: MaterialColor(primary value: Color(0xff4caf50))',
+      'disabledColor: MaterialColor(primary value: Color(0xff2196f3))',
+      'selectedBorderColor: MaterialColor(primary value: Color(0xffe91e63))',
+      'disabledBorderColor: MaterialColor(primary value: Color(0xffffeb3b))',
+      'borderRadius: BorderRadius.circular(7.0)',
+      'borderWidth: 3.0',
+      'direction: Axis.vertical',
+      'verticalDirection: VerticalDirection.up'
+    ]);
+  });
+
   testWidgets('ToggleButtons changes mouse cursor when the button is hovered', (WidgetTester tester) async {
     await tester.pumpWidget(
       Material(
@@ -1464,7 +1606,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -1485,7 +1627,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test default cursor when disabled
     await tester.pumpWidget(
@@ -1505,6 +1647,54 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+  });
+
+  testWidgets('ToggleButtons focus, hover, and highlight elevations are 0', (WidgetTester tester) async {
+    final List<FocusNode> focusNodes = <FocusNode>[FocusNode(), FocusNode()];
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            isSelected: const <bool>[true, false],
+            onPressed: (int index) { },
+            focusNodes: focusNodes,
+            children: const <Widget>[Text('one'), Text('two')],
+          ),
+        ),
+      ),
+    );
+
+    double toggleButtonElevation(String text) {
+      return tester.widget<Material>(find.widgetWithText(Material, text).first).elevation;
+    }
+
+    // Default toggle button elevation
+    expect(toggleButtonElevation('one'), 0); // highlighted
+    expect(toggleButtonElevation('two'), 0); // not highlighted
+
+    // Hovered button elevation
+    final TestGesture hoverGesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await hoverGesture.addPointer();
+    await hoverGesture.moveTo(tester.getCenter(find.text('one')));
+    await tester.pumpAndSettle();
+    expect(toggleButtonElevation('one'), 0);
+    await hoverGesture.moveTo(tester.getCenter(find.text('two')));
+    await tester.pumpAndSettle();
+    expect(toggleButtonElevation('two'), 0);
+
+    // Focused button elevation
+    focusNodes[0].requestFocus();
+    await tester.pumpAndSettle();
+    expect(focusNodes[0].hasFocus, isTrue);
+    expect(focusNodes[1].hasFocus, isFalse);
+    expect(toggleButtonElevation('one'), 0);
+    focusNodes[1].requestFocus();
+    await tester.pumpAndSettle();
+    expect(focusNodes[0].hasFocus, isFalse);
+    expect(focusNodes[1].hasFocus, isTrue);
+    expect(toggleButtonElevation('two'), 0);
+
+    await hoverGesture.removePointer();
   });
 }

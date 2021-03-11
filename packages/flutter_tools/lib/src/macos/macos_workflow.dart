@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import '../base/platform.dart';
@@ -10,9 +12,6 @@ import '../features.dart';
 
 
 /// The macOS-specific implementation of a [Workflow].
-///
-/// This workflow requires the flutter-desktop-embedding as a sibling
-/// repository to the flutter repo.
 class MacOSWorkflow implements Workflow {
   const MacOSWorkflow({
     @required Platform platform,

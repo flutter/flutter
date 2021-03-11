@@ -2,12 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
-import 'package:flutter/painting.dart';
 import 'package:flutter/foundation.dart';
 
 import 'object.dart';
@@ -25,11 +22,11 @@ enum _OverflowSide {
 // the indicators.
 class _OverflowRegionData {
   const _OverflowRegionData({
-    this.rect,
+    required this.rect,
     this.label = '',
     this.labelOffset = Offset.zero,
     this.rotation = 0.0,
-    this.side,
+    required this.side,
   });
 
   final Rect rect;
@@ -56,20 +53,20 @@ class _OverflowRegionData {
 /// ```dart
 /// class MyRenderObject extends RenderAligningShiftedBox with DebugOverflowIndicatorMixin {
 ///   MyRenderObject({
-///     AlignmentGeometry alignment,
-///     TextDirection textDirection,
-///     RenderBox child,
+///     AlignmentGeometry alignment = Alignment.center,
+///     TextDirection? textDirection,
+///     RenderBox? child,
 ///   }) : super.mixin(alignment, textDirection, child);
 ///
-///   Rect _containerRect;
-///   Rect _childRect;
+///   late Rect _containerRect;
+///   late Rect _childRect;
 ///
 ///   @override
 ///   void performLayout() {
 ///     // ...
-///     final BoxParentData childParentData = child.parentData;
+///     final BoxParentData childParentData = child!.parentData! as BoxParentData;
 ///     _containerRect = Offset.zero & size;
-///     _childRect = childParentData.offset & child.size;
+///     _childRect = childParentData.offset & child!.size;
 ///   }
 ///
 ///   @override
@@ -103,7 +100,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
   );
   static final Paint _indicatorPaint = Paint()
     ..shader = ui.Gradient.linear(
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(10.0, 10.0),
       <Color>[_black, _yellow, _yellow, _black],
       <double>[0.25, 0.25, 0.75, 0.75],
@@ -122,7 +119,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
 
   String _formatPixels(double value) {
     assert(value > 0.0);
-    String pixels;
+    final String pixels;
     if (value > 10.0) {
       pixels = value.toStringAsFixed(0);
     } else if (value > 1.0) {
@@ -201,7 +198,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     return regions;
   }
 
-  void _reportOverflow(RelativeRect overflow, List<DiagnosticsNode> overflowHints) {
+  void _reportOverflow(RelativeRect overflow, List<DiagnosticsNode>? overflowHints) {
     overflowHints ??= <DiagnosticsNode>[];
     if (overflowHints.isEmpty) {
       overflowHints.add(ErrorDescription(
@@ -248,8 +245,8 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
         context: ErrorDescription('during layout'),
         informationCollector: () sync* {
           if (debugCreator != null)
-            yield DiagnosticsDebugCreator(debugCreator);
-          yield* overflowHints;
+            yield DiagnosticsDebugCreator(debugCreator!);
+          yield* overflowHints!;
           yield describeForError('The specific $runtimeType in question is');
           // TODO(jacobr): this line is ascii art that it would be nice to
           // handle a little more generically in GUI debugging clients in the
@@ -271,7 +268,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     Offset offset,
     Rect containerRect,
     Rect childRect, {
-    List<DiagnosticsNode> overflowHints,
+    List<DiagnosticsNode>? overflowHints,
   }) {
     final RelativeRect overflow = RelativeRect.fromRect(containerRect, childRect);
 
@@ -285,7 +282,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     final List<_OverflowRegionData> overflowRegions = _calculateOverflowRegions(overflow, containerRect);
     for (final _OverflowRegionData region in overflowRegions) {
       context.canvas.drawRect(region.rect.shift(offset), _indicatorPaint);
-      final TextSpan textSpan = _indicatorLabel[region.side.index].text as TextSpan;
+      final TextSpan? textSpan = _indicatorLabel[region.side.index].text as TextSpan?;
       if (textSpan?.text != region.label) {
         _indicatorLabel[region.side.index].text = TextSpan(
           text: region.label,

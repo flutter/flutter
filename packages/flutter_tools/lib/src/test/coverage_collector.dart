@@ -2,33 +2,35 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+// @dart = 2.8
 
 import 'package:coverage/coverage.dart' as coverage;
+import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
-import '../dart/package_map.dart';
 import '../globals.dart' as globals;
 import '../vmservice.dart';
 
+import 'test_device.dart';
 import 'watcher.dart';
 
 /// A class that's used to collect coverage data during tests.
 class CoverageCollector extends TestWatcher {
-  CoverageCollector({this.libraryPredicate, this.verbose = true});
+  CoverageCollector({this.libraryPredicate, this.verbose = true, @required this.packagesPath});
 
   final bool verbose;
+  final String packagesPath;
   Map<String, Map<int, int>> _globalHitmap;
   bool Function(String) libraryPredicate;
 
   @override
-  Future<void> handleFinishedTest(ProcessEvent event) async {
-    _logMessage('test ${event.childIndex}: collecting coverage');
-    await collectCoverage(event.process, event.observatoryUri);
+  Future<void> handleFinishedTest(TestDevice testDevice) async {
+    _logMessage('Starting coverage collection');
+    await collectCoverage(testDevice);
   }
 
   void _logMessage(String line, { bool error = false }) {
@@ -68,7 +70,7 @@ class CoverageCollector extends TestWatcher {
     _logMessage('($observatoryUri): collected coverage data; merging...');
     _addHitmap(await coverage.createHitmap(
       data['coverage'] as List<Map<String, dynamic>>,
-      packagesPath: globalPackagesPath,
+      packagesPath: packagesPath,
       checkIgnoredLines: true,
     ));
     _logMessage('($observatoryUri): done merging coverage data into global coverage map.');
@@ -80,34 +82,41 @@ class CoverageCollector extends TestWatcher {
   /// has been run to completion so that all coverage data has been recorded.
   ///
   /// The returned [Future] completes when the coverage is collected.
-  Future<void> collectCoverage(Process process, Uri observatoryUri) async {
-    assert(process != null);
-    assert(observatoryUri != null);
-    final int pid = process.pid;
-    _logMessage('pid $pid: collecting coverage data from $observatoryUri...');
+  Future<void> collectCoverage(TestDevice testDevice) async {
+    assert(testDevice != null);
 
     Map<String, dynamic> data;
-    final Future<void> processComplete = process.exitCode
-      .then<void>((int code) {
-        throw Exception('Failed to collect coverage, process terminated prematurely with exit code $code.');
+
+    final Future<void> processComplete = testDevice.finished.catchError(
+      (Object error) => throw Exception(
+          'Failed to collect coverage, test device terminated prematurely with '
+          'error: ${(error as TestDeviceException).message}.'),
+      test: (Object error) => error is TestDeviceException,
+    );
+
+    final Future<void> collectionComplete = testDevice.observatoryUri
+      .then((Uri observatoryUri) {
+        _logMessage('collecting coverage data from $testDevice at $observatoryUri...');
+        return collect(observatoryUri, libraryPredicate)
+          .then<void>((Map<String, dynamic> result) {
+            if (result == null) {
+              throw Exception('Failed to collect coverage.');
+            }
+            _logMessage('Collected coverage data.');
+            data = result;
+          });
       });
-    final Future<void> collectionComplete = collect(observatoryUri, libraryPredicate)
-      .then<void>((Map<String, dynamic> result) {
-        if (result == null) {
-          throw Exception('Failed to collect coverage.');
-        }
-        data = result;
-      });
+
     await Future.any<void>(<Future<void>>[ processComplete, collectionComplete ]);
     assert(data != null);
 
-    _logMessage('pid $pid ($observatoryUri): collected coverage data; merging...');
+    _logMessage('Merging coverage data...');
     _addHitmap(await coverage.createHitmap(
       data['coverage'] as List<Map<String, dynamic>>,
-      packagesPath: globalPackagesPath,
+      packagesPath: packagesPath,
       checkIgnoredLines: true,
     ));
-    _logMessage('pid $pid ($observatoryUri): done merging coverage data into global coverage map.');
+    _logMessage('Done merging coverage data into global coverage map.');
   }
 
   /// Returns a future that will complete with the formatted coverage data
@@ -123,7 +132,7 @@ class CoverageCollector extends TestWatcher {
       return null;
     }
     if (formatter == null) {
-      final coverage.Resolver resolver = coverage.Resolver(packagesPath: globalPackagesPath);
+      final coverage.Resolver resolver = coverage.Resolver(packagesPath: packagesPath);
       final String packagePath = globals.fs.currentDirectory.path;
       final List<String> reportOn = coverageDirectory == null
         ? <String>[globals.fs.path.join(packagePath, 'lib')]
@@ -170,7 +179,7 @@ class CoverageCollector extends TestWatcher {
       final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_test_coverage.');
       try {
         final File sourceFile = coverageFile.copySync(globals.fs.path.join(tempDir.path, 'lcov.source.info'));
-        final RunResult result = processUtils.runSync(<String>[
+        final RunResult result = globals.processUtils.runSync(<String>[
           'lcov',
           '--add-tracefile', baseCoverageData,
           '--add-tracefile', sourceFile.path,
@@ -187,13 +196,13 @@ class CoverageCollector extends TestWatcher {
   }
 
   @override
-  Future<void> handleTestCrashed(ProcessEvent event) async { }
+  Future<void> handleTestCrashed(TestDevice testDevice) async { }
 
   @override
-  Future<void> handleTestTimedOut(ProcessEvent event) async { }
+  Future<void> handleTestTimedOut(TestDevice testDevice) async { }
 }
 
-Future<vm_service.VmService> _defaultConnect(Uri serviceUri) {
+Future<FlutterVmService> _defaultConnect(Uri serviceUri) {
   return connectToVmService(
       serviceUri, compression: CompressionOptions.compressionOff);
 }
@@ -201,12 +210,11 @@ Future<vm_service.VmService> _defaultConnect(Uri serviceUri) {
 Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libraryPredicate, {
   bool waitPaused = false,
   String debugName,
-  Future<vm_service.VmService> Function(Uri) connector = _defaultConnect,
+  Future<FlutterVmService> Function(Uri) connector = _defaultConnect,
 }) async {
-  final vm_service.VmService vmService = await connector(serviceUri);
-  final Map<String, dynamic> result = await _getAllCoverage(
-      vmService, libraryPredicate);
-  vmService.dispose();
+  final FlutterVmService vmService = await connector(serviceUri);
+  final Map<String, dynamic> result = await _getAllCoverage(vmService.service, libraryPredicate);
+  await vmService.dispose();
   return result;
 }
 
@@ -281,7 +289,7 @@ void _buildCoverageMap(
       final List<int> hits = (coverage['hits'] as List<dynamic>).cast<int>();
       final List<int> misses = (coverage['misses'] as List<dynamic>).cast<int>();
       final List<dynamic> tokenPositions = scripts[scriptRef['id']]['tokenPosTable'] as List<dynamic>;
-      // The token positions can be null if the script has no coverable lines.
+      // The token positions can be null if the script has no lines that may be covered.
       if (tokenPositions == null) {
         continue;
       }

@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 import '../rendering/src/sector_layout.dart';
 
@@ -17,6 +16,8 @@ RenderBoxToRenderSectorAdapter initCircle() {
 }
 
 class SectorApp extends StatefulWidget {
+  const SectorApp({Key? key}) : super(key: key);
+
   @override
   SectorAppState createState() => SectorAppState();
 }
@@ -54,9 +55,9 @@ class SectorAppState extends State<SectorApp> {
     int index = 0;
     while (index < actualSectorSizes.length && index < wantedSectorSizes.length && actualSectorSizes[index] == wantedSectorSizes[index])
       index += 1;
-    final RenderSectorRing ring = sectors.child as RenderSectorRing;
+    final RenderSectorRing ring = sectors.child! as RenderSectorRing;
     while (index < actualSectorSizes.length) {
-      ring.remove(ring.lastChild);
+      ring.remove(ring.lastChild!);
       actualSectorSizes.removeLast();
     }
     while (index < wantedSectorSizes.length) {
@@ -164,5 +165,5 @@ class SectorAppState extends State<SectorApp> {
 }
 
 void main() {
-  runApp(SectorApp());
+  runApp(const SectorApp());
 }

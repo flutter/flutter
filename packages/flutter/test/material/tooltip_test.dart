@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui';
 
 import 'package:flutter/services.dart';
@@ -11,7 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
@@ -233,7 +230,7 @@ void main() {
                         key: key,
                         message: tooltipText,
                         height: 100.0,
-                        padding: const EdgeInsets.all(0.0),
+                        padding: EdgeInsets.zero,
                         verticalOffset: 100.0,
                         preferBelow: false,
                         child: const SizedBox(
@@ -289,7 +286,7 @@ void main() {
                         key: key,
                         message: tooltipText,
                         height: 190.0,
-                        padding: const EdgeInsets.all(0.0),
+                        padding: EdgeInsets.zero,
                         verticalOffset: 100.0,
                         preferBelow: false,
                         child: const SizedBox(
@@ -356,7 +353,7 @@ void main() {
                         key: key,
                         message: tooltipText,
                         height: 190.0,
-                        padding: const EdgeInsets.all(0.0),
+                        padding: EdgeInsets.zero,
                         verticalOffset: 100.0,
                         preferBelow: true,
                         child: const SizedBox(
@@ -411,7 +408,7 @@ void main() {
                         key: key,
                         message: tooltipText,
                         height: 10.0,
-                        padding: const EdgeInsets.all(0.0),
+                        padding: EdgeInsets.zero,
                         verticalOffset: 10.0,
                         preferBelow: true,
                         child: const SizedBox(
@@ -468,7 +465,7 @@ void main() {
                         key: key,
                         message: tooltipText,
                         height: 10.0,
-                        padding: const EdgeInsets.all(0.0),
+                        padding: EdgeInsets.zero,
                         verticalOffset: 10.0,
                         preferBelow: true,
                         child: const SizedBox(
@@ -520,7 +517,7 @@ void main() {
                 return Tooltip(
                   key: key,
                   message: tooltipText,
-                  padding: const EdgeInsets.all(0.0),
+                  padding: EdgeInsets.zero,
                   margin: const EdgeInsets.all(_customMarginValue),
                   child: const SizedBox(
                     width: 0.0,
@@ -581,7 +578,7 @@ void main() {
     (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style;
+    final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style!;
     expect(textStyle.color, Colors.white);
     expect(textStyle.fontFamily, 'Roboto');
     expect(textStyle.decoration, TextDecoration.none);
@@ -607,7 +604,7 @@ void main() {
     (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style;
+    final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style!;
     expect(textStyle.color, Colors.black);
     expect(textStyle.fontFamily, 'Roboto');
     expect(textStyle.decoration, TextDecoration.none);
@@ -634,7 +631,7 @@ void main() {
     (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style;
+    final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style!;
     expect(textStyle.color, Colors.orange);
     expect(textStyle.fontFamily, null);
     expect(textStyle.decoration, TextDecoration.underline);
@@ -743,6 +740,38 @@ void main() {
     ));
   });
 
+  testWidgets('Tooltip default size, shape, and color test for Desktop', (WidgetTester tester) async {
+    // Regressing test for https://github.com/flutter/flutter/issues/68601
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Tooltip(
+          key: key,
+          message: tooltipText,
+          child: const SizedBox(
+            width: 0.0,
+            height: 0.0,
+          ),
+        ),
+      ),
+    );
+    (key.currentState as dynamic).ensureTooltipVisible();
+    await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+    final RenderParagraph tooltipRenderParagraph = tester.renderObject<RenderParagraph>(find.text(tooltipText));
+    expect(tooltipRenderParagraph.textSize.height, equals(10.0));
+
+    final RenderBox tip = tester.renderObject(
+      _findTooltipContainer(tooltipText),
+    );
+    expect(tip.size.height, equals(24.0));
+    expect(tip.size.width, equals(46.0));
+    expect(tip, paints..rrect(
+      rrect: RRect.fromRectAndRadius(tip.paintBounds, const Radius.circular(4.0)),
+      color: const Color(0xe6616161),
+    ));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.windows}));
+
   testWidgets('Can tooltip decoration be customized', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     const Decoration customDecoration = ShapeDecoration(
@@ -832,8 +861,8 @@ void main() {
   });
 
   testWidgets('Tooltip shows/hides when hovered', (WidgetTester tester) async {
-    const Duration waitDuration = Duration(milliseconds: 0);
-    TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    const Duration waitDuration = Duration.zero;
+    TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
       if (gesture != null)
         return gesture.removePointer();
@@ -1013,7 +1042,7 @@ void main() {
   });
 
   testWidgets('Tooltip text scales with textScaleFactor', (WidgetTester tester) async {
-    Widget buildApp(String text, { double textScaleFactor }) {
+    Widget buildApp(String text, { required double textScaleFactor }) {
       return MediaQuery(
         data: MediaQueryData(textScaleFactor: textScaleFactor),
         child: Directionality(
@@ -1254,6 +1283,6 @@ void main() {
 
 SemanticsNode findDebugSemantics(RenderObject object) {
   if (object.debugSemantics != null)
-    return object.debugSemantics;
-  return findDebugSemantics(object.parent as RenderObject);
+    return object.debugSemantics!;
+  return findDebugSemantics(object.parent! as RenderObject);
 }

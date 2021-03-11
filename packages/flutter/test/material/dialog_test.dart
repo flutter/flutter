@@ -2,18 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:matcher/matcher.dart';
 
 import '../widgets/semantics_tester.dart';
 
-MaterialApp _buildAppWithDialog(Widget dialog, { ThemeData theme, double textScaleFactor = 1.0 }) {
+MaterialApp _buildAppWithDialog(Widget dialog, { ThemeData? theme, double textScaleFactor = 1.0 }) {
   return MaterialApp(
     theme: theme,
     home: Material(
@@ -42,11 +39,18 @@ MaterialApp _buildAppWithDialog(Widget dialog, { ThemeData theme, double textSca
 }
 
 Material _getMaterialFromDialog(WidgetTester tester) {
-  return tester.widget<Material>(find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
+  return tester.widget<Material>(find.descendant(of: find.byType(Dialog), matching: find.byType(Material)));
 }
 
 RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text) {
-  return tester.element<StatelessElement>(find.descendant(of: find.byType(AlertDialog), matching: find.text(text))).renderObject as RenderParagraph;
+  return tester.element<StatelessElement>(find.descendant(of: find.byType(Dialog), matching: find.text(text))).renderObject! as RenderParagraph;
+}
+
+// What was the AlertDialog's ButtonBar when many of these tests were written,
+// is now a Container with an OverflowBar child. The Container's size and location
+// match the original ButtonBar's size and location.
+Finder _findButtonBar() {
+  return find.ancestor(of: find.byType(OverflowBar), matching: find.byType(Container)).first;
 }
 
 const ShapeBorder _defaultDialogShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
@@ -160,9 +164,23 @@ void main() {
     expect(content.text.style, contentTextStyle);
   });
 
-  testWidgets('Custom clipBehavior', (WidgetTester tester) async {
+  testWidgets('AlertDialog custom clipBehavior', (WidgetTester tester) async {
     const AlertDialog dialog = AlertDialog(
       actions: <Widget>[],
+      clipBehavior: Clip.antiAlias,
+    );
+    await tester.pumpWidget(_buildAppWithDialog(dialog));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Material materialWidget = _getMaterialFromDialog(tester);
+    expect(materialWidget.clipBehavior, Clip.antiAlias);
+  });
+
+  testWidgets('SimpleDialog custom clipBehavior', (WidgetTester tester) async {
+    const SimpleDialog dialog = SimpleDialog(
+      children: <Widget>[],
       clipBehavior: Clip.antiAlias,
     );
     await tester.pumpWidget(_buildAppWithDialog(dialog));
@@ -235,7 +253,7 @@ void main() {
 
     final BuildContext context = tester.element(find.text('Go'));
 
-    final Future<int> result = showDialog<int>(
+    final Future<int?> result = showDialog<int>(
       context: context,
       builder: (BuildContext context) {
         return SimpleDialog(
@@ -275,8 +293,8 @@ void main() {
       ),
     );
 
-    final Future<int> result = showDialog<int>(
-      context: navigator.currentContext,
+    final Future<int?> result = showDialog<int>(
+      context: navigator.currentContext!,
       builder: (BuildContext context) {
         return SimpleDialog(
           title: const Text('Title'),
@@ -484,7 +502,7 @@ void main() {
         matching: find.byType(Material),
       ).first,
     );
-    final Size actionsSize = tester.getSize(find.byType(ButtonBar));
+    final Size actionsSize = tester.getSize(_findButtonBar());
 
     expect(actionsSize.width, dialogSize.width);
   });
@@ -518,7 +536,7 @@ void main() {
         matching: find.byType(Material),
       ).first,
     );
-    final Size actionsSize = tester.getSize(find.byType(ButtonBar));
+    final Size actionsSize = tester.getSize(_findButtonBar());
 
     expect(actionsSize.width, dialogSize.width - (30.0 * 2));
   });
@@ -561,25 +579,25 @@ void main() {
     // First button
     expect(
       tester.getTopRight(find.byKey(key1)).dy,
-      tester.getTopRight(find.byType(ButtonBar)).dy + 8.0,
+      tester.getTopRight(_findButtonBar()).dy + 8.0,
     ); // top
     expect(
       tester.getBottomRight(find.byKey(key1)).dy,
-      tester.getBottomRight(find.byType(ButtonBar)).dy - 8.0,
+      tester.getBottomRight(_findButtonBar()).dy - 8.0,
     ); // bottom
 
     // Second button
     expect(
       tester.getTopRight(find.byKey(key2)).dy,
-      tester.getTopRight(find.byType(ButtonBar)).dy + 8.0,
+      tester.getTopRight(_findButtonBar()).dy + 8.0,
     ); // top
     expect(
       tester.getBottomRight(find.byKey(key2)).dy,
-      tester.getBottomRight(find.byType(ButtonBar)).dy - 8.0,
+      tester.getBottomRight(_findButtonBar()).dy - 8.0,
     ); // bottom
     expect(
       tester.getBottomRight(find.byKey(key2)).dx,
-      tester.getBottomRight(find.byType(ButtonBar)).dx - 8.0,
+      tester.getBottomRight(_findButtonBar()).dx - 8.0,
     ); // right
   });
 
@@ -625,25 +643,25 @@ void main() {
     // First button
     expect(
       tester.getTopRight(find.byKey(key1)).dy,
-      tester.getTopRight(find.byType(ButtonBar)).dy + ((10.0 + 20.0) / 2),
+      tester.getTopRight(_findButtonBar()).dy + ((10.0 + 20.0) / 2),
     ); // top
     expect(
       tester.getBottomRight(find.byKey(key1)).dy,
-      tester.getBottomRight(find.byType(ButtonBar)).dy - ((10.0 + 20.0) / 2),
+      tester.getBottomRight(_findButtonBar()).dy - ((10.0 + 20.0) / 2),
     ); // bottom
 
     // Second button
     expect(
       tester.getTopRight(find.byKey(key2)).dy,
-      tester.getTopRight(find.byType(ButtonBar)).dy + ((10.0 + 20.0) / 2),
+      tester.getTopRight(_findButtonBar()).dy + ((10.0 + 20.0) / 2),
     ); // top
     expect(
       tester.getBottomRight(find.byKey(key2)).dy,
-      tester.getBottomRight(find.byType(ButtonBar)).dy - ((10.0 + 20.0) / 2),
+      tester.getBottomRight(_findButtonBar()).dy - ((10.0 + 20.0) / 2),
     ); // bottom
     expect(
       tester.getBottomRight(find.byKey(key2)).dx,
-      tester.getBottomRight(find.byType(ButtonBar)).dx - ((10.0 + 20.0) / 2),
+      tester.getBottomRight(_findButtonBar()).dx - ((10.0 + 20.0) / 2),
     ); // right
   });
 
@@ -664,7 +682,7 @@ void main() {
     final Finder dialogFinder = find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first;
     final Finder titleFinder = find.byKey(titleKey);
     final Finder contentFinder = find.byKey(contentKey);
-    final Finder actionsFinder = find.byType(ButtonBar);
+    final Finder actionsFinder = _findButtonBar();
     final Finder childrenFinder = find.byKey(childrenKey);
 
     Future<void> openDialog(WidgetTester tester, Widget dialog, double textScaleFactor) async {
@@ -678,73 +696,73 @@ void main() {
 
     void expectLeftEdgePadding(
       WidgetTester tester, {
-      Finder finder,
-      double textScaleFactor,
-      double unscaledValue,
+      required Finder finder,
+      required double textScaleFactor,
+      required double unscaledValue,
     }) {
       expect(
         tester.getTopLeft(dialogFinder).dx,
-        closeTo(tester.getTopLeft(finder).dx - unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getTopLeft(finder).dx - unscaledValue * paddingScaleFactors[textScaleFactor]!),
       );
       expect(
         tester.getBottomLeft(dialogFinder).dx,
-        closeTo(tester.getBottomLeft(finder).dx - unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getBottomLeft(finder).dx - unscaledValue * paddingScaleFactors[textScaleFactor]!),
       );
     }
 
     void expectRightEdgePadding(
       WidgetTester tester, {
-      Finder finder,
-      double textScaleFactor,
-      double unscaledValue,
+      required Finder finder,
+      required double textScaleFactor,
+      required double unscaledValue,
     }) {
       expect(
         tester.getTopRight(dialogFinder).dx,
-        closeTo(tester.getTopRight(finder).dx + unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getTopRight(finder).dx + unscaledValue * paddingScaleFactors[textScaleFactor]!),
       );
       expect(
         tester.getBottomRight(dialogFinder).dx,
-        closeTo(tester.getBottomRight(finder).dx + unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getBottomRight(finder).dx + unscaledValue * paddingScaleFactors[textScaleFactor]!),
       );
     }
 
     void expectTopEdgePadding(
       WidgetTester tester, {
-      Finder finder,
-      double textScaleFactor,
-      double unscaledValue,
+      required Finder finder,
+      required double textScaleFactor,
+      required double unscaledValue,
     }) {
       expect(
         tester.getTopLeft(dialogFinder).dy,
-        closeTo(tester.getTopLeft(finder).dy - unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getTopLeft(finder).dy - unscaledValue * paddingScaleFactors[textScaleFactor]!),
       );
       expect(
         tester.getTopRight(dialogFinder).dy,
-        closeTo(tester.getTopRight(finder).dy - unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getTopRight(finder).dy - unscaledValue * paddingScaleFactors[textScaleFactor]!),
       );
     }
 
     void expectBottomEdgePadding(
       WidgetTester tester, {
-      Finder finder,
-      double textScaleFactor,
-      double unscaledValue,
+      required Finder finder,
+      required double textScaleFactor,
+      required double unscaledValue,
     }) {
       expect(
         tester.getBottomLeft(dialogFinder).dy,
-        closeTo(tester.getBottomRight(finder).dy + unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getBottomRight(finder).dy + unscaledValue * paddingScaleFactors[textScaleFactor]!),
       );
       expect(
         tester.getBottomRight(dialogFinder).dy,
-        closeTo(tester.getBottomRight(finder).dy + unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getBottomRight(finder).dy + unscaledValue * paddingScaleFactors[textScaleFactor]!),
       );
     }
 
     void expectVerticalInnerPadding(
     WidgetTester tester, {
-      Finder top,
-      Finder bottom,
-      double value,
+      required Finder top,
+      required Finder bottom,
+      required double value,
     }) {
       expect(
         tester.getBottomLeft(top).dy,
@@ -1144,9 +1162,9 @@ void main() {
   });
 
   testWidgets('Dialogs removes MediaQuery padding and view insets', (WidgetTester tester) async {
-    BuildContext outerContext;
-    BuildContext routeContext;
-    BuildContext dialogContext;
+    late BuildContext outerContext;
+    late BuildContext routeContext;
+    late BuildContext dialogContext;
 
     await tester.pumpWidget(Localizations(
       locale: const Locale('en', 'US'),
@@ -1216,7 +1234,7 @@ void main() {
     await tester.pumpWidget(
       const MediaQuery(
         data: MediaQueryData(
-          viewInsets: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
+          viewInsets: EdgeInsets.zero,
         ),
         child: Dialog(
           child: Placeholder(),
@@ -1242,7 +1260,7 @@ void main() {
     await tester.pumpWidget(
       const MediaQuery(
         data: MediaQueryData(
-          viewInsets: EdgeInsets.all(0.0),
+          viewInsets: EdgeInsets.zero,
         ),
         child: Dialog(
           child: Placeholder(),
@@ -1257,7 +1275,7 @@ void main() {
     await tester.pumpWidget(
       const MediaQuery(
         data: MediaQueryData(
-          viewInsets: EdgeInsets.all(0.0),
+          viewInsets: EdgeInsets.zero,
         ),
         child: Dialog(
           insetPadding: EdgeInsets.fromLTRB(10.0, 20.0, 30.0, 40.0),
@@ -1275,10 +1293,12 @@ void main() {
         ));
   });
 
-  testWidgets('Dialog widget contains route semantics from title', (WidgetTester tester) async {
+  testWidgets('AlertDialog widget contains route semantics from title for iOS', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
+
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
         home: Material(
           child: Builder(
             builder: (BuildContext context) {
@@ -1321,14 +1341,112 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('AlertDialog widget always contains alert route semantics for android', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.android),
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return Center(
+                child: ElevatedButton(
+                  child: const Text('X'),
+                  onPressed: () {
+                    showDialog<void>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return const AlertDialog(
+                          title: Text('Title'),
+                          content: Text('Y'),
+                          actions: <Widget>[],
+                        );
+                      },
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, isNot(includesNodeWith(
+      label: 'Title',
+      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+    )));
+    expect(semantics, isNot(includesNodeWith(
+      label: 'Alert',
+      flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
+    )));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+    // It does not use 'Title' as route semantics
+    expect(semantics, isNot(includesNodeWith(
+      label: 'Title',
+      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+    )));
+    expect(semantics, includesNodeWith(
+      label: 'Alert',
+      flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
+    ));
+
+    semantics.dispose();
+  });
+
+  testWidgets('SimpleDialog does not introduce additional node', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.android),
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return Center(
+                child: ElevatedButton(
+                  child: const Text('X'),
+                  onPressed: () {
+                    showDialog<void>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return const SimpleDialog(
+                          title: Text('Title'),
+                          semanticLabel: 'label',
+                        );
+                      },
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+    // A scope route is not focusable in accessibility service.
+    expect(semantics, includesNodeWith(
+      label: 'label',
+      flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
+    ));
+
+    semantics.dispose();
+  });
+
   testWidgets('Dismissible.confirmDismiss defers to an AlertDialog', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
     final List<int> dismissedItems = <int>[];
 
     // Dismiss is confirmed IFF confirmDismiss() returns true.
-    Future<bool> confirmDismiss (DismissDirection dismissDirection) {
+    Future<bool?> confirmDismiss (DismissDirection dismissDirection) async {
       return showDialog<bool>(
-        context: _scaffoldKey.currentContext,
+        context: _scaffoldKey.currentContext!,
         barrierDismissible: true, // showDialog() returns null if tapped outside the dialog
         builder: (BuildContext context) {
           return AlertDialog(
@@ -1493,11 +1611,11 @@ void main() {
   testWidgets('showDialog safe area', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        builder: (BuildContext context, Widget child) {
+        builder: (BuildContext context, Widget? child) {
           return MediaQuery(
             // Set up the safe area to be 20 pixels in from each side
             data: const MediaQueryData(padding: EdgeInsets.all(20.0)),
-            child: child,
+            child: child!,
           );
         },
         home: const Center(child: Text('Test')),
@@ -1527,7 +1645,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     // Should take up the whole screen
-    expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(0.0, 0.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)), Offset.zero);
     expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
   });
 
@@ -1683,13 +1801,13 @@ void main() {
   });
 
   testWidgets('Dialog with RouteSettings', (WidgetTester tester) async {
-    RouteSettings currentRouteSetting;
+    late RouteSettings currentRouteSetting;
 
     await tester.pumpWidget(
       MaterialApp(
         navigatorObservers: <NavigatorObserver>[
           _ClosureNavigatorObserver(onDidChange: (Route<dynamic> newRoute) {
-            currentRouteSetting = newRoute?.settings;
+            currentRouteSetting = newRoute.settings;
           })
         ],
         home: const Material(
@@ -1706,7 +1824,7 @@ void main() {
     final BuildContext context = tester.element(find.text('Go'));
     const RouteSettings exampleSetting = RouteSettings(name: 'simple');
 
-    final Future<int> result = showDialog<int>(
+    final Future<int?> result = showDialog<int>(
       context: context,
       builder: (BuildContext context) {
         return SimpleDialog(
@@ -1733,16 +1851,108 @@ void main() {
 
     expect(await result, isNull);
     await tester.pumpAndSettle();
-    expect(currentRouteSetting?.name, '/');
+    expect(currentRouteSetting.name, '/');
   });
+
+  testWidgets('showDialog - custom barrierLabel', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return Center(
+                child: ElevatedButton(
+                  child: const Text('X'),
+                  onPressed: () {
+                    showDialog<void>(
+                      context: context,
+                      barrierLabel: 'Custom label',
+                      builder: (BuildContext context) {
+                        return const AlertDialog(
+                          title: Text('Title'),
+                          content: Text('Y'),
+                          actions: <Widget>[],
+                        );
+                      },
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, isNot(includesNodeWith(
+      label: 'Custom label',
+      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+    )));
+  });
+
+  testWidgets('DialogRoute is state restorable', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        restorationScopeId: 'app',
+        home: _RestorableDialogTestWidget(),
+      ),
+    );
+
+    expect(find.byType(AlertDialog), findsNothing);
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AlertDialog), findsOneWidget);
+    final TestRestorationData restorationData = await tester.getRestorationData();
+
+    await tester.restartAndRestore();
+
+    expect(find.byType(AlertDialog), findsOneWidget);
+
+    // Tap on the barrier.
+    await tester.tapAt(const Offset(10.0, 10.0));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AlertDialog), findsNothing);
+
+    await tester.restoreFrom(restorationData);
+    expect(find.byType(AlertDialog), findsOneWidget);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
+}
+
+class _RestorableDialogTestWidget extends StatelessWidget {
+  static Route<Object?> _materialDialogBuilder(BuildContext context, Object? arguments) {
+    return DialogRoute<void>(
+      context: context,
+      builder: (BuildContext context) => const AlertDialog(title: Text('Material Alert!')),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: OutlinedButton(
+          onPressed: () {
+            Navigator.of(context).restorablePush(_materialDialogBuilder);
+          },
+          child: const Text('X'),
+        ),
+      ),
+    );
+  }
 }
 
 class DialogObserver extends NavigatorObserver {
   int dialogCount = 0;
 
   @override
-  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
-    if (route.toString().contains('_DialogRoute')) {
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (route is DialogRoute) {
       dialogCount++;
     }
     super.didPush(route, previousRoute);
@@ -1750,19 +1960,19 @@ class DialogObserver extends NavigatorObserver {
 }
 
 class _ClosureNavigatorObserver extends NavigatorObserver {
-  _ClosureNavigatorObserver({@required this.onDidChange});
+  _ClosureNavigatorObserver({required this.onDidChange});
 
   final void Function(Route<dynamic> newRoute) onDidChange;
 
   @override
-  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) => onDidChange(route);
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) => onDidChange(route);
 
   @override
-  void didPop(Route<dynamic> route, Route<dynamic> previousRoute) => onDidChange(previousRoute);
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) => onDidChange(previousRoute!);
 
   @override
-  void didRemove(Route<dynamic> route, Route<dynamic> previousRoute) => onDidChange(previousRoute);
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) => onDidChange(previousRoute!);
 
   @override
-  void didReplace({Route<dynamic> newRoute, Route<dynamic> oldRoute}) => onDidChange(newRoute);
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) => onDidChange(newRoute!);
 }

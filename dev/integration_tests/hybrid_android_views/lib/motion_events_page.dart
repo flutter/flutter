@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,16 +17,18 @@ import 'page.dart';
 const String kEventsFileName = 'touchEvents';
 
 class MotionEventsPage extends PageWidget {
-  const MotionEventsPage()
-      : super('Motion Event Tests', const ValueKey<String>('MotionEventsListTile'));
+  const MotionEventsPage({Key key})
+      : super('Motion Event Tests', const ValueKey<String>('MotionEventsListTile'), key: key);
 
   @override
   Widget build(BuildContext context) {
-    return MotionEventsBody();
+    return const MotionEventsBody();
   }
 }
 
 class MotionEventsBody extends StatefulWidget {
+  const MotionEventsBody({Key key}) : super(key: key);
+
   @override
   State createState() => MotionEventsBodyState();
 }
@@ -169,7 +170,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
   }
 
   void showMessage(BuildContext context, String message) {
-    Scaffold.of(context).showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(message),
       duration: const Duration(seconds: 3),
     ));
@@ -198,7 +199,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
         setState(() {});
         break;
     }
-    return Future<dynamic>.sync(null);
+    return Future<dynamic>.value(null);
   }
 
   Future<dynamic> onViewMethodChannelCall(MethodCall call) {
@@ -211,7 +212,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
         setState(() {});
         break;
     }
-    return Future<dynamic>.sync(null);
+    return Future<dynamic>.value(null);
   }
 
   Widget buildEventTile(BuildContext context, int index) {
@@ -224,7 +225,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
 }
 
 class TouchEventDiff extends StatelessWidget {
-  const TouchEventDiff(this.originalEvent, this.synthesizedEvent);
+  const TouchEventDiff(this.originalEvent, this.synthesizedEvent, {Key key}) : super(key: key);
 
   final Map<String, dynamic> originalEvent;
   final Map<String, dynamic> synthesizedEvent;

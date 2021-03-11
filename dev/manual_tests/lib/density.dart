@@ -2,12 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 final Map<int, Color> m2SwatchColors = <int, Color>{
   50: const Color(0xfff2e7fe),
@@ -23,9 +19,11 @@ final Map<int, Color> m2SwatchColors = <int, Color>{
 };
 final MaterialColor m2Swatch = MaterialColor(m2SwatchColors[500].value, m2SwatchColors);
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key key}) : super(key: key);
+
   static const String _title = 'Density Test';
 
   @override
@@ -57,7 +55,7 @@ class OptionModel extends ChangeNotifier {
   }
 
   VisualDensity get density => _density;
-  VisualDensity _density = const VisualDensity();
+  VisualDensity _density = VisualDensity.standard;
   set density(VisualDensity density) {
     if (density != _density) {
       _density = density;
@@ -136,7 +134,7 @@ class LabeledCheckbox extends StatelessWidget {
 }
 
 class Options extends StatefulWidget {
-  const Options(this.model);
+  const Options(this.model, {Key key}) : super(key: key);
 
   final OptionModel model;
 

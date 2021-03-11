@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 void main() {
   runApp(const MaterialApp(
@@ -15,7 +13,7 @@ void main() {
 }
 
 class DemoButton extends StatefulWidget {
-  const DemoButton({this.name, this.canRequestFocus = true, this.autofocus = false});
+  const DemoButton({Key key, this.name, this.canRequestFocus = true, this.autofocus = false}) : super(key: key);
 
   final String name;
   final bool canRequestFocus;
@@ -97,7 +95,7 @@ class _FocusDemoState extends State<FocusDemo> {
     super.dispose();
   }
 
-  bool _handleKeyPress(FocusNode node, RawKeyEvent event) {
+  KeyEventResult _handleKeyPress(FocusNode node, RawKeyEvent event) {
     if (event is RawKeyDownEvent) {
       print('Scope got key event: ${event.logicalKey}, $node');
       print('Keys down: ${RawKeyboard.instance.keysPressed}');
@@ -106,31 +104,31 @@ class _FocusDemoState extends State<FocusDemo> {
         if (event.isShiftPressed) {
           print('Moving to previous.');
           node.previousFocus();
-          return true;
+          return KeyEventResult.handled;
         } else {
           print('Moving to next.');
           node.nextFocus();
-          return true;
+          return KeyEventResult.handled;
         }
       }
       if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
         node.focusInDirection(TraversalDirection.left);
-        return true;
+        return KeyEventResult.handled;
       }
       if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
         node.focusInDirection(TraversalDirection.right);
-        return true;
+        return KeyEventResult.handled;
       }
       if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
         node.focusInDirection(TraversalDirection.up);
-        return true;
+        return KeyEventResult.handled;
       }
       if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
         node.focusInDirection(TraversalDirection.down);
-        return true;
+        return KeyEventResult.handled;
       }
     }
-    return false;
+    return KeyEventResult.ignored;
   }
 
   @override

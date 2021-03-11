@@ -2,14 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'semantics_tester.dart';
@@ -53,7 +50,7 @@ void main() {
     const double kItemHeight = 40.0;
 
     final List<Widget> containers = List<Widget>.generate(80, (int i) => MergeSemantics(
-      child: Container(
+      child: SizedBox(
         height: kItemHeight,
         child: Text('container $i', textDirection: TextDirection.ltr),
       ),
@@ -75,8 +72,8 @@ void main() {
 
     expect(scrollController.offset, kItemHeight / 2);
 
-    final int firstContainerId = tester.renderObject(find.byWidget(containers.first)).debugSemantics.id;
-    tester.binding.pipelineOwner.semanticsOwner.performAction(firstContainerId, SemanticsAction.showOnScreen);
+    final int firstContainerId = tester.renderObject(find.byWidget(containers.first)).debugSemantics!.id;
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(firstContainerId, SemanticsAction.showOnScreen);
     await tester.pump();
     await tester.pump(const Duration(seconds: 5));
 
@@ -92,7 +89,7 @@ void main() {
     const double kExpandedAppBarHeight = 56.0;
 
     final List<Widget> containers = List<Widget>.generate(80, (int i) => MergeSemantics(
-      child: Container(
+      child: SizedBox(
         height: kItemHeight,
         child: Text('container $i'),
       ),
@@ -137,8 +134,8 @@ void main() {
 
     expect(scrollController.offset, kItemHeight / 2);
 
-    final int firstContainerId = tester.renderObject(find.byWidget(containers.first)).debugSemantics.id;
-    tester.binding.pipelineOwner.semanticsOwner.performAction(firstContainerId, SemanticsAction.showOnScreen);
+    final int firstContainerId = tester.renderObject(find.byWidget(containers.first)).debugSemantics!.id;
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(firstContainerId, SemanticsAction.showOnScreen);
     await tester.pump();
     await tester.pump(const Duration(seconds: 5));
     expect(tester.getTopLeft(find.byWidget(containers.first)).dy, kExpandedAppBarHeight);
@@ -156,7 +153,7 @@ void main() {
     final List<Widget> children = <Widget>[];
     final List<Widget> slivers = List<Widget>.generate(30, (int i) {
       final Widget child = MergeSemantics(
-        child: Container(
+        child: SizedBox(
           child: Text('Item $i'),
           height: 72.0,
         ),
@@ -205,8 +202,8 @@ void main() {
 
     expect(scrollController.offset, 2.5 * kItemHeight);
 
-    final int id0 = tester.renderObject(find.byWidget(children[0])).debugSemantics.id;
-    tester.binding.pipelineOwner.semanticsOwner.performAction(id0, SemanticsAction.showOnScreen);
+    final int id0 = tester.renderObject(find.byWidget(children[0])).debugSemantics!.id;
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(id0, SemanticsAction.showOnScreen);
     await tester.pump();
     await tester.pump(const Duration(seconds: 5));
     expect(tester.getTopLeft(find.byWidget(children[0])).dy, kToolbarHeight);
@@ -310,7 +307,7 @@ void main() {
   testWidgets('Semantics tree is populated mid-scroll', (WidgetTester tester) async {
     semantics = SemanticsTester(tester);
 
-    final List<Widget> children = List<Widget>.generate(80, (int i) => Container(
+    final List<Widget> children = List<Widget>.generate(80, (int i) => SizedBox(
       child: Text('Item $i'),
       height: 40.0,
     ));
@@ -338,7 +335,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView(
           children: List<Widget>.generate(40, (int i) {
-            return Container(
+            return SizedBox(
               child: Text('item $i'),
               height: 400.0,
             );
@@ -405,14 +402,14 @@ void main() {
 
     const double kItemHeight = 100.0;
 
-    List<Widget> children;
-    ScrollController scrollController;
-    Widget widgetUnderTest;
+    late List<Widget> children;
+    late ScrollController scrollController;
+    late Widget widgetUnderTest;
 
     setUp(() {
       children = List<Widget>.generate(10, (int i) {
         return MergeSemantics(
-          child: Container(
+          child: SizedBox(
             height: kItemHeight,
             child: Text('container $i'),
           ),
@@ -426,7 +423,7 @@ void main() {
       widgetUnderTest = Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 2 * kItemHeight,
             child: ListView(
               controller: scrollController,
@@ -445,8 +442,8 @@ void main() {
 
       expect(scrollController.offset, kItemHeight / 2);
 
-      final int firstContainerId = tester.renderObject(find.byWidget(children.first)).debugSemantics.id;
-      tester.binding.pipelineOwner.semanticsOwner.performAction(firstContainerId, SemanticsAction.showOnScreen);
+      final int firstContainerId = tester.renderObject(find.byWidget(children.first)).debugSemantics!.id;
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(firstContainerId, SemanticsAction.showOnScreen);
       await tester.pumpAndSettle();
 
       expect(scrollController.offset, 0.0);
@@ -461,8 +458,8 @@ void main() {
 
       expect(scrollController.offset, kItemHeight / 2);
 
-      final int firstContainerId = tester.renderObject(find.byWidget(children[2])).debugSemantics.id;
-      tester.binding.pipelineOwner.semanticsOwner.performAction(firstContainerId, SemanticsAction.showOnScreen);
+      final int firstContainerId = tester.renderObject(find.byWidget(children[2])).debugSemantics!.id;
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(firstContainerId, SemanticsAction.showOnScreen);
       await tester.pumpAndSettle();
 
       expect(scrollController.offset, kItemHeight);
@@ -477,8 +474,8 @@ void main() {
 
       expect(scrollController.offset, kItemHeight / 2);
 
-      final int firstContainerId = tester.renderObject(find.byWidget(children[1])).debugSemantics.id;
-      tester.binding.pipelineOwner.semanticsOwner.performAction(firstContainerId, SemanticsAction.showOnScreen);
+      final int firstContainerId = tester.renderObject(find.byWidget(children[1])).debugSemantics!.id;
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(firstContainerId, SemanticsAction.showOnScreen);
       await tester.pumpAndSettle();
 
       expect(scrollController.offset, kItemHeight / 2);
@@ -490,9 +487,9 @@ void main() {
   group('showOnScreen with negative children', () {
     const double kItemHeight = 100.0;
 
-    List<Widget> children;
-    ScrollController scrollController;
-    Widget widgetUnderTest;
+    late List<Widget> children;
+    late ScrollController scrollController;
+    late Widget widgetUnderTest;
 
     setUp(() {
       final Key center = GlobalKey();
@@ -502,7 +499,7 @@ void main() {
           key: i == 5 ? center : null,
           child: MergeSemantics(
             key: ValueKey<int>(i),
-            child: Container(
+            child: SizedBox(
               height: kItemHeight,
               child: Text('container $i'),
             ),
@@ -524,7 +521,7 @@ void main() {
       widgetUnderTest = Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 2 * kItemHeight,
             child: Scrollable(
               controller: scrollController,
@@ -550,8 +547,8 @@ void main() {
 
       expect(scrollController.offset, -250.0);
 
-      final int firstContainerId = tester.renderObject(find.byKey(const ValueKey<int>(2))).debugSemantics.id;
-      tester.binding.pipelineOwner.semanticsOwner.performAction(firstContainerId, SemanticsAction.showOnScreen);
+      final int firstContainerId = tester.renderObject(find.byKey(const ValueKey<int>(2))).debugSemantics!.id;
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(firstContainerId, SemanticsAction.showOnScreen);
       await tester.pumpAndSettle();
 
       expect(scrollController.offset, -300.0);
@@ -566,8 +563,8 @@ void main() {
 
       expect(scrollController.offset, -250.0);
 
-      final int firstContainerId = tester.renderObject(find.byKey(const ValueKey<int>(4))).debugSemantics.id;
-      tester.binding.pipelineOwner.semanticsOwner.performAction(firstContainerId, SemanticsAction.showOnScreen);
+      final int firstContainerId = tester.renderObject(find.byKey(const ValueKey<int>(4))).debugSemantics!.id;
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(firstContainerId, SemanticsAction.showOnScreen);
       await tester.pumpAndSettle();
 
       expect(scrollController.offset, -200.0);
@@ -582,8 +579,8 @@ void main() {
 
       expect(scrollController.offset, -250.0);
 
-      final int firstContainerId = tester.renderObject(find.byKey(const ValueKey<int>(3))).debugSemantics.id;
-      tester.binding.pipelineOwner.semanticsOwner.performAction(firstContainerId, SemanticsAction.showOnScreen);
+      final int firstContainerId = tester.renderObject(find.byKey(const ValueKey<int>(3))).debugSemantics!.id;
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(firstContainerId, SemanticsAction.showOnScreen);
       await tester.pumpAndSettle();
 
       expect(scrollController.offset, -250.0);
@@ -614,7 +611,7 @@ void main() {
 
     final SemanticsNode rootScrollNode = semantics.nodesWith(actions: <SemanticsAction>[SemanticsAction.scrollUp]).single;
     final SemanticsNode innerListPane = semantics.nodesWith(ancestor: rootScrollNode, scrollExtentMax: 0).single;
-    final SemanticsNode outerListPane = innerListPane.parent;
+    final SemanticsNode outerListPane = innerListPane.parent!;
     final List<SemanticsNode> hiddenNodes = semantics.nodesWith(flags: <SemanticsFlag>[SemanticsFlag.isHidden]).toList();
 
     // This test is only valid if some children are offscreen.
@@ -631,7 +628,7 @@ void main() {
     expect(nodeGlobalRect(innerListPane), nodeGlobalRect(outerListPane));
 
     for (final SemanticsNode node in targetNodes) {
-      tester.binding.pipelineOwner.semanticsOwner.performAction(node.id, SemanticsAction.showOnScreen);
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(node.id, SemanticsAction.showOnScreen);
       await tester.pumpAndSettle();
 
       expect(nodeGlobalRect(innerListPane), nodeGlobalRect(outerListPane));
@@ -659,9 +656,9 @@ Future<void> fling(WidgetTester tester, Offset offset, int repetitions) async {
 
 Rect nodeGlobalRect(SemanticsNode node) {
   Matrix4 globalTransform = node.transform ?? Matrix4.identity();
-  for (SemanticsNode parent = node.parent; parent != null; parent = parent.parent) {
+  for (SemanticsNode? parent = node.parent; parent != null; parent = parent.parent) {
     if (parent.transform != null) {
-      globalTransform = parent.transform.multiplied(globalTransform);
+      globalTransform = parent.transform!.multiplied(globalTransform);
     }
   }
   return MatrixUtils.transformRect(globalTransform, node.rect);

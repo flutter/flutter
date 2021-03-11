@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -16,9 +14,7 @@ Widget buildFrame() {
       itemExtent: 290.0,
       scrollDirection: Axis.vertical,
       children: items.map<Widget>((int item) {
-        return Container(
-          child: Text('$item'),
-        );
+        return Text('$item');
       }).toList(),
     ),
   );
@@ -77,9 +73,7 @@ void main() {
           padding: const EdgeInsets.only(top: 250.0),
           scrollDirection: Axis.vertical,
           children: items.map<Widget>((int item) {
-            return Container(
-              child: Text('$item'),
-            );
+            return Text('$item');
           }).toList(),
         ),
       ),

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import '../base/common.dart';
 import '../build_info.dart';
 
@@ -15,7 +17,7 @@ void validateBuild(AndroidBuildInfo androidBuildInfo) {
     throwToolExit(
       'Cannot perform code size analysis when building for multiple ABIs. '
       'Specify one of android-arm, android-arm64, or android-x64 in the '
-      '--target-plaform flag.'
+      '--target-platform flag.'
     );
   }
   if (buildInfo.mode.isPrecompiled && androidBuildInfo.targetArchs.contains(AndroidArch.x86)) {

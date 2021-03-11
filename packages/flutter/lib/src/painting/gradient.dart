@@ -68,7 +68,8 @@ _ColorsAndStops _interpolateColorsAndStops(
 /// a [GradientRotation] of `pi/4` radians (i.e. 45 degrees).
 @immutable
 abstract class GradientTransform {
-  /// A const constructor so that subclasses may be const.
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const GradientTransform();
 
   /// When a [Gradient] creates its [Shader], it will call this method to
@@ -442,14 +443,14 @@ class LinearGradient extends Gradient {
   @override
   Gradient? lerpFrom(Gradient? a, double t) {
     if (a == null || (a is LinearGradient))
-      return LinearGradient.lerp(a as LinearGradient, this, t);
+      return LinearGradient.lerp(a as LinearGradient?, this, t);
     return super.lerpFrom(a, t);
   }
 
   @override
   Gradient? lerpTo(Gradient? b, double t) {
     if (b == null || (b is LinearGradient))
-      return LinearGradient.lerp(this, b as LinearGradient, t);
+      return LinearGradient.lerp(this, b as LinearGradient?, t);
     return super.lerpTo(b, t);
   }
 
@@ -700,14 +701,14 @@ class RadialGradient extends Gradient {
   @override
   Gradient? lerpFrom(Gradient? a, double t) {
     if (a == null || (a is RadialGradient))
-      return RadialGradient.lerp(a as RadialGradient, this, t);
+      return RadialGradient.lerp(a as RadialGradient?, this, t);
     return super.lerpFrom(a, t);
   }
 
   @override
   Gradient? lerpTo(Gradient? b, double t) {
     if (b == null || (b is RadialGradient))
-      return RadialGradient.lerp(this, b as RadialGradient, t);
+      return RadialGradient.lerp(this, b as RadialGradient?, t);
     return super.lerpTo(b, t);
   }
 
@@ -948,14 +949,14 @@ class SweepGradient extends Gradient {
   @override
   Gradient? lerpFrom(Gradient? a, double t) {
     if (a == null || (a is SweepGradient))
-      return SweepGradient.lerp(a as SweepGradient, this, t);
+      return SweepGradient.lerp(a as SweepGradient?, this, t);
     return super.lerpFrom(a, t);
   }
 
   @override
   Gradient? lerpTo(Gradient? b, double t) {
     if (b == null || (b is SweepGradient))
-      return SweepGradient.lerp(this, b as SweepGradient, t);
+      return SweepGradient.lerp(this, b as SweepGradient?, t);
     return super.lerpTo(b, t);
   }
 

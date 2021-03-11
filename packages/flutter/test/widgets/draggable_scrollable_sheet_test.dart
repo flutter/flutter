@@ -2,22 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  Widget _boilerplate(VoidCallback onButtonPressed, {
+  Widget _boilerplate(VoidCallback? onButtonPressed, {
     int itemCount = 100,
     double initialChildSize = .5,
     double maxChildSize = 1.0,
     double minChildSize = .25,
-    double itemExtent,
-    Key containerKey,
-    NotificationListenerCallback<ScrollNotification> onScrollNotification,
+    double? itemExtent,
+    Key? containerKey,
+    NotificationListenerCallback<ScrollNotification>? onScrollNotification,
   }) {
     return Directionality(
       textDirection: TextDirection.ltr,
@@ -153,7 +150,7 @@ void main() {
         await tester.drag(find.text('Item 1'), const Offset(0, -325));
         await tester.pumpAndSettle();
         expect(find.text('TapHere'), findsOneWidget);
-        await tester.tap(find.text('TapHere'));
+        await tester.tap(find.text('TapHere'), warnIfMissed: false);
         expect(taps, 1);
         expect(find.text('Item 1'), findsOneWidget);
         expect(find.text('Item 21'), findsOneWidget);
@@ -205,7 +202,7 @@ void main() {
         await tester.fling(find.text('Item 1'), const Offset(0, -200), 2000);
         await tester.pumpAndSettle();
         expect(find.text('TapHere'), findsOneWidget);
-        await tester.tap(find.text('TapHere'));
+        await tester.tap(find.text('TapHere'), warnIfMissed: false);
         expect(taps, 1);
         expect(find.text('Item 1'), findsNothing);
         expect(find.text('Item 21'), findsNothing);
@@ -239,7 +236,7 @@ void main() {
         await tester.fling(find.text('Item 1'), const Offset(0, -200), 2000);
         await tester.pumpAndSettle();
         expect(find.text('TapHere'), findsOneWidget);
-        await tester.tap(find.text('TapHere'));
+        await tester.tap(find.text('TapHere'), warnIfMissed: false);
         expect(taps, 1);
         expect(find.text('Item 1'), findsNothing);
         expect(find.text('Item 21'), findsNothing);
@@ -248,7 +245,7 @@ void main() {
         await tester.fling(find.text('Item 70'), const Offset(0, 200), 2000);
         await tester.pumpAndSettle();
         expect(find.text('TapHere'), findsOneWidget);
-        await tester.tap(find.text('TapHere'));
+        await tester.tap(find.text('TapHere'), warnIfMissed: false);
         expect(taps, 1);
         expect(find.text('Item 1'), findsOneWidget);
         expect(find.text('Item 21'), findsOneWidget);

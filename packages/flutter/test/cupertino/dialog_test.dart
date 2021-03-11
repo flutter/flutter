@@ -2,13 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -118,7 +115,7 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.color.withAlpha(255), CupertinoColors.systemRed.color);
+    expect(widget.style.color!.withAlpha(255), CupertinoColors.systemRed.color);
   });
 
   testWidgets('Dialog dark theme', (WidgetTester tester) async {
@@ -143,7 +140,7 @@ void main() {
     );
 
     expect(
-      cancelText.text.style.color.value,
+      cancelText.text.style!.color!.value,
       0xFF0A84FF, // dark elevated color of systemBlue.
     );
 
@@ -245,7 +242,7 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.color.withAlpha(255), CupertinoColors.systemRed.color);
+    expect(widget.style.color!.withAlpha(255), CupertinoColors.systemRed.color);
     expect(widget.style.fontWeight, equals(FontWeight.w600));
   });
 
@@ -256,8 +253,8 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.color.opacity, greaterThanOrEqualTo(127 / 255));
-    expect(widget.style.color.opacity, lessThanOrEqualTo(128 / 255));
+    expect(widget.style.color!.opacity, greaterThanOrEqualTo(127 / 255));
+    expect(widget.style.color!.opacity, lessThanOrEqualTo(128 / 255));
   });
 
   testWidgets('Dialog enabled action style', (WidgetTester tester) async {
@@ -268,7 +265,7 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.color.opacity, equals(1.0));
+    expect(widget.style.color!.opacity, equals(1.0));
   });
 
   testWidgets('Message is scrollable, has correct padding with large text sizes', (WidgetTester tester) async {
@@ -320,7 +317,7 @@ void main() {
     // Visually the "Cancel" button and "OK" button are the same height when using the
     // regular font. However, when using the test font, "Cancel" becomes 2 lines which
     // is why the height we're verifying for "Cancel" is larger than "OK".
-    expect(tester.getSize(find.text('The Title')), equals(const Size(270.0, 162.0)));
+    expect(tester.getSize(find.text('The Title')), equals(const Size(270.0, 132.0)));
     expect(tester.getTopLeft(find.text('The Title')), equals(const Offset(265.0, 80.0 + 24.0)));
     expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'Cancel')), equals(const Size(310.0, 148.0)));
     expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'OK')), equals(const Size(310.0, 98.0)));
@@ -554,7 +551,7 @@ void main() {
 
   testWidgets('Actions section height for 2 side-by-side buttons is height of tallest button.', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
-    double dividerWidth; // Will be set when the dialog builder runs. Needs a BuildContext.
+    late double dividerWidth; // Will be set when the dialog builder runs. Needs a BuildContext.
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
@@ -599,7 +596,7 @@ void main() {
 
   testWidgets('Actions section height for 2 stacked buttons with enough room is height of both buttons.', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
-    double dividerThickness; // Will be set when the dialog builder runs. Needs a BuildContext.
+    late double dividerThickness; // Will be set when the dialog builder runs. Needs a BuildContext.
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
@@ -799,7 +796,7 @@ void main() {
     // issue for our use-case, so we don't worry about it.
     expect(actionsSectionBox, paints..path(
       includes: <Offset>[
-        const Offset(0.0, 0.0),
+        Offset.zero,
         Offset(actionsSectionBox.size.width, actionsSectionBox.size.height),
       ],
     ));
@@ -807,7 +804,7 @@ void main() {
 
   testWidgets('Pressed button changes appearance and dividers disappear.', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
-    double dividerThickness; // Will be set when the dialog builder runs. Needs a BuildContext.
+    late double dividerThickness; // Will be set when the dialog builder runs. Needs a BuildContext.
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
@@ -961,31 +958,31 @@ void main() {
     // Enter animation.
     await tester.pump();
     Transform transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], closeTo(1.3, 0.01));
+    expect(transform.transform[0], moreOrLessEquals(1.3, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], closeTo(1.145, 0.001));
+    expect(transform.transform[0], moreOrLessEquals(1.145, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], closeTo(1.044, 0.001));
+    expect(transform.transform[0], moreOrLessEquals(1.044, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], closeTo(1.013, 0.001));
+    expect(transform.transform[0], moreOrLessEquals(1.013, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], closeTo(1.003, 0.001));
+    expect(transform.transform[0], moreOrLessEquals(1.003, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], closeTo(1.000, 0.001));
+    expect(transform.transform[0], moreOrLessEquals(1.000, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], closeTo(1.000, 0.001));
+    expect(transform.transform[0], moreOrLessEquals(1.000, epsilon: 0.001));
 
     await tester.tap(find.text('Delete'));
 
@@ -1042,50 +1039,50 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.firstWidget(find.byType(FadeTransition));
-    expect(transition.opacity.value, closeTo(0.40, 0.001));
+    expect(transition.opacity.value, moreOrLessEquals(0.40, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.firstWidget(find.byType(FadeTransition));
-    expect(transition.opacity.value, closeTo(0.437, 0.001));
+    expect(transition.opacity.value, moreOrLessEquals(0.437, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.firstWidget(find.byType(FadeTransition));
-    expect(transition.opacity.value, closeTo(0.55, 0.001));
+    expect(transition.opacity.value, moreOrLessEquals(0.55, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.firstWidget(find.byType(FadeTransition));
-    expect(transition.opacity.value, closeTo(0.737, 0.001));
+    expect(transition.opacity.value, moreOrLessEquals(0.737, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.firstWidget(find.byType(FadeTransition));
-    expect(transition.opacity.value, closeTo(1.0, 0.001));
+    expect(transition.opacity.value, moreOrLessEquals(1.0, epsilon: 0.001));
 
     await tester.tap(find.text('Delete'));
 
     // Exit animation, look at reverse FadeTransition.
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
-    expect(transition.opacity.value, closeTo(0.500, 0.001));
+    expect(transition.opacity.value, moreOrLessEquals(0.500, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
-    expect(transition.opacity.value, closeTo(0.332, 0.001));
+    expect(transition.opacity.value, moreOrLessEquals(0.332, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
-    expect(transition.opacity.value, closeTo(0.188, 0.001));
+    expect(transition.opacity.value, moreOrLessEquals(0.188, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
-    expect(transition.opacity.value, closeTo(0.081, 0.001));
+    expect(transition.opacity.value, moreOrLessEquals(0.081, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
-    expect(transition.opacity.value, closeTo(0.019, 0.001));
+    expect(transition.opacity.value, moreOrLessEquals(0.019, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
-    expect(transition.opacity.value, closeTo(0.0, 0.001));
+    expect(transition.opacity.value, moreOrLessEquals(0.0, epsilon: 0.001));
   });
 
   testWidgets('Actions are accessible by key', (WidgetTester tester) async {
@@ -1147,6 +1144,105 @@ void main() {
     // once animation settles the dialog is padded by the new viewInsets
     expect(tester.getRect(find.byType(Placeholder)), placeholderRectWithoutInsets.translate(10, 10));
   });
+
+  testWidgets('Default cupertino dialog golden', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+            child: const RepaintBoundary(
+              child: CupertinoAlertDialog(
+                title: Text('Title'),
+                content: Text('text'),
+                actions: <Widget>[
+                  CupertinoDialogAction(child: Text('No')),
+                  CupertinoDialogAction(child: Text('OK')),
+                ],
+              ),
+            ),
+          );
+        }
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(CupertinoAlertDialog),
+      matchesGoldenFile('dialog_test.cupertino.default.png'),
+    );
+  });
+
+  testWidgets('showCupertinoDialog - custom barrierLabel', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return Center(
+              child: CupertinoButton(
+                child: const Text('X'),
+                onPressed: () {
+                  showCupertinoDialog<void>(
+                    context: context,
+                    barrierLabel: 'Custom label',
+                    builder: (BuildContext context) {
+                      return const CupertinoAlertDialog(
+                        title: Text('Title'),
+                        content: Text('Content'),
+                        actions: <Widget>[
+                          CupertinoDialogAction(child: Text('Yes')),
+                          CupertinoDialogAction(child: Text('No')),
+                        ],
+                      );
+                    },
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(semantics, isNot(includesNodeWith(
+      label: 'Custom label',
+      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+    )));
+  });
+
+  testWidgets('CupertinoDialogRoute is state restorable', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        restorationScopeId: 'app',
+        home: _RestorableDialogTestWidget(),
+      ),
+    );
+
+    expect(find.byType(CupertinoAlertDialog), findsNothing);
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CupertinoAlertDialog), findsOneWidget);
+    final TestRestorationData restorationData = await tester.getRestorationData();
+
+    await tester.restartAndRestore();
+
+    expect(find.byType(CupertinoAlertDialog), findsOneWidget);
+
+    // Tap on the barrier.
+    await tester.tapAt(const Offset(10.0, 10.0));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CupertinoAlertDialog), findsNothing);
+
+    await tester.restoreFrom(restorationData);
+    expect(find.byType(CupertinoAlertDialog), findsOneWidget);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 }
 
 RenderBox findActionButtonRenderBoxByTitle(WidgetTester tester, String title) {
@@ -1165,7 +1261,9 @@ RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
   return actionsSection as RenderBox;
 }
 
-Widget createAppWithButtonThatLaunchesDialog({ WidgetBuilder dialogBuilder }) {
+Widget createAppWithButtonThatLaunchesDialog({
+  required WidgetBuilder dialogBuilder
+}) {
   return MaterialApp(
     home: Material(
       child: Center(
@@ -1203,4 +1301,38 @@ Widget createAppWithCenteredButton(Widget child) {
       )
     )
   );
+}
+
+
+class _RestorableDialogTestWidget extends StatelessWidget{
+  static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
+    return CupertinoDialogRoute<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return const CupertinoAlertDialog(
+          title: Text('Title'),
+          content: Text('Content'),
+          actions: <Widget>[
+            CupertinoDialogAction(child: Text('Yes')),
+            CupertinoDialogAction(child: Text('No')),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoPageScaffold(
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('Home'),
+      ),
+      child: Center(child: CupertinoButton(
+        onPressed: () {
+          Navigator.of(context).restorablePush(_dialogBuilder);
+        },
+        child: const Text('X'),
+      )),
+    );
+  }
 }

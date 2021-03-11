@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
@@ -144,7 +146,7 @@ class SourceVisitor implements ResolvedFiles {
       throw InvalidPatternException(pattern);
     }
     if (!environment.fileSystem.directory(filePath).existsSync()) {
-      throw Exception('$filePath does not exist!');
+      environment.fileSystem.directory(filePath).createSync(recursive: true);
     }
     for (final FileSystemEntity entity in environment.fileSystem.directory(filePath).listSync()) {
       final String filename = environment.fileSystem.path.basename(entity.path);

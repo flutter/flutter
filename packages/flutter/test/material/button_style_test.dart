@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -26,6 +23,7 @@ void main() {
     expect(style.elevation, null);
     expect(style.padding, null);
     expect(style.minimumSize, null);
+    expect(style.fixedSize, null);
     expect(style.side, null);
     expect(style.shape, null);
     expect(style.mouseCursor, null);
@@ -95,6 +93,7 @@ void main() {
     final MaterialStateProperty<double> elevation =  MaterialStateProperty.all<double>(1);
     final MaterialStateProperty<EdgeInsets> padding = MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.all(1));
     final MaterialStateProperty<Size> minimumSize = MaterialStateProperty.all<Size>(const Size(1, 2));
+    final MaterialStateProperty<Size> fixedSize = MaterialStateProperty.all<Size>(const Size(3, 4));
     final MaterialStateProperty<BorderSide> side = MaterialStateProperty.all<BorderSide>(const BorderSide());
     final MaterialStateProperty<OutlinedBorder> shape  = MaterialStateProperty.all<OutlinedBorder>(const StadiumBorder());
     final MaterialStateProperty<MouseCursor> mouseCursor = MaterialStateProperty.all<MouseCursor>(SystemMouseCursors.forbidden);
@@ -111,6 +110,7 @@ void main() {
       elevation: elevation,
       padding: padding,
       minimumSize: minimumSize,
+      fixedSize: fixedSize,
       side: side,
       shape: shape,
       mouseCursor: mouseCursor,
@@ -130,6 +130,7 @@ void main() {
         elevation: elevation,
         padding: padding,
         minimumSize: minimumSize,
+        fixedSize: fixedSize,
         side: side,
         shape: shape,
         mouseCursor: mouseCursor,

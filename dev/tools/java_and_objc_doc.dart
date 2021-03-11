@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
@@ -16,10 +15,10 @@ const String kDocRoot = 'dev/docs/doc';
 Future<void> main(List<String> args) async {
   final String engineVersion = File('bin/internal/engine.version').readAsStringSync().trim();
 
-  final String javadocUrl = 'https://storage.googleapis.com/flutter_infra/flutter/$engineVersion/android-javadoc.zip';
+  final String javadocUrl = 'https://storage.googleapis.com/flutter_infra_release/flutter/$engineVersion/android-javadoc.zip';
   generateDocs(javadocUrl, 'javadoc', 'io/flutter/view/FlutterView.html');
 
-  final String objcdocUrl = 'https://storage.googleapis.com/flutter_infra/flutter/$engineVersion/ios-objcdoc.zip';
+  final String objcdocUrl = 'https://storage.googleapis.com/flutter_infra_release/flutter/$engineVersion/ios-objcdoc.zip';
   generateDocs(objcdocUrl, 'objcdoc', 'Classes/FlutterViewController.html');
 }
 
@@ -29,7 +28,7 @@ Future<void> main(List<String> args) async {
 Future<Archive> fetchArchive(String url, int maxTries) async {
   List<int> responseBytes;
   for (int i = 0; i < maxTries; i++) {
-    final http.Response response = await http.get(url);
+    final http.Response response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
       responseBytes = response.bodyBytes;
       break;

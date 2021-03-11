@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 @TestOn('!chrome')
 import 'dart:async';
 import 'dart:typed_data';
@@ -65,7 +63,7 @@ void main() {
       );
 
       final FakeAndroidPlatformView fakeView = viewsController.views.first;
-      final Uint8List rawCreationParams = fakeView.creationParams;
+      final Uint8List rawCreationParams = fakeView.creationParams!;
       final ByteData byteData = ByteData.view(
           rawCreationParams.buffer,
           rawCreationParams.offsetInBytes,
@@ -141,7 +139,7 @@ void main() {
         ]),
       );
 
-      viewsController.resizeCompleter.complete();
+      viewsController.resizeCompleter!.complete();
       await tester.pump();
 
       expect(
@@ -232,12 +230,10 @@ void main() {
 
       await tester.pumpWidget(
         Center(
-          child: Container(
-            child: SizedBox(
-              width: 200.0,
-              height: 100.0,
-              child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr, key: key),
-            ),
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr, key: key),
           ),
         ),
       );
@@ -874,10 +870,10 @@ void main() {
       viewsController.registerViewType('webview');
 
       int factoryInvocationCount = 0;
-      final ValueGetter<EagerGestureRecognizer> constructRecognizer = () {
+      EagerGestureRecognizer constructRecognizer() {
         factoryInvocationCount += 1;
         return EagerGestureRecognizer();
-      };
+      }
 
       await tester.pumpWidget(
         AndroidView(
@@ -946,7 +942,7 @@ void main() {
       expect(semantics.transform, Matrix4.translationValues(600, 500, 0));
       expect(semantics.childrenCount, 0);
 
-      viewsController.createCompleter.complete();
+      viewsController.createCompleter!.complete();
       await tester.pumpAndSettle();
 
       expect(semantics.platformViewId, currentViewId + 1);
@@ -992,7 +988,7 @@ void main() {
           ),
       );
       final Element containerElement = tester.element(find.byKey(containerKey));
-      final FocusNode androidViewFocusNode = androidViewFocusWidget.focusNode;
+      final FocusNode androidViewFocusNode = androidViewFocusWidget.focusNode!;
       final FocusNode containerFocusNode = Focus.of(containerElement);
 
       containerFocusNode.requestFocus();
@@ -1036,7 +1032,7 @@ void main() {
         ),
       );
 
-      viewsController.createCompleter.complete();
+      viewsController.createCompleter!.complete();
 
 
       final Element containerElement = tester.element(find.byKey(containerKey));
@@ -1045,7 +1041,7 @@ void main() {
       containerFocusNode.requestFocus();
       await tester.pump();
 
-      int lastPlatformViewTextClient;
+      late int lastPlatformViewTextClient;
       SystemChannels.textInput.setMockMethodCallHandler((MethodCall call) {
         if (call.method == 'TextInput.setPlatformViewClient') {
           lastPlatformViewTextClient = call.arguments as int;
@@ -1085,7 +1081,7 @@ void main() {
         ),
       );
 
-      viewsController.createCompleter.complete();
+      viewsController.createCompleter!.complete();
 
       final Element containerElement = tester.element(find.byKey(containerKey));
       final FocusNode containerFocusNode = Focus.of(containerElement);
@@ -1103,10 +1099,94 @@ void main() {
 
       expect(viewsController.lastClearedFocusViewId, currentViewId + 1);
     });
+
+    testWidgets('can set and update clipBehavior', (WidgetTester tester) async {
+      final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      await tester.pumpWidget(
+        const Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: AndroidView(
+              viewType: 'webview',
+              layoutDirection: TextDirection.ltr,
+            ),
+          ),
+        ),
+      );
+
+      // By default, clipBehavior should be Clip.hardEdge
+      final RenderAndroidView renderObject = tester.renderObject(
+        find.descendant(
+          of: find.byType(AndroidView),
+          matching: find.byWidgetPredicate(
+            (Widget widget) => widget.runtimeType.toString() == '_AndroidPlatformView',
+          ),
+        ),
+      );
+      expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+
+      for(final Clip clip in Clip.values) {
+        await tester.pumpWidget(
+          Center(
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: AndroidView(
+                viewType: 'webview',
+                layoutDirection: TextDirection.ltr,
+                clipBehavior: clip,
+              ),
+            ),
+          ),
+        );
+        expect(renderObject.clipBehavior, clip);
+      }
+    });
+
+    testWidgets('clip is handled correctly during resizing', (WidgetTester tester) async {
+      // Regressing test for https://github.com/flutter/flutter/issues/67343
+      Widget buildView(double width, double height, Clip clipBehavior) {
+        return Center(
+          child: SizedBox(
+            width: width,
+            height: height,
+            child: AndroidView(
+              viewType: 'webview',
+              layoutDirection: TextDirection.ltr,
+              clipBehavior: clipBehavior,
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildView(200.0, 200.0, Clip.none));
+      // Resize the view.
+      await tester.pumpWidget(buildView(100.0, 100.0, Clip.none));
+      // No clip happen when the clip behavior is `Clip.none` .
+      expect(tester.layers.whereType<ClipRectLayer>(), hasLength(0));
+
+      // No clip when only the clip behavior changes while the size remains the same.
+      await tester.pumpWidget(buildView(100.0, 100.0, Clip.hardEdge));
+      expect(tester.layers.whereType<ClipRectLayer>(), hasLength(0));
+
+      // Resize trigger clip when the clip behavior is not `Clip.none` .
+      await tester.pumpWidget(buildView(50.0, 100.0, Clip.hardEdge));
+      expect(tester.layers.whereType<ClipRectLayer>(), hasLength(1));
+      ClipRectLayer clipRectLayer = tester.layers.whereType<ClipRectLayer>().first;
+      expect(clipRectLayer.clipRect, const Rect.fromLTWH(0.0, 0.0, 50.0, 100.0));
+
+      await tester.pumpWidget(buildView(50.0, 50.0, Clip.hardEdge));
+      expect(tester.layers.whereType<ClipRectLayer>(), hasLength(1));
+      clipRectLayer = tester.layers.whereType<ClipRectLayer>().first;
+      expect(clipRectLayer.clipRect, const Rect.fromLTWH(0.0, 0.0, 50.0, 50.0));
+    });
   });
 
   group('AndroidViewSurface', () {
-    FakeAndroidViewController controller;
+    late FakeAndroidViewController controller;
 
     setUp(() {
       controller = FakeAndroidViewController(0);
@@ -1230,7 +1310,7 @@ void main() {
         ),
       );
 
-      viewsController.creationDelay.complete();
+      viewsController.creationDelay!.complete();
 
       expect(
         viewsController.views,
@@ -1255,12 +1335,10 @@ void main() {
 
       await tester.pumpWidget(
         Center(
-          child: Container(
-            child: SizedBox(
-              width: 200.0,
-              height: 100.0,
-              child: UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr, key: key),
-            ),
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr, key: key),
           ),
         ),
       );
@@ -1294,7 +1372,7 @@ void main() {
       );
 
       final FakeUiKitView fakeView = viewsController.views.first;
-      final Uint8List rawCreationParams = fakeView.creationParams;
+      final Uint8List rawCreationParams = fakeView.creationParams!;
       final ByteData byteData = ByteData.view(
           rawCreationParams.buffer,
           rawCreationParams.offsetInBytes,
@@ -1803,16 +1881,16 @@ void main() {
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
-        Container(width: 300, height: 600,
+        SizedBox(width: 300, height: 600,
           child: Stack(
             alignment: Alignment.topLeft,
             children: <Widget>[
               Transform.translate(
                 offset: const Offset(0, 100),
-                child: Container(
+                child: const SizedBox(
                   width: 300,
                   height: 500,
-                  child: const UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr)),),
+                  child: UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr)),),
               Transform.translate(
                 offset: const Offset(0, 500),
                 child: Container(
@@ -1841,10 +1919,10 @@ void main() {
       viewsController.registerViewType('webview');
 
       int factoryInvocationCount = 0;
-      final ValueGetter<EagerGestureRecognizer> constructRecognizer = () {
+      EagerGestureRecognizer constructRecognizer() {
         factoryInvocationCount += 1;
         return EagerGestureRecognizer();
-      };
+      }
 
       await tester.pumpWidget(
         UiKitView(
@@ -1910,7 +1988,7 @@ void main() {
   });
 
   group('Common PlatformView', () {
-    FakePlatformViewController controller;
+    late FakePlatformViewController controller;
 
     setUp((){
       controller = FakePlatformViewController(0);
@@ -2116,10 +2194,10 @@ void main() {
     testWidgets('PlatformViewRenderBox reconstructed with same gestureRecognizers', (WidgetTester tester) async {
 
       int factoryInvocationCount = 0;
-      final ValueGetter<EagerGestureRecognizer> constructRecognizer = () {
+      EagerGestureRecognizer constructRecognizer() {
         ++ factoryInvocationCount;
         return EagerGestureRecognizer();
-      };
+      }
 
       final PlatformViewSurface platformViewSurface = PlatformViewSurface(
               controller: controller,
@@ -2140,10 +2218,10 @@ void main() {
     testWidgets('PlatformViewSurface rebuilt with same gestureRecognizers', (WidgetTester tester) async {
 
       int factoryInvocationCount = 0;
-      final ValueGetter<EagerGestureRecognizer> constructRecognizer = () {
+      EagerGestureRecognizer constructRecognizer() {
         ++ factoryInvocationCount;
         return EagerGestureRecognizer();
-      };
+      }
 
       await tester.pumpWidget(
         PlatformViewSurface(
@@ -2173,9 +2251,9 @@ void main() {
 
     testWidgets('PlatformViewLink Widget init, should create a SizedBox widget before onPlatformViewCreated and a PlatformViewSurface after', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      int createdPlatformViewId;
+      late int createdPlatformViewId;
 
-      PlatformViewCreatedCallback onPlatformViewCreatedCallBack;
+      late PlatformViewCreatedCallback onPlatformViewCreatedCallBack;
 
       final PlatformViewLink platformViewLink = PlatformViewLink(
         viewType: 'webview',
@@ -2205,7 +2283,7 @@ void main() {
     });
 
     testWidgets('PlatformViewLink Widget dispose', (WidgetTester tester) async {
-      FakePlatformViewController disposedController;
+      late FakePlatformViewController disposedController;
       final PlatformViewLink platformViewLink = PlatformViewLink(
         viewType: 'webview',
         onCreatePlatformView: (PlatformViewCreationParams params){
@@ -2266,12 +2344,10 @@ void main() {
 
       await tester.pumpWidget(
         Center(
-          child: Container(
-            child: SizedBox(
-              width: 200.0,
-              height: 100.0,
-              child: createPlatformViewLink(),
-            ),
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: createPlatformViewLink(),
           ),
         ),
       );
@@ -2370,8 +2446,8 @@ void main() {
 
     testWidgets('PlatformViewLink manages the focus properly', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
-      FakePlatformViewController controller;
-      ValueChanged<bool> focusChanged;
+      late FakePlatformViewController controller;
+      late ValueChanged<bool> focusChanged;
       final PlatformViewLink platformViewLink = PlatformViewLink(
         viewType: 'webview',
         onCreatePlatformView: (PlatformViewCreationParams params){
@@ -2407,7 +2483,7 @@ void main() {
               matching: find.byType(Focus),
           ),
       );
-      final FocusNode platformViewFocusNode = platformViewFocusWidget.focusNode;
+      final FocusNode platformViewFocusNode = platformViewFocusWidget.focusNode!;
       final Element containerElement = tester.element(find.byKey(containerKey));
       final FocusNode containerFocusNode = Focus.of(containerElement);
 
@@ -2506,7 +2582,7 @@ void main() {
     await gesture.moveTo(const Offset(400, 300));
     expect(logs, <String>['enter1']);
     expect(controller.dispatchedPointerEvents, hasLength(1));
-    expect(controller.dispatchedPointerEvents[0].runtimeType, PointerHoverEvent);
+    expect(controller.dispatchedPointerEvents[0], isA<PointerHoverEvent>());
     logs.clear();
     controller.dispatchedPointerEvents.clear();
 
@@ -2536,7 +2612,7 @@ void main() {
     await gesture.moveBy(const Offset(1, 1));
     expect(logs, isEmpty);
     expect(controller.dispatchedPointerEvents, hasLength(1));
-    expect(controller.dispatchedPointerEvents[0].runtimeType, PointerHoverEvent);
+    expect(controller.dispatchedPointerEvents[0], isA<PointerHoverEvent>());
     expect(controller.dispatchedPointerEvents[0].position, const Offset(401, 301));
     expect(controller.dispatchedPointerEvents[0].localPosition, const Offset(101, 101));
     controller.dispatchedPointerEvents.clear();
@@ -2571,6 +2647,6 @@ void main() {
     await gesture.moveBy(const Offset(1, 1));
     expect(logs, isEmpty);
     expect(controller.dispatchedPointerEvents, hasLength(1));
-    expect(controller.dispatchedPointerEvents[0].runtimeType, PointerHoverEvent);
+    expect(controller.dispatchedPointerEvents[0], isA<PointerHoverEvent>());
   });
 }

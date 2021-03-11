@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -25,8 +24,8 @@ const String kPlatformIntegrationPackageName = 'platform_integration';
 /// documentation to `//dev/docs/doc/api/`.
 ///
 /// This script also updates the index.html file so that it can be placed
-/// at the root of docs.flutter.io. We are keeping the files inside of
-/// docs.flutter.io/flutter for now, so we need to manipulate paths
+/// at the root of api.flutter.dev. We are keeping the files inside of
+/// api.flutter.dev/flutter for now, so we need to manipulate paths
 /// a bit. See https://github.com/flutter/flutter/issues/3900 for more info.
 ///
 /// This will only work on UNIX systems, not Windows. It requires that 'git' be
@@ -57,6 +56,8 @@ Future<void> main(List<String> arguments) async {
   buf.writeln('homepage: https://flutter.dev');
   // TODO(dnfield): Re-factor for proper versioning, https://github.com/flutter/flutter/issues/55409
   buf.writeln('version: 0.0.0');
+  buf.writeln('environment:');
+  buf.writeln("  sdk: '>=2.10.0 <3.0.0'");
   buf.writeln('dependencies:');
   for (final String package in findPackageNames()) {
     buf.writeln('  $package:');
@@ -140,7 +141,6 @@ Future<void> main(List<String> arguments) async {
   final List<String> dartdocArgs = <String>[
     ...dartdocBaseArgs,
     '--allow-tools',
-    '--enable-experiment=non-nullable',
     if (args['json'] as bool) '--json',
     if (args['validate-links'] as bool) '--validate-links' else '--no-validate-links',
     '--link-to-source-excludes', '../../bin/cache',
@@ -188,6 +188,7 @@ Future<void> main(List<String> arguments) async {
     ].join(','),
     '--exclude',
     <String>[
+      'dart:io/network_policy.dart', // dart-lang/dartdoc#2437
       'package:Flutter/temp_doc.dart',
       'package:http/browser_client.dart',
       'package:intl/intl_browser.dart',
@@ -302,7 +303,7 @@ void createSearchMetadata(String templatePath, String metadataPath) {
   final String branch = getBranchName();
   final String metadata = template.replaceAll(
     '{SITE_URL}',
-    branch == 'stable' ? 'https://docs.flutter.io/' : 'https://master-docs.flutter.io/',
+    branch == 'stable' ? 'https://api.flutter.dev/' : 'https://master-api.flutter.dev/',
   );
   Directory(path.dirname(metadataPath)).create(recursive: true);
   File(metadataPath).writeAsStringSync(metadata);
@@ -312,7 +313,7 @@ void createSearchMetadata(String templatePath, String metadataPath) {
 /// specified, for each source/destination file pair.
 ///
 /// Creates `destDir` if needed.
-void copyDirectorySync(Directory srcDir, Directory destDir, [void onFileCopied(File srcFile, File destFile)]) {
+void copyDirectorySync(Directory srcDir, Directory destDir, [void Function(File srcFile, File destFile) onFileCopied]) {
   if (!srcDir.existsSync())
     throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
 
@@ -467,6 +468,10 @@ List<Directory> findPackages() {
       if (entity is! Directory)
         return false;
       final File pubspec = File('${entity.path}/pubspec.yaml');
+      if (!pubspec.existsSync()) {
+        print("Unexpected package '${entity.path}' found in packages directory");
+        return false;
+      }
       // TODO(ianh): Use a real YAML parser here
       return !pubspec.readAsStringSync().contains('nodoc: true');
     })

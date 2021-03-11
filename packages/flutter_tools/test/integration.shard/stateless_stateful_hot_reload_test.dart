@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 
 import '../src/common.dart';
 import 'test_data/stateless_stateful_project.dart';
@@ -30,7 +31,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  test('Can switch between stateless and stateful', () async {
+  testWithoutContext('Can switch between stateless and stateful', () async {
     await _flutter.run();
     await _flutter.hotReload();
     final StringBuffer stdout = StringBuffer();

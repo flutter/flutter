@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -13,9 +15,11 @@ import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../build_info.dart';
 import '../bundle.dart';
-import '../convert.dart';
+import '../desktop_device.dart';
+import '../devfs.dart';
 import '../device.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
@@ -44,21 +48,23 @@ class FlutterTesterApp extends ApplicationPackage {
 /// Normally this is only used as the runner for `flutter test`, but it can
 /// also be used as a regular device when `--show-test-device` is provided
 /// to the flutter command.
-// TODO(scheglov): This device does not currently work with full restarts.
 class FlutterTesterDevice extends Device {
   FlutterTesterDevice(String deviceId, {
     @required ProcessManager processManager,
     @required FlutterVersion flutterVersion,
     @required Logger logger,
-    @required String buildDirectory,
+    // TODO(jonahwilliams): remove once g3 rolls.
+    // ignore: avoid_unused_constructor_parameters
+    String buildDirectory,
     @required FileSystem fileSystem,
     @required Artifacts artifacts,
+    @required OperatingSystemUtils operatingSystemUtils,
   }) : _processManager = processManager,
        _flutterVersion = flutterVersion,
        _logger = logger,
-       _buildDirectory = buildDirectory,
        _fileSystem = fileSystem,
        _artifacts = artifacts,
+       _operatingSystemUtils = operatingSystemUtils,
        super(
         deviceId,
         platformType: null,
@@ -69,9 +75,9 @@ class FlutterTesterDevice extends Device {
   final ProcessManager _processManager;
   final FlutterVersion _flutterVersion;
   final Logger _logger;
-  final String _buildDirectory;
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
+  final OperatingSystemUtils _operatingSystemUtils;
 
   Process _process;
   final DevicePortForwarder _portForwarder = const NoOpDevicePortForwarder();
@@ -103,8 +109,7 @@ class FlutterTesterDevice extends Device {
   @override
   void clearLogs() { }
 
-  final _FlutterTesterDeviceLogReader _logReader =
-      _FlutterTesterDeviceLogReader();
+  final DesktopLogReader _logReader = DesktopLogReader();
 
   @override
   DeviceLogReader getLogReader({
@@ -149,21 +154,22 @@ class FlutterTesterDevice extends Device {
       return LaunchResult.failed();
     }
 
-    final String assetDirPath = _fileSystem.path.join(_buildDirectory, 'flutter_assets');
+    final Directory assetDirectory = _fileSystem.systemTempDirectory
+      .createTempSync('flutter-tester');
     final String applicationKernelFilePath = getKernelPathForTransformerOptions(
-      _fileSystem.path.join(_buildDirectory, 'flutter-tester-app.dill'),
+      _fileSystem.path.join(assetDirectory.path, 'flutter-tester-app.dill'),
       trackWidgetCreation: buildInfo.trackWidgetCreation,
     );
+
     // Build assets and perform initial compilation.
     await BundleBuilder().build(
       buildInfo: buildInfo,
       mainPath: mainPath,
-      assetDirPath: assetDirPath,
       applicationKernelFilePath: applicationKernelFilePath,
-      precompiledSnapshot: false,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
-      platform: getTargetPlatformForName(getNameForHostPlatform(getCurrentHostPlatform())),
+      platform: getTargetPlatformForName(getNameForHostPlatform(_operatingSystemUtils.hostPlatform)),
       treeShakeIcons: buildInfo.treeShakeIcons,
+      assetDirPath: assetDirectory.path,
     );
 
     final List<String> command = <String>[
@@ -172,7 +178,7 @@ class FlutterTesterDevice extends Device {
       '--non-interactive',
       '--enable-dart-profiling',
       '--packages=${debuggingOptions.buildInfo.packagesPath}',
-      '--flutter-assets-dir=$assetDirPath',
+      '--flutter-assets-dir=${assetDirectory.path}',
       if (debuggingOptions.startPaused)
         '--start-paused',
       if (debuggingOptions.disableServiceAuthCodes)
@@ -190,15 +196,6 @@ class FlutterTesterDevice extends Device {
           'FLUTTER_TEST': 'true',
         },
       );
-      _process.stdout
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen(_logReader.addLine);
-      _process.stderr
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen(_logReader.addLine);
-
       if (!debuggingOptions.debuggingEnabled) {
         return LaunchResult.succeeded();
       }
@@ -209,6 +206,7 @@ class FlutterTesterDevice extends Device {
         devicePort: debuggingOptions.deviceVmServicePort,
         ipv6: ipv6,
       );
+      _logReader.initializeProcess(_process);
 
       final Uri observatoryUri = await observatoryDiscovery.uri;
       if (observatoryUri != null) {
@@ -246,6 +244,16 @@ class FlutterTesterDevice extends Device {
   bool isSupportedForProject(FlutterProject flutterProject) => true;
 
   @override
+  DevFSWriter createDevFSWriter(
+    covariant ApplicationPackage app,
+    String userIdentifier,
+  ) {
+    return LocalDevFSWriter(
+      fileSystem: _fileSystem,
+    );
+  }
+
+  @override
   Future<void> dispose() async {
     _logReader?.dispose();
     await _portForwarder?.dispose();
@@ -259,15 +267,18 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
     @required ProcessManager processManager,
     @required Logger logger,
     @required FlutterVersion flutterVersion,
-    @required Config config,
+    // TODO(jonahwilliams): remove after flutter rolls
+    // ignore: avoid_unused_constructor_parameters
+    Config config,
+    @required OperatingSystemUtils operatingSystemUtils,
   }) : _testerDevice = FlutterTesterDevice(
         kTesterDeviceId,
         fileSystem: fileSystem,
         artifacts: artifacts,
         processManager: processManager,
-        buildDirectory: getBuildDirectory(config, fileSystem),
         logger: logger,
         flutterVersion: flutterVersion,
+        operatingSystemUtils: operatingSystemUtils,
       ),
        super('Flutter tester');
 
@@ -287,23 +298,4 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
   Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
     return showFlutterTesterDevice ? <Device>[_testerDevice] : <Device>[];
   }
-}
-
-class _FlutterTesterDeviceLogReader extends DeviceLogReader {
-  final StreamController<String> _logLinesController =
-      StreamController<String>.broadcast();
-
-  @override
-  int get appPid => 0;
-
-  @override
-  Stream<String> get logLines => _logLinesController.stream;
-
-  @override
-  String get name => 'flutter tester log reader';
-
-  void addLine(String line) => _logLinesController.add(line);
-
-  @override
-  void dispose() {}
 }

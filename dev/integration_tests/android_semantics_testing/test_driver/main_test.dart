@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:android_semantics_testing/test_constants.dart';
@@ -239,12 +238,7 @@ void main() {
 
       test('Checkbox has correct Android semantics', () async {
         Future<AndroidSemanticsNode> getCheckboxSemantics(String key) async {
-          return getSemantics(
-            find.descendant(
-              of: find.byValueKey(key),
-              matching: find.byType('_CheckboxRenderObjectWidget'),
-            ),
-          );
+          return getSemantics(find.byValueKey(key));
         }
         expect(
           await getCheckboxSemantics(checkboxKeyValue),
@@ -291,12 +285,7 @@ void main() {
       });
       test('Radio has correct Android semantics', () async {
         Future<AndroidSemanticsNode> getRadioSemantics(String key) async {
-          return getSemantics(
-            find.descendant(
-              of: find.byValueKey(key),
-              matching: find.byType('_RadioRenderObjectWidget'),
-            ),
-          );
+          return getSemantics(find.byValueKey(key));
         }
         expect(
           await getRadioSemantics(radio2KeyValue),
@@ -332,12 +321,7 @@ void main() {
       });
       test('Switch has correct Android semantics', () async {
         Future<AndroidSemanticsNode> getSwitchSemantics(String key) async {
-          return getSemantics(
-            find.descendant(
-              of: find.byValueKey(key),
-              matching: find.byType('_SwitchRenderObjectWidget'),
-            ),
-          );
+          return getSemantics(find.byValueKey(key));
         }
         expect(
           await getSwitchSemantics(switchKeyValue),
@@ -375,12 +359,7 @@ void main() {
       // Regression test for https://github.com/flutter/flutter/issues/20820.
       test('Switch can be labeled', () async {
         Future<AndroidSemanticsNode> getSwitchSemantics(String key) async {
-          return getSemantics(
-            find.descendant(
-              of: find.byValueKey(key),
-              matching: find.byType('_SwitchRenderObjectWidget'),
-            ),
-          );
+          return getSemantics(find.byValueKey(key));
         }
         expect(
           await getSwitchSemantics(labeledSwitchKeyValue),
@@ -614,8 +593,8 @@ void main() {
                   isEnabled: true,
                   isFocusable: true,
                   actions: <AndroidSemanticsAction>[
-                    if (item == 'Body1') AndroidSemanticsAction.clearAccessibilityFocus,
-                    if (item != 'Body1') AndroidSemanticsAction.accessibilityFocus,
+                    if (item == 'Title') AndroidSemanticsAction.clearAccessibilityFocus,
+                    if (item != 'Title') AndroidSemanticsAction.accessibilityFocus,
                   ],
                 ),
                 reason: "Alert $item button doesn't have the right semantics");

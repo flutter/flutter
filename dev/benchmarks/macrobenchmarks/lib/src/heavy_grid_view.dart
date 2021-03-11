@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 
 class HeavyGridViewPage extends StatelessWidget {
+  const HeavyGridViewPage({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
@@ -19,7 +21,7 @@ class HeavyWidget extends StatelessWidget {
   HeavyWidget(this.index) : super(key: ValueKey<int>(index));
 
   final int index;
-  final List<int> _weight = List<int>(1000000);
+  final List<int> _weight = List<int>.filled(1000000, null);
 
   @override
   Widget build(BuildContext context) {

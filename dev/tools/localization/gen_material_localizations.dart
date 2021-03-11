@@ -4,7 +4,7 @@
 
 import 'localizations_utils.dart';
 
-HeaderGenerator generateMaterialHeader = (String regenerateInstructions) {
+String generateMaterialHeader(String regenerateInstructions) {
   return '''
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -16,7 +16,6 @@ HeaderGenerator generateMaterialHeader = (String regenerateInstructions) {
 
 import 'dart:collection';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 
@@ -28,11 +27,11 @@ import '../material_localizations.dart';
 // These classes are constructed by the [getMaterialTranslation] method at the
 // bottom of this file, and used by the [_MaterialLocalizationsDelegate.load]
 // method defined in `flutter_localizations/lib/src/material_localizations.dart`.''';
-};
+}
 
 /// Returns the source of the constructor for a GlobalMaterialLocalizations
 /// subclass.
-ConstructorGenerator generateMaterialConstructor = (LocaleInfo locale) {
+String generateMaterialConstructor(LocaleInfo locale) {
   final String localeName = locale.originalString;
   return '''
   /// Create an instance of the translation bundle for ${describeLocale(localeName)}.
@@ -40,15 +39,15 @@ ConstructorGenerator generateMaterialConstructor = (LocaleInfo locale) {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalization${locale.camelCase()}({
     String localeName = '$localeName',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -61,12 +60,12 @@ ConstructorGenerator generateMaterialConstructor = (LocaleInfo locale) {
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );''';
-};
+}
 
 const String materialFactoryName = 'getMaterialTranslation';
 
 const String materialFactoryDeclaration = '''
-GlobalMaterialLocalizations getMaterialTranslation(
+GlobalMaterialLocalizations? getMaterialTranslation(
   Locale locale,
   intl.DateFormat fullYearFormat,
   intl.DateFormat compactDateFormat,

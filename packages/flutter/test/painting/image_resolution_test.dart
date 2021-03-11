@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -48,7 +45,7 @@ void main() {
       final AssetImage assetImage = AssetImage(
           mainAssetPath,
           bundle: TestAssetBundle(assetBundleMap));
-      const ImageConfiguration configuration = ImageConfiguration();
+      const ImageConfiguration configuration = ImageConfiguration.empty;
 
       assetImage.obtainKey(configuration)
         .then(expectAsync1((AssetBundleImageKey bundleKey) {
@@ -101,7 +98,7 @@ void main() {
           bundle: testAssetBundle);
 
       // we have the exact match for this scale, let's use it
-      assetImage.obtainKey(const ImageConfiguration())
+      assetImage.obtainKey(ImageConfiguration.empty)
         .then(expectAsync1((AssetBundleImageKey bundleKey) {
           expect(bundleKey.name, mainAssetPath);
           expect(bundleKey.scale, 1.0);
@@ -133,7 +130,7 @@ void main() {
           bundle: TestAssetBundle(assetBundleMap));
 
 
-      assetImage.obtainKey(const ImageConfiguration())
+      assetImage.obtainKey(ImageConfiguration.empty)
         .then(expectAsync1((AssetBundleImageKey bundleKey) {
           expect(bundleKey.name, mainAssetPath);
           expect(bundleKey.scale, 1.0);

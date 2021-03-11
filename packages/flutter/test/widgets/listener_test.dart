@@ -2,14 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart';
 
 import 'gesture_utils.dart';
@@ -46,6 +43,34 @@ void main() {
       'bottom',
       'middle',
       'top',
+    ]));
+  });
+
+  testWidgets('Detects hover events from touch devices', (WidgetTester tester) async {
+    final List<String> log = <String>[];
+
+    await tester.pumpWidget(
+      Center(
+        child: SizedBox(
+          width: 300,
+          height: 300,
+          child: Listener(
+            onPointerHover: (_) {
+              log.add('bottom');
+            },
+            child: const Text('X', textDirection: TextDirection.ltr),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tester.getCenter(find.byType(Listener)));
+
+    expect(log, equals(<String>[
+      'bottom',
     ]));
   });
 

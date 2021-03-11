@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -144,7 +142,7 @@ void main() {
         await tester.pump(Duration(milliseconds: millis));
       }
 
-      void verify({ double size, RenderAnimatedSizeState state }) {
+      void verify({ double? size, RenderAnimatedSizeState? state }) {
         assert(size != null || state != null);
         final RenderAnimatedSize box = tester.renderObject(find.byType(AnimatedSize));
         if (size != null) {
@@ -280,6 +278,90 @@ void main() {
         expect(box.isAnimating, false);
         await tester.pump(const Duration(milliseconds: 10));
       }
+    });
+
+    testWidgets('can set and update clipBehavior', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Center(
+          child: AnimatedSize(
+            duration: const Duration(milliseconds: 200),
+            vsync: tester,
+            child: const SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
+          ),
+        ),
+      );
+
+      // By default, clipBehavior should be Clip.hardEdge
+      final RenderAnimatedSize renderObject = tester.renderObject(find.byType(AnimatedSize));
+      expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+
+      for(final Clip clip in Clip.values) {
+        await tester.pumpWidget(
+          Center(
+            child: AnimatedSize(
+              duration: const Duration(milliseconds: 200),
+              vsync: tester,
+              clipBehavior: clip,
+              child: const SizedBox(
+                width: 100.0,
+                height: 100.0,
+              ),
+            ),
+          ),
+        );
+        expect(renderObject.clipBehavior, clip);
+      }
+    });
+
+    testWidgets('works wrapped in IntrinsicHeight and Wrap', (WidgetTester tester) async {
+      Future<void> pumpWidget(Size size, [Duration? duration]) async {
+        return tester.pumpWidget(
+          Center(
+            child: IntrinsicHeight(
+              child: Wrap(
+                textDirection: TextDirection.ltr,
+                children: <Widget>[
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeInOutBack,
+                    vsync: tester,
+                    child: SizedBox(
+                      width: size.width,
+                      height: size.height,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          duration,
+        );
+      }
+
+      await pumpWidget(const Size(100, 100));
+      expect(tester.renderObject<RenderBox>(find.byType(IntrinsicHeight)).size, const Size(100, 100));
+
+      await pumpWidget(const Size(150, 200));
+      expect(tester.renderObject<RenderBox>(find.byType(IntrinsicHeight)).size, const Size(100, 100));
+
+      // Each pump triggers verification of dry layout.
+      for (int total = 0; total < 200; total += 10) {
+        await tester.pump(const Duration(milliseconds: 10));
+      }
+      expect(tester.renderObject<RenderBox>(find.byType(IntrinsicHeight)).size, const Size(150, 200));
+
+      // Change every pump
+      await pumpWidget(const Size(100, 100));
+      expect(tester.renderObject<RenderBox>(find.byType(IntrinsicHeight)).size, const Size(150, 200));
+
+      await pumpWidget(const Size(111, 111), const Duration(milliseconds: 10));
+      expect(tester.renderObject<RenderBox>(find.byType(IntrinsicHeight)).size, const Size(111, 111));
+
+      await pumpWidget(const Size(222, 222), const Duration(milliseconds: 10));
+      expect(tester.renderObject<RenderBox>(find.byType(IntrinsicHeight)).size, const Size(222, 222));
     });
   });
 }

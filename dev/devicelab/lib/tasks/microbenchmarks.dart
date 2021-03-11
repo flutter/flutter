@@ -10,6 +10,7 @@ import 'package:path/path.dart' as path;
 
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
 /// Creates a device lab task that runs benchmarks in
@@ -29,17 +30,18 @@ TaskFunction createMicrobenchmarkTask() {
             '-v',
             // --release doesn't work on iOS due to code signing issues
             '--profile',
+            '--no-publish-port',
             '-d',
             device.deviceId,
           ];
           options.add(benchmarkPath);
-          return await _startFlutter(
+          return _startFlutter(
             options: options,
             canFail: false,
           );
         });
 
-        return await _readJsonResults(flutterProcess);
+        return _readJsonResults(flutterProcess);
       }
       return _run();
     }
@@ -54,6 +56,7 @@ TaskFunction createMicrobenchmarkTask() {
       ...await _runMicrobench('lib/stocks/animation_bench.dart'),
       ...await _runMicrobench('lib/language/sync_star_bench.dart'),
       ...await _runMicrobench('lib/language/sync_star_semantics_bench.dart'),
+      ...await _runMicrobench('lib/foundation/all_elements_bench.dart'),
       ...await _runMicrobench('lib/foundation/change_notifier_bench.dart'),
  };
 

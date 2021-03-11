@@ -2,14 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-// This file contains tests that are only supported by the Dart VM. For
-// example, on the Web there's no way to express large integers.
 @TestOn('!chrome')
-
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import '../flutter_test_alternative.dart';
 import 'message_codecs_testing.dart';
@@ -82,5 +78,5 @@ void main() {
       ];
       checkEncodeDecode<dynamic>(standard, message);
     });
-  });
+  }, skip: kIsWeb);
 }

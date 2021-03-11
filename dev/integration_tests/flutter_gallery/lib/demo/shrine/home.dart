@@ -12,14 +12,14 @@ import 'package:flutter_gallery/demo/shrine/model/product.dart';
 import 'package:flutter_gallery/demo/shrine/supplemental/asymmetric_view.dart';
 
 class ProductPage extends StatelessWidget {
-  const ProductPage({this.category = Category.all});
+  const ProductPage({Key? key, this.category = Category.all}) : super(key: key);
 
   final Category category;
 
   @override
   Widget build(BuildContext context) {
     return ScopedModelDescendant<AppStateModel>(
-      builder: (BuildContext context, Widget child, AppStateModel model) {
+      builder: (BuildContext context, Widget? child, AppStateModel model) {
         return AsymmetricView(products: model.getProducts());
       });
   }
@@ -29,17 +29,18 @@ class HomePage extends StatelessWidget {
   const HomePage({
     this.expandingBottomSheet,
     this.backdrop,
-    Key key,
+    Key? key,
   }) : super(key: key);
 
-  final ExpandingBottomSheet expandingBottomSheet;
-  final Backdrop backdrop;
+  final ExpandingBottomSheet? expandingBottomSheet;
+  final Backdrop? backdrop;
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: <Widget>[
-        backdrop,
+        if (backdrop != null)
+          backdrop!,
         Align(child: expandingBottomSheet, alignment: Alignment.bottomRight),
       ],
     );

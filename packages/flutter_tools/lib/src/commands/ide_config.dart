@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+// @dart = 2.8
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -23,19 +23,19 @@ class IdeConfigCommand extends FlutterCommand {
       'update-templates',
       negatable: false,
       help: 'Update the templates in the template directory from the current '
-          'configuration files. This is the opposite of what $name usually does. '
-          'Will search the flutter tree for .iml files and copy any missing ones '
-          'into the template directory. If --overwrite is also specified, it will '
-          'update any out-of-date files, and remove any deleted files from the '
-          'template directory.',
+            'configuration files. This is the opposite of what $name usually does. '
+            'Will search the flutter tree for *.iml files and copy any missing ones '
+            'into the template directory. If "--overwrite" is also specified, it will '
+            'update any out-of-date files, and remove any deleted files from the '
+            'template directory.',
     );
     argParser.addFlag(
       'with-root-module',
       negatable: true,
       defaultsTo: true,
       help: 'Also create module that corresponds to the root of Flutter tree. '
-          'This makes the entire Flutter tree browsable and searchable in IDE. '
-          'Without this flag, only the child modules will be visible in IDE.',
+            'This makes the entire Flutter tree browsable and searchable in IDE. '
+            'Without this flag, only the child modules will be visible in IDE.',
     );
   }
 
@@ -270,13 +270,11 @@ class IdeConfigCommand extends FlutterCommand {
 String _validateFlutterDir(String dirPath, { String flutterRoot }) {
   final FileSystemEntityType type = globals.fs.typeSync(dirPath);
 
-  if (type != FileSystemEntityType.notFound) {
-    switch (type) {
-      case FileSystemEntityType.link:
-        // Do not overwrite links.
-        return "Invalid project root dir: '$dirPath' - refers to a link.";
-    }
+  switch (type) {
+    case FileSystemEntityType.link:
+      // Do not overwrite links.
+      return "Invalid project root dir: '$dirPath' - refers to a link.";
+    default:
+      return null;
   }
-
-  return null;
 }

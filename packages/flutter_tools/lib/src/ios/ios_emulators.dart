@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+// @dart = 2.8
 
 import '../base/process.dart';
 import '../device.dart';
@@ -49,7 +49,7 @@ class IOSEmulator extends Emulator {
         globals.xcode.getSimulatorPath(),
       ];
 
-      final RunResult launchResult = await processUtils.run(args);
+      final RunResult launchResult = await globals.processUtils.run(args);
       if (launchResult.exitCode != 0) {
         globals.printError('$launchResult');
         return false;

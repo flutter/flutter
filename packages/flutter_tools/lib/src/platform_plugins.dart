@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
 import 'base/common.dart';
 import 'base/file_system.dart';
-import 'globals.dart' as globals;
 
 /// Constant for 'pluginClass' key in plugin maps.
 const String kPluginClass = 'pluginClass';
@@ -15,7 +16,10 @@ const String kPluginClass = 'pluginClass';
 /// Constant for 'pluginClass' key in plugin maps.
 const String kDartPluginClass = 'dartPluginClass';
 
-/// Marker interface for all platform specific plugin config impls.
+// Constant for 'defaultPackage' key in plugin maps.
+const String kDefaultPackage = 'default_package';
+
+/// Marker interface for all platform specific plugin config implementations.
 abstract class PluginPlatform {
   const PluginPlatform();
 
@@ -38,17 +42,21 @@ class AndroidPlugin extends PluginPlatform {
     @required this.package,
     @required this.pluginClass,
     @required this.pluginPath,
-  });
+    @required FileSystem fileSystem,
+  }) : _fileSystem = fileSystem;
 
-  factory AndroidPlugin.fromYaml(String name, YamlMap yaml, String pluginPath) {
+  factory AndroidPlugin.fromYaml(String name, YamlMap yaml, String pluginPath, FileSystem fileSystem) {
     assert(validate(yaml));
     return AndroidPlugin(
       name: name,
       package: yaml['package'] as String,
       pluginClass: yaml['pluginClass'] as String,
       pluginPath: pluginPath,
+      fileSystem: fileSystem,
     );
   }
+
+  final FileSystem _fileSystem;
 
   static bool validate(YamlMap yaml) {
     if (yaml == null) {
@@ -91,7 +99,7 @@ class AndroidPlugin extends PluginPlatform {
   Set<String> _getSupportedEmbeddings() {
     assert(pluginPath != null);
     final Set<String> supportedEmbeddings = <String>{};
-    final String baseMainPath = globals.fs.path.join(
+    final String baseMainPath = _fileSystem.path.join(
       pluginPath,
       'android',
       'src',
@@ -99,16 +107,16 @@ class AndroidPlugin extends PluginPlatform {
     );
 
     final List<String> mainClassCandidates = <String>[
-      globals.fs.path.join(
+      _fileSystem.path.join(
         baseMainPath,
         'java',
-        package.replaceAll('.', globals.fs.path.separator),
+        package.replaceAll('.', _fileSystem.path.separator),
         '$pluginClass.java',
       ),
-      globals.fs.path.join(
+      _fileSystem.path.join(
         baseMainPath,
         'kotlin',
-        package.replaceAll('.', globals.fs.path.separator),
+        package.replaceAll('.', _fileSystem.path.separator),
         '$pluginClass.kt',
       )
     ];
@@ -116,7 +124,7 @@ class AndroidPlugin extends PluginPlatform {
     File mainPluginClass;
     bool mainClassFound = false;
     for (final String mainClassCandidate in mainClassCandidates) {
-      mainPluginClass = globals.fs.file(mainClassCandidate);
+      mainPluginClass = _fileSystem.file(mainClassCandidate);
       if (mainPluginClass.existsSync()) {
         mainClassFound = true;
         break;
@@ -132,15 +140,7 @@ class AndroidPlugin extends PluginPlatform {
       );
     }
 
-    String mainClassContent;
-    try {
-      mainClassContent = mainPluginClass.readAsStringSync();
-    } on FileSystemException {
-      throwToolExit(
-        "Couldn't read file ${mainPluginClass.path} even though it exists. "
-        'Please verify that this file has read permission and try again.'
-      );
-    }
+    final String mainClassContent = mainPluginClass.readAsStringSync();
     if (mainClassContent
         .contains('io.flutter.embedding.engine.plugins.FlutterPlugin')) {
       supportedEmbeddings.add('2');
@@ -167,7 +167,7 @@ class IOSPlugin extends PluginPlatform {
   });
 
   factory IOSPlugin.fromYaml(String name, YamlMap yaml) {
-    assert(validate(yaml));
+    assert(validate(yaml)); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/67241
     return IOSPlugin(
       name: name,
       classPrefix: '',
@@ -210,6 +210,7 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
     @required this.name,
     this.pluginClass,
     this.dartPluginClass,
+    this.defaultPackage,
   });
 
   factory MacOSPlugin.fromYaml(String name, YamlMap yaml) {
@@ -223,6 +224,7 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
       name: name,
       pluginClass: pluginClass,
       dartPluginClass: yaml[kDartPluginClass] as String,
+      defaultPackage: yaml[kDefaultPackage] as String,
     );
   }
 
@@ -230,7 +232,9 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
     if (yaml == null) {
       return false;
     }
-    return yaml[kPluginClass] is String || yaml[kDartPluginClass] is String;
+    return yaml[kPluginClass] is String ||
+           yaml[kDartPluginClass] is String ||
+           yaml[kDefaultPackage] is String;
   }
 
   static const String kConfigKey = 'macos';
@@ -238,6 +242,7 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
   final String name;
   final String pluginClass;
   final String dartPluginClass;
+  final String defaultPackage;
 
   @override
   bool isNative() => pluginClass != null;
@@ -247,7 +252,8 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
     return <String, dynamic>{
       'name': name,
       if (pluginClass != null) 'class': pluginClass,
-      if (dartPluginClass != null) 'dartPluginClass': dartPluginClass,
+      if (dartPluginClass != null) kDartPluginClass : dartPluginClass,
+      if (defaultPackage != null) kDefaultPackage : defaultPackage,
     };
   }
 }
@@ -261,7 +267,8 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin{
     @required this.name,
     this.pluginClass,
     this.dartPluginClass,
-  }) : assert(pluginClass != null || dartPluginClass != null);
+    this.defaultPackage,
+  }) : assert(pluginClass != null || dartPluginClass != null || defaultPackage != null);
 
   factory WindowsPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
@@ -274,6 +281,7 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin{
       name: name,
       pluginClass: pluginClass,
       dartPluginClass: yaml[kDartPluginClass] as String,
+      defaultPackage: yaml[kDefaultPackage] as String,
     );
   }
 
@@ -281,7 +289,9 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin{
     if (yaml == null) {
       return false;
     }
-    return yaml[kDartPluginClass] is String || yaml[kPluginClass] is String;
+    return yaml[kPluginClass] is String ||
+           yaml[kDartPluginClass] is String ||
+           yaml[kDefaultPackage] is String;
   }
 
   static const String kConfigKey = 'windows';
@@ -289,6 +299,7 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin{
   final String name;
   final String pluginClass;
   final String dartPluginClass;
+  final String defaultPackage;
 
   @override
   bool isNative() => pluginClass != null;
@@ -299,7 +310,8 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin{
       'name': name,
       if (pluginClass != null) 'class': pluginClass,
       if (pluginClass != null) 'filename': _filenameForCppClass(pluginClass),
-      if (dartPluginClass != null) 'dartPluginClass': dartPluginClass,
+      if (dartPluginClass != null) kDartPluginClass: dartPluginClass,
+      if (defaultPackage != null) kDefaultPackage: defaultPackage,
     };
   }
 }
@@ -313,7 +325,8 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
     @required this.name,
     this.pluginClass,
     this.dartPluginClass,
-  }) : assert(pluginClass != null || dartPluginClass != null);
+    this.defaultPackage,
+  }) : assert(pluginClass != null || dartPluginClass != null || defaultPackage != null);
 
   factory LinuxPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
@@ -326,6 +339,7 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
       name: name,
       pluginClass: pluginClass,
       dartPluginClass: yaml[kDartPluginClass] as String,
+      defaultPackage: yaml[kDefaultPackage] as String,
     );
   }
 
@@ -333,7 +347,9 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
     if (yaml == null) {
       return false;
     }
-    return yaml[kPluginClass] is String || yaml[kDartPluginClass] is String;
+    return yaml[kPluginClass] is String ||
+           yaml[kDartPluginClass] is String ||
+           yaml[kDefaultPackage] is String;
   }
 
   static const String kConfigKey = 'linux';
@@ -341,6 +357,7 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
   final String name;
   final String pluginClass;
   final String dartPluginClass;
+  final String defaultPackage;
 
   @override
   bool isNative() => pluginClass != null;
@@ -351,7 +368,8 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
       'name': name,
       if (pluginClass != null) 'class': pluginClass,
       if (pluginClass != null) 'filename': _filenameForCppClass(pluginClass),
-      if (dartPluginClass != null) 'dartPluginClass': dartPluginClass,
+      if (dartPluginClass != null) kDartPluginClass: dartPluginClass,
+      if (defaultPackage != null) kDefaultPackage: defaultPackage,
     };
   }
 }

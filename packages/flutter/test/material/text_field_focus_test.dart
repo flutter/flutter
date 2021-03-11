@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
@@ -121,6 +119,8 @@ void main() {
     expect(tester.testTextInput.isVisible, isTrue);
 
     tester.testTextInput.hide();
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    state.connectionClosed();
 
     expect(tester.testTextInput.isVisible, isFalse);
 
@@ -177,7 +177,7 @@ void main() {
   testWidgets('Focus keep-alive works with GlobalKey reparenting', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
-    Widget makeTest(String prefix) {
+    Widget makeTest(String? prefix) {
       return MaterialApp(
         home: Material(
           child: ListView(

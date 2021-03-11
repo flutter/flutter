@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+// @dart = 2.8
 
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -33,7 +33,6 @@ void main() {
       await asset.build(
         manifestPath : globals.fs.path.join(dataPath, 'main', 'pubspec.yaml'),
         packagesPath: globals.fs.path.join(dataPath, 'main', '.packages'),
-        includeDefaultFonts: false,
       );
 
       expect(asset.entries.containsKey('FontManifest.json'), isTrue);
@@ -57,7 +56,6 @@ void main() {
       await asset.build(
         manifestPath : globals.fs.path.join(dataPath, 'main', 'pubspec.yaml'), // file doesn't exist
         packagesPath: globals.fs.path.join(dataPath, 'main', '.packages'),
-        includeDefaultFonts: false,
       );
       expect(asset.wasBuiltOnce(), true);
     });

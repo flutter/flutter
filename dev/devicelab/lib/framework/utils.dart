@@ -7,13 +7,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:args/args.dart';
+import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 import 'package:stack_trace/stack_trace.dart';
 
-import 'framework.dart';
+import 'task_result.dart';
 
 /// Virtual current working directory, which affect functions, such as [exec].
 String cwd = Directory.current.path;
@@ -281,11 +281,11 @@ Future<Process> startProcess(
   final String finalWorkingDirectory = workingDirectory ?? cwd;
   print('\nExecuting: $command in $finalWorkingDirectory'
       + (environment != null ? ' with environment $environment' : ''));
-  environment ??= <String, String>{};
-  environment['BOT'] = isBot ? 'true' : 'false';
+  final Map<String, String> newEnvironment = Map<String, String>.from(environment ?? <String, String>{});
+  newEnvironment['BOT'] = isBot ? 'true' : 'false';
   final Process process = await _processManager.start(
     <String>[executable, ...arguments],
-    environment: environment,
+    environment: newEnvironment,
     workingDirectory: finalWorkingDirectory,
   );
   final ProcessInfo processInfo = ProcessInfo(command, process);
@@ -322,6 +322,7 @@ Future<int> exec(
   List<String> arguments, {
   Map<String, String> environment,
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
+  StringBuffer stderr, // if not null, the stderr will be written here
   String workingDirectory,
 }) async {
   return _execute(
@@ -329,6 +330,7 @@ Future<int> exec(
     arguments,
     environment: environment,
     canFail : canFail,
+    stderr: stderr,
     workingDirectory: workingDirectory,
   );
 }
@@ -433,22 +435,39 @@ Future<String> eval(
 }
 
 List<String> flutterCommandArgs(String command, List<String> options) {
+  // Commands support the --device-timeout flag.
+  final Set<String> supportedDeviceTimeoutCommands = <String>{
+    'attach',
+    'devices',
+    'drive',
+    'install',
+    'logs',
+    'run',
+    'screenshot',
+  };
   return <String>[
     command,
+    if (deviceOperatingSystem == DeviceOperatingSystem.ios && supportedDeviceTimeoutCommands.contains(command))
+      ...<String>[
+        '--device-timeout',
+        '5',
+      ],
     if (localEngine != null) ...<String>['--local-engine', localEngine],
     if (localEngineSrcPath != null) ...<String>['--local-engine-src-path', localEngineSrcPath],
     ...options,
   ];
 }
 
+/// Runs the flutter `command`, and returns the exit code.
+/// If `canFail` is `false`, the future completes with an error.
 Future<int> flutter(String command, {
   List<String> options = const <String>[],
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
-  Map<String, String> environment,
+  Map<String, String> environment = const <String, String>{},
 }) {
   final List<String> args = flutterCommandArgs(command, options);
   return exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
-      canFail: canFail, environment: environment);
+    canFail: canFail, environment: environment);
 }
 
 /// Runs a `flutter` command and returns the standard output as a string.
@@ -461,6 +480,16 @@ Future<String> evalFlutter(String command, {
   final List<String> args = flutterCommandArgs(command, options);
   return eval(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
       canFail: canFail, environment: environment, stderr: stderr);
+}
+
+Future<ProcessResult> executeFlutter(String command, {
+  List<String> options = const <String>[],
+}) async {
+  final List<String> args = flutterCommandArgs(command, options);
+  return _processManager.run(
+    <String>[path.join(flutterDirectory.path, 'bin', 'flutter'), ...args],
+    workingDirectory: cwd,
+  );
 }
 
 String get dartBin =>
@@ -485,7 +514,7 @@ Future<String> findJavaHome() async {
   return path.dirname(path.dirname(javaBinary));
 }
 
-Future<T> inDirectory<T>(dynamic directory, Future<T> action()) async {
+Future<T> inDirectory<T>(dynamic directory, Future<T> Function() action) async {
   final String previousCwd = cwd;
   try {
     cd(directory);
@@ -600,7 +629,7 @@ Iterable<String> grep(Pattern pattern, {@required String from}) {
 ///     } catch (error, chain) {
 ///
 ///     }
-Future<void> runAndCaptureAsyncStacks(Future<void> callback()) {
+Future<void> runAndCaptureAsyncStacks(Future<void> Function() callback) {
   final Completer<void> completer = Completer<void>();
   Chain.capture(() async {
     await callback();
@@ -610,26 +639,6 @@ Future<void> runAndCaptureAsyncStacks(Future<void> callback()) {
 }
 
 bool canRun(String path) => _processManager.canRun(path);
-
-String extractCloudAuthTokenArg(List<String> rawArgs) {
-  final ArgParser argParser = ArgParser()..addOption('cloud-auth-token');
-  ArgResults args;
-  try {
-    args = argParser.parse(rawArgs);
-  } on FormatException catch (error) {
-    stderr.writeln('${error.message}\n');
-    stderr.writeln('Usage:\n');
-    stderr.writeln(argParser.usage);
-    return null;
-  }
-
-  final String token = args['cloud-auth-token'] as String;
-  if (token == null) {
-    stderr.writeln('Required option --cloud-auth-token not found');
-    return null;
-  }
-  return token;
-}
 
 final RegExp _obsRegExp =
   RegExp('An Observatory debugger .* is available at: ');
@@ -741,8 +750,39 @@ Future<int> gitClone({String path, String repo}) async {
 
   await Directory(path).create(recursive: true);
 
-  return await inDirectory<int>(
+  return inDirectory<int>(
     path,
         () => exec('git', <String>['clone', repo]),
   );
+}
+
+/// Call [fn] retrying so long as [retryIf] return `true` for the exception
+/// thrown and [maxAttempts] has not been reached.
+///
+/// If no [retryIf] function is given this will retry any for any [Exception]
+/// thrown. To retry on an [Error], the error must be caught and _rethrown_
+/// as an [Exception].
+///
+/// Waits a constant duration of [delayDuration] between every retry attempt.
+Future<T> retry<T>(
+  FutureOr<T> Function() fn, {
+  FutureOr<bool> Function(Exception) retryIf,
+  int maxAttempts = 5,
+  Duration delayDuration = const Duration(seconds: 3),
+}) async {
+  int attempt = 0;
+  while (true) {
+    attempt++; // first invocation is the first attempt
+    try {
+      return await fn();
+    } on Exception catch (e) {
+      if (attempt >= maxAttempts ||
+          (retryIf != null && !(await retryIf(e)))) {
+        rethrow;
+      }
+    }
+
+    // Sleep for a delay
+    await Future<void>.delayed(delayDuration);
+  }
 }

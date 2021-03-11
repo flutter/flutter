@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -248,9 +245,7 @@ void main() {
                     showModalBottomSheet<void>(
                       context: context,
                       builder: (BuildContext context) {
-                        return Container(
-                          child: const Text('This is a modal bottom sheet.'),
-                        );
+                        return const Text('This is a modal bottom sheet.');
                       },
                     );
                   },
@@ -302,10 +297,8 @@ Widget bottomSheetWithElevations(BottomSheetThemeData bottomSheetTheme) {
                     showModalBottomSheet<void>(
                       context: context,
                       builder: (BuildContext _) {
-                        return Container(
-                          child: const Text(
-                            'This is a modal bottom sheet.',
-                          ),
+                        return const Text(
+                          'This is a modal bottom sheet.',
                         );
                       },
                     );
@@ -317,10 +310,8 @@ Widget bottomSheetWithElevations(BottomSheetThemeData bottomSheetTheme) {
                     showBottomSheet<void>(
                       context: context,
                       builder: (BuildContext _) {
-                        return Container(
-                          child: const Text(
-                            'This is a persistent bottom sheet.',
-                          ),
+                        return const Text(
+                          'This is a persistent bottom sheet.',
                         );
                       },
                     );

@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 
-import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
-import 'package:vm_service_client/vm_service_client.dart';
+import 'package:vm_service/vm_service.dart' as vms;
+import 'package:webdriver/async_io.dart' as async_io;
 
 import '../common/diagnostics_tree.dart';
 import '../common/error.dart';
@@ -65,7 +64,7 @@ enum TimelineStream {
 
 /// How long to wait before showing a message saying that
 /// things seem to be taking a long time.
-@visibleForTesting
+@internal
 const Duration kUnusuallyLongTimeout = Duration(seconds: 5);
 
 /// A convenient accessor to frequently used finders.
@@ -90,84 +89,89 @@ abstract class FlutterDriver {
   FlutterDriver();
 
   /// Creates a driver that uses a connection provided by either the combination
-  /// of [webConnection], or the combination of [serviceClient],
-  /// [peer] and [appIsolate]
+  /// of [webConnection], or the combination of [serviceClient] and [appIsolate]
+  /// for the VM.
   @visibleForTesting
   factory FlutterDriver.connectedTo({
-    FlutterWebConnection webConnection,
-    VMServiceClient serviceClient,
-    rpc.Peer peer,
-    VMIsolate appIsolate,
+    FlutterWebConnection? webConnection,
+    vms.VmService? serviceClient,
+    vms.Isolate? appIsolate,
   }) {
     if (webConnection != null) {
       return WebFlutterDriver.connectedTo(webConnection);
     }
-    return VMServiceFlutterDriver.connectedTo(serviceClient, peer, appIsolate);
+    return VMServiceFlutterDriver.connectedTo(serviceClient!, appIsolate!);
   }
 
   /// Connects to a Flutter application.
   ///
   /// Resumes the application if it is currently paused (e.g. at a breakpoint).
   ///
-  /// `dartVmServiceUrl` is the URL to Dart observatory (a.k.a. VM service). If
-  /// not specified, the URL specified by the `VM_SERVICE_URL` environment
-  /// variable is used. One or the other must be specified.
+  /// The `dartVmServiceUrl` parameter is the URL to Dart observatory
+  /// (a.k.a. VM service). If not specified, the URL specified by the
+  /// `VM_SERVICE_URL` environment variable is used. One or the other must be
+  /// specified.
   ///
-  /// `printCommunication` determines whether the command communication between
-  /// the test and the app should be printed to stdout.
+  /// The `printCommunication` parameter determines whether the command
+  /// communication between the test and the app should be printed to stdout.
   ///
-  /// `logCommunicationToFile` determines whether the command communication
-  /// between the test and the app should be logged to `flutter_driver_commands.log`.
+  /// The `logCommunicationToFile` parameter determines whether the command
+  /// communication between the test and the app should be logged to
+  /// `flutter_driver_commands.log`.
   ///
-  /// `isolateNumber` determines the specific isolate to connect to.
-  /// If this is left as `null`, will connect to the first isolate found
+  /// The `isolateNumber` parameter determines the specific isolate to connect
+  /// to. If this is left as `null`, will connect to the first isolate found
   /// running on `dartVmServiceUrl`.
   ///
-  /// `fuchsiaModuleTarget` specifies the pattern for determining which mod to
-  /// control. When running on a Fuchsia device, either this or the environment
-  /// variable `FUCHSIA_MODULE_TARGET` must be set (the environment variable is
-  /// treated as a substring pattern). This field will be ignored if
+  /// The `fuchsiaModuleTarget` parameter specifies the pattern for determining
+  /// which mod to control. When running on a Fuchsia device, either this or the
+  /// environment variable `FUCHSIA_MODULE_TARGET` must be set (the environment
+  /// variable is treated as a substring pattern). This field will be ignored if
   /// `isolateNumber` is set, as this is already enough information to connect
-  /// to an isolate.
+  /// to an isolate. This parameter is ignored on non-fuchsia devices.
   ///
-  /// `headers` optionally specifies HTTP headers to be included in the
-  /// [WebSocket] connection. This is only used for [VMServiceFlutterDriver]
-  /// connections.
-  ///
-  /// `browser` specifies which FlutterDriver implementation to use. If not
-  /// speicifed or set to false, [VMServiceFlutterDriver] implementation
-  /// will be used. Otherwise, [WebFlutterDriver] implementation will be used.
+  /// The `headers` parameter optionally specifies HTTP headers to be included
+  /// in the [WebSocket] connection. This is only used for
+  /// [VMServiceFlutterDriver] connections.
   ///
   /// The return value is a future. This method never times out, though it may
   /// fail (completing with an error). A timeout can be applied by the caller
   /// using [Future.timeout] if necessary.
   static Future<FlutterDriver> connect({
-    String dartVmServiceUrl,
+    String? dartVmServiceUrl,
     bool printCommunication = false,
     bool logCommunicationToFile = true,
-    int isolateNumber,
-    Pattern fuchsiaModuleTarget,
-    Duration timeout,
-    Map<String, dynamic> headers,
+    int? isolateNumber,
+    Pattern? fuchsiaModuleTarget,
+    Duration? timeout,
+    Map<String, dynamic>? headers,
   }) async {
     if (Platform.environment['FLUTTER_WEB_TEST'] != null) {
       return WebFlutterDriver.connectWeb(hostUrl: dartVmServiceUrl, timeout: timeout);
     }
     return VMServiceFlutterDriver.connect(
-              dartVmServiceUrl: dartVmServiceUrl,
-              printCommunication: printCommunication,
-              logCommunicationToFile: logCommunicationToFile,
-              isolateNumber: isolateNumber,
-              fuchsiaModuleTarget: fuchsiaModuleTarget,
-              headers: headers,
+      dartVmServiceUrl: dartVmServiceUrl,
+      printCommunication: printCommunication,
+      logCommunicationToFile: logCommunicationToFile,
+      isolateNumber: isolateNumber,
+      fuchsiaModuleTarget: fuchsiaModuleTarget,
+      headers: headers,
     );
   }
 
   /// Getter of appIsolate.
-  VMIsolate get appIsolate => throw UnimplementedError();
+  vms.Isolate get appIsolate => throw UnimplementedError();
 
   /// Getter of serviceClient.
-  VMServiceClient get serviceClient => throw UnimplementedError();
+  vms.VmService get serviceClient => throw UnimplementedError();
+
+  /// Getter of webDriver.
+  async_io.WebDriver get webDriver => throw UnimplementedError();
+
+  /// Enables accessibility feature.
+  Future<void> enableAccessibility() async {
+    throw UnimplementedError();
+  }
 
   /// Sends [command] to the Flutter Driver extensions.
   /// This must be implemented by subclass.
@@ -179,37 +183,45 @@ abstract class FlutterDriver {
   Future<Map<String, dynamic>> sendCommand(Command command) async => throw UnimplementedError();
 
   /// Checks the status of the Flutter Driver extension.
-  Future<Health> checkHealth({ Duration timeout }) async {
+  Future<Health> checkHealth({ Duration? timeout }) async {
     return Health.fromJson(await sendCommand(GetHealth(timeout: timeout)));
   }
 
   /// Returns a dump of the render tree.
-  Future<RenderTree> getRenderTree({ Duration timeout }) async {
+  Future<RenderTree> getRenderTree({ Duration? timeout }) async {
     return RenderTree.fromJson(await sendCommand(GetRenderTree(timeout: timeout)));
   }
 
   /// Returns a dump of the layer tree.
-  Future<LayerTree> getLayerTree({ Duration timeout }) async {
+  Future<LayerTree> getLayerTree({ Duration? timeout }) async {
     return LayerTree.fromJson(await sendCommand(GetLayerTree(timeout: timeout)));
   }
 
   /// Taps at the center of the widget located by [finder].
-  Future<void> tap(SerializableFinder finder, { Duration timeout }) async {
+  Future<void> tap(SerializableFinder finder, { Duration? timeout }) async {
     await sendCommand(Tap(finder, timeout: timeout));
   }
 
   /// Waits until [finder] locates the target.
-  Future<void> waitFor(SerializableFinder finder, { Duration timeout }) async {
+  ///
+  /// The [finder] will wait until there is no pending frame scheduled
+  /// in the app under test before executing an action.
+  ///
+  /// See also:
+  ///
+  ///  * [FlutterDriver.runUnsynchronized], which will execute an action
+  ///    with frame sync disabled even while frames are pending.
+  Future<void> waitFor(SerializableFinder finder, { Duration? timeout }) async {
     await sendCommand(WaitFor(finder, timeout: timeout));
   }
 
   /// Waits until [finder] can no longer locate the target.
-  Future<void> waitForAbsent(SerializableFinder finder, { Duration timeout }) async {
+  Future<void> waitForAbsent(SerializableFinder finder, { Duration? timeout }) async {
     await sendCommand(WaitForAbsent(finder, timeout: timeout));
   }
 
   /// Waits until the given [waitCondition] is satisfied.
-  Future<void> waitForCondition(SerializableWaitCondition waitCondition, {Duration timeout}) async {
+  Future<void> waitForCondition(SerializableWaitCondition waitCondition, {Duration? timeout}) async {
     await sendCommand(WaitForCondition(waitCondition, timeout: timeout));
   }
 
@@ -217,11 +229,12 @@ abstract class FlutterDriver {
   ///
   /// Use this method when you need to wait for the moment when the application
   /// becomes "stable", for example, prior to taking a [screenshot].
-  Future<void> waitUntilNoTransientCallbacks({ Duration timeout }) async {
+  Future<void> waitUntilNoTransientCallbacks({ Duration? timeout }) async {
     await sendCommand(WaitForCondition(const NoTransientCallbacks(), timeout: timeout));
   }
 
-  /// Waits until the next [Window.onReportTimings] is called.
+  /// Waits until the next [dart:ui.PlatformDispatcher.onReportTimings] is
+  /// called.
   ///
   /// Use this method to wait for the first frame to be rasterized during the
   /// app launch.
@@ -231,7 +244,7 @@ abstract class FlutterDriver {
     await sendCommand(const WaitForCondition(FirstFrameRasterized()));
   }
 
-  Future<DriverOffset> _getOffset(SerializableFinder finder, OffsetType type, { Duration timeout }) async {
+  Future<DriverOffset> _getOffset(SerializableFinder finder, OffsetType type, { Duration? timeout }) async {
     final GetOffset command = GetOffset(finder, type, timeout: timeout);
     final GetOffsetResult result = GetOffsetResult.fromJson(await sendCommand(command));
     return DriverOffset(result.dx, result.dy);
@@ -240,40 +253,40 @@ abstract class FlutterDriver {
   /// Returns the point at the top left of the widget identified by `finder`.
   ///
   /// The offset is expressed in logical pixels and can be translated to
-  /// device pixels via [Window.devicePixelRatio].
-  Future<DriverOffset> getTopLeft(SerializableFinder finder, { Duration timeout }) async {
+  /// device pixels via [dart:ui.FlutterView.devicePixelRatio].
+  Future<DriverOffset> getTopLeft(SerializableFinder finder, { Duration? timeout }) async {
     return _getOffset(finder, OffsetType.topLeft, timeout: timeout);
   }
 
   /// Returns the point at the top right of the widget identified by `finder`.
   ///
   /// The offset is expressed in logical pixels and can be translated to
-  /// device pixels via [Window.devicePixelRatio].
-  Future<DriverOffset> getTopRight(SerializableFinder finder, { Duration timeout }) async {
+  /// device pixels via [dart:ui.FlutterView.devicePixelRatio].
+  Future<DriverOffset> getTopRight(SerializableFinder finder, { Duration? timeout }) async {
     return _getOffset(finder, OffsetType.topRight, timeout: timeout);
   }
 
   /// Returns the point at the bottom left of the widget identified by `finder`.
   ///
   /// The offset is expressed in logical pixels and can be translated to
-  /// device pixels via [Window.devicePixelRatio].
-  Future<DriverOffset> getBottomLeft(SerializableFinder finder, { Duration timeout }) async {
+  /// device pixels via [dart:ui.FlutterView.devicePixelRatio].
+  Future<DriverOffset> getBottomLeft(SerializableFinder finder, { Duration? timeout }) async {
     return _getOffset(finder, OffsetType.bottomLeft, timeout: timeout);
   }
 
   /// Returns the point at the bottom right of the widget identified by `finder`.
   ///
   /// The offset is expressed in logical pixels and can be translated to
-  /// device pixels via [Window.devicePixelRatio].
-  Future<DriverOffset> getBottomRight(SerializableFinder finder, { Duration timeout }) async {
+  /// device pixels via [dart:ui.FlutterView.devicePixelRatio].
+  Future<DriverOffset> getBottomRight(SerializableFinder finder, { Duration? timeout }) async {
     return _getOffset(finder, OffsetType.bottomRight, timeout: timeout);
   }
 
   /// Returns the point at the center of the widget identified by `finder`.
   ///
   /// The offset is expressed in logical pixels and can be translated to
-  /// device pixels via [Window.devicePixelRatio].
-  Future<DriverOffset> getCenter(SerializableFinder finder, { Duration timeout }) async {
+  /// device pixels via [dart:ui.FlutterView.devicePixelRatio].
+  Future<DriverOffset> getCenter(SerializableFinder finder, { Duration? timeout }) async {
     return _getOffset(finder, OffsetType.center, timeout: timeout);
   }
 
@@ -298,11 +311,11 @@ abstract class FlutterDriver {
   /// See also:
   ///
   ///  * [getWidgetDiagnostics], which gets the [DiagnosticsNode] of a [Widget].
-  Future<Map<String, Object>> getRenderObjectDiagnostics(
+  Future<Map<String, Object?>> getRenderObjectDiagnostics(
       SerializableFinder finder, {
       int subtreeDepth = 0,
       bool includeProperties = true,
-      Duration timeout,
+      Duration? timeout,
   }) async {
     return sendCommand(GetDiagnosticsTree(
       finder,
@@ -331,11 +344,11 @@ abstract class FlutterDriver {
   ///
   ///  * [getRenderObjectDiagnostics], which gets the [DiagnosticsNode] of a
   ///    [RenderObject].
-  Future<Map<String, Object>> getWidgetDiagnostics(
+  Future<Map<String, Object?>> getWidgetDiagnostics(
     SerializableFinder finder, {
     int subtreeDepth = 0,
     bool includeProperties = true,
-    Duration timeout,
+    Duration? timeout,
   }) async {
     return sendCommand(GetDiagnosticsTree(
       finder,
@@ -359,7 +372,7 @@ abstract class FlutterDriver {
   ///
   /// The move events are generated at a given [frequency] in Hz (or events per
   /// second). It defaults to 60Hz.
-  Future<void> scroll(SerializableFinder finder, double dx, double dy, Duration duration, { int frequency = 60, Duration timeout }) async {
+  Future<void> scroll(SerializableFinder finder, double dx, double dy, Duration duration, { int frequency = 60, Duration? timeout }) async {
     await sendCommand(Scroll(finder, dx, dy, duration, frequency, timeout: timeout));
   }
 
@@ -370,7 +383,7 @@ abstract class FlutterDriver {
   /// that lazily creates its children, like [ListView] or [CustomScrollView],
   /// then this method may fail because [finder] doesn't actually exist.
   /// The [scrollUntilVisible] method can be used in this case.
-  Future<void> scrollIntoView(SerializableFinder finder, { double alignment = 0.0, Duration timeout }) async {
+  Future<void> scrollIntoView(SerializableFinder finder, { double alignment = 0.0, Duration? timeout }) async {
     await sendCommand(ScrollIntoView(finder, alignment: alignment, timeout: timeout));
   }
 
@@ -402,7 +415,7 @@ abstract class FlutterDriver {
     double alignment = 0.0,
     double dxScroll = 0.0,
     double dyScroll = 0.0,
-    Duration timeout,
+    Duration? timeout,
   }) async {
     assert(scrollable != null);
     assert(item != null);
@@ -427,7 +440,7 @@ abstract class FlutterDriver {
   }
 
   /// Returns the text in the `Text` widget located by [finder].
-  Future<String> getText(SerializableFinder finder, { Duration timeout }) async {
+  Future<String> getText(SerializableFinder finder, { Duration? timeout }) async {
     return GetTextResult.fromJson(await sendCommand(GetText(finder, timeout: timeout))).text;
   }
 
@@ -463,7 +476,7 @@ abstract class FlutterDriver {
   ///   await driver.waitFor(find.text('World!'));  // verify new text appears
   /// });
   /// ```
-  Future<void> enterText(String text, { Duration timeout }) async {
+  Future<void> enterText(String text, { Duration? timeout }) async {
     await sendCommand(EnterText(text, timeout: timeout));
   }
 
@@ -480,7 +493,7 @@ abstract class FlutterDriver {
   /// When enabled, the operating system's configured keyboard will not be
   /// invoked when the widget is focused, as the [SystemChannels.textInput]
   /// channel will be mocked out.
-  Future<void> setTextEntryEmulation({ @required bool enabled, Duration timeout }) async {
+  Future<void> setTextEntryEmulation({ required bool enabled, Duration? timeout }) async {
     assert(enabled != null);
     await sendCommand(SetTextEntryEmulation(enabled, timeout: timeout));
   }
@@ -491,7 +504,7 @@ abstract class FlutterDriver {
   /// It's expected that the application has registered a [DataHandler]
   /// callback in [enableFlutterDriverExtension] that can successfully handle
   /// these requests.
-  Future<String> requestData(String message, { Duration timeout }) async {
+  Future<String> requestData(String? message, { Duration? timeout }) async {
     return RequestDataResult.fromJson(await sendCommand(RequestData(message, timeout: timeout))).message;
   }
 
@@ -499,7 +512,7 @@ abstract class FlutterDriver {
   ///
   /// Returns true when the call actually changed the state from on to off or
   /// vice versa.
-  Future<bool> setSemantics(bool enabled, { Duration timeout }) async {
+  Future<bool> setSemantics(bool enabled, { Duration? timeout }) async {
     final SetSemanticsResult result = SetSemanticsResult.fromJson(await sendCommand(SetSemantics(enabled, timeout: timeout)));
     return result.changedState;
   }
@@ -512,7 +525,7 @@ abstract class FlutterDriver {
   ///
   /// Semantics must be enabled to use this method, either using a platform
   /// specific shell command or [setSemantics].
-  Future<int> getSemanticsId(SerializableFinder finder, { Duration timeout }) async {
+  Future<int> getSemanticsId(SerializableFinder finder, { Duration? timeout }) async {
     final Map<String, dynamic> jsonResponse = await sendCommand(GetSemanticsId(finder, timeout: timeout));
     final GetSemanticsIdResult result = GetSemanticsIdResult.fromJson(jsonResponse);
     return result.id;
@@ -643,7 +656,7 @@ abstract class FlutterDriver {
   ///
   /// For [WebFlutterDriver], this is only supported for Chrome.
   Future<Timeline> traceAction(
-    Future<dynamic> action(), {
+    Future<dynamic> Function() action, {
     List<TimelineStream> streams = const <TimelineStream>[TimelineStream.all],
     bool retainPriorEvents = false,
   }) async {
@@ -678,7 +691,7 @@ abstract class FlutterDriver {
   /// With frame sync disabled, it's the responsibility of the test author to
   /// ensure that no action is performed while the app is undergoing a
   /// transition to avoid flakiness.
-  Future<T> runUnsynchronized<T>(Future<T> action(), { Duration timeout }) async {
+  Future<T> runUnsynchronized<T>(Future<T> Function() action, { Duration? timeout }) async {
     await sendCommand(SetFrameSync(false, timeout: timeout));
     T result;
     try {
@@ -735,8 +748,8 @@ class CommonFinders {
   /// If `firstMatchOnly` is true then only the first ancestor matching
   /// `matching` will be returned. Defaults to false.
   SerializableFinder ancestor({
-    @required SerializableFinder of,
-    @required SerializableFinder matching,
+    required SerializableFinder of,
+    required SerializableFinder matching,
     bool matchRoot = false,
     bool firstMatchOnly = false,
   }) => Ancestor(of: of, matching: matching, matchRoot: matchRoot, firstMatchOnly: firstMatchOnly);
@@ -750,8 +763,8 @@ class CommonFinders {
   /// If `firstMatchOnly` is true then only the first descendant matching
   /// `matching` will be returned. Defaults to false.
   SerializableFinder descendant({
-    @required SerializableFinder of,
-    @required SerializableFinder matching,
+    required SerializableFinder of,
+    required SerializableFinder matching,
     bool matchRoot = false,
     bool firstMatchOnly = false,
   }) => Descendant(of: of, matching: matching, matchRoot: matchRoot, firstMatchOnly: firstMatchOnly);
@@ -770,7 +783,7 @@ class DriverOffset {
   final double dy;
 
   @override
-  String toString() => '$runtimeType($dx, $dy)';
+  String toString() => '$runtimeType($dx, $dy)'; // ignore: no_runtimetype_tostring, can't access package:flutter here to use objectRuntimeType
 
   @override
   bool operator ==(Object other) {

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -14,50 +12,40 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 Widget buildSliverAppBarApp({
-  bool floating,
-  bool pinned,
-  double collapsedHeight,
-  double expandedHeight,
+  bool floating = false,
+  bool pinned = false,
+  double? collapsedHeight,
+  double? expandedHeight,
   bool snap = false,
   double toolbarHeight = kToolbarHeight,
 }) {
-  return Localizations(
-    locale: const Locale('en', 'US'),
-    delegates: const <LocalizationsDelegate<dynamic>>[
-      DefaultMaterialLocalizations.delegate,
-      DefaultWidgetsLocalizations.delegate,
-    ],
-    child: Directionality(
-      textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(),
-        child: Scaffold(
-          body: DefaultTabController(
-            length: 3,
-            child: CustomScrollView(
-              primary: true,
-              slivers: <Widget>[
-                SliverAppBar(
-                  title: const Text('AppBar Title'),
-                  floating: floating,
-                  pinned: pinned,
-                  collapsedHeight: collapsedHeight,
-                  expandedHeight: expandedHeight,
-                  toolbarHeight: toolbarHeight,
-                  snap: snap,
-                  bottom: TabBar(
-                    tabs: <String>['A','B','C'].map<Widget>((String t) => Tab(text: 'TAB $t')).toList(),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: Container(
-                    height: 1200.0,
-                    color: Colors.orange[400],
-                  ),
-                ),
-              ],
+  return MaterialApp(
+    home: Scaffold(
+      body: DefaultTabController(
+        length: 3,
+        child: CustomScrollView(
+          primary: true,
+          slivers: <Widget>[
+            SliverAppBar(
+              backwardsCompatibility: false,
+              title: const Text('AppBar Title'),
+              floating: floating,
+              pinned: pinned,
+              collapsedHeight: collapsedHeight,
+              expandedHeight: expandedHeight,
+              toolbarHeight: toolbarHeight,
+              snap: snap,
+              bottom: TabBar(
+                tabs: <String>['A','B','C'].map<Widget>((String t) => Tab(text: 'TAB $t')).toList(),
+              ),
             ),
-          ),
+            SliverToBoxAdapter(
+              child: Container(
+                height: 1200.0,
+                color: Colors.orange[400],
+              ),
+            ),
+          ],
         ),
       ),
     ),
@@ -65,7 +53,7 @@ Widget buildSliverAppBarApp({
 }
 
 ScrollController primaryScrollController(WidgetTester tester) {
-  return PrimaryScrollController.of(tester.element(find.byType(CustomScrollView)));
+  return PrimaryScrollController.of(tester.element(find.byType(CustomScrollView)))!;
 }
 
 double appBarHeight(WidgetTester tester) => tester.getSize(find.byType(AppBar, skipOffstage: false)).height;
@@ -85,6 +73,7 @@ void main() {
         theme: ThemeData(platform: TargetPlatform.android),
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             title: const Text('X'),
           ),
         ),
@@ -105,6 +94,7 @@ void main() {
           theme: ThemeData(platform: platform),
           home: Scaffold(
             appBar: AppBar(
+              backwardsCompatibility: false,
               title: const Text('X'),
             ),
           ),
@@ -123,6 +113,7 @@ void main() {
           theme: ThemeData(platform: platform),
           home: Scaffold(
             appBar: AppBar(
+              backwardsCompatibility: false,
               title: const Text('X'),
               actions: const <Widget>[
                 Icon(Icons.thumb_up),
@@ -144,6 +135,7 @@ void main() {
           theme: ThemeData(platform: platform),
           home: Scaffold(
             appBar: AppBar(
+              backwardsCompatibility: false,
               title: const Text('X'),
               actions: const <Widget>[
                 Icon(Icons.thumb_up),
@@ -166,6 +158,7 @@ void main() {
         theme: ThemeData(platform: TargetPlatform.android),
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             centerTitle: true,
             title: const Text('X'),
           ),
@@ -185,6 +178,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             centerTitle: false,
             title: const Placeholder(key: Key('X')),
           ),
@@ -204,6 +198,7 @@ void main() {
           textDirection: TextDirection.rtl,
           child: Scaffold(
             appBar: AppBar(
+              backwardsCompatibility: false,
               centerTitle: false,
               title: const Placeholder(key: Key('X')),
             ),
@@ -222,6 +217,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             centerTitle: false,
             titleSpacing: 32.0,
             title: const Placeholder(key: Key('X')),
@@ -242,6 +238,7 @@ void main() {
           textDirection: TextDirection.rtl,
           child: Scaffold(
             appBar: AppBar(
+              backwardsCompatibility: false,
               centerTitle: false,
               titleSpacing: 32.0,
               title: const Placeholder(key: Key('X')),
@@ -263,6 +260,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             appBar: AppBar(
+              backwardsCompatibility: false,
               centerTitle: false,
               title: const Text('X'),
             ),
@@ -284,6 +282,7 @@ void main() {
             textDirection: TextDirection.rtl,
             child: Scaffold(
               appBar: AppBar(
+                backwardsCompatibility: false,
                 centerTitle: false,
                 title: const Text('X'),
               ),
@@ -303,12 +302,13 @@ void main() {
 
     final Key titleKey = UniqueKey();
     Widget leading = Container();
-    List<Widget> actions;
+    List<Widget> actions = <Widget>[];
 
     Widget buildApp() {
       return MaterialApp(
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             leading: leading,
             centerTitle: false,
             title: Container(
@@ -360,13 +360,14 @@ void main() {
 
     final Key titleKey = UniqueKey();
     double titleWidth = 700.0;
-    Widget leading = Container();
-    List<Widget> actions;
+    Widget? leading = Container();
+    List<Widget> actions = <Widget>[];
 
     Widget buildApp() {
       return MaterialApp(
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             leading: leading,
             centerTitle: true,
             title: Container(
@@ -412,8 +413,8 @@ void main() {
 
     final Key titleKey = UniqueKey();
     double titleWidth = 700.0;
-    Widget leading = Container();
-    List<Widget> actions;
+    Widget? leading = Container();
+    List<Widget> actions = <Widget>[];
 
     Widget buildApp() {
       return MaterialApp(
@@ -421,6 +422,7 @@ void main() {
           textDirection: TextDirection.rtl,
           child: Scaffold(
             appBar: AppBar(
+              backwardsCompatibility: false,
               leading: leading,
               centerTitle: true,
               title: Container(
@@ -466,6 +468,7 @@ void main() {
         home: SizedBox(
           height: kToolbarHeight,
           child: AppBar(
+            backwardsCompatibility: false,
             leading: const Text('L'),
             title: const Text('No Scaffold'),
             actions: const <Widget>[Text('A1'), Text('A2')],
@@ -484,11 +487,12 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
-          child: Container(
+          child: SizedBox(
             height: 0.0,
             width: 0.0,
             child: Scaffold(
               appBar: AppBar(
+                backwardsCompatibility: false,
                 title: const Text('X'),
               ),
             ),
@@ -512,6 +516,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             key: appBarKey,
             leading: SizedBox(key: leadingKey, height: 50.0),
             title: SizedBox(key: titleKey, height: 40.0),
@@ -539,6 +544,7 @@ void main() {
         theme: ThemeData(platform: TargetPlatform.android),
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             title: const Text('X'),
           ),
           drawer: Column(), // Doesn't really matter. Triggers a hamburger regardless.
@@ -547,7 +553,7 @@ void main() {
     );
 
     final Finder hamburger = find.byTooltip('Open navigation menu');
-    expect(tester.getTopLeft(hamburger), const Offset(0.0, 0.0));
+    expect(tester.getTopLeft(hamburger), Offset.zero);
     expect(tester.getSize(hamburger), const Size(56.0, 56.0));
   });
 
@@ -557,6 +563,7 @@ void main() {
         theme: ThemeData(platform: TargetPlatform.android),
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             title: const Text('X'),
             actions: const <Widget> [
               IconButton(
@@ -896,29 +903,79 @@ void main() {
     expect(tabBarHeight(tester), initialTabBarHeight);
   });
 
-  testWidgets('SliverAppBar rebuilds when forceElevated changes', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/59158.
-    Widget buildSliverAppBar(bool forceElevated) {
+  testWidgets('AppBar uses the specified elevation or defaults to 4.0', (WidgetTester tester) async {
+    Widget buildAppBar([double? elevation]) {
       return MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Title'), elevation: elevation),
+        ),
+      );
+    }
+
+    Material getMaterial() => tester.widget<Material>(find.descendant(
+      of: find.byType(AppBar),
+      matching: find.byType(Material),
+    ));
+
+    // Default elevation should be _AppBarState._defaultElevation = 4.0
+    await tester.pumpWidget(buildAppBar());
+    expect(getMaterial().elevation, 4.0);
+
+    // AppBar should use the specified elevation.
+    await tester.pumpWidget(buildAppBar(8.0));
+    expect(getMaterial().elevation, 8.0);
+  });
+
+  group('SliverAppBar elevation', () {
+    Widget buildSliverAppBar(bool forceElevated, {double? elevation, double? themeElevation}) {
+      return MaterialApp(
+        theme: ThemeData(appBarTheme: AppBarTheme(elevation: themeElevation)),
         home: CustomScrollView(
           slivers: <Widget>[
             SliverAppBar(
+              backwardsCompatibility: false,
               title: const Text('Title'),
               forceElevated: forceElevated,
+              elevation: elevation,
             ),
           ],
         ),
       );
     }
 
-    final Finder appBarFinder = find.byType(AppBar);
-    AppBar getAppBarWidget(Finder finder) => tester.widget<AppBar>(finder);
+    testWidgets('Respects forceElevated parameter', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/59158.
+      AppBar getAppBar() => tester.widget<AppBar>(find.byType(AppBar));
+      Material getMaterial() => tester.widget<Material>(find.byType(Material));
 
-    await tester.pumpWidget(buildSliverAppBar(false));
-    expect(getAppBarWidget(appBarFinder).elevation, 0.0);
+      // When forceElevated is off, SliverAppBar should not be elevated.
+      await tester.pumpWidget(buildSliverAppBar(false));
+      expect(getMaterial().elevation, 0.0);
 
-    await tester.pumpWidget(buildSliverAppBar(true));
-    expect(getAppBarWidget(appBarFinder).elevation, 4.0);
+      // Default elevation should be _AppBarState._defaultElevation = 4.0, and
+      // the AppBar's elevation should not be specified by SliverAppBar.
+      await tester.pumpWidget(buildSliverAppBar(true));
+      expect(getMaterial().elevation, 4.0);
+      expect(getAppBar().elevation, null);
+
+      // SliverAppBar should use the specified elevation.
+      await tester.pumpWidget(buildSliverAppBar(true, elevation: 8.0));
+      expect(getMaterial().elevation, 8.0);
+    });
+
+    testWidgets('Uses elevation of AppBarTheme by default', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/73525.
+      Material getMaterial() => tester.widget<Material>(find.byType(Material));
+
+      await tester.pumpWidget(buildSliverAppBar(false, themeElevation: 12.0));
+      expect(getMaterial().elevation, 0.0);
+
+      await tester.pumpWidget(buildSliverAppBar(true, themeElevation: 12.0));
+      expect(getMaterial().elevation, 12.0);
+
+      await tester.pumpWidget(buildSliverAppBar(true, elevation: 8.0, themeElevation: 12.0));
+      expect(getMaterial().elevation, 8.0);
+    });
   });
 
   testWidgets('AppBar dimensions, with and without bottom, primary', (WidgetTester tester) async {
@@ -958,7 +1015,10 @@ void main() {
             data: topPadding100,
             child: Scaffold(
               primary: true,
-              appBar: AppBar(title: const Text('title')),
+              appBar: AppBar(
+                backwardsCompatibility: false,
+                title: const Text('title')
+              ),
           ),
         ),
       ),
@@ -981,6 +1041,7 @@ void main() {
             child: Scaffold(
               primary: false,
               appBar: AppBar(
+                backwardsCompatibility: false,
                 bottom: PreferredSize(
                   preferredSize: const Size.fromHeight(200.0),
                   child: Container(),
@@ -1007,6 +1068,7 @@ void main() {
           child: Scaffold(
             primary: true,
             appBar: AppBar(
+              backwardsCompatibility: false,
               bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(200.0),
                 child: Container(),
@@ -1031,6 +1093,7 @@ void main() {
           child: MediaQuery(
             data: topPadding100,
             child: AppBar(
+              backwardsCompatibility: false,
               primary: false,
               title: const Text('title'),
             ),
@@ -1060,6 +1123,7 @@ void main() {
             body: Column(
               children: <Widget>[
                 AppBar(
+                  backwardsCompatibility: false,
                   title: const Text('title'),
                 ),
               ],
@@ -1097,11 +1161,105 @@ void main() {
       MaterialApp(
         home: Scaffold(
           drawer: const Drawer(),
-          appBar: AppBar(automaticallyImplyLeading: false),
+          appBar: AppBar(
+            backwardsCompatibility: false,
+            automaticallyImplyLeading: false,
+          ),
         ),
       ),
     );
     expect(find.byIcon(Icons.menu), findsNothing);
+  });
+
+  testWidgets('AppBar does not update the leading if a route is popped case 1', (WidgetTester tester) async {
+    final Page<void> page1 = MaterialPage<void>(
+      key: const ValueKey<String>('1'),
+      child: Scaffold(
+        key: const ValueKey<String>('1'),
+        appBar: AppBar(),
+      )
+    );
+    final Page<void> page2 = MaterialPage<void>(
+        key: const ValueKey<String>('2'),
+        child: Scaffold(
+          key: const ValueKey<String>('2'),
+          appBar: AppBar(),
+        )
+    );
+    List<Page<void>> pages = <Page<void>>[ page1 ];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Navigator(
+          pages: pages,
+          onPopPage: (Route<dynamic> route, dynamic result) => false,
+        ),
+      ),
+    );
+    expect(find.byType(BackButton), findsNothing);
+    // Update pages
+    pages = <Page<void>>[ page2 ];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Navigator(
+          pages: pages,
+          onPopPage: (Route<dynamic> route, dynamic result) => false,
+        ),
+      ),
+    );
+    expect(find.byType(BackButton), findsNothing);
+  });
+
+  testWidgets('AppBar does not update the leading if a route is popped case 2', (WidgetTester tester) async {
+    final Page<void> page1 = MaterialPage<void>(
+        key: const ValueKey<String>('1'),
+        child: Scaffold(
+          key: const ValueKey<String>('1'),
+          appBar: AppBar(),
+        )
+    );
+    final Page<void> page2 = MaterialPage<void>(
+        key: const ValueKey<String>('2'),
+        child: Scaffold(
+          key: const ValueKey<String>('2'),
+          appBar: AppBar(),
+        )
+    );
+    List<Page<void>> pages = <Page<void>>[ page1, page2 ];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Navigator(
+          pages: pages,
+          onPopPage: (Route<dynamic> route, dynamic result) => false,
+        ),
+      ),
+    );
+    // The page2 should have a back button
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey<String>('2')),
+        matching: find.byType(BackButton),
+      ),
+      findsOneWidget
+    );
+    // Update pages
+    pages = <Page<void>>[ page1 ];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Navigator(
+          pages: pages,
+          onPopPage: (Route<dynamic> route, dynamic result) => false,
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 10));
+    // The back button should persist during the pop animation.
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey<String>('2')),
+        matching: find.byType(BackButton),
+      ),
+      findsOneWidget
+    );
   });
 
   testWidgets('AppBar ink splash draw on the correct canvas', (WidgetTester tester) async {
@@ -1111,6 +1269,7 @@ void main() {
       MaterialApp(
         home: Center(
           child: AppBar(
+            backwardsCompatibility: false,
             title: const Text('Abc'),
             actions: <Widget>[
               IconButton(
@@ -1123,7 +1282,7 @@ void main() {
             flexibleSpace: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: const Alignment(0.0, -1.0),
+                  begin: Alignment.topCenter,
                   end: const Alignment(-0.04, 1.0),
                   colors: <Color>[Colors.blue.shade500, Colors.blue.shade800],
                 ),
@@ -1152,6 +1311,7 @@ void main() {
       MaterialApp(
         home: Center(
           child: AppBar(
+            backwardsCompatibility: false,
             leading: Placeholder(key: key),
             title: const Text('Abc'),
             actions: const <Widget>[
@@ -1163,7 +1323,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), Offset.zero);
     expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
   });
 
@@ -1173,6 +1333,7 @@ void main() {
       MaterialApp(
         home: Center(
           child: AppBar(
+            backwardsCompatibility: false,
             leading: Placeholder(key: key),
             title: const Text('Abc'),
             actions: const <Widget>[
@@ -1183,7 +1344,7 @@ void main() {
             flexibleSpace: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: const Alignment(0.0, -1.0),
+                  begin: Alignment.topCenter,
                   end: const Alignment(-0.04, 1.0),
                   colors: <Color>[Colors.blue.shade500, Colors.blue.shade800],
                 ),
@@ -1193,7 +1354,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), Offset.zero);
     expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
   });
 
@@ -1203,6 +1364,7 @@ void main() {
       MaterialApp(
         home: Center(
           child: AppBar(
+            backwardsCompatibility: false,
             leading: Placeholder(key: key),
             title: const Text('Abc'),
             actions: const <Widget>[
@@ -1213,7 +1375,7 @@ void main() {
             flexibleSpace: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: const Alignment(0.0, -1.0),
+                  begin: Alignment.topCenter,
                   end: const Alignment(-0.04, 1.0),
                   colors: <Color>[Colors.blue.shade500, Colors.blue.shade800],
                 ),
@@ -1234,7 +1396,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), Offset.zero);
     expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
   });
 
@@ -1244,6 +1406,7 @@ void main() {
       MaterialApp(
         home: Center(
           child: AppBar(
+            backwardsCompatibility: false,
             leading: Placeholder(key: key),
             title: const Text('Abc'),
             actions: const <Widget>[
@@ -1266,7 +1429,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), Offset.zero);
     expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
   });
 
@@ -1291,6 +1454,7 @@ void main() {
           child: Scaffold(
             primary: false,
             appBar: AppBar(
+              backwardsCompatibility: false,
               leading: Placeholder(key: leadingKey), // Forced to 56x56, see _kLeadingWidth in app_bar.dart.
               title: Placeholder(key: titleKey, fallbackHeight: kToolbarHeight),
               actions: <Widget>[ Placeholder(key: trailingKey, fallbackWidth: 10) ],
@@ -1299,7 +1463,7 @@ void main() {
         ),
       ),
     ));
-    expect(tester.getTopLeft(find.byType(AppBar)), const Offset(0, 0));
+    expect(tester.getTopLeft(find.byType(AppBar)), Offset.zero);
     expect(tester.getTopLeft(find.byKey(leadingKey)), const Offset(800.0 - 56.0, 100));
     expect(tester.getTopLeft(find.byKey(trailingKey)), const Offset(0.0, 100));
 
@@ -1335,6 +1499,7 @@ void main() {
             primary: true,
             slivers: <Widget>[
               SliverAppBar(
+                backwardsCompatibility: false,
                 leading: Placeholder(key: leadingKey),
                 title: Placeholder(key: titleKey, fallbackHeight: kToolbarHeight),
                 actions: <Widget>[ Placeholder(key: trailingKey) ],
@@ -1344,7 +1509,7 @@ void main() {
         ),
       ),
     ));
-    expect(tester.getTopLeft(find.byType(AppBar)), const Offset(0.0, 0.0));
+    expect(tester.getTopLeft(find.byType(AppBar)), Offset.zero);
     expect(tester.getTopLeft(find.byKey(leadingKey)), const Offset(800.0 - 56.0, 100.0));
     expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(416.0, 100.0));
     expect(tester.getTopLeft(find.byKey(trailingKey)), const Offset(0.0, 100.0));
@@ -1372,6 +1537,7 @@ void main() {
             primary: true,
             slivers: <Widget>[
               SliverAppBar(
+                backwardsCompatibility: false,
                 leading: Placeholder(key: leadingKey),
                 title: Placeholder(key: titleKey),
                 actions: <Widget>[ Placeholder(key: trailingKey) ],
@@ -1393,6 +1559,7 @@ void main() {
       MaterialApp(
         home: Center(
           child: AppBar(
+            backwardsCompatibility: false,
             leading: const Text('Leading'),
             title: const Text('Title'),
             actions: const <Widget>[
@@ -1478,6 +1645,7 @@ void main() {
             textDirection: TextDirection.rtl,
             child: Center(
               child: AppBar(
+                backwardsCompatibility: false,
                 leading: const Text('Leading'),
                 title: const Text('Title'),
                 actions: const <Widget>[
@@ -1566,6 +1734,7 @@ void main() {
       MaterialApp(
         home: Center(
           child: AppBar(
+            backwardsCompatibility: false,
             leading: const Text('Leading'),
             title: const ExcludeSemantics(child: Text('Title')),
             excludeHeaderSemantics: true,
@@ -1623,6 +1792,7 @@ void main() {
         home: CustomScrollView(
           slivers: <Widget>[
             SliverAppBar(
+              backwardsCompatibility: false,
               leading: Text('Leading'),
               flexibleSpace: ExcludeSemantics(child: Text('Title')),
               actions: <Widget>[Text('Action 1')],
@@ -1649,12 +1819,95 @@ void main() {
                           TestSemantics(
                             children: <TestSemantics>[
                               TestSemantics(
-                                label: 'Leading',
-                                textDirection: TextDirection.ltr,
+                                children: <TestSemantics>[
+                                  TestSemantics(
+                                    label: 'Leading',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                  TestSemantics(
+                                    label: 'Action 1',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                ],
+                              ),
+                              TestSemantics(),
+                            ],
+                          ),
+                          TestSemantics(
+                            flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+      ignoreId: true,
+    ));
+
+    semantics.dispose();
+  });
+
+  testWidgets('SliverAppBar with flexable space has correct semantics order', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/64922.
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverAppBar(
+              backwardsCompatibility: false,
+              leading: Text('Leading'),
+              flexibleSpace: Text('Flexible space'),
+              actions: <Widget>[Text('Action 1')],
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            textDirection: TextDirection.ltr,
+            children: <TestSemantics>[
+              TestSemantics(
+                children: <TestSemantics>[
+                  TestSemantics(
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            children: <TestSemantics>[
+                              TestSemantics(
+                                children: <TestSemantics>[
+                                  TestSemantics(
+                                    label: 'Leading',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                  TestSemantics(
+                                    label: 'Action 1',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                ],
                               ),
                               TestSemantics(
-                                label: 'Action 1',
-                                textDirection: TextDirection.ltr,
+                                children: <TestSemantics>[
+                                  TestSemantics(
+                                    flags: <SemanticsFlag>[SemanticsFlag.isHeader],
+                                    label: 'Flexible space',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -1684,11 +1937,15 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: darkTheme,
       home: Scaffold(
-        appBar: AppBar(title: const Text('test')),
+        appBar: AppBar(
+          backwardsCompatibility: false,
+          title: const Text('test')
+        ),
       ),
     ));
 
     expect(darkTheme.primaryColorBrightness, Brightness.dark);
+    expect(darkTheme.colorScheme.brightness, Brightness.dark);
     expect(SystemChrome.latestStyle, const SystemUiOverlayStyle(
       statusBarBrightness: Brightness.dark,
       statusBarIconBrightness: Brightness.light,
@@ -1697,14 +1954,20 @@ void main() {
 
   testWidgets('AppBar draws a dark system bar for a light background', (WidgetTester tester) async {
     final ThemeData lightTheme = ThemeData(primaryColor: Colors.white);
-    await tester.pumpWidget(MaterialApp(
-      theme: lightTheme,
-      home: Scaffold(
-        appBar: AppBar(title: const Text('test')),
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: lightTheme,
+        home: Scaffold(
+          appBar: AppBar(
+            backwardsCompatibility: false,
+            title: const Text('test')
+          ),
+        ),
       ),
-    ));
+    );
 
     expect(lightTheme.primaryColorBrightness, Brightness.light);
+    expect(lightTheme.colorScheme.brightness, Brightness.light);
     expect(SystemChrome.latestStyle, const SystemUiOverlayStyle(
       statusBarBrightness: Brightness.light,
       statusBarIconBrightness: Brightness.dark,
@@ -1724,6 +1987,7 @@ void main() {
               body: CustomScrollView(
                 slivers: <Widget>[
                   SliverAppBar(
+                    backwardsCompatibility: false,
                     expandedHeight: appBarHeight,
                     pinned: false,
                     floating: true,
@@ -1777,6 +2041,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: AppBar(
+          backwardsCompatibility: false,
           leading: const Text('L'),
           title: const Text('No Scaffold'),
           actions: const <Widget>[Text('A1'), Text('A2')],
@@ -1800,6 +2065,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: AppBar(
+          backwardsCompatibility: false,
           leading: const Text('L'),
           title: const Text('No Scaffold'),
           actions: const <Widget>[Text('A1'), Text('A2')],
@@ -1823,6 +2089,7 @@ void main() {
         home: CustomScrollView(
           slivers: <Widget>[
             SliverAppBar(
+              backwardsCompatibility: false,
               leading: Text('L'),
               title: Text('No Scaffold'),
               actions: <Widget>[Text('A1'), Text('A2')],
@@ -1850,6 +2117,7 @@ void main() {
         home: CustomScrollView(
           slivers: <Widget>[
             SliverAppBar(
+              backwardsCompatibility: false,
               leading: Text('L'),
               title: Text('No Scaffold'),
               actions: <Widget>[Text('A1'), Text('A2')],
@@ -1870,7 +2138,7 @@ void main() {
   });
 
   testWidgets('AppBars title has upper limit on text scaling, textScaleFactor = 1, 1.34, 2', (WidgetTester tester) async {
-    double textScaleFactor;
+    late double textScaleFactor;
 
     Widget buildFrame() {
       return MaterialApp(
@@ -1880,6 +2148,7 @@ void main() {
               data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
               child: Scaffold(
                 appBar: AppBar(
+                  backwardsCompatibility: false,
                   centerTitle: false,
                   title: const Text('Jumbo', style: TextStyle(fontSize: 18)),
                 ),
@@ -1906,9 +2175,9 @@ void main() {
   });
 
   testWidgets('AppBars with jumbo titles, textScaleFactor = 3, 3.5, 4', (WidgetTester tester) async {
-    double textScaleFactor;
-    TextDirection textDirection;
-    bool centerTitle;
+    double textScaleFactor = 1.0;
+    TextDirection textDirection = TextDirection.ltr;
+    bool centerTitle = false;
 
     Widget buildFrame() {
       return MaterialApp(
@@ -1920,6 +2189,7 @@ void main() {
                 builder: (BuildContext context) {
                   return Scaffold(
                     appBar: AppBar(
+                      backwardsCompatibility: false,
                       centerTitle: centerTitle,
                       title: MediaQuery(
                         data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
@@ -1941,10 +2211,8 @@ void main() {
     // Overall screen size is 800x600
     // Left or right justified title is padded by 16 on the "start" side.
     // Toolbar height is 56.
+    // "Jumbo" title is 100x20.
 
-    textScaleFactor = 1; // "Jumbo" title is 100x20.
-    textDirection = TextDirection.ltr;
-    centerTitle = false;
     await tester.pumpWidget(buildFrame());
     expect(tester.getRect(appBarTitle), const Rect.fromLTRB(16, 18, 116, 38));
     expect(tester.getCenter(appBarTitle).dy, tester.getCenter(toolbar).dy);
@@ -1975,11 +2243,48 @@ void main() {
     expect(tester.getCenter(appBarTitle).dy, tester.getCenter(toolbar).dy);
   });
 
+  testWidgets('SliverAppBar configures the delegate properly', (WidgetTester tester) async {
+    Future<void> buildAndVerifyDelegate({ required bool pinned, required bool floating, required bool snap }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              SliverAppBar(
+                backwardsCompatibility: false,
+                title: const Text('Jumbo'),
+                pinned: pinned,
+                floating: floating,
+                snap: snap,
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final SliverPersistentHeaderDelegate delegate = tester
+        .widget<SliverPersistentHeader>(find.byType(SliverPersistentHeader))
+        .delegate;
+
+      // Ensure we have a non-null vsync when it's needed.
+      if (!floating || (delegate.snapConfiguration == null && delegate.showOnScreenConfiguration == null))
+        expect(delegate.vsync, isNotNull);
+
+      expect(delegate.showOnScreenConfiguration != null, snap && floating);
+    }
+
+    await buildAndVerifyDelegate(pinned: false, floating: true, snap: false);
+    await buildAndVerifyDelegate(pinned: false, floating: true, snap: true);
+
+    await buildAndVerifyDelegate(pinned: true, floating: true, snap: false);
+    await buildAndVerifyDelegate(pinned: true, floating: true, snap: true);
+  });
+
   testWidgets('AppBar respects toolbarHeight', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             title: const Text('Title'),
             toolbarHeight: 48,
           ),
@@ -2033,15 +2338,23 @@ void main() {
     expect(appBarHeight(tester), collapsedHeight + initialTabBarHeight);
   });
 
-  test('SliverApp toolbarHeight cannot be null', () {
-    try{
-       SliverAppBar(
-        toolbarHeight: null,
-      );
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('toolbarHeight != null'));
-      expect(error.toString(), contains('is not true'));
-    }
+  testWidgets('SliverAppBar collapsedHeight', (WidgetTester tester) async {
+    const double collapsedHeight = 56.0;
+
+    await tester.pumpWidget(buildSliverAppBarApp(
+        floating: false,
+        pinned: false,
+        collapsedHeight: collapsedHeight
+    ));
+
+    final ScrollController controller = primaryScrollController(tester);
+    final double initialTabBarHeight = tabBarHeight(tester);
+
+    // Scroll the not-pinned appbar out of view, to its collapsed height.
+    controller.jumpTo(300.0);
+    await tester.pump();
+    expect(find.byType(SliverAppBar), findsNothing);
+    expect(appBarHeight(tester), collapsedHeight + initialTabBarHeight);
   });
 
   testWidgets('AppBar respects leadingWidth', (WidgetTester tester) async {
@@ -2049,6 +2362,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         appBar: AppBar(
+          backwardsCompatibility: false,
           leading: const Placeholder(key: key),
           leadingWidth: 100,
           title: const Text('Title'),
@@ -2066,6 +2380,7 @@ void main() {
       home: CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
+            backwardsCompatibility: false,
             leading: Placeholder(key: key),
             leadingWidth: 100,
             title: Text('Title'),
@@ -2077,4 +2392,130 @@ void main() {
     // By default toolbarHeight is 56.0.
     expect(tester.getRect(find.byKey(key)), const Rect.fromLTRB(0, 0, 100, 56));
   });
+
+  testWidgets("AppBar with EndDrawer doesn't have leading", (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(),
+        endDrawer: const Drawer(),
+      ),
+    ));
+
+    final Finder endDrawerFinder = find.byTooltip('Open navigation menu');
+    await tester.tap(endDrawerFinder);
+    await tester.pump();
+
+    final Finder appBarFinder = find.byType(NavigationToolbar);
+    NavigationToolbar getAppBarWidget(Finder finder) => tester.widget<NavigationToolbar>(finder);
+    expect(getAppBarWidget(appBarFinder).leading, null);
+  });
+
+  testWidgets('AppBar.titleSpacing defaults to NavigationToolbar.kMiddleSpacing', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Title'),
+        ),
+      ),
+    ));
+
+    final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
+    expect(navToolBar.middleSpacing, NavigationToolbar.kMiddleSpacing);
+  });
+
+  testWidgets('SliverAppBar.titleSpacing defaults to NavigationToolbar.kMiddleSpacing', (WidgetTester tester) async {
+    await tester.pumpWidget(buildSliverAppBarApp(
+      floating: false,
+      pinned: false,
+    ));
+
+    final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
+    expect(navToolBar.middleSpacing, NavigationToolbar.kMiddleSpacing);
+  });
+
+  testWidgets('AppBar foregroundColor and backgroundColor', (WidgetTester tester) async {
+    const Color foregroundColor = Color(0xff00ff00);
+    const Color backgroundColor = Color(0xff00ffff);
+    final Key leadingIconKey = UniqueKey();
+    final Key actionIconKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            backwardsCompatibility: false,
+            foregroundColor: foregroundColor,
+            backgroundColor: backgroundColor,
+            leading: Icon(Icons.add_circle, key: leadingIconKey),
+            title: const Text('title'),
+            actions: <Widget>[Icon(Icons.add_circle, key: actionIconKey), const Text('action')],
+          ),
+        ),
+      ),
+    );
+
+    final Material appBarMaterial = tester.widget<Material>(
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.byType(Material),
+      ),
+    );
+    expect(appBarMaterial.color, backgroundColor);
+
+    final TextStyle titleTextStyle = tester.widget<DefaultTextStyle>(
+      find.ancestor(of: find.text('title'), matching: find.byType(DefaultTextStyle)).first,
+    ).style;
+    expect(titleTextStyle.color, foregroundColor);
+
+    final IconThemeData leadingIconTheme = tester.widget<IconTheme>(
+      find.ancestor(of: find.byKey(leadingIconKey), matching: find.byType(IconTheme)).first,
+    ).data;
+    expect(leadingIconTheme.color, foregroundColor);
+
+    final IconThemeData actionIconTheme = tester.widget<IconTheme>(
+      find.ancestor(of: find.byKey(actionIconKey), matching: find.byType(IconTheme)).first,
+    ).data;
+    expect(actionIconTheme.color, foregroundColor);
+  });
+
+
+  testWidgets('AppBarTheme.backwardsCompatibility', (WidgetTester tester) async {
+    const Color foregroundColor = Color(0xff00ff00);
+    final Key leadingIconKey = UniqueKey();
+    final Key actionIconKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light().copyWith(
+          appBarTheme: const AppBarTheme(
+            backwardsCompatibility: false,
+          ),
+        ),
+        home: Scaffold(
+          appBar: AppBar(
+            foregroundColor: foregroundColor, // only applies if backwardsCompatibility is false
+            leading: Icon(Icons.add_circle, key: leadingIconKey),
+            title: const Text('title'),
+            actions: <Widget>[Icon(Icons.add_circle, key: actionIconKey), const Text('action')],
+          ),
+        ),
+      ),
+    );
+
+    final TextStyle titleTextStyle = tester.widget<DefaultTextStyle>(
+      find.ancestor(of: find.text('title'), matching: find.byType(DefaultTextStyle)).first,
+    ).style;
+    expect(titleTextStyle.color, foregroundColor);
+
+    final IconThemeData leadingIconTheme = tester.widget<IconTheme>(
+      find.ancestor(of: find.byKey(leadingIconKey), matching: find.byType(IconTheme)).first,
+    ).data;
+    expect(leadingIconTheme.color, foregroundColor);
+
+    final IconThemeData actionIconTheme = tester.widget<IconTheme>(
+      find.ancestor(of: find.byKey(actionIconKey), matching: find.byType(IconTheme)).first,
+    ).data;
+    expect(actionIconTheme.color, foregroundColor);
+  });
+
 }

@@ -151,7 +151,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   @override
   bool isModifierPressed(ModifierKey key, {KeyboardSide side = KeyboardSide.any}) {
     final int independentModifier = modifiers & deviceIndependentMask;
-    bool result;
+    final bool result;
     switch (key) {
       case ModifierKey.controlModifier:
         result = _isLeftRightModifierPressed(side, independentModifier & modifierControl, modifierLeftControl, modifierRightControl);
@@ -221,6 +221,17 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
     }
   }
 
+  @override
+  bool shouldDispatchEvent() {
+    // On macOS laptop keyboards, the fn key is used to generate home/end and
+    // f1-f12, but it ALSO generates a separate down/up event for the fn key
+    // itself. Other platforms hide the fn key, and just produce the key that
+    // it is combined with, so to keep it possible to write cross platform
+    // code that looks at which keys are pressed, the fn key is ignored on
+    // macOS.
+    return logicalKey != LogicalKeyboardKey.fn;
+  }
+
   /// Returns true if the given label represents an unprintable key.
   ///
   /// Examples of unprintable keys are "NSUpArrowFunctionKey = 0xF700"
@@ -245,7 +256,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   /// This mask is used to check the [modifiers] field to test whether the CAPS
   /// LOCK modifier key is on.
   ///
-  /// {@template flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@template flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   /// Use this value if you need to decode the [modifiers] field yourself, but
   /// it's much easier to use [isModifierPressed] if you just want to know if
   /// a modifier is pressed.
@@ -255,91 +266,91 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   /// This mask is used to check the [modifiers] field to test whether one of the
   /// SHIFT modifier keys is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierShift = 0x20000;
 
   /// This mask is used to check the [modifiers] field to test whether the left
   /// SHIFT modifier key is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierLeftShift = 0x02;
 
   /// This mask is used to check the [modifiers] field to test whether the right
   /// SHIFT modifier key is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierRightShift = 0x04;
 
   /// This mask is used to check the [modifiers] field to test whether one of the
   /// CTRL modifier keys is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierControl = 0x40000;
 
   /// This mask is used to check the [modifiers] field to test whether the left
   /// CTRL modifier key is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierLeftControl = 0x01;
 
   /// This mask is used to check the [modifiers] field to test whether the right
   /// CTRL modifier key is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierRightControl = 0x2000;
 
   /// This mask is used to check the [modifiers] field to test whether one of the
   /// ALT modifier keys is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierOption = 0x80000;
 
   /// This mask is used to check the [modifiers] field to test whether the left
   /// ALT modifier key is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierLeftOption = 0x20;
 
   /// This mask is used to check the [modifiers] field to test whether the right
   /// ALT modifier key is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierRightOption = 0x40;
 
   /// This mask is used to check the [modifiers] field to test whether one of the
   /// CMD modifier keys is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierCommand = 0x100000;
 
   /// This mask is used to check the [modifiers] field to test whether the left
   /// CMD modifier keys is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierLeftCommand = 0x08;
 
   /// This mask is used to check the [modifiers] field to test whether the right
   /// CMD modifier keys is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierRightCommand = 0x10;
 
   /// This mask is used to check the [modifiers] field to test whether any key in
   /// the numeric keypad is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierNumericPad = 0x200000;
 
   /// This mask is used to check the [modifiers] field to test whether the
   /// HELP modifier key is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierHelp = 0x400000;
 
   /// This mask is used to check the [modifiers] field to test whether one of the
   /// FUNCTION modifier keys is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierFunction = 0x800000;
 
   /// Used to retrieve only the device-independent modifier flags, allowing

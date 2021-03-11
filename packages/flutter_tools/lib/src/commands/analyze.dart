@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+// @dart = 2.8
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -32,7 +32,6 @@ class AnalyzeCommand extends FlutterCommand {
        _logger = logger,
        _terminal = terminal,
        _platform = platform {
-    addEnableExperimentation(hide: !verboseHelp);
     argParser.addFlag('flutter-repo',
         negatable: false,
         help: 'Include all the examples and tests from the Flutter repository.',
@@ -43,14 +42,14 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addFlag('dartdocs',
         negatable: false,
         help: 'List every public member that is lacking documentation. '
-              '(The public_member_api_docs lint must be enabled in analysis_options.yaml)',
+              '(The "public_member_api_docs" lint must be enabled in "analysis_options.yaml".)',
         hide: !verboseHelp);
     argParser.addFlag('watch',
         help: 'Run analysis continuously, watching the filesystem for changes.',
         negatable: false);
     argParser.addOption('write',
         valueHelp: 'file',
-        help: 'Also output the results to a file. This is useful with --watch '
+        help: 'Also output the results to a file. This is useful with "--watch" '
               'if you want a file to always contain the latest results.');
     argParser.addOption('dart-sdk',
         valueHelp: 'path-to-sdk',
@@ -68,13 +67,21 @@ class AnalyzeCommand extends FlutterCommand {
     // Not used by analyze --watch
     argParser.addFlag('congratulate',
         help: 'Show output even when there are no errors, warnings, hints, or lints. '
-              'Ignored if --watch is specified.',
+              'Ignored if "--watch" is specified.',
         defaultsTo: true);
     argParser.addFlag('preamble',
         defaultsTo: true,
         help: 'When analyzing the flutter repository, display the number of '
               'files that will be analyzed.\n'
-              'Ignored if --watch is specified.');
+              'Ignored if "--watch" is specified.');
+    argParser.addFlag('fatal-infos',
+        negatable: true,
+        help: 'Treat info level issues as fatal.',
+        defaultsTo: true);
+    argParser.addFlag('fatal-warnings',
+        negatable: true,
+        help: 'Treat warning level issues as fatal.',
+        defaultsTo: true);
   }
 
   /// The working directory for testing analysis using dartanalyzer.
@@ -120,7 +127,6 @@ class AnalyzeCommand extends FlutterCommand {
         platform: _platform,
         processManager: _processManager,
         terminal: _terminal,
-        experiments: stringsArg('enable-experiment'),
         artifacts: _artifacts,
       ).analyze();
     } else {
@@ -134,7 +140,6 @@ class AnalyzeCommand extends FlutterCommand {
         platform: _platform,
         processManager: _processManager,
         terminal: _terminal,
-        experiments: stringsArg('enable-experiment'),
         artifacts: _artifacts,
       ).analyze();
     }

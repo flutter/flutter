@@ -3,13 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 
-import 'widget_tester.dart';
 
 export 'package:flutter/services.dart' show TextEditingValue, TextInputAction;
 
@@ -34,10 +32,10 @@ class TestTextInput {
   /// To use the methods on this API that send fake keyboard messages (such as
   /// [updateEditingValue], [enterText], or [receiveAction]), the keyboard must
   /// first be requested, e.g. using [WidgetTester.showKeyboard].
-  final VoidCallback onCleared;
+  final VoidCallback? onCleared;
 
   /// The messenger which sends the bytes for this channel, not null.
-  BinaryMessenger get _binaryMessenger => ServicesBinding.instance.defaultBinaryMessenger;
+  BinaryMessenger get _binaryMessenger => ServicesBinding.instance!.defaultBinaryMessenger;
 
   /// Resets any internal state of this object and calls [register].
   ///
@@ -81,7 +79,7 @@ class TestTextInput {
   int _client = 0;
 
   /// Arguments supplied to the TextInput.setClient method call.
-  Map<String, dynamic> setClientArgs;
+  Map<String, dynamic>? setClientArgs;
 
   /// The last set of arguments that [TextInputConnection.setEditingState] sent
   /// to the embedder.
@@ -89,7 +87,7 @@ class TestTextInput {
   /// This is a map representation of a [TextEditingValue] object. For example,
   /// it will have a `text` entry whose value matches the most recent
   /// [TextEditingValue.text] that was sent to the embedder.
-  Map<String, dynamic> editingState;
+  Map<String, dynamic>? editingState;
 
   Future<dynamic> _handleTextInputCall(MethodCall methodCall) async {
     log.add(methodCall);
@@ -98,11 +96,14 @@ class TestTextInput {
         _client = methodCall.arguments[0] as int;
         setClientArgs = methodCall.arguments[1] as Map<String, dynamic>;
         break;
+      case 'TextInput.updateConfig':
+        setClientArgs = methodCall.arguments as Map<String, dynamic>;
+        break;
       case 'TextInput.clearClient':
         _client = 0;
         _isVisible = false;
         if (onCleared != null)
-          onCleared();
+          onCleared!();
         break;
       case 'TextInput.setEditingState':
         editingState = methodCall.arguments as Map<String, dynamic>;
@@ -138,7 +139,7 @@ class TestTextInput {
           <dynamic>[_client, value.toJSON()],
         ),
       ),
-      (ByteData data) { /* response from framework is discarded */ },
+      (ByteData? data) { /* response from framework is discarded */ },
     );
   }
 
@@ -161,7 +162,7 @@ class TestTextInput {
            <dynamic>[_client,]
         ),
       ),
-      (ByteData data) { /* response from framework is discarded */ },
+      (ByteData? data) { /* response from framework is discarded */ },
     );
   }
 
@@ -195,11 +196,12 @@ class TestTextInput {
             <dynamic>[_client, action.toString()],
           ),
         ),
-        (ByteData data) {
+        (ByteData? data) {
+          assert(data != null);
           try {
             // Decoding throws a PlatformException if the data represents an
             // error, and that's all we care about here.
-            SystemChannels.textInput.codec.decodeEnvelope(data);
+            SystemChannels.textInput.codec.decodeEnvelope(data!);
 
             // No error was found. Complete without issue.
             completer.complete();

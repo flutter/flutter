@@ -1,5 +1,5 @@
-#ifndef FLUTTER_WINDOW_H_
-#define FLUTTER_WINDOW_H_
+#ifndef RUNNER_FLUTTER_WINDOW_H_
+#define RUNNER_FLUTTER_WINDOW_H_
 
 #include <flutter/dart_project.h>
 #include <flutter/flutter_view_controller.h>
@@ -36,4 +36,4 @@ class FlutterWindow : public Win32Window {
   std::unique_ptr<flutter::FlutterViewController> flutter_controller_;
 };
 
-#endif  // FLUTTER_WINDOW_H_
+#endif  // RUNNER_FLUTTER_WINDOW_H_

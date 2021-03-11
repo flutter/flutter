@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -42,13 +40,13 @@ class TooltipThemeData with Diagnosticable {
   });
 
   /// The height of [Tooltip.child].
-  final double height;
+  final double? height;
 
   /// If provided, the amount of space by which to inset [Tooltip.child].
-  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry? padding;
 
   /// If provided, the amount of empty space to surround the [Tooltip].
-  final EdgeInsetsGeometry margin;
+  final EdgeInsetsGeometry? margin;
 
   /// The vertical gap between the widget and the displayed tooltip.
   ///
@@ -57,13 +55,13 @@ class TooltipThemeData with Diagnosticable {
   /// tooltips will position themselves under their corresponding widgets.
   /// Otherwise, tooltips will position themselves above their corresponding
   /// widgets with the given offset.
-  final double verticalOffset;
+  final double? verticalOffset;
 
   /// Whether the tooltip is displayed below its widget by default.
   ///
   /// If there is insufficient space to display the tooltip in the preferred
   /// direction, the tooltip will be displayed in the opposite direction.
-  final bool preferBelow;
+  final bool? preferBelow;
 
   /// Whether the [Tooltip.message] should be excluded from the semantics
   /// tree.
@@ -71,34 +69,34 @@ class TooltipThemeData with Diagnosticable {
   /// By default, [Tooltip]s will add a [Semantics] label that is set to
   /// [Tooltip.message]. Set this property to true if the app is going to
   /// provide its own custom semantics label.
-  final bool excludeFromSemantics;
+  final bool? excludeFromSemantics;
 
   /// The [Tooltip]'s shape and background color.
-  final Decoration decoration;
+  final Decoration? decoration;
 
   /// The style to use for the message of [Tooltip]s.
-  final TextStyle textStyle;
+  final TextStyle? textStyle;
 
   /// The length of time that a pointer must hover over a tooltip's widget
   /// before the tooltip will be shown.
-  final Duration waitDuration;
+  final Duration? waitDuration;
 
   /// The length of time that the tooltip will be shown once it has appeared.
-  final Duration showDuration;
+  final Duration? showDuration;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   TooltipThemeData copyWith({
-    double height,
-    EdgeInsetsGeometry padding,
-    EdgeInsetsGeometry margin,
-    double verticalOffset,
-    bool preferBelow,
-    bool excludeFromSemantics,
-    Decoration decoration,
-    TextStyle textStyle,
-    Duration waitDuration,
-    Duration showDuration,
+    double? height,
+    EdgeInsetsGeometry? padding,
+    EdgeInsetsGeometry? margin,
+    double? verticalOffset,
+    bool? preferBelow,
+    bool? excludeFromSemantics,
+    Decoration? decoration,
+    TextStyle? textStyle,
+    Duration? waitDuration,
+    Duration? showDuration,
   }) {
     return TooltipThemeData(
       height: height ?? this.height,
@@ -119,7 +117,7 @@ class TooltipThemeData with Diagnosticable {
   /// If both arguments are null, then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static TooltipThemeData lerp(TooltipThemeData a, TooltipThemeData b, double t) {
+  static TooltipThemeData? lerp(TooltipThemeData? a, TooltipThemeData? b, double t) {
     if (a == null && b == null)
       return null;
     assert(t != null);
@@ -128,8 +126,8 @@ class TooltipThemeData with Diagnosticable {
       padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
       margin: EdgeInsetsGeometry.lerp(a?.margin, b?.margin, t),
       verticalOffset: lerpDouble(a?.verticalOffset, b?.verticalOffset, t),
-      preferBelow: t < 0.5 ? a.preferBelow: b.preferBelow,
-      excludeFromSemantics: t < 0.5 ? a.excludeFromSemantics : b.excludeFromSemantics,
+      preferBelow: t < 0.5 ? a?.preferBelow: b?.preferBelow,
+      excludeFromSemantics: t < 0.5 ? a?.excludeFromSemantics : b?.excludeFromSemantics,
       decoration: Decoration.lerp(a?.decoration, b?.decoration, t),
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
     );
@@ -222,9 +220,9 @@ class TooltipTheme extends InheritedTheme {
   ///
   /// The data argument must not be null.
   const TooltipTheme({
-    Key key,
-    @required this.data,
-    Widget child,
+    Key? key,
+    required this.data,
+    required Widget child,
   }) : assert(data != null), super(key: key, child: child);
 
   /// The properties for descendant [Tooltip] widgets.
@@ -240,14 +238,13 @@ class TooltipTheme extends InheritedTheme {
   /// TooltipThemeData theme = TooltipTheme.of(context);
   /// ```
   static TooltipThemeData of(BuildContext context) {
-    final TooltipTheme tooltipTheme = context.dependOnInheritedWidgetOfExactType<TooltipTheme>();
+    final TooltipTheme? tooltipTheme = context.dependOnInheritedWidgetOfExactType<TooltipTheme>();
     return tooltipTheme?.data ?? Theme.of(context).tooltipTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final TooltipTheme ancestorTheme = context.findAncestorWidgetOfExactType<TooltipTheme>();
-    return identical(this, ancestorTheme) ? child : TooltipTheme(data: data, child: child);
+    return TooltipTheme(data: data, child: child);
   }
 
   @override

@@ -2,17 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' as ui;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 class _TestHitTester extends RenderBox {
   _TestHitTester(this.hitTestOverride);
@@ -20,7 +16,7 @@ class _TestHitTester extends RenderBox {
   final BoxHitTest hitTestOverride;
 
   @override
-  bool hitTest(BoxHitTestResult result, {ui.Offset position}) {
+  bool hitTest(BoxHitTestResult result, {required ui.Offset position}) {
     return hitTestOverride(result, position);
   }
 }
@@ -39,7 +35,7 @@ class TestMouseTrackerFlutterBinding extends BindingBase
     renderView.child = _TestHitTester(hitTest);
   }
 
-  SchedulerPhase _overridePhase;
+  SchedulerPhase? _overridePhase;
   @override
   SchedulerPhase get schedulerPhase => _overridePhase ?? super.schedulerPhase;
 
@@ -48,7 +44,7 @@ class TestMouseTrackerFlutterBinding extends BindingBase
   // In real apps this is done by the renderer binding, but in tests we have to
   // bypass the phase assertion of [MouseTracker.schedulePostFrameCheck].
   void scheduleMouseTrackerPostFrameCheck() {
-    final SchedulerPhase lastPhase = _overridePhase;
+    final SchedulerPhase? lastPhase = _overridePhase;
     _overridePhase = SchedulerPhase.persistentCallbacks;
     addPostFrameCallback((_) {
       mouseTracker.updateAllDevices(renderView.hitTestMouseTrackers);
@@ -56,7 +52,7 @@ class TestMouseTrackerFlutterBinding extends BindingBase
     _overridePhase = lastPhase;
   }
 
-  List<void Function(Duration)> postFrameCallbacks;
+  List<void Function(Duration)> postFrameCallbacks = <void Function(Duration)>[];
 
   // Proxy post-frame callbacks.
   @override
@@ -74,32 +70,34 @@ class TestMouseTrackerFlutterBinding extends BindingBase
 
 // An object that mocks the behavior of a render object with [MouseTrackerAnnotation].
 class TestAnnotationTarget with Diagnosticable implements MouseTrackerAnnotation, HitTestTarget  {
-  const TestAnnotationTarget({this.onEnter, this.onHover, this.onExit, this.cursor = MouseCursor.defer});
+  const TestAnnotationTarget({this.onEnter, this.onHover, this.onExit, this.cursor = MouseCursor.defer, this.validForMouseTracker = true});
 
   @override
-  final PointerEnterEventListener onEnter;
+  final PointerEnterEventListener? onEnter;
+
+  final PointerHoverEventListener? onHover;
 
   @override
-  final PointerHoverEventListener onHover;
-
-  @override
-  final PointerExitEventListener onExit;
+  final PointerExitEventListener? onExit;
 
   @override
   final MouseCursor cursor;
 
   @override
+  final bool validForMouseTracker;
+
+  @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     if (event is PointerHoverEvent)
       if (onHover != null)
-        onHover(event);
+        onHover!(event);
   }
 }
 
 // A hit test entry that can be assigned with a [TestAnnotationTarget] and an
 // optional transform matrix.
 class TestAnnotationEntry extends HitTestEntry {
-  TestAnnotationEntry(TestAnnotationTarget target, [Matrix4 transform])
+  TestAnnotationEntry(TestAnnotationTarget target, [Matrix4? transform])
     : transform = transform ?? Matrix4.identity(), super(target);
 
   @override

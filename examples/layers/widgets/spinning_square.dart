@@ -5,12 +5,14 @@
 import 'package:flutter/widgets.dart';
 
 class SpinningSquare extends StatefulWidget {
+  const SpinningSquare({Key? key}) : super(key: key);
+
   @override
   _SpinningSquareState createState() => _SpinningSquareState();
 }
 
 class _SpinningSquareState extends State<SpinningSquare> with SingleTickerProviderStateMixin {
-  AnimationController _animation;
+  late AnimationController _animation;
 
   @override
   void initState() {
@@ -44,5 +46,5 @@ class _SpinningSquareState extends State<SpinningSquare> with SingleTickerProvid
 }
 
 void main() {
-  runApp(Center(child: SpinningSquare()));
+  runApp(const Center(child: SpinningSquare()));
 }

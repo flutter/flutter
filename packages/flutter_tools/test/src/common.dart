@@ -2,13 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
+import 'package:path/path.dart' as path; // ignore: package_path_import
 
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
@@ -48,20 +57,21 @@ void tryToDelete(Directory directory) {
 /// environment variable is set, it will be returned. Otherwise, this will
 /// deduce the path from `platform.script`.
 String getFlutterRoot() {
-  if (globals.platform.environment.containsKey('FLUTTER_ROOT')) {
-    return globals.platform.environment['FLUTTER_ROOT'];
+  const Platform platform = LocalPlatform();
+  if (platform.environment.containsKey('FLUTTER_ROOT')) {
+    return platform.environment['FLUTTER_ROOT'];
   }
 
   Error invalidScript() => StateError('Could not determine flutter_tools/ path from script URL (${globals.platform.script}); consider setting FLUTTER_ROOT explicitly.');
 
   Uri scriptUri;
-  switch (globals.platform.script.scheme) {
+  switch (platform.script.scheme) {
     case 'file':
-      scriptUri = globals.platform.script;
+      scriptUri = platform.script;
       break;
     case 'data':
       final RegExp flutterTools = RegExp(r'(file://[^"]*[/\\]flutter_tools[/\\][^"]+\.dart)', multiLine: true);
-      final Match match = flutterTools.firstMatch(Uri.decodeFull(globals.platform.script.path));
+      final Match match = flutterTools.firstMatch(Uri.decodeFull(platform.script.path));
       if (match == null) {
         throw invalidScript();
       }
@@ -71,13 +81,22 @@ String getFlutterRoot() {
       throw invalidScript();
   }
 
-  final List<String> parts = globals.fs.path.split(globals.fs.path.fromUri(scriptUri));
+  final List<String> parts = path.split(LocalFileSystem.instance.path.fromUri(scriptUri));
   final int toolsIndex = parts.indexOf('flutter_tools');
   if (toolsIndex == -1) {
     throw invalidScript();
   }
-  final String toolsPath = globals.fs.path.joinAll(parts.sublist(0, toolsIndex + 1));
-  return globals.fs.path.normalize(globals.fs.path.join(toolsPath, '..', '..'));
+  final String toolsPath = path.joinAll(parts.sublist(0, toolsIndex + 1));
+  return path.normalize(path.join(toolsPath, '..', '..'));
+}
+
+/// Gets the path to the root of the Android SDK from the environment variable.
+String getAndroidSdkRoot() {
+  const Platform platform = LocalPlatform();
+  if (platform.environment.containsKey('ANDROID_SDK_ROOT')) {
+    return platform.environment['ANDROID_SDK_ROOT'];
+  }
+  throw StateError('ANDROID_SDK_ROOT environment varible not set');
 }
 
 CommandRunner<void> createTestCommandRunner([ FlutterCommand command ]) {
@@ -86,6 +105,18 @@ CommandRunner<void> createTestCommandRunner([ FlutterCommand command ]) {
     runner.addCommand(command);
   }
   return runner;
+}
+
+/// Capture console print events into a string buffer.
+Future<StringBuffer> capturedConsolePrint(Future<void> Function() body) async {
+  final StringBuffer buffer = StringBuffer();
+  await runZoned<Future<void>>(() async {
+    // Service the event loop.
+    await body();
+  }, zoneSpecification: ZoneSpecification(print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
+    buffer.writeln(line);
+  }));
+  return buffer;
 }
 
 /// Matcher for functions that throw [AssertionError].
@@ -157,7 +188,7 @@ Matcher containsIgnoringWhitespace(String toSearch) {
 /// system temporary directory are deleted after each test by calling
 /// `LocalFileSystem.dispose()`.
 @isTest
-void test(String description, FutureOr<void> body(), {
+void test(String description, FutureOr<void> Function() body, {
   String testOn,
   Timeout timeout,
   dynamic skip,
@@ -191,7 +222,7 @@ void test(String description, FutureOr<void> body(), {
 ///
 /// For more information, see https://github.com/flutter/flutter/issues/47161
 @isTest
-void testWithoutContext(String description, FutureOr<void> body(), {
+void testWithoutContext(String description, FutureOr<void> Function() body, {
   String testOn,
   Timeout timeout,
   dynamic skip,
@@ -266,11 +297,13 @@ class NoContext implements AppContext {
 class FakeVmServiceHost {
   FakeVmServiceHost({
     @required List<VmServiceExpectation> requests,
+    Uri httpAddress,
+    Uri wsAddress,
   }) : _requests = requests {
-    _vmService = vm_service.VmService(
+    _vmService = FlutterVmService(vm_service.VmService(
       _input.stream,
       _output.add,
-    );
+    ), httpAddress: httpAddress, wsAddress: wsAddress);
     _applyStreamListen();
     _output.stream.listen((String data) {
       final Map<String, Object> request = json.decode(data) as Map<String, Object>;
@@ -283,7 +316,7 @@ class FakeVmServiceHost {
         .having((Map<String, Object> request) => request['params'], 'args', fakeRequest.args)
       );
       if (fakeRequest.close) {
-        _vmService.dispose();
+        unawaited(_vmService.dispose());
         expect(_requests, isEmpty);
         return;
       }
@@ -310,8 +343,9 @@ class FakeVmServiceHost {
   final StreamController<String> _input = StreamController<String>();
   final StreamController<String> _output = StreamController<String>();
 
-  vm_service.VmService get vmService => _vmService;
-  vm_service.VmService _vmService;
+  FlutterVmService get vmService => _vmService;
+  FlutterVmService _vmService;
+
 
   bool get hasRemainingExpectations => _requests.isNotEmpty;
 
@@ -385,28 +419,69 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
       overrides: contextOverrides.map<Type, Generator>((Type type, dynamic value) {
         return MapEntry<Type, Generator>(type, () => value);
       }),
-      body: () => super.runCommand(topLevelResults),
+      body: () {
+        Cache.flutterRoot ??= Cache.defaultFlutterRoot(
+          platform: globals.platform,
+          fileSystem: globals.fs,
+          userMessages: UserMessages(),
+        );
+        // For compatibility with tests that set this to a relative path.
+        Cache.flutterRoot = globals.fs.path.normalize(globals.fs.path.absolute(Cache.flutterRoot));
+        return super.runCommand(topLevelResults);
+      }
     );
   }
 }
 
-/// A file system that allows preconfiguring certain entities.
+/// Matches a doctor validation result.
+Matcher matchDoctorValidation({
+  ValidationType validationType,
+  String statusInfo,
+  dynamic messages
+}) {
+  return const test_package.TypeMatcher<ValidationResult>()
+    .having((ValidationResult result) => result.type, 'type', validationType)
+    .having((ValidationResult result) => result.statusInfo, 'statusInfo', statusInfo)
+    .having((ValidationResult result) => result.messages, 'messages', messages);
+}
+
+/// Allows inserting file system exceptions into certain
+/// [MemoryFileSystem] operations by tagging path/op combinations.
 ///
-/// This is useful for inserting mocks/entities which throw errors or
-/// have other behavior that is not easily configured through the
-/// filesystem interface.
-class ConfiguredFileSystem extends ForwardingFileSystem {
-  ConfiguredFileSystem(FileSystem delegate, {@required this.entities}) : super(delegate);
+/// Example use:
+///
+/// ```
+/// void main() {
+///   var handler = FileExceptionHandler();
+///   var fs = MemoryFileSystem(opHandle: handler.opHandle);
+///
+///   var file = fs.file('foo')..createSync();
+///   handler.addError(file, FileSystemOp.read, FileSystemException('Error Reading foo'));
+///
+///   expect(() => file.writeAsStringSync('A'), throwsA(isA<FileSystemException>()));
+/// }
+/// ```
+class FileExceptionHandler {
+  final Map<String, Map<FileSystemOp, FileSystemException>> _contextErrors = <String, Map<FileSystemOp, FileSystemException>>{};
 
-  final Map<String, FileSystemEntity> entities;
-
-  @override
-  File file(dynamic path) {
-    return (entities[path] as File) ?? super.file(path);
+  /// Add an exception that will be thrown whenever the file system attached to this
+  /// handler performs the [operation] on the [entity].
+  void addError(FileSystemEntity entity, FileSystemOp operation, FileSystemException exception) {
+    final String path = entity.path;
+    _contextErrors[path] ??= <FileSystemOp, FileSystemException>{};
+    _contextErrors[path][operation] = exception;
   }
 
-  @override
-  Directory directory(dynamic path) {
-    return (entities[path] as Directory) ?? super.directory(path);
+  // Tear-off this method and pass it to the memory filesystem `opHandle` parameter.
+  void opHandle(String path, FileSystemOp operation) {
+    final Map<FileSystemOp, FileSystemException> exceptions = _contextErrors[path];
+    if (exceptions == null) {
+      return;
+    }
+    final FileSystemException exception = exceptions[operation];
+    if (exception == null) {
+      return;
+    }
+    throw exception;
   }
 }

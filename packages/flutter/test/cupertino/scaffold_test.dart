@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../painting/mocks_for_image_cache.dart';
+import '../image_data.dart';
 import '../rendering/mock_canvas.dart';
 
 /// Integration tests testing both [CupertinoPageScaffold] and [CupertinoTabScaffold].
@@ -25,11 +25,11 @@ void main() {
       ),
     );
 
-    expect(tester.getTopLeft(find.byType(Center)), const Offset(0.0, 0.0));
+    expect(tester.getTopLeft(find.byType(Center)), Offset.zero);
   });
 
   testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
-    BuildContext childContext;
+    late BuildContext childContext;
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(
@@ -67,7 +67,7 @@ void main() {
       darkColor: Color(0xFF000000),
     );
 
-    BuildContext childContext;
+    late BuildContext childContext;
     Widget scaffoldWithBrightness(Brightness brightness) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -120,7 +120,7 @@ void main() {
 
     expect(tester.getSize(find.byType(Container)).height, 600.0 - 44.0 - 100.0);
 
-    BuildContext childContext;
+    late BuildContext childContext;
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(
@@ -208,14 +208,14 @@ void main() {
         home: CupertinoTabScaffold(
           tabBar: CupertinoTabBar(
             backgroundColor: CupertinoColors.white,
-            items: const <BottomNavigationBarItem>[
+            items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
-                icon: ImageIcon(TestImageProvider(24, 24)),
-                title: Text('Tab 1'),
+                icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 1',
               ),
               BottomNavigationBarItem(
-                icon: ImageIcon(TestImageProvider(24, 24)),
-                title: Text('Tab 2'),
+                icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 2',
               ),
             ],
           ),
@@ -248,14 +248,14 @@ void main() {
           ),
           child: CupertinoTabScaffold(
             tabBar: CupertinoTabBar(
-              items: const <BottomNavigationBarItem>[
+              items: <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
-                  icon: ImageIcon(TestImageProvider(24, 24)),
-                  title: Text('Tab 1'),
+                  icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+                  label: 'Tab 1',
                 ),
                 BottomNavigationBarItem(
-                  icon: ImageIcon(TestImageProvider(24, 24)),
-                  title: Text('Tab 2'),
+                  icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+                  label: 'Tab 2',
                 ),
               ],
             ),
@@ -282,7 +282,7 @@ void main() {
     expect(tester.getTopLeft(find.byWidget(content)).dy, 20.0 + 44.0);
 
     // Overscroll to the bottom.
-    await tester.drag(find.byWidget(content), const Offset(0.0, -400.0));
+    await tester.drag(find.byWidget(content), const Offset(0.0, -400.0), warnIfMissed: false); // can't be hit (it's empty) but we're aiming for the list really so it doesn't matter
     // Let it bounce back.
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
@@ -298,14 +298,14 @@ void main() {
       CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: CupertinoTabBar(
-            items: const <BottomNavigationBarItem>[
+            items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
-                icon: ImageIcon(TestImageProvider(24, 24)),
-                title: Text('Tab 1'),
+                icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 1',
               ),
               BottomNavigationBarItem(
-                icon: ImageIcon(TestImageProvider(24, 24)),
-                title: Text('Tab 2'),
+                icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 2',
               ),
             ],
           ),
@@ -436,11 +436,11 @@ void main() {
   testWidgets('Lists in CupertinoPageScaffold scroll to the top when status bar tapped', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
-        builder: (BuildContext context, Widget child) {
+        builder: (BuildContext context, Widget? child) {
           // Acts as a 20px status bar at the root of the app.
           return MediaQuery(
             data: MediaQuery.of(context).copyWith(padding: const EdgeInsets.only(top: 20)),
-            child: child,
+            child: child!,
           );
         },
         home: CupertinoPageScaffold(

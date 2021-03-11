@@ -2,18 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+// @dart = 2.8
+
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:flutter_tools/src/test/flutter_web_platform.dart';
+import 'package:flutter_tools/src/test/flutter_web_goldens.dart';
 import 'package:flutter_tools/src/test/test_compiler.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
-import '../../src/mocks.dart';
+import '../../src/fakes.dart';
 import '../../src/testbed.dart';
 
 void main() {

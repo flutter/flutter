@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -108,7 +110,7 @@ class AzureDetector {
       request.headers.add('Metadata', true);
       await request.close();
     } on SocketException {
-      // If there is an error on the socket, it probalby means that we are not
+      // If there is an error on the socket, it probably means that we are not
       // running on Azure.
       return _isRunningOnAzure = false;
     } on HttpException {
@@ -118,6 +120,9 @@ class AzureDetector {
     } on TimeoutException {
       // The HttpClient connected to a host, but it did not respond in a timely
       // fashion. Assume we are not on a bot.
+      return _isRunningOnAzure = false;
+    } on OSError {
+      // The HttpClient might be running in a WSL1 environment.
       return _isRunningOnAzure = false;
     }
     // We got a response. We're running on Azure.

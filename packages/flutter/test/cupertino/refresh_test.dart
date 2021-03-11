@@ -2,18 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
+@TestOn('!chrome')
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  FakeBuilder mockHelper;
+  late FakeBuilder mockHelper;
 
   setUp(() {
     mockHelper = FakeBuilder();
@@ -24,7 +21,7 @@ void main() {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (BuildContext context, int index) {
-          return Container(
+          return SizedBox(
             height: 200.0,
             child: Center(child: Text(index.toString())),
           );
@@ -34,7 +31,7 @@ void main() {
     );
   }
 
-  final VoidCallback uiTestGroup = () {
+  void uiTestGroup() {
     testWidgets("doesn't invoke anything without user interaction", (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
@@ -53,8 +50,8 @@ void main() {
       expect(mockHelper.invocations, isEmpty);
 
       expect(
-        tester.getTopLeft(find.widgetWithText(Container, '0')),
-        const Offset(0.0, 0.0),
+        tester.getTopLeft(find.widgetWithText(SizedBox, '0')),
+        Offset.zero,
       );
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
@@ -88,7 +85,7 @@ void main() {
       expect(mockHelper.invocations, hasLength(1));
 
       expect(
-        tester.getTopLeft(find.widgetWithText(Container, '0')),
+        tester.getTopLeft(find.widgetWithText(SizedBox, '0')),
         const Offset(0.0, 50.0),
       );
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
@@ -117,8 +114,8 @@ void main() {
         expect(mockHelper.invocations, isEmpty);
 
         expect(
-          tester.getTopLeft(find.widgetWithText(Container, '0')),
-          const Offset(0.0, 0.0),
+          tester.getTopLeft(find.widgetWithText(SizedBox, '0')),
+          Offset.zero,
         );
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
@@ -168,8 +165,8 @@ void main() {
       expect(mockHelper.invocations, hasLength(3));
 
       expect(
-        tester.getTopLeft(find.widgetWithText(Container, '0')),
-        const Offset(0.0, 0.0),
+        tester.getTopLeft(find.widgetWithText(SizedBox, '0')),
+        Offset.zero,
       );
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
@@ -195,7 +192,7 @@ void main() {
         ),
       );
 
-      final TestGesture gesture = await tester.startGesture(const Offset(0.0, 0.0));
+      final TestGesture gesture = await tester.startGesture(Offset.zero);
       await gesture.moveBy(const Offset(0.0, 99.0));
       await tester.pump();
       await gesture.moveBy(const Offset(0.0, -30.0));
@@ -285,7 +282,7 @@ void main() {
         // Stays in that state forever until future completes.
         await tester.pump(const Duration(seconds: 1000));
         expect(
-          tester.getTopLeft(find.widgetWithText(Container, '0')),
+          tester.getTopLeft(find.widgetWithText(SizedBox, '0')),
           const Offset(0.0, 60.0),
         );
 
@@ -307,7 +304,7 @@ void main() {
         final FlutterError error = FlutterError('Oops');
         double errorCount = 0;
 
-        runZoned(
+        runZonedGuarded(
           () async {
             mockHelper.refreshCompleter = Completer<void>.sync();
             await tester.pumpWidget(
@@ -358,7 +355,7 @@ void main() {
             // Stays in that state forever until future completes.
             await tester.pump(const Duration(seconds: 1000));
             expect(
-              tester.getTopLeft(find.widgetWithText(Container, '0')),
+              tester.getTopLeft(find.widgetWithText(SizedBox, '0')),
               const Offset(0.0, 60.0),
             );
 
@@ -373,7 +370,7 @@ void main() {
             )));
             expect(mockHelper.invocations, hasLength(5));
           },
-          onError: (dynamic e) {
+          (Object e, StackTrace stack) {
             expect(e, error);
             expect(errorCount, 0);
             errorCount++;
@@ -415,7 +412,7 @@ void main() {
         const Rect.fromLTRB(0.0, 0.0, 800.0, 150.0),
       );
 
-      await tester.drag(find.text('0'), const Offset(0.0, -300.0), touchSlopY: 0);
+      await tester.drag(find.text('0'), const Offset(0.0, -300.0), touchSlopY: 0, warnIfMissed: false); // hits the list
       await tester.pump();
 
       // Refresh indicator still being told to layout the same way.
@@ -442,7 +439,7 @@ void main() {
 
       // Scroll the top of the refresh indicator back to overscroll, it will
       // snap to the size of the refresh indicator and stay there.
-      await tester.drag(find.text('1'), const Offset(0.0, 200.0));
+      await tester.drag(find.text('1'), const Offset(0.0, 200.0), warnIfMissed: false); // hits the list
       await tester.pump();
       await tester.pump(const Duration(seconds: 2));
       expect(
@@ -655,7 +652,7 @@ void main() {
 
         // Start another drag by an amount that would have been enough to
         // trigger another refresh if it were in the right state.
-        await tester.drag(find.text('0'), const Offset(0.0, 150.0), touchSlopY: 0.0);
+        await tester.drag(find.text('0'), const Offset(0.0, 150.0), touchSlopY: 0.0, warnIfMissed: false);
         await tester.pump();
 
         // Instead, it's still in the done state because the sliver never
@@ -706,7 +703,7 @@ void main() {
           ),
         );
 
-        final TestGesture gesture = await tester.startGesture(const Offset(0.0, 0.0));
+        final TestGesture gesture = await tester.startGesture(Offset.zero);
         // Start a refresh.
         await gesture.moveBy(const Offset(0.0, 150.0));
         await tester.pump();
@@ -843,9 +840,8 @@ void main() {
           ),
         );
 
-        await tester.fling(find.byType(Container).first, const Offset(0.0, 200.0), 2000.0);
-
-        await tester.fling(find.byType(Container).first, const Offset(0.0, -200.0), 3000.0);
+        await tester.fling(find.byType(SizedBox).first, const Offset(0.0, 200.0), 2000.0);
+        await tester.fling(find.byType(SizedBox).first, const Offset(0.0, -200.0), 3000.0, warnIfMissed: false); // IgnorePointer is enabled while scroll is ballistic.
 
         expect(mockHelper.invocations, isEmpty);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
@@ -919,9 +915,50 @@ void main() {
 
       expect(tester.takeException(), isNull);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
-  };
 
-  final VoidCallback stateMachineTestGroup = () {
+    // Test to make sure the refresh sliver's overscroll isn't eaten by the
+    // nav bar sliver https://github.com/flutter/flutter/issues/74516.
+    testWidgets(
+        'properly displays when the refresh sliver is behind the large title nav bar sliver',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              const CupertinoSliverNavigationBar(
+                largeTitle: Text('Title'),
+              ),
+              CupertinoSliverRefreshControl(
+                builder: mockHelper.builder,
+              ),
+              buildAListOfStuff(),
+            ],
+          ),
+        ),
+      );
+
+      final double initialFirstCellY = tester.getTopLeft(find.widgetWithText(SizedBox, '0')).dy;
+
+      // Drag down but not enough to trigger the refresh.
+      await tester.drag(find.text('0'), const Offset(0.0, 50.0), touchSlopY: 0);
+      await tester.pump();
+
+      expect(mockHelper.invocations.first, matchesBuilder(
+        refreshState: RefreshIndicatorMode.drag,
+        pulledExtent: 50,
+        refreshTriggerPullDistance: 100,  // default value.
+        refreshIndicatorExtent: 60,  // default value.
+      ));
+      expect(mockHelper.invocations, hasLength(1));
+
+      expect(
+        tester.getTopLeft(find.widgetWithText(SizedBox, '0')).dy,
+        initialFirstCellY + 50
+      );
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }
+
+  void stateMachineTestGroup() {
     testWidgets('starts in inactive state', (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
@@ -990,7 +1027,7 @@ void main() {
         ),
       );
 
-      final TestGesture gesture = await tester.startGesture(const Offset(0.0, 0.0));
+      final TestGesture gesture = await tester.startGesture(Offset.zero);
       await gesture.moveBy(const Offset(0.0, 79.0));
       await tester.pump();
       expect(
@@ -1026,7 +1063,7 @@ void main() {
           ),
         );
 
-        final TestGesture gesture = await tester.startGesture(const Offset(0.0, 0.0));
+        final TestGesture gesture = await tester.startGesture(Offset.zero);
         await gesture.moveBy(const Offset(0.0, 90.0)); // Arm it.
         await tester.pump();
         expect(
@@ -1037,7 +1074,7 @@ void main() {
         await gesture.moveBy(const Offset(0.0, -80.0)); // Overscrolling, need to move more than -40.
         await tester.pump();
         expect(
-          tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
+          tester.getTopLeft(find.widgetWithText(SizedBox, '0')).dy,
           moreOrLessEquals(49.775111111111116), // Below 50 now.
         );
         expect(
@@ -1079,7 +1116,7 @@ void main() {
           RefreshIndicatorMode.refresh,
         );
         expect(
-          tester.getRect(find.widgetWithText(Container, '0')),
+          tester.getRect(find.widgetWithText(SizedBox, '0')),
           const Rect.fromLTRB(0.0, 60.0, 800.0, 260.0),
         );
 
@@ -1111,7 +1148,7 @@ void main() {
           ),
         );
 
-        final TestGesture gesture = await tester.startGesture(const Offset(0.0, 0.0));
+        final TestGesture gesture = await tester.startGesture(Offset.zero);
         await gesture.moveBy(const Offset(0.0, 150.0));
         await tester.pump();
         expect(
@@ -1130,7 +1167,7 @@ void main() {
         await gesture.moveBy(const Offset(0.0, -200.0));
         await tester.pump();
         expect(
-          tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
+          tester.getTopLeft(find.widgetWithText(SizedBox, '0')).dy,
           moreOrLessEquals(27.944444444444457),
         );
         // Need to bring it to 100 * 0.1 to reset to inactive.
@@ -1142,7 +1179,7 @@ void main() {
         await gesture.moveBy(const Offset(0.0, -35.0));
         await tester.pump();
         expect(
-          tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
+          tester.getTopLeft(find.widgetWithText(SizedBox, '0')).dy,
           moreOrLessEquals(9.313890708161875),
         );
         expect(
@@ -1169,7 +1206,7 @@ void main() {
           ),
         );
 
-        final TestGesture gesture = await tester.startGesture(const Offset(0.0, 0.0));
+        final TestGesture gesture = await tester.startGesture(Offset.zero);
         await gesture.moveBy(const Offset(0.0, 150.0));
         await tester.pump();
         expect(
@@ -1182,7 +1219,7 @@ void main() {
         await tester.pump();
         // The refresh indicator is offscreen now.
         expect(
-          tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
+          tester.getTopLeft(find.widgetWithText(SizedBox, '0')).dy,
           moreOrLessEquals(-145.0332383665717),
         );
         expect(
@@ -1199,13 +1236,13 @@ void main() {
         );
         // Nothing moved.
         expect(
-          tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
+          tester.getTopLeft(find.widgetWithText(SizedBox, '0')).dy,
           moreOrLessEquals(-145.0332383665717),
         );
         await tester.pump(const Duration(seconds: 2));
         // Everything stayed as is.
         expect(
-          tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
+          tester.getTopLeft(find.widgetWithText(SizedBox, '0')).dy,
           moreOrLessEquals(-145.0332383665717),
         );
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
@@ -1308,7 +1345,7 @@ void main() {
       );
       expect(tester.widget<CupertinoActivityIndicator>(find.byType(CupertinoActivityIndicator)).progress, 100.0 / 100.0);
     });
-  };
+  }
 
   group('UI tests long list', uiTestGroup);
 
@@ -1407,10 +1444,10 @@ class RefreshTaskInvocation extends MockHelperInvocation {
 @immutable
 class BuilderInvocation extends MockHelperInvocation {
   const BuilderInvocation({
-    @required this.refreshState,
-    @required this.pulledExtent,
-    @required this.refreshIndicatorExtent,
-    @required this.refreshTriggerPullDistance,
+    required this.refreshState,
+    required this.pulledExtent,
+    required this.refreshIndicatorExtent,
+    required this.refreshTriggerPullDistance,
   });
 
   final RefreshIndicatorMode refreshState;
@@ -1423,10 +1460,10 @@ class BuilderInvocation extends MockHelperInvocation {
 }
 
 Matcher matchesBuilder({
-  @required RefreshIndicatorMode refreshState,
-  @required dynamic pulledExtent,
-  @required dynamic refreshTriggerPullDistance,
-  @required dynamic refreshIndicatorExtent,
+  required RefreshIndicatorMode refreshState,
+  required dynamic pulledExtent,
+  required dynamic refreshTriggerPullDistance,
+  required dynamic refreshIndicatorExtent,
 }) {
   return isA<BuilderInvocation>()
     .having((BuilderInvocation invocation) => invocation.refreshState, 'refreshState', refreshState)

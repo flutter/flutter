@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
 import 'package:flutter_devicelab/framework/apk_utils.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
 Future<void> main() async {
@@ -15,7 +15,15 @@ Future<void> main() async {
     try {
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
         section('APK content for task assembleDebug without explicit target platform');
-        await pluginProject.runGradleTask('assembleDebug');
+        await inDirectory(pluginProject.exampleAndroidPath, () {
+          return flutter(
+            'build',
+            options: <String>[
+              'apk',
+              '--debug',
+            ],
+          );
+        });
 
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
 
@@ -40,7 +48,16 @@ Future<void> main() async {
 
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
         section('APK content for task assembleRelease without explicit target platform');
-        await pluginProject.runGradleTask('assembleRelease');
+
+        await inDirectory(pluginProject.exampleAndroidPath, () {
+          return flutter(
+            'build',
+            options: <String>[
+              'apk',
+              '--release',
+            ],
+          );
+        });
 
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.releaseApkPath);
 
@@ -60,8 +77,17 @@ Future<void> main() async {
 
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
         section('APK content for task assembleRelease with target platform = android-arm, android-arm64');
-        await pluginProject.runGradleTask('assembleRelease',
-            options: <String>['-Ptarget-platform=android-arm,android-arm64']);
+
+        await inDirectory(pluginProject.exampleAndroidPath, () {
+          return flutter(
+            'build',
+            options: <String>[
+              'apk',
+              '--release',
+              '--target-platform=android-arm,android-arm64'
+            ],
+          );
+        });
 
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.releaseApkPath);
 
@@ -80,8 +106,18 @@ Future<void> main() async {
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
         section('APK content for task assembleRelease with '
                 'target platform = android-arm, android-arm64 and split per ABI');
-        await pluginProject.runGradleTask('assembleRelease',
-            options: <String>['-Ptarget-platform=android-arm,android-arm64', '-Psplit-per-abi=true']);
+
+        await inDirectory(pluginProject.exampleAndroidPath, () {
+          return flutter(
+            'build',
+            options: <String>[
+              'apk',
+              '--release',
+              '--split-per-abi',
+              '--target-platform=android-arm,android-arm64',
+            ],
+          );
+        });
 
         final Iterable<String> armApkFiles = await getFilesInApk(pluginProject.releaseArmApkPath);
 
@@ -108,7 +144,16 @@ Future<void> main() async {
 
       await runProjectTest((FlutterProject project) async {
         section('gradlew assembleRelease');
-        await project.runGradleTask('assembleRelease');
+
+        await inDirectory(project.rootPath, () {
+          return flutter(
+            'build',
+            options: <String>[
+              'apk',
+              '--release',
+            ],
+          );
+        });
 
         // When the platform-target isn't specified, we generate the snapshots
         // for arm and arm64.

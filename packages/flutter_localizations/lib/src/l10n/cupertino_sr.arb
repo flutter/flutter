@@ -25,5 +25,6 @@
   "pasteButtonLabel": "Налепи",
   "selectAllButtonLabel": "Изабери све",
   "tabSemanticsLabel": "$tabIndex. картица од $tabCount",
-  "modalBarrierDismissLabel": "Одбаци"
+  "modalBarrierDismissLabel": "Одбаци",
+  "searchTextFieldPlaceholderLabel": "Претражите"
 }

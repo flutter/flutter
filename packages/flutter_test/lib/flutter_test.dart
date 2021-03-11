@@ -27,7 +27,7 @@
 /// with the following signature:
 ///
 /// ```dart
-/// Future<void> main(FutureOr<void> testMain());
+/// Future<void> testExecutable(FutureOr<void> Function() testMain);
 /// ```
 ///
 /// The test framework will execute that method and pass it the `main()` method
@@ -42,6 +42,15 @@
 /// root of the project.
 ///
 /// If no configuration file is located, the test will be executed like normal.
+///
+/// See also:
+///
+///  * [WidgetController.hitTestWarningShouldBeFatal], which can be set
+///    in a `flutter_test_config.dart` file to turn warnings printed by
+///    [WidgetTester.tap] and similar APIs into fatal errors.
+///  * [debugCheckIntrinsicSizes], which can be set in a
+///    `flutter_test_config.dart` file to enable deeper [RenderBox]
+///    tests of the intrinsic APIs automatically while laying out widgets.
 library flutter_test;
 
 export 'dart:async' show Future;
@@ -56,6 +65,7 @@ export 'src/event_simulation.dart';
 export 'src/finders.dart';
 export 'src/frame_timing_summarizer.dart';
 export 'src/goldens.dart';
+export 'src/image.dart';
 export 'src/matchers.dart';
 export 'src/nonconst.dart';
 export 'src/platform.dart';

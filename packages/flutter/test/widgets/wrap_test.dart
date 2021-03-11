@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -32,7 +31,7 @@ void main() {
       ),
     );
     verify(tester, <Offset>[
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(300.0, 0.0),
       const Offset(0.0, 100.0),
       const Offset(300.0, 100.0),
@@ -90,7 +89,7 @@ void main() {
       ),
     );
     verify(tester, <Offset>[
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(300.0, 0.0),
       const Offset(0.0, 100.0),
       const Offset(300.0, 100.0),
@@ -191,7 +190,7 @@ void main() {
     );
     verify(tester, <Offset>[
       const Offset(300.0, 0.0),
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(300.0, 100.0),
       const Offset(0.0, 100.0),
     ]);
@@ -296,7 +295,7 @@ void main() {
     ));
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(200.0, 0.0),
       const Offset(500.0, 0.0),
     ]);
@@ -368,7 +367,7 @@ void main() {
     verify(tester, <Offset>[
       const Offset(700.0, 0.0),
       const Offset(400.0, 0.0),
-      const Offset(0.0, 0.0),
+      Offset.zero,
     ]);
 
     await tester.pumpWidget(Wrap(
@@ -442,7 +441,7 @@ void main() {
     ));
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(100.0, 0.0),
       const Offset(300.0, 0.0),
       const Offset(0.0, 265.0),
@@ -535,7 +534,7 @@ void main() {
       const Offset(100.0, 580.0),
       const Offset(300.0, 570.0),
       const Offset(0.0, 295.0),
-      const Offset(0.0, 0.0),
+      Offset.zero,
     ]);
 
     await tester.pumpWidget(Wrap(
@@ -627,7 +626,7 @@ void main() {
     );
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(700.0, 60.0)));
     verify(tester, <Offset>[
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(400.0, 10.0),
       const Offset(400.0, 40.0),
       const Offset(600.0, 50.0),
@@ -654,7 +653,7 @@ void main() {
     );
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(500.0, 130.0)));
     verify(tester, <Offset>[
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(0.0, 20.0),
       const Offset(0.0, 50.0),
       const Offset(0.0, 90.0),
@@ -685,7 +684,7 @@ void main() {
     );
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(150.0, 510.0)));
     verify(tester, <Offset>[
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(0.0, 260.0),
       const Offset(35.0, 0.0),
       const Offset(35.0, 260.0),
@@ -714,7 +713,7 @@ void main() {
     );
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(270.0, 250.0)));
     verify(tester, <Offset>[
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(22.0, 0.0),
       const Offset(54.0, 0.0),
       const Offset(96.0, 0.0),
@@ -848,7 +847,7 @@ void main() {
 
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(210.0, 0.0),
       const Offset(420.0, 0.0),
       const Offset(0.0, 20.0),
@@ -873,7 +872,7 @@ void main() {
     );
 
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 10.0)));
-    verify(tester, <Offset>[const Offset(0.0, 0.0)]);
+    verify(tester, <Offset>[Offset.zero]);
 
     await tester.pumpWidget(
       Column(
@@ -894,7 +893,7 @@ void main() {
 
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 30.0)));
     verify(tester, <Offset>[
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(0.0, 20.0),
     ]);
   });
@@ -902,9 +901,74 @@ void main() {
   testWidgets('Wrap can set and update clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(Wrap(textDirection: TextDirection.ltr));
     final RenderWrap renderObject = tester.allRenderObjects.whereType<RenderWrap>().first;
-    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+    expect(renderObject.clipBehavior, equals(Clip.none));
 
     await tester.pumpWidget(Wrap(textDirection: TextDirection.ltr, clipBehavior: Clip.antiAlias));
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+  });
+
+  testWidgets('Horizontal wrap - IntrinsicsHeight', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/48679.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: IntrinsicHeight(
+            child: Container(
+              color: Colors.green,
+              child: Wrap(
+                children: <Widget>[
+                  const Text('Start', style: TextStyle(height: 1.0, fontSize: 16)),
+                  Row(
+                    children: const <Widget>[
+                      SizedBox(height: 40, width: 60),
+                    ],
+                  ),
+                  const Text('End', style: TextStyle(height: 1.0, fontSize: 16)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // The row takes up the full width, therefore the "Start" and "End" text
+    // are placed before and after it and the total height is the sum of the
+    // individual heights.
+    expect(tester.getSize(find.byType(IntrinsicHeight)).height, 2 * 16 + 40);
+  });
+
+  testWidgets('Vertical wrap - IntrinsicsWidth', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/48679.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: IntrinsicWidth(
+            child: Container(
+              color: Colors.green,
+              child: Wrap(
+                direction: Axis.vertical,
+                children: <Widget>[
+                  const Text('Start', style: TextStyle(height: 1.0, fontSize: 16)),
+                  Column(
+                    children: const <Widget>[
+                      SizedBox(height: 40, width: 60),
+                    ],
+                  ),
+                  const Text('End', style: TextStyle(height: 1.0, fontSize: 16)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // The column takes up the full height, therefore the "Start" and "End" text
+    // are placed to the left and right of it and the total width is the sum of
+    // the individual widths.
+    expect(tester.getSize(find.byType(IntrinsicWidth)).width, 5 * 16 + 60 + 3 * 16);
   });
 }

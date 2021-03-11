@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+// @dart = 2.8
 
 import 'package:meta/meta.dart';
 
@@ -42,9 +42,11 @@ class BuildAarCommand extends BuildSubCommand {
     usesPubOption();
     addSplitDebugInfoOption();
     addDartObfuscationOption();
+    usesDartDefineOption();
     usesTrackWidgetCreation(verboseHelp: false);
     addNullSafetyModeOptions(hide: !verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
+    addAndroidSpecificBuildOptions(hide: !verboseHelp);
     argParser
       ..addMultiOption(
         'target-platform',
@@ -56,12 +58,15 @@ class BuildAarCommand extends BuildSubCommand {
       ..addOption(
         'output-dir',
         help: 'The absolute path to the directory where the repository is generated. '
-              "By default, this is '<current-directory>android/build'. ",
+              'By default, this is "<current-directory>android/build".',
       );
   }
 
   @override
   final String name = 'aar';
+
+  @override
+  bool get reportNullSafety => false;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
@@ -113,7 +118,7 @@ class BuildAarCommand extends BuildSubCommand {
       if (boolArg(buildMode)) {
         androidBuildInfo.add(
           AndroidBuildInfo(
-            getBuildInfo(forcedBuildMode: BuildMode.fromName(buildMode)),
+            await getBuildInfo(forcedBuildMode: BuildMode.fromName(buildMode)),
             targetArchs: targetArchitectures,
           )
         );
@@ -123,6 +128,7 @@ class BuildAarCommand extends BuildSubCommand {
       throwToolExit('Please specify a build mode and try again.');
     }
 
+    displayNullSafetyMode(androidBuildInfo.first.buildInfo);
     await androidBuilder.buildAar(
       project: _getProject(),
       target: '', // Not needed because this command only builds Android's code.
@@ -139,6 +145,6 @@ class BuildAarCommand extends BuildSubCommand {
     if (argResults.rest.isEmpty) {
       return FlutterProject.current();
     }
-    return FlutterProject.fromPath(findProjectRoot(argResults.rest.first));
+    return FlutterProject.fromDirectory(globals.fs.directory(findProjectRoot(argResults.rest.first)));
   }
 }

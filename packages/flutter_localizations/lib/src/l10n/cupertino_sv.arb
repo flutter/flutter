@@ -20,5 +20,6 @@
   "pasteButtonLabel": "Klistra in",
   "selectAllButtonLabel": "Markera alla",
   "tabSemanticsLabel": "Flik $tabIndex av $tabCount",
-  "modalBarrierDismissLabel": "Stäng"
+  "modalBarrierDismissLabel": "Stäng",
+  "searchTextFieldPlaceholderLabel": "Sök"
 }

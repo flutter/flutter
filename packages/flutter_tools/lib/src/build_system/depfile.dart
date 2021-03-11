@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 
@@ -22,13 +25,13 @@ class DepfileService {
 
   /// Given an [depfile] File, write the depfile contents.
   ///
-  /// If either [inputs] or [outputs] is empty, ensures the file does not
-  /// exist.
-  void writeToFile(Depfile depfile, File output) {
-    if (depfile.inputs.isEmpty || depfile.outputs.isEmpty) {
-      if (output.existsSync()) {
-        output.deleteSync();
-      }
+  /// If both [inputs] and [outputs] are empty, ensures the file does not
+  /// exist. This can be overriden with the [writeEmpty] parameter when
+  /// both static and runtime dependencies exist and it is not desired
+  /// to force a rerun due to no depfile.
+  void writeToFile(Depfile depfile, File output, {bool writeEmpty = false}) {
+    if (depfile.inputs.isEmpty && depfile.outputs.isEmpty && !writeEmpty) {
+      ErrorHandlingFileSystem.deleteIfExists(output);
       return;
     }
     final StringBuffer buffer = StringBuffer();
@@ -102,7 +105,7 @@ class DepfileService {
         .map<String>((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
         .where((String path) => path.isNotEmpty)
     // The tool doesn't write duplicates to these lists. This call is an attempt to
-    // be resillient to the outputs of other tools which write or user edits to depfiles.
+    // be resilient to the outputs of other tools which write or user edits to depfiles.
         .toSet()
         .map(_fileSystem.file)
         .toList();

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+// @dart = 2.8
 
 import 'package:meta/meta.dart';
 
@@ -81,7 +81,10 @@ class OutputPreferences {
 
 /// The command line terminal, if available.
 abstract class Terminal {
-  factory Terminal.test() = _TestTerminal;
+  /// Create a new test [Terminal].
+  ///
+  /// If not specified, [supportsColor] defaults to `false`.
+  factory Terminal.test({bool supportsColor, bool supportsEmoji}) = _TestTerminal;
 
   /// Whether the current terminal supports color escape codes.
   bool get supportsColor;
@@ -94,6 +97,14 @@ abstract class Terminal {
   /// If not set, defaults to false.
   bool get usesTerminalUi;
   set usesTerminalUi(bool value);
+
+  /// Whether there is a terminal attached to stdin.
+  ///
+  /// If true, this usually indicates that a user is using the CLI as
+  /// opposed to using an IDE. This can be used to determine
+  /// whether it is appropriate to show a terminal prompt,
+  /// or whether an automatic selection should be made instead.
+  bool get stdinHasTerminal;
 
   String bolden(String message);
 
@@ -119,6 +130,9 @@ abstract class Terminal {
   /// null, and the user presses enter without any other input, the return value
   /// will be the character in `acceptedCharacters` at the index given by
   /// `defaultChoiceIndex`.
+  ///
+  /// The accepted characters must be a String with a length of 1, excluding any
+  /// whitespace characters such as `\t`, `\n`, or ` `.
   ///
   /// If [usesTerminalUi] is false, throws a [StateError].
   Future<String> promptForCharInput(
@@ -153,7 +167,7 @@ class AnsiTerminal implements Terminal {
   static const String cyan = '\u001b[36m';
   static const String magenta = '\u001b[35m';
   static const String yellow = '\u001b[33m';
-  static const String grey = '\u001b[1;30m';
+  static const String grey = '\u001b[90m';
 
   static const Map<TerminalColor, String> _colorMap = <TerminalColor, String>{
     TerminalColor.red: red,
@@ -247,6 +261,9 @@ class AnsiTerminal implements Terminal {
     }
   }
 
+  @override
+  bool get stdinHasTerminal => _stdio.stdinHasTerminal;
+
   Stream<String> _broadcastStdInString;
 
   @override
@@ -275,7 +292,7 @@ class AnsiTerminal implements Terminal {
       assert(defaultChoiceIndex >= 0 && defaultChoiceIndex < acceptedCharacters.length);
       charactersToDisplay = List<String>.of(charactersToDisplay);
       charactersToDisplay[defaultChoiceIndex] = bolden(charactersToDisplay[defaultChoiceIndex]);
-      acceptedCharacters.add('\n');
+      acceptedCharacters.add('');
     }
     String choice;
     singleCharMode = true;
@@ -285,13 +302,14 @@ class AnsiTerminal implements Terminal {
         if (displayAcceptedCharacters) {
           logger.printStatus(' [${charactersToDisplay.join("|")}]', newline: false);
         }
+        // prompt ends with ': '
         logger.printStatus(': ', emphasis: true, newline: false);
       }
-      choice = await keystrokes.first;
+      choice = (await keystrokes.first).trim();
       logger.printStatus(choice);
     }
     singleCharMode = false;
-    if (defaultChoiceIndex != null && choice == '\n') {
+    if (defaultChoiceIndex != null && choice == '') {
       choice = acceptedCharacters[defaultChoiceIndex];
     }
     return choice;
@@ -299,6 +317,8 @@ class AnsiTerminal implements Terminal {
 }
 
 class _TestTerminal implements Terminal {
+  _TestTerminal({this.supportsColor = false, this.supportsEmoji = false});
+
   @override
   bool usesTerminalUi;
 
@@ -328,8 +348,11 @@ class _TestTerminal implements Terminal {
   set singleCharMode(bool value) { }
 
   @override
-  bool get supportsColor => false;
+  final bool supportsColor;
 
   @override
-  bool get supportsEmoji => false;
+  final bool supportsEmoji;
+
+  @override
+  bool get stdinHasTerminal => false;
 }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
@@ -270,7 +272,7 @@ class CommandHelpOption {
     message.write(''.padLeft(width - parentheticalText.length));
     message.write(_terminal.color(parentheticalText, TerminalColor.grey));
 
-    // Terminals seem to require this because we have both boldened and colored
+    // Terminals seem to require this because we have both bolded and colored
     // a line. Otherwise the next line comes out bold until a reset bold.
     if (_terminal.supportsColor) {
       message.write(AnsiTerminal.resetBold);
