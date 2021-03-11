@@ -86,12 +86,11 @@ class ScrollBehavior {
     }
   }
 
-  /// Wraps the given widget, which scrolls in the given [AxisDirection], and is
-  /// controlled by the given [ScrollController].
+  /// Wraps the given widget based on the information provided by [ScrollableDetails].
   ///
-  /// For example, on Android, this method wraps the given widget with a
-  /// [GlowingOverscrollIndicator] to provide visual feedback when the user
-  /// overscrolls.
+  /// For example, based on the platform and provided details, this method
+  /// could wrap a given widget with a [GlowingOverscrollIndicator] to provide
+  /// visual feedback when the user overscrolls.
   Widget buildViewportDecoration(
     BuildContext context,
     Widget child,
