@@ -2373,7 +2373,7 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
        assert(constraintsTransform != null),
        super(key: key, child: child);
 
-  /// Creates a widget that that imposes no constraints on its child, allowing
+  /// Creates a widget that imposes no constraints on its child, allowing
   /// it to render at its "natural" size. If the child overflows the parent's
   /// constraints, a warning will be given in debug mode.
   ///
@@ -2394,9 +2394,9 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
     clipBehavior: clipBehavior,
   );
 
-  /// Creates a widget that that imposes no height constraints on its child,
-  /// allowing it to render at its "natural" height. If the child overflows the
-  /// parent's constraints, a warning will be given in debug mode.
+  /// Creates a widget that imposes no height constraints on its child, allowing
+  /// it to render at its "natural" height. If the child overflows the parent's
+  /// constraints, a warning will be given in debug mode.
   ///
   /// The `alignment`, `clipBehavior` and `constraintsTransform` arguments must
   /// not be null.
@@ -2415,9 +2415,9 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
     clipBehavior: clipBehavior,
   );
 
-  /// Creates a widget that that imposes no height constraints on its child,
-  /// allowing it to render at its "natural" height. If the child overflows the
-  /// parent's constraints, a warning will be given in debug mode.
+  /// Creates a widget that imposes no height constraints on its child, allowing
+  /// it to render at its "natural" height. If the child overflows the parent's
+  /// constraints, a warning will be given in debug mode.
   ///
   /// The `alignment`, `clipBehavior` and `constraintsTransform` arguments must
   /// not be null.
@@ -2490,6 +2490,13 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
       ..constraintsTransform = constraintsTransform
       ..alignment = alignment
       ..clipBehavior = clipBehavior;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }
 

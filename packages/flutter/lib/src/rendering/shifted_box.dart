@@ -635,12 +635,12 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   }
 }
 
-/// A [RenderBox] that applies an arbitrary transform to its [constraints], and
-/// sizes its child using the normalized output [BoxConstraints], treating any
-/// overflow as error.
+/// A [RenderBox] that applies an arbitrary transform to its [constraints]
+/// before sizing its child using the new constraints, treating any overflow as
+/// error.
 ///
-/// This [RenderBox] sizes its child using a normalized [BoxConstraints] created
-/// by applying [constraintsTransform] to this [RenderBox]'s own [constraints].
+/// This [RenderBox] sizes its child using a [BoxConstraints] created by
+/// applying [constraintsTransform] to this [RenderBox]'s own [constraints].
 /// This box will then attempt to adopt the same size, within the limits of its
 /// own constraints. If it ends up with a different size, it will align the
 /// child based on [alignment]. If the box cannot expand enough to accommodate
@@ -651,7 +651,7 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
 /// the console, and black and yellow striped areas will appear where the
 /// overflow occurs.
 ///
-/// This [RenderBox] can be used to allow the child to enforce some of its
+/// This [RenderBox] allows the child to selectively enforce some of its
 /// intrinsic sizing rules, partially disregard the constraints set by its
 /// parent render object, and display a warning in debug mode if the parent
 /// render object fails to provide enough space.
@@ -668,7 +668,7 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
 ///  * [RenderUnconstrainedBox] which allows its children to render themselves
 ///    unconstrained, expands to fit them, and considers overflow to be an error.
 class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugOverflowIndicatorMixin {
-  /// Creates a render object that sizes itself to the child and modifies the
+  /// Creates a [RenderBox] that sizes itself to the child and modifies the
   /// [constraints] before passing it down to that child.
   ///
   /// The [alignment] and [clipBehavior] must not be null.
