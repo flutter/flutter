@@ -333,9 +333,20 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         final MethodCall decoded = codec.decodeMethodCall(data);
         switch (decoded.method) {
           case 'Skia.setResourceCacheMaxBytes':
-            if (decoded.arguments is int) {
-              rasterizer?.setSkiaResourceCacheMaxBytes(decoded.arguments);
+            if (useCanvasKit) {
+              // If we're in CanvasKit mode, we must also have a rasterizer.
+              assert(rasterizer != null);
+              assert(
+                decoded.arguments is int,
+                'Argument to Skia.setResourceCacheMaxBytes must be an int, but was ${decoded.arguments.runtimeType}',
+              );
+              final int cacheSizeInBytes = decoded.arguments as int;
+              rasterizer!.setSkiaResourceCacheMaxBytes(cacheSizeInBytes);
             }
+
+            // Also respond in HTML mode. Otherwise, apps would have to detect
+            // CanvasKit vs HTML before invoking this method.
+            _replyToPlatformMessage(callback, codec.encodeSuccessEnvelope([true]));
             break;
         }
         return;
@@ -896,9 +907,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// messages and responses have to be exchanged asynchronously. We simulate
   /// that by adding a zero-length delay to the reply.
   void _replyToPlatformMessage(
-      ui.PlatformMessageResponseCallback? callback,
-      ByteData? data,
-      ) {
+    ui.PlatformMessageResponseCallback? callback,
+    ByteData? data,
+  ) {
     Future<void>.delayed(Duration.zero).then((_) {
       if (callback != null) {
         callback(data);
