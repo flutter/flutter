@@ -165,8 +165,8 @@ class HotRunner extends ResidentRunner {
         final CompilerOutput compilerOutput =
             await device.generator.compileExpression(expression, definitions,
                 typeDefinitions, libraryUri, klass, isStatic);
-        if (compilerOutput != null && compilerOutput.data != null) {
-          return base64.encode(compilerOutput.data);
+        if (compilerOutput != null && compilerOutput.expressionData != null) {
+          return base64.encode(compilerOutput.expressionData);
         }
       }
     }

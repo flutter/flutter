@@ -328,8 +328,8 @@ class FlutterPlatform extends PlatformPlugin {
     final CompilerOutput compilerOutput =
       await compiler.compiler.compileExpression(expression, definitions,
         typeDefinitions, libraryUri, klass, isStatic);
-    if (compilerOutput != null && compilerOutput.data != null) {
-      return base64.encode(compilerOutput.data);
+    if (compilerOutput != null && compilerOutput.expressionData != null) {
+      return base64.encode(compilerOutput.expressionData);
     }
     throw 'Failed to compile $expression';
   }

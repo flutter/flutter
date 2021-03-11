@@ -115,7 +115,7 @@ void main() {
           '2+2', null, null, null, null, false).then(
               (CompilerOutput outputExpression) {
                 expect(outputExpression, isNotNull);
-                expect(outputExpression.data, <int>[1, 2, 3, 4]);
+                expect(outputExpression.expressionData, <int>[1, 2, 3, 4]);
               }
       );
     });
@@ -162,7 +162,7 @@ void main() {
       generator.compileExpression('0+1', null, null, null, null, false).then(
         (CompilerOutput outputExpression) {
           expect(outputExpression, isNotNull);
-          expect(outputExpression.data, <int>[0, 1, 2, 3]);
+          expect(outputExpression.expressionData, <int>[0, 1, 2, 3]);
 
           fileSystem.file('/path/to/main.dart.dill.incremental')
             ..createSync(recursive: true)
@@ -179,7 +179,7 @@ void main() {
       generator.compileExpression('1+1', null, null, null, null, false).then(
         (CompilerOutput outputExpression) {
           expect(outputExpression, isNotNull);
-          expect(outputExpression.data, <int>[4, 5, 6, 7]);
+          expect(outputExpression.expressionData, <int>[4, 5, 6, 7]);
           lastExpressionCompleted.complete(true);
         },
       ),

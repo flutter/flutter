@@ -66,14 +66,14 @@ class TargetModel {
 }
 
 class CompilerOutput {
-  const CompilerOutput(this.outputFilename, this.errorCount, this.sources, {this.data});
+  const CompilerOutput(this.outputFilename, this.errorCount, this.sources, {this.expressionData});
 
   final String outputFilename;
   final int errorCount;
   final List<Uri> sources;
 
   /// This field is only non-null for expression compilation requests.
-  final Uint8List data;
+  final Uint8List expressionData;
 }
 
 enum StdoutState { CollectDiagnostic, CollectDependencies }
@@ -120,15 +120,15 @@ class StdoutHandler {
       final int spaceDelimiter = message.lastIndexOf(' ');
       final String fileName = message.substring(boundaryKey.length + 1, spaceDelimiter);
       final int errorCount = int.parse(message.substring(spaceDelimiter + 1).trim());
-      Uint8List data;
-      if (_readFile && errorCount == 0) {
-        data = _fileSystem.file(fileName).readAsBytesSync();
+      Uint8List expressionData;
+      if (_readFile) {
+        expressionData = _fileSystem.file(fileName).readAsBytesSync();
       }
       final CompilerOutput output = CompilerOutput(
         fileName,
         errorCount,
         sources,
-        data: data,
+        expressionData: expressionData,
       );
       compilerOutput.complete(output);
       return;
