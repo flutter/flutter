@@ -1444,6 +1444,57 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Selectable rich text with gesture recognizer has correct semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      overlay(
+        child: SelectableText.rich(
+          TextSpan(
+            children: <TextSpan>[
+              const TextSpan(text: 'text'),
+              TextSpan(
+                text: 'link',
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () { },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          id: 1,
+          actions: <SemanticsAction>[SemanticsAction.longPress],
+          textDirection: TextDirection.ltr,
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 2,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 3,
+                  label: 'text',
+                  textDirection: TextDirection.ltr,
+                ),
+                TestSemantics(
+                  id: 4,
+                  flags: <SemanticsFlag>[SemanticsFlag.isLink],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  label: 'link',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true));
+
+    semantics.dispose();
+  });
+
   group('Keyboard Tests', () {
     late TextEditingController controller;
 

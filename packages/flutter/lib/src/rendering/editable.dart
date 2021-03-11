@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:ui' as ui show TextBox, BoxHeightStyle, BoxWidthStyle;
 
@@ -1474,10 +1475,34 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
   }
 
+  /// Collected during [describeSemanticsConfiguration], used by
+  /// [assembleSemanticsNode] and [_combineSemanticsInfo].
+  List<InlineSpanSemanticsInformation>? _semanticsInfo;
+
+  // Caches [SemanticsNode]s created during [assembleSemanticsNode] so they
+  // can be re-used when [assembleSemanticsNode] is called again. This ensures
+  // stable ids for the [SemanticsNode]s of [TextSpan]s across
+  // [assembleSemanticsNode] invocations.
+  Queue<SemanticsNode>? _cachedChildNodes;
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-
+    _semanticsInfo = _textPainter.text!.getSemanticsInformation();
+    // TODO(chunhtai): the macOS does not provide a public API to support text
+    // selections across multiple semantics nodes. Remove this platform check
+    // once we can support it.
+    // https://github.com/flutter/flutter/issues/77957
+    if (_semanticsInfo!.any((InlineSpanSemanticsInformation info) => info.recognizer != null) &&
+        defaultTargetPlatform != TargetPlatform.macOS) {
+      assert(readOnly && !obscureText);
+      // For Selectable rich text with recognizer, we need to create a semantics
+      // node for each text fragment.
+      config
+        ..isSemanticBoundary = true
+        ..explicitChildNodes = true;
+      return;
+    }
     config
       ..value = obscureText
           ? obscuringCharacter * _plainText.length
@@ -1518,6 +1543,87 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       ),
       SelectionChangedCause.keyboard,
     );
+  }
+
+  @override
+  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
+    assert(_semanticsInfo != null && _semanticsInfo!.isNotEmpty);
+    final List<SemanticsNode> newChildren = <SemanticsNode>[];
+    TextDirection currentDirection = textDirection;
+    Rect currentRect;
+    double ordinal = 0.0;
+    int start = 0;
+    final Queue<SemanticsNode> newChildCache = Queue<SemanticsNode>();
+    for (final InlineSpanSemanticsInformation info in combineSemanticsInfo(_semanticsInfo!)) {
+      assert(!info.isPlaceholder);
+      final TextSelection selection = TextSelection(
+        baseOffset: start,
+        extentOffset: start + info.text.length,
+      );
+      start += info.text.length;
+
+      final TextDirection initialDirection = currentDirection;
+      final List<ui.TextBox> rects = _textPainter.getBoxesForSelection(selection);
+      if (rects.isEmpty) {
+        continue;
+      }
+      Rect rect = rects.first.toRect();
+      currentDirection = rects.first.direction;
+      for (final ui.TextBox textBox in rects.skip(1)) {
+        rect = rect.expandToInclude(textBox.toRect());
+        currentDirection = textBox.direction;
+      }
+      // Any of the text boxes may have had infinite dimensions.
+      // We shouldn't pass infinite dimensions up to the bridges.
+      rect = Rect.fromLTWH(
+        math.max(0.0, rect.left),
+        math.max(0.0, rect.top),
+        math.min(rect.width, constraints.maxWidth),
+        math.min(rect.height, constraints.maxHeight),
+      );
+      // Round the current rectangle to make this API testable and add some
+      // padding so that the accessibility rects do not overlap with the text.
+      currentRect = Rect.fromLTRB(
+        rect.left.floorToDouble() - 4.0,
+        rect.top.floorToDouble() - 4.0,
+        rect.right.ceilToDouble() + 4.0,
+        rect.bottom.ceilToDouble() + 4.0,
+      );
+      final SemanticsConfiguration configuration = SemanticsConfiguration()
+        ..sortKey = OrdinalSortKey(ordinal++)
+        ..textDirection = initialDirection
+        ..label = info.semanticsLabel ?? info.text;
+      final GestureRecognizer? recognizer = info.recognizer;
+      if (recognizer != null) {
+        if (recognizer is TapGestureRecognizer) {
+          if (recognizer.onTap != null) {
+            configuration.onTap = recognizer.onTap;
+            configuration.isLink = true;
+          }
+        } else if (recognizer is DoubleTapGestureRecognizer) {
+          if (recognizer.onDoubleTap != null) {
+            configuration.onTap = recognizer.onDoubleTap;
+            configuration.isLink = true;
+          }
+        } else if (recognizer is LongPressGestureRecognizer) {
+          if (recognizer.onLongPress != null) {
+            configuration.onLongPress = recognizer.onLongPress;
+          }
+        } else {
+          assert(false, '${recognizer.runtimeType} is not supported.');
+        }
+      }
+      final SemanticsNode newChild = (_cachedChildNodes?.isNotEmpty == true)
+          ? _cachedChildNodes!.removeFirst()
+          : SemanticsNode();
+      newChild
+        ..updateWith(config: configuration)
+        ..rect = currentRect;
+      newChildCache.addLast(newChild);
+      newChildren.add(newChild);
+    }
+    _cachedChildNodes = newChildCache;
+    node.updateWith(config: config, childrenInInversePaintOrder: newChildren);
   }
 
   // TODO(ianh): in theory, [selection] could become null between when
