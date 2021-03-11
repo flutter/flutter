@@ -66,7 +66,7 @@ void main() {
   });
 
   testUsingContext('ProcessSignal toString() works', () async {
-    expect(io.ProcessSignal.sigint.toString(), ProcessSignal.SIGINT.toString());
+    expect(io.ProcessSignal.sigint.toString(), ProcessSignal.sigint.toString());
   });
 
   test('exit throws a StateError if called without being overriden', () {
