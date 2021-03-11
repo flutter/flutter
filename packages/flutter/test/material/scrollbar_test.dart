@@ -67,15 +67,15 @@ void main() {
             width: 300.0,
             child: Scrollbar(
               child: ListView(
-                children: <Widget>[
-                  Container(height: 40.0, child: const Text('0')),
-                  Container(height: 40.0, child: const Text('1')),
-                  Container(height: 40.0, child: const Text('2')),
-                  Container(height: 40.0, child: const Text('3')),
-                  Container(height: 40.0, child: const Text('4')),
-                  Container(height: 40.0, child: const Text('5')),
-                  Container(height: 40.0, child: const Text('6')),
-                  Container(height: 40.0, child: const Text('7')),
+                children: const <Widget>[
+                  SizedBox(height: 40.0, child: Text('0')),
+                  SizedBox(height: 40.0, child: Text('1')),
+                  SizedBox(height: 40.0, child: Text('2')),
+                  SizedBox(height: 40.0, child: Text('3')),
+                  SizedBox(height: 40.0, child: Text('4')),
+                  SizedBox(height: 40.0, child: Text('5')),
+                  SizedBox(height: 40.0, child: Text('6')),
+                  SizedBox(height: 40.0, child: Text('7')),
                 ],
               ),
             ),
@@ -101,13 +101,13 @@ void main() {
 
   testWidgets('ScrollbarPainter does not divide by zero', (WidgetTester tester) async {
     await tester.pumpWidget(
-      _buildBoilerplate(child: Container(
+      _buildBoilerplate(child: SizedBox(
         height: 200.0,
         width: 300.0,
         child: Scrollbar(
           child: ListView(
-            children: <Widget>[
-              Container(height: 40.0, child: const Text('0')),
+            children: const <Widget>[
+              SizedBox(height: 40.0, child: Text('0')),
             ],
           ),
         ),

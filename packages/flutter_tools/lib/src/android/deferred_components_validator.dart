@@ -7,8 +7,8 @@
 import '../base/common.dart';
 import '../base/deferred_component.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
 import '../base/terminal.dart';
-import '../build_system/build_system.dart';
 import '../globals.dart' as globals;
 
 /// A class to configure and run deferred component setup verification checks
@@ -21,10 +21,10 @@ import '../globals.dart' as globals;
 /// The results of each check are handled internally as they are not meant to
 /// be run isolated.
 abstract class DeferredComponentsValidator {
-  DeferredComponentsValidator(this.env, {
+  DeferredComponentsValidator(this.projectDir, this.logger, {
     this.exitOnFail = true,
     String title,
-  }) : outputDir = env.projectDir
+  }) : outputDir = projectDir
         .childDirectory('build')
         .childDirectory(kDeferredComponentsTempDirectory),
       inputs = <File>[],
@@ -34,12 +34,9 @@ abstract class DeferredComponentsValidator {
       modifiedFiles = <String>[],
       invalidFiles = <String, String>{},
       diffLines = <String>[];
-  /// The build environment that should be used to find the input files to run
-  /// checks against.
-  ///
-  /// The checks in this class are meant to be used as part of a build process,
-  /// so an environment should be available.
-  final Environment env;
+
+  /// Logger to use for [displayResults] output.
+  final Logger logger;
 
   /// When true, failed checks and tasks will result in [attemptToolExit]
   /// triggering [throwToolExit].
@@ -53,6 +50,9 @@ abstract class DeferredComponentsValidator {
 
   /// The title printed at the top of the results of [displayResults]
   final String title;
+
+  /// The root directory of the flutter project.
+  final Directory projectDir;
 
   /// The temporary directory that the validator writes recommended files into.
   final Directory outputDir;
@@ -111,20 +111,20 @@ abstract class DeferredComponentsValidator {
   /// All checks that are desired should be run before calling this method.
   void displayResults() {
     if (changesNeeded) {
-      env.logger.printStatus(_thickDivider);
-      env.logger.printStatus(title, indent: (_thickDivider.length - title.length) ~/ 2, emphasis: true);
-      env.logger.printStatus(_thickDivider);
+      logger.printStatus(_thickDivider);
+      logger.printStatus(title, indent: (_thickDivider.length - title.length) ~/ 2, emphasis: true);
+      logger.printStatus(_thickDivider);
       // Log any file reading/existence errors.
       if (invalidFiles.isNotEmpty) {
-        env.logger.printStatus('Errors checking the following files:\n', emphasis: true);
+        logger.printStatus('Errors checking the following files:\n', emphasis: true);
         for (final String key in invalidFiles.keys) {
-          env.logger.printStatus('  - $key: ${invalidFiles[key]}\n');
+          logger.printStatus('  - $key: ${invalidFiles[key]}\n');
         }
       }
       // Log diff file contents, with color highlighting
       if (diffLines != null && diffLines.isNotEmpty) {
-        env.logger.printStatus('Diff between `android` and expected files:', emphasis: true);
-        env.logger.printStatus('');
+        logger.printStatus('Diff between `android` and expected files:', emphasis: true);
+        logger.printStatus('');
         for (final String line in diffLines) {
           // We only care about diffs in files that have
           // counterparts.
@@ -137,62 +137,62 @@ abstract class DeferredComponentsValidator {
           } else if (line.startsWith('-')) {
             color = TerminalColor.red;
           }
-          env.logger.printStatus(line, color: color);
+          logger.printStatus(line, color: color);
         }
-        env.logger.printStatus('');
+        logger.printStatus('');
       }
       // Log any newly generated and modified files.
       if (generatedFiles.isNotEmpty) {
-        env.logger.printStatus('Newly generated android files:', emphasis: true);
+        logger.printStatus('Newly generated android files:', emphasis: true);
         for (final String filePath in generatedFiles) {
-          final String shortenedPath = filePath.substring(env.projectDir.parent.path.length + 1);
-          env.logger.printStatus('  - $shortenedPath', color: TerminalColor.grey);
+          final String shortenedPath = filePath.substring(projectDir.parent.path.length + 1);
+          logger.printStatus('  - $shortenedPath', color: TerminalColor.grey);
         }
-        env.logger.printStatus('');
+        logger.printStatus('');
       }
       if (modifiedFiles.isNotEmpty) {
-        env.logger.printStatus('Modified android files:', emphasis: true);
+        logger.printStatus('Modified android files:', emphasis: true);
         for (final String filePath in modifiedFiles) {
-          final String shortenedPath = filePath.substring(env.projectDir.parent.path.length + 1);
-          env.logger.printStatus('  - $shortenedPath', color: TerminalColor.grey);
+          final String shortenedPath = filePath.substring(projectDir.parent.path.length + 1);
+          logger.printStatus('  - $shortenedPath', color: TerminalColor.grey);
         }
-        env.logger.printStatus('');
+        logger.printStatus('');
       }
       if (generatedFiles.isNotEmpty || modifiedFiles.isNotEmpty) {
-        env.logger.printStatus('''
+        logger.printStatus('''
 The above files have been placed into `build/$kDeferredComponentsTempDirectory`,
 a temporary directory. The files should be reviewed and moved into the project's
 `android` directory.''');
         if (diffLines != null && diffLines.isNotEmpty && !globals.platform.isWindows) {
-          env.logger.printStatus(r'''
+          logger.printStatus(r'''
 
 The recommended changes can be quickly applied by running:
 
   $ patch -p0 < build/setup_deferred_components.diff
 ''');
         }
-        env.logger.printStatus('$_thinDivider\n');
+        logger.printStatus('$_thinDivider\n');
       }
       // Log loading unit golden changes, if any.
       if (loadingUnitComparisonResults != null) {
         if ((loadingUnitComparisonResults['new'] as List<LoadingUnit>).isNotEmpty) {
-          env.logger.printStatus('New loading units were found:', emphasis: true);
+          logger.printStatus('New loading units were found:', emphasis: true);
           for (final LoadingUnit unit in loadingUnitComparisonResults['new'] as List<LoadingUnit>) {
-            env.logger.printStatus(unit.toString(), color: TerminalColor.grey, indent: 2);
+            logger.printStatus(unit.toString(), color: TerminalColor.grey, indent: 2);
           }
-          env.logger.printStatus('');
+          logger.printStatus('');
         }
         if ((loadingUnitComparisonResults['missing'] as Set<LoadingUnit>).isNotEmpty) {
-          env.logger.printStatus('Previously existing loading units no longer exist:', emphasis: true);
+          logger.printStatus('Previously existing loading units no longer exist:', emphasis: true);
           for (final LoadingUnit unit in loadingUnitComparisonResults['missing'] as Set<LoadingUnit>) {
-            env.logger.printStatus(unit.toString(), color: TerminalColor.grey, indent: 2);
+            logger.printStatus(unit.toString(), color: TerminalColor.grey, indent: 2);
           }
-          env.logger.printStatus('');
+          logger.printStatus('');
         }
         if (loadingUnitComparisonResults['match'] as bool) {
-          env.logger.printStatus('No change in generated loading units.\n');
+          logger.printStatus('No change in generated loading units.\n');
         } else {
-          env.logger.printStatus('''
+          logger.printStatus('''
 It is recommended to verify that the changed loading units are expected
 and to update the `deferred-components` section in `pubspec.yaml` to
 incorporate any changes. The full list of generated loading units can be
@@ -205,14 +205,14 @@ $_thinDivider\n''');
         }
       }
       // TODO(garyq): Add link to web tutorial/guide once it is written.
-      env.logger.printStatus('''
-Setup verification can be skipped by passing the `--no-verify-deferred-components`
+      logger.printStatus('''
+Setup verification can be skipped by passing the `--no-validate-deferred-components`
 flag, however, doing so may put your app at risk of not functioning even if the
 build is successful.
 $_thickDivider''');
       return;
     }
-    env.logger.printStatus('$title passed.');
+    logger.printStatus('$title passed.');
   }
 
   void attemptToolExit() {

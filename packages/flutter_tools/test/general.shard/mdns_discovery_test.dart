@@ -213,7 +213,7 @@ void main() {
         flutterUsage: TestUsage(),
       );
       expect(
-        () async => await portDiscovery.query(),
+        () async => portDiscovery.query(),
         throwsA(isA<Exception>()),
       );
     });

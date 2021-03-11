@@ -655,7 +655,7 @@ class ActionDispatcher with Diagnosticable {
 ///                 IconButton(
 ///                   icon: const Icon(Icons.exposure_plus_1),
 ///                   onPressed: () {
-///                     Actions.invoke(context, ModifyIntent(count++));
+///                     Actions.invoke(context, ModifyIntent(++count));
 ///                   },
 ///                 ),
 ///                 AnimatedBuilder(
@@ -670,7 +670,7 @@ class ActionDispatcher with Diagnosticable {
 ///                 IconButton(
 ///                   icon: const Icon(Icons.exposure_minus_1),
 ///                   onPressed: () {
-///                     Actions.invoke(context, ModifyIntent(count--));
+///                     Actions.invoke(context, ModifyIntent(--count));
 ///                   },
 ///                 ),
 ///               ],
@@ -733,7 +733,7 @@ class Actions extends StatefulWidget {
   // Visits the Actions widget ancestors of the given element using
   // getElementForInheritedWidgetOfExactType. Returns true if the visitor found
   // what it was looking for.
-  static bool _visitActionsAncestors(BuildContext context, bool visitor(InheritedElement element)) {
+  static bool _visitActionsAncestors(BuildContext context, bool Function(InheritedElement element) visitor) {
     InheritedElement? actionsElement = context.getElementForInheritedWidgetOfExactType<_ActionsMarker>();
     while (actionsElement != null) {
       if (visitor(actionsElement) == true) {

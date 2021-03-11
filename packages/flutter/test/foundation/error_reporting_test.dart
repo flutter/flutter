@@ -34,7 +34,7 @@ Object getAssertionErrorWithLongMessage() {
 }
 
 Future<StackTrace> getSampleStack() async {
-  return await Future<StackTrace>.sync(() => StackTrace.current);
+  return Future<StackTrace>.sync(() => StackTrace.current);
 }
 
 Future<void> main() async {

@@ -119,7 +119,7 @@ class IOSDevices extends PollingDeviceDiscovery {
       );
     }
 
-    return await _xcdevice.getAvailableIOSDevices(timeout: timeout);
+    return _xcdevice.getAvailableIOSDevices(timeout: timeout);
   }
 
   @override
@@ -130,7 +130,7 @@ class IOSDevices extends PollingDeviceDiscovery {
       ];
     }
 
-    return await _xcdevice.getDiagnostics();
+    return _xcdevice.getDiagnostics();
   }
 }
 
@@ -258,6 +258,7 @@ class IOSDevice extends Device {
       installationResult = await _iosDeploy.installApp(
         deviceId: id,
         bundlePath: bundle.path,
+        appDeltaDirectory: app.appDeltaDirectory,
         launchArguments: <String>[],
         interfaceType: interfaceType,
       );
@@ -384,6 +385,7 @@ class IOSDevice extends Device {
           iosDeployDebugger = _iosDeploy.prepareDebuggerForLaunch(
             deviceId: id,
             bundlePath: bundle.path,
+            appDeltaDirectory: package.appDeltaDirectory,
             launchArguments: launchArguments,
             interfaceType: interfaceType,
           );
@@ -404,6 +406,7 @@ class IOSDevice extends Device {
         installationResult = await _iosDeploy.launchApp(
           deviceId: id,
           bundlePath: bundle.path,
+          appDeltaDirectory: package.appDeltaDirectory,
           launchArguments: launchArguments,
           interfaceType: interfaceType,
         );

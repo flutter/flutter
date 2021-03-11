@@ -48,15 +48,15 @@ const String textLotsOfText = 'Lorem ipsum dolor sit amet, consectetur '
   '🦻 👃 🫀 🫁 🧠 🦷 🦴 👀 👁 👅 👄 💋 🩸';
 
 class TextFieldPage extends StatelessWidget {
+  const TextFieldPage({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Material(
-      child: Container(
-        child: TextField(
-          maxLines: null,
-          controller: TextEditingController(text: textLotsOfText),
-          key: const Key('fullscreen-textfield'),
-        ),
+      child: TextField(
+        maxLines: null,
+        controller: TextEditingController(text: textLotsOfText),
+        key: const Key('fullscreen-textfield'),
       ),
     );
   }
