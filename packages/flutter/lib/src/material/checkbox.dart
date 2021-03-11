@@ -39,6 +39,8 @@ import 'toggleable.dart';
 ///
 /// ```dart
 /// bool isChecked = false;
+///
+/// @override
 /// Widget build(BuildContext context) {
 ///   Color getColor(Set<MaterialState> states) {
 ///     const Set<MaterialState> interactiveStates = <MaterialState>{
@@ -55,9 +57,9 @@ import 'toggleable.dart';
 ///     checkColor: Colors.white,
 ///     fillColor: MaterialStateProperty.resolveWith(getColor),
 ///     value: isChecked,
-///     onChanged: (val) {
+///     onChanged: (bool? value) {
 ///       setState(() {
-///         isChecked = !isChecked;
+///         isChecked = value!;
 ///       });
 ///     },
 ///   );

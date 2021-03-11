@@ -42,7 +42,7 @@ void main() {
       ''
     ]);
     expect(stdoutLines, <String>[
-      'Found 8 snippet code blocks and 0 sample code sections, and 2 dartpad sections.',
+      'Found 8 snippet code blocks, 0 sample code sections, and 2 dartpad sections.',
       'Starting analysis of code samples.',
       '',
     ]);

@@ -464,7 +464,7 @@ class SampleChecker {
       }
     }
     if (!silent)
-      print('Found ${sections.length} snippet code blocks and $sampleCount sample code sections, and $dartpadCount dartpad sections.');
+      print('Found ${sections.length} snippet code blocks, $sampleCount sample code sections, and $dartpadCount dartpad sections.');
     for (final Section section in sections) {
       final String path = _writeSection(section).path;
       if (sectionMap != null)
