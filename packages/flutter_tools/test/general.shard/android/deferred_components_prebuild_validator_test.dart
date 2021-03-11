@@ -88,6 +88,9 @@ void main() {
     file.deleteSync();
     expect(logger.statusText.contains('Newly generated android files:\n'), true);
     expect(logger.statusText.contains('build/${DeferredComponentsValidator.kDeferredComponentsTempDirectory}/component1/build.gradle\n'), true);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('androidComponentSetup AndroidManifest.xml does not exist', () async {
@@ -126,6 +129,9 @@ void main() {
     file.deleteSync();
     expect(logger.statusText.contains('Newly generated android files:\n'), true);
     expect(logger.statusText.contains('build/${DeferredComponentsValidator.kDeferredComponentsTempDirectory}/component1/src/main/AndroidManifest.xml\n'), true);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('androidComponentSetup all files exist passes', () async {
