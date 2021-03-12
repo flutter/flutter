@@ -318,7 +318,7 @@ class _MockHttpResponse implements HttpClientResponse {
   @override
   List<RedirectInfo> get redirects => <RedirectInfo>[];
 
-  ///TODO: We need a solution to override this value
+  ///TODO(Filip Hráček): We need a solution to override this value
   @override
   int get statusCode => 400;
 
