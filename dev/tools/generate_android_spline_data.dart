@@ -9,7 +9,13 @@ const double _startTension = 0.5;
 const double _endTension = 1.0;
 const double _inflexion = 0.35;
 
-// Generated spline data used in ClampingScrollSimulation.
+// Generate the spline data used in ClampingScrollSimulation.
+//
+// This logic is a translation of the 2-dimensional logic found in
+// https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/widget/Scroller.java.
+//
+// The output of this program should be copied over to [_splinePosition] in
+// flutter/packages/flutter/lib/src/widgets/scroll_simulation.dart.
 void main() {
   const double p1 = _startTension * _inflexion;
   const double p2 = 1.0 - _endTension * (1.0 - _inflexion);
