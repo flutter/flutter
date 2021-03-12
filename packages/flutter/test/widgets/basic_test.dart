@@ -331,7 +331,7 @@ void main() {
 
   testWidgets('UnconstrainedBox can set and update clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(const UnconstrainedBox());
-    final RenderUnconstrainedBox renderObject = tester.allRenderObjects.whereType<RenderUnconstrainedBox>().first;
+    final RenderConstraintsTransformBox renderObject = tester.allRenderObjects.whereType<RenderConstraintsTransformBox>().first;
     expect(renderObject.clipBehavior, equals(Clip.none));
 
     await tester.pumpWidget(const UnconstrainedBox(clipBehavior: Clip.antiAlias));
