@@ -2415,7 +2415,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return TextField(
+///   return const TextField(
 ///     decoration: InputDecoration(
 ///       icon: Icon(Icons.send),
 ///       hintText: 'Hint Text',
@@ -2438,7 +2438,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return TextField(
+///   return const TextField(
 ///     decoration: InputDecoration.collapsed(
 ///       hintText: 'Hint Text',
 ///       border: OutlineInputBorder(),
@@ -2458,7 +2458,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return TextField(
+///   return const TextField(
 ///     decoration: InputDecoration(
 ///       hintText: 'Hint Text',
 ///       errorText: 'Error Text',
@@ -2875,7 +2875,7 @@ class InputDecoration {
   ///     padding: const EdgeInsets.symmetric(horizontal: 8.0),
   ///     child: Column(
   ///       mainAxisAlignment: MainAxisAlignment.center,
-  ///       children: <Widget>[
+  ///       children: const <Widget>[
   ///         TextField(
   ///           decoration: InputDecoration(
   ///             hintText: 'Normal Icon Constraints',
@@ -3043,7 +3043,7 @@ class InputDecoration {
   ///     padding: const EdgeInsets.symmetric(horizontal: 8.0),
   ///     child: Column(
   ///       mainAxisAlignment: MainAxisAlignment.center,
-  ///       children: <Widget>[
+  ///       children: const <Widget>[
   ///         TextField(
   ///           decoration: InputDecoration(
   ///             hintText: 'Normal Icon Constraints',

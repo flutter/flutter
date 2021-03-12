@@ -106,7 +106,7 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
 }
 
 /// An interface for building the selection UI, to be provided by the
-/// implementor of the toolbar widget.
+/// implementer of the toolbar widget.
 ///
 /// Override text operations such as [handleCut] if needed.
 abstract class TextSelectionControls {
@@ -194,6 +194,9 @@ abstract class TextSelectionControls {
     return delegate.selectAllEnabled && delegate.textEditingValue.text.isNotEmpty && delegate.textEditingValue.selection.isCollapsed;
   }
 
+  // TODO(justinmc): This and other methods should be ported to Actions and
+  // removed, along with their keyboard shortcut equivalents.
+  // https://github.com/flutter/flutter/issues/75004
   /// Copy the current selection of the text field managed by the given
   /// `delegate` to the [Clipboard]. Then, remove the selected text from the
   /// text field and hide the toolbar.
@@ -231,15 +234,29 @@ abstract class TextSelectionControls {
       text: value.selection.textInside(value.text),
     ));
     clipboardStatus?.update();
-    delegate.userUpdateTextEditingValue(
-      TextEditingValue(
-        text: value.text,
-        selection: TextSelection.collapsed(offset: value.selection.end),
-      ),
-      SelectionChangedCause.toolBar,
-    );
     delegate.bringIntoView(delegate.textEditingValue.selection.extent);
-    delegate.hideToolbar();
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        // Hide the toolbar, but keep the selection and keep the handles.
+        delegate.hideToolbar(false);
+        return;
+      case TargetPlatform.macOS:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        // Collapse the selection and hide the toolbar and handles.
+        delegate.userUpdateTextEditingValue(
+          TextEditingValue(
+            text: value.text,
+            selection: TextSelection.collapsed(offset: value.selection.end),
+          ),
+          SelectionChangedCause.toolBar,
+        );
+        delegate.hideToolbar();
+        return;
+    }
   }
 
   /// Paste the current clipboard selection (obtained from [Clipboard]) into
@@ -548,22 +565,31 @@ class TextSelectionOverlay {
   }
 
   Widget _buildHandle(BuildContext context, _TextSelectionHandlePosition position) {
+    Widget handle;
     if ((_selection.isCollapsed && position == _TextSelectionHandlePosition.end) ||
          selectionControls == null)
-      return Container(); // hide the second handle when collapsed
-    return Visibility(
-      visible: handlesVisible,
-      child: _TextSelectionHandleOverlay(
-        onSelectionHandleChanged: (TextSelection newSelection) { _handleSelectionHandleChanged(newSelection, position); },
-        onSelectionHandleTapped: onSelectionHandleTapped,
-        startHandleLayerLink: startHandleLayerLink,
-        endHandleLayerLink: endHandleLayerLink,
-        renderObject: renderObject,
-        selection: _selection,
-        selectionControls: selectionControls,
-        position: position,
-        dragStartBehavior: dragStartBehavior,
-    ));
+      handle = Container(); // hide the second handle when collapsed
+    else {
+      handle = Visibility(
+        visible: handlesVisible,
+        child: _TextSelectionHandleOverlay(
+          onSelectionHandleChanged: (TextSelection newSelection) {
+            _handleSelectionHandleChanged(newSelection, position);
+          },
+          onSelectionHandleTapped: onSelectionHandleTapped,
+          startHandleLayerLink: startHandleLayerLink,
+          endHandleLayerLink: endHandleLayerLink,
+          renderObject: renderObject,
+          selection: _selection,
+          selectionControls: selectionControls,
+          position: position,
+          dragStartBehavior: dragStartBehavior,
+        )
+      );
+    }
+    return ExcludeSemantics(
+      child: handle,
+    );
   }
 
   Widget _buildToolbar(BuildContext context) {

@@ -746,7 +746,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// * Expose a [Future] in your application code that signals the readiness of
   ///   your widget tree, then await that future inside [callback].
   Future<T?> runAsync<T>(
-    Future<T> callback(), {
+    Future<T> Function() callback, {
     Duration additionalTime = const Duration(milliseconds: 1000),
   }) => binding.runAsync<T?>(callback, additionalTime: additionalTime);
 

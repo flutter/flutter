@@ -39,13 +39,13 @@ Future<void> performTest(WidgetTester tester, bool maintainState) async {
           if (settings.name == '/') {
             return MaterialPageRoute<void>(
               settings: settings,
-              builder: (_) => Container(child: const ThePositiveNumbers(from: 0)),
+              builder: (_) => const ThePositiveNumbers(from: 0),
               maintainState: maintainState,
             );
           } else if (settings.name == '/second') {
             return MaterialPageRoute<void>(
               settings: settings,
-              builder: (_) => Container(child: const ThePositiveNumbers(from: 10000)),
+              builder: (_) => const ThePositiveNumbers(from: 10000),
               maintainState: maintainState,
             );
           }

@@ -30,12 +30,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Container(
-        child: Semantics(
-          label: 'test1',
-          textDirection: TextDirection.ltr,
-          child: Container(),
-        ),
+      Semantics(
+        label: 'test1',
+        textDirection: TextDirection.ltr,
+        child: Container(),
       ),
     );
 
@@ -69,15 +67,13 @@ void main() {
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: Container(
+      child: Semantics(
+        label: 'test1',
         child: Semantics(
-          label: 'test1',
-          child: Semantics(
-            key: key,
-            container: true,
-            label: 'test2a',
-            child: Container(),
-          ),
+          key: key,
+          container: true,
+          label: 'test2a',
+          child: Container(),
         ),
       ),
     ));
@@ -102,18 +98,16 @@ void main() {
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: Container(
+      child: Semantics(
+        label: 'test1',
         child: Semantics(
-          label: 'test1',
+          container: true,
+          label: 'middle',
           child: Semantics(
+            key: key,
             container: true,
-            label: 'middle',
-            child: Semantics(
-              key: key,
-              container: true,
-              label: 'test2b',
-              child: Container(),
-            ),
+            label: 'test2b',
+            child: Container(),
           ),
         ),
       ),
@@ -457,6 +451,7 @@ void main() {
         onMoveCursorForwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
         onMoveCursorBackwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
         onSetSelection: (TextSelection _) => performedActions.add(SemanticsAction.setSelection),
+        onSetText: (String _) => performedActions.add(SemanticsAction.setText),
         onDidGainAccessibilityFocus: () => performedActions.add(SemanticsAction.didGainAccessibilityFocus),
         onDidLoseAccessibilityFocus: () => performedActions.add(SemanticsAction.didLoseAccessibilityFocus),
       ),
@@ -494,6 +489,9 @@ void main() {
             'base': 4,
             'extent': 5,
           });
+          break;
+        case SemanticsAction.setText:
+          semanticsOwner.performAction(expectedId, action, 'text');
           break;
         default:
           semanticsOwner.performAction(expectedId, action);

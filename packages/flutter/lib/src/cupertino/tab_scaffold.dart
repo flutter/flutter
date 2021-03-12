@@ -20,6 +20,8 @@ import 'theme.dart';
 ///
 /// ```dart
 /// class MyCupertinoTabScaffoldPage extends StatefulWidget {
+///   const MyCupertinoTabScaffoldPage({Key? key}) : super(key: key);
+///
 ///   @override
 ///   _CupertinoTabScaffoldPageState createState() => _CupertinoTabScaffoldPageState();
 /// }
@@ -31,7 +33,7 @@ import 'theme.dart';
 ///   Widget build(BuildContext context) {
 ///     return CupertinoTabScaffold(
 ///       tabBar: CupertinoTabBar(
-///         items: <BottomNavigationBarItem> [
+///         items: const <BottomNavigationBarItem> [
 ///           // ...
 ///         ],
 ///       ),
@@ -143,7 +145,7 @@ class CupertinoTabController extends ChangeNotifier {
 /// ```dart
 /// CupertinoTabScaffold(
 ///   tabBar: CupertinoTabBar(
-///     items: <BottomNavigationBarItem> [
+///     items: const <BottomNavigationBarItem> [
 ///       // ...
 ///     ],
 ///   ),

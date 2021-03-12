@@ -1658,7 +1658,7 @@ void main() {
 
     testWidgets('child with local history can be disposed', (WidgetTester tester) async {
       // Regression test: https://github.com/flutter/flutter/issues/52478
-      await tester.pumpWidget(MaterialApp(
+      await tester.pumpWidget(const MaterialApp(
         home: WidgetWithLocalHistory(),
       ));
 
@@ -1910,6 +1910,8 @@ class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
 }
 
 class WidgetWithLocalHistory extends StatefulWidget {
+  const WidgetWithLocalHistory({Key? key}) : super(key: key);
+
   @override
   WidgetWithLocalHistoryState createState() => WidgetWithLocalHistoryState();
 }

@@ -24,6 +24,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/testbed.dart';
 
 const String _kTestFlutterRoot = '/flutter';

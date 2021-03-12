@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 
 class HeavyGridViewPage extends StatelessWidget {
+  const HeavyGridViewPage({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
