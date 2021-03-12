@@ -393,8 +393,8 @@ class _SequenceProcessManager extends FakeProcessManager {
   List<FakeCommand> get _remainingExpectations => _commands;
 }
 
-/// Matcher that successfully matches against a [FileSystemEntity] that
-/// exists ([FileSystemEntity.existsSync] returns true).
+/// Matcher that successfully matches against a [FakeProcessManager] with
+/// no remaining expectations ([item.hasRemainingExpectations] returns false).
 const Matcher hasNoRemainingExpectations = _HasNoRemainingExpectations();
 
 class _HasNoRemainingExpectations extends Matcher {
@@ -417,6 +417,6 @@ class _HasNoRemainingExpectations extends Matcher {
       ) {
     final FakeProcessManager fakeProcessManager = item as FakeProcessManager;
     return description.add(
-        'has remaining expectations:\n${fakeProcessManager._remainingExpectations.map((FakeCommand command) => command.command.toString()).join('\n')}');
+        'has remaining expectations:\n${fakeProcessManager._remainingExpectations.map((FakeCommand command) => command.command).join('\n')}');
   }
 }
