@@ -760,10 +760,10 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 /// Widget build(BuildContext context) {
 ///   return DropdownButton<String>(
 ///     value: dropdownValue,
-///     icon: Icon(Icons.arrow_downward),
+///     icon: const Icon(Icons.arrow_downward),
 ///     iconSize: 24,
 ///     elevation: 16,
-///     style: TextStyle(
+///     style: const TextStyle(
 ///       color: Colors.deepPurple
 ///     ),
 ///     underline: Container(
@@ -1002,12 +1002,12 @@ class DropdownButton<T> extends StatefulWidget {
   ///           dropdownValue = newValue!;
   ///         });
   ///       },
-  ///       style: TextStyle(color: Colors.blue),
+  ///       style: const TextStyle(color: Colors.blue),
   ///       selectedItemBuilder: (BuildContext context) {
   ///         return options.map((String value) {
   ///           return Text(
   ///             dropdownValue,
-  ///             style: TextStyle(color: Colors.white),
+  ///             style: const TextStyle(color: Colors.white),
   ///           );
   ///         }).toList();
   ///       },

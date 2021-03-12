@@ -76,6 +76,7 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 /// ```
 ///
 /// ```dart
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Material(
 ///     child: Center(

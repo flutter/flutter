@@ -2159,6 +2159,7 @@ void main() {
           SemanticsAction.moveCursorBackwardByCharacter,
           SemanticsAction.moveCursorBackwardByWord,
           SemanticsAction.setSelection,
+          SemanticsAction.setText,
         ],
       ),
     );
@@ -2178,6 +2179,7 @@ void main() {
           SemanticsAction.moveCursorBackwardByWord,
           SemanticsAction.moveCursorForwardByWord,
           SemanticsAction.setSelection,
+          SemanticsAction.setText,
         ],
       ),
     );
@@ -2194,6 +2196,7 @@ void main() {
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorForwardByWord,
           SemanticsAction.setSelection,
+          SemanticsAction.setText,
         ],
       ),
     );
@@ -2253,6 +2256,7 @@ void main() {
           SemanticsAction.moveCursorBackwardByWord,
           SemanticsAction.moveCursorForwardByWord,
           SemanticsAction.setSelection,
+          SemanticsAction.setText,
         ],
       ),
     );
@@ -2279,6 +2283,7 @@ void main() {
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorForwardByWord,
           SemanticsAction.setSelection,
+          SemanticsAction.setText,
         ],
       ),
     );
@@ -2345,6 +2350,7 @@ void main() {
           SemanticsAction.moveCursorBackwardByWord,
           SemanticsAction.moveCursorForwardByWord,
           SemanticsAction.setSelection,
+          SemanticsAction.setText,
         ],
       ),
     );
@@ -2372,6 +2378,7 @@ void main() {
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorForwardByWord,
           SemanticsAction.setSelection,
+          SemanticsAction.setText,
         ],
       ),
     );
@@ -2446,6 +2453,7 @@ void main() {
           SemanticsAction.moveCursorBackwardByWord,
           SemanticsAction.moveCursorForwardByWord,
           SemanticsAction.setSelection,
+          SemanticsAction.setText,
         ],
       ),
     );
@@ -2472,6 +2480,7 @@ void main() {
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorForwardByWord,
           SemanticsAction.setSelection,
+          SemanticsAction.setText,
         ],
       ),
     );
@@ -2546,6 +2555,7 @@ void main() {
           SemanticsAction.moveCursorBackwardByWord,
           SemanticsAction.moveCursorForwardByWord,
           SemanticsAction.setSelection,
+          SemanticsAction.setText,
         ],
       ),
     );
@@ -2573,6 +2583,7 @@ void main() {
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorForwardByWord,
           SemanticsAction.setSelection,
+          SemanticsAction.setText,
         ],
       ),
     );
@@ -2737,6 +2748,7 @@ void main() {
                           actions: <SemanticsAction>[
                             SemanticsAction.moveCursorBackwardByCharacter,
                             SemanticsAction.setSelection,
+                            SemanticsAction.setText,
                             SemanticsAction.moveCursorBackwardByWord,
                           ],
                           value: expectedValue,
@@ -2825,6 +2837,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
           ],
         ),
       );
@@ -2839,6 +2852,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.copy,
           ],
         ),
@@ -2856,6 +2870,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.paste,
           ],
         ),
@@ -2872,6 +2887,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.cut,
           ],
         ),
@@ -2889,6 +2905,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.cut,
             SemanticsAction.copy,
             SemanticsAction.paste,
@@ -2935,6 +2952,7 @@ void main() {
                               SemanticsAction.moveCursorBackwardByCharacter,
                               SemanticsAction.moveCursorBackwardByWord,
                               SemanticsAction.setSelection,
+                              SemanticsAction.setText,
                               SemanticsAction.copy,
                               SemanticsAction.cut,
                               SemanticsAction.paste,
@@ -2968,6 +2986,73 @@ void main() {
 
       semantics.dispose();
     });
+  });
+
+  testWidgets('can set text with a11y', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(MaterialApp(
+      home: EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+      ),
+    ));
+    await tester.tap(find.byType(EditableText));
+    await tester.pump();
+
+    final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner!;
+    const int expectedNodeId = 4;
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              id: 1,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 3,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics.rootChild(
+                          id: expectedNodeId,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isTextField,
+                            SemanticsFlag.isFocused,
+                          ],
+                          actions: <SemanticsAction>[
+                            SemanticsAction.setSelection,
+                            SemanticsAction.setText,
+                          ],
+                          value: '',
+                          textSelection: TextSelection.collapsed(
+                              offset: controller.text.length),
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+
+    expect(controller.text, '');
+    owner.performAction(expectedNodeId, SemanticsAction.setText, 'how are you');
+    expect(controller.text, 'how are you');
+
+    semantics.dispose();
   });
 
   testWidgets('allows customizing text style in subclasses', (WidgetTester tester) async {
@@ -4096,7 +4181,7 @@ void main() {
       reason: 'on $platform',
     );
 
-    // Select to the beginning of the line.
+    // Select to the beginning of the first line.
     await sendKeys(
       tester,
       <LogicalKeyboardKey>[
@@ -4111,8 +4196,8 @@ void main() {
       selection,
       equals(
         const TextSelection(
-          baseOffset: 20,
-          extentOffset: 55,
+          baseOffset: 0,
+          extentOffset: 72,
           affinity: TextAffinity.downstream,
         ),
       ),
@@ -4477,25 +4562,12 @@ void main() {
     expect(controller.text, isEmpty, reason: 'on $platform');
   }
 
-  testWidgets('keyboard text selection works as expected on linux', (WidgetTester tester) async {
-    await testTextEditing(tester, platform: 'linux');
+  testWidgets('keyboard text selection works', (WidgetTester tester) async {
+    final String targetPlatform = defaultTargetPlatform.toString();
+    final String platform = targetPlatform.substring(targetPlatform.indexOf('.') + 1).toLowerCase();
+    await testTextEditing(tester, platform: platform);
     // On web, using keyboard for selection is handled by the browser.
-  }, skip: kIsWeb);
-
-  testWidgets('keyboard text selection works as expected on android', (WidgetTester tester) async {
-    await testTextEditing(tester, platform: 'android');
-    // On web, using keyboard for selection is handled by the browser.
-  }, skip: kIsWeb);
-
-  testWidgets('keyboard text selection works as expected on fuchsia', (WidgetTester tester) async {
-    await testTextEditing(tester, platform: 'fuchsia');
-    // On web, using keyboard for selection is handled by the browser.
-  }, skip: kIsWeb);
-
-  testWidgets('keyboard text selection works as expected on macos', (WidgetTester tester) async {
-    await testTextEditing(tester, platform: 'macos');
-    // On web, using keyboard for selection is handled by the browser.
-  }, skip: kIsWeb);
+  }, skip: kIsWeb, variant: TargetPlatformVariant.all());
 
   testWidgets('keyboard shortcuts respect read-only', (WidgetTester tester) async {
     final String platform = describeEnum(defaultTargetPlatform).toLowerCase();
@@ -7097,6 +7169,172 @@ void main() {
 
     expect(tester.takeException(), null);
   });
+
+  testWidgets('can change behavior by overriding text editing shortcuts', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: testText);
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 0,
+      affinity: TextAffinity.upstream,
+    );
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: Shortcuts(
+            shortcuts: <LogicalKeySet, Intent>{
+              LogicalKeySet(LogicalKeyboardKey.arrowLeft): const MoveSelectionRightTextIntent(),
+            },
+            child: EditableText(
+              maxLines: 10,
+              controller: controller,
+              showSelectionHandles: true,
+              autofocus: true,
+              focusNode: focusNode,
+              style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              selectionControls: materialTextSelectionControls,
+              keyboardType: TextInputType.text,
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+
+    // The right arrow key moves to the right as usual.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 1);
+
+    // And the left arrow also moves to the right due to the Shortcuts override.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 2);
+
+    // On web, using keyboard for selection is handled by the browser.
+  }, skip: kIsWeb);
+
+  testWidgets('can change behavior by overriding text editing actions', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: testText);
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 0,
+      affinity: TextAffinity.upstream,
+    );
+    late final bool myIntentWasCalled;
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: Actions(
+            actions: <Type, Action<Intent>>{
+              MoveSelectionLeftTextIntent: _MyMoveSelectionRightTextAction(
+                onInvoke: () {
+                  myIntentWasCalled = true;
+                },
+              ),
+            },
+            child: EditableText(
+              maxLines: 10,
+              controller: controller,
+              showSelectionHandles: true,
+              autofocus: true,
+              focusNode: focusNode,
+              style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              selectionControls: materialTextSelectionControls,
+              keyboardType: TextInputType.text,
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+
+    // The right arrow key moves to the right as usual.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 1);
+
+    // And the left arrow also moves to the right due to the Actions override.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 2);
+    expect(myIntentWasCalled, isTrue);
+
+    // On web, using keyboard for selection is handled by the browser.
+  }, skip: kIsWeb);
+
+  testWidgets('ignore key event from web platform', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'test\ntest',
+    );
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 0,
+      affinity: TextAffinity.upstream,
+    );
+    bool myIntentWasCalled = false;
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: Actions(
+            actions: <Type, Action<Intent>>{
+              MoveSelectionRightTextIntent: _MyMoveSelectionRightTextAction(
+                onInvoke: () {
+                  myIntentWasCalled = true;
+                },
+              ),
+            },
+            child: EditableText(
+              maxLines: 10,
+              controller: controller,
+              showSelectionHandles: true,
+              autofocus: true,
+              focusNode: focusNode,
+              style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              selectionControls: materialTextSelectionControls,
+              keyboardType: TextInputType.text,
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+
+    if (kIsWeb) {
+      await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'web');
+      await tester.pump();
+      expect(myIntentWasCalled, isFalse);
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 0);
+    } else {
+      await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+      await tester.pump();
+      expect(myIntentWasCalled, isTrue);
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 1);
+    }
+  });
 }
 
 class UnsettableController extends TextEditingController {
@@ -7323,5 +7561,19 @@ class _AccentColorTextEditingController extends TextEditingController {
   TextSpan buildTextSpan({required BuildContext context, TextStyle? style, required bool withComposing}) {
     final Color color = Theme.of(context).accentColor;
     return super.buildTextSpan(context: context, style: TextStyle(color: color), withComposing: withComposing);
+  }
+}
+
+class _MyMoveSelectionRightTextAction extends TextEditingAction<Intent> {
+  _MyMoveSelectionRightTextAction({
+    required this.onInvoke,
+  }) : super();
+
+  final VoidCallback onInvoke;
+
+  @override
+  Object? invoke(Intent intent, [BuildContext? context]) {
+    textEditingActionTarget!.renderEditable.moveSelectionRight(SelectionChangedCause.keyboard);
+    onInvoke();
   }
 }
