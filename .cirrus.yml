@@ -24,6 +24,15 @@ environment:
   CIRRUS_CHANGE_MESSAGE: ""
   CIRRUS_COMMIT_MESSAGE: ""
 
+
+gcp_credentials: ENCRYPTED[987a78af29b91ce8489594c9ab3fec21845bbe5ba68294b8f6def3cf0d380830f06687a89ea69c87344c5ade369700fe]
+
+gce_instance:
+  image_project: flutter-cirrus
+  image_name: debian-10-buster-v20210217
+  zone: us-central1-a
+  type: e2-standard-8
+
 # LINUX SHARDS
 task:
   container:
