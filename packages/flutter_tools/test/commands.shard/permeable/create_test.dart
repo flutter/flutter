@@ -23,7 +23,6 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
@@ -53,7 +52,7 @@ const String samplesIndexJson = '''
 void main() {
   Directory tempDir;
   Directory projectDir;
-  FlutterVersion mockFlutterVersion;
+  FakeFlutterVersion fakeFlutterVersion;
   LoggingProcessManager loggingProcessManager;
   BufferLogger logger;
 
@@ -67,7 +66,10 @@ void main() {
     logger = BufferLogger.test();
     tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
     projectDir = tempDir.childDirectory('flutter_project');
-    mockFlutterVersion = MockFlutterVersion();
+    fakeFlutterVersion = FakeFlutterVersion(
+      frameworkRevision: frameworkRevision,
+      channel: frameworkChannel,
+    );
   });
 
   tearDown(() {
@@ -612,8 +614,6 @@ void main() {
 
   testUsingContext('androidx is used by default in an app project', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -633,8 +633,6 @@ void main() {
 
   testUsingContext('androidx is used by default in a module project', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -650,8 +648,6 @@ void main() {
 
   testUsingContext('androidx is used by default in a plugin project', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -671,8 +667,6 @@ void main() {
 
   testUsingContext('creating a new project should create v2 embedding and never show an Android v1 deprecation warning', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -698,8 +692,6 @@ void main() {
 
   testUsingContext('app does not include desktop or web by default', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -717,8 +709,6 @@ void main() {
   testUsingContext('plugin does not include desktop or web by default',
       () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -744,8 +734,6 @@ void main() {
 
   testUsingContext('app supports Linux if requested', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -772,8 +760,6 @@ void main() {
 
   testUsingContext('plugin supports Linux if requested', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -809,8 +795,6 @@ void main() {
 
   testUsingContext('app supports macOS if requested', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -838,8 +822,6 @@ void main() {
 
   testUsingContext('plugin supports macOS if requested', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -872,8 +854,6 @@ void main() {
 
   testUsingContext('app supports Windows if requested', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -900,8 +880,6 @@ void main() {
 
   testUsingContext('Windows has correct VERSIONINFO', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -919,8 +897,6 @@ void main() {
 
   testUsingContext('plugin supports Windows if requested', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -964,8 +940,6 @@ void main() {
 
   testUsingContext('app supports web if requested', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -993,8 +967,6 @@ void main() {
 
   testUsingContext('plugin uses new platform schema', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1008,8 +980,6 @@ void main() {
 
   testUsingContext('has correct content and formatting with module template', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1110,14 +1080,12 @@ void main() {
     expect(sdkMetaContents, contains('<root url="file:/'));
     expect(sdkMetaContents, contains('/bin/cache/dart-sdk/lib/core"'));
   }, overrides: <Type, Generator>{
-    FlutterVersion: () => mockFlutterVersion,
+    FlutterVersion: () => fakeFlutterVersion,
     Platform: _kNoColorTerminalPlatform,
   });
 
   testUsingContext('has correct content and formatting with app template', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1194,14 +1162,12 @@ void main() {
     expect(sdkMetaContents, contains('<root url="file:/'));
     expect(sdkMetaContents, contains('/bin/cache/dart-sdk/lib/core"'));
   }, overrides: <Type, Generator>{
-    FlutterVersion: () => mockFlutterVersion,
+    FlutterVersion: () => fakeFlutterVersion,
     Platform: _kNoColorTerminalPlatform,
   });
 
   testUsingContext('has correct application id for android, bundle id for ios and application id for Linux', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1262,7 +1228,7 @@ void main() {
         'flutter_project.untitled',
     );
   }, overrides: <Type, Generator>{
-    FlutterVersion: () => mockFlutterVersion,
+    FlutterVersion: () => fakeFlutterVersion,
     Platform: _kNoColorTerminalPlatform,
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
@@ -1748,8 +1714,6 @@ void main() {
 
   testUsingContext('plugin does not support any platform by default', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1785,8 +1749,6 @@ void main() {
 
   testUsingContext('plugin supports ios if requested', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1807,8 +1769,6 @@ void main() {
 
   testUsingContext('plugin supports android if requested', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1831,8 +1791,6 @@ void main() {
 
   testUsingContext('plugin supports web if requested', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1855,8 +1813,6 @@ void main() {
 
   testUsingContext('plugin doe not support web if feature is not enabled', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1877,8 +1833,6 @@ void main() {
 
   testUsingContext('create an empty plugin, then add ios', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1893,8 +1847,6 @@ void main() {
 
   testUsingContext('create an empty plugin, then add android', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1910,8 +1862,6 @@ void main() {
 
   testUsingContext('create an empty plugin, then add linux', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1927,8 +1877,6 @@ void main() {
 
   testUsingContext('create an empty plugin, then add macos', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1944,8 +1892,6 @@ void main() {
 
   testUsingContext('create an empty plugin, then add windows', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1961,8 +1907,6 @@ void main() {
 
   testUsingContext('create an empty plugin, then add web', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1978,8 +1922,6 @@ void main() {
 
   testUsingContext('create a plugin with ios, then add macos', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2003,8 +1945,6 @@ void main() {
 
   testUsingContext('create a plugin with ios and android', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2026,8 +1966,6 @@ void main() {
 
   testUsingContext('create a module with --platforms throws error.', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2038,8 +1976,6 @@ void main() {
 
   testUsingContext('create a package with --platforms throws error.', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2050,8 +1986,6 @@ void main() {
 
   testUsingContext('create a plugin with android, delete then re-create folders', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2075,8 +2009,6 @@ void main() {
 
   testUsingContext('create a plugin with android, delete then re-create folders while also adding windows', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2105,8 +2037,6 @@ void main() {
 
   testUsingContext('flutter create . on and existing plugin does not add android folders if android is not supported in pubspec', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2119,8 +2049,6 @@ void main() {
 
   testUsingContext('flutter create . on and existing plugin does not add windows folder even feature is enabled', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2135,8 +2063,6 @@ void main() {
 
   testUsingContext('flutter create . on and existing plugin does not add linux folder even feature is enabled', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2151,8 +2077,6 @@ void main() {
 
   testUsingContext('flutter create . on and existing plugin does not add web files even feature is enabled', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2166,8 +2090,6 @@ void main() {
 
   testUsingContext('flutter create . on and existing plugin does not add macos folder even feature is enabled', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2182,8 +2104,6 @@ void main() {
 
   testUsingContext('flutter create -t plugin in an empty folder should not show pubspec.yaml updating suggestion', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2197,8 +2117,6 @@ void main() {
 
   testUsingContext('flutter create -t plugin in an existing plugin should show pubspec.yaml updating suggestion', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2214,8 +2132,6 @@ void main() {
 
   testUsingContext('newly created plugin has min flutter sdk version as 1.20.0', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2229,8 +2145,6 @@ void main() {
 
   testUsingContext('default app uses Android SDK 30', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2247,8 +2161,6 @@ void main() {
 
   testUsingContext('Linux plugins handle partially camel-case project names correctly', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2280,8 +2192,6 @@ void main() {
 
   testUsingContext('Windows plugins handle partially camel-case project names correctly', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2314,8 +2224,6 @@ void main() {
 
   testUsingContext('Linux plugins handle project names ending in _plugin correctly', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2352,8 +2260,6 @@ void main() {
 
   testUsingContext('Windows plugins handle project names ending in _plugin correctly', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2390,8 +2296,6 @@ void main() {
 
   testUsingContext('created plugin supports no platforms should print `no platforms` message', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2408,8 +2312,6 @@ void main() {
 
   testUsingContext('created plugin with no --platforms flag should not print `no platforms` message if the existing plugin supports a platform.', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2425,8 +2327,6 @@ void main() {
 
   testUsingContext('should show warning when disabled platforms are selected while creating a plugin', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2442,8 +2342,6 @@ void main() {
 
   testUsingContext("shouldn't show warning when only enabled platforms are selected while creating a plugin", () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2459,8 +2357,6 @@ void main() {
 
   testUsingContext('should show warning when disabled platforms are selected while creating a app', () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2476,8 +2372,6 @@ void main() {
 
   testUsingContext("shouldn't show warning when only enabled platforms are selected while creating a app", () async {
     Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -2672,8 +2566,6 @@ Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
   }
   expect(exec.exitCode, 0);
 }
-
-class MockFlutterVersion extends Mock implements FlutterVersion {}
 
 /// A ProcessManager that invokes a real process manager, but keeps
 /// track of all commands sent to it.
