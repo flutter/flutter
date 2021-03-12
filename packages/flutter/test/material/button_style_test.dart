@@ -160,17 +160,14 @@ void main() {
 
     const BorderSide blackSide = BorderSide(width: 1, color: Color(0xFF000000));
     const BorderSide whiteSide = BorderSide(width: 1, color: Color(0xFFFFFFFF));
-    const BorderSide emptyBlackSide = BorderSide(width: 0, color: Color(0));
-    const BorderSide emptyWhiteSide = BorderSide(width: 0, color: Color(0x00FFFFFF));
+    const BorderSide emptyBlackSide = BorderSide(width: 0, color: Color(0x00000000));
 
     final ButtonStyle blackStyle = ButtonStyle(side: MaterialStateProperty.all<BorderSide>(blackSide));
     final ButtonStyle whiteStyle = ButtonStyle(side: MaterialStateProperty.all<BorderSide>(whiteSide));
-    final ButtonStyle emptyBlackStyle = ButtonStyle(side: MaterialStateProperty.all<BorderSide>(emptyBlackSide));
-    final ButtonStyle emptyWhiteStyle = ButtonStyle(side: MaterialStateProperty.all<BorderSide>(emptyWhiteSide));
 
     // MaterialState.all<Foo>(value) properties resolve to value
     // for any set of MaterialStates.
-    Set<MaterialState> states = <MaterialState>{ };
+    const Set<MaterialState> states = <MaterialState>{ };
 
     expect(ButtonStyle.lerp(blackStyle, blackStyle, 0)?.side?.resolve(states), blackSide);
     expect(ButtonStyle.lerp(blackStyle, blackStyle, 0.5)?.side?.resolve(states), blackSide);
