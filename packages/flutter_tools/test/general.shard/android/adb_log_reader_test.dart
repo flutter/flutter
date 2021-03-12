@@ -43,7 +43,7 @@ void main() {
       processManager,
     );
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('AdbLogReader calls adb logcat with expected flags apiVersion < 21', () async {
@@ -66,7 +66,7 @@ void main() {
       processManager,
     );
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('AdbLogReader calls adb logcat with expected flags null apiVersion', () async {
@@ -89,7 +89,7 @@ void main() {
       processManager,
     );
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('AdbLogReader calls adb logcat with expected flags when requesting past logs', () async {
@@ -115,7 +115,7 @@ void main() {
       includePastLogs: true,
     );
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('AdbLogReader handles process early exit', () async {

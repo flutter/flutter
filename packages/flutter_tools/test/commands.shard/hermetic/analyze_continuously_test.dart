@@ -206,7 +206,7 @@ void main() {
     unawaited(commandRunner.run(<String>['analyze', '--watch']));
     await stdin.stream.first;
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testUsingContext('Can run AnalysisService with customized cache location --watch', () async {
@@ -244,6 +244,6 @@ void main() {
     unawaited(commandRunner.run(<String>['analyze', '--watch']));
     await stdin.stream.first;
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 }

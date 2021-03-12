@@ -225,7 +225,7 @@ void main() {
 
     // Verify caching works correctly.
     expect(await chromeDevice.sdkNameAndVersion, 'ABC');
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('Chrome and Edge version check invokes registry query on windows.', () async {
@@ -271,7 +271,7 @@ void main() {
 
     // Verify caching works correctly.
     expect(await chromeDevice.sdkNameAndVersion, 'Google Chrome 74.0.0');
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('Edge is not supported on versions less than 73', () async {

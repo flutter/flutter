@@ -456,7 +456,7 @@ void main() {
       );
       await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
 
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
@@ -481,7 +481,7 @@ void main() {
       );
       await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
 
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
@@ -510,7 +510,7 @@ void main() {
       );
       await createTestCommandRunner(PackagesCommand()).run(<String>['packages', '--verbose', 'pub', 'run', '--foo', 'bar']);
 
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),

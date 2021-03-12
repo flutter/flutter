@@ -309,7 +309,7 @@ void main() {
       main: Uri.file('main.dart'),
       assetsDirectory: Uri.file('flutter_assets/'),
     );
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   });
 
   testWithoutContext('Framework service extension invocations return null if service disappears ', () async {
@@ -368,7 +368,7 @@ void main() {
     final vm_service.Response timeline = await fakeVmServiceHost.vmService.getTimeline();
     expect(timeline, isNull);
 
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   });
 
   testWithoutContext('getIsolateOrNull returns null if service disappears ', () async {
@@ -385,7 +385,7 @@ void main() {
     );
     expect(isolate, null);
 
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   });
 
   testWithoutContext('getFlutterViews polls until a view is returned', () async {
@@ -413,7 +413,7 @@ void main() {
       ),
       isNotEmpty,
     );
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   });
 
   testWithoutContext('getFlutterViews does not poll if returnEarly is true', () async {
@@ -434,7 +434,7 @@ void main() {
       ),
       isEmpty,
     );
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   });
 
   group('findExtensionIsolate', () {

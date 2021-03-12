@@ -84,7 +84,7 @@ void main() {
     );
 
     expect(await androidDevice.installApp(androidApk), false);
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('Cannot install app if APK file is missing', () async {
@@ -128,7 +128,7 @@ void main() {
     );
 
     expect(await androidDevice.installApp(androidApk, userIdentifier: '10'), true);
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('Defaults to API level 16 if adb returns a null response', () async {
@@ -157,7 +157,7 @@ void main() {
     );
 
     expect(await androidDevice.installApp(androidApk, userIdentifier: '10'), true);
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('displays error if user not found', () async {
@@ -202,7 +202,7 @@ void main() {
 
     expect(await androidDevice.installApp(androidApk, userIdentifier: 'jane'), false);
     expect(logger.errorText, contains('Error: User "jane" not found. Run "adb shell pm list users" to see list of available identifiers.'));
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('Will skip install if the correct version is up to date', () async {
@@ -235,7 +235,7 @@ void main() {
     );
 
     expect(await androidDevice.installApp(androidApk, userIdentifier: '10'), true);
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('Will uninstall if the correct version is not up to date and install fails', () async {
@@ -276,7 +276,7 @@ void main() {
     );
 
     expect(await androidDevice.installApp(androidApk, userIdentifier: '10'), true);
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('Will fail to install if the apk was never installed and it fails the first time', () async {
@@ -309,7 +309,7 @@ void main() {
     );
 
     expect(await androidDevice.installApp(androidApk, userIdentifier: '10'), false);
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 }
 

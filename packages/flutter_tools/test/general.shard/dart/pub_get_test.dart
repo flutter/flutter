@@ -93,7 +93,7 @@ void main() {
       checkUpToDate: true,
     );
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
     expect(fileSystem.file('.dart_tool/version').readAsStringSync(), 'b');
   });
 
@@ -131,7 +131,7 @@ void main() {
       checkUpToDate: true,
     );
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
     expect(fileSystem.file('.dart_tool/version').readAsStringSync(), 'b');
   });
 
@@ -169,7 +169,7 @@ void main() {
       checkUpToDate: true,
     );
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
     expect(fileSystem.file('.dart_tool/version').readAsStringSync(), 'b');
   });
 
@@ -206,7 +206,7 @@ void main() {
       checkUpToDate: true,
     );
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
     expect(fileSystem.file('.dart_tool/version').readAsStringSync(), 'b');
   });
 
@@ -245,7 +245,7 @@ void main() {
       checkUpToDate: true,
     );
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
     expect(fileSystem.file('.dart_tool/version').readAsStringSync(), 'b');
   });
 
@@ -286,7 +286,7 @@ void main() {
       checkUpToDate: true,
     );
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
     expect(fileSystem.file('.dart_tool/version').readAsStringSync(), 'b');
   });
 

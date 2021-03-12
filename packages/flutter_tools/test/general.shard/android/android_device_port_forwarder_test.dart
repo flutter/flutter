@@ -123,7 +123,7 @@ void main() {
 
     await forwarder.dispose();
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('failures to unforward port do not throw if the forward is missing', () async {

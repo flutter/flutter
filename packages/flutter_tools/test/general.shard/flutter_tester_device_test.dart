@@ -155,7 +155,7 @@ void main() {
     testUsingContext('Can pass additional arguments to tester binary', () async {
       await device.start(compiledEntrypointPath: 'example.dill');
 
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
   });
 

@@ -200,7 +200,7 @@ void main() {
     expect(launchResult.started, true);
     expect(launchResult.hasObservatory, false);
     expect(await device.stopApp(iosApp), false);
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('IOSDevice.startApp forwards all supported debugging options', () async {
@@ -290,7 +290,7 @@ void main() {
 
     expect(launchResult.started, true);
     expect(await device.stopApp(iosApp), false);
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 }
 

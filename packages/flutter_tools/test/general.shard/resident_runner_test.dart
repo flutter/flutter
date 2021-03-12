@@ -239,7 +239,7 @@ void main() {
     expect(futureConnectionInfo.isCompleted, true);
     expect((await connectionInfo).baseUri, 'foo://bar');
     expect(futureAppStart.isCompleted, true);
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   }), overrides: <Type, Generator>{
     DevtoolsLauncher: () => mockDevtoolsLauncher,
   });
@@ -287,7 +287,7 @@ void main() {
       packageConfig: anyNamed('packageConfig'),
       suppressErrors: true,
     )).called(1);
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   }), overrides: <Type, Generator>{
     DevtoolsLauncher: () => mockDevtoolsLauncher,
   });
@@ -425,7 +425,7 @@ void main() {
       packageConfig: anyNamed('packageConfig'),
       suppressErrors: false,
     )).called(1);
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   }), overrides: <Type, Generator>{
     DevtoolsLauncher: () => mockDevtoolsLauncher,
   });
@@ -499,7 +499,7 @@ void main() {
     expect(futureConnectionInfo.isCompleted, true);
     expect((await connectionInfo).baseUri, 'foo://bar');
     expect(futureAppStart.isCompleted, true);
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   }), overrides: <Type, Generator>{
     DevtoolsLauncher: () => mockDevtoolsLauncher,
   });
@@ -546,7 +546,7 @@ void main() {
         cdKey(CustomDimensions.hotEventFullRestart): 'false',
       }),
     ));
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     Usage: () => TestUsage(),
   }), overrides: <Type, Generator>{
@@ -572,7 +572,7 @@ void main() {
     expect(result.fatal, false);
     expect(result.code, 1);
     expect(result.message, contains('Device initialization has not completed.'));
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   }));
 
   testUsingContext('ResidentRunner can handle an reload-barred exception from hot reload', () => testbed.run(() async {
@@ -619,7 +619,7 @@ void main() {
         cdKey(CustomDimensions.hotEventFullRestart): 'false',
       }),
     ));
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     Usage: () => TestUsage(),
   }), overrides: <Type, Generator>{
@@ -682,7 +682,7 @@ void main() {
         cdKey(CustomDimensions.hotEventFullRestart): 'false',
       }),
     ));
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     DevtoolsLauncher: () => mockDevtoolsLauncher,
     Usage: () => TestUsage(),
@@ -745,7 +745,7 @@ void main() {
     final OperationResult result = await residentRunner.restart(fullRestart: false);
 
     expect(result.code, 0);
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   }), overrides: <Type, Generator>{
     DevtoolsLauncher: () => mockDevtoolsLauncher,
   });
@@ -1148,7 +1148,7 @@ void main() {
     expect(event.parameters, containsPair(
       cdKey(CustomDimensions.hotEventTargetPlatform), getNameForTargetPlatform(TargetPlatform.android_arm),
     ));
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     Usage: () => TestUsage(),
   }), overrides: <Type, Generator>{
@@ -1219,7 +1219,7 @@ void main() {
     final OperationResult result = await residentRunner.restart(fullRestart: true);
 
     expect(result.isOk, true);
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   }), overrides: <Type, Generator>{
     DevtoolsLauncher: () => mockDevtoolsLauncher,
   });
@@ -1344,7 +1344,7 @@ void main() {
     await residentRunner.restart(fullRestart: true);
     await residentRunner.restart(fullRestart: true);
 
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   }), overrides: <Type, Generator>{
     DevtoolsLauncher: () => mockDevtoolsLauncher,
   });
@@ -1391,7 +1391,7 @@ void main() {
         cdKey(CustomDimensions.hotEventFullRestart): 'true',
       }),
     ));
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     Usage: () => TestUsage(),
   }), overrides: <Type, Generator>{
@@ -1561,7 +1561,7 @@ void main() {
     await residentRunner.writeSkSL();
 
     expect(testLogger.statusText, contains('No data was received'));
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   }));
 
   testUsingContext('ResidentRunner can write SkSL data to a unique file with engine revision, platform, and device name', () => testbed.run(() async {
@@ -1589,7 +1589,7 @@ void main() {
       'engineRevision': 'abcdefg',
       'data': <String, Object>{'A': 'B'}
     });
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystemUtils: () => FileSystemUtils(
       fileSystem: globals.fs,
@@ -1665,7 +1665,7 @@ void main() {
     await residentRunner.screenshot(mockFlutterDevice);
 
     expect(testLogger.statusText, contains('1kB'));
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   }));
 
   testUsingContext('ResidentRunner can take screenshot on release device', () => testbed.run(() async {
@@ -1709,7 +1709,7 @@ void main() {
     await residentRunner.screenshot(mockFlutterDevice);
 
     expect(testLogger.errorText, contains('Error'));
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   }));
 
   testUsingContext('ResidentRunner bails taking screenshot on debug device if debugAllowBanner during second request', () => testbed.run(() async {
@@ -1735,7 +1735,7 @@ void main() {
     await residentRunner.screenshot(mockFlutterDevice);
 
     expect(testLogger.errorText, contains('Error'));
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   }));
 
   testUsingContext('ResidentRunner bails taking screenshot on debug device if takeScreenshot throws', () => testbed.run(() async {
@@ -1770,7 +1770,7 @@ void main() {
 
     expect(() => residentRunner.screenshot(mockFlutterDevice),
         throwsAssertionError);
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   }));
 
   testUsingContext('ResidentRunner does not toggle banner in non-debug mode', () => testbed.run(() async {
@@ -1788,7 +1788,7 @@ void main() {
     await residentRunner.screenshot(mockFlutterDevice);
 
     expect(testLogger.statusText, contains('1kB'));
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   }));
 
   testUsingContext('FlutterDevice will not exit a paused isolate', () => testbed.run(() async {
@@ -1817,7 +1817,7 @@ void main() {
     await flutterDevice.exitApps();
 
     expect(mockDevice.appStopped, true);
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   }));
 
   testUsingContext('FlutterDevice can exit from a release mode isolate with no VmService', () => testbed.run(() async {
@@ -1866,7 +1866,7 @@ void main() {
     );
 
     expect(mockDevice.appStopped, true);
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   }));
 
   testUsingContext('FlutterDevice will exit an un-paused isolate', () => testbed.run(() async {
@@ -1902,7 +1902,7 @@ void main() {
     final Future<void> exitFuture = flutterDevice.exitApps();
 
     await expectLater(exitFuture, completes);
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   }));
 
   testUsingContext('ResidentRunner debugDumpApp calls flutter device', () => testbed.run(() async {
@@ -2086,7 +2086,7 @@ void main() {
     flutterDevice.vmService = fakeVmServiceHost.vmService;
 
     expect(await flutterDevice.toggleBrightness(), Brightness.dark);
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   }));
 
   testUsingContext('ResidentRunner debugToggleInvertOversizedImages calls flutter device', () => testbed.run(() async {
@@ -2148,7 +2148,7 @@ void main() {
     flutterDevice.vmService = fakeVmServiceHost.vmService;
 
     await flutterDevice.toggleInvertOversizedImages();
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   }));
 
   testUsingContext('ResidentRunner debugToggleDebugCheckElevationsEnabled calls flutter device', () => testbed.run(() async {
@@ -2268,7 +2268,7 @@ void main() {
     });
     await residentRunner.run(enableDevTools: true);
 
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
     expect(await globals.fs.file('foo').readAsString(), testUri.toString());
   }), overrides: <Type, Generator>{
     DevtoolsLauncher: () => mockDevtoolsLauncher,
@@ -2500,7 +2500,7 @@ void main() {
     await residentRunner.run(enableDevTools: true);
 
     expect(testLogger.errorText, contains('Failed to write vmservice-out-file at foo'));
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => ThrowingForwardingFileSystem(MemoryFileSystem.test()),
   }), overrides: <Type, Generator>{
@@ -2531,7 +2531,7 @@ void main() {
     await residentRunner.run(enableDevTools: true);
 
     expect(await globals.fs.file('foo').readAsString(), testUri.toString());
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   }), overrides: <Type, Generator>{
     DevtoolsLauncher: () => mockDevtoolsLauncher,
   });

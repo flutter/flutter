@@ -44,6 +44,6 @@ void main() {
     );
 
     expect(result, <String, Object>{'type': 'CodeCoverage', 'coverage': <Object>[]});
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost, hasNoRemainingExpectations);
   });
 }
