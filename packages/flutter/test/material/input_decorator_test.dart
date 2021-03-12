@@ -4486,7 +4486,7 @@ void main() {
           ),
         ),
       ));
-   } finally {
+    } finally {
       FlutterError.onError = oldHandler;
     }
     
