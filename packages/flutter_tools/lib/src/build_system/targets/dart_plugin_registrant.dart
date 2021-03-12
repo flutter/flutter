@@ -6,7 +6,7 @@
 
 import 'package:package_config/package_config.dart';
 
-import '../../../src/dart/package_map.dart';
+import '../../dart/package_map.dart';
 import '../../base/file_system.dart';
 import '../../plugins.dart';
 import '../../project.dart';
