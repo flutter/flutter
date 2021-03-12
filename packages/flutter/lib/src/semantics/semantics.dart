@@ -1552,7 +1552,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       // regenerating the id until we found an id that is not used.
       _id = _generateNewId();
     }
-    owner._nodes[_id] = this;
+    owner._nodes[id] = this;
     owner._detachedNodes.remove(this);
     if (_dirty) {
       _dirty = false;
@@ -1566,9 +1566,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   @override
   void detach() {
-    assert(owner!._nodes.containsKey(_id));
+    assert(owner!._nodes.containsKey(id));
     assert(!owner!._detachedNodes.contains(this));
-    owner!._nodes.remove(_id);
+    owner!._nodes.remove(id);
     owner!._detachedNodes.add(this);
     super.detach();
     assert(owner == null);
