@@ -117,7 +117,7 @@ abstract class BuildTestTask {
     }
 
     if (!testOnly) {
-      build();
+      await build();
     }
 
     if (buildOnly) {
