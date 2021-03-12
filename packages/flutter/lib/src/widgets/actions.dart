@@ -253,6 +253,8 @@ abstract class Action<T extends Intent> with Diagnosticable {
 ///
 /// ```dart preamble
 /// class ActionListenerExample extends StatefulWidget {
+///   const ActionListenerExample({Key? key}) : super(key: key);
+///
 ///   @override
 ///   _ActionListenerExampleState createState() => _ActionListenerExampleState();
 /// }
@@ -286,26 +288,26 @@ abstract class Action<T extends Intent> with Diagnosticable {
 ///             child: Text(_on ? 'Disable' : 'Enable'),
 ///           ),
 ///         ),
-///         _on
-///             ? Padding(
-///                 padding: const EdgeInsets.all(8.0),
-///                 child: ActionListener(
-///                   listener: (Action<Intent> action) {
-///                     if (action.intentType == MyIntent) {
-///                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-///                           content: const Text('Action Listener Called'),
-///                       ));
-///                     }
-///                   },
-///                   action: _myAction,
-///                   child: ElevatedButton(
-///                     onPressed: () =>
-///                         ActionDispatcher().invokeAction(_myAction, MyIntent()),
-///                     child: const Text('Call Action Listener'),
-///                   ),
-///                 ),
-///               )
-///             : Container(),
+///         if (_on)
+///           Padding(
+///             padding: const EdgeInsets.all(8.0),
+///             child: ActionListener(
+///               listener: (Action<Intent> action) {
+///                 if (action.intentType == MyIntent) {
+///                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+///                     content: Text('Action Listener Called'),
+///                   ));
+///                 }
+///               },
+///               action: _myAction,
+///               child: ElevatedButton(
+///                 onPressed: () => const ActionDispatcher()
+///                     .invokeAction(_myAction, const MyIntent()),
+///                 child: const Text('Call Action Listener'),
+///               ),
+///             ),
+///           ),
+///         if (!_on) Container(),
 ///       ],
 ///     );
 ///   }
@@ -313,13 +315,13 @@ abstract class Action<T extends Intent> with Diagnosticable {
 ///
 /// class MyAction extends Action<MyIntent> {
 ///   @override
-///   void addActionListener(listener) {
+///   void addActionListener(ActionListenerCallback listener) {
 ///     super.addActionListener(listener);
 ///     print('Action Listener was added');
 ///   }
 ///
 ///   @override
-///   void removeActionListener(listener) {
+///   void removeActionListener(ActionListenerCallback listener) {
 ///     super.removeActionListener(listener);
 ///     print('Action Listener was removed');
 ///   }
@@ -336,8 +338,9 @@ abstract class Action<T extends Intent> with Diagnosticable {
 /// ```
 ///
 /// ```dart
+/// @override
 /// Widget build(BuildContext context) {
-///   return ActionListenerExample();
+///   return const ActionListenerExample();
 /// }
 /// ```
 /// {@end-tool}
@@ -596,7 +599,7 @@ class ActionDispatcher with Diagnosticable {
 /// }
 ///
 /// class SaveButton extends StatefulWidget {
-///   const SaveButton(this.valueNotifier);
+///   const SaveButton(this.valueNotifier, {Key? key}) : super(key: key);
 ///
 ///   final ValueNotifier<bool> valueNotifier;
 ///
@@ -622,7 +625,7 @@ class ActionDispatcher with Diagnosticable {
 ///           ),
 ///           onPressed: () {
 ///             setState(() {
-///               savedValue = Actions.invoke(context, const SaveIntent()) as int;
+///               savedValue = Actions.invoke(context, const SaveIntent())! as int;
 ///             });
 ///           },
 ///         );
@@ -1135,7 +1138,7 @@ class _ActionsMarker extends InheritedWidget {
 ///   void initState() {
 ///     super.initState();
 ///     _actionMap = <Type, Action<Intent>>{
-///       ActivateIntent: CallbackAction(
+///       ActivateIntent: CallbackAction<Intent>(
 ///         onInvoke: (Intent intent) => _toggleState(),
 ///       ),
 ///     };
@@ -1185,14 +1188,14 @@ class _ActionsMarker extends InheritedWidget {
 ///         child: Row(
 ///           children: <Widget>[
 ///             Container(
-///               padding: EdgeInsets.all(10.0),
+///               padding: const EdgeInsets.all(10.0),
 ///               color: color,
 ///               child: widget.child,
 ///             ),
 ///             Container(
 ///               width: 30,
 ///               height: 30,
-///               margin: EdgeInsets.all(10.0),
+///               margin: const EdgeInsets.all(10.0),
 ///               color: _on ? Colors.red : Colors.transparent,
 ///             ),
 ///           ],
@@ -1204,10 +1207,11 @@ class _ActionsMarker extends InheritedWidget {
 /// ```
 ///
 /// ```dart
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     appBar: AppBar(
-///       title: Text('FocusableActionDetector Example'),
+///       title: const Text('FocusableActionDetector Example'),
 ///     ),
 ///     body: Center(
 ///       child: Row(
@@ -1215,11 +1219,11 @@ class _ActionsMarker extends InheritedWidget {
 ///         children: <Widget>[
 ///           Padding(
 ///             padding: const EdgeInsets.all(8.0),
-///             child: TextButton(onPressed: () {}, child: Text('Press Me')),
+///             child: TextButton(onPressed: () {}, child: const Text('Press Me')),
 ///           ),
 ///           Padding(
 ///             padding: const EdgeInsets.all(8.0),
-///             child: FadButton(onPressed: () {}, child: Text('And Me')),
+///             child: FadButton(onPressed: () {}, child: const Text('And Me')),
 ///           ),
 ///         ],
 ///       ),

@@ -267,14 +267,15 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 ///   super.dispose();
 /// }
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     body: Padding(
 ///       padding: const EdgeInsets.all(20.0),
 ///       child: Column(
 ///         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-///         children: [
-///           Text(
+///         children: <Widget>[
+///           const Text(
 ///             'Linear progress indicator with a fixed color',
 ///             style: const TextStyle(fontSize: 20),
 ///           ),
@@ -505,13 +506,14 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 ///   super.dispose();
 /// }
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     body: Padding(
 ///       padding: const EdgeInsets.all(20.0),
 ///       child: Column(
 ///         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-///         children: [
+///         children: <Widget>[
 ///           Text(
 ///             'Linear progress indicator with a fixed color',
 ///             style: Theme.of(context).textTheme.headline6,

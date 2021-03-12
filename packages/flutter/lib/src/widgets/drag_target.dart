@@ -113,10 +113,12 @@ enum DragAnchor {
 ///
 /// ```dart
 /// int acceptedData = 0;
+///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Row(
 ///     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-///     children: [
+///     children: <Widget>[
 ///       Draggable<int>(
 ///         // Data is the value this Draggable stores.
 ///         data: 10,
@@ -124,26 +126,26 @@ enum DragAnchor {
 ///           height: 100.0,
 ///           width: 100.0,
 ///           color: Colors.lightGreenAccent,
-///           child: Center(
-///             child: Text("Draggable"),
+///           child: const Center(
+///             child: Text('Draggable'),
 ///           ),
 ///         ),
 ///         feedback: Container(
 ///           color: Colors.deepOrange,
 ///           height: 100,
 ///           width: 100,
-///           child: Icon(Icons.directions_run),
+///           child: const Icon(Icons.directions_run),
 ///         ),
 ///         childWhenDragging: Container(
 ///           height: 100.0,
 ///           width: 100.0,
 ///           color: Colors.pinkAccent,
-///           child: Center(
-///             child: Text("Child When Dragging"),
+///           child: const Center(
+///             child: Text('Child When Dragging'),
 ///           ),
 ///         ),
 ///       ),
-///       DragTarget(
+///       DragTarget<int>(
 ///         builder: (
 ///           BuildContext context,
 ///           List<dynamic> accepted,
@@ -154,7 +156,7 @@ enum DragAnchor {
 ///             width: 100.0,
 ///             color: Colors.cyan,
 ///             child: Center(
-///               child: Text("Value is updated to: $acceptedData"),
+///               child: Text('Value is updated to: $acceptedData'),
 ///             ),
 ///           );
 ///         },

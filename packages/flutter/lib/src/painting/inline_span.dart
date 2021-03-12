@@ -155,17 +155,17 @@ List<InlineSpanSemanticsInformation> combineSemanticsInfo(List<InlineSpanSemanti
 /// Text.rich(
 ///   TextSpan(
 ///     text: 'My name is ',
-///     style: TextStyle(color: Colors.black),
+///     style: const TextStyle(color: Colors.black),
 ///     children: <InlineSpan>[
 ///       WidgetSpan(
 ///         alignment: PlaceholderAlignment.baseline,
 ///         baseline: TextBaseline.alphabetic,
 ///         child: ConstrainedBox(
-///           constraints: BoxConstraints(maxWidth: 100),
-///           child: TextField(),
+///           constraints: const BoxConstraints(maxWidth: 100),
+///           child: const TextField(),
 ///         )
 ///       ),
-///       TextSpan(
+///       const TextSpan(
 ///         text: '.',
 ///       ),
 ///     ],

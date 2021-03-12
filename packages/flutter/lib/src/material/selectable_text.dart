@@ -125,7 +125,7 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
 /// {@tool snippet}
 ///
 /// ```dart
-/// SelectableText(
+/// const SelectableText(
 ///   'Hello! How are you?',
 ///   textAlign: TextAlign.center,
 ///   style: TextStyle(fontWeight: FontWeight.bold),

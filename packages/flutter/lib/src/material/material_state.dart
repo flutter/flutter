@@ -109,10 +109,10 @@ typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 ///
 /// ```dart
 /// class MyColor extends MaterialStateColor {
+///   const MyColor() : super(_defaultColor);
+///
 ///   static const int _defaultColor = 0xcafefeed;
 ///   static const int _pressedColor = 0xdeadbeef;
-///
-///   const MyColor() : super(_defaultColor);
 ///
 ///   @override
 ///   Color resolve(Set<MaterialState> states) {
@@ -204,7 +204,7 @@ class _MaterialStateColor extends MaterialStateColor {
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return ListTile(
-///     title: Text('Disabled ListTile'),
+///     title: const Text('Disabled ListTile'),
 ///     enabled: false,
 ///     mouseCursor: ListTileCursor(),
 ///   );
@@ -304,7 +304,7 @@ class _EnabledAndDisabledMouseCursor extends MaterialStateMouseCursor {
 ///   @override
 ///   BorderSide? resolve(Set<MaterialState> states) {
 ///     if (states.contains(MaterialState.selected)) {
-///       return BorderSide(
+///       return const BorderSide(
 ///         width: 1,
 ///         color: Colors.red,
 ///       );
@@ -317,9 +317,10 @@ class _EnabledAndDisabledMouseCursor extends MaterialStateMouseCursor {
 /// ```dart
 /// bool isSelected = true;
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return FilterChip(
-///     label: Text('Select chip'),
+///     label: const Text('Select chip'),
 ///     selected: isSelected,
 ///     onSelected: (bool value) {
 ///       setState(() {
@@ -364,7 +365,7 @@ abstract class MaterialStateBorderSide extends BorderSide implements MaterialSta
 ///   @override
 ///   OutlinedBorder? resolve(Set<MaterialState> states) {
 ///     if (states.contains(MaterialState.selected)) {
-///       return RoundedRectangleBorder();
+///       return const RoundedRectangleBorder();
 ///     }
 ///     return null;  // Defer to default value on the theme or widget.
 ///   }
@@ -374,9 +375,10 @@ abstract class MaterialStateBorderSide extends BorderSide implements MaterialSta
 /// ```dart
 /// bool isSelected = true;
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return FilterChip(
-///     label: Text('Select chip'),
+///     label: const Text('Select chip'),
 ///     selected: isSelected,
 ///     onSelected: (bool value) {
 ///       setState(() {
@@ -451,7 +453,7 @@ abstract class MaterialStateOutlinedBorder extends OutlinedBorder implements Mat
 ///       foregroundColor: MaterialStateProperty.resolveWith(getColor),
 ///     ),
 ///     onPressed: () {},
-///     child: Text('TextButton'),
+///     child: const Text('TextButton'),
 ///   );
 /// }
 /// ```

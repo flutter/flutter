@@ -66,12 +66,12 @@ export 'package:flutter/rendering.dart' show
   WrapCrossAlignment;
 
 // Examples can assume:
-// class TestWidget extends StatelessWidget { @override Widget build(BuildContext context) => const Placeholder(); }
+// class TestWidget extends StatelessWidget { const TestWidget({Key? key}) : super(key: key); @override Widget build(BuildContext context) => const Placeholder(); }
 // late WidgetTester tester;
 // late bool _visible;
-// class Sky extends CustomPainter { @override void paint(Canvas c, Size s) => null; @override bool shouldRepaint(Sky s) => false; }
+// class Sky extends CustomPainter { @override void paint(Canvas c, Size s) {} @override bool shouldRepaint(Sky s) => false; }
 // late BuildContext context;
-// dynamic userAvatarUrl;
+// String userAvatarUrl = '';
 
 // BIDIRECTIONAL TEXT SUPPORT
 
@@ -204,7 +204,7 @@ class Directionality extends InheritedWidget {
 /// ```dart
 /// Image.network(
 ///   'https://raw.githubusercontent.com/flutter/assets-for-api-docs/master/packages/diagrams/assets/blend_mode_destination.jpeg',
-///   color: Color.fromRGBO(255, 255, 255, 0.5),
+///   color: const Color.fromRGBO(255, 255, 255, 0.5),
 ///   colorBlendMode: BlendMode.modulate
 /// )
 /// ```
@@ -397,7 +397,7 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 ///             alignment: Alignment.center,
 ///             width: 200.0,
 ///             height: 200.0,
-///             child: Text('Hello World'),
+///             child: const Text('Hello World'),
 ///           ),
 ///         ),
 ///       ),
@@ -485,10 +485,10 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 /// ```dart
 /// CustomPaint(
 ///   painter: Sky(),
-///   child: Center(
+///   child: const Center(
 ///     child: Text(
 ///       'Once upon a time...',
-///       style: const TextStyle(
+///       style: TextStyle(
 ///         fontSize: 40.0,
 ///         fontWeight: FontWeight.w900,
 ///         color: Color(0xFFFFFFFF),
@@ -1482,7 +1482,7 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
 /// not happen normally without using FittedBox.
 ///
 /// ```dart
-/// Widget build(BuildContext) {
+/// Widget build(BuildContext context) {
 ///   return Container(
 ///     height: 400,
 ///     width: 300,
@@ -1634,9 +1634,9 @@ class FractionalTranslation extends SingleChildRenderObjectWidget {
 /// to top, like an axis label on a graph:
 ///
 /// ```dart
-/// RotatedBox(
+/// const RotatedBox(
 ///   quarterTurns: 3,
-///   child: const Text('Hello World!'),
+///   child: Text('Hello World!'),
 /// )
 /// ```
 /// {@end-tool}
@@ -1795,7 +1795,7 @@ class Padding extends SingleChildRenderObjectWidget {
 ///     height: 120.0,
 ///     width: 120.0,
 ///     color: Colors.blue[50],
-///     child: Align(
+///     child: const Align(
 ///       alignment: Alignment.topRight,
 ///       child: FlutterLogo(
 ///         size: 60,
@@ -1826,7 +1826,7 @@ class Padding extends SingleChildRenderObjectWidget {
 ///     height: 120.0,
 ///     width: 120.0,
 ///     color: Colors.blue[50],
-///     child: Align(
+///     child: const Align(
 ///       alignment: Alignment(0.2, 0.6),
 ///       child: FlutterLogo(
 ///         size: 60,
@@ -1864,7 +1864,7 @@ class Padding extends SingleChildRenderObjectWidget {
 ///     height: 120.0,
 ///     width: 120.0,
 ///     color: Colors.blue[50],
-///     child: Align(
+///     child: const Align(
 ///       alignment: FractionalOffset(0.2, 0.6),
 ///       child: FlutterLogo(
 ///         size: 60,
@@ -2150,10 +2150,10 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 /// exact size 200x300, parental constraints permitting:
 ///
 /// ```dart
-/// SizedBox(
+/// const SizedBox(
 ///   width: 200.0,
 ///   height: 300.0,
-///   child: const Card(child: Text('Hello World!')),
+///   child: Card(child: Text('Hello World!')),
 /// )
 /// ```
 /// {@end-tool}
@@ -2768,7 +2768,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 /// displayed in a [SnackBar].
 ///
 /// ```dart
-/// GlobalKey _key = GlobalKey();
+/// final GlobalKey _key = GlobalKey();
 /// bool _offstage = true;
 ///
 /// Size _getFlutterLogoSize() {
@@ -2790,7 +2790,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 ///       ),
 ///       Text('Flutter logo is offstage: $_offstage'),
 ///       ElevatedButton(
-///         child: Text('Toggle Offstage Value'),
+///         child: const Text('Toggle Offstage Value'),
 ///         onPressed: () {
 ///           setState(() {
 ///             _offstage = !_offstage;
@@ -2799,7 +2799,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 ///       ),
 ///       if (_offstage)
 ///         ElevatedButton(
-///           child: Text('Get Flutter Logo size'),
+///           child: const Text('Get Flutter Logo size'),
 ///           onPressed: () {
 ///             ScaffoldMessenger.of(context).showSnackBar(
 ///               SnackBar(
@@ -3446,7 +3446,7 @@ class ListBody extends MultiChildRenderObjectWidget {
 ///         color: Colors.white,
 ///       ),
 ///       Container(
-///         padding: EdgeInsets.all(5.0),
+///         padding: const EdgeInsets.all(5.0),
 ///         alignment: Alignment.bottomCenter,
 ///         decoration: BoxDecoration(
 ///           gradient: LinearGradient(
@@ -3459,8 +3459,8 @@ class ListBody extends MultiChildRenderObjectWidget {
 ///             ],
 ///           ),
 ///         ),
-///         child: Text(
-///           "Foreground Text",
+///         child: const Text(
+///           'Foreground Text',
 ///           style: TextStyle(color: Colors.white, fontSize: 20.0),
 ///         ),
 ///       ),
@@ -4329,7 +4329,7 @@ class Flex extends MultiChildRenderObjectWidget {
 ///
 /// ```dart
 /// Row(
-///   children: <Widget>[
+///   children: const <Widget>[
 ///     Expanded(
 ///       child: Text('Deliver features faster', textAlign: TextAlign.center),
 ///     ),
@@ -4339,7 +4339,7 @@ class Flex extends MultiChildRenderObjectWidget {
 ///     Expanded(
 ///       child: FittedBox(
 ///         fit: BoxFit.contain, // otherwise the logo will be tiny
-///         child: const FlutterLogo(),
+///         child: FlutterLogo(),
 ///       ),
 ///     ),
 ///   ],
@@ -4540,13 +4540,13 @@ class Row extends Flex {
 ///
 /// ```dart
 /// Column(
-///   children: <Widget>[
+///   children: const <Widget>[
 ///     Text('Deliver features faster'),
 ///     Text('Craft beautiful UIs'),
 ///     Expanded(
 ///       child: FittedBox(
 ///         fit: BoxFit.contain, // otherwise the logo will be tiny
-///         child: const FlutterLogo(),
+///         child: FlutterLogo(),
 ///       ),
 ///     ),
 ///   ],
@@ -4568,12 +4568,12 @@ class Row extends Flex {
 ///   crossAxisAlignment: CrossAxisAlignment.start,
 ///   mainAxisSize: MainAxisSize.min,
 ///   children: <Widget>[
-///     Text('We move under cover and we move as one'),
-///     Text('Through the night, we have one shot to live another day'),
-///     Text('We cannot let a stray gunshot give us away'),
-///     Text('We will fight up close, seize the moment and stay in it'),
-///     Text('It’s either that or meet the business end of a bayonet'),
-///     Text('The code word is ‘Rochambeau,’ dig me?'),
+///     const Text('We move under cover and we move as one'),
+///     const Text('Through the night, we have one shot to live another day'),
+///     const Text('We cannot let a stray gunshot give us away'),
+///     const Text('We will fight up close, seize the moment and stay in it'),
+///     const Text('It’s either that or meet the business end of a bayonet'),
+///     const Text('The code word is ‘Rochambeau,’ dig me?'),
 ///     Text('Rochambeau!', style: DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0)),
 ///   ],
 /// )
@@ -4821,7 +4821,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     appBar: AppBar(
-///       title: Text('Expanded Column Sample'),
+///       title: const Text('Expanded Column Sample'),
 ///     ),
 ///     body: Center(
 ///        child: Column(
@@ -4860,7 +4860,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     appBar: AppBar(
-///       title: Text('Expanded Row Sample'),
+///       title: const Text('Expanded Row Sample'),
 ///     ),
 ///     body: Center(
 ///       child: Row(
@@ -4935,20 +4935,20 @@ class Expanded extends Flexible {
 ///   runSpacing: 4.0, // gap between lines
 ///   children: <Widget>[
 ///     Chip(
-///       avatar: CircleAvatar(backgroundColor: Colors.blue.shade900, child: Text('AH')),
-///       label: Text('Hamilton'),
+///       avatar: CircleAvatar(backgroundColor: Colors.blue.shade900, child: const Text('AH')),
+///       label: const Text('Hamilton'),
 ///     ),
 ///     Chip(
-///       avatar: CircleAvatar(backgroundColor: Colors.blue.shade900, child: Text('ML')),
-///       label: Text('Lafayette'),
+///       avatar: CircleAvatar(backgroundColor: Colors.blue.shade900, child: const Text('ML')),
+///       label: const Text('Lafayette'),
 ///     ),
 ///     Chip(
-///       avatar: CircleAvatar(backgroundColor: Colors.blue.shade900, child: Text('HM')),
-///       label: Text('Mulligan'),
+///       avatar: CircleAvatar(backgroundColor: Colors.blue.shade900, child: const Text('HM')),
+///       label: const Text('Mulligan'),
 ///     ),
 ///     Chip(
-///       avatar: CircleAvatar(backgroundColor: Colors.blue.shade900, child: Text('JL')),
-///       label: Text('Laurens'),
+///       avatar: CircleAvatar(backgroundColor: Colors.blue.shade900, child: const Text('JL')),
+///       label: const Text('Laurens'),
 ///     ),
 ///   ],
 /// )
@@ -5210,9 +5210,11 @@ class Wrap extends MultiChildRenderObjectWidget {
 /// ```dart main
 /// import 'package:flutter/material.dart';
 ///
-/// void main() => runApp(FlowApp());
+/// void main() => runApp(const FlowApp());
 ///
 /// class FlowApp extends StatelessWidget {
+///   const FlowApp({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return MaterialApp(
@@ -5220,13 +5222,15 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///         appBar: AppBar(
 ///           title: const Text('Flow Example'),
 ///         ),
-///         body: FlowMenu(),
+///         body: const FlowMenu(),
 ///       ),
 ///     );
 ///   }
 /// }
 ///
 /// class FlowMenu extends StatefulWidget {
+///   const FlowMenu({Key? key}) : super(key: key);
+///
 ///   @override
 ///   _FlowMenuState createState() => _FlowMenuState();
 /// }
@@ -5243,8 +5247,9 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///   ];
 ///
 ///   void _updateMenu(IconData icon) {
-///     if (icon != Icons.menu)
+///     if (icon != Icons.menu) {
 ///       setState(() => lastTapped = icon);
+///     }
 ///   }
 ///
 ///   @override
@@ -5263,7 +5268,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///       child: RawMaterialButton(
 ///         fillColor: lastTapped == icon ? Colors.amber[700] : Colors.blue,
 ///         splashColor: Colors.amber[100],
-///         shape: CircleBorder(),
+///         shape: const CircleBorder(),
 ///         constraints: BoxConstraints.tight(Size(buttonDiameter, buttonDiameter)),
 ///         onPressed: () {
 ///           _updateMenu(icon);
@@ -5282,11 +5287,9 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return Container(
-///       child: Flow(
-///         delegate: FlowMenuDelegate(menuAnimation: menuAnimation),
-///         children: menuItems.map<Widget>((IconData icon) => flowMenuItem(icon)).toList(),
-///       ),
+///     return Flow(
+///       delegate: FlowMenuDelegate(menuAnimation: menuAnimation),
+///       children: menuItems.map<Widget>((IconData icon) => flowMenuItem(icon)).toList(),
 ///     );
 ///   }
 /// }
@@ -5405,7 +5408,7 @@ class Flow extends MultiChildRenderObjectWidget {
 ///   text: TextSpan(
 ///     text: 'Hello ',
 ///     style: DefaultTextStyle.of(context).style,
-///     children: <TextSpan>[
+///     children: const <TextSpan>[
 ///       TextSpan(text: 'bold', style: TextStyle(fontWeight: FontWeight.bold)),
 ///       TextSpan(text: ' world!'),
 ///     ],
@@ -5859,7 +5862,7 @@ class RawImage extends LeafRenderObjectWidget {
 ///   MaterialApp(
 ///     home: DefaultAssetBundle(
 ///       bundle: TestAssetBundle(),
-///       child: TestWidget(),
+///       child: const TestWidget(),
 ///     ),
 ///   ),
 /// );
@@ -6005,7 +6008,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 /// @override
 /// Widget build(BuildContext context) {
 ///   return ConstrainedBox(
-///     constraints: new BoxConstraints.tight(Size(300.0, 200.0)),
+///     constraints: BoxConstraints.tight(const Size(300.0, 200.0)),
 ///     child: Listener(
 ///       onPointerDown: _incrementDown,
 ///       onPointerMove: _updateLocation,
@@ -6015,7 +6018,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 ///         child: Column(
 ///           mainAxisAlignment: MainAxisAlignment.center,
 ///           children: <Widget>[
-///             Text('You have pressed or released in this area this many times:'),
+///             const Text('You have pressed or released in this area this many times:'),
 ///             Text(
 ///               '$_downCounter presses\n$_upCounter releases',
 ///               style: Theme.of(context).textTheme.headline4,
@@ -6173,7 +6176,7 @@ class Listener extends SingleChildRenderObjectWidget {
 /// @override
 /// Widget build(BuildContext context) {
 ///   return ConstrainedBox(
-///     constraints: new BoxConstraints.tight(Size(300.0, 200.0)),
+///     constraints: BoxConstraints.tight(const Size(300.0, 200.0)),
 ///     child: MouseRegion(
 ///       onEnter: _incrementEnter,
 ///       onHover: _updateLocation,
@@ -6183,7 +6186,7 @@ class Listener extends SingleChildRenderObjectWidget {
 ///         child: Column(
 ///           mainAxisAlignment: MainAxisAlignment.center,
 ///           children: <Widget>[
-///             Text('You have entered or exited this box this many times:'),
+///             const Text('You have entered or exited this box this many times:'),
 ///             Text(
 ///               '$_enterCounter Entries\n$_exitCounter Exits',
 ///               style: Theme.of(context).textTheme.headline4,
@@ -6348,7 +6351,7 @@ class MouseRegion extends StatefulWidget {
   /// ```dart preamble
   /// // A region that hides its content one second after being hovered.
   /// class MyTimedButton extends StatefulWidget {
-  ///   MyTimedButton({ Key? key, required this.onEnterButton, required this.onExitButton })
+  ///   const MyTimedButton({ Key? key, required this.onEnterButton, required this.onExitButton })
   ///     : super(key: key);
   ///
   ///   final VoidCallback onEnterButton;
@@ -6362,21 +6365,22 @@ class MouseRegion extends StatefulWidget {
   ///   bool regionIsHidden = false;
   ///   bool hovered = false;
   ///
-  ///   void startCountdown() async {
-  ///     await Future.delayed(const Duration(seconds: 1));
+  ///   Future<void> startCountdown() async {
+  ///     await Future<void>.delayed(const Duration(seconds: 1));
   ///     hideButton();
   ///   }
   ///
   ///   void hideButton() {
   ///     setState(() { regionIsHidden = true; });
   ///     // This statement is necessary.
-  ///     if (hovered)
+  ///     if (hovered) {
   ///       widget.onExitButton();
+  ///     }
   ///   }
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return Container(
+  ///     return SizedBox(
   ///       width: 100,
   ///       height: 100,
   ///       child: MouseRegion(
@@ -6410,9 +6414,10 @@ class MouseRegion extends StatefulWidget {
   ///           onPressed: () {
   ///             setState(() { key = UniqueKey(); });
   ///           },
-  ///           child: Text('Refresh'),
+  ///           child: const Text('Refresh'),
   ///         ),
-  ///         hovering ? Text('Hovering') : Text('Not hovering'),
+  ///         if (hovering) const Text('Hovering'),
+  ///         if (!hovering) const Text('Not hovering'),
   ///         MyTimedButton(
   ///           key: key,
   ///           onEnterButton: () {
@@ -6660,14 +6665,10 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 ///         child: Column(
 ///           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
 ///           children: <Widget>[
-///             Text(
-///               'Ignoring: $ignoring',
-///             ),
+///             Text('Ignoring: $ignoring'),
 ///             ElevatedButton(
 ///               onPressed: () {},
-///               child: Text(
-///                 'Click me!',
-///               ),
+///               child: const Text('Click me!'),
 ///             ),
 ///           ],
 ///         ),
@@ -6750,7 +6751,7 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 /// Widget build(BuildContext context) {
 ///   return Stack(
 ///     alignment: AlignmentDirectional.center,
-///     children: [
+///     children: <Widget>[
 ///       SizedBox(
 ///         width: 200.0,
 ///         height: 100.0,
@@ -7255,7 +7256,7 @@ class Semantics extends SingleChildRenderObjectWidget {
 ///         value: true,
 ///         onChanged: (bool? value) {},
 ///       ),
-///       const Text("Settings"),
+///       const Text('Settings'),
 ///     ],
 ///   ),
 /// )
