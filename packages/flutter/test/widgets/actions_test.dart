@@ -921,7 +921,7 @@ void main() {
     });
 
     testWidgets(
-        'FocusableActionDetector can prevent it descendants to be focusable',
+        'FocusableActionDetector can prevent its descendants from being focusable',
         (WidgetTester tester) async {
       final FocusNode buttonNode = FocusNode(debugLabel: 'Test');
 
