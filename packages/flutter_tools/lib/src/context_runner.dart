@@ -24,6 +24,7 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/process.dart';
+import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'build_info.dart';
@@ -274,6 +275,11 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
         processManager: globals.processManager,
+      ),
+      OutputPreferences: () => OutputPreferences(
+        wrapText: globals.stdio.hasTerminal ?? false,
+        showColor:  globals.platform.stdoutSupportsAnsi,
+        stdio: globals.stdio,
       ),
       PersistentToolState: () => PersistentToolState(
         fileSystem: globals.fs,

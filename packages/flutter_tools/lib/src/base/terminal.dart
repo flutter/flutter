@@ -7,7 +7,6 @@
 import 'package:meta/meta.dart';
 
 import '../convert.dart';
-import '../globals.dart' as globals;
 import 'io.dart' as io;
 import 'logger.dart';
 import 'platform.dart';
@@ -22,16 +21,6 @@ enum TerminalColor {
   grey,
 }
 
-/// Warning mark to use in stdout or stderr.
-String get warningMark {
-  return globals.terminal.bolden(globals.terminal.color('[!]', TerminalColor.red));
-}
-
-/// Success mark to use in stdout.
-String get successMark {
-  return globals.terminal.bolden(globals.terminal.color('✓', TerminalColor.green));
-}
-
 /// A class that contains the context settings for command text output to the
 /// console.
 class OutputPreferences {
@@ -39,13 +28,17 @@ class OutputPreferences {
     bool wrapText,
     int wrapColumn,
     bool showColor,
-  }) : wrapText = wrapText ?? globals.stdio.hasTerminal,
+    io.Stdio stdio,
+  }) : _stdio = stdio,
+       wrapText = wrapText ?? stdio.hasTerminal,
        _overrideWrapColumn = wrapColumn,
-       showColor = showColor ?? globals.platform.stdoutSupportsAnsi ?? false;
+       showColor = showColor ?? false;
 
   /// A version of this class for use in tests.
   OutputPreferences.test({this.wrapText = false, int wrapColumn = kDefaultTerminalColumns, this.showColor = false})
-    : _overrideWrapColumn = wrapColumn;
+    : _overrideWrapColumn = wrapColumn, _stdio = null;
+
+  final io.Stdio _stdio;
 
   /// If [wrapText] is true, then any text sent to the context's [Logger]
   /// instance (e.g. from the [printError] or [printStatus] functions) will be
@@ -65,7 +58,7 @@ class OutputPreferences {
   /// terminal, or to [kDefaultTerminalColumns] if not writing to a terminal.
   final int _overrideWrapColumn;
   int get wrapColumn {
-    return _overrideWrapColumn ?? globals.stdio.terminalColumns ?? kDefaultTerminalColumns;
+    return _overrideWrapColumn ?? _stdio?.terminalColumns ?? kDefaultTerminalColumns;
   }
 
   /// Whether or not to output ANSI color codes when writing to the output
@@ -105,6 +98,12 @@ abstract class Terminal {
   /// whether it is appropriate to show a terminal prompt,
   /// or whether an automatic selection should be made instead.
   bool get stdinHasTerminal;
+
+  /// Warning mark to use in stdout or stderr.
+  String get warningMark;
+
+  /// Success mark to use in stdout.
+  String get successMark;
 
   String bolden(String message);
 
@@ -198,6 +197,16 @@ class AnsiTerminal implements Terminal {
 
   @override
   bool usesTerminalUi = false;
+
+  @override
+  String get warningMark {
+    return bolden(color('[!]', TerminalColor.red));
+  }
+
+  @override
+  String get successMark {
+    return bolden(color('✓', TerminalColor.green));
+  }
 
   @override
   String bolden(String message) {
@@ -355,4 +364,10 @@ class _TestTerminal implements Terminal {
 
   @override
   bool get stdinHasTerminal => false;
+
+  @override
+  String get successMark => '✓';
+
+  @override
+  String get warningMark => '[!]';
 }
