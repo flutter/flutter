@@ -22,15 +22,18 @@ import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import 'create_base.dart';
 
+const String kPlatformHelp =
+  'The platforms supported by this project. '
+  'Platform folders (e.g. android/) will be generated in the target project. '
+  'This argument only works when "--template" is set to app or plugin. '
+  'When adding platforms to a plugin project, the pubspec.yaml will be updated with the requested platform. '
+  'Adding desktop platforms requires the corresponding desktop config setting to be enabled.';
+
 class CreateCommand extends CreateBase {
   CreateCommand({
     bool verboseHelp = false,
   }) : super(verboseHelp: verboseHelp) {
-    addPlatformsOptions(customHelp: 'The platforms supported by this project. '
-        'Platform folders (e.g. android/) will be generated in the target project. '
-        'This argument only works when "--template" is set to app or plugin. '
-        'When adding platforms to a plugin project, the pubspec.yaml will be updated with the requested platform. '
-        'Adding desktop platforms requires the corresponding desktop config setting to be enabled.');
+    addPlatformsOptions(customHelp: kPlatformHelp);
     argParser.addOption(
       'template',
       abbr: 't',
@@ -240,6 +243,7 @@ class CreateCommand extends CreateBase {
       linux: featureFlags.isLinuxEnabled && platforms.contains('linux'),
       macos: featureFlags.isMacOSEnabled && platforms.contains('macos'),
       windows: featureFlags.isWindowsEnabled && platforms.contains('windows'),
+      windowsUwp: featureFlags.isWindowsUwpEnabled && platforms.contains('winuwp'),
       // Enable null-safety for sample code, which is - unlike our regular templates - already migrated.
       dartSdkVersionBounds: sampleCode != null ? '">=2.12.0-0 <3.0.0"' : '">=2.7.0 <3.0.0"'
     );
@@ -391,6 +395,7 @@ Your $application code is in $relativeAppMain.
       templateContext['linux'] = false;
       templateContext['macos'] = false;
       templateContext['windows'] = false;
+      templateContext['windows-uwp'] = false;
     }
     final List<String> platformsToAdd = _getSupportedPlatformsFromTemplateContext(templateContext);
 
@@ -469,6 +474,8 @@ Your $application code is in $relativeAppMain.
         'windows',
       if (templateContext['macos'] == true)
         'macos',
+      if (templateContext['windows-uwp'] == true)
+        'windows-uwp',
     ];
   }
 

@@ -38,11 +38,13 @@ const String _kNoPlatformsMessage = 'You\'ve created a plugin project that doesn
 const String frameworkRevision = '12345678';
 const String frameworkChannel = 'omega';
 const String _kDisabledPlatformRequestedMessage = 'currently not supported on your local environment.';
-// TODO(fujino): replace FakePlatform.fromPlatform() with FakePlatform()
-FakePlatform _kNoColorTerminalPlatform() => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
+
+FakePlatform _kNoColorTerminalPlatform() => FakePlatform(stdoutSupportsAnsi: false);
+
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
 };
+
 const String samplesIndexJson = '''
 [
   { "id": "sample1" },
@@ -702,6 +704,7 @@ void main() {
     expect(projectDir.childDirectory('macos'), isNot(exists));
     expect(projectDir.childDirectory('windows'), isNot(exists));
     expect(projectDir.childDirectory('web'), isNot(exists));
+    expect(projectDir.childDirectory('winuwp'), isNot(exists));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
   });
@@ -720,16 +723,40 @@ void main() {
     expect(projectDir.childDirectory('macos'), isNot(exists));
     expect(projectDir.childDirectory('windows'), isNot(exists));
     expect(projectDir.childDirectory('web'), isNot(exists));
-    expect(projectDir.childDirectory('example').childDirectory('linux'),
-        isNot(exists));
-    expect(projectDir.childDirectory('example').childDirectory('macos'),
-        isNot(exists));
-    expect(projectDir.childDirectory('example').childDirectory('windows'),
-        isNot(exists));
-    expect(projectDir.childDirectory('example').childDirectory('web'),
-        isNot(exists));
+    expect(projectDir.childDirectory('winuwp'), isNot(exists));
+    expect(projectDir.childDirectory('example').childDirectory('linux'), isNot(exists));
+    expect(projectDir.childDirectory('example').childDirectory('macos'), isNot(exists));
+    expect(projectDir.childDirectory('example').childDirectory('windows'), isNot(exists));
+    expect(projectDir.childDirectory('example').childDirectory('web'), isNot(exists));
+    expect(projectDir.childDirectory('example').childDirectory('winuwp'), isNot(exists));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
+  });
+
+  testUsingContext('app supports Windows UWP if requested', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--platforms=winuwp',
+      projectDir.path,
+    ]);
+
+    expect(projectDir.childDirectory('linux'), isNot(exists));
+    expect(projectDir.childDirectory('android'), isNot(exists));
+    expect(projectDir.childDirectory('ios'), isNot(exists));
+    expect(projectDir.childDirectory('windows'), isNot(exists));
+    expect(projectDir.childDirectory('macos'), isNot(exists));
+    expect(projectDir.childDirectory('web'), isNot(exists));
+    expect(projectDir.childDirectory('winuwp'), exists);
+    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWindowsUwpEnabled: true),
+    Logger: () => logger,
   });
 
   testUsingContext('app supports Linux if requested', () async {
@@ -745,13 +772,13 @@ void main() {
       projectDir.path,
     ]);
 
-    expect(
-        projectDir.childDirectory('linux').childFile('CMakeLists.txt'), exists);
+    expect(projectDir.childDirectory('linux').childFile('CMakeLists.txt'), exists);
     expect(projectDir.childDirectory('android'), isNot(exists));
     expect(projectDir.childDirectory('ios'), isNot(exists));
     expect(projectDir.childDirectory('windows'), isNot(exists));
     expect(projectDir.childDirectory('macos'), isNot(exists));
     expect(projectDir.childDirectory('web'), isNot(exists));
+    expect(projectDir.childDirectory('winuwp'), isNot(exists));
     expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
