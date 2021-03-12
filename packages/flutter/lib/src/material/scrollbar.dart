@@ -56,7 +56,9 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
-/// The Scrollbar should be provided a ScrollController that is also provided to the associated Scrollable.
+/// When isAlwaysShown is true, the scrollbar thumb will remain visible without the
+/// fade animation. This requires that a ScrollController is provided to controller,
+/// or that the PrimaryScrollController is available.
 /// ```dart
 /// final ScrollController _controllerOne = ScrollController();
 ///
