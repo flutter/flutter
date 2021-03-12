@@ -332,7 +332,7 @@ Future<void> _runBuildTests() async {
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ios_platform_view_tests')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ui')));
-  
+
   final List<String> devicelabBuildTasks = <String>[
     'flutter_gallery__transition_perf',
     'flutter_gallery_ios__transition_perf',
@@ -369,11 +369,14 @@ Future<void> _runDeviceLabBuildTask(String task) async {
     return;
   }
 
+  final String targetPlatform = (task.contains('_ios_')) ? 'ios' : 'android';
+
   await runCommand(dart, <String>[
     'run', path.join('bin', 'test_runner.dart'),
     'test',
     '--task', task,
     '--task-args', 'build',
+    '--task-args', 'target-device=$targetPlatform',
   ],
   workingDirectory: path.join('dev', 'devicelab'));
 }

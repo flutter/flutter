@@ -66,8 +66,8 @@ class GalleryTransitionTest extends BuildTestTask {
   final String driverFile;
 
   @override
-  List<String> getBuildArgs(DeviceOperatingSystem deviceOperatingSystem) {
-      switch (deviceOperatingSystem) {
+  List<String> getBuildArgs() {
+      switch (targetPlatform) {
         case DeviceOperatingSystem.android:
           return <String>[
               'apk',
@@ -91,7 +91,7 @@ class GalleryTransitionTest extends BuildTestTask {
     }
 
   @override
-  List<String> getTestArgs(DeviceOperatingSystem deviceOperatingSystem, String deviceId) {
+  List<String> getTestArgs(String deviceId) {
     final String testDriver = driverFile ?? (semanticsEnabled
       ? '${testFile}_with_semantics_test'
       : '${testFile}_test');
@@ -151,7 +151,7 @@ class GalleryTransitionTest extends BuildTestTask {
       return applicationBinaryPath;
     }
 
-    switch (deviceOperatingSystem) {
+    switch (targetPlatform) {
       case DeviceOperatingSystem.android:
         return 'build/app/outputs/flutter-apk/app-profile.apk';
       case DeviceOperatingSystem.ios:
