@@ -1,4 +1,4 @@
-Signature: c80a42c54b06bf12d424c14926b1858c
+Signature: 75441fdf645fcc200534f6670430ec28
 
 UNUSED LICENSES:
 
@@ -724,8 +724,6 @@ FILE: ../../../third_party/skia/src/shaders/gradients/Sk4fGradientBase.h
 FILE: ../../../third_party/skia/src/shaders/gradients/Sk4fGradientPriv.h
 FILE: ../../../third_party/skia/src/shaders/gradients/Sk4fLinearGradient.cpp
 FILE: ../../../third_party/skia/src/shaders/gradients/Sk4fLinearGradient.h
-FILE: ../../../third_party/skia/src/sksl/SkSLCFGGenerator.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLCFGGenerator.h
 FILE: ../../../third_party/skia/src/sksl/SkSLCPPCodeGenerator.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLCodeGenerator.h
 FILE: ../../../third_party/skia/src/sksl/SkSLCompiler.cpp
@@ -5194,8 +5192,6 @@ FILE: ../../../third_party/skia/src/gpu/vk/GrVkBuffer.h
 FILE: ../../../third_party/skia/src/sksl/SkSLBuiltinTypes.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLBuiltinTypes.h
 FILE: ../../../third_party/skia/src/sksl/SkSLContext.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLDefinitionMap.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLDefinitionMap.h
 FILE: ../../../third_party/skia/src/sksl/SkSLMangler.h
 FILE: ../../../third_party/skia/src/sksl/SkSLOperators.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLOperators.h
