@@ -15,7 +15,7 @@
 #include "flutter/shell/platform/windows/window_binding_handler_delegate.h"
 
 #ifdef WINUWP
-#include <winrt/Windows.UI.Composition.h>
+#include <third_party/cppwinrt/generated/winrt/Windows.UI.Composition.h>
 #endif
 
 namespace flutter {

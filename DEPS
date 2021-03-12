@@ -97,7 +97,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'd05290fdfb0b8d2aad3c60bf0b4a76f368616452',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '33358ba597f875f6646522fd4ea86c1b31404d77',
 
    # Fuchsia compatibility
    #
@@ -657,6 +657,17 @@ hooks = [
     'action': [
       'python',
       'src/flutter/tools/run_third_party_dart.py',
+    ]
+  },
+  {
+    # This must run whenever the cppwinrt dependency is updated
+    # to regenerate winrt headers
+    'name': 'Generate winrt headers',
+    'pattern': '.',
+    'condition': 'download_windows_deps',
+    'action': [
+      'python',
+      'src/build/win/generate_winrt_headers.py',
     ]
   }
 ]

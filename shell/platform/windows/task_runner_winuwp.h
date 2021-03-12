@@ -7,7 +7,7 @@
 
 #include <windows.h>
 
-#include <winrt/Windows.UI.Core.h>
+#include <third_party/cppwinrt/generated/winrt/Windows.UI.Core.h>
 
 #include <chrono>
 #include <functional>
