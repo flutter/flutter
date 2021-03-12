@@ -19,9 +19,11 @@ abstract class BuildTestTask {
     applicationBinaryPath = argResults[kApplicationBinaryPathOption] as String;
     buildOnly = argResults[kBuildOnlyFlag] as bool;
     testOnly = argResults[kTestOnlyFlag] as bool;
-    targetPlatform = deviceOperatingSystemFromString(argResults[kTargetPlatformOption] as String);
-    // Override deviceOperatingSystem to prevent extra utilities from being used.
-    _originalDeviceOperatingSystem = deviceOperatingSystem;
+    if (argResults.wasParsed(kTargetPlatformOption)) {
+      targetPlatform = deviceOperatingSystemFromString(argResults[kTargetPlatformOption] as String);
+      // Override deviceOperatingSystem to prevent extra utilities from being used.
+      _originalDeviceOperatingSystem = deviceOperatingSystem;
+    }
     deviceOperatingSystem = DeviceOperatingSystem.fake;
   }
 
@@ -33,6 +35,7 @@ abstract class BuildTestTask {
   final ArgParser argParser = ArgParser()
     ..addOption(kApplicationBinaryPathOption)
     ..addFlag(kBuildOnlyFlag)
+    ..addOption(kTargetPlatformOption)
     ..addFlag(kTestOnlyFlag);
 
   /// Args passed from the test runner via "--task-arg".
