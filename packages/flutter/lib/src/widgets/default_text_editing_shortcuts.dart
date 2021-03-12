@@ -33,11 +33,11 @@ import 'text_editing_intents.dart';
 ///     child: Center(
 ///       child: Shortcuts(
 ///         shortcuts: <LogicalKeySet, Intent>{
-///           LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowDown): NextFocusIntent(),
-///           LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowUp): PreviousFocusIntent(),
+///           LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowDown): const NextFocusIntent(),
+///           LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowUp): const PreviousFocusIntent(),
 ///         },
 ///         child: Column(
-///           children: <Widget>[
+///           children: const <Widget>[
 ///             TextField(
 ///               decoration: InputDecoration(
 ///                 hintText: 'alt + down moves to the next field.',
@@ -69,7 +69,7 @@ import 'text_editing_intents.dart';
 /// class DecrementCounterIntent extends Intent {}
 ///
 /// class MyWidget extends StatefulWidget {
-///   MyWidget({ Key? key }) : super(key: key);
+///   const MyWidget({ Key? key }) : super(key: key);
 ///
 ///   @override
 ///   MyWidgetState createState() => MyWidgetState();
@@ -89,7 +89,7 @@ import 'text_editing_intents.dart';
 ///         child: Column(
 ///           mainAxisAlignment: MainAxisAlignment.center,
 ///           children: <Widget>[
-///             Text(
+///             const Text(
 ///               'You have pushed the button this many times:',
 ///             ),
 ///             Text(
@@ -118,7 +118,7 @@ import 'text_editing_intents.dart';
 ///                     },
 ///                   ),
 ///                 },
-///                 child: TextField(
+///                 child: const TextField(
 ///                   maxLines: 2,
 ///                   decoration: InputDecoration(
 ///                     hintText: 'Up/down increment/decrement here.',
@@ -126,7 +126,7 @@ import 'text_editing_intents.dart';
 ///                 ),
 ///               ),
 ///             ),
-///             TextField(
+///             const TextField(
 ///               maxLines: 2,
 ///               decoration: InputDecoration(
 ///                 hintText: 'Up/down behave normally here.',
