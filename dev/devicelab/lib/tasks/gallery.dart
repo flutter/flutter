@@ -78,8 +78,15 @@ class GalleryTransitionTest extends BuildTestTask {
               '--target-platform',
               'android-arm,android-arm64',
             ];
-          default:
-           throw Exception('$deviceOperatingSystem has no build configuration');
+        case DeviceOperatingSystem.ios:
+          return <String>[
+            'ipa',
+            '--profile',
+            '-t',
+            'test_driver/$testFile.dart',
+          ];
+        default:
+          throw Exception('$deviceOperatingSystem has no build configuration');
       }
     }
 
@@ -147,6 +154,8 @@ class GalleryTransitionTest extends BuildTestTask {
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.android:
         return 'build/app/outputs/flutter-apk/app-profile.apk';
+      case DeviceOperatingSystem.ios:
+        return 'build/app/outputs/flutter-ipa/app-profile.ipa';
       default:
         throw UnimplementedError('getApplicationBinaryPath does not support $deviceOperatingSystem');
     }
