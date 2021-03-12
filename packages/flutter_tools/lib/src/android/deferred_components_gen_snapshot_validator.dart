@@ -107,6 +107,13 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
         }
       }
     }
+    for (final LoadingUnit unit in generatedLoadingUnits) {
+      if (!mapping.containsKey(unit.id)) {
+        // Store an empty string for unassigned loading units,
+        // indicating that it is in the base component.
+        mapping[unit.id] = '';
+      }
+    }
     // Encode the mapping as a string.
     final StringBuffer mappingBuffer = StringBuffer();
     for (final int key in mapping.keys) {
