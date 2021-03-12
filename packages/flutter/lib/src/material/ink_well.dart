@@ -1182,11 +1182,12 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 /// ```dart
 /// double sideLength = 50;
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return AnimatedContainer(
 ///     height: sideLength,
 ///     width: sideLength,
-///     duration: Duration(seconds: 2),
+///     duration: const Duration(seconds: 2),
 ///     curve: Curves.easeIn,
 ///     child: Material(
 ///       color: Colors.yellow,

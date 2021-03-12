@@ -458,7 +458,8 @@ class FakeFlutterVersion implements FlutterVersion {
     this.frameworkRevision = '11111111111111111111',
     this.frameworkRevisionShort = '11111',
     this.frameworkAge = '0 hours ago',
-    this.frameworkCommitDate = '12/01/01'
+    this.frameworkCommitDate = '12/01/01',
+    this.gitTagVersion = const GitTagVersion.unknown(),
   });
 
   bool get didFetchTagsAndUpdate => _didFetchTagsAndUpdate;
@@ -501,6 +502,9 @@ class FakeFlutterVersion implements FlutterVersion {
   String get frameworkDate => frameworkCommitDate;
 
   @override
+  final GitTagVersion gitTagVersion;
+
+  @override
   void fetchTagsAndUpdate() {
     _didFetchTagsAndUpdate = true;
   }
@@ -512,11 +516,6 @@ class FakeFlutterVersion implements FlutterVersion {
 
   @override
   bool checkRevisionAncestry({String tentativeDescendantRevision, String tentativeAncestorRevision}) {
-    throw UnimplementedError();
-  }
-
-  @override
-  GitTagVersion get gitTagVersion {
     throw UnimplementedError();
   }
 

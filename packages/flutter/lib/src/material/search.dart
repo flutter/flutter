@@ -101,7 +101,7 @@ abstract class SearchDelegate<T> {
   ///
   /// {@tool snippet}
   /// ```dart
-  /// class CustomSearchHintDelegate extends SearchDelegate {
+  /// class CustomSearchHintDelegate extends SearchDelegate<String> {
   ///   CustomSearchHintDelegate({
   ///     required String hintText,
   ///   }) : super(
@@ -111,22 +111,23 @@ abstract class SearchDelegate<T> {
   ///   );
   ///
   ///   @override
-  ///   Widget buildLeading(BuildContext context) => Text("leading");
+  ///   Widget buildLeading(BuildContext context) => const Text('leading');
   ///
+  ///   @override
   ///   PreferredSizeWidget buildBottom(BuildContext context) {
-  ///     return PreferredSize(
+  ///     return const PreferredSize(
   ///        preferredSize: Size.fromHeight(56.0),
-  ///        child: Text("bottom"));
+  ///        child: Text('bottom'));
   ///   }
   ///
   ///   @override
-  ///   Widget buildSuggestions(BuildContext context) => Text("suggestions");
+  ///   Widget buildSuggestions(BuildContext context) => const Text('suggestions');
   ///
   ///   @override
-  ///   Widget buildResults(BuildContext context) => Text('results');
+  ///   Widget buildResults(BuildContext context) => const Text('results');
   ///
   ///   @override
-  ///   List<Widget> buildActions(BuildContext context) => [];
+  ///   List<Widget> buildActions(BuildContext context) => <Widget>[];
   /// }
   /// ```
   /// {@end-tool}

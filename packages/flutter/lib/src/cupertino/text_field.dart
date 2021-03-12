@@ -4,7 +4,7 @@
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
-import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb;
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -149,6 +149,8 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 ///
 /// ```dart
 /// class MyPrefilledText extends StatefulWidget {
+///   const MyPrefilledText({Key? key}) : super(key: key);
+///
 ///   @override
 ///   _MyPrefilledTextState createState() => _MyPrefilledTextState();
 /// }
@@ -1202,7 +1204,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       ),
     );
 
-    final Widget child = Semantics(
+    return Semantics(
       enabled: enabled,
       onTap: !enabled || widget.readOnly ? null : () {
         if (!controller.selection.isValid) {
@@ -1226,13 +1228,5 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         ),
       ),
     );
-
-    if (kIsWeb) {
-      return Shortcuts(
-        shortcuts: scrollShortcutOverrides,
-        child: child,
-      );
-    }
-    return child;
   }
 }

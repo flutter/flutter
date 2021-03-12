@@ -232,6 +232,8 @@ abstract class DeletableChipAttributes {
   /// }
   ///
   /// class CastList extends StatefulWidget {
+  ///   const CastList({Key? key}) : super(key: key);
+  ///
   ///   @override
   ///   State createState() => CastListState();
   /// }
@@ -275,7 +277,7 @@ abstract class DeletableChipAttributes {
   /// ```dart
   /// @override
   /// Widget build(BuildContext context) {
-  ///   return CastList();
+  ///   return const CastList();
   /// }
   /// ```
   /// {@end-tool}
@@ -383,6 +385,8 @@ abstract class SelectableChipAttributes {
   ///
   /// ```dart
   /// class Wood extends StatefulWidget {
+  ///   const Wood({Key? key}) : super(key: key);
+  ///
   ///   @override
   ///   State<StatefulWidget> createState() => WoodState();
   /// }
@@ -519,6 +523,8 @@ abstract class TappableChipAttributes {
   ///
   /// ```dart
   /// class Blacksmith extends StatelessWidget {
+  ///   const Blacksmith({Key? key}) : super(key: key);
+  ///
   ///   void startHammering() {
   ///     print('bang bang bang');
   ///   }
@@ -567,9 +573,9 @@ abstract class TappableChipAttributes {
 /// Chip(
 ///   avatar: CircleAvatar(
 ///     backgroundColor: Colors.grey.shade800,
-///     child: Text('AB'),
+///     child: const Text('AB'),
 ///   ),
-///   label: Text('Aaron Burr'),
+///   label: const Text('Aaron Burr'),
 /// )
 /// ```
 /// {@end-tool}
@@ -716,9 +722,9 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
 /// InputChip(
 ///   avatar: CircleAvatar(
 ///     backgroundColor: Colors.grey.shade800,
-///     child: Text('AB'),
+///     child: const Text('AB'),
 ///   ),
-///   label: Text('Aaron Burr'),
+///   label: const Text('Aaron Burr'),
 ///   onPressed: () {
 ///     print('I am the one thing in life.');
 ///   }
@@ -916,6 +922,8 @@ class InputChip extends StatelessWidget
 ///
 /// ```dart
 /// class MyThreeOptions extends StatefulWidget {
+///   const MyThreeOptions({Key? key}) : super(key: key);
+///
 ///   @override
 ///   _MyThreeOptionsState createState() => _MyThreeOptionsState();
 /// }
@@ -1106,6 +1114,8 @@ class ChoiceChip extends StatelessWidget
 /// }
 ///
 /// class CastFilter extends StatefulWidget {
+///   const CastFilter({Key? key}) : super(key: key);
+///
 ///   @override
 ///   State createState() => CastFilterState();
 /// }
@@ -1117,7 +1127,7 @@ class ChoiceChip extends StatelessWidget
 ///     const ActorFilterEntry('Eliza Hamilton', 'EH'),
 ///     const ActorFilterEntry('James Madison', 'JM'),
 ///   ];
-///   List<String> _filters = <String>[];
+///   final List<String> _filters = <String>[];
 ///
 ///   Iterable<Widget> get actorWidgets sync* {
 ///     for (final ActorFilterEntry actor in _cast) {
@@ -1331,11 +1341,11 @@ class FilterChip extends StatelessWidget
 /// ActionChip(
 ///   avatar: CircleAvatar(
 ///     backgroundColor: Colors.grey.shade800,
-///     child: Text('AB'),
+///     child: const Text('AB'),
 ///   ),
-///   label: Text('Aaron Burr'),
+///   label: const Text('Aaron Burr'),
 ///   onPressed: () {
-///     print("If you stand for nothing, Burr, what’ll you fall for?");
+///     print('If you stand for nothing, Burr, what’ll you fall for?');
 ///   }
 /// )
 /// ```

@@ -1716,7 +1716,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   ///   elevation: 0.0,
   ///   child: Semantics(
   ///     explicitChildNodes: true,
-  ///     child: PhysicalModel( // B
+  ///     child: const PhysicalModel( // B
   ///       color: Colors.brown,
   ///       elevation: 5.0,
   ///       child: PhysicalModel( // C

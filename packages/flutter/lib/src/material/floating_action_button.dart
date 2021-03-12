@@ -69,14 +69,14 @@ class _DefaultHeroTag {
 ///     appBar: AppBar(
 ///       title: const Text('Floating Action Button'),
 ///     ),
-///     body: Center(
-///       child: const Text('Press the button below!')
+///     body: const Center(
+///       child: Text('Press the button below!')
 ///     ),
 ///     floatingActionButton: FloatingActionButton(
 ///       onPressed: () {
 ///         // Add your onPressed code here!
 ///       },
-///       child: Icon(Icons.navigation),
+///       child: const Icon(Icons.navigation),
 ///       backgroundColor: Colors.green,
 ///     ),
 ///   );
@@ -97,15 +97,15 @@ class _DefaultHeroTag {
 ///     appBar: AppBar(
 ///       title: const Text('Floating Action Button Label'),
 ///     ),
-///     body: Center(
-///       child: const Text('Press the button with a label below!'),
+///     body: const Center(
+///       child: Text('Press the button with a label below!'),
 ///     ),
 ///     floatingActionButton: FloatingActionButton.extended(
 ///       onPressed: () {
 ///         // Add your onPressed code here!
 ///       },
-///       label: Text('Approve'),
-///       icon: Icon(Icons.thumb_up),
+///       label: const Text('Approve'),
+///       icon: const Icon(Icons.thumb_up),
 ///       backgroundColor: Colors.pink,
 ///     ),
 ///   );

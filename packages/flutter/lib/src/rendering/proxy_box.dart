@@ -3047,7 +3047,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///
   /// ```dart
   /// class PngHome extends StatefulWidget {
-  ///   PngHome({Key? key}) : super(key: key);
+  ///   const PngHome({Key? key}) : super(key: key);
   ///
   ///   @override
   ///   _PngHomeState createState() => _PngHomeState();
@@ -3057,10 +3057,10 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///   GlobalKey globalKey = GlobalKey();
   ///
   ///   Future<void> _capturePng() async {
-  ///     RenderRepaintBoundary boundary = globalKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
-  ///     ui.Image image = await boundary.toImage();
-  ///     ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-  ///     Uint8List pngBytes = byteData!.buffer.asUint8List();
+  ///     final RenderRepaintBoundary boundary = globalKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
+  ///     final ui.Image image = await boundary.toImage();
+  ///     final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+  ///     final Uint8List pngBytes = byteData!.buffer.asUint8List();
   ///     print(pngBytes);
   ///   }
   ///
@@ -3070,7 +3070,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///       key: globalKey,
   ///       child: Center(
   ///         child: TextButton(
-  ///           child: Text('Hello World', textDirection: TextDirection.ltr),
+  ///           child: const Text('Hello World', textDirection: TextDirection.ltr),
   ///           onPressed: _capturePng,
   ///         ),
   ///       ),

@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
-import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -126,8 +125,8 @@ void main() {
   });
 
   testWithoutContext('Chrome device is not listed when Chrome cannot be run', () async {
-    final MockProcessManager processManager = MockProcessManager();
-    when(processManager.canRun(any)).thenReturn(false);
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
+    processManager.excludedExecutables = <String>{kLinuxExecutable};
     final WebDevices webDevices = WebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
@@ -141,24 +140,6 @@ void main() {
 
     expect(await webDevices.pollingGetDevices(),
       isNot(contains(isA<GoogleChromeDevice>())));
-  });
-
-  testWithoutContext('Edge device is not listed when Edge cannot be run', () async {
-    final MockProcessManager processManager = MockProcessManager();
-    when(processManager.canRun(any)).thenReturn(false);
-    final WebDevices webDevices = WebDevices(
-      featureFlags: TestFeatureFlags(isWebEnabled: true),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
-      platform: FakePlatform(
-        operatingSystem: 'linux',
-        environment: <String, String>{}
-      ),
-      processManager: processManager,
-    );
-
-    expect(await webDevices.pollingGetDevices(),
-      isNot(contains(isA<MicrosoftEdgeDevice>())));
   });
 
   testWithoutContext('Web Server device is listed if enabled via showWebServerDevice', () async {
@@ -329,6 +310,3 @@ void main() {
     expect((await macosWebDevices.pollingGetDevices()).whereType<MicrosoftEdgeDevice>(), isEmpty);
   });
 }
-
-// This is used to set `canRun` to false in a test.
-class MockProcessManager extends Mock implements ProcessManager {}
