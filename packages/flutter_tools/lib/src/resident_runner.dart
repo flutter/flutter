@@ -69,6 +69,7 @@ class FlutterDevice {
          processManager: globals.processManager,
          logger: globals.logger,
          platform: globals.platform,
+         fileSystem: globals.fs,
        );
 
   /// Create a [FlutterDevice] with optional code generation enabled.
@@ -138,6 +139,7 @@ class FlutterDevice {
         artifacts: globals.artifacts,
         processManager: globals.processManager,
         logger: globals.logger,
+        fileSystem: globals.fs,
         platform: platform,
       );
     } else {
@@ -173,6 +175,7 @@ class FlutterDevice {
         processManager: globals.processManager,
         logger: globals.logger,
         platform: platform,
+        fileSystem: globals.fs,
       );
     }
 
