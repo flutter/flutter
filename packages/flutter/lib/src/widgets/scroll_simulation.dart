@@ -230,12 +230,14 @@ class ClampingScrollSimulation extends Simulation {
 class _NBSample {
   _NBSample(double time, int duration) {
     _initSplinePosition();
-
+    _distanceCoef = 1.0;
+    _velocityCoef = 0.0;
+    if(duration == 0){
+      return;
+    }
     // See computeScrollOffset().
     final double t = time * 1000.0 / duration;
     final int index = (_nbSamples * t).round();
-    _distanceCoef = 1.0;
-    _velocityCoef = 0.0;
     if (index < _nbSamples) {
       final double tInf = index / _nbSamples;
       final double tSup = (index + 1) / _nbSamples;
