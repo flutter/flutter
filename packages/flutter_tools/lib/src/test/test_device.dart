@@ -12,6 +12,8 @@ import 'package:stream_channel/stream_channel.dart';
 ///
 /// Reusability of an instance across multiple runs is not guaranteed for all
 /// implementations.
+///
+/// Methods may throw [TestDeviceException] if a problem is encountered.
 abstract class TestDevice {
   /// Starts the test device with the provided entrypoint.
   ///
@@ -25,13 +27,9 @@ abstract class TestDevice {
   Future<Uri> get observatoryUri;
 
   /// Terminates the test device.
-  ///
-  /// A [TestDeviceException] can be thrown if it did not stop gracefully.
   Future<void> kill();
 
   /// Waits for the test device to stop.
-  ///
-  /// A [TestDeviceException] can be thrown if it did not stop gracefully.
   Future<void> get finished;
 }
 

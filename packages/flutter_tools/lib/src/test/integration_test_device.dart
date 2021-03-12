@@ -53,9 +53,13 @@ class IntegrationTestTestDevice implements TestDevice {
     final LaunchResult launchResult = await device.startApp(
       _applicationPackage,
       mainPath: entrypointPath,
+      platformArgs: <String, dynamic>{},
       debuggingOptions: debuggingOptions,
       userIdentifier: userIdentifier,
     );
+    if (!launchResult.started) {
+      throw TestDeviceException('Unable to start the app on the device.', StackTrace.current);
+    }
     assert(launchResult.started);
 
     // No need to set up the log reader because the logs are captured and
