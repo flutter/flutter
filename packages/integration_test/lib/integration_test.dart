@@ -307,12 +307,17 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
     //              and https://github.com/flutter/flutter/issues/67593
     final List<FrameTiming> frameTimings = <FrameTiming>[];
     Future<void> delayForFrameTimings() async {
+      int count = 0;
       while (frameTimings.isEmpty) {
+        count++;
         await Future<void>.delayed(const Duration(seconds: 2));
+        if (count > 20) {
+          print('delayForFrameTimings is taking longer than expected...');
+        }
       }
     }
 
-    await delayForFrameTimings(); // flush old FrameTimings
+    await Future<void>.delayed(const Duration(seconds: 2)); // flush old FrameTimings
     final TimingsCallback watcher = frameTimings.addAll;
     addTimingsCallback(watcher);
     await action();
