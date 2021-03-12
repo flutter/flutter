@@ -395,7 +395,7 @@ Your $application code is in $relativeAppMain.
       templateContext['linux'] = false;
       templateContext['macos'] = false;
       templateContext['windows'] = false;
-      templateContext['windows-uwp'] = false;
+      templateContext['winuwp'] = false;
     }
     final List<String> platformsToAdd = _getSupportedPlatformsFromTemplateContext(templateContext);
 
@@ -474,8 +474,8 @@ Your $application code is in $relativeAppMain.
         'windows',
       if (templateContext['macos'] == true)
         'macos',
-      if (templateContext['windows-uwp'] == true)
-        'windows-uwp',
+      if (templateContext['winuwp'] == true)
+        'winuwp',
     ];
   }
 
