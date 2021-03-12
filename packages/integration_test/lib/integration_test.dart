@@ -305,10 +305,14 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
     // TODO(CareF): remove this when flush FrameTiming is readly in engine.
     //              See https://github.com/flutter/flutter/issues/64808
     //              and https://github.com/flutter/flutter/issues/67593
-    Future<void> delayForFrameTimings() => Future<void>.delayed(const Duration(seconds: 2));
+    final List<FrameTiming> frameTimings = <FrameTiming>[];
+    Future<void> delayForFrameTimings() async {
+      while (frameTimings.isEmpty) {
+        await Future<void>.delayed(const Duration(seconds: 2));
+      }
+    }
 
     await delayForFrameTimings(); // flush old FrameTimings
-    final List<FrameTiming> frameTimings = <FrameTiming>[];
     final TimingsCallback watcher = frameTimings.addAll;
     addTimingsCallback(watcher);
     await action();
