@@ -111,7 +111,7 @@ final OutputPreferences _default = OutputPreferences(
   showColor:  platform.stdoutSupportsAnsi,
   stdio: stdio,
 );
-OutputPreferences get outputPreferences => context.get<OutputPreferences>() ?? _default
+OutputPreferences get outputPreferences => context.get<OutputPreferences>() ?? _default;
 
 final BotDetector _defaultBotDetector = BotDetector(
   httpClientFactory: context.get<HttpClientFactory>() ?? () => HttpClient(),
