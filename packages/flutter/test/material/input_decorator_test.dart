@@ -4459,4 +4459,37 @@ void main() {
     expect(errorDetails?.toString(), contains("InputDecorator's children reported a negative baseline"));
     expect(errorDetails?.toString(), contains('RenderStack'));
   });
+
+  testWidgets('min intrinsic height for TextField with no content padding', (WidgetTester tester) async {
+    FlutterErrorDetails? errorDetails;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      errorDetails ??= details;
+    };
+    try {
+      await tester.pumpWidget(MaterialApp(
+        home: Material(
+          child: Center(
+            child: IntrinsicHeight(
+              child: Column(
+                children: <Widget>[
+                  TextField(
+                    decoration: InputDecoration(
+                      labelText: "Label Text",
+                      helperText: "Helper Text",
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ));
+   } finally {
+      FlutterError.onError = oldHandler;
+    }
+    
+    expect(errorDetails?.toString(), isNot(contains("A RenderFlex overflowed by ")));
+  });
 }
