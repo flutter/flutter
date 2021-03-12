@@ -27,7 +27,7 @@ abstract class BuildTestTask {
 
   static const String kApplicationBinaryPathOption = 'application-binary-path';
   static const String kBuildOnlyFlag = 'build';
-  static const String kTargetPlatformOption = 'target-platforn';
+  static const String kTargetPlatformOption = 'target-platform';
   static const String kTestOnlyFlag = 'test';
 
   final ArgParser argParser = ArgParser()
