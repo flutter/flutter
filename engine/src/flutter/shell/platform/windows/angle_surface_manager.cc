@@ -8,8 +8,8 @@
 #include <vector>
 
 #ifdef WINUWP
+#include <third_party/cppwinrt/generated/winrt/Windows.UI.Composition.h>
 #include <windows.ui.core.h>
-#include <winrt/Windows.UI.Composition.h>
 #endif
 
 #if defined(WINUWP) && defined(USECOREWINDOW)
