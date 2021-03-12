@@ -670,10 +670,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       // _handleShortcuts depends on being started in the same stack invocation
       // as the _handleKeyEvent method
       _handleShortcuts(key);
-    } else if (key == LogicalKeyboardKey.delete) {
-      _handleDelete(forward: true);
-    } else if (key == LogicalKeyboardKey.backspace) {
-      _handleDelete(forward: false);
     }
   }
 
@@ -1013,6 +1009,292 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final double preferredLineHeight = _textPainter.preferredLineHeight;
     final double verticalOffset = 1.5 * preferredLineHeight;
     return _getTextPositionVertical(offset, verticalOffset);
+  }
+
+  void _deleteSelection(SelectionChangedCause cause) {
+    assert(_selection != null);
+
+    if (_readOnly || !_selection!.isValid || _selection!.isCollapsed) {
+      return;
+    }
+    
+    final String text = textSelectionDelegate.textEditingValue.text;
+    final String textBefore = _selection!.textBefore(text);
+    final String textAfter = _selection!.textAfter(text);
+    final int cursorPosition = math.min(_selection!.start, _selection!.end);
+
+    final TextSelection newSelection = TextSelection.collapsed(offset: cursorPosition);
+    _setTextEditingValue(
+      TextEditingValue(text: textBefore + textAfter, selection: newSelection),
+      cause,
+    );
+  }
+
+  /// Deletes a single character before the current collapsed selection.
+  ///
+  /// If current [selection] is not collapsed then it should delete the text
+  /// within the selection.
+  ///
+  /// {@template flutter.rendering.RenderEditable.cause}
+  /// The given [SelectionChangedCause] indicates the cause of this change and
+  /// will be passed to [onSelectionChanged].
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///   * [deleteForward], which is same but in the opposite direction.
+  void delete(SelectionChangedCause cause) {
+    assert(_selection != null);
+
+    if (_readOnly || !_selection!.isValid) {
+      return;
+    }
+
+    if (!_selection!.isCollapsed) {
+      return _deleteSelection(cause);
+    }
+
+    final String text = textSelectionDelegate.textEditingValue.text;
+    String textBefore = _selection!.textBefore(text);
+    if (textBefore.isEmpty) {
+      return;
+    }
+       
+    final int characterBoundary = previousCharacter(textBefore.length, textBefore);
+    textBefore = textBefore.substring(0, characterBoundary);
+
+    final String textAfter = _selection!.textAfter(text);
+    final TextSelection newSelection = TextSelection.collapsed(offset: characterBoundary);
+    _setTextEditingValue(
+      TextEditingValue(text: textBefore + textAfter, selection: newSelection),
+      cause,
+    );
+  }
+
+  /// Deletes a single word before the current collapsed selection.
+  ///
+  /// If the [selection] is not collapsed then it should delete the text
+  /// contained in the selection.
+  ///
+  /// {@template flutter.rendering.RenderEditable.cause}
+  /// The given [SelectionChangedCause] indicates the cause of this change and
+  /// will be passed to [onSelectionChanged].
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///   * [deleteForwardByWord], which is same but in the opposite direction.
+  void deleteByWord(SelectionChangedCause cause) {
+    assert(_selection != null);
+    
+    if (_readOnly || !_selection!.isValid) {
+      return;
+    }    
+    
+    if (!_selection!.isCollapsed) {
+      return _deleteSelection(cause);
+    }
+
+    final String text = textSelectionDelegate.textEditingValue.text;
+    String textBefore = _selection!.textBefore(text);
+    if (textBefore.isEmpty) {
+      return;
+    }
+
+    // When there is a line break, word delete should delete a single character
+    final bool isPreviousCharacterBreakLine = textBefore.codeUnitAt(textBefore.length - 1) == 0x0A;
+    if (isPreviousCharacterBreakLine) {
+      return delete(cause);
+    }
+
+    final int characterBoundary = _getLeftByWord(_textPainter, textBefore.length, false);
+    textBefore = textBefore.trimRight().substring(0, characterBoundary);
+
+    final String textAfter = _selection!.textAfter(text);
+    final TextSelection newSelection = TextSelection.collapsed(offset: characterBoundary);
+    _setTextEditingValue(
+      TextEditingValue(text: textBefore + textAfter, selection: newSelection),
+      cause,
+    );
+  }
+
+  /// Deletes a single line before the current collapsed selection.
+  ///
+  /// If current [selection] is not collapsed then it should delete the text
+  /// within the selection.
+  ///
+  /// {@template flutter.rendering.RenderEditable.cause}
+  /// The given [SelectionChangedCause] indicates the cause of this change and
+  /// will be passed to [onSelectionChanged].
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///   * [deleteForwardByWord], which is same but in the opposite direction.
+  void deleteByLine(SelectionChangedCause cause) {
+    assert(_selection != null);
+    
+    if (_readOnly || !_selection!.isValid) {
+      return;
+    }
+
+    if (!_selection!.isCollapsed) {
+      return _deleteSelection(cause);
+    }
+
+    final String text = textSelectionDelegate.textEditingValue.text;
+    String textBefore = _selection!.textBefore(text);
+    if (textBefore.isEmpty) {
+      return;
+    }
+
+    // When there is a line break, line delete shouldn't do anything
+    final bool isPreviousCharacterBreakLine = textBefore.codeUnitAt(textBefore.length - 1) == 0x0A;
+    if (isPreviousCharacterBreakLine) {
+      return;
+    }
+
+    final TextSelection line = _getLineAtOffset(TextPosition(offset: textBefore.length - 1));
+    textBefore = textBefore.substring(0, line.start);
+
+    final String textAfter = _selection!.textAfter(text);
+    final TextSelection newSelection = TextSelection.collapsed(offset: textBefore.length);
+    _setTextEditingValue(
+      TextEditingValue(text: textBefore + textAfter, selection: newSelection),
+      cause,
+    );
+  }
+
+  /// Deletes a single character after the current collapsed selection.
+  ///
+  /// If current [selection] is not collapsed then it should delete the text
+  /// within the selection.
+  ///
+  /// {@template flutter.rendering.RenderEditable.cause}
+  /// The given [SelectionChangedCause] indicates the cause of this change and
+  /// will be passed to [onSelectionChanged].
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///   * [delete], which is same but in the opposite direction.
+  void deleteForward(SelectionChangedCause cause) {
+    assert(_selection != null);
+    
+    if (_readOnly || !_selection!.isValid) {
+      return;
+    }
+
+    if (!_selection!.isCollapsed) {
+      return _deleteSelection(cause);
+    }
+
+    final String text = textSelectionDelegate.textEditingValue.text;
+    final String textBefore = _selection!.textBefore(text);
+    String textAfter = _selection!.textAfter(text);
+
+    if (textAfter.isNotEmpty) {
+      final int deleteCount = nextCharacter(0, textAfter);
+      textAfter = textAfter.substring(deleteCount);
+    }
+
+    _setTextEditingValue(
+      TextEditingValue(text: textBefore + textAfter, selection: _selection!),
+      cause,
+    );
+  }
+
+  /// Deletes a single word after the current collapsed selection.
+  ///
+  /// If the [selection] is not collapsed then it should delete the text
+  /// contained in the selection.
+  ///
+  /// {@template flutter.rendering.RenderEditable.cause}
+  /// The given [SelectionChangedCause] indicates the cause of this change and
+  /// will be passed to [onSelectionChanged].
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///   * [deleteByWord], which is same but in the opposite direction.
+  void deleteForwardByWord(SelectionChangedCause cause) {
+    assert(_selection != null);
+    
+    if (_readOnly || !_selection!.isValid) {
+      return;
+    }    
+    
+    if (!_selection!.isCollapsed) {
+      return _deleteSelection(cause);
+    }
+
+    final String text = textSelectionDelegate.textEditingValue.text;
+    String textAfter = _selection!.textAfter(text);
+    
+    if (textAfter.isEmpty) {
+      return;
+    }
+
+    // When next character is a line break, it should delete a single character
+    final bool isNextCharacterBreakLine = textAfter.codeUnitAt(0) == 0x0A;
+    if (isNextCharacterBreakLine) {
+      return deleteForward(cause);
+    }
+
+    final String textBefore = _selection!.textBefore(text);
+    final int characterBoundary = _getRightByWord(_textPainter, textBefore.length, false);
+    textAfter = textAfter.substring(characterBoundary - textBefore.length);
+
+    _setTextEditingValue(
+      TextEditingValue(text: textBefore + textAfter, selection: _selection!),
+      cause,
+    );
+  }
+
+  /// Deletes a single line after the current collapsed selection.
+  ///
+  /// If current [selection] is not collapsed then it should delete the text
+  /// within the selection.
+  ///
+  /// {@template flutter.rendering.RenderEditable.cause}
+  /// The given [SelectionChangedCause] indicates the cause of this change and
+  /// will be passed to [onSelectionChanged].
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///   * [deleteByWord], which is same but in the opposite direction.
+  void deleteForwardByLine(SelectionChangedCause cause) {
+    assert(_selection != null);
+    
+    if (_readOnly || !_selection!.isValid) {
+      return;
+    }
+
+    if (!_selection!.isCollapsed) {
+      return _deleteSelection(cause);
+    }
+
+    final String text = textSelectionDelegate.textEditingValue.text;
+    String textAfter = _selection!.textAfter(text);
+    if (textAfter.isEmpty) {
+      return;
+    }
+
+    // When there is a line break, it shouldn't do anything
+    final bool isNextCharacterBreakLine = textAfter.codeUnitAt(0) == 0x0A;
+    if (isNextCharacterBreakLine) {
+      return;
+    }
+
+    final String textBefore = _selection!.textBefore(text);
+    final TextSelection line = _getLineAtOffset(TextPosition(offset: textBefore.length));
+    textAfter = textAfter.substring(line.end - textBefore.length, textAfter.length);
+
+    _setTextEditingValue(
+      TextEditingValue(text: textBefore + textAfter, selection: _selection!),
+      cause,
+    );
   }
 
   /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
@@ -1823,38 +2105,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         SelectionChangedCause.keyboard,
       );
     }
-  }
-
-  void _handleDelete({ required bool forward }) {
-    final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
-    final String text = textSelectionDelegate.textEditingValue.text;
-    assert(_selection != null);
-    if (_readOnly || !selection.isValid) {
-      return;
-    }
-    String textBefore = selection.textBefore(text);
-    String textAfter = selection.textAfter(text);
-    int cursorPosition = math.min(selection.start, selection.end);
-    // If not deleting a selection, delete the next/previous character.
-    if (selection.isCollapsed) {
-      if (!forward && textBefore.isNotEmpty) {
-        final int characterBoundary = previousCharacter(textBefore.length, textBefore);
-        textBefore = textBefore.substring(0, characterBoundary);
-        cursorPosition = characterBoundary;
-      }
-      if (forward && textAfter.isNotEmpty) {
-        final int deleteCount = nextCharacter(0, textAfter);
-        textAfter = textAfter.substring(deleteCount);
-      }
-    }
-    final TextSelection newSelection = TextSelection.collapsed(offset: cursorPosition);
-    _setTextEditingValue(
-      TextEditingValue(
-        text: textBefore + textAfter,
-        selection: newSelection,
-      ),
-      SelectionChangedCause.keyboard,
-    );
   }
 
   @override
