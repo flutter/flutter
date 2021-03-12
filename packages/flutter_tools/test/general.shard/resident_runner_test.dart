@@ -39,6 +39,7 @@ import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 import '../src/testbed.dart';
 

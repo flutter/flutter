@@ -11,6 +11,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 
 const int kLollipopVersionCode = 21;
 const String kLastLogcatTimestamp = '11-27 15:39:04.506';

@@ -19,6 +19,7 @@ import 'package:fake_async/fake_async.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fake_process_manager.dart';
 
 final Map<String, Object> vm = <String, dynamic>{
   'type': 'VM',

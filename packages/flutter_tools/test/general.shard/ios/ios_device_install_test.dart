@@ -21,6 +21,7 @@ import 'package:meta/meta.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 const Map<String, String> kDyLdLibEntry = <String, String>{
