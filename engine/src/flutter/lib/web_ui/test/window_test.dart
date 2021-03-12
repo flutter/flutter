@@ -149,7 +149,7 @@ void testMain() {
     // should've been correctly set to "/bar".
     expect(window.browserHistory.urlStrategy, isNot(isNull));
     expect(window.browserHistory.urlStrategy!.getPath(), '/bar');
-  }, skip: browserEngine == BrowserEngine.webkit); // https://github.com/flutter/flutter/issues/50836
+  }, skip: true); // https://github.com/flutter/flutter/issues/50836
 
   test('initialize browser history with default url strategy (multiple)', () async {
     // On purpose, we don't initialize history on the window. We want to let the
@@ -177,25 +177,11 @@ void testMain() {
     // should've been correctly set to "/baz".
     expect(window.browserHistory.urlStrategy, isNot(isNull));
     expect(window.browserHistory.urlStrategy!.getPath(), '/baz');
-  }, skip: browserEngine == BrowserEngine.webkit); // https://github.com/flutter/flutter/issues/50836
+  }, skip: true); // https://github.com/flutter/flutter/issues/50836
 
   test('can disable location strategy', () async {
     // Disable URL strategy.
-    void disableUrlStrategy() {
-      try {
-        jsSetUrlStrategy(null);
-      } on AssertionError catch (e) {
-        if (e.message == 'Cannot set URL strategy more than once.') {
-          print('=' * 20);
-          // Print something easy to search for.
-          print('HISTORY_TEST_FLAKY_ASSERTION_FAILURE');
-          print('=' * 20);
-        } else {
-          rethrow;
-        }
-      }
-    }
-    expect(disableUrlStrategy, returnsNormally);
+    expect(() => jsSetUrlStrategy(null), returnsNormally);
     // History should be initialized.
     expect(window.browserHistory, isNotNull);
     // But without a URL strategy.
@@ -207,7 +193,7 @@ void testMain() {
     await routeInformationUpdated('/foo/bar', null);
     // Path should not be updated because URL strategy is disabled.
     expect(window.browserHistory.currentPath, '/');
-  });
+  }, skip: true);
 
   test('js interop throws on wrong type', () {
     expect(() => jsSetUrlStrategy(123), throwsA(anything));
