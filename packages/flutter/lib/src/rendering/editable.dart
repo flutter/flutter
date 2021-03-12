@@ -1011,13 +1011,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return _getTextPositionVertical(offset, verticalOffset);
   }
 
+  // Deletes the current uncollapsed [selection]
   void _deleteSelection(SelectionChangedCause cause) {
     assert(_selection != null);
 
     if (_readOnly || !_selection!.isValid || _selection!.isCollapsed) {
       return;
     }
-    
+
     final String text = textSelectionDelegate.textEditingValue.text;
     final String textBefore = _selection!.textBefore(text);
     final String textAfter = _selection!.textAfter(text);
@@ -1059,7 +1060,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (textBefore.isEmpty) {
       return;
     }
-       
+
     final int characterBoundary = previousCharacter(textBefore.length, textBefore);
     textBefore = textBefore.substring(0, characterBoundary);
 
@@ -1086,11 +1087,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///   * [deleteForwardByWord], which is same but in the opposite direction.
   void deleteByWord(SelectionChangedCause cause) {
     assert(_selection != null);
-    
+
     if (_readOnly || !_selection!.isValid) {
       return;
-    }    
-    
+    }
+
     if (!_selection!.isCollapsed) {
       return _deleteSelection(cause);
     }
@@ -1133,7 +1134,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///   * [deleteForwardByWord], which is same but in the opposite direction.
   void deleteByLine(SelectionChangedCause cause) {
     assert(_selection != null);
-    
+
     if (_readOnly || !_selection!.isValid) {
       return;
     }
@@ -1180,7 +1181,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///   * [delete], which is same but in the opposite direction.
   void deleteForward(SelectionChangedCause cause) {
     assert(_selection != null);
-    
+
     if (_readOnly || !_selection!.isValid) {
       return;
     }
@@ -1219,18 +1220,18 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///   * [deleteByWord], which is same but in the opposite direction.
   void deleteForwardByWord(SelectionChangedCause cause) {
     assert(_selection != null);
-    
+
     if (_readOnly || !_selection!.isValid) {
       return;
-    }    
-    
+    }
+
     if (!_selection!.isCollapsed) {
       return _deleteSelection(cause);
     }
 
     final String text = textSelectionDelegate.textEditingValue.text;
     String textAfter = _selection!.textAfter(text);
-    
+
     if (textAfter.isEmpty) {
       return;
     }
@@ -1266,7 +1267,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///   * [deleteByWord], which is same but in the opposite direction.
   void deleteForwardByLine(SelectionChangedCause cause) {
     assert(_selection != null);
-    
+
     if (_readOnly || !_selection!.isValid) {
       return;
     }

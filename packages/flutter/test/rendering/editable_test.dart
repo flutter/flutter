@@ -962,8 +962,7 @@ void main() {
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 0);
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
+    editable.deleteForward(SelectionChangedCause.keyboard);
     expect(delegate.textEditingValue.text, 'est');
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
@@ -1013,8 +1012,7 @@ void main() {
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 4);
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
+    editable.deleteForward(SelectionChangedCause.keyboard);
     expect(delegate.textEditingValue.text, '01236789');
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
@@ -1064,8 +1062,7 @@ void main() {
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 4);
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
+    editable.deleteForward(SelectionChangedCause.keyboard);
     expect(delegate.textEditingValue.text, '01232345');
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
@@ -1170,8 +1167,7 @@ void main() {
     expect(editable.selection?.isCollapsed, true);
     expect(editable.selection?.baseOffset, 3);
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
+     editable.deleteForward(SelectionChangedCause.keyboard);
     expect(delegate.textEditingValue.text, 'W Sczebrzeszynie chrząszcz brzmi w trzcinie');
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
@@ -1618,7 +1614,7 @@ void main() {
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 3);
     }, skip: isBrowser);
-  
+
     test('when using cjk characters', () async {
         const String text = '用多個塊測試';
         const int offset = 4;
@@ -1656,7 +1652,7 @@ void main() {
         expect(delegate.textEditingValue.selection.isCollapsed, true);
         expect(delegate.textEditingValue.selection.baseOffset, 3);
       }, skip: isBrowser);
-  
+
     test('when using rtl', () async {
       const String text = 'برنامج أهلا بالعالم';
       const int offset = text.length;
@@ -1924,7 +1920,7 @@ void main() {
         expect(delegate.textEditingValue.selection.isCollapsed, true);
         expect(delegate.textEditingValue.selection.baseOffset, 3);
       }, skip: isBrowser);
-  
+
     test('when using rtl', () async {
       const String text = 'برنامج أهلا بالعالم';
       const int offset = text.length;
@@ -2229,7 +2225,7 @@ void main() {
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 0);
     }, skip: isBrowser);
-  
+
     test('when using cjk characters', () async {
         const String text = '用多個塊測試';
         const int offset = 0;
@@ -2267,7 +2263,7 @@ void main() {
         expect(delegate.textEditingValue.selection.isCollapsed, true);
         expect(delegate.textEditingValue.selection.baseOffset, 0);
       }, skip: isBrowser);
-  
+
     test('when using rtl', () async {
       const String text = 'برنامج أهلا بالعالم';
       const int offset = 0;
@@ -2301,11 +2297,11 @@ void main() {
       pumpFrame();
 
       editable.deleteForward(SelectionChangedCause.keyboard);
-      expect(delegate.textEditingValue.text, 'رنامج أهلا بالعالم'); 
+      expect(delegate.textEditingValue.text, 'رنامج أهلا بالعالم');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 0);
     }, skip: isBrowser);
- 
+
   });
 
   group('deleteForwardByWord', () {
@@ -2536,7 +2532,7 @@ void main() {
         expect(delegate.textEditingValue.selection.isCollapsed, true);
         expect(delegate.textEditingValue.selection.baseOffset, offset);
       }, skip: isBrowser);
-  
+
     test('when using rtl', () async {
       const String text = 'برنامج أهلا بالعالم';
       const int offset = 0;
