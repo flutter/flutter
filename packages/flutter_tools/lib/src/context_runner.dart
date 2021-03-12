@@ -6,7 +6,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:process/process.dart';
 
 import 'android/android_builder.dart';
@@ -25,6 +24,7 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/process.dart';
+import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'build_info.dart';
