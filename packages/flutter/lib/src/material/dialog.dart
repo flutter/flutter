@@ -194,10 +194,10 @@ class Dialog extends StatelessWidget {
 ///     barrierDismissible: false, // user must tap button!
 ///     builder: (BuildContext context) {
 ///       return AlertDialog(
-///         title: Text('AlertDialog Title'),
+///         title: const Text('AlertDialog Title'),
 ///         content: SingleChildScrollView(
 ///           child: ListBody(
-///             children: <Widget>[
+///             children: const <Widget>[
 ///               Text('This is a demo alert dialog.'),
 ///               Text('Would you like to approve of this message?'),
 ///             ],
@@ -205,7 +205,7 @@ class Dialog extends StatelessWidget {
 ///         ),
 ///         actions: <Widget>[
 ///           TextButton(
-///             child: Text('Approve'),
+///             child: const Text('Approve'),
 ///             onPressed: () {
 ///               Navigator.of(context).pop();
 ///             },
@@ -232,7 +232,7 @@ class Dialog extends StatelessWidget {
 ///       builder: (BuildContext context) => AlertDialog(
 ///         title: const Text('AlertDialog Tilte'),
 ///         content: const Text('AlertDialog description'),
-///         actions: [
+///         actions: <Widget>[
 ///           TextButton(
 ///             onPressed: () => Navigator.pop(context, 'Cancel'),
 ///             child: const Text('Cancel'),
@@ -244,7 +244,7 @@ class Dialog extends StatelessWidget {
 ///         ],
 ///       ),
 ///     ),
-///     child: Text('Show Dialog'),
+///     child: const Text('Show Dialog'),
 ///   );
 /// }
 ///
@@ -367,13 +367,13 @@ class AlertDialog extends StatelessWidget {
   /// This is an example of a set of actions aligned with the content widget.
   /// ```dart
   /// AlertDialog(
-  ///   title: Text('Title'),
+  ///   title: const Text('Title'),
   ///   content: Container(width: 200, height: 200, color: Colors.green),
   ///   actions: <Widget>[
-  ///     ElevatedButton(onPressed: () {}, child: Text('Button 1')),
-  ///     ElevatedButton(onPressed: () {}, child: Text('Button 2')),
+  ///     ElevatedButton(onPressed: () {}, child: const Text('Button 1')),
+  ///     ElevatedButton(onPressed: () {}, child: const Text('Button 2')),
   ///   ],
-  ///   actionsPadding: EdgeInsets.symmetric(horizontal: 8.0),
+  ///   actionsPadding: const EdgeInsets.symmetric(horizontal: 8.0),
   /// )
   /// ```
   /// {@end-tool}
@@ -424,13 +424,8 @@ class AlertDialog extends StatelessWidget {
   /// This is different from [actionsPadding], which defines the padding
   /// between the entire button bar and the edges of the dialog.
   ///
-  /// If this property is null, then it will use the surrounding
-  /// [ButtonBarThemeData.buttonPadding]. If that is null, it will default to
+  /// If this property is null, then it will default to
   /// 8.0 logical pixels on the left and right.
-  ///
-  /// See also:
-  ///
-  /// * [ButtonBar], which [actions] configures to lay itself out.
   final EdgeInsetsGeometry? buttonPadding;
 
   /// {@macro flutter.material.dialog.backgroundColor}
@@ -538,13 +533,19 @@ class AlertDialog extends StatelessWidget {
 
 
     if (actions != null) {
+      final double spacing = (buttonPadding?.horizontal ?? 16) / 2;
       actionsWidget = Padding(
         padding: actionsPadding,
-        child: ButtonBar(
-          buttonPadding: buttonPadding,
-          overflowDirection: actionsOverflowDirection,
-          overflowButtonSpacing: actionsOverflowButtonSpacing,
-          children: actions!,
+        child: Container(
+          alignment: AlignmentDirectional.centerEnd,
+          padding: EdgeInsets.all(spacing),
+          child: OverflowBar(
+            spacing: spacing,
+            overflowAlignment: OverflowBarAlignment.end,
+            overflowDirection: actionsOverflowDirection ?? VerticalDirection.down,
+            overflowSpacing: actionsOverflowButtonSpacing ?? 0,
+            children: actions!,
+          ),
         ),
       );
     }
@@ -1008,13 +1009,15 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///
 /// ```dart
 /// void main() {
-///   runApp(MyApp());
+///   runApp(const MyApp());
 /// }
 ///
 /// class MyApp extends StatelessWidget {
+///   const MyApp({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return MaterialApp(
+///     return const MaterialApp(
 ///       restorationScopeId: 'app',
 ///       title: 'Restorable Routes Demo',
 ///       home: MyHomePage(),
@@ -1023,6 +1026,8 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// }
 ///
 /// class MyHomePage extends StatelessWidget {
+///   const MyHomePage({Key? key}) : super(key: key);
+///
 ///   static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
 ///     return DialogRoute<void>(
 ///       context: context,

@@ -19,6 +19,8 @@ import 'base/logger.dart';
 import 'base/platform.dart';
 import 'build_info.dart';
 import 'convert.dart';
+import 'plugins.dart';
+import 'project.dart';
 
 /// The target model describes the set of core libraries that are available within
 /// the SDK.
@@ -182,12 +184,14 @@ class KernelCompiler {
     @required Artifacts artifacts,
     @required List<String> fileSystemRoots,
     @required String fileSystemScheme,
+    @visibleForTesting StdoutHandler stdoutHandler,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _artifacts = artifacts,
        _processManager = processManager,
        _fileSystemScheme = fileSystemScheme,
-       _fileSystemRoots = fileSystemRoots;
+       _fileSystemRoots = fileSystemRoots,
+       _stdoutHandler = stdoutHandler ?? StdoutHandler(logger: logger);
 
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
@@ -195,6 +199,7 @@ class KernelCompiler {
   final Logger _logger;
   final String _fileSystemScheme;
   final List<String> _fileSystemRoots;
+  final StdoutHandler _stdoutHandler;
 
   Future<CompilerOutput> compile({
     String sdkRoot,
@@ -209,6 +214,8 @@ class KernelCompiler {
     String fileSystemScheme,
     String initializeFromDill,
     String platformDill,
+    Directory buildDir,
+    bool generateDartPluginRegistry = false,
     @required String packagesPath,
     @required BuildMode buildMode,
     @required bool trackWidgetCreation,
@@ -227,7 +234,8 @@ class KernelCompiler {
       throwToolExit('Unable to find Dart binary at $engineDartPath');
     }
     String mainUri;
-    final Uri mainFileUri = _fileSystem.file(mainPath).uri;
+    final File mainFile = _fileSystem.file(mainPath);
+    final Uri mainFileUri = mainFile.uri;
     if (packagesPath != null) {
       mainUri = packageConfig.toPackageUri(mainFileUri)?.toString();
     }
@@ -235,6 +243,23 @@ class KernelCompiler {
     if (outputFilePath != null && !_fileSystem.isFileSync(outputFilePath)) {
       _fileSystem.file(outputFilePath).createSync(recursive: true);
     }
+    if (buildDir != null && generateDartPluginRegistry) {
+      // `generated_main.dart` is under `.dart_tools/flutter_build/`,
+      // so the resident compiler can find it.
+      final File newMainDart = buildDir.parent.childFile('generated_main.dart');
+      if (await generateMainDartWithPluginRegistrant(
+        FlutterProject.current(),
+        packageConfig,
+        mainUri,
+        newMainDart,
+        mainFile,
+        // TODO(egarciad): Turn this on when the plugins are fixed.
+        throwOnPluginPubspecError: false,
+      )) {
+        mainUri = newMainDart.path;
+      }
+    }
+
     final List<String> command = <String>[
       engineDartPath,
       '--disable-dart-dev',
@@ -288,7 +313,6 @@ class KernelCompiler {
     _logger.printTrace(command.join(' '));
     final Process server = await _processManager.start(command);
 
-    final StdoutHandler _stdoutHandler = StdoutHandler(logger: _logger);
     server.stderr
       .transform<String>(utf8.decoder)
       .listen(_logger.printError);
@@ -518,11 +542,12 @@ class DefaultResidentCompiler implements ResidentCompiler {
     this.platformDill,
     List<String> dartDefines,
     this.librariesSpec,
+    @visibleForTesting StdoutHandler stdoutHandler,
   }) : assert(sdkRoot != null),
        _logger = logger,
        _processManager = processManager,
        _artifacts = artifacts,
-       _stdoutHandler = StdoutHandler(logger: logger),
+       _stdoutHandler = stdoutHandler ?? StdoutHandler(logger: logger),
        _platform = platform,
        dartDefines = dartDefines ?? const <String>[],
        // This is a URI, not a file path, so the forward slash is correct even on Windows.
@@ -579,7 +604,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
     }
-
     final Completer<CompilerOutput> completer = Completer<CompilerOutput>();
     _controller.add(
       _RecompileRequest(completer, mainUri, invalidatedFiles, outputPath, packageConfig, suppressErrors)

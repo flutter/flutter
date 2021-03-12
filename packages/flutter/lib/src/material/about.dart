@@ -11,7 +11,6 @@ import 'package:flutter/widgets.dart' hide Flow;
 
 import 'app_bar.dart';
 import 'back_button.dart';
-import 'button_bar.dart';
 import 'card.dart';
 import 'constants.dart';
 import 'debug.dart';
@@ -53,7 +52,7 @@ import 'theme.dart';
 ///  Widget build(BuildContext context) {
 ///    final TextStyle textStyle = Theme.of(context).textTheme.bodyText2!;
 ///    final List<Widget> aboutBoxChildren = <Widget>[
-///      SizedBox(height: 24),
+///      const SizedBox(height: 24),
 ///      RichText(
 ///        text: TextSpan(
 ///          children: <TextSpan>[
@@ -78,14 +77,14 @@ import 'theme.dart';
 ///
 ///    return Scaffold(
 ///      appBar: AppBar(
-///        title: Text('Show About Example'),
+///        title: const Text('Show About Example'),
 ///      ),
 ///      drawer: Drawer(
 ///        child: SingleChildScrollView(
 ///          child: SafeArea(
 ///            child: AboutListTile(
-///              icon: Icon(Icons.info),
-///              applicationIcon: FlutterLogo(),
+///              icon: const Icon(Icons.info),
+///              applicationIcon: const FlutterLogo(),
 ///              applicationName: 'Show About Example',
 ///              applicationVersion: 'August 2019',
 ///              applicationLegalese: '\u{a9} 2014 The Flutter Authors',
@@ -96,11 +95,11 @@ import 'theme.dart';
 ///      ),
 ///      body: Center(
 ///        child: ElevatedButton(
-///          child: Text('Show About Example'),
+///          child: const Text('Show About Example'),
 ///          onPressed: () {
 ///            showAboutDialog(
 ///              context: context,
-///              applicationIcon: FlutterLogo(),
+///              applicationIcon: const FlutterLogo(),
 ///              applicationName: 'Show About Example',
 ///              applicationVersion: 'August 2019',
 ///              applicationLegalese: '\u{a9} 2014 The Flutter Authors',
@@ -1534,13 +1533,17 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   ConstrainedBox(
-                    constraints:
-                    BoxConstraints.tightFor(width: masterViewWidth),
+                    constraints: BoxConstraints.tightFor(width: masterViewWidth),
                     child: IconTheme(
                       data: Theme.of(context).primaryIconTheme,
-                      child: ButtonBar(
-                        children:
-                        widget.actionBuilder!(context, _ActionLevel.view),
+                      child: Container(
+                        alignment: AlignmentDirectional.centerEnd,
+                        padding: const EdgeInsets.all(8),
+                        child: OverflowBar(
+                          spacing: 8,
+                          overflowAlignment: OverflowBarAlignment.end,
+                          children: widget.actionBuilder!(context, _ActionLevel.view),
+                        ),
                       ),
                     ),
                   )

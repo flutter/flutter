@@ -64,11 +64,8 @@ class ApplicationPackageFactory {
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
-        if (_androidSdk?.licensesAvailable == true && _androidSdk?.latestVersion == null) {
-          await checkGradleDependencies(_logger);
-        }
         if (applicationBinary == null) {
-          return await AndroidApk.fromAndroidProject(
+          return AndroidApk.fromAndroidProject(
             FlutterProject.current().android,
             processManager: _processManager,
             processUtils: _processUtils,
@@ -114,6 +111,8 @@ class ApplicationPackageFactory {
         return applicationBinary == null
             ? FuchsiaApp.fromFuchsiaProject(FlutterProject.current().fuchsia)
             : FuchsiaApp.fromPrebuiltApp(applicationBinary);
+      case TargetPlatform.windows_uwp_x64:
+        throw UnsupportedError('Cannot build for windows_uwp_x64');
     }
     assert(platform != null);
     return null;
@@ -220,8 +219,8 @@ class AndroidApk extends ApplicationPackage {
   }) async {
     File apkFile;
 
-    if (androidProject.isUsingGradle) {
-      apkFile = await getGradleAppOut(androidProject);
+    if (androidProject.isUsingGradle && androidProject.isSupportedVersion) {
+      apkFile = getApkDirectory(androidProject.parent).childFile('app.apk');
       if (apkFile.existsSync()) {
         // Grab information from the .apk. The gradle build script might alter
         // the application Id, so we need to look at what was actually built.
@@ -415,6 +414,10 @@ abstract class IOSApp extends ApplicationPackage {
   String get simulatorBundlePath;
 
   String get deviceBundlePath;
+
+  /// Directory used by ios-deploy to store incremental installation metadata for
+  /// faster second installs.
+  Directory get appDeltaDirectory;
 }
 
 class BuildableIOSApp extends IOSApp {
@@ -440,6 +443,9 @@ class BuildableIOSApp extends IOSApp {
 
   @override
   String get deviceBundlePath => _buildAppPath('iphoneos');
+
+  @override
+  Directory get appDeltaDirectory => globals.fs.directory(globals.fs.path.join(getIosBuildDirectory(), 'app-delta'));
 
   // Xcode uses this path for the final archive bundle location,
   // not a top-level output directory.
@@ -468,6 +474,9 @@ class PrebuiltIOSApp extends IOSApp {
 
   final Directory bundleDir;
   final String bundleName;
+
+  @override
+  final Directory appDeltaDirectory = null;
 
   @override
   String get name => bundleName;

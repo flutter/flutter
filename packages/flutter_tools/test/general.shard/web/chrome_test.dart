@@ -30,6 +30,7 @@ const List<String> kChromeArgs = <String>[
 const String kDevtoolsStderr = '\n\nDevTools listening\n\n';
 
 void main() {
+  FileExceptionHandler exceptionHandler;
   ChromiumLauncher chromeLauncher;
   FileSystem fileSystem;
   Platform platform;
@@ -37,6 +38,7 @@ void main() {
   OperatingSystemUtils operatingSystemUtils;
 
   setUp(() {
+    exceptionHandler = FileExceptionHandler();
     operatingSystemUtils = MockOperatingSystemUtils();
     when(operatingSystemUtils.findFreePort())
         .thenAnswer((Invocation invocation) async {
@@ -45,7 +47,7 @@ void main() {
     platform = FakePlatform(operatingSystem: 'macos', environment: <String, String>{
       kChromeEnvironment: 'example_chrome',
     });
-    fileSystem = MemoryFileSystem.test();
+    fileSystem = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
     processManager = FakeProcessManager.list(<FakeCommand>[]);
     chromeLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
@@ -59,7 +61,7 @@ void main() {
 
   testWithoutContext('can launch chrome and connect to the devtools', () async {
     expect(
-      () async => await _testLaunchChrome(
+      () async => _testLaunchChrome(
         '/.tmp_rand0/flutter_tools_chrome_device.rand0',
         processManager,
         chromeLauncher,
@@ -76,7 +78,7 @@ void main() {
     );
 
     expect(
-      () async => await _testLaunchChrome(
+      () async => _testLaunchChrome(
         '/.tmp_rand0/flutter_tools_chrome_device.rand1',
         processManager,
         chromeLauncher,
@@ -94,7 +96,7 @@ void main() {
     await chrome.close();
 
     expect(
-      () async => await _testLaunchChrome(
+      () async => _testLaunchChrome(
         '/.tmp_rand0/flutter_tools_chrome_device.rand1',
         processManager,
         chromeLauncher,
@@ -104,7 +106,6 @@ void main() {
   });
 
   testWithoutContext('does not crash if saving profile information fails due to a file system exception.', () async {
-    final MockFileSystemUtils fileSystemUtils = MockFileSystemUtils();
     final BufferLogger logger = BufferLogger.test();
     chromeLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
@@ -113,10 +114,7 @@ void main() {
       operatingSystemUtils: operatingSystemUtils,
       browserFinder: findChromeExecutable,
       logger: logger,
-      fileSystemUtils: fileSystemUtils,
     );
-    when(fileSystemUtils.copyDirectorySync(any, any))
-      .thenThrow(const FileSystemException());
     processManager.addCommand(const FakeCommand(
       command: <String>[
         'example_chrome',
@@ -134,17 +132,32 @@ void main() {
       cacheDir: fileSystem.currentDirectory,
     );
 
-    // Create cache dir that the Chrome launcher will atttempt to persist.
-    fileSystem.directory('/.tmp_rand0/flutter_tools_chrome_device.rand0/Default/Local Storage')
+    // Create cache dir that the Chrome launcher will atttempt to persist, and a file
+    // that will thrown an exception when it is read.
+    const String directoryPrefix = '/.tmp_rand0/flutter_tools_chrome_device.rand0/Default';
+    fileSystem.directory('$directoryPrefix/Local Storage')
       .createSync(recursive: true);
+    final File file = fileSystem.file('$directoryPrefix/Local Storage/foo')
+      ..createSync(recursive: true);
+    exceptionHandler.addError(
+      file,
+      FileSystemOp.read,
+      const FileSystemException(),
+    );
 
     await chrome.close(); // does not exit with error.
     expect(logger.errorText, contains('Failed to save Chrome preferences'));
   });
 
   testWithoutContext('does not crash if restoring profile information fails due to a file system exception.', () async {
-    final MockFileSystemUtils fileSystemUtils = MockFileSystemUtils();
     final BufferLogger logger = BufferLogger.test();
+    final File file = fileSystem.file('/Default/foo')
+      ..createSync(recursive: true);
+    exceptionHandler.addError(
+      file,
+      FileSystemOp.read,
+      const FileSystemException(),
+    );
     chromeLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
       platform: platform,
@@ -152,10 +165,8 @@ void main() {
       operatingSystemUtils: operatingSystemUtils,
       browserFinder: findChromeExecutable,
       logger: logger,
-      fileSystemUtils: fileSystemUtils,
     );
-    when(fileSystemUtils.copyDirectorySync(any, any))
-      .thenThrow(const FileSystemException());
+
     processManager.addCommand(const FakeCommand(
       command: <String>[
         'example_chrome',
@@ -195,7 +206,7 @@ void main() {
     ));
 
     expect(
-      () async => await chromeLauncher.launch(
+      () async => chromeLauncher.launch(
         'example_url',
         skipCheck: true,
         debugPort: 10000,
@@ -221,7 +232,7 @@ void main() {
     ));
 
     expect(
-      () async => await chromeLauncher.launch(
+      () async => chromeLauncher.launch(
         'example_url',
         skipCheck: true,
         headless: true,
@@ -233,7 +244,6 @@ void main() {
   testWithoutContext('can seed chrome temp directory with existing session data', () async {
     final Completer<void> exitCompleter = Completer<void>.sync();
     final Directory dataDir = fileSystem.directory('chrome-stuff');
-
     final File preferencesFile = dataDir
       .childDirectory('Default')
       .childFile('preferences');
@@ -265,7 +275,7 @@ void main() {
     );
 
     exitCompleter.complete();
-    await Future<void>.delayed(const Duration(microseconds: 1));
+    await Future<void>.delayed(const Duration(milliseconds: 1));
 
     // writes non-crash back to dart_tool
     expect(preferencesFile.readAsStringSync(), '"exit_type":"Normal"');
@@ -310,7 +320,7 @@ void main() {
     ));
 
     expect(
-      () async => await chromeLauncher.launch(
+      () async => chromeLauncher.launch(
         'example_url',
         skipCheck: true,
         headless: true,
@@ -336,7 +346,7 @@ void main() {
     ));
 
     expect(
-      () async => await chromeLauncher.launch(
+      () async => chromeLauncher.launch(
         'example_url',
         skipCheck: true,
         headless: true,
@@ -346,7 +356,6 @@ void main() {
   });
 }
 
-class MockFileSystemUtils extends Mock implements FileSystemUtils {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
 
 Future<Chromium> _testLaunchChrome(String userDataDir, FakeProcessManager processManager, ChromiumLauncher chromeLauncher) {

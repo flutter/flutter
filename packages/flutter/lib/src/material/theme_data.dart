@@ -164,7 +164,7 @@ enum MaterialTapTargetSize {
 ///   theme: ThemeData(
 ///     primaryColor: Colors.blue,
 ///     accentColor: Colors.green,
-///     textTheme: TextTheme(bodyText2: TextStyle(color: Colors.purple)),
+///     textTheme: const TextTheme(bodyText2: TextStyle(color: Colors.purple)),
 ///   ),
 ///   home: Scaffold(
 ///     appBar: AppBar(
@@ -174,10 +174,8 @@ enum MaterialTapTargetSize {
 ///       child: const Icon(Icons.add),
 ///       onPressed: () {},
 ///     ),
-///     body: Center(
-///       child: Text(
-///         'Button pressed 0 times',
-///       ),
+///     body: const Center(
+///       child: Text('Button pressed 0 times'),
 ///     ),
 ///   ),
 /// )
@@ -722,8 +720,8 @@ class ThemeData with Diagnosticable {
   ///
   /// ```dart
   /// MaterialApp(
-  ///   theme: ThemeData.from(colorScheme: ColorScheme.light()),
-  ///   darkTheme: ThemeData.from(colorScheme: ColorScheme.dark()),
+  ///   theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+  ///   darkTheme: ThemeData.from(colorScheme: const ColorScheme.dark()),
   /// )
   /// ```
   /// {@end-tool}
@@ -1978,7 +1976,7 @@ class _FifoCache<K, V> {
   /// if not, calls the given callback to obtain it first.
   ///
   /// The arguments must not be null.
-  V putIfAbsent(K key, V loader()) {
+  V putIfAbsent(K key, V Function() loader) {
     assert(key != null);
     assert(loader != null);
     final V? result = _cache[key];

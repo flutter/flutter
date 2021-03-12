@@ -720,7 +720,7 @@ class FlutterValidator extends DoctorValidator {
       messages.add(ValidationMessage(_userMessages.flutterRevision(
         version.frameworkRevisionShort,
         version.frameworkAge,
-        version.frameworkDate,
+        version.frameworkCommitDate,
       )));
       messages.add(ValidationMessage(_userMessages.engineRevision(version.engineRevisionShort)));
       messages.add(ValidationMessage(_userMessages.dartRevision(version.dartSdkVersion)));
