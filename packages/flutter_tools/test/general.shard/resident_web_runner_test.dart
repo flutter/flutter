@@ -187,7 +187,7 @@ void main() {
     when(mockFlutterDevice.device).thenReturn(MockChromeDevice());
 
     expect(residentWebRunner.debuggingEnabled, true);
-    expect(fakeVmServiceHost, hasNoRemainingExpectations);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -793,7 +793,7 @@ void main() {
 
     expect(logger.statusText,
       contains('    This is a message with 4 leading and trailing spaces    '));
-    expect(fakeVmServiceHost, hasNoRemainingExpectations);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -922,7 +922,7 @@ void main() {
     await connectionInfoCompleter.future;
     await residentWebRunner.debugDumpApp();
 
-    expect(fakeVmServiceHost, hasNoRemainingExpectations);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -947,7 +947,7 @@ void main() {
     await connectionInfoCompleter.future;
     await residentWebRunner.debugDumpLayerTree();
 
-    expect(fakeVmServiceHost, hasNoRemainingExpectations);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -972,7 +972,7 @@ void main() {
     await connectionInfoCompleter.future;
     await residentWebRunner.debugDumpRenderTree();
 
-    expect(fakeVmServiceHost, hasNoRemainingExpectations);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -997,7 +997,7 @@ void main() {
     await connectionInfoCompleter.future;
     await residentWebRunner.debugDumpSemanticsTreeInTraversalOrder();
 
-    expect(fakeVmServiceHost, hasNoRemainingExpectations);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -1023,7 +1023,7 @@ void main() {
     await connectionInfoCompleter.future;
     await residentWebRunner.debugDumpSemanticsTreeInInverseHitTestOrder();
 
-    expect(fakeVmServiceHost, hasNoRemainingExpectations);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -1062,7 +1062,7 @@ void main() {
 
     await residentWebRunner.debugToggleDebugPaintSizeEnabled();
 
-    expect(fakeVmServiceHost, hasNoRemainingExpectations);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -1101,7 +1101,7 @@ void main() {
 
     await residentWebRunner.debugTogglePerformanceOverlayOverride();
 
-    expect(fakeVmServiceHost, hasNoRemainingExpectations);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -1140,7 +1140,7 @@ void main() {
 
     await residentWebRunner.debugToggleInvertOversizedImages();
 
-    expect(fakeVmServiceHost, hasNoRemainingExpectations);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -1179,7 +1179,7 @@ void main() {
 
     await residentWebRunner.debugToggleWidgetInspector();
 
-    expect(fakeVmServiceHost, hasNoRemainingExpectations);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -1218,7 +1218,7 @@ void main() {
 
     await residentWebRunner.debugToggleProfileWidgetBuilds();
 
-    expect(fakeVmServiceHost, hasNoRemainingExpectations);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -1260,7 +1260,7 @@ void main() {
 
     expect(logger.statusText,
       contains('Switched operating system to fuchsia'));
-    expect(fakeVmServiceHost, hasNoRemainingExpectations);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -1302,7 +1302,7 @@ void main() {
 
     expect(logger.statusText,
       contains('Changed brightness to Brightness.dark.'));
-    expect(fakeVmServiceHost, hasNoRemainingExpectations);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -1332,7 +1332,7 @@ void main() {
     await residentWebRunner.exit();
 
     verifyNever(mockDebugConnection.close());
-    expect(fakeVmServiceHost, hasNoRemainingExpectations);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -1356,7 +1356,7 @@ void main() {
     onDone.complete();
 
     await result;
-    expect(fakeVmServiceHost, hasNoRemainingExpectations);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -1380,7 +1380,7 @@ void main() {
       'Launching ${fileSystem.path.join('lib', 'main.dart')} on '
       'Chromez in debug mode',
     ));
-    expect(fakeVmServiceHost, hasNoRemainingExpectations);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -1447,7 +1447,7 @@ void main() {
         },
       },
     )));
-    expect(fakeVmServiceHost, hasNoRemainingExpectations);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     Logger: () => FakeStatusLogger(BufferLogger.test()),
     FileSystem: () => fileSystem,
@@ -1495,7 +1495,7 @@ void main() {
         },
       },
     )));
-    expect(fakeVmServiceHost, hasNoRemainingExpectations);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -1510,7 +1510,7 @@ void main() {
       .thenThrow(const WebSocketException());
 
     await expectLater(residentWebRunner.run, throwsToolExit());
-    expect(fakeVmServiceHost, hasNoRemainingExpectations);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -1525,7 +1525,7 @@ void main() {
       .thenThrow(AppConnectionException(''));
 
     await expectLater(residentWebRunner.run, throwsToolExit());
-    expect(fakeVmServiceHost, hasNoRemainingExpectations);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -1540,7 +1540,7 @@ void main() {
       .thenThrow(ChromeDebugException(<String, dynamic>{}));
 
     await expectLater(residentWebRunner.run, throwsToolExit());
-    expect(fakeVmServiceHost, hasNoRemainingExpectations);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -1553,7 +1553,7 @@ void main() {
     when(mockWebDevFS.connect(any)).thenThrow(Exception());
 
     await expectLater(residentWebRunner.run, throwsException);
-    expect(fakeVmServiceHost, hasNoRemainingExpectations);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -1572,7 +1572,7 @@ void main() {
 
     await expectLater(residentWebRunner.run, throwsStateError);
     verify(mockStatus.stop()).called(1);
-    expect(fakeVmServiceHost, hasNoRemainingExpectations);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
