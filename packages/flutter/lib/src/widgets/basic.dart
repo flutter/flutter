@@ -2334,9 +2334,9 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 /// {@tool snippet}
 /// In the following snippet, the child [Card] is guaranteed to be at least as
 /// tall as its intrinsic height. Unlike [UnconstrainedBox], the child can be
-/// taller if the the parent's minHeight is constrained. If parent container's
-/// maxHeight is less than [Card]'s intrinsic height, in debug mode a warning
-/// will be given.
+/// taller if the the parent's minHeight is higher than the child's intrinsic
+/// height. If parent container's maxHeight is less than [Card]'s intrinsic
+/// height, in debug mode a warning will be given.
 ///
 /// ```dart
 /// ConstraintsTransformBox(
@@ -2359,6 +2359,8 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
   /// passes to its child. If the child overflows the parent's constraints, a
   /// warning will be given in debug mode.
   ///
+  /// The [debugTransformType] argument adds a debug label to this widget.
+  ///
   /// The `alignment`, `clipBehavior` and `constraintsTransform` arguments must
   /// not be null.
   const ConstraintsTransformBox({
@@ -2368,13 +2370,15 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
     this.alignment = Alignment.center,
     required this.constraintsTransform,
     this.clipBehavior = Clip.none,
-  }) : assert(alignment != null),
+    String debugTransformType = '',
+  }) : _debugTransformLabel = debugTransformType,
+       assert(alignment != null),
        assert(clipBehavior != null),
        assert(constraintsTransform != null),
        super(key: key, child: child);
 
-  /// Creates a widget that imposes no constraints on its child, allowing
-  /// it to render at its "natural" size. If the child overflows the parent's
+  /// Creates a widget that imposes no constraints on its child, allowing it to
+  /// render at its "natural" size. If the child overflows the parent's
   /// constraints, a warning will be given in debug mode.
   ///
   /// The `alignment`, `clipBehavior` and `constraintsTransform` arguments must
@@ -2392,10 +2396,11 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
     alignment: alignment,
     constraintsTransform: _unconstrained,
     clipBehavior: clipBehavior,
+    debugTransformType: 'unconstrained',
   );
 
-  /// Creates a widget that imposes no height constraints on its child, allowing
-  /// it to render at its "natural" height. If the child overflows the parent's
+  /// Creates a widget that imposes no width constraints on its child, allowing
+  /// it to render at its "natural" width. If the child overflows the parent's
   /// constraints, a warning will be given in debug mode.
   ///
   /// The `alignment`, `clipBehavior` and `constraintsTransform` arguments must
@@ -2413,6 +2418,7 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
     alignment: alignment,
     constraintsTransform: _widthConstrained,
     clipBehavior: clipBehavior,
+    debugTransformType: 'width-constrained',
   );
 
   /// Creates a widget that imposes no height constraints on its child, allowing
@@ -2434,6 +2440,7 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
     alignment: alignment,
     constraintsTransform: _heightConstrained,
     clipBehavior: clipBehavior,
+    debugTransformType: 'height-constrained',
   );
 
   static BoxConstraints _unconstrained(BoxConstraints constraints) => const BoxConstraints();
@@ -2443,7 +2450,7 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
   /// The text direction to use when interpreting the [alignment] if it is an
   /// [AlignmentDirectional].
   ///
-  /// Defaults to null, in which case [Directionality.of] is used to determine
+  /// Defaults to null, in which case [Directionality.maybeOf] is used to determine
   /// the text direction.
   final TextDirection? textDirection;
 
@@ -2473,6 +2480,8 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
   /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
+  final String _debugTransformLabel;
+
   @override
   RenderConstraintsTransformBox createRenderObject(BuildContext context) {
     return RenderConstraintsTransformBox(
@@ -2497,6 +2506,8 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    if (_debugTransformLabel.isNotEmpty)
+      properties.add(StringProperty('transform', _debugTransformLabel));
   }
 }
 
