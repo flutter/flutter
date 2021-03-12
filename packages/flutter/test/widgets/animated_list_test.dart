@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/src/material/divider.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/src/foundation/diagnostics.dart';
 import 'package:flutter/widgets.dart';
@@ -53,6 +54,64 @@ void main() {
     await tester.pump();
     expect(find.text('removing item'), findsOneWidget);
     expect(find.text('item 2'), findsNothing);
+
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    expect(find.text('removing item'), findsNothing);
+  });
+
+testWidgets('AnimatedList.separated', (WidgetTester tester) async {
+
+    final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AnimatedList.separated(
+          key: listKey,
+          initialItemCount: 2,
+          itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+            return SizedBox(
+              height: 100.0,
+              child: Center(
+                child: Text('item $index'),
+              ),
+            );
+          },
+          separatorBuilder: (BuildContext context, int index, Animation<double> animation) {
+            return Divider(key: Key('separatorKey $index'), height: 1, thickness: 1,);
+          },
+        ),
+      ),
+    );
+
+    expect(find.byKey(const Key('separatorKey 0')), findsOneWidget);
+    expect(find.byKey(const Key('separatorKey 1')), findsOneWidget);
+    expect(find.byWidgetPredicate((Widget widget) {
+      return widget is SliverAnimatedList
+          && widget.initialItemCount == 2
+          && widget.itemBuilder is AnimatedListItemBuilder;
+    }), findsOneWidget);
+
+    listKey.currentState!.insertItem(0);
+    await tester.pump();
+    expect(find.text('item 2'), findsOneWidget);
+    expect(find.byKey(const Key('separatorKey 2')), findsOneWidget);
+
+    listKey.currentState!.removeItem(
+      2,
+          (BuildContext context, Animation<double> animation) {
+        return const SizedBox(
+          height: 100.0,
+          child: Center(child: Text('removing item')),
+        );
+      },
+      duration: const Duration(milliseconds: 100),
+    );
+
+    await tester.pump();
+    expect(find.text('removing item'), findsOneWidget);
+    expect(find.text('item 2'), findsNothing);
+    expect(find.byKey(const Key('separatorKey 2')), findsNothing);
 
     await tester.pumpAndSettle(const Duration(milliseconds: 100));
     expect(find.text('removing item'), findsNothing);
