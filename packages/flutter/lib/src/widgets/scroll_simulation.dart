@@ -36,12 +36,12 @@ class BouncingScrollSimulation extends Simulation {
     required this.spring,
     Tolerance tolerance = Tolerance.defaultTolerance,
   }) : assert(position != null),
-       assert(velocity != null),
-       assert(leadingExtent != null),
-       assert(trailingExtent != null),
-       assert(leadingExtent <= trailingExtent),
-       assert(spring != null),
-       super(tolerance: tolerance) {
+        assert(velocity != null),
+        assert(leadingExtent != null),
+        assert(trailingExtent != null),
+        assert(leadingExtent <= trailingExtent),
+        assert(spring != null),
+        super(tolerance: tolerance) {
     if (position < leadingExtent) {
       _springSimulation = _underscrollSimulation(position, velocity);
       _springTime = double.negativeInfinity;
@@ -229,8 +229,6 @@ class ClampingScrollSimulation extends Simulation {
 
 class _NBSample {
   _NBSample(double time, int duration) {
-    _initSplinePosition();
-
     // See computeScrollOffset().
     final double t = time * 1000.0 / duration;
     final int index = (_nbSamples * t).clamp(0, _nbSamples).round();
@@ -253,59 +251,109 @@ class _NBSample {
   double get distanceCoef => _distanceCoef;
 
   static const int _nbSamples = 100;
-  static final List<double> _splinePosition =
-      List<double>.filled(_nbSamples + 1, 0.0);
-  static final List<double> _splineTime =
-      List<double>.filled(_nbSamples + 1, 0.0);
-  static const double _startTension = 0.5;
-  static const double _endTension = 1.0;
-  static bool _isInitialized = false;
 
-  // See static iniitalization in Scroller.java.
-  static void _initSplinePosition() {
-    if (_isInitialized) {
-      return;
-    }
-    const double p1 = _startTension * _inflexion;
-    const double p2 = 1.0 - _endTension * (1.0 - _inflexion);
-    double xMin = 0.0;
-    double yMin = 0.0;
-    for (int i = 0; i < _nbSamples; i++) {
-      final double alpha = i / _nbSamples;
-      double xMax = 1.0;
-      double x, tx, coef;
-      while (true) {
-        x = xMin + (xMax - xMin) / 2.0;
-        coef = 3.0 * x * (1.0 - x);
-        tx = coef * ((1.0 - x) * p1 + x * p2) + x * x * x;
-        if ((tx - alpha).abs() < 1e-5) {
-          break;
-        }
-        if (tx > alpha) {
-          xMax = x;
-        } else {
-          xMin = x;
-        }
-      }
-      _splinePosition[i] = coef * ((1.0 - x) * _startTension + x) + x * x * x;
-      double yMax = 1.0;
-      double y, dy;
-      while (true) {
-        y = yMin + (yMax - yMin) / 2.0;
-        coef = 3.0 * y * (1.0 - y);
-        dy = coef * ((1.0 - y) * _startTension + y) + y * y * y;
-        if ((dy - alpha).abs() < 1e-5) {
-          break;
-        }
-        if (dy > alpha) {
-          yMax = y;
-        } else {
-          yMin = y;
-        }
-      }
-      _splineTime[i] = coef * ((1.0 - y) * p1 + y * p2) + y * y * y;
-    }
-    _splinePosition[_nbSamples] = _splineTime[_nbSamples] = 1.0;
-    _isInitialized = true;
-  }
+  // Generated from dev/tools/generate_android_spline_data.dart.
+  static final List<double> _splinePosition = <double>[
+    0.000022888183591973643,
+    0.028561000304762274,
+    0.05705195792956655,
+    0.08538917797618413,
+    0.11349556286812107,
+    0.14129881694635613,
+    0.16877157254923383,
+    0.19581093511175632,
+    0.22239649722992452,
+    0.24843841866631658,
+    0.2740024733220569,
+    0.298967680744136,
+    0.32333234658228116,
+    0.34709556909569184,
+    0.3702249257894571,
+    0.39272483400399893,
+    0.41456988647721615,
+    0.43582889025419114,
+    0.4564192786416,
+    0.476410299013587,
+    0.4957560715637827,
+    0.5145493169954743,
+    0.5327205670880077,
+    0.5502846891191615,
+    0.5673274324802855,
+    0.583810881323224,
+    0.5997478744397482,
+    0.615194045299478,
+    0.6301165005270208,
+    0.6445484042257972,
+    0.6585198219185201,
+    0.6720397744233084,
+    0.6850997688076114,
+    0.6977281404741683,
+    0.7099506591298411,
+    0.7217749311525871,
+    0.7331784038850426,
+    0.7442308394229518,
+    0.7549087205105974,
+    0.7652471277371271,
+    0.7752251637549381,
+    0.7848768260203478,
+    0.7942056937103814,
+    0.8032299679689082,
+    0.8119428702388629,
+    0.8203713516576219,
+    0.8285187880808974,
+    0.8363794492831295,
+    0.8439768562813565,
+    0.851322799855549,
+    0.8584111051351724,
+    0.8652534074722162,
+    0.8718525580962131,
+    0.8782333271742155,
+    0.8843892099362031,
+    0.8903155590440985,
+    0.8960465359221951,
+    0.9015574505919048,
+    0.9068736766459904,
+    0.9119951682409297,
+    0.9169321898723632,
+    0.9216747065581234,
+    0.9262420604674766,
+    0.9306331858366086,
+    0.9348476990715433,
+    0.9389007110754832,
+    0.9427903495057521,
+    0.9465220679845756,
+    0.9500943036519721,
+    0.9535176728088761,
+    0.9567898524767604,
+    0.959924306623116,
+    0.9629127700159108,
+    0.9657622101750765,
+    0.9684818726275105,
+    0.9710676079044347,
+    0.9735231939498,
+    0.9758514437576309,
+    0.9780599066560445,
+    0.9801485715370128,
+    0.9821149805689633,
+    0.9839677526782791,
+    0.9857085499421516,
+    0.9873347811966005,
+    0.9888547171706613,
+    0.9902689443512227,
+    0.9915771042095881,
+    0.9927840651641069,
+    0.9938913963715834,
+    0.9948987305580712,
+    0.9958114963810524,
+    0.9966274782266875,
+    0.997352148697352,
+    0.9979848677523623,
+    0.9985285021374979,
+    0.9989844084453229,
+    0.9993537595844986,
+    0.999638729860106,
+    0.9998403888004533,
+    0.9999602810470701,
+    1.0
+  ];
 }
