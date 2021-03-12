@@ -325,7 +325,7 @@ void main() {
     );
     expect(
       const UnconstrainedBox(constrainedAxis: Axis.horizontal, textDirection: TextDirection.rtl, alignment: Alignment.topRight).toString(),
-      equals('UnconstrainedBox(alignment: Alignment.topRight, constrainedAxis: horizontal, textDirection: rtl)'),
+      equals('UnconstrainedBox(alignment: Alignment.topRight, textDirection: rtl, constrainedAxis: horizontal)'),
     );
   });
 
@@ -336,6 +336,19 @@ void main() {
 
     await tester.pumpWidget(const UnconstrainedBox(clipBehavior: Clip.antiAlias));
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+  });
+
+  group('ConstraintsTransformBox', () {
+    test('toString', () {
+      expect(
+        const ConstraintsTransformBox.unconstrained().toString(),
+        equals('ConstraintsTransformBox(alignment: Alignment.center, transform: unconstrained)'),
+      );
+      expect(
+        const ConstraintsTransformBox.widthConstrained(textDirection: TextDirection.rtl, alignment: Alignment.topRight).toString(),
+        equals('ConstraintsTransformBox(alignment: Alignment.topRight, textDirection: rtl, transform: width-constrained)'),
+      );
+    });
   });
 
   group('ColoredBox', () {

@@ -651,10 +651,16 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
 /// the console, and black and yellow striped areas will appear where the
 /// overflow occurs.
 ///
-/// This [RenderBox] allows the child to selectively enforce some of its
-/// intrinsic sizing rules, partially disregard the constraints set by its
-/// parent render object, and display a warning in debug mode if the parent
-/// render object fails to provide enough space.
+/// When [child] is null, this [RenderBox] takes the smallest possible size and
+/// never overflows.
+///
+/// This [RenderBox] can be used to ensure some of [child]'s intrinsic
+/// dimensions are honored, during development. For instance, if [child]
+/// requires a minimum height to fully display its content,
+/// [constraintsTransform] can be set to a function that removes the `maxHeight`
+/// constraint from the incoming [BoxConstraints], so that if the parent
+/// [RenderObject] fails to provide enough vertical space, a warning will be
+/// displayed in debug mode, while still allowing [child] to grow vertically.
 ///
 /// See also:
 ///
@@ -680,18 +686,25 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
     Clip clipBehavior = Clip.none,
   }) : assert(alignment != null),
        assert(clipBehavior != null),
+       assert(constraintsTransform != null),
        _constraintsTransform = constraintsTransform,
        _clipBehavior = clipBehavior,
        super.mixin(alignment, textDirection, child);
 
-  /// @{macro flutter.widgets.constraintsTransform}
+  /// {@macro flutter.widgets.constraintsTransform}
   BoxConstraintsTransform get constraintsTransform => _constraintsTransform;
   BoxConstraintsTransform _constraintsTransform;
   set constraintsTransform(BoxConstraintsTransform value) {
     if (_constraintsTransform == value)
       return;
     _constraintsTransform = value;
-    markNeedsLayout();
+    // The RenderObject only needs layout if the new transform maps the current
+    // `constraints` to a different value, or the render object has never been
+    // laid out before.
+    final bool needsLayout = _childConstraints == null
+                          || _childConstraints != value(constraints);
+    if (needsLayout)
+      markNeedsLayout();
   }
 
   /// {@macro flutter.material.Material.clipBehavior}
@@ -718,15 +731,17 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
   Rect _overflowChildRect = Rect.zero;
   bool _isOverflowing = false;
 
+  BoxConstraints? _childConstraints;
+
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     final RenderBox? child = this.child;
     if (child != null) {
-      assert(constraintsTransform != null);
       final BoxConstraints childConstraints = constraintsTransform(constraints);
       assert(childConstraints != null);
       assert(childConstraints.isNormalized, '$childConstraints is not normalized');
+      _childConstraints = childConstraints;
       child.layout(childConstraints, parentUsesSize: true);
       size = constraints.constrain(child.size);
       alignChild();
@@ -809,11 +824,20 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
 ///  * [RenderSizedOverflowBox], a render object that is a specific size but
 ///    passes its original constraints through to its child, which it allows to
 ///    overflow.
+///
+@Deprecated(
+  'Use RenderConstraintsTransformBox instead. '
+  'This feature was deprecated after v2.1.0-11.0.pre.'
+)
 class RenderUnconstrainedBox extends RenderConstraintsTransformBox {
   /// Create a render object that sizes itself to the child but does not
   /// pass the [constraints] down to that child.
   ///
   /// The [alignment] and [clipBehavior] must not be null.
+  @Deprecated(
+    'Use RenderConstraintsTransformBox instead. '
+    'This feature was deprecated after v2.1.0-11.0.pre.'
+  )
   RenderUnconstrainedBox({
     required AlignmentGeometry alignment,
     required TextDirection? textDirection,
