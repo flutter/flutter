@@ -2159,6 +2159,7 @@ void main() {
           SemanticsAction.moveCursorBackwardByCharacter,
           SemanticsAction.moveCursorBackwardByWord,
           SemanticsAction.setSelection,
+          SemanticsAction.setText,
         ],
       ),
     );
@@ -2178,6 +2179,7 @@ void main() {
           SemanticsAction.moveCursorBackwardByWord,
           SemanticsAction.moveCursorForwardByWord,
           SemanticsAction.setSelection,
+          SemanticsAction.setText,
         ],
       ),
     );
@@ -2194,6 +2196,7 @@ void main() {
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorForwardByWord,
           SemanticsAction.setSelection,
+          SemanticsAction.setText,
         ],
       ),
     );
@@ -2253,6 +2256,7 @@ void main() {
           SemanticsAction.moveCursorBackwardByWord,
           SemanticsAction.moveCursorForwardByWord,
           SemanticsAction.setSelection,
+          SemanticsAction.setText,
         ],
       ),
     );
@@ -2279,6 +2283,7 @@ void main() {
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorForwardByWord,
           SemanticsAction.setSelection,
+          SemanticsAction.setText,
         ],
       ),
     );
@@ -2345,6 +2350,7 @@ void main() {
           SemanticsAction.moveCursorBackwardByWord,
           SemanticsAction.moveCursorForwardByWord,
           SemanticsAction.setSelection,
+          SemanticsAction.setText,
         ],
       ),
     );
@@ -2372,6 +2378,7 @@ void main() {
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorForwardByWord,
           SemanticsAction.setSelection,
+          SemanticsAction.setText,
         ],
       ),
     );
@@ -2446,6 +2453,7 @@ void main() {
           SemanticsAction.moveCursorBackwardByWord,
           SemanticsAction.moveCursorForwardByWord,
           SemanticsAction.setSelection,
+          SemanticsAction.setText,
         ],
       ),
     );
@@ -2472,6 +2480,7 @@ void main() {
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorForwardByWord,
           SemanticsAction.setSelection,
+          SemanticsAction.setText,
         ],
       ),
     );
@@ -2546,6 +2555,7 @@ void main() {
           SemanticsAction.moveCursorBackwardByWord,
           SemanticsAction.moveCursorForwardByWord,
           SemanticsAction.setSelection,
+          SemanticsAction.setText,
         ],
       ),
     );
@@ -2573,6 +2583,7 @@ void main() {
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorForwardByWord,
           SemanticsAction.setSelection,
+          SemanticsAction.setText,
         ],
       ),
     );
@@ -2737,6 +2748,7 @@ void main() {
                           actions: <SemanticsAction>[
                             SemanticsAction.moveCursorBackwardByCharacter,
                             SemanticsAction.setSelection,
+                            SemanticsAction.setText,
                             SemanticsAction.moveCursorBackwardByWord,
                           ],
                           value: expectedValue,
@@ -2825,6 +2837,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
           ],
         ),
       );
@@ -2839,6 +2852,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.copy,
           ],
         ),
@@ -2856,6 +2870,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.paste,
           ],
         ),
@@ -2872,6 +2887,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.cut,
           ],
         ),
@@ -2889,6 +2905,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.cut,
             SemanticsAction.copy,
             SemanticsAction.paste,
@@ -2935,6 +2952,7 @@ void main() {
                               SemanticsAction.moveCursorBackwardByCharacter,
                               SemanticsAction.moveCursorBackwardByWord,
                               SemanticsAction.setSelection,
+                              SemanticsAction.setText,
                               SemanticsAction.copy,
                               SemanticsAction.cut,
                               SemanticsAction.paste,
@@ -2968,6 +2986,73 @@ void main() {
 
       semantics.dispose();
     });
+  });
+
+  testWidgets('can set text with a11y', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(MaterialApp(
+      home: EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+      ),
+    ));
+    await tester.tap(find.byType(EditableText));
+    await tester.pump();
+
+    final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner!;
+    const int expectedNodeId = 4;
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              id: 1,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 3,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics.rootChild(
+                          id: expectedNodeId,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isTextField,
+                            SemanticsFlag.isFocused,
+                          ],
+                          actions: <SemanticsAction>[
+                            SemanticsAction.setSelection,
+                            SemanticsAction.setText,
+                          ],
+                          value: '',
+                          textSelection: TextSelection.collapsed(
+                              offset: controller.text.length),
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+
+    expect(controller.text, '');
+    owner.performAction(expectedNodeId, SemanticsAction.setText, 'how are you');
+    expect(controller.text, 'how are you');
+
+    semantics.dispose();
   });
 
   testWidgets('allows customizing text style in subclasses', (WidgetTester tester) async {

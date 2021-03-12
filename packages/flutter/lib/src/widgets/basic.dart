@@ -7169,6 +7169,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     MoveCursorHandler? onMoveCursorForwardByCharacter,
     MoveCursorHandler? onMoveCursorBackwardByCharacter,
     SetSelectionHandler? onSetSelection,
+    SetTextHandler? onSetText,
     VoidCallback? onDidGainAccessibilityFocus,
     VoidCallback? onDidLoseAccessibilityFocus,
     Map<CustomSemanticsAction, VoidCallback>? customSemanticsActions,
@@ -7226,6 +7227,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       onDidLoseAccessibilityFocus: onDidLoseAccessibilityFocus,
       onDismiss: onDismiss,
       onSetSelection: onSetSelection,
+      onSetText: onSetText,
       customSemanticsActions: customSemanticsActions,
       hintOverrides: onTapHint != null || onLongPressHint != null ?
         SemanticsHintOverrides(
@@ -7343,6 +7345,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       onMoveCursorForwardByWord: properties.onMoveCursorForwardByWord,
       onMoveCursorBackwardByWord: properties.onMoveCursorBackwardByWord,
       onSetSelection: properties.onSetSelection,
+      onSetText: properties.onSetText,
       onDidGainAccessibilityFocus: properties.onDidGainAccessibilityFocus,
       onDidLoseAccessibilityFocus: properties.onDidLoseAccessibilityFocus,
       customSemanticsActions: properties.customSemanticsActions,
@@ -7415,6 +7418,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..onMoveCursorForwardByWord = properties.onMoveCursorForwardByWord
       ..onMoveCursorBackwardByWord = properties.onMoveCursorBackwardByWord
       ..onSetSelection = properties.onSetSelection
+      ..onSetText = properties.onSetText
       ..onDidGainAccessibilityFocus = properties.onDidGainAccessibilityFocus
       ..onDidLoseAccessibilityFocus = properties.onDidLoseAccessibilityFocus
       ..customSemanticsActions = properties.customSemanticsActions;

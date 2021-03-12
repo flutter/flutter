@@ -3965,7 +3965,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     final InheritedElement? ancestor = _inheritedWidgets == null ? null : _inheritedWidgets![T];
     if (ancestor != null) {
-      assert(ancestor is InheritedElement);
       return dependOnInheritedElement(ancestor, aspect: aspect) as T;
     }
     _hadUnsatisfiedDependencies = true;
