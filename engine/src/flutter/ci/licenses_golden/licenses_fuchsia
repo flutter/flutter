@@ -1,4 +1,4 @@
-Signature: 79dfab11929641003ba6b3fc275ccb3f
+Signature: 051c79542126e4ebb548990e54385060
 
 UNUSED LICENSES:
 
@@ -478,6 +478,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/meta.j
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hwinfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.report/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.virtualkeyboard/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.inspect/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/meta.json
@@ -490,6 +491,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.position/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.sensor/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.logger/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.lowpan.bootstrap/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.math/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.audio/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.drm/meta.json
@@ -565,6 +567,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/images_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/meta.json
@@ -1196,6 +1199,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/meta.j
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hwinfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.report/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.virtualkeyboard/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.inspect/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/meta.json
@@ -1208,6 +1212,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.position/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.sensor/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.logger/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.lowpan.bootstrap/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.math/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.audio/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.drm/meta.json
@@ -1283,6 +1288,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/images_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/meta.json
@@ -1811,6 +1817,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/meta.j
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hwinfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.report/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.virtualkeyboard/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.inspect/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/meta.json
@@ -1823,6 +1830,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.position/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.sensor/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.logger/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.lowpan.bootstrap/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.math/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.audio/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.drm/meta.json
@@ -1898,6 +1906,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/images_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/meta.json
@@ -2540,6 +2549,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.legacymetrics/metrics_recorder.fid
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.position/position.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.sensor/sensor.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location/types.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.lowpan.bootstrap/thread.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.audio/effects_controller.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.drm/properties.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.drm/types.fidl
@@ -3380,16 +3390,20 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic/lib/src/scenic_context.dart
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.types/component.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/data_provider_controller.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish/goldfish_sync.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.virtualkeyboard/virtual_keyboard.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/inotify.fidl
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/inotify.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/do-not-include.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/cstddef.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/functional.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/exception.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/functional.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/span.h
+FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/tuple.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/type_traits.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/iterator.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/span.h
+FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/tuple.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2021 The Fuchsia Authors. All rights reserved.
 
