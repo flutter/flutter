@@ -511,7 +511,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/34847.
-  testWidgets('didChange resets the text field\'s value to empty when passed null', (WidgetTester tester) async {
+  testWidgets("didChange resets the text field's value to empty when passed null", (WidgetTester tester) async {
     await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -536,7 +536,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/34847.
-  testWidgets('reset resets the text field\'s value to empty when intialValue is null', (WidgetTester tester) async {
+  testWidgets("reset resets the text field's value to empty when intialValue is null", (WidgetTester tester) async {
     await tester.pumpWidget(
         MaterialApp(
           home: Material(
