@@ -45,7 +45,7 @@ class HttpHostAvailabilityValidator extends DoctorValidator {
 
   /// Make an HTTP HEAD request to the given URL. If there is no exception,
   /// the host is available. If there is an exception, return a failed result.
-  Future<_HostAvailabilityResult> _checkHostAvailability(
+  Future<_HttpHostAvailabilityResult> _checkHostAvailability(
     String hostUrl,
   ) async {
     try {
@@ -53,13 +53,13 @@ class HttpHostAvailabilityValidator extends DoctorValidator {
       await _httpClient.head(hostUrl);
       // If there is an error, it will be caught in the on ... catch blocks below.
       // Else return a successful result
-      return _HostAvailabilityResult.pass(hostUrl);
+      return _HttpHostAvailabilityResult.pass(hostUrl);
     } on SocketException catch (socketError) {
       // Return a failed result
-      return _HostAvailabilityResult.fail(hostUrl, socketError.toString());
+      return _HttpHostAvailabilityResult.fail(hostUrl, socketError.toString());
     } on HttpException catch (httpError) {
       // Return a failed result
-      return _HostAvailabilityResult.fail(hostUrl, httpError.toString());
+      return _HttpHostAvailabilityResult.fail(hostUrl, httpError.toString());
     }
   }
 
@@ -69,12 +69,12 @@ class HttpHostAvailabilityValidator extends DoctorValidator {
     final List<ValidationMessage> messages = <ValidationMessage>[];
 
     // Run the _checkHostAvailability function for each host URL
-    final List<_HostAvailabilityResult> availabilityResults =
+    final List<_HttpHostAvailabilityResult> availabilityResults =
         await Future.wait(_allRequiredHosts.map(_checkHostAvailability));
 
     // If all tests pass, return a successfull ValidationResult
     if (availabilityResults
-        .every((_HostAvailabilityResult result) => result.hostAvailable)) {
+        .every((_HttpHostAvailabilityResult result) => result.hostAvailable)) {
       // Add a success message and then send back the result
       messages.add(const ValidationMessage('All required hosts are available'));
       return ValidationResult(
@@ -85,15 +85,15 @@ class HttpHostAvailabilityValidator extends DoctorValidator {
       // Else not all URLs are available. Get the number of URLs that are not 
       // available
       final int unavailableUrls = availabilityResults
-        .where((_HostAvailabilityResult result) => !result.hostAvailable).length;
+        .where((_HttpHostAvailabilityResult result) => !result.hostAvailable).length;
       final int totalUrls = availabilityResults.length;
       
       // Filter the list to only include those that have not passed
       availabilityResults
-        .removeWhere((_HostAvailabilityResult result) => result.hostAvailable);
+        .removeWhere((_HttpHostAvailabilityResult result) => result.hostAvailable);
 
       // Add the error messages to be displayed
-      for (final _HostAvailabilityResult result in availabilityResults) {
+      for (final _HttpHostAvailabilityResult result in availabilityResults) {
         messages.add(ValidationMessage.error('${result.hostUrl} is not available due to the following error: ${result.errorMessage}'));
       }
 
@@ -109,13 +109,13 @@ class HttpHostAvailabilityValidator extends DoctorValidator {
 }
 
 /// Result of a host availability check
-class _HostAvailabilityResult {
+class _HttpHostAvailabilityResult {
   /// Return a successful result for an available host
-  _HostAvailabilityResult.pass(this.hostUrl)
+  _HttpHostAvailabilityResult.pass(this.hostUrl)
       : errorMessage = '',
         hostAvailable = true;
   /// Return a failed result for an unavailable host
-  _HostAvailabilityResult.fail(this.hostUrl, this.errorMessage)
+  _HttpHostAvailabilityResult.fail(this.hostUrl, this.errorMessage)
       : hostAvailable = false;
 
   /// The URL

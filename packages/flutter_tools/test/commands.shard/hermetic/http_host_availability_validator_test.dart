@@ -13,10 +13,10 @@ import 'package:http/testing.dart';
 import '../../src/common.dart';
 
 void main() {
-  group('host availability validator', () {
+  group('http host availability validator', () {
     const List<String> operatingSystemsToTest = <String>['windows', 'macos', 'linux'];
 
-    test('all hosts are available', () async {
+    test('all http hosts are available', () async {
       /// A mock HTTP client that returns a 200 Successful response for
       /// every request
       final Client mockClient = MockClient((Request request) async {
@@ -40,7 +40,7 @@ void main() {
       }
     });
 
-    test('all hosts are not available', () async {
+    test('all http hosts are not available', () async {
       /// A mock HTTP client that returns an error for every request
       final Client mockClient = MockClient((Request request) async {
         throw const SocketException('No internet connection');
@@ -63,7 +63,7 @@ void main() {
       }
     });
 
-    test('one host is not available', () async {
+    test('one http host is not available', () async {
       bool throwExceptionForThisCase = false;
       // A mock client that throws an exception for only the first
       // request made
