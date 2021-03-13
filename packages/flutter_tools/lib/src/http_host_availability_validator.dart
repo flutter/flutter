@@ -20,8 +20,8 @@ const List<String> macOsRequiredHostUrls = <String>[
 ];
 
 /// Validation class that checks if all the given URLs are reachable
-class HostAvailabilityValidator extends DoctorValidator {
-  HostAvailabilityValidator({
+class HttpHostAvailabilityValidator extends DoctorValidator {
+  HttpHostAvailabilityValidator({
     required Platform platform,
     required http.Client httpClient,
   })   : _platform = platform,

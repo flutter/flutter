@@ -25,7 +25,7 @@ import 'device.dart';
 import 'features.dart';
 import 'fuchsia/fuchsia_workflow.dart';
 import 'globals.dart' as globals;
-import 'host_availability_validator.dart';
+import 'http_host_availability_validator.dart';
 import 'intellij/intellij_validator.dart';
 import 'linux/linux_doctor.dart';
 import 'linux/linux_workflow.dart';
@@ -134,7 +134,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
           deviceManager: globals.deviceManager,
           userMessages: globals.userMessages,
         ),
-      HostAvailabilityValidator(
+      HttpHostAvailabilityValidator(
         platform: globals.platform,
         httpClient: http.Client()
       ),

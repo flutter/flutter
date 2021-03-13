@@ -2,7 +2,7 @@
 import 'package:flutter_tools/src/base/io.dart';
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:flutter_tools/src/doctor.dart';
-import 'package:flutter_tools/src/host_availability_validator.dart';
+import 'package:flutter_tools/src/http_host_availability_validator.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:http/http.dart';
@@ -25,13 +25,13 @@ void main() {
 
       // Run the check for all operating systems one by one
       for(final String operatingSystem in operatingSystemsToTest) {
-        final HostAvailabilityValidator hostValidator = HostAvailabilityValidator(
+        final HttpHostAvailabilityValidator httpHostValidator = HttpHostAvailabilityValidator(
           platform: FakePlatform(operatingSystem: operatingSystem),
           httpClient: mockClient,
         );
 
         // Run the validation check and get the results
-        final ValidationResult result = await hostValidator.validate();
+        final ValidationResult result = await httpHostValidator.validate();
 
         // Check for only one information message
         expect(result.messages..where(
@@ -48,13 +48,13 @@ void main() {
 
       // Run the check for all operating systems one by one
       for(final String operatingSystem in operatingSystemsToTest) {
-        final HostAvailabilityValidator hostValidator = HostAvailabilityValidator(
+        final HttpHostAvailabilityValidator httpHostValidator = HttpHostAvailabilityValidator(
           platform: FakePlatform(operatingSystem: operatingSystem),
           httpClient: mockClient,
         );
 
         // Run the validation check and get the results
-        final ValidationResult result = await hostValidator.validate();
+        final ValidationResult result = await httpHostValidator.validate();
 
         // Check that all messages are errors
         expect(result.messages..where(
@@ -78,13 +78,13 @@ void main() {
 
       // Run the check for all operating systems one by one
       for(final String operatingSystem in operatingSystemsToTest) {
-        final HostAvailabilityValidator hostValidator = HostAvailabilityValidator(
+        final HttpHostAvailabilityValidator httpHostValidator = HttpHostAvailabilityValidator(
           platform: FakePlatform(operatingSystem: operatingSystem),
           httpClient: mockClient,
         );
 
         // Run the validation check and get the results
-        final ValidationResult result = await hostValidator.validate();
+        final ValidationResult result = await httpHostValidator.validate();
 
         // Check that only one message is an error
         expect(result.messages..where(
