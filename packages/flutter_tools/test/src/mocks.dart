@@ -201,25 +201,3 @@ class MockIOSDevice extends Mock implements IOSDevice {
   @override
   bool isSupportedForProject(FlutterProject flutterProject) => true;
 }
-
-class MockStdIn extends Mock implements IOSink {
-  final StringBuffer stdInWrites = StringBuffer();
-
-  String getAndClear() {
-    final String result = stdInWrites.toString();
-    stdInWrites.clear();
-    return result;
-  }
-
-  @override
-  void write([ Object o = '' ]) {
-    stdInWrites.write(o);
-  }
-
-  @override
-  void writeln([ Object o = '' ]) {
-    stdInWrites.writeln(o);
-  }
-}
-
-class MockStream extends Mock implements Stream<List<int>> {}

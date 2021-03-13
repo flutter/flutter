@@ -21,334 +21,387 @@ import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/mocks.dart';
+import '../src/fake_process_manager.dart';
+import '../src/fakes.dart';
 
 void main() {
-  ProcessManager mockProcessManager;
   ResidentCompiler generator;
   ResidentCompiler generatorWithScheme;
-  MockProcess mockFrontendServer;
-  MockStdIn mockFrontendServerStdIn;
-  MockStream mockFrontendServerStdErr;
-  StreamController<String> stdErrStreamController;
+  MemoryIOSink frontendServerStdIn;
   BufferLogger testLogger;
 
   setUp(() {
     testLogger = BufferLogger.test();
-    mockProcessManager = MockProcessManager();
-    mockFrontendServer = MockProcess();
-    mockFrontendServerStdIn = MockStdIn();
-    mockFrontendServerStdErr = MockStream();
-    generator = ResidentCompiler(
-      'sdkroot',
-      buildMode: BuildMode.debug,
-      logger: testLogger,
-      processManager: mockProcessManager,
-      artifacts: Artifacts.test(),
-      platform: FakePlatform(operatingSystem: 'linux'),
-      fileSystem: MemoryFileSystem.test(),
-    );
-    generatorWithScheme = ResidentCompiler(
-      'sdkroot',
-      buildMode: BuildMode.debug,
-      logger: testLogger,
-      processManager: mockProcessManager,
-      artifacts: Artifacts.test(),
-      platform: FakePlatform(operatingSystem: 'linux'),
-      fileSystemRoots: <String>[
-        '/foo/bar/fizz',
-      ],
-      fileSystemScheme: 'scheme',
-      fileSystem: MemoryFileSystem.test(),
-    );
+    frontendServerStdIn = MemoryIOSink();
+  });
 
-    when(mockFrontendServer.stdin).thenReturn(mockFrontendServerStdIn);
-    when(mockFrontendServer.stderr)
-        .thenAnswer((Invocation invocation) => mockFrontendServerStdErr);
-    when(mockFrontendServer.exitCode).thenAnswer((Invocation invocation) {
-      return Completer<int>().future;
+  // Migrated to not use mocks.
+  group('fake process manager', () {
+    FakeProcessManager fakeProcessManager;
+
+    const List<String> frontendServerCommand = <String>[
+      'Artifact.engineDartBinary',
+      '--disable-dart-dev',
+      'Artifact.frontendServerSnapshotForEngineDartSdk',
+      '--sdk-root',
+      'sdkroot/',
+      '--incremental',
+      '--target=flutter',
+      '--debugger-module-names',
+      '--experimental-emit-debug-metadata',
+      '--output-dill',
+      '/build/',
+      '-Ddart.vm.profile=false',
+      '-Ddart.vm.product=false',
+      '--enable-asserts',
+      '--track-widget-creation',
+    ];
+
+    setUp(() {
+      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      generator = ResidentCompiler(
+        'sdkroot',
+        buildMode: BuildMode.debug,
+        logger: testLogger,
+        processManager: fakeProcessManager,
+        artifacts: Artifacts.test(),
+        platform: FakePlatform(operatingSystem: 'linux'),
+        fileSystem: MemoryFileSystem.test(),
+      );
+      generatorWithScheme = ResidentCompiler(
+        'sdkroot',
+        buildMode: BuildMode.debug,
+        logger: testLogger,
+        processManager: fakeProcessManager,
+        artifacts: Artifacts.test(),
+        platform: FakePlatform(operatingSystem: 'linux'),
+        fileSystemRoots: <String>[
+          '/foo/bar/fizz',
+        ],
+        fileSystemScheme: 'scheme',
+        fileSystem: MemoryFileSystem.test(),
+      );
     });
-    stdErrStreamController = StreamController<String>();
-    when(mockFrontendServerStdErr.transform<String>(any))
-        .thenAnswer((Invocation invocation) => stdErrStreamController.stream);
 
-    when(mockProcessManager.canRun(any)).thenReturn(true);
-    when(mockProcessManager.start(any)).thenAnswer(
-        (Invocation invocation) => Future<Process>.value(mockFrontendServer)
-    );
+    testWithoutContext('incremental compile single dart compile', () async {
+      fakeProcessManager.addCommand(FakeCommand(
+        command: frontendServerCommand,
+        stdout: 'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0',
+        stdin: frontendServerStdIn,
+      ));
+
+      final CompilerOutput output = await generator.recompile(
+        Uri.parse('/path/to/main.dart'),
+          null /* invalidatedFiles */,
+        outputPath: '/build/',
+        packageConfig: PackageConfig.empty,
+      );
+      expect(frontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
+      expect(testLogger.errorText, equals('line1\nline2\n'));
+      expect(output.outputFilename, equals('/path/to/main.dart.dill'));
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('incremental compile single dart compile with filesystem scheme', () async {
+      fakeProcessManager.addCommand(FakeCommand(
+        command: const <String>[
+          ...frontendServerCommand,
+          '--filesystem-root',
+          '/foo/bar/fizz',
+          '--filesystem-scheme',
+          'scheme',
+        ],
+        stdout: 'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0',
+        stdin: frontendServerStdIn,
+      ));
+
+      final CompilerOutput output = await generatorWithScheme.recompile(
+        Uri.parse('file:///foo/bar/fizz/main.dart'),
+          null /* invalidatedFiles */,
+        outputPath: '/build/',
+        packageConfig: PackageConfig.empty,
+      );
+      expect(frontendServerStdIn.getAndClear(), 'compile scheme:///main.dart\n');
+      expect(testLogger.errorText, equals('line1\nline2\n'));
+      expect(output.outputFilename, equals('/path/to/main.dart.dill'));
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('incremental compile single dart compile abnormally terminates', () async {
+      fakeProcessManager.addCommand(FakeCommand(
+        command: frontendServerCommand,
+        stdin: frontendServerStdIn,
+      ));
+
+      expect(asyncGuard(() => generator.recompile(
+        Uri.parse('/path/to/main.dart'),
+        null, /* invalidatedFiles */
+        outputPath: '/build/',
+        packageConfig: PackageConfig.empty,
+      )), throwsToolExit());
+    });
+
+    testWithoutContext('incremental compile single dart compile abnormally terminates via exitCode', () async {
+      fakeProcessManager.addCommand(FakeCommand(
+        command: frontendServerCommand,
+        stdin: frontendServerStdIn,
+        exitCode: 1,
+      ));
+
+      expect(asyncGuard(() => generator.recompile(
+        Uri.parse('/path/to/main.dart'),
+        null, /* invalidatedFiles */
+        outputPath: '/build/',
+        packageConfig: PackageConfig.empty,
+      )), throwsToolExit(message: 'the Dart compiler exited unexpectedly.'));
+    });
   });
 
-  testWithoutContext('incremental compile single dart compile', () async {
-    when(mockFrontendServer.stdout)
-        .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
-          Future<List<int>>.value(utf8.encode(
-            'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0'
-          ))
-        ));
+  // Using mocks with stdout streaming.
+  group('mock process manager', () {
+    ProcessManager mockProcessManager;
+    MockProcess mockFrontendServer;
+    StreamController<String> stdErrStreamController;
 
-    final CompilerOutput output = await generator.recompile(
-      Uri.parse('/path/to/main.dart'),
+    setUp(() {
+      mockProcessManager = MockProcessManager();
+      mockFrontendServer = MockProcess();
+
+      stdErrStreamController = StreamController<String>();
+      when(mockFrontendServer.stdin).thenReturn(frontendServerStdIn);
+      when(mockFrontendServer.stderr)
+          .thenAnswer((Invocation invocation) => stdErrStreamController.stream.transform(utf8.encoder));
+      when(mockFrontendServer.exitCode).thenAnswer((Invocation invocation) {
+        return Completer<int>().future;
+      });
+
+      when(mockProcessManager.canRun(any)).thenReturn(true);
+      when(mockProcessManager.start(any)).thenAnswer(
+              (Invocation invocation) => Future<Process>.value(mockFrontendServer)
+      );
+      generator = ResidentCompiler(
+        'sdkroot',
+        buildMode: BuildMode.debug,
+        logger: testLogger,
+        processManager: mockProcessManager,
+        artifacts: Artifacts.test(),
+        platform: FakePlatform(operatingSystem: 'linux'),
+        fileSystem: MemoryFileSystem.test(),
+      );
+      generatorWithScheme = ResidentCompiler(
+        'sdkroot',
+        buildMode: BuildMode.debug,
+        logger: testLogger,
+        processManager: mockProcessManager,
+        artifacts: Artifacts.test(),
+        platform: FakePlatform(operatingSystem: 'linux'),
+        fileSystemRoots: <String>[
+          '/foo/bar/fizz',
+        ],
+        fileSystemScheme: 'scheme',
+        fileSystem: MemoryFileSystem.test(),
+      );
+    });
+
+    testWithoutContext('incremental compile and recompile', () async {
+      final StreamController<List<int>> streamController = StreamController<List<int>>();
+      when(mockFrontendServer.stdout)
+          .thenAnswer((Invocation invocation) => streamController.stream);
+      streamController.add(utf8.encode('result abc\nline0\nline1\nabc\nabc /path/to/main.dart.dill 0\n'));
+      await generator.recompile(
+        Uri.parse('/path/to/main.dart'),
+        null, /* invalidatedFiles */
+        outputPath: '/build/',
+        packageConfig: PackageConfig.empty,
+      );
+      expect(frontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
+
+      // No accept or reject commands should be issued until we
+      // send recompile request.
+      await _accept(streamController, generator, frontendServerStdIn, '');
+      await _reject(streamController, generator, frontendServerStdIn, '', '');
+
+      await _recompile(streamController, generator, frontendServerStdIn,
+        'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n');
+
+      await _accept(streamController, generator, frontendServerStdIn, r'^accept\n$');
+
+      await _recompile(streamController, generator, frontendServerStdIn,
+        'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n');
+      // No sources returned from reject command.
+      await _reject(streamController, generator, frontendServerStdIn, 'result abc\nabc\n',
+        r'^reject\n$');
+      expect(frontendServerStdIn.getAndClear(), isEmpty);
+      expect(testLogger.errorText, equals(
+        'line0\nline1\n'
+        'line1\nline2\n'
+        'line1\nline2\n'
+      ));
+    });
+
+    testWithoutContext('incremental compile and recompile with filesystem scheme', () async {
+      final StreamController<List<int>> streamController = StreamController<List<int>>();
+      when(mockFrontendServer.stdout)
+          .thenAnswer((Invocation invocation) => streamController.stream);
+      streamController.add(utf8.encode('result abc\nline0\nline1\nabc\nabc /path/to/main.dart.dill 0\n'));
+      await generatorWithScheme.recompile(
+        Uri.parse('file:///foo/bar/fizz/main.dart'),
+        null, /* invalidatedFiles */
+        outputPath: '/build/',
+        packageConfig: PackageConfig.empty,
+      );
+      expect(frontendServerStdIn.getAndClear(), 'compile scheme:///main.dart\n');
+
+      // No accept or reject commands should be issued until we
+      // send recompile request.
+      await _accept(streamController, generatorWithScheme, frontendServerStdIn, '');
+      await _reject(streamController, generatorWithScheme, frontendServerStdIn, '', '');
+
+      await _recompile(streamController, generatorWithScheme, frontendServerStdIn,
+        'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n',
+        mainUri: Uri.parse('file:///foo/bar/fizz/main.dart'),
+        expectedMainUri: 'scheme:///main.dart');
+
+      await _accept(streamController, generatorWithScheme, frontendServerStdIn, r'^accept\n$');
+
+      await _recompile(streamController, generatorWithScheme, frontendServerStdIn,
+        'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n',
+        mainUri: Uri.parse('file:///foo/bar/fizz/main.dart'),
+        expectedMainUri: 'scheme:///main.dart');
+      // No sources returned from reject command.
+      await _reject(streamController, generatorWithScheme, frontendServerStdIn, 'result abc\nabc\n',
+        r'^reject\n$');
+      expect(frontendServerStdIn.getAndClear(), isEmpty);
+      expect(testLogger.errorText, equals(
+        'line0\nline1\n'
+        'line1\nline2\n'
+        'line1\nline2\n'
+      ));
+    });
+
+    testWithoutContext('incremental compile and recompile non-entrypoint file with filesystem scheme', () async {
+      final Uri mainUri = Uri.parse('file:///foo/bar/fizz/main.dart');
+      const String expectedMainUri = 'scheme:///main.dart';
+      final List<Uri> updatedUris = <Uri>[
+        mainUri,
+        Uri.parse('file:///foo/bar/fizz/other.dart'),
+      ];
+      const List<String> expectedUpdatedUris = <String>[
+        expectedMainUri,
+        'scheme:///other.dart',
+      ];
+
+      final StreamController<List<int>> streamController = StreamController<List<int>>();
+      when(mockFrontendServer.stdout)
+          .thenAnswer((Invocation invocation) => streamController.stream);
+      streamController.add(utf8.encode('result abc\nline0\nline1\nabc\nabc /path/to/main.dart.dill 0\n'));
+      await generatorWithScheme.recompile(
+        Uri.parse('file:///foo/bar/fizz/main.dart'),
+        null, /* invalidatedFiles */
+        outputPath: '/build/',
+        packageConfig: PackageConfig.empty,
+      );
+      expect(frontendServerStdIn.getAndClear(), 'compile scheme:///main.dart\n');
+
+      // No accept or reject commands should be issued until we
+      // send recompile request.
+      await _accept(streamController, generatorWithScheme, frontendServerStdIn, '');
+      await _reject(streamController, generatorWithScheme, frontendServerStdIn, '', '');
+
+      await _recompile(streamController, generatorWithScheme, frontendServerStdIn,
+        'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n',
+        mainUri: mainUri,
+        expectedMainUri: expectedMainUri,
+        updatedUris: updatedUris,
+        expectedUpdatedUris: expectedUpdatedUris);
+
+      await _accept(streamController, generatorWithScheme, frontendServerStdIn, r'^accept\n$');
+
+      await _recompile(streamController, generatorWithScheme, frontendServerStdIn,
+        'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n',
+        mainUri: mainUri,
+        expectedMainUri: expectedMainUri,
+        updatedUris: updatedUris,
+        expectedUpdatedUris: expectedUpdatedUris);
+      // No sources returned from reject command.
+      await _reject(streamController, generatorWithScheme, frontendServerStdIn, 'result abc\nabc\n',
+        r'^reject\n$');
+      expect(frontendServerStdIn.getAndClear(), isEmpty);
+      expect(testLogger.errorText, equals(
+        'line0\nline1\n'
+        'line1\nline2\n'
+        'line1\nline2\n'
+      ));
+    });
+
+    testWithoutContext('incremental compile can suppress errors', () async {
+      final StreamController<List<int>> stdoutController = StreamController<List<int>>();
+      when(mockFrontendServer.stdout)
+        .thenAnswer((Invocation invocation) => stdoutController.stream);
+
+      stdoutController.add(utf8.encode('result abc\nline0\nline1\nabc\nabc /path/to/main.dart.dill 0\n'));
+
+      await generator.recompile(
+        Uri.parse('/path/to/main.dart'),
+        <Uri>[],
+        outputPath: '/build/',
+        packageConfig: PackageConfig.empty,
+      );
+      expect(frontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
+
+      await _recompile(stdoutController, generator, frontendServerStdIn,
+        'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n');
+
+      await _accept(stdoutController, generator, frontendServerStdIn, r'^accept\n$');
+
+      await _recompile(stdoutController, generator, frontendServerStdIn,
+        'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n', suppressErrors: true);
+
+      expect(frontendServerStdIn.getAndClear(), isEmpty);
+
+      // Compiler message is not printed with suppressErrors: true above.
+      expect(testLogger.errorText, isNot(equals(
+        'line1\nline2\n'
+      )));
+      expect(testLogger.traceText, contains(
+        'line1\nline2\n'
+      ));
+    });
+
+    testWithoutContext('incremental compile and recompile twice', () async {
+      final StreamController<List<int>> streamController = StreamController<List<int>>();
+      when(mockFrontendServer.stdout)
+          .thenAnswer((Invocation invocation) => streamController.stream);
+      streamController.add(utf8.encode(
+        'result abc\nline0\nline1\nabc\nabc /path/to/main.dart.dill 0\n'
+      ));
+      await generator.recompile(
+        Uri.parse('/path/to/main.dart'),
         null /* invalidatedFiles */,
-      outputPath: '/build/',
-      packageConfig: PackageConfig.empty,
-    );
-    expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
-    verifyNoMoreInteractions(mockFrontendServerStdIn);
-    expect(testLogger.errorText, equals('line1\nline2\n'));
-    expect(output.outputFilename, equals('/path/to/main.dart.dill'));
-  });
+        outputPath: '/build/',
+         packageConfig: PackageConfig.empty,
+      );
+      expect(frontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
 
-  testWithoutContext('incremental compile single dart compile with filesystem scheme', () async {
-    when(mockFrontendServer.stdout)
-        .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
-          Future<List<int>>.value(utf8.encode(
-            'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0'
-          ))
-        ));
+      await _recompile(streamController, generator, frontendServerStdIn,
+        'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n');
+      await _recompile(streamController, generator, frontendServerStdIn,
+        'result abc\nline2\nline3\nabc\nabc /path/to/main.dart.dill 0\n');
 
-    final CompilerOutput output = await generatorWithScheme.recompile(
-      Uri.parse('file:///foo/bar/fizz/main.dart'),
-        null /* invalidatedFiles */,
-      outputPath: '/build/',
-      packageConfig: PackageConfig.empty,
-    );
-    expect(mockFrontendServerStdIn.getAndClear(), 'compile scheme:///main.dart\n');
-    verifyNoMoreInteractions(mockFrontendServerStdIn);
-    expect(testLogger.errorText, equals('line1\nline2\n'));
-    expect(output.outputFilename, equals('/path/to/main.dart.dill'));
-  });
-
-  testWithoutContext('incremental compile single dart compile abnormally terminates', () async {
-    when(mockFrontendServer.stdout)
-        .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty()
-    );
-
-    expect(asyncGuard(() => generator.recompile(
-      Uri.parse('/path/to/main.dart'),
-      null, /* invalidatedFiles */
-      outputPath: '/build/',
-      packageConfig: PackageConfig.empty,
-    )), throwsToolExit());
-  });
-
-  testWithoutContext('incremental compile single dart compile abnormally terminates via exitCode', () async {
-    when(mockFrontendServer.exitCode)
-        .thenAnswer((Invocation invocation) async => 1);
-    when(mockFrontendServer.stdout)
-        .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty()
-    );
-
-    expect(asyncGuard(() => generator.recompile(
-      Uri.parse('/path/to/main.dart'),
-      null, /* invalidatedFiles */
-      outputPath: '/build/',
-      packageConfig: PackageConfig.empty,
-    )), throwsToolExit());
-  });
-
-  testWithoutContext('incremental compile and recompile', () async {
-    final StreamController<List<int>> streamController = StreamController<List<int>>();
-    when(mockFrontendServer.stdout)
-        .thenAnswer((Invocation invocation) => streamController.stream);
-    streamController.add(utf8.encode('result abc\nline0\nline1\nabc\nabc /path/to/main.dart.dill 0\n'));
-    await generator.recompile(
-      Uri.parse('/path/to/main.dart'),
-      null, /* invalidatedFiles */
-      outputPath: '/build/',
-      packageConfig: PackageConfig.empty,
-    );
-    expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
-
-    // No accept or reject commands should be issued until we
-    // send recompile request.
-    await _accept(streamController, generator, mockFrontendServerStdIn, '');
-    await _reject(streamController, generator, mockFrontendServerStdIn, '', '');
-
-    await _recompile(streamController, generator, mockFrontendServerStdIn,
-      'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n');
-
-    await _accept(streamController, generator, mockFrontendServerStdIn, r'^accept\n$');
-
-    await _recompile(streamController, generator, mockFrontendServerStdIn,
-      'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n');
-    // No sources returned from reject command.
-    await _reject(streamController, generator, mockFrontendServerStdIn, 'result abc\nabc\n',
-      r'^reject\n$');
-    verifyNoMoreInteractions(mockFrontendServerStdIn);
-    expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
-    expect(testLogger.errorText, equals(
-      'line0\nline1\n'
-      'line1\nline2\n'
-      'line1\nline2\n'
-    ));
-  });
-
-  testWithoutContext('incremental compile and recompile with filesystem scheme', () async {
-    final StreamController<List<int>> streamController = StreamController<List<int>>();
-    when(mockFrontendServer.stdout)
-        .thenAnswer((Invocation invocation) => streamController.stream);
-    streamController.add(utf8.encode('result abc\nline0\nline1\nabc\nabc /path/to/main.dart.dill 0\n'));
-    await generatorWithScheme.recompile(
-      Uri.parse('file:///foo/bar/fizz/main.dart'),
-      null, /* invalidatedFiles */
-      outputPath: '/build/',
-      packageConfig: PackageConfig.empty,
-    );
-    expect(mockFrontendServerStdIn.getAndClear(), 'compile scheme:///main.dart\n');
-
-    // No accept or reject commands should be issued until we
-    // send recompile request.
-    await _accept(streamController, generatorWithScheme, mockFrontendServerStdIn, '');
-    await _reject(streamController, generatorWithScheme, mockFrontendServerStdIn, '', '');
-
-    await _recompile(streamController, generatorWithScheme, mockFrontendServerStdIn,
-      'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n',
-      mainUri: Uri.parse('file:///foo/bar/fizz/main.dart'),
-      expectedMainUri: 'scheme:///main.dart');
-
-    await _accept(streamController, generatorWithScheme, mockFrontendServerStdIn, r'^accept\n$');
-
-    await _recompile(streamController, generatorWithScheme, mockFrontendServerStdIn,
-      'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n',
-      mainUri: Uri.parse('file:///foo/bar/fizz/main.dart'),
-      expectedMainUri: 'scheme:///main.dart');
-    // No sources returned from reject command.
-    await _reject(streamController, generatorWithScheme, mockFrontendServerStdIn, 'result abc\nabc\n',
-      r'^reject\n$');
-    verifyNoMoreInteractions(mockFrontendServerStdIn);
-    expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
-    expect(testLogger.errorText, equals(
-      'line0\nline1\n'
-      'line1\nline2\n'
-      'line1\nline2\n'
-    ));
-  });
-
-  testWithoutContext('incremental compile and recompile non-entrypoint file with filesystem scheme', () async {
-    final Uri mainUri = Uri.parse('file:///foo/bar/fizz/main.dart');
-    const String expectedMainUri = 'scheme:///main.dart';
-    final List<Uri> updatedUris = <Uri>[
-      mainUri,
-      Uri.parse('file:///foo/bar/fizz/other.dart'),
-    ];
-    const List<String> expectedUpdatedUris = <String>[
-      expectedMainUri,
-      'scheme:///other.dart',
-    ];
-
-    final StreamController<List<int>> streamController = StreamController<List<int>>();
-    when(mockFrontendServer.stdout)
-        .thenAnswer((Invocation invocation) => streamController.stream);
-    streamController.add(utf8.encode('result abc\nline0\nline1\nabc\nabc /path/to/main.dart.dill 0\n'));
-    await generatorWithScheme.recompile(
-      Uri.parse('file:///foo/bar/fizz/main.dart'),
-      null, /* invalidatedFiles */
-      outputPath: '/build/',
-      packageConfig: PackageConfig.empty,
-    );
-    expect(mockFrontendServerStdIn.getAndClear(), 'compile scheme:///main.dart\n');
-
-    // No accept or reject commands should be issued until we
-    // send recompile request.
-    await _accept(streamController, generatorWithScheme, mockFrontendServerStdIn, '');
-    await _reject(streamController, generatorWithScheme, mockFrontendServerStdIn, '', '');
-
-    await _recompile(streamController, generatorWithScheme, mockFrontendServerStdIn,
-      'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n',
-      mainUri: mainUri,
-      expectedMainUri: expectedMainUri,
-      updatedUris: updatedUris,
-      expectedUpdatedUris: expectedUpdatedUris);
-
-    await _accept(streamController, generatorWithScheme, mockFrontendServerStdIn, r'^accept\n$');
-
-    await _recompile(streamController, generatorWithScheme, mockFrontendServerStdIn,
-      'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n',
-      mainUri: mainUri,
-      expectedMainUri: expectedMainUri,
-      updatedUris: updatedUris,
-      expectedUpdatedUris: expectedUpdatedUris);
-    // No sources returned from reject command.
-    await _reject(streamController, generatorWithScheme, mockFrontendServerStdIn, 'result abc\nabc\n',
-      r'^reject\n$');
-    verifyNoMoreInteractions(mockFrontendServerStdIn);
-    expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
-    expect(testLogger.errorText, equals(
-      'line0\nline1\n'
-      'line1\nline2\n'
-      'line1\nline2\n'
-    ));
-  });
-
-  testWithoutContext('incremental compile can suppress errors', () async {
-    final StreamController<List<int>> stdoutController = StreamController<List<int>>();
-    when(mockFrontendServer.stdout)
-      .thenAnswer((Invocation invocation) => stdoutController.stream);
-
-    stdoutController.add(utf8.encode('result abc\nline0\nline1\nabc\nabc /path/to/main.dart.dill 0\n'));
-
-    await generator.recompile(
-      Uri.parse('/path/to/main.dart'),
-      <Uri>[],
-      outputPath: '/build/',
-      packageConfig: PackageConfig.empty,
-    );
-    expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
-
-    await _recompile(stdoutController, generator, mockFrontendServerStdIn,
-      'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n');
-
-    await _accept(stdoutController, generator, mockFrontendServerStdIn, r'^accept\n$');
-
-    await _recompile(stdoutController, generator, mockFrontendServerStdIn,
-      'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n', suppressErrors: true);
-
-    verifyNoMoreInteractions(mockFrontendServerStdIn);
-    expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
-
-    // Compiler message is not printed with suppressErrors: true above.
-    expect(testLogger.errorText, isNot(equals(
-      'line1\nline2\n'
-    )));
-    expect(testLogger.traceText, contains(
-      'line1\nline2\n'
-    ));
-  });
-
-  testWithoutContext('incremental compile and recompile twice', () async {
-    final StreamController<List<int>> streamController = StreamController<List<int>>();
-    when(mockFrontendServer.stdout)
-        .thenAnswer((Invocation invocation) => streamController.stream);
-    streamController.add(utf8.encode(
-      'result abc\nline0\nline1\nabc\nabc /path/to/main.dart.dill 0\n'
-    ));
-    await generator.recompile(
-      Uri.parse('/path/to/main.dart'),
-      null /* invalidatedFiles */,
-      outputPath: '/build/',
-       packageConfig: PackageConfig.empty,
-    );
-    expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
-
-    await _recompile(streamController, generator, mockFrontendServerStdIn,
-      'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n');
-    await _recompile(streamController, generator, mockFrontendServerStdIn,
-      'result abc\nline2\nline3\nabc\nabc /path/to/main.dart.dill 0\n');
-
-    verifyNoMoreInteractions(mockFrontendServerStdIn);
-    expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
-    expect(testLogger.errorText, equals(
-      'line0\nline1\n'
-      'line1\nline2\n'
-      'line2\nline3\n'
-    ));
+      expect(frontendServerStdIn.getAndClear(), isEmpty);
+      expect(testLogger.errorText, equals(
+        'line0\nline1\n'
+        'line1\nline2\n'
+        'line2\nline3\n'
+      ));
+    });
   });
 }
 
 Future<void> _recompile(
   StreamController<List<int>> streamController,
   ResidentCompiler generator,
-  MockStdIn mockFrontendServerStdIn,
+  MemoryIOSink frontendServerStdIn,
   String mockCompilerOutput, {
   bool suppressErrors = false,
   Uri mainUri,
@@ -373,7 +426,7 @@ Future<void> _recompile(
     suppressErrors: suppressErrors,
   );
   expect(output.outputFilename, equals('/path/to/main.dart.dill'));
-  final String commands = mockFrontendServerStdIn.getAndClear();
+  final String commands = frontendServerStdIn.getAndClear();
   final RegExp whitespace = RegExp(r'\s+');
   final List<String> parts = commands.split(whitespace);
 
@@ -383,28 +436,28 @@ Future<void> _recompile(
   for (int i = 0; i < expectedUpdatedUris.length; i++) {
     expect(parts[3 + i], equals(expectedUpdatedUris[i]));
   }
-  mockFrontendServerStdIn.stdInWrites.clear();
+  frontendServerStdIn.clear();
 }
 
 Future<void> _accept(
   StreamController<List<int>> streamController,
   ResidentCompiler generator,
-  MockStdIn mockFrontendServerStdIn,
+  MemoryIOSink frontendServerStdIn,
   String expected,
 ) async {
   // Put content into the output stream after generator.recompile gets
   // going few lines below, resets completer.
   generator.accept();
-  final String commands = mockFrontendServerStdIn.getAndClear();
+  final String commands = frontendServerStdIn.getAndClear();
   final RegExp re = RegExp(expected);
   expect(commands, matches(re));
-  mockFrontendServerStdIn.stdInWrites.clear();
+  frontendServerStdIn.clear();
 }
 
 Future<void> _reject(
   StreamController<List<int>> streamController,
   ResidentCompiler generator,
-  MockStdIn mockFrontendServerStdIn,
+  MemoryIOSink frontendServerStdIn,
   String mockCompilerOutput,
   String expected,
 ) async {
@@ -415,10 +468,10 @@ Future<void> _reject(
   });
   final CompilerOutput output = await generator.reject();
   expect(output, isNull);
-  final String commands = mockFrontendServerStdIn.getAndClear();
+  final String commands = frontendServerStdIn.getAndClear();
   final RegExp re = RegExp(expected);
   expect(commands, matches(re));
-  mockFrontendServerStdIn.stdInWrites.clear();
+  frontendServerStdIn.clear();
 }
 
 class MockProcess extends Mock implements Process {}
