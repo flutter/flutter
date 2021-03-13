@@ -1845,9 +1845,9 @@ void main() {
       expect(delegate.textEditingValue.selection.baseOffset, 5);
     }, skip: isBrowser);
 
-    test('when cursor is preceeded by break line', () async {
-      const String text = 'test with\n\n\nmultiple blocks';
-      const int offset = 12;
+    test('when cursor is preceeded by break line, it should delete the breaking line and the word right before it', () async {
+      const String text = 'test with\nmultiple blocks';
+      const int offset = 10;
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
             text: text,
@@ -1878,9 +1878,9 @@ void main() {
       pumpFrame();
 
       editable.deleteByWord(SelectionChangedCause.keyboard);
-      expect(delegate.textEditingValue.text, 'test with\n\nmultiple blocks');
+      expect(delegate.textEditingValue.text, 'test multiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
-      expect(delegate.textEditingValue.selection.baseOffset, 11);
+      expect(delegate.textEditingValue.selection.baseOffset, 5);
     }, skip: isBrowser);
 
     test('when using cjk characters', () async {
@@ -2038,8 +2038,8 @@ void main() {
     }, skip: isBrowser);
 
     test('when previous character is a breakline, it should preserve it', () async {
-      const String text = 'test with\n\n\nmultiple blocks';
-      const int offset = 12;
+      const String text = 'test with\nmultiple blocks';
+      const int offset = 10;
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
             text: text,
@@ -2074,7 +2074,6 @@ void main() {
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
     }, skip: isBrowser);
-
 
     test('when text is multiline, it should delete until the first line break it finds', () async {
       const String text = 'test with\n\nMore stuff right here.\nmultiple blocks';
@@ -2457,7 +2456,7 @@ void main() {
       expect(delegate.textEditingValue.selection.baseOffset, offset);
     }, skip: isBrowser);
 
-    test('when cursor is followed by break line, it should delete a single break line', () async {
+    test('when cursor is followed by break line, it should delete the next word', () async {
       const String text = 'test with\n\n\nmultiple blocks';
       const int offset = 9;
       final TextSelectionDelegate delegate = FakeEditableTextState()
@@ -2490,7 +2489,7 @@ void main() {
       pumpFrame();
 
       editable.deleteForwardByWord(SelectionChangedCause.keyboard);
-      expect(delegate.textEditingValue.text, 'test with\n\nmultiple blocks');
+      expect(delegate.textEditingValue.text, 'test with blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
     }, skip: isBrowser);

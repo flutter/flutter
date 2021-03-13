@@ -1103,12 +1103,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
 
-    // When there is a line break, word delete should delete a single character
-    final bool isPreviousCharacterBreakLine = textBefore.codeUnitAt(textBefore.length - 1) == 0x0A;
-    if (isPreviousCharacterBreakLine) {
-      return delete(cause);
-    }
-
     final int characterBoundary = _getLeftByWord(_textPainter, textBefore.length, false);
     textBefore = textBefore.trimRight().substring(0, characterBoundary);
 
@@ -1230,12 +1224,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     if (textAfter.isEmpty) {
       return;
-    }
-
-    // When next character is a line break, it should delete a single character
-    final bool isNextCharacterBreakLine = textAfter.codeUnitAt(0) == 0x0A;
-    if (isNextCharacterBreakLine) {
-      return deleteForward(cause);
     }
 
     final String textBefore = _selection!.textBefore(text);
