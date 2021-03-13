@@ -298,7 +298,11 @@ loading-units:
     validator.attemptToolExit();
 
     expect(logger.statusText.contains('Errors checking the following files:'), true);
+<<<<<<< HEAD
     expect(logger.statusText.contains("Invalid loading units yaml file, 'loading-units' is not a list of maps."), true);
+=======
+    expect(logger.statusText.contains("Invalid loading units yaml file, loading-units' is not a list of maps."), true);
+>>>>>>> e8c68a2d803d679721a7d62b3beaea1fffd37d6b
   });
 
   testWithoutContext('loadingUnitCache validator detects malformed file: missing id', () async {
@@ -541,7 +545,7 @@ loading-units:
     validator.displayResults();
     validator.attemptToolExit();
 
-    expect(logger.statusText.contains('Modified android files:\n'), true);
+    expect(logger.statusText.contains('Modified android files:n'), true);
     expect(logger.statusText.contains('build/${DeferredComponentsValidator.kDeferredComponentsTempDirectory}/app/src/main/AndroidManifest.xml\n'), true);
 
     final File manifestOutput = env.projectDir

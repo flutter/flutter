@@ -63,7 +63,11 @@ class BuildApkCommand extends BuildSubCommand {
     "This command can build debug and release versions of your application. 'debug' builds support "
     "debugging and a quick development cycle. 'release' builds don't support debugging and are "
     'suitable for deploying to app stores. If you are deploying the app to the Play Store, '
+<<<<<<< HEAD
     "it's recommended to use app bundles or split the APK to reduce the APK size. Learn more at:n\n"
+=======
+    "it's recommended to use app bundles or split the APK to reduce the APK size. Learn more at:\n\n"
+>>>>>>> e8c68a2d803d679721a7d62b3beaea1fffd37d6b
     ' * https://developer.android.com/guide/app-bundle\n'
     ' * https://developer.android.com/studio/build/configure-apk-splits#configure-abi-split';
 

@@ -6188,7 +6188,11 @@ void main() {
     expect(state.currentTextEditingValue.text, equals('hello \u{200E}الْعَ بِيَّةُ \u{200F}'));
   });
 
+<<<<<<< HEAD
   testWidgets("Whitespace directionality formatter doesn't overwrite existing Arabic", (WidgetTester tester) async {
+=======
+  testWidgets('Whitespace directionality formatter does not overwrite existing Arabic', (WidgetTester tester) async {
+>>>>>>> e8c68a2d803d679721a7d62b3beaea1fffd37d6b
     final TextEditingController controller = TextEditingController(text: 'testText');
     await tester.pumpWidget(
       MediaQuery(
@@ -6897,7 +6901,11 @@ void main() {
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/68086.
+<<<<<<< HEAD
     testWidgets("composing range removed if it's overflowed the truncated value's length", (WidgetTester tester) async {
+=======
+    testWidgets('composing range removed if it is overflowed the truncated value is length', (WidgetTester tester) async {
+>>>>>>> e8c68a2d803d679721a7d62b3beaea1fffd37d6b
       await setupWidget(
         tester,
         LengthLimitingTextInputFormatter(

@@ -36,11 +36,11 @@ void main() {
       'known_broken_documentation.dart:112:9: final int foo = null;',
       '>>> info: Prefer const over final for declarations (prefer_const_declarations)',
       'known_broken_documentation.dart:112:25: final int foo = null;',
+      ">>> A value of type 'Null' can't be assigned to a variable of type 'int' (invalid_assignment)",
       ">>> error: A value of type 'Null' can't be assigned to a variable of type 'int' (invalid_assignment)",
-      '',
+       '',
       'Found 2 sample code errors.',
-      ''
-    ]);
+      '']);
     expect(stdoutLines, <String>[
       'Found 8 snippet code blocks, 0 sample code sections, and 2 dartpad sections.',
       'Starting analysis of code samples.',
