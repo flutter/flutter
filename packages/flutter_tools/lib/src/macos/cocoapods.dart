@@ -71,7 +71,6 @@ enum CocoaPodsStatus {
   brokenInstall,
 }
 
-
 String get cocoaPodsMinimumVersion => '1.9.0';
 String get cocoaPodsRecommendedVersion => '1.10.0';
 
