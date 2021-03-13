@@ -43,7 +43,7 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 ///     child: GridView.builder(
 ///       itemCount: 120,
 ///       gridDelegate:
-///         SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+///         const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
 ///       itemBuilder: (BuildContext context, int index) {
 ///         return Center(
 ///           child: Text('item $index'),
@@ -70,7 +70,7 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 ///       controller: _controllerOne,
 ///       itemCount: 120,
 ///       gridDelegate:
-///         SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+///         const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
 ///       itemBuilder: (BuildContext context, int index) {
 ///         return Center(
 ///           child: Text('item $index'),
