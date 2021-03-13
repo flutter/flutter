@@ -348,37 +348,48 @@ class _TableElement extends RenderObjectElement {
   @override
   RenderTable get renderObject => super.renderObject as RenderTable;
 
-  // This class ignores the child's slot entirely.
-  // Instead of doing incremental updates to the child list, it replaces the entire list each frame.
-
   List<_TableElementRow> _children = const<_TableElementRow>[];
 
+  bool _doingMountOrUpdate = false;
+
   @override
-  void mount(Element? parent, dynamic newSlot) {
+  void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
+    _doingMountOrUpdate = true;
+    int rowIndex = -1;
     _children = widget.children.map<_TableElementRow>((TableRow row) {
+      int columnIndex = 0;
+      rowIndex += 1;
       return _TableElementRow(
         key: row.key,
         children: row.children!.map<Element>((Widget child) {
           assert(child != null);
-          return inflateWidget(child, null);
+          return inflateWidget(child, _TableSlot(columnIndex++, rowIndex));
         }).toList(growable: false),
       );
     }).toList(growable: false);
+    _doingMountOrUpdate = false;
     _updateRenderObjectChildren();
   }
 
   @override
-  void insertRenderObjectChild(RenderObject child, dynamic slot) {
+  void insertRenderObjectChild(RenderBox child, _TableSlot slot) {
     renderObject.setupParentData(child);
+    // Once [mount]/[update] are done, the children are getting set all at once
+    // in [_updateRenderObjectChildren].
+    if (!_doingMountOrUpdate) {
+      renderObject.setChild(slot.column, slot.row, child);
+    }
   }
 
   @override
-  void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
+  void moveRenderObjectChild(RenderBox child, Object? oldSlot, Object? newSlot) {
+    assert(_doingMountOrUpdate);
+    // Child gets moved at the end of [update] in [_updateRenderObjectChildren].
   }
 
   @override
-  void removeRenderObjectChild(RenderObject child, dynamic slot) {
+  void removeRenderObjectChild(RenderBox child, Object? slot) {
     final TableCellParentData childParentData = child.parentData! as TableCellParentData;
     renderObject.setChild(childParentData.x!, childParentData.y!, null);
   }
@@ -387,6 +398,7 @@ class _TableElement extends RenderObjectElement {
 
   @override
   void update(Table newWidget) {
+    _doingMountOrUpdate = true;
     final Map<LocalKey, List<Element>> oldKeyedRows = <LocalKey, List<Element>>{};
     for (final _TableElementRow row in _children) {
       if (row.key != null) {
@@ -396,7 +408,8 @@ class _TableElement extends RenderObjectElement {
     final Iterator<_TableElementRow> oldUnkeyedRows = _children.where((_TableElementRow row) => row.key == null).iterator;
     final List<_TableElementRow> newChildren = <_TableElementRow>[];
     final Set<List<Element>> taken = <List<Element>>{};
-    for (final TableRow row in newWidget.children) {
+    for (int rowIndex = 0; rowIndex < newWidget.children.length; rowIndex++) {
+      final TableRow row = newWidget.children[rowIndex];
       List<Element> oldChildren;
       if (row.key != null && oldKeyedRows.containsKey(row.key)) {
         oldChildren = oldKeyedRows[row.key]!;
@@ -406,9 +419,13 @@ class _TableElement extends RenderObjectElement {
       } else {
         oldChildren = const <Element>[];
       }
+      final List<_TableSlot> slots = List<_TableSlot>.generate(
+        row.children!.length,
+        (int columnIndex) => _TableSlot(columnIndex, rowIndex),
+      );
       newChildren.add(_TableElementRow(
         key: row.key,
-        children: updateChildren(oldChildren, row.children!, forgottenChildren: _forgottenChildren),
+        children: updateChildren(oldChildren, row.children!, forgottenChildren: _forgottenChildren, slots: slots),
       ));
     }
     while (oldUnkeyedRows.moveNext())
@@ -417,6 +434,7 @@ class _TableElement extends RenderObjectElement {
       updateChildren(oldChildren, const <Widget>[], forgottenChildren: _forgottenChildren);
 
     _children = newChildren;
+    _doingMountOrUpdate = false;
     _updateRenderObjectChildren();
     _forgottenChildren.clear();
     super.update(newWidget);
@@ -487,5 +505,32 @@ class TableCell extends ParentDataWidget<TableCellParentData> {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<TableCellVerticalAlignment>('verticalAlignment', verticalAlignment));
+  }
+}
+
+@immutable
+class _TableSlot with Diagnosticable {
+  const _TableSlot(this.column, this.row);
+
+  final int column;
+  final int row;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is _TableSlot
+        && column == other.column
+        && row == other.row;
+  }
+
+  @override
+  int get hashCode => hashValues(column, row);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(IntProperty('x', column));
+    properties.add(IntProperty('y', row));
   }
 }
