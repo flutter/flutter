@@ -77,27 +77,23 @@ uint32_t fl_backing_store_provider_get_gl_target(FlBackingStoreProvider* self) {
   return GL_TEXTURE_2D;
 }
 
-static int gl_version(uint32_t major, uint32_t minor) {
-  return (major << 16) | minor;
-}
-
 uint32_t fl_backing_store_provider_get_gl_format(FlBackingStoreProvider* self) {
   // Flutter defines SK_R32_SHIFT=16, so SK_PMCOLOR_BYTE_ORDER should be BGRA.
   // In Linux kN32_SkColorType is assumed to be kBGRA_8888_SkColorType.
   // So we must choose a valid gl format to be compatible with surface format
   // BGRA8.
-  // Following logics are copied from Skia GrGLCaps.cpp
+  // Following logics are copied from Skia GrGLCaps.cpp.
 
   if (epoxy_is_desktop_gl()) {
-    if (epoxy_gl_version() >= gl_version(1, 2) ||
-        epoxy_has_gl_extension("GL_EXT_bgra")) {
+    // For OpenGL.
+    if (epoxy_gl_version() >= 12 || epoxy_has_gl_extension("GL_EXT_bgra")) {
       return GL_RGBA8;
     }
   } else {
     // For OpenGL ES.
     if (epoxy_has_gl_extension("GL_EXT_texture_format_BGRA8888") ||
         (epoxy_has_gl_extension("GL_APPLE_texture_format_BGRA8888") &&
-         epoxy_gl_version() >= gl_version(3, 0))) {
+         epoxy_gl_version() >= 30)) {
       return GL_BGRA8_EXT;
     }
   }
