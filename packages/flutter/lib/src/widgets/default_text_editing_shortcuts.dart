@@ -201,6 +201,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Meta + shift + arrow up
     //   * Shift + end
     //   * Shift + home
+    //   * Meta + delete
   };
 
   static final Map<LogicalKeySet, Intent> _fuchsiaShortcuts = <LogicalKeySet, Intent>{
@@ -244,6 +245,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Meta + shift + arrow up
     //   * Shift + end
     //   * Shift + home
+    //   * Meta + delete
   };
 
   static final Map<LogicalKeySet, Intent> _iOSShortcuts = <LogicalKeySet, Intent>{
@@ -287,6 +289,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Meta + shift + arrow up
     //   * Shift + end
     //   * Shift + home
+    //   * Meta + delete
   };
 
   static final Map<LogicalKeySet, Intent> _linuxShortcuts = <LogicalKeySet, Intent>{
@@ -330,6 +333,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Meta + shift + arrow up
     //   * Shift + end
     //   * Shift + home
+    //   * Meta + delete
   };
 
   static final Map<LogicalKeySet, Intent> _macShortcuts = <LogicalKeySet, Intent>{
@@ -373,6 +377,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Home
     //   * Shift + end
     //   * Shift + home
+    //   * Control + delete
   };
 
   static final Map<LogicalKeySet, Intent> _windowsShortcuts = <LogicalKeySet, Intent>{
@@ -416,6 +421,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Meta + shift + arrow left
     //   * Meta + shift + arrow right
     //   * Meta + shift + arrow up
+    //   * Meta + delete
   };
 
   // Web handles its text selection natively and doesn't use any of these
@@ -425,6 +431,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.backspace): const DoNothingAndStopPropagationTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.backspace): const DoNothingAndStopPropagationTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.delete): const DoNothingAndStopPropagationTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.meta): const DoNothingAndStopPropagationTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.delete): const DoNothingAndStopPropagationTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.delete): const DoNothingAndStopPropagationTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowDown): const DoNothingAndStopPropagationTextIntent(),

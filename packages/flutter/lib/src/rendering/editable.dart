@@ -1011,9 +1011,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return _getTextPositionVertical(offset, verticalOffset);
   }
 
-  // Deletes the current uncollapsed [selection]
+  // Deletes the current uncollapsed [selection].
   void _deleteSelection(SelectionChangedCause cause) {
     assert(_selection != null);
+    assert(_selection?.isCollapsed == false);
 
     if (_readOnly || !_selection!.isValid || _selection!.isCollapsed) {
       return;
@@ -1031,10 +1032,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     );
   }
 
-  /// Deletes a single character before the current collapsed selection.
+  /// Deletes backwards from the current selection.
   ///
-  /// If current [selection] is not collapsed then it should delete the text
-  /// within the selection.
+  /// If the [selection] is collapsed, deletes a single character before the 
+  /// cursor.
+  ///
+  /// If the [selection] is not collapsed, deletes the selection.
   ///
   /// {@template flutter.rendering.RenderEditable.cause}
   /// The given [SelectionChangedCause] indicates the cause of this change and
@@ -1072,15 +1075,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     );
   }
 
-  /// Deletes a single word before the current collapsed selection.
+  /// Deletes a word before the current selection.
   ///
-  /// If the [selection] is not collapsed then it should delete the text
-  /// contained in the selection.
+  /// If the [selection] is collapsed, deletes a word before the cursor.
   ///
-  /// {@template flutter.rendering.RenderEditable.cause}
-  /// The given [SelectionChangedCause] indicates the cause of this change and
-  /// will be passed to [onSelectionChanged].
-  /// {@endtemplate}
+  /// If the [selection] is not collapsed, deletes the selection.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
   ///
   /// See also:
   ///
@@ -1119,15 +1120,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     );
   }
 
-  /// Deletes a single line before the current collapsed selection.
+  /// Deletes a line before the current selection.
   ///
-  /// If current [selection] is not collapsed then it should delete the text
-  /// within the selection.
+  /// If the [selection] is collapsed, deletes a line before the cursor.
   ///
-  /// {@template flutter.rendering.RenderEditable.cause}
-  /// The given [SelectionChangedCause] indicates the cause of this change and
-  /// will be passed to [onSelectionChanged].
-  /// {@endtemplate}
+  /// If the [selection] is not collapsed, deletes the selection.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
   ///
   /// See also:
   ///
@@ -1166,15 +1165,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     );
   }
 
-  /// Deletes a single character after the current collapsed selection.
+  /// Deletes in the foward direction from the current selection.
   ///
-  /// If current [selection] is not collapsed then it should delete the text
-  /// within the selection.
+  /// If the [selection] is collapsed, deletes a single character after the 
+  /// cursor.
   ///
-  /// {@template flutter.rendering.RenderEditable.cause}
-  /// The given [SelectionChangedCause] indicates the cause of this change and
-  /// will be passed to [onSelectionChanged].
-  /// {@endtemplate}
+  /// If the [selection] is not collapsed, deletes the selection.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
   ///
   /// See also:
   ///
@@ -1205,15 +1203,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     );
   }
 
-  /// Deletes a single word after the current collapsed selection.
+  /// Deletes a word after the current selection.
   ///
-  /// If the [selection] is not collapsed then it should delete the text
-  /// contained in the selection.
+  /// If the [selection] is collapsed, deletes a word after the cursor.
   ///
-  /// {@template flutter.rendering.RenderEditable.cause}
-  /// The given [SelectionChangedCause] indicates the cause of this change and
-  /// will be passed to [onSelectionChanged].
-  /// {@endtemplate}
+  /// If the [selection] is not collapsed, deletes the selection.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
   ///
   /// See also:
   ///
@@ -1252,15 +1248,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     );
   }
 
-  /// Deletes a single line after the current collapsed selection.
+  /// Deletes a line after the current selection.
   ///
-  /// If current [selection] is not collapsed then it should delete the text
-  /// within the selection.
+  /// If the [selection] is collapsed, deletes a line after the cursor.
   ///
-  /// {@template flutter.rendering.RenderEditable.cause}
-  /// The given [SelectionChangedCause] indicates the cause of this change and
-  /// will be passed to [onSelectionChanged].
-  /// {@endtemplate}
+  /// If the [selection] is not collapsed, deletes the selection.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
   ///
   /// See also:
   ///
@@ -1304,10 +1298,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// If [selectionEnabled] is false, keeps the selection collapsed and just
   /// moves it down.
   ///
-  /// {@template flutter.rendering.RenderEditable.cause}
-  /// The given [SelectionChangedCause] indicates the cause of this change and
-  /// will be passed to [onSelectionChanged].
-  /// {@endtemplate}
+  /// {@macro flutter.rendering.RenderEditable.cause}
   ///
   /// See also:
   ///
