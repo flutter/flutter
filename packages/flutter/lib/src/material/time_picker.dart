@@ -2174,7 +2174,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// ```dart
 /// Future<TimeOfDay?> selectedTime24Hour = showTimePicker(
 ///   context: context,
-///   initialTime: TimeOfDay(hour: 10, minute: 47),
+///   initialTime: const TimeOfDay(hour: 10, minute: 47),
 ///   builder: (BuildContext context, Widget? child) {
 ///     return MediaQuery(
 ///       data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),

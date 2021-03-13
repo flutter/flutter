@@ -458,7 +458,8 @@ class FakeFlutterVersion implements FlutterVersion {
     this.frameworkRevision = '11111111111111111111',
     this.frameworkRevisionShort = '11111',
     this.frameworkAge = '0 hours ago',
-    this.frameworkCommitDate = '12/01/01'
+    this.frameworkCommitDate = '12/01/01',
+    this.gitTagVersion = const GitTagVersion.unknown(),
   });
 
   bool get didFetchTagsAndUpdate => _didFetchTagsAndUpdate;
@@ -501,6 +502,9 @@ class FakeFlutterVersion implements FlutterVersion {
   String get frameworkDate => frameworkCommitDate;
 
   @override
+  final GitTagVersion gitTagVersion;
+
+  @override
   void fetchTagsAndUpdate() {
     _didFetchTagsAndUpdate = true;
   }
@@ -512,11 +516,6 @@ class FakeFlutterVersion implements FlutterVersion {
 
   @override
   bool checkRevisionAncestry({String tentativeDescendantRevision, String tentativeAncestorRevision}) {
-    throw UnimplementedError();
-  }
-
-  @override
-  GitTagVersion get gitTagVersion {
     throw UnimplementedError();
   }
 
@@ -552,6 +551,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isIOSEnabled = true,
     this.isFuchsiaEnabled = false,
     this.isExperimentalInvalidationStrategyEnabled = false,
+    this.isWindowsUwpEnabled = false,
   });
 
   @override
@@ -582,6 +582,9 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isExperimentalInvalidationStrategyEnabled;
 
   @override
+  final bool isWindowsUwpEnabled;
+
+  @override
   bool isEnabled(Feature feature) {
     switch (feature) {
       case flutterWebFeature:
@@ -602,6 +605,8 @@ class TestFeatureFlags implements FeatureFlags {
         return isFuchsiaEnabled;
       case experimentalInvalidationStrategy:
         return isExperimentalInvalidationStrategyEnabled;
+      case windowsUwpEmbedding:
+        return isWindowsUwpEnabled;
     }
     return false;
   }
@@ -655,7 +660,7 @@ class TestBuildSystem implements BuildSystem {
       return _singleResult;
     }
     if (_nextResult >= _results.length) {
-      throw StateError('Unexpected buildIncremental request of ${target.name}');
+      throw StateError('Unexpected build request of ${target.name}');
     }
     return _results[_nextResult++];
   }

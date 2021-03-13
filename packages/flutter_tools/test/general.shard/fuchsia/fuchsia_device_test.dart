@@ -1277,8 +1277,6 @@ class FuchsiaModulePackage extends ApplicationPackage {
   final String name;
 }
 
-class MockFuchsiaArtifacts extends Mock implements FuchsiaArtifacts {}
-
 class MockProcessManager extends Mock implements ProcessManager {}
 
 class MockProcessResult extends Mock implements ProcessResult {}

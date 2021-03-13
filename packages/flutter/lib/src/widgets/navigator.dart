@@ -26,8 +26,8 @@ import 'routes.dart';
 import 'ticker_provider.dart';
 
 // Examples can assume:
-// class MyPage extends Placeholder { MyPage({String? title}); }
-// class MyHomePage extends Placeholder { }
+// class MyPage extends Placeholder { const MyPage({Key? key}) : super(key: key); }
+// class MyHomePage extends Placeholder { const MyHomePage({Key? key}) : super(key: key); }
 // late NavigatorState navigator;
 // late BuildContext context;
 
@@ -1302,26 +1302,30 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 /// ```
 ///
 /// ```dart main
-/// void main() => runApp(MyApp());
+/// void main() => runApp(const MyApp());
 /// ```
 ///
 /// ```dart
 /// class MyApp extends StatelessWidget {
+///   const MyApp({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return MaterialApp(
 ///       title: 'Flutter Code Sample for Navigator',
 ///       // MaterialApp contains our top-level Navigator
 ///       initialRoute: '/',
-///       routes: {
-///         '/': (BuildContext context) => HomePage(),
-///         '/signup': (BuildContext context) => SignUpPage(),
+///       routes: <String, WidgetBuilder>{
+///         '/': (BuildContext context) => const HomePage(),
+///         '/signup': (BuildContext context) => const SignUpPage(),
 ///       },
 ///     );
 ///   }
 /// }
 ///
 /// class HomePage extends StatelessWidget {
+///   const HomePage({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return DefaultTextStyle(
@@ -1329,13 +1333,15 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 ///       child: Container(
 ///         color: Colors.white,
 ///         alignment: Alignment.center,
-///         child: Text('Home Page'),
+///         child: const Text('Home Page'),
 ///       ),
 ///     );
 ///   }
 /// }
 ///
 /// class CollectPersonalInfoPage extends StatelessWidget {
+///   const CollectPersonalInfoPage({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return DefaultTextStyle(
@@ -1350,7 +1356,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 ///         child: Container(
 ///           color: Colors.lightBlue,
 ///           alignment: Alignment.center,
-///           child: Text('Collect Personal Info Page'),
+///           child: const Text('Collect Personal Info Page'),
 ///         ),
 ///       ),
 ///     );
@@ -1359,8 +1365,9 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 ///
 /// class ChooseCredentialsPage extends StatelessWidget {
 ///   const ChooseCredentialsPage({
+///     Key? key,
 ///     required this.onSignupComplete,
-///   });
+///   }) : super(key: key);
 ///
 ///   final VoidCallback onSignupComplete;
 ///
@@ -1373,7 +1380,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 ///         child: Container(
 ///           color: Colors.pinkAccent,
 ///           alignment: Alignment.center,
-///           child: Text('Choose Credentials Page'),
+///           child: const Text('Choose Credentials Page'),
 ///         ),
 ///       ),
 ///     );
@@ -1381,6 +1388,8 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 /// }
 ///
 /// class SignUpPage extends StatelessWidget {
+///   const SignUpPage({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     // SignUpPage builds its own Navigator which ends up being a nested
@@ -1393,7 +1402,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 ///           case 'signup/personal_info':
 ///           // Assume CollectPersonalInfoPage collects personal info and then
 ///           // navigates to 'signup/choose_credentials'.
-///             builder = (BuildContext _) => CollectPersonalInfoPage();
+///             builder = (BuildContext context) => const CollectPersonalInfoPage();
 ///             break;
 ///           case 'signup/choose_credentials':
 ///           // Assume ChooseCredentialsPage collects new credentials and then
@@ -1412,7 +1421,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 ///           default:
 ///             throw Exception('Invalid route: ${settings.name}');
 ///         }
-///         return MaterialPageRoute(builder: builder, settings: settings);
+///         return MaterialPageRoute<void>(builder: builder, settings: settings);
 ///       },
 ///     );
 ///   }
@@ -2102,7 +2111,12 @@ class Navigator extends StatefulWidget {
   ///
   /// ```dart
   /// void _openMyPage() {
-  ///   Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => MyPage()));
+  ///   Navigator.push<void>(
+  ///     context,
+  ///     MaterialPageRoute<void>(
+  ///       builder: (BuildContext context) => const MyPage(),
+  ///     ),
+  ///   );
   /// }
   /// ```
   /// {@end-tool}
@@ -2145,12 +2159,13 @@ class Navigator extends StatefulWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// static Route _myRouteBuilder(BuildContext context, Object? arguments) {
-  ///   return MaterialPageRoute(
-  ///     builder: (BuildContext context) => MyStatefulWidget(),
+  /// static Route<void> _myRouteBuilder(BuildContext context, Object? arguments) {
+  ///   return MaterialPageRoute<void>(
+  ///     builder: (BuildContext context) => const MyStatefulWidget(),
   ///   );
   /// }
   ///
+  /// @override
   /// Widget build(BuildContext context) {
   ///   return Scaffold(
   ///     appBar: AppBar(
@@ -2204,8 +2219,12 @@ class Navigator extends StatefulWidget {
   ///
   /// ```dart
   /// void _completeLogin() {
-  ///   Navigator.pushReplacement(
-  ///       context, MaterialPageRoute(builder: (BuildContext context) => MyHomePage()));
+  ///   Navigator.pushReplacement<void, void>(
+  ///     context,
+  ///     MaterialPageRoute<void>(
+  ///       builder: (BuildContext context) => const MyHomePage(),
+  ///     ),
+  ///   );
   /// }
   /// ```
   /// {@end-tool}
@@ -2240,12 +2259,13 @@ class Navigator extends StatefulWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// static Route _myRouteBuilder(BuildContext context, Object? arguments) {
-  ///   return MaterialPageRoute(
-  ///     builder: (BuildContext context) => MyStatefulWidget(),
+  /// static Route<void> _myRouteBuilder(BuildContext context, Object? arguments) {
+  ///   return MaterialPageRoute<void>(
+  ///     builder: (BuildContext context) => const MyStatefulWidget(),
   ///   );
   /// }
   ///
+  /// @override
   /// Widget build(BuildContext context) {
   ///   return Scaffold(
   ///     appBar: AppBar(
@@ -2306,9 +2326,9 @@ class Navigator extends StatefulWidget {
   ///
   /// ```dart
   /// void _finishAccountCreation() {
-  ///   Navigator.pushAndRemoveUntil(
+  ///   Navigator.pushAndRemoveUntil<void>(
   ///     context,
-  ///     MaterialPageRoute(builder: (BuildContext context) => MyHomePage()),
+  ///     MaterialPageRoute<void>(builder: (BuildContext context) => const MyHomePage()),
   ///     ModalRoute.withName('/'),
   ///   );
   /// }
@@ -2345,12 +2365,13 @@ class Navigator extends StatefulWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// static Route _myRouteBuilder(BuildContext context, Object? arguments) {
-  ///   return MaterialPageRoute(
-  ///     builder: (BuildContext context) => MyStatefulWidget(),
+  /// static Route<void> _myRouteBuilder(BuildContext context, Object? arguments) {
+  ///   return MaterialPageRoute<void>(
+  ///     builder: (BuildContext context) => const MyStatefulWidget(),
   ///   );
   /// }
   ///
+  /// @override
   /// Widget build(BuildContext context) {
   ///   return Scaffold(
   ///     appBar: AppBar(
@@ -4439,7 +4460,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// ```dart
   /// void _openPage() {
-  ///   navigator.push(MaterialPageRoute(builder: (BuildContext context) => MyPage()));
+  ///   navigator.push<void>(
+  ///     MaterialPageRoute<void>(
+  ///       builder: (BuildContext context) => const MyPage(),
+  ///     ),
+  ///   );
   /// }
   /// ```
   /// {@end-tool}
@@ -4499,12 +4524,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// static Route _myRouteBuilder(BuildContext context, Object? arguments) {
-  ///   return MaterialPageRoute(
-  ///     builder: (BuildContext context) => MyStatefulWidget(),
+  /// static Route<void> _myRouteBuilder(BuildContext context, Object? arguments) {
+  ///   return MaterialPageRoute<void>(
+  ///     builder: (BuildContext context) => const MyStatefulWidget(),
   ///   );
   /// }
   ///
+  /// @override
   /// Widget build(BuildContext context) {
   ///   return Scaffold(
   ///     appBar: AppBar(
@@ -4602,8 +4628,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// ```dart
   /// void _doOpenPage() {
-  ///   navigator.pushReplacement(
-  ///       MaterialPageRoute(builder: (BuildContext context) => MyHomePage()));
+  ///   navigator.pushReplacement<void, void>(
+  ///     MaterialPageRoute<void>(
+  ///       builder: (BuildContext context) => const MyHomePage(),
+  ///     ),
+  ///   );
   /// }
   /// ```
   /// {@end-tool}
@@ -4638,12 +4667,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// static Route _myRouteBuilder(BuildContext context, Object? arguments) {
-  ///   return MaterialPageRoute(
-  ///     builder: (BuildContext context) => MyStatefulWidget(),
+  /// static Route<void> _myRouteBuilder(BuildContext context, Object? arguments) {
+  ///   return MaterialPageRoute<void>(
+  ///     builder: (BuildContext context) => const MyStatefulWidget(),
   ///   );
   /// }
   ///
+  /// @override
   /// Widget build(BuildContext context) {
   ///   return Scaffold(
   ///     appBar: AppBar(
@@ -4706,8 +4736,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// ```dart
   /// void _resetAndOpenPage() {
-  ///   navigator.pushAndRemoveUntil(
-  ///     MaterialPageRoute(builder: (BuildContext context) => MyHomePage()),
+  ///   navigator.pushAndRemoveUntil<void>(
+  ///     MaterialPageRoute<void>(builder: (BuildContext context) => const MyHomePage()),
   ///     ModalRoute.withName('/'),
   ///   );
   /// }
@@ -4745,12 +4775,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// static Route _myRouteBuilder(BuildContext context, Object? arguments) {
-  ///   return MaterialPageRoute(
-  ///     builder: (BuildContext context) => MyStatefulWidget(),
+  /// static Route<void> _myRouteBuilder(BuildContext context, Object? arguments) {
+  ///   return MaterialPageRoute<void>(
+  ///     builder: (BuildContext context) => const MyStatefulWidget(),
   ///   );
   /// }
   ///
+  /// @override
   /// Widget build(BuildContext context) {
   ///   return Scaffold(
   ///     appBar: AppBar(
@@ -5669,18 +5700,20 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 /// ```
 ///
 /// ```dart main
-/// void main() => runApp(MyApp());
+/// void main() => runApp(const MyApp());
 /// ```
 ///
 /// ```dart preamble
 /// class MyApp extends StatelessWidget {
+///   const MyApp({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return MaterialApp(
 ///       restorationScopeId: 'app',
 ///       home: Scaffold(
-///         appBar: AppBar(title: Text('RestorableRouteFuture Example')),
-///         body: MyHome(),
+///         appBar: AppBar(title: const Text('RestorableRouteFuture Example')),
+///         body: const MyHome(),
 ///       ),
 ///     );
 ///   }
@@ -5702,6 +5735,7 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 ///   @override
 ///   String get restorationId => 'home';
 ///
+///   @override
 ///   void initState() {
 ///     super.initState();
 ///     _counterRoute = RestorableRouteFuture<int>(
@@ -5740,9 +5774,9 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 ///   // A static `RestorableRouteBuilder` that can re-create the route during
 ///   // state restoration.
 ///   static Route<int> _counterRouteBuilder(BuildContext context, Object? arguments) {
-///     return MaterialPageRoute(
+///     return MaterialPageRoute<int>(
 ///       builder: (BuildContext context) => MyCounter(
-///         title: arguments as String,
+///         title: arguments!.toString(),
 ///       ),
 ///     );
 ///   }
@@ -5759,7 +5793,7 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 ///               // Show the route defined by the `RestorableRouteFuture`.
 ///               _counterRoute.present('Awesome Counter');
 ///             },
-///             child: Text('Open Counter'),
+///             child: const Text('Open Counter'),
 ///           ),
 ///         ],
 ///       ),
@@ -5810,7 +5844,7 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 ///         child: Text('Count: ${_count.value}'),
 ///       ),
 ///       floatingActionButton: FloatingActionButton(
-///         child: Icon(Icons.add),
+///         child: const Icon(Icons.add),
 ///         onPressed: () {
 ///           setState(() {
 ///             _count.value++;

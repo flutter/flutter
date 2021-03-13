@@ -4,8 +4,11 @@
 
 // @dart = 2.8
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> c3d0f60407f4fe556a73f9bef495aac352d4595b
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
@@ -97,14 +100,14 @@ void main() {
   group('Gradle', () {
     Directory tempDir;
     FakeProcessManager processManager;
-    FakeAndroidSdk mockAndroidSdk;
+    FakeAndroidSdk fakeAndroidSdk;
     TestUsage testUsage;
 
     setUp(() {
       testUsage = TestUsage();
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
       processManager = FakeProcessManager.any();
-      mockAndroidSdk = FakeAndroidSdk(globals.fs.directory('irrelevant'));
+      fakeAndroidSdk = FakeAndroidSdk(globals.fs.directory('irrelevant'));
     });
 
     tearDown(() {
@@ -171,7 +174,7 @@ void main() {
       ));
     },
     overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
+      AndroidSdk: () => fakeAndroidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => processManager,
       Usage: () => testUsage,
@@ -211,7 +214,7 @@ void main() {
       ));
     },
     overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
+      AndroidSdk: () => fakeAndroidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => processManager,
       Usage: () => testUsage,

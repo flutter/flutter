@@ -12,7 +12,6 @@ import 'package:vm_service/vm_service.dart';
 import '../android/android_device.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../device.dart';
@@ -495,6 +494,10 @@ class RunCommand extends RunCommandBase {
         debuggingOptions: await createDebuggingOptions(webMode),
         stayResident: stayResident,
         urlTunneller: null,
+        fileSystem: globals.fs,
+        usage: globals.flutterUsage,
+        logger: globals.logger,
+        systemClock: globals.systemClock,
       );
     }
     return ColdRunner(
@@ -635,7 +638,7 @@ class RunCommand extends RunCommandBase {
             logger: globals.logger,
             terminal: globals.terminal,
             signals: globals.signals,
-            processInfo: processInfo,
+            processInfo: globals.processInfo,
             reportReady: boolArg('report-ready'),
             pidFile: stringArg('pid-file'),
           )

@@ -100,6 +100,42 @@ class InlineSpanSemanticsInformation {
   String toString() => '${objectRuntimeType(this, 'InlineSpanSemanticsInformation')}{text: $text, semanticsLabel: $semanticsLabel, recognizer: $recognizer}';
 }
 
+/// Combines _semanticsInfo entries where permissible.
+///
+/// Consecutive inline spans can be combined if their
+/// [InlineSpanSemanticsInformation.requiresOwnNode] return false.
+List<InlineSpanSemanticsInformation> combineSemanticsInfo(List<InlineSpanSemanticsInformation> infoList) {
+  final List<InlineSpanSemanticsInformation> combined = <InlineSpanSemanticsInformation>[];
+  String workingText = '';
+  // TODO(ianh): this algorithm is internally inconsistent. workingText
+  // never becomes null, but we check for it being so below.
+  String? workingLabel;
+  for (final InlineSpanSemanticsInformation info in infoList) {
+    if (info.requiresOwnNode) {
+      combined.add(InlineSpanSemanticsInformation(
+        workingText,
+        semanticsLabel: workingLabel ?? workingText,
+      ));
+      workingText = '';
+      workingLabel = null;
+      combined.add(info);
+    } else {
+      workingText += info.text;
+      workingLabel ??= '';
+      if (info.semanticsLabel != null) {
+        workingLabel += info.semanticsLabel!;
+      } else {
+        workingLabel += info.text;
+      }
+    }
+  }
+  combined.add(InlineSpanSemanticsInformation(
+    workingText,
+    semanticsLabel: workingLabel,
+  ));
+  return combined;
+}
+
 /// An immutable span of inline content which forms part of a paragraph.
 ///
 ///  * The subclass [TextSpan] specifies text and may contain child [InlineSpan]s.
@@ -119,17 +155,17 @@ class InlineSpanSemanticsInformation {
 /// Text.rich(
 ///   TextSpan(
 ///     text: 'My name is ',
-///     style: TextStyle(color: Colors.black),
+///     style: const TextStyle(color: Colors.black),
 ///     children: <InlineSpan>[
 ///       WidgetSpan(
 ///         alignment: PlaceholderAlignment.baseline,
 ///         baseline: TextBaseline.alphabetic,
 ///         child: ConstrainedBox(
-///           constraints: BoxConstraints(maxWidth: 100),
-///           child: TextField(),
+///           constraints: const BoxConstraints(maxWidth: 100),
+///           child: const TextField(),
 ///         )
 ///       ),
-///       TextSpan(
+///       const TextSpan(
 ///         text: '.',
 ///       ),
 ///     ],

@@ -12,7 +12,6 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
-import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
@@ -260,7 +259,7 @@ void writeLocalProperties(File properties) {
 void exitWithNoSdkMessage() {
   BuildEvent('unsupported-project', eventError: 'android-sdk-not-found', flutterUsage: globals.flutterUsage).send();
   throwToolExit(
-    '$warningMark No Android SDK found. '
+    '${globals.logger.terminal.warningMark} No Android SDK found. '
     'Try setting the ANDROID_SDK_ROOT environment variable.'
   );
 }

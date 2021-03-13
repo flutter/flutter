@@ -259,7 +259,7 @@ typedef ChildIndexGetter = int? Function(Key key);
 ///       gridDelegate: _gridDelegate,
 ///       delegate: SliverChildBuilderDelegate(
 ///         (BuildContext context, int index) {
-///            return Text('...');
+///            return const Text('...');
 ///          },
 ///          childCount: 2,
 ///        ),
@@ -268,7 +268,7 @@ typedef ChildIndexGetter = int? Function(Key key);
 ///       gridDelegate: _gridDelegate,
 ///       delegate: SliverChildBuilderDelegate(
 ///         (BuildContext context, int index) {
-///            return Text('...');
+///            return const Text('...');
 ///          },
 ///          childCount: 2,
 ///          semanticIndexOffset: 2,
@@ -301,9 +301,9 @@ typedef ChildIndexGetter = int? Function(Key key);
 ///       delegate: SliverChildBuilderDelegate(
 ///         (BuildContext context, int index) {
 ///            if (index.isEven) {
-///              return Text('...');
+///              return const Text('...');
 ///            }
-///            return Spacer();
+///            return const Spacer();
 ///          },
 ///          semanticIndexCallback: (Widget widget, int localIndex) {
 ///            if (localIndex.isEven) {
@@ -966,7 +966,7 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
 ///
 /// ```dart
 /// SliverGrid(
-///   gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+///   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
 ///     maxCrossAxisExtent: 200.0,
 ///     mainAxisSpacing: 10.0,
 ///     crossAxisSpacing: 10.0,
@@ -1479,7 +1479,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 ///
 /// ```dart
 /// bool _visible = true;
-/// List<Widget> listItems = <Widget>[
+/// List<Widget> listItems = const <Widget>[
 ///   Text('Now you see me,'),
 ///   Text("Now you don't!"),
 /// ];
