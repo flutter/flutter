@@ -1034,7 +1034,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   /// Deletes backwards from the current selection.
   ///
-  /// If the [selection] is collapsed, deletes a single character before the 
+  /// If the [selection] is collapsed, deletes a single character before the
   /// cursor.
   ///
   /// If the [selection] is not collapsed, deletes the selection.
@@ -1161,7 +1161,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   /// Deletes in the foward direction from the current selection.
   ///
-  /// If the [selection] is collapsed, deletes a single character after the 
+  /// If the [selection] is collapsed, deletes a single character after the
   /// cursor.
   ///
   /// If the [selection] is not collapsed, deletes the selection.
