@@ -1062,7 +1062,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     );
   }
 
-  /// Deletes a word before the current selection.
+  /// Deletes a word backwards from the current selection.
   ///
   /// If the [selection] is collapsed, deletes a word before the cursor.
   ///
@@ -1107,7 +1107,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     );
   }
 
-  /// Deletes a line before the current selection.
+  /// Deletes a line backwards from the current selection.
   ///
   /// If the [selection] is collapsed, deletes a line before the cursor.
   ///
@@ -1190,7 +1190,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     );
   }
 
-  /// Deletes a word after the current selection.
+  /// Deletes a word in the foward direction from the current selection.
   ///
   /// If the [selection] is collapsed, deletes a word after the cursor.
   ///
@@ -1235,7 +1235,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     );
   }
 
-  /// Deletes a line after the current selection.
+  /// Deletes a line in the foward direction from the current selection.
   ///
   /// If the [selection] is collapsed, deletes a line after the cursor.
   ///
