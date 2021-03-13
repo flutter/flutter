@@ -4,7 +4,7 @@
 
 import 'actions.dart';
 
-/// An [Intent] to delete a character
+/// An [Intent] to delete a character in the backwards direction.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
 class DeleteTextIntent extends Intent{
@@ -12,7 +12,7 @@ class DeleteTextIntent extends Intent{
   const DeleteTextIntent();
 }
 
-/// An [Intent] to delete a word
+/// An [Intent] to delete a word in the backwards direction.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
 class DeleteByWordTextIntent extends Intent{
@@ -20,7 +20,7 @@ class DeleteByWordTextIntent extends Intent{
   const DeleteByWordTextIntent();
 }
 
-/// An [Intent] to delete a line
+/// An [Intent] to delete a line in the backwards direction.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
 class DeleteByLineTextIntent extends Intent{
@@ -28,7 +28,7 @@ class DeleteByLineTextIntent extends Intent{
   const DeleteByLineTextIntent();
 }
 
-/// An [Intent] to delete a character forward
+/// An [Intent] to delete in the forward direction.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
 class DeleteForwardTextIntent extends Intent{
@@ -36,7 +36,7 @@ class DeleteForwardTextIntent extends Intent{
   const DeleteForwardTextIntent();
 }
 
-/// An [Intent] to delete a word forward
+/// An [Intent] to delete a word in the forward direction.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
 class DeleteForwardByWordTextIntent extends Intent{
@@ -44,7 +44,7 @@ class DeleteForwardByWordTextIntent extends Intent{
   const DeleteForwardByWordTextIntent();
 }
 
-/// An [Intent] to delete a line forward
+/// An [Intent] to delete a line in the forward direction.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
 class DeleteForwardByLineTextIntent extends Intent{
