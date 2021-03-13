@@ -556,6 +556,134 @@ loading-units:
     expect(manifestOutput.readAsStringSync().contains('<!-- Don\'t delete the meta-data below.'), true);
   });
 
+  // The mapping is incorrectly placed in the activity instead of application.
+  testWithoutContext('androidStringMapping detects improperly placed metadata mapping', () async {
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
+      env,
+      exitOnFail: false,
+      title: 'test check',
+    );
+    final Directory baseModuleDir = env.projectDir.childDirectory('android').childDirectory('app');
+    final File manifest = baseModuleDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml');
+    if (manifest.existsSync()) {
+      manifest.deleteSync();
+    }
+    manifest.createSync(recursive: true);
+    manifest.writeAsStringSync('''
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.splitaot">
+    <application
+        android:name="io.flutter.app.FlutterPlayStoreSplitApplication"
+        android:label="splitaot"
+        android:extractNativeLibs="false">
+        <activity
+            android:name=".MainActivity"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize">
+            <meta-data android:name="io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping"
+                android:value="3:component1,2:component2,4:component2"/>
+        </activity>
+        <!-- Don't delete the meta-data below.
+             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+    </application>
+</manifest>
+''', flush: true, mode: FileMode.append);
+    validator.checkAppAndroidManifestComponentLoadingUnitMapping(
+      <DeferredComponent>[
+        DeferredComponent(name: 'component1', libraries: <String>['lib2']),
+        DeferredComponent(name: 'component2', libraries: <String>['lib1', 'lib4']),
+      ],
+      <LoadingUnit>[
+        LoadingUnit(id: 2, libraries: <String>['lib1']),
+        LoadingUnit(id: 3, libraries: <String>['lib2', 'lib3']),
+        LoadingUnit(id: 4, libraries: <String>['lib4', 'lib5']),
+      ],
+    );
+    validator.displayResults();
+    validator.attemptToolExit();
+
+    expect(logger.statusText.contains('Modified android files:\n'), true);
+    expect(logger.statusText.contains('build/${DeferredComponentsValidator.kDeferredComponentsTempDirectory}/app/src/main/AndroidManifest.xml\n'), true);
+
+    final File manifestOutput = env.projectDir
+      .childDirectory('build')
+      .childDirectory(DeferredComponentsValidator.kDeferredComponentsTempDirectory)
+      .childDirectory('app')
+      .childDirectory('src')
+      .childDirectory('main')
+      .childFile('AndroidManifest.xml');
+    expect(manifestOutput.existsSync(), true);
+    expect(manifestOutput.readAsStringSync().contains('<meta-data android:name="io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping" android:value="3:component1,2:component2,4:component2"/>'), true);
+    expect(manifestOutput.readAsStringSync().contains('<!-- Don\'t delete the meta-data below.'), true);
+  });
+
+  testWithoutContext('androidStringMapping generates base module loading unit mapping', () async {
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
+      env,
+      exitOnFail: false,
+      title: 'test check',
+    );
+    final Directory baseModuleDir = env.projectDir.childDirectory('android').childDirectory('app');
+    final File manifest = baseModuleDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml');
+    if (manifest.existsSync()) {
+      manifest.deleteSync();
+    }
+    manifest.createSync(recursive: true);
+    manifest.writeAsStringSync('''
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.splitaot">
+    <application
+        android:name="io.flutter.app.FlutterPlayStoreSplitApplication"
+        android:label="splitaot"
+        android:extractNativeLibs="false">
+        <activity
+            android:name=".MainActivity"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize">
+        </activity>
+        <!-- Don't delete the meta-data below.
+             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+    </application>
+</manifest>
+''', flush: true, mode: FileMode.append);
+    validator.checkAppAndroidManifestComponentLoadingUnitMapping(
+      <DeferredComponent>[
+        DeferredComponent(name: 'component1', libraries: <String>['lib2']),
+        DeferredComponent(name: 'component2', libraries: <String>['lib1', 'lib4']),
+      ],
+      <LoadingUnit>[
+        LoadingUnit(id: 2, libraries: <String>['lib1']),
+        LoadingUnit(id: 3, libraries: <String>['lib2', 'lib3']),
+        LoadingUnit(id: 4, libraries: <String>['lib4', 'lib5']),
+        // Loading units 6 and 7 are in base module
+        LoadingUnit(id: 5, libraries: <String>['lib6', 'lib7']),
+        LoadingUnit(id: 6, libraries: <String>['lib8', 'lib9']),
+      ],
+    );
+    validator.displayResults();
+    validator.attemptToolExit();
+
+    expect(logger.statusText.contains('Modified android files:\n'), true);
+    expect(logger.statusText.contains('build/${DeferredComponentsValidator.kDeferredComponentsTempDirectory}/app/src/main/AndroidManifest.xml\n'), true);
+
+    final File manifestOutput = env.projectDir
+      .childDirectory('build')
+      .childDirectory(DeferredComponentsValidator.kDeferredComponentsTempDirectory)
+      .childDirectory('app')
+      .childDirectory('src')
+      .childDirectory('main')
+      .childFile('AndroidManifest.xml');
+    expect(manifestOutput.existsSync(), true);
+    expect(manifestOutput.readAsStringSync().contains('<meta-data android:name="io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping" android:value="3:component1,2:component2,4:component2,5:,6:"/>'), true);
+    expect(manifestOutput.readAsStringSync().contains('<!-- Don\'t delete the meta-data below.'), true);
+  });
+
   // Tests if all of the regexp whitespace detection is working.
   testWithoutContext('androidStringMapping handles whitespace within entry', () async {
     final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
