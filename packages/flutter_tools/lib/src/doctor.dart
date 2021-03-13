@@ -6,6 +6,7 @@
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
+import 'package:http/http.dart' as http;
 
 import 'android/android_studio_validator.dart';
 import 'android/android_workflow.dart';
@@ -24,6 +25,7 @@ import 'device.dart';
 import 'features.dart';
 import 'fuchsia/fuchsia_workflow.dart';
 import 'globals.dart' as globals;
+import 'host_availability_validator.dart';
 import 'intellij/intellij_validator.dart';
 import 'linux/linux_doctor.dart';
 import 'linux/linux_workflow.dart';
@@ -132,6 +134,10 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
           deviceManager: globals.deviceManager,
           userMessages: globals.userMessages,
         ),
+      HostAvailabilityValidator(
+        platform: globals.platform,
+        httpClient: http.Client()
+      ),
     ];
     return _validators;
   }
