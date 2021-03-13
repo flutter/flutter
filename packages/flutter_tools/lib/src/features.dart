@@ -48,6 +48,9 @@ abstract class FeatureFlags {
   /// Whether fuchsia is enabled.
   bool get isFuchsiaEnabled => true;
 
+  /// Whether custom devices are enabled.
+  bool get areCustomDevicesEnabled => false;
+
   /// Whether fast single widget reloads are enabled.
   bool get isSingleWidgetReloadEnabled => false;
 
@@ -98,6 +101,9 @@ class FlutterFeatureFlags implements FeatureFlags {
   bool get isFuchsiaEnabled => isEnabled(flutterFuchsiaFeature);
 
   @override
+  bool get areCustomDevicesEnabled => isEnabled(flutterCustomDevicesFeature);
+
+  @override
   bool get isSingleWidgetReloadEnabled => isEnabled(singleWidgetReload);
 
   @override
@@ -127,6 +133,8 @@ class FlutterFeatureFlags implements FeatureFlags {
     }
     return isEnabled;
   }
+
+
 }
 
 /// All current Flutter feature flags.
@@ -140,6 +148,7 @@ const List<Feature> allFeatures = <Feature>[
   flutterAndroidFeature,
   flutterIOSFeature,
   flutterFuchsiaFeature,
+  flutterCustomDevicesFeature,
   experimentalInvalidationStrategy,
 ];
 
@@ -297,6 +306,30 @@ const Feature flutterFuchsiaFeature = Feature(
   ),
 );
 
+const Feature flutterCustomDevicesFeature = Feature(
+  name: 'alpha-quality support for custom, individually configured devices',
+  configSetting: 'enable-custom-devices',
+  environmentOverride: 'FLUTTER_CUSTOM_DEVICES',
+  extraHelpText: flutterNext ?
+  'Newer beta versions are available on the beta channel.' : null,
+  master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+  dev: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+  beta: FeatureChannelSetting(
+    available: flutterNext,
+    enabledByDefault: false,
+  ),
+  stable: FeatureChannelSetting(
+    available: flutterNext,
+    enabledByDefault: false,
+  )
+);
+
 /// The fast hot reload feature for https://github.com/flutter/flutter/issues/61407.
 const Feature singleWidgetReload = Feature(
   name: 'Hot reload optimization for changes to class body of a single widget',
@@ -371,7 +404,7 @@ class Feature {
     this.master = const FeatureChannelSetting(),
     this.dev = const FeatureChannelSetting(),
     this.beta = const FeatureChannelSetting(),
-    this.stable = const FeatureChannelSetting(),
+    this.stable = const FeatureChannelSetting()
   });
 
   /// The user visible name for this feature.

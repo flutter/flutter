@@ -149,8 +149,7 @@ class ProtocolDiscovery {
       hostUri = deviceUri.replace(port: actualHostPort);
     }
 
-    assert(InternetAddress(hostUri.host).isLoopback);
-    if (ipv6) {
+    if (InternetAddress(hostUri.host).isLoopback && ipv6) {
       hostUri = hostUri.replace(host: InternetAddress.loopbackIPv6.host);
     }
     return hostUri;
