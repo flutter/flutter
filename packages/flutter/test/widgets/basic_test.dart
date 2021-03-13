@@ -321,11 +321,11 @@ void main() {
   test('UnconstrainedBox toString', () {
     expect(
       const UnconstrainedBox(constrainedAxis: Axis.vertical,).toString(),
-      equals('UnconstrainedBox(alignment: Alignment.center, constrainedAxis: vertical)'),
+      equals('UnconstrainedBox(alignment: Alignment.center, constraints transform: width constraints removed, constrainedAxis: vertical)'),
     );
     expect(
       const UnconstrainedBox(constrainedAxis: Axis.horizontal, textDirection: TextDirection.rtl, alignment: Alignment.topRight).toString(),
-      equals('UnconstrainedBox(alignment: Alignment.topRight, textDirection: rtl, constrainedAxis: horizontal)'),
+      equals('UnconstrainedBox(alignment: Alignment.topRight, textDirection: rtl, constraints transform: height constraints removed, constrainedAxis: horizontal)'),
     );
   });
 
@@ -341,12 +341,18 @@ void main() {
   group('ConstraintsTransformBox', () {
     test('toString', () {
       expect(
-        const ConstraintsTransformBox.unconstrained().toString(),
-        equals('ConstraintsTransformBox(alignment: Alignment.center, transform: unconstrained)'),
+        const ConstraintsTransformBox(
+          constraintsTransform: ConstraintsTransformBox.unconstrained,
+        ).toString(),
+        equals('ConstraintsTransformBox(alignment: Alignment.center, constraints transform: unconstrained)'),
       );
       expect(
-        const ConstraintsTransformBox.widthConstrained(textDirection: TextDirection.rtl, alignment: Alignment.topRight).toString(),
-        equals('ConstraintsTransformBox(alignment: Alignment.topRight, textDirection: rtl, transform: width-constrained)'),
+        const ConstraintsTransformBox(
+          textDirection: TextDirection.rtl,
+          alignment: Alignment.topRight,
+          constraintsTransform: ConstraintsTransformBox.widthUnconstrained,
+        ).toString(),
+        equals('ConstraintsTransformBox(alignment: Alignment.topRight, textDirection: rtl, constraints transform: width constraints removed)'),
       );
     });
   });
