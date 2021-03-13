@@ -1,9 +1,12 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 // @dart = 2.8
 
 import 'package:file/src/interface/directory.dart';
 import 'package:file/src/interface/file.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device.dart';
@@ -20,10 +23,6 @@ import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
-
-final FakePlatform _windows = FakePlatform(
-  operatingSystem: 'windows',
-);
 
 void _writeCustomDevicesConfigFile(Directory dir, List<CustomDeviceConfig> configs) {
   dir.createSync();
@@ -100,8 +99,7 @@ void main() {
           disabled: false
         ),
         processManager: FakeProcessManager.any(),
-        logger: BufferLogger.test(),
-        fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test()
       );
 
       final PrebuiltLinuxApp linuxApp = PrebuiltLinuxApp(executable: 'foo');
@@ -141,8 +139,6 @@ void main() {
     );
 
     expect(await CustomDevices.test(
-      fileSystem: fs,
-      platform: _windows,
       featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
@@ -168,8 +164,6 @@ void main() {
     );
 
     expect(await CustomDevices.test(
-      fileSystem: fs,
-      platform: _windows,
       featureFlags: TestFeatureFlags(areCustomDevicesEnabled: false),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
@@ -194,8 +188,6 @@ void main() {
     );
 
     expect(await CustomDevices.test(
-      fileSystem: MemoryFileSystem.test(),
-      platform: _windows,
       featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
@@ -221,8 +213,6 @@ void main() {
 
     expect(
       await CustomDevices.test(
-        fileSystem: MemoryFileSystem.test(),
-        platform: _windows,
         featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
@@ -247,7 +237,6 @@ void main() {
       config: CustomDeviceConfig.example.copyWith(disabled: false),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
-      fileSystem: fileSystem,
     ).isSupportedForProject(flutterProject), true);
   });
 }

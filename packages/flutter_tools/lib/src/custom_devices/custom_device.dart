@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -14,9 +13,8 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/protocol_discovery.dart';
 import 'package:process/process.dart';
 
-import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../device.dart';
@@ -55,8 +53,8 @@ class CustomDeviceLogReader extends DeviceLogReader {
   /// finished.
   ///
   /// See [CustomDeviceLogReader.dispose] to end the [logLines] stream.
-  void listenToProcessOutput(Process process) {
-    final Converter<List<int>, String> decoder = const SystemEncoding().decoder;
+  void listenToProcessOutput(Process process, {Encoding encoding = systemEncoding}) {
+    final Converter<List<int>, String> decoder = encoding.decoder;
 
     process.stdout.transform<String>(decoder)
       .transform<String>(const LineSplitter())
@@ -312,7 +310,6 @@ class CustomDevice extends Device {
     required CustomDeviceConfig config,
     required Logger logger,
     required ProcessManager processManager,
-    required FileSystem fileSystem,
   }) : _config = config,
        _logger = logger,
        _processManager = processManager,
@@ -655,31 +652,25 @@ class CustomDevice extends Device {
 
 class CustomDevices extends PollingDeviceDiscovery {
   CustomDevices({
-    required Platform platform,
     required FeatureFlags featureFlags,
-    required FileSystem fileSystem,
     required ProcessManager processManager,
     required Logger logger,
   }) : _customDeviceWorkflow = CustomDeviceWorkflow(
         featureFlags: featureFlags,
       ),
-       _fileSystem = fileSystem,
        _logger = logger,
        _processManager = processManager,
        _config = null,
        super('custom devices');
 
   CustomDevices.test({
-    required Platform platform,
     required FeatureFlags featureFlags,
-    required FileSystem fileSystem,
     required ProcessManager processManager,
     required Logger logger,
     required CustomDevicesConfig config
   }) : _customDeviceWorkflow = CustomDeviceWorkflow(
         featureFlags: featureFlags,
       ),
-      _fileSystem = fileSystem,
       _logger = logger,
       _processManager = processManager,
       _config = config,
@@ -688,7 +679,6 @@ class CustomDevices extends PollingDeviceDiscovery {
   final CustomDeviceWorkflow  _customDeviceWorkflow;
   final ProcessManager _processManager;
   final Logger _logger;
-  final FileSystem _fileSystem;
   final CustomDevicesConfig? _config;
 
   @override
@@ -706,8 +696,7 @@ class CustomDevices extends PollingDeviceDiscovery {
         (CustomDeviceConfig config) => CustomDevice(
           config: config,
           logger: _logger,
-          processManager: _processManager,
-          fileSystem: _fileSystem
+          processManager: _processManager
         )
       ).toList();
   }

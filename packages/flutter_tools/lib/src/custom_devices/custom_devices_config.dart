@@ -1,12 +1,12 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:meta/meta.dart';
 
-// ignore: import_of_legacy_library_into_null_safe
 import '../base/config.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import '../base/file_system.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import '../base/logger.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import '../base/platform.dart';
 
 /// A single configured custom device.
@@ -127,7 +127,7 @@ class CustomDeviceConfig {
       _kUninstallCommand: uninstallCommand,
       _kRunDebugCommand: runDebugCommand,
       _kForwardPortCommand: forwardPortCommand,
-      _kForwardPortSuccessRegex: forwardPortSuccessRegex
+      _kForwardPortSuccessRegex: forwardPortSuccessRegex?.pattern
     };
   }
 
