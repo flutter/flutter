@@ -369,9 +369,10 @@ void TestAXNodeWrapper::ReplaceIntAttribute(int32_t node_id,
   std::vector<std::pair<ax::mojom::IntAttribute, int32_t>>& attributes =
       new_data.int_attributes;
 
-  attributes.erase(std::remove_if(
+  auto it = std::remove_if(
       attributes.begin(), attributes.end(),
-      [attribute](auto& pair) { return pair.first == attribute; }));
+      [attribute](auto& pair) { return pair.first == attribute; });
+  attributes.erase(it, attributes.end());
 
   new_data.AddIntAttribute(attribute, value);
   node->SetData(new_data);
@@ -384,9 +385,10 @@ void TestAXNodeWrapper::ReplaceFloatAttribute(
   std::vector<std::pair<ax::mojom::FloatAttribute, float>>& attributes =
       new_data.float_attributes;
 
-  attributes.erase(std::remove_if(
+  auto it = std::remove_if(
       attributes.begin(), attributes.end(),
-      [attribute](auto& pair) { return pair.first == attribute; }));
+      [attribute](auto& pair) { return pair.first == attribute; });
+  attributes.erase(it, attributes.end());
 
   new_data.AddFloatAttribute(attribute, value);
   node_->SetData(new_data);
@@ -398,9 +400,10 @@ void TestAXNodeWrapper::ReplaceBoolAttribute(ax::mojom::BoolAttribute attribute,
   std::vector<std::pair<ax::mojom::BoolAttribute, bool>>& attributes =
       new_data.bool_attributes;
 
-  attributes.erase(std::remove_if(
+  auto it = std::remove_if(
       attributes.begin(), attributes.end(),
-      [attribute](auto& pair) { return pair.first == attribute; }));
+      [attribute](auto& pair) { return pair.first == attribute; });
+  attributes.erase(it, attributes.end());
 
   new_data.AddBoolAttribute(attribute, value);
   node_->SetData(new_data);
@@ -413,9 +416,10 @@ void TestAXNodeWrapper::ReplaceStringAttribute(
   std::vector<std::pair<ax::mojom::StringAttribute, std::string>>& attributes =
       new_data.string_attributes;
 
-  attributes.erase(std::remove_if(
+  auto it = std::remove_if(
       attributes.begin(), attributes.end(),
-      [attribute](auto& pair) { return pair.first == attribute; }));
+      [attribute](auto& pair) { return pair.first == attribute; });
+  attributes.erase(it, attributes.end());
 
   new_data.AddStringAttribute(attribute, value);
   node_->SetData(new_data);
