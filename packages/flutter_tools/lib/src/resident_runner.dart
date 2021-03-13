@@ -1501,11 +1501,11 @@ class TerminalHandler {
 
   void registerSignalHandlers() {
     assert(residentRunner.stayResident);
-    _addSignalHandler(io.ProcessSignal.SIGINT, _cleanUp);
-    _addSignalHandler(io.ProcessSignal.SIGTERM, _cleanUp);
+    _addSignalHandler(io.ProcessSignal.sigint, _cleanUp);
+    _addSignalHandler(io.ProcessSignal.sigterm, _cleanUp);
     if (residentRunner.supportsServiceProtocol && residentRunner.supportsRestart) {
-      _addSignalHandler(io.ProcessSignal.SIGUSR1, _handleSignal);
-      _addSignalHandler(io.ProcessSignal.SIGUSR2, _handleSignal);
+      _addSignalHandler(io.ProcessSignal.sigusr1, _handleSignal);
+      _addSignalHandler(io.ProcessSignal.sigusr2, _handleSignal);
       if (_pidFile != null) {
         _logger.printTrace('Writing pid to: $_pidFile');
         _actualPidFile = _processInfo.writePidFile(_pidFile);
@@ -1663,7 +1663,7 @@ class TerminalHandler {
     }
     _processingUserRequest = true;
 
-    final bool fullRestart = signal == io.ProcessSignal.SIGUSR2;
+    final bool fullRestart = signal == io.ProcessSignal.sigusr2;
 
     try {
       await residentRunner.restart(fullRestart: fullRestart);

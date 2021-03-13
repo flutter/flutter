@@ -126,6 +126,8 @@ Future<bool> get isRunningOnBot => botDetector.isRunningOnBot;
 /// The current system clock instance.
 SystemClock get systemClock => context.get<SystemClock>();
 
+ProcessInfo get processInfo => context.get<ProcessInfo>();
+
 /// Display an error level message to the user. Commands should use this if they
 /// fail in some way.
 ///

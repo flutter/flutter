@@ -286,7 +286,7 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
       ),
-      ProcessInfo: () => ProcessInfo(),
+      ProcessInfo: () => ProcessInfo(globals.fs),
       ProcessManager: () => ErrorHandlingProcessManager(
         delegate: const LocalProcessManager(),
         platform: globals.platform,
