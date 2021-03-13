@@ -34,9 +34,9 @@ void main() {
         final ValidationResult result = await httpHostValidator.validate();
 
         // Check for only one information message
-        expect(result.messages..where(
+        expect(result.messages..removeWhere(
           (ValidationMessage message) => message.isHint || message.isError
-        ), hasLength(0));
+        ), hasLength(1));
       }
     });
 
