@@ -11,6 +11,7 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 
 const Map<String, String> kDyLdLibEntry = <String, String>{
   'DYLD_LIBRARY_PATH': '/path/to/libs',
@@ -49,7 +50,7 @@ void main() {
 
     // First port tried (49154) should fail, then succeed on the next
     expect(hostPort, 49154 + 1);
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 }
 
