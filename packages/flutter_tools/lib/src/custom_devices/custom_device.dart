@@ -4,22 +4,22 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/application_package.dart';
-import 'package:flutter_tools/src/base/common.dart';
-import 'package:flutter_tools/src/base/context.dart';
-import 'package:flutter_tools/src/base/process.dart';
-import 'package:flutter_tools/src/base/utils.dart';
-import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/protocol_discovery.dart';
 import 'package:process/process.dart';
 
+import '../application_package.dart';
+import '../base/common.dart';
+import '../base/context.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/process.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle.dart';
+import '../convert.dart';
 import '../device.dart';
 import '../features.dart';
 import '../project.dart';
+import '../protocol_discovery.dart';
 import 'custom_device_workflow.dart';
 import 'custom_devices_config.dart';
 
