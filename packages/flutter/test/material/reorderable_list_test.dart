@@ -1326,6 +1326,29 @@ void main() {
     }
     expect(items.take(8), orderedEquals(<int>[0, 1, 2, 3, 4, 5, 6, 7]));
   });
+
+  testWidget('ReorderableListView thows an error when key is not passed to its children',(WidgetTester tester) async {
+    final Widget reorderableListView = ReorderableListView(
+      children: const <Widget>[
+        SizedBox(
+          child: Text('A'),
+        ),
+        SizedBox(
+          child: Text('B'),
+        ),
+        SizedBox(
+          child: Text('C'),
+        ),
+      ],
+      onReorder: (int oldIndex, int newIndex) { },
+    );
+    await tester.pumpWidget(MaterialApp(
+      home: reorderableListView,
+    ));
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(exception.toString(), contains('Every item of ReorderableListView must have a key.'));
+  });
 }
 
 Future<void> longPressDrag(WidgetTester tester, Offset start, Offset end) async {
