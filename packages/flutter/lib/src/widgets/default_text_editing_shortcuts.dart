@@ -294,11 +294,11 @@ class DefaultTextEditingShortcuts extends Shortcuts {
 
   static final Map<LogicalKeySet, Intent> _linuxShortcuts = <LogicalKeySet, Intent>{
     LogicalKeySet(LogicalKeyboardKey.backspace): const DeleteTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.backspace): const DeleteByWordTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.backspace): const DeleteByLineTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.backspace): const DeleteByWordTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.backspace): const DeleteByLineTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.delete): const DeleteForwardTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.delete): const DeleteForwardByWordTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.delete): const DeleteForwardByLineTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.delete): const DeleteForwardByWordTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.delete): const DeleteForwardByLineTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowDown): const MoveSelectionToEndTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowLeft): const MoveSelectionLeftByLineTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowRight): const MoveSelectionRightByLineTextIntent(),
@@ -382,11 +382,11 @@ class DefaultTextEditingShortcuts extends Shortcuts {
 
   static final Map<LogicalKeySet, Intent> _windowsShortcuts = <LogicalKeySet, Intent>{
     LogicalKeySet(LogicalKeyboardKey.backspace): const DeleteTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.backspace): const DeleteByWordTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.backspace): const DeleteByLineTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.backspace): const DeleteByWordTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.backspace): const DeleteByLineTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.delete): const DeleteForwardTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.delete): const DeleteForwardByWordTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.delete): const DeleteForwardByLineTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.delete): const DeleteForwardByWordTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.delete): const DeleteForwardByLineTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowDown): const MoveSelectionToEndTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowLeft): const MoveSelectionLeftByLineTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowRight): const MoveSelectionRightByLineTextIntent(),
