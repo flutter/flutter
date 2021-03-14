@@ -40,6 +40,8 @@ class DefaultTextEditingActions extends Actions{
     DeleteByWordTextIntent: _DeleteByWordTextAction(),
     DeleteByLineTextIntent: _DeleteByLineTextAction(),
     DeleteForwardTextIntent: _DeleteForwardTextAction(),
+    DeleteForwardByWordTextIntent: _DeleteForwardByWordTextAction(),
+    DeleteForwardByLineTextIntent: _DeleteForwardByLineTextAction(),
     ExtendSelectionDownTextIntent: _ExtendSelectionDownTextAction(),
     ExtendSelectionLeftByLineTextIntent: _ExtendSelectionLeftByLineTextAction(),
     ExtendSelectionLeftByWordTextIntent: _ExtendSelectionLeftByWordTextAction(),
@@ -105,6 +107,20 @@ class _DeleteForwardTextAction extends TextEditingAction<DeleteForwardTextIntent
   @override
   Object? invoke(DeleteForwardTextIntent intent, [BuildContext? context]) {
     textEditingActionTarget!.renderEditable.deleteForward(SelectionChangedCause.keyboard);
+  }
+}
+
+class _DeleteForwardByWordTextAction extends TextEditingAction<DeleteForwardTextIntent> {
+  @override
+  Object? invoke(DeleteForwardTextIntent intent, [BuildContext? context]) {
+    textEditingActionTarget!.renderEditable.deleteForwardByWord(SelectionChangedCause.keyboard);
+  }
+}
+
+class _DeleteForwardByLineTextAction extends TextEditingAction<DeleteForwardTextIntent> {
+  @override
+  Object? invoke(DeleteForwardTextIntent intent, [BuildContext? context]) {
+    textEditingActionTarget!.renderEditable.deleteForwardByLine(SelectionChangedCause.keyboard);
   }
 }
 
