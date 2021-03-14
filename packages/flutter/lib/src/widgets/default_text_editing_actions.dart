@@ -110,16 +110,16 @@ class _DeleteForwardTextAction extends TextEditingAction<DeleteForwardTextIntent
   }
 }
 
-class _DeleteForwardByWordTextAction extends TextEditingAction<DeleteForwardTextIntent> {
+class _DeleteForwardByWordTextAction extends TextEditingAction<DeleteForwardByWordTextIntent> {
   @override
-  Object? invoke(DeleteForwardTextIntent intent, [BuildContext? context]) {
+  Object? invoke(DeleteForwardByWordTextIntent intent, [BuildContext? context]) {
     textEditingActionTarget!.renderEditable.deleteForwardByWord(SelectionChangedCause.keyboard);
   }
 }
 
-class _DeleteForwardByLineTextAction extends TextEditingAction<DeleteForwardTextIntent> {
+class _DeleteForwardByLineTextAction extends TextEditingAction<DeleteForwardByLineTextIntent> {
   @override
-  Object? invoke(DeleteForwardTextIntent intent, [BuildContext? context]) {
+  Object? invoke(DeleteForwardByLineTextIntent intent, [BuildContext? context]) {
     textEditingActionTarget!.renderEditable.deleteForwardByLine(SelectionChangedCause.keyboard);
   }
 }
