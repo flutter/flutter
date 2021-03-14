@@ -11,7 +11,8 @@ const int _kNumWarmUp = 100;
 const int _kScale = 1000;
 
 void main() {
-  assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
+  assert(false,
+      "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
 
   // In the following benchmarks, we won't remove the listeners when we don't
   // want to measure removeListener because we know that everything will be
@@ -42,7 +43,7 @@ void main() {
       if (addResult)
         printer.addResult(
           description: '$name ($listenerCount listeners)',
-          value: averagePerIteration * _kScale,
+          value: _makeToStringFriendly(averagePerIteration * _kScale),
           unit: 'ns per iteration',
           name: '$name${listenerCount}_iteration',
         );
@@ -68,7 +69,7 @@ void main() {
       if (addResult)
         printer.addResult(
           description: '$name ($listenerCount listeners)',
-          value: averagePerIteration * _kScale,
+          value: _makeToStringFriendly(averagePerIteration * _kScale),
           unit: 'ns per iteration',
           name: '$name${listenerCount}_iteration',
         );
@@ -110,14 +111,15 @@ void main() {
       if (addResult)
         printer.addResult(
           description: '$name ($listenerCount listeners)',
-          value: averagePerIteration * _kScale,
+          value: _makeToStringFriendly(averagePerIteration * _kScale),
           unit: 'ns per iteration',
           name: '$name${listenerCount}_iteration',
         );
     }
   }
 
-  void runRemoveListenerWhileNotifyingBenchmark(int iteration, {bool addResult = true}) {
+  void runRemoveListenerWhileNotifyingBenchmark(int iteration,
+      {bool addResult = true}) {
     const String name = 'removeListenerWhileNotifying';
 
     final List<VoidCallback> listeners = <VoidCallback>[
@@ -158,7 +160,7 @@ void main() {
       if (addResult)
         printer.addResult(
           description: '$name ($listenerCount listeners)',
-          value: averagePerIteration * _kScale,
+          value: _makeToStringFriendly(averagePerIteration * _kScale),
           unit: 'ns per iteration',
           name: '$name${listenerCount}_iteration',
         );
@@ -182,4 +184,12 @@ void main() {
 
 class _Notifier extends ChangeNotifier {
   void notify() => notifyListeners();
+}
+
+/// round the given double to but 2 decimal places.
+/// this is a workaround to ensure that the printed JSON does not get too long
+/// which can lead to the JSON being cut off in the middle
+/// see issue https://github.com/flutter/flutter/issues/74448
+double _makeToStringFriendly(double d) {
+  return double.parse(d.toStringAsFixed(2));
 }
