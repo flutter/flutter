@@ -62,6 +62,7 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 /// ```dart
 /// final ScrollController _controllerOne = ScrollController();
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Scrollbar(
 ///     controller: _controllerOne,
