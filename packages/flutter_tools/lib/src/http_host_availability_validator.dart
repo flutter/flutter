@@ -26,13 +26,13 @@ class HttpHostAvailabilityValidator extends DoctorValidator {
     required http.Client httpClient,
   })   : _platform = platform,
         _httpClient = httpClient,
-        super('Host availability');
+        super('HTTP host availability');
 
   final Platform _platform;
   final http.Client _httpClient;
 
   @override
-  String get slowWarning => 'Host availability check is taking a long time';
+  String get slowWarning => 'HTTP host availability check is taking a long time';
 
   /// Returns a list of URLs to check availability, different for different platforms
   List<String> get _allRequiredHosts {
@@ -76,7 +76,7 @@ class HttpHostAvailabilityValidator extends DoctorValidator {
     if (availabilityResults
         .every((_HttpHostAvailabilityResult result) => result.hostAvailable)) {
       // Add a success message and then send back the result
-      messages.add(const ValidationMessage('All required hosts are available'));
+      messages.add(const ValidationMessage('All required HTTP hosts are available'));
       return ValidationResult(
         ValidationType.installed,
         messages,
@@ -94,7 +94,7 @@ class HttpHostAvailabilityValidator extends DoctorValidator {
 
       // Add the error messages to be displayed
       for (final _HttpHostAvailabilityResult result in availabilityResults) {
-        messages.add(ValidationMessage.error('${result.hostUrl} is not available due to the following error: ${result.errorMessage}'));
+        messages.add(ValidationMessage.error('HTTP host ${result.hostUrl} is not available due to the following error: ${result.errorMessage}'));
       }
 
       // Return a partially successfull or completely errored result
