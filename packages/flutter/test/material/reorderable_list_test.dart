@@ -1327,7 +1327,7 @@ void main() {
     expect(items.take(8), orderedEquals(<int>[0, 1, 2, 3, 4, 5, 6, 7]));
   });
 
-  testWidget('ReorderableListView thows an error when key is not passed to its children',(WidgetTester tester) async {
+  testWidgets('ReorderableListView thows an error when key is not passed to its children',(WidgetTester tester) async {
     final Widget reorderableListView = ReorderableListView(
       children: const <Widget>[
         SizedBox(
