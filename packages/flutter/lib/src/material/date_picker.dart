@@ -423,7 +423,9 @@ class DatePickerDialog extends StatefulWidget {
   _DatePickerDialogState createState() => _DatePickerDialogState();
 }
 
-/// A state restorable data structure to save and restore [DateTime].
+/// A [RestorableValue] that knows how to save and restore [DateTime].
+///
+/// {@macro flutter.widgets.RestorableNum}.
 class RestorableDateTime extends RestorableValue<DateTime> {
   /// Creates a [RestorableDateTime].
   ///
