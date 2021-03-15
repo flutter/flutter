@@ -47,9 +47,7 @@ class GFX_RANGE_EXPORT Range {
 #endif
 
   // Returns a range that is invalid, which is {UINT32_MAX,UINT32_MAX}.
-  static constexpr Range InvalidRange() {
-    return Range(std::numeric_limits<uint32_t>::max());
-  }
+  static constexpr Range InvalidRange() { return Range(std::numeric_limits<uint32_t>::max()); }
 
   // Checks if the range is valid through comparison to InvalidRange().
   constexpr bool IsValid() const { return *this != InvalidRange(); }
@@ -68,27 +66,19 @@ class GFX_RANGE_EXPORT Range {
   constexpr bool is_empty() const { return start() == end(); }
 
   // Returns the minimum and maximum values.
-  constexpr uint32_t GetMin() const {
-    return start() < end() ? start() : end();
-  }
-  constexpr uint32_t GetMax() const {
-    return start() > end() ? start() : end();
-  }
+  constexpr uint32_t GetMin() const { return start() < end() ? start() : end(); }
+  constexpr uint32_t GetMax() const { return start() > end() ? start() : end(); }
 
   constexpr bool operator==(const Range& other) const {
     return start() == other.start() && end() == other.end();
   }
-  constexpr bool operator!=(const Range& other) const {
-    return !(*this == other);
-  }
+  constexpr bool operator!=(const Range& other) const { return !(*this == other); }
   constexpr bool EqualsIgnoringDirection(const Range& other) const {
     return GetMin() == other.GetMin() && GetMax() == other.GetMax();
   }
 
   // Returns true if this range intersects the specified |range|.
-  constexpr bool Intersects(const Range& range) const {
-    return Intersect(range).IsValid();
-  }
+  constexpr bool Intersects(const Range& range) const { return Intersect(range).IsValid(); }
 
   // Returns true if this range contains the specified |range|.
   constexpr bool Contains(const Range& range) const {
@@ -100,8 +90,7 @@ class GFX_RANGE_EXPORT Range {
   // Returns true if this range is contained by the specified |range| or it is
   // an empty range and ending the range |range|.
   constexpr bool IsBoundedBy(const Range& range) const {
-    return IsValid() && range.IsValid() && GetMin() >= range.GetMin() &&
-           GetMax() <= range.GetMax();
+    return IsValid() && range.IsValid() && GetMin() >= range.GetMin() && GetMax() <= range.GetMax();
   }
 
   // Computes the intersection of this range with the given |range|.
@@ -110,9 +99,8 @@ class GFX_RANGE_EXPORT Range {
   constexpr Range Intersect(const Range& range) const {
     const uint32_t min = std::max(GetMin(), range.GetMin());
     const uint32_t max = std::min(GetMax(), range.GetMax());
-    return (min < max || Contains(range) || range.Contains(*this))
-               ? Range(min, max)
-               : InvalidRange();
+    return (min < max || Contains(range) || range.Contains(*this)) ? Range(min, max)
+                                                                   : InvalidRange();
   }
 
 #if defined(OS_APPLE)
