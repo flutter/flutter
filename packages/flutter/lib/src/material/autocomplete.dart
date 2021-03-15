@@ -17,9 +17,11 @@ import 'text_form_field.dart';
 /// ```dart main
 /// import 'package:flutter/material.dart';
 ///
-/// void main() => runApp(AutocompleteExampleApp());
+/// void main() => runApp(const AutocompleteExampleApp());
 ///
 /// class AutocompleteExampleApp extends StatelessWidget {
+///   const AutocompleteExampleApp({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return MaterialApp(
@@ -27,7 +29,7 @@ import 'text_form_field.dart';
 ///         appBar: AppBar(
 ///           title: const Text('Autocomplete Basic'),
 ///         ),
-///         body: Center(
+///         body: const Center(
 ///           child: AutocompleteBasicExample(),
 ///         ),
 ///       ),
@@ -36,9 +38,9 @@ import 'text_form_field.dart';
 /// }
 ///
 /// class AutocompleteBasicExample extends StatelessWidget {
-///   AutocompleteBasicExample({Key? key}) : super(key: key);
+///   const AutocompleteBasicExample({Key? key}) : super(key: key);
 ///
-///   final List<String> _kOptions = <String>[
+///   static const List<String> _kOptions = <String>[
 ///     'aardvark',
 ///     'bobcat',
 ///     'chameleon',
@@ -71,9 +73,11 @@ import 'text_form_field.dart';
 /// ```dart main
 /// import 'package:flutter/material.dart';
 ///
-/// void main() => runApp(AutocompleteExampleApp());
+/// void main() => runApp(const AutocompleteExampleApp());
 ///
 /// class AutocompleteExampleApp extends StatelessWidget {
+///   const AutocompleteExampleApp({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return MaterialApp(
@@ -81,7 +85,7 @@ import 'text_form_field.dart';
 ///         appBar: AppBar(
 ///           title: const Text('Autocomplete Basic User'),
 ///         ),
-///         body: Center(
+///         body: const Center(
 ///           child: AutocompleteBasicUserExample(),
 ///         ),
 ///       ),

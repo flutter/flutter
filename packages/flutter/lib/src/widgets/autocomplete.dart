@@ -82,9 +82,11 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// import 'package:flutter/material.dart';
 /// import 'package:flutter/widgets.dart';
 ///
-/// void main() => runApp(AutocompleteExampleApp());
+/// void main() => runApp(const AutocompleteExampleApp());
 ///
 /// class AutocompleteExampleApp extends StatelessWidget {
+///   const AutocompleteExampleApp({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return MaterialApp(
@@ -92,7 +94,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///         appBar: AppBar(
 ///           title: const Text('RawAutocomplete Basic'),
 ///         ),
-///         body: Center(
+///         body: const Center(
 ///           child: AutocompleteBasicExample(),
 ///         ),
 ///       ),
@@ -172,9 +174,11 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// import 'package:flutter/material.dart';
 /// import 'package:flutter/widgets.dart';
 ///
-/// void main() => runApp(AutocompleteExampleApp());
+/// void main() => runApp(const AutocompleteExampleApp());
 ///
 /// class AutocompleteExampleApp extends StatelessWidget {
+///   const AutocompleteExampleApp({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return MaterialApp(
@@ -182,7 +186,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///         appBar: AppBar(
 ///           title: const Text('RawAutocomplete Custom Type'),
 ///         ),
-///         body: Center(
+///         body: const Center(
 ///           child: AutocompleteCustomTypeExample(),
 ///         ),
 ///       ),
@@ -290,9 +294,11 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// import 'package:flutter/material.dart';
 /// import 'package:flutter/widgets.dart';
 ///
-/// void main() => runApp(AutocompleteExampleApp());
+/// void main() => runApp(const AutocompleteExampleApp());
 ///
 /// class AutocompleteExampleApp extends StatelessWidget {
+///   const AutocompleteExampleApp({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return MaterialApp(
@@ -300,7 +306,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///         appBar: AppBar(
 ///           title: const Text('RawAutocomplete Form'),
 ///         ),
-///         body: Center(
+///         body: const Center(
 ///           child: AutocompleteFormExample(),
 ///         ),
 ///       ),
@@ -321,7 +327,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///   String? _dropdownValue;
 ///   String? _autocompleteSelection;
 ///
-///   const List<String> _options = <String>[
+///   static const List<String> _options = <String>[
 ///     'aardvark',
 ///     'bobcat',
 ///     'chameleon',
@@ -335,11 +341,11 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///         children: <Widget>[
 ///           DropdownButtonFormField<String>(
 ///             value: _dropdownValue,
-///             icon: Icon(Icons.arrow_downward),
+///             icon: const Icon(Icons.arrow_downward),
 ///             hint: const Text('This is a regular DropdownButtonFormField'),
 ///             iconSize: 24,
 ///             elevation: 16,
-///             style: TextStyle(color: Colors.deepPurple),
+///             style: const TextStyle(color: Colors.deepPurple),
 ///             onChanged: (String? newValue) {
 ///               setState(() {
 ///                 _dropdownValue = newValue;
@@ -528,18 +534,20 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// import 'package:flutter/material.dart';
   /// import 'package:flutter/widgets.dart';
   ///
-  /// void main() => runApp(AutocompleteExampleApp());
+  /// void main() => runApp(const AutocompleteExampleApp());
   ///
   /// class AutocompleteExampleApp extends StatelessWidget {
+  ///   const AutocompleteExampleApp({Key? key}) : super(key: key);
+  ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return MaterialApp(
+  ///     return const MaterialApp(
   ///       home: RawAutocompleteSplit(),
   ///     );
   ///   }
   /// }
   ///
-  /// final List<String> _options = <String>[
+  /// const List<String> _options = <String>[
   ///   'aardvark',
   ///   'bobcat',
   ///   'chameleon',
