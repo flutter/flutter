@@ -80,7 +80,8 @@ class GalleryTransitionTest extends BuildTestTask {
             ];
         case DeviceOperatingSystem.ios:
           return <String>[
-            'ipa',
+            'ios',
+            ' --no-codesign',
             '--profile',
             '-t',
             'test_driver/$testFile.dart',
