@@ -89,15 +89,15 @@ class _TableElementRow {
 /// Widget build(BuildContext context) {
 ///   return Table(
 ///     border: TableBorder.all(),
-///     columnWidths: {
+///     columnWidths: const <int, TableColumnWidth>{
 ///       0: IntrinsicColumnWidth(),
 ///       1: FlexColumnWidth(),
 ///       2: FixedColumnWidth(64),
 ///     },
 ///     defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-///     children: [
+///     children: <TableRow>[
 ///       TableRow(
-///         children: [
+///         children: <Widget>[
 ///           Container(
 ///             height: 32,
 ///             color: Colors.green,
@@ -117,10 +117,10 @@ class _TableElementRow {
 ///         ],
 ///       ),
 ///       TableRow(
-///         decoration: BoxDecoration(
+///         decoration: const BoxDecoration(
 ///           color: Colors.grey,
 ///         ),
-///         children: [
+///         children: <Widget>[
 ///           Container(
 ///             height: 64,
 ///             width: 128,

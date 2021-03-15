@@ -6,7 +6,7 @@
 
 import 'package:flutter_tools/src/test/event_printer.dart';
 import 'package:flutter_tools/src/test/test_device.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 
@@ -22,7 +22,7 @@ void main() {
     });
 
     testWithoutContext('handles a null parent', () {
-      final _Device device = _Device();
+      final FakeDevice device = FakeDevice();
 
       expect(() => eventPrinter.handleFinishedTest(device), returnsNormally);
       expect(() => eventPrinter.handleStartedDevice(observatoryUri), returnsNormally);
@@ -56,4 +56,4 @@ void main() {
   });
 }
 
-class _Device extends Mock implements TestDevice {}
+class FakeDevice extends Fake implements TestDevice {}
