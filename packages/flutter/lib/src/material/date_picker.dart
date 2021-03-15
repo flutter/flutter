@@ -149,23 +149,21 @@ const double _inputFormLandscapeHeight = 108.0;
 ///   @override
 ///   String get restorationId => 'scaffold_state';
 ///
-///   final RestorableIntN selectedYear = RestorableIntN(DateTime.now().year);
-///   final RestorableIntN selectedMonth = RestorableIntN(DateTime.now().month);
-///   final RestorableIntN selectedDay = RestorableIntN(DateTime.now().day);
+///   final RestorableInt selectedDate = RestorableInt(
+///     DateTime.now().millisecondsSinceEpoch,
+///   );
 ///   late RestorableRouteFuture<DateTime> _restorableDatePickerRouteFuture;
 ///
 ///   static Route<DateTime> _datePickerRoute(
 ///     BuildContext context,
 ///     Object? arguments,
 ///   ) {
-///     Map<dynamic, dynamic> argumentMap = arguments as Map<dynamic, dynamic>;
-///     Map<dynamic, dynamic> initialDate = argumentMap['initialDate'] as Map<dynamic, dynamic>;
-///
-///     return MaterialPageRoute<DateTime>(
+///     return DialogRoute<DateTime>(
+///       context: context,
 ///       builder: (context) {
 ///         return DatePickerDialog(
 ///           initialEntryMode: DatePickerEntryMode.calendarOnly,
-///           initialDate: DateTime(initialDate['year'], initialDate['month'], initialDate['day']),
+///           initialDate: DateTime.fromMillisecondsSinceEpoch(arguments as int),
 ///           firstDate: DateTime(2021, 1, 1),
 ///           lastDate: DateTime(2022, 1, 1),
 ///         );
@@ -177,35 +175,25 @@ const double _inputFormLandscapeHeight = 108.0;
 ///   void initState() {
 ///     super.initState();
 ///     _restorableDatePickerRouteFuture = RestorableRouteFuture<DateTime>(
+///       onComplete: _selectDate,
 ///       onPresent: (navigator, arguments) {
 ///         return navigator.restorablePush(
 ///           _datePickerRoute,
-///           arguments: {
-///             'initialDate': {
-///               'year': selectedYear.value,
-///               'month': selectedMonth.value,
-///               'day': selectedDay.value,
-///             },
-///           },
+///           arguments: selectedDate.value,
 ///         );
 ///       },
-///       onComplete: _selectDate,
 ///     );
 ///   }
 ///
 ///   @override
 ///   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
-///     registerForRestoration(selectedYear, 'selected_year');
-///     registerForRestoration(selectedMonth, 'selected_month');
-///     registerForRestoration(selectedDay, 'selected_day');
+///     registerForRestoration(selectedDate, 'selected_date');
 ///     registerForRestoration(_restorableDatePickerRouteFuture, 'date_picker_route_future');
 ///   }
 ///
 ///   void _selectDate(DateTime newSelectedDate) {
 ///     setState(() {
-///       selectedYear.value = newSelectedDate.year;
-///       selectedMonth.value = newSelectedDate.month;
-///       selectedDay.value = newSelectedDate.day;
+///       selectedDate.value = newSelectedDate.millisecondsSinceEpoch;
 ///     });
 ///   }
 ///
