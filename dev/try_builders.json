@@ -379,9 +379,27 @@
       "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
     },
     {
-      "name": "Mac build_tests",
+      "name": "Mac build_tests_1_4",
       "repo": "flutter",
-      "task_name": "mac_build_tests",
+      "task_name": "mac_build_tests_1_4",
+      "enabled": true
+    },
+    {
+      "name": "Mac build_tests_2_4",
+      "repo": "flutter",
+      "task_name": "mac_build_tests_2_4",
+      "enabled": true
+    },
+    {
+      "name": "Mac build_tests_3_4",
+      "repo": "flutter",
+      "task_name": "mac_build_tests_3_4",
+      "enabled": true
+    },
+    {
+      "name": "Mac build_tests_4_4",
+      "repo": "flutter",
+      "task_name": "mac_build_tests_4_4",
       "enabled": true
     },
     {
@@ -391,9 +409,45 @@
       "enabled": true
     },
     {
-      "name": "Mac framework_tests",
+      "name": "Mac framework_tests_libraries",
       "repo": "flutter",
-      "task_name": "mac_framework_tests",
+      "task_name": "mac_framework_tests_libraries",
+      "enabled": true,
+      "run_if": [
+        "dev/**",
+        "packages/flutter/**",
+        "packages/flutter_driver/**",
+        "packages/integration_test/**",
+        "packages/flutter_localizations/**",
+        "packages/fuchsia_remote_debug_protocol/**",
+        "packages/flutter_test/**",
+        "packages/flutter_goldens/**",
+        "packages/flutter_tools/lib/src/test/**",
+        "bin/**"
+      ]
+    },
+    {
+      "name": "Mac framework_tests_misc",
+      "repo": "flutter",
+      "task_name": "mac_framework_tests_misc",
+      "enabled": true,
+      "run_if": [
+        "dev/**",
+        "packages/flutter/**",
+        "packages/flutter_driver/**",
+        "packages/integration_test/**",
+        "packages/flutter_localizations/**",
+        "packages/fuchsia_remote_debug_protocol/**",
+        "packages/flutter_test/**",
+        "packages/flutter_goldens/**",
+        "packages/flutter_tools/lib/src/test/**",
+        "bin/**"
+      ]
+    },
+    {
+      "name": "Mac framework_tests_widgets",
+      "repo": "flutter",
+      "task_name": "mac_framework_tests_widgets",
       "enabled": true,
       "run_if": [
         "dev/**",
@@ -486,16 +540,37 @@
       "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
     },
     {
-      "name": "Mac tool_tests",
+      "name": "Mac tool_tests_general",
       "repo": "flutter",
-      "task_name": "mac_tool_tests",
+      "task_name": "mac_tool_tests_general",
       "enabled": true,
       "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
     },
     {
-      "name": "Mac tool_integration_tests",
+      "name": "Mac tool_tests_commands",
       "repo": "flutter",
-      "task_name": "mac_tool_integration_tests",
+      "task_name": "tool_tests_commands",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Mac tool_integration_tests_1_3",
+      "repo": "flutter",
+      "task_name": "mac_tool_integration_tests_1_3",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Mac tool_integration_tests_2_3",
+      "repo": "flutter",
+      "task_name": "mac_tool_integration_tests_2_3",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Mac tool_integration_tests_3_3",
+      "repo": "flutter",
+      "task_name": "mac_tool_integration_tests_3_3",
       "enabled": true,
       "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
     },
@@ -514,9 +589,21 @@
       "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
     },
     {
-      "name": "Windows build_tests",
+      "name": "Windows build_tests_1_3",
       "repo": "flutter",
-      "task_name": "win_build_tests",
+      "task_name": "win_build_tests_1_3",
+      "enabled": true
+    },
+    {
+      "name": "Windows build_tests_2_3",
+      "repo": "flutter",
+      "task_name": "win_build_tests_2_3",
+      "enabled": true
+    },
+    {
+      "name": "Windows build_tests_3_3",
+      "repo": "flutter",
+      "task_name": "win_build_tests_3_3",
       "enabled": true
     },
     {
@@ -526,9 +613,45 @@
       "enabled": true
     },
     {
-      "name": "Windows framework_tests",
+      "name": "Windows framework_tests_libraries",
       "repo": "flutter",
-      "task_name": "win_framework_tests",
+      "task_name": "win_framework_tests_libraries",
+      "enabled": true,
+      "run_if": [
+        "dev/",
+        "packages/flutter/",
+        "packages/flutter_driver/",
+        "packages/integration_test/",
+        "packages/flutter_localizations/",
+        "packages/fuchsia_remote_debug_protocol/",
+        "packages/flutter_test/",
+        "packages/flutter_goldens/",
+        "packages/flutter_tools/lib/src/test/",
+        "bin/"
+      ]
+    },
+    {
+      "name": "Windows framework_tests_misc",
+      "repo": "flutter",
+      "task_name": "framework_tests_misc",
+      "enabled": true,
+      "run_if": [
+        "dev/",
+        "packages/flutter/",
+        "packages/flutter_driver/",
+        "packages/integration_test/",
+        "packages/flutter_localizations/",
+        "packages/fuchsia_remote_debug_protocol/",
+        "packages/flutter_test/",
+        "packages/flutter_goldens/",
+        "packages/flutter_tools/lib/src/test/",
+        "bin/"
+      ]
+    },
+    {
+      "name": "Windows framework_tests_widgets",
+      "repo": "flutter",
+      "task_name": "framework_tests_widgets",
       "enabled": true,
       "run_if": [
         "dev/",
@@ -593,16 +716,37 @@
       "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
     },
     {
-      "name": "Windows tool_tests",
+      "name": "Windows tool_tests_general",
       "repo": "flutter",
-      "task_name": "win_tool_tests",
+      "task_name": "tool_tests_general",
       "enabled": true,
       "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
     },
     {
-      "name": "Windows tool_integration_tests",
+      "name": "Windows tool_tests_commands",
       "repo": "flutter",
-      "task_name": "win_tool_integration_tests",
+      "task_name": "tool_tests_commands",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Windows tool_integration_tests_1_3",
+      "repo": "flutter",
+      "task_name": "win_tool_integration_tests_1_3",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Windows tool_integration_tests_2_3",
+      "repo": "flutter",
+      "task_name": "win_tool_integration_tests_2_3",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Windows tool_integration_tests_3_3",
+      "repo": "flutter",
+      "task_name": "win_tool_integration_tests_3_3",
       "enabled": true,
       "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
     },
