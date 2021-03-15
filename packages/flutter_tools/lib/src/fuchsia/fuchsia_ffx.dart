@@ -93,9 +93,6 @@ class FuchsiaFfx {
       _logger.printError('ffx failed: ${result.stderr}');
       return null;
     }
-    if (result.stderr.contains('No devices found')) {
-      return null;
-    }
     return result.stdout.trim();
   }
 }
