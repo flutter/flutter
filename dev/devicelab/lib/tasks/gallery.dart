@@ -81,7 +81,9 @@ class GalleryTransitionTest extends BuildTestTask {
         case DeviceOperatingSystem.ios:
           return <String>[
             'ios',
-            '--no-codesign',
+            // Skip codesign on presubmit checks
+            if (targetPlatform != null)
+              '--no-codesign',
             '--profile',
             '-t',
             'test_driver/$testFile.dart',
@@ -100,7 +102,7 @@ class GalleryTransitionTest extends BuildTestTask {
         '--profile',
         if (needFullTimeline)
           '--trace-startup',
-        '--use-application-binary=${getApplicationBinaryPath()}',
+        '--use-application-binary="${getApplicationBinaryPath()}"',
         '--driver', 'test_driver/$testDriver.dart',
         '-d', deviceId,
       ];
@@ -156,7 +158,7 @@ class GalleryTransitionTest extends BuildTestTask {
       case DeviceOperatingSystem.android:
         return 'build/app/outputs/flutter-apk/app-profile.apk';
       case DeviceOperatingSystem.ios:
-        return 'build/app/outputs/flutter-ipa/app-profile.ipa';
+        return 'build/ios/iphoneos/Flutter Gallery.app';
       default:
         throw UnimplementedError('getApplicationBinaryPath does not support $deviceOperatingSystem');
     }
