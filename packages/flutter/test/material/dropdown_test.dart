@@ -3134,7 +3134,7 @@ void main() {
               value: value,
               items: const <DropdownMenuItem<String>>[
                 DropdownMenuItem<String>(
-                  disabled: true,
+                  enabled: false,
                   child: Text('disabled'),
                 ),
                 DropdownMenuItem<String>(
@@ -3173,7 +3173,7 @@ void main() {
             value: 'enabled',
             items: const <DropdownMenuItem<String>>[
               DropdownMenuItem<String>(
-                disabled: true,
+                enabled: false,
                 child: Text('disabled'),
               ),
               DropdownMenuItem<String>(
@@ -3205,7 +3205,7 @@ void main() {
     }
   });
 
-  testWidgets('value should be null if disabled is true', (WidgetTester tester) async {
+  testWidgets('value should be null if enabled is false', (WidgetTester tester) async {
     final List<String> values = <String>['enabled', 'disabled'];
 
     try {
@@ -3219,7 +3219,7 @@ void main() {
               items: values.map<DropdownMenuItem<String>>((String e) => DropdownMenuItem<String>(
                 value: e,
                 child: Text(e),
-                disabled: e == 'disabled',
+                enabled: e == 'enabled',
               )).toList(),
               onChanged: onChanged,
             ),
@@ -3232,12 +3232,12 @@ void main() {
     } on AssertionError catch (error) {
       expect(
         error.toString(),
-        matches('if disabled is true, value should be null'),
+        contains('if enabled is false, value should be null'),
       );
     }
   });
 
-  testWidgets('onTap should be null if disabled is true', (WidgetTester tester) async {
+  testWidgets('onTap should be null if enabled is false', (WidgetTester tester) async {
     final List<String> values = <String>['enabled', 'disabled'];
 
     try {
@@ -3248,12 +3248,17 @@ void main() {
           home: Scaffold(
             body: DropdownButton<String>(
               value: values[0],
-              items: values.map<DropdownMenuItem<String>>((String e) => DropdownMenuItem<String>(
-                value: e == 'disabled' ? null : e,
-                child: Text(e),
-                disabled: e == 'disabled',
-                onTap: () {},
-              )).toList(),
+              items: <DropdownMenuItem<String>>[
+                DropdownMenuItem<String>(
+                  enabled: false,
+                  child: const Text('disabled'),
+                  onTap: () {},
+                ),
+                const DropdownMenuItem<String>(
+                  value: 'enabled',
+                  child: Text('enabled'),
+                )
+              ],
               onChanged: onChanged,
             ),
           ),
@@ -3265,7 +3270,7 @@ void main() {
     } on AssertionError catch (error) {
       expect(
         error.toString(),
-        matches('if disabled is true, onTap should be null'),
+        contains('if enabled is false, onTap should be null'),
       );
     }
   });

@@ -183,8 +183,8 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
       padding: widget.padding,
       child: widget.route.items[widget.itemIndex],
     );
-    // An [InkWell] is added to the item only if it is not disabled
-    if (!dropdownMenuItem.disabled) {
+    // An [InkWell] is added to the item only if it is enabled
+    if (dropdownMenuItem.enabled) {
       child = InkWell(
         autofocus: widget.itemIndex == widget.route.selectedIndex,
         child: child,
@@ -695,30 +695,34 @@ class DropdownMenuItem<T> extends _DropdownMenuItemContainer {
     Key? key,
     this.onTap,
     this.value,
-    this.disabled = false,
+    this.enabled = true,
     required Widget child,
   })   : assert(child != null),
-          assert(!disabled || (disabled && value == null), 'if disabled is true, value should be null'),
-          assert(!disabled || (disabled && onTap == null), 'if disabled is true, onTap should be null'),
+          assert(enabled || (!enabled && value == null), 'if enabled is false, value should be null'),
+          assert(enabled || (!enabled && onTap == null), 'if enabled is false, onTap should be null'),
         super(key: key, child: child);
 
   /// Called when the dropdown menu item is tapped.
-  /// If disabled is `true`, it should be `null`.
+  ///
+  /// If enabled is `false`, this property should be `null`.
   final VoidCallback? onTap;
 
   /// The value to return if the user selects this menu item.
-  /// If disabled is `true`, it should be `null`.
   ///
   /// Eventually returned in a call to [DropdownButton.onChanged].
+  ///
+  /// If enabled is `false`, this property should be `null`.
   final T? value;
 
-  /// Whether a user can select this menu item. Defaults to `false`.
+  /// Whether or not a user can select this menu item.
   ///
-  /// If `true`: [value] and [onTap] should be `null`
-  /// and user will **not** be able to select this item.
+  /// If `false`, the user will be unable to select this item,
+  /// and since [value] and [onTap] are redundant for a disabled
+  /// and unselectable menu item, both should be `null`.
+  /// If `true`, the user will be able to select this item.
   ///
-  /// if `false`: user will be able to select this item.
-  final bool disabled;
+  /// Defaults to `true`
+  final bool enabled;
 }
 
 /// An inherited widget that causes any descendant [DropdownButton]
