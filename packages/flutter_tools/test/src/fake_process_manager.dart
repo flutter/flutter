@@ -215,6 +215,9 @@ abstract class FakeProcessManager implements ProcessManager {
   /// This is always `true` for [FakeProcessManager.any].
   bool get hasRemainingExpectations;
 
+  /// The expected [FakeCommand]s that have not yet run.
+  List<FakeCommand> get _remainingExpectations;
+
   @protected
   FakeCommand findCommand(
     List<String> command,
@@ -353,6 +356,9 @@ class _FakeAnyProcessManager extends FakeProcessManager {
 
   @override
   bool get hasRemainingExpectations => true;
+
+  @override
+  List<FakeCommand> get _remainingExpectations => <FakeCommand>[];
 }
 
 class _SequenceProcessManager extends FakeProcessManager {
@@ -382,4 +388,35 @@ class _SequenceProcessManager extends FakeProcessManager {
 
   @override
   bool get hasRemainingExpectations => _commands.isNotEmpty;
+
+  @override
+  List<FakeCommand> get _remainingExpectations => _commands;
+}
+
+/// Matcher that successfully matches against a [FakeProcessManager] with
+/// no remaining expectations ([item.hasRemainingExpectations] returns false).
+const Matcher hasNoRemainingExpectations = _HasNoRemainingExpectations();
+
+class _HasNoRemainingExpectations extends Matcher {
+  const _HasNoRemainingExpectations();
+
+  @override
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) =>
+      item is FakeProcessManager && !item.hasRemainingExpectations;
+
+  @override
+  Description describe(Description description) =>
+      description.add('a fake process manager with no remaining expectations');
+
+  @override
+  Description describeMismatch(
+      dynamic item,
+      Description description,
+      Map<dynamic, dynamic> matchState,
+      bool verbose,
+      ) {
+    final FakeProcessManager fakeProcessManager = item as FakeProcessManager;
+    return description.add(
+        'has remaining expectations:\n${fakeProcessManager._remainingExpectations.map((FakeCommand command) => command.command).join('\n')}');
+  }
 }

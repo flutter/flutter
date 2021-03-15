@@ -13,7 +13,7 @@ import 'package:flutter_tools/src/commands/build_windows.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/windows/visual_studio.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -45,7 +45,7 @@ void main() {
   FileSystem fileSystem;
 
   ProcessManager processManager;
-  MockVisualStudio mockVisualStudio;
+  FakeVisualStudio fakeVisualStudio;
   TestUsage usage;
 
   setUpAll(() {
@@ -55,7 +55,7 @@ void main() {
   setUp(() {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     Cache.flutterRoot = flutterRoot;
-    mockVisualStudio = MockVisualStudio();
+    fakeVisualStudio = FakeVisualStudio();
     usage = TestUsage();
   });
 
@@ -118,7 +118,7 @@ void main() {
 
   testUsingContext('Windows build fails when there is no vcvars64.bat', () async {
     final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
+      ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
 
     expect(createTestCommandRunner(command).run(
@@ -132,10 +132,10 @@ void main() {
   });
 
   testUsingContext('Windows build fails when there is no windows project', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
     final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
+      ..visualStudioOverride = fakeVisualStudio;
     setUpMockCoreProjectFiles();
-    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
     expect(createTestCommandRunner(command).run(
       const <String>['windows', '--no-pub']
@@ -150,10 +150,10 @@ void main() {
   });
 
   testUsingContext('Windows build fails on non windows platform', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
     final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
+      ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
-    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
     expect(createTestCommandRunner(command).run(
       const <String>['windows', '--no-pub']
@@ -166,10 +166,10 @@ void main() {
   });
 
   testUsingContext('Windows build does not spew stdout to status logger', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
     final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
+      ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
-    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeGenerationCommand(),
@@ -191,10 +191,10 @@ void main() {
   });
 
   testUsingContext('Windows build extracts errors from stdout', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
     final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
+      ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
-    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
     // This contains a mix of routine build output and various types of errors
     // (compile error, link error, warning treated as an error) from MSBuild,
@@ -249,10 +249,10 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
   });
 
   testUsingContext('Windows verbose build sets VERBOSE_SCRIPT_LOGGING', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
     final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
+      ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
-    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeGenerationCommand(),
@@ -275,10 +275,10 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
   });
 
   testUsingContext('Windows build invokes build and writes generated files', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
     final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
+      ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
-    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeGenerationCommand(),
@@ -340,10 +340,10 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
   });
 
   testUsingContext('Windows profile build passes Profile configuration', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
     final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
+      ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
-    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeGenerationCommand(),
@@ -375,10 +375,10 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
   });
 
   testUsingContext('Performs code size analysis and sends analytics', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
     final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
+      ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
-    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
     fileSystem.file(r'build\windows\runner\Release\app.so')
       ..createSync(recursive: true)
@@ -423,4 +423,9 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
   });
 }
 
-class MockVisualStudio extends Mock implements VisualStudio {}
+class FakeVisualStudio extends Fake implements VisualStudio {
+  FakeVisualStudio([this.cmakePath]);
+
+  @override
+  final String cmakePath;
+}

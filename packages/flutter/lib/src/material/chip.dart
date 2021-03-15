@@ -2022,7 +2022,10 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     final Offset densityAdjustment = (widget.visualDensity ?? theme.visualDensity).baseSizeAdjustment;
     switch (widget.materialTapTargetSize ?? theme.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:
-        constraints = BoxConstraints(minHeight: kMinInteractiveDimension + densityAdjustment.dy);
+        constraints = BoxConstraints(
+          minWidth: kMinInteractiveDimension + densityAdjustment.dx,
+          minHeight: kMinInteractiveDimension + densityAdjustment.dy,
+        );
         break;
       case MaterialTapTargetSize.shrinkWrap:
         constraints = const BoxConstraints();
