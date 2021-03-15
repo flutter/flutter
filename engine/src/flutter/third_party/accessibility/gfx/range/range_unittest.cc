@@ -11,16 +11,13 @@
 namespace {
 
 template <typename T>
-class RangeTest : public testing::Test {
-};
+class RangeTest : public testing::Test {};
 
 typedef testing::Types<gfx::Range, gfx::RangeF> RangeTypes;
 TYPED_TEST_SUITE(RangeTest, RangeTypes);
 
 template <typename T>
-void TestContainsAndIntersects(const T& r1,
-                               const T& r2,
-                               const T& r3) {
+void TestContainsAndIntersects(const T& r1, const T& r2, const T& r3) {
   EXPECT_TRUE(r1.Intersects(r1));
   EXPECT_TRUE(r1.Contains(r1));
   EXPECT_EQ(T(10, 12), r1.Intersect(r1));
