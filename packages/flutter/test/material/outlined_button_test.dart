@@ -187,7 +187,7 @@ void main() {
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(color: hoverColor));
 
-    gesture.removePointer();
+    await gesture.removePointer();
   });
 
   testWidgets('Does OutlinedButton work with focus', (WidgetTester tester) async {

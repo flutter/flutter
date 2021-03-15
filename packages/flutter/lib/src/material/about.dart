@@ -52,7 +52,7 @@ import 'theme.dart';
 ///  Widget build(BuildContext context) {
 ///    final TextStyle textStyle = Theme.of(context).textTheme.bodyText2!;
 ///    final List<Widget> aboutBoxChildren = <Widget>[
-///      SizedBox(height: 24),
+///      const SizedBox(height: 24),
 ///      RichText(
 ///        text: TextSpan(
 ///          children: <TextSpan>[
@@ -77,14 +77,14 @@ import 'theme.dart';
 ///
 ///    return Scaffold(
 ///      appBar: AppBar(
-///        title: Text('Show About Example'),
+///        title: const Text('Show About Example'),
 ///      ),
 ///      drawer: Drawer(
 ///        child: SingleChildScrollView(
 ///          child: SafeArea(
 ///            child: AboutListTile(
-///              icon: Icon(Icons.info),
-///              applicationIcon: FlutterLogo(),
+///              icon: const Icon(Icons.info),
+///              applicationIcon: const FlutterLogo(),
 ///              applicationName: 'Show About Example',
 ///              applicationVersion: 'August 2019',
 ///              applicationLegalese: '\u{a9} 2014 The Flutter Authors',
@@ -95,11 +95,11 @@ import 'theme.dart';
 ///      ),
 ///      body: Center(
 ///        child: ElevatedButton(
-///          child: Text('Show About Example'),
+///          child: const Text('Show About Example'),
 ///          onPressed: () {
 ///            showAboutDialog(
 ///              context: context,
-///              applicationIcon: FlutterLogo(),
+///              applicationIcon: const FlutterLogo(),
 ///              applicationName: 'Show About Example',
 ///              applicationVersion: 'August 2019',
 ///              applicationLegalese: '\u{a9} 2014 The Flutter Authors',

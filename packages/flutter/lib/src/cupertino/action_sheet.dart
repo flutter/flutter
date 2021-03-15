@@ -105,6 +105,8 @@ const double _kDividerThickness = 1.0;
 ///
 /// ```dart
 /// class MyStatefulWidget extends StatefulWidget {
+///   const MyStatefulWidget({Key? key}) : super(key: key);
+///
 ///   @override
 ///   _MyStatefulWidgetState createState() => _MyStatefulWidgetState();
 /// }
@@ -116,12 +118,12 @@ const double _kDividerThickness = 1.0;
 ///       child: Center(
 ///         child: CupertinoButton(
 ///           onPressed: () {
-///             showCupertinoModalPopup(
+///             showCupertinoModalPopup<void>(
 ///               context: context,
 ///               builder: (BuildContext context) => CupertinoActionSheet(
 ///                 title: const Text('Title'),
 ///                 message: const Text('Message'),
-///                 actions: [
+///                 actions: <CupertinoActionSheetAction>[
 ///                   CupertinoActionSheetAction(
 ///                     child: const Text('Action One'),
 ///                     onPressed: () {
@@ -138,7 +140,7 @@ const double _kDividerThickness = 1.0;
 ///               ),
 ///             );
 ///           },
-///           child: Text('CupertinoActionSheet'),
+///           child: const Text('CupertinoActionSheet'),
 ///         ),
 ///       ),
 ///     );

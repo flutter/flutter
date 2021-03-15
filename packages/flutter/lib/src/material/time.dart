@@ -31,7 +31,7 @@ enum DayPeriod {
 ///
 /// ```dart
 /// TimeOfDay now = TimeOfDay.now();
-/// TimeOfDay releaseTime = TimeOfDay(hour: 15, minute: 0); // 3:00pm
+/// const TimeOfDay releaseTime = TimeOfDay(hour: 15, minute: 0); // 3:00pm
 /// TimeOfDay roomBooked = TimeOfDay.fromDateTime(DateTime.parse('2018-10-20 16:30:04Z')); // 4:30pm
 /// ```
 /// {@end-tool}

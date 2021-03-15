@@ -101,9 +101,9 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// }
 ///
 /// class AutocompleteBasicExample extends StatelessWidget {
-///   AutocompleteBasicExample({Key? key}) : super(key: key);
+///   const AutocompleteBasicExample({Key? key}) : super(key: key);
 ///
-///   static final List<String> _options = <String>[
+///   static const List<String> _options = <String>[
 ///     'aardvark',
 ///     'bobcat',
 ///     'chameleon',
@@ -131,10 +131,10 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///           alignment: Alignment.topLeft,
 ///           child: Material(
 ///             elevation: 4.0,
-///             child: Container(
+///             child: SizedBox(
 ///               height: 200.0,
 ///               child: ListView.builder(
-///                 padding: EdgeInsets.all(8.0),
+///                 padding: const EdgeInsets.all(8.0),
 ///                 itemCount: options.length,
 ///                 itemBuilder: (BuildContext context, int index) {
 ///                   final String option = options.elementAt(index);
@@ -191,6 +191,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// }
 ///
 /// // An example of a type that someone might want to autocomplete a list of.
+/// @immutable
 /// class User {
 ///   const User({
 ///     required this.email,
@@ -207,8 +208,9 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///
 ///   @override
 ///   bool operator ==(Object other) {
-///     if (other.runtimeType != runtimeType)
+///     if (other.runtimeType != runtimeType) {
 ///       return false;
+///     }
 ///     return other is User
 ///         && other.name == name
 ///         && other.email == email;
@@ -219,9 +221,9 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// }
 ///
 /// class AutocompleteCustomTypeExample extends StatelessWidget {
-///   AutocompleteCustomTypeExample({Key? key}) : super(key: key);
+///   const AutocompleteCustomTypeExample({Key? key}) : super(key: key);
 ///
-///   static final List<User> _userOptions = <User>[
+///   static const List<User> _userOptions = <User>[
 ///     User(name: 'Alice', email: 'alice@example.com'),
 ///     User(name: 'Bob', email: 'bob@example.com'),
 ///     User(name: 'Charlie', email: 'charlie123@gmail.com'),
@@ -254,10 +256,10 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///           alignment: Alignment.topLeft,
 ///           child: Material(
 ///             elevation: 4.0,
-///             child: Container(
+///             child: SizedBox(
 ///               height: 200.0,
 ///               child: ListView.builder(
-///                 padding: EdgeInsets.all(8.0),
+///                 padding: const EdgeInsets.all(8.0),
 ///                 itemCount: options.length,
 ///                 itemBuilder: (BuildContext context, int index) {
 ///                   final User option = options.elementAt(index);
@@ -307,19 +309,19 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// }
 ///
 /// class AutocompleteFormExample extends StatefulWidget {
-///   AutocompleteFormExample({Key? key}) : super(key: key);
+///   const AutocompleteFormExample({Key? key}) : super(key: key);
 ///
 ///   @override
 ///   AutocompleteFormExampleState createState() => AutocompleteFormExampleState();
 /// }
 ///
 /// class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
-///   final _formKey = GlobalKey<FormState>();
+///   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 ///   final TextEditingController _textEditingController = TextEditingController();
 ///   String? _dropdownValue;
 ///   String? _autocompleteSelection;
 ///
-///   final List<String> _options = <String>[
+///   const List<String> _options = <String>[
 ///     'aardvark',
 ///     'bobcat',
 ///     'chameleon',
@@ -359,7 +361,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///           ),
 ///           TextFormField(
 ///             controller: _textEditingController,
-///             decoration: InputDecoration(
+///             decoration: const InputDecoration(
 ///               hintText: 'This is a regular TextFormField',
 ///             ),
 ///             validator: (String? value) {
@@ -383,7 +385,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///             fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
 ///               return TextFormField(
 ///                 controller: textEditingController,
-///                 decoration: InputDecoration(
+///                 decoration: const InputDecoration(
 ///                   hintText: 'This is an RawAutocomplete!',
 ///                 ),
 ///                 focusNode: focusNode,
@@ -403,10 +405,10 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///                 alignment: Alignment.topLeft,
 ///                 child: Material(
 ///                   elevation: 4.0,
-///                   child: Container(
+///                   child: SizedBox(
 ///                     height: 200.0,
 ///                     child: ListView.builder(
-///                       padding: EdgeInsets.all(8.0),
+///                       padding: const EdgeInsets.all(8.0),
 ///                       itemCount: options.length,
 ///                       itemBuilder: (BuildContext context, int index) {
 ///                         final String option = options.elementAt(index);
@@ -435,7 +437,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///                 context: context,
 ///                 builder: (BuildContext context) {
 ///                   return AlertDialog(
-///                     title: Text('Successfully submitted'),
+///                     title: const Text('Successfully submitted'),
 ///                     content: SingleChildScrollView(
 ///                       child: ListBody(
 ///                         children: <Widget>[
@@ -447,7 +449,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///                     ),
 ///                     actions: <Widget>[
 ///                       TextButton(
-///                         child: Text('Ok'),
+///                         child: const Text('Ok'),
 ///                         onPressed: () {
 ///                           Navigator.of(context).pop();
 ///                         },
@@ -457,7 +459,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///                 },
 ///               );
 ///             },
-///             child: Text('Submit'),
+///             child: const Text('Submit'),
 ///           ),
 ///         ],
 ///       ),
@@ -544,8 +546,9 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// ];
   ///
   /// class RawAutocompleteSplit extends StatefulWidget {
-  ///   RawAutocompleteSplit({Key? key}) : super(key: key);
+  ///   const RawAutocompleteSplit({Key? key}) : super(key: key);
   ///
+  ///   @override
   ///   RawAutocompleteSplitState createState() => RawAutocompleteSplitState();
   /// }
   ///
@@ -562,7 +565,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   ///         title: TextFormField(
   ///           controller: _textEditingController,
   ///           focusNode: _focusNode,
-  ///           decoration: InputDecoration(
+  ///           decoration: const InputDecoration(
   ///             hintText: 'Split RawAutocomplete App',
   ///           ),
   ///           onFieldSubmitted: (String value) {
