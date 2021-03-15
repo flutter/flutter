@@ -51,6 +51,16 @@ $otherComments  static const PhysicalKeyboardKey ${entry.constantName} = Physica
     return definitions.toString();
   }
 
+  String get _physicalDebugNames {
+    final StringBuffer result = StringBuffer();
+    for (final Key entry in keyData.data) {
+      result.write('''
+      ${toHex(entry.usbHidCode, digits: 8)}: '${entry.commentName}',
+''');
+    }
+    return result.toString();
+  }
+
   /// Gets the generated definitions of LogicalKeyboardKeys.
   String get _logicalDefinitions {
     final StringBuffer definitions = StringBuffer();
@@ -102,7 +112,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
     final StringBuffer result = StringBuffer();
     for (final Key entry in keyData.data) {
       result.write('''
-      ${toHex(entry.usbHidCode, digits: 8)}: '${entry.commentName}',
+      ${toHex(entry.flutterId, digits: 11)}: '${entry.commentName}',
 ''');
     }
     for (final String name in Key.synonyms.keys) {
@@ -110,21 +120,8 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
       // It won't end up being the same value because it'll be in the pseudo-key
       // plane.
       final Key entry = keyData.data.firstWhere((Key item) => item.name == Key.synonyms[name][0]);
-      final Set<String> unionNames = Key.synonyms[name].map<String>((dynamic name) {
-        return upperCamelToLowerCamel(name as String);
-      }).toSet();
       result.write('''
-      ${toHex(Key.synonymPlane | entry.flutterId, digits: 8)}: '${Key.getCommentName(name)}',
-''');
-    }
-    return result.toString();
-  }
-
-  String get _physicalDebugNames {
-    final StringBuffer result = StringBuffer();
-    for (final Key entry in keyData.data) {
-      result.write('''
-      ${toHex(entry.usbHidCode, digits: 8)}: '${entry.commentName}',
+      ${toHex(Key.synonymPlane | entry.flutterId, digits: 11)}: '${Key.getCommentName(name)}',
 ''');
     }
     return result.toString();

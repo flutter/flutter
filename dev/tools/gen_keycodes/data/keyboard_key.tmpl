@@ -399,18 +399,6 @@ class PhysicalKeyboardKey extends KeyboardKey {
   static PhysicalKeyboardKey? findKeyByCode(int usageCode) => _knownPhysicalKeys[usageCode];
 
   @override
-  int get hashCode => usbHidUsage.hashCode;
-
-  @override
-  bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-    return other is PhysicalKeyboardKey
-        && other.usbHidUsage == usbHidUsage;
-  }
-
-  @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('usbHidUsage', '0x${usbHidUsage.toRadixString(16).padLeft(8, '0')}', showName: true));

@@ -68,7 +68,8 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
     // If the key has a printable representation, then make a logical key based
     // on that.
     if (codePoint != 0) {
-      return LogicalKeyboardKey(LogicalKeyboardKey.unicodePlane | codePoint & LogicalKeyboardKey.valueMask);
+      final int flutterId = LogicalKeyboardKey.unicodePlane | codePoint & LogicalKeyboardKey.valueMask;
+      return kFuchsiaToLogicalKey[flutterId] ?? LogicalKeyboardKey(LogicalKeyboardKey.unicodePlane | codePoint & LogicalKeyboardKey.valueMask);
     }
 
     // Look to see if the hidUsage is one we know about and have a mapping for.
