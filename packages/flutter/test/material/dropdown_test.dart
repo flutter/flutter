@@ -2495,7 +2495,7 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/77655.
   testWidgets('DropdownButton selecting a null valued item should be selected',
       (WidgetTester tester) async {
-    final List<MapEntry<String?, String>> items = MapEntry<String?, String>[
+    final List<MapEntry<String?, String>> items = <MapEntry<String?, String>>[
       const MapEntry<String?, String>(null, 'None'),
       const MapEntry<String?, String>('one', 'One'),
       const MapEntry<String?, String>('two', 'Two'),
