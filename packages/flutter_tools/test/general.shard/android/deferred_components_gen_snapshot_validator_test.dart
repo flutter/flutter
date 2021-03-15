@@ -188,7 +188,6 @@ loading-units:
       exitOnFail: false,
       title: 'test check',
     );
-    final File cacheFile = env.projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
     validator.checkAgainstLoadingUnitsCache(
       <LoadingUnit>[
         LoadingUnit(id: 2, libraries: <String>['lib1']),
@@ -577,7 +576,7 @@ loading-units:
       .childDirectory('main')
       .childFile('AndroidManifest.xml');
     expect(manifestOutput.existsSync(), true);
-    expect(manifestOutput.readAsStringSync(), contains('<meta-data android:name="io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping" android:value="3:component1,2:component2,4:component2"/>'), true);
+    expect(manifestOutput.readAsStringSync(), contains('<meta-data android:name="io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping" android:value="3:component1,2:component2,4:component2"/>'));
     expect(manifestOutput.readAsStringSync(), contains('<!-- Don\'t delete the meta-data below.'));
   });
 
