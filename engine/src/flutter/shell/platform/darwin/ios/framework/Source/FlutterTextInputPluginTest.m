@@ -865,4 +865,31 @@ FLUTTER_ASSERT_ARC
   XCTAssertEqual(range.range.length, 20u);
 }
 
+- (void)testFlutterTextInputPluginRetainsFlutterTextInputView {
+  FlutterTextInputPlugin* myInputPlugin;
+  id myEngine = OCMClassMock([FlutterEngine class]);
+  myInputPlugin = [[FlutterTextInputPlugin alloc] init];
+  myInputPlugin.textInputDelegate = myEngine;
+  __weak UIView* activeView;
+  @autoreleasepool {
+    FlutterMethodCall* setClientCall = [FlutterMethodCall
+        methodCallWithMethodName:@"TextInput.setClient"
+                       arguments:@[
+                         [NSNumber numberWithInt:123], self.mutablePasswordTemplateCopy
+                       ]];
+    [myInputPlugin handleMethodCall:setClientCall
+                             result:^(id _Nullable result){
+                             }];
+    activeView = myInputPlugin.textInputView;
+    FlutterMethodCall* hideCall = [FlutterMethodCall methodCallWithMethodName:@"TextInput.hide"
+                                                                    arguments:@[]];
+    [myInputPlugin handleMethodCall:hideCall
+                             result:^(id _Nullable result){
+                             }];
+    XCTAssertNotNil(activeView);
+  }
+  // This assert proves the myInputPlugin.textInputView is not deallocated.
+  XCTAssertNotNil(activeView);
+}
+
 @end
