@@ -17,7 +17,14 @@ import 'common.dart';
 /// and replace the `./dart_tool/flutter_build/generated_main.dart`.
 class DartPluginRegistrantTarget extends Target {
 
-  const DartPluginRegistrantTarget();
+  /// Construct a [DartPluginRegistrantTarget].
+  ///
+  /// If `project` is unset, a [FlutterProject] based on environment is used.
+  DartPluginRegistrantTarget({FlutterProject project}) {
+    _project = project;
+  }
+
+  FlutterProject _project;
 
   @override
   Future<void> build(Environment environment) async {
@@ -40,7 +47,7 @@ class DartPluginRegistrantTarget extends Target {
       .childFile('generated_main.dart');
     assert(newMainDart.existsSync());
     await generateMainDartWithPluginRegistrant(
-      FlutterProject.current(),
+      _project ?? FlutterProject.fromDirectory(environment.projectDir),
       packageConfig,
       mainUri,
       newMainDart,
