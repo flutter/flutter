@@ -471,9 +471,8 @@ class RestorableDateTime extends RestorableValue<DateTime> {
 
 class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMixin {
   late final RestorableDateTime _selectedDate = RestorableDateTime(widget.initialDate);
+  late final RestorableInt _entryMode = RestorableInt(widget.initialEntryMode.index);
   final RestorableBool _autoValidate = RestorableBool(false);
-  final RestorableIntN _entryMode = RestorableIntN(null);
-
 
   @override
   String? get restorationId => widget.restorationId;
@@ -483,7 +482,6 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     registerForRestoration(_selectedDate, 'selected_date');
     registerForRestoration(_autoValidate, 'autovalidate');
     registerForRestoration(_entryMode, 'calendar_entry_mode');
-    _entryMode.value ??= widget.initialEntryMode.index;
   }
 
   final GlobalKey _calendarPickerKey = GlobalKey();
