@@ -226,8 +226,8 @@ loading-units-spelled-wrong:
     validator.displayResults();
     validator.attemptToolExit();
 
-    expect(logger.statusText, contains('Errors checking the following files:');
-    expect(logger.statusText, contains('Invalid loading units yaml file, \'loading-units\' entry did not exist.');
+    expect(logger.statusText, contains('Errors checking the following files:'));
+    expect(logger.statusText, contains('Invalid loading units yaml file, \'loading-units\' entry did not exist.'));
 
     expect(logger.statusText, contains('Previously existing loading units no longer exist:\n\n  LoadingUnit 2\n    Libraries:\n    - lib1\n'));
   });
