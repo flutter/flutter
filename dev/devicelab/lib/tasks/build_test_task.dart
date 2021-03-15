@@ -45,7 +45,7 @@ abstract class BuildTestTask {
   bool buildOnly = false;
 
   /// The [DeviceOperatingSystem] being targeted for this build.
-  /// 
+  ///
   /// If passed, no connected device checks are run as the current connected device
   /// will be set as [DeviceOperatingSystem.fake].
   DeviceOperatingSystem targetPlatform;
