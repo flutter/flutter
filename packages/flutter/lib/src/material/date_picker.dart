@@ -152,7 +152,15 @@ const double _inputFormLandscapeHeight = 108.0;
 ///   final RestorableInt selectedDate = RestorableInt(
 ///     DateTime.now().millisecondsSinceEpoch,
 ///   );
-///   late RestorableRouteFuture<DateTime> _restorableDatePickerRouteFuture;
+///   late final RestorableRouteFuture<DateTime> _restorableDatePickerRouteFuture = RestorableRouteFuture<DateTime>(
+///     onComplete: _selectDate,
+///     onPresent: (NavigatorState navigator, Object? arguments) {
+///       return navigator.restorablePush(
+///         _datePickerRoute,
+///         arguments: selectedDate.value,
+///       );
+///     },
+///   );
 ///
 ///   static Route<DateTime> _datePickerRoute(
 ///     BuildContext context,
@@ -166,20 +174,6 @@ const double _inputFormLandscapeHeight = 108.0;
 ///           initialDate: DateTime.fromMillisecondsSinceEpoch(arguments as int),
 ///           firstDate: DateTime(2021, 1, 1),
 ///           lastDate: DateTime(2022, 1, 1),
-///         );
-///       },
-///     );
-///   }
-///
-///   @override
-///   void initState() {
-///     super.initState();
-///     _restorableDatePickerRouteFuture = RestorableRouteFuture<DateTime>(
-///       onComplete: _selectDate,
-///       onPresent: (navigator, arguments) {
-///         return navigator.restorablePush(
-///           _datePickerRoute,
-///           arguments: selectedDate.value,
 ///         );
 ///       },
 ///     );
