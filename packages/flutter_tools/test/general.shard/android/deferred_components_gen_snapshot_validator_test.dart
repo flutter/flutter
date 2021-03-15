@@ -228,7 +228,7 @@ loading-units-spelled-wrong:
     expect(logger.statusText, contains('Errors checking the following files:'));
     expect(logger.statusText, contains('Invalid loading units yaml file, \'loading-units\' entry did not exist.'));
 
-    expect(logger.statusText, contains('Previously existing loading units no longer exist:\n\n  LoadingUnit 2\n    Libraries:\n    - lib1\n'));
+    expect(logger.statusText.contains('Previously existing loading units no longer exist:\n\n  LoadingUnit 2\n    Libraries:\n    - lib1\n'), false);
   });
 
   testWithoutContext('loadingUnitCache validator detects malformed file: not a list', () async {
