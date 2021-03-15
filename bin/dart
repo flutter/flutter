@@ -49,7 +49,7 @@ OS="$(uname -s)"
 
 # If we're on Windows, invoke the batch script instead to get proper locking.
 if [[ $OS =~ MINGW.* || $OS =~ CYGWIN.* ]]; then
-  exec "${BIN_DIR}/flutter.bat" "$@"
+  exec "${BIN_DIR}/dart.bat" "$@"
 fi
 
 # To define `shared::execute()` function
