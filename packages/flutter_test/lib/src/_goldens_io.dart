@@ -128,9 +128,9 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
   File _getGoldenFile(Uri golden) => File(_path.join(_path.fromUri(basedir), _path.fromUri(golden.path)));
 }
 
-/// A class for use in golden file comparators that run locally and provide
+/// A mixin for use in golden file comparators that run locally and provide
 /// output.
-class LocalComparisonOutput {
+mixin LocalComparisonOutput {
   /// Writes out diffs from the [ComparisonResult] of a golden file test.
   ///
   /// Will throw an error if a null result is provided.

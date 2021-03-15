@@ -163,7 +163,7 @@ void main() {
 
       expect(fileSystem.directory('build/ios/iphoneos'), exists);
       expect(launchResult.started, true);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       FileSystem: () => fileSystem,
@@ -252,7 +252,7 @@ void main() {
 
       expect(launchResult?.started, true);
       expect(fileSystem.directory('build/ios/iphoneos'), exists);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       FileSystem: () => fileSystem,
@@ -316,7 +316,7 @@ void main() {
         expect(logger.statusText,
           contains('Xcode build failed due to concurrent builds, will retry in 2 seconds'));
         expect(launchResult.started, true);
-        expect(processManager.hasRemainingExpectations, false);
+        expect(processManager, hasNoRemainingExpectations);
       });
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,

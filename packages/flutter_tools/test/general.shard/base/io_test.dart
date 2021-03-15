@@ -9,6 +9,7 @@ import 'dart:io' as io;
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -66,7 +67,7 @@ void main() {
   });
 
   testUsingContext('ProcessSignal toString() works', () async {
-    expect(io.ProcessSignal.sigint.toString(), ProcessSignal.SIGINT.toString());
+    expect(io.ProcessSignal.sigint.toString(), ProcessSignal.sigint.toString());
   });
 
   test('exit throws a StateError if called without being overriden', () {
@@ -99,6 +100,18 @@ void main() {
     expect(await listNetworkInterfaces(), isEmpty);
 
     resetNetworkInterfaceLister();
+  });
+
+  testWithoutContext('Does not listen to Posix process signals on windows', () async {
+    final FakePlatform windows = FakePlatform(operatingSystem: 'windows');
+    final FakePlatform linux = FakePlatform(operatingSystem: 'linux');
+    final FakeProcessSignal fakeSignalA = FakeProcessSignal();
+    final FakeProcessSignal fakeSignalB = FakeProcessSignal();
+    fakeSignalA.controller.add(fakeSignalA);
+    fakeSignalB.controller.add(fakeSignalB);
+
+    expect(await PosixProcessSignal(fakeSignalA, platform: windows).watch().isEmpty, true);
+    expect(await PosixProcessSignal(fakeSignalB, platform: linux).watch().first, isNotNull);
   });
 }
 
