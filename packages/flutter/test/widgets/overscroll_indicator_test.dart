@@ -535,10 +535,10 @@ void main() {
 
 class TestScrollBehavior1 extends ScrollBehavior {
   @override
-  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+  Widget buildViewportDecoration(BuildContext context, Widget child, ScrollableDetails details) {
     return GlowingOverscrollIndicator(
       child: child,
-      axisDirection: axisDirection,
+      axisDirection: details.direction,
       color: const Color(0xFF00FF00),
     );
   }
@@ -546,10 +546,10 @@ class TestScrollBehavior1 extends ScrollBehavior {
 
 class TestScrollBehavior2 extends ScrollBehavior {
   @override
-  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+  Widget buildViewportDecoration(BuildContext context, Widget child, ScrollableDetails details) {
     return GlowingOverscrollIndicator(
       child: child,
-      axisDirection: axisDirection,
+      axisDirection: details.direction,
       color: const Color(0xFF0000FF),
     );
   }

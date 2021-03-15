@@ -629,9 +629,6 @@ void main() {
 
 class NoScrollbarBehavior extends ScrollBehavior {
   @override
-  bool get useDecoration => true;
-
-  @override
   Widget buildViewportDecoration(BuildContext context, Widget child, ScrollableDetails details) {
     return child;
   }

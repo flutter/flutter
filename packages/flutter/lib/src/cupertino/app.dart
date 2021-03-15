@@ -429,18 +429,6 @@ class CupertinoApp extends StatefulWidget {
 ///
 ///  * [ScrollBehavior], the default scrolling behavior extended by this class.
 class CupertinoScrollBehavior extends ScrollBehavior {
-  /// Creates a CupertinoScrollBehavior configured to use [ScrollBehavior.buildViewportDecoration].
-  const CupertinoScrollBehavior() : super(useDecoration: true);
-
-  @Deprecated(
-    'Migrate to buildViewportDecoration. '
-    'This feature was deprecated after v2.1.0-11.0.pre.'
-  )
-  @override
-  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
-    // Never build any overscroll glow indicators.
-    return child;
-  }
 
   @override
   Widget buildViewportDecoration(

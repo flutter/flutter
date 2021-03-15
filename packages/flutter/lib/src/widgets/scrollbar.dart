@@ -600,7 +600,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// Scrollbars are added to most [Scrollable] widgets by default on Desktop
 /// platforms in [ScrollBehavior.buildViewportDecoration] as part of an app's
 /// [ScrollConfiguration]. Scrollable widgets that do not have automatically
-/// applied Scrollbars are
+/// applied Scrollbars include
 ///
 ///   * [EditableText]
 ///   * [ListWheelScrollView]

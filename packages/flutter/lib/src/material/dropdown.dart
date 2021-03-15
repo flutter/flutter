@@ -91,7 +91,7 @@ class _DropdownMenuPainter extends CustomPainter {
 // Do not use the platform-specific default scroll configuration.
 // Dropdown menus should never overscroll or display an overscroll indicator.
 class _DropdownScrollBehavior extends ScrollBehavior {
-  const _DropdownScrollBehavior() : super(useDecoration: true);
+  _DropdownScrollBehavior() : super(useDecoration: true);
 
   @override
   TargetPlatform getPlatform(BuildContext context) => Theme.of(context).platform;
@@ -295,7 +295,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
             type: MaterialType.transparency,
             textStyle: route.style,
             child: ScrollConfiguration(
-              behavior: const _DropdownScrollBehavior(),
+              behavior: _DropdownScrollBehavior(),
               child: PrimaryScrollController(
                 controller: widget.route.scrollController!,
                 child: Scrollbar(

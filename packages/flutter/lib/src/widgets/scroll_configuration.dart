@@ -8,7 +8,6 @@ import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
 import 'overscroll_indicator.dart';
-import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
 import 'scrollbar.dart';
@@ -24,7 +23,7 @@ const Color _kDefaultGlowColor = Color(0xFFFFFFFF);
 /// This class can be extended to further customize a [ScrollBehavior] for a
 /// subtree. For example, overriding [ScrollBehavior.getScrollPhysics] sets the
 /// default [ScrollPhysics] for [Scrollable]s that inherit this [ScrollConfiguration].
-/// Overriding [ScrollBehavior.buildViewportChrome] can be used to add or change
+/// Overriding [ScrollBehavior.buildViewportDecoration] can be used to add or change
 /// default decorations like [GlowingOverscrollIndicator]s.
 /// {@endtemplate}
 ///
@@ -35,28 +34,26 @@ const Color _kDefaultGlowColor = Color(0xFFFFFFFF);
 @immutable
 class ScrollBehavior {
   /// Creates a description of how [Scrollable] widgets should behave.
-  const ScrollBehavior({
+  ScrollBehavior({
     @Deprecated(
       'Set to true after migrating to buildViewportDecoration. '
       'This feature was deprecated after v2.1.0-11.0.pre.'
     )
-    this.useDecoration = false,
-  });
+    bool useDecoration = false,
+  }) {
+    _useDecoration = useDecoration;
+  }
+
+  // Whether [buildViewportChrome] or [buildViewportDecoration] should be used
+  // in wrapping the Scrollable widget.
+  //
+  // This is used as an opt-in during the deprecation period.
+  late final bool _useDecoration;
 
   /// The platform whose scroll physics should be implemented.
   ///
   /// Defaults to the current platform.
   TargetPlatform getPlatform(BuildContext context) => defaultTargetPlatform;
-
-  /// Whether [buildViewportChrome] or [buildViewportDecoration] should be used
-  /// in wrapping the Scrollable widget.
-  ///
-  /// This is used as an opt-in during the deprecation period.
-  @Deprecated(
-    'Set to true after migrating to buildViewportDecoration. '
-    'This feature was deprecated after v2.1.0-11.0.pre.'
-  )
-  final bool useDecoration;
 
   /// Wraps the given widget, which scrolls in the given [AxisDirection].
   ///
@@ -91,13 +88,20 @@ class ScrollBehavior {
   /// For example, based on the platform and provided details, this method
   /// could wrap a given widget with a [GlowingOverscrollIndicator] to provide
   /// visual feedback when the user overscrolls.
+  ///
+  /// When the [ScrollableDetails.controller] is provided, a [Scrollbar] is applied
+  /// to the [Scrollable] child.
   Widget buildViewportDecoration(
     BuildContext context,
     Widget child,
     ScrollableDetails details,
   ) {
+    // If useDecoration is false, call buildViewportChrome instead.
+    if (!_useDecoration)
+      return buildViewportChrome(context, child, details.direction);
+
     // When modifying this function, consider modifying the implementation in
-    // _MaterialScrollBehavior and _AlwaysCupertinoScrollBehavior as well.
+    // MaterialScrollBehavior and CupertinoScrollBehavior as well.
     // On Android and Fuchsia, we add a GlowingOverscrollIndicator.
     // On Desktop platforms, when a controller is provided, we add a RawScrollbar.
     switch (getPlatform(context)) {
@@ -213,7 +217,7 @@ class ScrollConfiguration extends InheritedWidget {
   /// a default [ScrollBehavior] instance is returned.
   static ScrollBehavior of(BuildContext context) {
     final ScrollConfiguration? configuration = context.dependOnInheritedWidgetOfExactType<ScrollConfiguration>();
-    return configuration?.behavior ?? const ScrollBehavior(useDecoration: true);
+    return configuration?.behavior ?? ScrollBehavior(useDecoration: true);
   }
 
   @override

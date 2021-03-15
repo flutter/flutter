@@ -732,16 +732,14 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       );
     }
 
-    return _configuration.useDecoration
-      ? _configuration.buildViewportDecoration(
+    return _configuration.buildViewportDecoration(
           context,
           result,
           ScrollableDetails(
-            widget.axisDirection,
-            widget.autoScrollbar ? widget.controller : null,
+            direction: widget.axisDirection,
+            controller: widget.autoScrollbar ? widget.controller : null,
           ),
-        )
-      : _configuration.buildViewportChrome(context, result, widget.axisDirection);
+        );
   }
 
   @override
@@ -764,7 +762,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 class ScrollableDetails {
   /// Creates a set of details describing the [Scrollable]. The [direction]
   /// cannot be null.
-  const ScrollableDetails(this.direction, this.controller);
+  const ScrollableDetails({
+    required this.direction,
+    this.controller,
+  });
 
   /// The direction in which this widget scrolls.
   ///
@@ -773,6 +774,11 @@ class ScrollableDetails {
 
   /// A [ScrollController] that can be used to control the position of the
   /// [Scrollable] widget.
+  ///
+  /// This is used by [ScrollBehavior] to apply a [Scrollbar] to the associated
+  /// [Scrollable].
+  ///
+  /// When null, no Scrollbar will be added. Defaults to null.
   final ScrollController? controller;
 }
 
