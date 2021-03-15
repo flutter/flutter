@@ -1214,7 +1214,7 @@ class WindowsUwpProject extends WindowsProject {
   String get _childDirectory => 'windows-uwp';
 
   /// Eventually this will be used to check if the user's unstable project needs to be regenerated.
-  String get projectVersion => _editableDirectory.childDirectory('data').childFile('version').readAsStringSync();
+  int get projectVersion => int.tryParse(_editableDirectory.childFile('project_version').readAsStringSync());
 }
 
 /// The Linux sub project.
