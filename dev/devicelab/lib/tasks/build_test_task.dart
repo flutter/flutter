@@ -20,11 +20,11 @@ abstract class BuildTestTask {
     buildOnly = argResults[kBuildOnlyFlag] as bool;
     testOnly = argResults[kTestOnlyFlag] as bool;
     if (argResults.wasParsed(kTargetPlatformOption)) {
-      targetPlatform = deviceOperatingSystemFromString(argResults[kTargetPlatformOption] as String);
       // Override deviceOperatingSystem to prevent extra utilities from being used.
+      targetPlatform = deviceOperatingSystemFromString(argResults[kTargetPlatformOption] as String);
       _originalDeviceOperatingSystem = deviceOperatingSystem;
+      deviceOperatingSystem = DeviceOperatingSystem.fake;
     }
-    deviceOperatingSystem = DeviceOperatingSystem.fake;
   }
 
   static const String kApplicationBinaryPathOption = 'application-binary-path';
@@ -44,9 +44,13 @@ abstract class BuildTestTask {
   /// If true, skip [test].
   bool buildOnly = false;
 
-  /// The [DeviceOperatingSystem] being targeted for this test.
+  /// The [DeviceOperatingSystem] being targeted for this build.
+  /// 
+  /// If passed, no connected device checks are run as the current connected device
+  /// will be set as [DeviceOperatingSystem.fake].
   DeviceOperatingSystem targetPlatform;
 
+  /// Original [deviceOperatingSystem] if [targetPlatform] is given.
   DeviceOperatingSystem _originalDeviceOperatingSystem;
 
   /// If true, skip [build].
@@ -80,8 +84,10 @@ abstract class BuildTestTask {
   ///
   /// This assumes that [applicationBinaryPath] exists.
   Future<TaskResult> test() async {
-    // Reset deviceOperatingSystem to original specified by task
-    deviceOperatingSystem = _originalDeviceOperatingSystem;
+    // Ensure deviceOperatingSystem is the one set in bin/task.
+    if (deviceOperatingSystem == DeviceOperatingSystem.fake) {
+      deviceOperatingSystem = _originalDeviceOperatingSystem;
+    }
     final Device device = await devices.workingDevice;
     await device.unlock();
     await inDirectory<void>(workingDirectory, () async {
