@@ -423,32 +423,22 @@ class DatePickerDialog extends StatefulWidget {
   _DatePickerDialogState createState() => _DatePickerDialogState();
 }
 
-/// A restorable data structure to save and restore [DateTime].
-class RestorableDateTimeN extends RestorableProperty<DateTime?> {
-  DateTime? _date;
-
-  /// Sets the date with a new [DateTime] value.
-  void setDate(DateTime dateTime) {
-    _date = dateTime;
-    notifyListeners();
-  }
-
-  /// Gets the most recent [DateTime].
-  DateTime? getDate() => _date;
-
+/// A state restorable data structure to save and restore [DateTime].
+class RestorableDateTimeN extends RestorableValue<DateTime?> {
   @override
   DateTime? createDefaultValue() => null;
+
+  @override
+  void didUpdateValue(DateTime? oldValue) {
+    assert(debugIsSerializableForRestoration(value));
+    notifyListeners();
+  }
 
   @override
   DateTime? fromPrimitives(Object? data) => data == null ? null : DateTime.fromMillisecondsSinceEpoch(data as int);
 
   @override
-  void initWithValue(DateTime? value) {
-    _date = value;
-  }
-
-  @override
-  Object? toPrimitives() => _date?.millisecondsSinceEpoch;
+  Object? toPrimitives() => value?.millisecondsSinceEpoch;
 }
 
 class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMixin {
@@ -466,9 +456,9 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     registerForRestoration(_autoValidate, 'autovalidate');
     registerForRestoration(_entryMode, 'calendar_entry_mode');
 
-    final DateTime? tempDate = _restorableSelectedDate.getDate();
+    final DateTime? tempDate = _restorableSelectedDate.value;
     if (tempDate == null) {
-      _restorableSelectedDate.setDate(widget.initialDate);
+      _restorableSelectedDate.value = widget.initialDate;
     }
 
     _entryMode.value ??= widget.initialEntryMode.index;
@@ -486,7 +476,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
       }
       form.save();
     }
-    Navigator.pop(context, _restorableSelectedDate.getDate());
+    Navigator.pop(context, _restorableSelectedDate.value);
   }
 
   void _handleCancel() {
@@ -513,7 +503,9 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
   }
 
   void _handleDateChanged(DateTime date) {
-    setState(() => _restorableSelectedDate.setDate(date));
+    setState(() {
+      _restorableSelectedDate.value = date;
+    });
   }
 
   Size _dialogSize(BuildContext context) {
@@ -554,7 +546,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     // layout issues.
     final double textScaleFactor = math.min(MediaQuery.of(context).textScaleFactor, 1.3);
 
-    final String dateText = localizations.formatMediumDate(_restorableSelectedDate.getDate()!);
+    final String dateText = localizations.formatMediumDate(_restorableSelectedDate.value!);
     final Color onPrimarySurface = colorScheme.brightness == Brightness.light
       ? colorScheme.onPrimary
       : colorScheme.onSurface;
@@ -584,7 +576,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     CalendarDatePicker calendarDatePicker() {
       return CalendarDatePicker(
         key: _calendarPickerKey,
-        initialDate: _restorableSelectedDate.getDate()!,
+        initialDate: _restorableSelectedDate.value!,
         firstDate: widget.firstDate,
         lastDate: widget.lastDate,
         currentDate: widget.currentDate,
@@ -607,7 +599,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
               children: <Widget>[
                 const Spacer(),
                 InputDatePickerFormField(
-                  initialDate: _restorableSelectedDate.getDate(),
+                  initialDate: _restorableSelectedDate.value,
                   firstDate: widget.firstDate,
                   lastDate: widget.lastDate,
                   onDateSubmitted: _handleDateChanged,
