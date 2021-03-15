@@ -1958,6 +1958,45 @@ void main() {
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 12);
     }, skip: isBrowser);
+  
+    test('when input has obscured text, it should delete everything before the selection', () async {
+      const int offset = 21;
+      final TextSelectionDelegate delegate = FakeEditableTextState()
+        ..textEditingValue = const TextEditingValue(
+          text: 'test with multiple\n\n words',
+          selection: TextSelection.collapsed(offset: offset),
+        );
+
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        obscureText: true,
+        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          text: '****',
+          style: TextStyle(
+            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          ),
+        ),
+        selection: const TextSelection.collapsed(offset: offset),
+      );
+
+      layout(editable);
+      editable.hasFocus = true;
+      pumpFrame();
+
+      editable.deleteByWord(SelectionChangedCause.keyboard);
+      expect(delegate.textEditingValue.text, 'words');
+      expect(delegate.textEditingValue.selection.isCollapsed, true);
+      expect(delegate.textEditingValue.selection.baseOffset, 0);
+    }, skip: isBrowser);
   });
 
   group('deleteByLine', () {
@@ -2111,6 +2150,45 @@ void main() {
       expect(delegate.textEditingValue.text, 'test with\n\nright here.\nmultiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 11);
+    }, skip: isBrowser);
+  
+    test('when input has obscured text, it should delete everything before the selection', () async {
+      const int offset = 21;
+      final TextSelectionDelegate delegate = FakeEditableTextState()
+        ..textEditingValue = const TextEditingValue(
+          text: 'test with multiple\n\n words',
+          selection: TextSelection.collapsed(offset: offset),
+        );
+
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        obscureText: true,
+        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          text: '****',
+          style: TextStyle(
+            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          ),
+        ),
+        selection: const TextSelection.collapsed(offset: offset),
+      );
+
+      layout(editable);
+      editable.hasFocus = true;
+      pumpFrame();
+
+      editable.deleteByLine(SelectionChangedCause.keyboard);
+      expect(delegate.textEditingValue.text, 'words');
+      expect(delegate.textEditingValue.selection.isCollapsed, true);
+      expect(delegate.textEditingValue.selection.baseOffset, 0);
     }, skip: isBrowser);
   });
 
@@ -2569,6 +2647,45 @@ void main() {
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
     }, skip: isBrowser);
+  
+    test('when input has obscured text, it should delete everything after the selection', () async {
+      const int offset = 4;
+      final TextSelectionDelegate delegate = FakeEditableTextState()
+        ..textEditingValue = const TextEditingValue(
+          text: 'test with multiple\n\n words',
+          selection: TextSelection.collapsed(offset: offset),
+        );
+
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        obscureText: true,
+        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          text: '****',
+          style: TextStyle(
+            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          ),
+        ),
+        selection: const TextSelection.collapsed(offset: offset),
+      );
+
+      layout(editable);
+      editable.hasFocus = true;
+      pumpFrame();
+
+      editable.deleteForwardByWord(SelectionChangedCause.keyboard);
+      expect(delegate.textEditingValue.text, 'test');
+      expect(delegate.textEditingValue.selection.isCollapsed, true);
+      expect(delegate.textEditingValue.selection.baseOffset, offset);
+    }, skip: isBrowser);
   });
 
   group('deleteForwardByLine', () {
@@ -2720,6 +2837,45 @@ void main() {
 
       editable.deleteForwardByLine(SelectionChangedCause.keyboard);
       expect(delegate.textEditingValue.text, 'te\n\nMore stuff right here.\nmultiple blocks');
+      expect(delegate.textEditingValue.selection.isCollapsed, true);
+      expect(delegate.textEditingValue.selection.baseOffset, offset);
+    }, skip: isBrowser);
+  
+    test('when input has obscured text, it should delete everything after the selection', () async {
+      const int offset = 4;
+      final TextSelectionDelegate delegate = FakeEditableTextState()
+        ..textEditingValue = const TextEditingValue(
+          text: 'test with multiple\n\n words',
+          selection: TextSelection.collapsed(offset: offset),
+        );
+
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        obscureText: true,
+        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          text: '****',
+          style: TextStyle(
+            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          ),
+        ),
+        selection: const TextSelection.collapsed(offset: offset),
+      );
+
+      layout(editable);
+      editable.hasFocus = true;
+      pumpFrame();
+
+      editable.deleteForwardByLine(SelectionChangedCause.keyboard);
+      expect(delegate.textEditingValue.text, 'test');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
     }, skip: isBrowser);

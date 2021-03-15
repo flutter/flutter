@@ -1031,6 +1031,44 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     );
   }
 
+  // Deletes the from the current collapsed selection to the start of the field.
+  //
+  // The given [SelectionChangedCause] indicates the cause of this change and
+  // will be passed to [onSelectionChanged].
+  //
+  // See also:
+  //
+  //   * _deleteToEnd
+  void _deleteToStart(TextSelection selection, SelectionChangedCause cause) {
+    assert(selection.isCollapsed == true);
+    if (_readOnly || !selection.isValid) {
+      return;
+    }
+
+    final String text = textSelectionDelegate.textEditingValue.text;
+    final String textAfter = _selection!.textAfter(text);
+    const TextSelection newSelection = TextSelection.collapsed(offset: 0);
+    _setTextEditingValue(
+      TextEditingValue(text: textAfter, selection: newSelection),
+      cause,
+    );
+  }
+
+  // Deletes the from the current collapsed selection to the end of the field.
+  void _deleteToEnd(TextSelection selection, SelectionChangedCause cause) {
+    if (_readOnly || !selection.isValid) {
+      return;
+    }
+
+    final String text = textSelectionDelegate.textEditingValue.text;
+    final String textBefore = _selection!.textBefore(text);
+    final TextSelection newSelection = TextSelection.collapsed(offset: textBefore.length);
+    _setTextEditingValue(
+      TextEditingValue(text: textBefore, selection: newSelection),
+      cause,
+    );
+  }
+
   /// Deletes backwards from the current selection.
   ///
   /// If the [selection] is collapsed, deletes a single character before the
@@ -1055,6 +1093,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     if (!_selection!.isCollapsed) {
       return _deleteSelection(_selection!, cause);
+    }
+
+    // When the text is obscured, the whole thing is treated as one big word.
+    if (obscureText) {
+      return _deleteToStart(_selection!, cause);
     }
 
     final String text = textSelectionDelegate.textEditingValue.text;
@@ -1094,6 +1137,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     if (!_selection!.isCollapsed) {
       return _deleteSelection(_selection!, cause);
+    }
+
+    // When the text is obscured, the whole thing is treated as one big line.
+    if (obscureText) {
+      return _deleteToStart(_selection!, cause);
     }
 
     final String text = textSelectionDelegate.textEditingValue.text;
@@ -1218,6 +1266,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return _deleteSelection(_selection!, cause);
     }
 
+    // When the text is obscured, the whole thing is treated as one big word.
+    if (obscureText) {
+      return _deleteToEnd(_selection!, cause);
+    }
+
     final String text = textSelectionDelegate.textEditingValue.text;
     String textAfter = _selection!.textAfter(text);
 
@@ -1255,6 +1308,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     if (!_selection!.isCollapsed) {
       return _deleteSelection(_selection!, cause);
+    }
+
+    // When the text is obscured, the whole thing is treated as one big line.
+    if (obscureText) {
+      return _deleteToEnd(_selection!, cause);
     }
 
     final String text = textSelectionDelegate.textEditingValue.text;
