@@ -429,7 +429,6 @@ class CupertinoApp extends StatefulWidget {
 ///
 ///  * [ScrollBehavior], the default scrolling behavior extended by this class.
 class CupertinoScrollBehavior extends ScrollBehavior {
-
   @override
   Widget buildViewportDecoration(
     BuildContext context,

@@ -689,7 +689,6 @@ class MaterialApp extends StatefulWidget {
 ///
 ///  * [ScrollBehavior], the default scrolling behavior extended by this class.
 class MaterialScrollBehavior extends ScrollBehavior {
-
   @override
   TargetPlatform getPlatform(BuildContext context) {
     return Theme.of(context).platform;

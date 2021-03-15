@@ -91,8 +91,6 @@ class _DropdownMenuPainter extends CustomPainter {
 // Do not use the platform-specific default scroll configuration.
 // Dropdown menus should never overscroll or display an overscroll indicator.
 class _DropdownScrollBehavior extends ScrollBehavior {
-  _DropdownScrollBehavior() : super(useDecoration: true);
-
   @override
   TargetPlatform getPlatform(BuildContext context) => Theme.of(context).platform;
 
