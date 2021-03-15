@@ -252,6 +252,16 @@ class MemoryIOSink implements IOSink {
 
   @override
   Future<void> flush() async { }
+
+  void clear() {
+    writes.clear();
+  }
+
+  String getAndClear() {
+    final String result = utf8.decode(writes.expand((List<int> l) => l).toList());
+    clear();
+    return result;
+  }
 }
 
 class MemoryStdout extends MemoryIOSink implements io.Stdout {

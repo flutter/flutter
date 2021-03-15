@@ -48,7 +48,7 @@ void main() {
       process.sendCommand(imageFile, goldenKey, false);
 
       final Map<String, dynamic> response = await process.getResponse();
-      final String stringToStdin = stringFromMemoryIOSink(ioSink);
+      final String stringToStdin = ioSink.getAndClear();
 
       expect(response, expectedResponse);
       expect(stringToStdin, '{"imageFile":"test_image_file","key":"file://golden_key/","update":false}\n');
@@ -75,7 +75,7 @@ void main() {
       process.sendCommand(imageFile2, goldenKey2, true);
 
       final Map<String, dynamic> response2 = await process.getResponse();
-      final String stringToStdin = stringFromMemoryIOSink(ioSink);
+      final String stringToStdin = ioSink.getAndClear();
 
       expect(response1, expectedResponse1);
       expect(response2, expectedResponse2);
@@ -101,7 +101,7 @@ Other JSON data after the initial data
       process.sendCommand(imageFile, goldenKey, false);
 
       final Map<String, dynamic> response = await process.getResponse();
-      final String stringToStdin = stringFromMemoryIOSink(ioSink);
+      final String stringToStdin = ioSink.getAndClear();
 
       expect(response, expectedResponse);
       expect(stringToStdin, '{"imageFile":"test_image_file","key":"file://golden_key/","update":false}\n');
@@ -112,5 +112,3 @@ Other JSON data after the initial data
 Stream<List<int>> stdoutFromString(String string) => Stream<List<int>>.fromIterable(<List<int>>[
   utf8.encode(string),
 ]);
-
-String stringFromMemoryIOSink(MemoryIOSink ioSink) => utf8.decode(ioSink.writes.expand((List<int> l) => l).toList());
