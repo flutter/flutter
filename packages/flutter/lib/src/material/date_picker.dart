@@ -424,25 +424,32 @@ class DatePickerDialog extends StatefulWidget {
 }
 
 /// A state restorable data structure to save and restore [DateTime].
-class RestorableDateTimeN extends RestorableValue<DateTime?> {
+class RestorableDateTime extends RestorableValue<DateTime> {
+  /// Creates a [RestorableDateTime].
+  ///
+  /// {@macro flutter.widgets.RestorableNum.constructor}
+  RestorableDateTime(DateTime defaultValue) : _defaultValue = defaultValue;
+
+  final DateTime _defaultValue;
+
   @override
-  DateTime? createDefaultValue() => null;
+  DateTime createDefaultValue() => _defaultValue;
 
   @override
   void didUpdateValue(DateTime? oldValue) {
-    assert(debugIsSerializableForRestoration(value));
+    assert(debugIsSerializableForRestoration(value.millisecondsSinceEpoch));
     notifyListeners();
   }
 
   @override
-  DateTime? fromPrimitives(Object? data) => data == null ? null : DateTime.fromMillisecondsSinceEpoch(data as int);
+  DateTime fromPrimitives(Object? data) => DateTime.fromMillisecondsSinceEpoch(data! as int);
 
   @override
-  Object? toPrimitives() => value?.millisecondsSinceEpoch;
+  Object? toPrimitives() => value.millisecondsSinceEpoch;
 }
 
 class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMixin {
-  final RestorableDateTimeN _restorableSelectedDate = RestorableDateTimeN();
+  late final RestorableDateTime _selectedDate = RestorableDateTime(widget.initialDate);
   final RestorableBool _autoValidate = RestorableBool(false);
   final RestorableIntN _entryMode = RestorableIntN(null);
 
@@ -452,14 +459,9 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
-    registerForRestoration(_restorableSelectedDate, 'selected_date');
+    registerForRestoration(_selectedDate, 'selected_date');
     registerForRestoration(_autoValidate, 'autovalidate');
     registerForRestoration(_entryMode, 'calendar_entry_mode');
-
-    final DateTime? tempDate = _restorableSelectedDate.value;
-    if (tempDate == null) {
-      _restorableSelectedDate.value = widget.initialDate;
-    }
 
     _entryMode.value ??= widget.initialEntryMode.index;
   }
@@ -476,7 +478,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
       }
       form.save();
     }
-    Navigator.pop(context, _restorableSelectedDate.value);
+    Navigator.pop(context, _selectedDate.value);
   }
 
   void _handleCancel() {
@@ -504,7 +506,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
 
   void _handleDateChanged(DateTime date) {
     setState(() {
-      _restorableSelectedDate.value = date;
+      _selectedDate.value = date;
     });
   }
 
@@ -546,7 +548,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     // layout issues.
     final double textScaleFactor = math.min(MediaQuery.of(context).textScaleFactor, 1.3);
 
-    final String dateText = localizations.formatMediumDate(_restorableSelectedDate.value!);
+    final String dateText = localizations.formatMediumDate(_selectedDate.value);
     final Color onPrimarySurface = colorScheme.brightness == Brightness.light
       ? colorScheme.onPrimary
       : colorScheme.onSurface;
@@ -576,7 +578,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     CalendarDatePicker calendarDatePicker() {
       return CalendarDatePicker(
         key: _calendarPickerKey,
-        initialDate: _restorableSelectedDate.value!,
+        initialDate: _selectedDate.value,
         firstDate: widget.firstDate,
         lastDate: widget.lastDate,
         currentDate: widget.currentDate,
@@ -599,7 +601,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
               children: <Widget>[
                 const Spacer(),
                 InputDatePickerFormField(
-                  initialDate: _restorableSelectedDate.value,
+                  initialDate: _selectedDate.value,
                   firstDate: widget.firstDate,
                   lastDate: widget.lastDate,
                   onDateSubmitted: _handleDateChanged,
