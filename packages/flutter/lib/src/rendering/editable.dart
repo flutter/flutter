@@ -999,18 +999,17 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   // Deletes the current uncollapsed [selection].
-  void _deleteSelection(SelectionChangedCause cause) {
-    assert(_selection != null);
-    assert(_selection?.isCollapsed == false);
+  void _deleteSelection(TextSelection selection, SelectionChangedCause cause) {
+    assert(selection.isCollapsed == false);
 
-    if (_readOnly || !_selection!.isValid || _selection!.isCollapsed) {
+    if (_readOnly || !selection.isValid || selection.isCollapsed) {
       return;
     }
 
     final String text = textSelectionDelegate.textEditingValue.text;
-    final String textBefore = _selection!.textBefore(text);
-    final String textAfter = _selection!.textAfter(text);
-    final int cursorPosition = math.min(_selection!.start, _selection!.end);
+    final String textBefore = selection.textBefore(text);
+    final String textAfter = selection.textAfter(text);
+    final int cursorPosition = math.min(selection.start, selection.end);
 
     final TextSelection newSelection = TextSelection.collapsed(offset: cursorPosition);
     _setTextEditingValue(
@@ -1042,7 +1041,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     if (!_selection!.isCollapsed) {
-      return _deleteSelection(cause);
+      return _deleteSelection(_selection!, cause);
     }
 
     final String text = textSelectionDelegate.textEditingValue.text;
@@ -1081,7 +1080,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     if (!_selection!.isCollapsed) {
-      return _deleteSelection(cause);
+      return _deleteSelection(_selection!, cause);
     }
 
     final String text = textSelectionDelegate.textEditingValue.text;
@@ -1120,7 +1119,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     if (!_selection!.isCollapsed) {
-      return _deleteSelection(cause);
+      return _deleteSelection(_selection!, cause);
     }
 
     final String text = textSelectionDelegate.textEditingValue.text;
@@ -1166,7 +1165,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     if (!_selection!.isCollapsed) {
-      return _deleteSelection(cause);
+      return _deleteSelection(_selection!, cause);
     }
 
     final String text = textSelectionDelegate.textEditingValue.text;
@@ -1203,7 +1202,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     if (!_selection!.isCollapsed) {
-      return _deleteSelection(cause);
+      return _deleteSelection(_selection!, cause);
     }
 
     final String text = textSelectionDelegate.textEditingValue.text;
@@ -1242,7 +1241,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     if (!_selection!.isCollapsed) {
-      return _deleteSelection(cause);
+      return _deleteSelection(_selection!, cause);
     }
 
     final String text = textSelectionDelegate.textEditingValue.text;
