@@ -130,6 +130,8 @@ const double _inputFormLandscapeHeight = 108.0;
 /// }
 ///
 /// class MyApp extends StatelessWidget {
+///   MyApp({Key key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return MaterialApp(
@@ -141,6 +143,8 @@ const double _inputFormLandscapeHeight = 108.0;
 /// }
 ///
 /// class MyHomePage extends StatefulWidget {
+///   MyHomePage({Key key}) : super(key: key);
+///
 ///   @override
 ///   _MyHomePageState createState() => _MyHomePageState();
 /// }
@@ -170,7 +174,7 @@ const double _inputFormLandscapeHeight = 108.0;
 ///         return DatePickerDialog(
 ///           restorationId: 'date_picker_dialog',
 ///           initialEntryMode: DatePickerEntryMode.calendarOnly,
-///           initialDate: DateTime.fromMillisecondsSinceEpoch(arguments as int),
+///           initialDate: DateTime.fromMillisecondsSinceEpoch(arguments! as int),
 ///           firstDate: DateTime(2021, 1, 1),
 ///           lastDate: DateTime(2022, 1, 1),
 ///         );
