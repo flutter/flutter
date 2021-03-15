@@ -492,7 +492,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   void _handleOk() {
-    if (DatePickerEntryMode.values[_entryMode.value!] == DatePickerEntryMode.input) {
+    if (DatePickerEntryMode.values[_entryMode.value] == DatePickerEntryMode.input) {
       final FormState form = _formKey.currentState!;
       if (!form.validate()) {
         setState(() => _autoValidate.value = true);
@@ -509,7 +509,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
 
   void _handleEntryModeToggle() {
     setState(() {
-      switch (DatePickerEntryMode.values[_entryMode.value!]) {
+      switch (DatePickerEntryMode.values[_entryMode.value]) {
         case DatePickerEntryMode.calendar:
           _autoValidate.value = false;
           _entryMode.value = DatePickerEntryMode.input.index;
@@ -534,7 +534,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
 
   Size _dialogSize(BuildContext context) {
     final Orientation orientation = MediaQuery.of(context).orientation;
-    switch (DatePickerEntryMode.values[_entryMode.value!]) {
+    switch (DatePickerEntryMode.values[_entryMode.value]) {
       case DatePickerEntryMode.calendar:
       case DatePickerEntryMode.calendarOnly:
         switch (orientation) {
@@ -645,7 +645,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
 
     final Widget picker;
     final Widget? entryModeButton;
-    switch (DatePickerEntryMode.values[_entryMode.value!]) {
+    switch (DatePickerEntryMode.values[_entryMode.value]) {
       case DatePickerEntryMode.calendar:
         picker = calendarDatePicker();
         entryModeButton = IconButton(
