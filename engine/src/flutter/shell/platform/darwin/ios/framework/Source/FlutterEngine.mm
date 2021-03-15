@@ -526,7 +526,6 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   _publisher.reset([[FlutterObservatoryPublisher alloc]
       initWithEnableObservatoryPublication:doesObservatoryPublication]);
   [self maybeSetupPlatformViewChannels];
-  _shell->GetIsGpuDisabledSyncSwitch()->SetSwitch(_isGpuDisabled ? true : false);
 }
 
 + (BOOL)isProfilerEnabled {
@@ -611,15 +610,15 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
                                     _threadHost->io_thread->GetTaskRunner()          // io
   );
 
+  _isGpuDisabled = [UIApplication sharedApplication].applicationState != UIApplicationStateActive;
   // Create the shell. This is a blocking operation.
   std::unique_ptr<flutter::Shell> shell = flutter::Shell::Create(
-      std::move(platformData),  // window data
-      std::move(task_runners),  // task runners
-      std::move(settings),      // settings
-      on_create_platform_view,  // platform view creation
-      on_create_rasterizer,     // rasterzier creation
-      /*is_gpu_disabled=*/[UIApplication sharedApplication].applicationState !=
-          UIApplicationStateActive);
+      /*platform_data=*/std::move(platformData),
+      /*task_runners=*/std::move(task_runners),
+      /*settings=*/std::move(settings),
+      /*on_create_platform_view=*/on_create_platform_view,
+      /*on_create_rasterizer=*/on_create_rasterizer,
+      /*is_gpu_disabled=*/_isGpuDisabled);
 
   if (shell == nullptr) {
     FML_LOG(ERROR) << "Could not start a shell FlutterEngine with entrypoint: "
