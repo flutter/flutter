@@ -6,6 +6,7 @@
 
 import 'dart:async';
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -30,6 +31,7 @@ void main() {
   MockStream mockFrontendServerStdErr;
   StreamController<String> stdErrStreamController;
   BufferLogger testLogger;
+  MemoryFileSystem fileSystem;
 
   setUp(() {
     testLogger = BufferLogger.test();
@@ -37,6 +39,7 @@ void main() {
     mockFrontendServer = MockProcess();
     mockFrontendServerStdIn = MockStdIn();
     mockFrontendServerStdErr = MockStream();
+    fileSystem = MemoryFileSystem.test();
     generator = ResidentCompiler(
       'sdkroot',
       buildMode: BuildMode.debug,
@@ -44,6 +47,7 @@ void main() {
       processManager: mockProcessManager,
       logger: testLogger,
       platform: FakePlatform(operatingSystem: 'linux'),
+      fileSystem: fileSystem,
     );
 
     when(mockFrontendServer.stdin).thenReturn(mockFrontendServerStdIn);
@@ -75,6 +79,9 @@ void main() {
         Completer<List<int>>();
     final Completer<List<int>> compileExpressionResponseCompleter =
         Completer<List<int>>();
+    fileSystem.file('/path/to/main.dart.dill')
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(<int>[1, 2, 3, 4]);
 
     when(mockFrontendServer.stdout)
         .thenAnswer((Invocation invocation) =>
@@ -108,8 +115,7 @@ void main() {
           '2+2', null, null, null, null, false).then(
               (CompilerOutput outputExpression) {
                 expect(outputExpression, isNotNull);
-                expect(outputExpression.outputFilename, equals('/path/to/main.dart.dill.incremental'));
-                expect(outputExpression.errorCount, 0);
+                expect(outputExpression.expressionData, <int>[1, 2, 3, 4]);
               }
       );
     });
@@ -141,6 +147,9 @@ void main() {
             equals('line1\nline2\n'));
         expect(outputCompile.outputFilename, equals('/path/to/main.dart.dill'));
 
+        fileSystem.file('/path/to/main.dart.dill.incremental')
+          ..createSync(recursive: true)
+          ..writeAsBytesSync(<int>[0, 1, 2, 3]);
         compileExpressionResponseCompleter1.complete(Future<List<int>>.value(utf8.encode(
             'result def\nline1\nline2\ndef /path/to/main.dart.dill.incremental 0\n'
         )));
@@ -153,9 +162,11 @@ void main() {
       generator.compileExpression('0+1', null, null, null, null, false).then(
         (CompilerOutput outputExpression) {
           expect(outputExpression, isNotNull);
-          expect(outputExpression.outputFilename,
-              equals('/path/to/main.dart.dill.incremental'));
-          expect(outputExpression.errorCount, 0);
+          expect(outputExpression.expressionData, <int>[0, 1, 2, 3]);
+
+          fileSystem.file('/path/to/main.dart.dill.incremental')
+            ..createSync(recursive: true)
+            ..writeAsBytesSync(<int>[4, 5, 6, 7]);
           compileExpressionResponseCompleter2.complete(Future<List<int>>.value(utf8.encode(
               'result def\nline1\nline2\ndef /path/to/main.dart.dill.incremental 0\n'
           )));
@@ -168,9 +179,7 @@ void main() {
       generator.compileExpression('1+1', null, null, null, null, false).then(
         (CompilerOutput outputExpression) {
           expect(outputExpression, isNotNull);
-          expect(outputExpression.outputFilename,
-              equals('/path/to/main.dart.dill.incremental'));
-          expect(outputExpression.errorCount, 0);
+          expect(outputExpression.expressionData, <int>[4, 5, 6, 7]);
           lastExpressionCompleted.complete(true);
         },
       ),

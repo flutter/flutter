@@ -59,10 +59,10 @@ import 'theme.dart';
 /// ![The CupertinoApp displays a CupertinoPageScaffold](https://flutter.github.io/assets-for-api-docs/assets/cupertino/basic_cupertino_app.png)
 ///
 /// ```dart
-/// CupertinoApp(
+/// const CupertinoApp(
 ///   home: CupertinoPageScaffold(
 ///     navigationBar: CupertinoNavigationBar(
-///       middle: const Text('Home'),
+///       middle: Text('Home'),
 ///     ),
 ///     child: Center(child: Icon(CupertinoIcons.share)),
 ///   ),
@@ -79,17 +79,17 @@ import 'theme.dart';
 /// CupertinoApp(
 ///   routes: <String, WidgetBuilder>{
 ///     '/': (BuildContext context) {
-///       return CupertinoPageScaffold(
+///       return const CupertinoPageScaffold(
 ///         navigationBar: CupertinoNavigationBar(
-///           middle: const Text('Home Route'),
+///           middle: Text('Home Route'),
 ///         ),
 ///         child: Center(child: Icon(CupertinoIcons.share)),
 ///       );
 ///     },
 ///     '/about': (BuildContext context) {
-///       return CupertinoPageScaffold(
+///       return const CupertinoPageScaffold(
 ///         navigationBar: CupertinoNavigationBar(
-///           middle: const Text('About Route'),
+///           middle: Text('About Route'),
 ///         ),
 ///         child: Center(child: Icon(CupertinoIcons.share)),
 ///       );
@@ -106,14 +106,14 @@ import 'theme.dart';
 /// ![The CupertinoApp displays a CupertinoPageScaffold with orange-colored icons](https://flutter.github.io/assets-for-api-docs/assets/cupertino/theme_cupertino_app.png)
 ///
 /// ```dart
-/// CupertinoApp(
+/// const CupertinoApp(
 ///   theme: CupertinoThemeData(
 ///     brightness: Brightness.dark,
 ///     primaryColor: CupertinoColors.systemOrange,
 ///   ),
 ///   home: CupertinoPageScaffold(
 ///     navigationBar: CupertinoNavigationBar(
-///       middle: const Text('CupertinoApp Theme'),
+///       middle: Text('CupertinoApp Theme'),
 ///     ),
 ///     child: Center(child: Icon(CupertinoIcons.share)),
 ///   ),
@@ -376,7 +376,7 @@ class CupertinoApp extends StatefulWidget {
   ///   return WidgetsApp(
   ///     actions: <Type, Action<Intent>>{
   ///       ... WidgetsApp.defaultActions,
-  ///       ActivateAction: CallbackAction(
+  ///       ActivateAction: CallbackAction<Intent>(
   ///         onInvoke: (Intent intent) {
   ///           // Do something here...
   ///           return null;

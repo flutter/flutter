@@ -12,7 +12,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
-import 'actions.dart';
 import 'autofill.dart';
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
@@ -27,8 +26,8 @@ import 'media_query.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
-import 'shortcuts.dart';
 import 'text.dart';
+import 'text_editing_action.dart';
 import 'text_selection.dart';
 import 'ticker_provider.dart';
 
@@ -53,17 +52,6 @@ const Duration _kCursorBlinkWaitForStart = Duration(milliseconds: 150);
 // Number of cursor ticks during which the most recently entered character
 // is shown in an obscured text field.
 const int _kObscureShowLatestCharCursorTicks = 3;
-
-/// A map used to disable scrolling shortcuts in text fields.
-///
-/// This is a temporary fix for: https://github.com/flutter/flutter/issues/74191
-final Map<LogicalKeySet, Intent> scrollShortcutOverrides = <LogicalKeySet, Intent>{
-  LogicalKeySet(LogicalKeyboardKey.space): DoNothingAndStopPropagationIntent(),
-  LogicalKeySet(LogicalKeyboardKey.arrowUp): DoNothingAndStopPropagationIntent(),
-  LogicalKeySet(LogicalKeyboardKey.arrowDown): DoNothingAndStopPropagationIntent(),
-  LogicalKeySet(LogicalKeyboardKey.arrowLeft): DoNothingAndStopPropagationIntent(),
-  LogicalKeySet(LogicalKeyboardKey.arrowRight): DoNothingAndStopPropagationIntent(),
-};
 
 /// A controller for an editable text field.
 ///
@@ -101,12 +89,13 @@ final Map<LogicalKeySet, Intent> scrollShortcutOverrides = <LogicalKeySet, Inten
 /// cursor at the end of the input.
 ///
 /// ```dart
-/// final _controller = TextEditingController();
+/// final TextEditingController _controller = TextEditingController();
 ///
+/// @override
 /// void initState() {
 ///   super.initState();
 ///   _controller.addListener(() {
-///     final text = _controller.text.toLowerCase();
+///     final String text = _controller.text.toLowerCase();
 ///     _controller.value = _controller.value.copyWith(
 ///       text: text,
 ///       selection: TextSelection(baseOffset: text.length, extentOffset: text.length),
@@ -115,11 +104,13 @@ final Map<LogicalKeySet, Intent> scrollShortcutOverrides = <LogicalKeySet, Inten
 ///   });
 /// }
 ///
+/// @override
 /// void dispose() {
 ///   _controller.dispose();
 ///   super.dispose();
 /// }
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     body: Container(
@@ -127,7 +118,7 @@ final Map<LogicalKeySet, Intent> scrollShortcutOverrides = <LogicalKeySet, Inten
 ///       padding: const EdgeInsets.all(6),
 ///       child: TextFormField(
 ///         controller: _controller,
-///         decoration: InputDecoration(border: OutlineInputBorder()),
+///         decoration: const InputDecoration(border: OutlineInputBorder()),
 ///       ),
 ///     ),
 ///   );
@@ -957,11 +948,13 @@ class EditableText extends StatefulWidget {
   /// ```dart
   /// final TextEditingController _controller = TextEditingController();
   ///
+  /// @override
   /// void dispose() {
   ///   _controller.dispose();
   ///   super.dispose();
   /// }
   ///
+  /// @override
   /// Widget build(BuildContext context) {
   ///   return Scaffold(
   ///     body: Column(
@@ -980,7 +973,7 @@ class EditableText extends StatefulWidget {
   ///               builder: (BuildContext context) {
   ///                 return AlertDialog(
   ///                   title: const Text('That is correct!'),
-  ///                   content: Text ('13 is the right answer.'),
+  ///                   content: const Text ('13 is the right answer.'),
   ///                   actions: <Widget>[
   ///                     TextButton(
   ///                       onPressed: () { Navigator.pop(context); },
@@ -1491,7 +1484,7 @@ class EditableText extends StatefulWidget {
 }
 
 /// State for a [EditableText].
-class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText>, TextSelectionDelegate implements TextInputClient, AutofillClient {
+class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText>, TextSelectionDelegate implements TextInputClient, AutofillClient, TextEditingActionTarget {
   Timer? _cursorTimer;
   bool _targetCursorVisibility = false;
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(true);
@@ -2472,6 +2465,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///
   /// This property is typically used to notify the renderer of input gestures
   /// when [RenderEditable.ignorePointer] is true.
+  @override
   RenderEditable get renderEditable => _editableKey.currentContext!.findRenderObject()! as RenderEditable;
 
   @override

@@ -39,7 +39,7 @@ void main() {
     expect(find.byKey(key), findsOneWidget);
   });
 
-  testWidgets('WidgetsApp can override default key bindings', (WidgetTester tester) async {
+  testWidgets('WidgetsApp default key bindings', (WidgetTester tester) async {
     bool? checked = false;
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
@@ -64,9 +64,12 @@ void main() {
     await tester.pumpAndSettle();
     // Default key mapping worked.
     expect(checked, isTrue);
-    checked = false;
+  });
 
+  testWidgets('WidgetsApp can override default key bindings', (WidgetTester tester) async {
     final TestAction action = TestAction();
+    bool? checked = false;
+    final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       WidgetsApp(
         key: key,

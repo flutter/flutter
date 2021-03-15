@@ -34,7 +34,7 @@ export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpR
 // late BuildContext context;
 // void setState(VoidCallback fn) { }
 // abstract class RenderFrogJar extends RenderObject { }
-// abstract class FrogJar extends RenderObjectWidget { }
+// abstract class FrogJar extends RenderObjectWidget { const FrogJar({Key? key}) : super(key: key); }
 // abstract class FrogJarParentData extends ParentData { late Size size; }
 
 // KEYS
@@ -693,6 +693,7 @@ abstract class StatelessWidget extends Widget {
 ///   final Color color;
 ///   final Widget? child;
 ///
+///   @override
 ///   _BirdState createState() => _BirdState();
 /// }
 ///
@@ -1351,7 +1352,7 @@ abstract class ProxyWidget extends Widget {
 ///
 /// ```dart
 /// class FrogSize extends ParentDataWidget<FrogJarParentData> {
-///   FrogSize({
+///   const FrogSize({
 ///     Key? key,
 ///     required this.size,
 ///     required Widget child,
@@ -1554,6 +1555,8 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 ///
 /// ```dart
 /// class MyPage extends StatelessWidget {
+///   const MyPage({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
@@ -1581,6 +1584,8 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 ///
 /// ```dart
 /// class MyOtherPage extends StatelessWidget {
+///   const MyOtherPage({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
@@ -4328,14 +4333,15 @@ typedef ErrorWidgetBuilder = Widget Function(FlutterErrorDetails details);
 ///     assert(() { inDebug = true; return true; }());
 ///     // In debug mode, use the normal error widget which shows
 ///     // the error message:
-///     if (inDebug)
+///     if (inDebug) {
 ///       return ErrorWidget(details.exception);
+///     }
 ///     // In release builds, show a yellow-on-blue message instead:
 ///     return Container(
 ///       alignment: Alignment.center,
-///       child: Text(
+///       child: const Text(
 ///         'Error!',
-///         style: TextStyle(color: Colors.yellow),
+///         style: const TextStyle(color: Colors.yellow),
 ///         textDirection: TextDirection.ltr,
 ///       ),
 ///     );
