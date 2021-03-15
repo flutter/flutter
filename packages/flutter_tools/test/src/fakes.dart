@@ -660,7 +660,7 @@ class TestBuildSystem implements BuildSystem {
       return _singleResult;
     }
     if (_nextResult >= _results.length) {
-      throw StateError('Unexpected buildIncremental request of ${target.name}');
+      throw StateError('Unexpected build request of ${target.name}');
     }
     return _results[_nextResult++];
   }

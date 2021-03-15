@@ -24,8 +24,8 @@ abstract class Signals {
 
   // The default list of signals that should cause the process to exit.
   static const List<ProcessSignal> defaultExitSignals = <ProcessSignal>[
-    ProcessSignal.SIGTERM,
-    ProcessSignal.SIGINT,
+    ProcessSignal.sigterm,
+    ProcessSignal.sigint,
   ];
 
   /// Adds a signal handler to run on receipt of signal.

@@ -8,6 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart';
 
+const int kMaxFrameworkAccessibilityIdentifier = (1<<16) - 1;
+
 void main() {
   setUp(() {
     debugResetSemanticsIdCounter();
@@ -565,6 +567,24 @@ void main() {
       '   elevation: 0.0\n'
       '   thickness: 0.0\n',
     );
+  });
+
+  test('Semantics id does not repeat', () {
+    final SemanticsOwner owner = SemanticsOwner();
+    const int expectId = 1400;
+    SemanticsNode? nodeToRemove;
+    for (int i = 0; i < kMaxFrameworkAccessibilityIdentifier; i++) {
+      final SemanticsNode node = SemanticsNode();
+      node.attach(owner);
+      if (node.id == expectId) {
+        nodeToRemove = node;
+      }
+    }
+    nodeToRemove!.detach();
+    final SemanticsNode newNode = SemanticsNode();
+    newNode.attach(owner);
+    // Id is reused.
+    expect(newNode.id, expectId);
   });
 
   test('Tags show up in debug properties', () {
