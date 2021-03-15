@@ -2492,6 +2492,7 @@ void main() {
     expect(value, equals('two'));
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/77655.
   testWidgets('DropdownButton selecting a null valued item should be selected',
       (WidgetTester tester) async {
     final List<MapEntry<String?, String>> items = MapEntry<String?, String>[
