@@ -80,6 +80,26 @@ void main() {
       Config: () => config,
     });
 
+    testUsingContext('returns sdkmanager path under cmdline tools (highest version) on Linux/macOS', () {
+      sdkDir = MockAndroidSdk.createSdkDirectory();
+      config.setValue('android-sdk', sdkDir.path);
+
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
+      final List<String> versions = <String>['3.0', '2.1', '1.0'];
+      for (final String version in versions) {
+        fileSystem.file(
+          fileSystem.path.join(sdk.directory.path, 'cmdline-tools', version, 'bin', 'sdkmanager')
+        ).createSync(recursive: true);
+      }
+
+      expect(sdk.sdkManagerPath, fileSystem.path.join(sdk.directory.path, 'cmdline-tools', '3.0', 'bin', 'sdkmanager'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
+      Config: () => config,
+    });
+
     testUsingContext('Caches adb location after first access', () {
       sdkDir = MockAndroidSdk.createSdkDirectory();
       config.setValue('android-sdk', sdkDir.path);
