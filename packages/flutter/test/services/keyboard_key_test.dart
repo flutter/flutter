@@ -15,12 +15,6 @@ void main() {
       // Check a modifier key
       expect(PhysicalKeyboardKey.findKeyByCode(0x000700e1), equals(PhysicalKeyboardKey.shiftLeft));
     });
-    test('Equality is only based on HID code.', () async {
-      const PhysicalKeyboardKey key1 = PhysicalKeyboardKey(0x01, debugName: 'key1');
-      const PhysicalKeyboardKey key2 = PhysicalKeyboardKey(0x01, debugName: 'key2');
-      expect(key1, equals(key1));
-      expect(key1, equals(key2));
-    });
   });
   group(LogicalKeyboardKey, () {
     test('Various classes of keys can be looked up by code', () async {
@@ -43,12 +37,6 @@ void main() {
       expect(LogicalKeyboardKey.isControlCharacter(' '), isFalse);
       expect(LogicalKeyboardKey.isControlCharacter('~'), isFalse);
       expect(LogicalKeyboardKey.isControlCharacter('\xa0'), isFalse); // NO-BREAK SPACE
-    });
-    test('Equality is only based on ID.', () async {
-      const LogicalKeyboardKey key1 = LogicalKeyboardKey(0x01, keyLabel: 'label1', debugName: 'key1');
-      const LogicalKeyboardKey key2 = LogicalKeyboardKey(0x01, keyLabel: 'label2', debugName: 'key2');
-      expect(key1, equals(key1));
-      expect(key1, equals(key2));
     });
     test('Basic synonyms can be looked up.', () async {
       expect(LogicalKeyboardKey.shiftLeft.synonyms.first, equals(LogicalKeyboardKey.shift));
