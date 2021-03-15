@@ -321,11 +321,12 @@ void main() {
   test('UnconstrainedBox toString', () {
     expect(
       const UnconstrainedBox(constrainedAxis: Axis.vertical,).toString(),
-      equals('UnconstrainedBox(alignment: Alignment.center, constraints transform: width constraints removed, constrainedAxis: vertical)'),
+      equals('UnconstrainedBox(alignment: Alignment.center, constrainedAxis: vertical)'),
+
     );
     expect(
       const UnconstrainedBox(constrainedAxis: Axis.horizontal, textDirection: TextDirection.rtl, alignment: Alignment.topRight).toString(),
-      equals('UnconstrainedBox(alignment: Alignment.topRight, textDirection: rtl, constraints transform: height constraints removed, constrainedAxis: horizontal)'),
+      equals('UnconstrainedBox(alignment: Alignment.topRight, constrainedAxis: horizontal, textDirection: rtl)'),
     );
   });
 

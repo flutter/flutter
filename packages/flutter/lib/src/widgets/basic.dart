@@ -2334,19 +2334,20 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 /// When [child] is null, this widget becomes as small as possible and never
 /// overflows
 ///
-/// This widget can be used to ensure some of [child]'s intrinsic dimensions are
-/// honored, during development. For instance, if [child] requires a minimum
-/// height to fully display its content, [constraintsTransform] can be set to
-/// [maxHeightUnconstrained], so that if the parent [RenderObject] fails to
-/// provide enough vertical space, a warning will be displayed in debug mode,
-/// while still allowing [child] to grow vertically:
+/// This widget can be used to ensure some of [child]'s natrual dimensions are
+/// honored, and get an early warning otherwise during development. For
+/// instance, if [child] requires a minimum height to fully display its content,
+/// [constraintsTransform] can be set to [maxHeightUnconstrained], so that if
+/// the parent [RenderObject] fails to provide enough vertical space, a warning
+/// will be displayed in debug mode, while still allowing [child] to grow
+/// vertically:
 ///
 /// {@tool snippet}
 /// In the following snippet, the [Card] is guaranteed to be at least as tall as
-/// its "natrual" height. Unlike [UnconstrainedBox], it can become taller if its
-/// "natrual" height is smaller than 40 px. If the [Container] isn't high enough
-/// to show the full content of the [Card], in debug mode a warning will be
-/// given.
+/// its "natrual" height. Unlike [UnconstrainedBox], it will become taller if
+/// its "natrual" height is smaller than 40 px. If the [Container] isn't high
+/// enough to show the full content of the [Card], in debug mode a warning will
+/// be given.
 ///
 /// ```dart
 /// Container(
@@ -2397,7 +2398,7 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
   ///
   /// The [ConstraintsTransformBox] becomes a proxy widget that has no effect on
   /// layout if [constraintsTransform] is set to this.
-  static BoxConstraints unmodified(BoxConstraints constraints) => const BoxConstraints();
+  static BoxConstraints unmodified(BoxConstraints constraints) => constraints;
 
   /// A [BoxConstraintsTransform] that always returns a [BoxConstraints] that
   /// imposes no constraints on either dimension (i.e. `const BoxConstraints()`).
@@ -2447,7 +2448,7 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
   /// [BoxConstraints] has a larger minimum constraint on that axis.
   static BoxConstraints maxUnconstrained(BoxConstraints constraints) => constraints.copyWith(maxWidth: double.infinity, maxHeight: double.infinity);
 
-  static final Map<BoxConstraintsTransform, String> _knownTransforms = <BoxConstraintsTransform, String>{
+  static final Map<BoxConstraintsTransform, String> _debugKnownTransforms = <BoxConstraintsTransform, String>{
     unmodified: 'unmodified',
     unconstrained: 'unconstrained',
     widthUnconstrained: 'width constraints removed',
@@ -2522,7 +2523,7 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
 
     final String? debugTransformLabel = _debugTransformLabel.isNotEmpty
       ? _debugTransformLabel
-      : _knownTransforms[constraintsTransform];
+      : _debugKnownTransforms[constraintsTransform];
 
     if (debugTransformLabel != null) {
       properties.add(DiagnosticsProperty<String>('constraints transform', debugTransformLabel));
@@ -2554,33 +2555,37 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
 ///  * [OverflowBox], a widget that imposes different constraints on its child
 ///    than it gets from its parent, possibly allowing the child to overflow
 ///    the parent.
-class UnconstrainedBox extends ConstraintsTransformBox {
+///  * [ConstraintsTransformBox], a widget that sizes its child using a
+///    transformed [BoxConstraints], and shows a warning if the child overflows
+///    in debug mode.
+class UnconstrainedBox extends StatelessWidget {
   /// Creates a widget that imposes no constraints on its child, allowing it to
   /// render at its "natural" size. If the child overflows the parents
   /// constraints, a warning will be given in debug mode.
   const UnconstrainedBox({
     Key? key,
-    Widget? child,
-    TextDirection? textDirection,
-    AlignmentGeometry alignment = Alignment.center,
+    this.child,
+    this.textDirection,
+    this.alignment = Alignment.center,
     this.constrainedAxis,
-    Clip clipBehavior = Clip.none,
+    this.clipBehavior = Clip.none,
   }) : assert(alignment != null),
        assert(clipBehavior != null),
-       super(
-         key: key,
-         child: child,
-         textDirection: textDirection,
-         alignment: alignment,
-         constraintsTransform: _fail,
-         clipBehavior: clipBehavior,
-       );
+       super(key: key);
 
-  static BoxConstraints _fail(BoxConstraints incoming) {
-    assert(false, 'this should never be reached');
-    return incoming;
-  }
-
+  /// The text direction to use when interpreting the [alignment] if it is an
+  /// [AlignmentDirectional].
+  final TextDirection? textDirection;
+  /// The alignment to use when laying out the child.
+  ///
+  /// If this is an [AlignmentDirectional], then [textDirection] must not be
+  /// null.
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment] for non-[Directionality]-aware alignments.
+  ///  * [AlignmentDirectional] for [Directionality]-aware alignments.
+  final AlignmentGeometry alignment;
   /// The axis to retain constraints on, if any.
   ///
   /// If not set, or set to null (the default), neither axis will retain its
@@ -2588,10 +2593,17 @@ class UnconstrainedBox extends ConstraintsTransformBox {
   /// be retained, and if set to [Axis.horizontal], then horizontal constraints
   /// will be retained.
   final Axis? constrainedAxis;
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// Defaults to [Clip.none].
+  final Clip clipBehavior;
 
-  @override
-  BoxConstraintsTransform get constraintsTransform {
-    final Axis? constrainedAxis = this.constrainedAxis;
+  /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget? child;
+
+  BoxConstraintsTransform _axisToTransform(Axis? constrainedAxis) {
     if (constrainedAxis != null) {
       switch (constrainedAxis) {
         case Axis.horizontal:
@@ -2605,9 +2617,22 @@ class UnconstrainedBox extends ConstraintsTransformBox {
   }
 
   @override
+  Widget build(BuildContext context) {
+    return ConstraintsTransformBox(
+      child: child,
+      textDirection: textDirection,
+      alignment: alignment,
+      clipBehavior: clipBehavior,
+      constraintsTransform: _axisToTransform(constrainedAxis),
+    );
+  }
+
+  @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
     properties.add(EnumProperty<Axis>('constrainedAxis', constrainedAxis, defaultValue: null));
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }
 
