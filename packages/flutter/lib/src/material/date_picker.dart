@@ -170,6 +170,7 @@ const double _inputFormLandscapeHeight = 108.0;
 ///       context: context,
 ///       builder: (BuildContext context) {
 ///         return DatePickerDialog(
+///           restorationId: 'date_picker_dialog',
 ///           initialEntryMode: DatePickerEntryMode.calendarOnly,
 ///           initialDate: DateTime.fromMillisecondsSinceEpoch(arguments as int),
 ///           firstDate: DateTime(2021, 1, 1),
@@ -335,6 +336,7 @@ class DatePickerDialog extends StatefulWidget {
     this.errorInvalidText,
     this.fieldHintText,
     this.fieldLabelText,
+    this.restorationId,
   }) : assert(initialDate != null),
        assert(firstDate != null),
        assert(lastDate != null),
@@ -419,6 +421,20 @@ class DatePickerDialog extends StatefulWidget {
   /// string. For example, 'Month, Day, Year' for en_US.
   final String? fieldLabelText;
 
+  /// Restoration ID to save and restore the state of the [DatePickerDialog].
+  ///
+  /// If it is non-null, the date picker will persist and restore the
+  /// date selected on the dialog.
+  ///
+  /// The state of this widget is persisted in a [RestorationBucket] claimed
+  /// from the surrounding [RestorationScope] using the provided restoration ID.
+  ///
+  /// See also:
+  ///
+  ///  * [RestorationManager], which explains how state restoration works in
+  ///    Flutter.
+  final String? restorationId;
+
   @override
   _DatePickerDialogState createState() => _DatePickerDialogState();
 }
@@ -457,14 +473,13 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
 
 
   @override
-  String? get restorationId => 'date_picker_state';
+  String? get restorationId => widget.restorationId;
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     registerForRestoration(_selectedDate, 'selected_date');
     registerForRestoration(_autoValidate, 'autovalidate');
     registerForRestoration(_entryMode, 'calendar_entry_mode');
-
     _entryMode.value ??= widget.initialEntryMode.index;
   }
 
