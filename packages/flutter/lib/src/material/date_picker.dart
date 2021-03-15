@@ -126,15 +126,15 @@ const double _inputFormLandscapeHeight = 108.0;
 ///
 /// ```dart
 /// void main() {
-///   runApp(MyApp());
+///   runApp(const MyApp());
 /// }
 ///
 /// class MyApp extends StatelessWidget {
-///   MyApp({Key key}) : super(key: key);
+///   const MyApp({Key? key}) : super(key: key);
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return MaterialApp(
+///     return const MaterialApp(
 ///       restorationScopeId: 'app',
 ///       title: 'Restorable Date Picker Demo',
 ///       home: MyHomePage(),
@@ -143,7 +143,7 @@ const double _inputFormLandscapeHeight = 108.0;
 /// }
 ///
 /// class MyHomePage extends StatefulWidget {
-///   MyHomePage({Key key}) : super(key: key);
+///   const MyHomePage({Key? key}) : super(key: key);
 ///
 ///   @override
 ///   _MyHomePageState createState() => _MyHomePageState();
