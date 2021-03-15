@@ -160,7 +160,7 @@ const double _inputFormLandscapeHeight = 108.0;
 ///   ) {
 ///     return DialogRoute<DateTime>(
 ///       context: context,
-///       builder: (context) {
+///       builder: (BuildContext context) {
 ///         return DatePickerDialog(
 ///           initialEntryMode: DatePickerEntryMode.calendarOnly,
 ///           initialDate: DateTime.fromMillisecondsSinceEpoch(arguments as int),
