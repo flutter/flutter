@@ -386,7 +386,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///               return TextFormField(
 ///                 controller: textEditingController,
 ///                 decoration: const InputDecoration(
-///                   hintText: 'This is an RawAutocomplete!',
+///                   hintText: 'This is a RawAutocomplete!',
 ///                 ),
 ///                 focusNode: focusNode,
 ///                 onFieldSubmitted: (String value) {
