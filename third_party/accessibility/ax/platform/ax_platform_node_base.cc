@@ -71,6 +71,11 @@ AXPlatformNode* AXPlatformNodeBase::GetFromUniqueId(int32_t unique_id) {
   return nullptr;
 }
 
+// static
+size_t AXPlatformNodeBase::GetInstanceCountForTesting() {
+  return g_unique_id_map.size();
+}
+
 AXPlatformNodeBase::AXPlatformNodeBase() = default;
 
 AXPlatformNodeBase::~AXPlatformNodeBase() = default;
