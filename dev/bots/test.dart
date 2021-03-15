@@ -376,7 +376,7 @@ Future<void> _runDeviceLabBuildTask(String task) async {
     'test',
     '--task', task,
     '--task-args', 'build',
-    '--task-args', 'target-device=$targetPlatform',
+    '--task-args', 'target-platform=$targetPlatform',
   ],
   workingDirectory: path.join('dev', 'devicelab'));
 }
