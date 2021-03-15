@@ -149,15 +149,13 @@ const double _inputFormLandscapeHeight = 108.0;
 ///   @override
 ///   String get restorationId => 'scaffold_state';
 ///
-///   final RestorableInt selectedDate = RestorableInt(
-///     DateTime.now().millisecondsSinceEpoch,
-///   );
+///   final RestorableDateTime _selectedDate = RestorableDateTime(DateTime.now());
 ///   late final RestorableRouteFuture<DateTime> _restorableDatePickerRouteFuture = RestorableRouteFuture<DateTime>(
 ///     onComplete: _selectDate,
 ///     onPresent: (NavigatorState navigator, Object? arguments) {
 ///       return navigator.restorablePush(
 ///         _datePickerRoute,
-///         arguments: selectedDate.value,
+///         arguments: _selectedDate.value.millisecondsSinceEpoch,
 ///       );
 ///     },
 ///   );
@@ -182,13 +180,18 @@ const double _inputFormLandscapeHeight = 108.0;
 ///
 ///   @override
 ///   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
-///     registerForRestoration(selectedDate, 'selected_date');
+///     registerForRestoration(_selectedDate, 'selected_date');
 ///     registerForRestoration(_restorableDatePickerRouteFuture, 'date_picker_route_future');
 ///   }
 ///
 ///   void _selectDate(DateTime newSelectedDate) {
 ///     setState(() {
-///       selectedDate.value = newSelectedDate.millisecondsSinceEpoch;
+///       _selectedDate.value = newSelectedDate;
+///       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+///         content: Text(
+///           'Selected: ${_selectedDate.value.day}/${_selectedDate.value.month}/${_selectedDate.value.year}',
+///         ),
+///       ));
 ///     });
 ///   }
 ///
