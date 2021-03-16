@@ -154,7 +154,7 @@ const double _inputFormLandscapeHeight = 108.0;
 ///   String get restorationId => 'scaffold_state';
 ///
 ///   final RestorableDateTime _selectedDate = RestorableDateTime(DateTime(2021, 7, 25));
-///   late final RestorableRouteFuture<DateTime> _restorableDatePickerRouteFuture = RestorableRouteFuture<DateTime>(
+///   late final RestorableRouteFuture<DateTime?> _restorableDatePickerRouteFuture = RestorableRouteFuture<DateTime?>(
 ///     onComplete: _selectDate,
 ///     onPresent: (NavigatorState navigator, Object? arguments) {
 ///       return navigator.restorablePush(
@@ -188,15 +188,16 @@ const double _inputFormLandscapeHeight = 108.0;
 ///     registerForRestoration(_restorableDatePickerRouteFuture, 'date_picker_route_future');
 ///   }
 ///
-///   void _selectDate(DateTime newSelectedDate) {
-///     setState(() {
-///       _selectedDate.value = newSelectedDate;
-///       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-///         content: Text(
-///           'Selected: ${_selectedDate.value.day}/${_selectedDate.value.month}/${_selectedDate.value.year}',
-///         ),
-///       ));
-///     });
+///   void _selectDate(DateTime? newSelectedDate) {
+///     if (newSelectedDate != null) {
+///       setState(() {
+///         _selectedDate.value = newSelectedDate;
+///         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+///           content: Text(
+///             'Selected: ${_selectedDate.value.day}/${_selectedDate.value.month}/${_selectedDate.value.year}'),
+///         ));
+///       });
+///     }
 ///   }
 ///
 ///   @override

@@ -1146,7 +1146,38 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 }
 
-class _RestorableDatePickerDialogTestWidget extends StatelessWidget {
+class _RestorableDatePickerDialogTestWidget extends StatefulWidget {
+  @override
+  _RestorableDatePickerDialogTestWidgetState createState() => _RestorableDatePickerDialogTestWidgetState();
+}
+
+class _RestorableDatePickerDialogTestWidgetState extends State<_RestorableDatePickerDialogTestWidget> with RestorationMixin {
+  @override
+  String? get restorationId => 'scaffold_state';
+
+  final RestorableDateTime _selectedDate = RestorableDateTime(DateTime(2021, 7, 25));
+  late final RestorableRouteFuture<DateTime?> _restorableDatePickerRouteFuture = RestorableRouteFuture<DateTime?>(
+    onComplete: _selectDate,
+    onPresent: (NavigatorState navigator, Object? arguments) {
+      return navigator.restorablePush(
+        _datePickerRoute,
+        arguments: _selectedDate.value.millisecondsSinceEpoch,
+      );
+    },
+  );
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    registerForRestoration(_selectedDate, 'selected_date');
+    registerForRestoration(_restorableDatePickerRouteFuture, 'date_picker_route_future');
+  }
+
+  void _selectDate(DateTime? newSelectedDate) {
+    if (newSelectedDate != null) {
+      setState(() { _selectedDate.value = newSelectedDate; });
+    }
+  }
+
   static Route<DateTime> _datePickerRoute(
     BuildContext context,
     Object? arguments,
@@ -1157,7 +1188,7 @@ class _RestorableDatePickerDialogTestWidget extends StatelessWidget {
         return DatePickerDialog(
           restorationId: 'date_picker_dialog',
           initialEntryMode: DatePickerEntryMode.calendarOnly,
-          initialDate: DateTime(2021, 7, 25),
+          initialDate: DateTime.fromMillisecondsSinceEpoch(arguments! as int),
           firstDate: DateTime(2021, 1, 1),
           lastDate: DateTime(2022, 1, 1),
         );
@@ -1171,7 +1202,7 @@ class _RestorableDatePickerDialogTestWidget extends StatelessWidget {
       body: Center(
         child: OutlinedButton(
           onPressed: () {
-            Navigator.of(context).restorablePush(_datePickerRoute);
+            _restorableDatePickerRouteFuture.present();
           },
           child: const Text('X'),
         ),
