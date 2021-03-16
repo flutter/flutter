@@ -153,7 +153,7 @@ const double _inputFormLandscapeHeight = 108.0;
 ///   @override
 ///   String get restorationId => 'scaffold_state';
 ///
-///   final RestorableDateTime _selectedDate = RestorableDateTime(DateTime.now());
+///   final RestorableDateTime _selectedDate = RestorableDateTime(DateTime(2021, 7, 25));
 ///   late final RestorableRouteFuture<DateTime> _restorableDatePickerRouteFuture = RestorableRouteFuture<DateTime>(
 ///     onComplete: _selectDate,
 ///     onPresent: (NavigatorState navigator, Object? arguments) {
