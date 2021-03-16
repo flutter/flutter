@@ -32,6 +32,18 @@ const List<String> _kAvailablePlatforms = <String>[
   'web',
 ];
 
+/// A list of all possible create platforms, even those that may not be enabled
+/// with the current config.
+const List<String> kAllCreatePlatforms = <String>[
+  'ios',
+  'android',
+  'windows',
+  'linux',
+  'macos',
+  'web',
+  'winuwp',
+];
+
 const String _kDefaultPlatformArgumentHelp =
     '(required) The platforms supported by this project. '
     'Platform folders (e.g. android/) will be generated in the target project. '

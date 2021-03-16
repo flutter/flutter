@@ -385,16 +385,11 @@ Your $application code is in $relativeAppMain.
   }
 
   Future<int> _generatePlugin(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
-    // Plugin doesn't create any platform by default
+    // Plugins only add a platform if it was requested explicitly by the user.
     if (!argResults.wasParsed('platforms')) {
-      // If the user didn't explicitly declare the platforms, we don't generate any platforms.
-      templateContext['ios'] = false;
-      templateContext['android'] = false;
-      templateContext['web'] = false;
-      templateContext['linux'] = false;
-      templateContext['macos'] = false;
-      templateContext['windows'] = false;
-      templateContext['winuwp'] = false;
+      for (final String platform in kAllCreatePlatforms) {
+        templateContext[platform] = false;
+      }
     }
     final List<String> platformsToAdd = _getSupportedPlatformsFromTemplateContext(templateContext);
 
@@ -461,20 +456,8 @@ Your $application code is in $relativeAppMain.
 
   List<String> _getSupportedPlatformsFromTemplateContext(Map<String, dynamic> templateContext) {
     return <String>[
-      if (templateContext['ios'] == true)
-        'ios',
-      if (templateContext['android'] == true)
-        'android',
-      if (templateContext['web'] == true)
-        'web',
-      if (templateContext['linux'] == true)
-        'linux',
-      if (templateContext['windows'] == true)
-        'windows',
-      if (templateContext['macos'] == true)
-        'macos',
-      if (templateContext['winuwp'] == true)
-        'winuwp',
+      for (String platform in kAllCreatePlatforms)
+        if (templateContext[platform] == true) platform
     ];
   }
 
