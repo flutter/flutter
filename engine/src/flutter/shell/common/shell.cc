@@ -372,7 +372,6 @@ Shell::Shell(DartVMRef vm,
       vm_(std::move(vm)),
       is_gpu_disabled_sync_switch_(new fml::SyncSwitch(is_gpu_disabled)),
       volatile_path_tracker_(std::move(volatile_path_tracker)),
-      pending_draw_semaphore_(1),
       weak_factory_gpu_(nullptr),
       weak_factory_(this) {
   FML_CHECK(vm_) << "Must have access to VM to create a shell.";
@@ -1139,7 +1138,7 @@ void Shell::OnAnimatorNotifyIdle(int64_t deadline) {
 }
 
 // |Animator::Delegate|
-void Shell::OnAnimatorDraw(std::shared_ptr<LayerTreeHolder> layer_tree_holder,
+void Shell::OnAnimatorDraw(fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline,
                            fml::TimePoint frame_target_time) {
   FML_DCHECK(is_setup_);
 
@@ -1159,28 +1158,19 @@ void Shell::OnAnimatorDraw(std::shared_ptr<LayerTreeHolder> layer_tree_holder,
            tree.frame_size() != expected_frame_size_;
   };
 
-  if (!pending_draw_semaphore_.TryWait()) {
-    // Multiple calls to OnAnimatorDraw will still result in a
-    // single request to the Rasterizer::Draw.
-    return;
-  }
-
   task_runners_.GetRasterTaskRunner()->PostTask(
-      [&pending_draw_semaphore = pending_draw_semaphore_,
-       &waiting_for_first_frame = waiting_for_first_frame_,
+      [&waiting_for_first_frame = waiting_for_first_frame_,
        &waiting_for_first_frame_condition = waiting_for_first_frame_condition_,
-       rasterizer = rasterizer_->GetWeakPtr(),
-       discard_callback = std::move(discard_callback),
-       layer_tree_holder = std::move(layer_tree_holder)]() {
+       rasterizer = rasterizer_->GetWeakPtr(), pipeline = std::move(pipeline),
+       discard_callback = std::move(discard_callback)]() {
         if (rasterizer) {
-          rasterizer->Draw(std::move(layer_tree_holder),
-                           std::move(discard_callback));
+          rasterizer->Draw(pipeline, std::move(discard_callback));
+
           if (waiting_for_first_frame.load()) {
             waiting_for_first_frame.store(false);
             waiting_for_first_frame_condition.notify_all();
           }
         }
-        pending_draw_semaphore.Signal();
       });
 }
 
