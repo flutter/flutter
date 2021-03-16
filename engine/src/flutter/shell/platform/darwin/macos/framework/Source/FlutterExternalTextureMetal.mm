@@ -11,7 +11,7 @@
 
   id<FlutterTexture> _texture;
 
-  id<MTLTexture> _mtlTexture;
+  std::vector<FlutterMetalTextureHandle> _textures;
 }
 
 - (instancetype)initWithFlutterTexture:(id<FlutterTexture>)texture
@@ -57,17 +57,14 @@
     return NO;
   }
 
-  _mtlTexture = CVMetalTextureGetTexture(cvMetalTexture);
+  _textures = {(__bridge FlutterMetalTextureHandle)CVMetalTextureGetTexture(cvMetalTexture)};
   CVBufferRelease(cvMetalTexture);
-
-  std::vector<FlutterMetalTextureHandle> textures = {
-      (__bridge FlutterMetalTextureHandle)_mtlTexture};
 
   textureOut->num_textures = 1;
   textureOut->height = textureSize.height();
   textureOut->width = textureSize.width();
   textureOut->pixel_format = FlutterMetalExternalTexturePixelFormat::kRGBA;
-  textureOut->textures = textures.data();
+  textureOut->textures = _textures.data();
 
   return YES;
 }

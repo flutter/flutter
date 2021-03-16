@@ -10,6 +10,7 @@
 
 #import "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetal.h"
 #import "flutter/shell/platform/darwin/graphics/FlutterDarwinExternalTextureMetal.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTextureMetal.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/embedder_external_texture_metal.h"
 #import "flutter/testing/testing.h"
@@ -17,6 +18,44 @@
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkSamplingOptions.h"
 #include "third_party/skia/include/core/SkSurface.h"
+
+@interface TestExternalTexture : NSObject <FlutterTexture>
+
+- (nonnull instancetype)initWidth:(size_t)width height:(size_t)height;
+
+@end
+
+@implementation TestExternalTexture {
+  size_t _width;
+  size_t _height;
+}
+
+- (nonnull instancetype)initWidth:(size_t)width height:(size_t)height {
+  if (self = [super init]) {
+    _width = width;
+    _height = height;
+  }
+  return self;
+}
+
+- (CVPixelBufferRef)copyPixelBuffer {
+  return [self pixelBuffer];
+}
+
+- (CVPixelBufferRef)pixelBuffer {
+  NSDictionary* options = @{
+    // This key is required to generate SKPicture with CVPixelBufferRef in metal.
+    (NSString*)kCVPixelBufferMetalCompatibilityKey : @YES
+  };
+  CVPixelBufferRef pxbuffer = NULL;
+  CVReturn status =
+      CVPixelBufferCreate(kCFAllocatorDefault, _width, _width, kCVPixelFormatType_32BGRA,
+                          (__bridge CFDictionaryRef)options, &pxbuffer);
+  NSAssert(status == kCVReturnSuccess && pxbuffer != NULL, @"Failed to create pixel buffer.");
+  return pxbuffer;
+}
+
+@end
 
 namespace flutter::testing {
 
@@ -70,6 +109,52 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestTextureResolution) {
   texture->Paint(*gpuSurface->getCanvas(), bounds, /*freeze=*/false, grContext, sampling);
 
   ASSERT_TRUE(mtlTexture != nil);
+
+  gpuSurface->makeImageSnapshot();
+}
+
+TEST(FlutterEmbedderExternalTextureUnittests, TestPopulateExternalTexture) {
+  // Constants.
+  const size_t width = 100;
+  const size_t height = 100;
+  const int64_t texture_id = 1;
+
+  // Set up the surface.
+  FlutterDarwinContextMetal* darwinContextMetal =
+      [[FlutterDarwinContextMetal alloc] initWithDefaultMTLDevice];
+  SkImageInfo info = SkImageInfo::MakeN32Premul(width, height);
+  GrDirectContext* grContext = darwinContextMetal.mainContext.get();
+  sk_sp<SkSurface> gpuSurface(SkSurface::MakeRenderTarget(grContext, SkBudgeted::kNo, info));
+
+  // Create a texture.
+  TestExternalTexture* testExternalTexture = [[TestExternalTexture alloc] initWidth:width
+                                                                             height:height];
+  FlutterExternalTextureMetal* textureHolder =
+      [[FlutterExternalTextureMetal alloc] initWithFlutterTexture:testExternalTexture
+                                               darwinMetalContext:darwinContextMetal];
+
+  // Callback to resolve the texture.
+  EmbedderExternalTextureMetal::ExternalTextureCallback callback = [&](int64_t texture_id, size_t w,
+                                                                       size_t h) {
+    EXPECT_TRUE(w == width);
+    EXPECT_TRUE(h == height);
+
+    FlutterMetalExternalTexture* texture = new FlutterMetalExternalTexture();
+    [textureHolder populateTexture:texture];
+
+    EXPECT_TRUE(texture->num_textures == 1);
+    EXPECT_TRUE(texture->textures != nullptr);
+    EXPECT_TRUE(texture->pixel_format == FlutterMetalExternalTexturePixelFormat::kRGBA);
+
+    return std::unique_ptr<FlutterMetalExternalTexture>(texture);
+  };
+
+  // Render the texture.
+  std::unique_ptr<flutter::Texture> texture =
+      std::make_unique<EmbedderExternalTextureMetal>(texture_id, callback);
+  SkRect bounds = SkRect::MakeWH(info.width(), info.height());
+  SkSamplingOptions sampling = SkSamplingOptions(SkFilterMode::kNearest);
+  texture->Paint(*gpuSurface->getCanvas(), bounds, /*freeze=*/false, grContext, sampling);
 
   gpuSurface->makeImageSnapshot();
 }
