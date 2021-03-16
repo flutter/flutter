@@ -16,7 +16,7 @@ enum FlutterProjectType {
   /// manage the platform code.
   app,
   /// A List/Detail app template that follows community best practices.
-  list_detail_app,
+  skeleton,
   /// The is a project that has managed platform host code. It is an application with
   /// ephemeral .ios and .android directories that can be updated automatically.
   module,

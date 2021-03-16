@@ -44,7 +44,7 @@ void main() {
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'app'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'app_shared'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'cocoapods'),
-          globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'list_detail_app'),
+          globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'skeleton'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'module', 'common'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'package'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'plugin'),
@@ -88,8 +88,8 @@ void main() {
       await runner.run(<String>['create', '--no-pub', '--template=app', 'testy']);
       expect(await command.usageValues, containsPair(CustomDimensions.commandCreateProjectType, 'app'));
 
-      await runner.run(<String>['create', '--no-pub', '--template=list_detail_app', 'testy']);
-      expect(await command.usageValues, containsPair(CustomDimensions.commandCreateProjectType, 'list_detail_app'));
+      await runner.run(<String>['create', '--no-pub', '--template=skeleton', 'testy']);
+      expect(await command.usageValues, containsPair(CustomDimensions.commandCreateProjectType, 'skeleton'));
 
       await runner.run(<String>['create', '--no-pub', '--template=package', 'testy']);
       expect(await command.usageValues, containsPair(CustomDimensions.commandCreateProjectType, 'package'));
