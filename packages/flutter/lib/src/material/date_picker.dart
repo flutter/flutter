@@ -446,33 +446,6 @@ class DatePickerDialog extends StatefulWidget {
   _DatePickerDialogState createState() => _DatePickerDialogState();
 }
 
-/// A [RestorableValue] that knows how to save and restore [DateTime].
-///
-/// {@macro flutter.widgets.RestorableNum}.
-class RestorableDateTime extends RestorableValue<DateTime> {
-  /// Creates a [RestorableDateTime].
-  ///
-  /// {@macro flutter.widgets.RestorableNum.constructor}
-  RestorableDateTime(DateTime defaultValue) : _defaultValue = defaultValue;
-
-  final DateTime _defaultValue;
-
-  @override
-  DateTime createDefaultValue() => _defaultValue;
-
-  @override
-  void didUpdateValue(DateTime? oldValue) {
-    assert(debugIsSerializableForRestoration(value.millisecondsSinceEpoch));
-    notifyListeners();
-  }
-
-  @override
-  DateTime fromPrimitives(Object? data) => DateTime.fromMillisecondsSinceEpoch(data! as int);
-
-  @override
-  Object? toPrimitives() => value.millisecondsSinceEpoch;
-}
-
 class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMixin {
   late final RestorableDateTime _selectedDate = RestorableDateTime(widget.initialDate);
   late final RestorableInt _entryMode = RestorableInt(widget.initialEntryMode.index);
