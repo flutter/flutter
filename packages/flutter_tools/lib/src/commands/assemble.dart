@@ -225,7 +225,6 @@ class AssembleCommand extends FlutterCommand {
       engineVersion: globals.artifacts.isLocalEngine
         ? null
         : globals.flutterVersion.engineRevision,
-      generateDartPluginRegistry: true,
     );
     return result;
   }

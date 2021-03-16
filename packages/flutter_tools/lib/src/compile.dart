@@ -232,7 +232,6 @@ class KernelCompiler {
     String initializeFromDill,
     String platformDill,
     Directory buildDir,
-    bool generateDartPluginRegistry = false,
     @required String packagesPath,
     @required BuildMode buildMode,
     @required bool trackWidgetCreation,
@@ -260,7 +259,7 @@ class KernelCompiler {
     if (outputFilePath != null && !_fileSystem.isFileSync(outputFilePath)) {
       _fileSystem.file(outputFilePath).createSync(recursive: true);
     }
-    if (buildDir != null && generateDartPluginRegistry) {
+    if (buildDir != null && false) {
       // `generated_main.dart` is under `.dart_tools/flutter_build/`,
       // so the resident compiler can find it.
       final File newMainDart = buildDir.parent.childFile('generated_main.dart');

@@ -331,7 +331,6 @@ class Environment {
     @required Artifacts artifacts,
     @required ProcessManager processManager,
     @required String engineVersion,
-    @required bool generateDartPluginRegistry,
     Directory buildDir,
     Map<String, String> defines = const <String, String>{},
     Map<String, String> inputs = const <String, String>{},
@@ -371,7 +370,7 @@ class Environment {
       processManager: processManager,
       engineVersion: engineVersion,
       inputs: inputs,
-      generateDartPluginRegistry: generateDartPluginRegistry,
+      generateDartPluginRegistry: false, // Disabled until https://github.com/flutter/flutter/issues/77680 is fixed
     );
   }
 
@@ -388,7 +387,6 @@ class Environment {
     Map<String, String> defines = const <String, String>{},
     Map<String, String> inputs = const <String, String>{},
     String engineVersion,
-    bool generateDartPluginRegistry = false,
     @required FileSystem fileSystem,
     @required Logger logger,
     @required Artifacts artifacts,
@@ -407,7 +405,6 @@ class Environment {
       artifacts: artifacts,
       processManager: processManager,
       engineVersion: engineVersion,
-      generateDartPluginRegistry: generateDartPluginRegistry,
     );
   }
 
