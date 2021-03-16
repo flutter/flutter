@@ -185,6 +185,37 @@ public class PlayStoreDeferredComponentManagerTest {
   }
 
   @Test
+  public void manifestMappingHandlesBaseModuleEmptyString() throws NameNotFoundException {
+    TestFlutterJNI jni = new TestFlutterJNI();
+
+    Bundle bundle = new Bundle();
+    bundle.putString(
+        PlayStoreDeferredComponentManager.MAPPING_KEY, "123:module:custom_name.so,3:,4:");
+    bundle.putString(ApplicationInfoLoader.PUBLIC_FLUTTER_ASSETS_DIR_KEY, "custom_assets");
+
+    Context spyContext = createSpyContext(bundle);
+    doReturn(null).when(spyContext).getAssets();
+
+    String soTestFilename = "libapp.so-3.part.so";
+    String soTestPath = "test/path/" + soTestFilename;
+    doReturn(new File(soTestPath)).when(spyContext).getFilesDir();
+    PlayStoreDeferredComponentManager playStoreManager =
+        new PlayStoreDeferredComponentManager(spyContext, jni);
+    jni.setDeferredComponentManager(playStoreManager);
+    assertEquals(jni.loadingUnitId, 0);
+
+    playStoreManager.installDeferredComponent(3, null);
+    assertEquals(jni.loadDartDeferredLibraryCalled, 1);
+    assertEquals(jni.updateAssetManagerCalled, 0); // no assets to load for base
+    assertEquals(jni.deferredComponentInstallFailureCalled, 0);
+
+    assertEquals(jni.searchPaths[0], soTestFilename);
+    assertTrue(jni.searchPaths[1].endsWith(soTestPath));
+    assertEquals(jni.searchPaths.length, 2);
+    assertEquals(jni.loadingUnitId, 3);
+  }
+
+  @Test
   public void searchPathsAddsApks() throws NameNotFoundException {
     TestFlutterJNI jni = new TestFlutterJNI();
     Context spyContext = createSpyContext(null);
