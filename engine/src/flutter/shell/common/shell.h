@@ -35,7 +35,6 @@
 #include "flutter/shell/common/animator.h"
 #include "flutter/shell/common/display_manager.h"
 #include "flutter/shell/common/engine.h"
-#include "flutter/shell/common/layer_tree_holder.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/shell_io_manager.h"
@@ -385,9 +384,6 @@ class Shell final : public PlatformView::Delegate,
   std::mutex waiting_for_first_frame_mutex_;
   std::condition_variable waiting_for_first_frame_condition_;
 
-  // Signalled when draw task on the raster thread is complete.
-  fml::Semaphore pending_draw_semaphore_;
-
   // Written in the UI thread and read from the raster thread. Hence make it
   // atomic.
   std::atomic<bool> needs_report_timings_{false};
@@ -521,7 +517,7 @@ class Shell final : public PlatformView::Delegate,
   void OnAnimatorNotifyIdle(int64_t deadline) override;
 
   // |Animator::Delegate|
-  void OnAnimatorDraw(std::shared_ptr<LayerTreeHolder> layer_tree_holder,
+  void OnAnimatorDraw(fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline,
                       fml::TimePoint frame_target_time) override;
 
   // |Animator::Delegate|
