@@ -2,7 +2,7 @@
 # https://cirrus-ci.org/guide/writing-tasks/
 
 # YAML anchors used to share fields between tasks.
-# See https://confluence.atlassian.com/bitbucket/yaml-anchors-960154027.html
+# See  https://confluence.atlassian.com/bitbucket/yaml-anchors-960154027.html
 
 
 #use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
