@@ -230,6 +230,74 @@ void main() {
       Config: () => config,
       Platform: () => FakePlatform(operatingSystem: 'linux'),
     });
+
+    testUsingContext('returns avdmanager path under cmdline tools', () {
+      sdkDir = MockAndroidSdk.createSdkDirectory();
+      config.setValue('android-sdk', sdkDir.path);
+
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
+      fileSystem.file(
+        fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'latest', 'bin', 'avdmanager')
+      ).createSync(recursive: true);
+
+      expect(sdk.avdManagerPath, fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'latest', 'bin', 'avdmanager'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
+      Config: () => config,
+    });
+
+    testUsingContext('returns avdmanager path under cmdline tools on windows', () {
+      sdkDir = MockAndroidSdk.createSdkDirectory();
+      config.setValue('android-sdk', sdkDir.path);
+
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
+      fileSystem.file(
+        fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'latest', 'bin', 'avdmanager.bat')
+      ).createSync(recursive: true);
+
+      expect(sdk.avdManagerPath, fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'latest', 'bin', 'avdmanager.bat'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => FakePlatform(operatingSystem: 'windows'),
+      Config: () => config,
+    });
+
+    testUsingContext("returns avdmanager path under tools if cmdline doesn't exist", () {
+      sdkDir = MockAndroidSdk.createSdkDirectory();
+      config.setValue('android-sdk', sdkDir.path);
+
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
+      fileSystem.file(
+        fileSystem.path.join(sdk.directory.path, 'tools', 'bin', 'avdmanager')
+      ).createSync(recursive: true);
+
+      expect(sdk.avdManagerPath, fileSystem.path.join(sdk.directory.path, 'tools', 'bin', 'avdmanager'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
+      Config: () => config,
+    });
+
+    testUsingContext("returns avdmanager path under tools if cmdline doesn't exist on windows", () {
+      sdkDir = MockAndroidSdk.createSdkDirectory();
+      config.setValue('android-sdk', sdkDir.path);
+
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
+      fileSystem.file(
+        fileSystem.path.join(sdk.directory.path, 'tools', 'bin', 'avdmanager.bat')
+      ).createSync(recursive: true);
+
+      expect(sdk.avdManagerPath, fileSystem.path.join(sdk.directory.path, 'tools', 'bin', 'avdmanager.bat'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => FakePlatform(operatingSystem: 'windows'),
+      Config: () => config,
+    });
   });
 }
 
