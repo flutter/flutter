@@ -347,9 +347,6 @@ abstract class IOSApp extends ApplicationPackage {
     } else {
       // Try to unpack as an ipa.
       final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_app.');
-      shutdownHooks.addShutdownHook(() async {
-        await tempDir.delete(recursive: true);
-      }, ShutdownStage.STILL_RECORDING);
       globals.os.unzip(globals.fs.file(applicationBinary), tempDir);
       final Directory payloadDir = globals.fs.directory(
         globals.fs.path.join(tempDir.path, 'Payload'),

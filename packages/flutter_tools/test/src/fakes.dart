@@ -252,6 +252,16 @@ class MemoryIOSink implements IOSink {
 
   @override
   Future<void> flush() async { }
+
+  void clear() {
+    writes.clear();
+  }
+
+  String getAndClear() {
+    final String result = utf8.decode(writes.expand((List<int> l) => l).toList());
+    clear();
+    return result;
+  }
 }
 
 class MemoryStdout extends MemoryIOSink implements io.Stdout {
@@ -660,7 +670,7 @@ class TestBuildSystem implements BuildSystem {
       return _singleResult;
     }
     if (_nextResult >= _results.length) {
-      throw StateError('Unexpected buildIncremental request of ${target.name}');
+      throw StateError('Unexpected build request of ${target.name}');
     }
     return _results[_nextResult++];
   }

@@ -598,7 +598,7 @@ class AlwaysKeepAliveRenderBoxState extends State<_AlwaysKeepAlive> with Automat
   }
 }
 
-abstract class KeepAliveParentDataMixinAlt implements KeepAliveParentDataMixin {
+mixin KeepAliveParentDataMixinAlt implements KeepAliveParentDataMixin {
   @override
   bool keptAlive = false;
 

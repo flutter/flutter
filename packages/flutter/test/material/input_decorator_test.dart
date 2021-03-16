@@ -13,6 +13,7 @@ import '../rendering/mock_canvas.dart';
 
 Widget buildInputDecorator({
   InputDecoration decoration = const InputDecoration(),
+  ThemeData? theme,
   InputDecorationTheme? inputDecorationTheme,
   TextDirection textDirection = TextDirection.ltr,
   bool expands = false,
@@ -33,7 +34,7 @@ Widget buildInputDecorator({
       child: Builder(
         builder: (BuildContext context) {
           return Theme(
-            data: Theme.of(context).copyWith(
+            data: (theme ?? Theme.of(context)).copyWith(
               inputDecorationTheme: inputDecorationTheme,
               visualDensity: visualDensity,
               fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
@@ -3593,6 +3594,94 @@ void main() {
     expect(debugString, contains('focusColor: Color(0x00000020)'));
     expect(debugString, contains('errorBorder: UnderlineInputBorder()'));
     expect(debugString, contains('focusedBorder: OutlineInputBorder()'));
+  });
+
+
+  testWidgets('InputDecoration default border uses colorScheme', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData.from(colorScheme: const ColorScheme.light());
+    final Color enabledColor = theme.colorScheme.onSurface.withOpacity(0.38);
+    final Color hoverColor = Color.alphaBlend(theme.hoverColor.withOpacity(0.12), enabledColor);
+
+    // Enabled
+    await tester.pumpWidget(
+      buildInputDecorator(
+        theme: theme,
+        decoration: const InputDecoration(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(getBorderColor(tester), enabledColor);
+
+    // Filled
+    await tester.pumpWidget(
+      buildInputDecorator(
+        theme: theme,
+        decoration: const InputDecoration(
+          filled: true,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(getBorderColor(tester), theme.hintColor);
+
+    // Hovering
+    await tester.pumpWidget(
+      buildInputDecorator(
+        theme: theme,
+        isHovering: true,
+        decoration: const InputDecoration(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(getBorderColor(tester), hoverColor);
+
+    // Focused
+    await tester.pumpWidget(
+      buildInputDecorator(
+        theme: theme,
+        isFocused: true,
+        decoration: const InputDecoration(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(getBorderColor(tester), theme.colorScheme.primary);
+
+    // Error
+    await tester.pumpWidget(
+      buildInputDecorator(
+        theme: theme,
+        decoration: const InputDecoration(
+          errorText: 'Nope',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(getBorderColor(tester), theme.errorColor);
+
+    // Disabled
+    await tester.pumpWidget(
+      buildInputDecorator(
+        theme: theme,
+        decoration: const InputDecoration(
+          enabled: false,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(getBorderColor(tester), theme.disabledColor);
+
+    // Disabled, filled
+    await tester.pumpWidget(
+      buildInputDecorator(
+        theme: theme,
+        decoration: const InputDecoration(
+          enabled: false,
+          filled: true,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(getBorderColor(tester), Colors.transparent);
   });
 
   testWidgets('InputDecoration borders', (WidgetTester tester) async {

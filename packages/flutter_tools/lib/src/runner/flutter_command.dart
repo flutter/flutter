@@ -14,7 +14,6 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/io.dart' as io;
-import '../base/terminal.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -1046,7 +1045,7 @@ abstract class FlutterCommand extends Command<void> {
 
   void _printDeprecationWarning() {
     if (deprecated) {
-      globals.printStatus('$warningMark The "$name" command is deprecated and '
+      globals.printStatus('${globals.logger.terminal.warningMark} The "$name" command is deprecated and '
           'will be removed in a future version of Flutter. '
           'See https://flutter.dev/docs/development/tools/sdk/releases '
           'for previous releases of Flutter.');
@@ -1076,8 +1075,8 @@ abstract class FlutterCommand extends Command<void> {
         globals.systemClock.now(),
       );
     }
-    globals.signals.addHandler(io.ProcessSignal.SIGTERM, handler);
-    globals.signals.addHandler(io.ProcessSignal.SIGINT, handler);
+    globals.signals.addHandler(io.ProcessSignal.sigterm, handler);
+    globals.signals.addHandler(io.ProcessSignal.sigint, handler);
   }
 
   /// Logs data about this command.
@@ -1326,7 +1325,7 @@ abstract class FlutterCommand extends Command<void> {
     );
     final String help = <String>[
       if (deprecated)
-        '$warningMark Deprecated. This command will be removed in a future version of Flutter.',
+        '${globals.logger.terminal.warningMark} Deprecated. This command will be removed in a future version of Flutter.',
       description,
       '',
       'Global options:',
