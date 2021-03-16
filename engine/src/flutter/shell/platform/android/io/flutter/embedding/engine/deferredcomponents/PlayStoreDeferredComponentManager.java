@@ -248,12 +248,14 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
 
   // Obtain and parses the metadata string. An example encoded string is:
   //
-  //    "2:component2,3:component3,4:component1:libcomponent4.so"
+  //    "2:component2,3:component3,4:component1:libcomponent4.so,5:"
   //
   // Where loading unit 2 is included in component2, loading unit 3 is
   // included in component3, and loading unit 4 is included in component1.
   // An optional third parameter can be added to indicate the name of
-  // the shared library of the loading unit.
+  // the shared library of the loading unit. Loading unit 5 maps to an empty
+  // string, indicating it is included in the base module and no dynamic
+  // feature modules need to be downloaded.
   private void initLoadingUnitMappingToComponentNames() {
     String mappingKey = DeferredComponentManager.class.getName() + ".loadingUnitMapping";
     ApplicationInfo applicationInfo = getApplicationInfo();
@@ -269,7 +271,8 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
                   + "' is defined in the base module's AndroidManifest.");
         } else {
           for (String entry : rawMappingString.split(",")) {
-            String[] splitEntry = entry.split(":");
+            // Split with -1 param to include empty string following trailing ":"
+            String[] splitEntry = entry.split(":", -1);
             int loadingUnitId = Integer.parseInt(splitEntry[0]);
             loadingUnitIdToComponentNames.put(loadingUnitId, splitEntry[1]);
             if (splitEntry.length > 2) {
@@ -287,6 +290,13 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
     if (resolvedComponentName == null) {
       Log.e(
           TAG, "Deferred component name was null and could not be resolved from loading unit id.");
+      return;
+    }
+
+    // Handle a loading unit that is included in the base module that does not need download.
+    if (resolvedComponentName.equals("") && loadingUnitId > 0) {
+      // No need to load assets as base assets are already loaded.
+      loadDartLibrary(loadingUnitId, resolvedComponentName);
       return;
     }
 
