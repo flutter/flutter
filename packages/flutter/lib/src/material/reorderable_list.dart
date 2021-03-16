@@ -34,10 +34,11 @@ import 'theme.dart';
 /// ```dart
 /// final List<int> _items = List<int>.generate(50, (int index) => index);
 ///
+/// @override
 /// Widget build(BuildContext context){
 ///   final ColorScheme colorScheme = Theme.of(context).colorScheme;
-///   final oddItemColor = colorScheme.primary.withOpacity(0.05);
-///   final evenItemColor = colorScheme.primary.withOpacity(0.15);
+///   final Color oddItemColor = colorScheme.primary.withOpacity(0.05);
+///   final Color evenItemColor = colorScheme.primary.withOpacity(0.15);
 ///
 ///   return ReorderableListView(
 ///     padding: const EdgeInsets.symmetric(horizontal: 40),
@@ -186,10 +187,11 @@ class ReorderableListView extends StatefulWidget {
   /// ```dart
   /// final List<int> _items = List<int>.generate(50, (int index) => index);
   ///
+  /// @override
   /// Widget build(BuildContext context){
   ///   final ColorScheme colorScheme = Theme.of(context).colorScheme;
-  ///   final oddItemColor = colorScheme.primary.withOpacity(0.05);
-  ///   final evenItemColor = colorScheme.primary.withOpacity(0.15);
+  ///   final Color oddItemColor = colorScheme.primary.withOpacity(0.05);
+  ///   final Color evenItemColor = colorScheme.primary.withOpacity(0.15);
   ///
   ///   return ReorderableListView(
   ///     buildDefaultDragHandles: false,
@@ -217,7 +219,7 @@ class ReorderableListView extends StatefulWidget {
   ///           ),
   ///         ),
   ///     ],
-  ///     onReorder: (oldIndex, newIndex) {
+  ///     onReorder: (int oldIndex, int newIndex) {
   ///       setState(() {
   ///         if (oldIndex < newIndex) {
   ///           newIndex -= 1;

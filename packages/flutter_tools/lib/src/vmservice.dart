@@ -4,6 +4,8 @@
 
 // @dart = 2.8
 
+import 'dart:async';
+
 import 'package:file/file.dart';
 import 'package:meta/meta.dart' show required;
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -146,7 +148,7 @@ Future<io.WebSocket> _defaultOpenChannel(String url, {
 
 /// Override `VMServiceConnector` in [context] to return a different VMService
 /// from [VMService.connect] (used by tests).
-typedef VMServiceConnector = Future<vm_service.VmService> Function(Uri httpUri, {
+typedef VMServiceConnector = Future<FlutterVmService> Function(Uri httpUri, {
   ReloadSources reloadSources,
   Restart restart,
   CompileExpression compileExpression,
@@ -155,24 +157,6 @@ typedef VMServiceConnector = Future<vm_service.VmService> Function(Uri httpUri, 
   io.CompressionOptions compression,
   Device device,
 });
-
-final Expando<Uri> _httpAddressExpando = Expando<Uri>();
-
-final Expando<Uri> _wsAddressExpando = Expando<Uri>();
-
-void setHttpAddress(Uri uri, vm_service.VmService vmService) {
-  if(vmService == null) {
-    return;
-  }
-  _httpAddressExpando[vmService] = uri;
-}
-
-void setWsAddress(Uri uri, vm_service.VmService vmService) {
-  if(vmService == null) {
-    return;
-  }
-  _wsAddressExpando[vmService] = uri;
-}
 
 /// A connection to the Dart VM Service.
 vm_service.VmService setUpVmService(
@@ -292,7 +276,7 @@ vm_service.VmService setUpVmService(
 /// protocol itself.
 ///
 /// See: https://github.com/dart-lang/sdk/commit/df8bf384eb815cf38450cb50a0f4b62230fba217
-Future<vm_service.VmService> connectToVmService(
+Future<FlutterVmService> connectToVmService(
   Uri httpUri, {
     ReloadSources reloadSources,
     Restart restart,
@@ -314,7 +298,7 @@ Future<vm_service.VmService> connectToVmService(
   );
 }
 
-Future<vm_service.VmService> _connect(
+Future<FlutterVmService> _connect(
   Uri httpUri, {
   ReloadSources reloadSources,
   Restart restart,
@@ -344,13 +328,11 @@ Future<vm_service.VmService> _connect(
     printStructuredErrorLogMethod,
     delegateService,
   );
-  _httpAddressExpando[service] = httpUri;
-  _wsAddressExpando[service] = wsUri;
 
   // This call is to ensure we are able to establish a connection instead of
   // keeping on trucking and failing farther down the process.
   await delegateService.getVersion();
-  return service;
+  return FlutterVmService(service, httpAddress: httpUri, wsAddress: wsUri);
 }
 
 String _validateRpcStringParam(String methodName, Map<String, dynamic> params, String paramName) {
@@ -414,10 +396,12 @@ class FlutterView {
 }
 
 /// Flutter specific VM Service functionality.
-extension FlutterVmService on vm_service.VmService {
-  Uri get wsAddress => this != null ? _wsAddressExpando[this] : null;
+class FlutterVmService {
+  FlutterVmService(this.service, {this.wsAddress, this.httpAddress});
 
-  Uri get httpAddress => this != null ? _httpAddressExpando[this] : null;
+  final vm_service.VmService service;
+  final Uri wsAddress;
+  final Uri httpAddress;
 
   Future<vm_service.Response> callMethodWrapper(
     String method, {
@@ -425,7 +409,7 @@ extension FlutterVmService on vm_service.VmService {
     Map<String, dynamic> args
   }) async {
     try {
-      return await callMethod(method, isolateId: isolateId, args: args);
+      return await service.callMethod(method, isolateId: isolateId, args: args);
     } on vm_service.RPCError catch (e) {
       // If the service disappears mid-request the tool is unable to recover
       // and should begin to shutdown due to the service connection closing.
@@ -497,11 +481,11 @@ extension FlutterVmService on vm_service.VmService {
     @required Uri assetsDirectory,
   }) async {
     try {
-      await streamListen('Isolate');
+      await service.streamListen(vm_service.EventStreams.kIsolate);
     } on vm_service.RPCError {
       // Do nothing, since the tool is already subscribed.
     }
-    final Future<void> onRunnable = onIsolateEvent.firstWhere((vm_service.Event event) {
+    final Future<void> onRunnable = service.onIsolateEvent.firstWhere((vm_service.Event event) {
       return event.kind == vm_service.EventKind.kIsolateRunnable;
     });
     await callMethodWrapper(
@@ -741,7 +725,7 @@ extension FlutterVmService on vm_service.VmService {
     Map<String, dynamic> args,
   }) async {
     try {
-      return await callServiceExtension(method, args: args);
+      return await service.callServiceExtension(method, args: args);
     } on vm_service.RPCError catch (err) {
       // If an application is not using the framework or the VM service
       // disappears while handling a request, return null.
@@ -802,10 +786,62 @@ extension FlutterVmService on vm_service.VmService {
     }
   }
 
+  /// Waits for a signal from the VM service that [extensionName] is registered.
+  ///
+  /// Looks at the list of loaded extensions for first Flutter view, as well as
+  /// the stream of added extensions to avoid races.
+  ///
+  /// Throws a [VmServiceDisappearedException] should the VM Service disappear
+  /// while making calls to it.
+  Future<vm_service.IsolateRef> findExtensionIsolate(String extensionName) async {
+    try {
+      await service.streamListen(vm_service.EventStreams.kIsolate);
+    } on vm_service.RPCError {
+      // Do nothing, since the tool is already subscribed.
+    }
+
+    final Completer<vm_service.IsolateRef> extensionAdded = Completer<vm_service.IsolateRef>();
+    StreamSubscription<vm_service.Event> isolateEvents;
+    isolateEvents = service.onIsolateEvent.listen((vm_service.Event event) {
+      if (event.kind == vm_service.EventKind.kServiceExtensionAdded
+          && event.extensionRPC == extensionName) {
+        isolateEvents.cancel();
+        extensionAdded.complete(event.isolate);
+      }
+    });
+
+    try {
+      final List<FlutterView> flutterViews = await getFlutterViews();
+      if (flutterViews.isEmpty) {
+        throw VmServiceDisappearedException();
+      }
+
+      for (final FlutterView flutterView in flutterViews) {
+        final vm_service.IsolateRef isolateRef = flutterView.uiIsolate;
+        if (isolateRef == null) {
+          continue;
+        }
+
+        final vm_service.Isolate isolate = await service.getIsolate(isolateRef.id);
+        if (isolate.extensionRPCs.contains(extensionName)) {
+          return isolateRef;
+        }
+      }
+      return await extensionAdded.future;
+    } finally {
+      await isolateEvents.cancel();
+      try {
+        await service.streamCancel(vm_service.EventStreams.kIsolate);
+      } on vm_service.RPCError {
+        // It's ok for cleanup to fail, such as when the service disappears.
+      }
+    }
+  }
+
   /// Attempt to retrieve the isolate with id [isolateId], or `null` if it has
   /// been collected.
   Future<vm_service.Isolate> getIsolateOrNull(String isolateId) {
-    return getIsolate(isolateId)
+    return service.getIsolate(isolateId)
       .catchError((dynamic error, StackTrace stackTrace) {
         return null;
       }, test: (dynamic error) {
@@ -818,7 +854,7 @@ extension FlutterVmService on vm_service.VmService {
   Future<vm_service.Response> createDevFS(String fsName) {
     // Call the unchecked version of `callServiceExtension` because the caller
     // has custom handling of certain RPCErrors.
-    return callServiceExtension(
+    return service.callServiceExtension(
       '_createDevFS',
       args: <String, dynamic>{'fsName': fsName},
     );
@@ -854,7 +890,17 @@ extension FlutterVmService on vm_service.VmService {
   Future<vm_service.Response> getTimeline() {
     return _checkedCallServiceExtension('getVMTimeline');
   }
+
+  Future<void> dispose() async {
+    // TODO(dnfield): Remove ignore once internal repo is up to date
+    // https://github.com/flutter/flutter/issues/74518
+    // ignore: await_only_futures
+     await service.dispose();
+  }
 }
+
+/// Thrown when the VM Service disappears while calls are being made to it.
+class VmServiceDisappearedException implements Exception {}
 
 /// Whether the event attached to an [Isolate.pauseEvent] should be considered
 /// a "pause" event.

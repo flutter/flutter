@@ -29,7 +29,7 @@ export 'package:flutter/rendering.dart' show RelativeRect;
 /// This code defines a widget called `Spinner` that spins a green square
 /// continually. It is built with an [AnimatedWidget].
 ///
-/// ```dart imports
+/// ```dart dartImports
 /// import 'dart:math' as math;
 /// ```
 ///
@@ -53,7 +53,7 @@ export 'package:flutter/rendering.dart' show RelativeRect;
 /// ```
 ///
 /// ```dart
-/// late AnimationController _controller = AnimationController(
+/// late final AnimationController _controller = AnimationController(
 ///   duration: const Duration(seconds: 10),
 ///   vsync: this,
 /// )..repeat();
@@ -196,11 +196,11 @@ class _AnimatedState extends State<AnimatedWidget> {
 ///
 /// ```dart
 /// class _MyStatefulWidgetState extends State<MyStatefulWidget> with SingleTickerProviderStateMixin {
-///   late AnimationController _controller = AnimationController(
+///   late final AnimationController _controller = AnimationController(
 ///     duration: const Duration(seconds: 2),
 ///     vsync: this,
 ///   )..repeat(reverse: true);
-///   late Animation<Offset> _offsetAnimation = Tween<Offset>(
+///   late final Animation<Offset> _offsetAnimation = Tween<Offset>(
 ///     begin: Offset.zero,
 ///     end: const Offset(1.5, 0.0),
 ///   ).animate(CurvedAnimation(
@@ -307,11 +307,11 @@ class SlideTransition extends AnimatedWidget {
 /// above:
 ///
 /// ```dart
-/// late AnimationController _controller = AnimationController(
+/// late final AnimationController _controller = AnimationController(
 ///   duration: const Duration(seconds: 2),
 ///   vsync: this,
 /// )..repeat(reverse: true);
-/// late Animation<double> _animation = CurvedAnimation(
+/// late final Animation<double> _animation = CurvedAnimation(
 ///   parent: _controller,
 ///   curve: Curves.fastOutSlowIn,
 /// );
@@ -403,11 +403,11 @@ class ScaleTransition extends AnimatedWidget {
 /// above:
 ///
 /// ```dart
-/// late AnimationController _controller = AnimationController(
+/// late final AnimationController _controller = AnimationController(
 ///   duration: const Duration(seconds: 2),
 ///   vsync: this,
 /// )..repeat(reverse: true);
-/// late Animation<double> _animation = CurvedAnimation(
+/// late final Animation<double> _animation = CurvedAnimation(
 ///   parent: _controller,
 ///   curve: Curves.elasticOut,
 /// );
@@ -506,11 +506,11 @@ class RotationTransition extends AnimatedWidget {
 /// where the internal widget has space to change its size.
 ///
 /// ```dart
-/// late AnimationController _controller = AnimationController(
+/// late final AnimationController _controller = AnimationController(
 ///   duration: const Duration(seconds: 3),
 ///   vsync: this,
 /// )..repeat();
-/// late Animation<double> _animation = CurvedAnimation(
+/// late final Animation<double> _animation = CurvedAnimation(
 ///   parent: _controller,
 ///   curve: Curves.fastOutSlowIn,
 /// );
@@ -528,8 +528,8 @@ class RotationTransition extends AnimatedWidget {
 ///       sizeFactor: _animation,
 ///       axis: Axis.horizontal,
 ///       axisAlignment: -1,
-///       child: Center(
-///           child: FlutterLogo(size: 200.0),
+///       child: const Center(
+///         child: FlutterLogo(size: 200.0),
 ///       ),
 ///     ),
 ///   );
@@ -631,11 +631,11 @@ class SizeTransition extends AnimatedWidget {
 /// the Flutter logo:
 ///
 /// ```dart
-/// late AnimationController _controller = AnimationController(
+/// late final AnimationController _controller = AnimationController(
 ///   duration: const Duration(seconds: 2),
 ///   vsync: this,
 /// )..repeat(reverse: true);
-/// late Animation<double> _animation = CurvedAnimation(
+/// late final Animation<double> _animation = CurvedAnimation(
 ///   parent: _controller,
 ///   curve: Curves.easeIn,
 /// );
@@ -728,18 +728,19 @@ class FadeTransition extends SingleChildRenderObjectWidget {
 ///
 /// ```dart
 /// class _MyStatefulWidgetState extends State<MyStatefulWidget> with SingleTickerProviderStateMixin {
-///   late AnimationController controller = AnimationController(
+///   late final AnimationController controller = AnimationController(
 ///     duration: const Duration(milliseconds: 1000),
 ///     vsync: this,
 ///   );
-///   late Animation<double> animation = CurvedAnimation(
+///   late final Animation<double> animation = CurvedAnimation(
 ///     parent: controller,
 ///     curve: Curves.easeIn,
 ///   );
 ///
-///   initState() {
+///   @override
+///   void initState() {
 ///     super.initState();
-///     animation.addStatusListener((status) {
+///     animation.addStatusListener((AnimationStatus status) {
 ///       if (status == AnimationStatus.completed) {
 ///         controller.reverse();
 ///       } else if (status == AnimationStatus.dismissed) {
@@ -749,6 +750,7 @@ class FadeTransition extends SingleChildRenderObjectWidget {
 ///     controller.forward();
 ///   }
 ///
+///   @override
 ///   Widget build(BuildContext context) {
 ///     return CustomScrollView(
 ///       slivers: <Widget>[
@@ -759,7 +761,7 @@ class FadeTransition extends SingleChildRenderObjectWidget {
 ///             delegate: SliverChildBuilderDelegate(
 ///               (BuildContext context, int index) {
 ///                 return Container(
-///                   color: index % 2 == 0
+///                   color: index.isEven
 ///                     ? Colors.indigo[200]
 ///                     : Colors.orange[200],
 ///                 );
@@ -872,7 +874,7 @@ class RelativeRectTween extends Tween<RelativeRect> {
 /// above:
 ///
 /// ```dart
-/// late AnimationController _controller = AnimationController(
+/// late final AnimationController _controller = AnimationController(
 ///   duration: const Duration(seconds: 2),
 ///   vsync: this,
 /// )..repeat(reverse: true);
@@ -885,24 +887,24 @@ class RelativeRectTween extends Tween<RelativeRect> {
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   final double smallLogo = 100;
-///   final double bigLogo = 200;
+///   const double smallLogo = 100;
+///   const double bigLogo = 200;
 ///
 ///   return LayoutBuilder(
-///     builder: (context, constraints) {
+///     builder: (BuildContext context, BoxConstraints constraints) {
 ///       final Size biggest = constraints.biggest;
 ///       return Stack(
-///         children: [
+///         children: <Widget>[
 ///           PositionedTransition(
 ///             rect: RelativeRectTween(
-///               begin: RelativeRect.fromSize(Rect.fromLTWH(0, 0, smallLogo, smallLogo), biggest),
+///               begin: RelativeRect.fromSize(const Rect.fromLTWH(0, 0, smallLogo, smallLogo), biggest),
 ///               end: RelativeRect.fromSize(Rect.fromLTWH(biggest.width - bigLogo, biggest.height - bigLogo, bigLogo, bigLogo), biggest),
 ///             ).animate(CurvedAnimation(
 ///               parent: _controller,
 ///               curve: Curves.elasticInOut,
 ///             )),
-///             child: Padding(
-///               padding: const EdgeInsets.all(8),
+///             child: const Padding(
+///               padding: EdgeInsets.all(8),
 ///               child: FlutterLogo()
 ///             ),
 ///           ),
@@ -972,7 +974,7 @@ class PositionedTransition extends AnimatedWidget {
 /// above:
 ///
 /// ```dart
-/// late AnimationController _controller = AnimationController(
+/// late final AnimationController _controller = AnimationController(
 ///   duration: const Duration(seconds: 2),
 ///   vsync: this,
 /// )..repeat(reverse: true);
@@ -985,25 +987,25 @@ class PositionedTransition extends AnimatedWidget {
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   final double smallLogo = 100;
-///   final double bigLogo = 200;
+///   const double smallLogo = 100;
+///   const double bigLogo = 200;
 ///
 ///   return LayoutBuilder(
-///     builder: (context, constraints) {
+///     builder: (BuildContext context, BoxConstraints constraints) {
 ///       final Size biggest = constraints.biggest;
 ///       return Stack(
-///         children: [
+///         children: <Widget>[
 ///           RelativePositionedTransition(
 ///             size: biggest,
 ///             rect: RectTween(
-///               begin: Rect.fromLTWH(0, 0, bigLogo, bigLogo),
+///               begin: const Rect.fromLTWH(0, 0, bigLogo, bigLogo),
 ///               end: Rect.fromLTWH(biggest.width - smallLogo, biggest.height - smallLogo, smallLogo, smallLogo),
 ///             ).animate(CurvedAnimation(
 ///               parent: _controller,
 ///               curve: Curves.elasticInOut,
 ///             )) as Animation<Rect>,
-///             child: Padding(
-///               padding: const EdgeInsets.all(8),
+///             child: const Padding(
+///               padding: EdgeInsets.all(8),
 ///               child: FlutterLogo()
 ///             ),
 ///           ),
@@ -1110,7 +1112,7 @@ class RelativePositionedTransition extends AnimatedWidget {
 ///   ),
 /// );
 ///
-/// late AnimationController _controller = AnimationController(
+/// late final AnimationController _controller = AnimationController(
 ///   vsync: this,
 ///   duration: const Duration(seconds: 3),
 /// )..repeat(reverse: true);
@@ -1272,8 +1274,8 @@ class AlignTransition extends AnimatedWidget {
 ///     vsync: this,
 ///   )..repeat(reverse: true);
 ///   _styleTween = TextStyleTween(
-///     begin: TextStyle(fontSize: 50, color: Colors.blue, fontWeight: FontWeight.w900),
-///     end: TextStyle(fontSize: 50, color: Colors.red, fontWeight: FontWeight.w100),
+///     begin: const TextStyle(fontSize: 50, color: Colors.blue, fontWeight: FontWeight.w900),
+///     end: const TextStyle(fontSize: 50, color: Colors.red, fontWeight: FontWeight.w100),
 ///   );
 ///   _curvedAnimation = CurvedAnimation(
 ///     parent: _controller,
@@ -1292,7 +1294,7 @@ class AlignTransition extends AnimatedWidget {
 ///   return Center(
 ///     child: DefaultTextStyleTransition(
 ///       style: _styleTween.animate(_curvedAnimation),
-///       child: Text('Flutter'),
+///       child: const Text('Flutter'),
 ///     ),
 ///   );
 /// }
@@ -1388,12 +1390,12 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// built with an [AnimatedBuilder] and makes use of the [child] feature to
 /// avoid having to rebuild the [Container] each time.
 ///
-/// ```dart imports
+/// ```dart dartImports
 /// import 'dart:math' as math;
 /// ```
 ///
 /// ```dart
-/// late AnimationController _controller = AnimationController(
+/// late final AnimationController _controller = AnimationController(
 ///   duration: const Duration(seconds: 10),
 ///   vsync: this,
 /// )..repeat();

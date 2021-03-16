@@ -303,7 +303,7 @@ class IOSScrollViewFlingVelocityTracker extends VelocityTracker {
       if (previousPoint == null || previousPoint.time <= time)
         return true;
       throw FlutterError(
-        'The position being added ($position) has a smaller timestamp ($time)'
+        'The position being added ($position) has a smaller timestamp ($time) '
         'than its predecessor: $previousPoint.'
       );
     }());

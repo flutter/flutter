@@ -86,6 +86,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.onRowsPerPageChanged,
     this.dragStartBehavior = DragStartBehavior.start,
     required this.source,
+    this.checkboxHorizontalMargin,
   }) : assert(actions == null || (actions != null && header != null)),
        assert(columns != null),
        assert(dragStartBehavior != null),
@@ -166,6 +167,10 @@ class PaginatedDataTable extends StatefulWidget {
   /// the content in the first data column.
   ///
   /// This value defaults to 24.0 to adhere to the Material Design specifications.
+  ///
+  /// If [checkboxHorizontalMargin] is null, then [horizontalMargin] is also the
+  /// margin between the edge of the table and the checkbox, as well as the
+  /// margin between the checkbox and the content in the first data column.
   final double horizontalMargin;
 
   /// The horizontal margin between the contents of each data column.
@@ -223,6 +228,13 @@ class PaginatedDataTable extends StatefulWidget {
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
+
+  /// Horizontal margin around the checkbox, if it is displayed.
+  ///
+  /// If null, then [horizontalMargin] is used as the margin between the edge
+  /// of the table and the checkbox, as well as the margin between the checkbox
+  /// and the content in the first data column. This value defaults to 24.0.
+  final double? checkboxHorizontalMargin;
 
   @override
   PaginatedDataTableState createState() => PaginatedDataTableState();
@@ -476,7 +488,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     // These typographic styles aren't quite the regular ones. We pick the closest ones from the regular
                     // list and then tweak them appropriately.
                     // See https://material.io/design/components/data-tables.html#tables-within-cards
-                    style: _selectedRowCount > 0 ? themeData.textTheme.subtitle1!.copyWith(color: themeData.accentColor)
+                    style: _selectedRowCount > 0 ? themeData.textTheme.subtitle1!.copyWith(color: themeData.colorScheme.secondary)
                                                  : themeData.textTheme.headline6!.copyWith(fontWeight: FontWeight.w400),
                     child: IconTheme.merge(
                       data: const IconThemeData(
@@ -513,6 +525,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     dataRowHeight: widget.dataRowHeight,
                     headingRowHeight: widget.headingRowHeight,
                     horizontalMargin: widget.horizontalMargin,
+                    checkboxHorizontalMargin: widget.checkboxHorizontalMargin,
                     columnSpacing: widget.columnSpacing,
                     showCheckboxColumn: widget.showCheckboxColumn,
                     showBottomBorder: true,
@@ -526,7 +539,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                   data: const IconThemeData(
                     opacity: 0.54
                   ),
-                  child: Container(
+                  child: SizedBox(
                     // TODO(bkonyi): this won't handle text zoom correctly,
                     //  https://github.com/flutter/flutter/issues/48522
                     height: 56.0,

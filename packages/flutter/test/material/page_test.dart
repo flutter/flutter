@@ -287,7 +287,7 @@ void main() {
           onPressed: () { Navigator.of(context).pushNamed('/b'); },
         ),
       ),
-      '/b': (BuildContext context) => Container(child: const Text('HELLO')),
+      '/b': (BuildContext context) => const Text('HELLO'),
     };
     await tester.pumpWidget(
       MaterialApp(
@@ -960,7 +960,7 @@ Widget buildNavigator({
 }
 
 class KeepsStateTestWidget extends StatefulWidget {
-  const KeepsStateTestWidget({this.navigatorKey});
+  const KeepsStateTestWidget({Key? key, this.navigatorKey}) : super(key: key);
 
   final Key? navigatorKey;
 

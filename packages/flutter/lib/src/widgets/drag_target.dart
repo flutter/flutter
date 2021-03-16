@@ -59,12 +59,12 @@ typedef DragEndCallback = void Function(DraggableDetails details);
 /// Signature for when a [Draggable] leaves a [DragTarget].
 ///
 /// Used by [DragTarget.onLeave].
-typedef DragTargetLeave = void Function(Object? data);
+typedef DragTargetLeave<T> = void Function(T? data);
 
 /// Signature for when a [Draggable] moves within a [DragTarget].
 ///
 /// Used by [DragTarget.onMove].
-typedef DragTargetMove = void Function(DragTargetDetails<dynamic> details);
+typedef DragTargetMove<T> = void Function(DragTargetDetails<T> details);
 
 /// Where the [Draggable] should be anchored during a drag.
 enum DragAnchor {
@@ -113,10 +113,12 @@ enum DragAnchor {
 ///
 /// ```dart
 /// int acceptedData = 0;
+///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Row(
 ///     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-///     children: [
+///     children: <Widget>[
 ///       Draggable<int>(
 ///         // Data is the value this Draggable stores.
 ///         data: 10,
@@ -124,26 +126,26 @@ enum DragAnchor {
 ///           height: 100.0,
 ///           width: 100.0,
 ///           color: Colors.lightGreenAccent,
-///           child: Center(
-///             child: Text("Draggable"),
+///           child: const Center(
+///             child: Text('Draggable'),
 ///           ),
 ///         ),
 ///         feedback: Container(
 ///           color: Colors.deepOrange,
 ///           height: 100,
 ///           width: 100,
-///           child: Icon(Icons.directions_run),
+///           child: const Icon(Icons.directions_run),
 ///         ),
 ///         childWhenDragging: Container(
 ///           height: 100.0,
 ///           width: 100.0,
 ///           color: Colors.pinkAccent,
-///           child: Center(
-///             child: Text("Child When Dragging"),
+///           child: const Center(
+///             child: Text('Child When Dragging'),
 ///           ),
 ///         ),
 ///       ),
-///       DragTarget(
+///       DragTarget<int>(
 ///         builder: (
 ///           BuildContext context,
 ///           List<dynamic> accepted,
@@ -154,7 +156,7 @@ enum DragAnchor {
 ///             width: 100.0,
 ///             color: Colors.cyan,
 ///             child: Center(
-///               child: Text("Value is updated to: $acceptedData"),
+///               child: Text('Value is updated to: $acceptedData'),
 ///             ),
 ///           );
 ///         },
@@ -653,12 +655,12 @@ class DragTarget<T extends Object> extends StatefulWidget {
 
   /// Called when a given piece of data being dragged over this target leaves
   /// the target.
-  final DragTargetLeave? onLeave;
+  final DragTargetLeave<T>? onLeave;
 
   /// Called when a [Draggable] moves within this [DragTarget].
   ///
   /// Note that this includes entering and leaving the target.
-  final DragTargetMove? onMove;
+  final DragTargetMove<T>? onMove;
 
   /// How to behave during hit testing.
   ///
@@ -712,7 +714,7 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
       _rejectedAvatars.remove(avatar);
     });
     if (widget.onLeave != null)
-      widget.onLeave!(avatar.data);
+      widget.onLeave!(avatar.data as T?);
   }
 
   void didDrop(_DragAvatar<Object> avatar) {
@@ -732,7 +734,7 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
     if (!mounted)
       return;
     if (widget.onMove != null)
-      widget.onMove!(DragTargetDetails<dynamic>(data: avatar.data, offset: avatar._lastOffset!));
+      widget.onMove!(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
   }
 
   @override

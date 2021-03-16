@@ -92,7 +92,7 @@ Widget _buildTestWidget({
           Expanded(
             child: Container(),
           ),
-          Container(
+          SizedBox(
             height: 500.0,
             child: ListView(
               controller: controller,

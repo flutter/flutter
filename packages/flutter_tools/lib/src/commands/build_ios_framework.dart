@@ -322,7 +322,7 @@ end
 
     try {
       // Copy xcframework engine cache framework to mode directory.
-      globals.fsUtils.copyDirectorySync(
+      copyDirectory(
         globals.fs.directory(engineCacheFlutterFrameworkDirectory),
         flutterFrameworkCopy,
       );
@@ -385,6 +385,7 @@ end
           engineVersion: globals.artifacts.isLocalEngine
               ? null
               : globals.flutterVersion.engineRevision,
+          generateDartPluginRegistry: true,
         );
         Target target;
         // Always build debug for simulator.

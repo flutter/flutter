@@ -144,9 +144,7 @@ void main() {
     expect(input2.value, 'Text2');
   });
 
-  testWidgets('Jump between TextFormFields with tab key after CapsLock is'
-      'activated',
-          (WidgetTester tester) async {
+  testWidgets('Jump between TextFormFields with tab key after CapsLock is activated', (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
 
