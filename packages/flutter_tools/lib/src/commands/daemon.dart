@@ -1024,6 +1024,7 @@ class NotifyingLogger extends DelegatingLogger {
     @required Duration timeout,
     String progressId,
     bool multilineOutput = false,
+    bool includeTiming = true,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     assert(timeout != null);
@@ -1152,6 +1153,7 @@ class AppRunLogger extends DelegatingLogger {
     @required Duration timeout,
     String progressId,
     bool multilineOutput = false,
+    bool includeTiming = true,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     final int id = _nextProgressId++;

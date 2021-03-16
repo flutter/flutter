@@ -628,7 +628,7 @@ class FakeStatusLogger extends DelegatingLogger {
   Status status;
 
   @override
-  Status startProgress(String message, {Duration timeout, String progressId, bool multilineOutput = false, int progressIndicatorPadding = kDefaultStatusPadding}) {
+  Status startProgress(String message, {Duration timeout, String progressId, bool multilineOutput = false, bool includeTiming = true, int progressIndicatorPadding = kDefaultStatusPadding}) {
     return status;
   }
 }
