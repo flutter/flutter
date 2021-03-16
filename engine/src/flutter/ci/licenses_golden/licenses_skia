@@ -1,4 +1,4 @@
-Signature: ca1ea7a303956e5e765eac6a890363c4
+Signature: 5b814cb4a78c4f329845121c239ada29
 
 UNUSED LICENSES:
 
@@ -2009,7 +2009,6 @@ FILE: ../../../third_party/skia/bench/LineBench.cpp
 FILE: ../../../third_party/skia/bench/Matrix44Bench.cpp
 FILE: ../../../third_party/skia/bench/MatrixConvolutionBench.cpp
 FILE: ../../../third_party/skia/bench/MorphologyBench.cpp
-FILE: ../../../third_party/skia/bench/ParagraphBench.cpp
 FILE: ../../../third_party/skia/bench/RTreeBench.cpp
 FILE: ../../../third_party/skia/bench/RefCntBench.cpp
 FILE: ../../../third_party/skia/bench/TableBench.cpp
