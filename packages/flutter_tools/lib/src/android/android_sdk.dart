@@ -383,7 +383,24 @@ class AndroidSdk {
   ///
   /// The sdkmanager was previously in the tools directory but this component
   /// was marked as obsolete in 3.6.
-  String get sdkManagerPath => getCmdlineToolsPath(globals.platform.isWindows ? 'sdkmanager.bat': 'sdkmanager');
+  String get sdkManagerPath {
+    final String executable = globals.platform.isWindows
+      ? 'sdkmanager.bat'
+      : 'sdkmanager';
+    final File cmdlineTool = directory
+      .childDirectory('cmdline-tools')
+      .childDirectory('latest')
+      .childDirectory('bin')
+      .childFile(executable);
+    if (cmdlineTool.existsSync()) {
+      return cmdlineTool.path;
+    }
+    return directory
+      .childDirectory('tools')
+      .childDirectory('bin')
+      .childFile(executable)
+      .path;
+  }
 
   /// First try Java bundled with Android Studio, then sniff JAVA_HOME, then fallback to PATH.
   static String findJavaBinary({
