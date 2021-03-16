@@ -522,6 +522,8 @@ void main() {
   });
 
   testWidgets('ExpansionTile iconColor, textColor', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/pull/78281
+
     const Color iconColor = Color(0xff00ff00);
     const Color collapsedIconColor = Color(0xff0000ff);
     const Color textColor = Color(0xff00ffff);
