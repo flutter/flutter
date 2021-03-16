@@ -19,23 +19,16 @@ abstract class BuildTestTask {
     applicationBinaryPath = argResults[kApplicationBinaryPathOption] as String;
     buildOnly = argResults[kBuildOnlyFlag] as bool;
     testOnly = argResults[kTestOnlyFlag] as bool;
-    if (argResults.wasParsed(kTargetPlatformOption)) {
-      // Override deviceOperatingSystem to prevent extra utilities from being used.
-      targetPlatform = deviceOperatingSystemFromString(argResults[kTargetPlatformOption] as String);
-      _originalDeviceOperatingSystem = deviceOperatingSystem;
-      deviceOperatingSystem = DeviceOperatingSystem.fake;
-    }
+
   }
 
   static const String kApplicationBinaryPathOption = 'application-binary-path';
   static const String kBuildOnlyFlag = 'build';
-  static const String kTargetPlatformOption = 'target-platform';
   static const String kTestOnlyFlag = 'test';
 
   final ArgParser argParser = ArgParser()
     ..addOption(kApplicationBinaryPathOption)
     ..addFlag(kBuildOnlyFlag)
-    ..addOption(kTargetPlatformOption)
     ..addFlag(kTestOnlyFlag);
 
   /// Args passed from the test runner via "--task-arg".
@@ -43,15 +36,6 @@ abstract class BuildTestTask {
 
   /// If true, skip [test].
   bool buildOnly = false;
-
-  /// The [DeviceOperatingSystem] being targeted for this build.
-  ///
-  /// If passed, no connected device checks are run as the current connected device
-  /// will be set as [DeviceOperatingSystem.fake].
-  DeviceOperatingSystem targetPlatform;
-
-  /// Original [deviceOperatingSystem] if [targetPlatform] is given.
-  DeviceOperatingSystem _originalDeviceOperatingSystem;
 
   /// If true, skip [build].
   bool testOnly = false;
@@ -75,7 +59,7 @@ abstract class BuildTestTask {
         await flutter('clean');
       }
       section('BUILDING APPLICATION');
-      await flutter('build', options: getBuildArgs());
+      await flutter('build', options: getBuildArgs(deviceOperatingSystem));
     });
 
   }
@@ -84,25 +68,21 @@ abstract class BuildTestTask {
   ///
   /// This assumes that [applicationBinaryPath] exists.
   Future<TaskResult> test() async {
-    // Ensure deviceOperatingSystem is the one set in bin/task.
-    if (deviceOperatingSystem == DeviceOperatingSystem.fake) {
-      deviceOperatingSystem = _originalDeviceOperatingSystem;
-    }
     final Device device = await devices.workingDevice;
     await device.unlock();
     await inDirectory<void>(workingDirectory, () async {
       section('DRIVE START');
-      await flutter('drive', options: getTestArgs(device.deviceId));
+      await flutter('drive', options: getTestArgs(deviceOperatingSystem, device.deviceId));
     });
 
     return parseTaskResult();
   }
 
   /// Args passed to flutter build to build the application under test.
-  List<String> getBuildArgs() => throw UnimplementedError('getBuildArgs is not implemented');
+  List<String> getBuildArgs(DeviceOperatingSystem deviceOperatingSystem) => throw UnimplementedError('getBuildArgs is not implemented');
 
   /// Args passed to flutter drive to test the built application.
-  List<String> getTestArgs(String deviceId) => throw UnimplementedError('getTestArgs is not implemented');
+  List<String> getTestArgs(DeviceOperatingSystem deviceOperatingSystem, String deviceId) => throw UnimplementedError('getTestArgs is not implemented');
 
   /// Logic to construct [TaskResult] from this test's results.
   Future<TaskResult> parseTaskResult() => throw UnimplementedError('parseTaskResult is not implemented');
@@ -126,7 +106,7 @@ abstract class BuildTestTask {
     }
 
     if (!testOnly) {
-      await build();
+      build();
     }
 
     if (buildOnly) {
