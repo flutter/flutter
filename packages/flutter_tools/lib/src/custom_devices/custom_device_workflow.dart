@@ -2,16 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
+import 'package:meta/meta.dart';
+
 import '../doctor.dart';
 import '../features.dart';
 
 /// The custom-devices-specific implementation of a [Workflow].
 ///
-/// This workflow requires the flutter-desktop-embedding as a sibling
-/// repository to the flutter repo.
+/// Will apply to the host platform / be able to launch & list devices only if
+/// the custom devices feature is enabled in the featureFlags argument.
+///
+/// Can't list emulators at all.
+@immutable
 class CustomDeviceWorkflow implements Workflow {
   const CustomDeviceWorkflow({
-    required FeatureFlags featureFlags
+    @required FeatureFlags featureFlags
   }) : _featureFlags = featureFlags;
 
   final FeatureFlags _featureFlags;
