@@ -387,14 +387,11 @@ class AndroidSdk {
     final String executable = globals.platform.isWindows
       ? 'sdkmanager.bat'
       : 'sdkmanager';
-    final File cmdlineTool = directory
-      .childDirectory('cmdline-tools')
-      .childDirectory('latest')
-      .childDirectory('bin')
-      .childFile(executable);
-    if (cmdlineTool.existsSync()) {
-      return cmdlineTool.path;
+    final String path = getCmdlineToolsPath(executable);
+    if (path != null) {
+      return path;
     }
+    // If no binary was found, return the default location
     return directory
       .childDirectory('tools')
       .childDirectory('bin')
