@@ -2576,6 +2576,7 @@ class UnconstrainedBox extends StatelessWidget {
   /// The text direction to use when interpreting the [alignment] if it is an
   /// [AlignmentDirectional].
   final TextDirection? textDirection;
+
   /// The alignment to use when laying out the child.
   ///
   /// If this is an [AlignmentDirectional], then [textDirection] must not be

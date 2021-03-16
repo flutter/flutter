@@ -322,8 +322,8 @@ void main() {
     expect(
       const UnconstrainedBox(constrainedAxis: Axis.vertical,).toString(),
       equals('UnconstrainedBox(alignment: Alignment.center, constrainedAxis: vertical)'),
-
     );
+
     expect(
       const UnconstrainedBox(constrainedAxis: Axis.horizontal, textDirection: TextDirection.rtl, alignment: Alignment.topRight).toString(),
       equals('UnconstrainedBox(alignment: Alignment.topRight, constrainedAxis: horizontal, textDirection: rtl)'),
