@@ -19,7 +19,7 @@ void main() {
   });
 
   testWithoutContext('CustomDeviceWorkflow reports true for everything except canListEmulators when custom devices feature is enabled', () {
-    final CustomDeviceWorkflow workflow = CustomDeviceWorkflow(featureFlags: TestFeatureFlags(areCustomDevicesEnabled: false));
+    final CustomDeviceWorkflow workflow = CustomDeviceWorkflow(featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true));
     expect(workflow.appliesToHostPlatform, true);
     expect(workflow.canLaunchDevices, true);
     expect(workflow.canListDevices, true);
