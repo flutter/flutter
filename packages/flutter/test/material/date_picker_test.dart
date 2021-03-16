@@ -1124,6 +1124,7 @@ void main() {
     );
 
     expect(find.byType(DatePickerDialog), findsNothing);
+    expect(find.text('25/7/2021'), findsOneWidget);
 
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
@@ -1140,9 +1141,18 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(DatePickerDialog), findsNothing);
+    expect(find.text('25/7/2021'), findsOneWidget);
 
     await tester.restoreFrom(restorationData);
     expect(find.byType(DatePickerDialog), findsOneWidget);
+
+    await tester.tap(find.text('30'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(DatePickerDialog), findsNothing);
+    expect(find.text('30/7/2021'), findsOneWidget);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 }
 
@@ -1198,13 +1208,21 @@ class _RestorableDatePickerDialogTestWidgetState extends State<_RestorableDatePi
 
   @override
   Widget build(BuildContext context) {
+    final DateTime selectedDateTime = _selectedDate.value;
+    // Example: "25/7/1994"
+    final String selectedDateTimeString = '${selectedDateTime.day}/${selectedDateTime.month}/${selectedDateTime.year}';
     return Scaffold(
       body: Center(
-        child: OutlinedButton(
-          onPressed: () {
-            _restorableDatePickerRouteFuture.present();
-          },
-          child: const Text('X'),
+        child: Column(
+          children: <Widget>[
+            OutlinedButton(
+              onPressed: () {
+                _restorableDatePickerRouteFuture.present();
+              },
+              child: const Text('X'),
+            ),
+            Text(selectedDateTimeString),
+          ],
         ),
       ),
     );
