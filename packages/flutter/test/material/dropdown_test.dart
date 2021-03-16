@@ -3146,7 +3146,11 @@ void main() {
                   child: Text('second'),
                 ),
               ],
-              onChanged: (String? v) => setState(() => value = v),
+              onChanged: (String? newValue) {
+                setState(() {
+                value = newValue;
+              });
+              },
             ),
           ),
         ),
@@ -3206,21 +3210,25 @@ void main() {
   });
 
   testWidgets('value should be null if enabled is false', (WidgetTester tester) async {
-    final List<String> values = <String>['enabled', 'disabled'];
-
     try {
-      // trying to assign [value] and [onTap] non-null values irrespective of
-      // if the menu item is disabled or now
+      // Try to assign [value] and [onTap] non-null values irrespective of
+      // if the menu item is disabled for now
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: DropdownButton<String>(
-              value: values[0],
-              items: values.map<DropdownMenuItem<String>>((String e) => DropdownMenuItem<String>(
-                value: e,
-                child: Text(e),
-                enabled: e == 'enabled',
-              )).toList(),
+              value: 'enabled',
+              items: <DropdownMenuItem<String>>[
+                DropdownMenuItem<String>(
+                  value: 'disabled',
+                  enabled: false,
+                  child: const Text('disabled'),
+                ),
+                const DropdownMenuItem<String>(
+                  value: 'enabled',
+                  child: Text('enabled'),
+                )
+              ],
               onChanged: onChanged,
             ),
           ),
@@ -3238,16 +3246,14 @@ void main() {
   });
 
   testWidgets('onTap should be null if enabled is false', (WidgetTester tester) async {
-    final List<String> values = <String>['enabled', 'disabled'];
-
     try {
-      // trying to assign [value] and [onTap] non-null values irrespective of
-      // if the menu item is disabled or now
+      // Try to assign [value] and [onTap] non-null values irrespective of
+      // if the menu item is disabled for now
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: DropdownButton<String>(
-              value: values[0],
+              value: 'enabled',
               items: <DropdownMenuItem<String>>[
                 DropdownMenuItem<String>(
                   enabled: false,

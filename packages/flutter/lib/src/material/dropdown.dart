@@ -704,14 +704,14 @@ class DropdownMenuItem<T> extends _DropdownMenuItemContainer {
 
   /// Called when the dropdown menu item is tapped.
   ///
-  /// If enabled is `false`, this property should be `null`.
+  /// If [enabled] is `false`, this property should be `null`.
   final VoidCallback? onTap;
 
   /// The value to return if the user selects this menu item.
   ///
   /// Eventually returned in a call to [DropdownButton.onChanged].
   ///
-  /// If enabled is `false`, this property should be `null`.
+  /// If [enabled] is `false`, this property should be `null`.
   final T? value;
 
   /// Whether or not a user can select this menu item.
@@ -721,7 +721,7 @@ class DropdownMenuItem<T> extends _DropdownMenuItemContainer {
   /// and unselectable menu item, both should be `null`.
   /// If `true`, the user will be able to select this item.
   ///
-  /// Defaults to `true`
+  /// Defaults to `true`.
   final bool enabled;
 }
 
