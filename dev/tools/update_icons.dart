@@ -36,7 +36,7 @@ const Map<String, List<String>> _platformAdaptiveIdentifiers = <String, List<Str
 };
 
 // Rewrite certain Flutter IDs (reserved keywords, numbers) using prefix matching.
-const Map<String, String> _identifierRewrites = <String, String>{
+const Map<String, String> identifierRewrites = <String, String>{
   '1x': 'one_x',
   '360': 'threesixty',
   '2d': 'twod',
@@ -348,9 +348,9 @@ class _Icon {
     }
 
     flutterId = id;
-    for (final MapEntry<String, String> rewritePair in _identifierRewrites.entries) {
+    for (final MapEntry<String, String> rewritePair in identifierRewrites.entries) {
       if (id.startsWith(rewritePair.key)) {
-        flutterId = id.replaceFirst(rewritePair.key, _identifierRewrites[rewritePair.key]);
+        flutterId = id.replaceFirst(rewritePair.key, identifierRewrites[rewritePair.key]);
       }
     }
 
