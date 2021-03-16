@@ -1114,6 +1114,70 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   });
+
+  testWidgets('DatePickerDialog is state restorable', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        restorationScopeId: 'app',
+        home: _RestorableDatePickerDialogTestWidget(),
+      ),
+    );
+
+    expect(find.byType(DatePickerDialog), findsNothing);
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(DatePickerDialog), findsOneWidget);
+    final TestRestorationData restorationData = await tester.getRestorationData();
+
+    await tester.restartAndRestore();
+
+    expect(find.byType(DatePickerDialog), findsOneWidget);
+
+    // Tap on the barrier.
+    await tester.tapAt(const Offset(10.0, 10.0));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(DatePickerDialog), findsNothing);
+
+    await tester.restoreFrom(restorationData);
+    expect(find.byType(DatePickerDialog), findsOneWidget);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
+}
+
+class _RestorableDatePickerDialogTestWidget extends StatelessWidget {
+  static Route<DateTime> _datePickerRoute(
+    BuildContext context,
+    Object? arguments,
+  ) {
+    return DialogRoute<DateTime>(
+      context: context,
+      builder: (BuildContext context) {
+        return DatePickerDialog(
+          restorationId: 'date_picker_dialog',
+          initialEntryMode: DatePickerEntryMode.calendarOnly,
+          initialDate: DateTime(2021, 7, 25),
+          firstDate: DateTime(2021, 1, 1),
+          lastDate: DateTime(2022, 1, 1),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: OutlinedButton(
+          onPressed: () {
+            Navigator.of(context).restorablePush(_datePickerRoute);
+          },
+          child: const Text('X'),
+        ),
+      ),
+    );
+  }
 }
 
 class _DatePickerObserver extends NavigatorObserver {
