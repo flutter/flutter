@@ -65,15 +65,14 @@ class _ConstVisitor extends RecursiveVisitor<void> {
   @override
   void visitConstructorInvocation(ConstructorInvocation node) {
     final Class parentClass = node.target.parent as Class;
-    if (!_matches(parentClass)) {
-      super.visitConstructorInvocation(node);
-      return;
+    if (_matches(parentClass)) {
+      nonConstantLocations.add(<String, dynamic>{
+        'file': node.location.file.toString(),
+        'line': node.location.line,
+        'column': node.location.column,
+      });
     }
-    nonConstantLocations.add(<String, dynamic>{
-      'file': node.location.file.toString(),
-      'line': node.location.line,
-      'column': node.location.column,
-    });
+    super.visitConstructorInvocation(node);
   }
 
   @override
