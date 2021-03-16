@@ -19,34 +19,24 @@
 - (bool)testKeyEventsArePropagatedIfNotHandled;
 - (bool)testKeyEventsAreNotPropagatedIfHandled;
 - (bool)testFlagsChangedEventsArePropagatedIfNotHandled;
+
++ (void)respondFalseForSendEvent:(const FlutterKeyEvent&)event
+                        callback:(nullable FlutterKeyEventCallback)callback
+                        userData:(nullable void*)userData;
 @end
 
 namespace flutter::testing {
 
-// Returns a mock FlutterViewController that is able to work in environments
-// without a real pasteboard.
-id mockViewController(NSString* pasteboardString) {
-  NSString* fixtures = @(testing::GetFixturesPath());
-  FlutterDartProject* project = [[FlutterDartProject alloc]
-      initWithAssetsPath:fixtures
-             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
-  FlutterViewController* viewController = [[FlutterViewController alloc] initWithProject:project];
+namespace {
 
-  // Mock pasteboard so that this test will work in environments without a
-  // real pasteboard.
-  id pasteboardMock = OCMClassMock([NSPasteboard class]);
-  OCMExpect(  // NOLINT(google-objc-avoid-throwing-exception)
-      [pasteboardMock stringForType:[OCMArg any]])
-      .andDo(^(NSInvocation* invocation) {
-        NSString* returnValue = pasteboardString.length > 0 ? pasteboardString : nil;
-        [invocation setReturnValue:&returnValue];
-      });
-  id viewControllerMock = OCMPartialMock(viewController);
-  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
-      [viewControllerMock pasteboard])
-      .andReturn(pasteboardMock);
-  return viewControllerMock;
+NSResponder* mockResponder() {
+  NSResponder* mock = OCMStrictClassMock([NSResponder class]);
+  OCMStub([mock keyDown:[OCMArg any]]).andDo(nil);
+  OCMStub([mock keyUp:[OCMArg any]]).andDo(nil);
+  OCMStub([mock flagsChanged:[OCMArg any]]).andDo(nil);
+  return mock;
 }
+}  // namespace
 
 TEST(FlutterViewController, HasStringsWhenPasteboardEmpty) {
   // Mock FlutterViewController so that it behaves like the pasteboard is empty.
@@ -114,6 +104,11 @@ TEST(FlutterViewControllerTest, TestFlagsChangedEventsArePropagatedIfNotHandled)
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [engineMock binaryMessenger])
       .andReturn(binaryMessengerMock);
+  OCMStub([[engineMock ignoringNonObjectArgs] sendKeyEvent:FlutterKeyEvent {}
+                                                  callback:nil
+                                                  userData:nil])
+      .andCall([FlutterViewControllerTestObjC class],
+               @selector(respondFalseForSendEvent:callback:userData:));
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
                                                                                 nibName:@""
                                                                                  bundle:nil];
@@ -147,11 +142,16 @@ TEST(FlutterViewControllerTest, TestFlagsChangedEventsArePropagatedIfNotHandled)
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [engineMock binaryMessenger])
       .andReturn(binaryMessengerMock);
+  OCMStub([[engineMock ignoringNonObjectArgs] sendKeyEvent:FlutterKeyEvent {}
+                                                  callback:nil
+                                                  userData:nil])
+      .andCall([FlutterViewControllerTestObjC class],
+               @selector(respondFalseForSendEvent:callback:userData:));
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
                                                                                 nibName:@""
                                                                                  bundle:nil];
-  id responderMock = OCMClassMock([FlutterIntermediateKeyResponder class]);
-  [viewController addKeyResponder:responderMock];
+  id responderMock = flutter::testing::mockResponder();
+  viewController.nextResponder = responderMock;
   NSDictionary* expectedEvent = @{
     @"keymap" : @"macos",
     @"type" : @"keydown",
@@ -180,7 +180,7 @@ TEST(FlutterViewControllerTest, TestFlagsChangedEventsArePropagatedIfNotHandled)
   [viewController keyDown:event];
   @try {
     OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
-        [responderMock handleKeyDown:[OCMArg any]]);
+        [responderMock keyDown:[OCMArg any]]);
     OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
         [binaryMessengerMock sendOnChannel:@"flutter/keyevent"
                                    message:encodedKeyEvent
@@ -197,11 +197,16 @@ TEST(FlutterViewControllerTest, TestFlagsChangedEventsArePropagatedIfNotHandled)
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [engineMock binaryMessenger])
       .andReturn(binaryMessengerMock);
+  OCMStub([[engineMock ignoringNonObjectArgs] sendKeyEvent:FlutterKeyEvent {}
+                                                  callback:nil
+                                                  userData:nil])
+      .andCall([FlutterViewControllerTestObjC class],
+               @selector(respondFalseForSendEvent:callback:userData:));
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
                                                                                 nibName:@""
                                                                                  bundle:nil];
-  id responderMock = OCMClassMock([FlutterIntermediateKeyResponder class]);
-  [viewController addKeyResponder:responderMock];
+  id responderMock = flutter::testing::mockResponder();
+  viewController.nextResponder = responderMock;
   NSDictionary* expectedEvent = @{
     @"keymap" : @"macos",
     @"type" : @"keydown",
@@ -232,7 +237,8 @@ TEST(FlutterViewControllerTest, TestFlagsChangedEventsArePropagatedIfNotHandled)
         [binaryMessengerMock sendOnChannel:@"flutter/keyevent"
                                    message:encodedKeyEvent
                                binaryReply:[OCMArg any]]);
-  } @catch (...) {
+  } @catch (NSException* e) {
+    NSLog(@"%@", e.reason);
     return false;
   }
   return true;
@@ -244,11 +250,16 @@ TEST(FlutterViewControllerTest, TestFlagsChangedEventsArePropagatedIfNotHandled)
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [engineMock binaryMessenger])
       .andReturn(binaryMessengerMock);
+  OCMStub([[engineMock ignoringNonObjectArgs] sendKeyEvent:FlutterKeyEvent {}
+                                                  callback:nil
+                                                  userData:nil])
+      .andCall([FlutterViewControllerTestObjC class],
+               @selector(respondFalseForSendEvent:callback:userData:));
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
                                                                                 nibName:@""
                                                                                  bundle:nil];
-  id responderMock = OCMClassMock([FlutterIntermediateKeyResponder class]);
-  [viewController addKeyResponder:responderMock];
+  id responderMock = flutter::testing::mockResponder();
+  viewController.nextResponder = responderMock;
   NSDictionary* expectedEvent = @{
     @"keymap" : @"macos",
     @"type" : @"keydown",
@@ -277,7 +288,7 @@ TEST(FlutterViewControllerTest, TestFlagsChangedEventsArePropagatedIfNotHandled)
   [viewController keyDown:event];
   @try {
     OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
-        never(), [responderMock handleKeyDown:[OCMArg any]]);
+        never(), [responderMock keyDown:[OCMArg any]]);
     OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
         [binaryMessengerMock sendOnChannel:@"flutter/keyevent"
                                    message:encodedKeyEvent
@@ -286,6 +297,13 @@ TEST(FlutterViewControllerTest, TestFlagsChangedEventsArePropagatedIfNotHandled)
     return false;
   }
   return true;
+}
+
++ (void)respondFalseForSendEvent:(const FlutterKeyEvent&)event
+                        callback:(nullable FlutterKeyEventCallback)callback
+                        userData:(nullable void*)userData {
+  if (callback != nullptr)
+    callback(false, userData);
 }
 
 @end
