@@ -71,7 +71,7 @@ class Surface {
   }
 
   void _syncCacheBytes() {
-    if(_skiaCacheBytes != null) {
+    if (_skiaCacheBytes != null) {
       _grContext?.setResourceCacheLimitBytes(_skiaCacheBytes!);
     }
   }
@@ -130,12 +130,12 @@ class Surface {
 
     _currentDevicePixelRatio = window.devicePixelRatio;
     _currentSize = _currentSize == null
-      // First frame. Allocate a canvas of the exact size as the window. The
-      // window is frequently never resized, particularly on mobile, so using
-      // the exact size is most optimal.
-      ? size
-      // The window is growing. Overallocate to prevent frequent reallocations.
-      : size * 1.4;
+        // First frame. Allocate a canvas of the exact size as the window. The
+        // window is frequently never resized, particularly on mobile, so using
+        // the exact size is most optimal.
+        ? size
+        // The window is growing. Overallocate to prevent frequent reallocations.
+        : size * 1.4;
 
     _surface?.dispose();
     _surface = null;
@@ -199,9 +199,11 @@ class Surface {
     htmlElement.append(htmlCanvas);
 
     if (webGLVersion == -1) {
-      return _makeSoftwareCanvasSurface(htmlCanvas, 'WebGL support not detected');
+      return _makeSoftwareCanvasSurface(
+          htmlCanvas, 'WebGL support not detected');
     } else if (canvasKitForceCpuOnly) {
-      return _makeSoftwareCanvasSurface(htmlCanvas, 'CPU rendering forced by application');
+      return _makeSoftwareCanvasSurface(
+          htmlCanvas, 'CPU rendering forced by application');
     } else {
       // Try WebGL first.
       final int glContext = canvasKit.GetWebGLContext(
@@ -215,13 +217,15 @@ class Surface {
       );
 
       if (glContext == 0) {
-        return _makeSoftwareCanvasSurface(htmlCanvas, 'Failed to initialize WebGL context');
+        return _makeSoftwareCanvasSurface(
+            htmlCanvas, 'Failed to initialize WebGL context');
       }
 
       _grContext = canvasKit.MakeGrContext(glContext);
 
       if (_grContext == null) {
-        throw CanvasKitError('Failed to initialize CanvasKit. CanvasKit.MakeGrContext returned null.');
+        throw CanvasKitError(
+            'Failed to initialize CanvasKit. CanvasKit.MakeGrContext returned null.');
       }
 
       // Set the cache byte limit for this grContext, if not specified it will use
@@ -236,7 +240,8 @@ class Surface {
       );
 
       if (skSurface == null) {
-        return _makeSoftwareCanvasSurface(htmlCanvas, 'Failed to initialize WebGL surface');
+        return _makeSoftwareCanvasSurface(
+            htmlCanvas, 'Failed to initialize WebGL surface');
       }
 
       return CkSurface(skSurface, _grContext, glContext);
@@ -245,11 +250,10 @@ class Surface {
 
   static bool _didWarnAboutWebGlInitializationFailure = false;
 
-  CkSurface _makeSoftwareCanvasSurface(html.CanvasElement htmlCanvas, String reason) {
+  CkSurface _makeSoftwareCanvasSurface(
+      html.CanvasElement htmlCanvas, String reason) {
     if (!_didWarnAboutWebGlInitializationFailure) {
-      html.window.console.warn(
-        'WARNING: Falling back to CPU-only rendering. $reason.'
-      );
+      printWarning('WARNING: Falling back to CPU-only rendering. $reason.');
       _didWarnAboutWebGlInitializationFailure = true;
     }
     return CkSurface(

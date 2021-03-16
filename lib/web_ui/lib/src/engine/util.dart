@@ -595,3 +595,9 @@ int clampInt(int value, int min, int max) {
     return value;
   }
 }
+
+/// Prints a warning message to the console.
+///
+/// This function can be overridden in tests. This could be useful, for example,
+/// to verify that warnings are printed under certain circumstances.
+void Function(String) printWarning = html.window.console.warn;

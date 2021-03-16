@@ -572,7 +572,7 @@ class CkParagraph extends ManagedSkiaObject<SkParagraph>
     try {
       skiaObject.layout(constraints.width);
     } catch (e) {
-      html.window.console.warn('CanvasKit threw an exception while laying '
+      printWarning('CanvasKit threw an exception while laying '
           'out the paragraph. The font was "${_paragraphStyle._fontFamily}". '
           'Exception:\n$e');
       rethrow;
@@ -775,7 +775,7 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
       List<SkTypeface>? typefacesForFamily =
           skiaFontCollection.familyToTypefaceMap[font];
       if (typefacesForFamily == null) {
-        html.window.console.warn('A fallback font was registered but we '
+        printWarning('A fallback font was registered but we '
             'cannot retrieve the typeface for it.');
         continue;
       }
@@ -864,7 +864,7 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
     if (_styleStack.length <= 1) {
       // The top-level text style is paragraph-level. We don't pop it off.
       if (assertionsEnabled) {
-        html.window.console.warn(
+        printWarning(
           'Cannot pop text style in ParagraphBuilder. '
           'Already popped all text styles from the style stack.',
         );
