@@ -448,7 +448,7 @@ class DatePickerDialog extends StatefulWidget {
 
 class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMixin {
   late final RestorableDateTime _selectedDate = RestorableDateTime(widget.initialDate);
-  late final RestorableInt _entryMode = RestorableInt(widget.initialEntryMode.index);
+  late final _RestorableDatePickerEntryMode _entryMode = _RestorableDatePickerEntryMode(widget.initialEntryMode);
   final RestorableBool _autoValidate = RestorableBool(false);
 
   @override
@@ -465,7 +465,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   void _handleOk() {
-    if (DatePickerEntryMode.values[_entryMode.value] == DatePickerEntryMode.input) {
+    if (_entryMode.value == DatePickerEntryMode.input) {
       final FormState form = _formKey.currentState!;
       if (!form.validate()) {
         setState(() => _autoValidate.value = true);
@@ -482,14 +482,14 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
 
   void _handleEntryModeToggle() {
     setState(() {
-      switch (DatePickerEntryMode.values[_entryMode.value]) {
+      switch (_entryMode.value) {
         case DatePickerEntryMode.calendar:
           _autoValidate.value = false;
-          _entryMode.value = DatePickerEntryMode.input.index;
+          _entryMode.value = DatePickerEntryMode.input;
           break;
         case DatePickerEntryMode.input:
           _formKey.currentState!.save();
-          _entryMode.value = DatePickerEntryMode.calendar.index;
+          _entryMode.value = DatePickerEntryMode.calendar;
           break;
         case DatePickerEntryMode.calendarOnly:
         case DatePickerEntryMode.inputOnly:
@@ -507,7 +507,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
 
   Size _dialogSize(BuildContext context) {
     final Orientation orientation = MediaQuery.of(context).orientation;
-    switch (DatePickerEntryMode.values[_entryMode.value]) {
+    switch (_entryMode.value) {
       case DatePickerEntryMode.calendar:
       case DatePickerEntryMode.calendarOnly:
         switch (orientation) {
@@ -618,7 +618,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
 
     final Widget picker;
     final Widget? entryModeButton;
-    switch (DatePickerEntryMode.values[_entryMode.value]) {
+    switch (_entryMode.value) {
       case DatePickerEntryMode.calendar:
         picker = calendarDatePicker();
         entryModeButton = IconButton(
@@ -708,6 +708,32 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
       clipBehavior: Clip.antiAlias,
     );
   }
+}
+
+// A restorable [DatePickerEntryMode] value.
+//
+// This serializes each entry as a unique `int` value.
+class _RestorableDatePickerEntryMode extends RestorableValue<DatePickerEntryMode> {
+  _RestorableDatePickerEntryMode(
+    DatePickerEntryMode defaultValue,
+  ) : _defaultValue = defaultValue;
+
+  final DatePickerEntryMode _defaultValue;
+
+  @override
+  DatePickerEntryMode createDefaultValue() => _defaultValue;
+
+  @override
+  void didUpdateValue(DatePickerEntryMode? oldValue) {
+    assert(debugIsSerializableForRestoration(value.index));
+    notifyListeners();
+  }
+
+  @override
+  DatePickerEntryMode fromPrimitives(Object? data) => DatePickerEntryMode.values[data! as int];
+
+  @override
+  Object? toPrimitives() => value.index;
 }
 
 /// Re-usable widget that displays the selected date (in large font) and the
