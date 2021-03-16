@@ -204,7 +204,7 @@ void main(List<String> args) {
   if (argResults[_dryRunOption] as bool) {
     stdout.write(newIconData);
   } else {
-    stderr.write('\nWriting to ${iconClassFile.path}.');
+    stderr.writeln('\nWriting to ${iconClassFile.path}.');
     iconClassFile.writeAsStringSync(newIconData);
     _overwriteOldCodepoints(newCodepointsFile, oldCodepointsFile);
   }
