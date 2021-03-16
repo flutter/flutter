@@ -33,6 +33,7 @@ task:
   gke_container:
     dockerfile: "dev/ci/docker_linux/Dockerfile" 
     builder_image_name: docker-builder # gce vm image
+    image_project: flutter-cirrus
     cluster_name: build-32-cluster
     zone: us-central1-a
     namespace: default
