@@ -1327,19 +1327,12 @@ void main() {
     expect(items.take(8), orderedEquals(<int>[0, 1, 2, 3, 4, 5, 6, 7]));
   });
 
-  testWidgets('ReorderableListView thows an error when key is not passed to its children',(WidgetTester tester) async {
-    final Widget reorderableListView = ReorderableListView(
-      children: const <Widget>[
-        SizedBox(
-          child: Text('A'),
-        ),
-        SizedBox(
-          child: Text('B'),
-        ),
-        SizedBox(
-          child: Text('C'),
-        ),
-      ],
+  testWidgets('ReorderableListView throws an error when key is not passed to its children', (WidgetTester tester) async {
+    final Widget reorderableListView = ReorderableListView.builder(
+      itemBuilder: (BuildContext context, int index) {
+        return SizedBox(child: Text('Item $index'));
+      },
+      itemCount: 3,
       onReorder: (int oldIndex, int newIndex) { },
     );
     await tester.pumpWidget(MaterialApp(
