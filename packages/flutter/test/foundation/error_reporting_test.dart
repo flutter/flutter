@@ -3,9 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
-
 import 'package:flutter/foundation.dart';
-import 'package:flutter_test/flutter_test.dart';
+import '../flutter_test_alternative.dart';
 
 Object getAssertionErrorWithMessage() {
   try {

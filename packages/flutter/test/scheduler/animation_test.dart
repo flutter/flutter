@@ -5,7 +5,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_test/flutter_test.dart';
+
+import '../flutter_test_alternative.dart';
 
 import 'scheduler_tester.dart';
 

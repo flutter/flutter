@@ -8,8 +8,8 @@ import 'dart:ui' show PointerChange;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_test/flutter_test.dart';
 
+import '../flutter_test_alternative.dart';
 import 'mouse_tracker_test_utils.dart';
 
 typedef MethodCallHandler = Future<dynamic> Function(MethodCall call);
