@@ -52,7 +52,7 @@ class PersistedPlatformView extends PersistedLeafSurface {
     if (platformView != null) {
       _shadowRoot.append(platformView);
     } else {
-      html.window.console.warn('No platform view created for id $viewId');
+      printWarning('No platform view created for id $viewId');
     }
     return element;
   }
@@ -93,7 +93,10 @@ class PersistedPlatformView extends PersistedLeafSurface {
 
   @override
   void update(PersistedPlatformView oldSurface) {
-    assert(viewId == oldSurface.viewId, 'PersistedPlatformView with different viewId should never be updated. Check the canUpdateAsMatch method.',);
+    assert(
+      viewId == oldSurface.viewId,
+      'PersistedPlatformView with different viewId should never be updated. Check the canUpdateAsMatch method.',
+    );
     super.update(oldSurface);
     // Only update if the view has been resized
     if (dx != oldSurface.dx ||

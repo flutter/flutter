@@ -180,7 +180,7 @@ class CkImage implements ui.Image, StackTraceDebugger {
         colorSpace: SkColorSpaceSRGB,
       );
       if (originalBytes == null) {
-        html.window.console.warn('Unable to encode image to bytes. We will not '
+        printWarning('Unable to encode image to bytes. We will not '
             'be able to resurrect it once it has been garbage collected.');
         return;
       }

@@ -1652,7 +1652,7 @@ class SkFont {
 class SkFontMgr {
   external String? getFamilyName(int fontId);
   external void delete();
-  external SkTypeface MakeTypefaceFromData(Uint8List font);
+  external SkTypeface? MakeTypefaceFromData(Uint8List font);
 }
 
 @JS('window.flutterCanvasKit.TypefaceFontProvider')
