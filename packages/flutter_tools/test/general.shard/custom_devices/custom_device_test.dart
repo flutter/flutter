@@ -228,7 +228,7 @@ void main() {
     expect(discoveredDevices, hasLength(1));
     expect(pingCommandWasExecuted, true);
   });
-  
+
   testWithoutContext('CustomDevices.discoverDevices doesnt report any devices when ping command fails', () async {
     final MemoryFileSystem fs = MemoryFileSystem.test();
     final Directory dir = fs.directory('custom_devices_config_dir');
