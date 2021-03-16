@@ -11,7 +11,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 
-// The test_api package is not for general use... it's literally for our use.
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package;
 
@@ -26,26 +25,13 @@ import 'test_compat.dart';
 import 'test_pointer.dart';
 import 'test_text_input.dart';
 
-// Keep users from needing multiple imports to test semantics.
+/// Keep users from needing multiple imports to test semantics.
 export 'package:flutter/rendering.dart' show SemanticsHandle;
 
-// We re-export the test package minus some features that we reimplement.
-//
-// Specifically:
-//
-//  - test, group, setUpAll, tearDownAll, setUp, tearDown, and expect would
-//    conflict with our own implementations in test_compat.dart. This handles
-//    setting up a declarer when one is not defined, which can happen when a
-//    test is executed via `flutter run`.
-//
-//  - expect is reimplemented below, to catch incorrect async usage.
-//
-//  - isInstanceOf is reimplemented in matchers.dart because we don't want to
-//    mark it as deprecated (ours is just a method, not a class).
-//
-// The test_api package has a deprecation warning to discourage direct use but
-// that doesn't apply here.
 // ignore: deprecated_member_use
+/// Hide these imports so that they do not conflict with our own implementations in
+/// test_compat.dart. This handles setting up a declarer when one is not defined, which
+/// can happen when a test is executed via flutter_run.
 export 'package:test_api/test_api.dart' hide
   test,
   group,
@@ -53,8 +39,9 @@ export 'package:test_api/test_api.dart' hide
   tearDownAll,
   setUp,
   tearDown,
-  expect,
-  isInstanceOf;
+  expect, // we have our own wrapper below
+  TypeMatcher, // matcher's TypeMatcher conflicts with the one in the Flutter framework
+  isInstanceOf; // we have our own wrapper in matchers.dart
 
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
 typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);

@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/painting.dart';
-import 'package:flutter_test/flutter_test.dart';
+
+import '../flutter_test_alternative.dart';
 
 void main() {
   test('applyBoxFit', () {

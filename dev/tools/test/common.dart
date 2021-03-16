@@ -4,15 +4,21 @@
 
 import 'dart:io';
 
-import 'package:args/args.dart';
-import 'package:dev_tools/stdio.dart';
 import 'package:file/file.dart';
-import 'package:test/test.dart';
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test/test.dart' as test_package show TypeMatcher;
 
-export 'package:test/test.dart' hide isInstanceOf;
+import 'package:dev_tools/stdio.dart';
+
+import 'package:args/args.dart';
+
+export 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
+
+// Defines a 'package:test' shim.
+// TODO(ianh): Remove this file once https://github.com/dart-lang/matcher/issues/98 is fixed
 
 /// A matcher that compares the type of the actual value to the type argument T.
-TypeMatcher<T> isInstanceOf<T>() => isA<T>();
+test_package.TypeMatcher<T> isInstanceOf<T>() => isA<T>();
 
 void tryToDelete(Directory directory) {
   // This should not be necessary, but it turns out that

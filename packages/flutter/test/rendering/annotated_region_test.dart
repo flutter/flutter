@@ -4,7 +4,7 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart';
+import '../flutter_test_alternative.dart';
 
 void main() {
   group('$AnnotatedRegion find', () {

@@ -16,7 +16,10 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/localizations/gen_l10n.dart';
 import 'package:flutter_tools/src/localizations/gen_l10n_types.dart';
 import 'package:flutter_tools/src/localizations/localizations_utils.dart';
-import 'package:test/test.dart';
+
+import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf; // ignore: deprecated_member_use
+// ignore: deprecated_member_use
+export 'package:test_core/test_core.dart' hide TypeMatcher, isInstanceOf, test; // Defines a 'package:test' shim.
 
 final String defaultL10nPathString = globals.fs.path.join('lib', 'l10n');
 final String syntheticPackagePath = globals.fs.path.join('.dart_tool', 'flutter_gen');

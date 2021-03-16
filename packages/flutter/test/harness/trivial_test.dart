@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
+import '../flutter_test_alternative.dart';
 
 void main() {
   test('should pass', () {

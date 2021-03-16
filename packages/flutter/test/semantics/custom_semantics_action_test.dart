@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/semantics.dart';
-import 'package:flutter_test/flutter_test.dart';
+
+import '../flutter_test_alternative.dart';
 
 void main() {
   group(CustomSemanticsAction, () {

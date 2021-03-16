@@ -32,6 +32,7 @@ To add a private test, add a manifest file of the form (assuming
   ],
   "pubspec": "my_private_test.pubspec.yaml",
   "deps": [
+    "test/flutter_test_alternative.dart",
     "lib/src/subpackage/my_private_implementation.dart",
   ]
 }
