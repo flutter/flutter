@@ -354,8 +354,9 @@ class _TableElement extends RenderObjectElement {
 
   @override
   void mount(Element? parent, Object? newSlot) {
-    super.mount(parent, newSlot);
+    assert(!_doingMountOrUpdate);
     _doingMountOrUpdate = true;
+    super.mount(parent, newSlot);
     int rowIndex = -1;
     _children = widget.children.map<_TableElementRow>((TableRow row) {
       int columnIndex = 0;
@@ -368,8 +369,9 @@ class _TableElement extends RenderObjectElement {
         }).toList(growable: false),
       );
     }).toList(growable: false);
-    _doingMountOrUpdate = false;
     _updateRenderObjectChildren();
+    assert(_doingMountOrUpdate);
+    _doingMountOrUpdate = false;
   }
 
   @override
@@ -383,13 +385,13 @@ class _TableElement extends RenderObjectElement {
   }
 
   @override
-  void moveRenderObjectChild(RenderBox child, Object? oldSlot, Object? newSlot) {
+  void moveRenderObjectChild(RenderBox child, _TableSlot oldSlot, _TableSlot newSlot) {
     assert(_doingMountOrUpdate);
     // Child gets moved at the end of [update] in [_updateRenderObjectChildren].
   }
 
   @override
-  void removeRenderObjectChild(RenderBox child, Object? slot) {
+  void removeRenderObjectChild(RenderBox child, _TableSlot slot) {
     final TableCellParentData childParentData = child.parentData! as TableCellParentData;
     renderObject.setChild(childParentData.x!, childParentData.y!, null);
   }
@@ -398,6 +400,7 @@ class _TableElement extends RenderObjectElement {
 
   @override
   void update(Table newWidget) {
+    assert(!_doingMountOrUpdate);
     _doingMountOrUpdate = true;
     final Map<LocalKey, List<Element>> oldKeyedRows = <LocalKey, List<Element>>{};
     for (final _TableElementRow row in _children) {
@@ -434,11 +437,12 @@ class _TableElement extends RenderObjectElement {
       updateChildren(oldChildren, const <Widget>[], forgottenChildren: _forgottenChildren);
 
     _children = newChildren;
-    _doingMountOrUpdate = false;
     _updateRenderObjectChildren();
     _forgottenChildren.clear();
     super.update(newWidget);
     assert(widget == newWidget);
+    assert(_doingMountOrUpdate);
+    _doingMountOrUpdate = false;
   }
 
   void _updateRenderObjectChildren() {

@@ -5539,8 +5539,8 @@ abstract class RenderObjectElement extends Element {
 
     Object? slotFor(int newChildIndex, Element? previousChild) {
       return slots != null
-          ? slots[newChildIndex]
-          : IndexedSlot<Element?>(newChildIndex, previousChild);
+        ? slots[newChildIndex]
+        : IndexedSlot<Element?>(newChildIndex, previousChild);
     }
 
     // This attempts to diff the new child list (newWidgets) with
