@@ -41,7 +41,7 @@ class CreateCommand extends CreateBase {
       valueHelp: 'type',
       allowedHelp: <String, String>{
         flutterProjectTypeToString(FlutterProjectType.app): '(default) Generate a Flutter application.',
-        flutterProjectTypeToString(FlutterProjectType.list_detail_app): 'Generate a List View / Detail View Flutter '
+        flutterProjectTypeToString(FlutterProjectType.skeleton): 'Generate a List View / Detail View Flutter '
             'application that follows community best practices',
         flutterProjectTypeToString(FlutterProjectType.package): 'Generate a shareable Flutter project containing modular '
             'Dart code.',
@@ -268,8 +268,8 @@ class CreateCommand extends CreateBase {
       case FlutterProjectType.app:
         generatedFileCount += await generateApp('app', relativeDir, templateContext, overwrite: overwrite);
         break;
-      case FlutterProjectType.list_detail_app:
-        generatedFileCount += await generateApp('list_detail_app', relativeDir, templateContext, overwrite: overwrite);
+      case FlutterProjectType.skeleton:
+        generatedFileCount += await generateApp('skeleton', relativeDir, templateContext, overwrite: overwrite);
         break;
       case FlutterProjectType.module:
         generatedFileCount += await _generateModule(relativeDir, templateContext, overwrite: overwrite);

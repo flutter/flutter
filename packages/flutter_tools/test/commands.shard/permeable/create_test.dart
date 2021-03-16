@@ -140,7 +140,7 @@ void main() {
   testUsingContext('can create a list view/detail view app', () async {
     await _createAndAnalyzeProject(
       projectDir,
-      <String>['-t', 'list_detail_app', '-i', 'objc', '-a', 'java', '--implementation-tests'],
+      <String>['-t', 'skeleton', '-i', 'objc', '-a', 'java', '--implementation-tests'],
       <String>[
       'analysis_options.yaml',
         'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
