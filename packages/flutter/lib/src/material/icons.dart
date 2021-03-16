@@ -22123,4 +22123,3 @@ class Icons {
   static const IconData zoom_out_outlined = IconData(0xf4de, fontFamily: 'MaterialIcons');
   // END GENERATED ICONS
 }
-
