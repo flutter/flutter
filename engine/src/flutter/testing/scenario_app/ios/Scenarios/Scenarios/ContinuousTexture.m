@@ -34,9 +34,7 @@
   CVReturn status = CVPixelBufferCreate(kCFAllocatorDefault, 200, 200, kCVPixelFormatType_32BGRA,
                                         (__bridge CFDictionaryRef)options, &pxbuffer);
 
-  NSParameterAssert(status == kCVReturnSuccess && pxbuffer != NULL);
-
-  CVPixelBufferLockBaseAddress(pxbuffer, 0);
+  NSAssert(status == kCVReturnSuccess && pxbuffer != NULL, @"Failed to create pixel buffer.");
   return pxbuffer;
 }
 
