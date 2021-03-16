@@ -60,11 +60,18 @@ class FontFallbackData {
   final Map<String, int> fontFallbackCounts = <String, int>{};
 
   void registerFallbackFont(String family, Uint8List bytes) {
+    final SkTypeface? typeface =
+        canvasKit.FontMgr.RefDefault().MakeTypefaceFromData(bytes);
+    if (typeface == null) {
+      printWarning('Failed to parse fallback font $family as a font.');
+      return;
+    }
     fontFallbackCounts.putIfAbsent(family, () => 0);
     int fontFallbackTag = fontFallbackCounts[family]!;
     fontFallbackCounts[family] = fontFallbackCounts[family]! + 1;
     String countedFamily = '$family $fontFallbackTag';
-    registeredFallbackFonts.add(_RegisteredFont(bytes, countedFamily));
+    registeredFallbackFonts
+        .add(_RegisteredFont(bytes, countedFamily, typeface));
     globalFontFallbacks.add(countedFamily);
   }
 }
@@ -123,7 +130,7 @@ Future<void> findFontsForMissingCodeunits(List<int> codeUnits) async {
       _registerSymbolsAndEmoji();
     } else {
       if (!notoDownloadQueue.isPending) {
-        html.window.console.log(
+        printWarning(
             'Could not find a set of Noto fonts to display all missing '
             'characters. Please add a font asset for the missing characters.'
             ' See: https://flutter.dev/docs/cookbook/design/fonts');
@@ -179,7 +186,7 @@ _ResolvedNotoFont? _makeResolvedNotoFontFromCss(String css, String name) {
       if (line.startsWith('  src:')) {
         int urlStart = line.indexOf('url(');
         if (urlStart == -1) {
-          html.window.console.warn('Unable to resolve Noto font URL: $line');
+          printWarning('Unable to resolve Noto font URL: $line');
           return null;
         }
         int urlEnd = line.indexOf(')');
@@ -207,7 +214,7 @@ _ResolvedNotoFont? _makeResolvedNotoFontFromCss(String css, String name) {
         }
       } else if (line == '}') {
         if (fontFaceUrl == null || fontFaceUnicodeRanges == null) {
-          html.window.console.warn('Unable to parse Google Fonts CSS: $css');
+          printWarning('Unable to parse Google Fonts CSS: $css');
           return null;
         }
         subsets
@@ -220,7 +227,7 @@ _ResolvedNotoFont? _makeResolvedNotoFontFromCss(String css, String name) {
   }
 
   if (resolvingFontFace) {
-    html.window.console.warn('Unable to parse Google Fonts CSS: $css');
+    printWarning('Unable to parse Google Fonts CSS: $css');
     return null;
   }
 
@@ -233,7 +240,7 @@ _ResolvedNotoFont? _makeResolvedNotoFontFromCss(String css, String name) {
   }
 
   if (rangesMap.isEmpty) {
-    html.window.console.warn('Parsed Google Fonts CSS was empty: $css');
+    printWarning('Parsed Google Fonts CSS was empty: $css');
     return null;
   }
 
@@ -267,14 +274,14 @@ Future<void> _registerSymbolsAndEmoji() async {
       if (line.startsWith('  src:')) {
         int urlStart = line.indexOf('url(');
         if (urlStart == -1) {
-          html.window.console.warn('Unable to resolve Noto font URL: $line');
+          printWarning('Unable to resolve Noto font URL: $line');
           return null;
         }
         int urlEnd = line.indexOf(')');
         return line.substring(urlStart + 4, urlEnd);
       }
     }
-    html.window.console.warn('Unable to determine URL for Noto font');
+    printWarning('Unable to determine URL for Noto font');
     return null;
   }
 
@@ -285,14 +292,14 @@ Future<void> _registerSymbolsAndEmoji() async {
     notoDownloadQueue.add(_ResolvedNotoSubset(
         symbolsFontUrl, 'Noto Sans Symbols', const <CodeunitRange>[]));
   } else {
-    html.window.console.warn('Error parsing CSS for Noto Symbols font.');
+    printWarning('Error parsing CSS for Noto Symbols font.');
   }
 
   if (emojiFontUrl != null) {
     notoDownloadQueue.add(_ResolvedNotoSubset(
         emojiFontUrl, 'Noto Color Emoji Compat', const <CodeunitRange>[]));
   } else {
-    html.window.console.warn('Error parsing CSS for Noto Emoji font.');
+    printWarning('Error parsing CSS for Noto Emoji font.');
   }
 }
 
@@ -724,9 +731,8 @@ class FallbackFontDownloadQueue {
               debugDescription: subset.family);
         } catch (e) {
           pendingSubsets.remove(subset.url);
-          html.window.console
-              .warn('Failed to load font ${subset.family} at ${subset.url}');
-          html.window.console.warn(e);
+          printWarning('Failed to load font ${subset.family} at ${subset.url}');
+          printWarning(e.toString());
           return;
         }
         downloadedSubsets.add(subset);

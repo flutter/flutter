@@ -61,14 +61,13 @@ class AssetManager {
       final html.EventTarget? target = e.target;
       if (target is html.HttpRequest) {
         if (target.status == 404 && asset == 'AssetManifest.json') {
-          html.window.console
-              .warn('Asset manifest does not exist at `$url` – ignoring.');
+          printWarning('Asset manifest does not exist at `$url` – ignoring.');
           return Uint8List.fromList(utf8.encode('{}')).buffer.asByteData();
         }
         throw AssetManagerException(url, target.status!);
       }
 
-      html.window.console.warn('Caught ProgressEvent with target: $target');
+      printWarning('Caught ProgressEvent with target: $target');
       rethrow;
     }
   }

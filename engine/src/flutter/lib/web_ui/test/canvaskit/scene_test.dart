@@ -16,7 +16,7 @@ void main() {
 }
 
 void testMain() {
-  group('LayerScene', () {
+  group('$LayerScene', () {
     setUpAll(() async {
       await ui.webOnlyInitializePlatform();
     });
