@@ -461,12 +461,12 @@ abstract class FloatingActionButtonLocation {
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     appBar: AppBar(
-///       title: Text('Home page'),
+///       title: const Text('Home page'),
 ///     ),
 ///     floatingActionButton: FloatingActionButton(
 ///       onPressed: () { print('FAB pressed.'); },
 ///       tooltip: 'Increment',
-///       child: Icon(Icons.add),
+///       child: const Icon(Icons.add),
 ///     ),
 ///     floatingActionButtonLocation: AlmostEndFloatFabLocation(),
 ///   );

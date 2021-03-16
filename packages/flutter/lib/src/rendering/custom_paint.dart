@@ -73,12 +73,12 @@ typedef SemanticsBuilderCallback = List<CustomPainterSemantics> Function(Size si
 /// class Sky extends CustomPainter {
 ///   @override
 ///   void paint(Canvas canvas, Size size) {
-///     var rect = Offset.zero & size;
-///     var gradient = RadialGradient(
-///       center: const Alignment(0.7, -0.6),
+///     final Rect rect = Offset.zero & size;
+///     const RadialGradient gradient = RadialGradient(
+///       center: Alignment(0.7, -0.6),
 ///       radius: 0.2,
-///       colors: [const Color(0xFFFFFF00), const Color(0xFF0099FF)],
-///       stops: [0.4, 1.0],
+///       colors: <Color>[Color(0xFFFFFF00), Color(0xFF0099FF)],
+///       stops: <double>[0.4, 1.0],
 ///     );
 ///     canvas.drawRect(
 ///       rect,
@@ -93,13 +93,13 @@ typedef SemanticsBuilderCallback = List<CustomPainterSemantics> Function(Size si
 ///       // with the label "Sun". When text to speech feature is enabled on the
 ///       // device, a user will be able to locate the sun on this picture by
 ///       // touch.
-///       var rect = Offset.zero & size;
-///       var width = size.shortestSide * 0.4;
+///       Rect rect = Offset.zero & size;
+///       final double width = size.shortestSide * 0.4;
 ///       rect = const Alignment(0.8, -0.9).inscribe(Size(width, width), rect);
-///       return [
+///       return <CustomPainterSemantics>[
 ///         CustomPainterSemantics(
 ///           rect: rect,
-///           properties: SemanticsProperties(
+///           properties: const SemanticsProperties(
 ///             label: 'Sun',
 ///             textDirection: TextDirection.ltr,
 ///           ),

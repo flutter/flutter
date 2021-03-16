@@ -130,6 +130,7 @@ class WebTestCompiler {
       processManager: _processManager,
       logger: _logger,
       platform: _platform,
+      fileSystem: _fileSystem,
     );
 
     final CompilerOutput output = await residentCompiler.recompile(

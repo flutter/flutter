@@ -57,6 +57,7 @@ import 'text_form_field.dart';
 /// ```
 ///
 /// ```dart
+/// @immutable
 /// class User {
 ///   const User({
 ///     required this.email,
@@ -73,8 +74,9 @@ import 'text_form_field.dart';
 ///
 ///   @override
 ///   bool operator ==(Object other) {
-///     if (other.runtimeType != runtimeType)
+///     if (other.runtimeType != runtimeType) {
 ///       return false;
+///     }
 ///     return other is User
 ///         && other.name == name
 ///         && other.email == email;
@@ -85,9 +87,9 @@ import 'text_form_field.dart';
 /// }
 ///
 /// class AutocompleteBasicUserExample extends StatelessWidget {
-///   AutocompleteBasicUserExample({Key? key}) : super(key: key);
+///   const AutocompleteBasicUserExample({Key? key}) : super(key: key);
 ///
-///   static final List<User> _userOptions = <User>[
+///   static const List<User> _userOptions = <User>[
 ///     User(name: 'Alice', email: 'alice@example.com'),
 ///     User(name: 'Bob', email: 'bob@example.com'),
 ///     User(name: 'Charlie', email: 'charlie123@gmail.com'),

@@ -115,7 +115,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///           icon: const Icon(Icons.navigate_next),
 ///           tooltip: 'Go to the next page',
 ///           onPressed: () {
-///             Navigator.push(context, MaterialPageRoute(
+///             Navigator.push(context, MaterialPageRoute<void>(
 ///               builder: (BuildContext context) {
 ///                 return Scaffold(
 ///                   appBar: AppBar(
@@ -317,10 +317,10 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///     primary: true,
   ///     slivers: <Widget>[
   ///       SliverAppBar(
-  ///         title: Text('Hello World'),
+  ///         title: const Text('Hello World'),
   ///         actions: <Widget>[
   ///           IconButton(
-  ///             icon: Icon(Icons.shopping_cart),
+  ///             icon: const Icon(Icons.shopping_cart),
   ///             tooltip: 'Open shopping cart',
   ///             onPressed: () {
   ///               // handle the press
@@ -1273,7 +1273,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 /// ```
 ///
 /// ```dart
-/// void main() => runApp(MyApp());
+/// void main() => runApp(const MyApp());
 ///
 /// class MyApp extends StatefulWidget {
 ///   const MyApp({Key? key}) : super(key: key);
@@ -1296,20 +1296,20 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///         body: CustomScrollView(
 ///           slivers: <Widget>[
 ///             SliverAppBar(
-///               pinned: this._pinned,
-///               snap: this._snap,
-///               floating: this._floating,
+///               pinned: _pinned,
+///               snap: _snap,
+///               floating: _floating,
 ///               expandedHeight: 160.0,
-///               flexibleSpace: FlexibleSpaceBar(
-///                 title: const Text("SliverAppBar"),
+///               flexibleSpace: const FlexibleSpaceBar(
+///                 title: Text('SliverAppBar'),
 ///                 background: FlutterLogo(),
 ///               ),
 ///             ),
-///             SliverToBoxAdapter(
+///             const SliverToBoxAdapter(
 ///               child: Center(
-///                 child: Container(
+///                 child: SizedBox(
 ///                   height: 2000,
-///                   child: const Text("Scroll to see SliverAppBar in effect ."),
+///                   child: const Text('Scroll to see SliverAppBar in effect .'),
 ///                 ),
 ///               ),
 ///             ),
@@ -1325,10 +1325,10 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///                   Switch(
 ///                     onChanged: (bool val) {
 ///                       setState(() {
-///                         this._pinned = val;
+///                         _pinned = val;
 ///                       });
 ///                     },
-///                     value: this._pinned,
+///                     value: _pinned,
 ///                   ),
 ///                 ],
 ///               ),
@@ -1338,12 +1338,12 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///                   Switch(
 ///                     onChanged: (bool val) {
 ///                       setState(() {
-///                         this._snap = val;
+///                         _snap = val;
 ///                         //Snapping only applies when the app bar is floating.
-///                         this._floating = this._floating || val;
+///                         _floating = _floating || val;
 ///                       });
 ///                     },
-///                     value: this._snap,
+///                     value: _snap,
 ///                   ),
 ///                 ],
 ///               ),
@@ -1353,15 +1353,15 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///                   Switch(
 ///                     onChanged: (bool val) {
 ///                       setState(() {
-///                         this._floating = val;
-///                         if (this._snap == true) {
-///                           if (this._floating != true) {
-///                             this._snap = false;
+///                         _floating = val;
+///                         if (_snap == true) {
+///                           if (_floating != true) {
+///                             _snap = false;
 ///                           }
 ///                         }
 ///                       });
 ///                     },
-///                     value: this._floating,
+///                     value: _floating,
 ///                   ),
 ///                 ],
 ///               ),

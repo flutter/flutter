@@ -28,7 +28,12 @@ Future<String> capture(AsyncVoidCallback callback, { int exitCode = 0 }) async {
   } finally {
     print = oldPrint;
   }
-  return buffer.toString();
+  if (stdout.supportsAnsiEscapes) {
+    // Remove ANSI escapes when this test is running on a terminal.
+    return buffer.toString().replaceAll(RegExp(r'(\x9B|\x1B\[)[0-?]{1,3}[ -/]*[@-~]'), '');
+  } else {
+    return buffer.toString();
+  }
 }
 
 void main() {
