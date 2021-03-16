@@ -221,6 +221,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
     this.value,
     this.enabled = true,
     this.height = kMinInteractiveDimension,
+    this.padding = const EdgeInsets.symmetric(horizontal: _kMenuHorizontalPadding),
     this.textStyle,
     this.mouseCursor,
     required this.child,
@@ -242,6 +243,11 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// Defaults to [kMinInteractiveDimension] pixels.
   @override
   final double height;
+
+  /// The padding around the item's child. The entire padded child will react to input gestures.
+  ///
+  /// This property must not be null. It defaults to 16.0 padding on horizontal sides.
+  final EdgeInsetsGeometry padding;
 
   /// The text style of the popup menu item.
   ///
@@ -327,7 +333,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
       child: Container(
         alignment: AlignmentDirectional.centerStart,
         constraints: BoxConstraints(minHeight: widget.height),
-        padding: const EdgeInsets.symmetric(horizontal: _kMenuHorizontalPadding),
+        padding: widget.padding,
         child: buildChild(),
       ),
     );

@@ -1802,6 +1802,52 @@ void main() {
     );
   });
 
+  testWidgets('PopupMenuItem padding', (WidgetTester tester) async {
+    final Key firstKey = UniqueKey();
+    final Key secondKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: <Widget>[
+              SizedBox(
+                width: 100,
+                height: 100,
+                child: PopupMenuItem<String>(
+                  value: 'value',
+                  child: SizedBox(
+                    key: firstKey,
+                    width: 100,
+                    height: 100,
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 100,
+                height: 100,
+                child: PopupMenuItem<String>(
+                  value: 'value',
+                  padding: const EdgeInsets.all(8),
+                  child: SizedBox(
+                    key: secondKey,
+                    width: 100,
+                    height: 100,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox child = tester.renderObject(find.byKey(firstKey));
+    expect(child.size, const Size(100 - 16 * 2, 100));
+
+    final RenderBox child2 = tester.renderObject(find.byKey(secondKey));
+    expect(child2.size, const Size(100 - 8 * 2, 100 - 8 * 2));
+  });
+
   group('feedback', () {
     late FeedbackTester feedback;
 
