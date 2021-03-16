@@ -252,6 +252,16 @@ class MemoryIOSink implements IOSink {
 
   @override
   Future<void> flush() async { }
+
+  void clear() {
+    writes.clear();
+  }
+
+  String getAndClear() {
+    final String result = utf8.decode(writes.expand((List<int> l) => l).toList());
+    clear();
+    return result;
+  }
 }
 
 class MemoryStdout extends MemoryIOSink implements io.Stdout {
@@ -458,7 +468,8 @@ class FakeFlutterVersion implements FlutterVersion {
     this.frameworkRevision = '11111111111111111111',
     this.frameworkRevisionShort = '11111',
     this.frameworkAge = '0 hours ago',
-    this.frameworkCommitDate = '12/01/01'
+    this.frameworkCommitDate = '12/01/01',
+    this.gitTagVersion = const GitTagVersion.unknown(),
   });
 
   bool get didFetchTagsAndUpdate => _didFetchTagsAndUpdate;
@@ -501,6 +512,9 @@ class FakeFlutterVersion implements FlutterVersion {
   String get frameworkDate => frameworkCommitDate;
 
   @override
+  final GitTagVersion gitTagVersion;
+
+  @override
   void fetchTagsAndUpdate() {
     _didFetchTagsAndUpdate = true;
   }
@@ -512,11 +526,6 @@ class FakeFlutterVersion implements FlutterVersion {
 
   @override
   bool checkRevisionAncestry({String tentativeDescendantRevision, String tentativeAncestorRevision}) {
-    throw UnimplementedError();
-  }
-
-  @override
-  GitTagVersion get gitTagVersion {
     throw UnimplementedError();
   }
 
@@ -661,7 +670,7 @@ class TestBuildSystem implements BuildSystem {
       return _singleResult;
     }
     if (_nextResult >= _results.length) {
-      throw StateError('Unexpected buildIncremental request of ${target.name}');
+      throw StateError('Unexpected build request of ${target.name}');
     }
     return _results[_nextResult++];
   }

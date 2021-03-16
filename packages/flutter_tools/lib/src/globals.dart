@@ -106,8 +106,12 @@ XcodeProjectInterpreter get xcodeProjectInterpreter => context.get<XcodeProjectI
 
 XCDevice get xcdevice => context.get<XCDevice>();
 
-final OutputPreferences _defaultOutputPreferences = OutputPreferences();
-OutputPreferences get outputPreferences => context.get<OutputPreferences>() ?? _defaultOutputPreferences;
+final OutputPreferences _default = OutputPreferences(
+  wrapText: stdio.hasTerminal ?? false,
+  showColor:  platform.stdoutSupportsAnsi,
+  stdio: stdio,
+);
+OutputPreferences get outputPreferences => context.get<OutputPreferences>() ?? _default;
 
 final BotDetector _defaultBotDetector = BotDetector(
   httpClientFactory: context.get<HttpClientFactory>() ?? () => HttpClient(),
@@ -121,6 +125,8 @@ Future<bool> get isRunningOnBot => botDetector.isRunningOnBot;
 
 /// The current system clock instance.
 SystemClock get systemClock => context.get<SystemClock>();
+
+ProcessInfo get processInfo => context.get<ProcessInfo>();
 
 /// Display an error level message to the user. Commands should use this if they
 /// fail in some way.

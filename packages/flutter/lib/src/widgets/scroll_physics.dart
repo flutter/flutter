@@ -113,7 +113,7 @@ class ScrollPhysics {
   /// `x` has the same behavior as `y`.
   ///
   /// ```dart
-  /// final FooScrollPhysics x = FooScrollPhysics().applyTo(BarScrollPhysics());
+  /// final FooScrollPhysics x = const FooScrollPhysics().applyTo(const BarScrollPhysics());
   /// const FooScrollPhysics y = FooScrollPhysics(parent: BarScrollPhysics());
   /// ```
   /// {@end-tool}
@@ -563,7 +563,7 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
 ///
 /// {@tool snippet}
 /// ```dart
-/// BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics())
+/// const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics())
 /// ```
 /// {@end-tool}
 ///

@@ -1044,9 +1044,10 @@ class RawGestureDetector extends StatefulWidget {
   /// ```dart
   /// class ForcePressGestureDetectorWithSemantics extends StatelessWidget {
   ///   const ForcePressGestureDetectorWithSemantics({
+  ///     Key? key,
   ///     required this.child,
   ///     required this.onForcePress,
-  ///   });
+  ///   }) : super(key: key);
   ///
   ///   final Widget child;
   ///   final VoidCallback onForcePress;

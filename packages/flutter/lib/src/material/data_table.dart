@@ -373,7 +373,7 @@ class DataCell {
 ///
 /// ```dart
 /// static const int numItems = 10;
-/// List<bool> selected = List<bool>.generate(numItems, (index) => false);
+/// List<bool> selected = List<bool>.generate(numItems, (int index) => false);
 ///
 /// @override
 /// Widget build(BuildContext context) {
@@ -387,17 +387,18 @@ class DataCell {
 ///       ],
 ///       rows: List<DataRow>.generate(
 ///         numItems,
-///         (index) => DataRow(
+///         (int index) => DataRow(
 ///           color: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
 ///             // All rows will have the same selected color.
 ///             if (states.contains(MaterialState.selected))
 ///               return Theme.of(context).colorScheme.primary.withOpacity(0.08);
 ///             // Even rows will have a grey color.
-///             if (index % 2 == 0)
+///             if (index.isEven) {
 ///               return Colors.grey.withOpacity(0.3);
+///             }
 ///             return null;  // Use default value for other states and odd rows.
 ///           }),
-///           cells: [DataCell(Text('Row $index'))],
+///           cells: <DataCell>[ DataCell(Text('Row $index')) ],
 ///           selected: selected[index],
 ///           onSelectChanged: (bool? value) {
 ///             setState(() {

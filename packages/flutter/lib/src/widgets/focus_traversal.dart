@@ -1273,10 +1273,11 @@ class _OrderedFocusInfo {
 /// ```dart preamble
 /// class DemoButton extends StatelessWidget {
 ///   const DemoButton({
+///     Key? key,
 ///     required this.name,
 ///     this.autofocus = false,
 ///     required this.order,
-///   });
+///   }) : super(key: key);
 ///
 ///   final String name;
 ///   final bool autofocus;
@@ -1493,11 +1494,12 @@ class FocusTraversalOrder extends InheritedWidget {
 /// /// the type of T.
 /// class OrderedButton<T> extends StatefulWidget {
 ///   const OrderedButton({
+///     Key? key,
 ///     required this.name,
 ///     this.canRequestFocus = true,
 ///     this.autofocus = false,
 ///     required this.order,
-///   });
+///   }) : super(key: key);
 ///
 ///   final String name;
 ///   final bool canRequestFocus;
@@ -1505,7 +1507,7 @@ class FocusTraversalOrder extends InheritedWidget {
 ///   final T order;
 ///
 ///   @override
-///   _OrderedButtonState createState() => _OrderedButtonState();
+///   _OrderedButtonState<T> createState() => _OrderedButtonState<T>();
 /// }
 ///
 /// class _OrderedButtonState<T> extends State<OrderedButton<T>> {
@@ -1614,7 +1616,7 @@ class FocusTraversalOrder extends InheritedWidget {
 ///               mainAxisAlignment: MainAxisAlignment.center,
 ///               children: List<Widget>.generate(3, (int index) {
 ///                 // Order as "C" "B", "A".
-///                 String order =
+///                 final String order =
 ///                     String.fromCharCode('A'.codeUnitAt(0) + (2 - index));
 ///                 return OrderedButton<String>(
 ///                   name: 'String: $order',
