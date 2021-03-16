@@ -202,9 +202,9 @@ void main(List<String> args) {
   final String newIconData = regenerateIconsFile(iconClassFileData, newTokenPairMap);
 
   if (argResults[_dryRunOption] as bool) {
-    stdout.writeln(newIconData);
+    stdout.write(newIconData);
   } else {
-    stderr.writeln('\nWriting to ${iconClassFile.path}.');
+    stderr.write('\nWriting to ${iconClassFile.path}.');
     iconClassFile.writeAsStringSync(newIconData);
     _overwriteOldCodepoints(newCodepointsFile, oldCodepointsFile);
   }
