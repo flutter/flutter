@@ -442,6 +442,8 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
     DraggableCanceledCallback? onDraggableCanceled,
     DragEndCallback? onDragEnd,
     VoidCallback? onDragCompleted,
+    bool rootOverlay = false,
+    HitTestBehavior hitTestBehavior = HitTestBehavior.deferToChild,
     this.hapticFeedbackOnStart = true,
     bool ignoringFeedbackSemantics = true,
     this.delay = kLongPressTimeout,
@@ -461,6 +463,8 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
     onDragEnd: onDragEnd,
     onDragCompleted: onDragCompleted,
     ignoringFeedbackSemantics: ignoringFeedbackSemantics,
+    rootOverlay: rootOverlay,
+    hitTestBehavior: hitTestBehavior,
   );
 
   /// Whether haptic feedback should be triggered on drag start.
