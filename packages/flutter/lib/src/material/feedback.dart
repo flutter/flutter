@@ -32,6 +32,8 @@ import 'theme.dart';
 ///
 /// ```dart
 /// class WidgetWithWrappedHandler extends StatelessWidget {
+///   const WidgetWithWrappedHandler({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return GestureDetector(
@@ -58,6 +60,8 @@ import 'theme.dart';
 ///
 /// ```dart
 /// class WidgetWithExplicitCall extends StatelessWidget {
+///   const WidgetWithExplicitCall({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return GestureDetector(

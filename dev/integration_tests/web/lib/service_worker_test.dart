@@ -4,16 +4,8 @@
 
 import 'dart:html' as html;
 Future<void> main() async {
-  final html.ServiceWorkerRegistration worker = await html.window.navigator.serviceWorker.ready;
-  if (worker.active != null) {
-    await Future.delayed(const Duration(seconds: 5));
-    await html.HttpRequest.getString('CLOSE');
-    return;
-  }
-  worker.addEventListener('statechange', (event) async {
-    if (worker.active != null) {
-      await Future.delayed(const Duration(seconds: 5));
-      await html.HttpRequest.getString('CLOSE');
-    }
-  });
+  await html.window.navigator.serviceWorker.ready;
+  final String response = 'CLOSE?version=1';
+  await html.HttpRequest.getString(response);
+  html.document.body.appendHtml(response);
 }

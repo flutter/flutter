@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -56,7 +58,7 @@ Future<void> buildWeb(
         if (serviceWorkerStrategy != null)
          kServiceWorkerStrategy: serviceWorkerStrategy,
         if (buildInfo.extraFrontEndOptions?.isNotEmpty ?? false)
-          kExtraFrontEndOptions: encodeDartDefines(buildInfo.extraFrontEndOptions),
+          kExtraFrontEndOptions: buildInfo.extraFrontEndOptions.join(','),
       },
       artifacts: globals.artifacts,
       fileSystem: globals.fs,
@@ -67,6 +69,8 @@ Future<void> buildWeb(
         ? null
         : globals.flutterVersion.engineRevision,
       flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+      // Web uses a different Dart plugin registry.
+      generateDartPluginRegistry: false,
     ));
     if (!result.success) {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {

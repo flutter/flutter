@@ -4,11 +4,11 @@
 
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import '../rendering/mock_canvas.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -628,7 +628,7 @@ void main() {
       )
     );
 
-    final Rect paddingRect = tester.getRect(find.byType(Padding));
+    final Rect paddingRect = tester.getRect(find.byType(SafeArea));
     final Rect radioRect = tester.getRect(find.byType(radioType));
     final Rect titleRect = tester.getRect(find.text('Title'));
 
@@ -668,37 +668,36 @@ void main() {
   });
 
   testWidgets('RadioListTile respects tileColor', (WidgetTester tester) async {
-    const Color tileColor = Colors.red;
+    final Color tileColor = Colors.red.shade500;
 
     await tester.pumpWidget(
       wrap(
-        child: const Center(
+        child: Center(
           child: RadioListTile<bool>(
             value: false,
             groupValue: true,
             onChanged: null,
-            title: Text('Title'),
+            title: const Text('Title'),
             tileColor: tileColor,
           ),
         ),
       ),
     );
 
-    final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
-    expect(coloredBox.color, tileColor);
+    expect(find.byType(Material), paints..path(color: tileColor));
   });
 
   testWidgets('RadioListTile respects selectedTileColor', (WidgetTester tester) async {
-    const Color selectedTileColor = Colors.black;
+    final Color selectedTileColor = Colors.green.shade500;
 
     await tester.pumpWidget(
       wrap(
-        child: const Center(
+        child: Center(
           child: RadioListTile<bool>(
             value: false,
             groupValue: true,
             onChanged: null,
-            title: Text('Title'),
+            title: const Text('Title'),
             selected: true,
             selectedTileColor: selectedTileColor,
           ),
@@ -706,7 +705,42 @@ void main() {
       ),
     );
 
-    final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
-    expect(coloredBox.color, equals(selectedTileColor));
+    expect(find.byType(Material), paints..path(color: selectedTileColor));
+  });
+
+  testWidgets('RadioListTile selected item text Color', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/pull/76906
+
+    const Color activeColor = Color(0xff00ff00);
+
+    Widget buildFrame({ Color? activeColor, Color? toggleableActiveColor }) {
+      return MaterialApp(
+        theme: ThemeData.light().copyWith(
+          toggleableActiveColor: toggleableActiveColor,
+        ),
+        home: Scaffold(
+          body: Center(
+            child: RadioListTile<bool>(
+              activeColor: activeColor,
+              selected: true,
+              title: const Text('title'),
+              value: false,
+              groupValue: true,
+              onChanged: (bool? newValue) { },
+            ),
+          ),
+        ),
+      );
+    }
+
+    Color? textColor(String text) {
+      return tester.renderObject<RenderParagraph>(find.text(text)).text.style?.color;
+    }
+
+    await tester.pumpWidget(buildFrame(toggleableActiveColor: activeColor));
+    expect(textColor('title'), activeColor);
+
+    await tester.pumpWidget(buildFrame(activeColor: activeColor));
+    expect(textColor('title'), activeColor);
   });
 }

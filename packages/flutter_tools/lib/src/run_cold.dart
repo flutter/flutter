@@ -2,14 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import 'base/common.dart';
 import 'base/file_system.dart';
 import 'build_info.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
+import 'resident_devtools_handler.dart';
 import 'resident_runner.dart';
 import 'tracing.dart';
 import 'vmservice.dart';
@@ -25,6 +29,7 @@ class ColdRunner extends ResidentRunner {
     bool ipv6 = false,
     bool stayResident = true,
     bool machine = false,
+    ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
   }) : super(
           devices,
           target: target,
@@ -33,6 +38,7 @@ class ColdRunner extends ResidentRunner {
           stayResident: stayResident,
           ipv6: ipv6,
           machine: machine,
+          devtoolsHandler: devtoolsHandler,
         );
 
   final bool traceStartup;
@@ -50,6 +56,7 @@ class ColdRunner extends ResidentRunner {
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
+    bool enableDevTools = false,
     String route,
   }) async {
     try {
@@ -70,14 +77,22 @@ class ColdRunner extends ResidentRunner {
     }
 
     // Connect to observatory.
-    if (debuggingOptions.debuggingEnabled) {
+    if (debuggingEnabled) {
       try {
-        await connectToServiceProtocol();
+        await connectToServiceProtocol(allowExistingDdsInstance: false);
       } on String catch (message) {
         globals.printError(message);
         appFailedToStart();
         return 2;
       }
+    }
+
+    if (enableDevTools && debuggingEnabled) {
+      // The method below is guaranteed never to return a failing future.
+      unawaited(residentDevtoolsHandler.serveAndAnnounceDevTools(
+        devToolsServerAddress: debuggingOptions.devToolsServerAddress,
+        flutterDevices: flutterDevices,
+      ));
     }
 
     if (flutterDevices.first.observatoryUris != null) {
@@ -115,7 +130,7 @@ class ColdRunner extends ResidentRunner {
 
     appStartedCompleter?.complete();
 
-    writeVmserviceFile();
+    writeVmServiceFile();
 
     if (stayResident && !traceStartup) {
       return waitForAppToFinish();
@@ -129,6 +144,7 @@ class ColdRunner extends ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
     bool allowExistingDdsInstance = false,
+    bool enableDevTools = false,
   }) async {
     _didAttach = true;
     try {
@@ -140,6 +156,7 @@ class ColdRunner extends ResidentRunner {
       globals.printError('Error connecting to the service protocol: $error');
       return 2;
     }
+
     for (final FlutterDevice device in flutterDevices) {
       await device.initLogReader();
     }
@@ -149,6 +166,15 @@ class ColdRunner extends ResidentRunner {
         globals.printTrace('Connected to $view.');
       }
     }
+
+    if (enableDevTools && debuggingEnabled) {
+      // The method below is guaranteed never to return a failing future.
+      unawaited(residentDevtoolsHandler.serveAndAnnounceDevTools(
+        devToolsServerAddress: debuggingOptions.devToolsServerAddress,
+        flutterDevices: flutterDevices,
+      ));
+    }
+
     appStartedCompleter?.complete();
     if (stayResident) {
       return waitForAppToFinish();
@@ -181,22 +207,13 @@ class ColdRunner extends ResidentRunner {
     if (details) {
       printHelpDetails();
     }
-    commandHelp.h.print();
+    commandHelp.h.print(); // TODO(ianh): print different message if details is false
     if (_didAttach) {
       commandHelp.d.print();
     }
     commandHelp.c.print();
     commandHelp.q.print();
-    for (final FlutterDevice device in flutterDevices) {
-      final String dname = device.device.name;
-      if (device.vmService != null) {
-        // Caution: This log line is parsed by device lab tests.
-        globals.printStatus(
-          'An Observatory debugger and profiler on $dname is available at: '
-          '${device.vmService.httpAddress}',
-        );
-      }
-    }
+    printDebuggerList();
   }
 
   @override

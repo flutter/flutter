@@ -8,8 +8,6 @@ import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
@@ -631,8 +629,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   // Returns the offset that should result from applying [event] to the current
   // position, taking min/max scroll extent into account.
-  double _targetScrollOffsetForPointerScroll(PointerScrollEvent event) {
-    final double delta = _pointerSignalEventDelta(event);
+  double _targetScrollOffsetForPointerScroll(double delta) {
     return math.min(math.max(position.pixels + delta, position.minScrollExtent),
       position.maxScrollExtent);
   }
@@ -655,9 +652,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       if (_physics != null && !_physics!.shouldAcceptUserOffset(position)) {
         return;
       }
-      final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event);
+      final double delta = _pointerSignalEventDelta(event);
+      final double targetScrollOffset = _targetScrollOffsetForPointerScroll(delta);
       // Only express interest in the event if it would actually result in a scroll.
-      if (targetScrollOffset != position.pixels) {
+      if (delta != 0.0 && targetScrollOffset != position.pixels) {
         GestureBinding.instance!.pointerSignalResolver.register(event, _handlePointerScroll);
       }
     }
@@ -665,9 +663,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   void _handlePointerScroll(PointerEvent event) {
     assert(event is PointerScrollEvent);
-    final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event as PointerScrollEvent);
-    if (targetScrollOffset != position.pixels) {
-      position.pointerScroll(_pointerSignalEventDelta(event));
+    final double delta = _pointerSignalEventDelta(event as PointerScrollEvent);
+    final double targetScrollOffset = _targetScrollOffsetForPointerScroll(delta);
+    if (delta != 0.0 && targetScrollOffset != position.pixels) {
+      position.pointerScroll(delta);
     }
   }
 
@@ -983,7 +982,7 @@ class ScrollAction extends Action<ScrollIntent> {
     final bool contextIsValid = focus != null && focus.context != null;
     if (contextIsValid) {
       // Check for primary scrollable within the current context
-      if (Scrollable.of(focus!.context!) != null)
+      if (Scrollable.of(focus.context!) != null)
         return true;
       // Check for fallback scrollable with context from PrimaryScrollController
       if (PrimaryScrollController.of(focus.context!) != null) {

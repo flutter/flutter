@@ -4,7 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 
 import 'gesture_tester.dart';
 
@@ -461,7 +460,7 @@ void main() {
 
     tester.route(pointer.move(const Offset(20.0, 25.0)));
     expect(didStartDrag, isFalse);
-    expect(updateDelta, const Offset(0.0, 0.0));
+    expect(updateDelta, Offset.zero);
     expect(updatePrimaryDelta, 0.0);
     expect(didEndDrag, isFalse);
     updateDelta = null;

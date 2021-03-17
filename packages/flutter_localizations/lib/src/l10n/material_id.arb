@@ -9,6 +9,8 @@
   "previousMonthTooltip": "Bulan sebelumnya",
   "nextPageTooltip": "Halaman berikutnya",
   "previousPageTooltip": "Halaman sebelumnya",
+  "firstPageTooltip": "First page",
+  "lastPageTooltip": "Last page",
   "showMenuTooltip": "Tampilkan menu",
   "aboutListTileTitle": "Tentang $applicationName",
   "licensesPageTitle": "Lisensi",

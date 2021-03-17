@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -44,7 +43,7 @@ enum OverflowBarAlignment {
 /// If the layout overflows, then children's order within their
 /// column is specified by [overflowDirection] instead.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center_no_null_safety}
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
 ///
 /// This example defines a simple approximation of a dialog
 /// layout, where the layout of the dialog's action buttons are
@@ -57,31 +56,31 @@ enum OverflowBarAlignment {
 /// Widget build(BuildContext context) {
 ///   return Container(
 ///     alignment: Alignment.center,
-///     padding: EdgeInsets.all(16),
+///     padding: const EdgeInsets.all(16),
 ///     color: Colors.black.withOpacity(0.15),
 ///     child: Material(
 ///       color: Colors.white,
 ///       elevation: 24,
-///       shape: RoundedRectangleBorder(
+///       shape: const RoundedRectangleBorder(
 ///         borderRadius: BorderRadius.all(Radius.circular(4))
 ///       ),
 ///       child: Padding(
-///         padding: EdgeInsets.all(8),
+///         padding: const EdgeInsets.all(8),
 ///         child: SingleChildScrollView(
 ///           child: Column(
 ///             mainAxisSize: MainAxisSize.min,
 ///             crossAxisAlignment: CrossAxisAlignment.stretch,
 ///             children: <Widget>[
-///               Container(height: 128, child: Placeholder()),
+///               const SizedBox(height: 128, child: Placeholder()),
 ///               Align(
 ///                 alignment: AlignmentDirectional.centerEnd,
 ///                 child: OverflowBar(
 ///                   spacing: 8,
 ///                   overflowAlignment: OverflowBarAlignment.end,
 ///                   children: <Widget>[
-///                     TextButton(child: Text('Cancel'), onPressed: () { }),
-///                     TextButton(child: Text('Really Really Cancel'), onPressed: () { }),
-///                     OutlinedButton(child: Text('OK'), onPressed: () { }),
+///                     TextButton(child: const Text('Cancel'), onPressed: () { }),
+///                     TextButton(child: const Text('Really Really Cancel'), onPressed: () { }),
+///                     OutlinedButton(child: const Text('OK'), onPressed: () { }),
 ///                   ],
 ///                 ),
 ///               ),

@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
 import 'base/context.dart';
+import 'base/deferred_component.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
@@ -15,6 +18,7 @@ import 'convert.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'flutter_manifest.dart';
+import 'license_collector.dart';
 import 'project.dart';
 
 const String defaultManifestPath = 'pubspec.yaml';
@@ -50,7 +54,8 @@ abstract class AssetBundleFactory {
     @required Logger logger,
     @required FileSystem fileSystem,
     @required Platform platform,
-  }) => _ManifestAssetBundleFactory(logger: logger, fileSystem: fileSystem, platform: platform);
+    bool splitDeferredAssets = false,
+  }) => _ManifestAssetBundleFactory(logger: logger, fileSystem: fileSystem, platform: platform, splitDeferredAssets: splitDeferredAssets);
 
   /// Creates a new [AssetBundle].
   AssetBundle createBundle();
@@ -58,6 +63,10 @@ abstract class AssetBundleFactory {
 
 abstract class AssetBundle {
   Map<String, DevFSContent> get entries;
+
+  /// The files that were specified under the deferred components assets sections
+  /// in pubspec.
+  Map<String, Map<String, DevFSContent>> get deferredComponentsEntries;
 
   /// Additional files that this bundle depends on that are not included in the
   /// output result.
@@ -72,6 +81,7 @@ abstract class AssetBundle {
     String manifestPath = defaultManifestPath,
     String assetDirPath,
     @required String packagesPath,
+    bool deferredComponentsEnabled = false,
   });
 }
 
@@ -80,16 +90,19 @@ class _ManifestAssetBundleFactory implements AssetBundleFactory {
     @required Logger logger,
     @required FileSystem fileSystem,
     @required Platform platform,
+    bool splitDeferredAssets = false,
   }) : _logger = logger,
        _fileSystem = fileSystem,
-       _platform = platform;
+       _platform = platform,
+       _splitDeferredAssets = splitDeferredAssets;
 
   final Logger _logger;
   final FileSystem _fileSystem;
   final Platform _platform;
+  final bool _splitDeferredAssets;
 
   @override
-  AssetBundle createBundle() => ManifestAssetBundle(logger: _logger, fileSystem: _fileSystem, platform: _platform);
+  AssetBundle createBundle() => ManifestAssetBundle(logger: _logger, fileSystem: _fileSystem, platform: _platform, splitDeferredAssets: _splitDeferredAssets);
 }
 
 /// An asset bundle based on a pubspec.yaml file.
@@ -100,18 +113,24 @@ class ManifestAssetBundle implements AssetBundle {
     @required Logger logger,
     @required FileSystem fileSystem,
     @required Platform platform,
+    bool splitDeferredAssets = false,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _platform = platform,
+       _splitDeferredAssets = splitDeferredAssets,
        _licenseCollector = LicenseCollector(fileSystem: fileSystem);
 
   final Logger _logger;
   final FileSystem _fileSystem;
   final LicenseCollector _licenseCollector;
   final Platform _platform;
+  final bool _splitDeferredAssets;
 
   @override
   final Map<String, DevFSContent> entries = <String, DevFSContent>{};
+
+  @override
+  final Map<String, Map<String, DevFSContent>> deferredComponentsEntries = <String, Map<String, DevFSContent>>{};
 
   // If an asset corresponds to a wildcard directory, then it may have been
   // updated without changes to the manifest. These are only tracked for
@@ -160,6 +179,7 @@ class ManifestAssetBundle implements AssetBundle {
     String manifestPath = defaultManifestPath,
     String assetDirPath,
     @required String packagesPath,
+    bool deferredComponentsEnabled = false,
   }) async {
     assetDirPath ??= getAssetBuildDirectory();
     FlutterProject flutterProject;
@@ -194,27 +214,47 @@ class ManifestAssetBundle implements AssetBundle {
     // in the pubspec.yaml file's assets and font and sections. The
     // value of each image asset is a list of resolution-specific "variants",
     // see _AssetDirectoryCache.
+    final List<String> excludeDirs = <String>[
+      assetDirPath,
+      getBuildDirectory(),
+      if (flutterProject.ios.existsSync())
+        flutterProject.ios.hostAppRoot.path,
+      if (flutterProject.macos.existsSync())
+        flutterProject.macos.managedDirectory.path,
+      if (flutterProject.windows.existsSync())
+        flutterProject.windows.managedDirectory.path,
+      if (flutterProject.linux.existsSync())
+        flutterProject.linux.managedDirectory.path,
+    ];
     final Map<_Asset, List<_Asset>> assetVariants = _parseAssets(
       packageConfig,
       flutterManifest,
       wildcardDirectories,
       assetBasePath,
-      excludeDirs: <String>[
-        assetDirPath,
-        getBuildDirectory(),
-        if (flutterProject.ios.existsSync())
-          flutterProject.ios.hostAppRoot.path,
-        if (flutterProject.macos.existsSync())
-          flutterProject.macos.managedDirectory.path,
-        if (flutterProject.windows.existsSync())
-          flutterProject.windows.managedDirectory.path,
-        if (flutterProject.linux.existsSync())
-          flutterProject.linux.managedDirectory.path,
-      ],
+      excludeDirs: excludeDirs,
     );
 
     if (assetVariants == null) {
       return 1;
+    }
+
+    // Parse assets for  deferred components.
+    final Map<String, Map<_Asset, List<_Asset>>> deferredComponentsAssetVariants = _parseDeferredComponentsAssets(
+      flutterManifest,
+      packageConfig,
+      assetBasePath,
+      wildcardDirectories,
+      flutterProject.directory,
+      excludeDirs: excludeDirs,
+    );
+    if (!_splitDeferredAssets || !deferredComponentsEnabled) {
+      // Include the assets in the regular set of assets if not using deferred
+      // components.
+      for (final String componentName in deferredComponentsAssetVariants.keys) {
+        assetVariants.addAll(deferredComponentsAssetVariants[componentName]);
+      }
+      deferredComponentsAssetVariants.clear();
+      deferredComponentsEntries.clear();
     }
 
     final bool includesMaterialFonts = flutterManifest.usesMaterialDesign;
@@ -224,7 +264,8 @@ class ManifestAssetBundle implements AssetBundle {
       primary: true,
     );
 
-    // Add fonts and assets from packages.
+    // Add fonts, assets, and licenses from packages.
+    final Map<String, List<File>> additionalLicenseFiles = <String, List<File>>{};
     for (final Package package in packageConfig.packages) {
       final Uri packageUri = package.packageUriRoot;
       if (packageUri != null && packageUri.scheme == 'file') {
@@ -237,6 +278,14 @@ class ManifestAssetBundle implements AssetBundle {
         if (packageFlutterManifest == null) {
           continue;
         }
+        // Collect any additional licenses from each package.
+        final List<File> licenseFiles = <File>[];
+        for (final String relativeLicensePath in packageFlutterManifest.additionalLicenses) {
+          final String absoluteLicensePath = _fileSystem.path.fromUri(package.root.resolve(relativeLicensePath));
+          licenseFiles.add(_fileSystem.file(absoluteLicensePath).absolute);
+        }
+        additionalLicenseFiles[packageFlutterManifest.appName] = licenseFiles;
+
         // Skip the app itself
         if (packageFlutterManifest.appName == flutterManifest.appName) {
           continue;
@@ -302,6 +351,39 @@ class ManifestAssetBundle implements AssetBundle {
         entries[variant.entryUri.path] ??= DevFSFileContent(variantFile);
       }
     }
+    // Save the contents of each deferred component image, image variant, and font
+    // asset in deferredComponentsEntries.
+    if (deferredComponentsAssetVariants != null) {
+      for (final String componentName in deferredComponentsAssetVariants.keys) {
+        deferredComponentsEntries[componentName] = <String, DevFSContent>{};
+        for (final _Asset asset in deferredComponentsAssetVariants[componentName].keys) {
+          final File assetFile = asset.lookupAssetFile(_fileSystem);
+          if (!assetFile.existsSync() && deferredComponentsAssetVariants[componentName][asset].isEmpty) {
+            _logger.printStatus('Error detected in pubspec.yaml:', emphasis: true);
+            _logger.printError('No file or variants found for $asset.\n');
+            if (asset.package != null) {
+              _logger.printError('This asset was included from package ${asset.package.name}.');
+            }
+            return 1;
+          }
+          // The file name for an asset's "main" entry is whatever appears in
+          // the pubspec.yaml file. The main entry's file must always exist for
+          // font assets. It need not exist for an image if resolution-specific
+          // variant files exist. An image's main entry is treated the same as a
+          // "1x" resolution variant and if both exist then the explicit 1x
+          // variant is preferred.
+          if (assetFile.existsSync()) {
+            assert(!deferredComponentsAssetVariants[componentName][asset].contains(asset));
+            deferredComponentsAssetVariants[componentName][asset].insert(0, asset);
+          }
+          for (final _Asset variant in deferredComponentsAssetVariants[componentName][asset]) {
+            final File variantFile = variant.lookupAssetFile(_fileSystem);
+            assert(variantFile.existsSync());
+            deferredComponentsEntries[componentName][variant.entryUri.path] ??= DevFSFileContent(variantFile);
+          }
+        }
+      }
+    }
     final List<_Asset> materialAssets = <_Asset>[
       if (flutterManifest.usesMaterialDesign)
         ..._getMaterialAssets(),
@@ -319,7 +401,12 @@ class ManifestAssetBundle implements AssetBundle {
 
     final DevFSStringContent assetManifest  = _createAssetManifest(assetVariants);
     final DevFSStringContent fontManifest = DevFSStringContent(json.encode(fonts));
-    final LicenseResult licenseResult = _licenseCollector.obtainLicenses(packageConfig);
+    final LicenseResult licenseResult = _licenseCollector.obtainLicenses(packageConfig, additionalLicenseFiles);
+    if (licenseResult.errorMessages.isNotEmpty) {
+      licenseResult.errorMessages.forEach(_logger.printError);
+      return 1;
+    }
+
     final DevFSStringContent licenses = DevFSStringContent(licenseResult.combinedLicenses);
     additionalDependencies = licenseResult.dependencies;
 
@@ -391,6 +478,50 @@ class ManifestAssetBundle implements AssetBundle {
           packageConfig,
         )) font.descriptor,
     ];
+  }
+
+  Map<String, Map<_Asset, List<_Asset>>> _parseDeferredComponentsAssets(
+    FlutterManifest flutterManifest,
+    PackageConfig packageConfig,
+    String assetBasePath,
+    List<Uri> wildcardDirectories,
+    Directory projectDirectory, {
+    List<String> excludeDirs = const <String>[],
+  }) {
+    final List<DeferredComponent> components = flutterManifest.deferredComponents;
+    final Map<String, Map<_Asset, List<_Asset>>> deferredComponentsAssetVariants = <String, Map<_Asset, List<_Asset>>>{};
+    if (components == null) {
+      return deferredComponentsAssetVariants;
+    }
+    for (final DeferredComponent component in components) {
+      deferredComponentsAssetVariants[component.name] = <_Asset, List<_Asset>>{};
+      final _AssetDirectoryCache cache = _AssetDirectoryCache(<String>[], _fileSystem);
+      for (final Uri assetUri in component.assets) {
+        if (assetUri.path.endsWith('/')) {
+          wildcardDirectories.add(assetUri);
+          _parseAssetsFromFolder(
+            packageConfig,
+            flutterManifest,
+            assetBasePath,
+            cache,
+            deferredComponentsAssetVariants[component.name],
+            assetUri,
+            excludeDirs: excludeDirs,
+          );
+        } else {
+          _parseAssetFromFile(
+            packageConfig,
+            flutterManifest,
+            assetBasePath,
+            cache,
+            deferredComponentsAssetVariants[component.name],
+            assetUri,
+            excludeDirs: excludeDirs,
+          );
+        }
+      }
+    }
+    return deferredComponentsAssetVariants;
   }
 
   DevFSStringContent _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants) {
@@ -719,108 +850,6 @@ class _Asset {
         ^ relativeUri.hashCode
         ^ entryUri.hashCode;
   }
-}
-
-/// Processes dependencies into a string representing the NOTICES file.
-///
-/// Reads the NOTICES or LICENSE file from each package in the .packages file,
-/// splitting each one into each component license so that it can be de-duped
-/// if possible. If the NOTICES file exists, it is preferred over the LICENSE
-/// file.
-///
-/// Individual licenses inside each LICENSE file should be separated by 80
-/// hyphens on their own on a line.
-///
-/// If a LICENSE or NOTICES file contains more than one component license,
-/// then each component license must start with the names of the packages to
-/// which the component license applies, with each package name on its own line
-/// and the list of package names separated from the actual license text by a
-/// blank line. The packages need not match the names of the pub package. For
-/// example, a package might itself contain code from multiple third-party
-/// sources, and might need to include a license for each one.
-class LicenseCollector {
-  LicenseCollector({
-    @required FileSystem fileSystem
-  }) : _fileSystem = fileSystem;
-
-  final FileSystem _fileSystem;
-
-  /// The expected separator for multiple licenses.
-  static final String licenseSeparator = '\n' + ('-' * 80) + '\n';
-
-  /// Obtain licenses from the `packageMap` into a single result.
-  LicenseResult obtainLicenses(
-    PackageConfig packageConfig,
-  ) {
-    final Map<String, Set<String>> packageLicenses = <String, Set<String>>{};
-    final Set<String> allPackages = <String>{};
-    final List<File> dependencies = <File>[];
-
-    for (final Package package in packageConfig.packages) {
-      final Uri packageUri = package.packageUriRoot;
-      if (packageUri == null || packageUri.scheme != 'file') {
-        continue;
-      }
-      // First check for NOTICES, then fallback to LICENSE
-      File file = _fileSystem.file(packageUri.resolve('../NOTICES'));
-      if (!file.existsSync()) {
-        file = _fileSystem.file(packageUri.resolve('../LICENSE'));
-      }
-      if (!file.existsSync()) {
-        continue;
-      }
-
-      dependencies.add(file);
-      final List<String> rawLicenses = file
-        .readAsStringSync()
-        .split(licenseSeparator);
-      for (final String rawLicense in rawLicenses) {
-        List<String> packageNames;
-        String licenseText;
-        if (rawLicenses.length > 1) {
-          final int split = rawLicense.indexOf('\n\n');
-          if (split >= 0) {
-            packageNames = rawLicense.substring(0, split).split('\n');
-            licenseText = rawLicense.substring(split + 2);
-          }
-        }
-        if (licenseText == null) {
-          packageNames = <String>[package.name];
-          licenseText = rawLicense;
-        }
-        packageLicenses.putIfAbsent(licenseText, () => <String>{})
-          .addAll(packageNames);
-        allPackages.addAll(packageNames);
-      }
-    }
-    final List<String> combinedLicensesList = packageLicenses.keys
-      .map<String>((String license) {
-        final List<String> packageNames = packageLicenses[license].toList()
-          ..sort();
-        return packageNames.join('\n') + '\n\n' + license;
-      }).toList();
-    combinedLicensesList.sort();
-    final String combinedLicenses = combinedLicensesList.join(licenseSeparator);
-
-    return LicenseResult(
-      combinedLicenses: combinedLicenses,
-      dependencies: dependencies,
-    );
-  }
-}
-
-/// The result of processing licenses with a [LicenseCollector].
-class LicenseResult {
-  const LicenseResult({
-    @required this.combinedLicenses,
-    @required this.dependencies,
-  });
-
-  /// The raw text of the consumed licenses.
-  final String combinedLicenses;
-
-  /// Each license file that was consumed as input.
-  final List<File> dependencies;
 }
 
 // Given an assets directory like this:

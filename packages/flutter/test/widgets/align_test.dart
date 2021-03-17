@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
@@ -18,7 +17,7 @@ void main() {
     await tester.pumpWidget(
       Align(
         child: Container(),
-        alignment: const Alignment(0.0, 0.0),
+        alignment: Alignment.center,
       ),
     );
 
@@ -98,7 +97,7 @@ void main() {
             width: 10.0,
             height: 10.0,
           ),
-          alignment: const Alignment(0.0, 0.0),
+          alignment: Alignment.center,
         ),
       ),
     );
@@ -115,10 +114,10 @@ void main() {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
+          children: const <Widget>[
             Align(
               widthFactor: 0.5,
-              child: Container(
+              child: SizedBox(
                 height: 100.0,
                 width: 100.0,
               ),
@@ -138,11 +137,11 @@ void main() {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
+          children: const <Widget>[
             Align(
               alignment: Alignment.center,
               heightFactor: 0.5,
-              child: Container(
+              child: SizedBox(
                 height: 100.0,
                 width: 100.0,
               ),

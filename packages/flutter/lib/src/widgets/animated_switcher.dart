@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
@@ -90,7 +89,7 @@ typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget? currentChild, Li
 /// The type of transition can be changed from a cross-fade to a custom
 /// transition by setting the [transitionBuilder].
 ///
-/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_material}
 /// This sample shows a counter that animates the scale of a text widget
 /// whenever the value changes.
 ///

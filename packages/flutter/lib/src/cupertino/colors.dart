@@ -12,9 +12,8 @@ import 'interface_level.dart';
 import 'theme.dart';
 
 // Examples can assume:
-// // @dart = 2.9
-// Widget child;
-// BuildContext context;
+// late Widget child;
+// late BuildContext context;
 
 /// A palette of [Color] constants that describe colors commonly used when
 /// matching the iOS platform aesthetics.
@@ -602,7 +601,7 @@ class CupertinoColors {
 /// CupertinoButton(
 ///   child: child,
 ///   // CupertinoDynamicColor works out of box in a CupertinoButton.
-///   color: CupertinoDynamicColor.withBrightness(
+///   color: const CupertinoDynamicColor.withBrightness(
 ///     color: CupertinoColors.white,
 ///     darkColor: CupertinoColors.black,
 ///   ),

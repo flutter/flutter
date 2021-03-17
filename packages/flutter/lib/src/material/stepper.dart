@@ -122,51 +122,41 @@ class Step {
 /// to this widget based on some logic triggered by the three callbacks that it
 /// provides.
 ///
-/// {@tool sample --template=stateful_widget_scaffold_center_no_null_safety}
+/// {@tool sample --template=stateful_widget_scaffold_center}
 ///
 /// ```dart
 /// int _index = 0;
+///
+/// @override
 /// Widget build(BuildContext context) {
-///   return Container(
-///     height: 300,
-///     width: 300,
-///     child: Stepper(
-///       currentStep: _index,
-///       onStepCancel: () {
-///         if (_index <= 0) {
-///          return;
-///         }
-///         setState(() {
-///           _index--;
-///         });
-///       },
-///       onStepContinue: () {
-///         if (_index >= 1) {
-///          return;
-///         }
-///         setState(() {
-///           _index++;
-///         });
-///       },
-///       onStepTapped: (index) {
-///         setState(() {
-///           _index = index;
-///         });
-///       },
-///       steps: [
-///         Step(
-///           title: Text("Step 1 title"),
-///           content: Container(
-///             alignment: Alignment.centerLeft,
-///             child: Text("Content for Step 1")
-///           ),
+///   return Stepper(
+///     currentStep: _index,
+///     onStepCancel: () {
+///       if (_index > 0) {
+///         setState(() { _index -= 1; });
+///       }
+///     },
+///     onStepContinue: () {
+///       if (_index <= 0) {
+///         setState(() { _index += 1; });
+///       }
+///     },
+///     onStepTapped: (int index) {
+///       setState(() { _index = index; });
+///     },
+///     steps: <Step>[
+///       Step(
+///         title: const Text('Step 1 title'),
+///         content: Container(
+///           alignment: Alignment.centerLeft,
+///           child: const Text('Content for Step 1')
 ///         ),
-///         Step(
-///           title: Text("Step 2 title"),
-///           content: Text("Content for Step 2"),
-///         ),
-///       ],
-///     ),
+///       ),
+///       const Step(
+///         title: Text('Step 2 title'),
+///         content: Text('Content for Step 2'),
+///       ),
+///     ],
 ///   );
 /// }
 /// ```
@@ -247,14 +237,14 @@ class Stepper extends StatefulWidget {
   /// For example, keeping track of the [currentStep] within the callback can
   /// change the text of the continue or cancel button depending on which step users are at.
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
+  /// {@tool dartpad --template=stateless_widget_scaffold}
   /// Creates a stepper control with custom buttons.
   ///
   /// ```dart
   /// Widget build(BuildContext context) {
   ///   return Stepper(
   ///     controlsBuilder:
-  ///       (BuildContext context, { VoidCallback onStepContinue, VoidCallback onStepCancel }) {
+  ///       (BuildContext context, { VoidCallback? onStepContinue, VoidCallback? onStepCancel }) {
   ///          return Row(
   ///            children: <Widget>[
   ///              TextButton(
@@ -372,11 +362,11 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Color _circleColor(int index) {
-    final ThemeData themeData = Theme.of(context);
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     if (!_isDark()) {
-      return widget.steps[index].isActive ? themeData.primaryColor : Colors.black38;
+      return widget.steps[index].isActive ? colorScheme.primary : colorScheme.onSurface.withOpacity(0.38);
     } else {
-      return widget.steps[index].isActive ? themeData.accentColor : themeData.backgroundColor;
+      return widget.steps[index].isActive ? colorScheme.secondary : colorScheme.background;
     }
   }
 
@@ -682,7 +672,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           canRequestFocus: widget.steps[i].state != StepState.disabled,
           child: Row(
             children: <Widget>[
-              Container(
+              SizedBox(
                 height: 72.0,
                 child: Center(
                   child: _buildIcon(i),

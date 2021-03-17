@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-
 import 'framework.dart';
 
 /// An [InheritedWidget] that defines visual properties like colors
@@ -17,7 +15,7 @@ import 'framework.dart';
 /// like the contents of a new route or an overlay, will be able to see the
 /// ancestor inherited themes of the context it was built in.
 ///
-/// {@tool dartpad --template=freeform_no_null_safety}
+/// {@tool dartpad --template=freeform}
 /// This example demonstrates how `InheritedTheme.capture()` can be used
 /// to wrap the contents of a new route with the inherited themes that
 /// are present when the route was built - but are not present when route
@@ -33,12 +31,14 @@ import 'framework.dart';
 ///
 /// ```dart main
 /// void main() {
-///   runApp(MyApp());
+///   runApp(const MyApp());
 /// }
 /// ```
 ///
 /// ```dart
 /// class MyAppBody extends StatelessWidget {
+///   const MyAppBody({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     final NavigatorState navigator = Navigator.of(context);
@@ -53,28 +53,32 @@ import 'framework.dart';
 ///     return GestureDetector(
 ///       onTap: () {
 ///         Navigator.of(context).push(
-///           MaterialPageRoute(
+///           MaterialPageRoute<void>(
 ///             builder: (BuildContext _) {
 ///               // Wrap the actual child of the route in the previously
 ///               // captured themes.
-///               return themes.wrap(Container(
-///                 alignment: Alignment.center,
-///                 color: Colors.white,
-///                 child: Text('Hello World'),
-///               ));
+///               return themes.wrap(
+///                 Container(
+///                   alignment: Alignment.center,
+///                   color: Colors.white,
+///                   child: const Text('Hello World'),
+///                 ),
+///               );
 ///             },
 ///           ),
 ///         );
 ///       },
-///       child: Center(child: Text('Tap Here')),
+///       child: const Center(child: Text('Tap Here')),
 ///     );
 ///   }
 /// }
 ///
 /// class MyApp extends StatelessWidget {
+///   const MyApp({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return MaterialApp(
+///     return const MaterialApp(
 ///       home: Scaffold(
 ///         // Override the DefaultTextStyle defined by the Scaffold.
 ///         // Descendant widgets will inherit this big blue text style.

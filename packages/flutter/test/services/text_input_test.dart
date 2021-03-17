@@ -7,8 +7,7 @@ import 'dart:convert' show utf8;
 import 'dart:convert' show jsonDecode;
 
 import 'package:flutter/services.dart';
-import 'package:flutter_test/flutter_test.dart' show TestWidgetsFlutterBinding;
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -134,7 +133,7 @@ void main() {
     test('basic structure', () async {
       const TextInputType text = TextInputType.text;
       const TextInputType number = TextInputType.number;
-      const TextInputType number2 = TextInputType.numberWithOptions();
+      const TextInputType number2 = TextInputType.numberWithOptions(); // ignore: use_named_constants
       const TextInputType signed = TextInputType.numberWithOptions(signed: true);
       const TextInputType signed2 = TextInputType.numberWithOptions(signed: true);
       const TextInputType decimal = TextInputType.numberWithOptions(decimal: true);
@@ -215,7 +214,7 @@ void main() {
     test('TextInputClient performPrivateCommand method is called with float',
         () async {
       // Assemble a TextInputConnection so we can verify its change in state.
-      final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue());
+      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
       const TextInputConfiguration configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
 
@@ -243,7 +242,7 @@ void main() {
         'TextInputClient performPrivateCommand method is called with CharSequence array',
         () async {
       // Assemble a TextInputConnection so we can verify its change in state.
-      final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue());
+      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
       const TextInputConfiguration configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
 
@@ -271,7 +270,7 @@ void main() {
         'TextInputClient performPrivateCommand method is called with CharSequence',
         () async {
       // Assemble a TextInputConnection so we can verify its change in state.
-      final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue());
+      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
       const TextInputConfiguration configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
 
@@ -300,7 +299,7 @@ void main() {
         'TextInputClient performPrivateCommand method is called with float array',
         () async {
       // Assemble a TextInputConnection so we can verify its change in state.
-      final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue());
+      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
       const TextInputConfiguration configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
 
@@ -328,7 +327,7 @@ void main() {
     test('TextInputClient showAutocorrectionPromptRect method is called',
         () async {
       // Assemble a TextInputConnection so we can verify its change in state.
-      final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue());
+      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
       const TextInputConfiguration configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
 
@@ -352,7 +351,7 @@ void main() {
 
   test('TextEditingValue.isComposingRangeValid', () async {
     // The composing range is empty.
-    expect(const TextEditingValue(text: '').isComposingRangeValid, isFalse);
+    expect(TextEditingValue.empty.isComposingRangeValid, isFalse);
 
     expect(
       const TextEditingValue(text: 'test', composing: TextRange(start: 1, end: 0)).isComposingRangeValid,

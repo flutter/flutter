@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import 'base/common.dart';
@@ -142,8 +144,6 @@ class FlutterVersion {
   String _frameworkVersion;
   String get frameworkVersion => _frameworkVersion;
 
-  String get frameworkDate => frameworkCommitDate;
-
   String get dartSdkVersion => globals.cache.dartSdkVersion;
 
   String get engineRevision => globals.cache.engineRevision;
@@ -178,6 +178,8 @@ class FlutterVersion {
     'engineRevision': engineRevision,
     'dartSdkVersion': dartSdkVersion,
   };
+
+  String get frameworkDate => frameworkCommitDate;
 
   /// A date String describing the last framework commit.
   ///

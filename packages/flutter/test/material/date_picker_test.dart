@@ -56,7 +56,7 @@ void main() {
 
   Future<void> prepareDatePicker(
     WidgetTester tester,
-    Future<void> callback(Future<DateTime?> date),
+    Future<void> Function(Future<DateTime?> date) callback,
     { TextDirection textDirection = TextDirection.ltr }
   ) async {
     late BuildContext buttonContext;
@@ -132,7 +132,7 @@ void main() {
       });
     });
 
-    testWidgets('Can toggle to input entry mode', (WidgetTester tester) async {
+    testWidgets('Can switch from calendar to input entry mode', (WidgetTester tester) async {
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         expect(find.byType(TextField), findsNothing);
         await tester.tap(find.byIcon(Icons.edit));
@@ -141,13 +141,50 @@ void main() {
       });
     });
 
-    testWidgets('Toggle to input mode keeps selected date', (WidgetTester tester) async {
+    testWidgets('Can switch from input to calendar entry mode', (WidgetTester tester) async {
+      initialEntryMode = DatePickerEntryMode.input;
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {
+        expect(find.byType(TextField), findsOneWidget);
+        await tester.tap(find.byIcon(Icons.calendar_today));
+        await tester.pumpAndSettle();
+        expect(find.byType(TextField), findsNothing);
+      });
+    });
+
+    testWidgets('Can not switch out of calendarOnly mode', (WidgetTester tester) async {
+      initialEntryMode = DatePickerEntryMode.calendarOnly;
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {
+        expect(find.byType(TextField), findsNothing);
+        expect(find.byIcon(Icons.edit), findsNothing);
+      });
+    });
+
+    testWidgets('Can not switch out of inputOnly mode', (WidgetTester tester) async {
+      initialEntryMode = DatePickerEntryMode.inputOnly;
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {
+        expect(find.byType(TextField), findsOneWidget);
+        expect(find.byIcon(Icons.calendar_today), findsNothing);
+      });
+    });
+
+    testWidgets('Switching to input mode keeps selected date', (WidgetTester tester) async {
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         await tester.tap(find.text('12'));
         await tester.tap(find.byIcon(Icons.edit));
         await tester.pumpAndSettle();
         await tester.tap(find.text('OK'));
         expect(await date, DateTime(2016, DateTime.january, 12));
+      });
+    });
+
+    testWidgets('Input only mode should validate date', (WidgetTester tester) async {
+      initialEntryMode = DatePickerEntryMode.inputOnly;
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {
+        // Enter text input mode and type an invalid date to get error.
+        await tester.enterText(find.byType(TextField), '1234567');
+        await tester.tap(find.text('OK'));
+        await tester.pumpAndSettle();
+        expect(find.text('Invalid format.'), findsOneWidget);
       });
     });
 
@@ -326,8 +363,8 @@ void main() {
           ),
         ),
       );
-      await tester.tap(find.text('X'));
-      await tester.pumpAndSettle();
+      await tester.pump(); // start theme animation
+      await tester.pump(const Duration(seconds: 5)); // end theme animation
       final Material themeDialogMaterial = tester.widget<Material>(find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first);
       expect(themeDialogMaterial.shape, customDialogTheme.shape);
       expect(themeDialogMaterial.elevation, customDialogTheme.elevation);
@@ -1095,7 +1132,7 @@ class _DatePickerObserver extends NavigatorObserver {
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (route.toString().contains('_DialogRoute')) {
+    if (route is DialogRoute) {
       datePickerCount++;
     }
     super.didPush(route, previousRoute);

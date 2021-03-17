@@ -317,11 +317,7 @@ class RenderSliverOffstage extends RenderProxySliver {
     if (!offstage)
       geometry = child!.geometry;
     else
-      geometry = const SliverGeometry(
-        scrollExtent: 0.0,
-        visible: false,
-        maxPaintExtent: 0.0,
-      );
+      geometry = SliverGeometry.zero;
   }
 
   @override

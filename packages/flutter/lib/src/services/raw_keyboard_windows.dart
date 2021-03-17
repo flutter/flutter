@@ -9,6 +9,11 @@ import 'keyboard_key.dart';
 import 'keyboard_maps.dart';
 import 'raw_keyboard.dart';
 
+// Virtual key VK_PROCESSKEY in Win32 API.
+//
+// Key down events related to IME operations use this as keyCode.
+const int _vkProcessKey = 0xe5;
+
 /// Platform-specific key event data for Windows.
 ///
 /// This object contains information about key events obtained from Windows's
@@ -192,6 +197,15 @@ class RawKeyEventDataWindows extends RawKeyEventData {
       case ModifierKey.symbolModifier:
         return KeyboardSide.all;
     }
+  }
+
+  @override
+  bool shouldDispatchEvent() {
+    // In Win32 API, down events related to IME operations use VK_PROCESSKEY as
+    // keyCode. This event, as well as the following key up event (which uses a
+    // normal keyCode), should be skipped, because the effect of IME operations
+    // will be handled by the text input API.
+    return keyCode != _vkProcessKey;
   }
 
   // These are not the values defined by the Windows header for each modifier. Since they

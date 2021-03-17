@@ -266,23 +266,19 @@ typedef RefreshCallback = Future<void> Function();
 /// sliver such as [CupertinoSliverNavigationBar] and your main scrollable
 /// content's sliver.
 ///
-/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_cupertino}
 ///
 /// When the user scrolls past [refreshTriggerPullDistance],
 /// this sample shows the default iOS pull to refresh indicator for 1 second and
 /// adds a new item to the top of the list view.
 ///
-/// ```dart imports
-/// import 'package:flutter/cupertino.dart';
-/// ```
-///
 /// ```dart
-/// List<Color> colors = [
+/// List<Color> colors = <Color>[
 ///   CupertinoColors.systemYellow,
 ///   CupertinoColors.systemOrange,
 ///   CupertinoColors.systemPink
 /// ];
-/// List<Widget> items = [
+/// List<Widget> items = <Widget>[
 ///   Container(color: CupertinoColors.systemPink, height: 100.0),
 ///   Container(color: CupertinoColors.systemOrange, height: 100.0),
 ///   Container(color: CupertinoColors.systemYellow, height: 100.0),
@@ -300,7 +296,7 @@ typedef RefreshCallback = Future<void> Function();
 ///             refreshTriggerPullDistance: 100.0,
 ///             refreshIndicatorExtent: 60.0,
 ///             onRefresh: () async {
-///               await Future.delayed(Duration(milliseconds: 1000));
+///               await Future<void>.delayed(const Duration(milliseconds: 1000));
 ///               setState(() {
 ///                 items.insert(0, Container(color: colors[items.length % 3], height: 100.0));
 ///               });

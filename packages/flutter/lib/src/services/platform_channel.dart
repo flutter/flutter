@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 
@@ -11,9 +10,6 @@ import 'binary_messenger.dart';
 import 'binding.dart';
 import 'message_codec.dart';
 import 'message_codecs.dart';
-
-// Examples can assume:
-// // @dart = 2.9
 
 /// A named channel for communicating with platform plugins using asynchronous
 /// message passing.
@@ -49,14 +45,14 @@ class BasicMessageChannel<T> {
   final MessageCodec<T> codec;
 
   /// The messenger which sends the bytes for this channel, not null.
-  BinaryMessenger get binaryMessenger => _binaryMessenger ?? defaultBinaryMessenger;
+  BinaryMessenger get binaryMessenger => _binaryMessenger ?? ServicesBinding.instance!.defaultBinaryMessenger;
   final BinaryMessenger? _binaryMessenger;
 
   /// Sends the specified [message] to the platform plugins on this channel.
   ///
   /// Returns a [Future] which completes to the received response, which may
   /// be null.
-  Future<T> send(T message) async {
+  Future<T?> send(T message) async {
     return codec.decodeMessage(await binaryMessenger.send(name, codec.encodeMessage(message)));
   }
 
@@ -69,7 +65,7 @@ class BasicMessageChannel<T> {
   ///
   /// The handler's return value is sent back to the platform plugins as a
   /// message reply. It may be null.
-  void setMessageHandler(Future<T> Function(T message)? handler) {
+  void setMessageHandler(Future<T> Function(T? message)? handler) {
     if (handler == null) {
       binaryMessenger.setMessageHandler(name, null);
     } else {
@@ -90,7 +86,7 @@ class BasicMessageChannel<T> {
   ///
   /// This is intended for testing. Messages intercepted in this manner are not
   /// sent to platform plugins.
-  void setMockMessageHandler(Future<T> Function(T message)? handler) {
+  void setMockMessageHandler(Future<T> Function(T? message)? handler) {
     if (handler == null) {
       binaryMessenger.setMockMessageHandler(name, null);
     } else {
@@ -143,7 +139,7 @@ class MethodChannel {
   /// The messenger used by this channel to send platform messages.
   ///
   /// The messenger may not be null.
-  BinaryMessenger get binaryMessenger => _binaryMessenger ?? defaultBinaryMessenger;
+  BinaryMessenger get binaryMessenger => _binaryMessenger ?? ServicesBinding.instance!.defaultBinaryMessenger;
   final BinaryMessenger? _binaryMessenger;
 
   @optionalTypeArgs
@@ -196,9 +192,9 @@ class MethodChannel {
   ///   static const MethodChannel _channel = MethodChannel('music');
   ///
   ///   static Future<bool> isLicensed() async {
-  ///     // invokeMethod returns a Future<T> which can be inferred as bool
-  ///     // in this context.
-  ///     return _channel.invokeMethod('isLicensed');
+  ///     // invokeMethod returns a Future<T?>, so we handle the case where
+  ///     // the return value is null by treating null as false.
+  ///     return _channel.invokeMethod<bool>('isLicensed').then<bool>((bool? value) => value ?? false);
   ///   }
   ///
   ///   static Future<List<Song>> songs() async {
@@ -207,8 +203,8 @@ class MethodChannel {
   ///     // code thus cannot assume e.g. List<Map<String, String>> even though
   ///     // the actual values involved would support such a typed container.
   ///     // The correct type cannot be inferred with any value of `T`.
-  ///     final List<dynamic> songs = await _channel.invokeMethod('getSongs');
-  ///     return songs.map(Song.fromJson).toList();
+  ///     final List<dynamic>? songs = await _channel.invokeMethod<List<dynamic>>('getSongs');
+  ///     return songs?.map(Song.fromJson).toList() ?? <Song>[];
   ///   }
   ///
   ///   static Future<void> play(Song song, double volume) async {
@@ -233,7 +229,7 @@ class MethodChannel {
   ///   final String artist;
   ///
   ///   static Song fromJson(dynamic json) {
-  ///     return Song(json['id'], json['title'], json['artist']);
+  ///     return Song(json['id'] as String, json['title'] as String, json['artist'] as String);
   ///   }
   /// }
   /// ```
@@ -296,7 +292,7 @@ class MethodChannel {
   ///     NSArray* items = [BWPlayApi items];
   ///     NSMutableArray* json = [NSMutableArray arrayWithCapacity:items.count];
   ///     for (final BWPlayItem* item in items) {
-  ///       [json addObject:@{@"id":item.itemId, @"title":item.name, @"artist":item.artist}];
+  ///       [json addObject:@{ @"id":item.itemId, @"title":item.name, @"artist":item.artist }];
   ///     }
   ///     result(json);
   ///   } else if ([@"play" isEqualToString:call.method]) {
@@ -433,7 +429,7 @@ class MethodChannel {
   /// is not set.
   bool checkMockMethodCallHandler(Future<dynamic> Function(MethodCall call)? handler) => _methodChannelMockHandlers[this] == handler;
 
-  Future<ByteData?> _handleAsMethodCall(ByteData? message, Future<dynamic>? handler(MethodCall call)) async {
+  Future<ByteData?> _handleAsMethodCall(ByteData? message, Future<dynamic>? Function(MethodCall call) handler) async {
     final MethodCall call = codec.decodeMethodCall(message);
     try {
       return codec.encodeSuccessEnvelope(await handler(call));
@@ -513,7 +509,7 @@ class EventChannel {
   final MethodCodec codec;
 
   /// The messenger used by this channel to send platform messages, not null.
-  BinaryMessenger get binaryMessenger => _binaryMessenger ?? defaultBinaryMessenger;
+  BinaryMessenger get binaryMessenger => _binaryMessenger ?? ServicesBinding.instance!.defaultBinaryMessenger;
   final BinaryMessenger? _binaryMessenger;
 
   /// Sets up a broadcast stream for receiving events on this channel.

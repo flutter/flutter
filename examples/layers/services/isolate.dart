@@ -197,6 +197,8 @@ class CalculationManager {
 // This is a StatefulWidget in order to hold the CalculationManager and
 // the AnimationController for the running animation.
 class IsolateExampleWidget extends StatefulWidget {
+  const IsolateExampleWidget({Key? key}) : super(key: key);
+
   @override
   IsolateExampleState createState() => IsolateExampleState();
 }
@@ -302,5 +304,5 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
 }
 
 void main() {
-  runApp(MaterialApp(home: IsolateExampleWidget()));
+  runApp(const MaterialApp(home: IsolateExampleWidget()));
 }

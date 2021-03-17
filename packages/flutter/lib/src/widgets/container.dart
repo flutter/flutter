@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -28,14 +27,14 @@ import 'image.dart';
 /// This sample shows a radial gradient that draws a moon on a night sky:
 ///
 /// ```dart
-/// DecoratedBox(
+/// const DecoratedBox(
 ///   decoration: BoxDecoration(
 ///     gradient: RadialGradient(
-///       center: const Alignment(-0.5, -0.6),
+///       center: Alignment(-0.5, -0.6),
 ///       radius: 0.15,
 ///       colors: <Color>[
-///         const Color(0xFFEEEEEE),
-///         const Color(0xFF111133),
+///         Color(0xFFEEEEEE),
+///         Color(0xFF111133),
 ///       ],
 ///       stops: <double>[0.9, 1.0],
 ///     ),

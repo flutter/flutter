@@ -136,7 +136,7 @@ enum AnimationBehavior {
 ///
 /// ```dart
 /// class Foo extends StatefulWidget {
-///   Foo({ Key? key, required this.duration }) : super(key: key);
+///   const Foo({ Key? key, required this.duration }) : super(key: key);
 ///
 ///   final Duration duration;
 ///
@@ -312,7 +312,7 @@ class AnimationController extends Animation<double>
 
   /// The length of time this animation should last when going in [reverse].
   ///
-  /// The value of [duration] us used if [reverseDuration] is not specified or
+  /// The value of [duration] is used if [reverseDuration] is not specified or
   /// set to null.
   Duration? reverseDuration;
 
@@ -507,6 +507,10 @@ class AnimationController extends Animation<double>
   /// regardless of whether `target` > [value] or not. At the end of the
   /// animation, when `target` is reached, [status] is reported as
   /// [AnimationStatus.completed].
+  ///
+  /// If the `target` argument is the same as the current [value] of the
+  /// animation, then this won't animate, and the returned [TickerFuture] will
+  /// be already complete.
   TickerFuture animateTo(double target, { Duration? duration, Curve curve = Curves.linear }) {
     assert(() {
       if (this.duration == null && duration == null) {

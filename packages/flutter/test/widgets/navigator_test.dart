@@ -84,10 +84,8 @@ class OnTapPage extends StatelessWidget {
       body: GestureDetector(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
-        child: Container(
-          child: Center(
-            child: Text(id, style: Theme.of(context).textTheme.headline3),
-          ),
+        child: Center(
+          child: Text(id, style: Theme.of(context).textTheme.headline3),
         ),
       ),
     );
@@ -279,7 +277,7 @@ void main() {
     expect(log, isEmpty);
     await tester.tap(find.text('left'));
     expect(log, equals(<String>['left']));
-    await tester.tap(find.text('right'));
+    await tester.tap(find.text('right'), warnIfMissed: false);
     expect(log, equals(<String>['left']));
   });
 
@@ -2489,6 +2487,62 @@ void main() {
     expect(tester.takeException(), isAssertionError);
   });
 
+  testWidgets('hero controller throws has correct error message', (WidgetTester tester) async {
+    final HeroControllerSpy spy = HeroControllerSpy();
+    await tester.pumpWidget(
+      HeroControllerScope(
+        controller: spy,
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: <Widget>[
+              Navigator(
+                initialRoute: 'navigator1',
+                onGenerateRoute: (RouteSettings s) {
+                  return MaterialPageRoute<void>(
+                    builder: (BuildContext c) {
+                      return const Placeholder();
+                    },
+                    settings: s,
+                  );
+                },
+              ),
+              Navigator(
+                initialRoute: 'navigator2',
+                onGenerateRoute: (RouteSettings s) {
+                  return MaterialPageRoute<void>(
+                    builder: (BuildContext c) {
+                      return const Placeholder();
+                    },
+                    settings: s,
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    final FlutterError error = exception as FlutterError;
+    expect(
+      error.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'FlutterError\n'
+        '   A HeroController can not be shared by multiple Navigators. The\n'
+        '   Navigators that share the same HeroController are:\n'
+        '   - NavigatorState#00000(tickers: tracking 1 ticker)\n'
+        '   - NavigatorState#00000(tickers: tracking 1 ticker)\n'
+        '   Please create a HeroControllerScope for each Navigator or use a\n'
+        '   HeroControllerScope.none to prevent subtree from receiving a\n'
+        '   HeroController.\n'
+        ''
+      ),
+    );
+  });
+
   group('Page api', (){
     Widget buildNavigator({
       required List<Page<dynamic>> pages,
@@ -2550,6 +2604,136 @@ void main() {
       expect(find.text('third'), findsNothing);
       expect(find.text('second'), findsNothing);
       expect(find.text('initial'), findsOneWidget);
+    });
+
+    testWidgets('throw if onPopPage callback is not provided', (WidgetTester tester) async {
+      final List<TestPage> myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name:'initial'),
+        const TestPage(key: ValueKey<String>('2'), name:'second'),
+        const TestPage(key: ValueKey<String>('3'), name:'third'),
+      ];
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: MediaQueryData.fromWindow(WidgetsBinding.instance!.window),
+          child: Localizations(
+            locale: const Locale('en', 'US'),
+            delegates: const <LocalizationsDelegate<dynamic>>[
+              DefaultMaterialLocalizations.delegate,
+              DefaultWidgetsLocalizations.delegate
+            ],
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Navigator(
+                pages: myPages,
+              ),
+            ),
+          ),
+        )
+      );
+
+      final dynamic exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception as FlutterError;
+      expect(
+        error.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   The Navigator.onPopPage must be provided to use the\n'
+          '   Navigator.pages API\n'
+          ''
+        ),
+      );
+    });
+
+    Widget _buildFrame(String action) {
+      const TestPage myPage = TestPage(key: ValueKey<String>('1'), name:'initial');
+      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+        '/' : (BuildContext context) => OnTapPage(
+          id: action,
+          onTap: (){
+            if (action == 'push') {
+              Navigator.of(context).push(myPage.createRoute(context));
+            } else if (action == 'pushReplacement') {
+              Navigator.of(context).pushReplacement(myPage.createRoute(context));
+            } else if (action == 'pushAndRemoveUntil') {
+              Navigator.of(context).pushAndRemoveUntil(myPage.createRoute(context), (_) => true);
+            }
+          },
+        ),
+      };
+
+      return MaterialApp(routes: routes);
+    }
+
+    void _checkException(WidgetTester tester) {
+      final dynamic exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception as FlutterError;
+      expect(
+        error.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   A page-based route should not be added using the imperative api.\n'
+          '   Provide a new list with the corresponding Page to Navigator.pages\n'
+          '   instead.\n'
+          ''
+        ),
+      );
+    }
+
+    testWidgets('throw if add page-based route using the imperative api - push', (WidgetTester tester) async {
+      await tester.pumpWidget(_buildFrame('push'));
+      await tester.tap(find.text('push'));
+      await tester.pumpAndSettle();
+      _checkException(tester);
+    });
+
+    testWidgets('throw if add page-based route using the imperative api - pushReplacement', (WidgetTester tester) async {
+      await tester.pumpWidget(_buildFrame('pushReplacement'));
+      await tester.tap(find.text('pushReplacement'));
+      await tester.pumpAndSettle();
+      _checkException(tester);
+    });
+
+    testWidgets('throw if add page-based route using the imperative api - pushAndRemoveUntil', (WidgetTester tester) async {
+      await tester.pumpWidget(_buildFrame('pushAndRemoveUntil'));
+      await tester.tap(find.text('pushAndRemoveUntil'));
+      await tester.pumpAndSettle();
+      _checkException(tester);
+    });
+
+    testWidgets('throw if page list is empty', (WidgetTester tester) async {
+      final List<TestPage> myPages = <TestPage>[];
+      final FlutterExceptionHandler? originalOnError = FlutterError.onError;
+      FlutterErrorDetails? firstError;
+      FlutterError.onError = (FlutterErrorDetails? detail) {
+        // We only care about the first error;
+        firstError ??= detail;
+      };
+      await tester.pumpWidget(
+          MediaQuery(
+            data: MediaQueryData.fromWindow(WidgetsBinding.instance!.window),
+            child: Localizations(
+              locale: const Locale('en', 'US'),
+              delegates: const <LocalizationsDelegate<dynamic>>[
+                DefaultMaterialLocalizations.delegate,
+                DefaultWidgetsLocalizations.delegate
+              ],
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Navigator(
+                  pages: myPages,
+                ),
+              ),
+            ),
+          )
+      );
+      FlutterError.onError = originalOnError;
+      expect(
+        firstError!.exception.toString(),
+        'The Navigator.pages must not be empty to use the Navigator.pages API',
+      );
     });
 
     testWidgets('can push and pop pages using page api', (WidgetTester tester) async {
