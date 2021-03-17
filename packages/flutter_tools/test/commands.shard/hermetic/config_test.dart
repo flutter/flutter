@@ -108,7 +108,6 @@ void main() {
         '--enable-macos-desktop',
       ]);
 
-
       expect(globals.config.getValue('enable-android'), true);
       expect(globals.config.getValue('enable-ios'), true);
       expect(globals.config.getValue('enable-web'), true);
