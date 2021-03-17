@@ -314,6 +314,18 @@ class MediaQueryData {
 
   /// Whether the device is inverting the colors of the platform.
   ///
+  /// Setting it, for instace by using: 
+  /// 
+  /// ```dart
+  /// MediaQuery(
+  ///   data: MediaQuery.of(context).copyWith(
+  ///     invertColors: false),
+  ///   child: child
+  /// ),
+  /// ```
+  ///
+  /// will have no effect on `child`, and the platform requested value will be used.
+  ///
   /// This flag is currently only updated on iOS devices.
   ///
   /// See also:
@@ -324,6 +336,18 @@ class MediaQueryData {
 
   /// Whether the user requested a high contrast between foreground and background
   /// content on iOS, via Settings -> Accessibility -> Increase Contrast.
+  ///
+  /// Setting it, for instace by using: 
+  /// 
+  /// ```dart
+  /// MediaQuery(
+  ///   data: MediaQuery.of(context).copyWith(
+  ///     highContrast: false),
+  ///   child: child
+  /// ),
+  /// ```
+  ///
+  /// will have no effect on `child`, and the platform requested value will be used.
   ///
   /// This flag is currently only updated on iOS devices that are running iOS 13
   /// or above.
@@ -340,6 +364,18 @@ class MediaQueryData {
 
   /// Whether the platform is requesting that text be drawn with a bold font
   /// weight.
+  ///
+  /// Setting it, for instace by using: 
+  /// 
+  /// ```dart
+  /// MediaQuery(
+  ///   data: MediaQuery.of(context).copyWith(
+  ///     boldText: false),
+  ///   child: child
+  /// ),
+  /// ```
+  ///
+  /// will override the value that the platform is requesting.
   ///
   /// See also:
   ///
