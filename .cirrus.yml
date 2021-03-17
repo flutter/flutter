@@ -5,12 +5,9 @@
 # See  https://confluence.atlassian.com/bitbucket/yaml-anchors-960154027.html
 
 
-#use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
-
 environment:
   # For details about environment variables used in Cirrus, including how encrypted variables work,
   # see https://cirrus-ci.org/guide/writing-tasks/#environment-variables
-  #GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
   # We change Flutter's directory to include a space in its name (see $CIRRUS_WORKING_DIR) so that
   # we constantly test path names with spaces in them. The FLUTTER_SDK_PATH_WITH_SPACE variable must
   # therefore have a space in it.
@@ -23,7 +20,6 @@ environment:
   # TODO(amirha): remove once we've migrated to newer Gradle
   CIRRUS_CHANGE_MESSAGE: ""
   CIRRUS_COMMIT_MESSAGE: ""
-  IMAGE_PROJECT: "flutter-cirrus"
 
 
 gcp_credentials: ENCRYPTED[1917385f09764ac58515f6fee14ed58688afc808849b244969d41d0b082061eecd0a4c8ba801f00833877a12b51f8bb5]
@@ -40,6 +36,7 @@ task:
     namespace: default
     cpu: $CPU
     memory: $MEMORY
+    use_in_memory_disk: $USE_IN_MEMORY_DISK
   environment:
     # We shrink our default resource requirement as much as possible because that way we are more
     # likely to get scheduled. We require 4G of RAM because most of the shards (all but one as of
