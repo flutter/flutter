@@ -216,7 +216,7 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// It is used, for example, to make sets of keys with members like
   /// [controlRight] and [controlLeft] and convert that set to contain just
   /// [control], so that the question "is any control key down?" can be asked.
-  static Set<LogicalKeyboardKey> collapseSynonyms(Set<LogicalKeyboardKey> input) {
+  static Set<LogicalKeyboardKey> collapseSynonyms(Iterable<LogicalKeyboardKey> input) {
     final Set<LogicalKeyboardKey> result = <LogicalKeyboardKey>{};
     for (final LogicalKeyboardKey key in input) {
       final LogicalKeyboardKey? synonym = _synonyms[key];
