@@ -13,7 +13,10 @@ namespace internal {
 
 namespace os_win {
 
-void UniqueFDTraits::Free(HANDLE fd) {
+std::mutex UniqueFDTraits::file_map_mutex;
+std::map<HANDLE, DirCacheEntry> UniqueFDTraits::file_map;
+
+void UniqueFDTraits::Free_Handle(HANDLE fd) {
   CloseHandle(fd);
 }
 
