@@ -104,13 +104,8 @@ abstract class Repository {
     if (!useExistingCheckout && _checkoutDirectory.existsSync()) {
       stdio.printTrace('Deleting $name from ${_checkoutDirectory.path}...');
       _checkoutDirectory.deleteSync(recursive: true);
-    } else if (useExistingCheckout && _checkoutDirectory.existsSync()) {
-      git.run(
-        <String>['checkout', initialRef],
-        'Checking out $initialRef',
-        workingDirectory: _checkoutDirectory.path,
-      );
     }
+
     if (!_checkoutDirectory.existsSync()) {
       stdio.printTrace(
         'Cloning $name from ${fetchRemote.url} to ${_checkoutDirectory.path}...',
@@ -128,7 +123,6 @@ abstract class Repository {
         'Cloning $name repo',
         workingDirectory: parentDirectory.path,
       );
-      // TODO test this
       if (pushRemote != null) {
         git.run(
           <String>['remote', 'add', pushRemote.name, pushRemote.url],
@@ -152,13 +146,13 @@ abstract class Repository {
           );
         }
       }
-      git.run(
-        <String>['checkout', initialRef],
-        'Checking out initialRef $initialRef',
-        workingDirectory: _checkoutDirectory.path,
-      );
     }
 
+    git.run(
+      <String>['checkout', '${fetchRemote.name}/$initialRef'],
+      'Checking out initialRef $initialRef',
+      workingDirectory: _checkoutDirectory.path,
+    );
     final String revision = reverseParse('HEAD');
     stdio.printTrace(
       'Repository $name is checked out at revision "$revision".',
@@ -199,6 +193,17 @@ abstract class Repository {
     git.run(
       <String>['fetch', remoteName, '--tags'],
       'fetch $remoteName --tags',
+      workingDirectory: checkoutDirectory.path,
+    );
+  }
+
+  /// Create (and checkout) a new branch based on the current HEAD.
+  ///
+  /// Runs `git checkout -b $branchName`.
+  void newBranch(String branchName) {
+    git.run(
+      <String>['checkout', '-b', branchName],
+      'create & checkout new branch $branchName',
       workingDirectory: checkoutDirectory.path,
     );
   }

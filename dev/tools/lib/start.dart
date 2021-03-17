@@ -170,6 +170,8 @@ class StartCommand extends Command<void> {
           'Text should match the regex pattern /${releaseCandidateBranchRegex.pattern}/.');
     }
 
+    // TODO add dart-hash flag
+
     final Int64 unixDate = Int64(DateTime.now().millisecondsSinceEpoch);
     final pb.ConductorState state = pb.ConductorState();
 
@@ -189,12 +191,17 @@ class StartCommand extends Command<void> {
         url: engineMirror,
       ),
     );
+    // Create a new branch so that we don't accidentally push to upstream
+    // candidateBranch.
+    engine.newBranch('cherrypicks-$candidateBranch');
     engineCherrypicks = _sortCherrypicks(
       repository: engine,
       cherrypicks: engineCherrypicks,
       upstreamRef: EngineRepository.defaultBranch,
       releaseRef: candidateBranch,
     );
+
+    // TODO try to apply
     final String engineHead = engine.reverseParse('HEAD');
     state.engine = pb.Repository(
       candidateBranch: candidateBranch,
@@ -215,6 +222,7 @@ class StartCommand extends Command<void> {
         url: frameworkMirror,
       ),
     );
+    framework.newBranch('cherrypicks-$candidateBranch');
     frameworkCherrypicks = _sortCherrypicks(
       repository: framework,
       cherrypicks: frameworkCherrypicks,
@@ -274,8 +282,8 @@ class StartCommand extends Command<void> {
     }
 
     final String branchPoint = repository.branchPoint(
-      upstreamRef,
-      releaseRef,
+      '${repository.fetchRemote.name}/$upstreamRef',
+      '${repository.fetchRemote.name}/$releaseRef',
     );
 
     // `git rev-list` returns newest first, so reverse this list
@@ -298,7 +306,10 @@ class StartCommand extends Command<void> {
 
     // We were given input cherrypicks that were not present in the upstream
     // rev-list
-    stdio.printError('The following cherrypicks were not found in the upstream $upstreamRef branch:');
+    stdio.printError(
+      'The following ${repository.name} cherrypicks were not found in the '
+      'upstream $upstreamRef branch:',
+    );
     for (final String cp in <String>[...validatedCherrypicks, ...unknownCherrypicks]) {
       stdio.printError('\t$cp');
     }
