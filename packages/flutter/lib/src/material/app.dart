@@ -690,7 +690,7 @@ class MaterialApp extends StatefulWidget {
 ///  * [ScrollBehavior], the default scrolling behavior extended by this class.
 class MaterialScrollBehavior extends ScrollBehavior {
   /// Creates a MaterialScrollBehavior that decorates [Scrollable]s with
-  /// [GlowingOverscrollIndicators]s and [Scrollbar]s based on the current
+  /// [GlowingOverscrollIndicator]s and [Scrollbar]s based on the current
   /// platform.
   const MaterialScrollBehavior();
 
