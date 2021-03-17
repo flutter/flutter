@@ -469,7 +469,7 @@ void main() {
     );
   });
 
-  testWidgets('SliverPadding consumes only its padding from the overlap of its parent\'s constraints', (WidgetTester tester) async {
+  testWidgets("SliverPadding consumes only its padding from the overlap of its parent's constraints", (WidgetTester tester) async {
     final _MockRenderSliver mock = _MockRenderSliver();
     final RenderSliverPadding renderObject = RenderSliverPadding(
       padding: const EdgeInsets.only(top: 20),
@@ -494,7 +494,7 @@ void main() {
     expect(mock.constraints.overlap, 80.0);
   });
 
-  testWidgets('SliverPadding passes the overlap to the child if it\'s negative', (WidgetTester tester) async {
+  testWidgets("SliverPadding passes the overlap to the child if it's negative", (WidgetTester tester) async {
     final _MockRenderSliver mock = _MockRenderSliver();
     final RenderSliverPadding renderObject = RenderSliverPadding(
       padding: const EdgeInsets.only(top: 20),

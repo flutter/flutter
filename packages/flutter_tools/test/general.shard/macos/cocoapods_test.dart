@@ -368,7 +368,7 @@ void main() {
 
       fileSystem.file(fileSystem.path.join('project', 'ios', 'Podfile'))
         ..createSync()
-        ..writeAsStringSync('plugin_pods = parse_KV_file(\'../.flutter-plugins\')');
+        ..writeAsStringSync("plugin_pods = parse_KV_file('../.flutter-plugins')");
 
       await expectLater(cocoaPodsUnderTest.processPods(
         xcodeProject: projectUnderTest.ios,
@@ -387,7 +387,7 @@ void main() {
 
       fileSystem.file(fileSystem.path.join('project', 'macos', 'Podfile'))
         ..createSync()
-        ..writeAsStringSync('plugin_pods = parse_KV_file(\'../.flutter-plugins\')');
+        ..writeAsStringSync("plugin_pods = parse_KV_file('../.flutter-plugins')");
 
       await cocoaPodsUnderTest.processPods(
         xcodeProject: projectUnderTest.macos,

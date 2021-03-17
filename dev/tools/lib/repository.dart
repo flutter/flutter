@@ -238,7 +238,7 @@ abstract class Repository {
         'commit',
         '--allow-empty',
         '-m',
-        '\'$message\'',
+        "'$message'",
       ],
       'create an empty commit',
       workingDirectory: checkoutDirectory.path,

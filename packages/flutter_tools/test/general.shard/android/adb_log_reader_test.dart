@@ -35,7 +35,7 @@ void main() {
           '-v',
           'time',
           '-T',
-          '\'$kLastLogcatTimestamp\'',
+          "'$kLastLogcatTimestamp'",
         ],
       )
     ]);

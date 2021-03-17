@@ -80,7 +80,7 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
     if (!appManifestFile.existsSync()) {
       invalidFiles[appManifestFile.path] = 'Error: $appManifestFile does not '
         'exist or could not be found. Please ensure an AndroidManifest.xml '
-        'exists for the app\'s base module.';
+        "exists for the app's base module.";
       return false;
     }
     XmlDocument document;
@@ -222,37 +222,37 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
     final YamlMap data = loadYaml(cacheFile.readAsStringSync()) as YamlMap;
     // validate yaml format.
     if (!data.containsKey('loading-units')) {
-      invalidFiles[cacheFile.path] = 'Invalid loading units yaml file, \'loading-units\' '
+      invalidFiles[cacheFile.path] = "Invalid loading units yaml file, 'loading-units' "
                                        'entry did not exist.';
       return loadingUnits;
     } else {
       if (data['loading-units'] is! YamlList && data['loading-units'] != null) {
-        invalidFiles[cacheFile.path] = 'Invalid loading units yaml file, \'loading-units\' '
+        invalidFiles[cacheFile.path] = "Invalid loading units yaml file, 'loading-units' "
                                          'is not a list.';
         return loadingUnits;
       }
       if (data['loading-units'] != null) {
         for (final dynamic loadingUnitData in data['loading-units']) {
           if (loadingUnitData is! YamlMap) {
-            invalidFiles[cacheFile.path] = 'Invalid loading units yaml file, \'loading-units\' '
+            invalidFiles[cacheFile.path] = "Invalid loading units yaml file, 'loading-units' "
                                              'is not a list of maps.';
             return loadingUnits;
           }
           final YamlMap loadingUnitDataMap = loadingUnitData as YamlMap;
           if (loadingUnitDataMap['id'] == null) {
             invalidFiles[cacheFile.path] = 'Invalid loading units yaml file, all '
-                                             'loading units must have an \'id\'';
+                                             "loading units must have an 'id'";
             return loadingUnits;
           }
           if (loadingUnitDataMap['libraries'] != null) {
             if (loadingUnitDataMap['libraries'] is! YamlList) {
-              invalidFiles[cacheFile.path] = 'Invalid loading units yaml file, \'libraries\' '
+              invalidFiles[cacheFile.path] = "Invalid loading units yaml file, 'libraries' "
                                                'is not a list.';
               return loadingUnits;
             }
             for (final dynamic node in loadingUnitDataMap['libraries'] as YamlList) {
               if (node is! String) {
-                invalidFiles[cacheFile.path] = 'Invalid loading units yaml file, \'libraries\' '
+                invalidFiles[cacheFile.path] = "Invalid loading units yaml file, 'libraries' "
                                                  'is not a list of strings.';
                 return loadingUnits;
               }

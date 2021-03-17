@@ -907,7 +907,7 @@ flutter:
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('pluginClass: none doesn\'t trigger registrant entry on macOS', () async {
+      testUsingContext("pluginClass: none doesn't trigger registrant entry on macOS", () async {
         when(flutterProject.isModule).thenReturn(true);
         // Create a plugin without a pluginClass.
         final Directory pluginDirectory = createFakePlugin(fs);
@@ -991,7 +991,7 @@ flutter:
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('pluginClass: none doesn\'t trigger registrant entry on Linux', () async {
+      testUsingContext("pluginClass: none doesn't trigger registrant entry on Linux", () async {
         when(flutterProject.isModule).thenReturn(false);
         // Create a plugin without a pluginClass.
         final Directory pluginDirectory = createFakePlugin(fs);
@@ -1099,7 +1099,7 @@ flutter:
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('pluginClass: none doesn\'t trigger registrant entry on Windows', () async {
+      testUsingContext("pluginClass: none doesn't trigger registrant entry on Windows", () async {
         when(flutterProject.isModule).thenReturn(false);
         // Create a plugin without a pluginClass.
         final Directory pluginDirectory = createFakePlugin(fs);
@@ -1738,7 +1738,7 @@ flutter:
         ));
         expect(
           testLogger.errorText,
-          'Plugin `url_launcher_linux_1` doesn\'t implement a plugin interface, '
+          "Plugin `url_launcher_linux_1` doesn't implement a plugin interface, "
           'nor sets a default implementation in pubspec.yaml.\n\n'
           'To set a default implementation, use:\n'
           'flutter:\n'
@@ -1798,7 +1798,7 @@ flutter:
         ));
         expect(
           testLogger.errorText,
-          'Plugin `url_launcher_linux` doesn\'t implement a plugin interface, '
+          "Plugin `url_launcher_linux` doesn't implement a plugin interface, "
           'nor sets a default implementation in pubspec.yaml.\n\n'
           'To set a default implementation, use:\n'
           'flutter:\n'
@@ -1812,7 +1812,7 @@ flutter:
           '  plugin:\n'
           '    implements: <plugin-interface>'
           '\n\n'
-          'Plugin `url_launcher_windows` doesn\'t implement a plugin interface, '
+          "Plugin `url_launcher_windows` doesn't implement a plugin interface, "
           'nor sets a default implementation in pubspec.yaml.\n\n'
           'To set a default implementation, use:\n'
           'flutter:\n'
@@ -1918,14 +1918,14 @@ void main() {
             '\n'
             '// @dart = 2.8\n'
             '\n'
-            'import \'package:app/main.dart\' as entrypoint;\n'
-            'import \'dart:io\'; // ignore: dart_io_import.\n'
-            'import \'package:url_launcher_linux${fs.path.separator}url_launcher_linux.dart\';\n'
-            'import \'package:awesome_macos/awesome_macos.dart\';\n'
-            'import \'package:url_launcher_macos${fs.path.separator}url_launcher_macos.dart\';\n'
-            'import \'package:url_launcher_windows${fs.path.separator}url_launcher_windows.dart\';\n'
+            "import 'package:app/main.dart' as entrypoint;\n"
+            "import 'dart:io'; // ignore: dart_io_import.\n"
+            "import 'package:url_launcher_linux${fs.path.separator}url_launcher_linux.dart';\n"
+            "import 'package:awesome_macos/awesome_macos.dart';\n"
+            "import 'package:url_launcher_macos${fs.path.separator}url_launcher_macos.dart';\n"
+            "import 'package:url_launcher_windows${fs.path.separator}url_launcher_windows.dart';\n"
             '\n'
-            '@pragma(\'vm:entry-point\')\n'
+            "@pragma('vm:entry-point')\n"
             'void _registerPlugins() {\n'
             '  if (Platform.isLinux) {\n'
             '      LinuxPlugin.registerWith();\n'

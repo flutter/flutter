@@ -93,7 +93,7 @@ void main() {
       '#l10n 38 (Hello for 123)\n'
       '#l10n 39 (Hello for price USD123.00)\n'
       '#l10n 40 (Hello for price BTC0.50 (with optional param))\n'
-      '#l10n 41 (Hello for price BTC\'0.50 (with special character))\n'
+      "#l10n 41 (Hello for price BTC'0.50 (with special character))\n"
       '#l10n 42 (Hello for price BTC"0.50 (with special character))\n'
       '#l10n 43 (Hello for price BTC"\'0.50 (with special character))\n'
       '#l10n 44 (Hello for Decimal Pattern 1,200,000)\n'
@@ -114,8 +114,8 @@ void main() {
       '#l10n 59 ([Hello] -World- #123#)\n'
       '#l10n 60 (\$!)\n'
       '#l10n 61 (One \$)\n'
-      '#l10n 62 (Flutter\'s amazing!)\n'
-      '#l10n 63 (Flutter\'s amazing, times 2!)\n'
+      "#l10n 62 (Flutter's amazing!)\n"
+      "#l10n 63 (Flutter's amazing, times 2!)\n"
       '#l10n 64 (Flutter is "amazing"!)\n'
       '#l10n 65 (Flutter is "amazing", times 2!)\n'
       '#l10n 66 (--- es ---)\n'
@@ -143,8 +143,8 @@ void main() {
       '#l10n 88 (ES - [Hola] -Mundo- #123#)\n'
       '#l10n 89 (ES - \$!)\n'
       '#l10n 90 (ES - One \$)\n'
-      '#l10n 91 (ES - Flutter\'s amazing!)\n'
-      '#l10n 92 (ES - Flutter\'s amazing, times 2!)\n'
+      "#l10n 91 (ES - Flutter's amazing!)\n"
+      "#l10n 92 (ES - Flutter's amazing, times 2!)\n"
       '#l10n 93 (ES - Flutter is "amazing"!)\n'
       '#l10n 94 (ES - Flutter is "amazing", times 2!)\n'
       '#l10n 95 (--- es_419 ---)\n'
