@@ -16,7 +16,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/ios/code_signing.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -114,7 +113,7 @@ void main() {
         workingDirectory: anyNamed('workingDirectory'),
       )).thenAnswer((_) => Future<ProcessResult>.value(exitsHappy));
 
-      expect(() async => await getCodeSigningIdentityDevelopmentTeam(
+      expect(() async => getCodeSigningIdentityDevelopmentTeam(
         iosApp: app,
         processManager: mockProcessManager,
         logger: logger,

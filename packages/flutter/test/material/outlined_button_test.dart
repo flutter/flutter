@@ -187,7 +187,7 @@ void main() {
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(color: hoverColor));
 
-    gesture.removePointer();
+    await gesture.removePointer();
   });
 
   testWidgets('Does OutlinedButton work with focus', (WidgetTester tester) async {
@@ -921,7 +921,7 @@ void main() {
     const Key childKey = Key('test child');
 
     Future<void> buildTest(VisualDensity visualDensity, {bool useText = false}) async {
-      return await tester.pumpWidget(
+      return tester.pumpWidget(
         MaterialApp(
           home: Directionality(
             textDirection: TextDirection.rtl,
@@ -1039,7 +1039,7 @@ void main() {
       for (final TextDirection textDirection in textDirectionOptions) {
         for (final Widget? icon in iconOptions) {
           final String testName = 'OutlinedButton'
-            ', text scale $textScaleFactor'
+            ', text scale $textScaleFactor' // ignore: missing_whitespace_between_adjacent_strings, https://github.com/dart-lang/linter/issues/2489
             '${icon != null ? ", with icon" : ""}'
             '${textDirection == TextDirection.rtl ? ", RTL" : ""}';
 

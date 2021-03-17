@@ -466,12 +466,12 @@ void main() {
         child: Text('XXX'),
       ),
     );
-    final WidgetPredicate popupMenu = (Widget widget) {
+    bool popupMenu(Widget widget) {
       final String widgetType = widget.runtimeType.toString();
       // TODO(mraleph): Remove the old case below.
       return widgetType == '_PopupMenu<int?>' // normal case
           || widgetType == '_PopupMenu'; // for old versions of Dart that don't reify method type arguments
-    };
+    }
 
     Future<void> openMenu(TextDirection textDirection, Alignment alignment) async {
       return TestAsyncUtils.guard<void>(() async {
@@ -1151,26 +1151,24 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: Container(
-            child: Center(
-              child: PopupMenuButton<String>(
-                onSelected: (String result) {
-                  selectedValue = result;
-                },
-                child: const Text('Menu Button'),
-                initialValue: '1',
-                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  const PopupMenuItem<String>(
-                    child: Text('1'),
-                    value: '1',
-                  ),
-                  const PopupMenuDivider(),
-                  const PopupMenuItem<String>(
-                    child: Text('2'),
-                    value: '2',
-                  ),
-                ],
-              ),
+          body: Center(
+            child: PopupMenuButton<String>(
+              onSelected: (String result) {
+                selectedValue = result;
+              },
+              child: const Text('Menu Button'),
+              initialValue: '1',
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  child: Text('1'),
+                  value: '1',
+                ),
+                const PopupMenuDivider(),
+                const PopupMenuItem<String>(
+                  child: Text('2'),
+                  value: '2',
+                ),
+              ],
             ),
           ),
         ),

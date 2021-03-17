@@ -23,6 +23,7 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 // The command used to actually launch the app with args in release/profile.
@@ -200,7 +201,7 @@ void main() {
     expect(launchResult.started, true);
     expect(launchResult.hasObservatory, false);
     expect(await device.stopApp(iosApp), false);
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('IOSDevice.startApp forwards all supported debugging options', () async {
@@ -290,7 +291,7 @@ void main() {
 
     expect(launchResult.started, true);
     expect(await device.stopApp(iosApp), false);
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 }
 

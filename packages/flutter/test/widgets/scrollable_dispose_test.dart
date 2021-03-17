@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/widgets.dart';
 
 import 'test_widgets.dart';
 
@@ -43,7 +41,7 @@ void main() {
             width: 400.0,
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              child: Container(
+              child: SizedBox(
                 width: 500.0,
                 child: ListView.builder(
                   controller: controller,

@@ -49,7 +49,7 @@ void main() {
         .thenAnswer((_) async => true);
       testDeviceManager.addDevice(device);
 
-      expect(() async => await createTestCommandRunner(command).run(<String>['install', '--device-user', '10']),
+      expect(() async => createTestCommandRunner(command).run(<String>['install', '--device-user', '10']),
         throwsToolExit(message: '--device-user is only supported for Android'));
     }, overrides: <Type, Generator>{
       Cache: () => Cache.test(),

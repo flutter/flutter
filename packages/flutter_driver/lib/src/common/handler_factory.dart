@@ -9,7 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_driver/driver_extension.dart';
 import 'package:flutter_driver/src/extension/wait_conditions.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -479,7 +478,7 @@ mixin CommandHandlerFactory {
   }
 
   // Waits until at the end of a frame the provided [condition] is [true].
-  Future<void> _waitUntilFrame(bool condition(), [ Completer<void>? completer ]) {
+  Future<void> _waitUntilFrame(bool Function() condition, [ Completer<void>? completer ]) {
     completer ??= Completer<void>();
     if (!condition()) {
       SchedulerBinding.instance!.addPostFrameCallback((Duration timestamp) {

@@ -23,7 +23,6 @@ import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/mocks.dart';
 
 final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   id: '1',
@@ -57,6 +56,7 @@ final FakeVmServiceRequest listViews = FakeVmServiceRequest(
     ],
   },
 );
+
 void main() {
   group('validateReloadReport', () {
     testUsingContext('invalid', () async {
@@ -142,7 +142,7 @@ void main() {
   });
 
   group('hotRestart', () {
-    final MockResidentCompiler residentCompiler = MockResidentCompiler();
+    final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
     final MockDevFs mockDevFs = MockDevFs();
     FileSystem fileSystem;
 
@@ -511,7 +511,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('\n');
 
-      final MockResidentCompiler residentCompiler = MockResidentCompiler();
+      final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
       final MockDevice mockDevice = MockDevice();
       when(mockDevice.supportsHotReload).thenReturn(true);
       when(mockDevice.supportsHotRestart).thenReturn(false);
@@ -628,4 +628,9 @@ class TestHotRunnerConfig extends HotRunnerConfig {
   Future<void> runPreShutdownOperations() async {
     shutdownHookCalled = true;
   }
+}
+
+class FakeResidentCompiler extends Fake implements ResidentCompiler {
+  @override
+  void accept() {}
 }

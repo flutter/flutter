@@ -77,7 +77,7 @@ void main() {
 
     await const DebugUnpackMacOS().build(environment);
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -95,7 +95,7 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('testing');
 
-    expect(() async => await const DebugMacOSBundleFlutterAssets().build(environment),
+    expect(() async => const DebugMacOSBundleFlutterAssets().build(environment),
         throwsException);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
