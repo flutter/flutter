@@ -12,7 +12,7 @@ import 'package:flutter_gallery/demo/shrine/model/product.dart';
 import 'package:flutter_gallery/demo/shrine/supplemental/asymmetric_view.dart';
 
 class ProductPage extends StatelessWidget {
-  const ProductPage({this.category = Category.all});
+  const ProductPage({Key? key, this.category = Category.all}) : super(key: key);
 
   final Category category;
 

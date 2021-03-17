@@ -93,7 +93,7 @@ import 'inherited_notifier.dart';
 ///     debugLabel: 'Scope',
 ///     autofocus: true,
 ///     child: DefaultTextStyle(
-///       style: textTheme.headline4,
+///       style: textTheme.headline4!,
 ///       child: Focus(
 ///         onKey: _handleKeyPress,
 ///         debugLabel: 'Button',
@@ -139,7 +139,10 @@ import 'inherited_notifier.dart';
 ///
 /// ```dart preamble
 /// class FocusableText extends StatelessWidget {
-///   const FocusableText(this.data, {Key key, this.autofocus}) : super(key: key);
+///   const FocusableText(this.data, {
+///     Key? key,
+///     required this.autofocus,
+///   }) : super(key: key);
 ///
 ///   /// The string to display as the text for this widget.
 ///   final String data;
@@ -160,7 +163,7 @@ import 'inherited_notifier.dart';
 ///         // would start looking for a Focus widget ancestor of the FocusableText
 ///         // instead of finding the one inside of its build function.
 ///         return Container(
-///           padding: EdgeInsets.all(8.0),
+///           padding: const EdgeInsets.all(8.0),
 ///           // Change the color based on whether or not this Container has focus.
 ///           color: Focus.of(context).hasPrimaryFocus ? Colors.black12 : null,
 ///           child: Text(data),
@@ -175,7 +178,7 @@ import 'inherited_notifier.dart';
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     body: ListView.builder(
-///       itemBuilder: (context, index) => FocusableText(
+///       itemBuilder: (BuildContext context, int index) => FocusableText(
 ///         'Item $index',
 ///         autofocus: index == 0,
 ///       ),
@@ -209,7 +212,9 @@ import 'inherited_notifier.dart';
 /// @override
 /// void dispose() {
 ///   super.dispose();
-///   childFocusNodes.forEach((FocusNode node) => node.dispose());
+///   for (final FocusNode node in childFocusNodes) {
+///     node.dispose();
+///   }
 /// }
 ///
 /// void _addChild() {
@@ -243,7 +248,7 @@ import 'inherited_notifier.dart';
 ///           _addChild();
 ///         });
 ///       },
-///       child: Icon(Icons.add),
+///       child: const Icon(Icons.add),
 ///     ),
 ///   );
 /// }
@@ -640,6 +645,9 @@ class _FocusState extends State<Focus> {
     }());
 
     if (oldWidget.focusNode == widget.focusNode) {
+      if (widget.onKey != focusNode.onKey) {
+        focusNode.onKey = widget.onKey;
+      }
       if (widget.skipTraversal != null) {
         focusNode.skipTraversal = widget.skipTraversal!;
       }
@@ -749,19 +757,19 @@ class _FocusState extends State<Focus> {
 /// /// This is just a separate widget to simplify the example.
 /// class Pane extends StatelessWidget {
 ///   const Pane({
-///     Key key,
-///     this.focusNode,
+///     Key? key,
+///     required this.focusNode,
 ///     this.onPressed,
+///     required this.backgroundColor,
+///     required this.icon,
 ///     this.child,
-///     this.backgroundColor,
-///     this.icon,
 ///   }) : super(key: key);
 ///
 ///   final FocusNode focusNode;
-///   final VoidCallback onPressed;
-///   final Widget child;
+///   final VoidCallback? onPressed;
 ///   final Color backgroundColor;
 ///   final Widget icon;
+///   final Widget? child;
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -802,7 +810,7 @@ class _FocusState extends State<Focus> {
 ///   }
 ///
 ///   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
-///     Size stackSize = constraints.biggest;
+///     final Size stackSize = constraints.biggest;
 ///     return Stack(
 ///       fit: StackFit.expand,
 ///       // The backdrop is behind the front widget in the Stack, but the widgets
@@ -821,7 +829,7 @@ class _FocusState extends State<Focus> {
 ///           // foreground pane semi-transparent to see it clearly.
 ///           canRequestFocus: backdropIsVisible,
 ///           child: Pane(
-///             icon: Icon(Icons.close),
+///             icon: const Icon(Icons.close),
 ///             focusNode: backdropNode,
 ///             backgroundColor: Colors.lightBlue,
 ///             onPressed: () => setState(() => backdropIsVisible = false),
@@ -832,11 +840,11 @@ class _FocusState extends State<Focus> {
 ///                 // the foreground pane without the FocusScope.
 ///                 ElevatedButton(
 ///                   onPressed: () => print('You pressed the other button!'),
-///                   child: Text('ANOTHER BUTTON TO FOCUS'),
+///                   child: const Text('ANOTHER BUTTON TO FOCUS'),
 ///                 ),
 ///                 DefaultTextStyle(
-///                     style: Theme.of(context).textTheme.headline2,
-///                     child: Text('BACKDROP')),
+///                     style: Theme.of(context).textTheme.headline2!,
+///                     child: const Text('BACKDROP')),
 ///               ],
 ///             ),
 ///           ),
@@ -855,7 +863,7 @@ class _FocusState extends State<Focus> {
 ///             }
 ///           },
 ///           child: Pane(
-///             icon: Icon(Icons.menu),
+///             icon: const Icon(Icons.menu),
 ///             focusNode: foregroundNode,
 ///             // TRY THIS: Try changing this to Colors.green.withOpacity(0.8) to see for
 ///             // yourself that the hidden components do/don't get focus.
@@ -864,8 +872,8 @@ class _FocusState extends State<Focus> {
 ///                 ? null
 ///                 : () => setState(() => backdropIsVisible = true),
 ///             child: DefaultTextStyle(
-///                 style: Theme.of(context).textTheme.headline2,
-///                 child: Text('FOREGROUND')),
+///                 style: Theme.of(context).textTheme.headline2!,
+///                 child: const Text('FOREGROUND')),
 ///           ),
 ///         ),
 ///       ],

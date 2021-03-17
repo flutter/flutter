@@ -2,10 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import 'base/common.dart';
 import 'base/file_system.dart';
+import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
@@ -84,6 +88,9 @@ enum Artifact {
   /// Tools related to subsetting or icon font files.
   fontSubset,
   constFinder,
+
+  /// The pub or pub.bat executable
+  pubExecutable,
 }
 
 String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
@@ -177,6 +184,11 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
     case Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps:
     case Artifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps:
       return 'dart_sdk.js.map';
+    case Artifact.pubExecutable:
+      if (platform == TargetPlatform.windows_x64) {
+        return 'pub.bat';
+      }
+      return 'pub';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -197,8 +209,15 @@ class EngineBuildPaths {
 abstract class Artifacts {
   /// A test-specific implementation of artifacts that returns stable paths for
   /// all artifacts.
+  ///
+  /// Creates a [LocalEngineArtifacts] if `localEngine` is non-null
   @visibleForTesting
-  factory Artifacts.test() = _TestArtifacts;
+  factory Artifacts.test({String localEngine}) {
+    if (localEngine != null) {
+      return _TestLocalEngine(localEngine);
+    }
+    return _TestArtifacts();
+  }
 
   static LocalEngineArtifacts getLocalEngine(EngineBuildPaths engineBuildPaths) {
     return LocalEngineArtifacts(
@@ -208,6 +227,7 @@ abstract class Artifacts {
       fileSystem: globals.fs,
       processManager: globals.processManager,
       platform: globals.platform,
+      operatingSystemUtils: globals.os,
     );
   }
 
@@ -234,13 +254,16 @@ class CachedArtifacts implements Artifacts {
     @required FileSystem fileSystem,
     @required Platform platform,
     @required Cache cache,
+    @required OperatingSystemUtils operatingSystemUtils,
   }) : _fileSystem = fileSystem,
        _platform = platform,
-       _cache = cache;
+       _cache = cache,
+       _operatingSystemUtils = operatingSystemUtils;
 
   final FileSystem _fileSystem;
   final Platform _platform;
   final Cache _cache;
+  final OperatingSystemUtils _operatingSystemUtils;
 
   @override
   String getArtifactPath(
@@ -259,6 +282,7 @@ class CachedArtifacts implements Artifacts {
         return _getIosArtifactPath(artifact, platform, mode, environmentType);
       case TargetPlatform.darwin_x64:
       case TargetPlatform.linux_x64:
+      case TargetPlatform.linux_arm64:
       case TargetPlatform.windows_x64:
         return _getDesktopArtifactPath(artifact, platform, mode);
       case TargetPlatform.fuchsia_arm64:
@@ -267,7 +291,7 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
       default: // could be null, but that can't be specified as a case.
-        return _getHostArtifactPath(artifact, platform ?? _currentHostPlatform(_platform), mode);
+        return _getHostArtifactPath(artifact, platform ?? _currentHostPlatform(_platform, _operatingSystemUtils), mode);
     }
   }
 
@@ -283,7 +307,7 @@ class CachedArtifacts implements Artifacts {
       final String engineDir = _getEngineArtifactsPath(platform, mode);
       return _fileSystem.path.join(engineDir, _artifactToFileName(artifact));
     }
-    return _getHostArtifactPath(artifact, platform ?? _currentHostPlatform(_platform), mode);
+    return _getHostArtifactPath(artifact, platform ?? _currentHostPlatform(_platform, _operatingSystemUtils), mode);
   }
 
   String _getAndroidArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
@@ -305,12 +329,14 @@ class CachedArtifacts implements Artifacts {
       BuildMode mode, EnvironmentType environmentType) {
     switch (artifact) {
       case Artifact.genSnapshot:
-      case Artifact.flutterFramework:
       case Artifact.flutterXcframework:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         final String artifactFileName = _artifactToFileName(artifact);
         final String engineDir = _getEngineArtifactsPath(platform, mode);
         return _fileSystem.path.join(engineDir, artifactFileName);
+      case Artifact.flutterFramework:
+        final String engineDir = _getEngineArtifactsPath(platform, mode);
+        return _getIosEngineArtifactPath(engineDir, environmentType, _fileSystem);
       case Artifact.idevicescreenshot:
       case Artifact.idevicesyslog:
         final String artifactFileName = _artifactToFileName(artifact);
@@ -454,6 +480,8 @@ class CachedArtifacts implements Artifacts {
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-html-sound', _artifactToFileName(artifact, platform, mode));
       case Artifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps:
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-html-sound', _artifactToFileName(artifact, platform, mode));
+      case Artifact.pubExecutable:
+        return _fileSystem.path.join(_dartSdkPath(_fileSystem), 'bin',  _artifactToFileName(artifact, platform, mode));
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
@@ -465,6 +493,7 @@ class CachedArtifacts implements Artifacts {
     final String platformName = getNameForTargetPlatform(platform);
     switch (platform) {
       case TargetPlatform.linux_x64:
+      case TargetPlatform.linux_arm64:
       case TargetPlatform.darwin_x64:
       case TargetPlatform.windows_x64:
         // TODO(jonahwilliams): remove once debug desktop artifacts are uploaded
@@ -492,6 +521,9 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.android:
         assert(false, 'cannot use TargetPlatform.android to look up artifacts');
         return null;
+      case TargetPlatform.windows_uwp_x64:
+        assert(false, 'cannot use TargetPlatform.windows_uwp_x64 to look up artifacts');
+        return null;
     }
     assert(false, 'Invalid platform $platform.');
     return null;
@@ -501,12 +533,13 @@ class CachedArtifacts implements Artifacts {
   bool get isLocalEngine => false;
 }
 
-TargetPlatform _currentHostPlatform(Platform platform) {
+TargetPlatform _currentHostPlatform(Platform platform, OperatingSystemUtils operatingSystemUtils) {
   if (platform.isMacOS) {
     return TargetPlatform.darwin_x64;
   }
   if (platform.isLinux) {
-    return TargetPlatform.linux_x64;
+    return operatingSystemUtils.hostPlatform == HostPlatform.linux_x64 ?
+             TargetPlatform.linux_x64 : TargetPlatform.linux_arm64;
   }
   if (platform.isWindows) {
     return TargetPlatform.windows_x64;
@@ -514,39 +547,75 @@ TargetPlatform _currentHostPlatform(Platform platform) {
   throw UnimplementedError('Host OS not supported.');
 }
 
-HostPlatform _currentHostPlatformAsHost(Platform platform) {
-  if (platform.isMacOS) {
-    return HostPlatform.darwin_x64;
+String _getIosEngineArtifactPath(String engineDirectory,
+    EnvironmentType environmentType, FileSystem fileSystem) {
+  final Directory xcframeworkDirectory = fileSystem
+      .directory(engineDirectory)
+      .childDirectory(_artifactToFileName(Artifact.flutterXcframework));
+
+  if (!xcframeworkDirectory.existsSync()) {
+    throwToolExit('No xcframework found at ${xcframeworkDirectory.path}. Try running "flutter precache --ios".');
   }
-  if (platform.isLinux) {
-    return HostPlatform.linux_x64;
+  Directory flutterFrameworkSource;
+  for (final Directory platformDirectory
+      in xcframeworkDirectory.listSync().whereType<Directory>()) {
+    if (!platformDirectory.basename.startsWith('ios-')) {
+      continue;
+    }
+    // ios-x86_64-simulator, ios-armv7_arm64 (Xcode 11), or ios-arm64_armv7 (Xcode 12).
+    final bool simulatorDirectory =
+        platformDirectory.basename.endsWith('-simulator');
+    if ((environmentType == EnvironmentType.simulator && simulatorDirectory) ||
+        (environmentType == EnvironmentType.physical && !simulatorDirectory)) {
+      flutterFrameworkSource = platformDirectory;
+    }
   }
-  if (platform.isWindows) {
-    return HostPlatform.windows_x64;
+  if (flutterFrameworkSource == null) {
+    throwToolExit('No iOS frameworks found in ${xcframeworkDirectory.path}');
   }
-  throw UnimplementedError('Host OS not supported.');
+
+  return flutterFrameworkSource
+      .childDirectory(_artifactToFileName(Artifact.flutterFramework))
+      .path;
+}
+
+abstract class LocalEngineArtifacts implements Artifacts {
+  factory LocalEngineArtifacts(String engineOutPath, String hostEngineOutPath, {
+    @required FileSystem fileSystem,
+    @required Cache cache,
+    @required ProcessManager processManager,
+    @required Platform platform,
+    @required OperatingSystemUtils operatingSystemUtils,
+  }) = CachedLocalEngineArtifacts;
+
+  String get engineOutPath;
 }
 
 /// Manages the artifacts of a locally built engine.
-class LocalEngineArtifacts implements Artifacts {
-  LocalEngineArtifacts(
+class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
+  CachedLocalEngineArtifacts(
     this.engineOutPath,
     this._hostEngineOutPath, {
     @required FileSystem fileSystem,
     @required Cache cache,
     @required ProcessManager processManager,
     @required Platform platform,
+    @required OperatingSystemUtils operatingSystemUtils,
   }) : _fileSystem = fileSystem,
        _cache = cache,
        _processManager = processManager,
-       _platform = platform;
+       _platform = platform,
+       _operatingSystemUtils = operatingSystemUtils;
 
-  final String engineOutPath; // TODO(goderbauer): This should be private.
+  @override
+  final String engineOutPath;
+
   final String _hostEngineOutPath;
   final FileSystem _fileSystem;
   final Cache _cache;
   final ProcessManager _processManager;
   final Platform _platform;
+  final OperatingSystemUtils _operatingSystemUtils;
 
   @override
   String getArtifactPath(
@@ -555,7 +624,7 @@ class LocalEngineArtifacts implements Artifacts {
     BuildMode mode,
     EnvironmentType environmentType,
   }) {
-    platform ??= _currentHostPlatform(_platform);
+    platform ??= _currentHostPlatform(_platform, _operatingSystemUtils);
     final bool isDirectoryArtifact = artifact == Artifact.flutterWebSdk || artifact == Artifact.flutterPatchedSdkPath;
     final String artifactFileName = isDirectoryArtifact ? null : _artifactToFileName(artifact, platform, mode);
     switch (artifact) {
@@ -578,7 +647,8 @@ class LocalEngineArtifacts implements Artifacts {
       case Artifact.platformLibrariesJson:
         return _fileSystem.path.join(_getFlutterPatchedSdkPath(mode), 'lib', artifactFileName);
       case Artifact.flutterFramework:
-        return _fileSystem.path.join(engineOutPath, artifactFileName);
+        return _getIosEngineArtifactPath(
+            engineOutPath, environmentType, _fileSystem);
       case Artifact.flutterPatchedSdkPath:
         // When using local engine always use [BuildMode.debug] regardless of
         // what was specified in [mode] argument because local engine will
@@ -663,6 +733,8 @@ class LocalEngineArtifacts implements Artifacts {
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-html-sound', artifactFileName);
       case Artifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps:
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-html-sound', artifactFileName);
+      case Artifact.pubExecutable:
+        return _fileSystem.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', _artifactToFileName(artifact, platform, mode));
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;
@@ -695,12 +767,11 @@ class LocalEngineArtifacts implements Artifacts {
   }
 
   String _flutterTesterPath(TargetPlatform platform) {
-    final HostPlatform hostPlatform = _currentHostPlatformAsHost(_platform);
-    if (hostPlatform == HostPlatform.linux_x64) {
+     if (_platform.isLinux) {
       return _fileSystem.path.join(engineOutPath, _artifactToFileName(Artifact.flutterTester));
-    } else if (hostPlatform == HostPlatform.darwin_x64) {
+    } else if (_platform.isMacOS) {
       return _fileSystem.path.join(engineOutPath, 'flutter_tester');
-    } else if (hostPlatform == HostPlatform.windows_x64) {
+    } else if (_platform.isWindows) {
       return _fileSystem.path.join(engineOutPath, 'flutter_tester.exe');
     }
     throw Exception('Unsupported platform $platform.');
@@ -799,4 +870,14 @@ class _TestArtifacts implements Artifacts {
 
   @override
   bool get isLocalEngine => false;
+}
+
+class _TestLocalEngine extends _TestArtifacts implements LocalEngineArtifacts {
+  _TestLocalEngine(this.engineOutPath);
+
+  @override
+  bool get isLocalEngine => true;
+
+  @override
+  final String engineOutPath;
 }

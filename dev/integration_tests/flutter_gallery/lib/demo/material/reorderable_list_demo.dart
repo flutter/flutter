@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 import '../../gallery/demo.dart';
 
@@ -148,7 +146,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
         break;
       case _ReorderableListType.horizontalAvatar:
       case _ReorderableListType.verticalAvatar:
-        listTile = Container(
+        listTile = SizedBox(
           key: Key(item.value),
           height: 100.0,
           width: 100.0,

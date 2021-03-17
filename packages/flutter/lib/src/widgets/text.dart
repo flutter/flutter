@@ -5,7 +5,6 @@
 import 'dart:ui' as ui show TextHeightBehavior;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -13,7 +12,7 @@ import 'inherited_theme.dart';
 import 'media_query.dart';
 
 // Examples can assume:
-// String _name;
+// late String _name;
 
 /// The text style to apply to descendant [Text] widgets which don't have an
 /// explicit style.
@@ -305,7 +304,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 ///   'Hello, $_name! How are you?',
 ///   textAlign: TextAlign.center,
 ///   overflow: TextOverflow.ellipsis,
-///   style: TextStyle(fontWeight: FontWeight.bold),
+///   style: const TextStyle(fontWeight: FontWeight.bold),
 /// )
 /// ```
 /// {@end-tool}

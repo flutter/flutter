@@ -301,8 +301,7 @@ void main() {
         paints
           ..rrect(
               color: const Color(0x52000000), // Black with 32% opacity
-              rrect: RRect.fromLTRBR(
-                  383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+              rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
           ..circle(color: const Color(0x33000000))
           ..circle(color: const Color(0x24000000))
           ..circle(color: const Color(0x1f000000))
@@ -317,8 +316,7 @@ void main() {
         paints
           ..rrect(
               color: Colors.blue[600]!.withAlpha(0x80),
-              rrect: RRect.fromLTRBR(
-                  383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+              rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
           ..circle(color: const Color(0x33000000))
           ..circle(color: const Color(0x24000000))
           ..circle(color: const Color(0x1f000000))
@@ -351,8 +349,7 @@ void main() {
       paints
         ..rrect(
             color: Colors.black12,
-            rrect: RRect.fromLTRBR(
-                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -383,8 +380,7 @@ void main() {
       paints
         ..rrect(
             color: Colors.black12,
-            rrect: RRect.fromLTRBR(
-                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -427,8 +423,7 @@ void main() {
       paints
         ..rrect(
             color: Colors.blue[500],
-            rrect: RRect.fromLTRBR(
-                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -442,8 +437,7 @@ void main() {
       paints
         ..rrect(
             color: Colors.green[500],
-            rrect: RRect.fromLTRBR(
-                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -528,19 +522,19 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(value, isFalse);
-    final RenderToggleable renderObject = tester.renderObject<RenderToggleable>(
+    final ToggleableStateMixin state = tester.state<ToggleableStateMixin>(
       find.descendant(
         of: find.byType(Switch),
         matching: find.byWidgetPredicate(
-          (Widget widget) => widget.runtimeType.toString() == '_SwitchRenderObjectWidget',
+          (Widget widget) => widget.runtimeType.toString() == '_MaterialSwitch',
         ),
       ),
     );
-    expect(renderObject.position.value, lessThan(0.5));
+    expect(state.position.value, lessThan(0.5));
     await tester.pump();
     await tester.pumpAndSettle();
     expect(value, isFalse);
-    expect(renderObject.position.value, 0);
+    expect(state.position.value, 0);
 
     // Move past the middle.
     gesture = await tester.startGesture(tester.getRect(find.byType(Switch)).center);
@@ -549,12 +543,12 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(value, isTrue);
-    expect(renderObject.position.value, greaterThan(0.5));
+    expect(state.position.value, greaterThan(0.5));
 
     await tester.pump();
     await tester.pumpAndSettle();
     expect(value, isTrue);
-    expect(renderObject.position.value, 1.0);
+    expect(state.position.value, 1.0);
 
     // Now move back to the left, the revert animation should play.
     gesture = await tester.startGesture(tester.getRect(find.byType(Switch)).center);
@@ -563,12 +557,12 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(value, isTrue);
-    expect(renderObject.position.value, lessThan(0.5));
+    expect(state.position.value, lessThan(0.5));
 
     await tester.pump();
     await tester.pumpAndSettle();
     expect(value, isTrue);
-    expect(renderObject.position.value, 1.0);
+    expect(state.position.value, 1.0);
   });
 
   testWidgets('switch has semantic events', (WidgetTester tester) async {
@@ -601,7 +595,7 @@ void main() {
       ),
     );
     await tester.tap(find.byType(Switch));
-    final RenderObject object = tester.firstRenderObject(find.byType(Focus));
+    final RenderObject object = tester.firstRenderObject(find.byType(Switch));
 
     expect(value, true);
     expect(semanticEvent, <String, dynamic>{
@@ -750,8 +744,7 @@ void main() {
       paints
         ..rrect(
             color: const Color(0x801e88e5),
-            rrect: RRect.fromLTRBR(
-                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
         ..circle(color: Colors.orange[500])
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
@@ -769,8 +762,7 @@ void main() {
       paints
         ..rrect(
             color: const Color(0x52000000),
-            rrect: RRect.fromLTRBR(
-                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
         ..circle(color: Colors.orange[500])
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
@@ -788,8 +780,7 @@ void main() {
       paints
         ..rrect(
             color: const Color(0x1f000000),
-            rrect: RRect.fromLTRBR(
-                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -854,8 +845,7 @@ void main() {
       paints
         ..rrect(
             color: const Color(0x801e88e5),
-            rrect: RRect.fromLTRBR(
-                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -875,8 +865,7 @@ void main() {
       paints
         ..rrect(
             color: const Color(0x801e88e5),
-            rrect: RRect.fromLTRBR(
-                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
         ..circle(color: Colors.orange[500])
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
@@ -892,8 +881,7 @@ void main() {
       paints
         ..rrect(
             color: const Color(0x1f000000),
-            rrect: RRect.fromLTRBR(
-                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -1070,8 +1058,7 @@ void main() {
       ),
     );
 
-    final RenderToggleable oldSwitchRenderObject = tester
-      .renderObject(find.byWidgetPredicate((Widget widget) => widget is LeafRenderObjectWidget));
+    final ToggleableStateMixin oldSwitchState = tester.state(find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_MaterialSwitch'));
 
     stateSetter(() { value = false; });
     await tester.pump();
@@ -1079,14 +1066,12 @@ void main() {
     stateSetter(() { enabled = false; });
     await tester.pump();
 
-    final RenderToggleable updatedSwitchRenderObject = tester
-      .renderObject(find.byWidgetPredicate((Widget widget) => widget is LeafRenderObjectWidget));
+    final ToggleableStateMixin updatedSwitchState = tester.state(find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_MaterialSwitch'));
 
-
-    expect(updatedSwitchRenderObject.isInteractive, false);
-    expect(updatedSwitchRenderObject, oldSwitchRenderObject);
-    expect(updatedSwitchRenderObject.position.isCompleted, false);
-    expect(updatedSwitchRenderObject.position.isDismissed, false);
+    expect(updatedSwitchState.isInteractive, false);
+    expect(updatedSwitchState, oldSwitchState);
+    expect(updatedSwitchState.position.isCompleted, false);
+    expect(updatedSwitchState.position.isDismissed, false);
   });
 
   testWidgets('Switch thumb color resolves in active/enabled states', (WidgetTester tester) async {
@@ -1137,8 +1122,7 @@ void main() {
       paints
         ..rrect(
             color: Colors.black12,
-            rrect: RRect.fromLTRBR(
-                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -1154,8 +1138,7 @@ void main() {
       paints
         ..rrect(
             color: Colors.black12,
-            rrect: RRect.fromLTRBR(
-                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -1171,8 +1154,7 @@ void main() {
       paints
         ..rrect(
             color: const Color(0x52000000), // Black with 32% opacity,
-            rrect: RRect.fromLTRBR(
-                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -1188,8 +1170,7 @@ void main() {
       paints
         ..rrect(
             color: Colors.black12,
-            rrect: RRect.fromLTRBR(
-                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -1246,8 +1227,7 @@ void main() {
       paints
         ..rrect(
             color: const Color(0x801e88e5),
-            rrect: RRect.fromLTRBR(
-                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
         ..circle(color: const Color(0x1f000000))
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
@@ -1268,8 +1248,7 @@ void main() {
       paints
         ..rrect(
             color: const Color(0x801e88e5),
-            rrect: RRect.fromLTRBR(
-                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
         ..circle(color: const Color(0x1f000000))
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
@@ -1327,8 +1306,7 @@ void main() {
       paints
         ..rrect(
             color: inactiveDisabledTrackColor,
-            rrect: RRect.fromLTRBR(
-                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0))),
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0))),
       reason: 'Inactive disabled switch track should use this value',
     );
 
@@ -1340,8 +1318,7 @@ void main() {
       paints
         ..rrect(
             color: activeDisabledTrackColor,
-            rrect: RRect.fromLTRBR(
-                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0))),
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0))),
       reason: 'Active disabled switch should match these colors',
     );
 
@@ -1353,8 +1330,7 @@ void main() {
       paints
         ..rrect(
             color: inactiveEnabledTrackColor,
-            rrect: RRect.fromLTRBR(
-                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0))),
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0))),
       reason: 'Inactive enabled switch should match these colors',
     );
 
@@ -1366,8 +1342,7 @@ void main() {
       paints
         ..rrect(
             color: inactiveDisabledTrackColor,
-            rrect: RRect.fromLTRBR(
-                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0))),
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0))),
       reason: 'Inactive disabled switch should match these colors',
     );
   });
@@ -1420,8 +1395,7 @@ void main() {
       paints
         ..rrect(
             color: focusedTrackColor,
-            rrect: RRect.fromLTRBR(
-                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0))),
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0))),
       reason: 'Inactive enabled switch should match these colors',
     );
 
@@ -1437,8 +1411,7 @@ void main() {
       paints
         ..rrect(
             color: hoveredTrackColor,
-            rrect: RRect.fromLTRBR(
-                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0))),
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0))),
       reason: 'Inactive enabled switch should match these colors',
     );
   });
@@ -1488,13 +1461,176 @@ void main() {
       paints
         ..rrect(
             color: Colors.black12,
-            rrect: RRect.fromLTRBR(
-                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
         ..circle(color: expectedThumbColor),
       reason: 'Active disabled thumb color should be blended on top of surface color',
     );
+  });
+
+  testWidgets('Switch overlay color resolves in active/pressed/focused/hovered states', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Switch');
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+    const Color thumbColor = Color(0xFF000000);
+    const Color activePressedOverlayColor = Color(0xFF000001);
+    const Color inactivePressedOverlayColor = Color(0xFF000002);
+    const Color hoverOverlayColor = Color(0xFF000003);
+    const Color focusOverlayColor = Color(0xFF000004);
+    const Color hoverColor = Color(0xFF000005);
+    const Color focusColor = Color(0xFF000006);
+
+    Color? getOverlayColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        if (states.contains(MaterialState.selected)) {
+          return activePressedOverlayColor;
+        }
+        return inactivePressedOverlayColor;
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return hoverOverlayColor;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return focusOverlayColor;
+      }
+      return null;
+    }
+    const double splashRadius = 24.0;
+
+    Widget buildSwitch({bool active = false, bool focused = false, bool useOverlay = true}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Switch(
+            focusNode: focusNode,
+            autofocus: focused,
+            value: active,
+            onChanged: (_) { },
+            thumbColor: MaterialStateProperty.all(thumbColor),
+            overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
+            hoverColor: hoverColor,
+            focusColor: focusColor,
+            splashRadius: splashRadius,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSwitch(active: false, useOverlay: false));
+    await tester.press(find.byType(Switch));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect()
+        ..circle(
+          color: thumbColor.withAlpha(kRadialReactionAlpha),
+          radius: splashRadius,
+        ),
+      reason: 'Default inactive pressed Switch should have overlay color from thumbColor',
+    );
+
+    await tester.pumpWidget(buildSwitch(active: true, useOverlay: false));
+    await tester.press(find.byType(Switch));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect()
+        ..circle(
+          color: thumbColor.withAlpha(kRadialReactionAlpha),
+          radius: splashRadius,
+        ),
+      reason: 'Default active pressed Switch should have overlay color from thumbColor',
+    );
+
+    await tester.pumpWidget(buildSwitch(active: false));
+    await tester.press(find.byType(Switch));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect()
+        ..circle(
+          color: inactivePressedOverlayColor,
+          radius: splashRadius,
+        ),
+      reason: 'Inactive pressed Switch should have overlay color: $inactivePressedOverlayColor',
+    );
+
+    await tester.pumpWidget(buildSwitch(active: true));
+    await tester.press(find.byType(Switch));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect()
+        ..circle(
+          color: activePressedOverlayColor,
+          radius: splashRadius,
+        ),
+      reason: 'Active pressed Switch should have overlay color: $activePressedOverlayColor',
+    );
+
+    await tester.pumpWidget(buildSwitch(focused: true));
+    await tester.pumpAndSettle();
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect()
+        ..circle(
+          color: focusOverlayColor,
+          radius: splashRadius,
+        ),
+      reason: 'Focused Switch should use overlay color $focusOverlayColor over $focusColor',
+    );
+
+    // Start hovering
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tester.getCenter(find.byType(Switch)));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect()
+        ..circle(
+          color: hoverOverlayColor,
+          radius: splashRadius,
+        ),
+      reason: 'Hovered Switch should use overlay color $hoverOverlayColor over $hoverColor',
+    );
+  });
+
+  testWidgets('Do not crash when widget disappears while pointer is down', (WidgetTester tester) async {
+    Widget buildSwitch(bool show) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: show ? Switch(value: true, onChanged: (_) { }) : Container(),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSwitch(true));
+    final Offset center = tester.getCenter(find.byType(Switch));
+    // Put a pointer down on the screen.
+    final TestGesture gesture = await tester.startGesture(center);
+    await tester.pump();
+    // While the pointer is down, the widget disappears.
+    await tester.pumpWidget(buildSwitch(false));
+    expect(find.byType(Switch), findsNothing);
+    // Release pointer after widget disappeared.
+    await gesture.up();
   });
 }

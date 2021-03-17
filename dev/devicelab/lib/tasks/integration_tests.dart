@@ -78,20 +78,6 @@ TaskFunction createCodegenerationIntegrationTest() {
   );
 }
 
-TaskFunction createImageLoadingIntegrationTest() {
-  return DriverTest(
-    '${flutterDirectory.path}/dev/integration_tests/image_loading',
-    'lib/main.dart',
-  );
-}
-
-TaskFunction createAndroidSplashScreenKitchenSinkTest() {
-  return DriverTest(
-    '${flutterDirectory.path}/dev/integration_tests/android_splash_screens/splash_screen_kitchen_sink',
-    'test_driver/main.dart',
-  );
-}
-
 TaskFunction createIOSPlatformViewTests() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ios_platform_view_tests',
@@ -131,7 +117,7 @@ TaskFunction dartDefinesTask() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/defines.dart', extraOptions: <String>[
-    '--dart-define=test.valueA=Example',
+    '--dart-define=test.valueA=Example,A',
     '--dart-define=test.valueB=Value',
     ],
   );

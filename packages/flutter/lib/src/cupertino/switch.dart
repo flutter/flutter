@@ -14,7 +14,7 @@ import 'colors.dart';
 import 'thumb_painter.dart';
 
 // Examples can assume:
-// bool _lights;
+// bool _lights = false;
 // void setState(VoidCallback fn) { }
 
 /// An iOS-style switch.
@@ -35,7 +35,7 @@ import 'thumb_painter.dart';
 /// ```dart
 /// MergeSemantics(
 ///   child: ListTile(
-///     title: Text('Lights'),
+///     title: const Text('Lights'),
 ///     trailing: CupertinoSwitch(
 ///       value: _lights,
 ///       onChanged: (bool value) { setState(() { _lights = value; }); },

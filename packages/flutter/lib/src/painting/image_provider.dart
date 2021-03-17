@@ -118,8 +118,6 @@ class ImageConfiguration {
     result.write('ImageConfiguration(');
     bool hasArguments = false;
     if (bundle != null) {
-      if (hasArguments)
-        result.write(', ');
       result.write('bundle: $bundle');
       hasArguments = true;
     }
@@ -236,10 +234,9 @@ typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int? cache
 /// ```dart
 /// class MyImage extends StatefulWidget {
 ///   const MyImage({
-///     Key key,
-///     @required this.imageProvider,
-///   }) : assert(imageProvider != null),
-///        super(key: key);
+///     Key? key,
+///     required this.imageProvider,
+///   }) : super(key: key);
 ///
 ///   final ImageProvider imageProvider;
 ///
@@ -248,8 +245,8 @@ typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int? cache
 /// }
 ///
 /// class _MyImageState extends State<MyImage> {
-///   ImageStream _imageStream;
-///   ImageInfo _imageInfo;
+///   ImageStream? _imageStream;
+///   ImageInfo? _imageInfo;
 ///
 ///   @override
 ///   void didChangeDependencies() {
@@ -268,15 +265,15 @@ typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int? cache
 ///   }
 ///
 ///   void _getImage() {
-///     final ImageStream oldImageStream = _imageStream;
+///     final ImageStream? oldImageStream = _imageStream;
 ///     _imageStream = widget.imageProvider.resolve(createLocalImageConfiguration(context));
-///     if (_imageStream.key != oldImageStream?.key) {
+///     if (_imageStream!.key != oldImageStream?.key) {
 ///       // If the keys are the same, then we got the same image back, and so we don't
 ///       // need to update the listeners. If the key changed, though, we must make sure
 ///       // to switch our listeners to the new image stream.
 ///       final ImageStreamListener listener = ImageStreamListener(_updateImage);
 ///       oldImageStream?.removeListener(listener);
-///       _imageStream.addListener(listener);
+///       _imageStream!.addListener(listener);
 ///     }
 ///   }
 ///
@@ -290,7 +287,7 @@ typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int? cache
 ///
 ///   @override
 ///   void dispose() {
-///     _imageStream.removeListener(ImageStreamListener(_updateImage));
+///     _imageStream?.removeListener(ImageStreamListener(_updateImage));
 ///     _imageInfo?.dispose();
 ///     _imageInfo = null;
 ///     super.dispose();
@@ -532,7 +529,12 @@ abstract class ImageProvider<T extends Object> {
   ///
   /// ```dart
   /// class MyWidget extends StatelessWidget {
-  ///   final String url = '...';
+  ///   const MyWidget({
+  ///     Key? key,
+  ///     this.url = ' ... ',
+  ///   }) : super(key: key);
+  ///
+  ///   final String url;
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
@@ -679,7 +681,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
       PaintingBinding.instance!.imageCache!.evict(key);
       throw StateError('Unable to read data');
     }
-    return await decode(data.buffer.asUint8List());
+    return decode(data.buffer.asUint8List());
   }
 }
 
@@ -761,14 +763,14 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
 
   @override
   ImageStreamCompleter load(_SizeAwareCacheKey key, DecoderCallback decode) {
-    final DecoderCallback decodeResize = (Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
+    Future<ui.Codec> decodeResize(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
       assert(
         cacheWidth == null && cacheHeight == null && allowUpscaling == null,
         'ResizeImage cannot be composed with another ImageProvider that applies '
         'cacheWidth, cacheHeight, or allowUpscaling.'
       );
       return decode(bytes, cacheWidth: width, cacheHeight: height, allowUpscaling: this.allowUpscaling);
-    };
+    }
     final ImageStreamCompleter completer = imageProvider.load(key.providerCacheKey, decodeResize);
     if (!kReleaseMode) {
       completer.debugLabel = '${completer.debugLabel} - Resized(${key.width}×${key.height})';
@@ -890,7 +892,7 @@ class FileImage extends ImageProvider<FileImage> {
       throw StateError('$file is empty and cannot be loaded as an image.');
     }
 
-    return await decode(bytes);
+    return decode(bytes);
   }
 
   @override
@@ -931,9 +933,21 @@ class MemoryImage extends ImageProvider<MemoryImage> {
       assert(scale != null);
 
   /// The bytes to decode into an image.
+  ///
+  /// The bytes represent encoded image bytes and can be encoded in any of the
+  /// following supported image formats: {@macro flutter.dart:ui.imageFormats}
+  ///
+  /// See also:
+  ///
+  ///  * [PaintingBinding.instantiateImageCodec]
   final Uint8List bytes;
 
   /// The scale to place in the [ImageInfo] object of the image.
+  ///
+  /// See also:
+  ///
+  ///  * [ImageInfo.scale], which gives more information on how this scale is
+  ///    applied.
   final double scale;
 
   @override

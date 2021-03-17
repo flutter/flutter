@@ -6,7 +6,6 @@ import 'dart:ui' show window;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -106,12 +105,12 @@ Future<void> _testConstrainedLabel(
   await tester.pumpWidget(
     _wrapForChip(
       child: Center(
-        child: Container(
+        child: SizedBox(
           width: chipParentWidth,
           height: chipParentHeight,
           child: Chip(
             avatar: avatar,
-            label: Container(
+            label: SizedBox(
               key: labelKey,
               width: labelWidth,
               height: labelHeight,
@@ -322,13 +321,13 @@ void main() {
       await tester.pumpWidget(
         _wrapForChip(
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 500.0,
               height: 500.0,
               child: Column(
                 children: <Widget>[
                   Chip(
-                    label: Container(
+                    label: SizedBox(
                       key: labelKey,
                       width: labelWidth,
                       height: labelHeight,
@@ -397,7 +396,7 @@ void main() {
       Widget chipBuilder (String text, {Widget? avatar, VoidCallback? onDeleted}) {
         return MaterialApp(
           home: Scaffold(
-            body: Container(
+            body: SizedBox(
               width: 150,
               child: Column(
                 children: <Widget>[
@@ -500,6 +499,28 @@ void main() {
     expect(tester.getSize(find.byType(Text)), const Size(40.0, 10.0));
     expect(tester.getSize(find.byType(Chip)), const Size(800.0, 48.0));
   });
+
+  testWidgets('Chip responds to materialTapTargetSize', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _wrapForChip(
+          child: Column(
+            children: const <Widget>[
+              Chip(
+                label: Text('X'),
+                materialTapTargetSize: MaterialTapTargetSize.padded,
+              ),
+              Chip(
+                label: Text('X'),
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(Chip).first), const Size(48.0, 48.0));
+      expect(tester.getSize(find.byType(Chip).last), const Size(38.0, 32.0));
+    },
+  );
 
   testWidgets('Chip elements are ordered horizontally for locale', (WidgetTester tester) async {
     final UniqueKey iconKey = UniqueKey();
@@ -635,7 +656,7 @@ void main() {
             ),
             Chip(
               avatar: const CircleAvatar(child: Text('B')),
-              label: Container(key: keyB, width: 10.0, height: 10.0),
+              label: SizedBox(key: keyB, width: 10.0, height: 10.0),
             ),
           ],
         ),
@@ -663,7 +684,7 @@ void main() {
         child: Column(
           children: <Widget>[
             Chip(
-              avatar: Container(key: keyA, width: 20.0, height: 20.0),
+              avatar: SizedBox(key: keyA, width: 20.0, height: 20.0),
               label: const Text('Chip A'),
             ),
           ],
@@ -681,7 +702,7 @@ void main() {
         child: Column(
           children: <Widget>[
             Chip(
-              deleteIcon: Container(key: keyA, width: 20.0, height: 20.0),
+              deleteIcon: SizedBox(key: keyA, width: 20.0, height: 20.0),
               label: const Text('Chip A'),
               onDeleted: () { },
             ),
@@ -707,7 +728,7 @@ void main() {
                   child: Center(
                     child: Chip(
                       avatar: Placeholder(key: keyA),
-                      label: Container(
+                      label: SizedBox(
                         key: keyB,
                         width: 40.0,
                         height: 40.0,
@@ -744,7 +765,7 @@ void main() {
                   child: Center(
                     child: Chip(
                       avatar: Placeholder(key: keyA),
-                      label: Container(
+                      label: SizedBox(
                         key: keyB,
                         width: 40.0,
                         height: 40.0,
@@ -881,8 +902,8 @@ void main() {
   });
 
   testWidgets('Delete button drawer works as expected on RawChip', (WidgetTester tester) async {
-    final UniqueKey labelKey = UniqueKey();
-    final UniqueKey deleteButtonKey = UniqueKey();
+    const Key labelKey = Key('label');
+    const Key deleteButtonKey = Key('delete');
     bool wasDeleted = false;
     Future<void> pushChip({ bool deletable = false }) async {
       return tester.pumpWidget(
@@ -898,8 +919,8 @@ void main() {
                         });
                       }
                     : null,
-                  deleteIcon: Container(width: 40.0, height: 40.0, key: deleteButtonKey),
-                  label: Text('Chip', key: labelKey),
+                  deleteIcon: Container(width: 40.0, height: 40.0, color: Colors.blue, key: deleteButtonKey),
+                  label: const Text('Chip', key: labelKey),
                   shape: const StadiumBorder(),
                 );
               }),
@@ -1227,13 +1248,13 @@ void main() {
     // With avatar, but not selectable.
     final UniqueKey avatarKey = UniqueKey();
     await pushChip(
-      avatar: Container(width: 40.0, height: 40.0, key: avatarKey),
+      avatar: SizedBox(width: 40.0, height: 40.0, key: avatarKey),
     );
     expect(tester.getSize(find.byType(RawChip)), equals(const Size(104.0, 48.0)));
 
     // Turn on selection.
     await pushChip(
-      avatar: Container(width: 40.0, height: 40.0, key: avatarKey),
+      avatar: SizedBox(width: 40.0, height: 40.0, key: avatarKey),
       selectable: true,
     );
     await tester.pumpAndSettle();
@@ -1385,7 +1406,7 @@ void main() {
 
     final UniqueKey avatarKey = UniqueKey();
     await pushChip(
-      avatar: Container(width: 40.0, height: 40.0, key: avatarKey),
+      avatar: SizedBox(width: 40.0, height: 40.0, key: avatarKey),
       selectable: true,
     );
     await tester.pumpAndSettle();
@@ -1438,6 +1459,32 @@ void main() {
     );
 
     expect(materialBox, paints..path(color: chipTheme.disabledColor));
+  });
+
+  testWidgets('Chip merges ChipThemeData label style with the provided label style', (WidgetTester tester) async {
+    // The font family should be preserved even if the chip overrides some label style properties
+    final ThemeData theme = ThemeData(
+      fontFamily: 'MyFont'
+    );
+
+    Widget buildChip() {
+      return _wrapForChip(
+        textDirection: TextDirection.ltr,
+        child: Theme(
+          data: theme,
+          child: const Chip(
+            label: Text('Label'),
+            labelStyle: TextStyle(fontWeight: FontWeight.w200),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildChip());
+
+    final TextStyle labelStyle = getLabelStyle(tester).style;
+    expect(labelStyle.fontFamily, 'MyFont');
+    expect(labelStyle.fontWeight, FontWeight.w200);
   });
 
   testWidgets('Chip size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
@@ -2025,7 +2072,7 @@ void main() {
           children: <Widget>[
             Chip(
               materialTapTargetSize: MaterialTapTargetSize.padded,
-              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(0.0))),
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
               avatar: const CircleAvatar(child: Text('A')),
               label: const Text('Chip A'),
               onDeleted: () {
@@ -2175,7 +2222,7 @@ void main() {
           children: <Widget>[
             InputChip(
               materialTapTargetSize: MaterialTapTargetSize.padded,
-              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(0.0))),
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
               avatar: const CircleAvatar(child: Text('A')),
               label: const Text('Chip A'),
               onPressed: () {
@@ -2196,7 +2243,7 @@ void main() {
     await tester.pumpWidget(
       _wrapForChip(
         child: InputChip(
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(0.0))),
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
           avatar: const CircleAvatar(child: Text('A')),
           label: const Text('Chip A'),
           onPressed: () { },
@@ -2599,7 +2646,7 @@ void main() {
         child: InputChip(
           focusNode: focusNode,
           autofocus: true,
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(0.0))),
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
           avatar: const CircleAvatar(child: Text('A')),
           label: const Text('Chip A'),
           onPressed: () { },
@@ -2614,7 +2661,7 @@ void main() {
         child: InputChip(
           focusNode: focusNode,
           autofocus: true,
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(0.0))),
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
           avatar: const CircleAvatar(child: Text('A')),
           label: const Text('Chip A'),
           onPressed: null,
@@ -2665,7 +2712,7 @@ void main() {
     const Key iconKey = Key('test icon');
     const Key avatarKey = Key('test avatar');
     Future<void> buildTest(VisualDensity visualDensity) async {
-      return await tester.pumpWidget(
+      return tester.pumpWidget(
         MaterialApp(
           home: Material(
             child: Center(

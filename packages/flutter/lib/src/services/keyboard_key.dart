@@ -20,7 +20,8 @@ import 'package:flutter/foundation.dart';
 ///  * [LogicalKeyboardKey], a class with static values that describe the keys
 ///    that are returned from [RawKeyEvent.logicalKey].
 abstract class KeyboardKey with Diagnosticable {
-  /// A const constructor so that subclasses may be const.
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const KeyboardKey();
 }
 
@@ -58,7 +59,7 @@ abstract class KeyboardKey with Diagnosticable {
 /// // The node used to request the keyboard focus.
 /// final FocusNode _focusNode = FocusNode();
 /// // The message to display.
-/// String _message;
+/// String? _message;
 ///
 /// // Focus nodes need to be disposed.
 /// @override
@@ -75,7 +76,7 @@ abstract class KeyboardKey with Diagnosticable {
 ///       _message = 'Pressed the "Q" key!';
 ///     } else {
 ///       if (kReleaseMode) {
-///         _message = 'Not a Q: Key label is "${event.logicalKey.keyLabel ?? '<none>'}"';
+///         _message = 'Not a Q: Key label is "${event.logicalKey.keyLabel}"';
 ///       } else {
 ///         // This will only print useful information in debug mode.
 ///         _message = 'Not a Q: Pressed ${event.logicalKey.debugName}';
@@ -91,13 +92,13 @@ abstract class KeyboardKey with Diagnosticable {
 ///     color: Colors.white,
 ///     alignment: Alignment.center,
 ///     child: DefaultTextStyle(
-///       style: textTheme.headline4,
+///       style: textTheme.headline4!,
 ///       child: RawKeyboardListener(
 ///         focusNode: _focusNode,
 ///         onKey: _handleKeyEvent,
 ///         child: AnimatedBuilder(
 ///           animation: _focusNode,
-///           builder: (BuildContext context, Widget child) {
+///           builder: (BuildContext context, Widget? child) {
 ///             if (!_focusNode.hasFocus) {
 ///               return GestureDetector(
 ///                 onTap: () {
@@ -1999,7 +2000,7 @@ class LogicalKeyboardKey extends KeyboardKey {
 /// // The node used to request the keyboard focus.
 /// final FocusNode _focusNode = FocusNode();
 /// // The message to display.
-/// String _message;
+/// String? _message;
 ///
 /// // Focus nodes need to be disposed.
 /// @override
@@ -2027,19 +2028,19 @@ class LogicalKeyboardKey extends KeyboardKey {
 ///     color: Colors.white,
 ///     alignment: Alignment.center,
 ///     child: DefaultTextStyle(
-///       style: textTheme.headline4,
+///       style: textTheme.headline4!,
 ///       child: RawKeyboardListener(
 ///         focusNode: _focusNode,
 ///         onKey: _handleKeyEvent,
 ///         child: AnimatedBuilder(
 ///           animation: _focusNode,
-///           builder: (BuildContext context, Widget child) {
+///           builder: (BuildContext context, Widget? child) {
 ///             if (!_focusNode.hasFocus) {
 ///               return GestureDetector(
 ///                 onTap: () {
 ///                   FocusScope.of(context).requestFocus(_focusNode);
 ///                 },
-///                 child: Text('Tap to focus'),
+///                 child: const Text('Tap to focus'),
 ///               );
 ///             }
 ///             return Text(_message ?? 'Press a key');

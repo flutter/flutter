@@ -5,7 +5,6 @@
 import 'dart:collection';
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -128,30 +127,30 @@ class CupertinoSegmentedControl<T extends Object> extends StatefulWidget {
   ///
   /// ```dart
   /// class SegmentedControlExample extends StatefulWidget {
+  ///   const SegmentedControlExample({Key? key}) : super(key: key);
+  ///
   ///   @override
   ///   State createState() => SegmentedControlExampleState();
   /// }
   ///
   /// class SegmentedControlExampleState extends State<SegmentedControlExample> {
-  ///   final Map<int, Widget> children = const {
+  ///   final Map<int, Widget> children = const <int, Widget>{
   ///     0: Text('Child 1'),
   ///     1: Text('Child 2'),
   ///   };
   ///
-  ///   int currentValue;
+  ///   late int currentValue;
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return Container(
-  ///       child: CupertinoSegmentedControl<int>(
-  ///         children: children,
-  ///         onValueChanged: (int newValue) {
-  ///           setState(() {
-  ///             currentValue = newValue;
-  ///           });
-  ///         },
-  ///         groupValue: currentValue,
-  ///       ),
+  ///     return CupertinoSegmentedControl<int>(
+  ///       children: children,
+  ///       onValueChanged: (int newValue) {
+  ///         setState(() {
+  ///           currentValue = newValue;
+  ///         });
+  ///       },
+  ///       groupValue: currentValue,
   ///     );
   ///   }
   /// }

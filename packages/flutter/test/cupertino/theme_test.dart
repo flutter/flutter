@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -218,7 +217,7 @@ void main() {
     }
   }
 
-  final VoidCallback dynamicColorsTestGroup = () {
+  void dynamicColorsTestGroup() {
     testWidgets('CupertinoTheme.of resolves colors', (WidgetTester tester) async {
       final CupertinoThemeData data = CupertinoThemeData(brightness: currentBrightness, primaryColor: CupertinoColors.systemRed);
       final CupertinoThemeData theme = await testTheme(tester, data);
@@ -250,7 +249,7 @@ void main() {
       colorMatches(theme.textTheme.pickerTextStyle.color, CupertinoColors.label);
       colorMatches(theme.textTheme.dateTimePickerTextStyle.color, CupertinoColors.label);
     });
-  };
+  }
 
   currentBrightness = Brightness.light;
   group('light colors', dynamicColorsTestGroup);

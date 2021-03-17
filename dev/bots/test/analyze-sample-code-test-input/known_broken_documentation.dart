@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This file is used by ../analyze-sample-code_test.dart, which depends on the
+// This file is used by ../analyze_sample_code_test.dart, which depends on the
 // precise contents (including especially the comments) of this file.
 
 // Examples can assume:
@@ -101,5 +101,34 @@
 ///
 /// ```dart
 /// const text1 = _Text('Poor wandering ones!');
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet}
+/// Snippet with null-safe syntax
+///
+/// ```dart
+/// final String? bar = 'Hello';
+/// final int foo = null;
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad --template=stateless_widget_material}
+/// Dartpad with null-safe syntax
+///
+/// ```dart preamble
+/// bool? _visible = true;
+/// final GlobalKey globalKey = GlobalKey();
+/// ```
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   final String title;
+///   return Opacity(
+///     key: globalKey,
+///     opacity: _visible! ? 1.0 : 0.0,
+///     child: Text(title),
+///   );
+/// }
 /// ```
 /// {@end-tool}

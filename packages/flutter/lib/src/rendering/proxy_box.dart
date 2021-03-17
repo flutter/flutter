@@ -7,18 +7,15 @@ import 'dart:ui' as ui show ImageFilter, Gradient, Image, Color;
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
-import 'binding.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'layout_helper.dart';
-import 'mouse_cursor.dart';
-import 'mouse_tracking.dart';
+import 'mouse_tracker.dart';
 import 'object.dart';
 
 export 'package:flutter/gestures.dart' show
@@ -1391,7 +1388,7 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
     assert(() {
       _debugPaint ??= Paint()
         ..shader = ui.Gradient.linear(
-          const Offset(0.0, 0.0),
+          Offset.zero,
           const Offset(10.0, 10.0),
           <Color>[const Color(0x00000000), const Color(0xFFFF00FF), const Color(0xFFFF00FF), const Color(0x00000000)],
           <double>[0.25, 0.25, 0.75, 0.75],
@@ -2504,7 +2501,7 @@ class RenderFittedBox extends RenderProxyBox {
         assert(debugCannotComputeDryLayout(
           reason: 'Child provided invalid size of $childSize.',
         ));
-        return const Size(0, 0);
+        return Size.zero;
       }
 
       switch (fit) {
@@ -3050,7 +3047,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///
   /// ```dart
   /// class PngHome extends StatefulWidget {
-  ///   PngHome({Key key}) : super(key: key);
+  ///   const PngHome({Key? key}) : super(key: key);
   ///
   ///   @override
   ///   _PngHomeState createState() => _PngHomeState();
@@ -3060,10 +3057,10 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///   GlobalKey globalKey = GlobalKey();
   ///
   ///   Future<void> _capturePng() async {
-  ///     RenderRepaintBoundary boundary = globalKey.currentContext.findRenderObject();
-  ///     ui.Image image = await boundary.toImage();
-  ///     ByteData byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-  ///     Uint8List pngBytes = byteData.buffer.asUint8List();
+  ///     final RenderRepaintBoundary boundary = globalKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
+  ///     final ui.Image image = await boundary.toImage();
+  ///     final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+  ///     final Uint8List pngBytes = byteData!.buffer.asUint8List();
   ///     print(pngBytes);
   ///   }
   ///
@@ -3073,7 +3070,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///       key: globalKey,
   ///       child: Center(
   ///         child: TextButton(
-  ///           child: Text('Hello World', textDirection: TextDirection.ltr),
+  ///           child: const Text('Hello World', textDirection: TextDirection.ltr),
   ///           onPressed: _capturePng,
   ///         ),
   ///       ),
@@ -3516,10 +3513,10 @@ class RenderMetaData extends RenderProxyBoxWithHitTestBehavior {
 
 /// Listens for the specified gestures from the semantics server (e.g.
 /// an accessibility tool).
-class RenderSemanticsGestureHandler extends RenderProxyBox {
+class RenderSemanticsGestureHandler extends RenderProxyBoxWithHitTestBehavior {
   /// Creates a render object that listens for specific semantic gestures.
   ///
-  /// The [scrollFactor] argument must not be null.
+  /// The [scrollFactor] and [behavior] arguments must not be null.
   RenderSemanticsGestureHandler({
     RenderBox? child,
     GestureTapCallback? onTap,
@@ -3527,12 +3524,13 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
     GestureDragUpdateCallback? onHorizontalDragUpdate,
     GestureDragUpdateCallback? onVerticalDragUpdate,
     this.scrollFactor = 0.8,
+    HitTestBehavior behavior = HitTestBehavior.deferToChild,
   }) : assert(scrollFactor != null),
        _onTap = onTap,
        _onLongPress = onLongPress,
        _onHorizontalDragUpdate = onHorizontalDragUpdate,
        _onVerticalDragUpdate = onVerticalDragUpdate,
-       super(child);
+       super(behavior: behavior, child: child);
 
   /// If non-null, the set of actions to allow. Other actions will be omitted,
   /// even if their callback is provided.
@@ -3752,6 +3750,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     MoveCursorHandler? onMoveCursorForwardByWord,
     MoveCursorHandler? onMoveCursorBackwardByWord,
     SetSelectionHandler? onSetSelection,
+    SetTextHandler? onSetText,
     VoidCallback? onDidGainAccessibilityFocus,
     VoidCallback? onDidLoseAccessibilityFocus,
     Map<CustomSemanticsAction, VoidCallback>? customSemanticsActions,
@@ -3807,6 +3806,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _onMoveCursorForwardByWord = onMoveCursorForwardByWord,
        _onMoveCursorBackwardByWord = onMoveCursorBackwardByWord,
        _onSetSelection = onSetSelection,
+       _onSetText = onSetText,
        _onDidGainAccessibilityFocus = onDidGainAccessibilityFocus,
        _onDidLoseAccessibilityFocus = onDidLoseAccessibilityFocus,
        _customSemanticsActions = customSemanticsActions,
@@ -4542,6 +4542,24 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
+  /// The handler for [SemanticsAction.setText].
+  ///
+  /// This handler is invoked when the user wants to replace the current text in
+  /// the text field with a new text.
+  ///
+  /// Voice access users can trigger this handler by speaking "type <text>" to
+  /// their Android devices.
+  SetTextHandler? get onSetText => _onSetText;
+  SetTextHandler? _onSetText;
+  set onSetText(SetTextHandler? handler) {
+    if (_onSetText == handler)
+      return;
+    final bool hadValue = _onSetText != null;
+    _onSetText = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate();
+  }
+
   /// The handler for [SemanticsAction.didGainAccessibilityFocus].
   ///
   /// This handler is invoked when the node annotated with this handler gains
@@ -4734,6 +4752,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.onMoveCursorBackwardByWord = _performMoveCursorBackwardByWord;
     if (onSetSelection != null)
       config.onSetSelection = _performSetSelection;
+    if (onSetText != null)
+      config.onSetText = _performSetText;
     if (onDidGainAccessibilityFocus != null)
       config.onDidGainAccessibilityFocus = _performDidGainAccessibilityFocus;
     if (onDidLoseAccessibilityFocus != null)
@@ -4825,6 +4845,11 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   void _performSetSelection(TextSelection selection) {
     if (onSetSelection != null)
       onSetSelection!(selection);
+  }
+
+  void _performSetText(String text) {
+    if (onSetText != null)
+      onSetText!(text);
   }
 
   void _performDidGainAccessibilityFocus() {
@@ -5223,7 +5248,7 @@ class RenderFollowerLayer extends RenderProxyBox {
     assert(
       link.leaderSize != null || (link.leader == null || leaderAnchor == Alignment.topLeft),
       '$link: layer is linked to ${link.leader} but a valid leaderSize is not set. '
-      'leaderSize is required when leaderAnchor is not Alignment.topLeft'
+      'leaderSize is required when leaderAnchor is not Alignment.topLeft '
       '(current value is $leaderAnchor).',
     );
     final Offset effectiveLinkedOffset = leaderSize == null

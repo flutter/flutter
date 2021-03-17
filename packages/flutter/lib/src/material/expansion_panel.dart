@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -78,6 +77,7 @@ class ExpansionPanel {
     required this.body,
     this.isExpanded = false,
     this.canTapOnHeader = false,
+    this.backgroundColor,
   }) : assert(headerBuilder != null),
        assert(body != null),
        assert(isExpanded != null),
@@ -101,6 +101,10 @@ class ExpansionPanel {
   /// Defaults to false.
   final bool canTapOnHeader;
 
+  /// Defines the background color of the panel.
+  ///
+  /// Defaults to [ThemeData.cardColor].
+  final Color? backgroundColor;
 }
 
 /// An expansion panel that allows for radio-like functionality.
@@ -123,11 +127,13 @@ class ExpansionPanelRadio extends ExpansionPanel {
     required ExpansionPanelHeaderBuilder headerBuilder,
     required Widget body,
     bool canTapOnHeader = false,
+    Color? backgroundColor,
   }) : assert(value != null),
       super(
         body: body,
         headerBuilder: headerBuilder,
         canTapOnHeader: canTapOnHeader,
+        backgroundColor: backgroundColor,
       );
 
   /// The value that uniquely identifies a radio panel so that the currently
@@ -149,8 +155,8 @@ class ExpansionPanelRadio extends ExpansionPanel {
 /// // stores ExpansionPanel state information
 /// class Item {
 ///   Item({
-///     this.expandedValue,
-///     this.headerValue,
+///     required this.expandedValue,
+///     required this.headerValue,
 ///     this.isExpanded = false,
 ///   });
 ///
@@ -160,7 +166,7 @@ class ExpansionPanelRadio extends ExpansionPanel {
 /// }
 ///
 /// List<Item> generateItems(int numberOfItems) {
-///   return List.generate(numberOfItems, (int index) {
+///   return List<Item>.generate(numberOfItems, (int index) {
 ///     return Item(
 ///       headerValue: 'Panel $index',
 ///       expandedValue: 'This is item number $index',
@@ -170,7 +176,7 @@ class ExpansionPanelRadio extends ExpansionPanel {
 /// ```
 ///
 /// ```dart
-/// List<Item> _data = generateItems(8);
+/// final List<Item> _data = generateItems(8);
 ///
 /// @override
 /// Widget build(BuildContext context) {
@@ -197,11 +203,11 @@ class ExpansionPanelRadio extends ExpansionPanel {
 ///         },
 ///         body: ListTile(
 ///           title: Text(item.expandedValue),
-///           subtitle: Text('To delete this panel, tap the trash can icon'),
-///           trailing: Icon(Icons.delete),
+///           subtitle: const Text('To delete this panel, tap the trash can icon'),
+///           trailing: const Icon(Icons.delete),
 ///           onTap: () {
 ///             setState(() {
-///               _data.removeWhere((currentItem) => item == currentItem);
+///               _data.removeWhere((Item currentItem) => item == currentItem);
 ///             });
 ///           }
 ///         ),
@@ -253,9 +259,9 @@ class ExpansionPanelList extends StatefulWidget {
   /// // stores ExpansionPanel state information
   /// class Item {
   ///   Item({
-  ///     this.id,
-  ///     this.expandedValue,
-  ///     this.headerValue,
+  ///     required this.id,
+  ///     required this.expandedValue,
+  ///     required this.headerValue,
   ///   });
   ///
   ///   int id;
@@ -264,7 +270,7 @@ class ExpansionPanelList extends StatefulWidget {
   /// }
   ///
   /// List<Item> generateItems(int numberOfItems) {
-  ///   return List.generate(numberOfItems, (int index) {
+  ///   return List<Item>.generate(numberOfItems, (int index) {
   ///     return Item(
   ///       id: index,
   ///       headerValue: 'Panel $index',
@@ -275,7 +281,7 @@ class ExpansionPanelList extends StatefulWidget {
   /// ```
   ///
   /// ```dart
-  /// List<Item> _data = generateItems(8);
+  /// final List<Item> _data = generateItems(8);
   ///
   /// @override
   /// Widget build(BuildContext context) {
@@ -299,11 +305,11 @@ class ExpansionPanelList extends StatefulWidget {
   ///         },
   ///         body: ListTile(
   ///           title: Text(item.expandedValue),
-  ///           subtitle: Text('To delete this panel, tap the trash can icon'),
-  ///           trailing: Icon(Icons.delete),
+  ///           subtitle: const Text('To delete this panel, tap the trash can icon'),
+  ///           trailing: const Icon(Icons.delete),
   ///           onTap: () {
   ///             setState(() {
-  ///               _data.removeWhere((currentItem) => item == currentItem);
+  ///               _data.removeWhere((Item currentItem) => item == currentItem);
   ///             });
   ///           }
   ///         )
@@ -530,6 +536,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       items.add(
         MaterialSlice(
           key: _SaltedKey<BuildContext, int>(context, index * 2),
+          color: child.backgroundColor,
           child: Column(
             children: <Widget>[
               header,

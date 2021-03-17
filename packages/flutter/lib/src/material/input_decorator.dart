@@ -396,7 +396,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
         child: FractionalTranslation(
           translation: Tween<Offset>(
             begin: const Offset(0.0, -0.25),
-            end: const Offset(0.0, 0.0),
+            end: Offset.zero,
           ).evaluate(_controller.view),
           child: Text(
             widget.errorText!,
@@ -935,9 +935,20 @@ class _RenderDecoration extends RenderBox {
     // baseline from the alphabetic baseline. The ideographic baseline is for
     // use post-layout and is derived from the alphabetic baseline combined with
     // the font metrics.
-    final double? baseline = box.getDistanceToBaseline(TextBaseline.alphabetic);
-    assert(baseline != null && baseline >= 0.0);
-    return baseline!;
+    final double baseline = box.getDistanceToBaseline(TextBaseline.alphabetic)!;
+
+    assert(() {
+      if (baseline >= 0)
+        return true;
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary("One of InputDecorator's children reported a negative baseline offset."),
+        ErrorDescription(
+          '${box.runtimeType}, of size ${box.size}, reported a negative '
+          'alphabetic baseline of $baseline.',
+        ),
+      ]);
+    }());
+    return baseline;
   }
 
   // Returns a value used by performLayout to position all of the renderers.
@@ -1284,7 +1295,7 @@ class _RenderDecoration extends RenderBox {
     assert(debugCannotComputeDryLayout(
       reason: 'Layout requires baseline metrics, which are only available after a full layout.',
     ));
-    return const Size(0, 0);
+    return Size.zero;
   }
 
   @override
@@ -1767,7 +1778,9 @@ class _AffixText extends StatelessWidget {
 /// [InputDecorator] can be used to create widgets that look and behave like a
 /// [TextField] but support other kinds of input.
 ///
-/// Requires one of its ancestors to be a [Material] widget.
+/// Requires one of its ancestors to be a [Material] widget. The [child] widget,
+/// as well as the decorative widgets specified in [decoration], must have
+/// non-negative baselines.
 ///
 /// See also:
 ///
@@ -2006,24 +2019,14 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
   Color _getActiveColor(ThemeData themeData) {
     if (isFocused) {
-      switch (themeData.brightness) {
-        case Brightness.dark:
-          return themeData.accentColor;
-        case Brightness.light:
-          return themeData.primaryColor;
-      }
+      return themeData.colorScheme.primary;
     }
     return themeData.hintColor;
   }
 
   Color _getDefaultBorderColor(ThemeData themeData) {
     if (isFocused) {
-      switch (themeData.brightness) {
-        case Brightness.dark:
-          return themeData.accentColor;
-        case Brightness.light:
-          return themeData.primaryColor;
-      }
+        return themeData.colorScheme.primary;
     }
     if (decoration!.filled!) {
       return themeData.hintColor;
@@ -2164,6 +2167,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       child: Text(
         decoration!.hintText!,
         style: hintStyle,
+        textDirection: decoration!.hintTextDirection,
         overflow: TextOverflow.ellipsis,
         textAlign: textAlign,
         maxLines: decoration!.hintMaxLines,
@@ -2401,7 +2405,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return TextField(
+///   return const TextField(
 ///     decoration: InputDecoration(
 ///       icon: Icon(Icons.send),
 ///       hintText: 'Hint Text',
@@ -2424,7 +2428,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return TextField(
+///   return const TextField(
 ///     decoration: InputDecoration.collapsed(
 ///       hintText: 'Hint Text',
 ///       border: OutlineInputBorder(),
@@ -2444,7 +2448,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return TextField(
+///   return const TextField(
 ///     decoration: InputDecoration(
 ///       hintText: 'Hint Text',
 ///       errorText: 'Error Text',
@@ -2509,6 +2513,7 @@ class InputDecoration {
     this.helperMaxLines,
     this.hintText,
     this.hintStyle,
+    this.hintTextDirection,
     this.hintMaxLines,
     this.errorText,
     this.errorStyle,
@@ -2518,7 +2523,7 @@ class InputDecoration {
       'This feature was deprecated after v1.13.2.'
     )
     this.hasFloatingPlaceholder = true,
-    this.floatingLabelBehavior = FloatingLabelBehavior.auto,
+    this.floatingLabelBehavior,
     this.isCollapsed = false,
     this.isDense,
     this.contentPadding,
@@ -2564,8 +2569,9 @@ class InputDecoration {
       'This feature was deprecated after v1.13.2.'
     )
     this.hasFloatingPlaceholder = true,
-    this.floatingLabelBehavior = FloatingLabelBehavior.auto,
+    this.floatingLabelBehavior,
     this.hintStyle,
+    this.hintTextDirection,
     this.filled = false,
     this.fillColor,
     this.focusColor,
@@ -2687,6 +2693,12 @@ class InputDecoration {
   /// input field and the current [Theme].
   final TextStyle? hintStyle;
 
+  /// The direction to use for the [hintText].
+  ///
+  /// If null, defaults to a value derived from [Directionality] for the
+  /// input field and the current context.
+  final TextDirection? hintTextDirection;
+
   /// The maximum number of lines the [hintText] can occupy.
   ///
   /// Defaults to the value of [TextField.maxLines] attribute.
@@ -2752,9 +2764,9 @@ class InputDecoration {
   ///
   /// When [FloatingLabelBehavior.never] the label will always appear in an empty
   /// field in place of the content.
-  ///
-  /// Defaults to [FloatingLabelBehavior.auto].
   /// {@endtemplate}
+  ///
+  /// If null, [InputDecorationTheme.floatingLabelBehavior] will be used.
   final FloatingLabelBehavior? floatingLabelBehavior;
 
   /// Whether the [InputDecorator.child] is part of a dense form (i.e., uses less vertical
@@ -2837,6 +2849,7 @@ class InputDecoration {
   /// 48px.
   ///
   /// {@tool dartpad --template=stateless_widget_scaffold}
+  ///
   /// This example shows the differences between two `TextField` widgets when
   /// [prefixIconConstraints] is set to the default value and when one is not.
   ///
@@ -2852,7 +2865,7 @@ class InputDecoration {
   ///     padding: const EdgeInsets.symmetric(horizontal: 8.0),
   ///     child: Column(
   ///       mainAxisAlignment: MainAxisAlignment.center,
-  ///       children: <Widget>[
+  ///       children: const <Widget>[
   ///         TextField(
   ///           decoration: InputDecoration(
   ///             hintText: 'Normal Icon Constraints',
@@ -3020,7 +3033,7 @@ class InputDecoration {
   ///     padding: const EdgeInsets.symmetric(horizontal: 8.0),
   ///     child: Column(
   ///       mainAxisAlignment: MainAxisAlignment.center,
-  ///       children: <Widget>[
+  ///       children: const <Widget>[
   ///         TextField(
   ///           decoration: InputDecoration(
   ///             hintText: 'Normal Icon Constraints',
@@ -3306,6 +3319,7 @@ class InputDecoration {
     int? helperMaxLines,
     String? hintText,
     TextStyle? hintStyle,
+    TextDirection? hintTextDirection,
     int? hintMaxLines,
     String? errorText,
     TextStyle? errorStyle,
@@ -3351,6 +3365,7 @@ class InputDecoration {
       helperMaxLines : helperMaxLines ?? this.helperMaxLines,
       hintText: hintText ?? this.hintText,
       hintStyle: hintStyle ?? this.hintStyle,
+      hintTextDirection: hintTextDirection ?? this.hintTextDirection,
       hintMaxLines: hintMaxLines ?? this.hintMaxLines,
       errorText: errorText ?? this.errorText,
       errorStyle: errorStyle ?? this.errorStyle,
@@ -3439,6 +3454,7 @@ class InputDecoration {
         && other.helperMaxLines == helperMaxLines
         && other.hintText == hintText
         && other.hintStyle == hintStyle
+        && other.hintTextDirection == hintTextDirection
         && other.hintMaxLines == hintMaxLines
         && other.errorText == errorText
         && other.errorStyle == errorStyle
@@ -3487,6 +3503,7 @@ class InputDecoration {
       helperMaxLines,
       hintText,
       hintStyle,
+      hintTextDirection,
       hintMaxLines,
       errorText,
       errorStyle,
@@ -3700,6 +3717,8 @@ class InputDecorationTheme with Diagnosticable {
   final bool hasFloatingPlaceholder;
 
   /// {@macro flutter.material.inputDecoration.floatingLabelBehavior}
+  ///
+  /// Defaults to [FloatingLabelBehavior.auto].
   final FloatingLabelBehavior floatingLabelBehavior;
 
   /// Whether the input decorator's child is part of a dense form (i.e., uses

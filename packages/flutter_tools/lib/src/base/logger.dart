@@ -2,14 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
 
 import '../convert.dart';
-import '../globals.dart' as globals;
 import 'io.dart';
-import 'terminal.dart' show AnsiTerminal, Terminal, TerminalColor, OutputPreferences;
+import 'terminal.dart' show Terminal, TerminalColor, OutputPreferences;
 import 'utils.dart';
 
 const int kDefaultStatusPadding = 59;
@@ -34,7 +35,7 @@ abstract class Logger {
 
   bool get hasTerminal;
 
-  Terminal get _terminal;
+  Terminal get terminal;
 
   OutputPreferences get _outputPreferences;
 
@@ -130,6 +131,10 @@ abstract class Logger {
     int progressIndicatorPadding = kDefaultStatusPadding,
   });
 
+  /// A [SilentStatus] or an [AnsiSpinner] (depending on whether the
+  /// terminal is fancy enough), already started.
+  Status startSpinner({ VoidCallback onFinish });
+
   /// Send an event to be emitted.
   ///
   /// Only surfaces a value in machine modes, Loggers may ignore this message in
@@ -160,7 +165,7 @@ class DelegatingLogger implements Logger {
   bool get hasTerminal => _delegate.hasTerminal;
 
   @override
-  Terminal get _terminal => _delegate._terminal;
+  Terminal get terminal => _delegate.terminal;
 
   @override
   OutputPreferences get _outputPreferences => _delegate._outputPreferences;
@@ -213,6 +218,11 @@ class DelegatingLogger implements Logger {
   }
 
   @override
+  Status startSpinner({VoidCallback onFinish}) {
+    return _delegate.startSpinner(onFinish: onFinish);
+  }
+
+  @override
   bool get supportsColor => _delegate.supportsColor;
 
   @override
@@ -239,18 +249,17 @@ T asLogger<T extends Logger>(Logger logger) {
 
 class StdoutLogger extends Logger {
   StdoutLogger({
-    @required Terminal terminal,
+    @required this.terminal,
     @required Stdio stdio,
     @required OutputPreferences outputPreferences,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
   })
     : _stdio = stdio,
-      _terminal = terminal,
       _outputPreferences = outputPreferences,
       _stopwatchFactory = stopwatchFactory;
 
   @override
-  final Terminal _terminal;
+  final Terminal terminal;
   @override
   final OutputPreferences _outputPreferences;
   final Stdio _stdio;
@@ -262,7 +271,7 @@ class StdoutLogger extends Logger {
   bool get isVerbose => false;
 
   @override
-  bool get supportsColor => _terminal.supportsColor;
+  bool get supportsColor => terminal.supportsColor;
 
   @override
   bool get hasTerminal => _stdio.stdinHasTerminal;
@@ -286,9 +295,9 @@ class StdoutLogger extends Logger {
       columnWidth: _outputPreferences.wrapColumn,
     );
     if (emphasis == true) {
-      message = _terminal.bolden(message);
+      message = terminal.bolden(message);
     }
-    message = _terminal.color(message, color ?? TerminalColor.red);
+    message = terminal.color(message, color ?? TerminalColor.red);
     writeToStdErr('$message\n');
     if (stackTrace != null) {
       writeToStdErr('$stackTrace\n');
@@ -315,10 +324,10 @@ class StdoutLogger extends Logger {
       columnWidth: _outputPreferences.wrapColumn,
     );
     if (emphasis == true) {
-      message = _terminal.bolden(message);
+      message = terminal.bolden(message);
     }
     if (color != null) {
-      message = _terminal.color(message, color);
+      message = terminal.color(message, color);
     }
     if (newline != false) {
       message = '$message\n';
@@ -359,7 +368,7 @@ class StdoutLogger extends Logger {
         onFinish: _clearStatus,
         stdio: _stdio,
         stopwatch: _stopwatchFactory.createStopwatch(),
-        terminal: _terminal,
+        terminal: terminal,
       )..start();
     } else {
       _status = SummaryStatus(
@@ -373,6 +382,22 @@ class StdoutLogger extends Logger {
     return _status;
   }
 
+  @override
+  Status startSpinner({ VoidCallback onFinish }) {
+    if (terminal.supportsColor) {
+      return AnsiSpinner(
+        onFinish: onFinish,
+        stopwatch: _stopwatchFactory.createStopwatch(),
+        terminal: terminal,
+        stdio: _stdio,
+      )..start();
+    }
+    return SilentStatus(
+      onFinish: onFinish,
+      stopwatch: _stopwatchFactory.createStopwatch(),
+    )..start();
+  }
+
   void _clearStatus() {
     _status = null;
   }
@@ -383,7 +408,7 @@ class StdoutLogger extends Logger {
   @override
   void clear() {
     _status?.pause();
-    writeToStdOut(_terminal.clearScreen() + '\n');
+    writeToStdOut(terminal.clearScreen() + '\n');
     _status?.resume();
   }
 }
@@ -411,33 +436,32 @@ class WindowsStdoutLogger extends StdoutLogger {
 
   @override
   void writeToStdOut(String message) {
-    // TODO(jcollins-g): wrong abstraction layer for this, move to [Stdio].
-    final String windowsMessage = _terminal.supportsEmoji
+    final String windowsMessage = terminal.supportsEmoji
       ? message
       : message.replaceAll('🔥', '')
                .replaceAll('🖼️', '')
                .replaceAll('✗', 'X')
                .replaceAll('✓', '√')
                .replaceAll('🔨', '')
-               .replaceAll('💪', '');
+               .replaceAll('💪', '')
+               .replaceAll('✏️', '');
     _stdio.stdoutWrite(windowsMessage);
   }
 }
 
 class BufferLogger extends Logger {
   BufferLogger({
-    @required AnsiTerminal terminal,
+    @required this.terminal,
     @required OutputPreferences outputPreferences,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
   }) : _outputPreferences = outputPreferences,
-       _terminal = terminal,
        _stopwatchFactory = stopwatchFactory;
 
   /// Create a [BufferLogger] with test preferences.
   BufferLogger.test({
     Terminal terminal,
     OutputPreferences outputPreferences,
-  }) : _terminal = terminal ?? Terminal.test(),
+  }) : terminal = terminal ?? Terminal.test(),
        _outputPreferences = outputPreferences ?? OutputPreferences.test(),
        _stopwatchFactory = const StopwatchFactory();
 
@@ -446,7 +470,7 @@ class BufferLogger extends Logger {
   final OutputPreferences _outputPreferences;
 
   @override
-  final Terminal _terminal;
+  final Terminal terminal;
 
   final StopwatchFactory _stopwatchFactory;
 
@@ -454,7 +478,7 @@ class BufferLogger extends Logger {
   bool get isVerbose => false;
 
   @override
-  bool get supportsColor => _terminal.supportsColor;
+  bool get supportsColor => terminal.supportsColor;
 
   final StringBuffer _error = StringBuffer();
   final StringBuffer _status = StringBuffer();
@@ -479,7 +503,7 @@ class BufferLogger extends Logger {
     int hangingIndent,
     bool wrap,
   }) {
-    _error.writeln(_terminal.color(
+    _error.writeln(terminal.color(
       wrapText(message,
         indent: indent,
         hangingIndent: hangingIndent,
@@ -531,6 +555,14 @@ class BufferLogger extends Logger {
     printStatus(message);
     return SilentStatus(
       stopwatch: _stopwatchFactory.createStopwatch(),
+    )..start();
+  }
+
+  @override
+  Status startSpinner({VoidCallback onFinish}) {
+    return SilentStatus(
+      stopwatch: _stopwatchFactory.createStopwatch(),
+      onFinish: onFinish,
     )..start();
   }
 
@@ -652,7 +684,7 @@ class VerboseLogger extends DelegatingLogger {
     } else {
       prefix = '+$millis ms'.padLeft(prefixWidth);
       if (millis >= 100) {
-        prefix = _terminal.bolden(prefix);
+        prefix = terminal.bolden(prefix);
       }
     }
     prefix = '[$prefix] ';
@@ -661,12 +693,12 @@ class VerboseLogger extends DelegatingLogger {
     final String indentMessage = message.replaceAll('\n', '\n$indent');
 
     if (type == _LogType.error) {
-      super.printError(prefix + _terminal.bolden(indentMessage));
+      super.printError(prefix + terminal.bolden(indentMessage));
       if (stackTrace != null) {
         super.printError(indent + stackTrace.toString().replaceAll('\n', '\n$indent'));
       }
     } else if (type == _LogType.status) {
-      super.printStatus(prefix + _terminal.bolden(indentMessage));
+      super.printStatus(prefix + terminal.bolden(indentMessage));
     } else {
       super.printStatus(prefix + indentMessage);
     }
@@ -674,6 +706,34 @@ class VerboseLogger extends DelegatingLogger {
 
   @override
   void sendEvent(String name, [Map<String, dynamic> args]) { }
+}
+
+class PrefixedErrorLogger extends DelegatingLogger {
+  PrefixedErrorLogger(Logger parent) : super(parent);
+
+  @override
+  void printError(
+    String message, {
+    StackTrace stackTrace,
+    bool emphasis,
+    TerminalColor color,
+    int indent,
+    int hangingIndent,
+    bool wrap,
+  }) {
+    if (message?.trim()?.isNotEmpty == true) {
+      message = 'ERROR: $message';
+    }
+    super.printError(
+      message,
+      stackTrace: stackTrace,
+      emphasis: emphasis,
+      color: color,
+      indent: indent,
+      hangingIndent: hangingIndent,
+      wrap: wrap,
+    );
+  }
 }
 
 enum _LogType { error, status, trace }
@@ -702,26 +762,6 @@ abstract class Status {
     this.onFinish,
     @required Stopwatch stopwatch,
   }) : _stopwatch = stopwatch;
-
-  /// A [SilentStatus] or an [AnsiSpinner] (depending on whether the
-  /// terminal is fancy enough), already started.
-  factory Status.withSpinner({
-    @required Stopwatch stopwatch,
-    @required Terminal terminal,
-    VoidCallback onFinish,
-  }) {
-    if (terminal.supportsColor) {
-      return AnsiSpinner(
-        onFinish: onFinish,
-        stopwatch: stopwatch,
-        terminal: terminal,
-      )..start();
-    }
-    return SilentStatus(
-      onFinish: onFinish,
-      stopwatch: stopwatch,
-    )..start();
-  }
 
   final VoidCallback onFinish;
 
@@ -794,10 +834,10 @@ class SummaryStatus extends Status {
     @required Stopwatch stopwatch,
     this.padding = kDefaultStatusPadding,
     VoidCallback onFinish,
-    Stdio stdio,
+    @required Stdio stdio,
   }) : assert(message != null),
        assert(padding != null),
-       _stdio = stdio ?? globals.stdio,
+       _stdio = stdio,
        super(
          onFinish: onFinish,
          stopwatch: stopwatch,
@@ -862,8 +902,8 @@ class AnsiSpinner extends Status {
     @required Stopwatch stopwatch,
     @required Terminal terminal,
     VoidCallback onFinish,
-    Stdio stdio,
-  }) : _stdio = stdio ?? globals.stdio,
+    @required Stdio stdio,
+  }) : _stdio = stdio,
        _terminal = terminal,
        super(
          onFinish: onFinish,

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -36,6 +37,11 @@ typedef DragTargetAcceptWithDetails<T> = void Function(DragTargetDetails<T> deta
 /// Used by [DragTarget.builder].
 typedef DragTargetBuilder<T> = Widget Function(BuildContext context, List<T?> candidateData, List<dynamic> rejectedData);
 
+/// Signature for when a [Draggable] is dragged across the screen.
+///
+/// Used by [Draggable.onDragUpdate].
+typedef DragUpdateCallback = void Function(DragUpdateDetails details);
+
 /// Signature for when a [Draggable] is dropped without being accepted by a [DragTarget].
 ///
 /// Used by [Draggable.onDraggableCanceled].
@@ -53,13 +59,31 @@ typedef DragEndCallback = void Function(DraggableDetails details);
 /// Signature for when a [Draggable] leaves a [DragTarget].
 ///
 /// Used by [DragTarget.onLeave].
-typedef DragTargetLeave = void Function(Object? data);
+typedef DragTargetLeave<T> = void Function(T? data);
 
 /// Signature for when a [Draggable] moves within a [DragTarget].
 ///
 /// Used by [DragTarget.onMove].
-typedef DragTargetMove = void Function(DragTargetDetails<dynamic> details);
+typedef DragTargetMove<T> = void Function(DragTargetDetails<T> details);
 
+/// Signature for the strategy that determines the drag start point.
+///
+/// Used for the built-in strategies switched via [DragAnchor] and the optinally
+/// injectable [Draggable.dragAnchorStrategy]
+typedef DragAnchorStrategy = Offset Function(Draggable<Object> draggable, BuildContext context, Offset position);
+
+/// The default [DragAnchorStrategy] used when [Draggable.dragAnchor] is not set
+/// or set to [DragAnchor.child]
+Offset childDragAnchorStrategy(Draggable<Object> draggable, BuildContext context, Offset position) {
+  final RenderBox renderObject = context.findRenderObject()! as RenderBox;
+  return renderObject.globalToLocal(position);
+}
+
+/// The [DragAnchorStrategy] used when [Draggable.dragAnchor] set to
+/// [DragAnchor.pointer]
+Offset pointerDragAnchorStrategy(Draggable<Object> draggable, BuildContext context, Offset position) {
+  return Offset.zero;
+}
 /// Where the [Draggable] should be anchored during a drag.
 enum DragAnchor {
   /// Display the feedback anchored at the position of the original child. If
@@ -107,10 +131,12 @@ enum DragAnchor {
 ///
 /// ```dart
 /// int acceptedData = 0;
+///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Row(
 ///     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-///     children: [
+///     children: <Widget>[
 ///       Draggable<int>(
 ///         // Data is the value this Draggable stores.
 ///         data: 10,
@@ -118,26 +144,26 @@ enum DragAnchor {
 ///           height: 100.0,
 ///           width: 100.0,
 ///           color: Colors.lightGreenAccent,
-///           child: Center(
-///             child: Text("Draggable"),
+///           child: const Center(
+///             child: Text('Draggable'),
 ///           ),
 ///         ),
 ///         feedback: Container(
 ///           color: Colors.deepOrange,
 ///           height: 100,
 ///           width: 100,
-///           child: Icon(Icons.directions_run),
+///           child: const Icon(Icons.directions_run),
 ///         ),
 ///         childWhenDragging: Container(
 ///           height: 100.0,
 ///           width: 100.0,
 ///           color: Colors.pinkAccent,
-///           child: Center(
-///             child: Text("Child When Dragging"),
+///           child: const Center(
+///             child: Text('Child When Dragging'),
 ///           ),
 ///         ),
 ///       ),
-///       DragTarget(
+///       DragTarget<int>(
 ///         builder: (
 ///           BuildContext context,
 ///           List<dynamic> accepted,
@@ -148,7 +174,7 @@ enum DragAnchor {
 ///             width: 100.0,
 ///             color: Colors.cyan,
 ///             child: Center(
-///               child: Text("Value is updated to: $acceptedData"),
+///               child: Text('Value is updated to: $acceptedData'),
 ///             ),
 ///           );
 ///         },
@@ -183,15 +209,22 @@ class Draggable<T extends Object> extends StatefulWidget {
     this.axis,
     this.childWhenDragging,
     this.feedbackOffset = Offset.zero,
+    @Deprecated(
+      'Use dragAnchorStrategy instead. '
+      'This feature was deprecated after v2.1.0-10.0.pre.'
+    )
     this.dragAnchor = DragAnchor.child,
+    this.dragAnchorStrategy,
     this.affinity,
     this.maxSimultaneousDrags,
     this.onDragStarted,
+    this.onDragUpdate,
     this.onDraggableCanceled,
     this.onDragEnd,
     this.onDragCompleted,
     this.ignoringFeedbackSemantics = true,
     this.rootOverlay = false,
+    this.hitTestBehavior = HitTestBehavior.deferToChild,
   }) : assert(child != null),
        assert(feedback != null),
        assert(ignoringFeedbackSemantics != null),
@@ -253,7 +286,22 @@ class Draggable<T extends Object> extends StatefulWidget {
   final Offset feedbackOffset;
 
   /// Where this widget should be anchored during a drag.
+  ///
+  /// This property is overridden by the [dragAnchorStrategy] if the latter is provided.
+  ///
+  /// Defaults to [DragAnchor.child].
+  @Deprecated(
+    'Use dragAnchorStrategy instead. '
+    'This feature was deprecated after v2.1.0-10.0.pre.'
+  )
   final DragAnchor dragAnchor;
+
+  /// A strategy that is used by this draggable to get the the anchor offset when it is dragged.
+  ///
+  /// The anchor offset refers to the distance between the users' fingers and the [feedback] widget when this draggable is dragged.
+  ///
+  /// Defaults to [childDragAnchorStrategy] if the [dragAnchor] is set to [DragAnchor.child] or [pointerDragAnchorStrategy] if the [dragAnchor] is set to [DragAnchor.pointer].
+  final DragAnchorStrategy? dragAnchorStrategy;
 
   /// Whether the semantics of the [feedback] widget is ignored when building
   /// the semantics tree.
@@ -298,6 +346,12 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// Called when the draggable starts being dragged.
   final VoidCallback? onDragStarted;
 
+  /// Called when the draggable is dragged.
+  ///
+  /// This function will only be called while this widget is still mounted to
+  /// the tree (i.e. [State.mounted] is true), and if this widget has actually moved.
+  final DragUpdateCallback? onDragUpdate;
+
   /// Called when the draggable is dropped without being accepted by a [DragTarget].
   ///
   /// This function might be called after this widget has been removed from the
@@ -337,6 +391,11 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// Defaults to false.
   final bool rootOverlay;
 
+  /// How to behave during hit test.
+  ///
+  /// Defaults to [HitTestBehavior.deferToChild].
+  final HitTestBehavior hitTestBehavior;
+
   /// Creates a gesture recognizer that recognizes the start of the drag.
   ///
   /// Subclasses can override this function to customize when they start
@@ -358,6 +417,11 @@ class Draggable<T extends Object> extends StatefulWidget {
 }
 
 /// Makes its child draggable starting from long press.
+///
+/// See also:
+///
+///  * [Draggable], similar to the [LongPressDraggable] widget but happens immediately.
+///  * [DragTarget], a widget that receives data when a [Draggable] widget is dropped.
 class LongPressDraggable<T extends Object> extends Draggable<T> {
   /// Creates a widget that can be dragged starting from long press.
   ///
@@ -374,11 +438,13 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
     DragAnchor dragAnchor = DragAnchor.child,
     int? maxSimultaneousDrags,
     VoidCallback? onDragStarted,
+    DragUpdateCallback? onDragUpdate,
     DraggableCanceledCallback? onDraggableCanceled,
     DragEndCallback? onDragEnd,
     VoidCallback? onDragCompleted,
     this.hapticFeedbackOnStart = true,
     bool ignoringFeedbackSemantics = true,
+    this.delay = kLongPressTimeout,
   }) : super(
     key: key,
     child: child,
@@ -390,6 +456,7 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
     dragAnchor: dragAnchor,
     maxSimultaneousDrags: maxSimultaneousDrags,
     onDragStarted: onDragStarted,
+    onDragUpdate: onDragUpdate,
     onDraggableCanceled: onDraggableCanceled,
     onDragEnd: onDragEnd,
     onDragCompleted: onDragCompleted,
@@ -399,9 +466,14 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
   /// Whether haptic feedback should be triggered on drag start.
   final bool hapticFeedbackOnStart;
 
+  /// The duration that a user has to press down before a long press is registered.
+  ///
+  /// Defaults to [kLongPressTimeout].
+  final Duration delay;
+
   @override
   DelayedMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
-    return DelayedMultiDragGestureRecognizer()
+    return DelayedMultiDragGestureRecognizer(delay: delay)
       ..onStart = (Offset position) {
         final Drag? result = onStart(position);
         if (result != null && hapticFeedbackOnStart)
@@ -453,14 +525,17 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
     if (widget.maxSimultaneousDrags != null && _activeCount >= widget.maxSimultaneousDrags!)
       return null;
     final Offset dragStartPoint;
-    switch (widget.dragAnchor) {
-      case DragAnchor.child:
-        final RenderBox renderObject = context.findRenderObject()! as RenderBox;
-        dragStartPoint = renderObject.globalToLocal(position);
-        break;
-      case DragAnchor.pointer:
-        dragStartPoint = Offset.zero;
-        break;
+    if (widget.dragAnchorStrategy == null) {
+      switch (widget.dragAnchor) {
+        case DragAnchor.child:
+          dragStartPoint = childDragAnchorStrategy(widget, context, position);
+          break;
+        case DragAnchor.pointer:
+          dragStartPoint = pointerDragAnchorStrategy(widget, context, position);
+          break;
+      }
+    } else {
+      dragStartPoint = widget.dragAnchorStrategy!(widget, context, position);
     }
     setState(() {
       _activeCount += 1;
@@ -474,6 +549,11 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
       feedback: widget.feedback,
       feedbackOffset: widget.feedbackOffset,
       ignoringFeedbackSemantics: widget.ignoringFeedbackSemantics,
+      onDragUpdate: (DragUpdateDetails details) {
+        if (mounted && widget.onDragUpdate != null) {
+          widget.onDragUpdate!(details);
+        }
+      },
       onDragEnd: (Velocity velocity, Offset offset, bool wasAccepted) {
         if (mounted) {
           setState(() {
@@ -508,6 +588,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
                          _activeCount < widget.maxSimultaneousDrags!;
     final bool showChild = _activeCount == 0 || widget.childWhenDragging == null;
     return Listener(
+      behavior: widget.hitTestBehavior,
       onPointerDown: canDrag ? _routePointer : null,
       child: showChild ? widget.child : widget.childWhenDragging,
     );
@@ -585,6 +666,7 @@ class DragTarget<T extends Object> extends StatefulWidget {
     this.onAcceptWithDetails,
     this.onLeave,
     this.onMove,
+    this.hitTestBehavior = HitTestBehavior.translucent,
   }) : super(key: key);
 
   /// Called to build the contents of this widget.
@@ -614,29 +696,44 @@ class DragTarget<T extends Object> extends StatefulWidget {
 
   /// Called when a given piece of data being dragged over this target leaves
   /// the target.
-  final DragTargetLeave? onLeave;
+  final DragTargetLeave<T>? onLeave;
 
   /// Called when a [Draggable] moves within this [DragTarget].
   ///
   /// Note that this includes entering and leaving the target.
-  final DragTargetMove? onMove;
+  final DragTargetMove<T>? onMove;
+
+  /// How to behave during hit testing.
+  ///
+  /// Defaults to [HitTestBehavior.translucent].
+  final HitTestBehavior hitTestBehavior;
 
   @override
   _DragTargetState<T> createState() => _DragTargetState<T>();
 }
 
-List<T?> _mapAvatarsToData<T extends Object>(List<_DragAvatar<T>> avatars) {
-  return avatars.map<T?>((_DragAvatar<T> avatar) => avatar.data).toList();
+List<T?> _mapAvatarsToData<T extends Object>(List<_DragAvatar<Object>> avatars) {
+  return avatars.map<T?>((_DragAvatar<Object> avatar) => avatar.data as T?).toList();
 }
 
 class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
-  final List<_DragAvatar<T>> _candidateAvatars = <_DragAvatar<T>>[];
+  final List<_DragAvatar<Object>> _candidateAvatars = <_DragAvatar<Object>>[];
   final List<_DragAvatar<Object>> _rejectedAvatars = <_DragAvatar<Object>>[];
+
+  // On non-web platforms, checks if data Object is equal to type[T] or subtype of [T].
+  // On web, it does the same, but requires a check for ints and doubles
+  // because dart doubles and ints are backed by the same kind of object on web.
+  // JavaScript does not support integers.
+  bool isExpectedDataType(Object? data, Type type) {
+    if (kIsWeb && ((type == int && T == double) || (type == double && T == int)))
+      return false;
+    return data is T?;
+  }
 
   bool didEnter(_DragAvatar<Object> avatar) {
     assert(!_candidateAvatars.contains(avatar));
     assert(!_rejectedAvatars.contains(avatar));
-    if (avatar is _DragAvatar<T> && (widget.onWillAccept == null || widget.onWillAccept!(avatar.data))) {
+    if (widget.onWillAccept == null || widget.onWillAccept!(avatar.data as T?)) {
       setState(() {
         _candidateAvatars.add(avatar);
       });
@@ -658,7 +755,7 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
       _rejectedAvatars.remove(avatar);
     });
     if (widget.onLeave != null)
-      widget.onLeave!(avatar.data);
+      widget.onLeave!(avatar.data as T?);
   }
 
   void didDrop(_DragAvatar<Object> avatar) {
@@ -678,7 +775,7 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
     if (!mounted)
       return;
     if (widget.onMove != null)
-      widget.onMove!(DragTargetDetails<dynamic>(data: avatar.data, offset: avatar._lastOffset!));
+      widget.onMove!(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
   }
 
   @override
@@ -686,7 +783,7 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
     assert(widget.builder != null);
     return MetaData(
       metaData: this,
-      behavior: HitTestBehavior.translucent,
+      behavior: widget.hitTestBehavior,
       child: widget.builder(context, _mapAvatarsToData<T>(_candidateAvatars), _mapAvatarsToData<Object>(_rejectedAvatars)),
     );
   }
@@ -708,6 +805,7 @@ class _DragAvatar<T extends Object> extends Drag {
     this.dragStartPoint = Offset.zero,
     this.feedback,
     this.feedbackOffset = Offset.zero,
+    this.onDragUpdate,
     this.onDragEnd,
     required this.ignoringFeedbackSemantics,
   }) : assert(overlayState != null),
@@ -725,20 +823,25 @@ class _DragAvatar<T extends Object> extends Drag {
   final Offset dragStartPoint;
   final Widget? feedback;
   final Offset feedbackOffset;
+  final DragUpdateCallback? onDragUpdate;
   final _OnDragEnd? onDragEnd;
   final OverlayState overlayState;
   final bool ignoringFeedbackSemantics;
 
-  _DragTargetState<T>? _activeTarget;
-  final List<_DragTargetState<T>> _enteredTargets = <_DragTargetState<T>>[];
+  _DragTargetState<Object>? _activeTarget;
+  final List<_DragTargetState<Object>> _enteredTargets = <_DragTargetState<Object>>[];
   Offset _position;
   Offset? _lastOffset;
   OverlayEntry? _entry;
 
   @override
   void update(DragUpdateDetails details) {
+    final Offset oldPosition = _position;
     _position += _restrictAxis(details.delta);
     updateDrag(_position);
+    if (onDragUpdate != null && _position != oldPosition) {
+      onDragUpdate!(details);
+    }
   }
 
   @override
@@ -758,12 +861,12 @@ class _DragAvatar<T extends Object> extends Drag {
     final HitTestResult result = HitTestResult();
     WidgetsBinding.instance!.hitTest(result, globalPosition + feedbackOffset);
 
-    final List<_DragTargetState<T>> targets = _getDragTargets(result.path).toList();
+    final List<_DragTargetState<Object>> targets = _getDragTargets(result.path).toList();
 
     bool listsMatch = false;
     if (targets.length >= _enteredTargets.length && _enteredTargets.isNotEmpty) {
       listsMatch = true;
-      final Iterator<_DragTargetState<T>> iterator = targets.iterator;
+      final Iterator<_DragTargetState<Object>> iterator = targets.iterator;
       for (int i = 0; i < _enteredTargets.length; i += 1) {
         iterator.moveNext();
         if (iterator.current != _enteredTargets[i]) {
@@ -775,7 +878,7 @@ class _DragAvatar<T extends Object> extends Drag {
 
     // If everything's the same, report moves, and bail early.
     if (listsMatch) {
-      for (final _DragTargetState<T> target in _enteredTargets) {
+      for (final _DragTargetState<Object> target in _enteredTargets) {
         target.didMove(this);
       }
       return;
@@ -785,8 +888,8 @@ class _DragAvatar<T extends Object> extends Drag {
     _leaveAllEntered();
 
     // Enter new targets.
-    final _DragTargetState<T>? newTarget = targets.cast<_DragTargetState<T>?>().firstWhere(
-      (_DragTargetState<T>? target) {
+    final _DragTargetState<Object>? newTarget = targets.cast<_DragTargetState<Object>?>().firstWhere(
+      (_DragTargetState<Object>? target) {
         if (target == null)
           return false;
         _enteredTargets.add(target);
@@ -796,21 +899,21 @@ class _DragAvatar<T extends Object> extends Drag {
     );
 
     // Report moves to the targets.
-    for (final _DragTargetState<T> target in _enteredTargets) {
+    for (final _DragTargetState<Object> target in _enteredTargets) {
       target.didMove(this);
     }
 
     _activeTarget = newTarget;
   }
 
-  Iterable<_DragTargetState<T>> _getDragTargets(Iterable<HitTestEntry> path) sync* {
+  Iterable<_DragTargetState<Object>> _getDragTargets(Iterable<HitTestEntry> path) sync* {
     // Look for the RenderBoxes that corresponds to the hit target (the hit target
     // widgets build RenderMetaData boxes for us for this purpose).
     for (final HitTestEntry entry in path) {
       final HitTestTarget target = entry.target;
       if (target is RenderMetaData) {
         final dynamic metaData = target.metaData;
-        if (metaData is _DragTargetState<T>)
+        if (metaData is _DragTargetState && metaData.isExpectedDataType(data, T))
           yield metaData;
       }
     }

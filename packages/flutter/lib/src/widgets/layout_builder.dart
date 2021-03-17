@@ -251,9 +251,9 @@ mixin RenderConstrainedLayoutBuilder<ConstraintType extends Constraints, ChildTy
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
-///     appBar: AppBar(title: Text("LayoutBuilder Example")),
+///     appBar: AppBar(title: const Text('LayoutBuilder Example')),
 ///     body: LayoutBuilder(
-///       builder: (context, constraints) {
+///       builder: (BuildContext context, BoxConstraints constraints) {
 ///         if (constraints.maxWidth > 600) {
 ///           return _buildWideContainers();
 ///         } else {
@@ -351,7 +351,7 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
       'Calculating the dry layout would require running the layout callback '
       'speculatively, which might mutate the live render object tree.',
     ));
-    return const Size(0, 0);
+    return Size.zero;
   }
 
   @override

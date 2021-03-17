@@ -353,7 +353,7 @@ class TextTheme with Diagnosticable {
   /// /// A Widget that sets the ambient theme's title text color for its
   /// /// descendants, while leaving other ambient theme attributes alone.
   /// class TitleColorThemeCopy extends StatelessWidget {
-  ///   TitleColorThemeCopy({Key key, this.child, this.titleColor}) : super(key: key);
+  ///   const TitleColorThemeCopy({Key? key, required this.child, required this.titleColor}) : super(key: key);
   ///
   ///   final Color titleColor;
   ///   final Widget child;
@@ -364,7 +364,7 @@ class TextTheme with Diagnosticable {
   ///     return Theme(
   ///       data: theme.copyWith(
   ///         textTheme: theme.textTheme.copyWith(
-  ///           headline6: theme.textTheme.headline6.copyWith(
+  ///           headline6: theme.textTheme.headline6!.copyWith(
   ///             color: titleColor,
   ///           ),
   ///         ),
@@ -494,7 +494,7 @@ class TextTheme with Diagnosticable {
   /// /// A Widget that sets the ambient theme's title text color for its
   /// /// descendants, while leaving other ambient theme attributes alone.
   /// class TitleColorTheme extends StatelessWidget {
-  ///   TitleColorTheme({Key key, this.child, this.titleColor}) : super(key: key);
+  ///   const TitleColorTheme({Key? key, required this.child, required this.titleColor}) : super(key: key);
   ///
   ///   final Color titleColor;
   ///   final Widget child;
@@ -507,7 +507,7 @@ class TextTheme with Diagnosticable {
   ///     // set the title, but everything else would be null. This isn't very
   ///     // useful, so merge it with the existing theme to keep all of the
   ///     // preexisting definitions for the other styles.
-  ///     TextTheme partialTheme = TextTheme(headline6: TextStyle(color: titleColor));
+  ///     final TextTheme partialTheme = TextTheme(headline6: TextStyle(color: titleColor));
   ///     theme = theme.copyWith(textTheme: theme.textTheme.merge(partialTheme));
   ///     return Theme(data: theme, child: child);
   ///   }

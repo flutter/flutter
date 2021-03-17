@@ -34,7 +34,7 @@ import 'time.dart';
 import 'time_picker_theme.dart';
 
 // Examples can assume:
-// BuildContext context;
+// late BuildContext context;
 
 const Duration _kDialogSizeAnimationDuration = Duration(milliseconds: 200);
 const Duration _kDialAnimateDuration = Duration(milliseconds: 200);
@@ -159,7 +159,7 @@ class _TimePickerHeader extends StatelessWidget {
         controls = Column(
           children: <Widget>[
             const SizedBox(height: 16.0),
-            Container(
+            SizedBox(
               height: kMinInteractiveDimension * 2,
               child: Row(
                 children: <Widget>[
@@ -209,7 +209,7 @@ class _TimePickerHeader extends StatelessWidget {
                   orientation: orientation,
                   onChanged: onChanged,
                 ),
-              Container(
+              SizedBox(
                 height: kMinInteractiveDimension * 2,
                 child: Row(
                   // Hour/minutes should not change positions in RTL locales.
@@ -287,7 +287,7 @@ class _HourMinuteControl extends StatelessWidget {
     final ShapeBorder shape = timePickerTheme.hourMinuteShape ?? _kDefaultShape;
 
     final Set<MaterialState> states = isSelected ? <MaterialState>{MaterialState.selected} : <MaterialState>{};
-    return Container(
+    return SizedBox(
       height: _kTimePickerHeaderControlHeight,
       child: Material(
         color: MaterialStateProperty.resolveAs(backgroundColor, states),
@@ -610,7 +610,7 @@ class _DayPeriodControl extends StatelessWidget {
         result = _DayPeriodInputPadding(
           minSize: const Size(width, kMinInteractiveDimension * 2),
           orientation: orientation,
-          child: Container(
+          child: SizedBox(
             width: width,
             height: _kTimePickerHeaderControlHeight,
             child: Material(
@@ -637,7 +637,7 @@ class _DayPeriodControl extends StatelessWidget {
         result = _DayPeriodInputPadding(
           minSize: const Size(0.0, kMinInteractiveDimension),
           orientation: orientation,
-          child: Container(
+          child: SizedBox(
             height: 40.0,
             child: Material(
               clipBehavior: Clip.antiAlias,
@@ -2126,7 +2126,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// Show a dialog with [initialTime] equal to the current time.
 ///
 /// ```dart
-/// Future<TimeOfDay> selectedTime = showTimePicker(
+/// Future<TimeOfDay?> selectedTime = showTimePicker(
 ///   initialTime: TimeOfDay.now(),
 ///   context: context,
 /// );
@@ -2155,13 +2155,13 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// Show a dialog with the text direction overridden to be [TextDirection.rtl].
 ///
 /// ```dart
-/// Future<TimeOfDay> selectedTimeRTL = showTimePicker(
+/// Future<TimeOfDay?> selectedTimeRTL = showTimePicker(
 ///   context: context,
 ///   initialTime: TimeOfDay.now(),
-///   builder: (BuildContext context, Widget child) {
+///   builder: (BuildContext context, Widget? child) {
 ///     return Directionality(
 ///       textDirection: TextDirection.rtl,
-///       child: child,
+///       child: child!,
 ///     );
 ///   },
 /// );
@@ -2172,13 +2172,13 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// Show a dialog with time unconditionally displayed in 24 hour format.
 ///
 /// ```dart
-/// Future<TimeOfDay> selectedTime24Hour = showTimePicker(
+/// Future<TimeOfDay?> selectedTime24Hour = showTimePicker(
 ///   context: context,
-///   initialTime: TimeOfDay(hour: 10, minute: 47),
-///   builder: (BuildContext context, Widget child) {
+///   initialTime: const TimeOfDay(hour: 10, minute: 47),
+///   builder: (BuildContext context, Widget? child) {
 ///     return MediaQuery(
 ///       data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
-///       child: child,
+///       child: child!,
 ///     );
 ///   },
 /// );
@@ -2215,7 +2215,7 @@ Future<TimeOfDay?> showTimePicker({
     confirmText: confirmText,
     helpText: helpText,
   );
-  return await showDialog<TimeOfDay>(
+  return showDialog<TimeOfDay>(
     context: context,
     useRootNavigator: useRootNavigator,
     builder: (BuildContext context) {

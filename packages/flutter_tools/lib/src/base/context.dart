@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:collection';
 
@@ -134,7 +136,7 @@ class AppContext {
   /// name. This is useful for debugging purposes and is analogous to naming a
   /// thread in Java.
   Future<V> run<V>({
-    @required FutureOr<V> body(),
+    @required FutureOr<V> Function() body,
     String name,
     Map<Type, Generator> overrides,
     Map<Type, Generator> fallbacks,
@@ -146,7 +148,7 @@ class AppContext {
       Map<Type, Generator>.unmodifiable(overrides ?? const <Type, Generator>{}),
       Map<Type, Generator>.unmodifiable(fallbacks ?? const <Type, Generator>{}),
     );
-    return await runZoned<Future<V>>(
+    return runZoned<Future<V>>(
       () async => await body(),
       zoneValues: <_Key, AppContext>{_Key.key: child},
       zoneSpecification: zoneSpecification,

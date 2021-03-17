@@ -138,7 +138,7 @@ class _CalculatorState extends State<Calculator> {
 }
 
 class CalcDisplay extends StatelessWidget {
-  const CalcDisplay({ this.content });
+  const CalcDisplay({ Key? key, this.content}) : super(key: key);
 
   final String? content;
 
@@ -154,7 +154,7 @@ class CalcDisplay extends StatelessWidget {
 }
 
 class KeyPad extends StatelessWidget {
-  const KeyPad({ this.calcState });
+  const KeyPad({ Key? key, this.calcState }) : super(key: key);
 
   final _CalculatorState? calcState;
 
@@ -222,7 +222,7 @@ class KeyPad extends StatelessWidget {
 }
 
 class KeyRow extends StatelessWidget {
-  const KeyRow(this.keys);
+  const KeyRow(this.keys, {Key? key}) : super(key: key);
 
   final List<Widget> keys;
 
@@ -238,7 +238,7 @@ class KeyRow extends StatelessWidget {
 }
 
 class CalcKey extends StatelessWidget {
-  const CalcKey(this.text, this.onTap);
+  const CalcKey(this.text, this.onTap, {Key? key}) : super(key: key);
 
   final String text;
   final GestureTapCallback onTap;
@@ -265,8 +265,8 @@ class CalcKey extends StatelessWidget {
 }
 
 class NumberKey extends CalcKey {
-  NumberKey(int value, _CalculatorState? calcState)
+  NumberKey(int value, _CalculatorState? calcState, {Key? key})
     : super('$value', () {
         calcState!.handleNumberTap(value);
-      });
+      }, key: key);
 }

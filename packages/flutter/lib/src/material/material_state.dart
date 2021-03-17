@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Color;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 /// Interactive states that some of the Material widgets can take on when
 /// receiving input from the user.
@@ -111,10 +110,10 @@ typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 ///
 /// ```dart
 /// class MyColor extends MaterialStateColor {
+///   const MyColor() : super(_defaultColor);
+///
 ///   static const int _defaultColor = 0xcafefeed;
 ///   static const int _pressedColor = 0xdeadbeef;
-///
-///   const MyColor() : super(_defaultColor);
 ///
 ///   @override
 ///   Color resolve(Set<MaterialState> states) {
@@ -127,7 +126,8 @@ typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 /// ```
 /// {@end-tool}
 abstract class MaterialStateColor extends Color implements MaterialStateProperty<Color> {
-  /// Creates a [MaterialStateColor].
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const MaterialStateColor(int defaultValue) : super(defaultValue);
 
   /// Creates a [MaterialStateColor] from a [MaterialPropertyResolver<Color>]
@@ -205,7 +205,7 @@ class _MaterialStateColor extends MaterialStateColor {
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return ListTile(
-///     title: Text('Disabled ListTile'),
+///     title: const Text('Disabled ListTile'),
 ///     enabled: false,
 ///     mouseCursor: ListTileCursor(),
 ///   );
@@ -222,7 +222,8 @@ class _MaterialStateColor extends MaterialStateColor {
 ///  * [SystemMouseCursors], which defines cursors that are supported by
 ///    native platforms.
 abstract class MaterialStateMouseCursor extends MouseCursor implements MaterialStateProperty<MouseCursor> {
-  /// Creates a [MaterialStateMouseCursor].
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const MaterialStateMouseCursor();
 
   @protected
@@ -302,9 +303,9 @@ class _EnabledAndDisabledMouseCursor extends MaterialStateMouseCursor {
 /// ```dart preamble
 /// class RedSelectedBorderSide extends MaterialStateBorderSide {
 ///   @override
-///   BorderSide resolve(Set<MaterialState> states) {
+///   BorderSide? resolve(Set<MaterialState> states) {
 ///     if (states.contains(MaterialState.selected)) {
-///       return BorderSide(
+///       return const BorderSide(
 ///         width: 1,
 ///         color: Colors.red,
 ///       );
@@ -317,9 +318,10 @@ class _EnabledAndDisabledMouseCursor extends MaterialStateMouseCursor {
 /// ```dart
 /// bool isSelected = true;
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return FilterChip(
-///     label: Text('Select chip'),
+///     label: const Text('Select chip'),
 ///     selected: isSelected,
 ///     onSelected: (bool value) {
 ///       setState(() {
@@ -335,7 +337,8 @@ class _EnabledAndDisabledMouseCursor extends MaterialStateMouseCursor {
 /// This class should only be used for parameters which are documented to take
 /// [MaterialStateBorderSide], otherwise only the default state will be used.
 abstract class MaterialStateBorderSide extends BorderSide implements MaterialStateProperty<BorderSide?> {
-  /// Creates a [MaterialStateBorderSide].
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const MaterialStateBorderSide();
 
   /// Returns a [BorderSide] that's to be used when a Material component is
@@ -361,9 +364,9 @@ abstract class MaterialStateBorderSide extends BorderSide implements MaterialSta
 /// ```dart preamble
 /// class SelectedBorder extends RoundedRectangleBorder implements MaterialStateOutlinedBorder {
 ///   @override
-///   OutlinedBorder resolve(Set<MaterialState> states) {
+///   OutlinedBorder? resolve(Set<MaterialState> states) {
 ///     if (states.contains(MaterialState.selected)) {
-///       return RoundedRectangleBorder();
+///       return const RoundedRectangleBorder();
 ///     }
 ///     return null;  // Defer to default value on the theme or widget.
 ///   }
@@ -373,9 +376,10 @@ abstract class MaterialStateBorderSide extends BorderSide implements MaterialSta
 /// ```dart
 /// bool isSelected = true;
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return FilterChip(
-///     label: Text('Select chip'),
+///     label: const Text('Select chip'),
 ///     selected: isSelected,
 ///     onSelected: (bool value) {
 ///       setState(() {
@@ -395,7 +399,8 @@ abstract class MaterialStateBorderSide extends BorderSide implements MaterialSta
 ///
 ///  * [ShapeBorder] the base class for shape outlines.
 abstract class MaterialStateOutlinedBorder extends OutlinedBorder implements MaterialStateProperty<OutlinedBorder?> {
-  /// Creates a [MaterialStateOutlinedBorder].
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const MaterialStateOutlinedBorder();
 
   /// Returns an [OutlinedBorder] that's to be used when a Material component is
@@ -449,7 +454,7 @@ abstract class MaterialStateOutlinedBorder extends OutlinedBorder implements Mat
 ///       foregroundColor: MaterialStateProperty.resolveWith(getColor),
 ///     ),
 ///     onPressed: () {},
-///     child: Text('TextButton'),
+///     child: const Text('TextButton'),
 ///   );
 /// }
 /// ```

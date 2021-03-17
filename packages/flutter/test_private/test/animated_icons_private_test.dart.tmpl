@@ -15,8 +15,7 @@ import 'dart:ui' as ui show Paint, Path, Canvas;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
-
-import 'test/flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 part 'src/material/animated_icons/animated_icons.dart';
 part 'src/material/animated_icons/animated_icons_data.dart';
@@ -422,7 +421,7 @@ const _AnimatedIconData movingBar = _AnimatedIconData(
       commands: <_PathCommand>[
         _PathMoveTo(
           <Offset>[
-            Offset(0.0, 0.0),
+            Offset.zero,
             Offset(0.0, 38.0),
           ],
         ),
@@ -446,7 +445,7 @@ const _AnimatedIconData movingBar = _AnimatedIconData(
         ),
         _PathLineTo(
           <Offset>[
-            Offset(0.0, 0.0),
+            Offset.zero,
             Offset(0.0, 38.0),
           ],
         ),

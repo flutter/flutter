@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -104,7 +106,7 @@ class FuchsiaPM {
   ///
   /// The argument [repoPath] should have previously been an argument to
   /// [newrepo]. The [host] should be the host reported by
-  /// [FuchsiaDevFinder.resolve], and [port] should be an unused port for the
+  /// [FuchsiaDevFinder.resolve] or [FuchsiaFfx.resolve] and [port] should be an unused port for the
   /// http server to bind.
   Future<Process> serve(String repoPath, String host, int port) async {
     if (globals.fuchsiaArtifacts.pm == null) {
@@ -243,7 +245,7 @@ class FuchsiaPackageServer {
     if (_process == null) {
       return false;
     }
-    return await fuchsiaSdk.fuchsiaPM.publish(_repo, package.path);
+    return fuchsiaSdk.fuchsiaPM.publish(_repo, package.path);
   }
 
   @override

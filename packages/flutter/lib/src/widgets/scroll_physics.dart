@@ -18,10 +18,14 @@ export 'package:flutter/physics.dart' show Simulation, ScrollSpringSimulation, T
 
 // Examples can assume:
 // class FooScrollPhysics extends ScrollPhysics {
-//   const FooScrollPhysics({ ScrollPhysics parent }): super(parent: parent);
+//   const FooScrollPhysics({ ScrollPhysics? parent }): super(parent: parent);
+//   @override
+//   FooScrollPhysics applyTo(ScrollPhysics? ancestor) {
+//     return FooScrollPhysics(parent: buildParent(ancestor));
+//   }
 // }
 // class BarScrollPhysics extends ScrollPhysics {
-//   const BarScrollPhysics({ ScrollPhysics parent }): super(parent: parent);
+//   const BarScrollPhysics({ ScrollPhysics? parent }): super(parent: parent);
 // }
 
 /// Determines the physics of a [Scrollable] widget.
@@ -109,7 +113,7 @@ class ScrollPhysics {
   /// `x` has the same behavior as `y`.
   ///
   /// ```dart
-  /// final FooScrollPhysics x = FooScrollPhysics().applyTo(BarScrollPhysics());
+  /// final FooScrollPhysics x = const FooScrollPhysics().applyTo(const BarScrollPhysics());
   /// const FooScrollPhysics y = FooScrollPhysics(parent: BarScrollPhysics());
   /// ```
   /// {@end-tool}
@@ -559,7 +563,7 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
 ///
 /// {@tool snippet}
 /// ```dart
-/// BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics())
+/// const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics())
 /// ```
 /// {@end-tool}
 ///
@@ -690,7 +694,8 @@ class BouncingScrollPhysics extends ScrollPhysics {
 ///  * [GlowingOverscrollIndicator], which is used by [ScrollConfiguration] to
 ///    provide the glowing effect that is usually found with this clamping effect
 ///    on Android. When using a [MaterialApp], the [GlowingOverscrollIndicator]'s
-///    glow color is specified to use [ThemeData.accentColor].
+///    glow color is specified to use the overall theme's
+///    [ColorScheme.secondary] color.
 class ClampingScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that prevent the scroll offset from exceeding the
   /// bounds of the content.

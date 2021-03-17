@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/foundation.dart' show precisionErrorTolerance;
@@ -46,19 +45,14 @@ import 'viewport.dart';
 ///
 /// ```dart
 /// class MyPageView extends StatefulWidget {
-///   MyPageView({Key key}) : super(key: key);
+///   const MyPageView({Key? key}) : super(key: key);
 ///
+///   @override
 ///   _MyPageViewState createState() => _MyPageViewState();
 /// }
 ///
 /// class _MyPageViewState extends State<MyPageView> {
-///   PageController _pageController;
-///
-///   @override
-///   void initState() {
-///     super.initState();
-///     _pageController = PageController();
-///   }
+///   final PageController _pageController = PageController();
 ///
 ///   @override
 ///   void dispose() {
@@ -72,7 +66,7 @@ import 'viewport.dart';
 ///       home: Scaffold(
 ///         body: PageView(
 ///           controller: _pageController,
-///           children: [
+///           children: <Widget>[
 ///             Container(
 ///               color: Colors.red,
 ///               child: Center(
@@ -86,7 +80,7 @@ import 'viewport.dart';
 ///                       );
 ///                     }
 ///                   },
-///                   child: Text('Next'),
+///                   child: const Text('Next'),
 ///                 ),
 ///               ),
 ///             ),
@@ -103,7 +97,7 @@ import 'viewport.dart';
 ///                       );
 ///                     }
 ///                   },
-///                   child: Text('Previous'),
+///                   child: const Text('Previous'),
 ///                 ),
 ///               ),
 ///             ),
@@ -572,6 +566,35 @@ const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=J1gE9xvph-A}
 ///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// Here is an example of [PageView]. It creates a centered [Text] in each of the three pages
+/// which scroll horizontally.
+///
+/// ```dart
+///  Widget build(BuildContext context) {
+///    final PageController controller = PageController(initialPage: 0);
+///    return PageView(
+///      /// [PageView.scrollDirection] defaults to [Axis.horizontal].
+///      /// Use [Axis.vertical] to scroll vertically.
+///      scrollDirection: Axis.horizontal,
+///      controller: controller,
+///      children: const <Widget>[
+///        Center(
+///          child: Text('First Page'),
+///        ),
+///        Center(
+///          child: Text('Second Page'),
+///        ),
+///        Center(
+///          child: Text('Third Page'),
+///        )
+///      ],
+///    );
+///  }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [PageController], which controls which page is visible in the view.
@@ -666,6 +689,8 @@ class PageView extends StatefulWidget {
   ///
   /// ```dart
   /// class MyPageView extends StatefulWidget {
+  ///   const MyPageView({Key? key}) : super(key: key);
+  ///
   ///   @override
   ///   _MyPageViewState createState() => _MyPageViewState();
   /// }
@@ -693,7 +718,7 @@ class PageView extends StatefulWidget {
   ///             },
   ///             childCount: items.length,
   ///             findChildIndexCallback: (Key key) {
-  ///               final ValueKey valueKey = key;
+  ///               final ValueKey<String> valueKey = key as ValueKey<String>;
   ///               final String data = valueKey.value;
   ///               return items.indexOf(data);
   ///             }
@@ -706,7 +731,7 @@ class PageView extends StatefulWidget {
   ///           children: <Widget>[
   ///             TextButton(
   ///               onPressed: () => _reverse(),
-  ///               child: Text('Reverse items'),
+  ///               child: const Text('Reverse items'),
   ///             ),
   ///           ],
   ///         ),
@@ -716,7 +741,7 @@ class PageView extends StatefulWidget {
   /// }
   ///
   /// class KeepAlive extends StatefulWidget {
-  ///   const KeepAlive({Key key, this.data}) : super(key: key);
+  ///   const KeepAlive({Key? key, required this.data}) : super(key: key);
   ///
   ///   final String data;
   ///

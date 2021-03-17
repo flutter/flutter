@@ -8,7 +8,6 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 void main() {
   runApp(const MaterialApp(
@@ -295,7 +294,7 @@ class UndoableDirectionalFocusAction extends UndoableFocusActionBase<Directional
 
 /// A button class that takes focus when clicked.
 class DemoButton extends StatefulWidget {
-  const DemoButton({this.name});
+  const DemoButton({Key key, this.name}) : super(key: key);
 
   final String name;
 

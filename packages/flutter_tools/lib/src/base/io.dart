@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 /// This file serves as the single point of entry into the `dart:io` APIs
 /// within Flutter tools.
 ///
@@ -46,10 +48,10 @@ import 'dart:io' as io
     stdout;
 
 import 'package:meta/meta.dart';
+import 'package:file/file.dart';
 
-import '../globals.dart' as globals;
 import 'async_guard.dart';
-import 'context.dart';
+import 'platform.dart';
 import 'process.dart';
 
 export 'dart:io'
@@ -162,16 +164,18 @@ void restoreExitFunction() {
 /// [ProcessSignal] instances are available on this class (e.g. "send").
 class ProcessSignal {
   @visibleForTesting
-  const ProcessSignal(this._delegate);
+  const ProcessSignal(this._delegate, {@visibleForTesting Platform platform = const LocalPlatform()})
+    : _platform = platform;
 
-  static const ProcessSignal SIGWINCH = _PosixProcessSignal._(io.ProcessSignal.sigwinch);
-  static const ProcessSignal SIGTERM = _PosixProcessSignal._(io.ProcessSignal.sigterm);
-  static const ProcessSignal SIGUSR1 = _PosixProcessSignal._(io.ProcessSignal.sigusr1);
-  static const ProcessSignal SIGUSR2 = _PosixProcessSignal._(io.ProcessSignal.sigusr2);
-  static const ProcessSignal SIGINT =  ProcessSignal(io.ProcessSignal.sigint);
-  static const ProcessSignal SIGKILL =  ProcessSignal(io.ProcessSignal.sigkill);
+  static const ProcessSignal sigwinch = PosixProcessSignal(io.ProcessSignal.sigwinch);
+  static const ProcessSignal sigterm = PosixProcessSignal(io.ProcessSignal.sigterm);
+  static const ProcessSignal sigusr1 = PosixProcessSignal(io.ProcessSignal.sigusr1);
+  static const ProcessSignal sigusr2 = PosixProcessSignal(io.ProcessSignal.sigusr2);
+  static const ProcessSignal sigint = ProcessSignal(io.ProcessSignal.sigint);
+  static const ProcessSignal sigkill = ProcessSignal(io.ProcessSignal.sigkill);
 
   final io.ProcessSignal _delegate;
+  final Platform _platform;
 
   Stream<ProcessSignal> watch() {
     return _delegate.watch().map<ProcessSignal>((io.ProcessSignal signal) => this);
@@ -181,12 +185,12 @@ class ProcessSignal {
   ///
   /// Returns true if the signal was delivered, false otherwise.
   ///
-  /// On Windows, this can only be used with [ProcessSignal.SIGTERM], which
+  /// On Windows, this can only be used with [ProcessSignal.sigterm], which
   /// terminates the process.
   ///
   /// This is implemented by sending the signal using [Process.killPid].
   bool send(int pid) {
-    assert(!globals.platform.isWindows || this == ProcessSignal.SIGTERM);
+    assert(!_platform.isWindows || this == ProcessSignal.sigterm);
     return io.Process.killPid(pid, _delegate);
   }
 
@@ -197,13 +201,16 @@ class ProcessSignal {
 /// A [ProcessSignal] that is only available on Posix platforms.
 ///
 /// Listening to a [_PosixProcessSignal] is a no-op on Windows.
-class _PosixProcessSignal extends ProcessSignal {
+@visibleForTesting
+class PosixProcessSignal extends ProcessSignal {
 
-  const _PosixProcessSignal._(io.ProcessSignal wrappedSignal) : super(wrappedSignal);
+  const PosixProcessSignal(io.ProcessSignal wrappedSignal, {@visibleForTesting Platform platform = const LocalPlatform()})
+    : super(wrappedSignal, platform: platform);
 
   @override
   Stream<ProcessSignal> watch() {
-    if (globals.platform.isWindows) {
+    // This uses the real platform since it invokes dart:io functionality directly.
+    if (_platform.isWindows) {
       return const Stream<ProcessSignal>.empty();
     }
     return super.watch();
@@ -362,34 +369,57 @@ class Stdio {
   Future<void> addStderrStream(Stream<List<int>> stream) => stderr.addStream(stream);
 }
 
-// TODO(zra): Move pid and writePidFile into `ProcessInfo`.
-void writePidFile(String pidFile) {
-  if (pidFile != null) {
-    // Write our pid to the file.
-    globals.fs.file(pidFile).writeAsStringSync(io.pid.toString());
-  }
-}
-
 /// An overridable version of io.ProcessInfo.
 abstract class ProcessInfo {
-  factory ProcessInfo() => _DefaultProcessInfo();
+  factory ProcessInfo(FileSystem fs) => _DefaultProcessInfo(fs);
 
-  static ProcessInfo get instance => context.get<ProcessInfo>();
+  factory ProcessInfo.test(FileSystem fs) => _TestProcessInfo(fs);
 
   int get currentRss;
 
   int get maxRss;
-}
 
-ProcessInfo get processInfo => ProcessInfo.instance;
+  File writePidFile(String pidFile);
+}
 
 /// The default implementation of [ProcessInfo], which uses [io.ProcessInfo].
 class _DefaultProcessInfo implements ProcessInfo {
+  _DefaultProcessInfo(this._fileSystem);
+
+  final FileSystem _fileSystem;
+
   @override
   int get currentRss => io.ProcessInfo.currentRss;
 
   @override
   int get maxRss => io.ProcessInfo.maxRss;
+
+  @override
+  File writePidFile(String pidFile) {
+    assert(pidFile != null);
+    return _fileSystem.file(pidFile)
+      ..writeAsStringSync(io.pid.toString());
+  }
+}
+
+/// The test version of [ProcessInfo].
+class _TestProcessInfo implements ProcessInfo {
+  _TestProcessInfo(this._fileSystem);
+
+  final FileSystem _fileSystem;
+
+  @override
+  int currentRss = 1000;
+
+  @override
+  int maxRss = 2000;
+
+  @override
+  File writePidFile(String pidFile) {
+    assert(pidFile != null);
+    return _fileSystem.file(pidFile)
+      ..writeAsStringSync('12345');
+  }
 }
 
 /// The return type for [listNetworkInterfaces].

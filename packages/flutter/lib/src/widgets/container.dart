@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -11,7 +10,7 @@ import 'framework.dart';
 import 'image.dart';
 
 // Examples can assume:
-// BuildContext context;
+// late BuildContext context;
 
 /// A widget that paints a [Decoration] either before or after its child paints.
 ///
@@ -28,14 +27,14 @@ import 'image.dart';
 /// This sample shows a radial gradient that draws a moon on a night sky:
 ///
 /// ```dart
-/// DecoratedBox(
+/// const DecoratedBox(
 ///   decoration: BoxDecoration(
 ///     gradient: RadialGradient(
-///       center: const Alignment(-0.5, -0.6),
+///       center: Alignment(-0.5, -0.6),
 ///       radius: 0.15,
 ///       colors: <Color>[
-///         const Color(0xFFEEEEEE),
-///         const Color(0xFF111133),
+///         Color(0xFFEEEEEE),
+///         Color(0xFF111133),
 ///       ],
 ///       stops: <double>[0.9, 1.0],
 ///     ),
@@ -218,7 +217,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// ```dart
 /// Container(
 ///   constraints: BoxConstraints.expand(
-///     height: Theme.of(context).textTheme.headline4.fontSize * 1.1 + 200.0,
+///     height: Theme.of(context).textTheme.headline4!.fontSize! * 1.1 + 200.0,
 ///   ),
 ///   padding: const EdgeInsets.all(8.0),
 ///   color: Colors.blue[600],
@@ -226,7 +225,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///   child: Text('Hello World',
 ///     style: Theme.of(context)
 ///         .textTheme
-///         .headline4
+///         .headline4!
 ///         .copyWith(color: Colors.white)),
 ///   transform: Matrix4.rotationZ(0.1),
 /// )

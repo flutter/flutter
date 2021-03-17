@@ -63,14 +63,9 @@ class SwitchThemeData with Diagnosticable {
   /// If specified, overrides the default value of [Switch.mouseCursor].
   final MaterialStateProperty<MouseCursor?>? mouseCursor;
 
-  /// The color for the checkbox's [Material].
+  /// {@macro flutter.material.switch.overlayColor}
   ///
-  /// Resolves in the following states:
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///
-  /// If specified, overrides the default value of [Switch.focusColor] and
-  /// [Switch.hoverColor].
+  /// If specified, overrides the default value of [Switch.overlayColor].
   final MaterialStateProperty<Color?>? overlayColor;
 
   /// {@macro flutter.material.switch.splashRadius}

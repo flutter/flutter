@@ -9,7 +9,6 @@ import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
 
 import 'package:flutter_devicelab/framework/ab.dart';
-import 'package:flutter_devicelab/framework/cocoon.dart';
 import 'package:flutter_devicelab/framework/manifest.dart';
 import 'package:flutter_devicelab/framework/runner.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
@@ -21,6 +20,9 @@ List<String> _taskNames = <String>[];
 
 /// The device-id to run test on.
 String deviceId;
+
+/// The git branch being tested on.
+String gitBranch;
 
 /// The build of the local engine to use.
 ///
@@ -38,6 +40,9 @@ String luciBuilder;
 
 /// Whether to exit on first test failure.
 bool exitOnFirstTestFailure;
+
+/// Path to write test results to.
+String resultsPath;
 
 /// File containing a service account token.
 ///
@@ -61,6 +66,16 @@ Future<void> main(List<String> rawArgs) async {
     exitCode = 1;
     return;
   }
+
+  deviceId = args['device-id'] as String;
+  exitOnFirstTestFailure = args['exit'] as bool;
+  gitBranch = args['git-branch'] as String;
+  localEngine = args['local-engine'] as String;
+  localEngineSrcPath = args['local-engine-src-path'] as String;
+  luciBuilder = args['luci-builder'] as String;
+  resultsPath = args['results-file'] as String;
+  serviceAccountTokenFile = args['service-account-token-file'] as String;
+  silent = args['silent'] as bool;
 
   if (!args.wasParsed('task')) {
     if (args.wasParsed('stage') || args.wasParsed('all')) {
@@ -86,48 +101,17 @@ Future<void> main(List<String> rawArgs) async {
     return;
   }
 
-  deviceId = args['device-id'] as String;
-  exitOnFirstTestFailure = args['exit'] as bool;
-  localEngine = args['local-engine'] as String;
-  localEngineSrcPath = args['local-engine-src-path'] as String;
-  luciBuilder = args['luci-builder'] as String;
-  serviceAccountTokenFile = args['service-account-token-file'] as String;
-  silent = args['silent'] as bool;
-
   if (args.wasParsed('ab')) {
     await _runABTest();
   } else {
-    await _runTasks();
-  }
-}
-
-Future<void> _runTasks() async {
-  for (final String taskName in _taskNames) {
-    section('Running task "$taskName"');
-    final TaskResult result = await runTask(
-      taskName,
+    await runTasks(_taskNames,
       silent: silent,
-      localEngine: localEngine,
-      localEngineSrcPath: localEngineSrcPath,
       deviceId: deviceId,
+      exitOnFirstTestFailure: exitOnFirstTestFailure,
+      gitBranch: gitBranch,
+      luciBuilder: luciBuilder,
+      resultsPath: resultsPath,
     );
-
-    print('Task result:');
-    print(const JsonEncoder.withIndent('  ').convert(result));
-    section('Finished task "$taskName"');
-
-    if (serviceAccountTokenFile != null) {
-      final Cocoon cocoon = Cocoon(serviceAccountTokenPath: serviceAccountTokenFile);
-      /// Cocoon references LUCI tasks by the [luciBuilder] instead of [taskName].
-      await cocoon.sendTaskResult(builderName: luciBuilder, result: result);
-    }
-
-    if (!result.succeeded) {
-      exitCode = 1;
-      if (exitOnFirstTestFailure) {
-        return;
-      }
-    }
   }
 }
 
@@ -220,7 +204,7 @@ File _uniqueFile(String filenameTemplate) {
   File file = File(parts[0] + parts[1]);
   int i = 1;
   while (file.existsSync()) {
-    file = File(parts[0]+i.toString()+parts[1]);
+    file = File(parts[0] + i.toString() + parts[1]);
     i++;
   }
   return file;
@@ -327,6 +311,11 @@ final ArgParser _argParser = ArgParser()
     help: 'Exit on the first test failure.',
   )
   ..addOption(
+    'git-branch',
+    help: '[Flutter infrastructure] Git branch of the current commit. LUCI\n'
+          'checkouts run in detached HEAD state, so the branch must be passed.',
+  )
+  ..addOption(
     'local-engine',
     help: 'Name of a build output within the engine out directory, if you\n'
           'are building Flutter locally. Use this to select a specific\n'
@@ -346,10 +335,7 @@ final ArgParser _argParser = ArgParser()
           'locally. Defaults to \$FLUTTER_ENGINE if set, or tries to guess at\n'
           'the location based on the value of the --flutter-root option.',
   )
-  ..addOption(
-    'luci-builder',
-    help: '[Flutter infrastructure] Name of the LUCI builder being run on.'
-  )
+  ..addOption('luci-builder', help: '[Flutter infrastructure] Name of the LUCI builder being run on.')
   ..addFlag(
     'match-host-platform',
     defaultsTo: true,
@@ -357,6 +343,11 @@ final ArgParser _argParser = ArgParser()
           'test with a `required_agent_capabilities` value of "mac/android"\n'
           'on a windows host). Each test publishes its '
           '`required_agent_capabilities`\nin the `manifest.yaml` file.',
+  )
+  ..addOption(
+    'results-file',
+    help: '[Flutter infrastructure] File path for test results. If passed with\n'
+          'task, will write test results to the file.'
   )
   ..addOption(
     'service-account-token-file',

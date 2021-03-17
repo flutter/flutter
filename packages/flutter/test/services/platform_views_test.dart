@@ -4,8 +4,7 @@
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_test/flutter_test.dart' show TestWidgetsFlutterBinding;
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'fake_platform_views.dart';
 
@@ -148,7 +147,7 @@ void main() {
     test('OnPlatformViewCreated callback', () async {
       viewsController.registerViewType('webview');
       final List<int> createdViews = <int>[];
-      final PlatformViewCreatedCallback callback = (int id) { createdViews.add(id); };
+      void callback(int id) { createdViews.add(id); }
 
       final AndroidViewController controller1 = PlatformViewsService.initAndroidView(
         id: 0,

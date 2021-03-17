@@ -1,21 +1,23 @@
 /// Flutter code sample for {{element}}
-// @dart = 2.9
 
 {{description}}
 
-import 'package:flutter/material.dart';
+{{code-dartImports}}
 
+import 'package:flutter/material.dart';
 {{code-imports}}
 
-void main() => runApp(new MyApp());
+void main() => runApp(const MyApp());
 
 /// This is the main application widget.
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   static const String _title = 'Flutter Code Sample';
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       title: _title,
       home: MyStatelessWidget(),
     );
@@ -27,7 +29,7 @@ class MyApp extends StatelessWidget {
 
 /// This is the stateless widget that the main application instantiates.
 class MyStatelessWidget extends StatelessWidget {
-  MyStatelessWidget({Key key}) : super(key: key);
+  const MyStatelessWidget({Key? key}) : super(key: key);
 
   @override
   {{code}}

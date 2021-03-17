@@ -16,7 +16,7 @@ import './stdio.dart';
 import './version.dart';
 
 /// A source code repository.
-class Repository {
+abstract class Repository {
   Repository({
     @required this.name,
     @required this.upstream,
@@ -46,22 +46,35 @@ class Repository {
 
   Directory _checkoutDirectory;
 
-  /// Lazily-loaded directory for the repository checkout.
+  /// Directory for the repository checkout.
   ///
-  /// Cloning a repository is time-consuming, thus the repository is not cloned
-  /// until this getter is called.
+  /// Since cloning a repository takes a long time, we do not ensure it is
+  /// cloned on the filesystem until this getter is accessed.
   Directory get checkoutDirectory {
     if (_checkoutDirectory != null) {
       return _checkoutDirectory;
     }
     _checkoutDirectory = parentDirectory.childDirectory(name);
-    if (checkoutDirectory.existsSync() && !useExistingCheckout) {
-      deleteDirectory();
-    }
-    if (!checkoutDirectory.existsSync()) {
-      stdio.printTrace('Cloning $name to ${checkoutDirectory.path}...');
+    if (!useExistingCheckout && _checkoutDirectory.existsSync()) {
+      stdio.printTrace('Deleting $name from ${_checkoutDirectory.path}...');
+      _checkoutDirectory.deleteSync(recursive: true);
+    } else if (useExistingCheckout && _checkoutDirectory.existsSync()) {
       git.run(
-        <String>['clone', '--', upstream, checkoutDirectory.path],
+        <String>['checkout', 'master'],
+        'Checkout to master branch',
+        workingDirectory: _checkoutDirectory.path,
+      );
+      git.run(
+        <String>['pull', '--ff-only'],
+        'Updating $name repo',
+        workingDirectory: _checkoutDirectory.path,
+      );
+    }
+    if (!_checkoutDirectory.existsSync()) {
+      stdio.printTrace(
+          'Cloning $name from $upstream to ${_checkoutDirectory.path}...');
+      git.run(
+        <String>['clone', '--', upstream, _checkoutDirectory.path],
         'Cloning $name repo',
         workingDirectory: parentDirectory.path,
       );
@@ -72,27 +85,16 @@ class Repository {
           git.run(
             <String>['checkout', channel, '--'],
             'check out branch $channel locally',
-            workingDirectory: checkoutDirectory.path,
+            workingDirectory: _checkoutDirectory.path,
           );
         }
       }
-    } else {
-      stdio.printTrace(
-        'Using existing $name repo at ${checkoutDirectory.path}...',
-      );
     }
-    return _checkoutDirectory;
-  }
 
-  void deleteDirectory() {
-    if (!checkoutDirectory.existsSync()) {
-      stdio.printTrace(
-        'Tried to delete ${checkoutDirectory.path} but it does not exist.',
-      );
-      return;
-    }
-    stdio.printTrace('Deleting $name from ${checkoutDirectory.path}...');
-    checkoutDirectory.deleteSync(recursive: true);
+    final String revision = reverseParse('HEAD');
+    stdio
+        .printTrace('Repository $name is checked out at revision "$revision".');
+    return _checkoutDirectory;
   }
 
   /// The URL of the remote named [remoteName].
@@ -124,6 +126,14 @@ class Repository {
     );
   }
 
+  void checkout(String revision) {
+    git.run(
+      <String>['checkout', revision],
+      'checkout $revision',
+      workingDirectory: checkoutDirectory.path,
+    );
+  }
+
   /// Obtain the version tag of the previous dev release.
   String getFullTag(String remoteName) {
     const String glob = '*.*.*-*.*.pre';
@@ -142,7 +152,7 @@ class Repository {
       <String>['rev-parse', ref],
       'look up the commit for the ref $ref',
       workingDirectory: checkoutDirectory.path,
-    );
+    ).trim();
     assert(revisionHash.isNotEmpty);
     return revisionHash;
   }
@@ -216,24 +226,6 @@ class Repository {
     );
   }
 
-  Version flutterVersion() {
-    // Build tool
-    processManager.runSync(<String>[
-      fileSystem.path.join(checkoutDirectory.path, 'bin', 'flutter'),
-      'help',
-    ]);
-    // Check version
-    final io.ProcessResult result = processManager.runSync(<String>[
-      fileSystem.path.join(checkoutDirectory.path, 'bin', 'flutter'),
-      '--version',
-      '--machine',
-    ]);
-    final Map<String, dynamic> versionJson = jsonDecode(
-      globals.stdoutToString(result.stdout),
-    ) as Map<String, dynamic>;
-    return Version.fromString(versionJson['frameworkVersion'] as String);
-  }
-
   /// Create an empty commit and return the revision.
   @visibleForTesting
   String authorEmptyCommit([String message = 'An empty commit']) {
@@ -261,19 +253,119 @@ class Repository {
   ///
   /// This method is for testing purposes.
   @visibleForTesting
+  Repository cloneRepository(String cloneName);
+}
+
+class FrameworkRepository extends Repository {
+  FrameworkRepository(
+    this.checkouts, {
+    String name = 'framework',
+    String upstream = FrameworkRepository.defaultUpstream,
+    bool localUpstream = false,
+    bool useExistingCheckout = false,
+  }) : super(
+          name: name,
+          upstream: upstream,
+          fileSystem: checkouts.fileSystem,
+          localUpstream: localUpstream,
+          parentDirectory: checkouts.directory,
+          platform: checkouts.platform,
+          processManager: checkouts.processManager,
+          stdio: checkouts.stdio,
+          useExistingCheckout: useExistingCheckout,
+        );
+
+  /// A [FrameworkRepository] with the host conductor's repo set as upstream.
+  ///
+  /// This is useful when testing a commit that has not been merged upstream
+  /// yet.
+  factory FrameworkRepository.localRepoAsUpstream(
+    Checkouts checkouts, {
+    String name = 'framework',
+    bool useExistingCheckout = false,
+    @required String upstreamPath,
+  }) {
+    return FrameworkRepository(
+      checkouts,
+      name: name,
+      upstream: 'file://$upstreamPath/',
+      localUpstream: false,
+      useExistingCheckout: useExistingCheckout,
+    );
+  }
+
+  final Checkouts checkouts;
+  static const String defaultUpstream =
+      'https://github.com/flutter/flutter.git';
+
+  String get cacheDirectory => fileSystem.path.join(
+        checkoutDirectory.path,
+        'bin',
+        'cache',
+      );
+
+  @override
   Repository cloneRepository(String cloneName) {
     assert(localUpstream);
     cloneName ??= 'clone-of-$name';
-    return Repository(
-      fileSystem: fileSystem,
+    return FrameworkRepository(
+      checkouts,
       name: cloneName,
-      parentDirectory: parentDirectory,
-      platform: platform,
-      processManager: processManager,
-      stdio: stdio,
       upstream: 'file://${checkoutDirectory.path}/',
       useExistingCheckout: useExistingCheckout,
     );
+  }
+
+  void _ensureToolReady() {
+    final File toolsStamp =
+        fileSystem.directory(cacheDirectory).childFile('flutter_tools.stamp');
+    if (toolsStamp.existsSync()) {
+      final String toolsStampHash = toolsStamp.readAsStringSync().trim();
+      final String repoHeadHash = reverseParse('HEAD');
+      if (toolsStampHash == repoHeadHash) {
+        return;
+      }
+    }
+
+    stdio.printTrace('Building tool...');
+    // Build tool
+    processManager.runSync(<String>[
+      fileSystem.path.join(checkoutDirectory.path, 'bin', 'flutter'),
+      'help',
+    ]);
+  }
+
+  io.ProcessResult runFlutter(List<String> args) {
+    _ensureToolReady();
+
+    return processManager.runSync(<String>[
+      fileSystem.path.join(checkoutDirectory.path, 'bin', 'flutter'),
+      ...args,
+    ]);
+  }
+
+  @override
+  void checkout(String revision) {
+    super.checkout(revision);
+    // The tool will overwrite old cached artifacts, but not delete unused
+    // artifacts from a previous version. Thus, delete the entire cache and
+    // re-populate.
+    final Directory cache = fileSystem.directory(cacheDirectory);
+    if (cache.existsSync()) {
+      stdio.printTrace('Deleting cache...');
+      cache.deleteSync(recursive: true);
+    }
+    _ensureToolReady();
+  }
+
+  Version flutterVersion() {
+    // Check version
+    final io.ProcessResult result =
+        runFlutter(<String>['--version', '--machine']);
+    final Map<String, dynamic> versionJson = jsonDecode(
+      globals.stdoutToString(result.stdout),
+    ) as Map<String, dynamic>;
+    return Version.fromString(versionJson['frameworkVersion'] as String);
   }
 }
 
@@ -285,81 +377,22 @@ enum RepositoryType {
 
 class Checkouts {
   Checkouts({
-    @required Platform platform,
     @required this.fileSystem,
+    @required this.platform,
     @required this.processManager,
-    Directory parentDirectory,
-    String directoryName = 'checkouts',
-  }) {
-    if (parentDirectory != null) {
-      directory = parentDirectory.childDirectory(directoryName);
-    } else {
-      String filePath;
-      // If a test
-      if (platform.script.scheme == 'data') {
-        final RegExp pattern = RegExp(
-          r'(file:\/\/[^"]*[/\\]dev\/tools[/\\][^"]+\.dart)',
-          multiLine: true,
-        );
-        final Match match =
-            pattern.firstMatch(Uri.decodeFull(platform.script.path));
-        if (match == null) {
-          throw Exception(
-            'Cannot determine path of script!\n${platform.script.path}',
-          );
-        }
-        filePath = Uri.parse(match.group(1)).path.replaceAll(r'%20', ' ');
-      } else {
-        filePath = platform.script.toFilePath();
-      }
-      final String checkoutsDirname = fileSystem.path.normalize(
-        fileSystem.path.join(
-          fileSystem.path.dirname(filePath),
-          '..',
-          'checkouts',
-        ),
-      );
-      directory = fileSystem.directory(checkoutsDirname);
-    }
+    @required this.stdio,
+    @required Directory parentDirectory,
+    String directoryName = 'flutter_conductor_checkouts',
+  })  : assert(parentDirectory != null),
+        directory = parentDirectory.childDirectory(directoryName) {
     if (!directory.existsSync()) {
       directory.createSync(recursive: true);
     }
   }
 
-  Directory directory;
+  final Directory directory;
   final FileSystem fileSystem;
+  final Platform platform;
   final ProcessManager processManager;
-
-  Repository addRepo({
-    @required RepositoryType repoType,
-    @required Stdio stdio,
-    @required Platform platform,
-    FileSystem fileSystem,
-    String upstream,
-    String name,
-    bool localUpstream = false,
-    bool useExistingCheckout = false,
-  }) {
-    switch (repoType) {
-      case RepositoryType.framework:
-        name ??= 'framework';
-        upstream ??= 'https://github.com/flutter/flutter.git';
-        break;
-      case RepositoryType.engine:
-        name ??= 'engine';
-        upstream ??= 'https://github.com/flutter/engine.git';
-        break;
-    }
-    return Repository(
-      name: name,
-      upstream: upstream,
-      stdio: stdio,
-      platform: platform,
-      fileSystem: fileSystem,
-      parentDirectory: directory,
-      processManager: processManager,
-      localUpstream: localUpstream,
-      useExistingCheckout: useExistingCheckout,
-    );
-  }
+  final Stdio stdio;
 }

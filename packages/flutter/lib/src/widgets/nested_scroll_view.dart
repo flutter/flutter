@@ -6,11 +6,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/painting.dart';
-import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'basic.dart';
 import 'framework.dart';
@@ -23,11 +20,7 @@ import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'scroll_view.dart';
 import 'sliver_fill.dart';
-import 'ticker_provider.dart';
 import 'viewport.dart';
-
-// Examples can assume:
-// List<String> _tabs;
 
 /// Signature used by [NestedScrollView] for building its header.
 ///
@@ -73,7 +66,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   final List<String> _tabs = ['Tab 1', 'Tab 2'];
+///   final List<String> _tabs = <String>['Tab 1', 'Tab 2'];
 ///   return DefaultTabController(
 ///     length: _tabs.length, // This is the number of tabs.
 ///     child: Scaffold(
@@ -251,7 +244,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///         padding: const EdgeInsets.all(8),
 ///         itemCount: 30,
 ///         itemBuilder: (BuildContext context, int index) {
-///           return Container(
+///           return SizedBox(
 ///             height: 50,
 ///             child: Center(child: Text('Item $index')),
 ///           );
@@ -517,20 +510,20 @@ class NestedScrollView extends StatefulWidget {
 ///   return NestedScrollView(
 ///     key: globalKey,
 ///     headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-///       return <Widget>[
+///       return const <Widget>[
 ///         SliverAppBar(
 ///           title: Text('NestedScrollViewState Demo!'),
 ///         ),
 ///       ];
 ///     },
-///     body: CustomScrollView(
+///     body: const CustomScrollView(
 ///       // Body slivers go here!
 ///     ),
 ///   );
 /// }
 ///
 /// ScrollController get innerController {
-///   return globalKey.currentState.innerController;
+///   return globalKey.currentState!.innerController;
 /// }
 /// ```
 /// {@end-tool}
@@ -802,8 +795,13 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   bool get hasScrolledBody {
     for (final _NestedScrollPosition position in _innerPositions) {
-      assert(position.hasContentDimensions && position.hasPixels);
-      if (position.pixels > position.minScrollExtent) {
+      if (!position.hasContentDimensions || !position.hasPixels) {
+        // It's possible that NestedScrollView built twice before layout phase
+        // in the same frame. This can happen when the FocusManager schedules a microTask
+        // that marks NestedScrollView dirty during the warm up frame.
+        // https://github.com/flutter/flutter/pull/75308
+        continue;
+      } else if (position.pixels > position.minScrollExtent) {
         return true;
       }
     }
@@ -1902,7 +1900,7 @@ class RenderSliverOverlapAbsorber extends RenderSliver with RenderObjectWithChil
       'A SliverOverlapAbsorberHandle cannot be passed to multiple RenderSliverOverlapAbsorber objects at the same time.',
     );
     if (child == null) {
-      geometry = const SliverGeometry();
+      geometry = SliverGeometry.zero;
       return;
     }
     child!.layout(constraints, parentUsesSize: true);
