@@ -187,7 +187,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('Invalid format.'), findsOneWidget);
 
-        // Toggle to calender mode and then back to input mode
+        // Toggle to calendar mode and then back to input mode
         await tester.tap(find.byIcon(Icons.calendar_today));
         await tester.pumpAndSettle();
         await tester.tap(find.byIcon(Icons.edit));
@@ -1117,46 +1117,110 @@ void main() {
 
   testWidgets('DatePickerDialog is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         restorationScopeId: 'app',
         home: _RestorableDatePickerDialogTestWidget(),
       ),
     );
 
+    // The date picker should be closed.
     expect(find.byType(DatePickerDialog), findsNothing);
     expect(find.text('25/7/2021'), findsOneWidget);
 
+    // Open the date picker.
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
-
     expect(find.byType(DatePickerDialog), findsOneWidget);
-    final TestRestorationData restorationData = await tester.getRestorationData();
 
+    final TestRestorationData restorationData = await tester.getRestorationData();
     await tester.restartAndRestore();
 
+    // The date picker should be open after restoring.
     expect(find.byType(DatePickerDialog), findsOneWidget);
 
     // Tap on the barrier.
     await tester.tapAt(const Offset(10.0, 10.0));
     await tester.pumpAndSettle();
 
+    // The date picker should be closed, the text value updated to the
+    // newly selected date.
     expect(find.byType(DatePickerDialog), findsNothing);
     expect(find.text('25/7/2021'), findsOneWidget);
 
+    // The date picker should be open after restoring.
     await tester.restoreFrom(restorationData);
     expect(find.byType(DatePickerDialog), findsOneWidget);
 
+    // Select a different date and close the date picker.
     await tester.tap(find.text('30'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
 
+    // The date picker should be closed, the text value updated to the
+    // newly selected date.
     expect(find.byType(DatePickerDialog), findsNothing);
     expect(find.text('30/7/2021'), findsOneWidget);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
+
+  testWidgets('DatePickerDialog state restoration - DatePickerEntryMode', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        restorationScopeId: 'app',
+        home: _RestorableDatePickerDialogTestWidget(
+          datePickerEntryMode: DatePickerEntryMode.calendarOnly,
+        ),
+      ),
+    );
+
+    // The date picker should be closed.
+    expect(find.byType(DatePickerDialog), findsNothing);
+    expect(find.text('25/7/2021'), findsOneWidget);
+
+    // Open the date picker.
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+    expect(find.byType(DatePickerDialog), findsOneWidget);
+
+    // Only in calendar mode and cannot switch out.
+    expect(find.byType(TextField), findsNothing);
+    expect(find.byIcon(Icons.edit), findsNothing);
+
+    final TestRestorationData restorationData = await tester.getRestorationData();
+    await tester.restartAndRestore();
+
+    // The date picker should be open after restoring.
+    expect(find.byType(DatePickerDialog), findsOneWidget);
+    // Only in calendar mode and cannot switch out.
+    expect(find.byType(TextField), findsNothing);
+    expect(find.byIcon(Icons.edit), findsNothing);
+
+    // Tap on the barrier.
+    await tester.tapAt(const Offset(10.0, 10.0));
+    await tester.pumpAndSettle();
+
+    // The date picker should be closed, the text value updated to the
+    // newly selected date.
+    expect(find.byType(DatePickerDialog), findsNothing);
+    expect(find.text('25/7/2021'), findsOneWidget);
+
+    // The date picker should be open after restoring.
+    await tester.restoreFrom(restorationData);
+    expect(find.byType(DatePickerDialog), findsOneWidget);
+    // Only in calendar mode and cannot switch out.
+    expect(find.byType(TextField), findsNothing);
+    expect(find.byIcon(Icons.edit), findsNothing);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 }
 
 class _RestorableDatePickerDialogTestWidget extends StatefulWidget {
+  const _RestorableDatePickerDialogTestWidget({
+    Key? key,
+    this.datePickerEntryMode = DatePickerEntryMode.calendar,
+  }) : super(key: key);
+
+  final DatePickerEntryMode datePickerEntryMode;
+
   @override
   _RestorableDatePickerDialogTestWidgetState createState() => _RestorableDatePickerDialogTestWidgetState();
 }
@@ -1171,7 +1235,10 @@ class _RestorableDatePickerDialogTestWidgetState extends State<_RestorableDatePi
     onPresent: (NavigatorState navigator, Object? arguments) {
       return navigator.restorablePush(
         _datePickerRoute,
-        arguments: _selectedDate.value.millisecondsSinceEpoch,
+        arguments: <String, dynamic>{
+          'selectedDate': _selectedDate.value.millisecondsSinceEpoch,
+          'datePickerEntryMode': widget.datePickerEntryMode.index,
+        }
       );
     },
   );
@@ -1195,10 +1262,11 @@ class _RestorableDatePickerDialogTestWidgetState extends State<_RestorableDatePi
     return DialogRoute<DateTime>(
       context: context,
       builder: (BuildContext context) {
+        final Map<dynamic, dynamic> args = arguments! as Map<dynamic, dynamic>;
         return DatePickerDialog(
           restorationId: 'date_picker_dialog',
-          initialEntryMode: DatePickerEntryMode.calendarOnly,
-          initialDate: DateTime.fromMillisecondsSinceEpoch(arguments! as int),
+          initialEntryMode: DatePickerEntryMode.values[args['datePickerEntryMode'] as int],
+          initialDate: DateTime.fromMillisecondsSinceEpoch(args['selectedDate'] as int),
           firstDate: DateTime(2021, 1, 1),
           lastDate: DateTime(2022, 1, 1),
         );
