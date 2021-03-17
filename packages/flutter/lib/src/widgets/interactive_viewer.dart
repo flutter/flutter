@@ -15,16 +15,20 @@ import 'ticker_provider.dart';
 
 /// A widget that enables pan and zoom interactions with its child.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=zrn7V3bMJvg}
+///
 /// The user can transform the child by dragging to pan or pinching to zoom.
 ///
-/// By default, InteractiveViewer may draw outside of its original area of the
-/// screen, such as when a child is zoomed in and increases in size. However, it
-/// will not receive gestures outside of its original area. To prevent
-/// InteractiveViewer from drawing outside of its original size, wrap it in a
-/// [ClipRect]. Or, to prevent dead areas where InteractiveViewer does not
-/// receive gestures, be sure that the InteractiveViewer widget is the size of
-/// the area that should be interactive. See
-/// [flutter-go](https://github.com/justinmc/flutter-go) for an example of
+/// By default, InteractiveViewer clips its child using [Clip.hardEdge].
+/// To prevent this behavior, consider setting [clipBehavior] to [Clip.none].
+/// When [clipBehavior] is [Clip.none], InteractiveViewer may draw outside of
+/// its original area of the screen, such as when a child is zoomed in and
+/// increases in size. However, it will not receive gestures outside of its original area.
+/// To prevent dead areas where InteractiveViewer does not receive gestures,
+/// don't set [clipBehavior] or be sure that the InteractiveViewer widget is the
+/// size of the area that should be interactive.
+///
+/// See [flutter-go](https://github.com/justinmc/flutter-go) for an example of
 /// robust positioning of an InteractiveViewer child that works for all screen
 /// sizes and child sizes.
 ///
@@ -41,11 +45,11 @@ import 'ticker_provider.dart';
 /// Widget build(BuildContext context) {
 ///   return Center(
 ///     child: InteractiveViewer(
-///       boundaryMargin: EdgeInsets.all(20.0),
+///       boundaryMargin: const EdgeInsets.all(20.0),
 ///       minScale: 0.1,
 ///       maxScale: 1.6,
 ///       child: Container(
-///         decoration: BoxDecoration(
+///         decoration: const BoxDecoration(
 ///           gradient: LinearGradient(
 ///             begin: Alignment.topCenter,
 ///             end: Alignment.bottomCenter,
@@ -66,6 +70,7 @@ class InteractiveViewer extends StatefulWidget {
   /// The [child] parameter must not be null.
   InteractiveViewer({
     Key? key,
+    this.clipBehavior = Clip.hardEdge,
     this.alignPanAxis = false,
     this.boundaryMargin = EdgeInsets.zero,
     this.constrained = true,
@@ -99,6 +104,13 @@ class InteractiveViewer extends StatefulWidget {
            && boundaryMargin.right.isFinite && boundaryMargin.bottom.isFinite
            && boundaryMargin.left.isFinite)),
        super(key: key);
+
+  /// If set to [Clip.none], the child may extend beyond the size of the InteractiveViewer,
+  /// but it will not receive gestures in these areas.
+  /// Be sure that the InteractiveViewer is the desired size when using [Clip.none].
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
 
   /// If true, panning is only allowed in the direction of the horizontal axis
   /// or the vertical axis.
@@ -374,13 +386,13 @@ class InteractiveViewer extends StatefulWidget {
   ///     ),
   ///     body: Center(
   ///       child: InteractiveViewer(
-  ///         boundaryMargin: EdgeInsets.all(double.infinity),
+  ///         boundaryMargin: const EdgeInsets.all(double.infinity),
   ///         transformationController: _transformationController,
   ///         minScale: 0.1,
   ///         maxScale: 1.0,
   ///         onInteractionStart: _onInteractionStart,
   ///         child: Container(
-  ///           decoration: BoxDecoration(
+  ///           decoration: const BoxDecoration(
   ///             gradient: LinearGradient(
   ///               begin: Alignment.topCenter,
   ///               end: Alignment.bottomCenter,
@@ -391,7 +403,7 @@ class InteractiveViewer extends StatefulWidget {
   ///         ),
   ///       ),
   ///     ),
-  ///     persistentFooterButtons: [
+  ///     persistentFooterButtons: <Widget>[
   ///       IconButton(
   ///         onPressed: _animateResetInitialize,
   ///         tooltip: 'Reset',
@@ -1059,15 +1071,20 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     );
 
     if (!widget.constrained) {
+      child = OverflowBox(
+        alignment: Alignment.topLeft,
+        minWidth: 0.0,
+        minHeight: 0.0,
+        maxWidth: double.infinity,
+        maxHeight: double.infinity,
+        child: child,
+      );
+    }
+
+    if (widget.clipBehavior != Clip.none) {
       child = ClipRect(
-        child: OverflowBox(
-          alignment: Alignment.topLeft,
-          minWidth: 0.0,
-          minHeight: 0.0,
-          maxWidth: double.infinity,
-          maxHeight: double.infinity,
-          child: child,
-        ),
+        clipBehavior: widget.clipBehavior,
+        child: child,
       );
     }
 
@@ -1078,6 +1095,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       onPointerSignal: _receivedPointerSignal,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque, // Necessary when panning off screen.
+        dragStartBehavior: DragStartBehavior.start,
         onScaleEnd: _onScaleEnd,
         onScaleStart: _onScaleStart,
         onScaleUpdate: _onScaleUpdate,

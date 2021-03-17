@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -41,10 +43,7 @@ void main() {
 
     // Config is updated if command succeeded.
     expect(generatedConfig, exists);
-    expect(generatedConfig.readAsStringSync(), allOf(
-      contains('DART_OBFUSCATION=true'),
-      isNot(contains('FLUTTER_FRAMEWORK_DIR')),
-    ));
+    expect(generatedConfig.readAsStringSync(), contains('DART_OBFUSCATION=true'));
 
     // file that only exists if app was fully built.
     final File frameworkPlist = fileSystem.file(

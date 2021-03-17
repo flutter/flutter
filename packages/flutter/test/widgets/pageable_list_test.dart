@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 Size pageSize = const Size(600.0, 300.0);
@@ -12,7 +11,7 @@ final List<GlobalKey> globalKeys = defaultPages.map<GlobalKey>((_) => GlobalKey(
 int? currentPage;
 
 Widget buildPage(int page) {
-  return Container(
+  return SizedBox(
     key: globalKeys[page],
     width: pageSize.width,
     height: pageSize.height,
@@ -37,7 +36,7 @@ Widget buildFrame({
   return Directionality(
     textDirection: textDirection,
     child: Center(
-      child: Container(
+      child: SizedBox(
         width: pageSize.width, height: pageSize.height, child: child,
       ),
     ),

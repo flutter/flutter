@@ -4,7 +4,6 @@
 
 import 'dart:ui';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -1348,9 +1347,9 @@ void main() {
       int? divisions,
       bool enabled = true,
     }) {
-      final ValueChanged<RangeValues> onChanged = (RangeValues newValues) {
+      void onChanged(RangeValues newValues) {
         values = newValues;
-      };
+      }
       return MaterialApp(
         home: Scaffold(
           // The builder is used to pass the context from the MaterialApp widget

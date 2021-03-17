@@ -431,7 +431,7 @@ abstract class FloatingActionButtonLocation {
 /// You can create your own subclass of [StandardFabLocation]
 /// to implement a custom [FloatingActionButtonLocation].
 ///
-/// {@tool dartpad --template=stateless_widget_material_no_null_safety}
+/// {@tool dartpad --template=stateless_widget_material}
 ///
 /// This is an example of a user-defined [FloatingActionButtonLocation].
 ///
@@ -461,12 +461,12 @@ abstract class FloatingActionButtonLocation {
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     appBar: AppBar(
-///       title: Text('Home page'),
+///       title: const Text('Home page'),
 ///     ),
 ///     floatingActionButton: FloatingActionButton(
 ///       onPressed: () { print('FAB pressed.'); },
 ///       tooltip: 'Increment',
-///       child: Icon(Icons.add),
+///       child: const Icon(Icons.add),
 ///     ),
 ///     floatingActionButtonLocation: AlmostEndFloatFabLocation(),
 ///   );
@@ -559,7 +559,7 @@ mixin FabFloatOffsetY on StandardFabLocation {
     final double snackBarHeight = scaffoldGeometry.snackBarSize.height;
     final double safeMargin = math.max(
       kFloatingActionButtonMargin,
-      scaffoldGeometry.minViewPadding.bottom - bottomContentHeight,
+      scaffoldGeometry.minViewPadding.bottom - bottomContentHeight + kFloatingActionButtonMargin,
     );
 
     double fabY = contentBottom - fabHeight - safeMargin;
@@ -567,7 +567,6 @@ mixin FabFloatOffsetY on StandardFabLocation {
       fabY = math.min(fabY, contentBottom - snackBarHeight - fabHeight - kFloatingActionButtonMargin);
     if (bottomSheetHeight > 0.0)
       fabY = math.min(fabY, contentBottom - bottomSheetHeight - fabHeight / 2.0);
-
     return fabY + adjustment;
   }
 }

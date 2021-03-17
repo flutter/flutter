@@ -18,7 +18,7 @@ Future<String> runFlutterAndQuit(List<String> args, Device device) async {
   print('run: starting...');
   final Process run = await startProcess(
     path.join(flutterDirectory.path, 'bin', 'flutter'),
-    <String>['run', '--suppress-analytics', ...args],
+    <String>['run', '--suppress-analytics', '--no-publish-port', ...args],
     isBot: false, // we just want to test the output, not have any debugging info
   );
   final List<String> stdout = <String>[];

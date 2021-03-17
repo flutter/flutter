@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 
 const double _kFrontHeadingHeight = 32.0; // front layer beveled rectangle
@@ -180,13 +179,14 @@ class _BackAppBar extends StatelessWidget {
 
 class Backdrop extends StatefulWidget {
   const Backdrop({
+    Key? key,
     this.frontAction,
     this.frontTitle,
     this.frontHeading,
     this.frontLayer,
     this.backTitle,
     this.backLayer,
-  });
+  }) : super(key: key);
 
   final Widget? frontAction;
   final Widget? frontTitle;

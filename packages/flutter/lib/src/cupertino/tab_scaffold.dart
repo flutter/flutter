@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'bottom_tab_bar.dart';
 import 'colors.dart';
@@ -21,6 +20,8 @@ import 'theme.dart';
 ///
 /// ```dart
 /// class MyCupertinoTabScaffoldPage extends StatefulWidget {
+///   const MyCupertinoTabScaffoldPage({Key? key}) : super(key: key);
+///
 ///   @override
 ///   _CupertinoTabScaffoldPageState createState() => _CupertinoTabScaffoldPageState();
 /// }
@@ -32,7 +33,7 @@ import 'theme.dart';
 ///   Widget build(BuildContext context) {
 ///     return CupertinoTabScaffold(
 ///       tabBar: CupertinoTabBar(
-///         items: <BottomNavigationBarItem> [
+///         items: const <BottomNavigationBarItem> [
 ///           // ...
 ///         ],
 ///       ),
@@ -144,7 +145,7 @@ class CupertinoTabController extends ChangeNotifier {
 /// ```dart
 /// CupertinoTabScaffold(
 ///   tabBar: CupertinoTabBar(
-///     items: <BottomNavigationBarItem> [
+///     items: const <BottomNavigationBarItem> [
 ///       // ...
 ///     ],
 ///   ),

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 
 import 'package:file/file.dart';
@@ -24,7 +26,7 @@ void main() {
     final Map<Type, Generator> overrides = <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
-      PlistParser: () => MockPlistUtils(),
+      PlistParser: () => FakePlistUtils(),
       Platform: _kNoColorTerminalPlatform,
       OperatingSystemUtils: () => os,
     };
@@ -196,13 +198,12 @@ void main() {
 
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
 
-final Generator _kNoColorTerminalPlatform =
-    () => FakePlatform(stdoutSupportsAnsi: false);
+FakePlatform _kNoColorTerminalPlatform() => FakePlatform(stdoutSupportsAnsi: false);
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
 };
 
-class MockPlistUtils extends Mock implements PlistParser {
+class FakePlistUtils extends Fake implements PlistParser {
   @override
   Map<String, dynamic> parseFile(String plistFilePath) {
     final File file = globals.fs.file(plistFilePath);

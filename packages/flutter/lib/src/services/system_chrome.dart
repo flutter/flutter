@@ -331,7 +331,7 @@ class SystemChrome {
   /// @override
   /// Widget build(BuildContext context) {
   ///   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
-  ///   return Placeholder();
+  ///   return const Placeholder();
   /// }
   /// ```
   /// {@end-tool}
@@ -344,21 +344,24 @@ class SystemChrome {
   /// navigation bar and synthesize them into a single style. This can be used
   /// to configure the system styles when an app bar is not used.
   ///
-  /// {@tool sample --template=stateful_widget_material_no_null_safety}
+  /// {@tool sample --template=stateful_widget_material}
   /// The following example creates a widget that changes the status bar color
   /// to a random value on Android.
   ///
-  /// ```dart imports
-  /// import 'package:flutter/services.dart';
+  /// ```dart dartImports
   /// import 'dart:math' as math;
   /// ```
   ///
+  /// ```dart imports
+  /// import 'package:flutter/services.dart';
+  /// ```
+  ///
   /// ```dart
-  /// final _random = math.Random();
+  /// final math.Random _random = math.Random();
   /// SystemUiOverlayStyle _currentStyle = SystemUiOverlayStyle.light;
   ///
   /// void _changeColor() {
-  ///   final color = Color.fromRGBO(
+  ///   final Color color = Color.fromRGBO(
   ///     _random.nextInt(255),
   ///     _random.nextInt(255),
   ///     _random.nextInt(255),
@@ -373,7 +376,7 @@ class SystemChrome {
   ///
   /// @override
   /// Widget build(BuildContext context) {
-  ///   return AnnotatedRegion(
+  ///   return AnnotatedRegion<SystemUiOverlayStyle>(
   ///     value: _currentStyle,
   ///     child: Center(
   ///       child: ElevatedButton(

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/platform_plugins.dart';
@@ -218,6 +220,39 @@ void main() {
     );
 
     expect(plugin.platforms, <String, PluginPlatform>{});
+    expect(plugin.defaultPackagePlatforms, <String, String>{
+      'linux': 'sample_package_linux',
+      'macos': 'sample_package_macos',
+      'windows': 'sample_package_windows',
+    });
+    expect(plugin.pluginDartClassPlatforms, <String, String>{});
+  });
+
+  testWithoutContext('Desktop plugin parsing allows a dartPluginClass field', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    const String pluginYamlRaw =
+      'platforms:\n'
+      ' linux:\n'
+      '  dartPluginClass: LinuxClass\n'
+      ' macos:\n'
+      '  dartPluginClass: MacOSClass\n'
+      ' windows:\n'
+      '  dartPluginClass: WindowsClass\n';
+
+    final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    final Plugin plugin = Plugin.fromYaml(
+      _kTestPluginName,
+      _kTestPluginPath,
+      pluginYaml,
+      const <String>[],
+      fileSystem: fileSystem,
+    );
+
+    expect(plugin.pluginDartClassPlatforms, <String, String>{
+      'linux': 'LinuxClass',
+      'macos': 'MacOSClass',
+      'windows': 'WindowsClass',
+    });
   });
 
   testWithoutContext('Plugin parsing throws a fatal error on an empty plugin', () {

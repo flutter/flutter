@@ -2,14 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'theme.dart';
-
-// Examples can assume:
-// // @dart = 2.9
 
 // Content padding determined via SwiftUI's `Form` view in the iOS 14.2 SDK.
 const EdgeInsetsGeometry _kDefaultPadding =
@@ -45,7 +41,7 @@ const EdgeInsetsGeometry _kDefaultPadding =
 ///
 /// ```dart
 /// class FlutterDemo extends StatefulWidget {
-///   FlutterDemo({Key key}) : super(key: key);
+///   const FlutterDemo({Key? key}) : super(key: key);
 ///
 ///   @override
 ///   _FlutterDemoState createState() => _FlutterDemoState();
@@ -59,20 +55,20 @@ const EdgeInsetsGeometry _kDefaultPadding =
 ///     return CupertinoPageScaffold(
 ///       child: Center(
 ///         child: CupertinoFormSection(
-///           header: Text('SECTION 1'),
+///           header: const Text('SECTION 1'),
 ///           children: <Widget>[
 ///             CupertinoFormRow(
 ///               child: CupertinoSwitch(
-///                 value: this.toggleValue,
-///                 onChanged: (value) {
+///                 value: toggleValue,
+///                 onChanged: (bool value) {
 ///                   setState(() {
-///                     this.toggleValue = value;
+///                     toggleValue = value;
 ///                   });
 ///                 },
 ///               ),
-///               prefix: Text('Toggle'),
-///               helper: Text('Use your instincts'),
-///               error: toggleValue ? Text('Cannot be true') : null,
+///               prefix: const Text('Toggle'),
+///               helper: const Text('Use your instincts'),
+///               error: toggleValue ? const Text('Cannot be true') : null,
 ///             ),
 ///           ],
 ///         ),

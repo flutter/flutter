@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/widgets.dart';
 
 class MockOnEndFunction {
   int called = 0;
@@ -548,7 +547,7 @@ class _TestTweenAnimationBuilderWidgetState extends _TestAnimatedWidgetState {
       duration: duration,
       onEnd: widget.callback,
       builder: (BuildContext context, double? size, Widget? child) {
-        return Container(
+        return SizedBox(
           child: child,
           width: size,
           height: size,

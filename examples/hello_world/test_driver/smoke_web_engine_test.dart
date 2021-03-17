@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 import 'dart:async';
 
 import 'package:flutter_driver/flutter_driver.dart';
@@ -15,7 +14,7 @@ void main() {
   group('Hello World App', () {
     final SerializableFinder titleFinder = find.byValueKey('title');
 
-    FlutterDriver driver;
+    late FlutterDriver driver;
 
     // Connect to the Flutter driver before running any tests.
     setUpAll(() async {

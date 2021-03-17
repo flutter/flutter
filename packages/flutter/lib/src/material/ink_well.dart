@@ -153,6 +153,9 @@ abstract class InteractiveInkFeature extends InkFeature {
 ///  * [InkSplash.splashFactory]
 ///  * [InkRipple.splashFactory]
 abstract class InteractiveInkFeatureFactory {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  ///
   /// Subclasses should provide a const constructor.
   const InteractiveInkFeatureFactory();
 
@@ -285,7 +288,7 @@ class InkResponse extends StatelessWidget {
   ///
   /// Must have an ancestor [Material] widget in which to cause ink reactions.
   ///
-  /// The [mouseCursor], [containedInkWell], [highlightShape], [enableFeedback],
+  /// The [containedInkWell], [highlightShape], [enableFeedback],
   /// and [excludeFromSemantics] arguments must not be null.
   const InkResponse({
     Key? key,
@@ -1171,7 +1174,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 ///
 /// An example of this situation is as follows:
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 ///
 /// Tap the container to cause it to grow. Then, tap it again and hold before
 /// the widget reaches its maximum size to observe the clipped ink splash.
@@ -1179,11 +1182,12 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 /// ```dart
 /// double sideLength = 50;
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return AnimatedContainer(
 ///     height: sideLength,
 ///     width: sideLength,
-///     duration: Duration(seconds: 2),
+///     duration: const Duration(seconds: 2),
 ///     curve: Curves.easeIn,
 ///     child: Material(
 ///       color: Colors.yellow,
@@ -1216,7 +1220,7 @@ class InkWell extends InkResponse {
   ///
   /// Must have an ancestor [Material] widget in which to cause ink reactions.
   ///
-  /// The [mouseCursor], [enableFeedback], and [excludeFromSemantics] arguments
+  /// The [enableFeedback], and [excludeFromSemantics] arguments
   /// must not be null.
   const InkWell({
     Key? key,

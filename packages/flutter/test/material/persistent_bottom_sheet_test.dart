@@ -4,6 +4,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 void main() {
   // Pumps and ensures that the BottomSheet animates non-linearly.
@@ -58,10 +59,10 @@ void main() {
             return ListView(
               controller: controller,
               shrinkWrap: true,
-              children: <Widget>[
-                Container(height: 100.0, child: const Text('One')),
-                Container(height: 100.0, child: const Text('Two')),
-                Container(height: 100.0, child: const Text('Three')),
+              children: const <Widget>[
+                SizedBox(height: 100.0, child: Text('One')),
+                SizedBox(height: 100.0, child: Text('Two')),
+                SizedBox(height: 100.0, child: Text('Three')),
               ],
             );
           },
@@ -93,10 +94,10 @@ void main() {
       return ListView(
         shrinkWrap: true,
         primary: false,
-        children: <Widget>[
-          Container(height: 100.0, child: const Text('One')),
-          Container(height: 100.0, child: const Text('Two')),
-          Container(height: 100.0, child: const Text('Three')),
+        children: const <Widget>[
+          SizedBox(height: 100.0, child: Text('One')),
+          SizedBox(height: 100.0, child: Text('Two')),
+          SizedBox(height: 100.0, child: Text('Three')),
         ],
       );
     });
@@ -125,10 +126,10 @@ void main() {
       return ListView(
         shrinkWrap: true,
         primary: false,
-        children: <Widget>[
-          Container(height: 100.0, child: const Text('One')),
-          Container(height: 100.0, child: const Text('Two')),
-          Container(height: 100.0, child: const Text('Three')),
+        children: const <Widget>[
+          SizedBox(height: 100.0, child: Text('One')),
+          SizedBox(height: 100.0, child: Text('Two')),
+          SizedBox(height: 100.0, child: Text('Three')),
         ],
       );
     });
@@ -164,10 +165,10 @@ void main() {
             return ListView(
               shrinkWrap: true,
               controller: controller,
-              children: <Widget>[
-                Container(height: 100.0, child: const Text('One')),
-                Container(height: 100.0, child: const Text('Two')),
-                Container(height: 100.0, child: const Text('Three')),
+              children: const <Widget>[
+                SizedBox(height: 100.0, child: Text('One')),
+                SizedBox(height: 100.0, child: Text('Two')),
+                SizedBox(height: 100.0, child: Text('Three')),
               ],
             );
           },
@@ -318,18 +319,18 @@ void main() {
             return ListView(
               controller: controller,
               shrinkWrap: true,
-              children: <Widget>[
-                Container(height: 100.0, child: const Text('One')),
-                Container(height: 100.0, child: const Text('Two')),
-                Container(height: 100.0, child: const Text('Three')),
-                Container(height: 100.0, child: const Text('Three')),
-                Container(height: 100.0, child: const Text('Three')),
-                Container(height: 100.0, child: const Text('Three')),
-                Container(height: 100.0, child: const Text('Three')),
-                Container(height: 100.0, child: const Text('Three')),
-                Container(height: 100.0, child: const Text('Three')),
-                Container(height: 100.0, child: const Text('Three')),
-                Container(height: 100.0, child: const Text('Three')),
+              children: const <Widget>[
+                SizedBox(height: 100.0, child: Text('One')),
+                SizedBox(height: 100.0, child: Text('Two')),
+                SizedBox(height: 100.0, child: Text('Three')),
+                SizedBox(height: 100.0, child: Text('Three')),
+                SizedBox(height: 100.0, child: Text('Three')),
+                SizedBox(height: 100.0, child: Text('Three')),
+                SizedBox(height: 100.0, child: Text('Three')),
+                SizedBox(height: 100.0, child: Text('Three')),
+                SizedBox(height: 100.0, child: Text('Three')),
+                SizedBox(height: 100.0, child: Text('Three')),
+                SizedBox(height: 100.0, child: Text('Three')),
               ],
             );
           },
@@ -384,7 +385,7 @@ void main() {
           padding: EdgeInsets.all(50.0),
         ),
         child: Scaffold(
-          resizeToAvoidBottomPadding: false,
+          resizeToAvoidBottomInset: false,
           body: Builder(
             builder: (BuildContext context) {
               scaffoldContext = context;
@@ -475,6 +476,28 @@ void main() {
     expect(find.byKey(bottomSheetKey), findsNothing);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/71435
+  testWidgets('Scaffold.bottomSheet should be updated without creating a new RO'
+      ' when the new widget has the same key and type.', (WidgetTester tester) async {
+    Widget buildFrame(String text) {
+      return MaterialApp(
+        home: Scaffold(
+          body: const Placeholder(),
+          bottomSheet: Text(text),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame('I love Flutter!'));
+    final RenderParagraph renderBeforeUpdate = tester.renderObject(find.text('I love Flutter!'));
+
+    await tester.pumpWidget(buildFrame('Flutter is the best!'));
+    await tester.pumpAndSettle();
+    final RenderParagraph renderAfterUpdate = tester.renderObject(find.text('Flutter is the best!'));
+
+    expect(renderBeforeUpdate, renderAfterUpdate);
+  });
+
   testWidgets('Verify that visual properties are passed through', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     const Color color = Colors.pink;
@@ -493,10 +516,10 @@ void main() {
       return ListView(
         shrinkWrap: true,
         primary: false,
-        children: <Widget>[
-          Container(height: 100.0, child: const Text('One')),
-          Container(height: 100.0, child: const Text('Two')),
-          Container(height: 100.0, child: const Text('Three')),
+        children: const <Widget>[
+          SizedBox(height: 100.0, child: Text('One')),
+          SizedBox(height: 100.0, child: Text('Two')),
+          SizedBox(height: 100.0, child: Text('Three')),
         ],
       );
     }, backgroundColor: color, elevation: elevation, shape: shape, clipBehavior: clipBehavior);

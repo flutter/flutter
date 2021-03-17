@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import 'file_system.dart';
@@ -26,6 +28,13 @@ abstract class ProjectMigrator {
   }
 
   @protected
+  String migrateFileContents(String fileContents) {
+    return fileContents;
+  }
+
+  @protected
+  /// Calls [migrateLine] per line, then [migrateFileContents]
+  /// including the line migrations.
   void processFileLines(File file) {
     final List<String> lines = file.readAsLinesSync();
 
@@ -51,9 +60,16 @@ abstract class ProjectMigrator {
       newProjectContents.writeln(newProjectLine);
     }
 
+    final String projectContentsWithMigratedLines = newProjectContents.toString();
+    final String projectContentsWithMigratedContents = migrateFileContents(projectContentsWithMigratedLines);
+    if (projectContentsWithMigratedLines != projectContentsWithMigratedContents) {
+      logger.printTrace('Migrating $basename contents');
+      migrationRequired = true;
+    }
+
     if (migrationRequired) {
       logger.printStatus('Upgrading $basename');
-      file.writeAsStringSync(newProjectContents.toString());
+      file.writeAsStringSync(projectContentsWithMigratedContents);
     }
   }
 }

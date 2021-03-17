@@ -115,7 +115,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///           icon: const Icon(Icons.navigate_next),
 ///           tooltip: 'Go to the next page',
 ///           onPressed: () {
-///             Navigator.push(context, MaterialPageRoute(
+///             Navigator.push(context, MaterialPageRoute<void>(
 ///               builder: (BuildContext context) {
 ///                 return Scaffold(
 ///                   appBar: AppBar(
@@ -192,7 +192,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.bottomOpacity = 1.0,
     this.toolbarHeight,
     this.leadingWidth,
-    this.backwardsCompatibility = true,
+    this.backwardsCompatibility,
     this.toolbarTextStyle,
     this.titleTextStyle,
     this.systemOverlayStyle,
@@ -201,7 +201,6 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
        assert(primary != null),
        assert(toolbarOpacity != null),
        assert(bottomOpacity != null),
-       assert(backwardsCompatibility != null),
        preferredSize = Size.fromHeight(toolbarHeight ?? kToolbarHeight + (bottom?.preferredSize.height ?? 0.0)),
        super(key: key);
 
@@ -318,10 +317,10 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///     primary: true,
   ///     slivers: <Widget>[
   ///       SliverAppBar(
-  ///         title: Text('Hello World'),
+  ///         title: const Text('Hello World'),
   ///         actions: <Widget>[
   ///           IconButton(
-  ///             icon: Icon(Icons.shopping_cart),
+  ///             icon: const Icon(Icons.shopping_cart),
   ///             tooltip: 'Open shopping cart',
   ///             onPressed: () {
   ///               // handle the press
@@ -609,16 +608,18 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// [iconTheme], [actionsIconTheme] properties, and the original use of
   /// the [textTheme] and [brightness] properties.
   ///
-  /// This property is true by default.
+  /// If this property is null, then [AppBarTheme.backwardsCompatibility] of
+  /// [ThemeData.appBarTheme] is used. If that is also null, the default
+  /// value is true.
   ///
   /// This is a temporary property. When setting it to false is no
-  /// longer considereed a breaking change, it will be depreacted and
+  /// longer considered a breaking change, it will be depreacted and
   /// its default value will be changed to false. App developers are
   /// encouraged to opt into the new features by setting it to false
   /// and using the [foregroundColor] and [systemOverlayStyle]
   /// properties as needed.
   /// {@endtemplate}
-  final bool backwardsCompatibility;
+  final bool? backwardsCompatibility;
 
   /// {@template flutter.material.appbar.toolbarTextStyle}
   /// The default text style for the AppBar's [leading], and
@@ -724,10 +725,11 @@ class _AppBarState extends State<AppBar> {
     final bool useCloseButton = parentRoute is PageRoute<dynamic> && parentRoute.fullscreenDialog;
 
     final double toolbarHeight = widget.toolbarHeight ?? kToolbarHeight;
+    final bool backwardsCompatibility = widget.backwardsCompatibility ?? appBarTheme.backwardsCompatibility ?? true;
 
-    final Color backgroundColor = widget.backwardsCompatibility
+    final Color backgroundColor = backwardsCompatibility
       ? widget.backgroundColor
-        ?? appBarTheme.color
+        ?? appBarTheme.backgroundColor
         ?? theme.primaryColor
       : widget.backgroundColor
         ?? appBarTheme.backgroundColor
@@ -737,7 +739,7 @@ class _AppBarState extends State<AppBar> {
       ?? appBarTheme.foregroundColor
       ?? (colorScheme.brightness == Brightness.dark ? colorScheme.onSurface : colorScheme.onPrimary);
 
-    IconThemeData overallIconTheme = widget.backwardsCompatibility
+    IconThemeData overallIconTheme = backwardsCompatibility
       ? widget.iconTheme
         ?? appBarTheme.iconTheme
         ?? theme.primaryIconTheme
@@ -749,7 +751,7 @@ class _AppBarState extends State<AppBar> {
       ?? appBarTheme.actionsIconTheme
       ?? overallIconTheme;
 
-    TextStyle? toolbarTextStyle = widget.backwardsCompatibility
+    TextStyle? toolbarTextStyle = backwardsCompatibility
       ? widget.textTheme?.bodyText2
         ?? appBarTheme.textTheme?.bodyText2
         ?? theme.primaryTextTheme.bodyText2
@@ -757,7 +759,7 @@ class _AppBarState extends State<AppBar> {
         ?? appBarTheme.toolbarTextStyle
         ?? theme.textTheme.bodyText2?.copyWith(color: foregroundColor);
 
-    TextStyle? titleTextStyle = widget.backwardsCompatibility
+    TextStyle? titleTextStyle = backwardsCompatibility
       ? widget.textTheme?.headline6
         ?? appBarTheme.textTheme?.headline6
         ?? theme.primaryTextTheme.headline6
@@ -951,7 +953,7 @@ class _AppBarState extends State<AppBar> {
     }
 
     final Brightness overlayStyleBrightness = widget.brightness ?? appBarTheme.brightness ?? colorScheme.brightness;
-    final SystemUiOverlayStyle overlayStyle = widget.backwardsCompatibility
+    final SystemUiOverlayStyle overlayStyle = backwardsCompatibility
       ? (overlayStyleBrightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
       : widget.systemOverlayStyle
         ?? appBarTheme.systemOverlayStyle
@@ -1103,7 +1105,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final ShapeBorder? shape;
   final double? toolbarHeight;
   final double? leadingWidth;
-  final bool backwardsCompatibility;
+  final bool? backwardsCompatibility;
   final TextStyle? toolbarTextStyle;
   final TextStyle? titleTextStyle;
   final SystemUiOverlayStyle? systemOverlayStyle;
@@ -1152,7 +1154,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
           ? Semantics(child: flexibleSpace, header: true)
           : flexibleSpace,
         bottom: bottom,
-        elevation: forceElevated || overlapsContent || (pinned && shrinkOffset > maxExtent - minExtent) ? elevation ?? 4.0 : 0.0,
+        elevation: forceElevated || overlapsContent || (pinned && shrinkOffset > maxExtent - minExtent) ? elevation : 0.0,
         shadowColor: shadowColor,
         backgroundColor: backgroundColor,
         foregroundColor: foregroundColor,
@@ -1271,7 +1273,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 /// ```
 ///
 /// ```dart
-/// void main() => runApp(MyApp());
+/// void main() => runApp(const MyApp());
 ///
 /// class MyApp extends StatefulWidget {
 ///   const MyApp({Key? key}) : super(key: key);
@@ -1294,20 +1296,20 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///         body: CustomScrollView(
 ///           slivers: <Widget>[
 ///             SliverAppBar(
-///               pinned: this._pinned,
-///               snap: this._snap,
-///               floating: this._floating,
+///               pinned: _pinned,
+///               snap: _snap,
+///               floating: _floating,
 ///               expandedHeight: 160.0,
-///               flexibleSpace: FlexibleSpaceBar(
-///                 title: const Text("SliverAppBar"),
+///               flexibleSpace: const FlexibleSpaceBar(
+///                 title: Text('SliverAppBar'),
 ///                 background: FlutterLogo(),
 ///               ),
 ///             ),
-///             SliverToBoxAdapter(
+///             const SliverToBoxAdapter(
 ///               child: Center(
-///                 child: Container(
+///                 child: SizedBox(
 ///                   height: 2000,
-///                   child: const Text("Scroll to see SliverAppBar in effect ."),
+///                   child: const Text('Scroll to see SliverAppBar in effect .'),
 ///                 ),
 ///               ),
 ///             ),
@@ -1323,10 +1325,10 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///                   Switch(
 ///                     onChanged: (bool val) {
 ///                       setState(() {
-///                         this._pinned = val;
+///                         _pinned = val;
 ///                       });
 ///                     },
-///                     value: this._pinned,
+///                     value: _pinned,
 ///                   ),
 ///                 ],
 ///               ),
@@ -1336,12 +1338,12 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///                   Switch(
 ///                     onChanged: (bool val) {
 ///                       setState(() {
-///                         this._snap = val;
+///                         _snap = val;
 ///                         //Snapping only applies when the app bar is floating.
-///                         this._floating = this._floating || val;
+///                         _floating = _floating || val;
 ///                       });
 ///                     },
-///                     value: this._snap,
+///                     value: _snap,
 ///                   ),
 ///                 ],
 ///               ),
@@ -1351,15 +1353,15 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///                   Switch(
 ///                     onChanged: (bool val) {
 ///                       setState(() {
-///                         this._floating = val;
-///                         if (this._snap == true) {
-///                           if (this._floating != true) {
-///                             this._snap = false;
+///                         _floating = val;
+///                         if (_snap == true) {
+///                           if (_floating != true) {
+///                             _snap = false;
 ///                           }
 ///                         }
 ///                       });
 ///                     },
-///                     value: this._floating,
+///                     value: _floating,
 ///                   ),
 ///                 ],
 ///               ),
@@ -1448,7 +1450,7 @@ class SliverAppBar extends StatefulWidget {
     this.shape,
     this.toolbarHeight = kToolbarHeight,
     this.leadingWidth,
-    this.backwardsCompatibility = true,
+    this.backwardsCompatibility,
     this.toolbarTextStyle,
     this.titleTextStyle,
     this.systemOverlayStyle,
@@ -1462,7 +1464,7 @@ class SliverAppBar extends StatefulWidget {
        assert(toolbarHeight != null),
        assert(floating || !snap, 'The "snap" argument only makes sense for floating app bars.'),
        assert(stretchTriggerOffset > 0.0),
-       assert(collapsedHeight == null || collapsedHeight > toolbarHeight, 'The "collapsedHeight" argument has to be larger than [toolbarHeight].'),
+       assert(collapsedHeight == null || collapsedHeight >= toolbarHeight, 'The "collapsedHeight" argument has to be larger than or equal to [toolbarHeight].'),
        super(key: key);
 
   /// {@macro flutter.material.appbar.leading}
@@ -1700,7 +1702,7 @@ class SliverAppBar extends StatefulWidget {
   /// {@macro flutter.material.appbar.backwardsCompatibility}
   ///
   /// This property is used to configure an [AppBar].
-  final bool backwardsCompatibility;
+  final bool? backwardsCompatibility;
 
   /// {@macro flutter.material.appbar.toolbarTextStyle}
   ///

@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 
 import '../rendering/mock_canvas.dart';
 
+const Color _kAndroidThumbIdleColor = Color(0xffbcbcbc);
+
 Widget _buildSingleChildScrollViewWithScrollbar({
   TextDirection textDirection = TextDirection.ltr,
   EdgeInsets padding = EdgeInsets.zero,
@@ -30,7 +32,24 @@ void main() {
     ));
     expect(find.byType(Scrollbar), isNot(paints..rect()));
     await tester.fling(find.byType(SingleChildScrollView), const Offset(0.0, -10.0), 10.0);
-    expect(find.byType(Scrollbar), paints..rect(rect: const Rect.fromLTRB(800.0 - 12.0, 0.0, 800.0, 600.0)));
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
+          color: const Color(0x00000000),
+        )
+        ..line(
+          p1: const Offset(796.0, 0.0),
+          p2: const Offset(796.0, 600.0),
+          strokeWidth: 1.0,
+          color: const Color(0x00000000),
+        )
+        ..rect(
+          rect: const Rect.fromLTRB(796.0, 1.5, 800.0, 91.5),
+          color: _kAndroidThumbIdleColor,
+        ),
+    );
   });
 
   testWidgets('Viewport basic test (RTL)', (WidgetTester tester) async {
@@ -40,7 +59,24 @@ void main() {
     ));
     expect(find.byType(Scrollbar), isNot(paints..rect()));
     await tester.fling(find.byType(SingleChildScrollView), const Offset(0.0, -10.0), 10.0);
-    expect(find.byType(Scrollbar), paints..rect(rect: const Rect.fromLTRB(0.0, 0.0, 12.0, 600.0)));
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(0.0, 0.0, 4.0, 600.0),
+          color: const Color(0x00000000),
+        )
+        ..line(
+          p1: Offset.zero,
+          p2: const Offset(0.0, 600.0),
+          strokeWidth: 1.0,
+          color: const Color(0x00000000),
+        )
+        ..rect(
+          rect: const Rect.fromLTRB(0.0, 1.5, 4.0, 91.5),
+          color: _kAndroidThumbIdleColor,
+        ),
+    );
   });
 
   testWidgets('works with MaterialApp and Scaffold', (WidgetTester tester) async {
@@ -67,15 +103,24 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.byType(Scrollbar), paints..rect(
-      rect: const Rect.fromLTWH(
-        800.0 - 12, // screen width - default thickness and margin
-        0,         // the paint area starts from the bottom of the app bar
-        12,         // thickness
-        // 56 being the height of the app bar
-        600.0 - 56 - 34 - 20,
-      ),
-    ));
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 490.0),
+          color: const Color(0x00000000),
+        )
+        ..line(
+          p1: const Offset(796.0, 0.0),
+          p2: const Offset(796.0, 490.0),
+          strokeWidth: 1.0,
+          color: const Color(0x00000000),
+        )
+        ..rect(
+          rect: const Rect.fromLTWH(796.0, 0.0, 4.0, (600.0 - 56 - 34 - 20) / 4000 * (600 - 56 - 34 - 20)),
+          color: _kAndroidThumbIdleColor,
+        ),
+    );
   });
 
   testWidgets("should not paint when there isn't enough space", (WidgetTester tester) async {

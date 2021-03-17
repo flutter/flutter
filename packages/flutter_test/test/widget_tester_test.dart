@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart';
@@ -52,6 +51,12 @@ void main() {
       test_package.expect(completed, isTrue);
     });
   });
+
+  group('respects the group skip flag', () {
+    testWidgets('should be skipped', (WidgetTester tester) async {
+      expect(false, true);
+    });
+  }, skip: true);
 
   group('findsOneWidget', () {
     testWidgets('finds exactly one widget', (WidgetTester tester) async {

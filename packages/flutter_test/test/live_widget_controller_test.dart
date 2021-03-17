@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class CountButton extends StatefulWidget {
+  const CountButton({Key? key}) : super(key: key);
+
   @override
   _CountButtonState createState() => _CountButtonState();
 }
@@ -30,6 +30,8 @@ class _CountButtonState extends State<CountButton> {
 }
 
 class AnimateSample extends StatefulWidget {
+  const AnimateSample({Key? key}) : super(key: key);
+
   @override
   _AnimateSampleState createState() => _AnimateSampleState();
 }
@@ -64,7 +66,7 @@ class _AnimateSampleState extends State<AnimateSample>
 
 void main() {
   test('Test pump on LiveWidgetController', () async {
-    runApp(MaterialApp(home: Center(child: CountButton())));
+    runApp(const MaterialApp(home: Center(child: CountButton())));
 
     await SchedulerBinding.instance!.endOfFrame;
     final WidgetController controller =
@@ -78,7 +80,7 @@ void main() {
   });
 
   test('Test pumpAndSettle on LiveWidgetController', () async {
-    runApp(MaterialApp(home: Center(child: AnimateSample())));
+    runApp(const MaterialApp(home: Center(child: AnimateSample())));
     await SchedulerBinding.instance!.endOfFrame;
     final WidgetController controller =
         LiveWidgetController(WidgetsBinding.instance!);

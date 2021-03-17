@@ -568,11 +568,109 @@ class _TabBarScrollController extends ScrollController {
 ///
 /// Uses values from [TabBarTheme] if it is set in the current context.
 ///
-/// To see a sample implementation, visit the [TabController] documentation.
+/// {@tool dartpad --template=stateless_widget_material}
+/// This sample shows the implementation of [TabBar] and [TabBarView] using a [DefaultTabController].
+/// Each [Tab] corresponds to a child of the [TabBarView] in the order they are written.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///    return DefaultTabController(
+///      initialIndex: 1,
+///      length: 3,
+///      child: Scaffold(
+///        appBar: AppBar(
+///          title: const Text('TabBar Widget'),
+///          bottom: const TabBar(
+///            tabs: <Widget>[
+///              Tab(
+///                icon: Icon(Icons.cloud_outlined),
+///              ),
+///              Tab(
+///                icon: Icon(Icons.beach_access_sharp),
+///              ),
+///              Tab(
+///                icon: Icon(Icons.brightness_5_sharp),
+///              ),
+///            ],
+///          ),
+///        ),
+///        body: const TabBarView(
+///          children: <Widget>[
+///            Center(
+///              child: Text('It\'s cloudy here'),
+///            ),
+///            Center(
+///              child: Text('It\'s rainy here'),
+///            ),
+///            Center(
+///              child: Text('It\'s sunny here'),
+///            ),
+///          ],
+///        ),
+///      ),
+///    );
+///  }
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad --template=stateful_widget_material_ticker}
+/// [TabBar] can also be implmented by using a [TabController] which provides more options
+/// to control the behavior of the [TabBar] and [TabBarView]. This can be used instead of
+/// a [DefaultTabController], demonstrated below.
+///
+/// ```dart
+///
+/// late TabController _tabController;
+///
+///  @override
+///  void initState() {
+///    super.initState();
+///    _tabController = TabController(length: 3, vsync: this);
+///  }
+///
+///  @override
+///  Widget build(BuildContext context) {
+///    return Scaffold(
+///      appBar: AppBar(
+///        title: const Text('TabBar Widget'),
+///        bottom: TabBar(
+///          controller: _tabController,
+///          tabs: const <Widget>[
+///            Tab(
+///              icon: Icon(Icons.cloud_outlined),
+///            ),
+///            Tab(
+///             icon: Icon(Icons.beach_access_sharp),
+///            ),
+///            Tab(
+///              icon: Icon(Icons.brightness_5_sharp),
+///            ),
+///          ],
+///        ),
+///      ),
+///      body: TabBarView(
+///        controller: _tabController,
+///        children: const <Widget>[
+///          Center(
+///            child: Text('It\'s cloudy here'),
+///          ),
+///          Center(
+///            child: Text('It\'s rainy here'),
+///          ),
+///          Center(
+///             child: Text('It\'s sunny here'),
+///          ),
+///        ],
+///      ),
+///    );
+///  }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
 ///  * [TabBarView], which displays page views that correspond to each tab.
+///  * [TabBar], which is used to display the [Tab] that corresponds to each page of the [TabBarView].
 class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a material design tab bar.
   ///
@@ -1479,7 +1577,7 @@ class TabPageSelector extends StatelessWidget {
   /// for all indicator circles.
   ///
   /// If this parameter is null, then the indicator is filled with the theme's
-  /// accent color, [ThemeData.accentColor].
+  /// [ColorScheme.secondary].
   final Color? selectedColor;
 
   Widget _buildTabIndicator(
@@ -1522,7 +1620,7 @@ class TabPageSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color fixColor = color ?? Colors.transparent;
-    final Color fixSelectedColor = selectedColor ?? Theme.of(context).accentColor;
+    final Color fixSelectedColor = selectedColor ?? Theme.of(context).colorScheme.secondary;
     final ColorTween selectedColorTween = ColorTween(begin: fixColor, end: fixSelectedColor);
     final ColorTween previousColorTween = ColorTween(begin: fixSelectedColor, end: fixColor);
     final TabController? tabController = controller ?? DefaultTabController.of(context);

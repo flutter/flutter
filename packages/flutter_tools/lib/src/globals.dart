@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:process/process.dart';
 
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
+import 'android/gradle_utils.dart';
 import 'artifacts.dart';
 import 'base/bot_detector.dart';
 import 'base/config.dart';
@@ -103,8 +106,12 @@ XcodeProjectInterpreter get xcodeProjectInterpreter => context.get<XcodeProjectI
 
 XCDevice get xcdevice => context.get<XCDevice>();
 
-final OutputPreferences _defaultOutputPreferences = OutputPreferences();
-OutputPreferences get outputPreferences => context.get<OutputPreferences>() ?? _defaultOutputPreferences;
+final OutputPreferences _default = OutputPreferences(
+  wrapText: stdio.hasTerminal ?? false,
+  showColor:  platform.stdoutSupportsAnsi,
+  stdio: stdio,
+);
+OutputPreferences get outputPreferences => context.get<OutputPreferences>() ?? _default;
 
 final BotDetector _defaultBotDetector = BotDetector(
   httpClientFactory: context.get<HttpClientFactory>() ?? () => HttpClient(),
@@ -118,6 +125,8 @@ Future<bool> get isRunningOnBot => botDetector.isRunningOnBot;
 
 /// The current system clock instance.
 SystemClock get systemClock => context.get<SystemClock>();
+
+ProcessInfo get processInfo => context.get<ProcessInfo>();
 
 /// Display an error level message to the user. Commands should use this if they
 /// fail in some way.
@@ -201,3 +210,6 @@ PlistParser _plistInstance;
 
 /// The global template renderer.
 TemplateRenderer get templateRenderer => context.get<TemplateRenderer>();
+
+/// Gradle utils in the current [AppContext].
+GradleUtils get gradleUtils => context.get<GradleUtils>();

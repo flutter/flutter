@@ -10,7 +10,6 @@ import 'theme.dart';
 import 'theme_data.dart';
 
 // Examples can assume:
-// // @dart = 2.9
 // void setState(VoidCallback fn) { }
 
 /// A [ListTile] with a [Checkbox]. In other words, a checkbox with a label.
@@ -27,9 +26,10 @@ import 'theme_data.dart';
 /// those of the same name on [ListTile].
 ///
 /// The [selected] property on this widget is similar to the [ListTile.selected]
-/// property, but the color used is that described by [activeColor], if any,
-/// defaulting to the accent color of the current [Theme]. No effort is made to
-/// coordinate the [selected] state and the [value] state; to have the list tile
+/// property. This tile's [activeColor] is used for the selected item's text color, or
+/// the theme's [ThemeData.toggleableActiveColor] if [activeColor] is null.
+///
+/// This widget does not coordinate the [selected] state and the [value] state; to have the list tile
 /// appear selected when the checkbox is checked, pass the same value to both.
 ///
 /// The checkbox is shown on the right by default in left-to-right languages
@@ -40,7 +40,7 @@ import 'theme_data.dart';
 /// To show the [CheckboxListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 ///
 /// ![CheckboxListTile sample](https://flutter.github.io/assets-for-api-docs/assets/material/checkbox_list_tile.png)
 ///
@@ -59,8 +59,8 @@ import 'theme_data.dart';
 ///   return CheckboxListTile(
 ///     title: const Text('Animate Slowly'),
 ///     value: timeDilation != 1.0,
-///     onChanged: (bool value) {
-///       setState(() { timeDilation = value ? 10.0 : 1.0; });
+///     onChanged: (bool? value) {
+///       setState(() { timeDilation = value! ? 10.0 : 1.0; });
 ///     },
 ///     secondary: const Icon(Icons.hourglass_empty),
 ///   );
@@ -85,7 +85,7 @@ import 'theme_data.dart';
 /// into one. Therefore, it may be necessary to create a custom radio tile
 /// widget to accommodate similar use cases.
 ///
-/// {@tool sample --template=stateful_widget_scaffold_center_no_null_safety}
+/// {@tool sample --template=stateful_widget_scaffold_center}
 ///
 /// ![Checkbox list tile semantics sample](https://flutter.github.io/assets-for-api-docs/assets/material/checkbox_list_tile_semantics.png)
 ///
@@ -99,11 +99,12 @@ import 'theme_data.dart';
 /// ```dart preamble
 /// class LinkedLabelCheckbox extends StatelessWidget {
 ///   const LinkedLabelCheckbox({
-///     this.label,
-///     this.padding,
-///     this.value,
-///     this.onChanged,
-///   });
+///     Key? key,
+///     required this.label,
+///     required this.padding,
+///     required this.value,
+///     required this.onChanged,
+///   }) : super(key: key);
 ///
 ///   final String label;
 ///   final EdgeInsets padding;
@@ -120,7 +121,7 @@ import 'theme_data.dart';
 ///             child: RichText(
 ///               text: TextSpan(
 ///                 text: label,
-///                 style: TextStyle(
+///                 style: const TextStyle(
 ///                   color: Colors.blueAccent,
 ///                   decoration: TextDecoration.underline,
 ///                 ),
@@ -133,7 +134,7 @@ import 'theme_data.dart';
 ///           ),
 ///           Checkbox(
 ///             value: value,
-///             onChanged: (bool newValue) {
+///             onChanged: (bool? newValue) {
 ///               onChanged(newValue);
 ///             },
 ///           ),
@@ -169,7 +170,7 @@ import 'theme_data.dart';
 /// combining [Checkbox] with other widgets, such as [Text], [Padding] and
 /// [InkWell].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 ///
 /// ![Custom checkbox list tile sample](https://flutter.github.io/assets-for-api-docs/assets/material/checkbox_list_tile_custom.png)
 ///
@@ -179,11 +180,12 @@ import 'theme_data.dart';
 /// ```dart preamble
 /// class LabeledCheckbox extends StatelessWidget {
 ///   const LabeledCheckbox({
-///     this.label,
-///     this.padding,
-///     this.value,
-///     this.onChanged,
-///   });
+///     Key? key,
+///     required this.label,
+///     required this.padding,
+///     required this.value,
+///     required this.onChanged,
+///   }) : super(key: key);
 ///
 ///   final String label;
 ///   final EdgeInsets padding;
@@ -203,7 +205,7 @@ import 'theme_data.dart';
 ///             Expanded(child: Text(label)),
 ///             Checkbox(
 ///               value: value,
-///               onChanged: (bool newValue) {
+///               onChanged: (bool? newValue) {
 ///                 onChanged(newValue);
 ///               },
 ///             ),
@@ -433,7 +435,7 @@ class CheckboxListTile extends StatelessWidget {
     }
     return MergeSemantics(
       child: ListTileTheme.merge(
-        selectedColor: activeColor ?? Theme.of(context).accentColor,
+        selectedColor: activeColor ?? Theme.of(context).toggleableActiveColor,
         child: ListTile(
           leading: leading,
           title: title,
