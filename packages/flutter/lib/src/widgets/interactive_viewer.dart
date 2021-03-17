@@ -20,7 +20,7 @@ import 'ticker_provider.dart';
 ///
 ///   * [InteractiveViewer.builder], whose builder is of this type.
 ///   * [WidgetBuilder], which is similar, but takes no Rect.
-typedef TransformedWidgetBuilder = Widget Function(BuildContext context, Rect viewport);
+typedef InteractiveViewerWidgetBuilder = Widget Function(BuildContext context, Rect viewport);
 
 /// A widget that enables pan and zoom interactions with its child.
 ///
@@ -360,7 +360,7 @@ class InteractiveViewer extends StatefulWidget {
   ///   * [ListView.builder], which follows a similar pattern.
   ///   * [InteractiveViewer.builder], which has an example of building the
   ///     child on demand.
-  final TransformedWidgetBuilder builder;
+  final InteractiveViewerWidgetBuilder builder;
 
   /// Whether the normal size constraints at this point in the widget tree are
   /// applied to the child.
@@ -638,8 +638,8 @@ class InteractiveViewer extends StatefulWidget {
   ///  * [TextEditingController] for an example of another similar pattern.
   final TransformationController? transformationController;
 
-  // Get a TransformedWidgetBuilder that simply returns the given child.
-  static TransformedWidgetBuilder _getBuilderForChild(Widget child) {
+  // Get a InteractiveViewerWidgetBuilder that simply returns the given child.
+  static InteractiveViewerWidgetBuilder _getBuilderForChild(Widget child) {
     return (BuildContext context, Rect viewport) {
       return child;
     };
