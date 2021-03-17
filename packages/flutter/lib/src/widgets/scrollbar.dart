@@ -901,29 +901,30 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _requestFreeScrollEvent();
+    _requestEmptyScrollEventIfNeeded();
   }
 
   // Waits one frame and cause an empty scroll event (zero delta pixels).
   //
   // This allows the thumb to show immediately when isAlwaysShown is true.
   // A scroll event is required in order to paint the thumb.
-  void _requestFreeScrollEvent() {
-    if (showScrollbar) {
-      WidgetsBinding.instance!.addPostFrameCallback((Duration duration) {
-        _fadeoutTimer?.cancel();
-        // Wait one frame and cause an empty scroll event.  This allows the
-        // thumb to show immediately when isAlwaysShown is true. A scroll
-        // event is required in order to paint the thumb.
-        final ScrollController? scrollController = widget.controller ?? PrimaryScrollController.of(context);
-        assert(
-        scrollController != null,
-        'A ScrollController is required when Scrollbar.isAlwaysShown is true. '
-            'Either Scrollbar.controller was not provided, or a PrimaryScrollController could not be found.',
-        );
-        scrollController!.position.didUpdateScrollPositionBy(0);
-      });
-    }
+  void _requestEmptyScrollEventIfNeeded() {
+    if (showScrollbar)
+      return;
+
+    WidgetsBinding.instance!.addPostFrameCallback((Duration duration) {
+      _fadeoutTimer?.cancel();
+      // Wait one frame and cause an empty scroll event.  This allows the
+      // thumb to show immediately when isAlwaysShown is true. A scroll
+      // event is required in order to paint the thumb.
+      final ScrollController? scrollController = widget.controller ?? PrimaryScrollController.of(context);
+      assert(
+      scrollController != null,
+      'A ScrollController is required when Scrollbar.isAlwaysShown is true. '
+          'Either Scrollbar.controller was not provided, or a PrimaryScrollController could not be found.',
+      );
+      scrollController!.position.didUpdateScrollPositionBy(0);
+    });
   }
 
   /// This method is responsible for configuring the [scrollbarPainter]
@@ -948,7 +949,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     // it may be necessary to trigger a scroll event to show or hide the bar when the
     // scrollable widget viewport size changed.
     if (widget.isAlwaysShown == true) {
-      _requestFreeScrollEvent();
+      _requestEmptyScrollEventIfNeeded();
       _fadeoutAnimationController.animateTo(1.0);
     } else if (widget.isAlwaysShown != oldWidget.isAlwaysShown) {
       _fadeoutAnimationController.reverse();
