@@ -50,6 +50,9 @@ int x = 'String';
 
   for (final String targetPlatform in targetPlatforms) {
     testWithoutContext('flutter build $targetPlatform shows dart compilation error in non-verbose', () {
+      if (targetPlatform == 'windows') {
+        processManager.runSync(<String>[flutterBin, 'config', '--enable-windows-desktop']);
+      }
       final ProcessResult result = processManager.runSync(<String>[
         flutterBin,
         ...getLocalEngineArguments(),
