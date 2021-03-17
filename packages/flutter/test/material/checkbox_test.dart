@@ -99,7 +99,7 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemantics(find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_CheckboxRenderObjectWidget')), matchesSemantics(
+    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
       // isFocusable is delayed by 1 frame.
@@ -108,7 +108,7 @@ void main() {
 
     await tester.pump();
     // isFocusable should be false now after the 1 frame delay.
-    expect(tester.getSemantics(find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_CheckboxRenderObjectWidget')), matchesSemantics(
+    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
     ));
@@ -120,7 +120,7 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemantics(find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_CheckboxRenderObjectWidget')), matchesSemantics(
+    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
       isChecked: true,
@@ -290,7 +290,7 @@ void main() {
     );
 
     await tester.tap(find.byType(Checkbox));
-    final RenderObject object = tester.firstRenderObject(find.byType(Focus));
+    final RenderObject object = tester.firstRenderObject(find.byType(Checkbox));
 
     expect(checkboxValue, true);
     expect(semanticEvent, <String, dynamic>{
@@ -319,10 +319,8 @@ void main() {
       );
     }
 
-    RenderToggleable getCheckboxRenderer() {
-      return tester.renderObject<RenderToggleable>(find.byWidgetPredicate((Widget widget) {
-        return widget.runtimeType.toString() == '_CheckboxRenderObjectWidget';
-      }));
+    RenderBox getCheckboxRenderer() {
+      return tester.renderObject<RenderBox>(find.byType(Checkbox));
     }
 
     await tester.pumpWidget(buildFrame(false));
@@ -377,10 +375,8 @@ void main() {
       );
     }
 
-    RenderToggleable getCheckboxRenderer() {
-      return tester.renderObject<RenderToggleable>(find.byWidgetPredicate((Widget widget) {
-        return widget.runtimeType.toString() == '_CheckboxRenderObjectWidget';
-      }));
+    RenderBox getCheckboxRenderer() {
+      return tester.renderObject<RenderBox>(find.byType(Checkbox));
     }
 
     await tester.pumpWidget(buildFrame(checkColor: checkColor));
@@ -453,11 +449,10 @@ void main() {
       paints
         ..circle(color: Colors.orange[500])
         ..drrect(
-            color: const Color(0x8a000000),
-            outer: RRect.fromLTRBR(
-                391.0, 291.0, 409.0, 309.0, const Radius.circular(1.0)),
-        inner: RRect.fromLTRBR(393.0,
-            293.0, 407.0, 307.0, const Radius.circular(-1.0))),
+          color: const Color(0x8a000000),
+          outer: RRect.fromLTRBR(15.0, 15.0, 33.0, 33.0, const Radius.circular(1.0)),
+          inner: RRect.fromLTRBR(17.0, 17.0, 31.0, 31.0, const Radius.circular(-1.0)),
+        ),
     );
 
     // Check what happens when disabled.
@@ -469,11 +464,10 @@ void main() {
       Material.of(tester.element(find.byType(Checkbox))),
       paints
         ..drrect(
-            color: const Color(0x61000000),
-            outer: RRect.fromLTRBR(
-                391.0, 291.0, 409.0, 309.0, const Radius.circular(1.0)),
-            inner: RRect.fromLTRBR(393.0,
-                293.0, 407.0, 307.0, const Radius.circular(-1.0))),
+          color: const Color(0x61000000),
+          outer: RRect.fromLTRBR(15.0, 15.0, 33.0, 33.0, const Radius.circular(1.0)),
+          inner: RRect.fromLTRBR(17.0, 17.0, 31.0, 31.0, const Radius.circular(-1.0)),
+        ),
     );
   });
 
@@ -604,7 +598,7 @@ void main() {
   testWidgets('Checkbox responds to density changes.', (WidgetTester tester) async {
     const Key key = Key('test');
     Future<void> buildTest(VisualDensity visualDensity) async {
-      return await tester.pumpWidget(
+      return tester.pumpWidget(
         MaterialApp(
           home: Material(
             child: Center(
@@ -825,10 +819,8 @@ void main() {
       );
     }
 
-    RenderToggleable getCheckboxRenderer() {
-      return tester.renderObject<RenderToggleable>(find.byWidgetPredicate((Widget widget) {
-        return widget.runtimeType.toString() == '_CheckboxRenderObjectWidget';
-      }));
+    RenderBox getCheckboxRenderer() {
+      return tester.renderObject<RenderBox>(find.byType(Checkbox));
     }
 
     await tester.pumpWidget(buildFrame(enabled: true));
@@ -878,10 +870,8 @@ void main() {
       );
     }
 
-    RenderToggleable getCheckboxRenderer() {
-      return tester.renderObject<RenderToggleable>(find.byWidgetPredicate((Widget widget) {
-        return widget.runtimeType.toString() == '_CheckboxRenderObjectWidget';
-      }));
+    RenderBox getCheckboxRenderer() {
+      return tester.renderObject<RenderBox>(find.byType(Checkbox));
     }
 
     await tester.pumpWidget(buildFrame());
@@ -937,11 +927,9 @@ void main() {
       paints
         ..drrect(
           color: const Color(0xfff44336),
-            outer: RRect.fromLTRBR(
-                391.0, 291.0, 409.0, 309.0, const Radius.circular(5)),
-            inner: RRect.fromLTRBR(
-                395.0, 295.0, 405.0, 305.0, const Radius.circular(1)))
-        ,
+          outer: RRect.fromLTRBR(15.0, 15.0, 33.0, 33.0, const Radius.circular(5)),
+          inner: RRect.fromLTRBR(19.0, 19.0, 29.0, 29.0, const Radius.circular(1)),
+        ),
     );
   });
 
@@ -1182,6 +1170,29 @@ void main() {
       reason: 'Inactive pressed Checkbox should have overlay color: $inactivePressedOverlayColor',
     );
 
+    await gesture.up();
+  });
+
+  testWidgets('Do not crash when widget disappears while pointer is down', (WidgetTester tester) async {
+    Widget buildCheckbox(bool show) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: show ? Checkbox(value: true, onChanged: (_) { }) : Container(),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildCheckbox(true));
+    final Offset center = tester.getCenter(find.byType(Checkbox));
+    // Put a pointer down on the screen.
+    final TestGesture gesture = await tester.startGesture(center);
+    await tester.pump();
+    // While the pointer is down, the widget disappears.
+    await tester.pumpWidget(buildCheckbox(false));
+    expect(find.byType(Checkbox), findsNothing);
+    // Release pointer after widget disappeared.
     await gesture.up();
   });
 }

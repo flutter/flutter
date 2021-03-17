@@ -251,9 +251,9 @@ mixin RenderConstrainedLayoutBuilder<ConstraintType extends Constraints, ChildTy
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
-///     appBar: AppBar(title: Text("LayoutBuilder Example")),
+///     appBar: AppBar(title: const Text('LayoutBuilder Example')),
 ///     body: LayoutBuilder(
-///       builder: (context, constraints) {
+///       builder: (BuildContext context, BoxConstraints constraints) {
 ///         if (constraints.maxWidth > 600) {
 ///           return _buildWideContainers();
 ///         } else {

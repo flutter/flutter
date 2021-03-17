@@ -10,7 +10,7 @@ import 'package:xml/xml.dart';
 import '../base/deferred_component.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
-import '../build_system/build_system.dart';
+import '../base/logger.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../template.dart';
@@ -25,20 +25,18 @@ import 'deferred_components_validator.dart';
 class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
   /// Constructs a validator instance.
   ///
-  /// The [env] property is used to locate the project files that are checked.
-  ///
   /// The [templatesDir] parameter is optional. If null, the tool's default
   /// templates directory will be used.
   ///
   /// When [exitOnFail] is set to true, the [handleResults] and [attemptToolExit]
   /// methods will exit the tool when this validator detects a recommended
   /// change. This defaults to true.
-  DeferredComponentsPrebuildValidator(Environment env, {
+  DeferredComponentsPrebuildValidator(Directory projectDir, Logger logger, {
     bool exitOnFail = true,
     String title,
     Directory templatesDir,
   }) : _templatesDir = templatesDir,
-       super(env, exitOnFail: exitOnFail, title: title);
+       super(projectDir, logger, exitOnFail: exitOnFail, title: title);
 
   final Directory _templatesDir;
 
@@ -56,7 +54,7 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
   /// This method does not check if the contents of either of the files are
   /// valid, as there are many ways that they can be validly configured.
   Future<bool> checkAndroidDynamicFeature(List<DeferredComponent> components) async {
-    inputs.add(env.projectDir.childFile('pubspec.yaml'));
+    inputs.add(projectDir.childFile('pubspec.yaml'));
     if (components == null || components.isEmpty) {
       return false;
     }
@@ -64,7 +62,8 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
     for (final DeferredComponent component in components) {
       final _DeferredComponentAndroidFiles androidFiles = _DeferredComponentAndroidFiles(
         name: component.name,
-        env: env,
+        projectDir: projectDir,
+        logger: logger,
         templatesDir: _templatesDir
       );
       if (!androidFiles.verifyFilesExist()) {
@@ -106,8 +105,8 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
   /// The string element's name attribute should be the component name with
   /// `Name` as a suffix, and the text contents should be the component name.
   bool checkAndroidResourcesStrings(List<DeferredComponent> components) {
-    final Directory androidDir = env.projectDir.childDirectory('android');
-    inputs.add(env.projectDir.childFile('pubspec.yaml'));
+    final Directory androidDir = projectDir.childDirectory('android');
+    inputs.add(projectDir.childFile('pubspec.yaml'));
 
     // Add component name mapping to strings.xml
     final File stringRes = androidDir
@@ -202,7 +201,7 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
 
   /// Deletes all files inside of the validator's output directory.
   void clearOutputDir() {
-    final Directory dir = env.projectDir.childDirectory('build').childDirectory(DeferredComponentsValidator.kDeferredComponentsTempDirectory);
+    final Directory dir = projectDir.childDirectory('build').childDirectory(DeferredComponentsValidator.kDeferredComponentsTempDirectory);
     ErrorHandlingFileSystem.deleteIfExists(dir, recursive: true);
   }
 }
@@ -212,16 +211,18 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
 class _DeferredComponentAndroidFiles {
   _DeferredComponentAndroidFiles({
     @required this.name,
-    @required this.env,
+    @required this.projectDir,
+    this.logger,
     Directory templatesDir,
   }) : _templatesDir = templatesDir;
 
   // The name of the deferred component.
   final String name;
-  final Environment env;
+  final Directory projectDir;
+  final Logger logger;
   final Directory _templatesDir;
 
-  Directory get androidDir => env.projectDir.childDirectory('android');
+  Directory get androidDir => projectDir.childDirectory('android');
   Directory get componentDir => androidDir.childDirectory(name);
 
   File get androidManifestFile => componentDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml');
@@ -250,18 +251,18 @@ class _DeferredComponentAndroidFiles {
   Future<List<File>> _setupComponentFiles(Directory outputDir) async {
     Template template;
     if (_templatesDir != null) {
-      final Directory templateComponentDir = _templatesDir.childDirectory('module${env.fileSystem.path.separator}android${env.fileSystem.path.separator}deferred_component');
+      final Directory templateComponentDir = _templatesDir.childDirectory('module${globals.fs.path.separator}android${globals.fs.path.separator}deferred_component');
       template = Template(templateComponentDir, templateComponentDir, _templatesDir,
-        fileSystem: env.fileSystem,
+        fileSystem: globals.fs,
         templateManifest: null,
-        logger: env.logger,
+        logger: logger,
         templateRenderer: globals.templateRenderer,
       );
     } else {
-      template = await Template.fromName('module${env.fileSystem.path.separator}android${env.fileSystem.path.separator}deferred_component',
-        fileSystem: env.fileSystem,
+      template = await Template.fromName('module${globals.fs.path.separator}android${globals.fs.path.separator}deferred_component',
+        fileSystem: globals.fs,
         templateManifest: null,
-        logger: env.logger,
+        logger: logger,
         templateRenderer: globals.templateRenderer,
       );
     }

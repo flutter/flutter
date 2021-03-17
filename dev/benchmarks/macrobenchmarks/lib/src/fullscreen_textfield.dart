@@ -53,12 +53,10 @@ class TextFieldPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      child: Container(
-        child: TextField(
-          maxLines: null,
-          controller: TextEditingController(text: textLotsOfText),
-          key: const Key('fullscreen-textfield'),
-        ),
+      child: TextField(
+        maxLines: null,
+        controller: TextEditingController(text: textLotsOfText),
+        key: const Key('fullscreen-textfield'),
       ),
     );
   }

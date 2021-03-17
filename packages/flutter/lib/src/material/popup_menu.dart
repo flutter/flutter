@@ -22,8 +22,8 @@ import 'tooltip.dart';
 
 // Examples can assume:
 // enum Commands { heroAndScholar, hurricaneCame }
-// dynamic _heroAndScholar;
-// dynamic _selection;
+// late bool _heroAndScholar;
+// late dynamic _selection;
 // late BuildContext context;
 // void setState(VoidCallback fn) { }
 

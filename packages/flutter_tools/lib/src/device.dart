@@ -418,6 +418,7 @@ class FlutterDeviceManager extends DeviceManager {
       logger: logger,
       fileSystem: fileSystem,
       windowsWorkflow: windowsWorkflow,
+      featureFlags: featureFlags,
     ),
     WebDevices(
       featureFlags: featureFlags,

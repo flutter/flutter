@@ -1146,13 +1146,15 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 ///
 /// ```dart
 /// void main() {
-///   runApp(MyApp());
+///   runApp(const MyApp());
 /// }
 ///
 /// class MyApp extends StatelessWidget {
+///   const MyApp({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return CupertinoApp(
+///     return const CupertinoApp(
 ///       restorationScopeId: 'app',
 ///       home: MyHomePage(),
 ///     );
@@ -1160,13 +1162,15 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 /// }
 ///
 /// class MyHomePage extends StatelessWidget {
-///   static Route _modalBuilder(BuildContext context, Object? arguments) {
-///     return CupertinoModalPopupRoute(
+///   const MyHomePage({Key? key}) : super(key: key);
+///
+///   static Route<void> _modalBuilder(BuildContext context, Object? arguments) {
+///     return CupertinoModalPopupRoute<void>(
 ///       builder: (BuildContext context) {
 ///         return CupertinoActionSheet(
 ///           title: const Text('Title'),
 ///           message: const Text('Message'),
-///           actions: [
+///           actions: <CupertinoActionSheetAction>[
 ///             CupertinoActionSheetAction(
 ///               child: const Text('Action One'),
 ///               onPressed: () {
@@ -1308,13 +1312,15 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 ///
 /// ```dart
 /// void main() {
-///   runApp(MyApp());
+///   runApp(const MyApp());
 /// }
 ///
 /// class MyApp extends StatelessWidget {
+///   const MyApp({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return CupertinoApp(
+///     return const CupertinoApp(
 ///       restorationScopeId: 'app',
 ///       home: MyHomePage(),
 ///     );
@@ -1322,6 +1328,8 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 /// }
 ///
 /// class MyHomePage extends StatelessWidget {
+///   const MyHomePage({Key? key}) : super(key: key);
+///
 ///   static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
 ///     return CupertinoDialogRoute<void>(
 ///       context: context,

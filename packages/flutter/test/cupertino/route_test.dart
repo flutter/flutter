@@ -1118,7 +1118,7 @@ void main() {
               child: Hero(
                 tag: 'tag',
                 transitionOnUserGestures: true,
-                child: Container(key: container, height: 150.0, width: 150.0)
+                child: SizedBox(key: container, height: 150.0, width: 150.0)
               ),
             )
           );
@@ -1131,7 +1131,7 @@ void main() {
                 child: Hero(
                   tag: 'tag',
                   transitionOnUserGestures: true,
-                  child: Container(key: container, height: 150.0, width: 150.0)
+                  child: SizedBox(key: container, height: 150.0, width: 150.0)
                 )
               ),
             )
