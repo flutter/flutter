@@ -901,8 +901,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (showScrollbar)
-      _requestFreeScrollEvent();
+    _requestFreeScrollEvent();
   }
 
   // Waits one frame and cause an empty scroll event (zero delta pixels).
@@ -910,19 +909,21 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   // This allows the thumb to show immediately when isAlwaysShown is true.
   // A scroll event is required in order to paint the thumb.
   void _requestFreeScrollEvent() {
-    WidgetsBinding.instance!.addPostFrameCallback((Duration duration) {
-      _fadeoutTimer?.cancel();
-      // Wait one frame and cause an empty scroll event.  This allows the
-      // thumb to show immediately when isAlwaysShown is true. A scroll
-      // event is required in order to paint the thumb.
-      final ScrollController? scrollController = widget.controller ?? PrimaryScrollController.of(context);
-      assert(
-      scrollController != null,
-      'A ScrollController is required when Scrollbar.isAlwaysShown is true. '
-          'Either Scrollbar.controller was not provided, or a PrimaryScrollController could not be found.',
-      );
-      scrollController!.position.didUpdateScrollPositionBy(0);
-    });
+    if (showScrollbar) {
+      WidgetsBinding.instance!.addPostFrameCallback((Duration duration) {
+        _fadeoutTimer?.cancel();
+        // Wait one frame and cause an empty scroll event.  This allows the
+        // thumb to show immediately when isAlwaysShown is true. A scroll
+        // event is required in order to paint the thumb.
+        final ScrollController? scrollController = widget.controller ?? PrimaryScrollController.of(context);
+        assert(
+        scrollController != null,
+        'A ScrollController is required when Scrollbar.isAlwaysShown is true. '
+            'Either Scrollbar.controller was not provided, or a PrimaryScrollController could not be found.',
+        );
+        scrollController!.position.didUpdateScrollPositionBy(0);
+      });
+    }
   }
 
   /// This method is responsible for configuring the [scrollbarPainter]
