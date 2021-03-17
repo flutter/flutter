@@ -4,7 +4,7 @@
 
 // @dart = 2.8
 
-@OnPlatform(<String, dynamic>{'windows': Timeout.factor(2)})
+@Timeout(Duration(seconds: 60))
 import 'dart:async';
 
 import 'package:file/file.dart';
