@@ -134,7 +134,6 @@ class _PlatformAdaptiveIcons {
 class Icons {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
-  // ignore: unused_element
   Icons._();
 
   /// A set of platform-adaptive material design icons.
