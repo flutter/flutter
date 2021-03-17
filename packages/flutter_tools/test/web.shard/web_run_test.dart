@@ -4,6 +4,8 @@
 
 // @dart = 2.8
 
+@OnPlatform(<String, dynamic>{'windows': Timeout.factor(2)})
+
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 
