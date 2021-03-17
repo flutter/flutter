@@ -1,4 +1,4 @@
-Signature: 4cafaa67404262878f93e81ab35e6fdf
+Signature: 3dbfe29754cb324ba0fa2e9def4b8df5
 
 UNUSED LICENSES:
 
@@ -3385,6 +3385,7 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/reader/reader.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic/lib/src/scenic_context.dart
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.types/component.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/data_provider_controller.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/dai_connect.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish/goldfish_sync.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.virtualkeyboard/virtual_keyboard.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/inotify.fidl
