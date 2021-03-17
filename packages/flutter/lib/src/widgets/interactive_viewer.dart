@@ -74,7 +74,7 @@ typedef TransformedWidgetBuilder = Widget Function(BuildContext context, Rect vi
 class InteractiveViewer extends StatefulWidget {
   /// Create an InteractiveViewer.
   ///
-  /// The child parameter must not be null.
+  /// The `child` parameter must not be null.
   InteractiveViewer({
     Key? key,
     this.clipBehavior = Clip.hardEdge,
@@ -765,9 +765,9 @@ class InteractiveViewer extends StatefulWidget {
 
   // Convert an axis aligned Quad to a Rect.
   //
-  // All Rects must axis aligned.
+  // All instances of Rect are axis aligned by definition.
   static Rect _axisAlignedQuadToRect(Quad quad) {
-    assert(isAxisAligned(quad));
+    assert(debugIsAxisAligned(quad));
     double? xMin;
     double? xMax;
     double? yMin;
@@ -791,8 +791,11 @@ class InteractiveViewer extends StatefulWidget {
   }
 
   /// Returns true iff the given Quad is axis aligned.
+  ///
+  /// In release mode, always returns true. This is because this method should
+  /// only be used in development asserts.
   @visibleForTesting
-  static bool isAxisAligned(Quad quad) {
+  static bool debugIsAxisAligned(Quad quad) {
     final double x0 = quad.point0.x;
     if (quad.point1.x != x0) {
       final double x1 = quad.point1.x;

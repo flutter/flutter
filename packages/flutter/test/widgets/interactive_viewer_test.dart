@@ -1317,15 +1317,15 @@ void main() {
     });
   });
 
-  group('isAxisAligned', () {
-    test('not axis aligned', () {
+  group('debugIsAxisAligned', () {
+    test('axis aligned', () {
       final Quad quad = Quad.points(
         Vector3(0.0, 0.0, 0.0),
         Vector3(10.0, 0.0, 0.0),
         Vector3(10.0, 10.0, 0.0),
         Vector3(0.0, 10.0, 0.0),
       );
-      expect(InteractiveViewer.isAxisAligned(quad), isTrue);
+      expect(InteractiveViewer.debugIsAxisAligned(quad), isTrue);
     });
 
     test('not axis aligned', () {
@@ -1335,7 +1335,7 @@ void main() {
         Vector3(12.0, 12.0, 0.0),
         Vector3(10.0, 2.0, 0.0),
       );
-      expect(InteractiveViewer.isAxisAligned(quad), isFalse);
+      expect(InteractiveViewer.debugIsAxisAligned(quad), isFalse);
     });
   });
 }
