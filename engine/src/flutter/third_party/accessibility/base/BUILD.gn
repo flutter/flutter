@@ -23,8 +23,10 @@ source_set("base") {
     "string_utils.h",
   ]
   if (is_win) {
-    # TODO: codecvt_utf8_utf16 is deprecated in C++17
-    defines = [ "_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS" ]
+    sources += [
+      "win/string_conversion.cc",
+      "win/string_conversion.h",
+    ]
   }
   if (is_mac) {
     sources += [

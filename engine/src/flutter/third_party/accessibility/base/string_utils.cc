@@ -10,6 +10,10 @@
 #include <regex>
 #include <sstream>
 
+#if defined(_WIN32)
+#include "base/win/string_conversion.h"
+#endif
+
 #include "no_destructor.h"
 
 namespace base {
@@ -19,16 +23,44 @@ std::u16string ASCIIToUTF16(std::string src) {
 }
 
 std::u16string UTF8ToUTF16(std::string src) {
+#if defined(_WIN32)
+  return WideToUTF16(win::Utf16FromUtf8(src));
+#else
   std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
   return convert.from_bytes(src);
+#endif
 }
 
 std::string UTF16ToUTF8(std::u16string src) {
+#if defined(_WIN32)
+  return win::Utf8FromUtf16(UTF16ToWide(src));
+#else
   std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
   return convert.to_bytes(src);
+#endif
+}
+
+std::u16string WideToUTF16(const std::wstring& src) {
+  return std::u16string(src.begin(), src.end());
+}
+
+std::wstring UTF16ToWide(const std::u16string& src) {
+  return std::wstring(src.begin(), src.end());
 }
 
 std::u16string NumberToString16(float number) {
+  return ASCIIToUTF16(NumberToString(number));
+}
+
+std::u16string NumberToString16(int32_t number) {
+  return ASCIIToUTF16(NumberToString(number));
+}
+
+std::u16string NumberToString16(unsigned int number) {
+  return ASCIIToUTF16(NumberToString(number));
+}
+
+std::u16string NumberToString16(double number) {
   return ASCIIToUTF16(NumberToString(number));
 }
 
@@ -41,6 +73,14 @@ std::string NumberToString(unsigned int number) {
 }
 
 std::string NumberToString(float number) {
+  // TODO(gw280): Format decimals to the shortest reasonable representation.
+  // See: https://github.com/flutter/flutter/issues/78460
+  return std::to_string(number);
+}
+
+std::string NumberToString(double number) {
+  // TODO(gw280): Format decimals to the shortest reasonable representation.
+  // See: https://github.com/flutter/flutter/issues/78460
   return std::to_string(number);
 }
 
@@ -56,12 +96,38 @@ std::string JoinString(std::vector<std::string> tokens, std::string delimiter) {
   return imploded.str();
 }
 
+std::u16string JoinString(std::vector<std::u16string> tokens,
+                          std::u16string delimiter) {
+  std::u16string result;
+  for (size_t i = 0; i < tokens.size(); i++) {
+    if (i == tokens.size() - 1) {
+      result.append(tokens[i]);
+    } else {
+      result.append(tokens[i]);
+      result.append(delimiter);
+    }
+  }
+  return result;
+}
+
 void ReplaceChars(std::string in,
                   std::string from,
                   std::string to,
                   std::string* out) {
   size_t pos = in.find(from);
   while (pos != std::string::npos) {
+    in.replace(pos, from.size(), to);
+    pos = in.find(from, pos + to.size());
+  }
+  *out = in;
+}
+
+void ReplaceChars(std::u16string in,
+                  std::u16string from,
+                  std::u16string to,
+                  std::u16string* out) {
+  size_t pos = in.find(from);
+  while (pos != std::u16string::npos) {
     in.replace(pos, from.size(), to);
     pos = in.find(from, pos + to.size());
   }
