@@ -1365,7 +1365,7 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
     };
     for (final Device device in devices) {
       final TargetPlatform targetPlatform = await device.targetPlatform;
-      final DevelopmentArtifact developmentArtifact = _artifactFromTargetPlatform(targetPlatform);
+      final DevelopmentArtifact developmentArtifact = artifactFromTargetPlatform(targetPlatform);
       if (developmentArtifact != null) {
         artifacts.add(developmentArtifact);
       }
@@ -1374,31 +1374,10 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
   }
 }
 
-/// A mixin which applies an implementation of [requiredArtifacts] that only
-/// downloads artifacts corresponding to a target device.
-mixin TargetPlatformBasedDevelopmentArtifacts on FlutterCommand {
-  @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
-    // If there is no specified target device, fallback to the default
-    // configuration.
-    final String rawTargetPlatform = stringArg('target-platform');
-    final TargetPlatform targetPlatform = getTargetPlatformForName(rawTargetPlatform);
-    if (targetPlatform == null) {
-      return super.requiredArtifacts;
-    }
-
-    final Set<DevelopmentArtifact> artifacts = <DevelopmentArtifact>{};
-    final DevelopmentArtifact developmentArtifact = _artifactFromTargetPlatform(targetPlatform);
-    if (developmentArtifact != null) {
-      artifacts.add(developmentArtifact);
-    }
-    return artifacts;
-  }
-}
-
 // Returns the development artifact for the target platform, or null
 // if none is supported
-DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
+@protected
+DevelopmentArtifact artifactFromTargetPlatform(TargetPlatform targetPlatform) {
   switch (targetPlatform) {
     case TargetPlatform.android:
     case TargetPlatform.android_arm:

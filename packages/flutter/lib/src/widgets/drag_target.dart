@@ -66,6 +66,24 @@ typedef DragTargetLeave<T> = void Function(T? data);
 /// Used by [DragTarget.onMove].
 typedef DragTargetMove<T> = void Function(DragTargetDetails<T> details);
 
+/// Signature for the strategy that determines the drag start point.
+///
+/// Used for the built-in strategies switched via [DragAnchor] and the optinally
+/// injectable [Draggable.dragAnchorStrategy]
+typedef DragAnchorStrategy = Offset Function(Draggable<Object> draggable, BuildContext context, Offset position);
+
+/// The default [DragAnchorStrategy] used when [Draggable.dragAnchor] is not set
+/// or set to [DragAnchor.child]
+Offset childDragAnchorStrategy(Draggable<Object> draggable, BuildContext context, Offset position) {
+  final RenderBox renderObject = context.findRenderObject()! as RenderBox;
+  return renderObject.globalToLocal(position);
+}
+
+/// The [DragAnchorStrategy] used when [Draggable.dragAnchor] set to
+/// [DragAnchor.pointer]
+Offset pointerDragAnchorStrategy(Draggable<Object> draggable, BuildContext context, Offset position) {
+  return Offset.zero;
+}
 /// Where the [Draggable] should be anchored during a drag.
 enum DragAnchor {
   /// Display the feedback anchored at the position of the original child. If
@@ -191,7 +209,12 @@ class Draggable<T extends Object> extends StatefulWidget {
     this.axis,
     this.childWhenDragging,
     this.feedbackOffset = Offset.zero,
+    @Deprecated(
+      'Use dragAnchorStrategy instead. '
+      'This feature was deprecated after v2.1.0-10.0.pre.'
+    )
     this.dragAnchor = DragAnchor.child,
+    this.dragAnchorStrategy,
     this.affinity,
     this.maxSimultaneousDrags,
     this.onDragStarted,
@@ -263,7 +286,22 @@ class Draggable<T extends Object> extends StatefulWidget {
   final Offset feedbackOffset;
 
   /// Where this widget should be anchored during a drag.
+  ///
+  /// This property is overridden by the [dragAnchorStrategy] if the latter is provided.
+  ///
+  /// Defaults to [DragAnchor.child].
+  @Deprecated(
+    'Use dragAnchorStrategy instead. '
+    'This feature was deprecated after v2.1.0-10.0.pre.'
+  )
   final DragAnchor dragAnchor;
+
+  /// A strategy that is used by this draggable to get the the anchor offset when it is dragged.
+  ///
+  /// The anchor offset refers to the distance between the users' fingers and the [feedback] widget when this draggable is dragged.
+  ///
+  /// Defaults to [childDragAnchorStrategy] if the [dragAnchor] is set to [DragAnchor.child] or [pointerDragAnchorStrategy] if the [dragAnchor] is set to [DragAnchor.pointer].
+  final DragAnchorStrategy? dragAnchorStrategy;
 
   /// Whether the semantics of the [feedback] widget is ignored when building
   /// the semantics tree.
@@ -308,7 +346,7 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// Called when the draggable starts being dragged.
   final VoidCallback? onDragStarted;
 
-  /// Called when the draggable is being dragged.
+  /// Called when the draggable is dragged.
   ///
   /// This function will only be called while this widget is still mounted to
   /// the tree (i.e. [State.mounted] is true), and if this widget has actually moved.
@@ -487,14 +525,17 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
     if (widget.maxSimultaneousDrags != null && _activeCount >= widget.maxSimultaneousDrags!)
       return null;
     final Offset dragStartPoint;
-    switch (widget.dragAnchor) {
-      case DragAnchor.child:
-        final RenderBox renderObject = context.findRenderObject()! as RenderBox;
-        dragStartPoint = renderObject.globalToLocal(position);
-        break;
-      case DragAnchor.pointer:
-        dragStartPoint = Offset.zero;
-        break;
+    if (widget.dragAnchorStrategy == null) {
+      switch (widget.dragAnchor) {
+        case DragAnchor.child:
+          dragStartPoint = childDragAnchorStrategy(widget, context, position);
+          break;
+        case DragAnchor.pointer:
+          dragStartPoint = pointerDragAnchorStrategy(widget, context, position);
+          break;
+      }
+    } else {
+      dragStartPoint = widget.dragAnchorStrategy!(widget, context, position);
     }
     setState(() {
       _activeCount += 1;

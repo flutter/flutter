@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter_test/flutter_test.dart';
 
-import '../flutter_test_alternative.dart';
 import 'gesture_tester.dart';
 
 // Down/move/up pair 1: normal tap sequence
