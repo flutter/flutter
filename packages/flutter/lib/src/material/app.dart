@@ -689,6 +689,11 @@ class MaterialApp extends StatefulWidget {
 ///
 ///  * [ScrollBehavior], the default scrolling behavior extended by this class.
 class MaterialScrollBehavior extends ScrollBehavior {
+  /// Creates a MaterialScrollBehavior that decorates [Scrollable]s with
+  /// [GlowingOverscrollIndicators]s and [Scrollbar]s based on the current
+  /// platform.
+  const MaterialScrollBehavior();
+
   @override
   TargetPlatform getPlatform(BuildContext context) {
     return Theme.of(context).platform;
@@ -708,26 +713,24 @@ class MaterialScrollBehavior extends ScrollBehavior {
     // Scrollbar.
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
-        break;
+        return child;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        child = GlowingOverscrollIndicator(
+        return GlowingOverscrollIndicator(
           child: child,
           axisDirection: details.direction,
           color: theme.accentColor,
         );
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         if (details.controller == null)
-          break;
-        child = Scrollbar(
+          return child;
+        return Scrollbar(
           child: child,
           controller: details.controller,
         );
     }
-    return child;
   }
 }
 
@@ -897,7 +900,7 @@ class _MaterialAppState extends State<MaterialApp> {
     }());
 
     return ScrollConfiguration(
-      behavior: widget.scrollBehavior ?? MaterialScrollBehavior(),
+      behavior: widget.scrollBehavior ?? const MaterialScrollBehavior(),
       child: HeroControllerScope(
         controller: _heroController,
         child: result,

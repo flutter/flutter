@@ -278,11 +278,11 @@ void main() {
     RenderObject painter;
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: ScrollConfiguration(
           behavior: TestScrollBehavior1(),
-          child: const CustomScrollView(
+          child: CustomScrollView(
             scrollDirection: Axis.horizontal,
             physics: AlwaysScrollableScrollPhysics(),
             reverse: true,
@@ -300,11 +300,11 @@ void main() {
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: ScrollConfiguration(
           behavior: TestScrollBehavior2(),
-          child: const CustomScrollView(
+          child: CustomScrollView(
             scrollDirection: Axis.horizontal,
             physics: AlwaysScrollableScrollPhysics(),
             slivers: <Widget>[
@@ -326,7 +326,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: ScrollConfiguration(
-          behavior: TestScrollBehavior2(),
+          behavior: const TestScrollBehavior2(),
           child: CustomScrollView(
             center: centerKey,
             physics: const AlwaysScrollableScrollPhysics(),
@@ -365,7 +365,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: ScrollConfiguration(
-          behavior: TestScrollBehavior2(),
+          behavior: const TestScrollBehavior2(),
           child: NotificationListener<OverscrollIndicatorNotification>(
             onNotification: (OverscrollIndicatorNotification notification) {
               if (notification.leading) {
@@ -534,6 +534,8 @@ void main() {
 }
 
 class TestScrollBehavior1 extends ScrollBehavior {
+  const TestScrollBehavior1();
+
   @override
   Widget buildViewportDecoration(BuildContext context, Widget child, ScrollableDetails details) {
     return GlowingOverscrollIndicator(
@@ -545,6 +547,8 @@ class TestScrollBehavior1 extends ScrollBehavior {
 }
 
 class TestScrollBehavior2 extends ScrollBehavior {
+  const TestScrollBehavior2();
+
   @override
   Widget buildViewportDecoration(BuildContext context, Widget child, ScrollableDetails details) {
     return GlowingOverscrollIndicator(

@@ -49,12 +49,14 @@ Widget _buildBoilerplate({
     textDirection: textDirection,
     child: MediaQuery(
       data: MediaQueryData(padding: padding),
-      child: ScrollConfiguration(behavior: NoScrollbarBehavior(), child: child),
+      child: ScrollConfiguration(behavior: const NoScrollbarBehavior(), child: child),
     ),
   );
 }
 
 class NoScrollbarBehavior extends ScrollBehavior {
+  const NoScrollbarBehavior();
+
   @override
   Widget buildViewportDecoration(BuildContext context, Widget child, ScrollableDetails details) {
     return child;

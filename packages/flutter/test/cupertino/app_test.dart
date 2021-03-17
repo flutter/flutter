@@ -198,7 +198,7 @@ void main() {
     late BuildContext capturedContext;
     await tester.pumpWidget(
       CupertinoApp(
-        scrollBehavior: MockScrollBehavior(),
+        scrollBehavior: const MockScrollBehavior(),
         home: Builder(
           builder: (BuildContext context) {
             capturedContext = context;
@@ -214,6 +214,8 @@ void main() {
 }
 
 class MockScrollBehavior extends ScrollBehavior {
+  const MockScrollBehavior();
+
   @override
   ScrollPhysics getScrollPhysics(BuildContext context) => const NeverScrollableScrollPhysics();
 }

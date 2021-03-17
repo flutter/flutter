@@ -30,7 +30,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: ScrollConfiguration(
-          behavior: NoScrollbarBehavior(),
+          behavior: const NoScrollbarBehavior(),
           child: Scrollbar(
             isAlwaysShown: true,
             showTrackOnHover: true,
@@ -124,7 +124,7 @@ void main() {
         scrollbarTheme: scrollbarTheme,
       ),
       home: ScrollConfiguration(
-        behavior: NoScrollbarBehavior(),
+        behavior: const NoScrollbarBehavior(),
         child: Scrollbar(
           isAlwaysShown: true,
           controller: scrollController,
@@ -316,7 +316,7 @@ void main() {
           colorScheme: const ColorScheme.light(),
         ),
         home: ScrollConfiguration(
-          behavior: NoScrollbarBehavior(),
+          behavior: const NoScrollbarBehavior(),
           child: Scrollbar(
             thickness: thickness,
             hoverThickness: hoverThickness,
@@ -412,7 +412,7 @@ void main() {
       return MaterialApp(
         theme: appTheme,
         home: ScrollConfiguration(
-          behavior: NoScrollbarBehavior(),
+          behavior: const NoScrollbarBehavior(),
           child: Scrollbar(
             isAlwaysShown: true,
             showTrackOnHover: true,
@@ -628,6 +628,8 @@ void main() {
 }
 
 class NoScrollbarBehavior extends ScrollBehavior {
+  const NoScrollbarBehavior();
+
   @override
   Widget buildViewportDecoration(BuildContext context, Widget child, ScrollableDetails details) {
     return child;

@@ -733,13 +733,13 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     }
 
     return _configuration.buildViewportDecoration(
-          context,
-          result,
-          ScrollableDetails(
-            direction: widget.axisDirection,
-            controller: widget.autoScrollbar ? widget.controller : null,
-          ),
-        );
+      context,
+      result,
+      ScrollableDetails(
+        direction: widget.axisDirection,
+        controller: widget.autoScrollbar ? widget.controller : null,
+      ),
+    );
   }
 
   @override

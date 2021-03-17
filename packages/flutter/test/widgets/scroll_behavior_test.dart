@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 late GestureVelocityTrackerBuilder lastCreatedBuilder;
 class TestScrollBehavior extends ScrollBehavior {
-  TestScrollBehavior(this.flag);
+  const TestScrollBehavior(this.flag);
 
   final bool flag;
 
@@ -50,7 +50,7 @@ void main() {
 
     await tester.pumpWidget(
       ScrollConfiguration(
-        behavior: TestScrollBehavior(true),
+        behavior: const TestScrollBehavior(true),
         child: scrollView,
       ),
     );
@@ -66,7 +66,7 @@ void main() {
     // Same Scrollable, different ScrollConfiguration
     await tester.pumpWidget(
       ScrollConfiguration(
-        behavior: TestScrollBehavior(false),
+        behavior: const TestScrollBehavior(false),
         child: scrollView,
       ),
     );

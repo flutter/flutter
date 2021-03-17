@@ -34,21 +34,19 @@ const Color _kDefaultGlowColor = Color(0xFFFFFFFF);
 @immutable
 class ScrollBehavior {
   /// Creates a description of how [Scrollable] widgets should behave.
-  ScrollBehavior({
+  const ScrollBehavior({
     @Deprecated(
-      'Set to true after migrating to buildViewportDecoration. '
+      'Temporary migration flag, do not use. '
       'This feature was deprecated after v2.1.0-11.0.pre.'
     )
     bool useDecoration = false,
-  }) {
-    _useDecoration = useDecoration;
-  }
+  }) : _useDecoration = useDecoration;
 
   // Whether [buildViewportChrome] or [buildViewportDecoration] should be used
   // in wrapping the Scrollable widget.
   //
-  // This is used as an opt-in during the deprecation period.
-  late final bool _useDecoration;
+  // This is used to maintain subclass behavior to allow for graceful migration.
+  final bool _useDecoration;
 
   /// The platform whose scroll physics should be implemented.
   ///
@@ -96,7 +94,8 @@ class ScrollBehavior {
     Widget child,
     ScrollableDetails details,
   ) {
-    // If useDecoration is false, call buildViewportChrome instead.
+    // If useDecoration is false, call buildViewportChrome instead, this is to
+    // avoid breaking subclasses that have not implemented buildViewportDecoration yet.
     if (!_useDecoration)
       return buildViewportChrome(context, child, details.direction);
 
@@ -217,7 +216,7 @@ class ScrollConfiguration extends InheritedWidget {
   /// a default [ScrollBehavior] instance is returned.
   static ScrollBehavior of(BuildContext context) {
     final ScrollConfiguration? configuration = context.dependOnInheritedWidgetOfExactType<ScrollConfiguration>();
-    return configuration?.behavior ?? ScrollBehavior(useDecoration: true);
+    return configuration?.behavior ?? const ScrollBehavior(useDecoration: true);
   }
 
   @override

@@ -235,7 +235,7 @@ void main() {
       return Directionality(
         textDirection: TextDirection.rtl,
         child: ScrollConfiguration(
-          behavior: RangeMaintainingTestScrollBehavior(),
+          behavior: const RangeMaintainingTestScrollBehavior(),
           child: Align(
             alignment: Alignment.topLeft,
             child: SizedBox(
@@ -298,7 +298,7 @@ class TabBarDemo extends StatelessWidget {
 }
 
 class RangeMaintainingTestScrollBehavior extends ScrollBehavior {
-  RangeMaintainingTestScrollBehavior();
+  const RangeMaintainingTestScrollBehavior();
 
   @override
   TargetPlatform getPlatform(BuildContext context) => throw 'should not be called';

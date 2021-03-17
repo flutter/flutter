@@ -32,6 +32,8 @@ class TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate 
 }
 
 class TestBehavior extends ScrollBehavior {
+  const TestBehavior();
+
   @override
   Widget buildViewportDecoration(BuildContext context, Widget child, ScrollableDetails details) {
     return GlowingOverscrollIndicator(
@@ -78,7 +80,7 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: ScrollConfiguration(
-            behavior: TestBehavior(),
+            behavior: const TestBehavior(),
             child: Scrollbar(
               child: Scrollable(
                 axisDirection: AxisDirection.down,

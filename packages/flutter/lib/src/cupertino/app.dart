@@ -429,6 +429,10 @@ class CupertinoApp extends StatefulWidget {
 ///
 ///  * [ScrollBehavior], the default scrolling behavior extended by this class.
 class CupertinoScrollBehavior extends ScrollBehavior {
+  /// Creates a CupertinoScrollBehavior that uses [BouncingScrollPhysics] and
+  /// adds [CupertinoScrollbar]s on desktop platforms.
+  const CupertinoScrollBehavior();
+
   @override
   Widget buildViewportDecoration(
     BuildContext context,
@@ -566,7 +570,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
     final CupertinoThemeData effectiveThemeData = widget.theme ?? const CupertinoThemeData();
 
     return ScrollConfiguration(
-      behavior: widget.scrollBehavior ?? CupertinoScrollBehavior(),
+      behavior: widget.scrollBehavior ?? const CupertinoScrollBehavior(),
       child: CupertinoUserInterfaceLevel(
         data: CupertinoUserInterfaceLevelData.base,
         child: CupertinoTheme(
