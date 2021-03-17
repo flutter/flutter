@@ -5495,12 +5495,15 @@ abstract class RenderObjectElement extends Element {
   /// acts as if the child was not in `oldChildren`.
   ///
   /// This function is a convenience wrapper around [updateChild], which updates
-  /// each individual child. When calling [updateChild], this function uses an
-  /// [IndexedSlot<Element>] as the value for the `newSlot` argument.
-  /// [IndexedSlot.index] is set to the index that the currently processed
-  /// `child` corresponds to in the `newWidgets` list and [IndexedSlot.value] is
-  /// set to the [Element] of the previous widget in that list (or null if it is
-  /// the first child).
+  /// each individual child. If `slots` is non-null, the value for the `newSlot`
+  /// argument of [updateChild] is retrieved from that list using the index that
+  /// the currently processed `child` corresponds to in the `newWidgets` list
+  /// (`newWidgets` and `slots` must have the same length). If `slots` is null,
+  /// an [IndexedSlot<Element>] is used as the value for the `newSlot` argument.
+  /// In that case, [IndexedSlot.index] is set to the index that the currently
+  /// processed `child` corresponds to in the `newWidgets` list and
+  /// [IndexedSlot.value] is set to the [Element] of the previous widget in that
+  /// list (or null if it is the first child).
   ///
   /// When the [slot] value of an [Element] changes, its
   /// associated [renderObject] needs to move to a new position in the child
@@ -5525,12 +5528,19 @@ abstract class RenderObjectElement extends Element {
   /// knows where a child needs to move to in a linked list by providing its new
   /// previous sibling.
   @protected
-  List<Element> updateChildren(List<Element> oldChildren, List<Widget> newWidgets, { Set<Element>? forgottenChildren }) {
+  List<Element> updateChildren(List<Element> oldChildren, List<Widget> newWidgets, { Set<Element>? forgottenChildren, List<Object?>? slots }) {
     assert(oldChildren != null);
     assert(newWidgets != null);
+    assert(slots == null || newWidgets.length == slots.length);
 
     Element? replaceWithNullIfForgotten(Element child) {
       return forgottenChildren != null && forgottenChildren.contains(child) ? null : child;
+    }
+
+    Object? slotFor(int newChildIndex, Element? previousChild) {
+      return slots != null
+        ? slots[newChildIndex]
+        : IndexedSlot<Element?>(newChildIndex, previousChild);
     }
 
     // This attempts to diff the new child list (newWidgets) with
@@ -5581,7 +5591,7 @@ abstract class RenderObjectElement extends Element {
       assert(oldChild == null || oldChild._lifecycleState == _ElementLifecycle.active);
       if (oldChild == null || !Widget.canUpdate(oldChild.widget, newWidget))
         break;
-      final Element newChild = updateChild(oldChild, newWidget, IndexedSlot<Element?>(newChildrenTop, previousChild))!;
+      final Element newChild = updateChild(oldChild, newWidget, slotFor(newChildrenTop, previousChild))!;
       assert(newChild._lifecycleState == _ElementLifecycle.active);
       newChildren[newChildrenTop] = newChild;
       previousChild = newChild;
@@ -5639,7 +5649,7 @@ abstract class RenderObjectElement extends Element {
         }
       }
       assert(oldChild == null || Widget.canUpdate(oldChild.widget, newWidget));
-      final Element newChild = updateChild(oldChild, newWidget, IndexedSlot<Element?>(newChildrenTop, previousChild))!;
+      final Element newChild = updateChild(oldChild, newWidget, slotFor(newChildrenTop, previousChild))!;
       assert(newChild._lifecycleState == _ElementLifecycle.active);
       assert(oldChild == newChild || oldChild == null || oldChild._lifecycleState != _ElementLifecycle.active);
       newChildren[newChildrenTop] = newChild;
@@ -5661,7 +5671,7 @@ abstract class RenderObjectElement extends Element {
       assert(oldChild._lifecycleState == _ElementLifecycle.active);
       final Widget newWidget = newWidgets[newChildrenTop];
       assert(Widget.canUpdate(oldChild.widget, newWidget));
-      final Element newChild = updateChild(oldChild, newWidget, IndexedSlot<Element?>(newChildrenTop, previousChild))!;
+      final Element newChild = updateChild(oldChild, newWidget, slotFor(newChildrenTop, previousChild))!;
       assert(newChild._lifecycleState == _ElementLifecycle.active);
       assert(oldChild == newChild || oldChild == null || oldChild._lifecycleState != _ElementLifecycle.active);
       newChildren[newChildrenTop] = newChild;

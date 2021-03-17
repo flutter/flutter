@@ -9,7 +9,6 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../convert.dart';
-import '../globals.dart' as globals;
 import 'io.dart';
 import 'terminal.dart' show Terminal, TerminalColor, OutputPreferences;
 import 'utils.dart';
@@ -132,6 +131,10 @@ abstract class Logger {
     int progressIndicatorPadding = kDefaultStatusPadding,
   });
 
+  /// A [SilentStatus] or an [AnsiSpinner] (depending on whether the
+  /// terminal is fancy enough), already started.
+  Status startSpinner({ VoidCallback onFinish });
+
   /// Send an event to be emitted.
   ///
   /// Only surfaces a value in machine modes, Loggers may ignore this message in
@@ -212,6 +215,11 @@ class DelegatingLogger implements Logger {
       multilineOutput: multilineOutput,
       progressIndicatorPadding: progressIndicatorPadding,
     );
+  }
+
+  @override
+  Status startSpinner({VoidCallback onFinish}) {
+    return _delegate.startSpinner(onFinish: onFinish);
   }
 
   @override
@@ -374,6 +382,22 @@ class StdoutLogger extends Logger {
     return _status;
   }
 
+  @override
+  Status startSpinner({ VoidCallback onFinish }) {
+    if (terminal.supportsColor) {
+      return AnsiSpinner(
+        onFinish: onFinish,
+        stopwatch: _stopwatchFactory.createStopwatch(),
+        terminal: terminal,
+        stdio: _stdio,
+      )..start();
+    }
+    return SilentStatus(
+      onFinish: onFinish,
+      stopwatch: _stopwatchFactory.createStopwatch(),
+    )..start();
+  }
+
   void _clearStatus() {
     _status = null;
   }
@@ -531,6 +555,14 @@ class BufferLogger extends Logger {
     printStatus(message);
     return SilentStatus(
       stopwatch: _stopwatchFactory.createStopwatch(),
+    )..start();
+  }
+
+  @override
+  Status startSpinner({VoidCallback onFinish}) {
+    return SilentStatus(
+      stopwatch: _stopwatchFactory.createStopwatch(),
+      onFinish: onFinish,
     )..start();
   }
 
@@ -731,26 +763,6 @@ abstract class Status {
     @required Stopwatch stopwatch,
   }) : _stopwatch = stopwatch;
 
-  /// A [SilentStatus] or an [AnsiSpinner] (depending on whether the
-  /// terminal is fancy enough), already started.
-  factory Status.withSpinner({
-    @required Stopwatch stopwatch,
-    @required Terminal terminal,
-    VoidCallback onFinish,
-  }) {
-    if (terminal.supportsColor) {
-      return AnsiSpinner(
-        onFinish: onFinish,
-        stopwatch: stopwatch,
-        terminal: terminal,
-      )..start();
-    }
-    return SilentStatus(
-      onFinish: onFinish,
-      stopwatch: stopwatch,
-    )..start();
-  }
-
   final VoidCallback onFinish;
 
   @protected
@@ -822,10 +834,10 @@ class SummaryStatus extends Status {
     @required Stopwatch stopwatch,
     this.padding = kDefaultStatusPadding,
     VoidCallback onFinish,
-    Stdio stdio,
+    @required Stdio stdio,
   }) : assert(message != null),
        assert(padding != null),
-       _stdio = stdio ?? globals.stdio,
+       _stdio = stdio,
        super(
          onFinish: onFinish,
          stopwatch: stopwatch,
@@ -890,8 +902,8 @@ class AnsiSpinner extends Status {
     @required Stopwatch stopwatch,
     @required Terminal terminal,
     VoidCallback onFinish,
-    Stdio stdio,
-  }) : _stdio = stdio ?? globals.stdio,
+    @required Stdio stdio,
+  }) : _stdio = stdio,
        _terminal = terminal,
        super(
          onFinish: onFinish,

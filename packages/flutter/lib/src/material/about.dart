@@ -50,7 +50,8 @@ import 'theme.dart';
 ///
 /// ```dart
 ///  Widget build(BuildContext context) {
-///    final TextStyle textStyle = Theme.of(context).textTheme.bodyText2!;
+///    final ThemeData theme = Theme.of(context);
+///    final TextStyle textStyle = theme.textTheme.bodyText2!;
 ///    final List<Widget> aboutBoxChildren = <Widget>[
 ///      const SizedBox(height: 24),
 ///      RichText(
@@ -63,7 +64,7 @@ import 'theme.dart';
 ///              'from a single codebase. Learn more about Flutter at '
 ///            ),
 ///            TextSpan(
-///              style: textStyle.copyWith(color: Theme.of(context).accentColor),
+///              style: textStyle.copyWith(color: theme.colorScheme.primary),
 ///              text: 'https://flutter.dev'
 ///            ),
 ///            TextSpan(

@@ -6,7 +6,6 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
@@ -49,7 +48,6 @@ final Platform notMacosPlatform = FakePlatform(
 void main() {
   FileSystem fileSystem;
   TestUsage usage;
-  BufferLogger logger;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -58,31 +56,42 @@ void main() {
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     usage = TestUsage();
-    logger = BufferLogger.test();
   });
 
   // Sets up the minimal mock project files necessary to look like a Flutter project.
-  void createCoreMockProjectFiles() {
+  void _createCoreMockProjectFiles() {
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('.packages').createSync();
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
   }
 
   // Sets up the minimal mock project files necessary for iOS builds to succeed.
-  void createMinimalMockProjectFiles() {
+  void _createMinimalMockProjectFiles() {
     fileSystem.directory(fileSystem.path.join('ios', 'Runner.xcodeproj')).createSync(recursive: true);
     fileSystem.directory(fileSystem.path.join('ios', 'Runner.xcworkspace')).createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj')).createSync();
-    createCoreMockProjectFiles();
+    _createCoreMockProjectFiles();
   }
 
   const FakeCommand xattrCommand = FakeCommand(command: <String>[
     'xattr', '-r', '-d', 'com.apple.FinderInfo', '/ios'
   ]);
 
+  FakeCommand _setUpRsyncCommand({void Function() onRun}) {
+    return FakeCommand(
+      command: const <String>[
+        'rsync',
+        '-av',
+        '--delete',
+        'build/ios/Release-iphoneos/Runner.app',
+        'build/ios/iphoneos',
+      ],
+      onRun: onRun);
+  }
+
   // Creates a FakeCommand for the xcodebuild call to build the app
   // in the given configuration.
-  FakeCommand setUpFakeXcodeBuildHandler({ bool verbose = false, bool showBuildSettings = false, void Function() onRun }) {
+  FakeCommand _setUpFakeXcodeBuildHandler({ bool verbose = false, bool showBuildSettings = false, void Function() onRun }) {
     return FakeCommand(
       command: <String>[
         'xcrun',
@@ -94,39 +103,27 @@ void main() {
           '-quiet',
         '-workspace', 'Runner.xcworkspace',
         '-scheme', 'Runner',
+        'BUILD_DIR=/build/ios',
         '-sdk', 'iphoneos',
         'FLUTTER_SUPPRESS_ANALYTICS=true',
         'COMPILER_INDEX_STORE_ENABLE=NO',
-        '-archivePath', '/build/ios/archive/Runner',
-        'archive',
         if (showBuildSettings)
           '-showBuildSettings',
       ],
-      stdout: 'STDOUT STUFF',
+      stdout: '''
+      TARGET_BUILD_DIR=build/ios/Release-iphoneos
+      WRAPPER_NAME=Runner.app
+''',
       onRun: onRun,
     );
   }
 
-  const FakeCommand exportArchiveCommand = FakeCommand(
-    command: <String>[
-      'xcrun',
-      'xcodebuild',
-      '-exportArchive',
-      '-archivePath',
-      '/build/ios/archive/Runner.xcarchive',
-      '-exportPath',
-      '/build/ios/ipa',
-      '-exportOptionsPlist',
-      '/ExportOptions.plist'
-    ],
-  );
-
-  testUsingContext('ipa build fails when there is no ios project', () async {
+  testUsingContext('ios build fails when there is no ios project', () async {
     final BuildCommand command = BuildCommand();
-    createCoreMockProjectFiles();
+    _createCoreMockProjectFiles();
 
     expect(createTestCommandRunner(command).run(
-      const <String>['build', 'ipa', '--no-pub']
+      const <String>['build', 'ios', '--no-pub']
     ), throwsToolExit(message: 'Application not configured for iOS'));
   }, overrides: <Type, Generator>{
     Platform: () => macosPlatform,
@@ -135,12 +132,12 @@ void main() {
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
-  testUsingContext('ipa build fails in debug with code analysis', () async {
+  testUsingContext('ios build fails in debug with code analysis', () async {
     final BuildCommand command = BuildCommand();
-    createCoreMockProjectFiles();
+    _createCoreMockProjectFiles();
 
     expect(createTestCommandRunner(command).run(
-      const <String>['build', 'ipa', '--no-pub', '--debug', '--analyze-size']
+      const <String>['build', 'ios', '--no-pub', '--debug', '--analyze-size']
     ), throwsToolExit(message: '--analyze-size" can only be used on release builds'));
   }, overrides: <Type, Generator>{
     Platform: () => macosPlatform,
@@ -149,7 +146,7 @@ void main() {
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
-  testUsingContext('ipa build fails on non-macOS platform', () async {
+  testUsingContext('ios build fails on non-macOS platform', () async {
     final BuildCommand command = BuildCommand();
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('.packages').createSync();
@@ -157,7 +154,7 @@ void main() {
       .createSync(recursive: true);
 
     expect(createTestCommandRunner(command).run(
-      const <String>['build', 'ipa', '--no-pub']
+      const <String>['build', 'ios', '--no-pub']
     ), throwsToolExit());
   }, overrides: <Type, Generator>{
     Platform: () => notMacosPlatform,
@@ -166,116 +163,54 @@ void main() {
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
-  testUsingContext('ipa build fails when export plist does not exist',
-      () async {
+  testUsingContext('ios build invokes xcode build', () async {
     final BuildCommand command = BuildCommand();
-    createMinimalMockProjectFiles();
-
-    await expectToolExitLater(
-      createTestCommandRunner(command).run(<String>[
-        'build',
-        'ipa',
-        '--export-options-plist',
-        'bogus.plist',
-        '--no-pub',
-      ]),
-      contains('property list does not exist'),
-    );
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => macosPlatform,
-    XcodeProjectInterpreter: () =>
-        FakeXcodeProjectInterpreterWithBuildSettings(),
-  });
-
-  testUsingContext('ipa build fails when export plist is not a file', () async {
-    final Directory bogus = fileSystem.directory('bogus')..createSync();
-    final BuildCommand command = BuildCommand();
-    createMinimalMockProjectFiles();
-
-    await expectToolExitLater(
-      createTestCommandRunner(command).run(<String>[
-        'build',
-        'ipa',
-        '--export-options-plist',
-        bogus.path,
-        '--no-pub',
-      ]),
-      contains('is not a file.'),
-    );
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => macosPlatform,
-    XcodeProjectInterpreter: () =>
-        FakeXcodeProjectInterpreterWithBuildSettings(),
-  });
-
-  testUsingContext('ipa build invokes xcode build', () async {
-    final BuildCommand command = BuildCommand();
-    createMinimalMockProjectFiles();
+    _createMinimalMockProjectFiles();
 
     await createTestCommandRunner(command).run(
-      const <String>['build', 'ipa', '--no-pub']
+      const <String>['build', 'ios', '--no-pub']
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(),
-      setUpFakeXcodeBuildHandler(showBuildSettings: true),
+      _setUpFakeXcodeBuildHandler(onRun: () {
+        fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
+      }),
+      _setUpFakeXcodeBuildHandler(showBuildSettings: true),
+      _setUpRsyncCommand(),
     ]),
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
-  testUsingContext('ipa build invokes xcode build with verbosity', () async {
+  testUsingContext('ios build invokes xcode build with verbosity', () async {
     final BuildCommand command = BuildCommand();
-    createMinimalMockProjectFiles();
+    _createMinimalMockProjectFiles();
 
     await createTestCommandRunner(command).run(
-      const <String>['build', 'ipa', '--no-pub', '-v']
+      const <String>['build', 'ios', '--no-pub', '-v']
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(verbose: true),
-      setUpFakeXcodeBuildHandler(verbose: true, showBuildSettings: true),
+      _setUpFakeXcodeBuildHandler(verbose: true, onRun: () {
+        fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
+      }),
+      _setUpFakeXcodeBuildHandler(verbose: true, showBuildSettings: true),
+      _setUpRsyncCommand(),
     ]),
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
-  });
-
-  testUsingContext('code size analysis fails when app not found', () async {
-    final BuildCommand command = BuildCommand();
-    createMinimalMockProjectFiles();
-
-    await expectToolExitLater(
-      createTestCommandRunner(command).run(
-          const <String>['build', 'ipa', '--no-pub', '--analyze-size']
-      ),
-      contains('Could not find app to analyze code size'),
-    );
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => macosPlatform,
-    XcodeProjectInterpreter: () =>
-        FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
   testUsingContext('Performs code size analysis and sends analytics', () async {
     final BuildCommand command = BuildCommand();
-    createMinimalMockProjectFiles();
-
-    fileSystem.file('build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Frameworks/App.framework/App')
-      ..createSync(recursive: true)
-      ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
+    _createMinimalMockProjectFiles();
 
     await createTestCommandRunner(command).run(
-      const <String>['build', 'ipa', '--no-pub', '--analyze-size']
+      const <String>['build', 'ios', '--no-pub', '--analyze-size']
     );
 
     expect(testLogger.statusText, contains('A summary of your iOS bundle analysis can be found at'));
@@ -287,7 +222,8 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      _setUpFakeXcodeBuildHandler(onRun: () {
+        fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
         fileSystem.file('build/flutter_size_01/snapshot.arm64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('''
@@ -303,44 +239,14 @@ void main() {
           ..createSync(recursive: true)
           ..writeAsStringSync('{}');
       }),
-      setUpFakeXcodeBuildHandler(showBuildSettings: true),
+      _setUpFakeXcodeBuildHandler(showBuildSettings: true),
+      _setUpRsyncCommand(onRun: () => fileSystem.file('build/ios/iphoneos/Runner.app/Frameworks/App.framework/App')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0))),
     ]),
     Platform: () => macosPlatform,
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
     Usage: () => usage,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
-  });
-
-  testUsingContext('ipa build invokes xcode build export archive', () async {
-    final String outputPath =
-        fileSystem.path.absolute(fileSystem.path.join('build', 'ios', 'ipa'));
-    final File exportOptions = fileSystem.file('ExportOptions.plist')
-      ..createSync();
-    final BuildCommand command = BuildCommand();
-    createMinimalMockProjectFiles();
-
-    await createTestCommandRunner(command).run(
-      <String>[
-        'build',
-        'ipa',
-        '--no-pub',
-        '--export-options-plist',
-        exportOptions.path,
-      ],
-    );
-
-    expect(logger.statusText, contains('Built IPA to $outputPath.'));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-          xattrCommand,
-          setUpFakeXcodeBuildHandler(),
-          setUpFakeXcodeBuildHandler(showBuildSettings: true),
-          exportArchiveCommand,
-        ]),
-    Platform: () => macosPlatform,
-    Logger: () => logger,
-    XcodeProjectInterpreter: () =>
-        FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 }
