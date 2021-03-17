@@ -466,7 +466,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   void _handleOk() {
-    if (_entryMode.value == DatePickerEntryMode.input) {
+    if (_entryMode == DatePickerEntryMode.input || _entryMode == DatePickerEntryMode.inputOnly) {
       final FormState form = _formKey.currentState!;
       if (!form.validate()) {
         setState(() => _autoValidate.value = true);
@@ -1160,7 +1160,7 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
   }
 
   void _handleOk() {
-    if (_entryMode == DatePickerEntryMode.input) {
+    if (_entryMode == DatePickerEntryMode.input || _entryMode == DatePickerEntryMode.inputOnly) {
       final _InputDateRangePickerState picker = _inputPickerKey.currentState!;
       if (!picker.validate()) {
         setState(() {

@@ -147,15 +147,29 @@ class AssembleCommand extends FlutterCommand {
       return const <CustomDimensions, String>{};
     }
     try {
-      final Environment localEnvironment = createEnvironment();
       return <CustomDimensions, String>{
-        CustomDimensions.commandBuildBundleTargetPlatform: localEnvironment.defines['TargetPlatform'],
+        CustomDimensions.commandBuildBundleTargetPlatform: environment.defines[kTargetPlatform],
         CustomDimensions.commandBuildBundleIsModule: '${flutterProject.isModule}',
       };
     } on Exception {
       // We've failed to send usage.
     }
     return const <CustomDimensions, String>{};
+  }
+
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
+    final String platform = environment.defines[kTargetPlatform];
+    if (platform == null) {
+      return super.requiredArtifacts;
+    }
+
+    final TargetPlatform targetPlatform = getTargetPlatformForName(platform);
+    final DevelopmentArtifact artifact = artifactFromTargetPlatform(targetPlatform);
+    if (artifact != null) {
+      return <DevelopmentArtifact>{artifact};
+    }
+    return super.requiredArtifacts;
   }
 
   /// The target(s) we are building.
@@ -196,6 +210,9 @@ class AssembleCommand extends FlutterCommand {
     }
     return false;
   }
+
+  Environment get environment => _environment ??= createEnvironment();
+  Environment _environment;
 
   /// The environmental configuration for a build invocation.
   Environment createEnvironment() {
@@ -259,7 +276,6 @@ class AssembleCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Environment env = createEnvironment();
     final List<Target> targets = createTargets();
     final List<Target> nonDeferredTargets = <Target>[];
     final List<Target> deferredTargets = <AndroidAotDeferredComponentsBundle>[];
@@ -271,7 +287,7 @@ class AssembleCommand extends FlutterCommand {
       }
     }
     Target target;
-    final List<String> decodedDefines = decodeDartDefines(env.defines, kDartDefines);
+    final List<String> decodedDefines = decodeDartDefines(environment.defines, kDartDefines);
     if (FlutterProject.current().manifest.deferredComponents != null
         && decodedDefines.contains('validate-deferred-components=true')
         && deferredTargets.isNotEmpty
@@ -289,7 +305,7 @@ class AssembleCommand extends FlutterCommand {
     }
     final BuildResult result = await _buildSystem.build(
       target,
-      env,
+      environment,
       buildSystemConfig: BuildSystemConfig(
         resourcePoolSize: argResults.wasParsed('resource-pool-size')
           ? int.tryParse(stringArg('resource-pool-size'))

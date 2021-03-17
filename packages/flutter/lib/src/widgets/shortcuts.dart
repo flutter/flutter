@@ -26,6 +26,7 @@ import 'inherited_notifier.dart';
 ///
 ///  * [ShortcutManager], which uses [LogicalKeySet] (a [KeySet] subclass) to
 ///    define its key map.
+@immutable
 class KeySet<T extends KeyboardKey> {
   /// A constructor for making a [KeySet] of up to four keys.
   ///
@@ -81,7 +82,6 @@ class KeySet<T extends KeyboardKey> {
   final HashSet<T> _keys;
 
   @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes, to remove in NNBD with a late final hashcode
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
@@ -90,25 +90,19 @@ class KeySet<T extends KeyboardKey> {
         && setEquals<T>(other._keys, _keys);
   }
 
-  // Arrays used to temporarily store hash codes for sorting.
-  static final List<int> _tempHashStore3 = <int>[0, 0, 0]; // used to sort exactly 3 keys
-  static final List<int> _tempHashStore4 = <int>[0, 0, 0, 0]; // used to sort exactly 4 keys
 
   // Cached hash code value. Improves [hashCode] performance by 27%-900%,
   // depending on key set size and read/write ratio.
-  int? _hashCode;
-
   @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes, to remove in NNBD with a late final hashcode
-  int get hashCode {
-    // Return cached hash code if available.
-    if (_hashCode != null) {
-      return _hashCode!;
-    }
+  late final int hashCode = _computeHashCode(_keys);
 
+  // Arrays used to temporarily store hash codes for sorting.
+  static final List<int> _tempHashStore3 = <int>[0, 0, 0]; // used to sort exactly 3 keys
+  static final List<int> _tempHashStore4 = <int>[0, 0, 0, 0]; // used to sort exactly 4 keys
+  static int _computeHashCode<T>(Set<T> keys) {
     // Compute order-independent hash and cache it.
-    final int length = _keys.length;
-    final Iterator<T> iterator = _keys.iterator;
+    final int length = keys.length;
+    final Iterator<T> iterator = keys.iterator;
 
     // There's always at least one key. Just extract it.
     iterator.moveNext();
@@ -116,14 +110,14 @@ class KeySet<T extends KeyboardKey> {
 
     if (length == 1) {
       // Don't do anything fancy if there's exactly one key.
-      return _hashCode = h1;
+      return h1;
     }
 
     iterator.moveNext();
     final int h2 = iterator.current.hashCode;
     if (length == 2) {
       // No need to sort if there's two keys, just compare them.
-      return _hashCode = h1 < h2
+      return h1 < h2
         ? hashValues(h1, h2)
         : hashValues(h2, h1);
     }
@@ -142,7 +136,7 @@ class KeySet<T extends KeyboardKey> {
       sortedHashes[3] = iterator.current.hashCode;
     }
     sortedHashes.sort();
-    return _hashCode = hashList(sortedHashes);
+    return hashList(sortedHashes);
   }
 }
 
