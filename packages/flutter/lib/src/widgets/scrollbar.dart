@@ -948,6 +948,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     // scrollable widget viewport size changed.
     if (widget.isAlwaysShown == true) {
       _requestFreeScrollEvent();
+      _fadeoutAnimationController.animateTo(1.0);
     } else if (widget.isAlwaysShown != oldWidget.isAlwaysShown) {
       _fadeoutAnimationController.reverse();
     }
