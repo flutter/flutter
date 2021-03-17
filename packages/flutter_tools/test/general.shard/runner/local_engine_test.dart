@@ -36,7 +36,7 @@ void main() {
       .file('bin/cache/pkg/sky_engine/lib')
       .createSync(recursive: true);
 
-    BufferLogger logger = BufferLogger.test();
+    final BufferLogger logger = BufferLogger.test();
     final LocalEngineLocator localEngineLocator = LocalEngineLocator(
       fileSystem: fileSystem,
       flutterRoot: '',
@@ -77,7 +77,7 @@ void main() {
     fileSystem.directory('$kArbitraryEngineRoot/src/out/ios_debug').createSync(recursive: true);
     fileSystem.directory('$kArbitraryEngineRoot/src/out/host_debug').createSync(recursive: true);
 
-    BufferLogger logger = BufferLogger.test();
+    final BufferLogger logger = BufferLogger.test();
     final LocalEngineLocator localEngineLocator = LocalEngineLocator(
       fileSystem: fileSystem,
       flutterRoot: '',
@@ -110,7 +110,7 @@ void main() {
       .file('bin/cache/pkg/sky_engine/lib')
       .createSync(recursive: true);
 
-    BufferLogger logger = BufferLogger.test();
+    final BufferLogger logger = BufferLogger.test();
     final LocalEngineLocator localEngineLocator = LocalEngineLocator(
       fileSystem: fileSystem,
       flutterRoot: 'flutter/flutter',
