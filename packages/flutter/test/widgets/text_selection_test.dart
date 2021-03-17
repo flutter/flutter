@@ -797,7 +797,6 @@ class FakeRenderEditable extends RenderEditable {
     ),
     startHandleLayerLink: LayerLink(),
     endHandleLayerLink: LayerLink(),
-    ignorePointer: true,
     textAlign: TextAlign.start,
     textDirection: TextDirection.ltr,
     locale: const Locale('en', 'US'),

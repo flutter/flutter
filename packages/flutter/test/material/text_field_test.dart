@@ -18,8 +18,6 @@ import '../widgets/editable_text_utils.dart' show findRenderEditable, globalize,
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
-typedef FormatEditUpdateCallback = void Function(TextEditingValue, TextEditingValue);
-
 class MockClipboard {
   Object _clipboardData = <String, dynamic>{
     'text': null,
@@ -127,16 +125,6 @@ double getOpacity(WidgetTester tester, Finder finder) {
       matching: find.byType(FadeTransition),
     ),
   ).opacity.value;
-}
-
-class TestFormatter extends TextInputFormatter {
-  TestFormatter(this.onFormatEditUpdate);
-  FormatEditUpdateCallback onFormatEditUpdate;
-  @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
-    onFormatEditUpdate(oldValue, newValue);
-    return newValue;
-  }
 }
 
 void main() {
@@ -486,6 +474,7 @@ void main() {
     );
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
+<<<<<<< HEAD
   testWidgets('TextInputFormatter gets correct selection value', (WidgetTester tester) async {
     late TextEditingValue actualOldValue;
     late TextEditingValue actualNewValue;
@@ -527,6 +516,8 @@ void main() {
     );
   });
 
+=======
+>>>>>>> parent of b0d4d44853... Reland "fixes TextInputFormatter gets wrong old value of a selection" (#76653)
   testWidgets('text field selection toolbar renders correctly inside opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
@@ -1124,9 +1115,11 @@ void main() {
     ));
 
     expect(find.text('Paste'), findsNothing);
+
     final Offset emptyPos = textOffsetToPosition(tester, 0);
     await tester.longPressAt(emptyPos, pointer: 7);
     await tester.pumpAndSettle();
+
     expect(find.text('Paste'), findsOneWidget);
   });
 
@@ -3548,11 +3541,8 @@ void main() {
     // scrolls to make the caret visible.
     scrollableState = tester.firstState(find.byType(Scrollable));
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    editableTextState.userUpdateTextEditingValue(
-      editableTextState.textEditingValue.copyWith(
-        selection: TextSelection.collapsed(offset: longText.length),
-      ),
-      null,
+    editableTextState.textEditingValue = editableTextState.textEditingValue.copyWith(
+      selection: TextSelection.collapsed(offset: longText.length),
     );
 
     await tester.pump(); // TODO(ianh): Figure out why this extra pump is needed.
@@ -3585,11 +3575,8 @@ void main() {
     // Move the caret to the end of the text and check that the text field
     // scrolls to make the caret visible.
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    editableTextState.userUpdateTextEditingValue(
-      editableTextState.textEditingValue.copyWith(
-        selection: const TextSelection.collapsed(offset: tallText.length),
-      ),
-      null,
+    editableTextState.textEditingValue = editableTextState.textEditingValue.copyWith(
+      selection: const TextSelection.collapsed(offset: tallText.length),
     );
     await tester.pump();
     await skipPastScrollingAnimation(tester);
