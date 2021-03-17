@@ -29,7 +29,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // existing tests do not fail when the package has a new version.
   'flutter_gallery_assets': '^1.0.1',
   'flutter_template_images': '1.0.1', // Must always exactly match flutter_tools template.
-  'mockito': '4.1.1', // Prevent mockito from upgrading to the source gen version.
+  'mockito': '4.1.1+1', // Prevent mockito from upgrading to the source gen version.
   'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
   // DART TEAM OWNED NNBD DEPS
   'archive': '">=3.0.0-nullsafety.0"',
@@ -66,6 +66,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'connectivity': '">=3.0.0-nullsafety.1"',
   'device_info': '">=2.0.0-nullsafety.1"',
   'file': '">=6.0.0-nullsafety.4"',
+  'path_provider': '">=2.0.0-nullsafety.1"',
   'platform': '">=3.0.0-nullsafety.4"',
   'process': '">=4.0.0-nullsafety.4"',
   'process_runner': '">=4.0.0-nullsafety.5"',
@@ -1397,7 +1398,7 @@ class PubDependencyTree {
 
 // Produces a 16-bit checksum from the codePoints of the package name and
 // version strings using Fletcher's algorithm.
-String _computeChecksum(Iterable<String> names, String getVersion(String name)) {
+String _computeChecksum(Iterable<String> names, String Function(String name) getVersion) {
   int lowerCheck = 0;
   int upperCheck = 0;
   final List<String> sortedNames = names.toList()..sort();

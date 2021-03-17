@@ -314,7 +314,7 @@ enum UnfocusDisposition {
 ///
 /// ```dart preamble
 /// class ColorfulButton extends StatefulWidget {
-///   ColorfulButton({Key? key}) : super(key: key);
+///   const ColorfulButton({Key? key}) : super(key: key);
 ///
 ///   @override
 ///   _ColorfulButtonState createState() => _ColorfulButtonState();
@@ -407,7 +407,7 @@ enum UnfocusDisposition {
 ///   final TextTheme textTheme = Theme.of(context).textTheme;
 ///   return DefaultTextStyle(
 ///     style: textTheme.headline4!,
-///     child: ColorfulButton(),
+///     child: const ColorfulButton(),
 ///   );
 /// }
 /// ```
@@ -812,7 +812,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///         children: <Widget>[
   ///           Wrap(
   ///             children: List<Widget>.generate(4, (int index) {
-  ///               return SizedBox(
+  ///               return const SizedBox(
   ///                 width: 200,
   ///                 child: Padding(
   ///                   padding: const EdgeInsets.all(8.0),
@@ -1494,7 +1494,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// interaction type.
   ///
   /// The initial value of [highlightMode] depends upon the value of
-  /// [defaultTargetPlatform] and [BaseMouseTracker.mouseIsConnected] of
+  /// [defaultTargetPlatform] and [MouseTracker.mouseIsConnected] of
   /// [RendererBinding.mouseTracker], making a guess about which interaction is
   /// most appropriate for the initial interaction mode.
   ///

@@ -27,7 +27,7 @@ import 'restoration.dart';
 ///   // During state restoration it is automatically restored to its old value.
 ///   // If no restoration data is available to restore the answer from, it is
 ///   // initialized to the specified default value, in this case 42.
-///   RestorableInt _answer = RestorableInt(42);
+///   final RestorableInt _answer = RestorableInt(42);
 ///
 ///   @override
 ///   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {

@@ -195,9 +195,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   /// Called by the test framework at the beginning of a widget test to
   /// prepare the binding for the next test.
+  ///
+  /// If [registerTestTextInput] returns true when this method is called,
+  /// the [testTextInput] is configured to simulate the keyboard.
   void reset() {
     _restorationManager = null;
     resetGestureBinding();
+    testTextInput.reset();
+    if (registerTestTextInput)
+      _testTextInput.register();
   }
 
   @override
@@ -237,7 +243,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   @protected
   bool get overrideHttpClient => true;
 
-  /// Determines whether the binding automatically registers [testTextInput].
+  /// Determines whether the binding automatically registers [testTextInput] as
+  /// a fake keyboard implementation.
   ///
   /// Unit tests make use of this to mock out text input communication for
   /// widgets. An integration test would set this to false, to test real IME
@@ -245,6 +252,19 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// [TestTextInput.isRegistered] reports whether the text input mock is
   /// registered or not.
+  ///
+  /// Some of the properties and methods on [testTextInput] are only valid if
+  /// [registerTestTextInput] returns true when a test starts. If those
+  /// members are accessed when using a binding that sets this flag to false,
+  /// they will throw.
+  ///
+  /// If this property returns true when a test ends, the [testTextInput] is
+  /// unregistered.
+  ///
+  /// This property should not change the value it returns during the lifetime
+  /// of the binding. Changing the value of this property risks very confusing
+  /// behavior as the [TestTextInput] may be inconsistently registered or
+  /// unregistered.
   @protected
   bool get registerTestTextInput => true;
 
@@ -319,9 +339,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       binding.setupHttpOverrides();
     }
     _testTextInput = TestTextInput(onCleared: _resetFocusedEditable);
-    if (registerTestTextInput) {
-      _testTextInput.register();
-    }
   }
 
   @override
@@ -402,7 +419,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// current timeout, if any. See [AutomatedTestWidgetsFlutterBinding.addTime]
   /// for details.
   Future<T?> runAsync<T>(
-    Future<T> callback(), {
+    Future<T> Function() callback, {
     Duration additionalTime = const Duration(milliseconds: 1000),
   });
 
@@ -600,7 +617,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// The `timeout` argument sets the initial timeout, if any. It can
   /// be increased with [addTime]. By default there is no timeout.
-  Future<void> runTest(Future<void> testBody(), VoidCallback invariantTester, { String description = '', Duration? timeout });
+  Future<void> runTest(Future<void> Function() testBody, VoidCallback invariantTester, { String description = '', Duration? timeout });
 
   /// This is called during test execution before and after the body has been
   /// executed.
@@ -641,7 +658,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   Future<void> _runTest(
-    Future<void> testBody(),
+    Future<void> Function() testBody,
     VoidCallback invariantTester,
     String description, {
     Future<void>? timeout,
@@ -774,7 +791,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     return testCompleter.future;
   }
 
-  Future<void> _runTestBody(Future<void> testBody(), VoidCallback invariantTester) async {
+  Future<void> _runTestBody(Future<void> Function() testBody, VoidCallback invariantTester) async {
     assert(inTest);
     // So that we can assert that it remains the same after the test finishes.
     _beforeTestCheckIntrinsicSizes = debugCheckIntrinsicSizes;
@@ -799,6 +816,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // alone so that we don't cause more spurious errors.
       runApp(Container(key: UniqueKey(), child: _postTestMessage)); // Unmount any remaining widgets.
       await pump();
+      if (registerTestTextInput)
+        _testTextInput.unregister();
       invariantTester();
       _verifyAutoUpdateGoldensUnset(autoUpdateGoldensBeforeTest && !isBrowser);
       _verifyReportTestExceptionUnset(reportTestExceptionBeforeTest);
@@ -979,7 +998,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   Future<T?> runAsync<T>(
-    Future<T> callback(), {
+    Future<T> Function() callback, {
     Duration additionalTime = const Duration(milliseconds: 1000),
   }) {
     assert(additionalTime != null);
@@ -996,13 +1015,13 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
     final Zone realAsyncZone = Zone.current.fork(
       specification: ZoneSpecification(
-        scheduleMicrotask: (Zone self, ZoneDelegate parent, Zone zone, void f()) {
+        scheduleMicrotask: (Zone self, ZoneDelegate parent, Zone zone, void Function() f) {
           Zone.root.scheduleMicrotask(f);
         },
-        createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void f()) {
+        createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void Function() f) {
           return Zone.root.createTimer(duration, f);
         },
-        createPeriodicTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration period, void f(Timer timer)) {
+        createPeriodicTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration period, void Function(Timer timer) f) {
           return Zone.root.createPeriodicTimer(period, f);
         },
       ),
@@ -1166,7 +1185,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   Future<void> runTest(
-    Future<void> testBody(),
+    Future<void> Function() testBody,
     VoidCallback invariantTester, {
     String description = '',
     Duration? timeout,
@@ -1582,7 +1601,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   Future<T?> runAsync<T>(
-    Future<T> callback(), {
+    Future<T> Function() callback, {
     Duration additionalTime = const Duration(milliseconds: 1000),
   }) async {
     assert(() {
@@ -1615,7 +1634,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Future<void> runTest(Future<void> testBody(), VoidCallback invariantTester, { String description = '', Duration? timeout }) async {
+  Future<void> runTest(Future<void> Function() testBody, VoidCallback invariantTester, { String description = '', Duration? timeout }) async {
     assert(description != null);
     assert(!inTest);
     _inTest = true;

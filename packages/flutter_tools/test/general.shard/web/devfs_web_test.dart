@@ -6,7 +6,6 @@
 
 import 'dart:io' hide Directory, File;
 
-import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -1022,7 +1021,7 @@ void main() {
 
     expect(await webAssetServer.metadataContents('foo/main_module.ddc_merged_metadata'), null);
     // Not base href.
-    expect(() async  => await webAssetServer.metadataContents('bar/main_module.ddc_merged_metadata'), throwsException);
+    expect(() async => webAssetServer.metadataContents('bar/main_module.ddc_merged_metadata'), throwsException);
   }));
 
   test('DevFS URI includes any specified base path.', () => testbed.run(() async {
@@ -1084,4 +1083,3 @@ void main() {
 
 class MockHttpServer extends Mock implements HttpServer {}
 class MockResidentCompiler extends Mock implements ResidentCompiler {}
-class MockDwds extends Mock implements Dwds {}

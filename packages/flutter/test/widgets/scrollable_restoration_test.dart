@@ -18,7 +18,7 @@ void main() {
               delegate: SliverChildListDelegate(
                 List<Widget>.generate(
                   50,
-                  (int index) => Container(
+                  (int index) => SizedBox(
                     height: 50,
                     child: Text('Tile $index'),
                   ),
@@ -41,7 +41,7 @@ void main() {
           cacheExtent: 0,
           children: List<Widget>.generate(
             50,
-            (int index) => Container(
+            (int index) => SizedBox(
               height: 50,
               child: Text('Tile $index'),
             ),
@@ -59,7 +59,7 @@ void main() {
         child: ListView.builder(
           restorationId: 'list',
           cacheExtent: 0,
-          itemBuilder: (BuildContext context, int index) => Container(
+          itemBuilder: (BuildContext context, int index) => SizedBox(
             height: 50,
             child: Text('Tile $index'),
           ),
@@ -78,7 +78,7 @@ void main() {
           cacheExtent: 0,
           itemCount: 50,
           separatorBuilder: (BuildContext context, int index) => const SizedBox.shrink(),
-          itemBuilder: (BuildContext context, int index) => Container(
+          itemBuilder: (BuildContext context, int index) => SizedBox(
             height: 50,
             child: Text('Tile $index'),
           ),
@@ -98,7 +98,7 @@ void main() {
           childrenDelegate: SliverChildListDelegate(
             List<Widget>.generate(
               50,
-              (int index) => Container(
+              (int index) => SizedBox(
                 height: 50,
                 child: Text('Tile $index'),
               ),
@@ -120,7 +120,7 @@ void main() {
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 1),
           children: List<Widget>.generate(
             50,
-            (int index) => Container(
+            (int index) => SizedBox(
               height: 50,
               child: Text('Tile $index'),
             ),
@@ -139,7 +139,7 @@ void main() {
           restorationId: 'grid',
           cacheExtent: 0,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 1),
-          itemBuilder: (BuildContext context, int index) => Container(
+          itemBuilder: (BuildContext context, int index) => SizedBox(
             height: 50,
             child: Text('Tile $index'),
           ),
@@ -160,7 +160,7 @@ void main() {
           childrenDelegate: SliverChildListDelegate(
             List<Widget>.generate(
               50,
-              (int index) => Container(
+              (int index) => SizedBox(
                 height: 50,
                 child: Text('Tile $index'),
               ),
@@ -182,7 +182,7 @@ void main() {
           crossAxisCount: 1,
           children: List<Widget>.generate(
             50,
-            (int index) => Container(
+            (int index) => SizedBox(
               height: 50,
               child: Text('Tile $index'),
             ),
@@ -203,7 +203,7 @@ void main() {
           maxCrossAxisExtent: 50,
           children: List<Widget>.generate(
             50,
-            (int index) => Container(
+            (int index) => SizedBox(
               height: 50,
               child: Text('Tile $index'),
             ),
@@ -223,7 +223,7 @@ void main() {
           child: Column(
             children: List<Widget>.generate(
               50,
-              (int index) => Container(
+              (int index) => SizedBox(
                 height: 50,
                 child: Text('Tile $index'),
               ),
@@ -269,9 +269,7 @@ void main() {
           restorationId: 'pager',
           children: List<Widget>.generate(
             50,
-            (int index) => Container(
-              child: Text('Tile $index'),
-            ),
+            (int index) => Text('Tile $index'),
           ),
         ),
       ),
@@ -285,7 +283,7 @@ void main() {
       TestHarness(
         child: PageView.builder(
           restorationId: 'pager',
-          itemBuilder: (BuildContext context, int index) => Container(
+          itemBuilder: (BuildContext context, int index) => SizedBox(
             height: 50,
             child: Text('Tile $index'),
           ),
@@ -304,7 +302,7 @@ void main() {
           childrenDelegate: SliverChildListDelegate(
             List<Widget>.generate(
               50,
-              (int index) => Container(
+              (int index) => SizedBox(
                 height: 50,
                 child: Text('Tile $index'),
               ),
@@ -325,9 +323,7 @@ void main() {
           itemExtent: 50,
           children: List<Widget>.generate(
             50,
-            (int index) => Container(
-              child: Text('Tile $index'),
-            ),
+            (int index) => Text('Tile $index'),
           ),
         ),
       ),
@@ -345,7 +341,7 @@ void main() {
           childDelegate: ListWheelChildListDelegate(
             children: List<Widget>.generate(
               50,
-              (int index) => Container(
+              (int index) => SizedBox(
                 height: 50,
                 child: Text('Tile $index'),
               ),
@@ -383,7 +379,7 @@ void main() {
               cacheExtent: 0,
               children: List<Widget>.generate(
                 50,
-                (int index) => Container(
+                (int index) => SizedBox(
                   height: 50,
                   child: Text('Tile $index'),
                 ),
@@ -434,7 +430,7 @@ void main() {
           cacheExtent: 0,
           children: List<Widget>.generate(
             50,
-            (int index) => Container(
+            (int index) => SizedBox(
               height: 50,
               child: Text('Tile $index'),
             ),

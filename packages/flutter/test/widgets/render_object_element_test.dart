@@ -28,7 +28,7 @@ class Pair<T> {
 /// and the other child in the bottom half. It will swap which child is on top
 /// and which is on bottom every time the widget is rendered.
 abstract class Swapper extends RenderObjectWidget {
-  const Swapper({ this.stable, this.swapper });
+  const Swapper({ Key? key, this.stable, this.swapper }) : super(key: key);
 
   final Widget? stable;
   final Widget? swapper;
@@ -42,9 +42,10 @@ abstract class Swapper extends RenderObjectWidget {
 
 class SwapperWithProperOverrides extends Swapper {
   const SwapperWithProperOverrides({
+    Key? key,
     Widget? stable,
     Widget? swapper,
-  }) : super(stable: stable, swapper: swapper);
+  }) : super(key: key, stable: stable, swapper: swapper);
 
   @override
   SwapperElement createElement() => SwapperElementWithProperOverrides(this);
@@ -52,9 +53,10 @@ class SwapperWithProperOverrides extends Swapper {
 
 class SwapperWithNoOverrides extends Swapper {
   const SwapperWithNoOverrides({
+    Key? key,
     Widget? stable,
     Widget? swapper,
-  }) : super(stable: stable, swapper: swapper);
+  }) : super(key: key, stable: stable, swapper: swapper);
 
   @override
   SwapperElement createElement() => SwapperElementWithNoOverrides(this);
@@ -62,9 +64,10 @@ class SwapperWithNoOverrides extends Swapper {
 
 class SwapperWithDeprecatedOverrides extends Swapper {
   const SwapperWithDeprecatedOverrides({
+    Key? key,
     Widget? stable,
     Widget? swapper,
-  }) : super(stable: stable, swapper: swapper);
+  }) : super(key: key, stable: stable, swapper: swapper);
 
   @override
   SwapperElement createElement() => SwapperElementWithDeprecatedOverrides(this);

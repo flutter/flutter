@@ -15,6 +15,7 @@ import '../base/utils.dart';
 import '../globals.dart' as globals;
 import '../vmservice.dart';
 
+import 'test_device.dart';
 import 'watcher.dart';
 
 /// A class that's used to collect coverage data during tests.
@@ -27,9 +28,9 @@ class CoverageCollector extends TestWatcher {
   bool Function(String) libraryPredicate;
 
   @override
-  Future<void> handleFinishedTest(ProcessEvent event) async {
-    _logMessage('test ${event.childIndex}: collecting coverage');
-    await collectCoverage(event.process, event.observatoryUri);
+  Future<void> handleFinishedTest(TestDevice testDevice) async {
+    _logMessage('Starting coverage collection');
+    await collectCoverage(testDevice);
   }
 
   void _logMessage(String line, { bool error = false }) {
@@ -81,34 +82,41 @@ class CoverageCollector extends TestWatcher {
   /// has been run to completion so that all coverage data has been recorded.
   ///
   /// The returned [Future] completes when the coverage is collected.
-  Future<void> collectCoverage(Process process, Uri observatoryUri) async {
-    assert(process != null);
-    assert(observatoryUri != null);
-    final int pid = process.pid;
-    _logMessage('pid $pid: collecting coverage data from $observatoryUri...');
+  Future<void> collectCoverage(TestDevice testDevice) async {
+    assert(testDevice != null);
 
     Map<String, dynamic> data;
-    final Future<void> processComplete = process.exitCode
-      .then<void>((int code) {
-        throw Exception('Failed to collect coverage, process terminated prematurely with exit code $code.');
+
+    final Future<void> processComplete = testDevice.finished.catchError(
+      (Object error) => throw Exception(
+          'Failed to collect coverage, test device terminated prematurely with '
+          'error: ${(error as TestDeviceException).message}.'),
+      test: (Object error) => error is TestDeviceException,
+    );
+
+    final Future<void> collectionComplete = testDevice.observatoryUri
+      .then((Uri observatoryUri) {
+        _logMessage('collecting coverage data from $testDevice at $observatoryUri...');
+        return collect(observatoryUri, libraryPredicate)
+          .then<void>((Map<String, dynamic> result) {
+            if (result == null) {
+              throw Exception('Failed to collect coverage.');
+            }
+            _logMessage('Collected coverage data.');
+            data = result;
+          });
       });
-    final Future<void> collectionComplete = collect(observatoryUri, libraryPredicate)
-      .then<void>((Map<String, dynamic> result) {
-        if (result == null) {
-          throw Exception('Failed to collect coverage.');
-        }
-        data = result;
-      });
+
     await Future.any<void>(<Future<void>>[ processComplete, collectionComplete ]);
     assert(data != null);
 
-    _logMessage('pid $pid ($observatoryUri): collected coverage data; merging...');
+    _logMessage('Merging coverage data...');
     _addHitmap(await coverage.createHitmap(
       data['coverage'] as List<Map<String, dynamic>>,
       packagesPath: packagesPath,
       checkIgnoredLines: true,
     ));
-    _logMessage('pid $pid ($observatoryUri): done merging coverage data into global coverage map.');
+    _logMessage('Done merging coverage data into global coverage map.');
   }
 
   /// Returns a future that will complete with the formatted coverage data
@@ -188,13 +196,13 @@ class CoverageCollector extends TestWatcher {
   }
 
   @override
-  Future<void> handleTestCrashed(ProcessEvent event) async { }
+  Future<void> handleTestCrashed(TestDevice testDevice) async { }
 
   @override
-  Future<void> handleTestTimedOut(ProcessEvent event) async { }
+  Future<void> handleTestTimedOut(TestDevice testDevice) async { }
 }
 
-Future<vm_service.VmService> _defaultConnect(Uri serviceUri) {
+Future<FlutterVmService> _defaultConnect(Uri serviceUri) {
   return connectToVmService(
       serviceUri, compression: CompressionOptions.compressionOff);
 }
@@ -202,14 +210,10 @@ Future<vm_service.VmService> _defaultConnect(Uri serviceUri) {
 Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libraryPredicate, {
   bool waitPaused = false,
   String debugName,
-  Future<vm_service.VmService> Function(Uri) connector = _defaultConnect,
+  Future<FlutterVmService> Function(Uri) connector = _defaultConnect,
 }) async {
-  final vm_service.VmService vmService = await connector(serviceUri);
-  final Map<String, dynamic> result = await _getAllCoverage(
-      vmService, libraryPredicate);
-  // TODO(dnfield): Remove ignore once internal repo is up to date
-  // https://github.com/flutter/flutter/issues/74518
-  // ignore: await_only_futures
+  final FlutterVmService vmService = await connector(serviceUri);
+  final Map<String, dynamic> result = await _getAllCoverage(vmService.service, libraryPredicate);
   await vmService.dispose();
   return result;
 }

@@ -13,11 +13,11 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:matcher/matcher.dart';
-import 'package:mockito/mockito.dart';
 import 'package:fake_async/fake_async.dart';
+import 'package:meta/meta.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fakes.dart';
 
 final Platform _kNoAnsiPlatform = FakePlatform(stdoutSupportsAnsi: false);
@@ -25,8 +25,6 @@ final String red = RegExp.escape(AnsiTerminal.red);
 final String bold = RegExp.escape(AnsiTerminal.bold);
 final String resetBold = RegExp.escape(AnsiTerminal.resetBold);
 final String resetColor = RegExp.escape(AnsiTerminal.resetColor);
-
-class MockStdout extends Mock implements Stdout {}
 
 void main() {
   testWithoutContext('correct logger instance is created', () {
@@ -291,23 +289,9 @@ void main() {
   });
 
   testWithoutContext('Logger does not throw when stdio write throws synchronously', () async {
-    final MockStdout stdout = MockStdout();
-    final MockStdout stderr = MockStdout();
+    final FakeStdout stdout = FakeStdout(syncError: true);
+    final FakeStdout stderr = FakeStdout(syncError: true);
     final Stdio stdio = Stdio.test(stdout: stdout, stderr: stderr);
-    bool stdoutThrew = false;
-    bool stderrThrew = false;
-    final Completer<void> stdoutError = Completer<void>();
-    final Completer<void> stderrError = Completer<void>();
-    when(stdout.write(any)).thenAnswer((_) {
-      stdoutThrew = true;
-      throw 'Error';
-    });
-    when(stderr.write(any)).thenAnswer((_) {
-      stderrThrew = true;
-      throw 'Error';
-    });
-    when(stdout.done).thenAnswer((_) => stdoutError.future);
-    when(stderr.done).thenAnswer((_) => stderrError.future);
     final Logger logger = StdoutLogger(
       terminal: AnsiTerminal(
         stdio: stdio,
@@ -316,38 +300,15 @@ void main() {
       stdio: stdio,
       outputPreferences: OutputPreferences.test(),
     );
+
     logger.printStatus('message');
     logger.printError('error message');
-    expect(stdoutThrew, true);
-    expect(stderrThrew, true);
   });
 
   testWithoutContext('Logger does not throw when stdio write throws asynchronously', () async {
-    final MockStdout stdout = MockStdout();
-    final MockStdout stderr = MockStdout();
+    final FakeStdout stdout = FakeStdout(syncError: false);
+    final FakeStdout stderr = FakeStdout(syncError: false);
     final Stdio stdio = Stdio.test(stdout: stdout, stderr: stderr);
-    final Completer<void> stdoutError = Completer<void>();
-    final Completer<void> stderrError = Completer<void>();
-    bool stdoutThrew = false;
-    bool stderrThrew = false;
-    final Completer<void> stdoutCompleter = Completer<void>();
-    final Completer<void> stderrCompleter = Completer<void>();
-    when(stdout.write(any)).thenAnswer((_) {
-      Zone.current.runUnaryGuarded<void>((_) {
-        stdoutThrew = true;
-        stdoutCompleter.complete();
-        throw 'Error';
-      }, null);
-    });
-    when(stderr.write(any)).thenAnswer((_) {
-      Zone.current.runUnaryGuarded<void>((_) {
-        stderrThrew = true;
-        stderrCompleter.complete();
-        throw 'Error';
-      }, null);
-    });
-    when(stdout.done).thenAnswer((_) => stdoutError.future);
-    when(stderr.done).thenAnswer((_) => stderrError.future);
     final Logger logger = StdoutLogger(
       terminal: AnsiTerminal(
         stdio: stdio,
@@ -358,34 +319,15 @@ void main() {
     );
     logger.printStatus('message');
     logger.printError('error message');
-    await stdoutCompleter.future;
-    await stderrCompleter.future;
-    expect(stdoutThrew, true);
-    expect(stderrThrew, true);
+
+    await stdout.done;
+    await stderr.done;
   });
 
   testWithoutContext('Logger does not throw when stdio completes done with an error', () async {
-    final MockStdout stdout = MockStdout();
-    final MockStdout stderr = MockStdout();
+    final FakeStdout stdout = FakeStdout(syncError: false, completeWithError: true);
+    final FakeStdout stderr = FakeStdout(syncError: false, completeWithError: true);
     final Stdio stdio = Stdio.test(stdout: stdout, stderr: stderr);
-    final Completer<void> stdoutError = Completer<void>();
-    final Completer<void> stderrError = Completer<void>();
-    final Completer<void> stdoutCompleter = Completer<void>();
-    final Completer<void> stderrCompleter = Completer<void>();
-    when(stdout.write(any)).thenAnswer((_) {
-      Zone.current.runUnaryGuarded<void>((_) {
-        stdoutError.completeError(Exception('Some pipe error'));
-        stdoutCompleter.complete();
-      }, null);
-    });
-    when(stderr.write(any)).thenAnswer((_) {
-      Zone.current.runUnaryGuarded<void>((_) {
-        stderrError.completeError(Exception('Some pipe error'));
-        stderrCompleter.complete();
-      }, null);
-    });
-    when(stdout.done).thenAnswer((_) => stdoutError.future);
-    when(stderr.done).thenAnswer((_) => stderrError.future);
     final Logger logger = StdoutLogger(
       terminal: AnsiTerminal(
         stdio: stdio,
@@ -396,8 +338,9 @@ void main() {
     );
     logger.printStatus('message');
     logger.printError('error message');
-    await stdoutCompleter.future;
-    await stderrCompleter.future;
+
+    expect(() async => stdout.done, throwsA(isA<Exception>()));
+    expect(() async => stderr.done, throwsA(isA<Exception>()));
   });
 
   group('Spinners', () {
@@ -444,7 +387,7 @@ void main() {
     List<String> outputStdout() => mockStdio.writtenToStdout.join('').split('\n');
     List<String> outputStderr() => mockStdio.writtenToStderr.join('').split('\n');
 
-    void doWhileAsync(FakeAsync time, bool doThis()) {
+    void doWhileAsync(FakeAsync time, bool Function() doThis) {
       do {
         mockStopwatch.elapsed += const Duration(milliseconds: 1);
         time.elapse(const Duration(milliseconds: 1));
@@ -572,6 +515,7 @@ void main() {
               outputStdout().join('\n'),
               "Knock Knock, Who's There     " // initial message
               '        ' // placeholder so that spinner can backspace on its first tick
+              // ignore: missing_whitespace_between_adjacent_strings
               '\b\b\b\b\b\b\b\b       $a' // first tick
               '\b\b\b\b\b\b\b\b        ' // clearing the spinner
               '\b\b\b\b\b\b\b\b' // clearing the clearing of the spinner
@@ -580,6 +524,7 @@ void main() {
               'Rude Interrupting Cow\n' // message
               "Knock Knock, Who's There     " // message restoration
               '        ' // placeholder so that spinner can backspace on its second tick
+              // ignore: missing_whitespace_between_adjacent_strings
               '\b\b\b\b\b\b\b\b       $b' // second tick
               '\b\b\b\b\b\b\b\b        ' // clearing the spinner to put the time
               '\b\b\b\b\b\b\b\b' // clearing the clearing of the spinner
@@ -713,7 +658,7 @@ void main() {
       expect(lines[3], equals('0123456789' * 3));
     });
 
-    testUsingContext('AppRunLogger writes plain text statuses when no app is active', () async {
+    testWithoutContext('AppRunLogger writes plain text statuses when no app is active', () async {
       final BufferLogger buffer = BufferLogger.test();
       final AppRunLogger logger = AppRunLogger(parent: buffer);
 
@@ -1173,3 +1118,29 @@ Matcher _matchesInvocation(Invocation expected) {
 /// to [FakeLogger].
 Matcher _throwsInvocationFor(dynamic Function() fakeCall) =>
   throwsA(_matchesInvocation(_invocationFor(fakeCall)));
+
+class FakeStdout extends Fake implements Stdout {
+  FakeStdout({@required this.syncError, this.completeWithError = false});
+
+  final bool syncError;
+  final bool completeWithError;
+  final Completer<void> _completer = Completer<void>();
+
+  @override
+  void write(Object object) {
+    if (syncError) {
+      throw 'Error!';
+    }
+    Zone.current.runUnaryGuarded<void>((_) {
+      if (completeWithError) {
+        _completer.completeError(Exception('Some pipe error'));
+      } else {
+        _completer.complete();
+        throw 'Error!';
+      }
+    }, null);
+  }
+
+  @override
+  Future<void> get done => _completer.future;
+}
