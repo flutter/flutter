@@ -484,20 +484,22 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///
   /// ```dart
   /// class App extends StatelessWidget {
+  ///   const App({Key? key}) : super(key: key);
+  ///
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     return MaterialApp(
   ///       initialRoute: '/',
-  ///       routes: {
-  ///         '/': (BuildContext context) => HomePage(),
-  ///         '/second_page': (BuildContext context) => SecondPage(),
+  ///       routes: <String, WidgetBuilder>{
+  ///         '/': (BuildContext context) => const HomePage(),
+  ///         '/second_page': (BuildContext context) => const SecondPage(),
   ///       },
   ///     );
   ///   }
   /// }
   ///
   /// class HomePage extends StatefulWidget {
-  ///   HomePage();
+  ///   const HomePage({Key? key}) : super(key: key);
   ///
   ///   @override
   ///   _HomePageState createState() => _HomePageState();
@@ -511,10 +513,10 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///         child: Column(
   ///           mainAxisSize: MainAxisSize.min,
   ///           children: <Widget>[
-  ///             Text('HomePage'),
+  ///             const Text('HomePage'),
   ///             // Press this button to open the SecondPage.
   ///             ElevatedButton(
-  ///               child: Text('Second Page >'),
+  ///               child: const Text('Second Page >'),
   ///               onPressed: () {
   ///                 Navigator.pushNamed(context, '/second_page');
   ///               },
@@ -527,6 +529,8 @@ mixin LocalHistoryRoute<T> on Route<T> {
   /// }
   ///
   /// class SecondPage extends StatefulWidget {
+  ///   const SecondPage({Key? key}) : super(key: key);
+  ///
   ///   @override
   ///   _SecondPageState createState() => _SecondPageState();
   /// }
@@ -535,7 +539,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///
   ///   bool _showRectangle = false;
   ///
-  ///   void _navigateLocallyToShowRectangle() async {
+  ///   Future<void> _navigateLocallyToShowRectangle() async {
   ///     // This local history entry essentially represents the display of the red
   ///     // rectangle. When this local history entry is removed, we hide the red
   ///     // rectangle.
@@ -552,14 +556,14 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     final localNavContent = _showRectangle
+  ///     final Widget localNavContent = _showRectangle
   ///       ? Container(
   ///           width: 100.0,
   ///           height: 100.0,
   ///           color: Colors.red,
   ///         )
   ///       : ElevatedButton(
-  ///           child: Text('Show Rectangle'),
+  ///           child: const Text('Show Rectangle'),
   ///           onPressed: _navigateLocallyToShowRectangle,
   ///         );
   ///
@@ -570,7 +574,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///           children: <Widget>[
   ///             localNavContent,
   ///             ElevatedButton(
-  ///               child: Text('< Back'),
+  ///               child: const Text('< Back'),
   ///               onPressed: () {
   ///                 // Pop a route. If this is pressed while the red rectangle is
   ///                 // visible then it will will pop our local history entry, which
@@ -1620,15 +1624,18 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 ///
 /// ```dart
 /// // Register the RouteObserver as a navigation observer.
-/// final RouteObserver<ModalRoute> routeObserver = RouteObserver<ModalRoute>();
+/// final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
 /// void main() {
 ///   runApp(MaterialApp(
 ///     home: Container(),
-///     navigatorObservers: [routeObserver],
+///     navigatorObservers: <RouteObserver<ModalRoute<void>>>[ routeObserver ],
 ///   ));
 /// }
 ///
 /// class RouteAwareWidget extends StatefulWidget {
+///   const RouteAwareWidget({Key? key}) : super(key: key);
+///
+///   @override
 ///   State<RouteAwareWidget> createState() => RouteAwareWidgetState();
 /// }
 ///
@@ -1909,13 +1916,15 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 ///
 /// ```dart
 /// void main() {
-///   runApp(MyApp());
+///   runApp(const MyApp());
 /// }
 ///
 /// class MyApp extends StatelessWidget {
+///   const MyApp({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return MaterialApp(
+///     return const MaterialApp(
 ///       restorationScopeId: 'app',
 ///       home: MyHomePage(),
 ///     );
@@ -1923,6 +1932,8 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 /// }
 ///
 /// class MyHomePage extends StatelessWidget {
+///   const MyHomePage({Key? key}) : super(key: key);
+///
 ///   static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
 ///     return RawDialogRoute<void>(
 ///       pageBuilder: (

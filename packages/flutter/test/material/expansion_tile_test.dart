@@ -520,4 +520,42 @@ void main() {
 
     expect(boxDecoration.color, backgroundColor);
   });
+
+  testWidgets('ExpansionTile iconColor, textColor', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/pull/78281
+
+    const Color iconColor = Color(0xff00ff00);
+    const Color collapsedIconColor = Color(0xff0000ff);
+    const Color textColor = Color(0xff00ffff);
+    const Color collapsedTextColor = Color(0xffff00ff);
+
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          iconColor: iconColor,
+          collapsedIconColor: collapsedIconColor,
+          textColor: textColor,
+          collapsedTextColor: collapsedTextColor,
+          initiallyExpanded: false,
+          title: TestText('title'),
+          trailing: TestIcon(),
+          children: <Widget>[
+            SizedBox(height: 100, width: 100),
+          ],
+        ),
+      ),
+    ));
+
+    Color getIconColor() => tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color!;
+    Color getTextColor() => tester.state<TestTextState>(find.byType(TestText)).textStyle.color!;
+
+    expect(getIconColor(), collapsedIconColor);
+    expect(getTextColor(), collapsedTextColor);
+
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    expect(getIconColor(), iconColor);
+    expect(getTextColor(), textColor);
+  });
 }

@@ -18,8 +18,8 @@ import 'slider_theme.dart';
 import 'theme.dart';
 
 // Examples can assume:
-// RangeValues _rangeValues = RangeValues(0.3, 0.7);
-// RangeValues _dollarsRange = RangeValues(50, 100);
+// RangeValues _rangeValues = const RangeValues(0.3, 0.7);
+// RangeValues _dollarsRange = const RangeValues(50, 100);
 // void setState(VoidCallback fn) { }
 
 /// [RangeSlider] uses this callback to paint the value indicator on the overlay.

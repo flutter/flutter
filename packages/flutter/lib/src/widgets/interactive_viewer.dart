@@ -52,11 +52,11 @@ typedef InteractiveViewerWidgetBuilder = Widget Function(BuildContext context, R
 /// Widget build(BuildContext context) {
 ///   return Center(
 ///     child: InteractiveViewer(
-///       boundaryMargin: EdgeInsets.all(20.0),
+///       boundaryMargin: const EdgeInsets.all(20.0),
 ///       minScale: 0.1,
 ///       maxScale: 1.6,
 ///       child: Container(
-///         decoration: BoxDecoration(
+///         decoration: const BoxDecoration(
 ///           gradient: LinearGradient(
 ///             begin: Alignment.topCenter,
 ///             end: Alignment.bottomCenter,
@@ -602,13 +602,13 @@ class InteractiveViewer extends StatefulWidget {
   ///     ),
   ///     body: Center(
   ///       child: InteractiveViewer(
-  ///         boundaryMargin: EdgeInsets.all(double.infinity),
+  ///         boundaryMargin: const EdgeInsets.all(double.infinity),
   ///         transformationController: _transformationController,
   ///         minScale: 0.1,
   ///         maxScale: 1.0,
   ///         onInteractionStart: _onInteractionStart,
   ///         child: Container(
-  ///           decoration: BoxDecoration(
+  ///           decoration: const BoxDecoration(
   ///             gradient: LinearGradient(
   ///               begin: Alignment.topCenter,
   ///               end: Alignment.bottomCenter,
@@ -619,7 +619,7 @@ class InteractiveViewer extends StatefulWidget {
   ///         ),
   ///       ),
   ///     ),
-  ///     persistentFooterButtons: [
+  ///     persistentFooterButtons: <Widget>[
   ///       IconButton(
   ///         onPressed: _animateResetInitialize,
   ///         tooltip: 'Reset',

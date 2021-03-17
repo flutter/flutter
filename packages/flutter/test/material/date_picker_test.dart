@@ -177,6 +177,17 @@ void main() {
       });
     });
 
+    testWidgets('Input only mode should validate date', (WidgetTester tester) async {
+      initialEntryMode = DatePickerEntryMode.inputOnly;
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {
+        // Enter text input mode and type an invalid date to get error.
+        await tester.enterText(find.byType(TextField), '1234567');
+        await tester.tap(find.text('OK'));
+        await tester.pumpAndSettle();
+        expect(find.text('Invalid format.'), findsOneWidget);
+      });
+    });
+
     testWidgets('Switching to input mode resets input error state', (WidgetTester tester) async {
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         // Enter text input mode and type an invalid date to get error.

@@ -52,9 +52,10 @@ import 'theme_data.dart';
 /// This sample produces an enabled and a disabled ElevatedButton.
 ///
 /// ```dart
+/// @override
 /// Widget build(BuildContext context) {
 ///   final ButtonStyle style =
-///     ElevatedButton.styleFrom(textStyle: TextStyle(fontSize: 20));
+///     ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));
 ///
 ///   return Center(
 ///     child: Column(
@@ -467,7 +468,7 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
     final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: <Widget>[icon, SizedBox(width: gap), label],
+      children: <Widget>[icon, SizedBox(width: gap), Flexible(child: label)],
     );
   }
 }
