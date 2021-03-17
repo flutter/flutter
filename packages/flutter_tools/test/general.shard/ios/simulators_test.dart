@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -12,7 +11,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -21,7 +19,6 @@ import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -811,7 +808,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       ));
 
       expect(
-        () async => await simControl.install(deviceId, appId),
+        () async => simControl.install(deviceId, appId),
         throwsToolExit(message: r'Unable to install'),
       );
     });
@@ -829,7 +826,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       ));
 
       expect(
-        () async => await simControl.uninstall(deviceId, appId),
+        () async => simControl.uninstall(deviceId, appId),
         throwsToolExit(message: r'Unable to uninstall'),
       );
     });
@@ -847,7 +844,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       ));
 
       expect(
-        () async => await simControl.launch(deviceId, appId),
+        () async => simControl.launch(deviceId, appId),
         throwsToolExit(message: r'Unable to launch'),
       );
     });
@@ -931,7 +928,7 @@ flutter:
   module: {}
 ''');
       globals.fs.file('.packages').createSync();
-      final FlutterProject flutterProject = FlutterProject.current();
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(globals.fs.currentDirectory);
 
       final IOSSimulator simulator = IOSSimulator(
         'test',
@@ -949,7 +946,7 @@ flutter:
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('.packages').createSync();
       globals.fs.directory('ios').createSync();
-      final FlutterProject flutterProject = FlutterProject.current();
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(globals.fs.currentDirectory);
 
       final IOSSimulator simulator = IOSSimulator(
         'test',
@@ -965,7 +962,7 @@ flutter:
     testUsingContext('is false with no host app and no module', () async {
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('.packages').createSync();
-      final FlutterProject flutterProject = FlutterProject.current();
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(globals.fs.currentDirectory);
 
       final IOSSimulator simulator = IOSSimulator(
         'test',
@@ -988,5 +985,3 @@ flutter:
     });
   });
 }
-
-class MockBuildSystem extends Mock implements BuildSystem {}

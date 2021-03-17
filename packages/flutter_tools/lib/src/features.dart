@@ -52,7 +52,10 @@ abstract class FeatureFlags {
   bool get isSingleWidgetReloadEnabled => false;
 
   /// Whether the CFE experimental invalidation strategy is enabled.
-  bool get isExperimentalInvalidationStrategyEnabled => false;
+  bool get isExperimentalInvalidationStrategyEnabled => true;
+
+  /// Whether the windows UWP embedding is enabled.
+  bool get isWindowsUwpEnabled => false;
 
   /// Whether a particular feature is enabled for the current channel.
   ///
@@ -101,6 +104,9 @@ class FlutterFeatureFlags implements FeatureFlags {
   bool get isExperimentalInvalidationStrategyEnabled => isEnabled(experimentalInvalidationStrategy);
 
   @override
+  bool get isWindowsUwpEnabled => isEnabled(windowsUwpEmbedding);
+
+  @override
   bool isEnabled(Feature feature) {
     final String currentChannel = _flutterVersion.channel;
     final FeatureChannelSetting featureSetting = feature.getSettingForChannel(currentChannel);
@@ -129,6 +135,7 @@ const List<Feature> allFeatures = <Feature>[
   flutterLinuxDesktopFeature,
   flutterMacOSDesktopFeature,
   flutterWindowsDesktopFeature,
+  windowsUwpEmbedding,
   singleWidgetReload,
   flutterAndroidFeature,
   flutterIOSFeature,
@@ -324,14 +331,24 @@ const Feature experimentalInvalidationStrategy = Feature(
   ),
   dev: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
+    enabledByDefault: true,
   ),
   beta: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
+    enabledByDefault: true,
   ),
   stable: FeatureChannelSetting(
-    available: false,
+    available: true,
+    enabledByDefault: true,
+  ),
+);
+
+/// The feature for enabling the Windows UWP embeding.
+const Feature windowsUwpEmbedding = Feature(
+  name: 'Flutter for Windows UWP',
+  configSetting: 'enable-windows-uwp-desktop',
+  master: FeatureChannelSetting(
+    available: true,
     enabledByDefault: false,
   ),
 );

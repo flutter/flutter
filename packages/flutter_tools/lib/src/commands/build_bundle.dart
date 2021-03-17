@@ -70,7 +70,7 @@ class BuildBundleCommand extends BuildSubCommand {
   @override
   Future<Map<CustomDimensions, String>> get usageValues async {
     final String projectDir = globals.fs.file(targetFile).parent.parent.path;
-    final FlutterProject flutterProject = FlutterProject.fromPath(projectDir);
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(globals.fs.directory(projectDir));
     if (flutterProject == null) {
       return const <CustomDimensions, String>{};
     }

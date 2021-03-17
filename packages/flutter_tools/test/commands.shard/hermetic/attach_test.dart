@@ -19,7 +19,6 @@ import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
-import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
@@ -718,7 +717,6 @@ void main() {
 class MockHotRunner extends Mock implements HotRunner {}
 class MockHotRunnerFactory extends Mock implements HotRunnerFactory {}
 class MockIOSDevice extends Mock implements IOSDevice {}
-class MockMDnsObservatoryDiscovery extends Mock implements MDnsObservatoryDiscovery {}
 class MockPortForwarder extends Mock implements DevicePortForwarder {}
 
 class StreamLogger extends Logger {
@@ -762,11 +760,20 @@ class StreamLogger extends Logger {
     @required Duration timeout,
     String progressId,
     bool multilineOutput = false,
+    bool includeTiming = true,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     _log('[progress] $message');
     return SilentStatus(
       stopwatch: Stopwatch(),
+    )..start();
+  }
+
+  @override
+  Status startSpinner({ VoidCallback onFinish }) {
+    return SilentStatus(
+      stopwatch: Stopwatch(),
+      onFinish: onFinish,
     )..start();
   }
 
@@ -799,6 +806,9 @@ class StreamLogger extends Logger {
 
   @override
   void clear() => _log('[stdout] ${globals.terminal.clearScreen()}\n');
+
+  @override
+  Terminal get terminal => Terminal.test();
 }
 
 class LoggerInterrupted implements Exception {

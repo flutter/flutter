@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-
 import 'package:flutter_test/flutter_test.dart';
 
 Future<void> pumpTest(
@@ -45,19 +44,19 @@ Future<void> pumpDoubleScrollableTest(
     theme: ThemeData(
       platform: platform,
     ),
-    home: CustomScrollView(
+    home: const CustomScrollView(
       slivers: <Widget>[
         SliverToBoxAdapter(
-          child: Container(
+          child: SizedBox(
             height: 300,
-            child: const CustomScrollView(
+            child: CustomScrollView(
               slivers: <Widget>[
                 SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
               ],
             ),
           ),
         ),
-        const SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
+        SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
       ],
     ),
   ));
@@ -890,8 +889,8 @@ void main() {
     expect(find.byKey(const ValueKey<String>('Box 0')), findsNothing);
     expect(find.byKey(const ValueKey<String>('Box 52')), findsOneWidget);
 
-    expect(expensiveWidgets, 38);
-    expect(cheapWidgets, 20);
+    expect(expensiveWidgets, 40);
+    expect(cheapWidgets, 21);
   });
 
   testWidgets('Can recommendDeferredLoadingForContext - override heuristic', (WidgetTester tester) async {
@@ -933,9 +932,9 @@ void main() {
     expect(find.byKey(const ValueKey<String>('Box 0')), findsNothing);
     expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsOneWidget);
 
-    expect(expensiveWidgets, 18);
-    expect(cheapWidgets, 40);
-    expect(physics.count, 40 + 18);
+    expect(expensiveWidgets, 17);
+    expect(cheapWidgets, 44);
+    expect(physics.count, 44 + 17);
   });
 
   testWidgets('Can recommendDeferredLoadingForContext - override heuristic and always return true', (WidgetTester tester) async {
@@ -976,7 +975,7 @@ void main() {
     expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsOneWidget);
 
     expect(expensiveWidgets, 0);
-    expect(cheapWidgets, 58);
+    expect(cheapWidgets, 61);
   });
 
   testWidgets('ensureVisible does not move PageViews', (WidgetTester tester) async {
@@ -1157,31 +1156,29 @@ void main() {
       home: Scaffold(
         body: SingleChildScrollView(
           controller: outerController,
-          child: Container(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Column(
-                  children: <Widget>[
-                    for (int i = 0; i < 100; i++)
-                      Text('SingleChildScrollView $i'),
-                  ]
-                ),
-                Container(
-                  height: 3000,
-                  width: 400,
-                  child: ListView.builder(
-                    controller: innerController,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: 100,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Text('Nested NeverScrollable ListView $index');
-                    },
-                  )
-                ),
-              ]
-            )
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Column(
+                children: <Widget>[
+                  for (int i = 0; i < 100; i++)
+                    Text('SingleChildScrollView $i'),
+                ]
+              ),
+              SizedBox(
+                height: 3000,
+                width: 400,
+                child: ListView.builder(
+                  controller: innerController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: 100,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Text('Nested NeverScrollable ListView $index');
+                  },
+                )
+              ),
+            ]
           )
         )
       ),

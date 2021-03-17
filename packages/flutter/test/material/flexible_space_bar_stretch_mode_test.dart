@@ -60,13 +60,11 @@ void main() {
                 flexibleSpace: RepaintBoundary(
                   child: FlexibleSpaceBar(
                     stretchModes: const <StretchMode>[StretchMode.blurBackground],
-                    background: Container(
-                      child: Row(
-                        children: <Widget>[
-                          Expanded(child: Container(color: Colors.red)),
-                          Expanded(child:Container(color: Colors.blue)),
-                        ],
-                      )
+                    background: Row(
+                      children: <Widget>[
+                        Expanded(child: Container(color: Colors.red)),
+                        Expanded(child:Container(color: Colors.blue)),
+                      ],
                     ),
                   ),
                 ),

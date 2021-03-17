@@ -12,11 +12,14 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
 
 /// A fake implementation of the [DeviceLogReader].
@@ -249,6 +252,16 @@ class MemoryIOSink implements IOSink {
 
   @override
   Future<void> flush() async { }
+
+  void clear() {
+    writes.clear();
+  }
+
+  String getAndClear() {
+    final String result = utf8.decode(writes.expand((List<int> l) => l).toList());
+    clear();
+    return result;
+  }
 }
 
 class MemoryStdout extends MemoryIOSink implements io.Stdout {
@@ -442,4 +455,240 @@ class FakePub extends Fake implements Pub {
     String flutterRootOverride,
     bool checkUpToDate = false,
   }) async { }
+}
+
+class FakeFlutterVersion implements FlutterVersion {
+  FakeFlutterVersion({
+    this.channel = 'unknown',
+    this.dartSdkVersion = '12',
+    this.engineRevision = 'abcdefghijklmnopqrstuvwxyz',
+    this.engineRevisionShort = 'abcde',
+    this.repositoryUrl = 'https://github.com/flutter/flutter.git',
+    this.frameworkVersion = '0.0.0',
+    this.frameworkRevision = '11111111111111111111',
+    this.frameworkRevisionShort = '11111',
+    this.frameworkAge = '0 hours ago',
+    this.frameworkCommitDate = '12/01/01',
+    this.gitTagVersion = const GitTagVersion.unknown(),
+  });
+
+  bool get didFetchTagsAndUpdate => _didFetchTagsAndUpdate;
+  bool _didFetchTagsAndUpdate = false;
+
+  bool get didCheckFlutterVersionFreshness => _didCheckFlutterVersionFreshness;
+  bool _didCheckFlutterVersionFreshness = false;
+
+  @override
+  final String channel;
+
+  @override
+  final String dartSdkVersion;
+
+  @override
+  final String engineRevision;
+
+  @override
+  final String engineRevisionShort;
+
+  @override
+  final String repositoryUrl;
+
+  @override
+  final String frameworkVersion;
+
+  @override
+  final String frameworkRevision;
+
+  @override
+  final String frameworkRevisionShort;
+
+  @override
+  final String frameworkAge;
+
+  @override
+  final String frameworkCommitDate;
+
+  @override
+  String get frameworkDate => frameworkCommitDate;
+
+  @override
+  final GitTagVersion gitTagVersion;
+
+  @override
+  void fetchTagsAndUpdate() {
+    _didFetchTagsAndUpdate = true;
+  }
+
+  @override
+  Future<void> checkFlutterVersionFreshness() async {
+    _didCheckFlutterVersionFreshness = true;
+  }
+
+  @override
+  bool checkRevisionAncestry({String tentativeDescendantRevision, String tentativeAncestorRevision}) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> ensureVersionFile() async { }
+
+  @override
+  String getBranchName({bool redactUnknownBranches = false}) {
+    return 'master';
+  }
+
+  @override
+  String getVersionString({bool redactUnknownBranches = false}) {
+    return 'v0.0.0';
+  }
+
+  @override
+  Map<String, Object> toJson() {
+    return <String, Object>{};
+  }
+}
+
+// A test implementation of [FeatureFlags] that allows enabling without reading
+// config. If not otherwise specified, all values default to false.
+class TestFeatureFlags implements FeatureFlags {
+  TestFeatureFlags({
+    this.isLinuxEnabled = false,
+    this.isMacOSEnabled = false,
+    this.isWebEnabled = false,
+    this.isWindowsEnabled = false,
+    this.isSingleWidgetReloadEnabled = false,
+    this.isAndroidEnabled = true,
+    this.isIOSEnabled = true,
+    this.isFuchsiaEnabled = false,
+    this.isExperimentalInvalidationStrategyEnabled = false,
+    this.isWindowsUwpEnabled = false,
+  });
+
+  @override
+  final bool isLinuxEnabled;
+
+  @override
+  final bool isMacOSEnabled;
+
+  @override
+  final bool isWebEnabled;
+
+  @override
+  final bool isWindowsEnabled;
+
+  @override
+  final bool isSingleWidgetReloadEnabled;
+
+  @override
+  final bool isAndroidEnabled;
+
+  @override
+  final bool isIOSEnabled;
+
+  @override
+  final bool isFuchsiaEnabled;
+
+  @override
+  final bool isExperimentalInvalidationStrategyEnabled;
+
+  @override
+  final bool isWindowsUwpEnabled;
+
+  @override
+  bool isEnabled(Feature feature) {
+    switch (feature) {
+      case flutterWebFeature:
+        return isWebEnabled;
+      case flutterLinuxDesktopFeature:
+        return isLinuxEnabled;
+      case flutterMacOSDesktopFeature:
+        return isMacOSEnabled;
+      case flutterWindowsDesktopFeature:
+        return isWindowsEnabled;
+      case singleWidgetReload:
+        return isSingleWidgetReloadEnabled;
+      case flutterAndroidFeature:
+        return isAndroidEnabled;
+      case flutterIOSFeature:
+        return isIOSEnabled;
+      case flutterFuchsiaFeature:
+        return isFuchsiaEnabled;
+      case experimentalInvalidationStrategy:
+        return isExperimentalInvalidationStrategyEnabled;
+      case windowsUwpEmbedding:
+        return isWindowsUwpEnabled;
+    }
+    return false;
+  }
+}
+
+class FakeStatusLogger extends DelegatingLogger {
+  FakeStatusLogger(Logger delegate) : super(delegate);
+
+  Status status;
+
+  @override
+  Status startProgress(String message, {Duration timeout, String progressId, bool multilineOutput = false, bool includeTiming = true, int progressIndicatorPadding = kDefaultStatusPadding}) {
+    return status;
+  }
+}
+
+class TestBuildSystem implements BuildSystem {
+  /// Create a [BuildSystem] instance that returns the provided results in order.
+  TestBuildSystem.list(this._results, [this._onRun])
+    : _exception = null,
+      _singleResult = null;
+
+  /// Create a [BuildSystem] instance that returns the provided result for every build
+  /// and buildIncremental request.
+  TestBuildSystem.all(this._singleResult, [this._onRun])
+    : _exception = null,
+      _results = <BuildResult>[];
+
+  /// Create a [BuildSystem] instance that always throws the provided error for every build
+  /// and buildIncremental request.
+  TestBuildSystem.error(this._exception)
+    : _singleResult = null,
+      _results = <BuildResult>[],
+      _onRun = null;
+
+  final List<BuildResult> _results;
+  final BuildResult _singleResult;
+  final dynamic _exception;
+  final void Function(Target target, Environment environment) _onRun;
+  int _nextResult = 0;
+
+  @override
+  Future<BuildResult> build(Target target, Environment environment, {BuildSystemConfig buildSystemConfig = const BuildSystemConfig()}) async {
+    if (_onRun != null) {
+      _onRun(target, environment);
+    }
+    if (_exception != null) {
+      throw _exception;
+    }
+    if (_singleResult != null) {
+      return _singleResult;
+    }
+    if (_nextResult >= _results.length) {
+      throw StateError('Unexpected build request of ${target.name}');
+    }
+    return _results[_nextResult++];
+  }
+
+  @override
+  Future<BuildResult> buildIncremental(Target target, Environment environment, BuildResult previousBuild) async {
+    if (_onRun != null) {
+      _onRun(target, environment);
+    }
+    if (_exception != null) {
+      throw _exception;
+    }
+    if (_singleResult != null) {
+      return _singleResult;
+    }
+    if (_nextResult >= _results.length) {
+      throw StateError('Unexpected buildIncremental request of ${target.name}');
+    }
+    return _results[_nextResult++];
+  }
 }
