@@ -141,8 +141,10 @@ class PageViewAppState extends State<PageViewApp> {
 }
 
 void main() {
-  runApp(MaterialApp(
-    title: 'PageView',
-    home: const PageViewApp(),
-  ));
+  runApp(
+    const MaterialApp(
+      title: 'PageView',
+      home: PageViewApp(),
+    ),
+  );
 }

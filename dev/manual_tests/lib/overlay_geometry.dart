@@ -204,8 +204,10 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
 }
 
 void main() {
-  runApp(MaterialApp(
-    title: 'Cards',
-    home: const OverlayGeometryApp(),
-  ));
+  runApp(
+    const MaterialApp(
+      title: 'Cards',
+      home: OverlayGeometryApp(),
+    ),
+  );
 }
