@@ -143,11 +143,6 @@ class PageViewAppState extends State<PageViewApp> {
 void main() {
   runApp(MaterialApp(
     title: 'PageView',
-    theme: ThemeData(
-      brightness: Brightness.light,
-      primarySwatch: Colors.blue,
-      accentColor: Colors.redAccent,
-    ),
     home: const PageViewApp(),
   ));
 }
