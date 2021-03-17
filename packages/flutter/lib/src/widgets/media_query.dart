@@ -314,8 +314,8 @@ class MediaQueryData {
 
   /// Whether the device is inverting the colors of the platform.
   ///
-  /// Setting it, for instace by using: 
-  /// 
+  /// Setting it, for instance by using:
+  ///
   /// ```dart
   /// MediaQuery(
   ///   data: MediaQuery.of(context).copyWith(
@@ -337,8 +337,8 @@ class MediaQueryData {
   /// Whether the user requested a high contrast between foreground and background
   /// content on iOS, via Settings -> Accessibility -> Increase Contrast.
   ///
-  /// Setting it, for instace by using: 
-  /// 
+  /// Setting it, for instance by using:
+  ///
   /// ```dart
   /// MediaQuery(
   ///   data: MediaQuery.of(context).copyWith(
@@ -365,8 +365,8 @@ class MediaQueryData {
   /// Whether the platform is requesting that text be drawn with a bold font
   /// weight.
   ///
-  /// Setting it, for instace by using: 
-  /// 
+  /// Setting it, for instance by using:
+  ///
   /// ```dart
   /// MediaQuery(
   ///   data: MediaQuery.of(context).copyWith(
