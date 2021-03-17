@@ -118,8 +118,8 @@ ENV LANG en_US.UTF-8
 RUN gem install bundler -N
 
 # Gemfile last edited 1/6/2019 (update to trigger a rebuild of Docker image)
-COPY ci/docker_linux/Gemfile /Gemfile
-COPY ci/docker_linux/Gemfile.lock /Gemfile.lock
+COPY dev/ci/docker_linux/Gemfile /Gemfile
+COPY dev/ci/docker_linux/Gemfile.lock /Gemfile.lock
 
 RUN bundle config set system 'true' && \
   bundle install --system
