@@ -149,7 +149,7 @@ class KeySet<T extends KeyboardKey> {
 /// all conditions, if any:
 ///
 ///  * The event's [RawKeyEvent.logicalKey] is one of [triggers].
-///  * The [requires] returns true.
+///  * The [accepts] returns true.
 ///
 /// See also:
 ///
@@ -190,7 +190,7 @@ abstract class ShortcutPrompt {
   ///
   ///  * [LogicalKeyboardKey.collapseSynonyms], which helps deciding whether a
   ///    modifier key is pressed when the side variation is not important.
-  bool requires(RawKeyEvent event, RawKeyboard state);
+  bool accepts(RawKeyEvent event, RawKeyboard state);
 
   /// Returns a description of the key set that is short and readable.
   ///
@@ -310,7 +310,7 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
   Iterable<LogicalKeyboardKey>? get triggers => _promptCore.triggeringKeys;
 
   @override
-  bool requires(RawKeyEvent event, RawKeyboard state) {
+  bool accepts(RawKeyEvent event, RawKeyboard state) {
     return event is RawKeyDownEvent && _promptCore.requiresState(state);
   }
 
@@ -502,7 +502,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
     if (candidates == null)
       return null;
     for (final _PromptIntent promptIntent in candidates) {
-      if (promptIntent.prompt.requires(event, state)) {
+      if (promptIntent.prompt.accepts(event, state)) {
         return promptIntent.intent;
       }
     }
