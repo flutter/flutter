@@ -449,7 +449,7 @@ class RenderParagraph extends RenderBox
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    // Hit test text spans
+    // Hit test text spans.
     late final bool hitText;
     final TextPosition textPosition = _textPainter.getPositionForOffset(position);
     final InlineSpan? span = _textPainter.text!.getSpanForPosition(textPosition);

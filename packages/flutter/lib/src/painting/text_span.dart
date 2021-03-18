@@ -119,7 +119,8 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   /// provided to an [InlineSpan] object. It defines a `BuzzingText` widget
   /// which uses the [HapticFeedback] class to vibrate the device when the user
   /// long-presses the "find the" span, which is underlined in wavy green. The
-  /// hit-testing is handled by the [RichText] widget.
+  /// hit-testing is handled by the [RichText] widget. It also changes the
+  /// hovering mouse cursor to `precise`.
   ///
   /// ```dart
   /// class BuzzingText extends StatefulWidget {
@@ -164,6 +165,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   ///               decorationStyle: TextDecorationStyle.wavy,
   ///             ),
   ///             recognizer: _longPressRecognizer,
+  ///             mouseCursor: SystemMouseCursors.precise,
   ///           ),
   ///           const TextSpan(
   ///             text: ' secret?',
