@@ -2771,9 +2771,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final List<_ScribblePlaceholder> placeholders = <_ScribblePlaceholder>[];
       final int placeholderLocation = _value.text.length - _placeholderLocation;
       if (_isMultiline) {
-        final Rect selectionBox = renderEditable.getBoxesForSelection(TextSelection(baseOffset: placeholderLocation, extentOffset: placeholderLocation + 1)).first;
-        placeholders.add(_ScribblePlaceholder(child: Container(), size: Size(renderEditable.size.width - selectionBox.topLeft.dx - selectionBox.width, 0.0)));
-        placeholders.add(_ScribblePlaceholder(child: Container(), size: Size(selectionBox.topLeft.dx - selectionBox.width, 0.0)));
+        final Iterable<Rect> selectionBoxes = renderEditable.getBoxesForSelection(TextSelection(baseOffset: placeholderLocation, extentOffset: placeholderLocation + 1));
+        if (selectionBoxes.isNotEmpty) {
+          final Rect selectionBox = selectionBoxes.first;
+          placeholders.add(_ScribblePlaceholder(child: Container(), size: Size(renderEditable.size.width - selectionBox.topLeft.dx - selectionBox.width, 0.0)));
+          placeholders.add(_ScribblePlaceholder(child: Container(), size: Size(selectionBox.topLeft.dx, 0.0)));
+        }
       } else {
         placeholders.add(_ScribblePlaceholder(child: Container(), size: const Size(100.0, 0.0)));
       }
