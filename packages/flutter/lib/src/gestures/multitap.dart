@@ -117,7 +117,8 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   DoubleTapGestureRecognizer({
     Object? debugOwner,
     PointerDeviceKind? kind,
-  }) : super(debugOwner: debugOwner, kind: kind);
+    Set<PointerDeviceKind>? kindSet,
+  }) : super(debugOwner: debugOwner, kind: kind, kindSet: kindSet);
 
   // Implementation notes:
   //
@@ -460,7 +461,8 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
     this.longTapDelay = Duration.zero,
     Object? debugOwner,
     PointerDeviceKind? kind,
-  }) : super(debugOwner: debugOwner, kind: kind);
+    Set<PointerDeviceKind>? kindSet,
+  }) : super(debugOwner: debugOwner, kind: kind, kindSet: kindSet);
 
   /// A pointer that might cause a tap has contacted the screen at a particular
   /// location.

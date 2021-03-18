@@ -1384,6 +1384,7 @@ class _ThumbPressGestureRecognizer extends LongPressGestureRecognizer {
   _ThumbPressGestureRecognizer({
     double? postAcceptSlopTolerance,
     PointerDeviceKind? kind,
+    Set<PointerDeviceKind>? kindSet,
     required Object debugOwner,
     required GlobalKey customPaintKey,
     required Duration pressDuration,
@@ -1391,6 +1392,7 @@ class _ThumbPressGestureRecognizer extends LongPressGestureRecognizer {
        super(
          postAcceptSlopTolerance: postAcceptSlopTolerance,
          kind: kind,
+         kindSet: kindSet,
          debugOwner: debugOwner,
          duration: pressDuration,
        );

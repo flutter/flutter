@@ -423,7 +423,8 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
     this.controller,
     this.gestureRecognizerFactories, {
     PointerDeviceKind? kind,
-  }) : super(kind: kind) {
+    Set<PointerDeviceKind>? kindSet,
+  }) : super(kind: kind, kindSet: kindSet) {
     team = GestureArenaTeam()
       ..captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(
@@ -501,7 +502,8 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
     _HandlePointerEvent handlePointerEvent,
     this.gestureRecognizerFactories, {
     PointerDeviceKind? kind,
-  }) : super(kind: kind) {
+    Set<PointerDeviceKind>? kindSet,
+  }) : super(kind: kind, kindSet: kindSet) {
     team = GestureArenaTeam()
       ..captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(

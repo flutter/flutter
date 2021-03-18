@@ -67,10 +67,11 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   DragGestureRecognizer({
     Object? debugOwner,
     PointerDeviceKind? kind,
+    Set<PointerDeviceKind>? kindSet,
     this.dragStartBehavior = DragStartBehavior.start,
     this.velocityTrackerBuilder = _defaultBuilder,
   }) : assert(dragStartBehavior != null),
-       super(debugOwner: debugOwner, kind: kind);
+       super(debugOwner: debugOwner, kind: kind, kindSet: kindSet);
 
   static VelocityTracker _defaultBuilder(PointerEvent event) => VelocityTracker.withKind(event.kind);
   /// Configure the behavior of offsets sent to [onStart].
@@ -508,7 +509,8 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   VerticalDragGestureRecognizer({
     Object? debugOwner,
     PointerDeviceKind? kind,
-  }) : super(debugOwner: debugOwner, kind: kind);
+    Set<PointerDeviceKind>? kindSet,
+  }) : super(debugOwner: debugOwner, kind: kind, kindSet: kindSet);
 
   @override
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
@@ -549,7 +551,8 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   HorizontalDragGestureRecognizer({
     Object? debugOwner,
     PointerDeviceKind? kind,
-  }) : super(debugOwner: debugOwner, kind: kind);
+    Set<PointerDeviceKind>? kindSet,
+  }) : super(debugOwner: debugOwner, kind: kind, kindSet: kindSet);
 
   @override
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {

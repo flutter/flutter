@@ -57,15 +57,24 @@ enum DragStartBehavior {
 abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableTreeMixin {
   /// Initializes the gesture recognizer.
   ///
-  /// The argument is optional and is only used for debug purposes (e.g. in the
+  /// The [debugOwner] argument is optional and is only used for debug purposes (e.g. in the
   /// [toString] serialization).
   ///
   /// {@template flutter.gestures.GestureRecognizer.kind}
-  /// It's possible to limit this recognizer to a specific [PointerDeviceKind]
-  /// by providing the optional [kind] argument. If [kind] is null,
+  /// It's possible to limit this recognizer to either a specific [PointerDeviceKind]
+  /// by providing the optional [kind] argument or a set of them by providing the
+  /// also optional [kindSet] argument. If both [kind] and [kindSet] are null,
   /// the recognizer will accept pointer events from all device kinds.
   /// {@endtemplate}
-  GestureRecognizer({ this.debugOwner, PointerDeviceKind? kind }) : _kindFilter = kind;
+  GestureRecognizer({
+    this.debugOwner,
+    PointerDeviceKind? kind,
+    Set<PointerDeviceKind>? kindSet,
+  })  : assert(
+            kind == null || kindSet == null,
+            'kind and kindSet should not be defined at the same GestureRecognizer declaration',
+        ),
+        _kindFilter = kind != null ? <PointerDeviceKind>{ kind } : kindSet ;
 
   /// The recognizer's owner.
   ///
@@ -75,7 +84,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
 
   /// The kind of device that's allowed to be recognized. If null, events from
   /// all device kinds will be tracked and recognized.
-  final PointerDeviceKind? _kindFilter;
+  final Set<PointerDeviceKind>? _kindFilter;
 
   /// Holds a mapping between pointer IDs and the kind of devices they are
   /// coming from.
@@ -129,7 +138,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   bool isPointerAllowed(PointerDownEvent event) {
     // Currently, it only checks for device kind. But in the future we could check
     // for other things e.g. mouse button.
-    return _kindFilter == null || _kindFilter == event.kind;
+    return _kindFilter == null || _kindFilter!.contains(event.kind);
   }
 
   /// For a given pointer ID, returns the device kind associated with it.
@@ -223,7 +232,8 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   OneSequenceGestureRecognizer({
     Object? debugOwner,
     PointerDeviceKind? kind,
-  }) : super(debugOwner: debugOwner, kind: kind);
+    Set<PointerDeviceKind>? kindSet,
+  }) : super(debugOwner: debugOwner, kind: kind, kindSet: kindSet);
 
   final Map<int, GestureArenaEntry> _entries = <int, GestureArenaEntry>{};
   final Set<int> _trackedPointers = HashSet<int>();
@@ -399,6 +409,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
     this.postAcceptSlopTolerance = kTouchSlop,
     Object? debugOwner,
     PointerDeviceKind? kind,
+    Set<PointerDeviceKind>? kindSet,
   }) : assert(
          preAcceptSlopTolerance == null || preAcceptSlopTolerance >= 0,
          'The preAcceptSlopTolerance must be positive or null',
@@ -407,7 +418,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
          postAcceptSlopTolerance == null || postAcceptSlopTolerance >= 0,
          'The postAcceptSlopTolerance must be positive or null',
        ),
-       super(debugOwner: debugOwner, kind: kind);
+       super(debugOwner: debugOwner, kind: kind, kindSet: kindSet);
 
   /// If non-null, the recognizer will call [didExceedDeadline] after this
   /// amount of time has elapsed since starting to track the primary pointer.

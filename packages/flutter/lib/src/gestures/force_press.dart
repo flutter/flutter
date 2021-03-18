@@ -123,11 +123,12 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
     this.interpolation = _inverseLerp,
     Object? debugOwner,
     PointerDeviceKind? kind,
+    Set<PointerDeviceKind>? kindSet,
   }) : assert(startPressure != null),
        assert(peakPressure != null),
        assert(interpolation != null),
        assert(peakPressure > startPressure),
-       super(debugOwner: debugOwner, kind: kind);
+       super(debugOwner: debugOwner, kind: kind, kindSet: kindSet);
 
   /// A pointer is in contact with the screen and has just pressed with a force
   /// exceeding the [startPressure]. Consequently, if there were other gesture

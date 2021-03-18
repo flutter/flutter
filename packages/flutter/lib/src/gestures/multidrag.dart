@@ -202,7 +202,8 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
   MultiDragGestureRecognizer({
     required Object? debugOwner,
     PointerDeviceKind? kind,
-  }) : super(debugOwner: debugOwner, kind: kind);
+    Set<PointerDeviceKind>? kindSet,
+  }) : super(debugOwner: debugOwner, kind: kind, kindSet: kindSet);
 
   /// Called when this class recognizes the start of a drag gesture.
   ///
@@ -351,7 +352,8 @@ class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Im
   ImmediateMultiDragGestureRecognizer({
     Object? debugOwner,
     PointerDeviceKind? kind,
-  }) : super(debugOwner: debugOwner, kind: kind);
+    Set<PointerDeviceKind>? kindSet,
+  }) : super(debugOwner: debugOwner, kind: kind, kindSet: kindSet);
 
   @override
   _ImmediatePointerState createNewPointerState(PointerDownEvent event) {
@@ -400,7 +402,8 @@ class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_H
   HorizontalMultiDragGestureRecognizer({
     Object? debugOwner,
     PointerDeviceKind? kind,
-  }) : super(debugOwner: debugOwner, kind: kind);
+    Set<PointerDeviceKind>? kindSet,
+  }) : super(debugOwner: debugOwner, kind: kind, kindSet: kindSet);
 
   @override
   _HorizontalPointerState createNewPointerState(PointerDownEvent event) {
@@ -449,7 +452,8 @@ class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Ver
   VerticalMultiDragGestureRecognizer({
     Object? debugOwner,
     PointerDeviceKind? kind,
-  }) : super(debugOwner: debugOwner, kind: kind);
+    Set<PointerDeviceKind>? kindSet,
+  }) : super(debugOwner: debugOwner, kind: kind, kindSet: kindSet);
 
   @override
   _VerticalPointerState createNewPointerState(PointerDownEvent event) {
@@ -552,8 +556,9 @@ class DelayedMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Dela
     this.delay = kLongPressTimeout,
     Object? debugOwner,
     PointerDeviceKind? kind,
+    Set<PointerDeviceKind>? kindSet,
   }) : assert(delay != null),
-       super(debugOwner: debugOwner, kind: kind);
+       super(debugOwner: debugOwner, kind: kind, kindSet: kindSet);
 
   /// The amount of time the pointer must remain in the same place for the drag
   /// to be recognized.

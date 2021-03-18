@@ -251,9 +251,10 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   ScaleGestureRecognizer({
     Object? debugOwner,
     PointerDeviceKind? kind,
+    Set<PointerDeviceKind>? kindSet,
     this.dragStartBehavior = DragStartBehavior.down,
   }) : assert(dragStartBehavior != null),
-       super(debugOwner: debugOwner, kind: kind);
+       super(debugOwner: debugOwner, kind: kind, kindSet: kindSet);
 
   /// Determines what point is used as the starting point in all calculations
   /// involving this gesture.
