@@ -407,7 +407,7 @@ class RestorableDateTimeN extends RestorableValue<DateTime?> {
   }
 
   @override
-  DateTime fromPrimitives(Object? data) => DateTime.fromMillisecondsSinceEpoch(data! as int);
+  DateTime? fromPrimitives(Object? data) => data != null ? DateTime.fromMillisecondsSinceEpoch(data as int) : null;
 
   @override
   Object? toPrimitives() => value?.millisecondsSinceEpoch;

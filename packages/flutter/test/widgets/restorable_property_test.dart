@@ -19,6 +19,7 @@ void main() {
     expect(() => RestorableBoolN(true).value, throwsAssertionError);
     expect(() => RestorableTextEditingController().value, throwsAssertionError);
     expect(() => RestorableDateTime(DateTime(2020, 4, 3)).value, throwsAssertionError);
+    expect(() => RestorableDateTimeN(DateTime(2020, 4, 3)).value, throwsAssertionError);
     expect(() => _TestRestorableValue().value, throwsAssertionError);
   });
 
@@ -34,8 +35,14 @@ void main() {
     expect(state.intValue.value, 42);
     expect(state.stringValue.value, 'hello world');
     expect(state.boolValue.value, false);
-    expect(state.controllerValue.value.text, 'FooBar');
     expect(state.dateTimeValue.value, DateTime(2021, 3, 16));
+    expect(state.nullableNumValue.value, null);
+    expect(state.nullableDoubleValue.value, null);
+    expect(state.nullableIntValue.value, null);
+    expect(state.nullableStringValue.value, null);
+    expect(state.nullableBoolValue.value, null);
+    expect(state.nullableDateTimeValue.value, null);
+    expect(state.controllerValue.value.text, 'FooBar');
     expect(state.objectValue.value, 55);
 
     // Modify values.
@@ -45,8 +52,14 @@ void main() {
       state.intValue.value = 10;
       state.stringValue.value = 'guten tag';
       state.boolValue.value = true;
-      state.controllerValue.value.text = 'blabla';
       state.dateTimeValue.value = DateTime(2020, 7, 4);
+      state.nullableNumValue.value = 5.0;
+      state.nullableDoubleValue.value = 2.0;
+      state.nullableIntValue.value = 1;
+      state.nullableStringValue.value = 'hullo';
+      state.nullableBoolValue.value = false;
+      state.nullableDateTimeValue.value = DateTime(2020, 4, 4);
+      state.controllerValue.value.text = 'blabla';
       state.objectValue.value = 53;
     });
     await tester.pump();
@@ -56,8 +69,14 @@ void main() {
     expect(state.intValue.value, 10);
     expect(state.stringValue.value, 'guten tag');
     expect(state.boolValue.value, true);
-    expect(state.controllerValue.value.text, 'blabla');
     expect(state.dateTimeValue.value, DateTime(2020, 7, 4));
+    expect(state.nullableNumValue.value, 5.0);
+    expect(state.nullableDoubleValue.value, 2.0);
+    expect(state.nullableIntValue.value, 1);
+    expect(state.nullableStringValue.value, 'hullo');
+    expect(state.nullableBoolValue.value, false);
+    expect(state.nullableDateTimeValue.value, DateTime(2020, 4, 4));
+    expect(state.controllerValue.value.text, 'blabla');
     expect(state.objectValue.value, 53);
     expect(find.text('guten tag'), findsOneWidget);
   });
@@ -77,8 +96,14 @@ void main() {
     expect(state.intValue.value, 42);
     expect(state.stringValue.value, 'hello world');
     expect(state.boolValue.value, false);
-    expect(state.controllerValue.value.text, 'FooBar');
     expect(state.dateTimeValue.value, DateTime(2021, 3, 16));
+    expect(state.nullableNumValue.value, null);
+    expect(state.nullableDoubleValue.value, null);
+    expect(state.nullableIntValue.value, null);
+    expect(state.nullableStringValue.value, null);
+    expect(state.nullableBoolValue.value, null);
+    expect(state.nullableDateTimeValue.value, null);
+    expect(state.controllerValue.value.text, 'FooBar');
     expect(state.objectValue.value, 55);
 
     // Modify values.
@@ -88,8 +113,14 @@ void main() {
       state.intValue.value = 10;
       state.stringValue.value = 'guten tag';
       state.boolValue.value = true;
-      state.controllerValue.value.text = 'blabla';
       state.dateTimeValue.value = DateTime(2020, 7, 4);
+      state.nullableNumValue.value = 5.0;
+      state.nullableDoubleValue.value = 2.0;
+      state.nullableIntValue.value = 1;
+      state.nullableStringValue.value = 'hullo';
+      state.nullableBoolValue.value = false;
+      state.nullableDateTimeValue.value = DateTime(2020, 4, 4);
+      state.controllerValue.value.text = 'blabla';
       state.objectValue.value = 53;
     });
     await tester.pump();
@@ -99,8 +130,14 @@ void main() {
     expect(state.intValue.value, 10);
     expect(state.stringValue.value, 'guten tag');
     expect(state.boolValue.value, true);
-    expect(state.controllerValue.value.text, 'blabla');
     expect(state.dateTimeValue.value, DateTime(2020, 7, 4));
+    expect(state.nullableNumValue.value, 5.0);
+    expect(state.nullableDoubleValue.value, 2.0);
+    expect(state.nullableIntValue.value, 1);
+    expect(state.nullableStringValue.value, 'hullo');
+    expect(state.nullableBoolValue.value, false);
+    expect(state.nullableDateTimeValue.value, DateTime(2020, 4, 4));
+    expect(state.controllerValue.value.text, 'blabla');
     expect(state.objectValue.value, 53);
     expect(find.text('guten tag'), findsOneWidget);
 
@@ -115,8 +152,14 @@ void main() {
     expect(state.intValue.value, 10);
     expect(state.stringValue.value, 'guten tag');
     expect(state.boolValue.value, true);
-    expect(state.controllerValue.value.text, 'blabla');
     expect(state.dateTimeValue.value, DateTime(2020, 7, 4));
+    expect(state.nullableNumValue.value, 5.0);
+    expect(state.nullableDoubleValue.value, 2.0);
+    expect(state.nullableIntValue.value, 1);
+    expect(state.nullableStringValue.value, 'hullo');
+    expect(state.nullableBoolValue.value, false);
+    expect(state.nullableDateTimeValue.value, DateTime(2020, 4, 4));
+    expect(state.controllerValue.value.text, 'blabla');
     expect(state.objectValue.value, 53);
     expect(find.text('guten tag'), findsOneWidget);
   });
@@ -396,13 +439,14 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
   final RestorableInt intValue = RestorableInt(42);
   final RestorableString stringValue = RestorableString('hello world');
   final RestorableBool boolValue = RestorableBool(false);
+  final RestorableDateTime dateTimeValue = RestorableDateTime(DateTime(2021, 3, 16));
   final RestorableNumN<num?> nullableNumValue = RestorableNumN<num?>(null);
   final RestorableDoubleN nullableDoubleValue = RestorableDoubleN(null);
   final RestorableIntN nullableIntValue = RestorableIntN(null);
   final RestorableStringN nullableStringValue = RestorableStringN(null);
   final RestorableBoolN nullableBoolValue = RestorableBoolN(null);
+  final RestorableDateTimeN nullableDateTimeValue = RestorableDateTimeN(null);
   final RestorableTextEditingController controllerValue = RestorableTextEditingController(text: 'FooBar');
-  final RestorableDateTime dateTimeValue = RestorableDateTime(DateTime(2021, 3, 16));
   final _TestRestorableValue objectValue = _TestRestorableValue();
 
   @override
@@ -412,13 +456,14 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
     registerForRestoration(intValue, 'int');
     registerForRestoration(stringValue, 'string');
     registerForRestoration(boolValue, 'bool');
+    registerForRestoration(dateTimeValue, 'dateTime');
     registerForRestoration(nullableNumValue, 'nullableNum');
     registerForRestoration(nullableDoubleValue, 'nullableDouble');
     registerForRestoration(nullableIntValue, 'nullableInt');
     registerForRestoration(nullableStringValue, 'nullableString');
     registerForRestoration(nullableBoolValue, 'nullableBool');
+    registerForRestoration(nullableDateTimeValue, 'nullableDateTime');
     registerForRestoration(controllerValue, 'controller');
-    registerForRestoration(dateTimeValue, 'dateTime');
     registerForRestoration(objectValue, 'object');
   }
 
