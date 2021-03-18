@@ -2707,7 +2707,7 @@ void main() {
       final List<TestPage> myPages = <TestPage>[];
       final FlutterExceptionHandler? originalOnError = FlutterError.onError;
       FlutterErrorDetails? firstError;
-      FlutterError.onError = (FlutterErrorDetails? detail) {
+      FlutterError.onError = (FlutterErrorDetails detail) {
         // We only care about the first error;
         firstError ??= detail;
       };
