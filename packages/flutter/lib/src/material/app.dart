@@ -692,7 +692,13 @@ class MaterialScrollBehavior extends ScrollBehavior {
   /// Creates a MaterialScrollBehavior that decorates [Scrollable]s with
   /// [GlowingOverscrollIndicator]s and [Scrollbar]s based on the current
   /// platform.
-  const MaterialScrollBehavior();
+  const MaterialScrollBehavior({
+    Set<TargetPlatform>? scrollbarPlatforms,
+    Set<TargetPlatform>? glowingPlatforms,
+  }) : super(
+    scrollbarPlatforms: scrollbarPlatforms,
+    glowingPlatforms: glowingPlatforms,
+  );
 
   @override
   TargetPlatform getPlatform(BuildContext context) {
@@ -707,30 +713,27 @@ class MaterialScrollBehavior extends ScrollBehavior {
   ) {
     final ThemeData theme = Theme.of(context);
     // When modifying this function, consider modifying the implementation in
-    // the base class as well.
-    // On Android and Fuchsia, we add a GlowingOverscrollIndicator.
-    // On Desktop platforms, when a ScrollController is provided, we add a
-    // Scrollbar.
-    switch (getPlatform(context)) {
-      case TargetPlatform.iOS:
-        return child;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        return GlowingOverscrollIndicator(
-          child: child,
-          axisDirection: details.direction,
-          color: theme.accentColor,
-        );
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        if (details.controller == null)
-          return child;
-        return Scrollbar(
-          child: child,
-          controller: details.controller,
-        );
+    // the base class and CupertinoScrollBehavior as well.
+    // By default:
+    //   * On Android and Fuchsia, we add a GlowingOverscrollIndicator.
+    //   * On Desktop platforms, when a controller is provided, we add a
+    //     RawScrollbar.
+    final TargetPlatform platform = getPlatform(context);
+
+    if ((glowingPlatforms ?? ScrollBehavior.defaultGlowingPlatforms).contains(platform)) {
+      child = GlowingOverscrollIndicator(
+        child: child,
+        axisDirection: details.direction,
+        color: theme.accentColor,
+      );
     }
+    if ((scrollbarPlatforms ?? ScrollBehavior.defaultScrollbarPlatforms).contains(platform)) {
+      child = RawScrollbar (
+        child: child,
+        controller: details.controller,
+      );
+    }
+    return child;
   }
 }
 

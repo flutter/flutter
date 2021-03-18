@@ -431,7 +431,12 @@ class CupertinoApp extends StatefulWidget {
 class CupertinoScrollBehavior extends ScrollBehavior {
   /// Creates a CupertinoScrollBehavior that uses [BouncingScrollPhysics] and
   /// adds [CupertinoScrollbar]s on desktop platforms.
-  const CupertinoScrollBehavior();
+  const CupertinoScrollBehavior({
+    Set<TargetPlatform>? scrollbarPlatforms,
+  }) : super(
+    scrollbarPlatforms: scrollbarPlatforms,
+    glowingPlatforms: const <TargetPlatform>{},
+  );
 
   @override
   Widget buildViewportDecoration(
@@ -439,24 +444,13 @@ class CupertinoScrollBehavior extends ScrollBehavior {
     Widget child,
     ScrollableDetails details,
   ) {
-    // GlowingOverscrollIndicator is not applicable.
-    // On Desktop, when a ScrollController is provided, we add a
-    // CupertinoScrollbar.
-    switch (getPlatform(context)) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.iOS:
-        return child;
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        if (details.controller == null)
-          return child;
-        return CupertinoScrollbar(
-          child: child,
-          controller: details.controller,
-        );
+    if ((scrollbarPlatforms ?? ScrollBehavior.defaultScrollbarPlatforms).contains(getPlatform(context))) {
+      return CupertinoScrollbar(
+        child: child,
+        controller: details.controller,
+      );
     }
+    return child;
   }
 
   @override

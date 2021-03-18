@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
@@ -40,6 +41,8 @@ class ScrollBehavior {
       'This feature was deprecated after v2.1.0-11.0.pre.'
     )
     bool useDecoration = false,
+    this.scrollbarPlatforms,
+    this.glowingPlatforms,
   }) : _useDecoration = useDecoration;
 
   // Whether [buildViewportChrome] or [buildViewportDecoration] should be used
@@ -47,6 +50,25 @@ class ScrollBehavior {
   //
   // This is used to maintain subclass behavior to allow for graceful migration.
   final bool _useDecoration;
+
+  ///
+  final Set<TargetPlatform>? scrollbarPlatforms;
+
+  ///
+  static Set<TargetPlatform> get defaultScrollbarPlatforms => <TargetPlatform>{
+    TargetPlatform.linux,
+    TargetPlatform.macOS,
+    TargetPlatform.windows,
+  };
+
+  ///
+  final Set<TargetPlatform>? glowingPlatforms;
+
+  ///
+  static Set<TargetPlatform> get defaultGlowingPlatforms => <TargetPlatform>{
+    TargetPlatform.android,
+    TargetPlatform.fuchsia,
+  };
 
   /// The platform whose scroll physics should be implemented.
   ///
@@ -58,37 +80,34 @@ class ScrollBehavior {
   /// For example, on Android, this method wraps the given widget with a
   /// [GlowingOverscrollIndicator] to provide visual feedback when the user
   /// overscrolls.
+  ///
+  /// This method is deprecated. Use [ScrollBehavior.buildViewportDecoration].
   @Deprecated(
     'Migrate to buildViewportDecoration. '
     'This feature was deprecated after v2.1.0-11.0.pre.'
   )
   Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
     // When modifying this function, consider modifying the implementation in
-    // MaterialScrollBehavior as well.
-    switch (getPlatform(context)) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        return child;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        return GlowingOverscrollIndicator(
-          child: child,
-          axisDirection: axisDirection,
-          color: _kDefaultGlowColor,
-        );
+    // MaterialScrollBehavior and CupertinoScrollBehavior as well.
+    if ((glowingPlatforms ?? ScrollBehavior.defaultGlowingPlatforms).contains(getPlatform(context))) {
+      child = GlowingOverscrollIndicator(
+        child: child,
+        axisDirection: axisDirection,
+        color: _kDefaultGlowColor,
+      );
     }
+    return child;
   }
 
-  /// Wraps the given widget based on the information provided by [ScrollableDetails].
+  /// Wraps the given widget with the information provided by [ScrollableDetails].
   ///
-  /// For example, based on the platform and provided details, this method
-  /// could wrap a given widget with a [GlowingOverscrollIndicator] to provide
-  /// visual feedback when the user overscrolls.
+  /// Based on the platforms designated by [glowingPlatforms], or
+  /// the [defaultGlowingPlatforms], this method could wrap a given widget with
+  /// a [GlowingOverscrollIndicator] to provide visual feedback when the user overscrolls.
   ///
-  /// When the [ScrollableDetails.controller] is provided, a [Scrollbar] is applied
-  /// to the [Scrollable] child.
+  /// Based on the platforms designated by [scrollbarPlatforms], or
+  /// the [defaultScrollbarPlatforms], this method could wrap a given widget with
+  /// a [Scrollbar].
   Widget buildViewportDecoration(
     BuildContext context,
     Widget child,
@@ -101,28 +120,24 @@ class ScrollBehavior {
 
     // When modifying this function, consider modifying the implementation in
     // MaterialScrollBehavior and CupertinoScrollBehavior as well.
-    // On Android and Fuchsia, we add a GlowingOverscrollIndicator.
-    // On Desktop platforms, when a controller is provided, we add a RawScrollbar.
-    switch (getPlatform(context)) {
-      case TargetPlatform.iOS:
-        break;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        child = GlowingOverscrollIndicator(
-          child: child,
-          axisDirection: details.direction,
-          color: _kDefaultGlowColor,
-        );
-        break;
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        child = details.controller != null
-          ? RawScrollbar(
-            child: child,
-            controller: details.controller,
-          )
-          : child;
+    // By default:
+    //   * On Android and Fuchsia, we add a GlowingOverscrollIndicator.
+    //   * On Desktop platforms, when a controller is provided, we add a
+    //     RawScrollbar.
+    final TargetPlatform platform = getPlatform(context);
+
+    if ((glowingPlatforms ?? ScrollBehavior.defaultGlowingPlatforms).contains(platform)) {
+      child = GlowingOverscrollIndicator(
+        child: child,
+        axisDirection: details.direction,
+        color: _kDefaultGlowColor,
+      );
+    }
+    if ((scrollbarPlatforms ?? ScrollBehavior.defaultScrollbarPlatforms).contains(platform)) {
+      child = RawScrollbar (
+        child: child,
+        controller: details.controller,
+      );
     }
     return child;
   }
