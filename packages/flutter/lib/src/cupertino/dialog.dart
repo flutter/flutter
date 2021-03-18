@@ -13,6 +13,7 @@ import 'colors.dart';
 import 'interface_level.dart';
 import 'localizations.dart';
 import 'scrollbar.dart';
+import 'theme.dart';
 
 // TODO(abarth): These constants probably belong somewhere more general.
 
@@ -49,6 +50,7 @@ const TextStyle _kCupertinoDialogActionStyle = TextStyle(
   textBaseline: TextBaseline.alphabetic,
 );
 
+// CupertinoActionSheet-specific text styles.
 const TextStyle _kActionSheetActionStyle = TextStyle(
   fontFamily: '.SF UI Text',
   inherit: false,
@@ -62,65 +64,32 @@ const TextStyle _kActionSheetContentStyle = TextStyle(
   inherit: false,
   fontSize: 13.0,
   fontWeight: FontWeight.w400,
-  color: _kContentTextColor,
+  color: _kActionSheetContentTextColor,
   textBaseline: TextBaseline.alphabetic,
 );
 
-// Translucent, very light gray that is painted on top of the blurred backdrop
-// as the action sheet's background color.
-// TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/39272. Use
-// System Materials once we have them.
-// Extracted from https://developer.apple.com/design/resources/.
-const Color _kBackgroundColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0xC7F9F9F9),
-  darkColor: Color(0xC7252525),
-);
-
-// Translucent, light gray that is painted on top of the blurred backdrop as
-// the background color of a pressed button.
-// Eye-balled from iOS 13 beta simulator.
-const Color _kPressedColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0xFFE1E1E1),
-  darkColor: Color(0xFF2E2E2E),
-);
-
-const Color _kCancelPressedColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0xFFECECEC),
-  darkColor: Color(0xFF49494B),
-);
-
-// The gray color used for text that appears in the title area.
-// Extracted from https://developer.apple.com/design/resources/.
-const Color _kContentTextColor = Color(0xFF8F8F8F);
-
-// Translucent gray that is painted on top of the blurred backdrop in the gap
-// areas between the content section and actions section, as well as between
-// buttons.
-// Eye-balled from iOS 13 beta simulator.
-const Color _kButtonDividerColor = _kContentTextColor;
-
+// Generic constants shared between Dialog and ActionSheet.
 const double _kBlurAmount = 20.0;
-const double _kEdgeHorizontalPadding = 8.0;
-const double _kCancelButtonPadding = 8.0;
-const double _kEdgeVerticalPadding = 10.0;
-const double _kContentHorizontalPadding = 40.0;
-const double _kContentVerticalPadding = 14.0;
-const double _kButtonHeight = 56.0;
 const double _kCornerRadius = 14.0;
 const double _kDividerThickness = 1.0;
 
+// Dialog specific constants.
 // iOS dialogs have a normal display width and another display width that is
 // used when the device is in accessibility mode. Each of these widths are
 // listed below.
 const double _kCupertinoDialogWidth = 270.0;
 const double _kAccessibilityCupertinoDialogWidth = 310.0;
+const double _kDialogEdgePadding = 20.0;
+const double _kDialogMinButtonHeight = 45.0;
+const double _kDialogMinButtonFontSize = 10.0;
 
-const double _kBlurAmount = 20.0;
-const double _kEdgePadding = 20.0;
-const double _kMinButtonHeight = 45.0;
-const double _kMinButtonFontSize = 10.0;
-const double _kDialogCornerRadius = 14.0;
-const double _kDividerThickness = 1.0;
+// ActionSheet specific constants.
+const double _kActionSheetEdgeHorizontalPadding = 8.0;
+const double _kActionSheetCancelButtonPadding = 8.0;
+const double _kActionSheetEdgeVerticalPadding = 10.0;
+const double _kActionSheetContentHorizontalPadding = 40.0;
+const double _kActionSheetContentVerticalPadding = 14.0;
+const double _kActionSheetButtonHeight = 56.0;
 
 // A translucent color that is painted on top of the blurred backdrop as the
 // dialog's background color
@@ -133,10 +102,36 @@ const Color _kDialogColor = CupertinoDynamicColor.withBrightness(
 // Translucent light gray that is painted on top of the blurred backdrop as the
 // background color of a pressed button.
 // Eyeballed from iOS 13 beta simulator.
-const Color _kDialogPressedColor = CupertinoDynamicColor.withBrightness(
+const Color _kPressedColor = CupertinoDynamicColor.withBrightness(
   color: Color(0xFFE1E1E1),
   darkColor: Color(0xFF2E2E2E),
 );
+
+const Color _kActionSheetCancelPressedColor =
+    CupertinoDynamicColor.withBrightness(
+  color: Color(0xFFECECEC),
+  darkColor: Color(0xFF49494B),
+);
+
+// Translucent, very light gray that is painted on top of the blurred backdrop
+// as the action sheet's background color.
+// TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/39272. Use
+// System Materials once we have them.
+// Extracted from https://developer.apple.com/design/resources/.
+const Color _kActionSheetBackgroundColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xC7F9F9F9),
+  darkColor: Color(0xC7252525),
+);
+
+// The gray color used for text that appears in the title area.
+// Extracted from https://developer.apple.com/design/resources/.
+const Color _kActionSheetContentTextColor = Color(0xFF8F8F8F);
+
+// Translucent gray that is painted on top of the blurred backdrop in the gap
+// areas between the content section and actions section, as well as between
+// buttons.
+// Eye-balled from iOS 13 beta simulator.
+const Color _kActionSheetButtonDividerColor = _kActionSheetContentTextColor;
 
 // The alert dialog layout policy changes depending on whether the user is using
 // a "regular" font size vs a "large" font size. This is a spectrum. There are
@@ -311,7 +306,7 @@ class CupertinoAlertDialog extends StatelessWidget {
                 context: context,
                 child: Center(
                   child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: _kEdgePadding),
+                    margin: const EdgeInsets.symmetric(vertical: _kDialogEdgePadding),
                     width: isInAccessibilityMode
                       ? _kAccessibilityCupertinoDialogWidth
                       : _kCupertinoDialogWidth,
@@ -378,7 +373,7 @@ class CupertinoPopupSurface extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(_kDialogCornerRadius),
+      borderRadius: BorderRadius.circular(_kCornerRadius),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
         child: Container(
@@ -539,7 +534,7 @@ class CupertinoActionSheet extends StatelessWidget {
     }
 
     return Container(
-      color: CupertinoDynamicColor.resolve(_kBackgroundColor, context),
+      color: CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -563,7 +558,7 @@ class CupertinoActionSheet extends StatelessWidget {
 
   Widget _buildCancelButton() {
     final double cancelPadding = (actions != null || message != null || title != null)
-        ? _kCancelButtonPadding : 0.0;
+        ? _kActionSheetCancelButtonPadding : 0.0;
     return Padding(
       padding: EdgeInsets.only(top: cancelPadding),
       child: _CupertinoActionSheetCancelButton(
@@ -594,9 +589,9 @@ class CupertinoActionSheet extends StatelessWidget {
     final Orientation orientation = MediaQuery.of(context).orientation;
     final double actionSheetWidth;
     if (orientation == Orientation.portrait) {
-      actionSheetWidth = MediaQuery.of(context).size.width - (_kEdgeHorizontalPadding * 2);
+      actionSheetWidth = MediaQuery.of(context).size.width - (_kActionSheetEdgeHorizontalPadding * 2);
     } else {
-      actionSheetWidth = MediaQuery.of(context).size.height - (_kEdgeHorizontalPadding * 2);
+      actionSheetWidth = MediaQuery.of(context).size.height - (_kActionSheetEdgeHorizontalPadding * 2);
     }
 
     return SafeArea(
@@ -610,8 +605,8 @@ class CupertinoActionSheet extends StatelessWidget {
           child: Container(
             width: actionSheetWidth,
             margin: const EdgeInsets.symmetric(
-              horizontal: _kEdgeHorizontalPadding,
-              vertical: _kEdgeVerticalPadding,
+              horizontal: _kActionSheetEdgeHorizontalPadding,
+              vertical: _kActionSheetEdgeVerticalPadding,
             ),
             child: Column(
               children: children,
@@ -682,7 +677,7 @@ class CupertinoActionSheetAction extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       child: ConstrainedBox(
         constraints: const BoxConstraints(
-          minHeight: _kButtonHeight,
+          minHeight: _kActionSheetButtonHeight,
         ),
         child: Semantics(
           button: true,
@@ -734,7 +729,7 @@ class _CupertinoActionSheetCancelButtonState extends State<_CupertinoActionSheet
   @override
   Widget build(BuildContext context) {
     final Color backgroundColor = isBeingPressed
-      ? _kCancelPressedColor
+      ? _kActionSheetCancelPressedColor
       : CupertinoColors.secondarySystemGroupedBackground;
     return GestureDetector(
       excludeFromSemantics: true,
@@ -767,14 +762,14 @@ class _CupertinoAlertRenderWidget extends RenderObjectWidget {
     assert(debugCheckHasMediaQuery(context));
     return _RenderCupertinoAlert(
       dividerThickness: _kDividerThickness / MediaQuery.of(context).devicePixelRatio,
-      dividerColor: CupertinoDynamicColor.resolve(_kButtonDividerColor, context),
+      dividerColor: CupertinoDynamicColor.resolve(_kActionSheetButtonDividerColor, context),
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderCupertinoAlert renderObject) {
     super.updateRenderObject(context, renderObject);
-    renderObject.dividerColor = CupertinoDynamicColor.resolve(_kButtonDividerColor, context);
+    renderObject.dividerColor = CupertinoDynamicColor.resolve(_kActionSheetButtonDividerColor, context);
   }
 
   @override
@@ -1132,7 +1127,7 @@ class _RenderCupertinoAlert extends RenderBox {
     double height = contentHeight + (hasDivider ? _dividerThickness : 0.0) + actionsHeight;
 
     if (actionsHeight > 0 || contentHeight > 0)
-      height -= 2 * _kEdgeVerticalPadding;
+      height -= 2 * _kActionSheetEdgeVerticalPadding;
     if (height.isFinite)
       return height;
     return 0.0;
@@ -1146,7 +1141,7 @@ class _RenderCupertinoAlert extends RenderBox {
     double height = contentHeight + (hasDivider ? _dividerThickness : 0.0) + actionsHeight;
 
     if (actionsHeight > 0 || contentHeight > 0)
-      height -= 2 * _kEdgeVerticalPadding;
+      height -= 2 * _kActionSheetEdgeVerticalPadding;
     if (height.isFinite)
       return height;
     return 0.0;
@@ -1666,10 +1661,10 @@ class _CupertinoAlertContentSection extends StatelessWidget {
     if (title != null) {
       titleContentGroup.add(Padding(
         padding: const EdgeInsets.only(
-          left: _kContentHorizontalPadding,
-          right: _kContentHorizontalPadding,
-          bottom: _kContentVerticalPadding,
-          top: _kContentVerticalPadding,
+          left: _kActionSheetContentHorizontalPadding,
+          right: _kActionSheetContentHorizontalPadding,
+          bottom: _kActionSheetContentVerticalPadding,
+          top: _kActionSheetContentVerticalPadding,
         ),
         child: DefaultTextStyle(
           style: message == null ? _kActionSheetContentStyle
@@ -1684,10 +1679,10 @@ class _CupertinoAlertContentSection extends StatelessWidget {
       titleContentGroup.add(
         Padding(
           padding: EdgeInsets.only(
-            left: _kContentHorizontalPadding,
-            right: _kContentHorizontalPadding,
-            bottom: title == null ? _kContentVerticalPadding : 22.0,
-            top: title == null ? _kContentVerticalPadding : 0.0,
+            left: _kActionSheetContentHorizontalPadding,
+            right: _kActionSheetContentHorizontalPadding,
+            bottom: title == null ? _kActionSheetContentVerticalPadding : 22.0,
+            top: title == null ? _kActionSheetContentVerticalPadding : 0.0,
           ),
           child: DefaultTextStyle(
             style: title == null ? _kActionSheetContentStyle.copyWith(fontWeight: FontWeight.w600)
@@ -1773,10 +1768,10 @@ class _CupertinoAlertContentSection extends StatelessWidget {
       if (title != null)
         Padding(
           padding: EdgeInsets.only(
-            left: _kEdgePadding,
-            right: _kEdgePadding,
-            bottom: content == null ? _kEdgePadding : 1.0,
-            top: _kEdgePadding * textScaleFactor,
+            left: _kDialogEdgePadding,
+            right: _kDialogEdgePadding,
+            bottom: content == null ? _kDialogEdgePadding : 1.0,
+            top: _kDialogEdgePadding * textScaleFactor,
           ),
           child: DefaultTextStyle(
             style: _kCupertinoDialogTitleStyle.copyWith(
@@ -1789,10 +1784,10 @@ class _CupertinoAlertContentSection extends StatelessWidget {
       if (content != null)
         Padding(
           padding: EdgeInsets.only(
-            left: _kEdgePadding,
-            right: _kEdgePadding,
-            bottom: _kEdgePadding * textScaleFactor,
-            top: title == null ? _kEdgePadding : 1.0,
+            left: _kDialogEdgePadding,
+            right: _kDialogEdgePadding,
+            bottom: _kDialogEdgePadding * textScaleFactor,
+            top: title == null ? _kDialogEdgePadding : 1.0,
           ),
           child: DefaultTextStyle(
             style: _kCupertinoDialogContentStyle.copyWith(
@@ -2178,7 +2173,7 @@ class CupertinoDialogAction extends StatelessWidget {
     // iOS scale factor) vs the minimum text size that we allow in action
     // buttons. This ratio information is used to automatically scale down action
     // button text to fit the available space.
-    final double fontSizeRatio = (textScaleFactor * textStyle.fontSize!) / _kMinButtonFontSize;
+    final double fontSizeRatio = (textScaleFactor * textStyle.fontSize!) / _kDialogMinButtonFontSize;
     final double padding = _calculatePadding(context);
 
     return IntrinsicHeight(
@@ -2262,7 +2257,7 @@ class CupertinoDialogAction extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       child: ConstrainedBox(
         constraints: const BoxConstraints(
-          minHeight: _kMinButtonHeight,
+          minHeight: _kDialogMinButtonHeight,
         ),
         child: Container(
           alignment: Alignment.center,
@@ -2294,9 +2289,9 @@ class _CupertinoAlertActionsRenderWidget extends MultiChildRenderObjectWidget {
   RenderObject createRenderObject(BuildContext context) {
     return _RenderCupertinoAlertActions(
       dividerThickness: _dividerThickness,
-      dividerColor: CupertinoDynamicColor.resolve(_kButtonDividerColor, context),
+      dividerColor: CupertinoDynamicColor.resolve(_kActionSheetButtonDividerColor, context),
       hasCancelButton: _hasCancelButton,
-      backgroundColor: CupertinoDynamicColor.resolve(_kBackgroundColor, context),
+      backgroundColor: CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context),
       pressedColor: CupertinoDynamicColor.resolve(_kPressedColor, context),
     );
   }
@@ -2305,9 +2300,9 @@ class _CupertinoAlertActionsRenderWidget extends MultiChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderCupertinoAlertActions renderObject) {
     renderObject
       ..dividerThickness = _dividerThickness
-      ..dividerColor = CupertinoDynamicColor.resolve(_kButtonDividerColor, context)
+      ..dividerColor = CupertinoDynamicColor.resolve(_kActionSheetButtonDividerColor, context)
       ..hasCancelButton = _hasCancelButton
-      ..backgroundColor = CupertinoDynamicColor.resolve(_kBackgroundColor, context)
+      ..backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context)
       ..pressedColor = CupertinoDynamicColor.resolve(_kPressedColor, context);
   }
 }
@@ -2337,7 +2332,7 @@ class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
         : _kCupertinoDialogWidth,
       dividerThickness: _dividerThickness,
       dialogColor: CupertinoDynamicColor.resolve(_kDialogColor, context),
-      dialogPressedColor: CupertinoDynamicColor.resolve(_kDialogPressedColor, context),
+      dialogPressedColor: CupertinoDynamicColor.resolve(_kPressedColor, context),
       dividerColor: CupertinoDynamicColor.resolve(CupertinoColors.separator, context),
     );
   }
@@ -2350,7 +2345,7 @@ class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
         : _kCupertinoDialogWidth
       ..dividerThickness = _dividerThickness
       ..dialogColor = CupertinoDynamicColor.resolve(_kDialogColor, context)
-      ..dialogPressedColor = CupertinoDynamicColor.resolve(_kDialogPressedColor, context)
+      ..dialogPressedColor = CupertinoDynamicColor.resolve(_kPressedColor, context)
       ..dividerColor = CupertinoDynamicColor.resolve(CupertinoColors.separator, context);
   }
 }
