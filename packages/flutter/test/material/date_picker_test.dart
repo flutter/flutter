@@ -1210,8 +1210,8 @@ void main() {
     await tester.tapAt(const Offset(10.0, 10.0));
     await tester.pumpAndSettle();
 
-    // The date picker should be closed, the text value updated to the
-    // newly selected date.
+    // The date picker should be closed, the text value should be the same
+    // as before.
     expect(find.byType(DatePickerDialog), findsNothing);
     expect(find.text('25/7/2021'), findsOneWidget);
 
