@@ -73,13 +73,6 @@ class FileSystemUtils {
     }
   }
 
-  /// Return a relative path if [fullPath] is contained by the cwd, else return an
-  /// absolute path.
-  String getDisplayPath(String fullPath) {
-    final String cwd = _fileSystem.currentDirectory.path + _fileSystem.path.separator;
-    return fullPath.startsWith(cwd) ? fullPath.substring(cwd.length) : fullPath;
-  }
-
   /// Escapes [path].
   ///
   /// On Windows it replaces all '\' with '\\'. On other platforms, it returns the
@@ -115,6 +108,13 @@ class FileSystemUtils {
   }
 }
 
+/// Return a relative path if [fullPath] is contained by the cwd, else return an
+/// absolute path.
+String getDisplayPath(String fullPath, FileSystem fileSystem) {
+  final String cwd = fileSystem.currentDirectory.path + fileSystem.path.separator;
+  return fullPath.startsWith(cwd) ? fullPath.substring(cwd.length) : fullPath;
+}
+
 /// Creates `destDir` if needed, then recursively copies `srcDir` to
 /// `destDir`, invoking [onFileCopied], if specified, for each
 /// source/destination file pair.
@@ -123,8 +123,8 @@ class FileSystemUtils {
 void copyDirectory(
   Directory srcDir,
   Directory destDir, {
-  bool shouldCopyFile(File srcFile, File destFile),
-  void onFileCopied(File srcFile, File destFile),
+  bool Function(File srcFile, File destFile) shouldCopyFile,
+  void Function(File srcFile, File destFile) onFileCopied,
 }) {
   if (!srcDir.existsSync()) {
     throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
@@ -235,7 +235,6 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
       // exits normally.
       shutdownHooks?.addShutdownHook(
         _tryToDeleteTemp,
-        ShutdownStage.CLEANUP,
       );
     }
     return _systemTemp;

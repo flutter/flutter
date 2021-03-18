@@ -27,7 +27,7 @@ import 'package:package_config/package_config.dart';
 import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
+import '../src/context.dart' hide FakeOperatingSystemUtils;
 import '../src/fakes.dart';
 import '../src/pubspec_schema.dart';
 import '../src/testbed.dart';
@@ -44,7 +44,7 @@ void main() {
     MockWindowsProject windowsProject;
     MockLinuxProject linuxProject;
     FakeSystemClock systemClock;
-    FlutterVersion mockVersion;
+    FlutterVersion flutterVersion;
     // A Windows-style filesystem. This is not populated by default, so tests
     // using it instead of fs must re-run any necessary setup (e.g.,
     // setUpProject).
@@ -126,15 +126,11 @@ void main() {
       fsWindows = MemoryFileSystem(style: FileSystemStyle.windows);
       systemClock = FakeSystemClock()
         ..currentTime = DateTime(1970, 1, 1);
-      mockVersion = MockFlutterVersion();
+      flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0');
 
       // Add basic properties to the Flutter project and subprojects
       setUpProject(fs);
       flutterProject.directory.childFile('.packages').createSync(recursive: true);
-
-      when(mockVersion.frameworkVersion).thenAnswer(
-        (Invocation _) => '1.0.0'
-      );
     });
 
     // Makes fake plugin packages for each plugin, adds them to flutterProject,
@@ -436,10 +432,6 @@ dependencies:
 
         final DateTime dateCreated = DateTime(1970, 1, 1);
         systemClock.currentTime = dateCreated;
-        const String version = '1.0.0';
-        when(mockVersion.frameworkVersion).thenAnswer(
-          (Invocation _) => version
-        );
 
         await refreshPluginsList(flutterProject);
 
@@ -510,7 +502,7 @@ dependencies:
 
         expect(jsonContent['dependencyGraph'], expectedDependencyGraph);
         expect(jsonContent['date_created'], dateCreated.toString());
-        expect(jsonContent['version'], version);
+        expect(jsonContent['version'], '1.0.0');
 
         // Make sure tests are updated if a new object is added/removed.
         final List<String> expectedKeys = <String>[
@@ -525,7 +517,7 @@ dependencies:
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         SystemClock: () => systemClock,
-        FlutterVersion: () => mockVersion
+        FlutterVersion: () => flutterVersion
       });
 
       testUsingContext('Changes to the plugin list invalidates the Cocoapod lockfiles', () async {
@@ -542,7 +534,7 @@ dependencies:
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         SystemClock: () => systemClock,
-        FlutterVersion: () => mockVersion
+        FlutterVersion: () => flutterVersion
       });
 
       testUsingContext('No changes to the plugin list does not invalidate the Cocoapod lockfiles', () async {
@@ -565,7 +557,7 @@ dependencies:
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         SystemClock: () => systemClock,
-        FlutterVersion: () => mockVersion
+        FlutterVersion: () => flutterVersion
       });
     });
 
@@ -2167,8 +2159,7 @@ void main() {
 
     testWithoutContext('Symlink failures give developer mode instructions on recent versions of Windows', () async {
       final Platform platform = FakePlatform(operatingSystem: 'windows');
-      final MockOperatingSystemUtils os = MockOperatingSystemUtils();
-      when(os.name).thenReturn('Microsoft Windows [Version 10.0.14972.1]');
+      final FakeOperatingSystemUtils os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14972.1]');
 
       const FileSystemException e = FileSystemException('', '', OSError('', 1314));
 
@@ -2178,8 +2169,7 @@ void main() {
 
     testWithoutContext('Symlink failures instruct developers to run as administrator on older versions of Windows', () async {
       final Platform platform = FakePlatform(operatingSystem: 'windows');
-      final MockOperatingSystemUtils os = MockOperatingSystemUtils();
-      when(os.name).thenReturn('Microsoft Windows [Version 10.0.14393]');
+      final FakeOperatingSystemUtils os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14393]');
 
       const FileSystemException e = FileSystemException('', '', OSError('', 1314));
 
@@ -2189,8 +2179,7 @@ void main() {
 
     testWithoutContext('Symlink failures only give instructions for specific errors', () async {
       final Platform platform = FakePlatform(operatingSystem: 'windows');
-      final MockOperatingSystemUtils os = MockOperatingSystemUtils();
-      when(os.name).thenReturn('Microsoft Windows [Version 10.0.14393]');
+      final FakeOperatingSystemUtils os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14393]');
 
       const FileSystemException e = FileSystemException('', '', OSError('', 999));
 
@@ -2208,7 +2197,13 @@ class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterprete
 class MockWebProject extends Mock implements WebProject {}
 class MockWindowsProject extends Mock implements WindowsProject {}
 class MockLinuxProject extends Mock implements LinuxProject {}
-class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
+
+class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
+  FakeOperatingSystemUtils(this.name);
+
+  @override
+  final String name;
+}
 
 class FakeSystemClock extends Fake implements SystemClock {
   DateTime currentTime;

@@ -322,7 +322,6 @@ Future<int> exec(
   List<String> arguments, {
   Map<String, String> environment,
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
-  StringBuffer stderr, // if not null, the stderr will be written here
   String workingDirectory,
 }) async {
   return _execute(
@@ -330,7 +329,6 @@ Future<int> exec(
     arguments,
     environment: environment,
     canFail : canFail,
-    stderr: stderr,
     workingDirectory: workingDirectory,
   );
 }
@@ -514,7 +512,7 @@ Future<String> findJavaHome() async {
   return path.dirname(path.dirname(javaBinary));
 }
 
-Future<T> inDirectory<T>(dynamic directory, Future<T> action()) async {
+Future<T> inDirectory<T>(dynamic directory, Future<T> Function() action) async {
   final String previousCwd = cwd;
   try {
     cd(directory);
@@ -629,7 +627,7 @@ Iterable<String> grep(Pattern pattern, {@required String from}) {
 ///     } catch (error, chain) {
 ///
 ///     }
-Future<void> runAndCaptureAsyncStacks(Future<void> callback()) {
+Future<void> runAndCaptureAsyncStacks(Future<void> Function() callback) {
   final Completer<void> completer = Completer<void>();
   Chain.capture(() async {
     await callback();
@@ -750,7 +748,7 @@ Future<int> gitClone({String path, String repo}) async {
 
   await Directory(path).create(recursive: true);
 
-  return await inDirectory<int>(
+  return inDirectory<int>(
     path,
         () => exec('git', <String>['clone', repo]),
   );

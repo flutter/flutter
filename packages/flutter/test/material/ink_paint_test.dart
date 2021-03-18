@@ -45,7 +45,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Material(
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 200.0,
               height: 60.0,
               child: InkWell(
@@ -94,7 +94,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Material(
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 100.0,
               height: 100.0,
               child: InkWell(
@@ -258,7 +258,7 @@ void main() {
 
     final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
     Future<void> buildTest(Intent intent) async {
-      return await tester.pumpWidget(
+      return tester.pumpWidget(
         Shortcuts(
           shortcuts: <LogicalKeySet, Intent>{
             LogicalKeySet(LogicalKeyboardKey.space): intent,
@@ -267,7 +267,7 @@ void main() {
             textDirection: TextDirection.ltr,
             child: Material(
               child: Center(
-                child: Container(
+                child: SizedBox(
                   width: 100.0,
                   height: 100.0,
                   child: InkWell(
@@ -358,7 +358,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Material(
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 100.0,
               height: 100.0,
               child: InkWell(
@@ -394,7 +394,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Material(
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 100.0,
               height: 100.0,
               child: InkWell(

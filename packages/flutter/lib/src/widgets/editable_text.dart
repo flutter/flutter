@@ -12,7 +12,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
-import 'actions.dart';
 import 'autofill.dart';
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
@@ -27,13 +26,12 @@ import 'media_query.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
-import 'shortcuts.dart';
 import 'text.dart';
+import 'text_editing_action.dart';
 import 'text_selection.dart';
 import 'ticker_provider.dart';
 
-export 'package:flutter/rendering.dart' show SelectionChangedCause;
-export 'package:flutter/services.dart' show TextEditingValue, TextSelection, TextInputType, SmartQuotesType, SmartDashesType;
+export 'package:flutter/services.dart' show SelectionChangedCause, TextEditingValue, TextSelection, TextInputType, SmartQuotesType, SmartDashesType;
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
@@ -54,17 +52,6 @@ const Duration _kCursorBlinkWaitForStart = Duration(milliseconds: 150);
 // Number of cursor ticks during which the most recently entered character
 // is shown in an obscured text field.
 const int _kObscureShowLatestCharCursorTicks = 3;
-
-/// A map used to disable scrolling shortcuts in text fields.
-///
-/// This is a temporary fix for: https://github.com/flutter/flutter/issues/74191
-final Map<LogicalKeySet, Intent> scrollShortcutOverrides = <LogicalKeySet, Intent>{
-  LogicalKeySet(LogicalKeyboardKey.space): DoNothingAndStopPropagationIntent(),
-  LogicalKeySet(LogicalKeyboardKey.arrowUp): DoNothingAndStopPropagationIntent(),
-  LogicalKeySet(LogicalKeyboardKey.arrowDown): DoNothingAndStopPropagationIntent(),
-  LogicalKeySet(LogicalKeyboardKey.arrowLeft): DoNothingAndStopPropagationIntent(),
-  LogicalKeySet(LogicalKeyboardKey.arrowRight): DoNothingAndStopPropagationIntent(),
-};
 
 /// A controller for an editable text field.
 ///
@@ -102,12 +89,13 @@ final Map<LogicalKeySet, Intent> scrollShortcutOverrides = <LogicalKeySet, Inten
 /// cursor at the end of the input.
 ///
 /// ```dart
-/// final _controller = TextEditingController();
+/// final TextEditingController _controller = TextEditingController();
 ///
+/// @override
 /// void initState() {
 ///   super.initState();
 ///   _controller.addListener(() {
-///     final text = _controller.text.toLowerCase();
+///     final String text = _controller.text.toLowerCase();
 ///     _controller.value = _controller.value.copyWith(
 ///       text: text,
 ///       selection: TextSelection(baseOffset: text.length, extentOffset: text.length),
@@ -116,11 +104,13 @@ final Map<LogicalKeySet, Intent> scrollShortcutOverrides = <LogicalKeySet, Inten
 ///   });
 /// }
 ///
+/// @override
 /// void dispose() {
 ///   _controller.dispose();
 ///   super.dispose();
 /// }
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     body: Container(
@@ -128,7 +118,7 @@ final Map<LogicalKeySet, Intent> scrollShortcutOverrides = <LogicalKeySet, Inten
 ///       padding: const EdgeInsets.all(6),
 ///       child: TextFormField(
 ///         controller: _controller,
-///         decoration: InputDecoration(border: OutlineInputBorder()),
+///         decoration: const InputDecoration(border: OutlineInputBorder()),
 ///       ),
 ///     ),
 ///   );
@@ -958,11 +948,13 @@ class EditableText extends StatefulWidget {
   /// ```dart
   /// final TextEditingController _controller = TextEditingController();
   ///
+  /// @override
   /// void dispose() {
   ///   _controller.dispose();
   ///   super.dispose();
   /// }
   ///
+  /// @override
   /// Widget build(BuildContext context) {
   ///   return Scaffold(
   ///     body: Column(
@@ -981,7 +973,7 @@ class EditableText extends StatefulWidget {
   ///               builder: (BuildContext context) {
   ///                 return AlertDialog(
   ///                   title: const Text('That is correct!'),
-  ///                   content: Text ('13 is the right answer.'),
+  ///                   content: const Text ('13 is the right answer.'),
   ///                   actions: <Widget>[
   ///                     TextButton(
   ///                       onPressed: () { Navigator.pop(context); },
@@ -1492,7 +1484,7 @@ class EditableText extends StatefulWidget {
 }
 
 /// State for a [EditableText].
-class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText> implements TextSelectionDelegate, TextInputClient, AutofillClient {
+class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText>, TextSelectionDelegate implements TextInputClient, AutofillClient, TextEditingActionTarget {
   Timer? _cursorTimer;
   bool _targetCursorVisibility = false;
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(true);
@@ -1727,7 +1719,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     if (value.text == _value.text && value.composing == _value.composing) {
       // `selection` is the only change.
-      _handleSelectionChanged(value.selection, renderEditable, SelectionChangedCause.keyboard);
+      _handleSelectionChanged(value.selection, SelectionChangedCause.keyboard);
     } else {
       hideToolbar();
       _currentPromptRectRange = null;
@@ -1739,7 +1731,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         }
       }
 
-      _formatAndSetValue(value);
+      _formatAndSetValue(value, SelectionChangedCause.keyboard);
     }
 
     // Wherever the value is changed by the user, schedule a showCaretOnScreen
@@ -1852,7 +1844,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       renderEditable.setFloatingCursor(FloatingCursorDragState.End, finalPosition, _lastTextPosition!);
       if (_lastTextPosition!.offset != renderEditable.selection!.baseOffset)
         // The cause is technically the force cursor, but the cause is listed as tap as the desired functionality is the same.
-        _handleSelectionChanged(TextSelection.collapsed(offset: _lastTextPosition!.offset), renderEditable, SelectionChangedCause.forcePress);
+        _handleSelectionChanged(TextSelection.collapsed(offset: _lastTextPosition!.offset), SelectionChangedCause.forcePress);
       _startCaretRect = null;
       _lastTextPosition = null;
       _pointOffsetOrigin = null;
@@ -2118,7 +2110,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  void _handleSelectionChanged(TextSelection selection, RenderEditable renderObject, SelectionChangedCause? cause) {
+  void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
     // We return early if the selection is not valid. This can happen when the
     // text of [EditableText] is updated at the same time as the selection is
     // changed by a gesture event.
@@ -2130,37 +2122,43 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // This will show the keyboard for all selection changes on the
     // EditableWidget, not just changes triggered by user gestures.
     requestKeyboard();
-
-    _selectionOverlay?.hide();
-    _selectionOverlay = null;
-
-    if (widget.selectionControls != null) {
-      _selectionOverlay = TextSelectionOverlay(
-        clipboardStatus: _clipboardStatus,
-        context: context,
-        value: _value,
-        debugRequiredFor: widget,
-        toolbarLayerLink: _toolbarLayerLink,
-        startHandleLayerLink: _startHandleLayerLink,
-        endHandleLayerLink: _endHandleLayerLink,
-        renderObject: renderObject,
-        selectionControls: widget.selectionControls,
-        selectionDelegate: this,
-        dragStartBehavior: widget.dragStartBehavior,
-        onSelectionHandleTapped: widget.onSelectionHandleTapped,
-      );
+    if (widget.selectionControls == null) {
+      _selectionOverlay?.hide();
+      _selectionOverlay = null;
+    } else {
+      if (_selectionOverlay == null) {
+        _selectionOverlay = TextSelectionOverlay(
+          clipboardStatus: _clipboardStatus,
+          context: context,
+          value: _value,
+          debugRequiredFor: widget,
+          toolbarLayerLink: _toolbarLayerLink,
+          startHandleLayerLink: _startHandleLayerLink,
+          endHandleLayerLink: _endHandleLayerLink,
+          renderObject: renderEditable,
+          selectionControls: widget.selectionControls,
+          selectionDelegate: this,
+          dragStartBehavior: widget.dragStartBehavior,
+          onSelectionHandleTapped: widget.onSelectionHandleTapped,
+        );
+      } else {
+        _selectionOverlay!.update(_value);
+      }
       _selectionOverlay!.handlesVisible = widget.showSelectionHandles;
       _selectionOverlay!.showHandles();
-      try {
-        widget.onSelectionChanged?.call(selection, cause);
-      } catch (exception, stack) {
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'widgets',
-          context: ErrorDescription('while calling onSelectionChanged for $cause'),
-        ));
-      }
+    }
+    // TODO(chunhtai): we should make sure selection actually changed before
+    // we call the onSelectionChanged.
+    // https://github.com/flutter/flutter/issues/76349.
+    try {
+      widget.onSelectionChanged?.call(selection, cause);
+    } catch (exception, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'widgets',
+        context: ErrorDescription('while calling onSelectionChanged for $cause'),
+      ));
     }
 
     // To keep the cursor from blinking while it moves, restart the timer here.
@@ -2247,7 +2245,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   late final _WhitespaceDirectionalityFormatter _whitespaceFormatter = _WhitespaceDirectionalityFormatter(textDirection: _textDirection);
 
-  void _formatAndSetValue(TextEditingValue value) {
+  void _formatAndSetValue(TextEditingValue value, SelectionChangedCause? cause, {bool userInteraction = false}) {
     // Only apply input formatters if the text has changed (including uncommited
     // text in the composing region), or when the user committed the composing
     // text.
@@ -2279,6 +2277,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // sending multiple `TextInput.updateEditingValue` messages.
     beginBatchEdit();
     _value = value;
+    // Changes made by the keyboard can sometimes be "out of band" for listening
+    // components, so always send those events, even if we didn't think it
+    // changed. Also, the user long pressing should always send a selection change
+    // as well.
+    if (selectionChanged ||
+        (userInteraction &&
+        (cause == SelectionChangedCause.longPress ||
+         cause == SelectionChangedCause.keyboard))) {
+      _handleSelectionChanged(value.selection, cause);
+    }
     if (textChanged) {
       try {
         widget.onChanged?.call(value.text);
@@ -2288,19 +2296,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           stack: stack,
           library: 'widgets',
           context: ErrorDescription('while calling onChanged'),
-        ));
-      }
-    }
-
-    if (selectionChanged) {
-      try {
-        widget.onSelectionChanged?.call(value.selection, null);
-      } catch (exception, stack) {
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'widgets',
-          context: ErrorDescription('while calling onSelectionChanged'),
         ));
       }
     }
@@ -2416,7 +2411,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
       if (!_value.selection.isValid) {
         // Place cursor at the end if the selection is invalid when we receive focus.
-        _handleSelectionChanged(TextSelection.collapsed(offset: _value.text.length), renderEditable, null);
+        _handleSelectionChanged(TextSelection.collapsed(offset: _value.text.length), null);
       }
     } else {
       WidgetsBinding.instance!.removeObserver(this);
@@ -2470,6 +2465,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///
   /// This property is typically used to notify the renderer of input gestures
   /// when [RenderEditable.ignorePointer] is true.
+  @override
   RenderEditable get renderEditable => _editableKey.currentContext!.findRenderObject()! as RenderEditable;
 
   @override
@@ -2478,8 +2474,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   double get _devicePixelRatio => MediaQuery.of(context).devicePixelRatio;
 
   @override
-  set textEditingValue(TextEditingValue value) {
-    _selectionOverlay?.update(value);
+  void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause? cause) {
     // Compare the current TextEditingValue with the pre-format new
     // TextEditingValue value, in case the formatter would reject the change.
     final bool shouldShowCaret = widget.readOnly
@@ -2488,7 +2483,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (shouldShowCaret) {
       _scheduleShowCaretOnScreen();
     }
-    _formatAndSetValue(value);
+    _formatAndSetValue(value, cause, userInteraction: true);
   }
 
   @override
@@ -2657,7 +2652,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 smartQuotesType: widget.smartQuotesType,
                 enableSuggestions: widget.enableSuggestions,
                 offset: offset,
-                onSelectionChanged: _handleSelectionChanged,
                 onCaretChanged: _handleCaretChanged,
                 rendererIgnoresPointer: widget.rendererIgnoresPointer,
                 cursorWidth: widget.cursorWidth,
@@ -2741,7 +2735,6 @@ class _Editable extends LeafRenderObjectWidget {
     required this.smartQuotesType,
     required this.enableSuggestions,
     required this.offset,
-    this.onSelectionChanged,
     this.onCaretChanged,
     this.rendererIgnoresPointer = false,
     required this.cursorWidth,
@@ -2789,7 +2782,6 @@ class _Editable extends LeafRenderObjectWidget {
   final SmartQuotesType smartQuotesType;
   final bool enableSuggestions;
   final ViewportOffset offset;
-  final SelectionChangedHandler? onSelectionChanged;
   final CaretChangedHandler? onCaretChanged;
   final bool rendererIgnoresPointer;
   final double cursorWidth;
@@ -2829,7 +2821,6 @@ class _Editable extends LeafRenderObjectWidget {
       locale: locale ?? Localizations.maybeLocaleOf(context),
       selection: value.selection,
       offset: offset,
-      onSelectionChanged: onSelectionChanged,
       onCaretChanged: onCaretChanged,
       ignorePointer: rendererIgnoresPointer,
       obscuringCharacter: obscuringCharacter,
@@ -2874,7 +2865,6 @@ class _Editable extends LeafRenderObjectWidget {
       ..locale = locale ?? Localizations.maybeLocaleOf(context)
       ..selection = value.selection
       ..offset = offset
-      ..onSelectionChanged = onSelectionChanged
       ..onCaretChanged = onCaretChanged
       ..ignorePointer = rendererIgnoresPointer
       ..textHeightBehavior = textHeightBehavior

@@ -37,7 +37,7 @@ import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/testbed.dart';
 
-final Generator _kNoColorOutputPlatform = () => FakePlatform(
+FakePlatform _kNoColorOutputPlatform() => FakePlatform(
   localeName: 'en_US.UTF-8',
   environment: <String, String>{},
   stdoutSupportsAnsi: false,
@@ -53,12 +53,12 @@ final Platform macPlatform = FakePlatform(
 );
 
 void main() {
-  MockFlutterVersion mockFlutterVersion;
+  FakeFlutterVersion flutterVersion;
   BufferLogger logger;
   FakeProcessManager fakeProcessManager;
 
   setUp(() {
-    mockFlutterVersion = MockFlutterVersion();
+    flutterVersion = FakeFlutterVersion();
     logger = BufferLogger.test();
     fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
   });
@@ -667,13 +667,12 @@ void main() {
 
     await commandRunner.run(<String>['doctor']);
 
-    verify(mockFlutterVersion.fetchTagsAndUpdate()).called(1);
-
+    expect(flutterVersion.didFetchTagsAndUpdate, true);
     Cache.enableLocking();
   }, overrides: <Type, Generator>{
     ProcessManager: () => FakeProcessManager.any(),
     FileSystem: () => MemoryFileSystem.test(),
-    FlutterVersion: () => mockFlutterVersion,
+    FlutterVersion: () => flutterVersion,
     Doctor: () => NoOpDoctor(),
   }, initializeFlutterRoot: false);
 

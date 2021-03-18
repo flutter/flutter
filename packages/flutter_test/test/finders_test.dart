@@ -153,9 +153,7 @@ void main() {
             key: key1,
             child: const Text('1'),
           ),
-          Container(
-            child: const Text('2'),
-          ),
+          const Text('2'),
         ],
       )),
     );
@@ -181,7 +179,7 @@ Widget _boilerplate(Widget child) {
 }
 
 class SimpleCustomSemanticsWidget extends LeafRenderObjectWidget {
-  const SimpleCustomSemanticsWidget(this.label);
+  const SimpleCustomSemanticsWidget(this.label, {Key? key}) : super(key: key);
 
   final String label;
 

@@ -71,7 +71,7 @@ void main() {
     @required CompleterIOSink stdinSink,
   }) {
     assert(stdinSink != null);
-    stdinSink.writes.clear();
+    stdinSink.clear();
     when(fontSubsetProcess.exitCode).thenAnswer((_) async => exitCode);
     when(fontSubsetProcess.stdout).thenAnswer((_) => Stream<List<int>>.fromIterable(<List<int>>[utf8.encode(stdout)]));
     when(fontSubsetProcess.stderr).thenAnswer((_) => Stream<List<int>>.fromIterable(<List<int>>[utf8.encode(stderr)]));
@@ -222,7 +222,7 @@ void main() {
     );
 
     expect(
-      () async => await iconTreeShaker.subsetFont(
+      () async => iconTreeShaker.subsetFont(
         input: fileSystem.file(inputPath),
         outputPath: outputPath,
         relativePath: relativePath,
@@ -257,7 +257,7 @@ void main() {
       outputPath: outputPath,
       relativePath: relativePath,
     );
-    expect(stdinSink.writes, <List<int>>[utf8.encode('59470\n')]);
+    expect(stdinSink.getAndClear(), '59470\n');
     _resetFontSubsetInvocation(stdinSink: stdinSink);
 
     expect(subsetted, true);
@@ -267,7 +267,7 @@ void main() {
       relativePath: relativePath,
     );
     expect(subsetted, true);
-    expect(stdinSink.writes, <List<int>>[utf8.encode('59470\n')]);
+    expect(stdinSink.getAndClear(), '59470\n');
 
     verify(mockProcessManager.run(_getConstFinderArgs(appDill.path))).called(1);
     verify(mockProcessManager.start(fontSubsetArgs)).called(2);
@@ -362,7 +362,7 @@ void main() {
     _addConstFinderInvocation(appDill.path, stdout: constFinderResultWithInvalid);
 
     await expectLater(
-      () async => await iconTreeShaker.subsetFont(
+      () async => iconTreeShaker.subsetFont(
         input: fileSystem.file(inputPath),
         outputPath: outputPath,
         relativePath: relativePath,
@@ -401,7 +401,7 @@ void main() {
     _resetFontSubsetInvocation(exitCode: -1, stdinSink: stdinSink);
 
     await expectLater(
-      () async => await iconTreeShaker.subsetFont(
+      () async => iconTreeShaker.subsetFont(
         input: fileSystem.file(inputPath),
         outputPath: outputPath,
         relativePath: relativePath,
@@ -435,7 +435,7 @@ void main() {
     _resetFontSubsetInvocation(exitCode: -1, stdinSink: stdinSink);
 
     await expectLater(
-      () async => await iconTreeShaker.subsetFont(
+      () async => iconTreeShaker.subsetFont(
         input: fileSystem.file(inputPath),
         outputPath: outputPath,
         relativePath: relativePath,
@@ -469,7 +469,7 @@ void main() {
     _addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
 
     await expectLater(
-      () async => await iconTreeShaker.subsetFont(
+      () async => iconTreeShaker.subsetFont(
         input: fileSystem.file(inputPath),
         outputPath: outputPath,
         relativePath: relativePath,
@@ -503,7 +503,7 @@ void main() {
     _addConstFinderInvocation(appDill.path, exitCode: -1);
 
     await expectLater(
-      () async => await iconTreeShaker.subsetFont(
+      () async => iconTreeShaker.subsetFont(
         input: fileSystem.file(inputPath),
         outputPath: outputPath,
         relativePath: relativePath,

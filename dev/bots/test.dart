@@ -309,6 +309,7 @@ Future<void> _runWebToolTests() async {
           forceSingleCore: true,
           testPaths: <String>[path.join(kTest, '$kWeb$kDotShard', '')],
           enableFlutterToolAsserts: true,
+          perTestTimeout: const Duration(minutes: 3),
         );
       }
   };
@@ -519,7 +520,7 @@ Future<void> _flutterBuild(
     final File file = File(path.join(flutterRoot, relativePathToApplication, 'perf.json'));
     if (!_allTargetsCached(file)) {
       print('${red}Not all build targets cached after second run.$reset');
-      print('The target performance data was: ${file.readAsStringSync()}');
+      print('The target performance data was: ${file.readAsStringSync().replaceAll('},', '},\n')}');
       exit(1);
     }
   }

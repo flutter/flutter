@@ -560,7 +560,7 @@ void main() {
   });
 
   group('close button', () {
-    Future<void> expectCloseIcon(WidgetTester tester, PageRoute<void> routeBuilder(), String type) async {
+    Future<void> expectCloseIcon(WidgetTester tester, PageRoute<void> Function() routeBuilder, String type) async {
       const IconData expectedIcon = Icons.close;
       await tester.pumpWidget(
         MaterialApp(
@@ -949,7 +949,7 @@ void main() {
                   ),
                 ),
               ],
-              drawer: Container(
+              drawer: SizedBox(
                 key: drawer,
                 width: 204.0,
                 child: SafeArea(
@@ -1051,7 +1051,7 @@ void main() {
                   ),
                 ),
               ],
-              drawer: Container(
+              drawer: SizedBox(
                 key: drawer,
                 width: 204.0,
                 child: SafeArea(
@@ -1831,9 +1831,7 @@ void main() {
               body: Center(
                 child: Container(),
               ),
-              bottomSheet: Container(
-                child: const Text('Bottom sheet'),
-              ),
+              bottomSheet: const Text('Bottom sheet'),
             ),
           ),
         );
@@ -1850,7 +1848,7 @@ void main() {
                 child: Text('This is a Material persistent bottom sheet. Drag downwards to dismiss it.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: themeData.accentColor,
+                    color: themeData.colorScheme.secondary,
                     fontSize: 24.0,
                   ),
                 ),
@@ -2108,7 +2106,7 @@ void main() {
                   scaffoldMessenger = ScaffoldMessenger.maybeOf(context);
                 },
                 behavior: HitTestBehavior.opaque,
-                child: Container(
+                child: const SizedBox(
                   height: 100.0,
                   width: 100.0,
                 ),
@@ -2145,7 +2143,7 @@ void main() {
                   ScaffoldMessenger.of(context);
                 },
                 behavior: HitTestBehavior.opaque,
-                child: Container(
+                child: const SizedBox(
                   height: 100.0,
                   width: 100.0,
                 ),
@@ -2200,6 +2198,77 @@ void main() {
       '   Typically, the ScaffoldMessenger widget is introduced by the\n'
       '   MaterialApp at the top of your application widget tree.\n'
     ));
+  });
+
+  testWidgets('ScaffoldMessenger checks for nesting when a new Scaffold is registered', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/77251
+    const String snackBarContent = 'SnackBar Content';
+    await tester.pumpWidget(MaterialApp(
+      home: Builder(
+        builder: (BuildContext context) => Scaffold(
+          body: Scaffold(
+            body: TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (BuildContext context) {
+                      return Scaffold(
+                        body: Column(
+                          children: <Widget>[
+                            TextButton(
+                              onPressed: () {
+                                const SnackBar snackBar = SnackBar(
+                                  content: Text(snackBarContent),
+                                  behavior: SnackBarBehavior.floating,
+                                );
+                                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                              },
+                              child: const Text('Show SnackBar'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context, null);
+                              },
+                              child: const Text('Pop route'),
+                            )
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+              child: const Text('Push route'),
+            ),
+          ),
+        ),
+      )
+    ));
+
+    expect(find.text(snackBarContent), findsNothing);
+    await tester.tap(find.text('Push route'));
+    await tester.pumpAndSettle();
+    expect(find.text(snackBarContent), findsNothing);
+    expect(find.text('Pop route'), findsOneWidget);
+
+    // Show SnackBar on second page
+    await tester.tap(find.text('Show SnackBar'));
+    await tester.pump();
+    expect(find.text(snackBarContent), findsOneWidget);
+    // Pop the second page, the SnackBar completes a hero animation to the next route.
+    // If we have not handled the nested Scaffolds properly, this will throw an
+    // exception as duplicate SnackBars on the first route would have a common hero tag.
+    await tester.tap(find.text('Pop route'));
+    await tester.pump();
+    // There are SnackBars two during the execution of the hero animation.
+    expect(find.text(snackBarContent), findsNWidgets(2));
+    await tester.pumpAndSettle();
+    expect(find.text(snackBarContent), findsOneWidget);
+    // Allow the SnackBar to animate out
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
+    expect(find.text(snackBarContent), findsNothing);
   });
 }
 

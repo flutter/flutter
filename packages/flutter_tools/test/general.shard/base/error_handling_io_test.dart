@@ -8,6 +8,7 @@ import 'dart:io' as io; // ignore: dart_io_import;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -226,9 +227,9 @@ void main() {
       final File file = fs.file('file');
 
       const String expectedMessage = 'The flutter tool cannot access the file';
-      expect(() async => await file.writeAsBytes(<int>[0]),
+      expect(() async => file.writeAsBytes(<int>[0]),
              throwsToolExit(message: expectedMessage));
-      expect(() async => await file.writeAsString(''),
+      expect(() async => file.writeAsString(''),
              throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsBytesSync(<int>[0]),
              throwsToolExit(message: expectedMessage));
@@ -250,9 +251,9 @@ void main() {
       final File file = fs.file('file');
 
       const String expectedMessage = 'The target device is full';
-      expect(() async => await file.writeAsBytes(<int>[0]),
+      expect(() async => file.writeAsBytes(<int>[0]),
              throwsToolExit(message: expectedMessage));
-      expect(() async => await file.writeAsString(''),
+      expect(() async => file.writeAsString(''),
              throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsBytesSync(<int>[0]),
              throwsToolExit(message: expectedMessage));
@@ -270,9 +271,9 @@ void main() {
       final File file = fs.file('file');
 
       const String expectedMessage = 'The file is being used by another program';
-      expect(() async => await file.writeAsBytes(<int>[0]),
+      expect(() async => file.writeAsBytes(<int>[0]),
              throwsToolExit(message: expectedMessage));
-      expect(() async => await file.writeAsString(''),
+      expect(() async => file.writeAsString(''),
              throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsBytesSync(<int>[0]),
              throwsToolExit(message: expectedMessage));
@@ -291,9 +292,9 @@ void main() {
 
       const String expectedMessage = 'There is a problem with the device driver '
         'that this file or directory is stored on';
-      expect(() async => await file.writeAsBytes(<int>[0]),
+      expect(() async => file.writeAsBytes(<int>[0]),
              throwsToolExit(message: expectedMessage));
-      expect(() async => await file.writeAsString(''),
+      expect(() async => file.writeAsString(''),
              throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsBytesSync(<int>[0]),
              throwsToolExit(message: expectedMessage));
@@ -315,7 +316,7 @@ void main() {
       final Directory directory = fs.directory('directory');
 
       const String expectedMessage = 'The target device is full';
-      expect(() async => await directory.createTemp('prefix'),
+      expect(() async => directory.createTemp('prefix'),
              throwsToolExit(message: expectedMessage));
       expect(() => directory.createTempSync('prefix'),
              throwsToolExit(message: expectedMessage));
@@ -370,6 +371,7 @@ void main() {
     const int eperm = 1;
     const int enospc = 28;
     const int eacces = 13;
+
     MockFileSystem mockFileSystem;
     ErrorHandlingFileSystem fs;
 
@@ -392,9 +394,9 @@ void main() {
       final File file = fs.file('file');
 
       const String expectedMessage = 'The flutter tool cannot access the file or directory';
-      expect(() async => await file.writeAsBytes(<int>[0]),
+      expect(() async => file.writeAsBytes(<int>[0]),
              throwsToolExit(message: expectedMessage));
-      expect(() async => await file.writeAsString(''),
+      expect(() async => file.writeAsString(''),
              throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsBytesSync(<int>[0]),
              throwsToolExit(message: expectedMessage));
@@ -416,9 +418,9 @@ void main() {
       final Directory directory = fs.directory('file');
 
       const String expectedMessage = 'The flutter tool cannot access the file or directory';
-      expect(() async => await directory.create(),
+      expect(() async => directory.create(),
              throwsToolExit(message: expectedMessage));
-      expect(() async => await directory.delete(),
+      expect(() async => directory.delete(),
              throwsToolExit(message: expectedMessage));
       expect(() => directory.createSync(),
              throwsToolExit(message: expectedMessage));
@@ -436,9 +438,9 @@ void main() {
       final File file = fs.file('file');
 
       const String expectedMessage = 'The target device is full';
-      expect(() async => await file.writeAsBytes(<int>[0]),
+      expect(() async => file.writeAsBytes(<int>[0]),
              throwsToolExit(message: expectedMessage));
-      expect(() async => await file.writeAsString(''),
+      expect(() async => file.writeAsString(''),
              throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsBytesSync(<int>[0]),
              throwsToolExit(message: expectedMessage));
@@ -456,7 +458,7 @@ void main() {
       final Directory directory = fs.directory('directory');
 
       const String expectedMessage = 'The target device is full';
-      expect(() async => await directory.createTemp('prefix'),
+      expect(() async => directory.createTemp('prefix'),
              throwsToolExit(message: expectedMessage));
       expect(() => directory.createTempSync('prefix'),
              throwsToolExit(message: expectedMessage));
@@ -474,6 +476,19 @@ void main() {
       const String expectedMessage = 'Flutter failed to check for directory existence at';
       expect(() => directory.existsSync(),
              throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('When the current working directory disappears', () async {
+      setupReadMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: kSystemCannotFindFile,
+      );
+
+      expect(() => fs.currentDirectory, throwsToolExit(message: 'Unable to read current working directory'));
+
+      // Error is not caught by other operations.
+      expect(() => fs.file('foo').readAsStringSync(), throwsFileSystemException(kSystemCannotFindFile));
     });
   });
 
@@ -503,9 +518,9 @@ void main() {
       final File file = fs.file('file');
 
       const String expectedMessage = 'The flutter tool cannot access the file';
-      expect(() async => await file.writeAsBytes(<int>[0]),
+      expect(() async => file.writeAsBytes(<int>[0]),
              throwsToolExit(message: expectedMessage));
-      expect(() async => await file.writeAsString(''),
+      expect(() async => file.writeAsString(''),
              throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsBytesSync(<int>[0]),
              throwsToolExit(message: expectedMessage));
@@ -525,9 +540,9 @@ void main() {
       final Directory directory = fs.directory('file');
 
       const String expectedMessage = 'The flutter tool cannot access the file or directory';
-      expect(() async => await directory.create(),
+      expect(() async => directory.create(),
              throwsToolExit(message: expectedMessage));
-      expect(() async => await directory.delete(),
+      expect(() async => directory.delete(),
              throwsToolExit(message: expectedMessage));
       expect(() => directory.createSync(),
              throwsToolExit(message: expectedMessage));
@@ -545,9 +560,9 @@ void main() {
       final File file = fs.file('file');
 
       const String expectedMessage = 'The target device is full';
-      expect(() async => await file.writeAsBytes(<int>[0]),
+      expect(() async => file.writeAsBytes(<int>[0]),
              throwsToolExit(message: expectedMessage));
-      expect(() async => await file.writeAsString(''),
+      expect(() async => file.writeAsString(''),
              throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsBytesSync(<int>[0]),
              throwsToolExit(message: expectedMessage));
@@ -565,7 +580,7 @@ void main() {
       final Directory directory = fs.directory('directory');
 
       const String expectedMessage = 'The target device is full';
-      expect(() async => await directory.createTemp('prefix'),
+      expect(() async => directory.createTemp('prefix'),
              throwsToolExit(message: expectedMessage));
       expect(() => directory.createTempSync('prefix'),
              throwsToolExit(message: expectedMessage));
@@ -709,9 +724,9 @@ void main() {
 
       const String expectedMessage = 'The target device is full';
 
-      expect(() async => await processManager.start(<String>['foo']),
+      expect(() async => processManager.start(<String>['foo']),
              throwsToolExit(message: expectedMessage));
-      expect(() async => await processManager.run(<String>['foo']),
+      expect(() async => processManager.run(<String>['foo']),
              throwsToolExit(message: expectedMessage));
       expect(() => processManager.runSync(<String>['foo']),
              throwsToolExit(message: expectedMessage));
@@ -730,9 +745,9 @@ void main() {
       );
 
       const String expectedMessage = 'The file is being used by another program';
-      expect(() async => await processManager.start(<String>['foo']),
+      expect(() async => processManager.start(<String>['foo']),
              throwsToolExit(message: expectedMessage));
-      expect(() async => await processManager.run(<String>['foo']),
+      expect(() async => processManager.run(<String>['foo']),
              throwsToolExit(message: expectedMessage));
       expect(() => processManager.runSync(<String>['foo']),
              throwsToolExit(message: expectedMessage));
@@ -751,9 +766,9 @@ void main() {
       );
 
       const String expectedMessage = 'The flutter tool cannot access the file';
-      expect(() async => await processManager.start(<String>['foo']),
+      expect(() async => processManager.start(<String>['foo']),
              throwsToolExit(message: expectedMessage));
-      expect(() async => await processManager.run(<String>['foo']),
+      expect(() async => processManager.run(<String>['foo']),
              throwsToolExit(message: expectedMessage));
       expect(() => processManager.runSync(<String>['foo']),
              throwsToolExit(message: expectedMessage));
@@ -777,9 +792,9 @@ void main() {
       );
 
       const String expectedMessage = 'The target device is full';
-      expect(() async => await processManager.start(<String>['foo']),
+      expect(() async => processManager.start(<String>['foo']),
              throwsToolExit(message: expectedMessage));
-      expect(() async => await processManager.run(<String>['foo']),
+      expect(() async => processManager.run(<String>['foo']),
              throwsToolExit(message: expectedMessage));
       expect(() => processManager.runSync(<String>['foo']),
              throwsToolExit(message: expectedMessage));
@@ -798,9 +813,9 @@ void main() {
 
       const String expectedMessage = 'The flutter tool cannot access the file';
 
-      expect(() async => await processManager.start(<String>['foo']),
+      expect(() async => processManager.start(<String>['foo']),
              throwsToolExit(message: expectedMessage));
-      expect(() async => await processManager.run(<String>['foo']),
+      expect(() async => processManager.run(<String>['foo']),
              throwsToolExit(message: expectedMessage));
       expect(() => processManager.runSync(<String>['foo']),
              throwsToolExit(message: expectedMessage));
@@ -824,9 +839,9 @@ void main() {
 
       const String expectedMessage = 'The target device is full';
 
-      expect(() async => await processManager.start(<String>['foo']),
+      expect(() async => processManager.start(<String>['foo']),
              throwsToolExit(message: expectedMessage));
-      expect(() async => await processManager.run(<String>['foo']),
+      expect(() async => processManager.run(<String>['foo']),
              throwsToolExit(message: expectedMessage));
       expect(() => processManager.runSync(<String>['foo']),
              throwsToolExit(message: expectedMessage));
@@ -845,9 +860,9 @@ void main() {
 
       const String expectedMessage = 'The flutter tool cannot access the file';
 
-      expect(() async => await processManager.start(<String>['foo']),
+      expect(() async => processManager.start(<String>['foo']),
              throwsToolExit(message: expectedMessage));
-      expect(() async => await processManager.run(<String>['foo']),
+      expect(() async => processManager.run(<String>['foo']),
              throwsToolExit(message: expectedMessage));
       expect(() => processManager.runSync(<String>['foo']),
              throwsToolExit(message: expectedMessage));

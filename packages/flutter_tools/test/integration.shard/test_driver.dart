@@ -175,7 +175,7 @@ abstract class FlutterTestDriver {
     final int port = _vmServiceWsUri != null ? vmServicePort : _attachPort;
     final VmService vmService = await vmServiceConnectUri('ws://localhost:$port/ws');
     final Isolate isolate = await waitForExtension(vmService, extension);
-    return await vmService.callServiceExtension(
+    return vmService.callServiceExtension(
       extension,
       isolateId: isolate.id,
       args: args,
@@ -204,7 +204,7 @@ abstract class FlutterTestDriver {
 
   Future<int> _killForcefully() {
     _debugPrint('Sending SIGKILL to $_processPid..');
-    ProcessSignal.SIGKILL.send(_processPid);
+    ProcessSignal.sigkill.send(_processPid);
     return _process.exitCode;
   }
 
@@ -300,9 +300,9 @@ abstract class FlutterTestDriver {
 
   Future<Isolate> stepOverOrOverAsyncSuspension({ bool waitForNextPause = true }) async {
     if (await isAtAsyncSuspension()) {
-      return await stepOverAsync(waitForNextPause: waitForNextPause);
+      return stepOverAsync(waitForNextPause: waitForNextPause);
     }
-    return await stepOver(waitForNextPause: waitForNextPause);
+    return stepOver(waitForNextPause: waitForNextPause);
   }
 
   Future<Isolate> _resume(String step, bool waitForNextPause) async {

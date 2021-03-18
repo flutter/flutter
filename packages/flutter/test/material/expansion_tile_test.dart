@@ -297,15 +297,15 @@ void main() {
   });
 
   testWidgets('ExpansionTile expandedAlignment test', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: Center(
           child: ExpansionTile(
-            title: const Text('title'),
+            title: Text('title'),
             expandedAlignment: Alignment.centerLeft,
             children: <Widget>[
-              Container(height: 100, width: 100),
-              Container(height: 100, width: 80),
+              SizedBox(height: 100, width: 100),
+              SizedBox(height: 100, width: 80),
             ],
           ),
         ),
@@ -339,9 +339,9 @@ void main() {
             // and expandedCrossAxisAlignment later in the test.
             expandedAlignment: Alignment.centerRight,
             expandedCrossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Container(height: 100, width: 100, key: child0Key),
-              Container(height: 100, width: 80, key: child1Key),
+            children: const <Widget>[
+              SizedBox(height: 100, width: 100, key: child0Key),
+              SizedBox(height: 100, width: 80, key: child1Key),
             ],
           ),
         ),
@@ -391,14 +391,14 @@ void main() {
   testWidgets('expandedCrossAxisAlignment and expandedAlignment default values', (WidgetTester tester) async {
     const Key child1Key = Key('child1');
 
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: Center(
           child: ExpansionTile(
-            title: const Text('title'),
+            title: Text('title'),
             children: <Widget>[
-              Container(height: 100, width: 100),
-              Container(height: 100, width: 80, key: child1Key),
+              SizedBox(height: 100, width: 100),
+              SizedBox(height: 100, width: 80, key: child1Key),
             ],
           ),
         ),
@@ -424,18 +424,20 @@ void main() {
   });
 
   testWidgets('childrenPadding default value', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: Center(
-          child: ExpansionTile(
-            title: const Text('title'),
-            children: <Widget>[
-              Container(height: 100, width: 100),
-            ],
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: ExpansionTile(
+              title: Text('title'),
+              children: <Widget>[
+                SizedBox(height: 100, width: 100),
+              ],
+            ),
           ),
         ),
       ),
-    ));
+    );
 
     await tester.tap(find.text('title'));
     await tester.pumpAndSettle();
@@ -452,19 +454,21 @@ void main() {
   });
 
   testWidgets('ExpansionTile childrenPadding test', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: Center(
-          child: ExpansionTile(
-            title: const Text('title'),
-            childrenPadding: const EdgeInsets.fromLTRB(10, 8, 12, 4),
-            children: <Widget>[
-              Container(height: 100, width: 100),
-            ],
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: ExpansionTile(
+              title: Text('title'),
+              childrenPadding: EdgeInsets.fromLTRB(10, 8, 12, 4),
+              children: <Widget>[
+                SizedBox(height: 100, width: 100),
+              ],
+            ),
           ),
         ),
       ),
-    ));
+    );
 
     await tester.tap(find.text('title'));
     await tester.pumpAndSettle();
@@ -515,5 +519,43 @@ void main() {
     )).decoration! as BoxDecoration;
 
     expect(boxDecoration.color, backgroundColor);
+  });
+
+  testWidgets('ExpansionTile iconColor, textColor', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/pull/78281
+
+    const Color iconColor = Color(0xff00ff00);
+    const Color collapsedIconColor = Color(0xff0000ff);
+    const Color textColor = Color(0xff00ffff);
+    const Color collapsedTextColor = Color(0xffff00ff);
+
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          iconColor: iconColor,
+          collapsedIconColor: collapsedIconColor,
+          textColor: textColor,
+          collapsedTextColor: collapsedTextColor,
+          initiallyExpanded: false,
+          title: TestText('title'),
+          trailing: TestIcon(),
+          children: <Widget>[
+            SizedBox(height: 100, width: 100),
+          ],
+        ),
+      ),
+    ));
+
+    Color getIconColor() => tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color!;
+    Color getTextColor() => tester.state<TestTextState>(find.byType(TestText)).textStyle.color!;
+
+    expect(getIconColor(), collapsedIconColor);
+    expect(getTextColor(), collapsedTextColor);
+
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    expect(getIconColor(), iconColor);
+    expect(getTextColor(), textColor);
   });
 }

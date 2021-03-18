@@ -52,7 +52,7 @@ void main() {
 
   Future<void> preparePicker(
     WidgetTester tester,
-    Future<void> callback(Future<DateTimeRange?> date),
+    Future<void> Function(Future<DateTimeRange?> date) callback,
     { TextDirection textDirection = TextDirection.ltr }
   ) async {
     late BuildContext buttonContext;
@@ -263,6 +263,20 @@ void main() {
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       expect(find.byType(TextField), findsNWidgets(2));
       expect(find.byIcon(Icons.calendar_today), findsNothing);
+    });
+  });
+
+  testWidgets('Input only mode should validate date', (WidgetTester tester) async {
+    initialEntryMode = DatePickerEntryMode.inputOnly;
+    errorInvalidText = 'oops';
+    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+      await tester.enterText(find.byType(TextField).at(0), '08/08/2014');
+      await tester.enterText(find.byType(TextField).at(1), '08/08/2014');
+      expect(find.text(errorInvalidText!), findsNothing);
+
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+      expect(find.text(errorInvalidText!), findsNWidgets(2));
     });
   });
 

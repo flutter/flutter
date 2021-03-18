@@ -4,7 +4,7 @@
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
-import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb;
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -102,6 +102,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 
   @override
   void onSingleTapUp(TapUpDetails details) {
+    editableText.hideToolbar();
     // Because TextSelectionGestureDetector listens to taps that happen on
     // widgets in front of it, tapping the clear button will also trigger
     // this handler. If the clear button widget recognizes the up event,
@@ -148,6 +149,8 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 ///
 /// ```dart
 /// class MyPrefilledText extends StatefulWidget {
+///   const MyPrefilledText({Key? key}) : super(key: key);
+///
 ///   @override
 ///   _MyPrefilledTextState createState() => _MyPrefilledTextState();
 /// }
@@ -1134,7 +1137,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
     final BoxDecoration? effectiveDecoration = widget.decoration?.copyWith(
       border: resolvedBorder,
-      color: enabled ? decorationColor : (decorationColor ?? disabledColor),
+      color: enabled ? decorationColor : disabledColor,
     );
 
     final Color selectionColor = CupertinoTheme.of(context).primaryColor.withOpacity(0.2);
@@ -1201,7 +1204,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       ),
     );
 
-    final Widget child = Semantics(
+    return Semantics(
       enabled: enabled,
       onTap: !enabled || widget.readOnly ? null : () {
         if (!controller.selection.isValid) {
@@ -1213,6 +1216,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         ignoring: !enabled,
         child: Container(
           decoration: effectiveDecoration,
+          color: !enabled && effectiveDecoration == null ? disabledColor : null,
           child: _selectionGestureDetectorBuilder.buildGestureDetector(
             behavior: HitTestBehavior.translucent,
             child: Align(
@@ -1225,13 +1229,5 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         ),
       ),
     );
-
-    if (kIsWeb) {
-      return Shortcuts(
-        shortcuts: scrollShortcutOverrides,
-        child: child,
-      );
-    }
-    return child;
   }
 }

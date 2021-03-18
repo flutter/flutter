@@ -608,7 +608,7 @@ void main() {
     const Key childKey = Key('test child');
 
     Future<void> buildTest(VisualDensity visualDensity, {bool useText = false}) async {
-      return await tester.pumpWidget(
+      return tester.pumpWidget(
         MaterialApp(
           home: Directionality(
             textDirection: TextDirection.rtl,
@@ -1111,6 +1111,26 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
     }
+  });
+
+  testWidgets('Fixed ElevatedButton.icon RenderFlex overflow', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 200,
+            child: ElevatedButton.icon(
+              onPressed: () {},
+              icon: const Icon(Icons.add),
+              label: const Text(
+                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut a euismod nibh. Morbi laoreet purus.',
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), null);
   });
 }
 

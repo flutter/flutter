@@ -106,7 +106,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   final List<ProjectMigrator> migrators = <ProjectMigrator>[
-    RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.xcode, globals.flutterUsage),
+    RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.flutterUsage),
     XcodeBuildSystemMigration(app.project, globals.logger),
     ProjectBaseConfigurationMigration(app.project, globals.logger),
     ProjectBuildLocationMigration(app.project, globals.logger),
@@ -255,7 +255,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     if (buildForDevice) {
       buildCommands.addAll(<String>['-sdk', 'iphoneos']);
     } else {
-      buildCommands.addAll(<String>['-sdk', 'iphonesimulator', '-arch', 'x86_64']);
+      buildCommands.addAll(<String>['-sdk', 'iphonesimulator']);
     }
   }
 
@@ -426,18 +426,24 @@ Future<XcodeBuildResult> buildXcodeProject({
         targetBuildDir,
         buildSettings['WRAPPER_NAME'],
       );
-      if (globals.fs.isDirectorySync(expectedOutputDirectory)) {
+      if (globals.fs.directory(expectedOutputDirectory).existsSync()) {
         // Copy app folder to a place where other tools can find it without knowing
         // the BuildInfo.
-        outputDir = expectedOutputDirectory.replaceFirst('/$configuration-', '/');
-        if (globals.fs.isDirectorySync(outputDir)) {
-          // Previous output directory might have incompatible artifacts
-          // (for example, kernel binary files produced from previous run).
-          globals.fs.directory(outputDir).deleteSync(recursive: true);
-        }
-        copyDirectory(
-          globals.fs.directory(expectedOutputDirectory),
-          globals.fs.directory(outputDir),
+        outputDir = targetBuildDir.replaceFirst('/$configuration-', '/');
+        globals.fs.directory(outputDir).createSync(recursive: true);
+
+        // rsync instead of copy to maintain timestamps to support incremental
+        // app install deltas. Use --delete to remove incompatible artifacts
+        // (for example, kernel binary files produced from previous run).
+        await globals.processUtils.run(
+          <String>[
+            'rsync',
+            '-av',
+            '--delete',
+            expectedOutputDirectory,
+            outputDir,
+          ],
+          throwOnError: true,
         );
       } else {
         globals.printError('Build succeeded but the expected app at $expectedOutputDirectory not found');

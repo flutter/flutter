@@ -124,7 +124,7 @@ enum HeroFlightDirection {
 ///        ListTile(
 ///          leading: Hero(
 ///            tag: 'hero-rectangle',
-///            child: _blueRectangle(Size(50,50)),
+///            child: _blueRectangle(const Size(50, 50)),
 ///          ),
 ///          onTap: () => _gotoDetailsPage(context),
 ///          title: const Text('Tap on the icon to view hero animation transition.'),
@@ -142,7 +142,7 @@ enum HeroFlightDirection {
 ///  }
 ///
 ///  void _gotoDetailsPage(BuildContext context) {
-///    Navigator.of(context).push(MaterialPageRoute(
+///    Navigator.of(context).push(MaterialPageRoute<void>(
 ///      builder: (BuildContext context) => Scaffold(
 ///        appBar: AppBar(
 ///          title: const Text('second Page'),
@@ -153,7 +153,7 @@ enum HeroFlightDirection {
 ///            children: <Widget>[
 ///              Hero(
 ///                tag: 'hero-rectangle',
-///                child: _blueRectangle(Size(200,200)),
+///                child: _blueRectangle(const Size(200, 200)),
 ///              ),
 ///            ],
 ///          ),
@@ -996,8 +996,8 @@ class HeroController extends NavigatorObserver {
             fromHero: fromHero,
             toHero: toHero,
             createRectTween: createRectTween,
-            shuttleBuilder: fromHero.widget.flightShuttleBuilder
-                          ?? toHero.widget.flightShuttleBuilder
+            shuttleBuilder: toHero.widget.flightShuttleBuilder
+                          ?? fromHero.widget.flightShuttleBuilder
                           ?? _defaultHeroFlightShuttleBuilder,
             isUserGestureTransition: isUserGestureTransition,
             isDiverted: existingFlight != null,
@@ -1031,7 +1031,7 @@ class HeroController extends NavigatorObserver {
     _flights.remove(flight.manifest.tag);
   }
 
-  static final HeroFlightShuttleBuilder _defaultHeroFlightShuttleBuilder = (
+  Widget _defaultHeroFlightShuttleBuilder(
     BuildContext flightContext,
     Animation<double> animation,
     HeroFlightDirection flightDirection,
@@ -1040,7 +1040,7 @@ class HeroController extends NavigatorObserver {
   ) {
     final Hero toHero = toHeroContext.widget as Hero;
     return toHero.child;
-  };
+  }
 }
 
 /// Enables or disables [Hero]es in the widget subtree.

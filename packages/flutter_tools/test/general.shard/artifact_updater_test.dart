@@ -175,7 +175,7 @@ void main() {
         ..createSync(),
     );
 
-    await expectLater(() async => await artifactUpdater.downloadZipArchive(
+    await expectLater(() async => artifactUpdater.downloadZipArchive(
       'test message',
       Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
@@ -230,7 +230,7 @@ void main() {
         ..createSync(),
     );
 
-    await expectLater(() async => await artifactUpdater.downloadZipArchive(
+    await expectLater(() async => artifactUpdater.downloadZipArchive(
       'test message',
       Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
@@ -260,7 +260,7 @@ void main() {
         ..createSync(),
     );
 
-    await expectLater(() async => await artifactUpdater.downloadZipArchive(
+    await expectLater(() async => artifactUpdater.downloadZipArchive(
       'test message',
       Uri.parse('http:///foo-bar/test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
@@ -286,7 +286,7 @@ void main() {
         ..createSync(),
     );
 
-    await expectLater(() async => await artifactUpdater.downloadZipArchive(
+    await expectLater(() async => artifactUpdater.downloadZipArchive(
       'test message',
       Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
@@ -461,7 +461,7 @@ void main() {
       ..createSync(recursive: true);
     handler.addError(errorDirectory, FileSystemOp.delete, const FileSystemException('', '', OSError('', kSharingViolation)));
 
-    await expectLater(() async => await artifactUpdater.downloadZippedTarball(
+    await expectLater(() async => artifactUpdater.downloadZippedTarball(
       'test message',
       Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),

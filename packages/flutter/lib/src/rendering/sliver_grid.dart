@@ -290,9 +290,7 @@ abstract class SliverGridDelegate {
 ///     ),
 ///     children: List<Widget>.generate(20, (int i) {
 ///       return Builder(builder: (BuildContext context) {
-///         return Container(
-///           child: Text('$i'),
-///         );
+///         return Text('$i');
 ///       });
 ///     }),
 ///   );
@@ -315,9 +313,7 @@ abstract class SliverGridDelegate {
 ///     ),
 ///     children: List<Widget>.generate(20, (int i) {
 ///       return Builder(builder: (BuildContext context) {
-///         return Container(
-///           child: Text('$i'),
-///         );
+///         return Text('$i');
 ///       });
 ///     }),
 ///   );

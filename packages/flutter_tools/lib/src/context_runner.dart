@@ -24,6 +24,7 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/process.dart';
+import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'build_info.dart';
@@ -62,7 +63,7 @@ import 'windows/visual_studio_validator.dart';
 import 'windows/windows_workflow.dart';
 
 Future<T> runInContext<T>(
-  FutureOr<T> runner(), {
+  FutureOr<T> Function() runner, {
   Map<Type, Generator> overrides,
 }) async {
 
@@ -74,7 +75,7 @@ Future<T> runInContext<T>(
     return runner();
   }
 
-  return await context.run<T>(
+  return context.run<T>(
     name: 'global fallbacks',
     body: runnerWrapper,
     overrides: overrides,
@@ -275,12 +276,17 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         processManager: globals.processManager,
       ),
+      OutputPreferences: () => OutputPreferences(
+        wrapText: globals.stdio.hasTerminal ?? false,
+        showColor:  globals.platform.stdoutSupportsAnsi,
+        stdio: globals.stdio,
+      ),
       PersistentToolState: () => PersistentToolState(
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
       ),
-      ProcessInfo: () => ProcessInfo(),
+      ProcessInfo: () => ProcessInfo(globals.fs),
       ProcessManager: () => ErrorHandlingProcessManager(
         delegate: const LocalProcessManager(),
         platform: globals.platform,
@@ -351,7 +357,6 @@ Future<T> runInContext<T>(
         processManager: globals.processManager,
         platform: globals.platform,
         fileSystem: globals.fs,
-        terminal: globals.terminal,
         usage: globals.flutterUsage,
       ),
     },

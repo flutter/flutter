@@ -38,7 +38,7 @@ void main() {
         processManager: FakeProcessManager.any(),
       );
 
-      expect(() async => await fuchsiaFfx.list(),
+      expect(() async => fuchsiaFfx.list(),
           throwsToolExit(message: 'Fuchsia ffx tool not found.'));
     });
 
@@ -128,6 +128,85 @@ void main() {
 
       expect(await fuchsiaFfx.list(timeout: const Duration(seconds: 2)),
           <String>['device1']);
+    });
+  });
+
+  group('ffx resolve', () {
+    testWithoutContext('ffx not found', () {
+      final FuchsiaFfx fuchsiaFfx = FuchsiaFfx(
+        fuchsiaArtifacts: fakeFuchsiaArtifacts,
+        logger: logger,
+        processManager: FakeProcessManager.any(),
+      );
+
+      expect(() async => fuchsiaFfx.list(),
+          throwsToolExit(message: 'Fuchsia ffx tool not found.'));
+    });
+
+    testWithoutContext('unknown device', () async {
+      ffx.createSync();
+
+      final ProcessManager processManager =
+          FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[ffx.path, 'target', 'list', '--format', 'a', 'unknown-device'],
+          exitCode: 2,
+          stderr: 'No devices found.',
+        ),
+      ]);
+
+      final FuchsiaFfx fuchsiaFfx = FuchsiaFfx(
+        fuchsiaArtifacts: fakeFuchsiaArtifacts,
+        logger: logger,
+        processManager: processManager,
+      );
+
+      expect(await fuchsiaFfx.resolve('unknown-device'), isNull);
+      expect(logger.errorText, 'ffx failed: No devices found.\n');
+    });
+
+    testWithoutContext('error', () async {
+      ffx.createSync();
+
+      final ProcessManager processManager =
+          FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[ffx.path, 'target', 'list', '--format', 'a', 'error-device'],
+          exitCode: 1,
+          stderr: 'unexpected error',
+        ),
+      ]);
+
+      final FuchsiaFfx fuchsiaFfx = FuchsiaFfx(
+        fuchsiaArtifacts: fakeFuchsiaArtifacts,
+        logger: logger,
+        processManager: processManager,
+      );
+
+      expect(await fuchsiaFfx.resolve('error-device'), isNull);
+      expect(logger.errorText, contains('unexpected error'));
+    });
+
+    testWithoutContext('valid device', () async {
+      ffx.createSync();
+
+      final ProcessManager processManager =
+          FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[ffx.path, 'target', 'list', '--format', 'a', 'known-device'],
+          exitCode: 0,
+          stdout: '1234-1234-1234-1234',
+        ),
+      ]);
+
+      final FuchsiaFfx fuchsiaFfx = FuchsiaFfx(
+        fuchsiaArtifacts: fakeFuchsiaArtifacts,
+        logger: logger,
+        processManager: processManager,
+      );
+
+      expect(await fuchsiaFfx.resolve('known-device'), '1234-1234-1234-1234');
+      expect(logger.errorText, isEmpty);
     });
   });
 }

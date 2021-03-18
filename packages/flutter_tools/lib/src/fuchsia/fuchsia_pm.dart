@@ -245,7 +245,7 @@ class FuchsiaPackageServer {
     if (_process == null) {
       return false;
     }
-    return await fuchsiaSdk.fuchsiaPM.publish(_repo, package.path);
+    return fuchsiaSdk.fuchsiaPM.publish(_repo, package.path);
   }
 
   @override
