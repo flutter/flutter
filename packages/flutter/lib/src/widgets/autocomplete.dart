@@ -323,7 +323,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///                 ),
 ///                 validator: (String? value) {
 ///                   if (value == null || value.isEmpty) {
-///                     return 'Can\'t be empty.';
+///                     return "Can't be empty.";
 ///                   }
 ///                   return null;
 ///                 },
