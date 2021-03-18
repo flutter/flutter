@@ -270,7 +270,7 @@ class _StandardPromptCore {
 ///  * Accepts pressing ShiftLeft then ContrlLeft.
 ///  * Rejects pressing ControlLeft then ShiftRight.
 ///  * Accepts pressing ShiftLeft, AltLeft, then ContrlLeft.
-/// ```
+/// ```dart
 /// final LogicalKeySet set2 = LogicalKeySet(
 ///   LogicalKeyboardKey.controlLeft,
 ///   LogicalKeyboardKey.shift,
