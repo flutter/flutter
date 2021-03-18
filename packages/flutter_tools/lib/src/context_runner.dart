@@ -357,7 +357,6 @@ Future<T> runInContext<T>(
         processManager: globals.processManager,
         platform: globals.platform,
         fileSystem: globals.fs,
-        terminal: globals.terminal,
         usage: globals.flutterUsage,
       ),
     },

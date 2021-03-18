@@ -309,6 +309,7 @@ Future<void> _runWebToolTests() async {
           forceSingleCore: true,
           testPaths: <String>[path.join(kTest, '$kWeb$kDotShard', '')],
           enableFlutterToolAsserts: true,
+          perTestTimeout: const Duration(minutes: 3),
         );
       }
   };
