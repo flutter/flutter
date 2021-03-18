@@ -4,7 +4,6 @@
 
 #include "uia_registrar_win.h"
 #include <wrl/implements.h>
-#include "base/stl_util.h"
 
 namespace ui {
 

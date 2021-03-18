@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/accessibility/ax_active_popup.h"
+#include "ax_active_popup.h"
+
+#include "base/logging.h"
 
 namespace ui {
 // Represents a global storage for the view accessibility for an
@@ -10,13 +12,13 @@ namespace ui {
 // autofill popup. This singleton is used for communicating the live status of
 // the autofill popup between web contents and views.
 // The assumption here is that only one autofill popup can exist at a time.
-static base::NoDestructor<base::Optional<int32_t>> g_active_popup_ax_unique_id;
+static std::optional<int32_t> g_active_popup_ax_unique_id;
 
-base::Optional<int32_t> GetActivePopupAxUniqueId() {
+std::optional<int32_t> GetActivePopupAxUniqueId() {
   return *g_active_popup_ax_unique_id;
 }
 
-void SetActivePopupAxUniqueId(base::Optional<int32_t> ax_unique_id) {
+void SetActivePopupAxUniqueId(std::optional<int32_t> ax_unique_id) {
   // When an instance of autofill popup hides, the caller of popup hide should
   // make sure g_active_popup_ax_unique_id is cleared. The assumption is that
   // there can only be one active autofill popup existing at a time. If on
@@ -24,13 +26,13 @@ void SetActivePopupAxUniqueId(base::Optional<int32_t> ax_unique_id) {
   // this would indicate two autofill popups are showing at the same time or
   // previous on popup hide call did not clear the variable, so we should fail
   // DCHECK here.
-  DCHECK(!GetActivePopupAxUniqueId());
+  BASE_DCHECK(!GetActivePopupAxUniqueId());
 
-  *g_active_popup_ax_unique_id = ax_unique_id;
+  g_active_popup_ax_unique_id = ax_unique_id;
 }
 
 void ClearActivePopupAxUniqueId() {
-  *g_active_popup_ax_unique_id = base::nullopt;
+  g_active_popup_ax_unique_id = std::nullopt;
 }
 
 }  // namespace ui

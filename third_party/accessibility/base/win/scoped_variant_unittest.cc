@@ -10,7 +10,7 @@
 
 #include "base/win/dispatch_stub.h"
 #include "base/win/scoped_variant.h"
-#include "testing/gtest/include/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 using base::win::test::DispatchStub;
 

@@ -132,14 +132,14 @@ struct VariantUtil final {
   // of managed contents.
   // e.g. Does not affect IUnknown* reference counts or allocate a BSTR.
   static Type RawGet(const VARIANT& var) {
-    DCHECK(IsConvertibleFrom(V_VT(&var)));
+    BASE_DCHECK(IsConvertibleFrom(V_VT(&var)));
     return var.*VartypeToNativeType<ElementVartype>::kMemberOffset;
   }
   // Set the associated VARIANT union member value.
   // The caller is responsible for handling the lifetime of managed contents.
   // e.g. Incrementing IUnknown* reference counts or allocating a BSTR.
   static void RawSet(VARIANT* var, Type value) {
-    DCHECK(IsConvertibleTo(V_VT(var)));
+    BASE_DCHECK(IsConvertibleTo(V_VT(var)));
     var->*VartypeToNativeType<ElementVartype>::kMemberOffset = value;
   }
 };
