@@ -998,7 +998,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return _getTextPositionVertical(offset, verticalOffset);
   }
 
-  // Deletes the current uncollapsed [selection].
+  // Deletes the current uncollapsed selection.
   void _deleteSelection(TextSelection selection, SelectionChangedCause cause) {
     assert(selection.isCollapsed == false);
 
@@ -1020,14 +1020,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   // Deletes the from the current collapsed selection to the start of the field.
   //
-  // The given [SelectionChangedCause] indicates the cause of this change and
-  // will be passed to [onSelectionChanged].
+  // The given SelectionChangedCause indicates the cause of this change and
+  // will be passed to onSelectionChanged.
   //
   // See also:
-  //
   //   * _deleteToEnd
   void _deleteToStart(TextSelection selection, SelectionChangedCause cause) {
     assert(selection.isCollapsed == true);
+
     if (_readOnly || !selection.isValid) {
       return;
     }
@@ -1042,7 +1042,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   // Deletes the from the current collapsed selection to the end of the field.
+  //
+  // The given SelectionChangedCause indicates the cause of this change and
+  // will be passed to onSelectionChanged.
+  //
+  // See also:
+  //   * _deleteToStart
   void _deleteToEnd(TextSelection selection, SelectionChangedCause cause) {
+    assert(selection.isCollapsed == true);
+
     if (_readOnly || !selection.isValid) {
       return;
     }
@@ -1158,7 +1166,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// See also:
   ///
-  ///   * [deleteForwardByWord], which is same but in the opposite direction.
+  ///   * [deleteForwardByLine], which is same but in the opposite direction.
   void deleteByLine(SelectionChangedCause cause) {
     assert(_selection != null);
 
@@ -1285,7 +1293,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// See also:
   ///
-  ///   * [deleteByWord], which is same but in the opposite direction.
+  ///   * [deleteByLine], which is same but in the opposite direction.
   void deleteForwardByLine(SelectionChangedCause cause) {
     assert(_selection != null);
 
@@ -1308,7 +1316,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
 
-    // When there is a line break, it shouldn't do anything
+    // When there is a line break, it shouldn't do anything.
     final bool isNextCharacterBreakLine = textAfter.codeUnitAt(0) == 0x0A;
     if (isNextCharacterBreakLine) {
       return;
