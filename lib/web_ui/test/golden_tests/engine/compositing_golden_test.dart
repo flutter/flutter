@@ -69,6 +69,52 @@ void testMain() async {
         region: region);
   });
 
+  test('pushClipRect with offset and transform ClipOp none should not clip',
+      () async {
+    final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
+
+    builder.pushOffset(0, 80);
+    builder.pushTransform(
+      Matrix4.diagonal3Values(1, -1, 1).toFloat64(),
+    );
+    builder.pushClipRect(Rect.fromLTRB(10, 10, 60, 60),
+        clipBehavior: Clip.none);
+    _drawTestPicture(builder);
+    builder.pop();
+    builder.pop();
+    builder.pop();
+
+    html.document.body.append(builder.build().webOnlyRootElement);
+
+    await matchGoldenFile('compositing_clip_rect_clipop_none.png',
+        region: region);
+  });
+
+  test('pushClipRRect with offset and transform ClipOp none should not clip',
+      () async {
+    final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
+
+    builder.pushOffset(0, 80);
+    builder.pushTransform(
+      Matrix4.diagonal3Values(1, -1, 1).toFloat64(),
+    );
+    builder.pushClipRRect(
+        RRect.fromRectAndRadius(
+          const Rect.fromLTRB(10, 10, 60, 60),
+          const Radius.circular(1),
+        ),
+        clipBehavior: Clip.none);
+    _drawTestPicture(builder);
+    builder.pop();
+    builder.pop();
+    builder.pop();
+
+    html.document.body.append(builder.build().webOnlyRootElement);
+
+    await matchGoldenFile('compositing_clip_rrect_clipop_none.png',
+        region: region);
+  });
+
   test('pushClipRRect', () async {
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
     builder.pushClipRRect(
@@ -108,6 +154,35 @@ void testMain() async {
     html.document.body.append(builder.build().webOnlyRootElement);
 
     await matchGoldenFile('compositing_shifted_physical_shape_clip.png',
+        region: region);
+  });
+
+  test('pushPhysicalShape clipOp.none', () async {
+    final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
+    builder.pushPhysicalShape(
+      path: Path()..addRect(const Rect.fromLTRB(10, 10, 60, 60)),
+      clipBehavior: Clip.hardEdge,
+      color: const Color.fromRGBO(0, 0, 0, 0.3),
+      elevation: 0,
+    );
+    _drawTestPicture(builder);
+    builder.pop();
+
+    builder.pushOffset(70, 0);
+    builder.pushPhysicalShape(
+      path: Path()
+        ..addRRect(RRect.fromLTRBR(10, 10, 60, 60, const Radius.circular(5))),
+      clipBehavior: Clip.none,
+      color: const Color.fromRGBO(0, 0, 0, 0.3),
+      elevation: 0,
+    );
+    _drawTestPicture(builder);
+    builder.pop();
+    builder.pop();
+
+    html.document.body.append(builder.build().webOnlyRootElement);
+
+    await matchGoldenFile('compositing_shifted_physical_shape_clipnone.png',
         region: region);
   });
 
@@ -154,8 +229,9 @@ void testMain() async {
 
     builder.pushOffset(210, 0);
     builder.pushPhysicalShape(
-      path: Path()..addRRect(RRect.fromRectAndRadius(
-          Rect.fromLTRB(10, 10, 60, 60), Radius.circular(10.0))),
+      path: Path()
+        ..addRRect(RRect.fromRectAndRadius(
+            Rect.fromLTRB(10, 10, 60, 60), Radius.circular(10.0))),
       clipBehavior: Clip.hardEdge,
       color: const Color(0xFFA0FFFF),
       elevation: 4,
@@ -192,8 +268,7 @@ void testMain() async {
 
     html.Element viewElement = builder.build().webOnlyRootElement;
     html.document.body.append(viewElement);
-    await matchGoldenFile('compositing_physical_update_1.png',
-        region: region);
+    await matchGoldenFile('compositing_physical_update_1.png', region: region);
     viewElement.remove();
 
     /// Update color to green.
@@ -210,8 +285,7 @@ void testMain() async {
 
     html.Element viewElement2 = builder2.build().webOnlyRootElement;
     html.document.body.append(viewElement2);
-    await matchGoldenFile('compositing_physical_update_2.png',
-        region: region);
+    await matchGoldenFile('compositing_physical_update_2.png', region: region);
     viewElement2.remove();
 
     /// Update elevation.
@@ -246,8 +320,7 @@ void testMain() async {
 
     html.Element viewElement4 = builder4.build().webOnlyRootElement;
     html.document.body.append(viewElement4);
-    await matchGoldenFile('compositing_physical_update_4.png',
-        region: region);
+    await matchGoldenFile('compositing_physical_update_4.png', region: region);
     viewElement4.remove();
 
     /// Update shape back to arbitrary path.
@@ -265,8 +338,8 @@ void testMain() async {
     html.Element viewElement5 = builder5.build().webOnlyRootElement;
     html.document.body.append(viewElement5);
     await matchGoldenFile('compositing_physical_update_3.png',
-         region: region, maxDiffRatePercent:
-         browserEngine == BrowserEngine.webkit ? 0.6 : 0.4);
+        region: region,
+        maxDiffRatePercent: browserEngine == BrowserEngine.webkit ? 0.6 : 0.4);
     viewElement5.remove();
 
     /// Update shadow color.
@@ -284,8 +357,7 @@ void testMain() async {
 
     html.Element viewElement6 = builder6.build().webOnlyRootElement;
     html.document.body.append(viewElement6);
-    await matchGoldenFile('compositing_physical_update_5.png',
-        region: region);
+    await matchGoldenFile('compositing_physical_update_5.png', region: region);
     viewElement6.remove();
   });
 
@@ -592,8 +664,10 @@ void _testCullRectComputation() {
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
 
     builder.pushTransform(Matrix4.diagonal3Values(
-        EnginePlatformDispatcher.browserDevicePixelRatio,
-        EnginePlatformDispatcher.browserDevicePixelRatio, 1.0).toFloat64());
+            EnginePlatformDispatcher.browserDevicePixelRatio,
+            EnginePlatformDispatcher.browserDevicePixelRatio,
+            1.0)
+        .toFloat64());
 
     // TODO(yjbanov): see the TODO below.
     // final double screenWidth = html.window.innerWidth.toDouble();
@@ -610,9 +684,8 @@ void _testCullRectComputation() {
       const Rect.fromLTRB(-200, -200, 200, 200),
     );
 
-    builder.pushTransform(
-      Matrix4.rotationY(45.0 * math.pi / 180.0).toFloat64()
-    );
+    builder
+        .pushTransform(Matrix4.rotationY(45.0 * math.pi / 180.0).toFloat64());
 
     builder.pushClipRect(
       const Rect.fromLTRB(-140, -140, 140, 140),
@@ -726,7 +799,9 @@ void _testCullRectComputation() {
     () async {
       // To reproduce blurriness we need real clipping.
       final DomParagraph paragraph =
-          (DomParagraphBuilder(ParagraphStyle(fontFamily: 'Roboto'))..addText('Am I blurry?')).build();
+          (DomParagraphBuilder(ParagraphStyle(fontFamily: 'Roboto'))
+                ..addText('Am I blurry?'))
+              .build();
       paragraph.layout(const ParagraphConstraints(width: 1000));
 
       final Rect canvasSize = Rect.fromLTRB(
@@ -774,7 +849,10 @@ void _testCullRectComputation() {
 
       final html.Element sceneElement = builder.build().webOnlyRootElement;
       expect(
-        sceneElement.querySelectorAll('p').map<String>((e) => e.innerText).toList(),
+        sceneElement
+            .querySelectorAll('p')
+            .map<String>((e) => e.innerText)
+            .toList(),
         <String>['Am I blurry?', 'Am I blurry?'],
         reason: 'Expected to render text using HTML',
       );
