@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/convert.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
+import '../../../src/fake_process_manager.dart';
 
 final Platform platform = FakePlatform(operatingSystem: 'linux', environment: const <String, String>{});
 void main() {
@@ -204,7 +205,7 @@ void main() {
 
     await androidAot.build(environment);
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -246,7 +247,7 @@ void main() {
 
     await androidAot.build(environment);
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,

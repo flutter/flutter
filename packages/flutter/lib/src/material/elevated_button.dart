@@ -47,6 +47,39 @@ import 'theme_data.dart';
 /// If [onPressed] and [onLongPress] callbacks are null, then the
 /// button will be disabled.
 ///
+/// {@tool dartpad --template=stateful_widget_scaffold}
+///
+/// This sample produces an enabled and a disabled ElevatedButton.
+///
+/// ```dart
+/// @override
+/// Widget build(BuildContext context) {
+///   final ButtonStyle style =
+///     ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));
+///
+///   return Center(
+///     child: Column(
+///       mainAxisSize: MainAxisSize.min,
+///       children: <Widget>[
+///         ElevatedButton(
+///            style: style,
+///            onPressed: null,
+///            child: const Text('Disabled'),
+///         ),
+///         const SizedBox(height: 30),
+///         ElevatedButton(
+///           style: style,
+///           onPressed: () {},
+///           child: const Text('Enabled'),
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+///
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [TextButton], a simple flat button without a shadow.
@@ -435,7 +468,7 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
     final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: <Widget>[icon, SizedBox(width: gap), label],
+      children: <Widget>[icon, SizedBox(width: gap), Flexible(child: label)],
     );
   }
 }

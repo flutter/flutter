@@ -6,22 +6,20 @@ import 'dart:io' hide Platform;
 
 import 'package:file/file.dart' as fs;
 import 'package:file/memory.dart';
-import 'package:mockito/mockito.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 
 import '../test.dart';
 import 'common.dart';
 
-class MockFile extends Mock implements File {}
-
 void main() {
-  MockFile file;
-  setUp(() {
-    file = MockFile();
-    when(file.existsSync()).thenReturn(true);
-  });
   group('verifyVersion()', () {
+    MemoryFileSystem fileSystem;
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+    });
+
     test('passes for valid version strings', () async {
       const List<String> valid_versions = <String>[
         '1.2.3',
@@ -31,7 +29,9 @@ void main() {
         '1.2.3-5.0.pre.12',
       ];
       for (final String version in valid_versions) {
-        when(file.readAsString()).thenAnswer((Invocation invocation) => Future<String>.value(version));
+        final File file = fileSystem.file('version');
+        file.writeAsStringSync(version);
+
         expect(
           await verifyVersion(file),
           isNull,
@@ -51,7 +51,9 @@ void main() {
         '1.2.3-hotfix.1',
       ];
       for (final String version in invalid_versions) {
-        when(file.readAsString()).thenAnswer((Invocation invocation) => Future<String>.value(version));
+        final File file = fileSystem.file('version');
+        file.writeAsStringSync(version);
+
         expect(
           await verifyVersion(file),
           'The version logic generated an invalid version string: "$version".',

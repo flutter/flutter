@@ -500,6 +500,28 @@ void main() {
     expect(tester.getSize(find.byType(Chip)), const Size(800.0, 48.0));
   });
 
+  testWidgets('Chip responds to materialTapTargetSize', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _wrapForChip(
+          child: Column(
+            children: const <Widget>[
+              Chip(
+                label: Text('X'),
+                materialTapTargetSize: MaterialTapTargetSize.padded,
+              ),
+              Chip(
+                label: Text('X'),
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(Chip).first), const Size(48.0, 48.0));
+      expect(tester.getSize(find.byType(Chip).last), const Size(38.0, 32.0));
+    },
+  );
+
   testWidgets('Chip elements are ordered horizontally for locale', (WidgetTester tester) async {
     final UniqueKey iconKey = UniqueKey();
     final Widget test = Overlay(

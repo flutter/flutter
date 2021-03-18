@@ -137,6 +137,7 @@
         "templates/app/windows.tmpl/runner/utils.h",
         "templates/app/windows.tmpl/runner/win32_window.cpp",
         "templates/app/windows.tmpl/runner/win32_window.h",
+        "templates/app/winuwp.tmpl/project_version",
         "templates/cocoapods/Podfile-ios-objc",
         "templates/cocoapods/Podfile-ios-swift",
         "templates/cocoapods/Podfile-macos",

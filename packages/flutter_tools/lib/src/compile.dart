@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
@@ -65,11 +66,14 @@ class TargetModel {
 }
 
 class CompilerOutput {
-  const CompilerOutput(this.outputFilename, this.errorCount, this.sources);
+  const CompilerOutput(this.outputFilename, this.errorCount, this.sources, {this.expressionData});
 
   final String outputFilename;
   final int errorCount;
   final List<Uri> sources;
+
+  /// This field is only non-null for expression compilation requests.
+  final Uint8List expressionData;
 }
 
 enum StdoutState { CollectDiagnostic, CollectDependencies }
@@ -77,12 +81,15 @@ enum StdoutState { CollectDiagnostic, CollectDependencies }
 /// Handles stdin/stdout communication with the frontend server.
 class StdoutHandler {
   StdoutHandler({
-    @required Logger logger
-  }) : _logger = logger {
+    @required Logger logger,
+    @required FileSystem fileSystem,
+  }) : _logger = logger,
+       _fileSystem = fileSystem {
     reset();
   }
 
   final Logger _logger;
+  final FileSystem _fileSystem;
 
   String boundaryKey;
   StdoutState state = StdoutState.CollectDiagnostic;
@@ -91,6 +98,7 @@ class StdoutHandler {
 
   bool _suppressCompilerMessages;
   bool _expectSources;
+  bool _readFile;
 
   void handler(String message) {
     const String kResultPrefix = 'result ';
@@ -110,11 +118,19 @@ class StdoutHandler {
         return;
       }
       final int spaceDelimiter = message.lastIndexOf(' ');
-      compilerOutput.complete(
-          CompilerOutput(
-              message.substring(boundaryKey.length + 1, spaceDelimiter),
-              int.parse(message.substring(spaceDelimiter + 1).trim()),
-              sources));
+      final String fileName = message.substring(boundaryKey.length + 1, spaceDelimiter);
+      final int errorCount = int.parse(message.substring(spaceDelimiter + 1).trim());
+      Uint8List expressionData;
+      if (_readFile) {
+        expressionData = _fileSystem.file(fileName).readAsBytesSync();
+      }
+      final CompilerOutput output = CompilerOutput(
+        fileName,
+        errorCount,
+        sources,
+        expressionData: expressionData,
+      );
+      compilerOutput.complete(output);
       return;
     }
     if (state == StdoutState.CollectDiagnostic) {
@@ -140,11 +156,12 @@ class StdoutHandler {
 
   // This is needed to get ready to process next compilation result output,
   // with its own boundary key and new completer.
-  void reset({ bool suppressCompilerMessages = false, bool expectSources = true }) {
+  void reset({ bool suppressCompilerMessages = false, bool expectSources = true, bool readFile = false }) {
     boundaryKey = null;
     compilerOutput = Completer<CompilerOutput>();
     _suppressCompilerMessages = suppressCompilerMessages;
     _expectSources = expectSources;
+    _readFile = readFile;
     state = StdoutState.CollectDiagnostic;
   }
 }
@@ -184,12 +201,14 @@ class KernelCompiler {
     @required Artifacts artifacts,
     @required List<String> fileSystemRoots,
     @required String fileSystemScheme,
+    @visibleForTesting StdoutHandler stdoutHandler,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _artifacts = artifacts,
        _processManager = processManager,
        _fileSystemScheme = fileSystemScheme,
-       _fileSystemRoots = fileSystemRoots;
+       _fileSystemRoots = fileSystemRoots,
+       _stdoutHandler = stdoutHandler ?? StdoutHandler(logger: logger, fileSystem: fileSystem);
 
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
@@ -197,6 +216,7 @@ class KernelCompiler {
   final Logger _logger;
   final String _fileSystemScheme;
   final List<String> _fileSystemRoots;
+  final StdoutHandler _stdoutHandler;
 
   Future<CompilerOutput> compile({
     String sdkRoot,
@@ -310,7 +330,6 @@ class KernelCompiler {
     _logger.printTrace(command.join(' '));
     final Process server = await _processManager.start(command);
 
-    final StdoutHandler _stdoutHandler = StdoutHandler(logger: _logger);
     server.stderr
       .transform<String>(utf8.decoder)
       .listen(_logger.printError);
@@ -428,6 +447,7 @@ abstract class ResidentCompiler {
     @required ProcessManager processManager,
     @required Artifacts artifacts,
     @required Platform platform,
+    @required FileSystem fileSystem,
     bool testCompilation,
     bool trackWidgetCreation,
     String packagesPath,
@@ -528,6 +548,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     @required ProcessManager processManager,
     @required Artifacts artifacts,
     @required Platform platform,
+    @required FileSystem fileSystem,
     this.testCompilation = false,
     this.trackWidgetCreation = true,
     this.packagesPath,
@@ -540,11 +561,12 @@ class DefaultResidentCompiler implements ResidentCompiler {
     this.platformDill,
     List<String> dartDefines,
     this.librariesSpec,
+    @visibleForTesting StdoutHandler stdoutHandler,
   }) : assert(sdkRoot != null),
        _logger = logger,
        _processManager = processManager,
        _artifacts = artifacts,
-       _stdoutHandler = StdoutHandler(logger: logger),
+       _stdoutHandler = stdoutHandler ?? StdoutHandler(logger: logger, fileSystem: fileSystem),
        _platform = platform,
        dartDefines = dartDefines ?? const <String>[],
        // This is a URI, not a file path, so the forward slash is correct even on Windows.
@@ -759,21 +781,20 @@ class DefaultResidentCompiler implements ResidentCompiler {
     String libraryUri,
     String klass,
     bool isStatic,
-  ) {
+  ) async {
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
     }
 
     final Completer<CompilerOutput> completer = Completer<CompilerOutput>();
-    _controller.add(
-        _CompileExpressionRequest(
-            completer, expression, definitions, typeDefinitions, libraryUri, klass, isStatic)
-    );
+    final _CompileExpressionRequest request =  _CompileExpressionRequest(
+        completer, expression, definitions, typeDefinitions, libraryUri, klass, isStatic);
+    _controller.add(request);
     return completer.future;
   }
 
   Future<CompilerOutput> _compileExpression(_CompileExpressionRequest request) async {
-    _stdoutHandler.reset(suppressCompilerMessages: true, expectSources: false);
+    _stdoutHandler.reset(suppressCompilerMessages: true, expectSources: false, readFile: true);
 
     // 'compile-expression' should be invoked after compiler has been started,
     // program was compiled.

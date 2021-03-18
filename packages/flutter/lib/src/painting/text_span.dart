@@ -35,7 +35,7 @@ import 'text_style.dart';
 /// The text "Hello world!", in black:
 ///
 /// ```dart
-/// TextSpan(
+/// const TextSpan(
 ///   text: 'Hello world!',
 ///   style: TextStyle(color: Colors.black),
 /// )
@@ -119,6 +119,8 @@ class TextSpan extends InlineSpan {
   ///
   /// ```dart
   /// class BuzzingText extends StatefulWidget {
+  ///   const BuzzingText({Key? key}) : super(key: key);
+  ///
   ///   @override
   ///   _BuzzingTextState createState() => _BuzzingTextState();
   /// }
@@ -148,18 +150,18 @@ class TextSpan extends InlineSpan {
   ///     return Text.rich(
   ///       TextSpan(
   ///         text: 'Can you ',
-  ///         style: TextStyle(color: Colors.black),
+  ///         style: const TextStyle(color: Colors.black),
   ///         children: <InlineSpan>[
   ///           TextSpan(
   ///             text: 'find the',
-  ///             style: TextStyle(
+  ///             style: const TextStyle(
   ///               color: Colors.green,
   ///               decoration: TextDecoration.underline,
   ///               decorationStyle: TextDecorationStyle.wavy,
   ///             ),
   ///             recognizer: _longPressRecognizer,
   ///           ),
-  ///           TextSpan(
+  ///           const TextSpan(
   ///             text: ' secret?',
   ///           ),
   ///         ],

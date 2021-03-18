@@ -2540,7 +2540,6 @@ void main() {
     expect(find.text('Target'), findsOneWidget);
     expect(onDragCompletedCalled, isFalse);
 
-
     final Offset secondLocation = tester.getCenter(find.text('Target'));
     await gesture.moveTo(secondLocation);
     await tester.pump();
@@ -3017,6 +3016,30 @@ void main() {
         ],
     ), ignoreTransform: true, ignoreRect: true));
     semantics.dispose();
+  });
+
+  testWidgets('Drag and drop - when a dragAnchorStrategy is provided it gets called', (WidgetTester tester) async {
+    bool dragAnchorStrategyCalled = false;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Column(
+        children: <Widget>[
+          Draggable<int>(
+            child: const Text('Source'),
+            feedback: const Text('Feedback'),
+            dragAnchorStrategy: (Draggable<Object> widget, BuildContext context, Offset position) {
+              dragAnchorStrategyCalled = true;
+              return const Offset(0, 0);
+            }
+          )
+        ],
+      ),
+    ));
+
+    final Offset location = tester.getCenter(find.text('Source'));
+    await tester.startGesture(location, pointer: 7);
+
+    expect(dragAnchorStrategyCalled, true);
   });
 
   testWidgets('configurable Draggable hit test behavior', (WidgetTester tester) async {

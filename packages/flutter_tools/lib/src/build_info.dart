@@ -485,6 +485,7 @@ enum TargetPlatform {
   linux_x64,
   linux_arm64,
   windows_x64,
+  windows_uwp_x64,
   fuchsia_arm64,
   fuchsia_x64,
   tester,
@@ -578,10 +579,12 @@ String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch darwinArch}
       return 'darwin-x64';
     case TargetPlatform.linux_x64:
       return 'linux-x64';
-   case TargetPlatform.linux_arm64:
+    case TargetPlatform.linux_arm64:
       return 'linux-arm64';
     case TargetPlatform.windows_x64:
       return 'windows-x64';
+    case TargetPlatform.windows_uwp_x64:
+      return 'windows-uwp-x64';
     case TargetPlatform.fuchsia_arm64:
       return 'fuchsia-arm64';
     case TargetPlatform.fuchsia_x64:

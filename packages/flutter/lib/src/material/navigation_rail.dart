@@ -58,7 +58,7 @@ import 'theme.dart';
 ///              });
 ///            },
 ///            labelType: NavigationRailLabelType.selected,
-///            destinations: [
+///            destinations: const <NavigationRailDestination>[
 ///              NavigationRailDestination(
 ///                icon: Icon(Icons.favorite_border),
 ///                selectedIcon: Icon(Icons.favorite),
@@ -76,7 +76,7 @@ import 'theme.dart';
 ///              ),
 ///            ],
 ///          ),
-///          VerticalDivider(thickness: 1, width: 1),
+///          const VerticalDivider(thickness: 1, width: 1),
 ///          // This is the main content.
 ///          Expanded(
 ///            child: Center(
@@ -329,7 +329,7 @@ class NavigationRail extends StatefulWidget {
   /// This can be used to synchronize animations in the [leading] or [trailing]
   /// widget, such as an animated menu or a [FloatingActionButton] animation.
   ///
-  /// {@tool snippet}
+  /// {@tool dartpad --template=stateless_widget_material}
   ///
   /// This example shows how to use this animation to create a
   /// [FloatingActionButton] that animates itself between the normal and
@@ -338,10 +338,11 @@ class NavigationRail extends StatefulWidget {
   /// An instance of `ExtendableFab` would be created for
   /// [NavigationRail.leading].
   ///
-  /// ```dart
+  /// ```dart dartImports
   /// import 'dart:ui';
+  /// ```
   ///
-  /// @override
+  /// ```dart
   /// Widget build(BuildContext context) {
   ///   final Animation<double> animation = NavigationRail.extendedAnimation(context);
   ///   return AnimatedBuilder(
@@ -355,7 +356,7 @@ class NavigationRail extends StatefulWidget {
   ///         ),
   ///         child: animation.value == 0
   ///           ? FloatingActionButton(
-  ///               child: Icon(Icons.add),
+  ///               child: const Icon(Icons.add),
   ///               onPressed: () {},
   ///             )
   ///           : Align(
@@ -364,8 +365,8 @@ class NavigationRail extends StatefulWidget {
   ///               child: Padding(
   ///                 padding: const EdgeInsetsDirectional.only(start: 8),
   ///                 child: FloatingActionButton.extended(
-  ///                   icon: Icon(Icons.add),
-  ///                   label: Text('CREATE'),
+  ///                   icon: const Icon(Icons.add),
+  ///                   label: const Text('CREATE'),
   ///                   onPressed: () {},
   ///                 ),
   ///               ),
@@ -490,7 +491,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                           extendedTransitionAnimation: _extendedAnimation,
                           selected: widget.selectedIndex == i,
                           icon: widget.selectedIndex == i ? widget.destinations[i].selectedIcon : widget.destinations[i].icon,
-                          label: widget.destinations[i].label!,
+                          label: widget.destinations[i].label,
                           destinationAnimation: _destinationAnimations[i],
                           labelType: labelType,
                           iconTheme: widget.selectedIndex == i ? selectedIconTheme : unselectedIconTheme,
@@ -818,10 +819,11 @@ class NavigationRailDestination {
   const NavigationRailDestination({
     required this.icon,
     Widget? selectedIcon,
-    this.label,
+    required this.label,
     this.padding,
   }) : selectedIcon = selectedIcon ?? icon,
-       assert(icon != null);
+       assert(icon != null),
+       assert(label != null);
 
   /// The icon of the destination.
   ///
@@ -856,7 +858,7 @@ class NavigationRailDestination {
   /// [NavigationRail.labelType] is [NavigationRailLabelType.none], the label is
   /// still used for semantics, and may still be used if
   /// [NavigationRail.extended] is true.
-  final Widget? label;
+  final Widget label;
 
   /// The amount of space to inset the destination item.
   final EdgeInsetsGeometry? padding;

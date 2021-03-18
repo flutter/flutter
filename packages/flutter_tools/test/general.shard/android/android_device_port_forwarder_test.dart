@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/device.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 
 void main() {
   testWithoutContext('AndroidDevicePortForwarder returns the generated host '
@@ -123,7 +124,7 @@ void main() {
 
     await forwarder.dispose();
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('failures to unforward port do not throw if the forward is missing', () async {
