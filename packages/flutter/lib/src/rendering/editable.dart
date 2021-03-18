@@ -828,8 +828,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     final int leftOffset = _getLeftByWord(textPainter, selection.extentOffset, includeWhitespace);
 
-    if (stopAtReversal
-        && selection.extentOffset > selection.baseOffset
+    if (stopAtReversal && selection.extentOffset > selection.baseOffset
         && leftOffset < selection.baseOffset) {
       return selection.copyWith(
         extentOffset: selection.baseOffset,
@@ -843,7 +842,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   // Return the given TextSelection extended right to the end of the nearest
   // word.
-  static TextSelection _extendGivenSelectionRightByWord(TextPainter textPainter, TextSelection selection, [bool includeWhitespace = true]) {
+  //
+  // See extendSelectionRightByWord for a detailed explanation of the two
+  // optional parameters.
+  static TextSelection _extendGivenSelectionRightByWord(TextPainter textPainter, TextSelection selection, [bool includeWhitespace = true, bool stopAtReversal = false]) {
     // If the selection is already all the way right, there is nothing to do.
     final String text = textPainter.text!.toPlainText();
     if (selection.isCollapsed && selection.extentOffset == text.length) {
@@ -851,6 +853,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     final int rightOffset = _getRightByWord(textPainter, selection.extentOffset, includeWhitespace);
+
+    if (stopAtReversal && selection.baseOffset > selection.extentOffset
+        && rightOffset > selection.baseOffset) {
+      return selection.copyWith(
+        extentOffset: selection.baseOffset,
+      );
+    }
+
     return selection.copyWith(
       extentOffset: rightOffset,
     );
@@ -1352,9 +1362,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
-  /// By default, `includeWhitespace` is set to true, meaning that whitespace can
-  /// be considered a word in itself.  If set to false, the selection will be
-  /// extended past any whitespace and the first word following the whitespace.
+  /// By default, `includeWhitespace` is set to true, meaning that whitespace
+  /// can be considered a word in itself.  If set to false, the selection will
+  /// be extended past any whitespace and the first word following the
+  /// whitespace.
   ///
   /// {@template flutter.rendering.RenderEditable.stopAtReversal}
   /// The `stopAtReversal` parameter is false by default, meaning that it's
@@ -1394,15 +1405,18 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
-  /// By default, includeWhitespace is set to true, meaning that whitespace can
-  /// be considered a word in itself.  If set to false, the selection will be
-  /// extended past any whitespace and the first word following the whitespace.
+  /// By default, `includeWhitespace` is set to true, meaning that whitespace
+  /// can be considered a word in itself.  If set to false, the selection will
+  /// be extended past any whitespace and the first word following the
+  /// whitespace.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.stopAtReversal}
   ///
   /// See also:
   ///
   ///   * [extendSelectionLeftByWord], which is the same but in the opposite
   ///     direction.
-  void extendSelectionRightByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
+  void extendSelectionRightByWord(SelectionChangedCause cause, [bool includeWhitespace = true, bool stopAtReversal = false]) {
     assert(selection != null);
 
     // When the text is obscured, the whole thing is treated as one big word.
@@ -1417,6 +1431,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       _textPainter,
       selection!,
       includeWhitespace,
+      stopAtReversal,
     );
     if (nextSelection == selection) {
       return;

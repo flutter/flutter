@@ -43,6 +43,7 @@ class DefaultTextEditingActions extends Actions{
     ExtendSelectionLeftByWordTextIntent: _ExtendSelectionLeftByWordTextAction(),
     ExtendSelectionLeftByWordAndStopAtReversalTextIntent: _ExtendSelectionLeftByWordAndStopAtReversalTextAction(),
     ExtendSelectionLeftTextIntent: _ExtendSelectionLeftTextAction(),
+    ExtendSelectionRightByWordAndStopAtReversalTextIntent: _ExtendSelectionRightByWordAndStopAtReversalTextAction(),
     ExtendSelectionRightByWordTextIntent: _ExtendSelectionRightByWordTextAction(),
     ExtendSelectionRightByLineTextIntent: _ExtendSelectionRightByLineTextAction(),
     ExtendSelectionRightTextIntent: _ExtendSelectionRightTextAction(),
@@ -144,6 +145,13 @@ class _ExtendSelectionRightByLineTextAction extends TextEditingAction<ExtendSele
   @override
   Object? invoke(ExtendSelectionRightByLineTextIntent intent, [BuildContext? context]) {
     textEditingActionTarget!.renderEditable.extendSelectionRightByLine(SelectionChangedCause.keyboard);
+  }
+}
+
+class _ExtendSelectionRightByWordAndStopAtReversalTextAction extends TextEditingAction<ExtendSelectionRightByWordAndStopAtReversalTextIntent> {
+  @override
+  Object? invoke(ExtendSelectionRightByWordAndStopAtReversalTextIntent intent, [BuildContext? context]) {
+    textEditingActionTarget!.renderEditable.extendSelectionRightByWord(SelectionChangedCause.keyboard, false, true);
   }
 }
 
