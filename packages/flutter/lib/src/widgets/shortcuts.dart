@@ -244,13 +244,13 @@ class _StandardPromptCore {
 ///  * No other modifier keys are pressed.
 ///
 /// {@tool snippet}
+/// The following object can be used for shorcut Ctrl-A. It:
+///
+///  * Accepts pressing ContrlLeft then KeyA.
+///  * Accepts pressing ContrlRight then KeyA.
+///  * Rejects pressing KeyA then ContrlLeft.
+///  * Rejects pressing ShiftLeft, ContrlLeft, then KeyA.
 /// ```dart
-/// // Ctrl-A.
-/// //
-/// // Accepts pressing ContrlLeft then KeyA.
-/// // Accepts pressing ContrlRight then KeyA.
-/// // Rejects pressing KeyA then ContrlLeft.
-/// // Rejects pressing ShiftLeft, ContrlLeft, then KeyA.
 /// const LogicalKeySet set1 = LogicalKeySet(
 ///   LogicalKeyboardKey.controlLeft,
 ///   LogicalKeyboardKey.keyA,
@@ -264,14 +264,14 @@ class _StandardPromptCore {
 /// modifiers.
 ///
 /// {@tool snippet}
+/// The following object can be used for shorcut CtrlLeft-Shift. It:
+///
+///  * Accepts pressing ContrlLeft then ShiftLeft.
+///  * Accepts pressing ContrlLeft then ShiftRight.
+///  * Accepts pressing ShiftLeft then ContrlLeft.
+///  * Rejects pressing ControlLeft then ShiftRight.
+///  * Accepts pressing ShiftLeft, AltLeft, then ContrlLeft.
 /// ```
-/// // CtrlLeft-Shift.
-/// //
-/// // Accepts pressing ContrlLeft then ShiftLeft.
-/// // Accepts pressing ContrlLeft then ShiftRight.
-/// // Accepts pressing ShiftLeft then ContrlLeft.
-/// // Rejects pressing ControlLeft then ShiftRight.
-/// // Accepts pressing ShiftLeft, AltLeft, then ContrlLeft.
 /// const LogicalKeySet set2 = LogicalKeySet(
 ///   LogicalKeyboardKey.controlLeft,
 ///   LogicalKeyboardKey.shift,
