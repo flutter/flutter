@@ -4,6 +4,7 @@
 
 // @dart = 2.8
 
+@Timeout(Duration(minutes: 3))
 import 'package:file/file.dart';
 
 import '../integration.shard/test_data/stepping_project.dart';
@@ -48,7 +49,7 @@ void main() {
         reason: 'After $i steps, debugger should stop at $expectedLine but stopped at $actualLine'
       );
     }
-  }, skip: platform.isWindows); // https://github.com/flutter/flutter/issues/70486
+  });
 
   tearDown(() async {
     await flutter.stop();

@@ -61,9 +61,6 @@ Future<void> run(List<String> arguments) async {
   print('$clock Test imports...');
   await verifyNoTestImports(flutterRoot);
 
-  print('$clock Test package imports...');
-  await verifyNoTestPackageImports(flutterRoot);
-
   print('$clock Bad imports (framework)...');
   await verifyNoBadImportsInFlutter(flutterRoot);
 
@@ -295,79 +292,6 @@ Future<void> verifyNoTestImports(String workingDirectory) async {
     exitWithError(<String>[
       '${bold}The following file$s import a test directly. Test utilities should be in their own file.$reset',
       ...errors,
-    ]);
-  }
-}
-
-Future<void> verifyNoTestPackageImports(String workingDirectory) async {
-  // TODO(ianh): Remove this whole test once https://github.com/dart-lang/matcher/issues/98 is fixed.
-  final List<String> shims = <String>[];
-  final List<String> errors = (await _allFiles(workingDirectory, 'dart', minimumMatches: 2000).toList())
-    .map<String>((File file) {
-      final String name = Uri.file(path.relative(file.path,
-          from: workingDirectory)).toFilePath(windows: false);
-      if (name.startsWith('bin/cache') ||
-          name == 'dev/bots/test.dart' ||
-          name.startsWith('.pub-cache'))
-        return null;
-      final String data = file.readAsStringSync();
-      if (data.contains("import 'package:test/test.dart'")) {
-        if (data.contains("// Defines a 'package:test' shim.")) {
-          shims.add('  $name');
-          if (!data.contains('https://github.com/dart-lang/matcher/issues/98'))
-            return '  $name: Shims must link to the isInstanceOf issue.';
-          if (data.contains("import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;") &&
-              data.contains("export 'package:test/test.dart' hide TypeMatcher, isInstanceOf;"))
-            return null;
-          return '  $name: Shim seems to be missing the expected import/export lines.';
-        }
-        final int count = 'package:test'.allMatches(data).length;
-        if (path.split(file.path).contains('test_driver') ||
-            name.startsWith('dev/missing_dependency_tests/') ||
-            name.startsWith('dev/automated_tests/') ||
-            name.startsWith('dev/snippets/') ||
-            name.startsWith('packages/flutter/test/engine/') ||
-            name.startsWith('examples/layers/test/smoketests/raw/') ||
-            name.startsWith('examples/layers/test/smoketests/rendering/') ||
-            name.startsWith('dev/integration_tests/flutter_gallery/test/calculator')) {
-          // We only exempt driver tests, some of our special trivial tests.
-          // Driver tests aren't typically expected to use TypeMatcher and company.
-          // The trivial tests don't typically do anything at all and it would be
-          // a pain to have to give them a shim.
-          if (!data.contains("import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;"))
-            return '  $name: test does not hide TypeMatcher and isInstanceOf from package:test; consider using a shim instead.';
-          assert(count > 0);
-          if (count == 1)
-            return null;
-          return "  $name: uses 'package:test' $count times.";
-        }
-        if (name.startsWith('packages/flutter_test/')) {
-          // flutter_test has deep ties to package:test
-          return null;
-        }
-        if (data.contains("import 'package:test/test.dart' as test_package;") ||
-            data.contains("import 'package:test/test.dart' as test_package show ")) {
-          if (count == 1)
-            return null;
-        }
-        return "  $name: uses 'package:test' directly";
-      }
-      return null;
-    })
-    .where((String line) => line != null)
-    .toList()
-    ..sort();
-
-  // Fail if any errors
-  if (errors.isNotEmpty) {
-    final String s1 = errors.length == 1 ? 's' : '';
-    final String s2 = errors.length == 1 ? '' : 's';
-    exitWithError(<String>[
-      "${bold}The following file$s2 use$s1 'package:test' incorrectly:$reset",
-      ...errors,
-      "Rather than depending on 'package:test' directly, use one of the shims:",
-      ...shims,
-      "This insulates us from breaking changes in 'package:test'."
     ]);
   }
 }

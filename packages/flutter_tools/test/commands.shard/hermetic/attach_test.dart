@@ -760,11 +760,20 @@ class StreamLogger extends Logger {
     @required Duration timeout,
     String progressId,
     bool multilineOutput = false,
+    bool includeTiming = true,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     _log('[progress] $message');
     return SilentStatus(
       stopwatch: Stopwatch(),
+    )..start();
+  }
+
+  @override
+  Status startSpinner({ VoidCallback onFinish }) {
+    return SilentStatus(
+      stopwatch: Stopwatch(),
+      onFinish: onFinish,
     )..start();
   }
 

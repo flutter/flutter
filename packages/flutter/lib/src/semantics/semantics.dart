@@ -1207,7 +1207,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   SemanticsNode({
     this.key,
     VoidCallback? showOnScreen,
-  }) : id = _generateNewId(),
+  }) : _id = _generateNewId(),
        _showOnScreen = showOnScreen;
 
   /// Creates a semantic node to represent the root of the semantics tree.
@@ -1217,7 +1217,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     this.key,
     VoidCallback? showOnScreen,
     required SemanticsOwner owner,
-  }) : id = 0,
+  }) : _id = 0,
        _showOnScreen = showOnScreen {
     attach(owner);
   }
@@ -1244,9 +1244,15 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   /// The unique identifier for this node.
   ///
-  /// The root node has an id of zero. Other nodes are given a unique id when
-  /// they are created.
-  final int id;
+  /// The root node has an id of zero. Other nodes are given a unique id
+  /// when they are attached to a [SemanticsOwner]. If they are detached, their
+  /// ids are invalid and should not be used.
+  ///
+  /// In rare circumstances, id may change if this node is detached and
+  /// re-attached to the [SemanticsOwner]. This should only happen when the
+  /// application has generated too many semantics nodes.
+  int get id => _id;
+  int _id;
 
   final VoidCallback? _showOnScreen;
 
@@ -1541,7 +1547,11 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   @override
   void attach(SemanticsOwner owner) {
     super.attach(owner);
-    assert(!owner._nodes.containsKey(id));
+    while (owner._nodes.containsKey(id)) {
+      // Ids may repeat if the Flutter has generated > 2^16 ids. We need to keep
+      // regenerating the id until we found an id that is not used.
+      _id = _generateNewId();
+    }
     owner._nodes[id] = this;
     owner._detachedNodes.remove(this);
     if (_dirty) {

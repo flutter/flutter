@@ -236,6 +236,8 @@ class UserMessages {
       'It is likely available from your distribution (e.g.: apt install libblkid-dev)';
   String get lzmaLibraryMissing => 'The lzma development library is required for Linux development.\n'
       'It is likely available from your distribution (e.g.: apt install liblzma-dev)';
+  String get gcryptLibraryMissing => 'The gcrypt development library is required for Linux development.\n'
+      'It is likely available from your distribution (e.g.: apt install libgcrypt20-dev)';
 
   // Messages used in FlutterCommand
   String flutterElapsedTime(String name, String elapsedTime) => '"flutter $name" took $elapsedTime.';

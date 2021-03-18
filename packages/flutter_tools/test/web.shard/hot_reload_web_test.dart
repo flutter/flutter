@@ -4,6 +4,7 @@
 
 // @dart = 2.8
 
+@Timeout(Duration(minutes: 3))
 import 'dart:async';
 
 import 'package:file/file.dart';

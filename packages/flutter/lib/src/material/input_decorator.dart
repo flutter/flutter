@@ -2019,24 +2019,14 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
   Color _getActiveColor(ThemeData themeData) {
     if (isFocused) {
-      switch (themeData.brightness) {
-        case Brightness.dark:
-          return themeData.accentColor;
-        case Brightness.light:
-          return themeData.primaryColor;
-      }
+      return themeData.colorScheme.primary;
     }
     return themeData.hintColor;
   }
 
   Color _getDefaultBorderColor(ThemeData themeData) {
     if (isFocused) {
-      switch (themeData.brightness) {
-        case Brightness.dark:
-          return themeData.accentColor;
-        case Brightness.light:
-          return themeData.primaryColor;
-      }
+        return themeData.colorScheme.primary;
     }
     if (decoration!.filled!) {
       return themeData.hintColor;
