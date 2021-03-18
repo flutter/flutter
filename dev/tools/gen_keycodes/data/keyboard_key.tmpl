@@ -382,9 +382,9 @@ class LogicalKeyboardKey extends KeyboardKey {
 ///    keyboard events.
 @immutable
 class PhysicalKeyboardKey extends KeyboardKey {
-  /// A PhysicalKeyboardKey object for a key ID.
+  /// A PhysicalKeyboardKey object for a USB HID usage.
   ///
-  /// This factory constructor ensures that the same `keyId` always results
+  /// This factory constructor ensures that the same `usbHidUsage` always results
   /// in the identical instance. It looks up an object from the predefined values
   /// if possible, or construct a new one and cache it.
   factory PhysicalKeyboardKey(int usbHidUsage) {
@@ -392,7 +392,7 @@ class PhysicalKeyboardKey extends KeyboardKey {
       _additionalKeyPool.putIfAbsent(usbHidUsage, () => PhysicalKeyboardKey._(usbHidUsage));
   }
 
-  /// Creates a PhysicalKeyboardKey object for a key ID.
+  /// Creates a PhysicalKeyboardKey object for a USB HID usage.
   const PhysicalKeyboardKey._(this.usbHidUsage);
 
   /// The unique USB HID usage ID of this physical key on the keyboard.
