@@ -1266,7 +1266,7 @@ void main() {
         painted ? paintPattern : isNot(paintPattern),
       );
     }
-    Future<void> expectSplashContinueAfterMove(bool value) async{
+    Future<void> expectSplashContinueAfterMove(bool value) async {
       await tester.pump();
       expectPaintedCircle(true);
       await tester.pump(const Duration(milliseconds: 10));
@@ -1312,7 +1312,7 @@ void main() {
     expectPaintedCircle(false);
   });
 
-  testWidgets('When InkWell/Ancestor has a GlobalKey and ancestor Material is replaced, splash should stop.', (WidgetTester tester)async {
+  testWidgets('When InkWell/Ancestor has a GlobalKey and ancestor Material is replaced, splash should stop.', (WidgetTester tester) async {
     final Key key = GlobalKey();
     bool replaced = false;
 

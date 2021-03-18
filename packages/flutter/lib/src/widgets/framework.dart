@@ -1152,8 +1152,8 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// will mark this object as inactive when it is removed and call
   /// [deactivate].
   ///
-  /// When the object is rejoined to tree innext frame (e.g. by change
-  /// position), it will be marked as active again and this method will be
+  /// If the object is reinserted to the tree in the next frame (e.g. by
+  /// changing position), it will be marked as active again and this method will be
   /// called.
   ///
   /// See also:

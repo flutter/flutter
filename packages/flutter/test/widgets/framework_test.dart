@@ -1288,7 +1288,7 @@ void main() {
     expect(state.deactivatedCount, 1);
     expect(state.reactivatedCount, 1);
 
-    // Remove it - should call deactivate, but not reactivate, didChangeDependencies
+    // Remove it - should call deactivate, but not reactivate or didChangeDependencies
     await tester.pumpWidget(const Inherited(4, child: SizedBox()));
     expect(key.currentState, isNull);
     expect(state.didChangeDependenciesCount, 3);
