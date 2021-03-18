@@ -374,7 +374,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
     return Semantics(
       container: true,
       child: FadeTransition(
-        opacity: _controller.drive(Tween<double>(begin: 1.0, end: 0.0)),
+        opacity: Tween<double>(begin: 1.0, end: 0.0).animate(_controller),
         child: Text(
           widget.helperText!,
           style: widget.helperStyle,
