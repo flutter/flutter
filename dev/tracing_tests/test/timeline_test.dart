@@ -67,7 +67,7 @@ class TestRootState extends State<TestRoot> {
 }
 
 Future<void> runFrame(VoidCallback callback) {
-  final Future<void> result = SchedulerBinding.instance!.endOfFrame; // schedules a frame
+  final Future<void> result = SchedulerBinding.instance.endOfFrame; // schedules a frame
   callback();
   return result;
 }
@@ -79,7 +79,7 @@ void main() {
     // We don't have expectations around the first frame because there's a race around
     // the warm-up frame that we don't want to get involved in here.
     await runFrame(() { runApp(const TestRoot()); });
-    await SchedulerBinding.instance!.endOfFrame;
+    await SchedulerBinding.instance.endOfFrame;
     await fetchInterestingEvents();
 
     // The next few cases build the exact same tree so should have no effect.
