@@ -212,9 +212,11 @@ class InteractiveViewer extends StatefulWidget {
   /// import 'package:flutter/material.dart';
   /// import 'package:flutter/widgets.dart';
   ///
-  /// void main() => runApp(IVBuilderExampleApp());
+  /// void main() => runApp(const IVBuilderExampleApp());
   ///
   /// class IVBuilderExampleApp extends StatelessWidget {
+  ///   const IVBuilderExampleApp({Key? key}) : super(key: key);
+  ///
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     return MaterialApp(
