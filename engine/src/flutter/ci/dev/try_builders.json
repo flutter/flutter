@@ -21,6 +21,11 @@
          "enabled": true
       },
       {
+         "name":"Linux Fuchsia FEMU",
+         "repo":"engine",
+         "enabled": true
+      },
+      {
          "name":"Linux Host Engine",
          "repo":"engine",
          "enabled": true
