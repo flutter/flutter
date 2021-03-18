@@ -8,7 +8,7 @@
 
 #include <algorithm>
 
-#include "base/check_op.h"
+#include "base/logging.h"
 
 namespace base {
 namespace win {
@@ -21,7 +21,7 @@ EnumVariant::EnumVariant(ULONG count) : current_index_(0) {
 EnumVariant::~EnumVariant() = default;
 
 VARIANT* EnumVariant::ItemAt(ULONG index) {
-  DCHECK_LT(index, items_.size());
+  BASE_DCHECK(index < items_.size());
   // This is a hack to return a mutable pointer to the ScopedVariant, even
   // though the original intent of the AsInput method was to allow only readonly
   // access to the wrapped variant.
@@ -34,8 +34,8 @@ HRESULT EnumVariant::Next(ULONG requested_count,
   if (!out_elements)
     return E_INVALIDARG;
 
-  DCHECK_LE(current_index_, items_.size());
-  ULONG available_count = ULONG{items_.size()} - current_index_;
+  BASE_DCHECK(current_index_ <= items_.size());
+  ULONG available_count = static_cast<ULONG>(items_.size()) - current_index_;
   ULONG count = std::min(requested_count, available_count);
   for (ULONG i = 0; i < count; ++i)
     out_elements[i] = items_[current_index_ + i].Copy();
@@ -51,8 +51,8 @@ HRESULT EnumVariant::Next(ULONG requested_count,
 
 HRESULT EnumVariant::Skip(ULONG skip_count) {
   ULONG count = skip_count;
-  if (current_index_ + count > ULONG{items_.size()})
-    count = ULONG{items_.size()} - current_index_;
+  if (current_index_ + count > static_cast<ULONG>(items_.size()))
+    count = static_cast<ULONG>(items_.size()) - current_index_;
 
   current_index_ += count;
   return (count == skip_count ? S_OK : S_FALSE);
@@ -69,7 +69,7 @@ HRESULT EnumVariant::Clone(IEnumVARIANT** out_cloned_object) {
 
   size_t count = items_.size();
   Microsoft::WRL::ComPtr<EnumVariant> other =
-      Microsoft::WRL::Make<EnumVariant>(ULONG{count});
+      Microsoft::WRL::Make<EnumVariant>(static_cast<ULONG>(count));
   for (size_t i = 0; i < count; ++i)
     other->items_[i] = static_cast<const VARIANT&>(items_[i]);
 

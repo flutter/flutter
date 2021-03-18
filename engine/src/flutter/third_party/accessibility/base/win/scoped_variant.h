@@ -179,7 +179,7 @@ class BASE_EXPORT ScopedVariant {
   // Use the Compare method instead.
   bool operator==(const ScopedVariant& var) const;
   bool operator!=(const ScopedVariant& var) const;
-  DISALLOW_COPY_AND_ASSIGN(ScopedVariant);
+  BASE_DISALLOW_COPY_AND_ASSIGN(ScopedVariant);
 };
 
 }  // namespace win

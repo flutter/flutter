@@ -9,10 +9,9 @@
 #include <utility>
 #include <vector>
 
-#include "base/check_op.h"
 #include "base/compiler_specific.h"
 #include "build/build_config.h"
-#include "testing/gtest/include/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 // EXPECT/ASSERT_DCHECK_DEATH is intended to replace EXPECT/ASSERT_DEBUG_DEATH
 // when the death is expected to be caused by a DCHECK. Contrary to
@@ -21,7 +20,9 @@
 // happen and as such executing the statement results in undefined behavior
 // (|statement| is compiled in unsupported configurations nonetheless).
 // Death tests misbehave on Android.
-#if DCHECK_IS_ON() && defined(GTEST_HAS_DEATH_TEST) && !defined(OS_ANDROID)
+// TODO(gw280): once https://github.com/flutter/flutter/issues/78491 is resolved
+// we can potentially remove the condition on NDEBUG here.
+#if defined(GTEST_HAS_DEATH_TEST) && !defined(OS_ANDROID) && !defined(NDEBUG)
 
 // EXPECT/ASSERT_DCHECK_DEATH tests verify that a DCHECK is hit ("Check failed"
 // is part of the error message), but intentionally do not expose the gtest
@@ -31,7 +32,7 @@
 #define ASSERT_DCHECK_DEATH(statement) ASSERT_DEATH(statement, "Check failed")
 
 #else
-// DCHECK_IS_ON() && defined(GTEST_HAS_DEATH_TEST) && !defined(OS_ANDROID)
+// defined(GTEST_HAS_DEATH_TEST) && !defined(OS_ANDROID) && !defined(NDEBUG)
 
 #define EXPECT_DCHECK_DEATH(statement) \
   GTEST_UNSUPPORTED_DEATH_TEST(statement, "Check failed", )
@@ -39,7 +40,7 @@
   GTEST_UNSUPPORTED_DEATH_TEST(statement, "Check failed", return )
 
 #endif
-// DCHECK_IS_ON() && defined(GTEST_HAS_DEATH_TEST) && !defined(OS_ANDROID)
+// defined(GTEST_HAS_DEATH_TEST) && !defined(OS_ANDROID) && !defined(NDEBUG)
 
 // As above, but for CHECK().
 #if defined(GTEST_HAS_DEATH_TEST) && !defined(OS_ANDROID)
@@ -63,45 +64,5 @@
   GTEST_UNSUPPORTED_DEATH_TEST(statement, "", return )
 
 #endif  // defined(GTEST_HAS_DEATH_TEST) && !defined(OS_ANDROID)
-
-namespace base {
-
-class FilePath;
-
-struct TestIdentifier {
-  TestIdentifier();
-  TestIdentifier(const TestIdentifier& other);
-
-  std::string test_case_name;
-  std::string test_name;
-  std::string file;
-  int line;
-};
-
-// Constructs a full test name given a test case name and a test name,
-// e.g. for test case "A" and test name "B" returns "A.B".
-std::string FormatFullTestName(const std::string& test_case_name,
-                               const std::string& test_name);
-
-// Returns the full test name with the "DISABLED_" prefix stripped out.
-// e.g. for the full test names "A.DISABLED_B", "DISABLED_A.B", and
-// "DISABLED_A.DISABLED_B", returns "A.B".
-std::string TestNameWithoutDisabledPrefix(const std::string& full_test_name);
-
-// Returns a vector of gtest-based tests compiled into
-// current executable.
-std::vector<TestIdentifier> GetCompiledInTests();
-
-// Writes the list of gtest-based tests compiled into
-// current executable as a JSON file. Returns true on success.
-bool WriteCompiledInTestsToFile(const FilePath& path) WARN_UNUSED_RESULT;
-
-// Reads the list of gtest-based tests from |path| into |output|.
-// Returns true on success.
-bool ReadTestNamesFromFile(const FilePath& path,
-                           std::vector<TestIdentifier>* output)
-    WARN_UNUSED_RESULT;
-
-}  // namespace base
 
 #endif  // BASE_TEST_GTEST_UTIL_H_

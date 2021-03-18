@@ -4,15 +4,14 @@
 
 #include "base/win/scoped_variant.h"
 
+#include <propvarutil.h>
 #include <wrl/client.h>
 
 #include <algorithm>
 #include <functional>
 
-#include "base/check.h"
 #include "base/logging.h"
 #include "base/numerics/ranges.h"
-#include "base/win/propvarutil.h"
 #include "base/win/variant_util.h"
 
 namespace base {
@@ -57,7 +56,7 @@ ScopedVariant::ScopedVariant(bool value) {
 }
 
 ScopedVariant::ScopedVariant(double value, VARTYPE vt) {
-  DCHECK(vt == VT_R8 || vt == VT_DATE);
+  BASE_DCHECK(vt == VT_R8 || vt == VT_DATE);
   var_.vt = vt;
   var_.dblVal = value;
 }
@@ -102,7 +101,7 @@ void ScopedVariant::Swap(ScopedVariant& var) {
 }
 
 VARIANT* ScopedVariant::Receive() {
-  DCHECK(!IsLeakableVarType(var_.vt)) << "variant leak. type: " << var_.vt;
+  BASE_DCHECK(!IsLeakableVarType(var_.vt)) << "variant leak. type: " << var_.vt;
   return &var_;
 }
 
@@ -113,9 +112,9 @@ VARIANT ScopedVariant::Copy() const {
 }
 
 int ScopedVariant::Compare(const VARIANT& other, bool ignore_case) const {
-  DCHECK(!V_ISARRAY(&var_))
+  BASE_DCHECK(!V_ISARRAY(&var_))
       << "Comparison is not supported when |this| owns a SAFEARRAY";
-  DCHECK(!V_ISARRAY(&other))
+  BASE_DCHECK(!V_ISARRAY(&other))
       << "Comparison is not supported when |other| owns a SAFEARRAY";
 
   const bool this_is_empty = var_.vt == VT_EMPTY || var_.vt == VT_NULL;
@@ -160,7 +159,7 @@ int ScopedVariant::Compare(const VARIANT& other, bool ignore_case) const {
     ULONG flags = ignore_case ? NORM_IGNORECASE : 0;
     HRESULT hr =
         ::VarBstrCmp(V_BSTR(&var_), V_BSTR(&other), LOCALE_USER_DEFAULT, flags);
-    DCHECK(SUCCEEDED(hr) && hr != VARCMP_NULL)
+    BASE_DCHECK(SUCCEEDED(hr) && hr != VARCMP_NULL)
         << "unsupported variant comparison: " << var_.vt << " and " << other.vt;
 
     switch (hr) {
@@ -180,79 +179,79 @@ int ScopedVariant::Compare(const VARIANT& other, bool ignore_case) const {
 }
 
 void ScopedVariant::Set(const wchar_t* str) {
-  DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
+  BASE_DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
   var_.vt = VT_BSTR;
   var_.bstrVal = ::SysAllocString(str);
 }
 
 void ScopedVariant::Set(int8_t i8) {
-  DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
+  BASE_DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
   var_.vt = VT_I1;
   var_.cVal = i8;
 }
 
 void ScopedVariant::Set(uint8_t ui8) {
-  DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
+  BASE_DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
   var_.vt = VT_UI1;
   var_.bVal = ui8;
 }
 
 void ScopedVariant::Set(int16_t i16) {
-  DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
+  BASE_DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
   var_.vt = VT_I2;
   var_.iVal = i16;
 }
 
 void ScopedVariant::Set(uint16_t ui16) {
-  DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
+  BASE_DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
   var_.vt = VT_UI2;
   var_.uiVal = ui16;
 }
 
 void ScopedVariant::Set(int32_t i32) {
-  DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
+  BASE_DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
   var_.vt = VT_I4;
   var_.lVal = i32;
 }
 
 void ScopedVariant::Set(uint32_t ui32) {
-  DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
+  BASE_DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
   var_.vt = VT_UI4;
   var_.ulVal = ui32;
 }
 
 void ScopedVariant::Set(int64_t i64) {
-  DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
+  BASE_DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
   var_.vt = VT_I8;
   var_.llVal = i64;
 }
 
 void ScopedVariant::Set(uint64_t ui64) {
-  DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
+  BASE_DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
   var_.vt = VT_UI8;
   var_.ullVal = ui64;
 }
 
 void ScopedVariant::Set(float r32) {
-  DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
+  BASE_DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
   var_.vt = VT_R4;
   var_.fltVal = r32;
 }
 
 void ScopedVariant::Set(double r64) {
-  DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
+  BASE_DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
   var_.vt = VT_R8;
   var_.dblVal = r64;
 }
 
 void ScopedVariant::SetDate(DATE date) {
-  DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
+  BASE_DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
   var_.vt = VT_DATE;
   var_.date = date;
 }
 
 void ScopedVariant::Set(IDispatch* disp) {
-  DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
+  BASE_DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
   var_.vt = VT_DISPATCH;
   var_.pdispVal = disp;
   if (disp)
@@ -260,13 +259,13 @@ void ScopedVariant::Set(IDispatch* disp) {
 }
 
 void ScopedVariant::Set(bool b) {
-  DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
+  BASE_DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
   var_.vt = VT_BOOL;
   var_.boolVal = b ? VARIANT_TRUE : VARIANT_FALSE;
 }
 
 void ScopedVariant::Set(IUnknown* unk) {
-  DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
+  BASE_DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
   var_.vt = VT_UNKNOWN;
   var_.punkVal = unk;
   if (unk)
@@ -274,20 +273,20 @@ void ScopedVariant::Set(IUnknown* unk) {
 }
 
 void ScopedVariant::Set(SAFEARRAY* array) {
-  DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
+  BASE_DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
   if (SUCCEEDED(::SafeArrayGetVartype(array, &var_.vt))) {
     var_.vt |= VT_ARRAY;
     var_.parray = array;
   } else {
-    DCHECK(!array) << "Unable to determine safearray vartype";
+    BASE_DCHECK(!array) << "Unable to determine safearray vartype";
     var_.vt = VT_EMPTY;
   }
 }
 
 void ScopedVariant::Set(const VARIANT& var) {
-  DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
+  BASE_DCHECK(!IsLeakableVarType(var_.vt)) << "leaking variant: " << var_.vt;
   if (FAILED(::VariantCopy(&var_, &var))) {
-    DLOG(ERROR) << "VariantCopy failed";
+    BASE_DLOG() << "Error: VariantCopy failed";
     var_.vt = VT_EMPTY;
   }
 }
