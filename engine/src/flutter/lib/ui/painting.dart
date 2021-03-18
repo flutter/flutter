@@ -4879,13 +4879,17 @@ class Picture extends NativeFieldWrapperClass2 {
     if (width <= 0 || height <= 0)
       throw Exception('Invalid image dimensions.');
     return _futurize(
-      (_Callback<Image> callback) => _toImage(width, height, (_Image image) {
-        callback(Image._(image));
+      (_Callback<Image?> callback) => _toImage(width, height, (_Image? image) {
+        if (image == null) {
+          callback(null);
+        } else {
+          callback(Image._(image));
+        }
       }),
     );
   }
 
-  String? _toImage(int width, int height, _Callback<_Image> callback) native 'Picture_toImage';
+  String? _toImage(int width, int height, _Callback<_Image?> callback) native 'Picture_toImage';
 
   /// Release the resources used by this object. The object is no longer usable
   /// after this method is called.
