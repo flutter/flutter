@@ -314,11 +314,17 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
     return event is RawKeyDownEvent && _promptCore.requiresState(state);
   }
 
-  static final Set<LogicalKeyboardKey> _modifiers = <LogicalKeyboardKey>{
+  static const Set<LogicalKeyboardKey> _modifiers = <LogicalKeyboardKey>{
     LogicalKeyboardKey.alt,
     LogicalKeyboardKey.control,
     LogicalKeyboardKey.meta,
     LogicalKeyboardKey.shift,
+  };
+  static const Map<LogicalKeyboardKey, List<LogicalKeyboardKey>> _unmapSynonyms = <LogicalKeyboardKey, List<LogicalKeyboardKey>>{
+    LogicalKeyboardKey.control: <LogicalKeyboardKey>[LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.controlRight],
+    LogicalKeyboardKey.shift: <LogicalKeyboardKey>[LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.shiftRight],
+    LogicalKeyboardKey.alt: <LogicalKeyboardKey>[LogicalKeyboardKey.altLeft, LogicalKeyboardKey.altRight],
+    LogicalKeyboardKey.meta: <LogicalKeyboardKey>[LogicalKeyboardKey.metaLeft, LogicalKeyboardKey.metaRight],
   };
 
   /// Returns a description of the key set that is short and readable.
@@ -352,23 +358,12 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
   static _StandardPromptCore _computePromptCore(Set<LogicalKeyboardKey> keys) {
     final Set<LogicalKeyboardKey> collapsed = LogicalKeyboardKey.collapseSynonyms(keys);
     assert(collapsed.isNotEmpty);
-    final Set<LogicalKeyboardKey> nonModifierKeys = collapsed.difference(const <LogicalKeyboardKey>{
-      LogicalKeyboardKey.control,
-      LogicalKeyboardKey.shift,
-      LogicalKeyboardKey.alt,
-      LogicalKeyboardKey.meta,
-    });
-    const Map<LogicalKeyboardKey, List<LogicalKeyboardKey>> unmapSynonyms = <LogicalKeyboardKey, List<LogicalKeyboardKey>>{
-      LogicalKeyboardKey.control: <LogicalKeyboardKey>[LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.controlRight],
-      LogicalKeyboardKey.shift: <LogicalKeyboardKey>[LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.shiftRight],
-      LogicalKeyboardKey.alt: <LogicalKeyboardKey>[LogicalKeyboardKey.altLeft, LogicalKeyboardKey.altRight],
-      LogicalKeyboardKey.meta: <LogicalKeyboardKey>[LogicalKeyboardKey.metaLeft, LogicalKeyboardKey.metaRight],
-    };
+    final Set<LogicalKeyboardKey> nonModifierKeys = collapsed.difference(_modifiers);
     if (nonModifierKeys.isEmpty) {
       // If there are no keys left with all modifiers excluded, consider
       // modifier keys as normal triggering keys.
       final Set<LogicalKeyboardKey> triggeringKeys = keys.expand(
-        (LogicalKeyboardKey key) => unmapSynonyms[key] ?? <LogicalKeyboardKey>[key],
+        (LogicalKeyboardKey key) => _unmapSynonyms[key] ?? <LogicalKeyboardKey>[key],
       ).toSet();
       return _StandardPromptCore(
         control: null,
