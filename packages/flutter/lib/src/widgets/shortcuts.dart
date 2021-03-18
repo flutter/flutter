@@ -4,6 +4,7 @@
 
 import 'dart:collection';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -414,10 +415,17 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutPrompt, Intent
   }
 }
 
-class _PromptIntent {
+class _PromptIntent with Diagnosticable {
   const _PromptIntent(this.prompt, this.intent);
   final ShortcutPrompt prompt;
   final Intent intent;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<String>('prompt', prompt.debugDescribeKeys()));
+    properties.add(DiagnosticsProperty<Intent>('intent', intent));
+  }
 }
 
 /// A manager of keyboard shortcut bindings.

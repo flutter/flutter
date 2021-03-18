@@ -49,6 +49,27 @@ class TestShortcutManager extends ShortcutManager {
   }
 }
 
+Widget logicalKeySetTester(LogicalKeySet prompt, ValueSetter<Intent> onInvoke) {
+  return Actions(
+    key: GlobalKey(),
+    actions: <Type, Action<Intent>>{
+      TestIntent: TestAction(onInvoke: (Intent intent) {
+        onInvoke(intent);
+        return true;
+      }),
+    },
+    child: Shortcuts(
+      shortcuts: <LogicalKeySet, Intent>{
+        prompt: const TestIntent(),
+      },
+      child: const Focus(
+        autofocus: true,
+        child: SizedBox(width: 100, height: 100),
+      ),
+    ),
+  );
+}
+
 void main() {
   group(LogicalKeySet, () {
     test('LogicalKeySet passes parameters correctly.', () {
@@ -194,6 +215,29 @@ void main() {
 
       expect(description.length, equals(1));
       expect(description[0], equals('keys: Key A + Key B'));
+    });
+
+    testWidgets('handles Ctrl-C', (WidgetTester tester) async {
+      int invoked = 0;
+      await tester.pumpWidget(logicalKeySetTester(
+        LogicalKeySet(
+          LogicalKeyboardKey.control,
+          LogicalKeyboardKey.keyC,
+        ),
+        (Intent intent) { invoked += 1; },
+      ));
+      await tester.pump();
+
+      // Presses
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      expect(invoked, 0);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+      expect(invoked, 1);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+      expect(invoked, 1);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     });
   });
   group(Shortcuts, () {
