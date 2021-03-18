@@ -27,3 +27,27 @@
 #endif
 
 #endif  // ACCESSIBILITY_BASE_COMPILER_SPECIFIC_H_
+
+// Macro for hinting that an expression is likely to be false.
+#if !defined(BASE_UNLIKELY)
+#if defined(COMPILER_GCC) || defined(__clang__)
+#define BASE_UNLIKELY(x) __builtin_expect(!!(x), 0)
+#else
+#define BASE_UNLIKELY(x) (x)
+#endif  // defined(COMPILER_GCC)
+#endif  // !defined(BASE_UNLIKELY)
+
+#if !defined(BASE_LIKELY)
+#if defined(COMPILER_GCC) || defined(__clang__)
+#define BASE_LIKELY(x) __builtin_expect(!!(x), 1)
+#else
+#define BASE_LIKELY(x) (x)
+#endif  // defined(COMPILER_GCC)
+#endif  // !defined(BASE_LIKELY)
+
+// Macro for telling -Wimplicit-fallthrough that a fallthrough is intentional.
+#if defined(__clang__)
+#define BASE_FALLTHROUGH [[clang::fallthrough]]
+#else
+#define BASE_FALLTHROUGH
+#endif

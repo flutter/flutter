@@ -39,6 +39,9 @@ source_set("gfx") {
     "geometry/vector2d_f.h",
     "gfx_export.h",
     "native_widget_types.h",
+    "range/gfx_range_export.h",
+    "range/range.cc",
+    "range/range.h",
     "transform.cc",
     "transform.h",
   ]

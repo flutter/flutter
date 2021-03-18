@@ -4,10 +4,6 @@
 
 #include "base/win/variant_vector.h"
 
-#include "base/check_op.h"
-#include "base/notreached.h"
-#include "base/optional.h"
-#include "base/process/memory.h"
 #include "base/win/scoped_safearray.h"
 #include "base/win/scoped_variant.h"
 
@@ -21,7 +17,7 @@ template <VARTYPE ElementVartype>
 int CompareAgainstSafearray(const std::vector<ScopedVariant>& vector,
                             const ScopedSafearray& safearray,
                             bool ignore_case) {
-  base::Optional<ScopedSafearray::LockScope<ElementVartype>> lock_scope =
+  std::optional<ScopedSafearray::LockScope<ElementVartype>> lock_scope =
       safearray.CreateLockScope<ElementVartype>();
   // If we fail to create a lock scope, then arbitrarily treat |this| as
   // greater. This should only happen when the SAFEARRAY fails to be locked,
@@ -65,7 +61,7 @@ VariantVector::VariantVector(VariantVector&& other)
       vector_(std::move(other.vector_)) {}
 
 VariantVector& VariantVector::operator=(VariantVector&& other) {
-  DCHECK_NE(this, &other);
+  BASE_DCHECK(this != &other);
   vartype_ = std::exchange(other.vartype_, VT_EMPTY);
   vector_ = std::move(other.vector_);
   return *this;
@@ -92,7 +88,7 @@ VARIANT VariantVector::ReleaseAsScalarVariant() {
   ScopedVariant scoped_variant;
 
   if (!Empty()) {
-    DCHECK_EQ(Size(), 1U);
+    BASE_DCHECK(Size() == 1U);
     scoped_variant = std::move(vector_[0]);
     Reset();
   }
@@ -163,7 +159,7 @@ VARIANT VariantVector::ReleaseAsSafearrayVariant() {
     // VARTYPES. For example a value within VT_TYPEMASK that's joined something
     // outside the typemask like VT_ARRAY or VT_BYREF.
     default:
-      NOTREACHED();
+      BASE_UNREACHABLE();
       break;
   }
 
@@ -306,7 +302,7 @@ int VariantVector::Compare(SAFEARRAY* safearray, bool ignore_case) const {
     // VARTYPES. For example a value within VT_TYPEMASK that's joined something
     // outside the typemask like VT_ARRAY or VT_BYREF.
     default:
-      NOTREACHED();
+      BASE_UNREACHABLE();
       compare_result = 1;
       break;
   }
@@ -317,20 +313,19 @@ int VariantVector::Compare(SAFEARRAY* safearray, bool ignore_case) const {
 
 template <VARTYPE ElementVartype>
 SAFEARRAY* VariantVector::CreateAndPopulateSafearray() {
-  DCHECK(!Empty());
+  BASE_DCHECK(!Empty());
 
   ScopedSafearray scoped_safearray(
       SafeArrayCreateVector(ElementVartype, 0, Size()));
   if (!scoped_safearray.Get()) {
     constexpr size_t kElementSize =
         sizeof(typename internal::VariantUtil<ElementVartype>::Type);
-    base::TerminateBecauseOutOfMemory(sizeof(SAFEARRAY) +
-                                      (Size() * kElementSize));
+    std::abort();
   }
 
-  base::Optional<ScopedSafearray::LockScope<ElementVartype>> lock_scope =
+  std::optional<ScopedSafearray::LockScope<ElementVartype>> lock_scope =
       scoped_safearray.CreateLockScope<ElementVartype>();
-  DCHECK(lock_scope);
+  BASE_DCHECK(lock_scope);
 
   for (size_t i = 0; i < Size(); ++i) {
     VARIANT element = vector_[i].Release();

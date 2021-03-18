@@ -8,12 +8,13 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include <algorithm>
 #include <limits>
 #include <ostream>
 #include <string>
 
-#include "build/build_config.h"
-#include "ui/gfx/range/gfx_range_export.h"
+#include "ax_build/build_config.h"
+#include "gfx_range_export.h"
 
 #if defined(OS_APPLE)
 #if __OBJC__

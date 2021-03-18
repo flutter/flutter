@@ -13,9 +13,7 @@
 #include <vector>
 
 #include "base/base_export.h"
-#include "base/check.h"
 #include "base/logging.h"
-#include "base/no_destructor.h"
 #include "base/win/scoped_variant.h"
 #include "base/win/variant_util.h"
 
@@ -119,7 +117,8 @@ class BASE_EXPORT VariantVector final {
   // for inserting into |vector_|.
   template <VARTYPE ExpectedVartype>
   void AssertVartype() const {
-    DCHECK(internal::VariantUtil<ExpectedVartype>::IsConvertibleTo(vartype_))
+    BASE_DCHECK(
+        internal::VariantUtil<ExpectedVartype>::IsConvertibleTo(vartype_))
         << "Type mismatch, " << ExpectedVartype << " is not convertible to "
         << Type();
   }
