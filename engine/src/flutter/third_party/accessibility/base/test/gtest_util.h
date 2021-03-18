@@ -34,9 +34,9 @@
 // DCHECK_IS_ON() && defined(GTEST_HAS_DEATH_TEST) && !defined(OS_ANDROID)
 
 #define EXPECT_DCHECK_DEATH(statement) \
-    GTEST_UNSUPPORTED_DEATH_TEST(statement, "Check failed", )
+  GTEST_UNSUPPORTED_DEATH_TEST(statement, "Check failed", )
 #define ASSERT_DCHECK_DEATH(statement) \
-    GTEST_UNSUPPORTED_DEATH_TEST(statement, "Check failed", return)
+  GTEST_UNSUPPORTED_DEATH_TEST(statement, "Check failed", return )
 
 #endif
 // DCHECK_IS_ON() && defined(GTEST_HAS_DEATH_TEST) && !defined(OS_ANDROID)
@@ -98,9 +98,9 @@ bool WriteCompiledInTestsToFile(const FilePath& path) WARN_UNUSED_RESULT;
 
 // Reads the list of gtest-based tests from |path| into |output|.
 // Returns true on success.
-bool ReadTestNamesFromFile(
-    const FilePath& path,
-    std::vector<TestIdentifier>* output) WARN_UNUSED_RESULT;
+bool ReadTestNamesFromFile(const FilePath& path,
+                           std::vector<TestIdentifier>* output)
+    WARN_UNUSED_RESULT;
 
 }  // namespace base
 
