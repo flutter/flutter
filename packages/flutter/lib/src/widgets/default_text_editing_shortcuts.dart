@@ -202,6 +202,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Shift + end
     //   * Shift + home
     //   * Meta + delete
+    //   * Meta + backspace
   };
 
   static final Map<LogicalKeySet, Intent> _fuchsiaShortcuts = <LogicalKeySet, Intent>{
@@ -246,6 +247,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Shift + end
     //   * Shift + home
     //   * Meta + delete
+    //   * Meta + backspace
   };
 
   static final Map<LogicalKeySet, Intent> _iOSShortcuts = <LogicalKeySet, Intent>{
@@ -290,6 +292,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Shift + end
     //   * Shift + home
     //   * Meta + delete
+    //   * Meta + backspace
   };
 
   static final Map<LogicalKeySet, Intent> _linuxShortcuts = <LogicalKeySet, Intent>{
@@ -334,6 +337,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Shift + end
     //   * Shift + home
     //   * Meta + delete
+    //   * Meta + backspace
   };
 
   static final Map<LogicalKeySet, Intent> _macShortcuts = <LogicalKeySet, Intent>{
@@ -378,6 +382,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Shift + end
     //   * Shift + home
     //   * Control + delete
+    //   * Control + backspace
   };
 
   static final Map<LogicalKeySet, Intent> _windowsShortcuts = <LogicalKeySet, Intent>{
@@ -422,18 +427,20 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Meta + shift + arrow right
     //   * Meta + shift + arrow up
     //   * Meta + delete
+    //   * Meta + backspace
   };
 
   // Web handles its text selection natively and doesn't use any of these
   // shortcuts in Flutter.
   static final Map<LogicalKeySet, Intent> _webShortcuts = <LogicalKeySet, Intent>{
     LogicalKeySet(LogicalKeyboardKey.backspace): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.backspace): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.backspace): const DoNothingAndStopPropagationTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.delete): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.meta): const DoNothingAndStopPropagationTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.backspace): const DoNothingAndStopPropagationTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.delete): const DoNothingAndStopPropagationTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.backspace): const DoNothingAndStopPropagationTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.delete): const DoNothingAndStopPropagationTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.backspace): const DoNothingAndStopPropagationTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.delete): const DoNothingAndStopPropagationTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowDown): const DoNothingAndStopPropagationTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowLeft): const DoNothingAndStopPropagationTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowRight): const DoNothingAndStopPropagationTextIntent(),

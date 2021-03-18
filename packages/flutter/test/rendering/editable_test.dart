@@ -1961,7 +1961,7 @@ void main() {
   });
 
   group('deleteByLine', () {
-    test('when cursor is on last character of a word, it should delete everything to the left', () async {
+    test('when cursor is on last character of a line, it should delete everything to the left', () async {
       const String text = 'test with multiple blocks';
       const int offset = text.length;
       final TextSelectionDelegate delegate = FakeEditableTextState()
