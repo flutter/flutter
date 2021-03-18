@@ -32,8 +32,7 @@ class KeySet<T extends KeyboardKey> {
   ///
   /// If you need a set of more than four keys, use [KeySet.fromSet].
   ///
-  /// The `key1` parameter must not be null. The same [KeyboardKey] may
-  /// not be appear more than once in the set.
+  /// The same [KeyboardKey] may not be appear more than once in the set.
   KeySet(
     T key1, [
     T? key2,
@@ -70,7 +69,7 @@ class KeySet<T extends KeyboardKey> {
   ///
   /// Do not mutate the `keys` set after passing it to this object.
   ///
-  /// The `keys` set must not be null, contain nulls, or be empty.
+  /// The `keys` set must not be empty.
   KeySet.fromSet(Set<T> keys)
       : assert(keys != null),
         assert(keys.isNotEmpty),
@@ -288,8 +287,7 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
   ///
   /// If you need a set of more than four keys, use [LogicalKeySet.fromSet].
   ///
-  /// The `key1` parameter must not be null. The same [LogicalKeyboardKey] may
-  /// not be appear more than once in the set.
+  /// The same [LogicalKeyboardKey] may not be appear more than once in the set.
   LogicalKeySet(
     LogicalKeyboardKey key1, [
     LogicalKeyboardKey? key2,
@@ -300,8 +298,6 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
   /// Create  a [LogicalKeySet] from a set of [LogicalKeyboardKey]s.
   ///
   /// Do not mutate the `keys` set after passing it to this object.
-  ///
-  /// The `keys` must not be null.
   LogicalKeySet.fromSet(Set<LogicalKeyboardKey> keys) : super.fromSet(keys);
 
   late final _StandardPromptCore _promptCore = _computePromptCore(keys);
@@ -391,8 +387,6 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
 class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutPrompt, Intent>> {
   /// Create a diagnostics property for `Map<LogicalKeySet, Intent>` objects,
   /// which are the same type as the [Shortcuts.shortcuts] property.
-  ///
-  /// The [showName] and [level] arguments must not be null.
   ShortcutMapProperty(
     String name,
     Map<ShortcutPrompt, Intent> value, {
@@ -432,8 +426,6 @@ class _PromptIntent {
 /// the widget that you want to find a manager for.
 class ShortcutManager extends ChangeNotifier with Diagnosticable {
   /// Constructs a [ShortcutManager].
-  ///
-  /// The [shortcuts] argument must not  be null.
   ShortcutManager({
     Map<ShortcutPrompt, Intent> shortcuts = const <ShortcutPrompt, Intent>{},
     this.modal = false,
@@ -506,13 +498,9 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 
   /// Handles a key press `event` in the given `context`.
   ///
-  /// The optional `keysPressed` argument is used as the set of currently
-  /// pressed keys. Defaults to a set derived from [RawKeyboard.keysPressed] if
-  /// `keysPressed` is not supplied.
-  ///
   /// If a key mapping is found, then the associated action will be invoked
-  /// using the [Intent] that the `keysPressed` maps to, and the currently
-  /// focused widget's context (from [FocusManager.primaryFocus]).
+  /// using the [Intent], and the currently focused widget's context (from
+  /// [FocusManager.primaryFocus]).
   ///
   /// Returns a [KeyEventResult.handled] if an action was invoked, otherwise a
   /// [KeyEventResult.skipRemainingHandlers] if [modal] is true, or if it maps
@@ -523,16 +511,12 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   /// returned), a pressed [KeySet] must be mapped to an [Intent], the [Intent]
   /// must be mapped to an [Action], and the [Action] must be enabled.
   @protected
-  KeyEventResult handleKeypress(
-    BuildContext context,
-    RawKeyEvent event,
-    { LogicalKeySet? keysPressed }) {
+  KeyEventResult handleKeypress(BuildContext context, RawKeyEvent event) {
     if (event is! RawKeyDownEvent) {
       return KeyEventResult.ignored;
     }
     assert(context != null);
-    assert(keysPressed == null); // TODO
-    assert(keysPressed != null || RawKeyboard.instance.keysPressed.isNotEmpty,
+    assert(RawKeyboard.instance.keysPressed.isNotEmpty,
       'Received a key down event when no keys are in keysPressed. '
       "This state can occur if the key event being sent doesn't properly "
       'set its modifier flags. This was the event: $event and its data: '
@@ -747,7 +731,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 class Shortcuts extends StatefulWidget {
   /// Creates a const [Shortcuts] widget.
   ///
-  /// The [child] and [shortcuts] arguments are required and must not be null.
+  /// The [child] and [shortcuts] arguments are required.
   const Shortcuts({
     Key? key,
     this.manager,
@@ -793,8 +777,6 @@ class Shortcuts extends StatefulWidget {
   /// Returns the [ShortcutManager] that most tightly encloses the given
   /// [BuildContext].
   ///
-  /// The [context] argument must not be null.
-  ///
   /// If no [Shortcuts] widget encloses the context given, will assert in debug
   /// mode and throw an exception in release mode.
   ///
@@ -822,8 +804,6 @@ class Shortcuts extends StatefulWidget {
 
   /// Returns the [ShortcutManager] that most tightly encloses the given
   /// [BuildContext].
-  ///
-  /// The [context] argument must not be null.
   ///
   /// If no [Shortcuts] widget encloses the context given, will return null.
   ///

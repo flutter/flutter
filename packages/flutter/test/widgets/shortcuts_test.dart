@@ -41,11 +41,11 @@ class TestShortcutManager extends ShortcutManager {
   List<LogicalKeyboardKey> keys;
 
   @override
-  KeyEventResult handleKeypress(BuildContext context, RawKeyEvent event, {LogicalKeySet? keysPressed}) {
+  KeyEventResult handleKeypress(BuildContext context, RawKeyEvent event) {
     if (event is RawKeyDownEvent) {
       keys.add(event.logicalKey);
     }
-    return super.handleKeypress(context, event, keysPressed: keysPressed);
+    return super.handleKeypress(context, event);
   }
 }
 
