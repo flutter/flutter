@@ -6,7 +6,7 @@
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
-import 'package:path/path.dart' as path; // ignore: package_path_import
+import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:yaml/yaml.dart';
 
 import 'android/gradle.dart';
@@ -1115,7 +1115,7 @@ const String _dartPluginRegistryForDesktopTemplate = '''
 // @dart = {{dartLanguageVersion}}
 
 import '{{mainEntrypoint}}' as entrypoint;
-import 'dart:io'; // ignore: dart_io_import.
+import 'dart:io'; // flutter_ignore: dart_io_import.
 {{#linux}}
 import 'package:{{pluginName}}/{{pluginName}}.dart';
 {{/linux}}
