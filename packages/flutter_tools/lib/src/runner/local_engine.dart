@@ -66,6 +66,7 @@ class LocalEngineLocator {
         Uri engineUri = packageConfig[kFlutterEnginePackageName]?.packageUriRoot;
         final String cachedPath = _fileSystem.path.join(_flutterRoot, 'bin', 'cache', 'pkg', kFlutterEnginePackageName, 'lib');
         if (engineUri != null && _fileSystem.identicalSync(cachedPath, engineUri.path)) {
+          _logger.printTrace('Local engine auto-detection sky_engine in $packagePath is the same version in bin/cache.');
           engineUri = null;
         }
         // If sky_engine is specified and the engineSourcePath not set, try to
@@ -92,7 +93,8 @@ class LocalEngineLocator {
             );
           }
         }
-      } on FileSystemException {
+      } on FileSystemException catch (e) {
+        _logger.printTrace('Local engine auto-detection file exception: $e');
         engineSourcePath = null;
       }
       // If engineSourcePath is still not set, try to determine it by flutter root.
@@ -109,7 +111,10 @@ class LocalEngineLocator {
     }
 
     if (engineSourcePath != null) {
+      _logger.printTrace('Local engine source at $engineSourcePath');
       return _findEngineBuildPath(localEngine, engineSourcePath);
+    } else if (localEngine != null) {
+      _logger.printTrace('Could not find engine source for $localEngine, skipping');
     }
     return null;
   }
