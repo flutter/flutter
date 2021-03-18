@@ -279,11 +279,11 @@ abstract class Repository {
     return exitcode == 0;
   }
 
-  /// Resets repository HEAD to [commit].
-  void reset(String commit) {
+  /// Resets repository HEAD to [ref].
+  void reset(String ref) {
     git.run(
-      <String>['reset', commit, '--hard'],
-      'reset to the release commit',
+      <String>['reset', ref, '--hard'],
+      'reset to the release ref',
       workingDirectory: checkoutDirectory.path,
     );
   }

@@ -108,6 +108,8 @@ class NextCommand extends Command<void> {
         assert(false); // should be unreachable
         break;
       case ReleasePhase.APPLY_ENGINE_CHERRYPICKS:
+        // TODO push should be
+        // `git push --set-upstream $REMOTE_NAME HEAD:cherrypicks-CANDIDATE_BRANCH_NAME`
       case ReleasePhase.CODESIGN_ENGINE_BINARIES:
       case ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
       case ReleasePhase.PUBLISH_VERSION:
