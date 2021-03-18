@@ -981,7 +981,7 @@ class _RestorableDateRangePickerDialogTestWidgetState extends State<_RestorableD
     onComplete: _selectDateRange,
     onPresent: (NavigatorState navigator, Object? arguments) {
       return navigator.restorablePush(
-        _datePickerRoute,
+        _dateRangePickerRoute,
         arguments: <String, dynamic>{
           'datePickerEntryMode': widget.datePickerEntryMode.index,
         }
@@ -1005,7 +1005,7 @@ class _RestorableDateRangePickerDialogTestWidgetState extends State<_RestorableD
     }
   }
 
-  static Route<DateTimeRange?> _datePickerRoute(
+  static Route<DateTimeRange?> _dateRangePickerRoute(
     BuildContext context,
     Object? arguments,
   ) {

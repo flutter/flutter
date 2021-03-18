@@ -958,6 +958,135 @@ class _DatePickerHeader extends StatelessWidget {
 /// The [builder] parameter can be used to wrap the dialog widget
 /// to add inherited widgets like [Theme].
 ///
+/// ### State Restoration
+///
+/// Using this method will not enable state restoration for the date range picker.
+/// In order to enable state restoration for a date range picker, use
+/// [Navigator.restorablePush] or [Navigator.restorablePushNamed] with
+/// [DateRangePickerDialog].
+///
+/// For more information about state restoration, see [RestorationManager].
+///
+/// {@macro flutter.widgets.RestorationManager}
+///
+/// ```dart imports
+/// import 'package:flutter/material.dart';
+/// ```
+///
+/// ```dart
+///
+/// {@tool sample --template=freeform}
+///
+/// This sample demonstrates how to create a restorable Material date range picker.
+/// This is accomplished by enabling state restoration by specifying
+/// [MaterialApp.restorationScopeId] and using [Navigator.restorablePush] to
+/// push [DateRangePickerDialog] when the button is tapped.
+///
+///
+/// void main() {
+///   runApp(const MyApp());
+/// }
+///
+/// class MyApp extends StatelessWidget {
+///   const MyApp({Key? key}) : super(key: key);
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return const MaterialApp(
+///       restorationScopeId: 'app',
+///       title: 'Restorable Date Range Picker Demo',
+///       home: MyHomePage(),
+///     );
+///   }
+/// }
+///
+/// class MyHomePage extends StatefulWidget {
+///   const MyHomePage({Key? key}) : super(key: key);
+///
+///   @override
+///   _MyHomePageState createState() => _MyHomePageState();
+/// }
+///
+/// class _MyHomePageState extends State<MyHomePage> with RestorationMixin {
+///   final RestorableDateTimeN _startDate = RestorableDateTimeN(DateTime(2021, 1, 1));
+///   final RestorableDateTimeN _endDate = RestorableDateTimeN(DateTime(2021, 1, 5));
+///   late final RestorableRouteFuture<DateTimeRange?> _restorableDateRangePickerRouteFuture = RestorableRouteFuture<DateTimeRange?>(
+///     onComplete: _selectDateRange,
+///     onPresent: (NavigatorState navigator, Object? arguments) {
+///       return navigator.restorablePush(
+///         _dateRangePickerRoute,
+///         arguments: <String, dynamic>{
+///           'initialStartDate': _startDate.value?.millisecondsSinceEpoch,
+///           'initialEndDate': _endDate.value?.millisecondsSinceEpoch,
+///         }
+///       );
+///     },
+///   );
+///
+///   void _selectDateRange(DateTimeRange? newSelectedDate) {
+///     if (newSelectedDate != null) {
+///       setState(() {
+///         _startDate.value = newSelectedDate.start;
+///         _endDate.value = newSelectedDate.end;
+///       });
+///     }
+///   }
+///
+///   @override
+///   String get restorationId => 'scaffold_state';
+///
+///   @override
+///   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+///     registerForRestoration(_startDate, 'start_date');
+///     registerForRestoration(_endDate, 'end_date');
+///     registerForRestoration(_restorableDateRangePickerRouteFuture, 'date_picker_route_future');
+///   }
+///
+///   static Route<DateTimeRange?> _dateRangePickerRoute(
+///     BuildContext context,
+///     Object? arguments,
+///   ) {
+///     return DialogRoute<DateTimeRange?>(
+///       context: context,
+///       builder: (BuildContext context) {
+///         return DateRangePickerDialog(
+///           restorationId: 'date_picker_dialog',
+///           initialDateRange: _initialDateTimeRange(arguments as Map<dynamic, dynamic>),
+///           firstDate: DateTime(2021, 1, 1),
+///           currentDate: DateTime(2021, 1, 25),
+///           lastDate: DateTime(2022, 1, 1),
+///         );
+///       },
+///     );
+///   }
+///
+///   static DateTimeRange? _initialDateTimeRange(Map<dynamic, dynamic> arguments) {
+///     if (arguments['initialStartDate'] != null && arguments['initialEndDate'] != null) {
+///       return DateTimeRange(
+///         start: DateTime.fromMillisecondsSinceEpoch(arguments['initialStartDate'] as int),
+///         end: DateTime.fromMillisecondsSinceEpoch(arguments['initialEndDate'] as int),
+///       );
+///     }
+///
+///     return null;
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Scaffold(
+///       body: Center(
+///         child: OutlinedButton(
+///           onPressed: () { _restorableDateRangePickerRouteFuture.present(); },
+///           child: const Text('Open Date Range Picker'),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+///
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [showDatePicker], which shows a material design date picker used to
@@ -1134,8 +1263,8 @@ class DateRangePickerDialog extends StatefulWidget {
 
   /// The date range that the date range picker starts with when it opens.
   ///
-  /// If an initial date range is provided, [initialDateRange.start]
-  /// and [initialDateRange.end] must both fall between or on [firstDate] and
+  /// If an initial date range is provided, `initialDateRange.start`
+  /// and `initialDateRange.end` must both fall between or on [firstDate] and
   /// [lastDate]. For all of these [DateTime] values, only their dates are
   /// considered. Their time fields are ignored.
   ///
