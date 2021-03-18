@@ -263,9 +263,17 @@ class AndroidSdk {
 
   String getAvdManagerPath() {
     final String binaryName = globals.platform.isWindows ? 'avdmanager.bat' : 'avdmanager';
-    final File file = directory.childDirectory('tools').childDirectory('bin').childFile(binaryName);
-    if (file.existsSync()) {
-      return file.path;
+    final File cmdlineToolsBinary = directory
+      .childDirectory('cmdline-tools')
+      .childDirectory('latest')
+      .childDirectory('bin')
+      .childFile(binaryName);
+    if (cmdlineToolsBinary.existsSync()) {
+      return cmdlineToolsBinary.path;
+    }
+    final File toolsBinary = directory.childDirectory('tools').childDirectory('bin').childFile(binaryName);
+    if (toolsBinary.existsSync()) {
+      return toolsBinary.path;
     }
     return null;
   }

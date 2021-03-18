@@ -26,35 +26,6 @@ typedef ShutdownHook = FutureOr<dynamic> Function();
 // See [here](https://github.com/flutter/flutter/pull/14535#discussion_r167041161)
 // for more details.
 
-/// The stage in which a [ShutdownHook] will be run. All shutdown hooks within
-/// a given stage will be started in parallel and will be guaranteed to run to
-/// completion before shutdown hooks in the next stage are started.
-class ShutdownStage implements Comparable<ShutdownStage> {
-  const ShutdownStage._(this.priority);
-
-  /// The stage priority. Smaller values will be run before larger values.
-  final int priority;
-
-  /// The stage before the invocation recording (if one exists) is serialized
-  /// to disk. Tasks performed during this stage *will* be recorded.
-  static const ShutdownStage STILL_RECORDING = ShutdownStage._(1);
-
-  /// The stage during which the invocation recording (if one exists) will be
-  /// serialized to disk. Invocations performed after this stage will not be
-  /// recorded.
-  static const ShutdownStage SERIALIZE_RECORDING = ShutdownStage._(2);
-
-  /// The stage during which a serialized recording will be refined (e.g.
-  /// cleansed for tests, zipped up for bug reporting purposes, etc.).
-  static const ShutdownStage POST_PROCESS_RECORDING = ShutdownStage._(3);
-
-  /// The stage during which temporary files and directories will be deleted.
-  static const ShutdownStage CLEANUP = ShutdownStage._(4);
-
-  @override
-  int compareTo(ShutdownStage other) => priority.compareTo(other.priority);
-}
-
 ShutdownHooks get shutdownHooks => ShutdownHooks.instance;
 
 abstract class ShutdownHooks {
@@ -67,14 +38,9 @@ abstract class ShutdownHooks {
   static ShutdownHooks get instance => context.get<ShutdownHooks>();
 
   /// Registers a [ShutdownHook] to be executed before the VM exits.
-  ///
-  /// If [stage] is specified, the shutdown hook will be run during the specified
-  /// stage. By default, the shutdown hook will be run during the
-  /// [ShutdownStage.CLEANUP] stage.
   void addShutdownHook(
-    ShutdownHook shutdownHook, [
-    ShutdownStage stage = ShutdownStage.CLEANUP,
-  ]);
+    ShutdownHook shutdownHook
+  );
 
   /// Runs all registered shutdown hooks and returns a future that completes when
   /// all such hooks have finished.
@@ -92,18 +58,16 @@ class _DefaultShutdownHooks implements ShutdownHooks {
   }) : _logger = logger;
 
   final Logger _logger;
-
-  final Map<ShutdownStage, List<ShutdownHook>> _shutdownHooks = <ShutdownStage, List<ShutdownHook>>{};
+  final List<ShutdownHook> _shutdownHooks = <ShutdownHook>[];
 
   bool _shutdownHooksRunning = false;
 
   @override
   void addShutdownHook(
-    ShutdownHook shutdownHook, [
-    ShutdownStage stage = ShutdownStage.CLEANUP,
-  ]) {
+    ShutdownHook shutdownHook
+  ) {
     assert(!_shutdownHooksRunning);
-    _shutdownHooks.putIfAbsent(stage, () => <ShutdownHook>[]).add(shutdownHook);
+    _shutdownHooks.add(shutdownHook);
   }
 
   @override
@@ -111,22 +75,17 @@ class _DefaultShutdownHooks implements ShutdownHooks {
     _logger.printTrace('Running shutdown hooks');
     _shutdownHooksRunning = true;
     try {
-      for (final ShutdownStage stage in _shutdownHooks.keys.toList()..sort()) {
-        _logger.printTrace('Shutdown hook priority ${stage.priority}');
-        final List<ShutdownHook> hooks = _shutdownHooks.remove(stage);
-        final List<Future<dynamic>> futures = <Future<dynamic>>[];
-        for (final ShutdownHook shutdownHook in hooks) {
-          final FutureOr<dynamic> result = shutdownHook();
-          if (result is Future<dynamic>) {
-            futures.add(result);
-          }
+      final List<Future<dynamic>> futures = <Future<dynamic>>[];
+      for (final ShutdownHook shutdownHook in _shutdownHooks) {
+        final FutureOr<dynamic> result = shutdownHook();
+        if (result is Future<dynamic>) {
+          futures.add(result);
         }
-        await Future.wait<dynamic>(futures);
       }
+      await Future.wait<dynamic>(futures);
     } finally {
       _shutdownHooksRunning = false;
     }
-    assert(_shutdownHooks.isEmpty);
     _logger.printTrace('Shutdown hooks complete');
   }
 }

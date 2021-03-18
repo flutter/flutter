@@ -4,6 +4,7 @@
 
 // @dart = 2.8
 
+@Timeout(Duration(minutes: 3))
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 

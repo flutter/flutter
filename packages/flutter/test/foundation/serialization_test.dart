@@ -5,7 +5,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Write and read buffer round-trip', () {
