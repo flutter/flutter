@@ -1027,7 +1027,7 @@ Future<DateTimeRange?> showDateRangePicker({
   assert(useRootNavigator != null);
   assert(debugCheckHasMaterialLocalizations(context));
 
-  Widget dialog = _DateRangePickerDialog(
+  Widget dialog = DateRangePickerDialog(
     initialDateRange: initialDateRange,
     firstDate: firstDate,
     lastDate: lastDate,
@@ -1100,8 +1100,18 @@ String _formatRangeEndDate(MaterialLocalizations localizations, DateTime? startD
       : localizations.formatShortDate(endDate);
 }
 
-class _DateRangePickerDialog extends StatefulWidget {
-  const _DateRangePickerDialog({
+/// A Material-style date range picker dialog.
+///
+/// It is used internally by [showDateRangePicker] or can be directly pushed
+/// onto the [Navigator] stack to enable state restoration. See
+/// [showDateRangePicker] for a state restoration app example.
+///
+/// See also:
+///
+///  * [showDateRangePicker], which is a way to display the date picker.
+class DateRangePickerDialog extends StatefulWidget {
+  /// A Material-style date range picker dialog.
+  const DateRangePickerDialog({
     Key? key,
     this.initialDateRange,
     required this.firstDate,
@@ -1121,28 +1131,114 @@ class _DateRangePickerDialog extends StatefulWidget {
     this.fieldEndLabelText,
   }) : super(key: key);
 
+  /// The date range that the date range picker starts with when it opens.
+  ///
+  /// If an initial date range is provided, [initialDateRange.start]
+  /// and [initialDateRange.end] must both fall between or on [firstDate] and
+  /// [lastDate]. For all of these [DateTime] values, only their dates are
+  /// considered. Their time fields are ignored.
+  ///
+  /// If [initialDateRange] is non-null, then it will be used as the initially
+  /// selected date range. If it is provided, [initialDateRange.start] must be
+  /// before or on [initialDateRange.end].
   final DateTimeRange? initialDateRange;
+
+  /// The earliest allowable date on the date range.
   final DateTime firstDate;
+
+  /// The latest allowable date on the date range.
   final DateTime lastDate;
+
+  /// The [currentDate] represents the current day (i.e. today).
+  ///
+  /// This date will be highlighted in the day grid.
+  ///
+  /// If `null`, the date of `DateTime.now()` will be used.
   final DateTime? currentDate;
+
+  /// The initial date range picker entry mode.
+  ///
+  /// The date range has two main modes: [DatePickerEntryMode.calendar] (a
+  /// scrollable calendar month grid) or [DatePickerEntryMode.input] (two text
+  /// input fields) mode.
+  ///
+  /// It defaults to [DatePickerEntryMode.calendar] and must be non-null.
   final DatePickerEntryMode initialEntryMode;
+
+  /// The label on the cancel button for the text input mode.
+  ///
+  /// If null, the localized value of
+  /// [MaterialLocalizations.cancelButtonLabel] is used.
   final String? cancelText;
+
+  /// The label on the "OK" button for the text input mode.
+  ///
+  /// If null, the localized value of
+  /// [MaterialLocalizations.okButtonLabel] is used.
   final String? confirmText;
+
+  /// The label on the save button for the fullscreen calendar mode.
+  ///
+  /// If null, the localized value of
+  /// [MaterialLocalizations.saveButtonLabel] is used.
   final String? saveText;
+
+  /// The label displayed at the top of the dialog.
+  ///
+  /// If null, the localized value of
+  /// [MaterialLocalizations.dateRangePickerHelpText] is used.
   final String? helpText;
+
+  /// The message used when the date range is invalid (e.g. start date is after
+  /// end date).
+  ///
+  /// If null, the localized value of
+  /// [MaterialLocalizations.invalidDateRangeLabel] is used.
   final String? errorInvalidRangeText;
+
+  /// The message used when an input text isn't in a proper date format.
+  ///
+  /// If null, the localized value of
+  /// [MaterialLocalizations.invalidDateFormatLabel] is used.
   final String? errorFormatText;
+
+  /// The message used when an input text isn't a selectable date.
+  ///
+  /// If null, the localized value of
+  /// [MaterialLocalizations.dateOutOfRangeLabel] is used.
   final String? errorInvalidText;
+
+  /// The text used to prompt the user when no text has been entered in the
+  /// start field.
+  ///
+  /// If null, the localized value of
+  /// [MaterialLocalizations.dateHelpText] is used.
   final String? fieldStartHintText;
+
+  /// The text used to prompt the user when no text has been entered in the
+  /// end field.
+  ///
+  /// If null, the localized value of [MaterialLocalizations.dateHelpText] is
+  /// used.
   final String? fieldEndHintText;
+
+  /// The label for the start date text input field.
+  ///
+  /// If null, the localized value of [MaterialLocalizations.dateRangeStartLabel]
+  /// is used.
   final String? fieldStartLabelText;
+
+  /// The label for the end date text input field.
+  ///
+  /// If null, the localized value of [MaterialLocalizations.dateRangeEndLabel]
+  /// is used.
   final String? fieldEndLabelText;
 
   @override
   _DateRangePickerDialogState createState() => _DateRangePickerDialogState();
 }
 
-class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
+class _DateRangePickerDialogState extends State<DateRangePickerDialog> {
   late DatePickerEntryMode _entryMode;
   DateTime? _selectedStart;
   DateTime? _selectedEnd;
