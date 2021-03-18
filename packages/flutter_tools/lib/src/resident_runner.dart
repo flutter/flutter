@@ -923,7 +923,7 @@ abstract class ResidentRunner {
 
     final CompositeTarget compositeTarget = CompositeTarget(<Target>[
       const GenerateLocalizationsTarget(),
-      DartPluginRegistrantTarget(),
+      const DartPluginRegistrantTarget(),
     ]);
 
     _lastBuild = await globals.buildSystem.buildIncremental(

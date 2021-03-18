@@ -99,7 +99,7 @@ void main() {
         processManager: FakeProcessManager.any(),
         generateDartPluginRegistry: false);
 
-    expect(DartPluginRegistrantTarget().canSkip(environment), true);
+    expect(const DartPluginRegistrantTarget().canSkip(environment), true);
 
     final Environment environment2 = Environment.test(
         fileSystem.currentDirectory,
@@ -109,7 +109,7 @@ void main() {
         processManager: FakeProcessManager.any(),
         generateDartPluginRegistry: true);
 
-    expect(DartPluginRegistrantTarget().canSkip(environment2), false);
+    expect(const DartPluginRegistrantTarget().canSkip(environment2), false);
   });
 
   testWithoutContext(
@@ -129,7 +129,7 @@ void main() {
     config.createSync(recursive: true);
     config.writeAsStringSync(_kSamplePackageJson);
 
-    await expectLater(DartPluginRegistrantTarget().build(environment),
+    await expectLater(const DartPluginRegistrantTarget().build(environment),
         throwsAssertionError);
   });
 
@@ -163,7 +163,7 @@ void main() {
     generatedMain.createSync(recursive: true);
 
     final FlutterProject testProject = FlutterProject.fromDirectoryTest(environment.projectDir);
-    await DartPluginRegistrantTarget(project: testProject).build(environment);
+    await DartPluginRegistrantTarget.test(testProject).build(environment);
 
     final String mainContent = generatedMain.readAsStringSync();
     expect(mainContent, contains(_kNoPluginsRegistrant));
@@ -202,7 +202,7 @@ void main() {
     pluginPubspec.createSync(recursive: true);
     pluginPubspec.writeAsStringSync(_kSamplePluginPubspec);
     final FlutterProject testProject = FlutterProject.fromDirectoryTest(environment.projectDir);
-    await DartPluginRegistrantTarget(project: testProject).build(environment);
+    await DartPluginRegistrantTarget.test(testProject).build(environment);
 
     final String mainContent = generatedMain.readAsStringSync();
     expect(mainContent, contains(_kLinuxRegistrant));
