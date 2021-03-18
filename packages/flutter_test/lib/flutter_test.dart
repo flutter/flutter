@@ -74,6 +74,7 @@ export 'src/restoration.dart';
 export 'src/stack_manipulation.dart';
 export 'src/test_async_utils.dart';
 export 'src/test_compat.dart';
+export 'src/test_default_binary_messenger.dart';
 export 'src/test_exception_reporter.dart';
 export 'src/test_pointer.dart';
 export 'src/test_text_input.dart';
