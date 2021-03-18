@@ -987,12 +987,32 @@ class _RecordingWidgetsBinding extends BindingBase
         SemanticsBinding,
         RendererBinding,
         WidgetsBinding {
-  /// Makes an instance of [_RecordingWidgetsBinding] the current binding.
+
+  @override
+  void initInstances() {
+    super.initInstances();
+    _instance = this;
+  }
+
+  /// The singleton instance of this object.
+  ///
+  /// Provides access to the features exposed by this class. The binding must
+  /// be initialized before using this getter; this is typically done by calling
+  /// [_RecordingWidgetsBinding.ensureInitialized].
+  static _RecordingWidgetsBinding get instance => BindingBase.checkInstance(_instance);
+  static _RecordingWidgetsBinding? _instance;
+
+  /// Returns an instance of the [_RecordingWidgetsBinding], creating and
+  /// initializing it if necessary.
+  ///
+  /// See also:
+  ///
+  ///  - [WidgetsFlutterBinding.ensureInitialized], the equivalent in the widgets framework.
   static _RecordingWidgetsBinding ensureInitialized() {
-    if (WidgetsBinding.instance == null) {
+    if (_instance == null) {
       _RecordingWidgetsBinding();
     }
-    return WidgetsBinding.instance! as _RecordingWidgetsBinding;
+    return instance;
   }
 
   FrameRecorder? _recorder;

@@ -24,13 +24,14 @@ class TestGestureArenaMember extends GestureArenaMember {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   late DoubleTapGestureRecognizer tap;
   bool doubleTapRecognized = false;
   TapDownDetails? doubleTapDownDetails;
   bool doubleTapCanceled = false;
 
   setUp(() {
-    ensureGestureBinding();
     tap = DoubleTapGestureRecognizer();
 
     doubleTapRecognized = false;

@@ -94,6 +94,7 @@ class _Resampler {
   //
   // The `samplingOffset` is relative to the current frame time, which
   // can be in the past when we're not actively resampling.
+  //
   // The `samplingClock` is the clock used to determine frame time age.
   void sample(Duration samplingOffset, SamplingClock clock) {
     final SchedulerBinding? scheduler = SchedulerBinding.instance;
@@ -259,15 +260,19 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     window.onPointerDataPacket = _handlePointerDataPacket;
   }
 
+  /// The singleton instance of this object.
+  ///
+  /// Provides access to the features exposed by this mixin. The binding must
+  /// be initialized before using this getter; this is typically done by calling
+  /// [runApp] or [WidgetsFlutterBinding.ensureInitialized].
+  static GestureBinding get instance => BindingBase.checkInstance(_instance);
+  static GestureBinding? _instance;
+
   @override
   void unlocked() {
     super.unlocked();
     _flushPointerEventQueue();
   }
-
-  /// The singleton instance of this object.
-  static GestureBinding? get instance => _instance;
-  static GestureBinding? _instance;
 
   final Queue<PointerEvent> _pendingPointerEvents = Queue<PointerEvent>();
 

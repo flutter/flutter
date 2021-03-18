@@ -17,7 +17,7 @@ class TestGestureArenaMember extends GestureArenaMember {
 }
 
 void main() {
-  setUp(ensureGestureBinding);
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   // Down/up pair 1: normal tap sequence
   const PointerDownEvent down1 = PointerDownEvent(
