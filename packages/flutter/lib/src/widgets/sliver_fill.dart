@@ -42,7 +42,6 @@ class SliverFillViewport extends StatelessWidget {
   /// the viewport in the main axis.
   final double viewportFraction;
 
-  /// {@template flutter.widgets.SliverFillViewport.padEnds}
   /// Whether to add padding to both ends of the list.
   ///
   /// If this is set to true and [viewportFraction] < 1.0, padding will be added
@@ -54,7 +53,6 @@ class SliverFillViewport extends StatelessWidget {
   ///
   /// This option cannot be null. If [viewportFraction] >= 1.0, this option has no
   /// effect. Defaults to true.
-  /// {@endtemplate}
   final bool padEnds;
 
   /// {@macro flutter.widgets.SliverMultiBoxAdaptorWidget.delegate}

@@ -857,7 +857,14 @@ class PageView extends StatefulWidget {
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
-  /// {@macro flutter.widgets.SliverFillViewport.padEnds}
+  /// Whether to add padding to both ends of the list.
+  ///
+  /// If this is set to true and [PageController.viewportFraction] < 1.0, padding will be added
+  /// such that the first and last child slivers will be in the center of
+  /// the viewport when scrolled all the way to the start or end, respectively.
+  ///
+  /// This option cannot be null. If [PageController.viewportFraction] >= 1.0, this option has no
+  /// effect. Defaults to true.
   final bool padEnds;
 
   @override
