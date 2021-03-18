@@ -1775,7 +1775,7 @@ void main() {
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 12);
     }, skip: isBrowser);
-  
+
     test('when input has obscured text, it should delete everything before the selection', () async {
       const int offset = 21;
       final TextSelectionDelegate delegate = FakeEditableTextState()
@@ -1968,7 +1968,7 @@ void main() {
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 11);
     }, skip: isBrowser);
-  
+
     test('when input has obscured text, it should delete everything before the selection', () async {
       const int offset = 21;
       final TextSelectionDelegate delegate = FakeEditableTextState()
@@ -2464,7 +2464,7 @@ void main() {
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
     }, skip: isBrowser);
-  
+
     test('when input has obscured text, it should delete everything after the selection', () async {
       const int offset = 4;
       final TextSelectionDelegate delegate = FakeEditableTextState()
@@ -2657,7 +2657,7 @@ void main() {
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
     }, skip: isBrowser);
-  
+
     test('when input has obscured text, it should delete everything after the selection', () async {
       const int offset = 4;
       final TextSelectionDelegate delegate = FakeEditableTextState()
