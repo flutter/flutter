@@ -250,7 +250,7 @@ class _StandardPromptCore {
 ///  * Rejects pressing KeyA then ContrlLeft.
 ///  * Rejects pressing ShiftLeft, ContrlLeft, then KeyA.
 /// ```dart
-/// const LogicalKeySet set1 = LogicalKeySet(
+/// final LogicalKeySet set1 = LogicalKeySet(
 ///   LogicalKeyboardKey.controlLeft,
 ///   LogicalKeyboardKey.keyA,
 /// );
@@ -271,7 +271,7 @@ class _StandardPromptCore {
 ///  * Rejects pressing ControlLeft then ShiftRight.
 ///  * Accepts pressing ShiftLeft, AltLeft, then ContrlLeft.
 /// ```
-/// const LogicalKeySet set2 = LogicalKeySet(
+/// final LogicalKeySet set2 = LogicalKeySet(
 ///   LogicalKeyboardKey.controlLeft,
 ///   LogicalKeyboardKey.shift,
 /// );
