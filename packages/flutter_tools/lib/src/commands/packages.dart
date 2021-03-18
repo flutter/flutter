@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:args/args.dart';
 
 import '../base/common.dart';
@@ -86,7 +88,7 @@ class PackagesGetCommand extends FlutterCommand {
     if (target == null) {
       return usageValues;
     }
-    final FlutterProject rootProject = FlutterProject.fromPath(target);
+    final FlutterProject rootProject = FlutterProject.fromDirectory(globals.fs.directory(target));
     // Do not send plugin analytics if pub has not run before.
     final bool hasPlugins = rootProject.flutterPluginsDependenciesFile.existsSync()
       && rootProject.packagesFile.existsSync()
@@ -117,6 +119,7 @@ class PackagesGetCommand extends FlutterCommand {
         outputDir: globals.fs.directory(getBuildDirectory()),
         processManager: globals.processManager,
         projectDir: flutterProject.directory,
+        generateDartPluginRegistry: true,
       );
 
       await generateLocalizationsSyntheticPackage(
@@ -158,7 +161,7 @@ class PackagesGetCommand extends FlutterCommand {
        '${ workingDirectory ?? "current working directory" }.'
       );
     }
-    final FlutterProject rootProject = FlutterProject.fromPath(target);
+    final FlutterProject rootProject = FlutterProject.fromDirectory(globals.fs.directory(target));
 
     await _runPubGet(target, rootProject);
     await rootProject.regeneratePlatformSpecificTooling();
@@ -309,7 +312,7 @@ class PackagesInteractiveGetCommand extends FlutterCommand {
       throwToolExit('Expected to find project root in '
           'current working directory.');
     }
-    final FlutterProject flutterProject = FlutterProject.fromPath(target);
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(globals.fs.directory(target));
 
     if (flutterProject.manifest.generateSyntheticPackage) {
       final Environment environment = Environment(
@@ -322,6 +325,7 @@ class PackagesInteractiveGetCommand extends FlutterCommand {
         outputDir: globals.fs.directory(getBuildDirectory()),
         processManager: globals.processManager,
         projectDir: flutterProject.directory,
+        generateDartPluginRegistry: true,
       );
 
       await generateLocalizationsSyntheticPackage(

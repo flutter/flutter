@@ -12,8 +12,8 @@ import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
 
 void main() {
-  VmService vmService;
-  String isolateId;
+  late VmService vmService;
+  late String isolateId;
   setUpAll(() async {
     final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
 
@@ -21,9 +21,9 @@ void main() {
       fail('This test _must_ be run with --enable-vmservice.');
     }
 
-    vmService = await vmServiceConnectUri('ws://localhost:${info.serverUri.port}${info.serverUri.path}ws');
+    vmService = await vmServiceConnectUri('ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws');
     await vmService.setVMTimelineFlags(<String>['Dart']);
-    isolateId = developer.Service.getIsolateID(isolate.Isolate.current);
+    isolateId = developer.Service.getIsolateID(isolate.Isolate.current)!;
 
     // Initialize the image cache.
     TestWidgetsFlutterBinding.ensureInitialized();
@@ -32,22 +32,22 @@ void main() {
   test('Image cache tracing', () async {
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
     final TestImageStreamCompleter completer2 = TestImageStreamCompleter();
-    PaintingBinding.instance.imageCache.putIfAbsent(
+    PaintingBinding.instance!.imageCache!.putIfAbsent(
       'Test',
       () => completer1,
     );
-    PaintingBinding.instance.imageCache.clear();
+    PaintingBinding.instance!.imageCache!.clear();
 
     completer2.testSetImage(ImageInfo(image: await createTestImage()));
-    PaintingBinding.instance.imageCache.putIfAbsent(
+    PaintingBinding.instance!.imageCache!.putIfAbsent(
       'Test2',
       () => completer2,
     );
-    PaintingBinding.instance.imageCache.evict('Test2');
+    PaintingBinding.instance!.imageCache!.evict('Test2');
 
     final Timeline timeline = await vmService.getVMTimeline();
     _expectTimelineEvents(
-      timeline.traceEvents,
+      timeline.traceEvents!,
       <Map<String, dynamic>>[
         <String, dynamic>{
           'name': 'ImageCache.putIfAbsent',
@@ -83,9 +83,9 @@ void main() {
 void _expectTimelineEvents(List<TimelineEvent> events, List<Map<String, dynamic>> expected) {
   for (final TimelineEvent event in events) {
     for (int index = 0; index < expected.length; index += 1) {
-      if (expected[index]['name'] == event.json['name']) {
+      if (expected[index]['name'] == event.json!['name']) {
         final Map<String, dynamic> expectedArgs = expected[index]['args'] as Map<String, dynamic>;
-        final Map<String, dynamic> args = event.json['args'] as Map<String, dynamic>;
+        final Map<String, dynamic> args = event.json!['args'] as Map<String, dynamic>;
         if (_mapsEqual(expectedArgs, args)) {
           expected.removeAt(index);
         }

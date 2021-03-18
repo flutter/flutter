@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'android/android_device_discovery.dart';
 import 'android/android_sdk.dart';
@@ -43,6 +44,7 @@ import 'macos/xcode.dart';
 import 'project.dart';
 import 'tester/flutter_tester.dart';
 import 'version.dart';
+import 'vmservice.dart';
 import 'web/web_device.dart';
 import 'windows/windows_device.dart';
 import 'windows/windows_workflow.dart';
@@ -392,6 +394,7 @@ class FlutterDeviceManager extends DeviceManager {
       config: config,
       logger: logger,
       artifacts: artifacts,
+      operatingSystemUtils: operatingSystemUtils,
     ),
     MacOSDevices(
       processManager: processManager,
@@ -415,6 +418,7 @@ class FlutterDeviceManager extends DeviceManager {
       logger: logger,
       fileSystem: fileSystem,
       windowsWorkflow: windowsWorkflow,
+      featureFlags: featureFlags,
     ),
     WebDevices(
       featureFlags: featureFlags,
@@ -1028,7 +1032,7 @@ abstract class DeviceLogReader {
 
   /// Some logs can be obtained from a VM service stream.
   /// Set this after the VM services are connected.
-  vm_service.VmService connectedVMService;
+  FlutterVmService connectedVMService;
 
   @override
   String toString() => name;
@@ -1058,7 +1062,7 @@ class NoOpDeviceLogReader implements DeviceLogReader {
   int appPid;
 
   @override
-  vm_service.VmService connectedVMService;
+  FlutterVmService connectedVMService;
 
   @override
   Stream<String> get logLines => const Stream<String>.empty();

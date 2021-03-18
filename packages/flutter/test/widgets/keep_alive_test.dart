@@ -103,7 +103,7 @@ void main() {
           addAutomaticKeepAlives: false,
           addRepaintBoundaries: false,
           addSemanticIndexes: false,
-          children: generateList(Container(height: 12.3, child: const Placeholder())), // about 50 widgets visible
+          children: generateList(const SizedBox(height: 12.3, child: Placeholder())), // about 50 widgets visible
         ),
       ),
     );
@@ -152,7 +152,7 @@ void main() {
           addSemanticIndexes: false,
           crossAxisCount: 2,
           childAspectRatio: 400.0 / 24.6, // about 50 widgets visible
-          children: generateList(Container(child: const Placeholder())),
+          children: generateList(const Placeholder()),
         ),
       ),
     );
@@ -258,6 +258,7 @@ void main() {
       '             │ parentData: <none> (can use size)\n'
       '             │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
       '             │ size: Size(800.0, 600.0)\n'
+      '             │ behavior: opaque\n'
       '             │ gestures: vertical scroll\n'
       '             │\n'
       '             └─child: RenderPointerListener#00000\n'
@@ -406,6 +407,7 @@ void main() {
       '             │ parentData: <none> (can use size)\n'
       '             │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
       '             │ size: Size(800.0, 600.0)\n'
+      '             │ behavior: opaque\n'
       '             │ gestures: vertical scroll\n'
       '             │\n'
       '             └─child: RenderPointerListener#00000\n'

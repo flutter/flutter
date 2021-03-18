@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
@@ -144,13 +146,24 @@ String generateNumberFormattingLogic(Message message) {
       }
       final Iterable<String> parameters =
         placeholder.optionalParameters.map<String>((OptionalParameter parameter) {
-          return '${parameter.name}: ${parameter.value}';
+          if (parameter.value is num) {
+            return '${parameter.name}: ${parameter.value}';
+          } else {
+            return '${parameter.name}: ${generateString(parameter.value.toString())}';
+          }
         },
       );
-      return numberFormatTemplate
-        .replaceAll('@(placeholder)', placeholder.name)
-        .replaceAll('@(format)', placeholder.format)
-        .replaceAll('@(parameters)', parameters.join(',    \n'));
+
+      if (placeholder.hasNumberFormatWithParameters) {
+        return numberFormatNamedTemplate
+            .replaceAll('@(placeholder)', placeholder.name)
+            .replaceAll('@(format)', placeholder.format)
+            .replaceAll('@(parameters)', parameters.join(',\n      '));
+      } else {
+        return numberFormatPositionalTemplate
+            .replaceAll('@(placeholder)', placeholder.name)
+            .replaceAll('@(format)', placeholder.format);
+      }
     });
 
   return formatStatements.isEmpty ? '@(none)' : formatStatements.join('');
@@ -407,13 +420,13 @@ String _generateLookupBody(
   bool useDeferredLoading,
   String fileName,
 ) {
-  final String Function(LocaleInfo) generateSwitchClauseTemplate = (LocaleInfo locale) {
+  String generateSwitchClauseTemplate(LocaleInfo locale) {
     return (useDeferredLoading ?
       switchClauseDeferredLoadingTemplate : switchClauseTemplate)
       .replaceAll('@(localeClass)', '$className${locale.camelCase()}')
       .replaceAll('@(appClass)', className)
       .replaceAll('@(library)', '${fileName}_${locale.languageCode}');
-  };
+  }
   return lookupBodyTemplate
     .replaceAll('@(lookupAllCodesSpecified)', _generateLookupByAllCodes(
       allBundles,

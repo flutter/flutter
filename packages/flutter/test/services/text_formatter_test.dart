@@ -11,8 +11,8 @@ void main() {
   TextEditingValue testNewValue = TextEditingValue.empty;
 
   test('withFunction wraps formatting function', () {
-    testOldValue = const TextEditingValue();
-    testNewValue = const TextEditingValue();
+    testOldValue = TextEditingValue.empty;
+    testNewValue = TextEditingValue.empty;
 
     late TextEditingValue calledOldValue;
     late TextEditingValue calledNewValue;

@@ -37,7 +37,7 @@ void main() {
       rect: const Rect.fromLTWH(50.0, 75.0, 200.0, 100.0),
       image: image300x300,
       fit: BoxFit.cover,
-      alignment: const Alignment(-1.0, 0.0),
+      alignment: Alignment.centerLeft,
     );
 
     final Invocation command = canvas.invocations.firstWhere((Invocation invocation) {
@@ -101,7 +101,7 @@ void main() {
 
     expect(
       messages.single,
-      'Image TestImage has a display size of 200×100 but a decode size of 300×300, which uses an additional 364kb.\n\n'
+      'Image TestImage has a display size of 200×100 but a decode size of 300×300, which uses an additional 364KB.\n\n'
       'Consider resizing the asset ahead of time, supplying a cacheWidth parameter of 200, a cacheHeight parameter of 100, or using a ResizeImage.',
     );
 

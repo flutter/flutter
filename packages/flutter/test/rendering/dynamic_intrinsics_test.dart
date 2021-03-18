@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
@@ -72,7 +72,7 @@ class RenderInvalidIntrinsics extends RenderBox {
   @override
   double computeMaxIntrinsicHeight(double width) => -1;
   @override
-  Size computeDryLayout(BoxConstraints constraints) => const Size(0, 0);
+  Size computeDryLayout(BoxConstraints constraints) => Size.zero;
 }
 
 void main() {

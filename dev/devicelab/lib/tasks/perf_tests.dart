@@ -271,6 +271,43 @@ TaskFunction createTextfieldPerfE2ETest() {
   ).run;
 }
 
+TaskFunction createStackSizeTest() {
+  final String testDirectory =
+      '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks';
+  const String testTarget = 'test_driver/run_app.dart';
+  const String testDriver = 'test_driver/stack_size_perf_test.dart';
+  return () {
+    return inDirectory<TaskResult>(testDirectory, () async {
+      final Device device = await devices.workingDevice;
+      await device.unlock();
+      final String deviceId = device.deviceId;
+      await flutter('packages', options: <String>['get']);
+
+      await flutter('drive', options: <String>[
+        '--no-android-gradle-daemon',
+        '-v',
+        '--verbose-system-logs',
+        '--profile',
+        '-t', testTarget,
+        '--driver', testDriver,
+        '-d',
+        deviceId,
+      ]);
+      final Map<String, dynamic> data = json.decode(
+        file('$testDirectory/build/stack_size.json').readAsStringSync(),
+      ) as Map<String, dynamic>;
+
+      final Map<String, dynamic> result = <String, dynamic>{
+        'stack_size_per_nesting_level': data['stack_size'],
+      };
+      return TaskResult.success(
+        result,
+        benchmarkScoreKeys: result.keys.toList(),
+      );
+    });
+  };
+}
+
 TaskFunction createFullscreenTextfieldPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -449,7 +486,7 @@ class StartupTest {
   final bool reportMetrics;
 
   Future<TaskResult> run() async {
-    return await inDirectory<TaskResult>(testDirectory, () async {
+    return inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
       const int iterations = 5;
       final List<Map<String, dynamic>> results = <Map<String, dynamic>>[];
@@ -463,6 +500,24 @@ class StartupTest {
             '-v',
             '--profile',
             '--target-platform=android-arm,android-arm64',
+          ]);
+          applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
+          break;
+        case DeviceOperatingSystem.androidArm:
+          await flutter('build', options: <String>[
+            'apk',
+            '-v',
+            '--profile',
+            '--target-platform=android-arm',
+          ]);
+          applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
+          break;
+        case DeviceOperatingSystem.androidArm64:
+          await flutter('build', options: <String>[
+            'apk',
+            '-v',
+            '--profile',
+            '--target-platform=android-arm64',
           ]);
           applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
           break;
@@ -484,6 +539,7 @@ class StartupTest {
       for (int i = 0; i < iterations; i += 1) {
         final int result = await flutter('run', options: <String>[
           '--no-android-gradle-daemon',
+          '--no-publish-port',
           '--verbose',
           '--profile',
           '--trace-startup',
@@ -667,8 +723,8 @@ class PerfTest {
           if (measureMemory && !isAndroid) ...<String>[
             // See https://github.com/flutter/flutter/issues/68888
             if (data['average_memory_usage'] != null) 'average_memory_usage',
-            '90th_percentile_memory_usage',
-            '99th_percentile_memory_usage',
+            if (data['90th_percentile_memory_usage'] != null) '90th_percentile_memory_usage',
+            if (data['99th_percentile_memory_usage'] != null) '99th_percentile_memory_usage',
           ],
         ],
       );
@@ -783,6 +839,7 @@ class PerfTestWithSkSL extends PerfTest {
         '--verbose',
         '--verbose-system-logs',
         '--purge-persistent-cache',
+        '--no-publish-port',
         '--profile',
         if (cacheSkSL) '--cache-sksl',
         '-d', _device.deviceId,
@@ -938,14 +995,26 @@ class CompileTest {
   final bool reportPackageContentSizes;
 
   Future<TaskResult> run() async {
-    return await inDirectory<TaskResult>(testDirectory, () async {
+    return inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
       await device.unlock();
       await flutter('packages', options: <String>['get']);
 
+      final Map<String, dynamic> compileRelease = await _compileApp(reportPackageContentSizes: reportPackageContentSizes);
+      final Map<String, dynamic> compileDebug = await _compileDebug(
+        clean: true,
+        metricKey: 'debug_full_compile_millis',
+      );
+      // Build again without cleaning, should be faster.
+      final Map<String, dynamic> compileSecondDebug = await _compileDebug(
+        clean: false,
+        metricKey: 'debug_second_compile_millis',
+      );
+
       final Map<String, dynamic> metrics = <String, dynamic>{
-        ...await _compileApp(reportPackageContentSizes: reportPackageContentSizes),
-        ...await _compileDebug(),
+        ...compileRelease,
+        ...compileDebug,
+        ...compileSecondDebug,
       };
 
       return TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
@@ -983,8 +1052,23 @@ class CompileTest {
           metrics.addAll(await getSizesFromIosApp(appPath));
         break;
       case DeviceOperatingSystem.android:
+      case DeviceOperatingSystem.androidArm:
         options.insert(0, 'apk');
         options.add('--target-platform=android-arm');
+        options.add('--tree-shake-icons');
+        options.add('--split-debug-info=infos/');
+        watch.start();
+        await flutter('build', options: options);
+        watch.stop();
+        final String apkPath = '$cwd/build/app/outputs/flutter-apk/app-release.apk';
+        final File apk = file(apkPath);
+        releaseSizeInBytes = apk.lengthSync();
+        if (reportPackageContentSizes)
+          metrics.addAll(await getSizesFromApk(apkPath));
+        break;
+      case DeviceOperatingSystem.androidArm64:
+        options.insert(0, 'apk');
+        options.add('--target-platform=android-arm64');
         options.add('--tree-shake-icons');
         options.add('--split-debug-info=infos/');
         watch.start();
@@ -1010,8 +1094,13 @@ class CompileTest {
     return metrics;
   }
 
-  static Future<Map<String, dynamic>> _compileDebug() async {
-    await flutter('clean');
+  static Future<Map<String, dynamic>> _compileDebug({
+    @required bool clean,
+    @required String metricKey,
+  }) async {
+    if (clean) {
+      await flutter('clean');
+    }
     final Stopwatch watch = Stopwatch();
     final List<String> options = <String>['--debug'];
     switch (deviceOperatingSystem) {
@@ -1019,8 +1108,13 @@ class CompileTest {
         options.insert(0, 'ios');
         break;
       case DeviceOperatingSystem.android:
+      case DeviceOperatingSystem.androidArm:
         options.insert(0, 'apk');
         options.add('--target-platform=android-arm');
+        break;
+      case DeviceOperatingSystem.androidArm64:
+        options.insert(0, 'apk');
+        options.add('--target-platform=android-arm64');
         break;
       case DeviceOperatingSystem.fuchsia:
         throw Exception('Unsupported option for Fuchsia devices');
@@ -1032,7 +1126,7 @@ class CompileTest {
     watch.stop();
 
     return <String, dynamic>{
-      'debug_full_compile_millis': watch.elapsedMilliseconds,
+      metricKey: watch.elapsedMilliseconds,
     };
   }
 
@@ -1286,6 +1380,7 @@ class DevToolsMemoryTest {
         'run',
         '--verbose',
         '--profile',
+        '--no-publish-port',
         '-d', _device.deviceId,
         driverTest,
       ],
@@ -1314,11 +1409,16 @@ class DevToolsMemoryTest {
   }
 
   Future<void> _launchDevTools() async {
+    // The version of devtools is pinned. If we pub global activate devtools and an
+    // upstream devtools release breaks our CI, it will manifest on an unrelated
+    // commit, making it more difficult to determine the cause.
+    //
+    // Also, for release branches, all external test dependencies need to be pinned.
     await exec(pubBin, <String>[
       'global',
       'activate',
       'devtools',
-      '0.2.5',
+      '2.0.0',
     ]);
     _devToolsProcess = await startProcess(
       pubBin,
@@ -1401,6 +1501,7 @@ class ReportedDurationTest {
       print('launching $project$test on device...');
       await flutter('run', options: <String>[
         '--verbose',
+        '--no-publish-port',
         '--no-fast-start',
         '--${_reportedDurationTestToString(flavor)}',
         '--no-resident',

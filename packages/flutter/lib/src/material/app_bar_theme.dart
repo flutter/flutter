@@ -43,10 +43,10 @@ class AppBarTheme with Diagnosticable {
     this.titleTextStyle,
     this.systemOverlayStyle,
     this.backwardsCompatibility,
-  }) :  assert(
-          color == null || backgroundColor == null,
-          'The color and backgroundColor parameters mean the same thing. Only specify one.'),
-        backgroundColor = backgroundColor ?? color;
+  }) : assert(
+         color == null || backgroundColor == null,
+         'The color and backgroundColor parameters mean the same thing. Only specify one.'),
+       backgroundColor = backgroundColor ?? color;
 
   /// This property is obsolete, please use [systemOverlayStyle] instead.
   ///

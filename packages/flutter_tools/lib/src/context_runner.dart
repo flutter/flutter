@@ -2,13 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:process/process.dart';
 
+import 'android/android_builder.dart';
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
 import 'android/android_workflow.dart';
+import 'android/gradle.dart';
 import 'android/gradle_utils.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
@@ -20,6 +24,7 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/process.dart';
+import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'build_info.dart';
@@ -58,7 +63,7 @@ import 'windows/visual_studio_validator.dart';
 import 'windows/windows_workflow.dart';
 
 Future<T> runInContext<T>(
-  FutureOr<T> runner(), {
+  FutureOr<T> Function() runner, {
   Map<Type, Generator> overrides,
 }) async {
 
@@ -70,11 +75,20 @@ Future<T> runInContext<T>(
     return runner();
   }
 
-  return await context.run<T>(
+  return context.run<T>(
     name: 'global fallbacks',
     body: runnerWrapper,
     overrides: overrides,
     fallbacks: <Type, Generator>{
+      AndroidBuilder: () => AndroidGradleBuilder(
+        logger: globals.logger,
+        processManager: globals.processManager,
+        fileSystem: globals.fs,
+        artifacts: globals.artifacts,
+        usage: globals.flutterUsage,
+        gradleUtils: globals.gradleUtils,
+        platform: globals.platform,
+      ),
       AndroidLicenseValidator: () => AndroidLicenseValidator(
         operatingSystemUtils: globals.os,
         platform: globals.platform,
@@ -100,6 +114,7 @@ Future<T> runInContext<T>(
       AndroidWorkflow: () => AndroidWorkflow(
         androidSdk: globals.androidSdk,
         featureFlags: featureFlags,
+        operatingSystemUtils: globals.os,
       ),
       ApplicationPackageFactory: () => ApplicationPackageFactory(
         userMessages: globals.userMessages,
@@ -112,6 +127,7 @@ Future<T> runInContext<T>(
         fileSystem: globals.fs,
         cache: globals.cache,
         platform: globals.platform,
+        operatingSystemUtils: globals.os,
       ),
       AssetBundleFactory: () {
         return AssetBundleFactory.defaultInstance(
@@ -210,7 +226,13 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         fuchsiaArtifacts: globals.fuchsiaArtifacts,
       ),
-      GradleUtils: () => GradleUtils(),
+      GradleUtils: () => GradleUtils(
+        fileSystem: globals.fs,
+        operatingSystemUtils: globals.os,
+        logger: globals.logger,
+        platform: globals.platform,
+        cache: globals.cache,
+      ),
       HotRunnerConfig: () => HotRunnerConfig(),
       IOSSimulatorUtils: () => IOSSimulatorUtils(
         logger: globals.logger,
@@ -254,12 +276,17 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         processManager: globals.processManager,
       ),
+      OutputPreferences: () => OutputPreferences(
+        wrapText: globals.stdio.hasTerminal ?? false,
+        showColor:  globals.platform.stdoutSupportsAnsi,
+        stdio: globals.stdio,
+      ),
       PersistentToolState: () => PersistentToolState(
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
       ),
-      ProcessInfo: () => ProcessInfo(),
+      ProcessInfo: () => ProcessInfo(globals.fs),
       ProcessManager: () => ErrorHandlingProcessManager(
         delegate: const LocalProcessManager(),
         platform: globals.platform,
@@ -330,7 +357,6 @@ Future<T> runInContext<T>(
         processManager: globals.processManager,
         platform: globals.platform,
         fileSystem: globals.fs,
-        terminal: globals.terminal,
         usage: globals.flutterUsage,
       ),
     },

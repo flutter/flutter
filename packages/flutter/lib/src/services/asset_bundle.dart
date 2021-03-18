@@ -10,7 +10,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 
-import 'binary_messenger.dart';
+import 'binding.dart';
 
 /// A collection of resources used by the application.
 ///
@@ -90,7 +90,7 @@ abstract class AssetBundle {
   ///
   /// Implementations may cache the result, so a particular key should only be
   /// used with one parser for the lifetime of the asset bundle.
-  Future<T> loadStructuredData<T>(String key, Future<T> parser(String value));
+  Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser);
 
   /// If this is a caching asset bundle, and the given key describes a cached
   /// asset, then evict the asset from the cache so that the next time it is
@@ -136,7 +136,7 @@ class NetworkAssetBundle extends AssetBundle {
   /// The result is not cached. The parser is run each time the resource is
   /// fetched.
   @override
-  Future<T> loadStructuredData<T>(String key, Future<T> parser(String value)) async {
+  Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser) async {
     assert(key != null);
     assert(parser != null);
     return parser(await loadString(key));
@@ -180,7 +180,7 @@ abstract class CachingAssetBundle extends AssetBundle {
   /// subsequent calls will be a [SynchronousFuture], which resolves its
   /// callback synchronously.
   @override
-  Future<T> loadStructuredData<T>(String key, Future<T> parser(String value)) {
+  Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser) {
     assert(key != null);
     assert(parser != null);
     if (_structuredDataCache.containsKey(key))
@@ -222,7 +222,7 @@ class PlatformAssetBundle extends CachingAssetBundle {
   Future<ByteData> load(String key) async {
     final Uint8List encoded = utf8.encoder.convert(Uri(path: Uri.encodeFull(key)).path);
     final ByteData? asset =
-        await defaultBinaryMessenger.send('flutter/assets', encoded.buffer.asByteData());
+        await ServicesBinding.instance!.defaultBinaryMessenger.send('flutter/assets', encoded.buffer.asByteData());
     if (asset == null)
       throw FlutterError('Unable to load asset: $key');
     return asset;

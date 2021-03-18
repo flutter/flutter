@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'ink_well.dart';
 import 'material_state.dart';
 import 'theme_data.dart';
 
@@ -107,6 +108,7 @@ class ButtonStyle with Diagnosticable {
     this.elevation,
     this.padding,
     this.minimumSize,
+    this.fixedSize,
     this.side,
     this.shape,
     this.mouseCursor,
@@ -115,6 +117,7 @@ class ButtonStyle with Diagnosticable {
     this.animationDuration,
     this.enableFeedback,
     this.alignment,
+    this.splashFactory,
   });
 
   /// The style for a button's [Text] widget descendants.
@@ -157,6 +160,16 @@ class ButtonStyle with Diagnosticable {
   /// The size of the rectangle the button lies within may be larger
   /// per [tapTargetSize].
   final MaterialStateProperty<Size?>? minimumSize;
+
+  /// The button's size.
+  ///
+  /// This size is still constrained by the style's [minimumSize]. Fixed
+  /// size dimensions whose value is [double.infinity] are ignored.
+  ///
+  /// To specify buttons with a fixed width and the default height use
+  /// `fixedSize: Size.fromWidth(320)`. Similarly, to specify a fixed
+  /// height and the default width use `fixedSize: Size.fromHeight(100)`.
+  final MaterialStateProperty<Size?>? fixedSize;
 
   /// The color and weight of the button's outline.
   ///
@@ -219,6 +232,21 @@ class ButtonStyle with Diagnosticable {
   /// Always defaults to [Alignment.center].
   final AlignmentGeometry? alignment;
 
+  /// Creates the [InkWell] splash factory, which defines the appearance of
+  /// "ink" splashes that occur in response to taps.
+  ///
+  /// Use [NoSplash.splashFactory] to defeat ink splash rendering. For example:
+  /// ```dart
+  /// ElevatedButton(
+  ///   style: ElevatedButton.styleFrom(
+  ///     splashFactory: NoSplash.splashFactory,
+  ///   ),
+  ///   onPressed: () { },
+  ///   child: Text('No Splash'),
+  /// )
+  /// ```
+  final InteractiveInkFeatureFactory? splashFactory;
+
   /// Returns a copy of this ButtonStyle with the given fields replaced with
   /// the new values.
   ButtonStyle copyWith({
@@ -230,6 +258,7 @@ class ButtonStyle with Diagnosticable {
     MaterialStateProperty<double?>? elevation,
     MaterialStateProperty<EdgeInsetsGeometry?>? padding,
     MaterialStateProperty<Size?>? minimumSize,
+    MaterialStateProperty<Size?>? fixedSize,
     MaterialStateProperty<BorderSide?>? side,
     MaterialStateProperty<OutlinedBorder?>? shape,
     MaterialStateProperty<MouseCursor?>? mouseCursor,
@@ -238,6 +267,7 @@ class ButtonStyle with Diagnosticable {
     Duration? animationDuration,
     bool? enableFeedback,
     AlignmentGeometry? alignment,
+    InteractiveInkFeatureFactory? splashFactory,
   }) {
     return ButtonStyle(
       textStyle: textStyle ?? this.textStyle,
@@ -248,6 +278,7 @@ class ButtonStyle with Diagnosticable {
       elevation: elevation ?? this.elevation,
       padding: padding ?? this.padding,
       minimumSize: minimumSize ?? this.minimumSize,
+      fixedSize: fixedSize ?? this.fixedSize,
       side: side ?? this.side,
       shape: shape ?? this.shape,
       mouseCursor: mouseCursor ?? this.mouseCursor,
@@ -256,6 +287,7 @@ class ButtonStyle with Diagnosticable {
       animationDuration: animationDuration ?? this.animationDuration,
       enableFeedback: enableFeedback ?? this.enableFeedback,
       alignment: alignment ?? this.alignment,
+      splashFactory: splashFactory ?? this.splashFactory,
     );
   }
 
@@ -276,6 +308,7 @@ class ButtonStyle with Diagnosticable {
       elevation: elevation ?? style.elevation,
       padding: padding ?? style.padding,
       minimumSize: minimumSize ?? style.minimumSize,
+      fixedSize: fixedSize ?? style.fixedSize,
       side: side ?? style.side,
       shape: shape ?? style.shape,
       mouseCursor: mouseCursor ?? style.mouseCursor,
@@ -284,6 +317,7 @@ class ButtonStyle with Diagnosticable {
       animationDuration: animationDuration ?? style.animationDuration,
       enableFeedback: enableFeedback ?? style.enableFeedback,
       alignment: alignment ?? style.alignment,
+      splashFactory: splashFactory ?? style.splashFactory,
     );
   }
 
@@ -298,6 +332,7 @@ class ButtonStyle with Diagnosticable {
       elevation,
       padding,
       minimumSize,
+      fixedSize,
       side,
       shape,
       mouseCursor,
@@ -306,6 +341,7 @@ class ButtonStyle with Diagnosticable {
       animationDuration,
       enableFeedback,
       alignment,
+      splashFactory,
     );
   }
 
@@ -324,6 +360,7 @@ class ButtonStyle with Diagnosticable {
         && other.elevation == elevation
         && other.padding == padding
         && other.minimumSize == minimumSize
+        && other.fixedSize == fixedSize
         && other.side == side
         && other.shape == shape
         && other.mouseCursor == mouseCursor
@@ -331,7 +368,8 @@ class ButtonStyle with Diagnosticable {
         && other.tapTargetSize == tapTargetSize
         && other.animationDuration == animationDuration
         && other.enableFeedback == enableFeedback
-        && other.alignment == alignment;
+        && other.alignment == alignment
+        && other.splashFactory == splashFactory;
   }
 
   @override
@@ -345,6 +383,7 @@ class ButtonStyle with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<EdgeInsetsGeometry?>>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('minimumSize', minimumSize, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('fixedSize', fixedSize, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<BorderSide?>>('side', side, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<OutlinedBorder?>>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
@@ -369,6 +408,7 @@ class ButtonStyle with Diagnosticable {
       elevation: _lerpProperties<double?>(a?.elevation, b?.elevation, t, lerpDouble),
       padding:  _lerpProperties<EdgeInsetsGeometry?>(a?.padding, b?.padding, t, EdgeInsetsGeometry.lerp),
       minimumSize: _lerpProperties<Size?>(a?.minimumSize, b?.minimumSize, t, Size.lerp),
+      fixedSize: _lerpProperties<Size?>(a?.fixedSize, b?.fixedSize, t, Size.lerp),
       side: _lerpSides(a?.side, b?.side, t),
       shape: _lerpShapes(a?.shape, b?.shape, t),
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
@@ -377,6 +417,7 @@ class ButtonStyle with Diagnosticable {
       animationDuration: t < 0.5 ? a?.animationDuration : b?.animationDuration,
       enableFeedback: t < 0.5 ? a?.enableFeedback : b?.enableFeedback,
       alignment: AlignmentGeometry.lerp(a?.alignment, b?.alignment, t),
+      splashFactory: t < 0.5 ? a?.splashFactory : b?.splashFactory,
     );
   }
 
@@ -434,7 +475,7 @@ class _LerpSides implements MaterialStateProperty<BorderSide?> {
     if (resolvedA == null)
       return BorderSide.lerp(BorderSide(width: 0, color: resolvedB!.color.withAlpha(0)), resolvedB, t);
     if (resolvedB == null)
-      return BorderSide.lerp(BorderSide(width: 0, color: resolvedA.color.withAlpha(0)), resolvedA, t);
+      return BorderSide.lerp(resolvedA, BorderSide(width: 0, color: resolvedA.color.withAlpha(0)), t);
     return BorderSide.lerp(resolvedA, resolvedB, t);
   }
 }

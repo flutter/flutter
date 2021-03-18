@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'bottom_app_bar_theme.dart';
@@ -28,7 +27,7 @@ import 'theme.dart';
 ///     color: Colors.white,
 ///     child: bottomAppBarContents,
 ///   ),
-///   floatingActionButton: FloatingActionButton(onPressed: null),
+///   floatingActionButton: const FloatingActionButton(onPressed: null),
 /// )
 /// ```
 /// {@end-tool}
@@ -43,20 +42,20 @@ import 'theme.dart';
 ///
 /// ```dart
 /// void main() {
-///   runApp(BottomAppBarDemo());
+///   runApp(const BottomAppBarDemo());
 /// }
 ///
 /// class BottomAppBarDemo extends StatefulWidget {
-///   const BottomAppBarDemo();
+///   const BottomAppBarDemo({Key? key}) : super(key: key);
 ///
 ///   @override
 ///   State createState() => _BottomAppBarDemoState();
 /// }
 ///
 /// class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
-///   var _showFab = true;
-///   var _showNotch = true;
-///   var _fabLocation = FloatingActionButtonLocation.endDocked;
+///   bool _showFab = true;
+///   bool _showNotch = true;
+///   FloatingActionButtonLocation _fabLocation = FloatingActionButtonLocation.endDocked;
 ///
 ///   void _onShowNotchChanged(bool value) {
 ///     setState(() {
@@ -70,9 +69,9 @@ import 'theme.dart';
 ///     });
 ///   }
 ///
-///   void _onFabLocationChanged(dynamic value) {
+///   void _onFabLocationChanged(FloatingActionButtonLocation? value) {
 ///     setState(() {
-///       _fabLocation = value;
+///       _fabLocation = value ?? FloatingActionButtonLocation.endDocked;
 ///     });
 ///   }
 ///
@@ -82,55 +81,47 @@ import 'theme.dart';
 ///       home: Scaffold(
 ///         appBar: AppBar(
 ///           automaticallyImplyLeading: false,
-///           title: Text("Bottom App Bar Demo"),
+///           title: const Text('Bottom App Bar Demo'),
 ///         ),
 ///         body: ListView(
 ///           padding: const EdgeInsets.only(bottom: 88),
-///           children: [
+///           children: <Widget>[
 ///             SwitchListTile(
-///               title: Text(
-///                 "Floating Action Button",
+///               title: const Text(
+///                 'Floating Action Button',
 ///               ),
 ///               value: _showFab,
 ///               onChanged: _onShowFabChanged,
 ///             ),
 ///             SwitchListTile(
-///               title: Text("Notch"),
+///               title: const Text('Notch'),
 ///               value: _showNotch,
 ///               onChanged: _onShowNotchChanged,
 ///             ),
-///             Padding(
-///               padding: const EdgeInsets.all(16),
-///               child: Text("Floating action button position"),
+///             const Padding(
+///               padding: EdgeInsets.all(16),
+///               child: Text('Floating action button position'),
 ///             ),
 ///             RadioListTile<FloatingActionButtonLocation>(
-///               title: Text(
-///                 "Docked - End",
-///               ),
+///               title: const Text('Docked - End'),
 ///               value: FloatingActionButtonLocation.endDocked,
 ///               groupValue: _fabLocation,
 ///               onChanged: _onFabLocationChanged,
 ///             ),
 ///             RadioListTile<FloatingActionButtonLocation>(
-///               title: Text(
-///                 "Docked - Center",
-///               ),
+///               title: const Text('Docked - Center'),
 ///               value: FloatingActionButtonLocation.centerDocked,
 ///               groupValue: _fabLocation,
 ///               onChanged: _onFabLocationChanged,
 ///             ),
 ///             RadioListTile<FloatingActionButtonLocation>(
-///               title: Text(
-///                 "Floating - End",
-///               ),
+///               title: const Text('Floating - End'),
 ///               value: FloatingActionButtonLocation.endFloat,
 ///               groupValue: _fabLocation,
 ///               onChanged: _onFabLocationChanged,
 ///             ),
 ///             RadioListTile<FloatingActionButtonLocation>(
-///               title: Text(
-///                 "Floating - Center",
-///               ),
+///               title: const Text('Floating - Center'),
 ///               value: FloatingActionButtonLocation.centerFloat,
 ///               groupValue: _fabLocation,
 ///               onChanged: _onFabLocationChanged,
@@ -141,7 +132,7 @@ import 'theme.dart';
 ///             ? FloatingActionButton(
 ///                 onPressed: () {},
 ///                 child: const Icon(Icons.add),
-///                 tooltip: "Create",
+///                 tooltip: 'Create',
 ///               )
 ///             : null,
 ///         floatingActionButtonLocation: _fabLocation,
@@ -161,9 +152,9 @@ import 'theme.dart';
 ///   });
 ///
 ///   final FloatingActionButtonLocation fabLocation;
-///   final dynamic shape;
+///   final NotchedShape? shape;
 ///
-///   static final centerLocations = <FloatingActionButtonLocation>[
+///   static final List<FloatingActionButtonLocation> centerLocations = <FloatingActionButtonLocation>[
 ///     FloatingActionButtonLocation.centerDocked,
 ///     FloatingActionButtonLocation.centerFloat,
 ///   ];
@@ -176,7 +167,7 @@ import 'theme.dart';
 ///       child: IconTheme(
 ///         data: IconThemeData(color: Theme.of(context).colorScheme.onPrimary),
 ///         child: Row(
-///           children: [
+///           children: <Widget>[
 ///             IconButton(
 ///               tooltip: 'Open navigation menu',
 ///               icon: const Icon(Icons.menu),
@@ -184,12 +175,12 @@ import 'theme.dart';
 ///             ),
 ///             if (centerLocations.contains(fabLocation)) const Spacer(),
 ///             IconButton(
-///               tooltip: "Search",
+///               tooltip: 'Search',
 ///               icon: const Icon(Icons.search),
 ///               onPressed: () {},
 ///             ),
 ///             IconButton(
-///               tooltip: "Favorite",
+///               tooltip: 'Favorite',
 ///               icon: const Icon(Icons.favorite),
 ///               onPressed: () {},
 ///             ),

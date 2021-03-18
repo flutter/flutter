@@ -14,6 +14,8 @@ import 'button_style_button.dart';
 import 'color_scheme.dart';
 import 'constants.dart';
 import 'elevated_button_theme.dart';
+import 'ink_ripple.dart';
+import 'ink_well.dart';
 import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -44,6 +46,39 @@ import 'theme_data.dart';
 ///
 /// If [onPressed] and [onLongPress] callbacks are null, then the
 /// button will be disabled.
+///
+/// {@tool dartpad --template=stateful_widget_scaffold}
+///
+/// This sample produces an enabled and a disabled ElevatedButton.
+///
+/// ```dart
+/// @override
+/// Widget build(BuildContext context) {
+///   final ButtonStyle style =
+///     ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));
+///
+///   return Center(
+///     child: Column(
+///       mainAxisSize: MainAxisSize.min,
+///       children: <Widget>[
+///         ElevatedButton(
+///            style: style,
+///            onPressed: null,
+///            child: const Text('Disabled'),
+///         ),
+///         const SizedBox(height: 30),
+///         ElevatedButton(
+///           style: style,
+///           onPressed: () {},
+///           child: const Text('Enabled'),
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+///
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -139,6 +174,7 @@ class ElevatedButton extends ButtonStyleButton {
     TextStyle? textStyle,
     EdgeInsetsGeometry? padding,
     Size? minimumSize,
+    Size? fixedSize,
     BorderSide? side,
     OutlinedBorder? shape,
     MouseCursor? enabledMouseCursor,
@@ -148,6 +184,7 @@ class ElevatedButton extends ButtonStyleButton {
     Duration? animationDuration,
     bool? enableFeedback,
     AlignmentGeometry? alignment,
+    InteractiveInkFeatureFactory? splashFactory,
   }) {
     final MaterialStateProperty<Color?>? backgroundColor = (onSurface == null && primary == null)
       ? null
@@ -174,6 +211,7 @@ class ElevatedButton extends ButtonStyleButton {
       elevation: elevationValue,
       padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
       minimumSize: ButtonStyleButton.allOrNull<Size>(minimumSize),
+      fixedSize: ButtonStyleButton.allOrNull<Size>(fixedSize),
       side: ButtonStyleButton.allOrNull<BorderSide>(side),
       shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
       mouseCursor: mouseCursor,
@@ -182,6 +220,7 @@ class ElevatedButton extends ButtonStyleButton {
       animationDuration: animationDuration,
       enableFeedback: enableFeedback,
       alignment: alignment,
+      splashFactory: splashFactory,
     );
   }
 
@@ -231,6 +270,7 @@ class ElevatedButton extends ButtonStyleButton {
   ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
   ///   * `3 < textScaleFactor` - horizontal(4)
   /// * `minimumSize` - Size(64, 36)
+  /// * `fixedSize` - null
   /// * `side` - null
   /// * `shape` - RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
   /// * `mouseCursor`
@@ -241,6 +281,7 @@ class ElevatedButton extends ButtonStyleButton {
   /// * `animationDuration` - kThemeChangeDuration
   /// * `enableFeedback` - true
   /// * `alignment` - Alignment.center
+  /// * `splashFactory` - InkRipple.splashFactory
   ///
   /// The default padding values for the [ElevatedButton.icon] factory are slightly different:
   ///
@@ -284,6 +325,7 @@ class ElevatedButton extends ButtonStyleButton {
       animationDuration: kThemeChangeDuration,
       enableFeedback: true,
       alignment: Alignment.center,
+      splashFactory: InkRipple.splashFactory,
     );
   }
 
@@ -426,7 +468,7 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
     final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: <Widget>[icon, SizedBox(width: gap), label],
+      children: <Widget>[icon, SizedBox(width: gap), Flexible(child: label)],
     );
   }
 }

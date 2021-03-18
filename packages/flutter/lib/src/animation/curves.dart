@@ -339,8 +339,8 @@ class Cubic extends Curve {
 ///     Offset(0.93, 0.93),
 ///     Offset(0.05, 0.75),
 ///   ],
-///   startHandle: Offset(0.93, 0.93),
-///   endHandle: Offset(0.18, 0.23),
+///   startHandle: const Offset(0.93, 0.93),
+///   endHandle: const Offset(0.18, 0.23),
 ///   tension: 0.0,
 /// );
 ///
@@ -389,7 +389,7 @@ class Cubic extends Curve {
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     // Scale the path values to match the -1.0 to 1.0 domain of the Alignment widget.
-///     final Offset position = widget.path.transform(animation.value) * 2.0 - Offset(1.0, 1.0);
+///     final Offset position = widget.path.transform(animation.value) * 2.0 - const Offset(1.0, 1.0);
 ///     return Align(
 ///       alignment: Alignment(position.dx, position.dy),
 ///       child: widget.child,
@@ -411,7 +411,7 @@ class Cubic extends Curve {
 ///           backgroundColor: Colors.yellow,
 ///           child: DefaultTextStyle(
 ///             style: Theme.of(context).textTheme.headline6!,
-///             child: Text("B"), // Buzz, buzz!
+///             child: const Text('B'), // Buzz, buzz!
 ///           ),
 ///         ),
 ///       ),
@@ -550,7 +550,7 @@ abstract class Curve2D extends ParametricCurve<Offset> {
 ///  * [Curve2D.generateSamples], which generates samples of this type.
 ///  * [Curve2D], a parametric curve that maps a double parameter to a 2D location.
 class Curve2DSample {
-  /// A const constructor for the sample so that subclasses can be const.
+  /// Creates an object that holds a sample; used with [Curve2D] subclasses.
   ///
   /// All arguments must not be null.
   const Curve2DSample(this.t, this.value) : assert(t != null), assert(value != null);

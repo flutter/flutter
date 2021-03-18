@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -101,7 +103,10 @@ class WebExpressionCompiler implements ExpressionCompiler {
   }
 
   @override
-  Future<bool> updateDependencies(Map<String, String> modules) async => true;
+  Future<void> initialize({bool soundNullSafety}) async {}
+
+  @override
+  Future<bool> updateDependencies(Map<String, ModuleInfo> modules) async => true;
 }
 
 /// A web server which handles serving JavaScript and assets.
@@ -236,8 +241,7 @@ class WebAssetServer implements AssetReader {
     // load the through the isolate APIs.
     final Directory directory =
         await _loadDwdsDirectory(globals.fs, globals.logger);
-    final shelf.Middleware middleware =
-        (FutureOr<shelf.Response> Function(shelf.Request) innerHandler) {
+    shelf.Handler middleware(FutureOr<shelf.Response> Function(shelf.Request) innerHandler) {
       return (shelf.Request request) async {
         if (request.url.path.endsWith('dwds/src/injected/client.js')) {
           final Uri uri = directory.uri.resolve('src/injected/client.js');
@@ -249,7 +253,7 @@ class WebAssetServer implements AssetReader {
         }
         return innerHandler(request);
       };
-    };
+    }
 
     logging.Logger.root.onRecord.listen((logging.LogRecord event) {
       globals.printTrace('${event.loggerName}: ${event.message}');
@@ -552,6 +556,7 @@ class WebAssetServer implements AssetReader {
 
   @override
   Future<String> dartSourceContents(String serverPath) async {
+    serverPath = _stripBasePath(serverPath, basePath);
     final File result = _resolveDartFile(serverPath);
     if (result.existsSync()) {
       return result.readAsString();
@@ -561,18 +566,20 @@ class WebAssetServer implements AssetReader {
 
   @override
   Future<String> sourceMapContents(String serverPath) async {
+    serverPath = _stripBasePath(serverPath, basePath);
     return utf8.decode(_webMemoryFS.sourcemaps[serverPath]);
   }
 
   @override
   Future<String> metadataContents(String serverPath) async {
+    serverPath = _stripBasePath(serverPath, basePath);
     if (serverPath == 'main_module.ddc_merged_metadata') {
       return _webMemoryFS.mergedMetadata;
     }
     if (_webMemoryFS.metadataFiles.containsKey(serverPath)) {
       return utf8.decode(_webMemoryFS.metadataFiles[serverPath]);
     }
-    return null;
+    throw Exception('Could not find metadata contents for $serverPath');
   }
 
   @override

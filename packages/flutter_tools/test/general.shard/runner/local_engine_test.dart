@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -34,10 +36,11 @@ void main() {
       .file('bin/cache/pkg/sky_engine/lib')
       .createSync(recursive: true);
 
+    final BufferLogger logger = BufferLogger.test();
     final LocalEngineLocator localEngineLocator = LocalEngineLocator(
       fileSystem: fileSystem,
       flutterRoot: '',
-      logger: BufferLogger.test(),
+      logger: logger,
       userMessages: UserMessages(),
       platform: FakePlatform(environment: <String, String>{}),
     );
@@ -49,6 +52,7 @@ void main() {
         targetEngine: '/arbitrary/engine/src/out/ios_debug',
       ),
     );
+    expect(logger.traceText, contains('Local engine source at /arbitrary/engine/src'));
 
     // Verify that this also works if the sky_engine path is a symlink to the engine root.
     fileSystem.link('/symlink').createSync(kArbitraryEngineRoot);
@@ -63,6 +67,7 @@ void main() {
         targetEngine: '/symlink/src/out/ios_debug',
       ),
     );
+    expect(logger.traceText, contains('Local engine source at /symlink/src'));
   });
 
   testWithoutContext('works if --local-engine is specified and --local-engine-src-path '
@@ -72,10 +77,11 @@ void main() {
     fileSystem.directory('$kArbitraryEngineRoot/src/out/ios_debug').createSync(recursive: true);
     fileSystem.directory('$kArbitraryEngineRoot/src/out/host_debug').createSync(recursive: true);
 
+    final BufferLogger logger = BufferLogger.test();
     final LocalEngineLocator localEngineLocator = LocalEngineLocator(
       fileSystem: fileSystem,
       flutterRoot: '',
-      logger: BufferLogger.test(),
+      logger: logger,
       userMessages: UserMessages(),
       platform: FakePlatform(environment: <String, String>{}),
     );
@@ -87,6 +93,7 @@ void main() {
         targetEngine: '/arbitrary/engine/src/out/ios_debug',
       ),
     );
+    expect(logger.traceText, contains('Local engine source at /arbitrary/engine/src'));
   });
 
   testWithoutContext('works if --local-engine is specified and --local-engine-src-path '
@@ -103,10 +110,11 @@ void main() {
       .file('bin/cache/pkg/sky_engine/lib')
       .createSync(recursive: true);
 
+    final BufferLogger logger = BufferLogger.test();
     final LocalEngineLocator localEngineLocator = LocalEngineLocator(
       fileSystem: fileSystem,
       flutterRoot: 'flutter/flutter',
-      logger: BufferLogger.test(),
+      logger: logger,
       userMessages: UserMessages(),
       platform: FakePlatform(environment: <String, String>{}),
     );
@@ -118,6 +126,7 @@ void main() {
         targetEngine: 'flutter/engine/src/out/ios_debug',
       ),
     );
+    expect(logger.traceText, contains('Local engine source at flutter/engine/src'));
   });
 }
 
