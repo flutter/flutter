@@ -204,6 +204,7 @@ Future<VmService> vmServiceConnectUri(String wsUri, {Log log}) async {
         controller.add(data);
       }
     },
+    onError: (dynamic err, StackTrace stackTrace) => controller.addError(err, stackTrace),
     onDone: () => streamClosedCompleter.complete(),
   );
 
