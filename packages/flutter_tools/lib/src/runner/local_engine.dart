@@ -55,7 +55,7 @@ class LocalEngineLocator {
     if (engineSourcePath == null && localEngine != null) {
       try {
         engineSourcePath = _findEngineSourceByLocalEngine(localEngine);
-        engineSourcePath ??= await _findEngineSourceBySkyEngine(packagePath);
+        engineSourcePath ??= await _findEngineSourceByPackageConfig(packagePath);
       } on FileSystemException catch (e) {
         _logger.printTrace('Local engine auto-detection file exception: $e');
         engineSourcePath = null;
@@ -97,7 +97,7 @@ class LocalEngineLocator {
       final Directory localEngineDirectory = _fileSystem.directory(localEngine);
       final Directory outDirectory = localEngineDirectory?.parent;
       final Directory srcDirectory = outDirectory?.parent;
-      if (localEngineDirectory.existsSync() && outDirectory.basename == 'out' && srcDirectory.basename == 'src') {
+      if (localEngineDirectory.existsSync() && outDirectory?.basename == 'out' && srcDirectory?.basename == 'src') {
         _logger.printTrace('Parsed engine source from local engine as ${srcDirectory.path}.');
         return srcDirectory.path;
       }
@@ -105,7 +105,7 @@ class LocalEngineLocator {
     return null;
   }
 
-  Future<String> _findEngineSourceBySkyEngine(String packagePath) async {
+  Future<String> _findEngineSourceByPackageConfig(String packagePath) async {
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       _fileSystem.file(
         // TODO(jonahwilliams): update to package_config
