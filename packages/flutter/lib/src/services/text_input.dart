@@ -790,7 +790,7 @@ enum SelectionChangedCause {
   /// of text.
   drag,
 
-  /// The user iPadOS 14 Scribble to change the selection.
+  /// The user used iPadOS 14 Scribble to change the selection.
   scribble,
 }
 
@@ -1380,14 +1380,12 @@ class TextInput {
       return _scribbleClients.keys.where((String elementIdentifier) {
         final Rect rect = Rect.fromLTWH(args[0].toDouble() as double, args[1].toDouble() as double, args[2].toDouble() as double, args[3].toDouble() as double);
         return _scribbleClients[elementIdentifier]?.isInScribbleRect(rect) ?? false;
-      }).map((String elementIdentifier) {
+      }).where((String elementIdentifier) {
         final Rect bounds = _scribbleClients[elementIdentifier]?.bounds ?? Rect.zero;
-        if (bounds == Rect.zero || bounds.hasNaN) {
-          return <dynamic>[elementIdentifier];
-        }
+        return !(bounds == Rect.zero || bounds.hasNaN || bounds.isInfinite);
+      }).map((String elementIdentifier) {
+        final Rect bounds = _scribbleClients[elementIdentifier]!.bounds;
         return <dynamic>[elementIdentifier, ...<dynamic>[bounds.left, bounds.top, bounds.width, bounds.height]];
-      }).where((List<dynamic> list) {
-        return list.length == 5;
       }).toList();
     } else if (method == 'TextInputClient.scribbleInteractionBegan') {
       _scribbleInProgress = true;
@@ -1489,6 +1487,7 @@ class TextInput {
 
   void _clearClient() {
     _channel.invokeMethod<void>('TextInput.clearClient');
+    _currentConnection?._client.removeTextPlaceholder();
     _currentConnection = null;
     _scheduleHide();
   }
@@ -1609,12 +1608,12 @@ class TextInput {
   }
 
   /// Registers a [ScribbleClient] with [elementIdentifier] that can be focused using an
-  /// UIIndirectScribbleInteraction on an iPad
+  /// UIIndirectScribbleInteraction on an iPad.
   static void registerScribbleElement(String elementIdentifier, ScribbleClient scribbleClient) {
     TextInput._instance._scribbleClients[elementIdentifier] = scribbleClient;
   }
 
-  /// Unregisters a [ScribbleClient] with [elementIdentifier]
+  /// Unregisters a [ScribbleClient] with [elementIdentifier].
   static void unregisterScribbleElement(String elementIdentifier) {
     TextInput._instance._scribbleClients.remove(elementIdentifier);
   }

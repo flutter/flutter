@@ -2449,8 +2449,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _cachedText = text.toString();
       _cachedFirstRect = firstRect;
       final List<Rect> rects = List<Rect>.generate(
-              text.length, (int i) => renderEditable.getBoxesForSelection(TextSelection(baseOffset: i, extentOffset: i + 1)).first)
-          .toList();
+              text.length, (int i) => renderEditable.getBoxesForSelection(TextSelection(baseOffset: i, extentOffset: i + 1)).first);
       _textInputConnection!.setSelectionRects(rects);
     }
   }
@@ -2771,7 +2770,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final List<_ScribblePlaceholder> placeholders = <_ScribblePlaceholder>[];
       final int placeholderLocation = _value.text.length - _placeholderLocation;
       if (_isMultiline) {
-        final Iterable<Rect> selectionBoxes = renderEditable.getBoxesForSelection(TextSelection(baseOffset: placeholderLocation, extentOffset: placeholderLocation + 1));
+        final List<Rect> selectionBoxes = renderEditable.getBoxesForSelection(TextSelection(baseOffset: placeholderLocation, extentOffset: placeholderLocation + 1));
         if (selectionBoxes.isNotEmpty) {
           final Rect selectionBox = selectionBoxes.first;
           placeholders.add(_ScribblePlaceholder(child: Container(), size: Size(renderEditable.size.width - selectionBox.topLeft.dx - selectionBox.width, 0.0)));
