@@ -42,7 +42,7 @@ const PointerUpEvent up2 = PointerUpEvent(
 );
 
 void main() {
-  setUp(ensureGestureBinding);
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   test('GestureRecognizer smoketest', () {
     final TestGestureRecognizer recognizer = TestGestureRecognizer(debugOwner: 0);
