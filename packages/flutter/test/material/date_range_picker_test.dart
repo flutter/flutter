@@ -893,11 +893,14 @@ void main() {
     // // Select a different date and close the date range picker.
     await tester.tap(find.text('12').first);
     await tester.pumpAndSettle();
-
     await tester.tap(find.text('14').first);
     await tester.pumpAndSettle();
+
+    // Restart after the new selection. It should remain selected.
+    await tester.restartAndRestore();
+
+    // Close the date range picker.
     await tester.tap(find.text('SAVE'));
-    await tester.pump();
     await tester.pumpAndSettle();
 
     // The date range picker should be closed, the text value updated to the

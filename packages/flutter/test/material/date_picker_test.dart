@@ -1162,9 +1162,14 @@ void main() {
     await tester.restoreFrom(restorationData);
     expect(find.byType(DatePickerDialog), findsOneWidget);
 
-    // Select a different date and close the date picker.
+    // Select a different date.
     await tester.tap(find.text('30'));
     await tester.pumpAndSettle();
+
+    // Restart after the new selection. It should remain selected.
+    await tester.restartAndRestore();
+
+    // Close the date picker.
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
 
