@@ -145,7 +145,21 @@ class LogicalKeyboardKey extends KeyboardKey {
 
   /// The debug string to print for this keyboard key, which will be null in
   /// release mode.
-  String? get debugName => _debugNames[keyId];
+  String? get debugName {
+    String? result;
+    assert(() {
+      result = _debugNames[keyId];
+      if (result == null) {
+        if (keyId & ~valueMask == unicodePlane) {
+          result = 'Key ${String.fromCharCode(keyId)}';
+        } else {
+          result = 'Key with ID 0x${keyId.toRadixString(16).padLeft(11, '0')}';
+        }
+      }
+      return true;
+    }());
+    return result;
+  }
 
   /// Returns the [LogicalKeyboardKey] constant that matches the given ID, or
   /// null, if not found.
@@ -2333,7 +2347,15 @@ class PhysicalKeyboardKey extends KeyboardKey {
 
   /// The debug string to print for this keyboard key, which will be null in
   /// release mode.
-  String? get debugName => _debugNames[usbHidUsage];
+  String? get debugName {
+    String? result;
+    assert(() {
+      result = _debugNames[usbHidUsage] ??
+        'Key with ID 0x${usbHidUsage.toRadixString(16).padLeft(8, '0')}';
+      return true;
+    }());
+    return result;
+  }
 
   /// Finds a known [PhysicalKeyboardKey] that matches the given USB HID usage
   /// code.
