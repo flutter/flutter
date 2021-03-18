@@ -277,9 +277,10 @@ class AndroidSdk {
     if (cmdlineToolsDir.existsSync()) {
       final List<Version> cmdlineTools = cmdlineToolsDir
         .listSync()
-        .map((FileSystemEntity entity) {
+        .whereType<Directory>()
+        .map((Directory subDirectory) {
           try {
-            return Version.parse(entity.basename);
+            return Version.parse(subDirectory.basename);
           } on Exception {
             return null;
           }
