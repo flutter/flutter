@@ -150,6 +150,31 @@ const double _kDefaultFontSize = 14.0;
 ///
 /// See [StrutStyle] for further control of line height at the paragraph level.
 ///
+/// ### Leading Distribution and Trimming
+///
+/// [Leading](https://en.wikipedia.org/wiki/Leading) is the vertical space
+/// between glyphs from adjacent lines. Quantitatively, it is the line height
+/// (see the previous section) subtracted by the font's ascent and descent.
+/// It's possible to have a negative `Leading` if [height] is sufficiently
+/// small.
+///
+/// When the [height] multiplier is null, `leading` and how it is distributed
+/// over and under the text is up to the font's
+/// [metrics](https://en.wikipedia.org/wiki/Typeface#Font_metrics).
+///
+/// [leadingDistribution], and [TextPainter.textHeightBehavior], are 2 notable
+/// parameters that control `leading` when the [height] multiplier is specified.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_breakdown.png)
+///
+/// Above is a side-by-side comparison of different [leadingDistribution] and
+/// [TextPainter.textHeightBehavior] combinations.
+///
+/// * Configuration 1: [leadingDistribution]: [TextLeadingDistribution.proportional]
+/// * Configuration 2: same as Configuration 1, except [TextHeightBehavior.applyHeightToFirstAscent] is set to false.
+/// * Configuration 3: [leadingDistribution]: [TextLeadingDistribution.even]
+/// * Configuration 4: same as Configuration 3, except [TextHeightBehavior.applyHeightToLastDescent] is set to false.
+///
 /// ### Wavy red underline with black text
 ///
 /// {@tool snippet}
