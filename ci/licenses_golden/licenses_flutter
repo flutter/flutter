@@ -2052,6 +2052,8 @@ FILE: ../../../flutter/third_party/accessibility/ax/test_ax_node_helper.cc
 FILE: ../../../flutter/third_party/accessibility/ax/test_ax_node_helper.h
 FILE: ../../../flutter/third_party/accessibility/ax/test_ax_tree_manager.cc
 FILE: ../../../flutter/third_party/accessibility/ax/test_ax_tree_manager.h
+FILE: ../../../flutter/third_party/accessibility/base/win/dispatch_stub.cc
+FILE: ../../../flutter/third_party/accessibility/base/win/dispatch_stub.h
 FILE: ../../../flutter/third_party/accessibility/base/win/variant_util.h
 FILE: ../../../flutter/third_party/accessibility/base/win/variant_vector.cc
 FILE: ../../../flutter/third_party/accessibility/base/win/variant_vector.h
