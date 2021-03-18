@@ -2587,6 +2587,7 @@ class UnconstrainedBox extends StatelessWidget {
   ///  * [Alignment] for non-[Directionality]-aware alignments.
   ///  * [AlignmentDirectional] for [Directionality]-aware alignments.
   final AlignmentGeometry alignment;
+
   /// The axis to retain constraints on, if any.
   ///
   /// If not set, or set to null (the default), neither axis will retain its
@@ -2594,6 +2595,7 @@ class UnconstrainedBox extends StatelessWidget {
   /// be retained, and if set to [Axis.horizontal], then horizontal constraints
   /// will be retained.
   final Axis? constrainedAxis;
+
   /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none].
