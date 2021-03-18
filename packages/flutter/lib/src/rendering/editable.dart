@@ -817,13 +817,25 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   // Return the given TextSelection extended left to the beginning of the
   // nearest word.
-  static TextSelection _extendGivenSelectionLeftByWord(TextPainter textPainter, TextSelection selection, [bool includeWhitespace = true]) {
+  //
+  // See extendSelectionLeftByWord for a detailed explanation of the two
+  // optional parameters.
+  static TextSelection _extendGivenSelectionLeftByWord(TextPainter textPainter, TextSelection selection, [bool includeWhitespace = true, bool stopAtReversal = false]) {
     // If the selection is already all the way left, there is nothing to do.
     if (selection.isCollapsed && selection.extentOffset <= 0) {
       return selection;
     }
 
     final int leftOffset = _getLeftByWord(textPainter, selection.extentOffset, includeWhitespace);
+
+    if (stopAtReversal
+        && selection.extentOffset > selection.baseOffset
+        && leftOffset < selection.baseOffset) {
+      return selection.copyWith(
+        extentOffset: selection.baseOffset,
+      );
+    }
+
     return selection.copyWith(
       extentOffset: leftOffset,
     );
@@ -1340,15 +1352,22 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
-  /// By default, includeWhitespace is set to true, meaning that whitespace can
+  /// By default, `includeWhitespace` is set to true, meaning that whitespace can
   /// be considered a word in itself.  If set to false, the selection will be
   /// extended past any whitespace and the first word following the whitespace.
+  ///
+  /// {@template flutter.rendering.RenderEditable.stopAtReversal}
+  /// The `stopAtReversal` parameter is false by default, meaning that it's
+  /// ok for the base and extent to flip their order here. If set to true, then
+  /// the selection will collapse when it would otherwise reverse its order. A
+  /// selection that is already collapsed is not affected by this parameter.
+  /// {@endtemplate}
   ///
   /// See also:
   ///
   ///   * [extendSelectionRightByWord], which is the same but in the opposite
   ///     direction.
-  void extendSelectionLeftByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
+  void extendSelectionLeftByWord(SelectionChangedCause cause, [bool includeWhitespace = true, bool stopAtReversal = false]) {
     assert(selection != null);
 
     // When the text is obscured, the whole thing is treated as one big word.
@@ -1363,6 +1382,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       _textPainter,
       selection!,
       includeWhitespace,
+      stopAtReversal,
     );
     if (nextSelection == selection) {
       return;

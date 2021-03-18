@@ -314,7 +314,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowRight): const MoveSelectionRightByWordTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowUp): const MoveSelectionLeftByLineTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowDown): const ExtendSelectionRightByLineTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): const ExtendSelectionLeftByWordTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): const ExtendSelectionLeftByWordAndStopAtReversalTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const ExtendSelectionRightByWordTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): const ExtendSelectionLeftByLineTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.arrowDown): const MoveSelectionDownTextIntent(),
