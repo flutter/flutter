@@ -140,15 +140,61 @@ class KeySet<T extends KeyboardKey> {
   }
 }
 
+/// An interface to define the keyboard key combination to trigger a shortcut.
+///
+/// A [Shortcuts] widget maps [ShortcutPrompt]s to [Intent]s to define the
+/// behavior that a key combination should trigger. When a [Shortcuts] widget
+/// receives a key event, it checks the following conditions for every registered
+/// prompt in insertion order and chooses the first `Intent` whose prompt matches
+/// all conditions, if any:
+///
+///  * The event's [RawKeyEvent.logicalKey] is one of [triggers].
+///  * The [requires] returns true.
+///
+/// See also:
+///
+///  * [LogicalKeySet], an implementation that requires one or more
+///    [LogicalKeyboardKey]s to be pressed at the same time.
 abstract class ShortcutPrompt {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const ShortcutPrompt();
 
-  Iterable<LogicalKeyboardKey>? get triggeringKeys;
+  /// All the keys that might be the final event to trigger this shortcut.
+  ///
+  /// For example, for `Ctrl-A`, the KeyA is the only trigger, while Ctrl is not,
+  /// because the shortcut should only work by pressing KeyA *after* Ctrl, but
+  /// not before. For `Ctrl-A-E`, on the other hand, both KeyA and KeyE should be
+  /// triggers, since either of them is allowed to trigger.
+  ///
+  /// The trigger keys are used as the first-pass filter for incoming events, as
+  /// [Intent]s are stored in a [Map] and indexed by trigger keys. Subclasses
+  /// should make sure that the return value of this method does not change
+  /// throughout the lifespan of this object.
+  Iterable<LogicalKeyboardKey>? get triggers;
 
-  bool requiresEvent(RawKeyEvent event);
+  /// Whether the triggering `event` and the keyboard `state` at the time of the
+  /// event meet required conditions, providing that the event is a triggering
+  /// event.
+  ///
+  /// For example, for `Ctrl-A`, it has to check if the event is a
+  /// [RawKeyDownEvent], if either side of the Ctrl key is pressed, and none of
+  /// the Shift keys, Alt keys, or Meta keys are pressed; it doesn't have to
+  /// check if KeyA is pressed, since it's already guaranteed.
+  ///
+  /// This method must not cause any side effect to `state`. Typically
+  /// this is only used to query whether [RawKeyboard.keysPressed] contains
+  /// a key.
+  ///
+  /// See also:
+  ///
+  ///  * [LogicalKeyboardKey.collapseSynonyms], which helps deciding whether a
+  ///    modifier key is pressed when the side variation is not important.
+  bool requires(RawKeyEvent event, RawKeyboard state);
 
-  bool requiresState(RawKeyboard state);
-
+  /// Returns a description of the key set that is short and readable.
+  ///
+  /// Intended to be used in debug mode for logging purposes.
   String debugDescribeKeys();
 }
 
@@ -181,17 +227,61 @@ class _StandardPromptCore {
   }
 }
 
-/// A set of [LogicalKeyboardKey]s that can be used as the keys in a map.
+/// A [ShortcutPrompt] that requires one or more [LogicalKeyboardKey]s
+/// to be pressed at the same time.
 ///
-/// A key set contains the keys that are down simultaneously to represent a
-/// shortcut.
+/// More restrictions might be given to approach the typical expectation for
+/// shorcut combinations, depending on whether the given set of keys contain any
+/// non-modifier keys, where modifier keys are defined as both side of Ctrl keys,
+/// Shift keys, Alt keys, and Meta keys.
 ///
-/// This is mainly used by [ShortcutManager] and [Shortcuts] widget to allow the
-/// definition of shortcut mappings.
+/// If the keys contains non-modifier keys, then the non-modifier keys are used
+/// as trigger keys, and requires all of the following conditions:
 ///
-/// This is a thin wrapper around a [Set], but changes the equality comparison
-/// from an identity comparison to a contents comparison so that non-identical
-/// sets with the same keys in them will compare as equal.
+///  * All non-modifier keys are pressed.
+///  * *Either* side of the mentioned modifier keys, even if side-specific
+///    variations are given, are pressed.
+///  * No other modifier keys are pressed.
+///
+/// {@tool snippet}
+/// ```dart
+/// // Ctrl-A.
+/// //
+/// // Accepts pressing ContrlLeft then KeyA.
+/// // Accepts pressing ContrlRight then KeyA.
+/// // Rejects pressing KeyA then ContrlLeft.
+/// // Rejects pressing ShiftLeft, ContrlLeft, then KeyA.
+/// const LogicalKeySet set1 = LogicalKeySet(
+///   LogicalKeyboardKey.controlLeft,
+///   LogicalKeyboardKey.keyA,
+/// );
+/// ```
+/// {@end-tool}
+///
+/// If the keys contains only modifier keys, then all modifier keys are used
+/// as trigger keys, and their given variations (side-specific or any side)
+/// are required to be held at the event, and it doesn't check the state of other
+/// modifiers.
+///
+/// {@tool snippet}
+/// ```
+/// // CtrlLeft-Shift.
+/// //
+/// // Accepts pressing ContrlLeft then ShiftLeft.
+/// // Accepts pressing ContrlLeft then ShiftRight.
+/// // Accepts pressing ShiftLeft then ContrlLeft.
+/// // Rejects pressing ControlLeft then ShiftRight.
+/// // Accepts pressing ShiftLeft, AltLeft, then ContrlLeft.
+/// const LogicalKeySet set2 = LogicalKeySet(
+///   LogicalKeyboardKey.controlLeft,
+///   LogicalKeyboardKey.shift,
+/// );
+/// ```
+/// {@end-tool}
+///
+/// This class is also a thin wrapper around a [Set], but changes the equality
+/// comparison from an identity comparison to a contents comparison so that
+/// non-identical sets with the same keys in them will compare as equal.
 class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
     implements ShortcutPrompt {
   /// A constructor for making a [LogicalKeySet] of up to four keys.
@@ -217,13 +307,12 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
   late final _StandardPromptCore _promptCore = _computePromptCore(keys);
 
   @override
-  Iterable<LogicalKeyboardKey>? get triggeringKeys => _promptCore.triggeringKeys;
+  Iterable<LogicalKeyboardKey>? get triggers => _promptCore.triggeringKeys;
 
   @override
-  bool requiresEvent(RawKeyEvent event) => event is RawKeyDownEvent;
-
-  @override
-  bool requiresState(RawKeyboard state) => _promptCore.requiresState(state);
+  bool requires(RawKeyEvent event, RawKeyboard state) {
+    return event is RawKeyDownEvent && _promptCore.requiresState(state);
+  }
 
   static final Set<LogicalKeyboardKey> _modifiers = <LogicalKeyboardKey>{
     LogicalKeyboardKey.alt,
@@ -388,7 +477,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   static Map<LogicalKeyboardKey?, List<_PromptIntent>> _indexShortcuts(Map<ShortcutPrompt, Intent> source) {
     final Map<LogicalKeyboardKey?, List<_PromptIntent>> result = <LogicalKeyboardKey?, List<_PromptIntent>>{};
     source.forEach((ShortcutPrompt prompt, Intent intent) {
-      final Iterable<LogicalKeyboardKey?>? triggeringKeys = prompt.triggeringKeys;
+      final Iterable<LogicalKeyboardKey?>? triggeringKeys = prompt.triggers;
       for (final LogicalKeyboardKey? trigger in triggeringKeys ?? <LogicalKeyboardKey?>[null]) {
         result.putIfAbsent(trigger, () => <_PromptIntent>[])
           .add(_PromptIntent(prompt, intent));
@@ -413,8 +502,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
     if (candidates == null)
       return null;
     for (final _PromptIntent promptIntent in candidates) {
-      if (promptIntent.prompt.requiresEvent(event)
-          && promptIntent.prompt.requiresState(state)) {
+      if (promptIntent.prompt.requires(event, state)) {
         return promptIntent.intent;
       }
     }
