@@ -573,7 +573,7 @@ class _RailDestination extends StatelessWidget {
             ),
           );
         } else {
-          final Animation<double> labelFadeAnimation = destinationAnimation.drive(CurveTween(curve: const Interval(0.0, 0.25)));
+          final Animation<double> labelFadeAnimation = extendedTransitionAnimation.drive(CurveTween(curve: const Interval(0.0, 0.25)));
           content = Padding(
             padding: padding ?? EdgeInsets.zero,
             child: ConstrainedBox(
