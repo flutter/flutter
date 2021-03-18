@@ -1411,7 +1411,7 @@ void main() {
       await tester.pumpWidget(
         Inherited(
           1,
-          child: Container(
+          child: SizedBox(
             child: StatefulWidgetSpy(
               key: key,
               onBuild: (BuildContext context) {
