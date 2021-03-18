@@ -264,6 +264,7 @@ void main() {
     final _RestorableWidgetState state = tester.state(find.byType(_RestorableWidget));
 
     final List<String> notifyLog = <String>[];
+
     state.numValue.addListener(() {
       notifyLog.add('num');
     });
@@ -278,6 +279,27 @@ void main() {
     });
     state.boolValue.addListener(() {
       notifyLog.add('bool');
+    });
+    state.dateTimeValue.addListener(() {
+      notifyLog.add('date-time');
+    });
+    state.nullableNumValue.addListener(() {
+      notifyLog.add('nullable-num');
+    });
+    state.nullableDoubleValue.addListener(() {
+      notifyLog.add('nullable-double');
+    });
+    state.nullableIntValue.addListener(() {
+      notifyLog.add('nullable-int');
+    });
+    state.nullableStringValue.addListener(() {
+      notifyLog.add('nullable-string');
+    });
+    state.nullableBoolValue.addListener(() {
+      notifyLog.add('nullable-bool');
+    });
+    state.nullableDateTimeValue.addListener(() {
+      notifyLog.add('nullable-date-time');
     });
     state.controllerValue.addListener(() {
       notifyLog.add('controller');
@@ -317,6 +339,48 @@ void main() {
     notifyLog.clear();
 
     state.setProperties(() {
+      state.dateTimeValue.value = DateTime(2020, 7, 4);
+    });
+    expect(notifyLog.single, 'date-time');
+    notifyLog.clear();
+
+    state.setProperties(() {
+      state.nullableNumValue.value = 42.2;
+    });
+    expect(notifyLog.single, 'nullable-num');
+    notifyLog.clear();
+
+    state.setProperties(() {
+      state.nullableDoubleValue.value = 42.2;
+    });
+    expect(notifyLog.single, 'nullable-double');
+    notifyLog.clear();
+
+    state.setProperties(() {
+      state.nullableIntValue.value = 45;
+    });
+    expect(notifyLog.single, 'nullable-int');
+    notifyLog.clear();
+
+    state.setProperties(() {
+      state.nullableStringValue.value = 'bar';
+    });
+    expect(notifyLog.single, 'nullable-string');
+    notifyLog.clear();
+
+    state.setProperties(() {
+      state.nullableBoolValue.value = true;
+    });
+    expect(notifyLog.single, 'nullable-bool');
+    notifyLog.clear();
+
+    state.setProperties(() {
+      state.nullableDateTimeValue.value = DateTime(2020, 4, 4);
+    });
+    expect(notifyLog.single, 'nullable-date-time');
+    notifyLog.clear();
+
+    state.setProperties(() {
       state.controllerValue.value.text = 'foo';
     });
     expect(notifyLog.single, 'controller');
@@ -338,8 +402,17 @@ void main() {
       state.intValue.value = 45;
       state.stringValue.value = 'bar';
       state.boolValue.value = true;
+      state.dateTimeValue.value = DateTime(2020, 7, 4);
+      state.nullableNumValue.value = 42.2;
+      state.nullableDoubleValue.value = 42.2;
+      state.nullableIntValue.value = 45;
+      state.nullableStringValue.value = 'bar';
+      state.nullableBoolValue.value = true;
+      state.nullableDateTimeValue.value = DateTime(2020, 4, 4);
       state.controllerValue.value.text = 'foo';
+      state.objectValue.value = 42;
     });
+
     expect(notifyLog, isEmpty);
   });
 
