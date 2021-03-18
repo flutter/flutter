@@ -30,6 +30,12 @@ void checkEncodeDecode(id value) {
     ASSERT_TRUE([value isEqual:decoded]);
 }
 
+TEST(FlutterStandardCodec, CanDecodeZeroLength) {
+  FlutterStandardMessageCodec* codec = [FlutterStandardMessageCodec sharedInstance];
+  id decoded = [codec decode:[NSData data]];
+  ASSERT_TRUE(decoded == nil);
+}
+
 TEST(FlutterStandardCodec, CanEncodeAndDecodeNil) {
   checkEncodeDecode(nil, nil);
 }

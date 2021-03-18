@@ -42,6 +42,11 @@ TEST(FlutterStringCodec, CanEncodeAndDecodeNonBMPString) {
   ASSERT_TRUE([value isEqualTo:decoded]);
 }
 
+TEST(FlutterJSONCodec, CanDecodeZeroLength) {
+  FlutterJSONMessageCodec* codec = [FlutterJSONMessageCodec sharedInstance];
+  ASSERT_TRUE([codec decode:[NSData data]] == nil);
+}
+
 TEST(FlutterJSONCodec, CanEncodeAndDecodeNil) {
   FlutterJSONMessageCodec* codec = [FlutterJSONMessageCodec sharedInstance];
   ASSERT_TRUE([codec encode:nil] == nil);
