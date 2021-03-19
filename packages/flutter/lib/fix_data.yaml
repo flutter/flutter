@@ -12,6 +12,39 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/67947
+  - title: "Migrate to 'ScaffoldMessenger'"
+    date: 2020-10-19
+    element:
+      uris: [ 'material.dart' ]
+      method: 'showSnackBar'
+      inClass: 'Scaffold'
+    changes:
+      - kind: 'rename'
+        newName: 'ScaffoldMessenger'
+
+  # Changes made in https://github.com/flutter/flutter/pull/67947
+  - title: "Migrate to 'ScaffoldMessenger'"
+    date: 2020-10-19
+    element:
+      uris: [ 'material.dart' ]
+      method: 'removeCurrentSnackBar'
+      inClass: 'Scaffold'
+    changes:
+      - kind: 'rename'
+        newName: 'ScaffoldMessenger'
+
+  # Changes made in https://github.com/flutter/flutter/pull/67947
+  - title: "Migrate to 'ScaffoldMessenger'"
+    date: 2020-10-19
+    element:
+      uris: [ 'material.dart' ]
+      method: 'hideCurrentSnackBar'
+      inClass: 'Scaffold'
+    changes:
+      - kind: 'rename'
+        newName: 'ScaffoldMessenger'
+
   # Changes made in https://github.com/flutter/flutter/pull/59127
   - title: "Migrate to 'label'"
     date: 2020-07-09

@@ -178,4 +178,9 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/59127
   const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem(title: myTitle);
   bottomNavigationBarItem.title;
+
+  // Changes made in https://github.com/flutter/flutter/pull/67947
+  Scaffold.of(context).showSnackBar(SnackBar(content: Text('Snack')));
+  Scaffold.of(context).hideCurrentSnackBar(SnackBar(content: Text('Snack')));
+  Scaffold.of(context).removeCurrentSnackBar(SnackBar(content: Text('Snack')));
 }
