@@ -484,6 +484,7 @@ class StartupTest {
       for (int i = 0; i < iterations; i += 1) {
         final int result = await flutter('run', options: <String>[
           '--no-android-gradle-daemon',
+          '--no-publish-port',
           '--verbose',
           '--profile',
           '--trace-startup',
@@ -783,6 +784,7 @@ class PerfTestWithSkSL extends PerfTest {
         '--verbose',
         '--verbose-system-logs',
         '--purge-persistent-cache',
+        '--no-publish-port',
         '--profile',
         if (cacheSkSL) '--cache-sksl',
         '-d', _device.deviceId,
@@ -1286,6 +1288,7 @@ class DevToolsMemoryTest {
         'run',
         '--verbose',
         '--profile',
+        '--no-publish-port',
         '-d', _device.deviceId,
         driverTest,
       ],
@@ -1401,6 +1404,7 @@ class ReportedDurationTest {
       print('launching $project$test on device...');
       await flutter('run', options: <String>[
         '--verbose',
+        '--no-publish-port',
         '--no-fast-start',
         '--${_reportedDurationTestToString(flavor)}',
         '--no-resident',

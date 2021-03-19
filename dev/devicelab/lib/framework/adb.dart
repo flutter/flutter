@@ -751,7 +751,7 @@ class IosDevice extends Device {
 
   @override
   Future<void> reboot() {
-    return Process.run('idevicesyslog', <String>['reboot', '-u', deviceId]);
+    return Process.run('idevicediagnostics', <String>['restart', '-u', deviceId]);
   }
 }
 

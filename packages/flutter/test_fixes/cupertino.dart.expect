@@ -47,13 +47,13 @@ void main() {
   final behavior = stack.clipBehavior;
 
   // Changes made in https://github.com/flutter/flutter/pull/61648
-  const Form form = Form(autovalidateMode: AutoValidateMode.always);
-  const Form form = Form(autovalidateMode: AutoValidateMode.disabled);
+  const Form form = Form(autovalidateMode: AutovalidateMode.always);
+  const Form form = Form(autovalidateMode: AutovalidateMode.disabled);
   final autoMode = form.autovalidateMode;
 
   // Changes made in https://github.com/flutter/flutter/pull/61648
-  const FormField formField = FormField(autovalidateMode: AutoValidateMode.always);
-  const FormField formField = FormField(autovalidateMode: AutoValidateMode.disabled);
+  const FormField formField = FormField(autovalidateMode: AutovalidateMode.always);
+  const FormField formField = FormField(autovalidateMode: AutovalidateMode.disabled);
   final autoMode = formField.autovalidateMode;
 
   // Changes made in https://github.com/flutter/flutter/pull/68736
