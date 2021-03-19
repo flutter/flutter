@@ -72,7 +72,7 @@
             ]
           },
           "runDebug": {
-            "description": "The command to be invoked to run the app in debug mode. The name of the app to be started is available via the ${appName} string interpolation. Make sure the flutter cmdline output is available via this commands' stdout/stderr, since the SDK needs the \"Observatory is now listening on ...\" message to function. The observatory URL will be connected to as-is, without any port forwarding, so you need to make sure it is reachable from your host device, possibly via the \"--observatory-host=<ip>\" engine flag.",
+            "description": "The command to be invoked to run the app in debug mode. The name of the app to be started is available via the ${appName} string interpolation. Make sure the flutter cmdline output is available via this commands stdout/stderr since the SDK needs the \"Observatory is now listening on ...\" message to function. If the forwardPort command is not specified, the observatory URL will be connected to as-is, without any port forwarding. In that case you need to make sure it is reachable from your host device, possibly via the \"--observatory-host=<ip>\" engine flag.",
             "type": "array",
             "items": {
               "type": "string"
@@ -83,7 +83,7 @@
             ]
           },
           "forwardPort": {
-            "description": "The command to be invoked to forward a specific device port to a port on the host device. The device port is available via ${hostPort}, the device port via ${devicePort}. On success, the command should stay running for the duration of the forwarding. The command will be terminated using SIGTERM when the forwarding should be stopped. When using ssh, make sure ssh quits when the forwarding fails since thats not the default behaviour.",
+            "description": "The command to be invoked to forward a specific device port to a port on the host device. The host port is available via ${hostPort} and the device port via ${devicePort}. On success, the command should stay running for the duration of the forwarding. The command will be terminated using SIGTERM when the forwarding should be stopped. When using ssh, make sure ssh quits when the forwarding fails since thats not the default behaviour.",
             "type": ["array", "null"],
             "items": {
               "type": "string"
@@ -95,7 +95,7 @@
             "required": false
           },
           "forwardPortSuccessRegex": {
-            "description": "A regular expression to be used to classify a successful port forwarding. As soon as any line of stdout or stderr of the forward port command matches this regex, the port forwarding is considered successful. The regex syntax is the standard dart syntax.",
+            "description": "A regular expression to be used to classify a successful port forwarding. As soon as any line of stdout or stderr of the forward port command matches this regex, the port forwarding is considered successful. The regex syntax is the standard dart syntax. This value needs to be present & non-null when \"forwardPort\" specified.",
             "type": ["string", "null"],
             "format": "regex",
             "items": {
