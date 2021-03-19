@@ -5,8 +5,7 @@
 #ifndef UI_ACCESSIBILITY_AX_TREE_H_
 #define UI_ACCESSIBILITY_AX_TREE_H_
 
-#include <stdint.h>
-
+#include <cstdint>
 #include <map>
 #include <memory>
 #include <set>

@@ -5,8 +5,7 @@
 #ifndef BASE_NUMERICS_CHECKED_MATH_H_
 #define BASE_NUMERICS_CHECKED_MATH_H_
 
-#include <stddef.h>
-
+#include <cstddef>
 #include <limits>
 #include <type_traits>
 

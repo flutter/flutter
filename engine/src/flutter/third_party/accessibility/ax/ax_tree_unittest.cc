@@ -4,12 +4,9 @@
 
 #include "ax_tree.h"
 
-#include <stddef.h>
-#include <stdint.h>
-
+#include <cstddef>
+#include <cstdint>
 #include <memory>
-
-#include "gtest/gtest.h"
 
 #include "ax_enum_util.h"
 #include "ax_node.h"
@@ -18,6 +15,7 @@
 #include "ax_tree_id.h"
 #include "ax_tree_observer.h"
 #include "base/string_utils.h"
+#include "gtest/gtest.h"
 #include "test_ax_tree_manager.h"
 
 // Helper macro for testing selection values and maintain

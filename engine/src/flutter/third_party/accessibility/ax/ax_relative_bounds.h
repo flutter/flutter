@@ -5,8 +5,7 @@
 #ifndef UI_ACCESSIBILITY_AX_RELATIVE_BOUNDS_H_
 #define UI_ACCESSIBILITY_AX_RELATIVE_BOUNDS_H_
 
-#include <stdint.h>
-
+#include <cstdint>
 #include <memory>
 #include <ostream>
 

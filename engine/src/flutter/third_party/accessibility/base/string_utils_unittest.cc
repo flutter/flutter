@@ -4,8 +4,8 @@
 
 #include "string_utils.h"
 
-#include <errno.h>
-#include <stddef.h>
+#include <cerrno>
+#include <cstddef>
 
 #include "base/logging.h"
 #include "gtest/gtest.h"

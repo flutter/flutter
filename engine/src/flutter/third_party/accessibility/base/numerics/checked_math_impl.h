@@ -5,11 +5,10 @@
 #ifndef BASE_NUMERICS_CHECKED_MATH_IMPL_H_
 #define BASE_NUMERICS_CHECKED_MATH_IMPL_H_
 
-#include <stddef.h>
-#include <stdint.h>
-
 #include <climits>
 #include <cmath>
+#include <cstddef>
+#include <cstdint>
 #include <cstdlib>
 #include <limits>
 #include <type_traits>

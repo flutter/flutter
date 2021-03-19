@@ -4,9 +4,8 @@
 
 #include "ax_tree.h"
 
-#include <stddef.h>
-
 #include <algorithm>
+#include <cstddef>
 #include <numeric>
 #include <utility>
 

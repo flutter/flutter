@@ -2,18 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <stdint.h>
-
 #include <algorithm>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
-// #include "base/bind.h"
-// #include "base/callback.h"
-// #include "base/strings/string16.h"
-// #include "base/strings/utf_string_conversions.h"
 #include "ax/ax_enums.h"
 #include "ax/ax_node.h"
 #include "ax/ax_node_data.h"

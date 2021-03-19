@@ -4,9 +4,10 @@
 
 #include "base/win/variant_vector.h"
 
-#include <stddef.h>
 #include <windows.foundation.h>
 #include <wrl/client.h>
+
+#include <cstddef>
 
 #include "base/stl_util.h"
 #include "base/test/gtest_util.h"

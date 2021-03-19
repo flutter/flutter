@@ -5,11 +5,10 @@
 #ifndef UI_ACCESSIBILITY_PLATFORM_AX_UNIQUE_ID_H_
 #define UI_ACCESSIBILITY_PLATFORM_AX_UNIQUE_ID_H_
 
-#include <stdint.h>
-
-#include "base/macros.h"
+#include <cstdint>
 
 #include "ax/ax_export.h"
+#include "base/macros.h"
 
 namespace ui {
 
