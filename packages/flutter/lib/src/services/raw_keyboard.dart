@@ -735,17 +735,22 @@ class RawKeyboard {
     // pressed/released while the app doesn't have focus, to make sure that
     // _keysPressed reflects reality at all times.
     //
-    // If the given modifier state is [KeyboardSide.any], then don't update an
-    // unpressed key to being pressed, instead only update pressed keys to be
-    // unpressed.
+    // If the given modifier state is [KeyboardSide.any], then only update an
+    // unpressed key to being pressed, and pressed keys to be unpressed, but not
+    // between pressed sides.
 
     final Map<ModifierKey, KeyboardSide?> modifiersPressed = event.data.modifiersPressed;
     final Map<PhysicalKeyboardKey, LogicalKeyboardKey> modifierKeys = <PhysicalKeyboardKey, LogicalKeyboardKey>{};
+    // Physical keys that whose modifiers are pressed at any side.
     final Set<PhysicalKeyboardKey> anySideKeys = <PhysicalKeyboardKey>{};
     for (final ModifierKey key in modifiersPressed.keys) {
       if (modifiersPressed[key] == KeyboardSide.any) {
-        anySideKeys.addAll(_modifierKeyMap[_ModifierSidePair(key, KeyboardSide.all)] ?? <PhysicalKeyboardKey>{});
-        continue;
+        final Set<PhysicalKeyboardKey>? thisModifierKeys = _modifierKeyMap[_ModifierSidePair(key, KeyboardSide.all)];
+        assert(thisModifierKeys != null);
+        anySideKeys.addAll(thisModifierKeys!);
+        if (thisModifierKeys.any(keysPressed.contains)) {
+          continue;
+        }
       }
       final Set<PhysicalKeyboardKey>? mappedKeys = _modifierKeyMap[_ModifierSidePair(key, modifiersPressed[key])];
       assert((){
