@@ -917,26 +917,33 @@ abstract class TextInputClient {
   /// scribble.
   void showToolbar();
 
-  /// UIKit has requested a text placeholder be added at the current selection
+  /// Requests that the client add a text placeholder to reserve visual space
+  /// in the text.
+  ///
+  /// For example, this is called when responding to UIKit requesting
+  /// a text placeholder be added at the current selection.
   void insertTextPlaceholder(Size size);
 
-  /// UIKit has requested that the text placeholder be removed
+  /// Requests that the client remove the text placeholder.
   void removeTextPlaceholder();
 }
 
-/// An interface for recieving focus during a UIIndirectScribbleInteraction
+/// An interface to receive focus from the engine.
+///
+/// This is currently only used to handle UIIndirectScribbleInteraction.
 abstract class ScribbleClient {
-  /// A unique identifier for this element
+  /// A unique identifier for this element.
   String get elementIdentifier;
 
-  /// Called during a UIIndirectScribbleInteraction when the [ScribbleClient] should
-  /// receive focus
+  /// Called by the engine when the [ScribbleClient] should receive focus. 
+  ///
+  /// For example, this method is called during a UIIndirectScribbleInteraction.
   void onScribbleFocus(Offset offset);
 
-  /// Tests whether the [ScribbleClient] overlaps the given rectangle bounds
+  /// Tests whether the [ScribbleClient] overlaps the given rectangle bounds.
   bool isInScribbleRect(Rect rect);
 
-  /// The current bounds of the [ScribbleClient]
+  /// The current bounds of the [ScribbleClient].
   Rect get bounds;
 }
 
@@ -980,10 +987,10 @@ class TextInputConnection {
   /// Whether this connection is currently interacting with the text input control.
   bool get attached => TextInput._instance._currentConnection == this;
 
-  /// Whether there is currently a Scribble interaction in progress
+  /// Whether there is currently a Scribble interaction in progress.
   ///
   /// This is used to make sure selection handles are shown when UIKit changes
-  /// the selection during a Scribble interaction
+  /// the selection during a Scribble interaction.
   bool get scribbleInProgress => TextInput._instance.scribbleInProgress;
 
   /// Requests that the text input control become visible.
@@ -1360,11 +1367,11 @@ class TextInput {
   final Map<String, ScribbleClient> _scribbleClients = <String, ScribbleClient>{};
   bool _scribbleInProgress = false;
 
-  /// Used for testing within the Flutter SDK to get the currently registered [ScribbleClient] list
+  /// Used for testing within the Flutter SDK to get the currently registered [ScribbleClient] list.
   @visibleForTesting
   static Map<String, ScribbleClient> get scribbleClients => TextInput._instance._scribbleClients;
 
-  /// true if a scribble interaction is currently happening
+  /// true if a scribble interaction is currently happening.
   bool get scribbleInProgress => _scribbleInProgress;
 
   Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
@@ -1607,7 +1614,10 @@ class TextInput {
     );
   }
 
-  /// Registers a [ScribbleClient] with [elementIdentifier] that can be focused using an
+  /// Registers a [ScribbleClient] with [elementIdentifier] that can be focused
+  /// by the engine.
+  ///
+  /// For example, the registered [ScribbleClient] list is used to respond to
   /// UIIndirectScribbleInteraction on an iPad.
   static void registerScribbleElement(String elementIdentifier, ScribbleClient scribbleClient) {
     TextInput._instance._scribbleClients[elementIdentifier] = scribbleClient;

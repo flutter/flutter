@@ -1736,7 +1736,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     if (value.text == _value.text && value.composing == _value.composing) {
       // `selection` is the only change.
-      _handleSelectionChanged(value.selection, _textInputConnection?.scribbleInProgress ?? false ? SelectionChangedCause.scribble : SelectionChangedCause.keyboard);
+      _handleSelectionChanged(value.selection, (_textInputConnection?.scribbleInProgress ?? false) ? SelectionChangedCause.scribble : SelectionChangedCause.keyboard);
     } else {
       hideToolbar();
       _currentPromptRectRange = null;
@@ -2435,6 +2435,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   String _cachedText = '';
   Rect? _cachedFirstRect;
+  Size _cachedSize = Size.zero;
 
   void _updateSelectionRects() {
     if (defaultTargetPlatform != TargetPlatform.iOS)
@@ -2442,12 +2443,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final TextSpan textSpan = buildTextSpan();
     final StringBuffer text = StringBuffer();
     textSpan.computeToPlainText(text);
-    final Rect firstRect = renderEditable.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1)).first;
+    final List<Rect> firstSelectionBoxes = renderEditable.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1));
+    final Rect? firstRect = firstSelectionBoxes.isNotEmpty ? firstSelectionBoxes.first : null;
     final ScrollDirection scrollDirection = _scrollController?.position.userScrollDirection ?? ScrollDirection.idle;
+    final Size size = renderEditable.size;
     if (scrollDirection == ScrollDirection.idle && (text.toString() != _cachedText ||
-        _cachedFirstRect != firstRect)) {
+        _cachedFirstRect != firstRect || _cachedSize != size)) {
       _cachedText = text.toString();
       _cachedFirstRect = firstRect;
+      _cachedSize = size;
       final List<Rect> rects = List<Rect>.generate(
               text.length, (int i) => renderEditable.getBoxesForSelection(TextSelection(baseOffset: i, extentOffset: i + 1)).first);
       _textInputConnection!.setSelectionRects(rects);
@@ -2688,7 +2692,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               onCopy: _semanticsOnCopy(controls),
               onCut: _semanticsOnCut(controls),
               onPaste: _semanticsOnPaste(controls),
-              child: _ScribbleElement(
+              child: _ScribbleFocusable(
                 focusNode: widget.focusNode,
                 editableKey: _editableKey,
                 child: _Editable(
@@ -2978,19 +2982,19 @@ class _Editable extends LeafRenderObjectWidget {
   }
 }
 
-class _ScribbleElement extends StatefulWidget {
-  const _ScribbleElement({Key? key, required this.child, required this.focusNode, required this.editableKey}): super(key: key);
-
+class _ScribbleFocusable extends StatefulWidget {
+  const _ScribbleFocusable({Key? key, required this.child, required this.focusNode, required this.editableKey}): super(key: key);
+  
   final Widget child;
   final FocusNode focusNode;
   final GlobalKey editableKey;
 
   @override
-  _ScribbleElementState createState() => _ScribbleElementState();
+  _ScribbleFocusableState createState() => _ScribbleFocusableState();
 }
 
-class _ScribbleElementState extends State<_ScribbleElement> implements ScribbleClient {
-  _ScribbleElementState(): _elementIdentifier = (_nextElementIdentifier++).toString();
+class _ScribbleFocusableState extends State<_ScribbleFocusable> implements ScribbleClient {
+  _ScribbleFocusableState(): _elementIdentifier = (_nextElementIdentifier++).toString();
 
   @override
   void initState() {
@@ -3015,7 +3019,7 @@ class _ScribbleElementState extends State<_ScribbleElement> implements ScribbleC
   @override
   void onScribbleFocus(Offset offset) {
     widget.focusNode.requestFocus();
-    renderEditable?.selectPositionAt(from: offset, cause: SelectionChangedCause.keyboard);
+    renderEditable?.selectPositionAt(from: offset, cause: SelectionChangedCause.scribble);
   }
 
   @override
@@ -3050,8 +3054,8 @@ class _ScribbleElementState extends State<_ScribbleElement> implements ScribbleC
     final RenderBox? box = context.findRenderObject() as RenderBox?;
     if (box == null || !mounted || !box.attached)
       return Rect.zero;
-    final Offset topLeft = box.localToGlobal(Offset.zero);
-    return Rect.fromLTWH(topLeft.dx, topLeft.dy, box.size.width, box.size.height);
+    final Matrix4 transform = box.getTransformTo(null);
+    return MatrixUtils.transformRect(transform, Rect.fromLTWH(0, 0, box.size.width, box.size.height));
   }
 
   @override
@@ -3080,17 +3084,9 @@ class _ScribblePlaceholder extends WidgetSpan {
          child: child,
        );
 
-  /// The size of the span, used in place of adding a placeholder size to the [TextPainter]
+  /// The size of the span, used in place of adding a placeholder size to the [TextPainter].
   final Size size;
 
-  /// Adds a placeholder box to the paragraph builder if a size has been
-  /// calculated for the widget.
-  ///
-  /// Sizes are provided through `dimensions`, which should contain a 1:1
-  /// in-order mapping of widget to laid-out dimensions. If no such dimension
-  /// is provided, the widget will be skipped.
-  ///
-  /// The `textScaleFactor` will be applied to the laid-out size of the widget.
   @override
   void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions>? dimensions }) {
     assert(debugAssertIsValid());
