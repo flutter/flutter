@@ -575,7 +575,7 @@ class _TabBarScrollController extends ScrollController {
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return DefaultTabController(
-///     initialIndex: 0,
+///     initialIndex: 1,
 ///     length: 3,
 ///     child: Scaffold(
 ///       appBar: AppBar(
