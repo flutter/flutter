@@ -760,6 +760,7 @@ class _CallbackHookProvider<T> {
   /// Exceptions thrown by callbacks will be caught and reported using
   /// [FlutterError.reportError].
   @protected
+  @pragma('vm:notify-debugger-on-exception')
   T invokeCallback(T defaultValue) {
     if (_callbacks.isEmpty)
       return defaultValue;

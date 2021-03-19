@@ -114,6 +114,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
     super.unmount();
   }
 
+  @pragma('vm:notify-debugger-on-exception')
   void _layout(ConstraintType constraints) {
     owner!.buildScope(this, () {
       Widget built;

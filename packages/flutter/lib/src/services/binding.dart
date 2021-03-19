@@ -272,6 +272,7 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
   }
 
   @override
+  @pragma('vm:notify-debugger-on-exception')
   Future<void> handlePlatformMessage(
     String channel,
     ByteData? data,

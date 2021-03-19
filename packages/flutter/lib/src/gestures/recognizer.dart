@@ -165,6 +165,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// callback that returns a string describing useful debugging information,
   /// e.g. the arguments passed to the callback.
   @protected
+  @pragma('vm:notify-debugger-on-exception')
   T? invokeCallback<T>(String name, RecognizerCallback<T> callback, { String Function()? debugReport }) {
     assert(callback != null);
     T? result;
