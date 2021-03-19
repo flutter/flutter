@@ -81,6 +81,7 @@ void main() {
       });
 
       testUsingContext('does not check that Flutter installation is up-to-date with CI=true in environment', () async {
+        final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
         final FakeFlutterVersion version = globals.flutterVersion as FakeFlutterVersion;
 
         await runner.run(<String>['dummy', '--version']);
@@ -94,6 +95,7 @@ void main() {
       }, initializeFlutterRoot: false);
 
       testUsingContext('checks that Flutter installation is up-to-date with CI=true and --machine when explicit --version-check', () async {
+        final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
         final FakeFlutterVersion version = globals.flutterVersion as FakeFlutterVersion;
 
         await runner.run(<String>['dummy', '--version', '--machine', '--version-check']);
