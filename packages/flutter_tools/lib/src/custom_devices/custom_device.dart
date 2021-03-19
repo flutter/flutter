@@ -158,7 +158,7 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
       }
     });
 
-    // if the process exists (even with exitCode == 0), that is considered
+    // if the process exits (even with exitCode == 0), that is considered
     // a port forwarding failure and we complete with a null value.
     unawaited(process.exitCode.then((int exitCode) {
       if (!completer.isCompleted) {
