@@ -22,6 +22,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fake_process_manager.dart';
 
 void main() {
   FakePlatform platform;
@@ -155,7 +156,7 @@ void main() {
     testUsingContext('Can pass additional arguments to tester binary', () async {
       await device.start(compiledEntrypointPath: 'example.dill');
 
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
   });
 

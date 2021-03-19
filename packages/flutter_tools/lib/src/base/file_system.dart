@@ -235,7 +235,6 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
       // exits normally.
       shutdownHooks?.addShutdownHook(
         _tryToDeleteTemp,
-        ShutdownStage.CLEANUP,
       );
     }
     return _systemTemp;

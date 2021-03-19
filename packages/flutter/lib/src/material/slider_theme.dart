@@ -1427,7 +1427,7 @@ abstract class RangeSliderTrackShape {
 ///    rectangular edges
 ///  * [RoundedRectSliderTrackShape], which is a track shape with round
 ///    stadium-like edges.
-abstract class BaseSliderTrackShape {
+mixin BaseSliderTrackShape {
   /// Returns a rect that represents the track bounds that fits within the
   /// [Slider].
   ///

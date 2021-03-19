@@ -919,6 +919,50 @@ void main() {
       expect(hovering, isFalse);
       expect(focusing, isFalse);
     });
+
+    testWidgets(
+        'FocusableActionDetector can prevent its descendants from being focusable',
+        (WidgetTester tester) async {
+      final FocusNode buttonNode = FocusNode(debugLabel: 'Test');
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: FocusableActionDetector(
+            descendantsAreFocusable: true,
+            child: MaterialButton(
+              focusNode: buttonNode,
+              child: const Text('Test'),
+              onPressed: () {},
+            ),
+          ),
+        ),
+      );
+
+      // Button is focusable
+      expect(buttonNode.hasFocus, isFalse);
+      buttonNode.requestFocus();
+      await tester.pump();
+      expect(buttonNode.hasFocus, isTrue);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: FocusableActionDetector(
+            descendantsAreFocusable: false,
+            child: MaterialButton(
+              focusNode: buttonNode,
+              child: const Text('Test'),
+              onPressed: () {},
+            ),
+          ),
+        ),
+      );
+
+      // Button is NOT focusable
+      expect(buttonNode.hasFocus, isFalse);
+      buttonNode.requestFocus();
+      await tester.pump();
+      expect(buttonNode.hasFocus, isFalse);
+    });
   });
 
   group('Diagnostics', () {

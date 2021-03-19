@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/ios/ios_deploy.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 void main () {
@@ -80,7 +81,7 @@ void main () {
 
       expect(await iosDeployDebugger.launchAndAttach(), isTrue);
       expect(await iosDeployDebugger.logLines.toList(), <String>['Did finish launching.']);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
       expect(appDeltaDirectory, exists);
     });
   });
@@ -294,7 +295,7 @@ void main () {
       );
 
       expect(exitCode, 0);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('returns non-zero exit code when ios-deploy does the same', () async {
@@ -317,7 +318,7 @@ void main () {
       );
 
       expect(exitCode, 1);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
   });
 }

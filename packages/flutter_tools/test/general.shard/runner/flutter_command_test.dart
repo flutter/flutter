@@ -637,7 +637,7 @@ class FakeSignals implements Signals {
 
   @override
   Object addHandler(ProcessSignal signal, SignalHandler handler) {
-    if (signal == ProcessSignal.SIGTERM) {
+    if (signal == ProcessSignal.sigterm) {
       return delegate.addHandler(subForSigTerm, handler);
     }
     return delegate.addHandler(signal, handler);

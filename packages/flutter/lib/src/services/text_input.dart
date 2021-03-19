@@ -791,9 +791,9 @@ enum SelectionChangedCause {
   drag,
 }
 
-/// An interface for manipulating the selection, to be used by the implementer
+/// A mixin for manipulating the selection, to be used by the implementer
 /// of the toolbar widget.
-abstract class TextSelectionDelegate {
+mixin TextSelectionDelegate {
   /// Gets the current text input.
   TextEditingValue get textEditingValue;
 
