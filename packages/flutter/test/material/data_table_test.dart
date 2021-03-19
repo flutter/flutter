@@ -1604,6 +1604,7 @@ void main() {
     tableBorder = table.border;
     expect(tableBorder?.bottom.width, null);
     expect(tableBorder?.top.color, null);
+  });
 
   testWidgets('checkboxHorizontalMargin properly applied', (WidgetTester tester) async {
     const double _customCheckboxHorizontalMargin = 15.0;
