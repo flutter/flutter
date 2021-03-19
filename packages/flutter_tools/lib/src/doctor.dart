@@ -6,7 +6,6 @@
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
-import 'package:http/http.dart' as http;
 
 import 'android/android_studio_validator.dart';
 import 'android/android_workflow.dart';
@@ -14,6 +13,7 @@ import 'artifacts.dart';
 import 'base/async_guard.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
@@ -136,7 +136,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         ),
       HttpHostAvailabilityValidator(
         platform: globals.platform,
-        httpClient: http.Client()
+        httpClient: HttpClient(),
       ),
     ];
     return _validators;

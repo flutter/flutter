@@ -1,10 +1,6 @@
-// ignore: import_of_legacy_library_into_null_safe
-import 'package:flutter_tools/src/base/io.dart';
-// ignore: import_of_legacy_library_into_null_safe
-import 'package:http/http.dart' as http;
-// ignore: import_of_legacy_library_into_null_safe
+// @dart = 2.9
+import 'base/io.dart';
 import 'base/platform.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'doctor.dart';
 
 /// Hosts used by flutter on all machines
@@ -22,14 +18,14 @@ const List<String> macOsRequiredHostUrls = <String>[
 /// Validation class that checks if all the given URLs are reachable
 class HttpHostAvailabilityValidator extends DoctorValidator {
   HttpHostAvailabilityValidator({
-    required Platform platform,
-    required http.Client httpClient,
+    Platform platform,
+    HttpClient httpClient,
   })   : _platform = platform,
         _httpClient = httpClient,
         super('HTTP host availability');
 
   final Platform _platform;
-  final http.Client _httpClient;
+  final HttpClient _httpClient;
 
   @override
   String get slowWarning => 'HTTP host availability check is taking a long time';
@@ -50,7 +46,7 @@ class HttpHostAvailabilityValidator extends DoctorValidator {
   ) async {
     try {
       // Make the HEAD request
-      await _httpClient.head(hostUrl);
+      await _httpClient.headUrl(Uri.parse(hostUrl));
       // If there is an error, it will be caught in the on ... catch blocks below.
       // Else return a successful result
       return _HttpHostAvailabilityResult.pass(hostUrl);
