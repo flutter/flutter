@@ -9,8 +9,6 @@ import 'dart:convert';
 
 import 'dart:io';
 
-import 'package:flutter_tools/src/base/io.dart';
-
 /// The HTTP verb for a [FakeRequest].
 enum HttpMethod {
   get,
