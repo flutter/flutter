@@ -173,7 +173,8 @@ class ChromiumLauncher {
 
     final String chromeExecutable = _browserFinder(_platform, _fileSystem);
 
-    if (_logger.isVerbose) {
+    if (_logger.isVerbose && !_platform.isWindows) {
+      // Note: --version is not supported on windows.
       final ProcessResult versionResult = await _processManager.run(<String>[chromeExecutable, '--version']);
       _logger.printTrace('Using ${versionResult.stdout}');
     }
