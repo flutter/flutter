@@ -14,12 +14,10 @@ import 'package:flutter_tools/src/commands/build_winuwp.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/windows/visual_studio.dart';
-import 'package:test/fake.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/fakes.dart';
 import '../../src/testbed.dart';
 
 const String flutterRoot = r'C:\flutter';
