@@ -132,7 +132,6 @@ Future<void> buildWindowsUwp(WindowsUwpProject windowsProject, BuildInfo buildIn
       'you must delete the winuwp directory and re-create the project.'
     );
   }
-  // TODO: actually build stuff.
   throwToolExit('Windows UWP builds are not implemented.');
 }
 
