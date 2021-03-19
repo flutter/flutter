@@ -1908,7 +1908,6 @@ void main() {
           'package:app/main.dart',
           flutterBuild,
           mainFile,
-          throwOnPluginPubspecError: true,
         );
         expect(didGenerate, isTrue);
         expect(flutterBuild.readAsStringSync(),
@@ -1994,7 +1993,6 @@ void main() {
             'package:app/main.dart',
             flutterBuild,
             mainFile,
-            throwOnPluginPubspecError: true,
           ), throwsToolExit(message:
             'Invalid plugin specification url_launcher_macos.\n'
             'Invalid "macos" plugin specification.'
@@ -2050,7 +2048,6 @@ void main() {
             'package:app/main.dart',
             flutterBuild,
             mainFile,
-            throwOnPluginPubspecError: true,
           ), throwsToolExit(message:
             'Invalid plugin specification url_launcher_macos.\n'
             'Cannot find the `flutter.plugin.platforms` key in the `pubspec.yaml` file. '
@@ -2058,35 +2055,6 @@ void main() {
             'https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms'
           ),
         );
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-      });
-
-      testUsingContext('Does not show error messages if throwOnPluginPubspecError is false', () async {
-        final FileSystem fs = MemoryFileSystem();
-        final Set<String> directDependencies = <String>{
-          'url_launcher_windows',
-        };
-        resolvePlatformImplementation(<Plugin>[
-          Plugin.fromYaml(
-            'url_launcher_windows',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'platforms': <String, dynamic>{
-                'windows': <String, dynamic>{
-                  'dartPluginClass': 'UrlLauncherPluginWindows',
-                },
-              },
-            }),
-            <String>[],
-            fileSystem: fs,
-            appDependencies: directDependencies,
-          ),
-        ],
-          throwOnPluginPubspecError: false,
-        );
-        expect(testLogger.errorText, '');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
