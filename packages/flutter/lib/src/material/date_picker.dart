@@ -901,8 +901,8 @@ class _DatePickerHeader extends StatelessWidget {
 /// returned.
 ///
 /// If [initialDateRange] is non-null, then it will be used as the initially
-/// selected date range. If it is provided, [initialDateRange.start] must be
-/// before or on [initialDateRange.end].
+/// selected date range. If it is provided, `initialDateRange.start` must be
+/// before or on `initialDateRange.end`.
 ///
 /// The [firstDate] is the earliest allowable date. The [lastDate] is the latest
 /// allowable date. Both must be non-null.
