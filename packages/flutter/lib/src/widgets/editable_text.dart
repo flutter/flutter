@@ -23,6 +23,7 @@ import 'focus_scope.dart';
 import 'framework.dart';
 import 'localizations.dart';
 import 'media_query.dart';
+import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
@@ -492,6 +493,7 @@ class EditableText extends StatefulWidget {
     this.autofillHints,
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
+    this.scrollBehavior,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -1312,6 +1314,9 @@ class EditableText extends StatefulWidget {
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
   final String? restorationId;
+
+  ///
+  final ScrollBehavior? scrollBehavior;
 
   // Infer the keyboard type of an `EditableText` if it's not specified.
   static TextInputType _inferKeyboardType({
@@ -2610,10 +2615,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         excludeFromSemantics: true,
         axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
         controller: _scrollController,
-        physics: widget.scrollPhysics,
+        physics: widget.scrollPhysics ?? widget.scrollBehavior?.getScrollPhysics(context),
         dragStartBehavior: widget.dragStartBehavior,
         restorationId: widget.restorationId,
-        autoScrollbar: false,
+        scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(
+          scrollbarPlatforms: _isMultiline
+            ? null
+            : const <TargetPlatform>{}
+        ),
         viewportBuilder: (BuildContext context, ViewportOffset offset) {
           return CompositedTransformTarget(
             link: _toolbarLayerLink,

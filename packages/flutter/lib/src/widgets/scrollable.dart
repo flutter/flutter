@@ -91,13 +91,12 @@ class Scrollable extends StatefulWidget {
     this.semanticChildCount,
     this.dragStartBehavior = DragStartBehavior.start,
     this.restorationId,
-    this.autoScrollbar = true,
+    this.scrollBehavior,
   }) : assert(axisDirection != null),
        assert(dragStartBehavior != null),
        assert(viewportBuilder != null),
        assert(excludeFromSemantics != null),
        assert(semanticChildCount == null || semanticChildCount >= 0),
-       assert(autoScrollbar != null),
        super (key: key);
 
   /// The direction in which this widget scrolls.
@@ -245,23 +244,13 @@ class Scrollable extends StatefulWidget {
   /// {@endtemplate}
   final String? restorationId;
 
+  ///
+  final ScrollBehavior? scrollBehavior;
+
   /// The axis along which the scroll view scrolls.
   ///
   /// Determined by the [axisDirection].
   Axis get axis => axisDirectionToAxis(axisDirection);
-
-  /// {@template flutter.widgets.scrollable.autoScrollbar}
-  /// Whether a [Scrollbar] should automatically be applied to this Scrollable.
-  ///
-  /// Only applicable on Desktop and web platforms.
-  ///
-  /// See also:
-  ///
-  ///   * [ScrollBehavior.buildViewportDecoration], which builds a [Scrollbar],
-  ///     [CupertinoScrollbar] or [RawScrollbar] based on the current
-  ///     configuration.
-  /// {@endtemplate}
-  final bool autoScrollbar;
 
   @override
   ScrollableState createState() => ScrollableState();
@@ -405,8 +394,11 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   void _updatePosition() {
     _configuration = ScrollConfiguration.of(context);
     _physics = _configuration.getScrollPhysics(context);
-    if (widget.physics != null)
+    if (widget.physics != null) {
       _physics = widget.physics!.applyTo(_physics);
+    } else if (widget.scrollBehavior != null) {
+      _physics = widget.scrollBehavior!.getScrollPhysics(context).applyTo(_physics);
+    }
     final ScrollController? controller = widget.controller;
     final ScrollPosition? oldPosition = _position;
     if (oldPosition != null) {
@@ -448,8 +440,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   }
 
   bool _shouldUpdatePosition(Scrollable oldWidget) {
-    ScrollPhysics? newPhysics = widget.physics;
-    ScrollPhysics? oldPhysics = oldWidget.physics;
+    ScrollPhysics? newPhysics = widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context);
+    ScrollPhysics? oldPhysics = oldWidget.physics ?? oldWidget.scrollBehavior?.getScrollPhysics(context);
     do {
       if (newPhysics?.runtimeType != oldPhysics?.runtimeType)
         return true;
@@ -737,7 +729,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       result,
       ScrollableDetails(
         direction: widget.axisDirection,
-        controller: widget.autoScrollbar ? widget.controller : null,
+        controller: widget.controller ?? ScrollController(),
       ),
     );
   }
@@ -764,7 +756,7 @@ class ScrollableDetails {
   /// cannot be null.
   const ScrollableDetails({
     required this.direction,
-    this.controller,
+    required this.controller,
   });
 
   /// The direction in which this widget scrolls.
@@ -775,11 +767,9 @@ class ScrollableDetails {
   /// A [ScrollController] that can be used to control the position of the
   /// [Scrollable] widget.
   ///
-  /// This is used by [ScrollBehavior] to apply a [Scrollbar] to the associated
+  /// This can be used by [ScrollBehavior] to apply a [Scrollbar] to the associated
   /// [Scrollable].
-  ///
-  /// When null, no Scrollbar will be added. Defaults to null.
-  final ScrollController? controller;
+  final ScrollController controller;
 }
 
 /// With [_ScrollSemantics] certain child [SemanticsNode]s can be

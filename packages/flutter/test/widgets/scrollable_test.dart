@@ -23,7 +23,6 @@ Future<void> pumpTest(
       platform: platform,
     ),
     home: CustomScrollView(
-      autoScrollbar: false,
       controller: controller,
       reverse: reverse,
       physics: scrollable ? null : const NeverScrollableScrollPhysics(),

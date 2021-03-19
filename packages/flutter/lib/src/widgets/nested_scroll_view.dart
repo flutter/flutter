@@ -13,6 +13,7 @@ import 'basic.dart';
 import 'framework.dart';
 import 'primary_scroll_controller.dart';
 import 'scroll_activity.dart';
+import 'scroll_configuration.dart';
 import 'scroll_context.dart';
 import 'scroll_controller.dart';
 import 'scroll_metrics.dart';
@@ -369,6 +370,7 @@ class NestedScrollView extends StatefulWidget {
     this.floatHeaderSlivers = false,
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
+    this.scrollBehavior,
   }) : assert(scrollDirection != null),
        assert(reverse != null),
        assert(headerSliverBuilder != null),
@@ -452,6 +454,9 @@ class NestedScrollView extends StatefulWidget {
 
   /// {@macro flutter.widgets.scrollable.restorationId}
   final String? restorationId;
+
+  ///
+  final ScrollBehavior? scrollBehavior;
 
   /// Returns the [SliverOverlapAbsorberHandle] of the nearest ancestor
   /// [NestedScrollView].
@@ -613,6 +618,10 @@ class NestedScrollViewState extends State<NestedScrollView> {
 
   @override
   Widget build(BuildContext context) {
+    final ScrollPhysics _scrollPhysics = widget.physics?.applyTo(const ClampingScrollPhysics())
+      ?? widget.scrollBehavior?.getScrollPhysics(context).applyTo(const ClampingScrollPhysics())
+      ?? const ClampingScrollPhysics();
+
     return _InheritedNestedScrollView(
       state: this,
       child: Builder(
@@ -622,9 +631,8 @@ class NestedScrollViewState extends State<NestedScrollView> {
             dragStartBehavior: widget.dragStartBehavior,
             scrollDirection: widget.scrollDirection,
             reverse: widget.reverse,
-            physics: widget.physics != null
-              ? widget.physics!.applyTo(const ClampingScrollPhysics())
-              : const ClampingScrollPhysics(),
+            physics: _scrollPhysics,
+            scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbarPlatforms: const <TargetPlatform>{}),
             controller: _coordinator!._outerController,
             slivers: widget._buildSlivers(
               context,
@@ -652,6 +660,7 @@ class _NestedScrollViewCustomScrollView extends CustomScrollView {
     required Clip clipBehavior,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     String? restorationId,
+    ScrollBehavior? scrollBehavior,
   }) : super(
          scrollDirection: scrollDirection,
          reverse: reverse,
@@ -661,7 +670,7 @@ class _NestedScrollViewCustomScrollView extends CustomScrollView {
          dragStartBehavior: dragStartBehavior,
          restorationId: restorationId,
          clipBehavior: clipBehavior,
-         autoScrollbar: false,
+         scrollBehavior: scrollBehavior,
        );
 
   final SliverOverlapAbsorberHandle handle;

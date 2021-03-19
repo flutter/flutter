@@ -12,6 +12,7 @@ import 'package:flutter/scheduler.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'notification_listener.dart';
+import 'scroll_configuration.dart';
 import 'scroll_context.dart';
 import 'scroll_controller.dart';
 import 'scroll_metrics.dart';
@@ -431,6 +432,7 @@ class _FixedExtentScrollable extends Scrollable {
     required this.itemExtent,
     required ViewportBuilder viewportBuilder,
     String? restorationId,
+    ScrollBehavior? scrollBehavior,
   }) : super (
     key: key,
     axisDirection: axisDirection,
@@ -438,7 +440,7 @@ class _FixedExtentScrollable extends Scrollable {
     physics: physics,
     viewportBuilder: viewportBuilder,
     restorationId: restorationId,
-    autoScrollbar: false,
+    scrollBehavior: scrollBehavior,
   );
 
   final double itemExtent;
@@ -585,6 +587,7 @@ class ListWheelScrollView extends StatefulWidget {
     this.renderChildrenOutsideViewport = false,
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
+    this.scrollBehavior,
     required List<Widget> children,
   }) : assert(children != null),
        assert(diameterRatio != null),
@@ -626,6 +629,7 @@ class ListWheelScrollView extends StatefulWidget {
     this.renderChildrenOutsideViewport = false,
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
+    this.scrollBehavior,
     required this.childDelegate,
   }) : assert(childDelegate != null),
        assert(diameterRatio != null),
@@ -717,6 +721,9 @@ class ListWheelScrollView extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.restorationId}
   final String? restorationId;
 
+  ///
+  final ScrollBehavior? scrollBehavior;
+
   @override
   _ListWheelScrollViewState createState() => _ListWheelScrollViewState();
 }
@@ -767,9 +774,10 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
       },
       child: _FixedExtentScrollable(
         controller: scrollController,
-        physics: widget.physics,
+        physics: widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context),
         itemExtent: widget.itemExtent,
         restorationId: widget.restorationId,
+        scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbarPlatforms: const <TargetPlatform>{}),
         viewportBuilder: (BuildContext context, ViewportOffset offset) {
           return ListWheelViewport(
             diameterRatio: widget.diameterRatio,

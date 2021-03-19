@@ -45,6 +45,18 @@ class ScrollBehavior {
     this.glowingPlatforms,
   }) : _useDecoration = useDecoration;
 
+  ///
+  ScrollBehavior copyWith({
+    Set<TargetPlatform>? scrollbarPlatforms,
+    Set<TargetPlatform>? glowingPlatforms,
+  }) {
+    return ScrollBehavior(
+      scrollbarPlatforms: scrollbarPlatforms ?? this.scrollbarPlatforms ?? ScrollBehavior.defaultScrollbarPlatforms,
+      glowingPlatforms: glowingPlatforms ?? this.glowingPlatforms ?? ScrollBehavior.defaultGlowingPlatforms,
+      useDecoration: true,
+    );
+  }
+
   // Whether [buildViewportChrome] or [buildViewportDecoration] should be used
   // in wrapping the Scrollable widget.
   //
