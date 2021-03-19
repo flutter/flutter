@@ -1494,7 +1494,6 @@ class TextInput {
 
   void _clearClient() {
     _channel.invokeMethod<void>('TextInput.clearClient');
-    _currentConnection?._client.removeTextPlaceholder();
     _currentConnection = null;
     _scheduleHide();
   }

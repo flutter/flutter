@@ -2466,6 +2466,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _updateSelectionRects();
       SchedulerBinding.instance!
           .addPostFrameCallback((Duration _) => _updateSizeAndTransform());
+    } else if (_placeholderLocation != -1) {
+      SchedulerBinding.instance!
+        .addPostFrameCallback((Duration _) => removeTextPlaceholder());
     }
   }
 
@@ -2592,7 +2595,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void insertTextPlaceholder(Size size) {
-    print('[scribble][flutter] insertTextPlaceholder $size');
     setState(() {
       _placeholderLocation = _value.text.length - widget.controller.selection.end;
     });
@@ -2600,7 +2602,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void removeTextPlaceholder() {
-    print('[scribble][flutter] removeTextPlaceholder');
     setState(() {
       _placeholderLocation = -1;
     });

@@ -1572,7 +1572,7 @@ void main() {
     await tester.testTextInput.scribbleFocusElement(TextInput.scribbleClients.keys.first, Offset.zero);
 
     expect(focusNode.hasFocus, true);
-    expect(selectionCause, SelectionChangedCause.keyboard);
+    expect(selectionCause, SelectionChangedCause.scribble);
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('Declares itself for Scribble interaction if the bounds overlap the scribble rect and the widget is touchable', (WidgetTester tester) async {
