@@ -14,13 +14,13 @@ import 'gesture_detector.dart';
 import 'layout_builder.dart';
 import 'ticker_provider.dart';
 
-/// A type for widget builders that take a [Rect] of the current viewport.
+/// A type for widget builders that take a [Quad] of the current viewport.
 ///
 /// See also:
 ///
 ///   * [InteractiveViewer.builder], whose builder is of this type.
-///   * [WidgetBuilder], which is similar, but takes no Rect.
-typedef InteractiveViewerWidgetBuilder = Widget Function(BuildContext context, Rect viewport);
+///   * [WidgetBuilder], which is similar, but takes no viewport.
+typedef InteractiveViewerWidgetBuilder = Widget Function(BuildContext context, Quad viewport);
 
 /// A widget that enables pan and zoom interactions with its child.
 ///
@@ -248,16 +248,41 @@ class InteractiveViewer extends StatefulWidget {
   ///   late int _firstVisibleColumn;
   ///   late int _lastVisibleRow;
   ///   late int _lastVisibleColumn;
-  ///   bool _isCellVisible(int row, int column, Rect viewport) {
+  ///   bool _isCellVisible(int row, int column, Quad viewport) {
   ///     if (viewport != _cachedViewport) {
+  ///       final Rect aabb = _axisAlignedBoundingBox(viewport);
   ///       _cachedViewport = viewport;
-  ///       _firstVisibleRow = (viewport.top / _cellHeight).floor();
-  ///       _firstVisibleColumn = (viewport.left / _cellWidth).floor();
-  ///       _lastVisibleRow = (viewport.bottom / _cellHeight).floor();
-  ///       _lastVisibleColumn = (viewport.right / _cellWidth).floor();
+  ///       _firstVisibleRow = (aabb.top / _cellHeight).floor();
+  ///       _firstVisibleColumn = (aabb.left / _cellWidth).floor();
+  ///       _lastVisibleRow = (aabb.bottom / _cellHeight).floor();
+  ///       _lastVisibleColumn = (aabb.right / _cellWidth).floor();
   ///     }
   ///     return row >= _firstVisibleRow && row <= _lastVisibleRow
   ///         && column >= _firstVisibleColumn && column <= _lastVisibleColumn;
+  ///   }
+  ///
+  ///   // Returns the axis aligned bounding box for the given Quad, which might not
+  ///   // be axis aligned.
+  ///   Rect _axisAlignedBoundingBox(Quad quad) {
+  ///     double? xMin;
+  ///     double? xMax;
+  ///     double? yMin;
+  ///     double? yMax;
+  ///     for (final Vector3 point in <Vector3>[quad.point0, quad.point1, quad.point2, quad.point3]) {
+  ///       if (xMin == null || point.x < xMin) {
+  ///         xMin = point.x;
+  ///       }
+  ///       if (xMax == null || point.x > xMax) {
+  ///         xMax = point.x;
+  ///       }
+  ///       if (yMin == null || point.y < yMin) {
+  ///         yMin = point.y;
+  ///       }
+  ///       if (yMax == null || point.y > yMax) {
+  ///         yMax = point.y;
+  ///       }
+  ///     }
+  ///     return Rect.fromLTRB(xMin, yMin, xMax, yMax);
   ///   }
   ///
   ///   void _onChangeTransformation() {
@@ -285,7 +310,7 @@ class InteractiveViewer extends StatefulWidget {
   ///             alignPanAxis: true,
   ///             scaleEnabled: false,
   ///             transformationController: _transformationController,
-  ///             builder: (BuildContext context, Rect viewport) {
+  ///             builder: (BuildContext context, Quad viewport) {
   ///               // A simple extension of Table that builds cells.
   ///               return _TableBuilder(
   ///                 rowCount: 60,
@@ -642,7 +667,7 @@ class InteractiveViewer extends StatefulWidget {
 
   // Get a InteractiveViewerWidgetBuilder that simply returns the given child.
   static InteractiveViewerWidgetBuilder _getBuilderForChild(Widget child) {
-    return (BuildContext context, Rect viewport) {
+    return (BuildContext context, Quad viewport) {
       return child;
     };
   }
@@ -763,64 +788,6 @@ class InteractiveViewer extends StatefulWidget {
       }
     }
     return closestOverall;
-  }
-
-  // Convert an axis aligned Quad to a Rect.
-  //
-  // All instances of Rect are axis aligned by definition.
-  static Rect _axisAlignedQuadToRect(Quad quad) {
-    assert(debugIsAxisAligned(quad));
-    double? xMin;
-    double? xMax;
-    double? yMin;
-    double? yMax;
-
-    for (final Vector3 point in <Vector3>[quad.point0, quad.point1, quad.point2, quad.point3]) {
-      if (xMin == null || point.x < xMin) {
-        xMin = point.x;
-      }
-      if (xMax == null || point.x > xMax) {
-        xMax = point.x;
-      }
-      if (yMin == null || point.y < yMin) {
-        yMin = point.y;
-      }
-      if (yMax == null || point.y > yMax) {
-        yMax = point.y;
-      }
-    }
-    return Rect.fromLTRB(xMin!, yMin!, xMax!, yMax!);
-  }
-
-  /// Returns true iff the given Quad is axis aligned.
-  ///
-  /// In release mode, always returns true. This is because this method should
-  /// only be used in development asserts.
-  @visibleForTesting
-  static bool debugIsAxisAligned(Quad quad) {
-    final double x0 = quad.point0.x;
-    if (quad.point1.x != x0) {
-      final double x1 = quad.point1.x;
-      if ((quad.point2.x != x0 && quad.point2.x != x1)
-          || (quad.point3.x != x0 && quad.point3.x != x1)) {
-        return false;
-      }
-    } else if (quad.point2.x == x0 || quad.point2.x != quad.point3.x) {
-      return false;
-    }
-
-    final double y0 = quad.point0.y;
-    if (quad.point1.y != y0) {
-      final double y1 = quad.point1.y;
-      if ((quad.point2.y != y0 && quad.point2.y != y1)
-          || (quad.point3.y != y0 && quad.point3.y != y1)) {
-        return false;
-      }
-    } else if (quad.point2.y == y0 || quad.point2.y != quad.point3.y) {
-      return false;
-    }
-
-    return true;
   }
 
   @override _InteractiveViewerState createState() => _InteractiveViewerState();
@@ -1356,14 +1323,11 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
           // When constrained is false, such as when using
           // InteractiveViewer.builder, then the viewport is the size of the
           // constraints.
-          final Rect transformedViewport = InteractiveViewer._axisAlignedQuadToRect(
-            _transformViewport(matrix, Offset.zero & constraints.biggest),
-          );
           Widget child = Transform(
             transform: matrix,
             child: KeyedSubtree(
               key: _childKey,
-              child: widget.builder(context, transformedViewport),
+              child: widget.builder(context, _transformViewport(matrix, Offset.zero & constraints.biggest)),
             ),
           );
 

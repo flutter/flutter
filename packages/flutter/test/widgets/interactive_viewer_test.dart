@@ -1316,26 +1316,4 @@ void main() {
       expect(nearestPoint.y, moreOrLessEquals(10.8, epsilon: 0.1));
     });
   });
-
-  group('debugIsAxisAligned', () {
-    test('axis aligned', () {
-      final Quad quad = Quad.points(
-        Vector3(0.0, 0.0, 0.0),
-        Vector3(10.0, 0.0, 0.0),
-        Vector3(10.0, 10.0, 0.0),
-        Vector3(0.0, 10.0, 0.0),
-      );
-      expect(InteractiveViewer.debugIsAxisAligned(quad), isTrue);
-    });
-
-    test('not axis aligned', () {
-      final Quad quad = Quad.points(
-        Vector3(0.0, 0.0, 0.0),
-        Vector3(2.0, 10.0, 0.0),
-        Vector3(12.0, 12.0, 0.0),
-        Vector3(10.0, 2.0, 0.0),
-      );
-      expect(InteractiveViewer.debugIsAxisAligned(quad), isFalse);
-    });
-  });
 }
