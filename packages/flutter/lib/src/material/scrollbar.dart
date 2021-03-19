@@ -151,7 +151,7 @@ class Scrollbar extends StatefulWidget {
   /// default thickness of 8.0 pixels.
   final double? thickness;
 
-  /// The color of the scrollbar thumb.
+  /// The [Radius] of the scrollbar thumb's rounded rectangle corners.
   ///
   /// If null, the default value is platform dependent. On [TargetPlatform.android],
   /// no radius is applied to the scrollbar thumb. On [TargetPlatform.iOS],

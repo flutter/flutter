@@ -8,6 +8,7 @@ import 'dart:io' as io; // ignore: dart_io_import;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -370,6 +371,7 @@ void main() {
     const int eperm = 1;
     const int enospc = 28;
     const int eacces = 13;
+
     MockFileSystem mockFileSystem;
     ErrorHandlingFileSystem fs;
 
@@ -474,6 +476,19 @@ void main() {
       const String expectedMessage = 'Flutter failed to check for directory existence at';
       expect(() => directory.existsSync(),
              throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('When the current working directory disappears', () async {
+      setupReadMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: kSystemCannotFindFile,
+      );
+
+      expect(() => fs.currentDirectory, throwsToolExit(message: 'Unable to read current working directory'));
+
+      // Error is not caught by other operations.
+      expect(() => fs.file('foo').readAsStringSync(), throwsFileSystemException(kSystemCannotFindFile));
     });
   });
 

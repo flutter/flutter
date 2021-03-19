@@ -13,7 +13,6 @@ import 'theme.dart';
 class ElevationOverlay {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
-  // ignore: unused_element
   ElevationOverlay._();
 
   /// Applies an overlay color to a surface color to indicate
