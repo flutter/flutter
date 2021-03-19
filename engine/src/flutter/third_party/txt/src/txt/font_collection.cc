@@ -295,6 +295,10 @@ std::shared_ptr<minikin::FontFamily> FontCollection::CreateMinikinFontFamily(
     }
   }
 
+  if (skia_typefaces.empty()) {
+    return nullptr;
+  }
+
   SortSkTypefaces(skia_typefaces);
 
   std::vector<minikin::Font> minikin_fonts;
