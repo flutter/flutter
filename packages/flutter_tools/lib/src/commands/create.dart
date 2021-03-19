@@ -243,8 +243,8 @@ class CreateCommand extends CreateBase {
       macos: featureFlags.isMacOSEnabled && platforms.contains('macos'),
       windows: featureFlags.isWindowsEnabled && platforms.contains('windows'),
       windowsUwp: featureFlags.isWindowsUwpEnabled && platforms.contains('winuwp'),
-      // Enable null-safety for sample code, which is - unlike our regular templates - already migrated.
-      dartSdkVersionBounds: sampleCode != null ? '">=2.12.0-0 <3.0.0"' : '">=2.7.0 <3.0.0"'
+      // Enable null safety everywhere.
+      dartSdkVersionBounds: '">=2.12.0 <3.0.0"'
     );
 
     final String relativeDirPath = globals.fs.path.relative(projectDirPath);
