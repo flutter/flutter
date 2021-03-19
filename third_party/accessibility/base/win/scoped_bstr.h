@@ -83,10 +83,8 @@ class BASE_EXPORT ScopedBstr {
   bool operator==(const ScopedBstr& bstr2) const = delete;
   bool operator!=(const ScopedBstr& bstr2) const = delete;
 
- protected:
-  BSTR bstr_ = nullptr;
-
  private:
+  BSTR bstr_ = nullptr;
   BASE_DISALLOW_COPY_AND_ASSIGN(ScopedBstr);
 };
 
