@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/runner/local_engine.dart';
-import 'package:matcher/matcher.dart';
 
 import '../../src/common.dart';
 

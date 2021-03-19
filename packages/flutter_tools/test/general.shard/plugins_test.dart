@@ -30,7 +30,6 @@ import '../src/common.dart';
 import '../src/context.dart' hide FakeOperatingSystemUtils;
 import '../src/fakes.dart';
 import '../src/pubspec_schema.dart';
-import '../src/testbed.dart';
 
 void main() {
   group('plugins', () {
