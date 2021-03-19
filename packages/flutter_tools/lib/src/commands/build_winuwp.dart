@@ -6,7 +6,6 @@
 
 import 'package:meta/meta.dart';
 
-import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../build_info.dart';
 import '../cache.dart';
