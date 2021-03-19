@@ -15,6 +15,7 @@ import 'stack_frame.dart';
 // late bool draconisAlive;
 // late bool draconisAmulet;
 // late Diagnosticable draconis;
+// void methodThatMayThrow() { }
 
 /// Signature for [FlutterError.onError] handler.
 typedef FlutterExceptionHandler = void Function(FlutterErrorDetails details);
