@@ -855,9 +855,9 @@ class TextPainter {
   /// visually contiguous.
   ///
   /// Leading or trailing newline characters will be represented by zero-width
-  /// [Textbox]es.
+  /// `Textbox`es.
   ///
-  /// The method only returns [TextBox]s of glyphs that are entirely enclosed by
+  /// The method only returns `TextBox`es of glyphs that are entirely enclosed by
   /// the given `selection`: a multi-code-unit glyph will be excluded if only
   /// part of its code units are in `selection`.
   List<TextBox> getBoxesForSelection(
