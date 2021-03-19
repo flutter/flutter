@@ -5,10 +5,9 @@
 #ifndef UI_GFX_RANGE_RANGE_H_
 #define UI_GFX_RANGE_RANGE_H_
 
-#include <stddef.h>
-#include <stdint.h>
-
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
 #include <limits>
 #include <ostream>
 #include <string>

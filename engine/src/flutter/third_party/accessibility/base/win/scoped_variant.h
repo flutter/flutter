@@ -8,7 +8,8 @@
 #include <windows.h>
 
 #include <oleauto.h>
-#include <stdint.h>
+
+#include <cstdint>
 
 #include "base/base_export.h"
 #include "base/macros.h"

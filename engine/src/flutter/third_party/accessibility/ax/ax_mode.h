@@ -5,8 +5,7 @@
 #ifndef UI_ACCESSIBILITY_AX_MODE_H_
 #define UI_ACCESSIBILITY_AX_MODE_H_
 
-#include <stdint.h>
-
+#include <cstdint>
 #include <ostream>
 #include <string>
 

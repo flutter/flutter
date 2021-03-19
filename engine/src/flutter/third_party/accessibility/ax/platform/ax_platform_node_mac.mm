@@ -5,16 +5,16 @@
 #import "ax_platform_node_mac.h"
 
 #import <Cocoa/Cocoa.h>
-#include <stddef.h>
+
+#include <cstddef>
 
 #include "ax/ax_action_data.h"
 #include "ax/ax_node_data.h"
 #include "ax/ax_role_properties.h"
-#include "base/no_destructor.h"
-#import "gfx/mac/coordinate_conversion.h"
-
 #include "ax_platform_node.h"
 #include "ax_platform_node_delegate.h"
+#include "base/no_destructor.h"
+#import "gfx/mac/coordinate_conversion.h"
 
 namespace {
 

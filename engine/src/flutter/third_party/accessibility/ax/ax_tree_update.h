@@ -5,9 +5,8 @@
 #ifndef UI_ACCESSIBILITY_AX_TREE_UPDATE_H_
 #define UI_ACCESSIBILITY_AX_TREE_UPDATE_H_
 
-#include <stddef.h>
-#include <stdint.h>
-
+#include <cstddef>
+#include <cstdint>
 #include <string>
 #include <unordered_map>
 #include <vector>

@@ -5,7 +5,7 @@
 #ifndef ACCESSIBILITY_GFX_NATIVE_WIDGET_TYPES_H_
 #define ACCESSIBILITY_GFX_NATIVE_WIDGET_TYPES_H_
 
-#include <stdint.h>
+#include <cstdint>
 
 #include "ax_build/build_config.h"
 #include "gfx/gfx_export.h"

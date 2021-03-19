@@ -5,7 +5,7 @@
 #ifndef UI_ACCESSIBILITY_AX_TREE_OBSERVER_H_
 #define UI_ACCESSIBILITY_AX_TREE_OBSERVER_H_
 
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 #include <vector>
 

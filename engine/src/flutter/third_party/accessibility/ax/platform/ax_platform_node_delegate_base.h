@@ -5,8 +5,7 @@
 #ifndef UI_ACCESSIBILITY_PLATFORM_AX_PLATFORM_NODE_DELEGATE_BASE_H_
 #define UI_ACCESSIBILITY_PLATFORM_AX_PLATFORM_NODE_DELEGATE_BASE_H_
 
-#include <stdint.h>
-
+#include <cstdint>
 #include <memory>
 #include <set>
 #include <string>

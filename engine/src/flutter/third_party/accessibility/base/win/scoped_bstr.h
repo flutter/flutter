@@ -8,7 +8,8 @@
 #include <windows.h>
 
 #include <oleauto.h>
-#include <stddef.h>
+
+#include <cstddef>
 
 #include "base/base_export.h"
 #include "base/logging.h"

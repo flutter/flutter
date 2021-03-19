@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <stdint.h>
 #include <wrl/client.h>
 #include <wrl/implements.h>
 
+#include <cstdint>
 #include <utility>
 
 #include "base/win/dispatch_stub.h"

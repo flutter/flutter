@@ -4,7 +4,7 @@
 
 #include "ax_table_info.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "ax_constants.h"
 #include "ax_enums.h"

@@ -4,7 +4,7 @@
 
 #include "base/win/scoped_bstr.h"
 
-#include <stdint.h>
+#include <cstdint>
 
 #include "base/logging.h"
 #include "base/numerics/safe_conversions.h"
