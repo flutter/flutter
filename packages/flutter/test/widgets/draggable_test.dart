@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/semantics.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 
@@ -3082,6 +3082,51 @@ void main() {
     );
 
     expect(tester.widget<MetaData>(find.byType(MetaData)).behavior, hitTestBehavior);
+  });
+
+  testWidgets(
+      'configurable LongPressDraggable with opaque hit test behavior and false rootOverlay',
+      (WidgetTester tester) async {
+    const HitTestBehavior hitTestBehavior = HitTestBehavior.opaque;
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: LongPressDraggable<int>(
+          hitTestBehavior: hitTestBehavior,
+          feedback: SizedBox(height: 50.0, child: Text('Draggable')),
+          child: SizedBox(height: 50.0, child: Text('Target')),
+        ),
+      ),
+    );
+
+    final LongPressDraggable<int> widgetFound =
+        tester.widget<LongPressDraggable<int>>(find.byWidgetPredicate(
+            (Widget widget) => widget is LongPressDraggable<int>));
+    expect(widgetFound.hitTestBehavior, hitTestBehavior);
+
+    expect(widgetFound.rootOverlay, isFalse);
+  });
+
+  testWidgets(
+      'configurable LongPressDraggable with deferToChild hit test behavior and true rootOverlay',
+      (WidgetTester tester) async {
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: LongPressDraggable<int>(
+          rootOverlay: true,
+          feedback: SizedBox(height: 50.0, child: Text('Draggable')),
+          child: SizedBox(height: 50.0, child: Text('Target')),
+        ),
+      ),
+    );
+
+    final LongPressDraggable<int> widgetFound =
+        tester.widget<LongPressDraggable<int>>(find.byWidgetPredicate(
+            (Widget widget) => widget is LongPressDraggable<int>));
+    expect(widgetFound.hitTestBehavior, HitTestBehavior.deferToChild);
+
+    expect(widgetFound.rootOverlay, isTrue);
   });
 }
 
