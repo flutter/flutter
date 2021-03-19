@@ -5,10 +5,9 @@
 #ifndef UI_ACCESSIBILITY_AX_NODE_H_
 #define UI_ACCESSIBILITY_AX_NODE_H_
 
-#include <stdint.h>
-#include <optional>
-
+#include <cstdint>
 #include <memory>
+#include <optional>
 #include <ostream>
 #include <string>
 #include <vector>

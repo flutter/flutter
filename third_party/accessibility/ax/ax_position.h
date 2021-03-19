@@ -5,8 +5,8 @@
 #ifndef UI_ACCESSIBILITY_AX_POSITION_H_
 #define UI_ACCESSIBILITY_AX_POSITION_H_
 
-#include <math.h>
-#include <stdint.h>
+#include <cmath>
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <ostream>

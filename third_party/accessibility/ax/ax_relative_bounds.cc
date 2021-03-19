@@ -4,7 +4,7 @@
 
 #include "ax_relative_bounds.h"
 
-#include <math.h>
+#include <cmath>
 
 #include "ax_enum_util.h"
 #include "base/string_utils.h"

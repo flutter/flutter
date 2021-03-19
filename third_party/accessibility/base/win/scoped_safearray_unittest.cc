@@ -5,9 +5,8 @@
 #include "base/win/scoped_safearray.h"
 #include "base/test/gtest_util.h"
 
-#include <stddef.h>
-
 #include <array>
+#include <cstddef>
 #include <vector>
 
 #include "gtest/gtest.h"

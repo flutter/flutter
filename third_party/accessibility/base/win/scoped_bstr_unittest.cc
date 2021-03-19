@@ -4,7 +4,7 @@
 
 #include "base/win/scoped_bstr.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "gtest/gtest.h"
 

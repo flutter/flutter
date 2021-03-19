@@ -10,8 +10,7 @@
 #ifndef UI_GFX_GEOMETRY_VECTOR2D_H_
 #define UI_GFX_GEOMETRY_VECTOR2D_H_
 
-#include <stdint.h>
-
+#include <cstdint>
 #include <iosfwd>
 #include <string>
 

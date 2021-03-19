@@ -4,9 +4,8 @@
 
 #include "range.h"
 
-#include <inttypes.h>
-
 #include <algorithm>
+#include <cinttypes>
 
 #include "base/string_utils.h"
 
