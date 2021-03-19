@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/flutter/flutter/master/packages/flutter_tools/static/custom-devices.schema.json",
+  "$id": "https://raw.githubusercontent.com/flutter/flutter/stable/packages/flutter_tools/static/custom-devices.schema.json",
   "title": "Flutter Custom Devices",
   "description": "The schema for the flutter custom devices config file.",
   "type": "object",
@@ -97,6 +97,7 @@
           "forwardPortSuccessRegex": {
             "description": "A regular expression to be used to classify a successful port forwarding. As soon as any line of stdout or stderr of the forward port command matches this regex, the port forwarding is considered successful. The regex syntax is the standard dart syntax.",
             "type": ["string", "null"],
+            "format": "regex",
             "items": {
               "type": "string"
             },

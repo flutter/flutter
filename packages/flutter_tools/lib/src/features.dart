@@ -133,8 +133,6 @@ class FlutterFeatureFlags implements FeatureFlags {
     }
     return isEnabled;
   }
-
-
 }
 
 /// All current Flutter feature flags.
@@ -307,11 +305,9 @@ const Feature flutterFuchsiaFeature = Feature(
 );
 
 const Feature flutterCustomDevicesFeature = Feature(
-  name: 'alpha-quality support for custom, individually configured devices',
+  name: 'Early support for custom device types',
   configSetting: 'enable-custom-devices',
   environmentOverride: 'FLUTTER_CUSTOM_DEVICES',
-  extraHelpText: flutterNext ?
-  'Newer beta versions are available on the beta channel.' : null,
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
@@ -321,11 +317,11 @@ const Feature flutterCustomDevicesFeature = Feature(
     enabledByDefault: false,
   ),
   beta: FeatureChannelSetting(
-    available: flutterNext,
+    available: false,
     enabledByDefault: false,
   ),
   stable: FeatureChannelSetting(
-    available: flutterNext,
+    available: false,
     enabledByDefault: false,
   )
 );

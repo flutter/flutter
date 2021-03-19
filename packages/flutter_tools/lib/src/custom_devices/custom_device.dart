@@ -166,7 +166,6 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
       }
     }));
 
-    // just some cleanup once the forwarding completed
     unawaited(completer.future.whenComplete(() {
       logLinesSubscription.cancel();
       reader.dispose();
@@ -504,8 +503,8 @@ class CustomDevice extends Device {
   @override
   Future<void> dispose() async {
     _sessions
-        ..forEach((_, CustomDeviceAppSession session) => session.dispose())
-        ..clear();
+      ..forEach((_, CustomDeviceAppSession session) => session.dispose())
+      ..clear();
   }
 
   @override
@@ -538,13 +537,13 @@ class CustomDevice extends Device {
   }
 
   @override
-  Future<bool> isAppInstalled(covariant ApplicationPackage app, {String userIdentifier}) {
-    return Future<bool>.value(false);
+  Future<bool> isAppInstalled(covariant ApplicationPackage app, {String userIdentifier}) async {
+    return false;
   }
 
   @override
-  Future<bool> isLatestBuildInstalled(covariant ApplicationPackage app) {
-    return Future<bool>.value(false);
+  Future<bool> isLatestBuildInstalled(covariant ApplicationPackage app) async {
+    return false;
   }
 
   @override
@@ -578,9 +577,9 @@ class CustomDevice extends Device {
         processManager: _processManager,
         logger: _logger,
       );
-    } else {
-      return const NoOpDevicePortForwarder();
     }
+
+    return const NoOpDevicePortForwarder();
   }
 
   @override
