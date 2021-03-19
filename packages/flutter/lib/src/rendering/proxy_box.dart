@@ -15,7 +15,6 @@ import 'package:vector_math/vector_math_64.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'layout_helper.dart';
-import 'mouse_tracker.dart';
 import 'object.dart';
 
 export 'package:flutter/gestures.dart' show
