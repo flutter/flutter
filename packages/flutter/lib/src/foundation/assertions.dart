@@ -1105,7 +1105,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   /// containing the `catch` block with
   /// `@pragma('vm:notify-debugger-on-exception')` to allow an attached debugger
   /// to treat the exception as unhandled. This means instead of executing the
-  /// `catch` black, the debugger can break at the original source location from
+  /// `catch` block, the debugger can break at the original source location from
   /// which the exception was thrown.
   ///
   /// ```dart
