@@ -1269,8 +1269,8 @@ class DateRangePickerDialog extends StatefulWidget {
   /// considered. Their time fields are ignored.
   ///
   /// If [initialDateRange] is non-null, then it will be used as the initially
-  /// selected date range. If it is provided, [initialDateRange.start] must be
-  /// before or on [initialDateRange.end].
+  /// selected date range. If it is provided, `initialDateRange.start` must be
+  /// before or on `initialDateRange.end`.
   final DateTimeRange? initialDateRange;
 
   /// The earliest allowable date on the date range.
