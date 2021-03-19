@@ -14,7 +14,6 @@ import 'basic_types.dart';
 class MatrixUtils {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
-  // ignore: unused_element
   MatrixUtils._();
 
   /// Returns the given [transform] matrix as an [Offset], if the matrix is

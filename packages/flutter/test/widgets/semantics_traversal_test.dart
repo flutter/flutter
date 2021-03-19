@@ -4,11 +4,9 @@
 
 import 'dart:collection';
 import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -297,30 +295,28 @@ class TraversalTester {
   }) async {
     assert(children is LinkedHashMap);
     await tester.pumpWidget(
-        Container(
-            child: Directionality(
-              textDirection: textDirection,
-              child: Semantics(
-                textDirection: textDirection,
-                child: CustomMultiChildLayout(
-                  delegate: TestLayoutDelegate(children),
-                  children: children.keys.map<Widget>((String label) {
-                    return LayoutId(
-                      id: label,
-                      child: Semantics(
-                        container: true,
-                        explicitChildNodes: true,
-                        label: label,
-                        child: SizedBox(
-                          width: children[label]!.width,
-                          height: children[label]!.height,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
+        Directionality(
+          textDirection: textDirection,
+          child: Semantics(
+            textDirection: textDirection,
+            child: CustomMultiChildLayout(
+              delegate: TestLayoutDelegate(children),
+              children: children.keys.map<Widget>((String label) {
+                return LayoutId(
+                  id: label,
+                  child: Semantics(
+                    container: true,
+                    explicitChildNodes: true,
+                    label: label,
+                    child: SizedBox(
+                      width: children[label]!.width,
+                      height: children[label]!.height,
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
+          ),
         ),
     );
 

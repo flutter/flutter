@@ -72,9 +72,9 @@ import 'value_listenable_builder.dart';
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   return TweenAnimationBuilder(
+///   return TweenAnimationBuilder<double>(
 ///     tween: Tween<double>(begin: 0, end: targetValue),
-///     duration: Duration(seconds: 1),
+///     duration: const Duration(seconds: 1),
 ///     builder: (BuildContext context, double size, Widget? child) {
 ///       return IconButton(
 ///         iconSize: size,
@@ -87,7 +87,7 @@ import 'value_listenable_builder.dart';
 ///         },
 ///       );
 ///     },
-///     child: Icon(Icons.aspect_ratio),
+///     child: const Icon(Icons.aspect_ratio),
 ///   );
 /// }
 /// ```

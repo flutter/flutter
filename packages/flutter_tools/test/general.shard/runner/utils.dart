@@ -4,10 +4,7 @@
 
 // @dart = 2.8
 
-import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:mockito/mockito.dart';
 
 typedef CommandFunction = Future<FlutterCommandResult> Function();
 
@@ -39,7 +36,3 @@ class DummyFlutterCommand extends FlutterCommand {
     return commandFunction == null ? FlutterCommandResult.fail() : await commandFunction();
   }
 }
-
-class MockitoCache extends Mock implements Cache {}
-
-class MockitoUsage extends Mock implements Usage {}

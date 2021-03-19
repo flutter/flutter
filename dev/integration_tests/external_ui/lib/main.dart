@@ -11,10 +11,12 @@ import 'package:flutter_driver/driver_extension.dart';
 void main() {
   enableFlutterDriverExtension();
   debugPrint('Application starting...');
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
+  const MyApp({Key key}) : super(key: key);
+
   @override
   State createState() => MyAppState();
 }
@@ -134,10 +136,10 @@ Press play to produce texture frames.''';
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Container(
+              const SizedBox(
                 width: 300.0,
                 height: 200.0,
-                child: const Texture(textureId: 0),
+                child: Texture(textureId: 0),
               ),
               Container(
                 width: 300.0,

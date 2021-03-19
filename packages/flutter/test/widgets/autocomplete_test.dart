@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class User {
@@ -213,7 +212,7 @@ void main() {
     late Iterable<User> lastOptions;
     late AutocompleteOnSelected<User> lastOnSelected;
     late User lastUserSelected;
-    late final AutocompleteOptionToString<User> displayStringForOption = (User option) => option.name;
+    String displayStringForOption(User option) => option.name;
     late FocusNode focusNode;
     late TextEditingController textEditingController;
 

@@ -608,6 +608,7 @@ void main() {
          hasMoveCursorBackwardByCharacterAction: true,
          hasMoveCursorForwardByWordAction: true,
          hasMoveCursorBackwardByWordAction: true,
+         hasSetTextAction: true,
          hasSetSelectionAction: true,
          hasCopyAction: true,
          hasCutAction: true,

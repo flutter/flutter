@@ -69,12 +69,16 @@ const _DayPickerGridDelegate _kDayPickerGridDelegate = _DayPickerGridDelegate();
 ///
 @Deprecated(
   'Use CalendarDatePicker instead. '
-  'This feature was deprecated after v1.15.3.'
+  'This feature was deprecated after v1.26.0-18.0.pre.'
 )
 class DayPicker extends StatelessWidget {
   /// Creates a day picker.
   ///
   /// Rarely used directly. Instead, typically used as part of a [MonthPicker].
+  @Deprecated(
+    'Use CalendarDatePicker instead. '
+    'This feature was deprecated after v1.26.0-18.0.pre.'
+  )
   DayPicker({
     Key? key,
     required this.selectedDate,
@@ -310,7 +314,7 @@ class DayPicker extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Column(
         children: <Widget>[
-          Container(
+          SizedBox(
             height: _kDayPickerRowHeight,
             child: Center(
               child: ExcludeSemantics(
@@ -351,13 +355,17 @@ class DayPicker extends StatelessWidget {
 ///
 @Deprecated(
   'Use CalendarDatePicker instead. '
-  'This feature was deprecated after v1.15.3.'
+  'This feature was deprecated after v1.26.0-18.0.pre.'
 )
 class MonthPicker extends StatefulWidget {
   /// Creates a month picker.
   ///
   /// Rarely used directly. Instead, typically used as part of the dialog shown
   /// by [showDatePicker].
+  @Deprecated(
+    'Use CalendarDatePicker instead. '
+    'This feature was deprecated after v1.26.0-18.0.pre.'
+  )
   MonthPicker({
     Key? key,
     required this.selectedDate,

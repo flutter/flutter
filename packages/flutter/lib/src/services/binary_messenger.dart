@@ -15,7 +15,8 @@ typedef MessageHandler = Future<ByteData?>? Function(ByteData? message);
 ///
 /// This class also registers handlers for incoming messages.
 abstract class BinaryMessenger {
-  /// A const constructor to allow subclasses to be const.
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const BinaryMessenger();
 
   /// Calls the handler registered for the given channel.

@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'stock_types.dart';
 
 class StockSettings extends StatefulWidget {
-  const StockSettings(this.configuration, this.updater);
+  const StockSettings(this.configuration, this.updater, {Key key}) : super(key: key);
 
   final StockConfiguration configuration;
   final ValueChanged<StockConfiguration> updater;

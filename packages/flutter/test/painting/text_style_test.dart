@@ -4,8 +4,88 @@
 
 import 'dart:ui' as ui show TextStyle, ParagraphStyle, FontFeature, Shadow;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+// This matcher verifies ui.TextStyle.toString (from dart:ui) reports a superset
+// of the given TextStyle's (from painting.dart) properties.
+class _DartUiTextStyleToStringMatcher extends Matcher {
+  _DartUiTextStyleToStringMatcher(this.textStyle);
+
+  final TextStyle textStyle;
+
+  late final List<String> propertiesInOrder = <String>[
+    _propertyToString('color', textStyle.color),
+    _propertyToString('decoration', textStyle.decoration),
+    _propertyToString('decorationColor', textStyle.decorationColor),
+    _propertyToString('decorationStyle', textStyle.decorationStyle),
+    _propertyToString('decorationThickness', textStyle.decorationThickness),
+    _propertyToString('fontWeight', textStyle.fontWeight),
+    _propertyToString('fontStyle', textStyle.fontStyle),
+    _propertyToString('textBaseline', textStyle.textBaseline),
+    _propertyToString('fontFamily', textStyle.fontFamily),
+    _propertyToString('fontFamilyFallback', textStyle.fontFamilyFallback),
+    _propertyToString('fontSize', textStyle.fontSize),
+    _propertyToString('letterSpacing', textStyle.letterSpacing),
+    _propertyToString('wordSpacing', textStyle.wordSpacing),
+    _propertyToString('height', textStyle.height),
+    // TODO(LongCatIsLooong): web support for
+    // https://github.com/flutter/flutter/issues/72521
+    if (!kIsWeb) _propertyToString('leadingDistribution', textStyle.leadingDistribution),
+    _propertyToString('locale', textStyle.locale),
+    _propertyToString('background', textStyle.background),
+    _propertyToString('foreground', textStyle.foreground),
+    _propertyToString('shadows', textStyle.shadows),
+    _propertyToString('fontFeatures', textStyle.fontFeatures),
+  ];
+
+  static String _propertyToString(String name, Object? property) => '$name: ${property ?? 'unspecified'}';
+
+  @override
+  Description describe(Description description) => description.add('is a superset of $textStyle.');
+
+  @override
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+    final String description = item.toString();
+    const String prefix = 'TextStyle(';
+    const String suffix = ')';
+    if (!description.startsWith(prefix) || !description.endsWith(suffix))
+      return false;
+
+    final String propertyDescription = description.substring(
+      prefix.length,
+      description.length - suffix.length,
+    );
+    int startIndex = 0;
+    for (final String property in propertiesInOrder) {
+      startIndex = propertyDescription.indexOf(property, startIndex);
+      if (startIndex < 0) {
+        matchState['missingProperty'] = property;
+        return false;
+      }
+      startIndex += property.length;
+    }
+    return true;
+  }
+
+  @override
+  Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
+    final Description description = super.describeMismatch(item, mismatchDescription, matchState, verbose);
+    final String? property = matchState['missingProperty'] as String?;
+    if (property != null) {
+      description.add("expect property: '$property'");
+      final int propertyIndex = propertiesInOrder.indexOf(property);
+      if (propertyIndex > 0) {
+        description.add(" after: '${propertiesInOrder[propertyIndex - 1]}'");
+      }
+      description.add('\n');
+    }
+    return description;
+  }
+}
+
+Matcher matchesToStringOf(TextStyle textStyle) => _DartUiTextStyleToStringMatcher(textStyle);
 
 void main() {
   test('TextStyle control test', () {
@@ -39,7 +119,11 @@ void main() {
       equals('TextStyle(inherit: false, size: 10.0, weight: 800, height: 123.0x)'),
     );
 
-    final TextStyle s2 = s1.copyWith(color: const Color(0xFF00FF00), height: 100.0);
+    final TextStyle s2 = s1.copyWith(
+      color: const Color(0xFF00FF00),
+      height: 100.0,
+      leadingDistribution: TextLeadingDistribution.even,
+    );
     expect(s1.fontFamily, isNull);
     expect(s1.fontSize, 10.0);
     expect(s1.fontWeight, FontWeight.w800);
@@ -50,11 +134,12 @@ void main() {
     expect(s2.fontWeight, FontWeight.w800);
     expect(s2.height, 100.0);
     expect(s2.color, const Color(0xFF00FF00));
+    expect(s2.leadingDistribution, TextLeadingDistribution.even);
     expect(s2, isNot(equals(s1)));
     expect(
       s2.toString(),
       equals(
-        'TextStyle(inherit: true, color: Color(0xff00ff00), size: 10.0, weight: 800, height: 100.0x)',
+        'TextStyle(inherit: true, color: Color(0xff00ff00), size: 10.0, weight: 800, height: 100.0x, leadingDistribution: even)',
       ),
     );
 
@@ -86,6 +171,7 @@ void main() {
     expect(s2.fontWeight, FontWeight.w800);
     expect(s2.height, 100.0);
     expect(s2.color, const Color(0xFF00FF00));
+    expect(s2.leadingDistribution, TextLeadingDistribution.even);
     expect(s2, isNot(equals(s1)));
     expect(s2, isNot(equals(s4)));
     expect(s4.fontFamily, isNull);
@@ -93,6 +179,7 @@ void main() {
     expect(s4.fontWeight, FontWeight.w800);
     expect(s4.height, 123.0);
     expect(s4.color, const Color(0xFF00FF00));
+    expect(s4.leadingDistribution, TextLeadingDistribution.even);
 
     final TextStyle s5 = TextStyle.lerp(s1, s3, 0.25)!;
     expect(s1.fontFamily, isNull);
@@ -169,17 +256,22 @@ void main() {
 
     final ui.TextStyle ts5 = s5.getTextStyle();
     expect(ts5, equals(ui.TextStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: 123.0)));
-    expect(ts5.toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, decorationThickness: unspecified, fontWeight: FontWeight.w700, fontStyle: unspecified, textBaseline: unspecified, fontFamily: unspecified, fontFamilyFallback: unspecified, fontSize: 12.0, letterSpacing: unspecified, wordSpacing: unspecified, height: 123.0x, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified, fontFeatures: unspecified)');
+    expect(ts5, matchesToStringOf(s5));
     final ui.TextStyle ts2 = s2.getTextStyle();
-    expect(ts2, equals(ui.TextStyle(color: const Color(0xFF00FF00), fontWeight: FontWeight.w800, fontSize: 10.0, height: 100.0)));
-    expect(ts2.toString(), 'TextStyle(color: Color(0xff00ff00), decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, decorationThickness: unspecified, fontWeight: FontWeight.w800, fontStyle: unspecified, textBaseline: unspecified, fontFamily: unspecified, fontFamilyFallback: unspecified, fontSize: 10.0, letterSpacing: unspecified, wordSpacing: unspecified, height: 100.0x, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified, fontFeatures: unspecified)');
+    expect(ts2, equals(ui.TextStyle(color: const Color(0xFF00FF00), fontWeight: FontWeight.w800, fontSize: 10.0, height: 100.0, leadingDistribution: TextLeadingDistribution.even)));
+    expect(ts2, matchesToStringOf(s2));
 
     final ui.ParagraphStyle ps2 = s2.getParagraphStyle(textAlign: TextAlign.center);
-    expect(ps2, equals(ui.ParagraphStyle(textAlign: TextAlign.center, fontWeight: FontWeight.w800, fontSize: 10.0, height: 100.0)));
+    expect(
+      ps2,
+      equals(ui.ParagraphStyle(textAlign: TextAlign.center, fontWeight: FontWeight.w800, fontSize: 10.0, height: 100.0, textHeightBehavior: const TextHeightBehavior(leadingDistribution: TextLeadingDistribution.even))),
+    );
     final ui.ParagraphStyle ps5 = s5.getParagraphStyle();
-    expect(ps5, equals(ui.ParagraphStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: 123.0)));
+    expect(
+      ps5,
+      equals(ui.ParagraphStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: 123.0)),
+    );
   });
-
 
   test('TextStyle with text direction', () {
     final ui.ParagraphStyle ps6 = const TextStyle().getParagraphStyle(textDirection: TextDirection.ltr);
@@ -192,11 +284,11 @@ void main() {
   test('TextStyle using package font', () {
     const TextStyle s6 = TextStyle(fontFamily: 'test');
     expect(s6.fontFamily, 'test');
-    expect(s6.getTextStyle().toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, decorationThickness: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: test, fontFamilyFallback: unspecified, fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified, fontFeatures: unspecified)');
+    expect(s6.getTextStyle(), matchesToStringOf(s6));
 
     const TextStyle s7 = TextStyle(fontFamily: 'test', package: 'p');
     expect(s7.fontFamily, 'packages/p/test');
-    expect(s7.getTextStyle().toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, decorationThickness: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: packages/p/test, fontFamilyFallback: unspecified, fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified, fontFeatures: unspecified)');
+    expect(s7.getTextStyle(), matchesToStringOf(s7));
 
     const TextStyle s8 = TextStyle(fontFamilyFallback: <String>['test', 'test2'], package: 'p');
     expect(s8.fontFamilyFallback![0], 'packages/p/test');
@@ -232,7 +324,7 @@ void main() {
     expect(s4.fontFamilyFallback!.isEmpty, true);
 
     final ui.TextStyle uis1 = s2.getTextStyle();
-    expect(uis1.toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, decorationThickness: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: foo, fontFamilyFallback: [Roboto, test], fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified, fontFeatures: unspecified)');
+    expect(uis1, matchesToStringOf(s2));
 
     expect(s2.apply().fontFamily, 'foo');
     expect(s2.apply().fontFamilyFallback, const <String>['Roboto', 'test']);
@@ -266,6 +358,11 @@ void main() {
     const TextStyle b = TextStyle(fontFamilyFallback: <String>['Noto'], shadows: <ui.Shadow>[ui.Shadow()], fontFeatures: <ui.FontFeature>[ui.FontFeature('abcd')]);
     expect(a.hashCode, a.hashCode);
     expect(a.hashCode, isNot(equals(b.hashCode)));
+
+    const TextStyle c = TextStyle(leadingDistribution: TextLeadingDistribution.even);
+    const TextStyle d = TextStyle(leadingDistribution: TextLeadingDistribution.proportional);
+    expect(c.hashCode, c.hashCode);
+    expect(c.hashCode, isNot(d.hashCode));
   });
 
   test('TextStyle foreground and color combos', () {
@@ -374,7 +471,14 @@ void main() {
   });
 
   test('TextStyle apply', () {
-    const TextStyle style = TextStyle(fontSize: 10, shadows: <ui.Shadow>[], fontStyle: FontStyle.normal, fontFeatures: <ui.FontFeature>[], textBaseline: TextBaseline.alphabetic);
+    const TextStyle style = TextStyle(
+      fontSize: 10,
+      shadows: <ui.Shadow>[],
+      fontStyle: FontStyle.normal,
+      fontFeatures: <ui.FontFeature>[],
+      textBaseline: TextBaseline.alphabetic,
+      leadingDistribution: TextLeadingDistribution.even,
+    );
     expect(style.apply().shadows, const <ui.Shadow>[]);
     expect(style.apply(shadows: const <ui.Shadow>[ui.Shadow(blurRadius: 2.0)]).shadows, const <ui.Shadow>[ui.Shadow(blurRadius: 2.0)]);
     expect(style.apply().fontStyle, FontStyle.normal);
@@ -385,5 +489,10 @@ void main() {
     expect(style.apply(fontFeatures: const <ui.FontFeature>[ui.FontFeature.enable('test')]).fontFeatures, const <ui.FontFeature>[ui.FontFeature.enable('test')]);
     expect(style.apply().textBaseline, TextBaseline.alphabetic);
     expect(style.apply(textBaseline: TextBaseline.ideographic).textBaseline, TextBaseline.ideographic);
+    expect(style.apply().leadingDistribution, TextLeadingDistribution.even);
+    expect(
+      style.apply(leadingDistribution: TextLeadingDistribution.proportional).leadingDistribution,
+      TextLeadingDistribution.proportional,
+    );
   });
 }

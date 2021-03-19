@@ -436,7 +436,7 @@ class RenderStack extends RenderBox
   }
 
   /// Helper function for calculating the intrinsics metrics of a Stack.
-  static double getIntrinsicDimension(RenderBox? firstChild, double mainChildSizeGetter(RenderBox child)) {
+  static double getIntrinsicDimension(RenderBox? firstChild, double Function(RenderBox child) mainChildSizeGetter) {
     double extent = 0.0;
     RenderBox? child = firstChild;
     while (child != null) {

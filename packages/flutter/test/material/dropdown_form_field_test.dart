@@ -7,12 +7,11 @@ import 'dart:ui' show window;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 import '../rendering/mock_canvas.dart';
 
 const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
-final ValueChanged<String?> onChanged = (_) { };
+void onChanged<T>(T _) { }
 final Type dropdownButtonType = DropdownButton<String>(
   onChanged: (_) { },
   items: const <DropdownMenuItem<String>>[],
@@ -66,7 +65,7 @@ Widget buildFormFrame({
             iconEnabledColor: iconEnabledColor,
             isDense: isDense,
             isExpanded: isExpanded,
-            items: items == null ? null : items.map<DropdownMenuItem<String>>((String item) {
+            items: items?.map<DropdownMenuItem<String>>((String item) {
               return DropdownMenuItem<String>(
                 key: ValueKey<String>(item),
                 value: item,

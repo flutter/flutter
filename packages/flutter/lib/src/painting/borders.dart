@@ -38,14 +38,14 @@ enum BorderStyle {
 ///
 /// ```dart
 /// Container(
-///   padding: EdgeInsets.all(8.0),
+///   padding: const EdgeInsets.all(8.0),
 ///   decoration: BoxDecoration(
 ///     border: Border(
 ///       top: BorderSide(width: 16.0, color: Colors.lightBlue.shade50),
 ///       bottom: BorderSide(width: 16.0, color: Colors.lightBlue.shade900),
 ///     ),
 ///   ),
-///   child: Text('Flutter in the sky', textAlign: TextAlign.center),
+///   child: const Text('Flutter in the sky', textAlign: TextAlign.center),
 /// )
 /// ```
 /// {@end-tool}

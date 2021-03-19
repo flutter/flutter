@@ -663,6 +663,22 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
     this.bottom = 0.0,
   });
 
+  /// Creates insets where all the offsets are `value`.
+  ///
+  /// {@tool snippet}
+  ///
+  /// Typical eight-pixel margin on all sides:
+  ///
+  /// ```dart
+  /// const EdgeInsetsDirectional.all(8.0)
+  /// ```
+  /// {@end-tool}
+  const EdgeInsetsDirectional.all(double value)
+    : start = value,
+      top = value,
+      end = value,
+      bottom = value;
+
   /// An [EdgeInsetsDirectional] with zero offsets in each direction.
   ///
   /// Consider using [EdgeInsets.zero] instead, since that object has the same

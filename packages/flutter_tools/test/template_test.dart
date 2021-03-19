@@ -10,12 +10,12 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/template.dart';
-import 'package:mockito/mockito.dart';
 import 'src/common.dart';
 
 void main() {
   testWithoutContext('Template.render throws ToolExit when FileSystem exception is raised', () {
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final FileExceptionHandler handler = FileExceptionHandler();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
     final Template template = Template(
       fileSystem.directory('examples'),
       fileSystem.currentDirectory,
@@ -25,11 +25,11 @@ void main() {
       templateRenderer: FakeTemplateRenderer(),
       templateManifest: null,
     );
-    final MockDirectory mockDirectory = MockDirectory();
-    when(mockDirectory.createSync(recursive: true)).thenThrow(const FileSystemException());
+    final Directory directory = fileSystem.directory('foo');
+    handler.addError(directory, FileSystemOp.create, const FileSystemException());
 
-    expect(() => template.render(mockDirectory, <String, Object>{}),
-        throwsToolExit());
+    expect(() => template.render(directory, <String, Object>{}),
+      throwsToolExit());
   });
 
   testWithoutContext('Template.render replaces .img.tmpl files with files from the image source', () {
@@ -59,8 +59,6 @@ void main() {
     expect(destinationImage.readAsBytesSync(), equals(sourceImage.readAsBytesSync()));
   });
 }
-
-class MockDirectory extends Mock implements Directory {}
 
 class FakeTemplateRenderer extends TemplateRenderer {
   @override

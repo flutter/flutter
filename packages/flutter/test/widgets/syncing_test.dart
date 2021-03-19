@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -51,7 +52,9 @@ void main() {
   testWidgets('no change', (WidgetTester tester) async {
     await tester.pumpWidget(
       Container(
+        color: Colors.blue,
         child: Container(
+          color: Colors.blue,
           child: TestWidget(
             persistentState: 1,
             syncedState: 0,
@@ -68,7 +71,9 @@ void main() {
 
     await tester.pumpWidget(
       Container(
+        color: Colors.blue,
         child: Container(
+          color: Colors.blue,
           child: TestWidget(
             persistentState: 2,
             syncedState: 0,
@@ -87,7 +92,9 @@ void main() {
   testWidgets('remove one', (WidgetTester tester) async {
     await tester.pumpWidget(
       Container(
+        color: Colors.blue,
         child: Container(
+          color: Colors.blue,
           child: TestWidget(
             persistentState: 10,
             syncedState: 0,
@@ -104,6 +111,7 @@ void main() {
 
     await tester.pumpWidget(
       Container(
+        color: Colors.green,
         child: TestWidget(
           persistentState: 11,
           syncedState: 0,

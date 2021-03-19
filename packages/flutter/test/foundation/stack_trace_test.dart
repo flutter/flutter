@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
+
 import 'package:flutter/foundation.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   // TODO(ianh): These tests and the filtering mechanism should be revisited to

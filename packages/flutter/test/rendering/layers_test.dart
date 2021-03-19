@@ -215,7 +215,7 @@ void main() {
     );
   });
 
-  void checkNeedsAddToScene(Layer layer, void mutateCallback()) {
+  void checkNeedsAddToScene(Layer layer, void Function() mutateCallback) {
     layer.debugMarkClean();
     layer.updateSubtreeNeedsAddToScene();
     expect(layer.debugSubtreeNeedsAddToScene, false);

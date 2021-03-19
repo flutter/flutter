@@ -15,11 +15,14 @@ import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 
 void main() {
   testWithoutContext('FlutterValidator shows an error message if gen_snapshot is '
     'downloaded and exits with code 1', () async {
-    final MockFlutterVersion flutterVersion = MockFlutterVersion();
+    final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+      frameworkVersion: '1.0.0',
+    );
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final Artifacts artifacts = Artifacts.test();
     final FlutterValidator flutterValidator = FlutterValidator(
@@ -46,7 +49,7 @@ void main() {
 
     expect(await flutterValidator.validate(), matchDoctorValidation(
       validationType: ValidationType.partial,
-      statusInfo: 'Channel unknown, Unknown, on Linux, locale en_US.UTF-8',
+      statusInfo: 'Channel unknown, 1.0.0, on Linux, locale en_US.UTF-8',
       messages: containsAll(const <ValidationMessage>[
         ValidationMessage.error(
           'Downloaded executables cannot execute on host.\n'
@@ -60,13 +63,16 @@ void main() {
   });
 
   testWithoutContext('FlutterValidator does not run gen_snapshot binary check if it is not already downloaded', () async {
+    final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+      frameworkVersion: '1.0.0',
+    );
     final FlutterValidator flutterValidator = FlutterValidator(
       platform: FakePlatform(
         operatingSystem: 'windows',
         localeName: 'en_US.UTF-8',
         environment: <String, String>{},
       ),
-      flutterVersion: () => MockFlutterVersion(),
+      flutterVersion: () => flutterVersion,
       userMessages: UserMessages(),
       artifacts: Artifacts.test(),
       fileSystem: MemoryFileSystem.test(),
@@ -79,16 +85,15 @@ void main() {
     // fail if the gen_snapshot binary is not present.
     expect(await flutterValidator.validate(), matchDoctorValidation(
       validationType: ValidationType.installed,
-      statusInfo: 'Channel unknown, Unknown, on Windows, locale en_US.UTF-8',
+      statusInfo: 'Channel unknown, 1.0.0, on Windows, locale en_US.UTF-8',
       messages: anything,
     ));
   });
 
   testWithoutContext('FlutterValidator handles exception thrown by version checking', () async {
-    final MockFlutterVersion flutterVersion = MockFlutterVersion();
     final FlutterValidator flutterValidator = FlutterValidator(
       platform: FakePlatform(operatingSystem: 'windows', localeName: 'en_US.UTF-8'),
-      flutterVersion: () => flutterVersion,
+      flutterVersion: () => FakeThrowingFlutterVersion(),
       userMessages: UserMessages(),
       artifacts: Artifacts.test(),
       fileSystem: MemoryFileSystem.test(),
@@ -96,10 +101,6 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[]),
       flutterRoot: () => 'sdk/flutter',
     );
-
-    when(flutterVersion.channel).thenReturn('unknown');
-    when(flutterVersion.frameworkVersion).thenReturn('0.0.0');
-    when(flutterVersion.frameworkDate).thenThrow(VersionCheckError('version error'));
 
     expect(await flutterValidator.validate(), matchDoctorValidation(
       validationType: ValidationType.partial,
@@ -112,6 +113,9 @@ void main() {
   });
 
   testWithoutContext('FlutterValidator shows mirrors on pub and flutter cloud storage', () async {
+    final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+      frameworkVersion: '1.0.0',
+    );
     final Platform platform = FakePlatform(
       operatingSystem: 'windows',
       localeName: 'en_US.UTF-8',
@@ -120,7 +124,6 @@ void main() {
         'FLUTTER_STORAGE_BASE_URL': 'https://example.com/flutter',
       },
     );
-    final MockFlutterVersion flutterVersion = MockFlutterVersion();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final Artifacts artifacts = Artifacts.test();
     final FlutterValidator flutterValidator = FlutterValidator(
@@ -136,7 +139,7 @@ void main() {
 
     expect(await flutterValidator.validate(), matchDoctorValidation(
       validationType: ValidationType.installed,
-      statusInfo: 'Channel unknown, Unknown, on Windows, locale en_US.UTF-8',
+      statusInfo: 'Channel unknown, 1.0.0, on Windows, locale en_US.UTF-8',
       messages: containsAll(const <ValidationMessage>[
         ValidationMessage('Pub download mirror https://example.com/pub'),
         ValidationMessage('Flutter download mirror https://example.com/flutter'),
@@ -145,10 +148,16 @@ void main() {
   });
 }
 
-class MockFlutterVersion extends Mock implements FlutterVersion {}
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   FakeOperatingSystemUtils({this.name});
 
   @override
   final String name;
+}
+
+class FakeThrowingFlutterVersion extends FakeFlutterVersion {
+  @override
+   String get frameworkCommitDate {
+     throw VersionCheckError('version error');
+   }
 }

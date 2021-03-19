@@ -106,7 +106,7 @@ void main() {
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(color: hoverColor));
 
-    gesture.removePointer();
+    await gesture.removePointer();
   });
 
   testWidgets('OutlineButton changes mouse cursor when hovered', (WidgetTester tester) async {
@@ -1168,7 +1168,7 @@ void main() {
     const Key childKey = Key('test child');
 
     Future<void> buildTest(VisualDensity visualDensity, {bool useText = false}) async {
-      return await tester.pumpWidget(
+      return tester.pumpWidget(
         MaterialApp(
           home: Directionality(
             textDirection: TextDirection.rtl,
@@ -1221,6 +1221,26 @@ void main() {
     childRect = tester.getRect(find.byKey(childKey));
     expect(box.size, equals(const Size(76, 36)));
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
+  });
+
+  testWidgets('Fixed OutlineButton.icon RenderFlex overflow', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 200,
+            child: OutlineButton.icon(
+              onPressed: () {},
+              icon: const Icon(Icons.add),
+              label: const Text(
+                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut a euismod nibh. Morbi laoreet purus.',
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), null);
   });
 }
 

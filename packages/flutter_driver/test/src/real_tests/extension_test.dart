@@ -7,14 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_driver/flutter_driver.dart';
-import 'package:flutter_driver/src/common/diagnostics_tree.dart';
-import 'package:flutter_driver/src/common/find.dart';
-import 'package:flutter_driver/src/common/geometry.dart';
-import 'package:flutter_driver/src/common/request_data.dart';
-import 'package:flutter_driver/src/common/text.dart';
-import 'package:flutter_driver/src/common/wait.dart';
 import 'package:flutter_driver/src/extension/extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -56,7 +49,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -81,7 +74,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -117,7 +110,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -142,7 +135,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -159,7 +152,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -182,7 +175,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -201,7 +194,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -230,7 +223,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -259,7 +252,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -277,7 +270,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -310,7 +303,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -359,7 +352,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -410,7 +403,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -460,7 +453,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -532,8 +525,8 @@ void main() {
         alignment: Alignment.topLeft,
         child: Transform.translate(
           offset: const Offset(40, 30),
-          child: Container(
-            key: const ValueKey<int>(1),
+          child: const SizedBox(
+            key: ValueKey<int>(1),
             width: 100,
             height: 120,
           ),
@@ -567,14 +560,14 @@ void main() {
                 key: const ValueKey<String>('column'),
                 children: <Widget>[
                   const Text('Hello1', key: ValueKey<String>('text1')),
-                  Container(
+                  SizedBox(
                     height: 25.0,
                     child: RichText(
                       key: const ValueKey<String>('text2'),
                       text: const TextSpan(text: 'Hello2'),
                     ),
                   ),
-                  Container(
+                  SizedBox(
                     height: 25.0,
                     child: EditableText(
                       key: const ValueKey<String>('text3'),
@@ -585,18 +578,30 @@ void main() {
                       backgroundCursorColor: Colors.black,
                     ),
                   ),
-                  Container(
+                  SizedBox(
                     height: 25.0,
                     child: TextField(
                       key: const ValueKey<String>('text4'),
                       controller: TextEditingController(text: 'Hello4'),
                     ),
                   ),
-                  Container(
+                  SizedBox(
                     height: 25.0,
                     child: TextFormField(
                       key: const ValueKey<String>('text5'),
                       controller: TextEditingController(text: 'Hello5'),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 25.0,
+                    child: RichText(
+                      key: const ValueKey<String>('text6'),
+                      text: const TextSpan(children: <TextSpan>[
+                        TextSpan(text: 'Hello'),
+                        TextSpan(text: ', '),
+                        TextSpan(text: 'World'),
+                        TextSpan(text: '!'),
+                      ]),
                     ),
                   ),
                 ],
@@ -609,6 +614,7 @@ void main() {
       expect(await getTextInternal(ByValueKey('text3')), 'Hello3');
       expect(await getTextInternal(ByValueKey('text4')), 'Hello4');
       expect(await getTextInternal(ByValueKey('text5')), 'Hello5');
+      expect(await getTextInternal(ByValueKey('text6')), 'Hello, World!');
 
       // Check if error thrown for other types
       final Map<String, String> arguments = GetText(ByValueKey('column'), timeout: const Duration(seconds: 1)).serialize();
@@ -718,20 +724,20 @@ void main() {
       await tester.pumpWidget(
           MaterialApp(
             home: Center(
-                child: Container(
+                child: SizedBox(
                   key: const ValueKey<String>('parent'),
                   height: 100,
                   width: 100,
                   child: Center(
                     child: Row(
-                      children: <Widget>[
-                        Container(
-                          key: const ValueKey<String>('leftchild'),
+                      children: const <Widget>[
+                        SizedBox(
+                          key: ValueKey<String>('leftchild'),
                           width: 25,
                           height: 25,
                         ),
-                        Container(
-                          key: const ValueKey<String>('righttchild'),
+                        SizedBox(
+                          key: ValueKey<String>('righttchild'),
                           width: 25,
                           height: 25,
                         ),
@@ -774,7 +780,7 @@ void main() {
       Future<Offset?> getAncestorTopLeft() async {
         final Map<String, String> arguments = GetOffset(Ancestor(
           of: ByValueKey('leaf'),
-          matching: const ByType('Container'),
+          matching: const ByType('SizedBox'),
           firstMatchOnly: true,
         ), OffsetType.topLeft, timeout: const Duration(seconds: 1)).serialize();
         final Map<String, dynamic> response = await driverExtension.call(arguments);
@@ -786,18 +792,18 @@ void main() {
       }
 
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Center(
-            child: Container(
+            child: SizedBox(
               height: 200,
               width: 200,
               child: Center(
-                child: Container(
+                child: SizedBox(
                   height: 100,
                   width: 100,
                   child: Center(
-                    child: Container(
-                      key: const ValueKey<String>('leaf'),
+                    child: SizedBox(
+                      key: ValueKey<String>('leaf'),
                       height: 50,
                       width: 50,
                     ),
@@ -950,7 +956,7 @@ void main() {
 
       Future<Map<String, dynamic>> getText(SerializableFinder finder) async {
         final Map<String, String> arguments = GetText(finder, timeout: const Duration(seconds: 1)).serialize();
-        return await driverExtension.call(arguments);
+        return driverExtension.call(arguments);
       }
 
       await tester.pumpWidget(debugTree);
@@ -1017,7 +1023,7 @@ void main() {
 
       Future<Map<String, dynamic>> tap(SerializableFinder finder) async {
         final Map<String, String> arguments = Tap(finder, timeout: const Duration(seconds: 1)).serialize();
-        return await driverExtension.call(arguments);
+        return driverExtension.call(arguments);
       }
 
       await tester.pumpWidget(debugTree);
@@ -1029,7 +1035,7 @@ void main() {
 
   group('extension commands', () {
     int invokes = 0;
-    final VoidCallback stubCallback = () => invokes++;
+    void stubCallback() => invokes++;
 
     final Widget debugTree = Directionality(
       textDirection: TextDirection.ltr,
@@ -1060,7 +1066,7 @@ void main() {
 
       Future<Map<String, dynamic>> invokeCommand(SerializableFinder finder, int times) async {
         final Map<String, String> arguments = StubNestedCommand(finder, times).serialize();
-        return await driverExtension.call(arguments);
+        return driverExtension.call(arguments);
       }
 
       await tester.pumpWidget(debugTree);
@@ -1145,7 +1151,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -1171,7 +1177,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -1195,7 +1201,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });

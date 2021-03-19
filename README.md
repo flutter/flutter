@@ -1,7 +1,7 @@
 # [![Flutter logo][]][flutter.dev]
 
 [![Build Status - Cirrus][]][Build status]
-[![Gitter Channel][]][Gitter badge]
+[![Discord badge][]][Discord instructions]
 [![Twitter handle][]][Twitter badge]
 
 Flutter is Google's SDK for crafting beautiful, fast user experiences for
@@ -72,8 +72,8 @@ Information on how to get started can be found at our
 [flutter.dev]: https://flutter.dev
 [Build Status - Cirrus]: https://api.cirrus-ci.com/github/flutter/flutter.svg
 [Build status]: https://cirrus-ci.com/github/flutter/flutter/master
-[Gitter Channel]: https://badges.gitter.im/flutter/flutter.svg
-[Gitter badge]: https://gitter.im/flutter/flutter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+[Discord instructions]: https://github.com/flutter/flutter/wiki/Chat
+[Discord badge]: https://img.shields.io/discord/608014603317936148
 [Twitter handle]: https://img.shields.io/twitter/follow/flutterdev.svg?style=social&label=Follow
 [Twitter badge]: https://twitter.com/intent/follow?screen_name=flutterdev
 [layered architecture]: https://flutter.dev/docs/resources/inside-flutter

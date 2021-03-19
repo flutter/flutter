@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 class IconsDemo extends StatefulWidget {
+  const IconsDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/material/icons';
 
   @override

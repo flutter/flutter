@@ -86,7 +86,7 @@ LanguageVersion determineLanguageVersion(File file, Package package) {
 
   // If the language version cannot be found, use the package version.
   if (package != null) {
-    return package.languageVersion;
+    return package.languageVersion ?? nullSafeVersion;
   }
   // Default to 2.12
   return nullSafeVersion;

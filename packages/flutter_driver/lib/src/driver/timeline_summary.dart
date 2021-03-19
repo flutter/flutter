@@ -236,7 +236,7 @@ class TimelineSummary {
 
   List<Duration> _extractDurations(
     String name,
-    Duration extractor(TimelineEvent beginEvent, TimelineEvent endEvent),
+    Duration Function(TimelineEvent beginEvent, TimelineEvent endEvent) extractor,
   ) {
     final List<Duration> result = <Duration>[];
     final List<TimelineEvent> events = _extractNamedEvents(name);

@@ -153,6 +153,9 @@ abstract class InteractiveInkFeature extends InkFeature {
 ///  * [InkSplash.splashFactory]
 ///  * [InkRipple.splashFactory]
 abstract class InteractiveInkFeatureFactory {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  ///
   /// Subclasses should provide a const constructor.
   const InteractiveInkFeatureFactory();
 
@@ -1179,11 +1182,12 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 /// ```dart
 /// double sideLength = 50;
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return AnimatedContainer(
 ///     height: sideLength,
 ///     width: sideLength,
-///     duration: Duration(seconds: 2),
+///     duration: const Duration(seconds: 2),
 ///     curve: Curves.easeIn,
 ///     child: Material(
 ///       color: Colors.yellow,

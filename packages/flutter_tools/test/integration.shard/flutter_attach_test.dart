@@ -4,8 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:io';
-
 import 'package:file/file.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -37,16 +35,6 @@ void main() {
     await _flutterAttach.detach();
     await _flutterRun.stop();
     tryToDelete(tempDir);
-  });
-
-  testWithoutContext('writes pid-file', () async {
-    final File pidFile = tempDir.childFile('test.pid');
-    await _flutterRun.run(withDebugger: true);
-    await _flutterAttach.attach(
-      _flutterRun.vmServicePort,
-      pidFile: pidFile,
-    );
-    expect(pidFile.existsSync(), isTrue);
   });
 
   testWithoutContext('can hot reload', () async {

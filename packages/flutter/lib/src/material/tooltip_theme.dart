@@ -207,7 +207,7 @@ class TooltipThemeData with Diagnosticable {
 ///     message: 'Example tooltip',
 ///     child: IconButton(
 ///       iconSize: 36.0,
-///       icon: Icon(Icons.touch_app),
+///       icon: const Icon(Icons.touch_app),
 ///       onPressed: () {},
 ///     ),
 ///   ),

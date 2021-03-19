@@ -24,11 +24,11 @@ class BuildApkCommand extends BuildSubCommand {
     usesPubOption();
     usesBuildNumberOption();
     usesBuildNameOption();
-    addShrinkingFlag();
+    addShrinkingFlag(verboseHelp: verboseHelp);
     addSplitDebugInfoOption();
     addDartObfuscationOption();
     usesDartDefineOption();
-    usesExtraDartFlagOptions();
+    usesExtraDartFlagOptions(verboseHelp: verboseHelp);
     addBundleSkSLPathOption(hide: !verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     addBuildPerformanceFile(hide: !verboseHelp);

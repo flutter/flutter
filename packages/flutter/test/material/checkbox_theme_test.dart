@@ -138,8 +138,8 @@ void main() {
     // Selected checkbox.
     await tester.pumpWidget(buildCheckbox(selected: true));
     await tester.pumpAndSettle();
-    expect(_getCheckboxMaterial(tester), paints..rrect(color: selectedFillColor));
-    expect(_getCheckboxMaterial(tester), paints..path(color: defaultCheckColor));
+    expect(_getCheckboxMaterial(tester), paints..path(color: selectedFillColor));
+    expect(_getCheckboxMaterial(tester), paints..path(color: selectedFillColor)..path(color: defaultCheckColor));
 
     // Checkbox with hover.
     await tester.pumpWidget(buildCheckbox());
@@ -152,7 +152,7 @@ void main() {
     await tester.pumpWidget(buildCheckbox(autofocus: true, selected: true));
     await tester.pumpAndSettle();
     expect(_getCheckboxMaterial(tester), paints..circle(color: focusOverlayColor, radius: splashRadius));
-    expect(_getCheckboxMaterial(tester), paints..path(color: focusedCheckColor));
+    expect(_getCheckboxMaterial(tester), paints..path(color: selectedFillColor)..path(color: focusedCheckColor));
   });
 
   testWidgets('Checkbox properties are taken over the theme values', (WidgetTester tester) async {
@@ -237,8 +237,8 @@ void main() {
     // Selected checkbox.
     await tester.pumpWidget(buildCheckbox(selected: true));
     await tester.pumpAndSettle();
-    expect(_getCheckboxMaterial(tester), paints..rrect(color: selectedFillColor));
-    expect(_getCheckboxMaterial(tester), paints..path(color: checkColor));
+    expect(_getCheckboxMaterial(tester), paints..path(color: selectedFillColor));
+    expect(_getCheckboxMaterial(tester), paints..path(color: selectedFillColor)..path(color: checkColor));
 
     // Checkbox with hover.
     await tester.pumpWidget(buildCheckbox());
@@ -288,7 +288,7 @@ void main() {
     // Selected checkbox.
     await tester.pumpWidget(buildCheckbox(selected: true));
     await tester.pumpAndSettle();
-    expect(_getCheckboxMaterial(tester), paints..rrect(color: selectedFillColor));
+    expect(_getCheckboxMaterial(tester), paints..path(color: selectedFillColor));
   });
 
   testWidgets('Checkbox theme overlay color resolves in active/pressed states', (WidgetTester tester) async {

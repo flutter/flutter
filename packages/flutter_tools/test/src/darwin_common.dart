@@ -40,7 +40,7 @@ bool containsBitcode(String pathToBinary, ProcessManager processManager) {
   lines.asMap().forEach((int index, String line) {
     if (line.contains('segname __LLVM') && lines.length - index - 1 > 3) {
       final String emptyBitcodeMarker =
-      lines.skip(index - 1).take(3).firstWhere(
+      lines.skip(index - 1).take(4).firstWhere(
             (String line) => line.contains(' size 0x0000000000000001'),
         orElse: () => null,
       );

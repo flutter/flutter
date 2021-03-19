@@ -271,7 +271,7 @@ class BenchBuildColorsGrid extends WidgetBuildRecorder {
   @override
   Widget createWidget() {
     _counter++;
-    return MaterialApp(home: ColorsDemo());
+    return const MaterialApp(home: ColorsDemo());
   }
 }
 
@@ -469,6 +469,8 @@ class PaletteTabView extends StatelessWidget {
 }
 
 class ColorsDemo extends StatelessWidget {
+  const ColorsDemo({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(

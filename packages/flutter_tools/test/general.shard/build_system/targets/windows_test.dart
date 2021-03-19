@@ -20,7 +20,6 @@ import 'package:flutter_tools/src/convert.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
-import '../../../src/fake_process_manager.dart';
 
 final Platform kWindowsPlatform = FakePlatform(
   operatingSystem: 'windows',

@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 class SliderDemo extends StatefulWidget {
+  const SliderDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/material/slider';
 
   @override
@@ -332,7 +334,7 @@ class _SlidersState extends State<_Sliders> {
                   valueIndicatorColor: Colors.deepPurpleAccent,
                   thumbShape: _CustomThumbShape(),
                   valueIndicatorShape: _CustomValueIndicatorShape(),
-                  valueIndicatorTextStyle: theme.accentTextTheme.bodyText1!.copyWith(color: theme.colorScheme.onSurface),
+                  valueIndicatorTextStyle: theme.textTheme.bodyText1!.copyWith(color: theme.colorScheme.onSurface),
                 ),
                 child: Slider(
                   value: _discreteCustomValue,

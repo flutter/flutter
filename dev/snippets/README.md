@@ -63,7 +63,7 @@ when generating the HTML to put into the Dart docs.
 
 #### Analysis
 
-The `../bots/analyze-sample-code.dart` script finds code inside the `@tool
+The `../bots/analyze_sample_code.dart` script finds code inside the `@tool
 snippet` sections and uses the Dart analyzer to check them.
 
 There are several kinds of sample code you can specify:
@@ -165,7 +165,7 @@ For more information about how to create, use, or update templates, see
 
 #### Analysis
 
-The `../bots/analyze-sample-code.dart` script finds code inside the `@tool
+The `../bots/analyze_sample_code.dart` script finds code inside the `@tool
 sample` sections and uses the Dart analyzer to check them after applying the
 specified template.
 
@@ -222,7 +222,7 @@ generating the entire docs output takes a long time.
 Instead, you can run the analysis locally with this command from the Flutter root:
 
 ```
-TMPDIR=/tmp bin/cache/dart-sdk/bin/dart dev/bots/analyze-sample-code.dart --temp=samples
+TMPDIR=/tmp bin/cache/dart-sdk/bin/dart dev/bots/analyze_sample_code.dart --temp=samples
 ```
 
 This will analyze the samples, and leave the generated files in `/tmp/samples`

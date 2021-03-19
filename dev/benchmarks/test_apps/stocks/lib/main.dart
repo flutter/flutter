@@ -20,6 +20,8 @@ import 'stock_symbol_viewer.dart';
 import 'stock_types.dart';
 
 class StocksApp extends StatefulWidget {
+  const StocksApp({Key key}) : super(key: key);
+
   @override
   StocksAppState createState() => StocksAppState();
 }
@@ -62,7 +64,7 @@ class StocksAppState extends State<StocksApp> {
       case StockMode.pessimistic:
         return ThemeData(
           brightness: Brightness.dark,
-          accentColor: Colors.redAccent,
+          primarySwatch: Colors.purple,
         );
     }
     assert(_configuration.stockMode != null);
@@ -109,5 +111,5 @@ class StocksAppState extends State<StocksApp> {
 }
 
 void main() {
-  runApp(StocksApp());
+  runApp(const StocksApp());
 }

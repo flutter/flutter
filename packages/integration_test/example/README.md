@@ -4,7 +4,7 @@ Demonstrates how to use the `package:integration_test`.
 
 To run `integration_test/example_test.dart`,
 
-Android / iOS:
+## Android / iOS
 
 ```sh
 flutter drive \
@@ -12,7 +12,16 @@ flutter drive \
   --target=integration_test/example_test.dart
 ```
 
-Web:
+## Web
+
+In one shell, run Chromedriver ([download
+here](https://chromedriver.chromium.org/downloads)):
+
+```
+chromedriver --port 8444
+```
+
+Then, in another shell, run `flutter drive`:
 
 ```sh
 flutter drive \

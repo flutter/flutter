@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/src/foundation/assertions.dart';
-import 'package:flutter/src/painting/basic_types.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 

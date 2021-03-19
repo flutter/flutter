@@ -38,9 +38,11 @@ class TextureBox extends RenderBox {
   /// [filterQuality] to set texture's [FilterQuality].
   TextureBox({
     required int textureId,
+    bool freeze = false,
     FilterQuality filterQuality = FilterQuality.low,
   }) : assert(textureId != null),
       _textureId = textureId,
+      _freeze = freeze,
       _filterQuality = filterQuality;
 
   /// The identity of the backend texture.
@@ -54,15 +56,26 @@ class TextureBox extends RenderBox {
     }
   }
 
+  /// When true the texture will not be updated with new frames.
+  bool get freeze => _freeze;
+  bool _freeze;
+  set freeze(bool value) {
+    assert(value != null);
+    if (value != _freeze) {
+      _freeze = value;
+      markNeedsPaint();
+    }
+  }
+
   /// {@macro flutter.widgets.Texture.filterQuality}
   FilterQuality get filterQuality => _filterQuality;
   FilterQuality _filterQuality;
   set filterQuality(FilterQuality value) {
     assert(value != null);
-    if (value == _filterQuality)
-      return;
-    _filterQuality = value;
-    markNeedsPaint();
+    if (value != _filterQuality) {
+      _filterQuality = value;
+      markNeedsPaint();
+    }
   }
 
   @override
@@ -87,6 +100,7 @@ class TextureBox extends RenderBox {
     context.addLayer(TextureLayer(
       rect: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
       textureId: _textureId,
+      freeze: freeze,
       filterQuality: _filterQuality,
     ));
   }

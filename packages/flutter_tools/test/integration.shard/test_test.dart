@@ -168,7 +168,7 @@ void main() {
       extraArguments: const <String>['--verbose']);
     final String stdout = result.stdout as String;
     if ((!stdout.contains('+1: All tests passed')) ||
-        (!stdout.contains('test 0: starting shell process')) ||
+        (!stdout.contains('test 0: Starting flutter_tester process with command')) ||
         (!stdout.contains('test 0: deleting temporary directory')) ||
         (!stdout.contains('test 0: finished')) ||
         (!stdout.contains('test package returned with exit code 0'))) {
@@ -185,7 +185,7 @@ void main() {
       extraArguments: const <String>['--verbose']);
     final String stdout = result.stdout as String;
     if ((!stdout.contains('+2: All tests passed')) ||
-        (!stdout.contains('test 0: starting shell process')) ||
+        (!stdout.contains('test 0: Starting flutter_tester process with command')) ||
         (!stdout.contains('test 0: deleting temporary directory')) ||
         (!stdout.contains('test 0: finished')) ||
         (!stdout.contains('test package returned with exit code 0'))) {

@@ -51,7 +51,7 @@ bool debugInstrumentationEnabled = false;
 ///  * [Timeline], which is used to record synchronous tracing events for
 ///    visualization in Chrome's tracing format. This method does not
 ///    implicitly add any timeline events.
-Future<T> debugInstrumentAction<T>(String description, Future<T> action()) async {
+Future<T> debugInstrumentAction<T>(String description, Future<T> Function() action) async {
   bool instrument = false;
   assert(() {
     instrument = debugInstrumentationEnabled;

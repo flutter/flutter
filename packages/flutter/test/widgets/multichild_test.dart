@@ -145,12 +145,12 @@ void main() {
     await tester.pumpWidget(
       Stack(
         textDirection: TextDirection.ltr,
-        children: <Widget>[
-          const DecoratedBox(decoration: kBoxDecorationA),
-          Container(
-            child: const DecoratedBox(decoration: kBoxDecorationB),
+        children: const <Widget>[
+          DecoratedBox(decoration: kBoxDecorationA),
+          DummyWidget(
+            child: DecoratedBox(decoration: kBoxDecorationB),
           ),
-          const DecoratedBox(decoration: kBoxDecorationC),
+          DecoratedBox(decoration: kBoxDecorationC),
         ],
       ),
     );
@@ -160,14 +160,14 @@ void main() {
     await tester.pumpWidget(
       Stack(
         textDirection: TextDirection.ltr,
-        children: <Widget>[
-          const DecoratedBox(decoration: kBoxDecorationA),
-          Container(
-            child: Container(
-              child: const DecoratedBox(decoration: kBoxDecorationB),
+        children: const <Widget>[
+          DecoratedBox(decoration: kBoxDecorationA),
+          DummyWidget(
+            child: DummyWidget(
+              child: DecoratedBox(decoration: kBoxDecorationB),
             ),
           ),
-          const DecoratedBox(decoration: kBoxDecorationC),
+          DecoratedBox(decoration: kBoxDecorationC),
         ],
       ),
     );
@@ -177,16 +177,16 @@ void main() {
     await tester.pumpWidget(
       Stack(
         textDirection: TextDirection.ltr,
-        children: <Widget>[
-          Container(
-            child: Container(
-              child: const DecoratedBox(decoration: kBoxDecorationB),
+        children: const <Widget>[
+          DummyWidget(
+            child: DummyWidget(
+              child: DecoratedBox(decoration: kBoxDecorationB),
             ),
           ),
-          Container(
-            child: const DecoratedBox(decoration: kBoxDecorationA),
+          DummyWidget(
+            child: DecoratedBox(decoration: kBoxDecorationA),
           ),
-          const DecoratedBox(decoration: kBoxDecorationC),
+          DecoratedBox(decoration: kBoxDecorationC),
         ],
       ),
     );
@@ -196,14 +196,14 @@ void main() {
     await tester.pumpWidget(
       Stack(
         textDirection: TextDirection.ltr,
-        children: <Widget>[
-          Container(
-            child: const DecoratedBox(decoration: kBoxDecorationB),
+        children: const <Widget>[
+          DummyWidget(
+            child: DecoratedBox(decoration: kBoxDecorationB),
           ),
-          Container(
-            child: const DecoratedBox(decoration: kBoxDecorationA),
+          DummyWidget(
+            child: DecoratedBox(decoration: kBoxDecorationA),
           ),
-          const DecoratedBox(decoration: kBoxDecorationC),
+          DecoratedBox(decoration: kBoxDecorationC),
         ],
       ),
     );
@@ -213,14 +213,14 @@ void main() {
     await tester.pumpWidget(
       Stack(
         textDirection: TextDirection.ltr,
-        children: <Widget>[
-          Container(
-            key: const Key('b'),
-            child: const DecoratedBox(decoration: kBoxDecorationB),
+        children: const <Widget>[
+          DummyWidget(
+            key: Key('b'),
+            child: DecoratedBox(decoration: kBoxDecorationB),
           ),
-          Container(
-            key: const Key('a'),
-            child: const DecoratedBox(decoration: kBoxDecorationA),
+          DummyWidget(
+            key: Key('a'),
+            child: DecoratedBox(decoration: kBoxDecorationA),
           ),
         ],
       ),
@@ -231,14 +231,14 @@ void main() {
     await tester.pumpWidget(
       Stack(
         textDirection: TextDirection.ltr,
-        children: <Widget>[
-          Container(
-            key: const Key('a'),
-            child: const DecoratedBox(decoration: kBoxDecorationA),
+        children: const <Widget>[
+          DummyWidget(
+            key: Key('a'),
+            child: DecoratedBox(decoration: kBoxDecorationA),
           ),
-          Container(
-            key: const Key('b'),
-            child: const DecoratedBox(decoration: kBoxDecorationB),
+          DummyWidget(
+            key: Key('b'),
+            child: DecoratedBox(decoration: kBoxDecorationB),
           ),
         ],
       ),
@@ -362,4 +362,13 @@ class FakeRenderObject extends RenderBox {
   void performLayout() {
     size = constraints.biggest;
   }
+}
+
+class DummyWidget extends StatelessWidget {
+  const DummyWidget({ Key? key, required this.child }) : super(key: key);
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => child;
 }

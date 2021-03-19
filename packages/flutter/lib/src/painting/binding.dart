@@ -29,27 +29,35 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   static PaintingBinding? get instance => _instance;
   static PaintingBinding? _instance;
 
-  /// [ShaderWarmUp] to be executed during [initInstances].
+  /// [ShaderWarmUp] instance to be executed during [initInstances].
+  ///
+  /// Defaults to an instance of [DefaultShaderWarmUp].
   ///
   /// If the application has scenes that require the compilation of complex
   /// shaders that are not covered by [DefaultShaderWarmUp], it may cause jank
-  /// in the middle of an animation or interaction. In that case, set
-  /// [shaderWarmUp] to a custom [ShaderWarmUp] before calling [initInstances]
+  /// in the middle of an animation or interaction. In that case, setting
+  /// [shaderWarmUp] to a custom [ShaderWarmUp] before creating the binding
   /// (usually before [runApp] for normal Flutter apps, and before
-  /// [enableFlutterDriverExtension] for Flutter driver tests). Paint the scene
-  /// in the custom [ShaderWarmUp] so Flutter can pre-compile and cache the
-  /// shaders during startup. The warm up is only costly (100ms-200ms,
-  /// depending on the shaders to compile) during the first run after the
-  /// installation or a data wipe. The warm up does not block the main thread
-  /// so there should be no "Application Not Responding" warning.
+  /// [enableFlutterDriverExtension] for Flutter driver tests) may help if that
+  /// object paints the difficult scene in its [ShaderWarmUp.warmUpOnCanvas]
+  /// method, as this allows Flutter to pre-compile and cache the required
+  /// shaders during startup.
   ///
   /// Currently the warm-up happens synchronously on the raster thread which
   /// means the rendering of the first frame on the raster thread will be
   /// postponed until the warm-up is finished.
   ///
+  /// The warm up is only costly (100ms-200ms, depending on the shaders to
+  /// compile) during the first run after the installation or a data wipe. The
+  /// warm up does not block the platform thread so there should be no
+  /// "Application Not Responding" warning.
+  ///
+  /// If this is null, no shader warm-up is executed.
+  ///
   /// See also:
   ///
-  ///  * [ShaderWarmUp], the interface of how this warm up works.
+  ///  * [ShaderWarmUp], the interface for implementing custom warm-up scenes.
+  ///  * <https://flutter.dev/docs/perf/rendering/shader>
   static ShaderWarmUp? shaderWarmUp = const DefaultShaderWarmUp();
 
   /// The singleton that implements the Flutter framework's image cache.

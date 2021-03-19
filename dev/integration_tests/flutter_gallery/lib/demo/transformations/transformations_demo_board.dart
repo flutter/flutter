@@ -11,7 +11,7 @@ import 'package:vector_math/vector_math_64.dart' show Vector3;
 // The entire state of the hex board and abstraction to get information about
 // it. Iterable so that all BoardPoints on the board can be iterated over.
 @immutable
-class Board extends Object with IterableMixin<BoardPoint?> {
+class Board extends IterableMixin<BoardPoint?> {
   Board({
     required this.boardRadius,
     required this.hexagonRadius,

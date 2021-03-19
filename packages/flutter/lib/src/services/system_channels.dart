@@ -11,7 +11,6 @@ import 'platform_channel.dart';
 class SystemChannels {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
-  // ignore: unused_element
   SystemChannels._();
 
   /// A JSON [MethodChannel] for navigation.
@@ -324,17 +323,16 @@ class SystemChannels {
   /// [OptionalMethodChannel.invokeMethod]):
   ///
   ///  * `installDeferredComponent`: Requests that a deferred component identified by
-  ///    the provided loadingUnitId or moduleName be downloaded and installed.
-  ///    Providing a loadingUnitId with null moduleName will install a dynamic
-  ///    feature module that includes the desired loading unit. If a moduleName
-  ///    is provided, then the deferred component with the moduleName will be installed.
-  ///    This method returns a future that will not be completed until the
-  ///    feature is fully installed and ready to use. When an error occurs, the
-  ///    future will complete an error. Calling `loadLibrary()` on a deferred
-  ///    imported library is equivalent to calling this method with a
-  ///    loadingUnitId and null moduleName.
+  ///    the provided loadingUnitId or componentName be downloaded and installed.
+  ///    Providing a loadingUnitId with null componentName will install a component that
+  ///    includes the desired loading unit. If a componentName is provided, then the
+  ///    deferred component with the componentName will be installed. This method
+  ///    returns a future that will not be completed until the feature is fully installed
+  ///    and ready to use. When an error occurs, the future will complete an error.
+  ///    Calling `loadLibrary()` on a deferred imported library is equivalent to calling
+  ///    this method with a loadingUnitId and null componentName.
   ///  * `uninstallDeferredComponent`:  Requests that a deferred component identified by
-  ///    the provided loadingUnitId or moduleName be uninstalled. Since
+  ///    the provided loadingUnitId or componentName be uninstalled. Since
   ///    uninstallation typically requires significant disk i/o, this method only
   ///    signals the intent to uninstall. Actual uninstallation (eg, removal of
   ///    assets and files) may occur at a later time. However, once uninstallation
@@ -343,5 +341,21 @@ class SystemChannels {
   static const MethodChannel deferredComponent = OptionalMethodChannel(
     'flutter/deferredcomponent',
     StandardMethodCodec(),
+  );
+
+  /// A JSON [MethodChannel] for localization.
+  ///
+  /// The following outgoing methods are defined for this channel (invoked using
+  /// [OptionalMethodChannel.invokeMethod]):
+  ///
+  ///  * `Localization.getStringResource`: Obtains the native string resource
+  ///    for a specific locale. The argument is a [Map] with two keys, `key`
+  ///    giving a [String] which the resource is defined with, and an optional
+  ///    `locale` which is a [String] containing the BCP47 locale identifier of
+  ///    the locale requested. See [Locale.toLanguageTag]. When `locale` is not
+  ///    specified, the current system locale is used instead.
+  static const MethodChannel localization = OptionalMethodChannel(
+    'flutter/localization',
+    JSONMethodCodec(),
   );
 }

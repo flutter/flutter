@@ -18,6 +18,8 @@ void main() {
     expect(localizations.previousMonthTooltip, isNotNull);
     expect(localizations.nextPageTooltip, isNotNull);
     expect(localizations.previousPageTooltip, isNotNull);
+    expect(localizations.firstPageTooltip, isNotNull);
+    expect(localizations.lastPageTooltip, isNotNull);
     expect(localizations.showMenuTooltip, isNotNull);
     expect(localizations.licensesPageTitle, isNotNull);
     expect(localizations.rowsPerPageTitle, isNotNull);

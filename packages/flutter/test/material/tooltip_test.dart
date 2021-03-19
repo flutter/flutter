@@ -9,7 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
@@ -858,7 +857,7 @@ void main() {
     // keep holding the long press, should still show tooltip
     await tester.pump(kLongPressTimeout);
     expect(find.text(tooltipText), findsOneWidget);
-    gesture.up();
+    await gesture.up();
   });
 
   testWidgets('Tooltip shows/hides when hovered', (WidgetTester tester) async {

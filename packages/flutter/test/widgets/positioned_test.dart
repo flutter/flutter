@@ -86,7 +86,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 100.0,
             width: 100.0,
             child: Stack(

@@ -431,6 +431,26 @@ void main() {
       expect(find.text('2016'), findsNothing); // 2016 in year grid
     });
 
+    testWidgets('Dragging more than half the width should not cause a jump', (
+        WidgetTester tester) async {
+      await tester.pumpWidget(calendarDatePicker());
+      await tester.pumpAndSettle();
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(PageView)));
+      // This initial drag is required for the PageView to recognize the gesture, as it uses DragStartBehavior.start.
+      // It does not count towards the drag distance.
+      await gesture.moveBy(const Offset(100, 0));
+      // Dragging for a bit less than half the width should reveal the previous month.
+      await gesture.moveBy(const Offset(800 / 2 - 1, 0));
+      await tester.pumpAndSettle();
+      expect(find.text('January 2016'), findsOneWidget);
+      expect(find.text('1'), findsNWidgets(2));
+      // Dragging a bit over the half should still show both.
+      await gesture.moveBy(const Offset(2, 0));
+      await tester.pumpAndSettle();
+      expect(find.text('December 2015'), findsOneWidget);
+      expect(find.text('1'), findsNWidgets(2));
+    });
+
     group('Keyboard navigation', () {
       testWidgets('Can toggle to year mode', (WidgetTester tester) async {
         await tester.pumpWidget(calendarDatePicker());

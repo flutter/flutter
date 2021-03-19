@@ -126,7 +126,6 @@ class PaintingContext extends ClipContext {
       // layer for repaint boundaries.
       child._layer = childLayer = OffsetLayer();
     } else {
-      assert(childLayer is OffsetLayer);
       assert(debugAlsoPaintedParent || childLayer.attached);
       childLayer.removeAllChildren();
     }

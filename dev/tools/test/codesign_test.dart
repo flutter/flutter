@@ -69,7 +69,7 @@ void main() {
     test('throws exception if not run from macos', () async {
       createRunner(operatingSystem: 'linux');
       expect(
-        () async => await runner.run(<String>['codesign']),
+        () async => runner.run(<String>['codesign']),
         throwsExceptionWith('Error! Expected operating system "macos"'),
       );
     });
@@ -77,7 +77,7 @@ void main() {
     test('throws exception if verify flag is not provided', () async {
       createRunner();
       expect(
-        () async => await runner.run(<String>['codesign']),
+        () async => runner.run(<String>['codesign']),
         throwsExceptionWith(
             'Sorry, but codesigning is not implemented yet. Please pass the --$kVerify flag to verify signatures'),
       );
@@ -240,7 +240,7 @@ void main() {
         ...codesignCheckCommands,
       ]);
       expect(
-        () async => await runner.run(<String>['codesign', '--$kVerify', '--$kRevision', revision]),
+        () async => runner.run(<String>['codesign', '--$kVerify', '--$kRevision', revision]),
         throwsExceptionWith('Test failed because unsigned binaries detected.'),
       );
       expect(processManager.hasRemainingExpectations, false);
@@ -325,7 +325,7 @@ void main() {
         ...codesignCheckCommands,
       ]);
       expect(
-        () async => await runner.run(<String>['codesign', '--$kVerify', '--$kRevision', revision]),
+        () async => runner.run(<String>['codesign', '--$kVerify', '--$kRevision', revision]),
         throwsExceptionWith('Test failed because files found with the wrong entitlements'),
       );
       expect(processManager.hasRemainingExpectations, false);

@@ -28,7 +28,7 @@ void main() {
   testUsingContext('All build commands support null safety options', () {
     final List<FlutterCommand> commands = <FlutterCommand>[
       BuildWindowsCommand(verboseHelp: false),
-      BuildLinuxCommand(verboseHelp: false),
+      BuildLinuxCommand(verboseHelp: false, operatingSystemUtils: globals.os),
       BuildMacosCommand(verboseHelp: false),
       BuildWebCommand(verboseHelp: false),
       BuildApkCommand(verboseHelp: false),

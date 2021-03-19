@@ -102,7 +102,7 @@ ${_projectMetadataInformation()}
       '&body=${Uri.encodeQueryComponent(body)}'
       '&labels=${Uri.encodeQueryComponent('tool,severe: crash')}';
 
-    return await _shortURL(fullURL);
+    return _shortURL(fullURL);
   }
 
   /// Provide information about the Flutter project in the working directory, if present.
@@ -121,7 +121,7 @@ ${_projectMetadataInformation()}
       }
       final FlutterProjectMetadata metadata = FlutterProjectMetadata(project.metadataFile, _logger);
       final StringBuffer description = StringBuffer()
-        ..writeln('**Type**: ${metadata.projectType?.name}')
+        ..writeln('**Type**: ${flutterProjectTypeToString(metadata.projectType)}')
         ..writeln('**Version**: ${manifest.appVersion}')
         ..writeln('**Material**: ${manifest.usesMaterialDesign}')
         ..writeln('**Android X**: ${manifest.usesAndroidX}')

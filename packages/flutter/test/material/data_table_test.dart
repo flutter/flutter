@@ -54,6 +54,18 @@ void main() {
                 onTap: () {
                   log.add('cell-tap: ${dessert.calories}');
                 },
+                onDoubleTap: () {
+                  log.add('cell-doubleTap: ${dessert.calories}');
+                },
+                onLongPress: () {
+                  log.add('cell-longPress: ${dessert.calories}');
+                },
+                onTapCancel: () {
+                  log.add('cell-tapCancel: ${dessert.calories}');
+                },
+                onTapDown: (TapDownDetails details) {
+                  log.add('cell-tapDown: ${dessert.calories}');
+                },
               ),
             ],
           );
@@ -95,8 +107,40 @@ void main() {
     await tester.pumpAndSettle(const Duration(milliseconds: 200));
 
     await tester.tap(find.text('375'));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.text('375'));
 
-    expect(log, <String>['cell-tap: 375']);
+    expect(log, <String>['cell-doubleTap: 375']);
+    log.clear();
+
+    await tester.longPress(find.text('375'));
+    // The tap down is triggered on gesture down.
+    // Then, the cancel is triggered when the gesture arena
+    // recognizes that the long press overrides the tap event
+    // so it triggers a tap cancel, followed by the long press.
+    expect(log,<String>['cell-tapDown: 375' ,'cell-tapCancel: 375', 'cell-longPress: 375']);
+    log.clear();
+
+    TestGesture gesture = await tester.startGesture(
+      tester.getRect(find.text('375')).center,
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+    // onTapDown callback is registered.
+    expect(log, equals(<String>['cell-tapDown: 375']));
+    await gesture.up();
+
+    await tester.pump(const Duration(seconds: 1));
+    // onTap callback is registered after the gesture is removed.
+    expect(log, equals(<String>['cell-tapDown: 375', 'cell-tap: 375']));
+    log.clear();
+
+    // dragging off the bounds of the cell calls the cancel callback
+    gesture = await tester.startGesture(tester.getRect(find.text('375')).center);
+    await tester.pump(const Duration(milliseconds: 100));
+    await gesture.moveBy(const Offset(0.0, 200.0));
+    await gesture.cancel();
+    expect(log, equals(<String>['cell-tapDown: 375', 'cell-tapCancel: 375']));
+
     log.clear();
 
     await tester.tap(find.byType(Checkbox).last);
@@ -1494,6 +1538,95 @@ void main() {
     expect(
       tester.getBottomRight(find.byType(Table)),
       const Offset(width - borderVertical, height - borderHorizontal),
+    );
+  });
+
+  testWidgets('checkboxHorizontalMargin properly applied', (WidgetTester tester) async {
+    const double _customCheckboxHorizontalMargin = 15.0;
+    const double _customHorizontalMargin = 10.0;
+    Finder cellContent;
+    Finder checkbox;
+    Finder padding;
+
+    Widget buildCustomTable({
+      int? sortColumnIndex,
+      bool sortAscending = true,
+      double? horizontalMargin,
+      double? checkboxHorizontalMargin,
+    }) {
+      return DataTable(
+        sortColumnIndex: sortColumnIndex,
+        sortAscending: sortAscending,
+        onSelectAll: (bool? value) {},
+        horizontalMargin: horizontalMargin,
+        checkboxHorizontalMargin: checkboxHorizontalMargin,
+        columns: <DataColumn>[
+          const DataColumn(
+            label: Text('Name'),
+            tooltip: 'Name',
+          ),
+          DataColumn(
+            label: const Text('Calories'),
+            tooltip: 'Calories',
+            numeric: true,
+            onSort: (int columnIndex, bool ascending) {},
+          ),
+          DataColumn(
+            label: const Text('Fat'),
+            tooltip: 'Fat',
+            numeric: true,
+            onSort: (int columnIndex, bool ascending) {},
+          ),
+        ],
+        rows: kDesserts.map<DataRow>((Dessert dessert) {
+          return DataRow(
+            key: ValueKey<String>(dessert.name),
+            onSelectChanged: (bool? selected) {},
+            cells: <DataCell>[
+              DataCell(
+                Text(dessert.name),
+              ),
+              DataCell(
+                Text('${dessert.calories}'),
+                showEditIcon: true,
+                onTap: () {},
+              ),
+              DataCell(
+                Text('${dessert.fat}'),
+                showEditIcon: true,
+                onTap: () {},
+              ),
+            ],
+          );
+        }).toList(),
+      );
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildCustomTable(
+        checkboxHorizontalMargin: _customCheckboxHorizontalMargin,
+        horizontalMargin: _customHorizontalMargin,
+      )),
+    ));
+
+    // Custom checkbox padding.
+    checkbox = find.byType(Checkbox).first;
+    padding = find.ancestor(of: checkbox, matching: find.byType(Padding));
+    expect(
+      tester.getRect(checkbox).left - tester.getRect(padding).left,
+      _customCheckboxHorizontalMargin,
+    );
+    expect(
+      tester.getRect(padding).right - tester.getRect(checkbox).right,
+      _customCheckboxHorizontalMargin,
+    );
+
+    // First column padding.
+    padding = find.widgetWithText(Padding, 'Frozen yogurt').first;
+    cellContent = find.widgetWithText(Align, 'Frozen yogurt'); // DataTable wraps its DataCells in an Align widget.
+    expect(
+      tester.getRect(cellContent).left - tester.getRect(padding).left,
+      _customHorizontalMargin,
     );
   });
 }

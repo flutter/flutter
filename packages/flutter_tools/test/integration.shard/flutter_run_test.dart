@@ -51,12 +51,6 @@ void main() {
     }
   });
 
-  testWithoutContext('flutter run writes pid-file', () async {
-    final File pidFile = tempDir.childFile('test.pid');
-    await _flutter.run(pidFile: pidFile);
-    expect(pidFile.existsSync(), isTrue);
-  });
-
   testWithoutContext('sets activeDevToolsServerAddress extension', () async {
     await _flutter.run(
       startPaused: true,

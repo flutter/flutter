@@ -39,7 +39,7 @@ Future<TaskResult> createFlutterRunTask() async {
   final Device device = await devices.workingDevice;
   await device.unlock();
   final List<String> options = <String>[
-    '-t', runTestSource.absolute.path, '-d', device.deviceId, '-v',
+    '-t', runTestSource.absolute.path, '-d', device.deviceId, '-v', '--no-publish-port',
   ];
   await inDirectory<void>(flutterGalleryDir, () async {
     final Process run = await startProcess(

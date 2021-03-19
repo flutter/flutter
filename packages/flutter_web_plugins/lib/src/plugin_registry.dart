@@ -189,16 +189,20 @@ class Registrar extends BinaryMessenger {
 /// as part of a simplification of the web plugins API.
 @Deprecated(
   'Use Registrar instead. '
-  'This feature was deprecated after v1.24.0-7.0.pre.'
+  'This feature was deprecated after v1.26.0-18.0.pre.'
 )
 class PluginRegistry extends Registrar {
   /// Creates a [Registrar].
   ///
   /// The argument is ignored.
+  @Deprecated(
+    'Use Registrar instead. '
+    'This feature was deprecated after v1.26.0-18.0.pre.'
+  )
   PluginRegistry([
     @Deprecated(
       'This argument is ignored. '
-      'This feature was deprecated after v1.24.0-7.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.'
     )
     BinaryMessenger? binaryMessenger,
   ]) : super(); // ignore: avoid_unused_constructor_parameters
@@ -206,7 +210,7 @@ class PluginRegistry extends Registrar {
   /// Returns `this`. The argument is ignored.
   @Deprecated(
     'This method is redundant. It returns the object on which it is called. '
-    'This feature was deprecated after v1.24.0-7.0.pre.'
+    'This feature was deprecated after v1.26.0-18.0.pre.'
   )
   Registrar registrarFor(Type key) => this;
 }

@@ -104,18 +104,22 @@ void main() {
       .map((DiagnosticsNode node) => node.toString())
       .toList();
 
-    expect(description, <String>[
-      'textAlign: center',
-      'textDirection: rtl',
-      'softWrap: no wrapping except at line break characters',
-      'overflow: ellipsis',
-      'textScaleFactor: 1.3',
-      'maxLines: 1',
-      'textWidthBasis: longestLine',
-      'text: "rich text"',
-      'locale: zh_HK',
-      'strutStyle: StrutStyle(size: 16.0)',
-      'textHeightBehavior: TextHeightBehavior(applyHeightToFirstAscent: false, applyHeightToLastDescent: true)'
-    ]);
+    expect(description, unorderedMatches(<dynamic>[
+      contains('textAlign: center'),
+      contains('textDirection: rtl'),
+      contains('softWrap: no wrapping except at line break characters'),
+      contains('overflow: ellipsis'),
+      contains('textScaleFactor: 1.3'),
+      contains('maxLines: 1'),
+      contains('textWidthBasis: longestLine'),
+      contains('text: "rich text"'),
+      contains('locale: zh_HK'),
+      allOf(startsWith('strutStyle: StrutStyle('), contains('size: 16.0'),),
+      allOf(
+        startsWith('textHeightBehavior: TextHeightBehavior('),
+        contains('applyHeightToFirstAscent: false'),
+        contains('applyHeightToLastDescent: true'),
+      ),
+    ]));
   });
 }

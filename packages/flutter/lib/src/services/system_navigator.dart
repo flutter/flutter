@@ -9,7 +9,6 @@ import 'system_channels.dart';
 class SystemNavigator {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
-  // ignore: unused_element
   SystemNavigator._();
 
   /// Removes the topmost Flutter instance, presenting what was before

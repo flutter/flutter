@@ -308,10 +308,7 @@ class Doctor {
 
     for (final ValidatorTask validatorTask in startValidatorTasks()) {
       final DoctorValidator validator = validatorTask.validator;
-      final Status status = Status.withSpinner(
-        stopwatch: Stopwatch(),
-        terminal: globals.terminal,
-      );
+      final Status status = _logger.startSpinner();
       ValidationResult result;
       try {
         result = await validatorTask.result;
@@ -720,7 +717,7 @@ class FlutterValidator extends DoctorValidator {
       messages.add(ValidationMessage(_userMessages.flutterRevision(
         version.frameworkRevisionShort,
         version.frameworkAge,
-        version.frameworkDate,
+        version.frameworkCommitDate,
       )));
       messages.add(ValidationMessage(_userMessages.engineRevision(version.engineRevisionShort)));
       messages.add(ValidationMessage(_userMessages.dartRevision(version.dartSdkVersion)));

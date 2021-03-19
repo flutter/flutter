@@ -4,7 +4,7 @@
 
 import 'localizations_utils.dart';
 
-HeaderGenerator generateCupertinoHeader = (String regenerateInstructions) {
+String generateCupertinoHeader(String regenerateInstructions) {
   return '''
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -27,11 +27,11 @@ import '../cupertino_localizations.dart';
 // These classes are constructed by the [getCupertinoTranslation] method at the
 // bottom of this file, and used by the [_GlobalCupertinoLocalizationsDelegate.load]
 // method defined in `flutter_localizations/lib/src/cupertino_localizations.dart`.''';
-};
+}
 
 /// Returns the source of the constructor for a GlobalCupertinoLocalizations
 /// subclass.
-ConstructorGenerator generateCupertinoConstructor = (LocaleInfo locale) {
+String generateCupertinoConstructor(LocaleInfo locale) {
   final String localeName = locale.originalString;
   return '''
   /// Create an instance of the translation bundle for ${describeLocale(localeName)}.
@@ -58,7 +58,7 @@ ConstructorGenerator generateCupertinoConstructor = (LocaleInfo locale) {
     singleDigitSecondFormat: singleDigitSecondFormat,
     decimalFormat: decimalFormat,
   );''';
-};
+}
 
 const String cupertinoFactoryName = 'getCupertinoTranslation';
 

@@ -19,7 +19,7 @@ import 'framework.dart';
 ///
 /// ```dart
 /// Row(
-///   children: <Widget>[
+///   children: const <Widget>[
 ///     Text('Begin'),
 ///     Spacer(), // Defaults to a flex of one.
 ///     Text('Middle'),

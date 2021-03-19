@@ -7,27 +7,22 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
-
 import '../../src/common.dart';
 import '../../src/context.dart';
 
 void main() {
    group('injectGradleWrapperIfNeeded', () {
-    MemoryFileSystem memoryFileSystem;
-    Directory tempDir;
+    MemoryFileSystem fileSystem;
     Directory gradleWrapperDirectory;
+    GradleUtils gradleUtils;
 
     setUp(() {
-      memoryFileSystem = MemoryFileSystem.test();
-      tempDir = memoryFileSystem.systemTempDirectory.createTempSync('flutter_artifacts_test.');
-      gradleWrapperDirectory = memoryFileSystem.directory(
-          memoryFileSystem.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'gradle_wrapper'));
+      fileSystem = MemoryFileSystem.test();
+      gradleWrapperDirectory = fileSystem.directory('cache/bin/cache/artifacts/gradle_wrapper');
       gradleWrapperDirectory.createSync(recursive: true);
       gradleWrapperDirectory
         .childFile('gradlew')
@@ -41,10 +36,17 @@ void main() {
         .childDirectory('wrapper')
         .childFile('gradle-wrapper.jar')
         .writeAsStringSync('irrelevant');
+      gradleUtils = GradleUtils(
+        cache: Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem),
+        fileSystem: fileSystem,
+        platform: FakePlatform(environment: <String, String>{}, operatingSystem: 'linux'),
+        logger: BufferLogger.test(),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+      );
     });
 
-    testUsingContext('injects the wrapper when all files are missing', () {
-      final Directory sampleAppAndroid = globals.fs.directory('/sample-app/android');
+    testWithoutContext('injects the wrapper when all files are missing', () {
+      final Directory sampleAppAndroid = fileSystem.directory('/sample-app/android');
       sampleAppAndroid.createSync(recursive: true);
 
       gradleUtils.injectGradleWrapperIfNeeded(sampleAppAndroid);
@@ -73,14 +75,10 @@ void main() {
             'zipStoreBase=GRADLE_USER_HOME\n'
             'zipStorePath=wrapper/dists\n'
             'distributionUrl=https\\://services.gradle.org/distributions/gradle-6.7-all.zip\n');
-    }, overrides: <Type, Generator>{
-      Cache: () => Cache.test(rootOverride: tempDir, fileSystem: memoryFileSystem),
-      FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('injects the wrapper when some files are missing', () {
-      final Directory sampleAppAndroid = globals.fs.directory('/sample-app/android');
+    testWithoutContext('injects the wrapper when some files are missing', () {
+      final Directory sampleAppAndroid = fileSystem.directory('/sample-app/android');
       sampleAppAndroid.createSync(recursive: true);
 
       // There's an existing gradlew
@@ -114,13 +112,9 @@ void main() {
           'zipStoreBase=GRADLE_USER_HOME\n'
           'zipStorePath=wrapper/dists\n'
           'distributionUrl=https\\://services.gradle.org/distributions/gradle-6.7-all.zip\n');
-    }, overrides: <Type, Generator>{
-      Cache: () => Cache.test(rootOverride: tempDir, fileSystem: memoryFileSystem),
-      FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('injects the wrapper and the Gradle version is derivated from the AGP version', () {
+    testWithoutContext('injects the wrapper and the Gradle version is derivated from the AGP version', () {
       const Map<String, String> testCases = <String, String>{
         // AGP version : Gradle version
         '1.0.0': '2.3',
@@ -139,7 +133,7 @@ void main() {
       };
 
       for (final MapEntry<String, String> entry in testCases.entries) {
-        final Directory sampleAppAndroid = globals.fs.systemTempDirectory.createTempSync('android');
+        final Directory sampleAppAndroid = fileSystem.systemTempDirectory.createTempSync('android');
         sampleAppAndroid
           .childFile('build.gradle')
           .writeAsStringSync('''
@@ -176,141 +170,22 @@ void main() {
               'zipStorePath=wrapper/dists\n'
               'distributionUrl=https\\://services.gradle.org/distributions/gradle-${entry.value}-all.zip\n');
       }
-    }, overrides: <Type, Generator>{
-      Cache: () => Cache.test(rootOverride: tempDir, fileSystem: memoryFileSystem),
-      FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    });
-  });
-
-  group('GradleUtils.getExecutable', () {
-    final String gradlewFilename = globals.platform.isWindows ? 'gradlew.bat' : 'gradlew';
-
-    MemoryFileSystem memoryFileSystem;
-    OperatingSystemUtils operatingSystemUtils;
-    MockGradleUtils gradleUtils;
-
-    setUp(() {
-      memoryFileSystem = MemoryFileSystem.test();
-      operatingSystemUtils = MockOperatingSystemUtils();
-      gradleUtils = MockGradleUtils();
     });
 
-    testUsingContext('returns the gradlew path', () {
-      final Directory androidDirectory = globals.fs.directory('/android')..createSync();
+    testWithoutContext('returns the gradlew path', () {
+      final Directory androidDirectory = fileSystem.directory('/android')..createSync();
       androidDirectory.childFile('gradlew').createSync();
       androidDirectory.childFile('gradlew.bat').createSync();
       androidDirectory.childFile('gradle.properties').createSync();
 
-      when(gradleUtils.injectGradleWrapperIfNeeded(any)).thenReturn(null);
+      final FlutterProject flutterProject = FlutterProjectFactory(
+        logger: BufferLogger.test(),
+        fileSystem: fileSystem,
+      ).fromDirectory(fileSystem.currentDirectory);
 
-      expect(
-        GradleUtils().getExecutable(FlutterProject.current()),
-        androidDirectory.childFile(gradlewFilename).path,
+      expect(gradleUtils.getExecutable(flutterProject),
+        androidDirectory.childFile('gradlew').path,
       );
-    }, overrides: <Type, Generator>{
-      FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-      OperatingSystemUtils: () => operatingSystemUtils,
-      GradleUtils: () => gradleUtils,
-    });
-
-    testUsingContext('gives execute permission to gradle', () {
-      final FlutterProject flutterProject = MockFlutterProject();
-      final AndroidProject androidProject = MockAndroidProject();
-      when(flutterProject.android).thenReturn(androidProject);
-
-      final FileStat gradleStat = MockFileStat();
-      when(gradleStat.mode).thenReturn(444);
-
-      final File gradlew = MockFile();
-      when(gradlew.path).thenReturn('gradlew');
-      when(gradlew.absolute).thenReturn(gradlew);
-      when(gradlew.statSync()).thenReturn(gradleStat);
-      when(gradlew.existsSync()).thenReturn(true);
-
-      final Directory androidDirectory = MockDirectory();
-      when(androidDirectory.childFile(gradlewFilename)).thenReturn(gradlew);
-      when(androidProject.hostAppGradleRoot).thenReturn(androidDirectory);
-
-      when(gradleUtils.injectGradleWrapperIfNeeded(any)).thenReturn(null);
-
-      GradleUtils().getExecutable(flutterProject);
-
-      verify(operatingSystemUtils.makeExecutable(gradlew)).called(1);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-      OperatingSystemUtils: () => operatingSystemUtils,
-      GradleUtils: () => gradleUtils,
-    });
-
-    testUsingContext('gives execute permission to gradle even when not all permission flags are set', () {
-      final FlutterProject flutterProject = MockFlutterProject();
-      final AndroidProject androidProject = MockAndroidProject();
-      when(flutterProject.android).thenReturn(androidProject);
-
-      final FileStat gradleStat = MockFileStat();
-      when(gradleStat.mode).thenReturn(400);
-
-      final File gradlew = MockFile();
-      when(gradlew.path).thenReturn('gradlew');
-      when(gradlew.absolute).thenReturn(gradlew);
-      when(gradlew.statSync()).thenReturn(gradleStat);
-      when(gradlew.existsSync()).thenReturn(true);
-
-      final Directory androidDirectory = MockDirectory();
-      when(androidDirectory.childFile(gradlewFilename)).thenReturn(gradlew);
-      when(androidProject.hostAppGradleRoot).thenReturn(androidDirectory);
-
-      when(gradleUtils.injectGradleWrapperIfNeeded(any)).thenReturn(null);
-
-      GradleUtils().getExecutable(flutterProject);
-
-      verify(operatingSystemUtils.makeExecutable(gradlew)).called(1);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-      OperatingSystemUtils: () => operatingSystemUtils,
-      GradleUtils: () => gradleUtils,
-    });
-
-    testUsingContext("doesn't give execute permission to gradle if not needed", () {
-      final FlutterProject flutterProject = MockFlutterProject();
-      final AndroidProject androidProject = MockAndroidProject();
-      when(flutterProject.android).thenReturn(androidProject);
-
-      final FileStat gradleStat = MockFileStat();
-      when(gradleStat.mode).thenReturn(0x49 /* a+x */);
-
-      final File gradlew = MockFile();
-      when(gradlew.path).thenReturn('gradlew');
-      when(gradlew.absolute).thenReturn(gradlew);
-      when(gradlew.statSync()).thenReturn(gradleStat);
-      when(gradlew.existsSync()).thenReturn(true);
-
-      final Directory androidDirectory = MockDirectory();
-      when(androidDirectory.childFile(gradlewFilename)).thenReturn(gradlew);
-      when(androidProject.hostAppGradleRoot).thenReturn(androidDirectory);
-
-      when(gradleUtils.injectGradleWrapperIfNeeded(any)).thenReturn(null);
-
-      GradleUtils().getExecutable(flutterProject);
-
-      verifyNever(operatingSystemUtils.makeExecutable(gradlew));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-      OperatingSystemUtils: () => operatingSystemUtils,
-      GradleUtils: () => gradleUtils,
     });
   });
 }
-
-class MockAndroidProject extends Mock implements AndroidProject {}
-class MockDirectory extends Mock implements Directory {}
-class MockFile extends Mock implements File {}
-class MockFileStat extends Mock implements FileStat {}
-class MockFlutterProject extends Mock implements FlutterProject {}
-class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
-class MockGradleUtils extends Mock implements GradleUtils {}

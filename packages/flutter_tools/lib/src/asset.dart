@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
 import 'base/context.dart';
+import 'base/deferred_component.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
@@ -53,7 +54,8 @@ abstract class AssetBundleFactory {
     @required Logger logger,
     @required FileSystem fileSystem,
     @required Platform platform,
-  }) => _ManifestAssetBundleFactory(logger: logger, fileSystem: fileSystem, platform: platform);
+    bool splitDeferredAssets = false,
+  }) => _ManifestAssetBundleFactory(logger: logger, fileSystem: fileSystem, platform: platform, splitDeferredAssets: splitDeferredAssets);
 
   /// Creates a new [AssetBundle].
   AssetBundle createBundle();
@@ -61,6 +63,10 @@ abstract class AssetBundleFactory {
 
 abstract class AssetBundle {
   Map<String, DevFSContent> get entries;
+
+  /// The files that were specified under the deferred components assets sections
+  /// in pubspec.
+  Map<String, Map<String, DevFSContent>> get deferredComponentsEntries;
 
   /// Additional files that this bundle depends on that are not included in the
   /// output result.
@@ -75,6 +81,7 @@ abstract class AssetBundle {
     String manifestPath = defaultManifestPath,
     String assetDirPath,
     @required String packagesPath,
+    bool deferredComponentsEnabled = false,
   });
 }
 
@@ -83,16 +90,19 @@ class _ManifestAssetBundleFactory implements AssetBundleFactory {
     @required Logger logger,
     @required FileSystem fileSystem,
     @required Platform platform,
+    bool splitDeferredAssets = false,
   }) : _logger = logger,
        _fileSystem = fileSystem,
-       _platform = platform;
+       _platform = platform,
+       _splitDeferredAssets = splitDeferredAssets;
 
   final Logger _logger;
   final FileSystem _fileSystem;
   final Platform _platform;
+  final bool _splitDeferredAssets;
 
   @override
-  AssetBundle createBundle() => ManifestAssetBundle(logger: _logger, fileSystem: _fileSystem, platform: _platform);
+  AssetBundle createBundle() => ManifestAssetBundle(logger: _logger, fileSystem: _fileSystem, platform: _platform, splitDeferredAssets: _splitDeferredAssets);
 }
 
 /// An asset bundle based on a pubspec.yaml file.
@@ -103,18 +113,24 @@ class ManifestAssetBundle implements AssetBundle {
     @required Logger logger,
     @required FileSystem fileSystem,
     @required Platform platform,
+    bool splitDeferredAssets = false,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _platform = platform,
+       _splitDeferredAssets = splitDeferredAssets,
        _licenseCollector = LicenseCollector(fileSystem: fileSystem);
 
   final Logger _logger;
   final FileSystem _fileSystem;
   final LicenseCollector _licenseCollector;
   final Platform _platform;
+  final bool _splitDeferredAssets;
 
   @override
   final Map<String, DevFSContent> entries = <String, DevFSContent>{};
+
+  @override
+  final Map<String, Map<String, DevFSContent>> deferredComponentsEntries = <String, Map<String, DevFSContent>>{};
 
   // If an asset corresponds to a wildcard directory, then it may have been
   // updated without changes to the manifest. These are only tracked for
@@ -163,6 +179,7 @@ class ManifestAssetBundle implements AssetBundle {
     String manifestPath = defaultManifestPath,
     String assetDirPath,
     @required String packagesPath,
+    bool deferredComponentsEnabled = false,
   }) async {
     assetDirPath ??= getAssetBuildDirectory();
     FlutterProject flutterProject;
@@ -197,27 +214,47 @@ class ManifestAssetBundle implements AssetBundle {
     // in the pubspec.yaml file's assets and font and sections. The
     // value of each image asset is a list of resolution-specific "variants",
     // see _AssetDirectoryCache.
+    final List<String> excludeDirs = <String>[
+      assetDirPath,
+      getBuildDirectory(),
+      if (flutterProject.ios.existsSync())
+        flutterProject.ios.hostAppRoot.path,
+      if (flutterProject.macos.existsSync())
+        flutterProject.macos.managedDirectory.path,
+      if (flutterProject.windows.existsSync())
+        flutterProject.windows.managedDirectory.path,
+      if (flutterProject.linux.existsSync())
+        flutterProject.linux.managedDirectory.path,
+    ];
     final Map<_Asset, List<_Asset>> assetVariants = _parseAssets(
       packageConfig,
       flutterManifest,
       wildcardDirectories,
       assetBasePath,
-      excludeDirs: <String>[
-        assetDirPath,
-        getBuildDirectory(),
-        if (flutterProject.ios.existsSync())
-          flutterProject.ios.hostAppRoot.path,
-        if (flutterProject.macos.existsSync())
-          flutterProject.macos.managedDirectory.path,
-        if (flutterProject.windows.existsSync())
-          flutterProject.windows.managedDirectory.path,
-        if (flutterProject.linux.existsSync())
-          flutterProject.linux.managedDirectory.path,
-      ],
+      excludeDirs: excludeDirs,
     );
 
     if (assetVariants == null) {
       return 1;
+    }
+
+    // Parse assets for  deferred components.
+    final Map<String, Map<_Asset, List<_Asset>>> deferredComponentsAssetVariants = _parseDeferredComponentsAssets(
+      flutterManifest,
+      packageConfig,
+      assetBasePath,
+      wildcardDirectories,
+      flutterProject.directory,
+      excludeDirs: excludeDirs,
+    );
+    if (!_splitDeferredAssets || !deferredComponentsEnabled) {
+      // Include the assets in the regular set of assets if not using deferred
+      // components.
+      for (final String componentName in deferredComponentsAssetVariants.keys) {
+        assetVariants.addAll(deferredComponentsAssetVariants[componentName]);
+      }
+      deferredComponentsAssetVariants.clear();
+      deferredComponentsEntries.clear();
     }
 
     final bool includesMaterialFonts = flutterManifest.usesMaterialDesign;
@@ -314,6 +351,39 @@ class ManifestAssetBundle implements AssetBundle {
         entries[variant.entryUri.path] ??= DevFSFileContent(variantFile);
       }
     }
+    // Save the contents of each deferred component image, image variant, and font
+    // asset in deferredComponentsEntries.
+    if (deferredComponentsAssetVariants != null) {
+      for (final String componentName in deferredComponentsAssetVariants.keys) {
+        deferredComponentsEntries[componentName] = <String, DevFSContent>{};
+        for (final _Asset asset in deferredComponentsAssetVariants[componentName].keys) {
+          final File assetFile = asset.lookupAssetFile(_fileSystem);
+          if (!assetFile.existsSync() && deferredComponentsAssetVariants[componentName][asset].isEmpty) {
+            _logger.printStatus('Error detected in pubspec.yaml:', emphasis: true);
+            _logger.printError('No file or variants found for $asset.\n');
+            if (asset.package != null) {
+              _logger.printError('This asset was included from package ${asset.package.name}.');
+            }
+            return 1;
+          }
+          // The file name for an asset's "main" entry is whatever appears in
+          // the pubspec.yaml file. The main entry's file must always exist for
+          // font assets. It need not exist for an image if resolution-specific
+          // variant files exist. An image's main entry is treated the same as a
+          // "1x" resolution variant and if both exist then the explicit 1x
+          // variant is preferred.
+          if (assetFile.existsSync()) {
+            assert(!deferredComponentsAssetVariants[componentName][asset].contains(asset));
+            deferredComponentsAssetVariants[componentName][asset].insert(0, asset);
+          }
+          for (final _Asset variant in deferredComponentsAssetVariants[componentName][asset]) {
+            final File variantFile = variant.lookupAssetFile(_fileSystem);
+            assert(variantFile.existsSync());
+            deferredComponentsEntries[componentName][variant.entryUri.path] ??= DevFSFileContent(variantFile);
+          }
+        }
+      }
+    }
     final List<_Asset> materialAssets = <_Asset>[
       if (flutterManifest.usesMaterialDesign)
         ..._getMaterialAssets(),
@@ -408,6 +478,50 @@ class ManifestAssetBundle implements AssetBundle {
           packageConfig,
         )) font.descriptor,
     ];
+  }
+
+  Map<String, Map<_Asset, List<_Asset>>> _parseDeferredComponentsAssets(
+    FlutterManifest flutterManifest,
+    PackageConfig packageConfig,
+    String assetBasePath,
+    List<Uri> wildcardDirectories,
+    Directory projectDirectory, {
+    List<String> excludeDirs = const <String>[],
+  }) {
+    final List<DeferredComponent> components = flutterManifest.deferredComponents;
+    final Map<String, Map<_Asset, List<_Asset>>> deferredComponentsAssetVariants = <String, Map<_Asset, List<_Asset>>>{};
+    if (components == null) {
+      return deferredComponentsAssetVariants;
+    }
+    for (final DeferredComponent component in components) {
+      deferredComponentsAssetVariants[component.name] = <_Asset, List<_Asset>>{};
+      final _AssetDirectoryCache cache = _AssetDirectoryCache(<String>[], _fileSystem);
+      for (final Uri assetUri in component.assets) {
+        if (assetUri.path.endsWith('/')) {
+          wildcardDirectories.add(assetUri);
+          _parseAssetsFromFolder(
+            packageConfig,
+            flutterManifest,
+            assetBasePath,
+            cache,
+            deferredComponentsAssetVariants[component.name],
+            assetUri,
+            excludeDirs: excludeDirs,
+          );
+        } else {
+          _parseAssetFromFile(
+            packageConfig,
+            flutterManifest,
+            assetBasePath,
+            cache,
+            deferredComponentsAssetVariants[component.name],
+            assetUri,
+            excludeDirs: excludeDirs,
+          );
+        }
+      }
+    }
+    return deferredComponentsAssetVariants;
   }
 
   DevFSStringContent _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants) {

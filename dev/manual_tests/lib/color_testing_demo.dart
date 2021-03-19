@@ -10,10 +10,12 @@ class ColorTestingDemo extends StatelessWidget {
   static const String routeName = '/color_demo';
 
   @override
-  Widget build(BuildContext context) => ColorDemoHome();
+  Widget build(BuildContext context) => const ColorDemoHome();
 }
 
 class ColorDemoHome extends StatelessWidget {
+  const ColorDemoHome({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,7 +87,7 @@ class ColorRow extends StatelessWidget {
 }
 
 void main() {
-  runApp(MaterialApp(
+  runApp(const MaterialApp(
     title: 'Color Testing Demo',
     home: ColorDemoHome(),
   ));

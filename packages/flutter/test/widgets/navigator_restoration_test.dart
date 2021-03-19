@@ -2,13 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-
-import '../flutter_test_alternative.dart' show Fake;
 
 void main() {
   testWidgets('Restoration Smoke Test', (WidgetTester tester) async {
@@ -1034,13 +1030,13 @@ Route<void> _routeBuilder(BuildContext context, Object? arguments) {
 Route<void> _routeFutureBuilder(BuildContext context, Object? arguments) {
   return MaterialPageRoute<void>(
     builder: (BuildContext context) {
-      return RouteFutureWidget();
+      return const RouteFutureWidget();
     },
   );
 }
 
 class PagedTestWidget extends StatelessWidget {
-  const PagedTestWidget({this.restorationId = 'app'});
+  const PagedTestWidget({Key? key, this.restorationId = 'app'}) : super(key: key);
 
   final String restorationId;
 
@@ -1048,7 +1044,7 @@ class PagedTestWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return RootRestorationScope(
       restorationId: restorationId,
-      child: Directionality(
+      child: const Directionality(
         textDirection: TextDirection.ltr,
         child: PagedTestNavigator(),
       ),
@@ -1057,6 +1053,8 @@ class PagedTestWidget extends StatelessWidget {
 }
 
 class PagedTestNavigator extends StatefulWidget {
+  const PagedTestNavigator({Key? key}) : super(key: key);
+
   @override
   State<PagedTestNavigator> createState() => PagedTestNavigatorState();
 }
@@ -1161,7 +1159,7 @@ class TestPage extends Page<void> {
 }
 
 class TestWidget extends StatelessWidget {
-  const TestWidget({this.restorationId = 'app'});
+  const TestWidget({Key? key, this.restorationId = 'app'}) : super(key: key);
 
   final String? restorationId;
 
@@ -1241,6 +1239,8 @@ class RouteWidgetState extends State<RouteWidget> with RestorationMixin {
 }
 
 class RouteFutureWidget extends StatefulWidget {
+  const RouteFutureWidget({Key? key}): super(key: key);
+
   @override
   State<RouteFutureWidget> createState() => RouteFutureWidgetState();
 }

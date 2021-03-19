@@ -7,13 +7,15 @@ import 'package:flutter/scheduler.dart' show timeDilation;
 
 void main() {
   runApp(
-    ComplexLayoutApp()
+    const ComplexLayoutApp()
   );
 }
 
 enum ScrollMode { complex, tile }
 
 class ComplexLayoutApp extends StatefulWidget {
+  const ComplexLayoutApp({Key key}) : super(key: key);
+
   @override
   ComplexLayoutAppState createState() => ComplexLayoutAppState();
 
@@ -68,7 +70,7 @@ class TileScrollLayout extends StatelessWidget {
             child: Material(
               elevation: (index % 5 + 1).toDouble(),
               color: Colors.white,
-              child: IconBar(),
+              child: const IconBar(),
             ),
           );
         },
@@ -101,7 +103,7 @@ class ComplexLayoutState extends State<ComplexLayout> {
               print('Pressed search');
             },
           ),
-          TopBarMenu(),
+          const TopBarMenu(),
         ],
       ),
       body: Column(
@@ -118,7 +120,7 @@ class ComplexLayoutState extends State<ComplexLayout> {
               },
             ),
           ),
-          BottomBar(),
+          const BottomBar(),
         ],
       ),
       drawer: const GalleryDrawer(),
@@ -127,6 +129,8 @@ class ComplexLayoutState extends State<ComplexLayout> {
 }
 
 class TopBarMenu extends StatelessWidget {
+  const TopBarMenu({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<String>(
@@ -178,7 +182,7 @@ class TopBarMenu extends StatelessWidget {
 }
 
 class MenuItemWithIcon extends StatelessWidget {
-  const MenuItemWithIcon(this.icon, this.title, this.subtitle);
+  const MenuItemWithIcon(this.icon, this.title, this.subtitle, {Key key}) : super(key: key);
 
   final IconData icon;
   final String title;
@@ -209,15 +213,15 @@ class FancyImageItem extends StatelessWidget {
     return ListBody(
       children: <Widget>[
         UserHeader('Ali Connors $index'),
-        ItemDescription(),
-        ItemImageBox(),
-        InfoBar(),
+        const ItemDescription(),
+        const ItemImageBox(),
+        const InfoBar(),
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 8.0),
           child: Divider(),
         ),
-        IconBar(),
-        FatDivider(),
+        const IconBar(),
+        const FatDivider(),
       ],
     );
   }
@@ -233,19 +237,21 @@ class FancyGalleryItem extends StatelessWidget {
       children: <Widget>[
         const UserHeader('Ali Connors'),
         ItemGalleryBox(index),
-        InfoBar(),
+        const InfoBar(),
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 8.0),
           child: Divider(),
         ),
-        IconBar(),
-        FatDivider(),
+        const IconBar(),
+        const FatDivider(),
       ],
     );
   }
 }
 
 class InfoBar extends StatelessWidget {
+  const InfoBar({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -262,6 +268,8 @@ class InfoBar extends StatelessWidget {
 }
 
 class IconBar extends StatelessWidget {
+  const IconBar({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -279,7 +287,7 @@ class IconBar extends StatelessWidget {
 }
 
 class IconWithText extends StatelessWidget {
-  const IconWithText(this.icon, this.title);
+  const IconWithText(this.icon, this.title, {Key key}) : super(key: key);
 
   final IconData icon;
   final String title;
@@ -300,7 +308,7 @@ class IconWithText extends StatelessWidget {
 }
 
 class MiniIconWithText extends StatelessWidget {
-  const MiniIconWithText(this.icon, this.title);
+  const MiniIconWithText(this.icon, this.title, {Key key}) : super(key: key);
 
   final IconData icon;
   final String title;
@@ -329,6 +337,8 @@ class MiniIconWithText extends StatelessWidget {
 }
 
 class FatDivider extends StatelessWidget {
+  const FatDivider({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -339,7 +349,7 @@ class FatDivider extends StatelessWidget {
 }
 
 class UserHeader extends StatelessWidget {
-  const UserHeader(this.userName);
+  const UserHeader(this.userName, {Key key}) : super(key: key);
 
   final String userName;
 
@@ -380,7 +390,7 @@ class UserHeader extends StatelessWidget {
               ],
             ),
           ),
-          TopBarMenu(),
+          const TopBarMenu(),
         ],
       ),
     );
@@ -388,6 +398,8 @@ class UserHeader extends StatelessWidget {
 }
 
 class ItemDescription extends StatelessWidget {
+  const ItemDescription({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return const Padding(
@@ -398,6 +410,8 @@ class ItemDescription extends StatelessWidget {
 }
 
 class ItemImageBox extends StatelessWidget {
+  const ItemImageBox({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -477,7 +491,7 @@ class ItemImageBox extends StatelessWidget {
 }
 
 class ItemGalleryBox extends StatelessWidget {
-  const ItemGalleryBox(this.index);
+  const ItemGalleryBox(this.index, {Key key}) : super(key: key);
 
   final int index;
 
@@ -537,9 +551,7 @@ class ItemGalleryBox extends StatelessWidget {
                 }).toList(),
               ),
             ),
-            Container(
-              child: const TabPageSelector(),
-            ),
+            const TabPageSelector(),
           ],
         ),
       ),
@@ -548,6 +560,8 @@ class ItemGalleryBox extends StatelessWidget {
 }
 
 class BottomBar extends StatelessWidget {
+  const BottomBar({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -574,7 +588,7 @@ class BottomBar extends StatelessWidget {
 }
 
 class BottomBarButton extends StatelessWidget {
-  const BottomBarButton(this.icon, this.title);
+  const BottomBarButton(this.icon, this.title, {Key key}) : super(key: key);
 
   final IconData icon;
   final String title;
@@ -618,7 +632,7 @@ class GalleryDrawer extends StatelessWidget {
         key: const PageStorageKey<String>('gallery-drawer'),
         padding: EdgeInsets.zero,
         children: <Widget>[
-          FancyDrawerHeader(),
+          const FancyDrawerHeader(),
           ListTile(
             key: const Key('scroll-switcher'),
             title: const Text('Scroll Mode'),
@@ -668,6 +682,8 @@ class GalleryDrawer extends StatelessWidget {
 }
 
 class FancyDrawerHeader extends StatelessWidget {
+  const FancyDrawerHeader({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Container(

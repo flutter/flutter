@@ -20,7 +20,7 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/testbed.dart';
+import '../../src/fakes.dart';
 
 final FakePlatform macOS = FakePlatform(
   operatingSystem: 'macos',

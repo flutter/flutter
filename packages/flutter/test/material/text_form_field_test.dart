@@ -201,7 +201,7 @@ void main() {
   });
 
   testWidgets('Passes onEditingComplete to underlying TextField', (WidgetTester tester) async {
-    final VoidCallback onEditingComplete = () { };
+    void onEditingComplete() { }
 
     await tester.pumpWidget(
       MaterialApp(
@@ -726,5 +726,27 @@ void main() {
     final BuildContext context = tester.element(hintTextFinder);
     final TextDirection textDirection = Directionality.of(context);
     expect(textDirection, TextDirection.rtl);
+  });
+
+  testWidgets('Passes scrollController to underlying TextField', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              scrollController: scrollController,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder textFieldFinder = find.byType(TextField);
+    expect(textFieldFinder, findsOneWidget);
+
+    final TextField textFieldWidget = tester.widget(textFieldFinder);
+    expect(textFieldWidget.scrollController, scrollController);
   });
 }

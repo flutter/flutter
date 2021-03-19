@@ -14,10 +14,10 @@ void main() {
       final Manifest manifest = loadTaskManifest();
       expect(manifest.tasks, isNotEmpty);
 
-      final ManifestTask task = manifest.tasks.firstWhere((ManifestTask task) => task.name == 'simple_animation_perf_ios');
-      expect(task.description, 'Measure CPU/GPU usage percentages of a simple animation.\n');
-      expect(task.stage, 'devicelab_ios');
-      expect(task.requiredAgentCapabilities, <String>['mac/ios']);
+      final ManifestTask task = manifest.tasks.firstWhere((ManifestTask task) => task.name == 'complex_layout_win__compile');
+      expect(task.description, 'Collects various performance metrics of compiling the Complex Layout for Android from Windows.\n');
+      expect(task.stage, 'devicelab_win');
+      expect(task.requiredAgentCapabilities, <String>['windows/android']);
 
       for (final ManifestTask task in manifest.tasks) {
         final File taskFile = File('bin/tasks/${task.name}.dart');

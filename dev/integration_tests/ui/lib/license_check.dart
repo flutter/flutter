@@ -10,10 +10,12 @@ import 'package:flutter_driver/driver_extension.dart';
 /// license in it.
 void main() {
   enableFlutterDriverExtension();
-  runApp(ShowLicenses());
+  runApp(const ShowLicenses());
 }
 
 class ShowLicenses extends StatelessWidget {
+  const ShowLicenses({Key key}) : super(key: key);
+
   Widget _buildTestResultWidget(
     BuildContext context,
     AsyncSnapshot<List<LicenseEntry>> snapshot,

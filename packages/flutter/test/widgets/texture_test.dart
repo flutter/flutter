@@ -7,9 +7,37 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
+  testWidgets('Texture with freeze set to true', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        const Center(child: Texture(textureId: 1, freeze: true))
+    );
+
+    final Texture texture = tester.firstWidget(find.byType(Texture));
+    expect(texture, isNotNull);
+    expect(texture.textureId, 1);
+    expect(texture.freeze, true);
+
+    final RenderObject renderObject = tester.firstRenderObject(find.byType(Texture));
+    expect(renderObject, isNotNull);
+    final TextureBox textureBox = renderObject as TextureBox;
+    expect(textureBox, isNotNull);
+    expect(textureBox.textureId, 1);
+    expect(textureBox.freeze, true);
+
+    final ContainerLayer containerLayer = ContainerLayer();
+    final PaintingContext paintingContext = PaintingContext(containerLayer, Rect.zero);
+    textureBox.paint(paintingContext, Offset.zero);
+    final Layer layer = containerLayer.lastChild!;
+    expect(layer, isNotNull);
+    final TextureLayer textureLayer = layer as TextureLayer;
+    expect(textureLayer, isNotNull);
+    expect(textureLayer.textureId, 1);
+    expect(textureLayer.freeze, true);
+  });
+
   testWidgets('Texture with default FilterQuality', (WidgetTester tester) async {
     await tester.pumpWidget(
-        const Center(child: Texture(textureId: 1,))
+        const Center(child: Texture(textureId: 1))
     );
 
     final Texture texture = tester.firstWidget(find.byType(Texture));

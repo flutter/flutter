@@ -30,17 +30,18 @@ TaskFunction createMicrobenchmarkTask() {
             '-v',
             // --release doesn't work on iOS due to code signing issues
             '--profile',
+            '--no-publish-port',
             '-d',
             device.deviceId,
           ];
           options.add(benchmarkPath);
-          return await _startFlutter(
+          return _startFlutter(
             options: options,
             canFail: false,
           );
         });
 
-        return await _readJsonResults(flutterProcess);
+        return _readJsonResults(flutterProcess);
       }
       return _run();
     }

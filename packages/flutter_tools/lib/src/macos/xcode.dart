@@ -29,8 +29,11 @@ import '../ios/mac.dart';
 import '../ios/xcodeproj.dart';
 import '../reporting/reporting.dart';
 
-Version get xcodeRequiredVersion => Version(11, 0, 0, text: '11.0');
-Version get xcodeRecommendedVersion => Version(12, 0, 1, text: '12.0.1');
+Version get xcodeRequiredVersion => Version(12, 0, 1, text: '12.0.1');
+
+/// Diverging this number from the minimum required version will provide a doctor
+/// warning, not error, that users should upgrade Xcode.
+Version get xcodeRecommendedVersion => xcodeRequiredVersion;
 
 /// SDK name passed to `xcrun --sdk`. Corresponds to undocumented Xcode
 /// SUPPORTED_PLATFORMS values.

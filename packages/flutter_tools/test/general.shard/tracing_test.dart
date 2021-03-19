@@ -149,7 +149,7 @@ void main() {
       ),
     ]);
 
-    await expectLater(() async => await downloadStartupTrace(fakeVmServiceHost.vmService,
+    await expectLater(() async => downloadStartupTrace(fakeVmServiceHost.vmService,
       output: fileSystem.currentDirectory,
       logger: logger,
     ), throwsToolExit(message: 'The device disconnected before the timeline could be retrieved.'));
@@ -176,7 +176,7 @@ void main() {
       ),
     ]);
 
-    await expectLater(() async => await downloadStartupTrace(fakeVmServiceHost.vmService,
+    await expectLater(() async => downloadStartupTrace(fakeVmServiceHost.vmService,
       output: fileSystem.currentDirectory,
       logger: logger,
     ), throwsToolExit(message: 'Engine start event is missing in the timeline'));
@@ -212,7 +212,7 @@ void main() {
       ),
     ]);
 
-    await expectLater(() async => await downloadStartupTrace(fakeVmServiceHost.vmService,
+    await expectLater(() async => downloadStartupTrace(fakeVmServiceHost.vmService,
       output: fileSystem.currentDirectory,
       logger: logger,
     ), throwsToolExit(message: 'First frame events are missing in the timeline'));

@@ -65,6 +65,8 @@ class ChipTheme extends InheritedTheme {
   ///
   /// ```dart
   /// class Spaceship extends StatelessWidget {
+  ///   const Spaceship({Key? key}) : super(key: key);
+  ///
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     return ChipTheme(
@@ -122,6 +124,8 @@ class ChipTheme extends InheritedTheme {
 ///
 /// ```dart
 /// class CarColor extends StatefulWidget {
+///   const CarColor({Key? key}) : super(key: key);
+///
 ///   @override
 ///   State createState() => _CarColorState();
 /// }
@@ -134,7 +138,7 @@ class ChipTheme extends InheritedTheme {
 ///     return ChipTheme(
 ///       data: ChipTheme.of(context).copyWith(backgroundColor: Colors.lightBlue),
 ///       child: ChoiceChip(
-///         label: Text('Light Blue'),
+///         label: const Text('Light Blue'),
 ///         onSelected: (bool value) {
 ///           setState(() {
 ///             _color = value ? Colors.lightBlue : Colors.red;

@@ -5,11 +5,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/physics.dart';
 
-import '../flutter_test_alternative.dart' show Fake;
 import '../rendering/mock_canvas.dart';
 import '../rendering/recording_canvas.dart';
 import '../widgets/semantics_tester.dart';
@@ -2209,7 +2207,7 @@ void main() {
 
     // A fling in the TabBar or TabBarView, shouldn't do anything.
 
-    await tester.fling(find.byType(TabBar), const Offset(-100.0, 0.0), 5000.0);
+    await tester.fling(find.byType(TabBar), const Offset(-100.0, 0.0), 5000.0, warnIfMissed: false);
     await tester.pumpAndSettle();
 
     await tester.fling(find.byType(TabBarView), const Offset(100.0, 0.0), 5000.0);
@@ -2399,14 +2397,12 @@ void main() {
       required List<String> tabs,
     }) {
       return boilerplate(
-        child: Container(
-          child: TabBar(
-            controller: controller,
-            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
-            onTap: (int index) {
-              tabIndex = index;
-            },
-          ),
+        child: TabBar(
+          controller: controller,
+          tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+          onTap: (int index) {
+            tabIndex = index;
+          },
         ),
       );
     }
@@ -3310,7 +3306,7 @@ void main() {
   });
 
   testWidgets('Crash on dispose', (WidgetTester tester) async {
-    await tester.pumpWidget(Padding(padding: const EdgeInsets.only(right: 200.0), child: TabBarDemo()));
+    await tester.pumpWidget(const Padding(padding: EdgeInsets.only(right: 200.0), child: TabBarDemo()));
     await tester.tap(find.byIcon(Icons.directions_bike));
     // There was a time where this would throw an exception
     // because we tried to send a notification on dispose.
@@ -3430,6 +3426,8 @@ class _KeepAliveInkState extends State<KeepAliveInk> with AutomaticKeepAliveClie
 }
 
 class TabBarDemo extends StatelessWidget {
+  const TabBarDemo({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

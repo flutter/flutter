@@ -945,18 +945,18 @@ class RenderListWheelViewport
     Offset offsetToCenter,
   ) {
     // Paint child cylindrically, without [overAndUnderCenterOpacity].
-    final PaintingContextCallback painter = (PaintingContext context, Offset offset) {
+    void painter(PaintingContext context, Offset offset) {
       context.paintChild(
         child,
         // Paint everything in the center (e.g. angle = 0), then transform.
         offset + offsetToCenter,
       );
-    };
+    }
 
     // Paint child cylindrically, with [overAndUnderCenterOpacity].
-    final PaintingContextCallback opacityPainter = (PaintingContext context, Offset offset) {
+    void opacityPainter(PaintingContext context, Offset offset) {
       context.pushOpacity(offset, (overAndUnderCenterOpacity * 255).round(), painter);
-    };
+    }
 
     context.pushTransform(
       needsCompositing,

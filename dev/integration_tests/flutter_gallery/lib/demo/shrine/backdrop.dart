@@ -198,12 +198,13 @@ class _BackdropTitle extends AnimatedWidget {
 /// front or back layer is showing.
 class Backdrop extends StatefulWidget {
   const Backdrop({
+    Key? key,
     required this.frontLayer,
     required this.backLayer,
     required this.frontTitle,
     required this.backTitle,
     required this.controller,
-  });
+  }) : super(key: key);
 
   final Widget frontLayer;
   final Widget backLayer;
@@ -355,7 +356,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
           onPressed: () {
             Navigator.push<void>(
               context,
-              MaterialPageRoute<void>(builder: (BuildContext context) => LoginPage()),
+              MaterialPageRoute<void>(builder: (BuildContext context) => const LoginPage()),
             );
           },
         ),
@@ -364,7 +365,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
           onPressed: () {
             Navigator.push<void>(
               context,
-              MaterialPageRoute<void>(builder: (BuildContext context) => LoginPage()),
+              MaterialPageRoute<void>(builder: (BuildContext context) => const LoginPage()),
             );
           },
         ),

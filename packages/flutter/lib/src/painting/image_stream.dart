@@ -194,6 +194,15 @@ class ImageStreamListener {
   ///
   /// If an error occurs during loading, [onError] will be called instead of
   /// [onImage].
+  ///
+  /// If [onError] is called and does not throw, then the error is considered to
+  /// be handled. An error handler can explicitly rethrow the exception reported
+  /// to it to safely indicate that it did not handle the exception.
+  ///
+  /// If an image stream has no listeners that handled the error when the error
+  /// was first encountered, then the error is reported using
+  /// [FlutterError.reportError], with the [FlutterErrorDetails.silent] flag set
+  /// to true.
   final ImageErrorListener? onError;
 
   @override
@@ -504,15 +513,17 @@ abstract class ImageStreamCompleter with Diagnosticable {
     if (_currentError != null && listener.onError != null) {
       try {
         listener.onError!(_currentError!.exception, _currentError!.stack);
-      } catch (exception, stack) {
-        FlutterError.reportError(
-          FlutterErrorDetails(
-            exception: exception,
-            library: 'image resource service',
-            context: ErrorDescription('by a synchronously-called image error listener'),
-            stack: stack,
-          ),
-        );
+      } catch (newException, newStack) {
+        if (newException != _currentError!.exception) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: newException,
+              library: 'image resource service',
+              context: ErrorDescription('by a synchronously-called image error listener'),
+              stack: newStack,
+            ),
+          );
+        }
       }
     }
   }
@@ -630,7 +641,9 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// occurred while resolving the image.
   ///
   /// If no error listeners (listeners with an [ImageStreamListener.onError]
-  /// specified) are attached, a [FlutterError] will be reported instead.
+  /// specified) are attached, or if the handlers all rethrow the exception
+  /// verbatim (with `throw exception`), a [FlutterError] will be reported using
+  /// [FlutterError.reportError].
   ///
   /// The `context` should be a string describing where the error was caught, in
   /// a form that will make sense in English when following the word "thrown",
@@ -677,23 +690,26 @@ abstract class ImageStreamCompleter with Diagnosticable {
         .whereType<ImageErrorListener>()
         .toList();
 
-    if (localErrorListeners.isEmpty) {
-      FlutterError.reportError(_currentError!);
-    } else {
-      for (final ImageErrorListener errorListener in localErrorListeners) {
-        try {
-          errorListener(exception, stack);
-        } catch (exception, stack) {
+    bool handled = false;
+    for (final ImageErrorListener errorListener in localErrorListeners) {
+      try {
+        errorListener(exception, stack);
+        handled = true;
+      } catch (newException, newStack) {
+        if (newException != exception) {
           FlutterError.reportError(
             FlutterErrorDetails(
               context: ErrorDescription('when reporting an error to an image listener'),
               library: 'image resource service',
-              exception: exception,
-              stack: stack,
+              exception: newException,
+              stack: newStack,
             ),
           );
         }
       }
+    }
+    if (!handled) {
+      FlutterError.reportError(_currentError!);
     }
   }
 

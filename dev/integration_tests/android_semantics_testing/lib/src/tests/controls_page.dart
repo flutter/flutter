@@ -9,6 +9,8 @@ export 'controls_constants.dart';
 
 /// A test page with a checkbox, three radio buttons, and a switch.
 class SelectionControlsPage extends StatefulWidget {
+  const SelectionControlsPage({Key key}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() => _SelectionControlsPageState();
 }

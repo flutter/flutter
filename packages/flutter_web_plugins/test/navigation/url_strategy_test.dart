@@ -143,7 +143,7 @@ class TestPlatformLocation extends PlatformLocation {
   String hash = '';
 
   @override
-  Object? Function() state = () => null;
+  Object? get state => null;
 
   /// Mocks the base href of the document.
   String baseHref = '';

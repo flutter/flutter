@@ -791,7 +791,7 @@ void main() {
       expect(repeating.animationBehavior, AnimationBehavior.preserve);
     });
 
-    test('AnimationBehavior.preserve runs at normal speed when animatingTo', () async {
+    test('AnimationBehavior.preserve runs at normal speed when animatingTo', () {
       debugSemanticsDisableAnimations = true;
       final AnimationController controller = AnimationController(
         vsync: const TestVSync(),
@@ -816,7 +816,7 @@ void main() {
       debugSemanticsDisableAnimations = false;
     });
 
-    test('AnimationBehavior.normal runs at 20x speed when animatingTo', () async {
+    test('AnimationBehavior.normal runs at 20x speed when animatingTo', () {
       debugSemanticsDisableAnimations = true;
       final AnimationController controller = AnimationController(
         vsync: const TestVSync(),

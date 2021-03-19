@@ -95,7 +95,6 @@ class AnnounceSemanticsEvent extends SemanticsEvent {
 ///
 /// This is only used by Android to announce tooltip values.
 class TooltipSemanticsEvent extends SemanticsEvent {
-
   /// Constructs an event that triggers a tooltip announcement by the platform.
   const TooltipSemanticsEvent(this.message) : super('tooltip');
 
@@ -115,7 +114,6 @@ class TooltipSemanticsEvent extends SemanticsEvent {
 /// Currently only honored on Android. Triggers a long-press specific sound
 /// when TalkBack is enabled.
 class LongPressSemanticsEvent extends SemanticsEvent {
-
   /// Constructs an event that triggers a long-press semantic feedback by the platform.
   const LongPressSemanticsEvent() : super('longPress');
 
@@ -128,7 +126,6 @@ class LongPressSemanticsEvent extends SemanticsEvent {
 /// Currently only honored on Android. Triggers a tap specific sound when
 /// TalkBack is enabled.
 class TapSemanticEvent extends SemanticsEvent {
-
   /// Constructs an event that triggers a long-press semantic feedback by the platform.
   const TapSemanticEvent() : super('tap');
 
@@ -152,10 +149,14 @@ class TapSemanticEvent extends SemanticsEvent {
 ///
 @Deprecated(
   'This event has never been implemented and will be removed in a future version of Flutter. References to it should be removed. '
-  'This feature was deprecated after v1.12.16.'
+  'This feature was deprecated after v1.26.0-18.0.pre.'
 )
 class UpdateLiveRegionEvent extends SemanticsEvent {
   /// Creates a new [UpdateLiveRegionEvent].
+  @Deprecated(
+    'This event has never been implemented and will be removed in a future version of Flutter. References to it should be removed. '
+    'This feature was deprecated after v1.26.0-18.0.pre.'
+  )
   const UpdateLiveRegionEvent() : super('updateLiveRegion');
 
   @override

@@ -25,14 +25,14 @@ enum FlutterProjectType {
   plugin,
 }
 
-extension FlutterProjectTypeExtension on FlutterProjectType {
-  String get name => getEnumName(this);
+String flutterProjectTypeToString(FlutterProjectType type) {
+  return getEnumName(type);
 }
 
 FlutterProjectType stringToProjectType(String value) {
   FlutterProjectType result;
   for (final FlutterProjectType type in FlutterProjectType.values) {
-    if (value == type.name) {
+    if (value == flutterProjectTypeToString(type)) {
       result = type;
       break;
     }

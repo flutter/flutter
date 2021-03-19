@@ -113,7 +113,7 @@ flutter:
 
 ''');
 
-    expect(() async => await const CopyAssets().build(environment),
+    expect(() async => const CopyAssets().build(environment),
       throwsA(isA<Exception>()));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,

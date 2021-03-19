@@ -375,12 +375,13 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 /// emitting bids, the final price is displayed.
 ///
 /// ```dart
-/// Stream<int> _bids = (() async* {
-///   await Future<void>.delayed(Duration(seconds: 1));
+/// final Stream<int> _bids = (() async* {
+///   await Future<void>.delayed(const Duration(seconds: 1));
 ///   yield 1;
-///   await Future<void>.delayed(Duration(seconds: 1));
+///   await Future<void>.delayed(const Duration(seconds: 1));
 /// })();
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return DefaultTextStyle(
 ///     style: Theme.of(context).textTheme.headline2!,
@@ -394,7 +395,7 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 ///           List<Widget> children;
 ///           if (snapshot.hasError) {
 ///             children = <Widget>[
-///               Icon(
+///               const Icon(
 ///                 Icons.error_outline,
 ///                 color: Colors.red,
 ///                 size: 60,
@@ -411,26 +412,26 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 ///           } else {
 ///             switch (snapshot.connectionState) {
 ///               case ConnectionState.none:
-///                 children = <Widget>[
+///                 children = const <Widget>[
 ///                   Icon(
 ///                     Icons.info,
 ///                     color: Colors.blue,
 ///                     size: 60,
 ///                   ),
-///                   const Padding(
+///                   Padding(
 ///                     padding: EdgeInsets.only(top: 16),
 ///                     child: Text('Select a lot'),
 ///                   )
 ///                 ];
 ///                 break;
 ///               case ConnectionState.waiting:
-///                 children = <Widget>[
+///                 children = const <Widget>[
 ///                   SizedBox(
-///                     child: const CircularProgressIndicator(),
+///                     child: CircularProgressIndicator(),
 ///                     width: 60,
 ///                     height: 60,
 ///                   ),
-///                   const Padding(
+///                   Padding(
 ///                     padding: EdgeInsets.only(top: 16),
 ///                     child: Text('Awaiting bids...'),
 ///                   )
@@ -438,7 +439,7 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 ///                 break;
 ///               case ConnectionState.active:
 ///                 children = <Widget>[
-///                   Icon(
+///                   const Icon(
 ///                     Icons.check_circle_outline,
 ///                     color: Colors.green,
 ///                     size: 60,
@@ -451,7 +452,7 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 ///                 break;
 ///               case ConnectionState.done:
 ///                 children = <Widget>[
-///                   Icon(
+///                   const Icon(
 ///                     Icons.info,
 ///                     color: Colors.blue,
 ///                     size: 60,
@@ -618,11 +619,12 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// in the UI.
 ///
 /// ```dart
-/// Future<String> _calculation = Future<String>.delayed(
-///   Duration(seconds: 2),
+/// final Future<String> _calculation = Future<String>.delayed(
+///   const Duration(seconds: 2),
 ///   () => 'Data Loaded',
 /// );
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return DefaultTextStyle(
 ///     style: Theme.of(context).textTheme.headline2!,
@@ -633,7 +635,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 ///         List<Widget> children;
 ///         if (snapshot.hasData) {
 ///           children = <Widget>[
-///             Icon(
+///             const Icon(
 ///               Icons.check_circle_outline,
 ///               color: Colors.green,
 ///               size: 60,
@@ -645,7 +647,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 ///           ];
 ///         } else if (snapshot.hasError) {
 ///           children = <Widget>[
-///             Icon(
+///             const Icon(
 ///               Icons.error_outline,
 ///               color: Colors.red,
 ///               size: 60,
@@ -656,13 +658,13 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 ///             )
 ///           ];
 ///         } else {
-///           children = <Widget>[
+///           children = const <Widget>[
 ///             SizedBox(
 ///               child: CircularProgressIndicator(),
 ///               width: 60,
 ///               height: 60,
 ///             ),
-///             const Padding(
+///             Padding(
 ///               padding: EdgeInsets.only(top: 16),
 ///               child: Text('Awaiting result...'),
 ///             )

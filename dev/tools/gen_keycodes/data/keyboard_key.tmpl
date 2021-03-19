@@ -20,7 +20,8 @@ import 'package:flutter/foundation.dart';
 ///  * [LogicalKeyboardKey], a class with static values that describe the keys
 ///    that are returned from [RawKeyEvent.logicalKey].
 abstract class KeyboardKey with Diagnosticable {
-  /// A const constructor so that subclasses may be const.
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const KeyboardKey();
 }
 

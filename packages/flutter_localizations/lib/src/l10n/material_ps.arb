@@ -13,6 +13,8 @@
   "previousMonthTooltip": "تیره میاشت",
   "nextPageTooltip": "بله پاڼه",
   "previousPageTooltip": "مخکینی مخ",
+  "firstPageTooltip": "First page",
+  "lastPageTooltip": "Last page",
   "showMenuTooltip": "غورنۍ ښودل",
   "aboutListTileTitle": "د $applicationName په اړه",
   "licensesPageTitle": "جوازونه",

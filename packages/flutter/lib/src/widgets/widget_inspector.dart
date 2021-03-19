@@ -767,7 +767,7 @@ mixin WidgetInspectorService {
   /// name "ext.flutter.inspector.name"), which takes no arguments.
   void _registerSignalServiceExtension({
     required String name,
-    required FutureOr<Object?> callback(),
+    required FutureOr<Object?> Function() callback,
   }) {
     registerServiceExtension(
       name: name,
@@ -785,7 +785,7 @@ mixin WidgetInspectorService {
   /// references to avoid leaking memory.
   void _registerObjectGroupServiceExtension({
     required String name,
-    required FutureOr<Object?> callback(String objectGroup),
+    required FutureOr<Object?> Function(String objectGroup) callback,
   }) {
     registerServiceExtension(
       name: name,
@@ -854,7 +854,7 @@ mixin WidgetInspectorService {
   /// lifetimes of object references in the returned JSON (see [disposeGroup]).
   void _registerServiceExtensionWithArg({
     required String name,
-    required FutureOr<Object?> callback(String? objectId, String objectGroup),
+    required FutureOr<Object?> Function(String? objectId, String objectGroup) callback,
   }) {
     registerServiceExtension(
       name: name,
@@ -872,7 +872,7 @@ mixin WidgetInspectorService {
   /// "arg0", "arg1", "arg2", ..., "argn".
   void _registerServiceExtensionVarArgs({
     required String name,
-    required FutureOr<Object?> callback(List<String> args),
+    required FutureOr<Object?> Function(List<String> args) callback,
   }) {
     registerServiceExtension(
       name: name,

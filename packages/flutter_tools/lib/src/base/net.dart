@@ -48,6 +48,7 @@ class Net {
   Future<List<int>> fetchUrl(Uri url, {
     int maxAttempts,
     File destFile,
+    @visibleForTesting Duration durationOverride,
   }) async {
     int attempts = 0;
     int durationSeconds = 1;
@@ -78,7 +79,7 @@ class Net {
         'Download failed -- attempting retry $attempts in '
         '$durationSeconds second${ durationSeconds == 1 ? "" : "s"}...',
       );
-      await Future<void>.delayed(Duration(seconds: durationSeconds));
+      await Future<void>.delayed(durationOverride ?? Duration(seconds: durationSeconds));
       if (durationSeconds < 64) {
         durationSeconds *= 2;
       }
@@ -172,8 +173,6 @@ class Net {
     }
   }
 }
-
-
 
 /// An IOSink that collects whatever is written to it.
 class _MemoryIOSink implements IOSink {

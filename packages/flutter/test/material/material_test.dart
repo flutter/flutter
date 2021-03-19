@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -233,9 +232,9 @@ void main() {
                 },
                 child: null,
               ),
-              Material(
+              const Material(
                 type: MaterialType.transparency,
-                child: Container(
+                child: SizedBox(
                   width: 400.0,
                   height: 500.0,
                 ),

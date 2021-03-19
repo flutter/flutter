@@ -24,6 +24,10 @@ import 'platform.dart';
 // ToolExit and a message that is more clear than the FileSystemException by
 // itself.
 
+/// On windows this is error code 2: ERROR_FILE_NOT_FOUND, and on
+/// macOS/Linux it is error code 2/ENOENT: No such file or directory.
+const int kSystemCannotFindFile = 2;
+
 /// A [FileSystem] that throws a [ToolExit] on certain errors.
 ///
 /// If a [FileSystem] error is not caused by the Flutter tool, and can only be
@@ -83,10 +87,6 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
       // Certain error codes indicate the file could not be found. It could have
       // been deleted by a different program while the tool was running.
       // if it still exists, the file likely exists on a read-only volume.
-      //
-      // On windows this is error code 2: ERROR_FILE_NOT_FOUND, and on
-      // macOS/Linux it is error code 2/ENOENT: No such file or directory.
-      const int kSystemCannotFindFile = 2;
       if (err?.osError?.errorCode != kSystemCannotFindFile || _noExitOnFailure) {
         rethrow;
       }
@@ -105,7 +105,18 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
 
   @override
   Directory get currentDirectory {
-    return _runSync(() =>  directory(delegate.currentDirectory), platform: _platform);
+    try {
+      return _runSync(() =>  directory(delegate.currentDirectory), platform: _platform);
+    } on FileSystemException catch (err) {
+      // Special handling for OS error 2 for current directory only.
+      if (err.osError.errorCode == kSystemCannotFindFile) {
+        throwToolExit(
+          'Unable to read current working directory. This can happen if the directory the '
+          'Flutter tool was run from was moved or deleted.'
+        );
+      }
+      rethrow;
+    }
   }
 
   @override
@@ -575,6 +586,70 @@ T _runSync<T>(T Function() op, {
   }
 }
 
+class _ProcessDelegate {
+  const _ProcessDelegate();
+
+  Future<io.Process> start(
+    List<String> command, {
+    String workingDirectory,
+    Map<String, String> environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    io.ProcessStartMode mode = io.ProcessStartMode.normal,
+  }) {
+    return io.Process.start(
+      command[0],
+      command.skip(1).toList(),
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+      runInShell: runInShell,
+    );
+  }
+
+  Future<io.ProcessResult> run(
+    List<String> command, {
+    String workingDirectory,
+    Map<String, String> environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    Encoding stdoutEncoding = io.systemEncoding,
+    Encoding stderrEncoding = io.systemEncoding,
+  }) {
+    return io.Process.run(
+      command[0],
+      command.skip(1).toList(),
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+      runInShell: runInShell,
+      stdoutEncoding: stdoutEncoding,
+      stderrEncoding: stderrEncoding,
+    );
+  }
+
+  io.ProcessResult runSync(
+    List<String> command, {
+    String workingDirectory,
+    Map<String, String> environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    Encoding stdoutEncoding = io.systemEncoding,
+    Encoding stderrEncoding = io.systemEncoding,
+  }) {
+    return io.Process.runSync(
+      command[0],
+      command.skip(1).toList(),
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+      runInShell: runInShell,
+      stdoutEncoding: stdoutEncoding,
+      stderrEncoding: stderrEncoding,
+    );
+  }
+}
+
 /// A [ProcessManager] that throws a [ToolExit] on certain errors.
 ///
 /// If a [ProcessException] is not caused by the Flutter tool, and can only be
@@ -592,6 +667,21 @@ class ErrorHandlingProcessManager extends ProcessManager {
 
   final ProcessManager _delegate;
   final Platform _platform;
+  static const _ProcessDelegate _processDelegate = _ProcessDelegate();
+  static bool _skipCommandLookup = false;
+
+  /// Bypass package:process command lookup for all functions in this block.
+  ///
+  /// This required that the fully resolved executable path is provided.
+  static Future<T> skipCommandLookup<T>(Future<T> Function() operation) async {
+    final bool previousValue = ErrorHandlingProcessManager._skipCommandLookup;
+    try {
+      ErrorHandlingProcessManager._skipCommandLookup = true;
+      return await operation();
+    } finally {
+      ErrorHandlingProcessManager._skipCommandLookup = previousValue;
+    }
+  }
 
   @override
   bool canRun(dynamic executable, {String workingDirectory}) {
@@ -619,15 +709,28 @@ class ErrorHandlingProcessManager extends ProcessManager {
     Encoding stdoutEncoding = io.systemEncoding,
     Encoding stderrEncoding = io.systemEncoding,
   }) {
-    return _run(() => _delegate.run(
-      command,
-      workingDirectory: workingDirectory,
-      environment: environment,
-      includeParentEnvironment: includeParentEnvironment,
-      runInShell: runInShell,
-      stdoutEncoding: stdoutEncoding,
-      stderrEncoding: stderrEncoding,
-    ), platform: _platform);
+    return _run(() {
+      if (_skipCommandLookup && _delegate is LocalProcessManager) {
+       return _processDelegate.run(
+          command.cast<String>(),
+          workingDirectory: workingDirectory,
+          environment: environment,
+          includeParentEnvironment: includeParentEnvironment,
+          runInShell: runInShell,
+          stdoutEncoding: stdoutEncoding,
+          stderrEncoding: stderrEncoding,
+        );
+      }
+      return _delegate.run(
+        command,
+        workingDirectory: workingDirectory,
+        environment: environment,
+        includeParentEnvironment: includeParentEnvironment,
+        runInShell: runInShell,
+        stdoutEncoding: stdoutEncoding,
+        stderrEncoding: stderrEncoding,
+      );
+    }, platform: _platform);
   }
 
   @override
@@ -639,13 +742,24 @@ class ErrorHandlingProcessManager extends ProcessManager {
     bool runInShell = false,
     io.ProcessStartMode mode = io.ProcessStartMode.normal,
   }) {
-    return _run(() => _delegate.start(
-      command,
-      workingDirectory: workingDirectory,
-      environment: environment,
-      includeParentEnvironment: includeParentEnvironment,
-      runInShell: runInShell,
-    ), platform: _platform);
+    return _run(() {
+      if (_skipCommandLookup && _delegate is LocalProcessManager) {
+        return _processDelegate.start(
+          command.cast<String>(),
+          workingDirectory: workingDirectory,
+          environment: environment,
+          includeParentEnvironment: includeParentEnvironment,
+          runInShell: runInShell,
+        );
+      }
+      return _delegate.start(
+        command,
+        workingDirectory: workingDirectory,
+        environment: environment,
+        includeParentEnvironment: includeParentEnvironment,
+        runInShell: runInShell,
+      );
+    }, platform: _platform);
   }
 
   @override
@@ -658,15 +772,28 @@ class ErrorHandlingProcessManager extends ProcessManager {
     Encoding stdoutEncoding = io.systemEncoding,
     Encoding stderrEncoding = io.systemEncoding,
   }) {
-    return _runSync(() => _delegate.runSync(
-      command,
-      workingDirectory: workingDirectory,
-      environment: environment,
-      includeParentEnvironment: includeParentEnvironment,
-      runInShell: runInShell,
-      stdoutEncoding: stdoutEncoding,
-      stderrEncoding: stderrEncoding,
-    ), platform: _platform);
+    return _runSync(() {
+      if (_skipCommandLookup && _delegate is LocalProcessManager) {
+        return _processDelegate.runSync(
+          command.cast<String>(),
+          workingDirectory: workingDirectory,
+          environment: environment,
+          includeParentEnvironment: includeParentEnvironment,
+          runInShell: runInShell,
+          stdoutEncoding: stdoutEncoding,
+          stderrEncoding: stderrEncoding,
+        );
+      }
+      return _delegate.runSync(
+        command,
+        workingDirectory: workingDirectory,
+        environment: environment,
+        includeParentEnvironment: includeParentEnvironment,
+        runInShell: runInShell,
+        stdoutEncoding: stdoutEncoding,
+        stderrEncoding: stderrEncoding,
+      );
+    }, platform: _platform);
   }
 }
 

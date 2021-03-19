@@ -628,6 +628,7 @@ void main() {
                             actions: <SemanticsAction>[
                               SemanticsAction.tap,
                               SemanticsAction.setSelection,
+                              SemanticsAction.setText,
                               SemanticsAction.paste,
                             ],
                             label: 'Search',

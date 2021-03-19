@@ -104,6 +104,36 @@ void main() {
       expect(resultJson, expectedJson);
     });
 
+    test('uploads metrics sends expected post body', () async {
+      _processResult = ProcessResult(1, 0, commitSha, '');
+      const String uploadMetricsRequestWithSpaces = '{"CommitBranch":"master","CommitSha":"a4952838bf288a81d8ea11edfd4b4cd649fa94cc","BuilderName":"builder a b c","NewStatus":"Succeeded","ResultData":{},"BenchmarkScoreKeys":[]}';
+      final MockClient client = MockClient((Request request) async {
+        if (request.body == uploadMetricsRequestWithSpaces) {
+          return Response('{}', 200);
+        }
+
+        return Response('Expected: $uploadMetricsRequestWithSpaces\nReceived: ${request.body}', 500);
+     });
+      cocoon = Cocoon(
+        fs: fs,
+        httpClient: client,
+        processRunSync: runSyncStub,
+        serviceAccountTokenPath: serviceAccountTokenPath,
+        requestRetryLimit: 0,
+      );
+
+      const String resultsPath = 'results.json';
+      const String updateTaskJson = '{'
+          '"CommitBranch":"master",'
+          '"CommitSha":"$commitSha",'
+          '"BuilderName":"builder a b c",'  //ignore: missing_whitespace_between_adjacent_strings
+          '"NewStatus":"Succeeded",'
+          '"ResultData":{},'
+          '"BenchmarkScoreKeys":[]}';
+      fs.file(resultsPath).writeAsStringSync(updateTaskJson);
+      await cocoon.sendResultsPath(resultsPath);
+    });
+
     test('uploads expected update task payload from results file', () async {
       _processResult = ProcessResult(1, 0, commitSha, '');
       cocoon = Cocoon(
@@ -111,6 +141,7 @@ void main() {
         httpClient: mockClient,
         processRunSync: runSyncStub,
         serviceAccountTokenPath: serviceAccountTokenPath,
+        requestRetryLimit: 0,
       );
 
       const String resultsPath = 'results.json';
@@ -132,6 +163,7 @@ void main() {
         serviceAccountTokenPath: serviceAccountTokenPath,
         fs: fs,
         httpClient: mockClient,
+        requestRetryLimit: 0,
       );
 
       final TaskResult result = TaskResult.success(<String, dynamic>{});
@@ -146,6 +178,7 @@ void main() {
         serviceAccountTokenPath: serviceAccountTokenPath,
         fs: fs,
         httpClient: mockClient,
+        requestRetryLimit: 0,
       );
 
       final TaskResult result = TaskResult.success(<String, dynamic>{});
@@ -160,6 +193,7 @@ void main() {
         serviceAccountTokenPath: serviceAccountTokenPath,
         fs: fs,
         httpClient: mockClient,
+        requestRetryLimit: 0,
       );
 
       final TaskResult result = TaskResult.success(<String, dynamic>{});

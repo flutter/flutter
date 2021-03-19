@@ -52,12 +52,13 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// ```
 ///
 /// ```dart
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Column(
 ///     mainAxisSize: MainAxisSize.min,
 ///     children: <Widget>[
 ///       IconButton(
-///         icon: Icon(Icons.volume_up),
+///         icon: const Icon(Icons.volume_up),
 ///         tooltip: 'Increase volume by 10',
 ///         onPressed: () {
 ///           setState(() {
@@ -94,6 +95,7 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/icon_button_background.png)
 ///
 /// ```dart
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Material(
 ///     color: Colors.white,
@@ -104,7 +106,7 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 ///           shape: CircleBorder(),
 ///         ),
 ///         child: IconButton(
-///           icon: Icon(Icons.android),
+///           icon: const Icon(Icons.android),
 ///           color: Colors.white,
 ///           onPressed: () {},
 ///         ),
@@ -144,7 +146,6 @@ class IconButton extends StatelessWidget {
     this.padding = const EdgeInsets.all(8.0),
     this.alignment = Alignment.center,
     this.splashRadius,
-    required this.icon,
     this.color,
     this.focusColor,
     this.hoverColor,
@@ -158,6 +159,7 @@ class IconButton extends StatelessWidget {
     this.tooltip,
     this.enableFeedback = true,
     this.constraints,
+    required this.icon,
   }) : assert(iconSize != null),
        assert(padding != null),
        assert(alignment != null),

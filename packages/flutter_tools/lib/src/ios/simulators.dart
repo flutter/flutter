@@ -692,7 +692,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
       onListen: _start,
       onCancel: _stop,
     );
-    _appName = app == null ? null : app.name.replaceAll('.app', '');
+    _appName = app?.name?.replaceAll('.app', '');
   }
 
   final IOSSimulator device;

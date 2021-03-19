@@ -30,7 +30,7 @@ final List<String> baseApkFiles = <String> [
 ];
 
 /// Runs the given [testFunction] on a freshly generated Flutter project.
-Future<void> runProjectTest(Future<void> testFunction(FlutterProject project)) async {
+Future<void> runProjectTest(Future<void> Function(FlutterProject project) testFunction) async {
   final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_gradle_plugin_test.');
   final FlutterProject project = await FlutterProject.create(tempDir, 'hello');
 
@@ -42,7 +42,7 @@ Future<void> runProjectTest(Future<void> testFunction(FlutterProject project)) a
 }
 
 /// Runs the given [testFunction] on a freshly generated Flutter plugin project.
-Future<void> runPluginProjectTest(Future<void> testFunction(FlutterPluginProject pluginProject)) async {
+Future<void> runPluginProjectTest(Future<void> Function(FlutterPluginProject pluginProject) testFunction) async {
   final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_gradle_plugin_test.');
   final FlutterPluginProject pluginProject = await FlutterPluginProject.create(tempDir, 'aaa');
 
@@ -54,7 +54,7 @@ Future<void> runPluginProjectTest(Future<void> testFunction(FlutterPluginProject
 }
 
 /// Runs the given [testFunction] on a freshly generated Flutter module project.
-Future<void> runModuleProjectTest(Future<void> testFunction(FlutterModuleProject moduleProject)) async {
+Future<void> runModuleProjectTest(Future<void> Function(FlutterModuleProject moduleProject) testFunction) async {
   final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_gradle_module_test.');
   final FlutterModuleProject moduleProject = await FlutterModuleProject.create(tempDir, 'hello_module');
 
@@ -210,7 +210,7 @@ class ApkExtractor {
 
 /// Gets the content of the `AndroidManifest.xml`.
 Future<String> getAndroidManifest(String apk) async {
-  return await _evalApkAnalyzer(
+  return _evalApkAnalyzer(
     <String>[
       'manifest',
       'print',

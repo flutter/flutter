@@ -12,6 +12,7 @@ const String _introText =
   'apps accessible, like screen readers.';
 
 class TooltipDemo extends StatelessWidget {
+  const TooltipDemo({Key? key}) : super(key: key);
 
   static const String routeName = '/material/tooltips';
 

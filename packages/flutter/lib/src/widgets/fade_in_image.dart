@@ -58,7 +58,7 @@ import 'transitions.dart';
 /// FadeInImage(
 ///   // here `bytes` is a Uint8List containing the bytes for the in-memory image
 ///   placeholder: MemoryImage(bytes),
-///   image: NetworkImage('https://backend.example.com/image.png'),
+///   image: const NetworkImage('https://backend.example.com/image.png'),
 /// )
 /// ```
 /// {@end-tool}

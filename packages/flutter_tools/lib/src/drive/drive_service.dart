@@ -127,7 +127,7 @@ class FlutterDriverService extends DriverService {
   Device _device;
   ApplicationPackage _applicationPackage;
   String _vmServiceUri;
-  vm_service.VmService _vmService;
+  FlutterVmService _vmService;
 
   @override
   Future<void> start(
@@ -220,7 +220,7 @@ class FlutterDriverService extends DriverService {
     final DeviceLogReader logReader = await device.getLogReader(app: _applicationPackage);
     logReader.logLines.listen(_logger.printStatus);
 
-    final vm_service.VM vm = await _vmService.getVM();
+    final vm_service.VM vm = await _vmService.service.getVM();
     logReader.appPid = vm.pid;
   }
 
@@ -268,7 +268,7 @@ class FlutterDriverService extends DriverService {
       }
     } else if (_device.supportsFlutterExit) {
       // Otherwise use the VM Service URI to stop the app as a best effort approach.
-      final vm_service.VM vm = await _vmService.getVM();
+      final vm_service.VM vm = await _vmService.service.getVM();
       final vm_service.IsolateRef isolateRef = vm.isolates
         .firstWhere((vm_service.IsolateRef element) {
           return !element.isSystemIsolate;

@@ -95,5 +95,5 @@ class DartDevelopmentService {
     }
   }
 
-  Future<void> shutdown() async => await _ddsInstance?.shutdown();
+  Future<void> shutdown() async => _ddsInstance?.shutdown();
 }

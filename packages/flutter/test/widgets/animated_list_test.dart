@@ -8,14 +8,14 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('AnimatedList', (WidgetTester tester) async {
-    final AnimatedListItemBuilder builder = (BuildContext context, int index, Animation<double> animation) {
+    Widget builder(BuildContext context, int index, Animation<double> animation) {
       return SizedBox(
         height: 100.0,
         child: Center(
           child: Text('item $index'),
         ),
       );
-    };
+    }
     final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
 
     await tester.pumpWidget(

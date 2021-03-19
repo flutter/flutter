@@ -9,7 +9,7 @@ import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -17,7 +17,7 @@ import '../../src/context.dart';
 void main() {
   testWithoutContext('AndroidDevice.stopApp handles a null ApplicationPackage', () async {
     final AndroidDevice androidDevice = AndroidDevice('1234',
-      androidSdk: MockAndroidSdk(),
+      androidSdk: FakeAndroidSdk(),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       platform: FakePlatform(operatingSystem: 'linux'),
@@ -28,4 +28,4 @@ void main() {
   });
 }
 
-class MockAndroidSdk extends Mock implements AndroidSdk {}
+class FakeAndroidSdk extends Fake implements AndroidSdk {}

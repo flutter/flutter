@@ -4,43 +4,27 @@
 
 // @dart = 2.8
 
-import '../base/io.dart' show Process;
+import 'test_device.dart';
 
 /// Callbacks for reporting progress while running tests.
 abstract class TestWatcher {
-  /// Called after a child process starts.
+  /// Called after the test device starts.
   ///
   /// If startPaused was true, the caller needs to resume in Observatory to
   /// start running the tests.
-  void handleStartedProcess(ProcessEvent event) { }
+  void handleStartedDevice(Uri observatoryUri) { }
 
-  /// Called after the tests finish but before the process exits.
+  /// Called after the tests finish but before the test device exits.
   ///
-  /// The child process won't exit until this method completes.
-  /// Not called if the process died.
-  Future<void> handleFinishedTest(ProcessEvent event);
+  /// The test device won't exit until this method completes.
+  /// Not called if the test device died.
+  Future<void> handleFinishedTest(TestDevice testDevice);
 
-  /// Called when the test process crashed before connecting to test harness.
-  Future<void> handleTestCrashed(ProcessEvent event);
+  /// Called when the test device crashed before it could be connected to the
+  /// test harness.
+  Future<void> handleTestCrashed(TestDevice testDevice);
 
-  /// Called if we timed out waiting for the test process to connect to test
+  /// Called if we timed out waiting for the test device to connect to test
   /// harness.
-  Future<void> handleTestTimedOut(ProcessEvent event);
-}
-
-/// Describes a child process started during testing.
-class ProcessEvent {
-  ProcessEvent(this.childIndex, this.process, [this.observatoryUri]);
-
-  /// The index assigned when the child process was launched.
-  ///
-  /// Indexes are assigned consecutively starting from zero.
-  /// When debugging, there should only be one child process so this will
-  /// always be zero.
-  final int childIndex;
-
-  final Process process;
-
-  /// The observatory URL or null if not debugging.
-  final Uri observatoryUri;
+  Future<void> handleTestTimedOut(TestDevice testDevice);
 }

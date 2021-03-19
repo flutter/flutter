@@ -502,7 +502,7 @@ void paintImage({
           exception: 'Image $debugImageLabel has a display size of '
             '$outputWidth×$outputHeight but a decode size of '
             '${image.width}×${image.height}, which uses an additional '
-            '${overheadInKilobytes}kb.\n\n'
+            '${overheadInKilobytes}KB.\n\n'
             'Consider resizing the asset ahead of time, supplying a cacheWidth '
             'parameter of $outputWidth, a cacheHeight parameter of '
             '$outputHeight, or using a ResizeImage.',

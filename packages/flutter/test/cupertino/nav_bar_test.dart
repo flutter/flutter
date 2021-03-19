@@ -1137,19 +1137,17 @@ void main() {
         home: Builder(builder: (BuildContext context) {
           return MediaQuery(
             data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
-            child: CupertinoPageScaffold(
+            child: const CupertinoPageScaffold(
               child: CustomScrollView(
                 slivers: <Widget>[
-                  const CupertinoSliverNavigationBar(
+                  CupertinoSliverNavigationBar(
                     leading: Text('leading'),
                     middle: Text('middle'),
                     largeTitle: Text('Large Title'),
                     trailing: Text('trailing'),
                   ),
                   SliverToBoxAdapter(
-                    child: Container(
-                      child: const Text('content'),
-                    ),
+                    child: Text('content'),
                   ),
                 ],
               ),
@@ -1185,17 +1183,15 @@ void main() {
       builder: (BuildContext context) {
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
-          child: Container(
-            child: const CupertinoPageScaffold(
-              child: CustomScrollView(
-                slivers: <Widget>[
-                  CupertinoSliverNavigationBar(
-                    automaticallyImplyLeading: true,
-                    automaticallyImplyTitle: true,
-                    previousPageTitle: 'previous title',
-                  ),
-                ],
-              ),
+          child: const CupertinoPageScaffold(
+            child: CustomScrollView(
+              slivers: <Widget>[
+                CupertinoSliverNavigationBar(
+                  automaticallyImplyLeading: true,
+                  automaticallyImplyTitle: true,
+                  previousPageTitle: 'previous title',
+                ),
+              ],
             ),
           ),
         );
