@@ -19,8 +19,6 @@ void main() {
     'web',
     if (platform.isWindows)
       'windows',
-    if (platform.isLinux)
-      'linux',
     if (platform.isMacOS)
       ...<String>['macos', 'ios'],
   ];
@@ -35,7 +33,6 @@ void main() {
     processManager.runSync(<String>[flutterBin, 'config',
       '--enable-macos-desktop',
       '--enable-windows-desktop',
-      '--enable-linux-desktop',
       '--enable-web',
     ]);
 
