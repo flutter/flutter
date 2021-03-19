@@ -52,10 +52,10 @@ class HttpHostAvailabilityValidator extends DoctorValidator {
       return _HttpHostAvailabilityResult.pass(hostUrl);
     } on SocketException catch (socketError) {
       // Return a failed result
-      return _HttpHostAvailabilityResult.fail(hostUrl, socketError.toString());
+      return _HttpHostAvailabilityResult.fail(hostUrl, socketError.message);
     } on HttpException catch (httpError) {
       // Return a failed result
-      return _HttpHostAvailabilityResult.fail(hostUrl, httpError.toString());
+      return _HttpHostAvailabilityResult.fail(hostUrl, httpError.message);
     }
   }
 
@@ -90,7 +90,7 @@ class HttpHostAvailabilityValidator extends DoctorValidator {
 
       // Add the error messages to be displayed
       for (final _HttpHostAvailabilityResult result in availabilityResults) {
-        messages.add(ValidationMessage.error('HTTP host ${result.hostUrl} is not available due to the following error: ${result.errorMessage}'));
+        messages.add(ValidationMessage.error('HTTP host ${result.hostUrl} is not available: ${result.errorMessage}'));
       }
 
       // Return a partially successfull or completely errored result

@@ -39,10 +39,10 @@ void main() {
         final HttpHostAvailabilityValidator httpHostValidator = HttpHostAvailabilityValidator(
           platform: FakePlatform(operatingSystem: operatingSystem),
           httpClient: FakeHttpClient.list(<FakeRequest>[
-            FakeRequest(Uri.parse('https://cloud.google.com/'), method: HttpMethod.head, responseError: const OSError('Connection Reset by peer')),
-            FakeRequest(Uri.parse('https://maven.google.com/'), method: HttpMethod.head, responseError: const OSError('Connection Reset by peer')),
-            FakeRequest(Uri.parse('https://pub.dev/'), method: HttpMethod.head, responseError: const OSError('Connection Reset by peer')),
-            FakeRequest(Uri.parse('https://cocoapods.org/'), method: HttpMethod.head, responseError: const OSError('Connection Reset by peer')),
+            FakeRequest(Uri.parse('https://cloud.google.com/'), method: HttpMethod.head, responseError: const OSError('Name or service not known', -2)),
+            FakeRequest(Uri.parse('https://maven.google.com/'), method: HttpMethod.head, responseError: const OSError('Name or service not known', -2)),
+            FakeRequest(Uri.parse('https://pub.dev/'), method: HttpMethod.head, responseError: const OSError('Name or service not known', -2)),
+            FakeRequest(Uri.parse('https://cocoapods.org/'), method: HttpMethod.head, responseError: const OSError('Name or service not known', -2)),
           ]),
         );
 
@@ -62,7 +62,7 @@ void main() {
         final HttpHostAvailabilityValidator httpHostValidator = HttpHostAvailabilityValidator(
           platform: FakePlatform(operatingSystem: operatingSystem),
           httpClient: FakeHttpClient.list(<FakeRequest>[
-            FakeRequest(Uri.parse('https://cloud.google.com/'), method: HttpMethod.head, responseError: const OSError('Connection Reset by peer')),
+            FakeRequest(Uri.parse('https://cloud.google.com/'), method: HttpMethod.head, responseError: const OSError('Name or service not known', -2)),
             FakeRequest(Uri.parse('https://maven.google.com/'), method: HttpMethod.head),
             FakeRequest(Uri.parse('https://pub.dev/'), method: HttpMethod.head),
             FakeRequest(Uri.parse('https://cocoapods.org/'), method: HttpMethod.head),
