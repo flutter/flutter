@@ -19,6 +19,8 @@ void main() {
     'web',
     if (platform.isWindows)
       'windows',
+    if (platform.isLinux)
+      'linux',
     if (platform.isMacOS)
       ...<String>['macos', 'ios'],
   ];
