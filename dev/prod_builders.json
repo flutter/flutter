@@ -901,6 +901,12 @@
       "flaky": false
     },
     {
+      "name": "Mac dart_plugin_registry_test",
+      "repo": "flutter",
+      "task_name": "dart_plugin_registry_test",
+      "flaky": true
+    },
+    {
       "name": "Mac tool_tests_general",
       "repo": "flutter",
       "task_name": "mac_tool_tests_general",
