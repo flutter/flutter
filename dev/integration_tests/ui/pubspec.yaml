@@ -8,7 +8,7 @@ environment:
 # It can probably be removed, see the comment in that file.
 
 dependencies:
-  image: 3.0.1
+  image: 3.0.2
   flutter:
     sdk: flutter
   flutter_driver:
@@ -79,4 +79,4 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: c88a
+# PUBSPEC CHECKSUM: d28b
