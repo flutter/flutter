@@ -32,6 +32,7 @@ class BuildWindowsUwpCommand extends BuildSubCommand {
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
     // TODO(flutter): add a windows_uwp artifact here once that is updated.
+    // https://github.com/flutter/flutter/issues/78627
   };
 
   @override
