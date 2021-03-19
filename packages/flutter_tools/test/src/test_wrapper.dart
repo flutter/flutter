@@ -4,11 +4,9 @@
 
 // @dart = 2.8
 
-import 'package:test_api/test_api.dart' as test_package show TypeMatcher; // ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf; // ignore: deprecated_member_use
-// ignore: deprecated_member_use
-export 'package:test_core/test_core.dart' hide TypeMatcher, isInstanceOf, test; // Defines a 'package:test' shim.
+import 'package:test/test.dart' hide isInstanceOf;
+
+export 'package:test/test.dart' hide isInstanceOf;
 
 /// A matcher that compares the type of the actual value to the type argument T.
-// TODO(ianh): Remove this once https://github.com/dart-lang/matcher/issues/98 is fixed
-test_package.TypeMatcher<T> isInstanceOf<T>() => isA<T>();
+TypeMatcher<T> isInstanceOf<T>() => isA<T>();

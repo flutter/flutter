@@ -265,7 +265,7 @@ class _RaisedButtonWithIcon extends RaisedButton with MaterialButtonWithIconMixi
            children: <Widget>[
              icon,
              const SizedBox(width: 8.0),
-             label,
+             Flexible(child: label),
            ],
          ),
        );
