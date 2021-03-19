@@ -209,6 +209,8 @@ class InteractiveViewer extends StatefulWidget {
   /// logged in the console for illustration.
   ///
   /// ```dart main
+  /// import 'package:vector_math/vector_math_64.dart' show Quad, Vector3;
+  ///
   /// import 'package:flutter/material.dart';
   /// import 'package:flutter/widgets.dart';
   ///
@@ -243,7 +245,7 @@ class InteractiveViewer extends StatefulWidget {
   ///
   ///   // Returns true iff the given cell is currently visible. Caches viewport
   ///   // calculations.
-  ///   late Rect _cachedViewport;
+  ///   late Quad _cachedViewport;
   ///   late int _firstVisibleRow;
   ///   late int _firstVisibleColumn;
   ///   late int _lastVisibleRow;
@@ -282,7 +284,7 @@ class InteractiveViewer extends StatefulWidget {
   ///         yMax = point.y;
   ///       }
   ///     }
-  ///     return Rect.fromLTRB(xMin, yMin, xMax, yMax);
+  ///     return Rect.fromLTRB(xMin!, yMin!, xMax!, yMax!);
   ///   }
   ///
   ///   void _onChangeTransformation() {

@@ -1041,7 +1041,8 @@ void main() {
                   scaleEnabled: false,
                   boundaryMargin: const EdgeInsets.all(double.infinity),
                   // Build visible children green, off-screen children red.
-                  builder: (BuildContext context, Rect viewport) {
+                  builder: (BuildContext context, Quad viewportQuad) {
+                    final Rect viewport = _axisAlignedBoundingBox(viewportQuad);
                     final List<Container> children = <Container>[];
                     for (int i = 0; i < 10; i++) {
                       final double childTop = i * childHeight;
@@ -1316,4 +1317,28 @@ void main() {
       expect(nearestPoint.y, moreOrLessEquals(10.8, epsilon: 0.1));
     });
   });
+}
+
+// Returns the axis aligned bounding box for the given Quad, which might not
+// be axis aligned.
+Rect _axisAlignedBoundingBox(Quad quad) {
+  double? xMin;
+  double? xMax;
+  double? yMin;
+  double? yMax;
+  for (final Vector3 point in <Vector3>[quad.point0, quad.point1, quad.point2, quad.point3]) {
+    if (xMin == null || point.x < xMin) {
+      xMin = point.x;
+    }
+    if (xMax == null || point.x > xMax) {
+      xMax = point.x;
+    }
+    if (yMin == null || point.y < yMin) {
+      yMin = point.y;
+    }
+    if (yMax == null || point.y > yMax) {
+      yMax = point.y;
+    }
+  }
+  return Rect.fromLTRB(xMin!, yMin!, xMax!, yMax!);
 }
