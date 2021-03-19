@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_windows.dart';
+import 'package:flutter_tools/src/commands/build_winuwp.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/windows/visual_studio.dart';
@@ -23,6 +24,7 @@ import '../../src/testbed.dart';
 
 const String flutterRoot = r'C:\flutter';
 const String buildFilePath = r'C:\windows\CMakeLists.txt';
+const String buildUwpFilePath = r'C:\winuwp\CMakeLists.txt';
 const String visualStudioPath = r'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community';
 const String cmakePath = visualStudioPath + r'\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe';
 
@@ -67,8 +69,16 @@ void main() {
   }
 
   // Creates the mock files necessary to run a build.
-  void setUpMockProjectFilesForBuild({int templateVersion}) {
+  void setUpMockProjectFilesForBuild() {
     fileSystem.file(buildFilePath).createSync(recursive: true);
+    setUpMockCoreProjectFiles();
+  }
+
+  void setUpMockUwpFilesForBuild(int version) {
+    final Directory projectDirectory = (fileSystem.file(buildUwpFilePath)
+      ..createSync(recursive: true))
+      .parent;
+    projectDirectory.childFile('project_version').writeAsString(version.toString());
     setUpMockCoreProjectFiles();
   }
 
@@ -420,6 +430,57 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
     Platform: () => windowsPlatform,
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: windowsPlatform),
     Usage: () => usage,
+  });
+
+  testUsingContext('Windows build fails when there is no windows project', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
+    final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
+      ..visualStudioOverride = fakeVisualStudio;
+    setUpMockCoreProjectFiles();
+
+    expect(createTestCommandRunner(command).run(
+      const <String>['winuwp', '--no-pub']
+    ), throwsToolExit(message: 'No Windows UWP desktop project configured. See '
+      'https://flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'to learn about adding Windows support to a project.'));
+  }, overrides: <Type, Generator>{
+    Platform: () => windowsPlatform,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isWindowsUwpEnabled: true),
+  });
+
+  testUsingContext('Windows build fails on non windows platform', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
+    final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
+      ..visualStudioOverride = fakeVisualStudio;
+    setUpMockUwpFilesForBuild(0);
+
+    expect(createTestCommandRunner(command).run(
+      const <String>['winuwp', '--no-pub']
+    ), throwsToolExit());
+  }, overrides: <Type, Generator>{
+    Platform: () => notWindowsPlatform,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isWindowsUwpEnabled: true),
+  });
+
+  testUsingContext('Windows build fails when the project version is out of date', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
+    final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
+      ..visualStudioOverride = fakeVisualStudio;
+    setUpMockUwpFilesForBuild(-1);
+
+    expect(createTestCommandRunner(command).run(
+      const <String>['winuwp', '--no-pub']
+    ), throwsToolExit(message: 'The Windows UWP project template and build process has changed. '
+        'In order to build you must delete the winuwp directory and re-create the project'));
+  }, overrides: <Type, Generator>{
+    Platform: () => windowsPlatform,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isWindowsUwpEnabled: true),
   });
 }
 
