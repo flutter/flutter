@@ -124,7 +124,8 @@ Future<void> buildWindowsUwp(WindowsUwpProject windowsProject, BuildInfo buildIn
     throwToolExit(
       'No Windows UWP desktop project configured. See '
       'https://flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
-      'to learn about adding Windows support to a project.');
+      'to learn about adding Windows support to a project.',
+    );
   }
   if (windowsProject.projectVersion != kCurrentUwpTemplateVersion) {
     throwToolExit(
