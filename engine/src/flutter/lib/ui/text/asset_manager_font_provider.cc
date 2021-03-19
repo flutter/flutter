@@ -117,6 +117,8 @@ SkTypeface* AssetManagerFontStyleSet::createTypeface(int i) {
     // Ownership of the stream is transferred.
     asset.typeface = SkTypeface::MakeFromStream(std::move(stream));
     if (!asset.typeface) {
+      FML_DLOG(ERROR) << "Unable to load font asset for family: "
+                      << family_name_;
       return nullptr;
     }
   }
