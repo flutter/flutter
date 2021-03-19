@@ -1,4 +1,4 @@
-Signature: 1c2ce1feec0376b64f439520eb004a74
+Signature: b514241c0a201215280a83e70b483afa
 
 UNUSED LICENSES:
 
@@ -1883,8 +1883,6 @@ FILE: ../../../third_party/skia/src/gpu/GrDefaultGeoProcFactory.h
 FILE: ../../../third_party/skia/src/gpu/GrFragmentProcessor.h
 FILE: ../../../third_party/skia/src/gpu/GrGpuResource.h
 FILE: ../../../third_party/skia/src/gpu/GrGpuResourceCacheAccess.h
-FILE: ../../../third_party/skia/src/gpu/GrPathRendering.cpp
-FILE: ../../../third_party/skia/src/gpu/GrPathRendering.h
 FILE: ../../../third_party/skia/src/gpu/GrPrimitiveProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/GrProcessorAnalysis.cpp
 FILE: ../../../third_party/skia/src/gpu/GrProcessorAnalysis.h
@@ -1911,8 +1909,6 @@ FILE: ../../../third_party/skia/src/gpu/effects/GrPorterDuffXferProcessor.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrRRectEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrRRectEffect.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLAssembleInterface.cpp
-FILE: ../../../third_party/skia/src/gpu/gl/GrGLPathRendering.cpp
-FILE: ../../../third_party/skia/src/gpu/gl/GrGLPathRendering.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLTextureRenderTarget.h
 FILE: ../../../third_party/skia/src/gpu/gl/android/GrGLMakeNativeInterface_android.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/builders/GrGLProgramBuilder.cpp
@@ -2073,8 +2069,6 @@ FILE: ../../../third_party/skia/src/core/SkTLList.h
 FILE: ../../../third_party/skia/src/core/SkWriteBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/GrMemoryPool.cpp
 FILE: ../../../third_party/skia/src/gpu/GrMemoryPool.h
-FILE: ../../../third_party/skia/src/gpu/GrPath.cpp
-FILE: ../../../third_party/skia/src/gpu/GrPath.h
 FILE: ../../../third_party/skia/src/gpu/GrProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/GrProcessor.h
 FILE: ../../../third_party/skia/src/gpu/GrProcessorUnitTest.h
@@ -2090,15 +2084,11 @@ FILE: ../../../third_party/skia/src/gpu/effects/GrGaussianConvolutionFragmentPro
 FILE: ../../../third_party/skia/src/gpu/effects/GrGaussianConvolutionFragmentProcessor.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLCaps.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLCaps.h
-FILE: ../../../third_party/skia/src/gpu/gl/GrGLPath.cpp
-FILE: ../../../third_party/skia/src/gpu/gl/GrGLPath.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLProgramDataManager.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLProgramDataManager.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLUtil.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrAAConvexPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrAAConvexPathRenderer.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrStencilAndCoverPathRenderer.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrStencilAndCoverPathRenderer.h
 FILE: ../../../third_party/skia/src/image/SkImage.cpp
 FILE: ../../../third_party/skia/src/image/SkImage_Base.h
 FILE: ../../../third_party/skia/src/image/SkImage_Gpu.cpp
@@ -2454,7 +2444,6 @@ FILE: ../../../third_party/skia/src/gpu/geometry/GrQuad.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLTextureRenderTarget.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLUniformHandler.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLUniformHandler.h
-FILE: ../../../third_party/skia/src/gpu/gl/GrGLVaryingHandler.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLVaryingHandler.h
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLBlend.cpp
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLBlend.h
@@ -2478,8 +2467,6 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrDashLinePathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawAtlasOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawAtlasOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawOp.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrDrawPathOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrDrawPathOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawVerticesOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawVerticesOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrLatticeOp.cpp
@@ -2488,7 +2475,6 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrMeshDrawOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrMeshDrawOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrOp.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrStencilPathOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrTriangulatingPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrTriangulatingPathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/text/GrDistanceFieldAdjustTable.cpp
@@ -2731,8 +2717,6 @@ FILE: ../../../third_party/skia/src/gpu/GrBlend.h
 FILE: ../../../third_party/skia/src/gpu/GrCaps.h
 FILE: ../../../third_party/skia/src/gpu/GrGeometryProcessor.h
 FILE: ../../../third_party/skia/src/gpu/GrPaint.cpp
-FILE: ../../../third_party/skia/src/gpu/GrPathProcessor.cpp
-FILE: ../../../third_party/skia/src/gpu/GrPathProcessor.h
 FILE: ../../../third_party/skia/src/gpu/GrPrimitiveProcessor.h
 FILE: ../../../third_party/skia/src/gpu/GrRectanizerSkyline.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrBezierEffect.cpp
@@ -3478,7 +3462,6 @@ FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlUtil.mm
 FILE: ../../../third_party/skia/src/gpu/ops/GrClearOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelper.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelper.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrStencilPathOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrTextureOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrTextureOp.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkSemaphore.cpp
@@ -6373,7 +6356,6 @@ LIBRARY: skia
 ORIGIN: ../../../third_party/skia/include/docs/SkPDFDocument.h + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/include/docs/SkPDFDocument.h
-FILE: ../../../third_party/skia/src/gpu/GrPathRendering_none.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFGlyphUse.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFSubsetFont.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFSubsetFont.h
