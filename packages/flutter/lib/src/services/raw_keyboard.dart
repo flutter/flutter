@@ -743,12 +743,16 @@ class RawKeyboard {
     final Map<PhysicalKeyboardKey, LogicalKeyboardKey> modifierKeys = <PhysicalKeyboardKey, LogicalKeyboardKey>{};
     // Physical keys that whose modifiers are pressed at any side.
     final Set<PhysicalKeyboardKey> anySideKeys = <PhysicalKeyboardKey>{};
+    final Set<PhysicalKeyboardKey> keysPressedAfterEvent = <PhysicalKeyboardKey>{
+      ..._keysPressed.keys,
+      if (event is RawKeyDownEvent) event.physicalKey,
+    };
     for (final ModifierKey key in modifiersPressed.keys) {
       if (modifiersPressed[key] == KeyboardSide.any) {
         final Set<PhysicalKeyboardKey>? thisModifierKeys = _modifierKeyMap[_ModifierSidePair(key, KeyboardSide.all)];
         assert(thisModifierKeys != null);
         anySideKeys.addAll(thisModifierKeys!);
-        if (thisModifierKeys.any(keysPressed.contains)) {
+        if (thisModifierKeys.any(keysPressedAfterEvent.contains)) {
           continue;
         }
       }

@@ -398,6 +398,46 @@ void main() {
           <LogicalKeyboardKey>{},
         ),
       );
+
+      // Press right modifier key
+      final Map<String, dynamic> data3 = KeyEventSimulator.getKeyData(
+        LogicalKeyboardKey.shiftRight,
+        platform: 'web',
+        isDown: true,
+      )..['metaState'] |= RawKeyEventDataWeb.modifierShift;
+      // Dispatch the modified data.
+      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(data3),
+        (ByteData? data) {},
+      );
+      expect(
+        RawKeyboard.instance.keysPressed,
+        equals(
+          <LogicalKeyboardKey>{
+            LogicalKeyboardKey.shiftRight,
+          },
+        ),
+      );
+
+      // Release the key
+      final Map<String, dynamic> data4 = KeyEventSimulator.getKeyData(
+        LogicalKeyboardKey.shiftRight,
+        platform: 'web',
+        isDown: false,
+      )..['metaState'] = 0;
+      // Dispatch the modified data.
+      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(data4),
+        (ByteData? data) {},
+      );
+      expect(
+        RawKeyboard.instance.keysPressed,
+        equals(
+          <LogicalKeyboardKey>{},
+        ),
+      );
     });
 
     testWidgets('sided modifiers without a side set return all sides on Android', (WidgetTester tester) async {
