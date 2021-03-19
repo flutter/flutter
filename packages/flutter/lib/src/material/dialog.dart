@@ -526,7 +526,10 @@ class AlertDialog extends StatelessWidget {
         ),
         child: DefaultTextStyle(
           style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subtitle1!,
-          child: content!,
+          child: Semantics(
+            container: true,
+            child: content!,
+          ),
         ),
       );
     }
@@ -877,7 +880,11 @@ class SimpleDialog extends StatelessWidget {
         ),
         child: DefaultTextStyle(
           style: titleTextStyle ?? DialogTheme.of(context).titleTextStyle ?? theme.textTheme.headline6!,
-          child: Semantics(namesRoute: label == null, child: title),
+          child: Semantics(
+            namesRoute: label == null,
+            container: true,
+            child: title
+          ),
         ),
       );
     }
