@@ -130,7 +130,7 @@ Future<void> buildWindowsUwp(WindowsUwpProject windowsProject, BuildInfo buildIn
   if (windowsProject.projectVersion != kCurrentUwpTemplateVersion) {
     throwToolExit(
       'The Windows UWP project template and build process has changed. In order to build '
-      'you must delete the winuwp directory and re-create the project.'
+      'you must delete the winuwp directory and re-create the project.',
     );
   }
   throwToolExit('Windows UWP builds are not implemented.');
