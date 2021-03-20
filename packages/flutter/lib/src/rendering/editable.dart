@@ -1026,14 +1026,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // See also:
   //   * _deleteToEnd
   void _deleteToStart(TextSelection selection, SelectionChangedCause cause) {
-    assert(selection.isCollapsed == true);
+    assert(selection.isCollapsed);
 
     if (_readOnly || !selection.isValid) {
       return;
     }
 
     final String text = textSelectionDelegate.textEditingValue.text;
-    final String textAfter = _selection!.textAfter(text);
+    final String textAfter = selection.textAfter(text);
     const TextSelection newSelection = TextSelection.collapsed(offset: 0);
     _setTextEditingValue(
       TextEditingValue(text: textAfter, selection: newSelection),
@@ -1049,14 +1049,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // See also:
   //   * _deleteToStart
   void _deleteToEnd(TextSelection selection, SelectionChangedCause cause) {
-    assert(selection.isCollapsed == true);
+    assert(selection.isCollapsed);
 
     if (_readOnly || !selection.isValid) {
       return;
     }
 
     final String text = textSelectionDelegate.textEditingValue.text;
-    final String textBefore = _selection!.textBefore(text);
+    final String textBefore = selection.textBefore(text);
     final TextSelection newSelection = TextSelection.collapsed(offset: textBefore.length);
     _setTextEditingValue(
       TextEditingValue(text: textBefore, selection: newSelection),
@@ -1117,6 +1117,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// If the [selection] is collapsed, deletes a word before the cursor.
   ///
   /// If the [selection] is not collapsed, deletes the selection.
+  /// 
+  /// If [obscureText] is true, it treats the whole text content as
+  /// a single word.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -1161,6 +1164,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// If the [selection] is collapsed, deletes a line before the cursor.
   ///
   /// If the [selection] is not collapsed, deletes the selection.
+  /// 
+  /// If [obscureText] is true, it treats the whole text content as
+  /// a single word.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -1244,6 +1250,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// If the [selection] is collapsed, deletes a word after the cursor.
   ///
   /// If the [selection] is not collapsed, deletes the selection.
+  /// 
+  /// If [obscureText] is true, it treats the whole text content as
+  /// a single word.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -1288,6 +1297,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// If the [selection] is collapsed, deletes a line after the cursor.
   ///
   /// If the [selection] is not collapsed, deletes the selection.
+  /// 
+  /// If [obscureText] is true, it treats the whole text content as
+  /// a single word.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
