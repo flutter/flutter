@@ -319,7 +319,7 @@ class CustomDevice extends Device {
          config.id,
          category: Category.mobile,
          ephemeral: true,
-         platformType: PlatformType.linux
+         platformType: PlatformType.custom
        );
 
   final CustomDeviceConfig _config;

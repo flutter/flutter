@@ -391,6 +391,9 @@ class DaemonDomain extends Domain {
       if (featureFlags.isFuchsiaEnabled && flutterProject.fuchsia.existsSync()) {
         result.add('fuchsia');
       }
+      if (featureFlags.areCustomDevicesEnabled) {
+        result.add('custom');
+      }
       return <String, Object>{
         'platforms': result,
       };

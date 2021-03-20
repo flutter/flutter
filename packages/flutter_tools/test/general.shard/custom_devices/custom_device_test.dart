@@ -127,6 +127,7 @@ void main() {
 
       expect(device.id, 'testid');
       expect(device.name, 'testlabel');
+      expect(device.platformType, PlatformType.custom);
       expect(await device.sdkNameAndVersion, 'testsdknameandversion');
       expect(await device.targetPlatform, TargetPlatform.linux_arm64);
       expect(await device.installApp(linuxApp), true);
