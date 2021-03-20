@@ -1130,12 +1130,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// If the [selection] is collapsed, deletes a word before the cursor.
   ///
   /// If the [selection] is not collapsed, deletes the selection.
-  /// 
+  ///
   /// If [obscureText] is true, it treats the whole text content as
   /// a single word.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
-  /// 
+  ///
   /// {@template flutter.rendering.RenderEditable.whiteSpace}
   /// By default, includeWhitespace is set to true, meaning that whitespace can
   /// be considered a word in itself.  If set to false, the selection will be
@@ -1183,7 +1183,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// If the [selection] is collapsed, deletes a line before the cursor.
   ///
   /// If the [selection] is not collapsed, deletes the selection.
-  /// 
+  ///
   /// If [obscureText] is true, it treats the whole text content as
   /// a single word.
   ///
@@ -1269,12 +1269,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// If the [selection] is collapsed, deletes a word after the cursor.
   ///
   /// If the [selection] is not collapsed, deletes the selection.
-  /// 
+  ///
   /// If [obscureText] is true, it treats the whole text content as
   /// a single word.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
-  /// 
+  ///
   /// {@macro flutter.rendering.RenderEditable.whiteSpace}
   ///
   /// See also:
@@ -1318,7 +1318,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// If the [selection] is collapsed, deletes a line after the cursor.
   ///
   /// If the [selection] is not collapsed, deletes the selection.
-  /// 
+  ///
   /// If [obscureText] is true, it treats the whole text content as
   /// a single word.
   ///
