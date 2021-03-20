@@ -32,7 +32,7 @@ task:
     builder_image_name: docker-builder # gce vm image
     builder_image_project: flutter-cirrus
     cluster_name: test-cluster
-    region: us-central1
+    zone: us-central1-a
     namespace: flutter
     cpu: $CPU
     memory: $MEMORY
