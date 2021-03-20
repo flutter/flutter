@@ -15,18 +15,6 @@ export 'package:flutter/services.dart' show TextEditingValue, TextInputAction;
 ///
 /// Typical app tests will not need to use this class directly.
 ///
-/// The [TestWidgetsFlutterBinding] class registers a [TestTextInput] instance
-/// ([TestWidgetsFlutterBinding.testTextInput]) as a stub keyboard
-/// implementation if its [TestWidgetsFlutterBinding.registerTestTextInput]
-/// property returns true when a test starts, and unregisters it when the test
-/// ends (unless it ends with a failure).
-///
-/// See [register], [unregister], and [isRegistered] for details.
-///
-/// The [updateEditingValue], [enterText], and [receiveAction] methods can be
-/// used even when the [TestTextInput] is not registered. All other methods
-/// will assert if [isRegistered] is false.
-///
 /// See also:
 ///
 /// * [WidgetTester.enterText], which uses this class to simulate keyboard input.
@@ -49,43 +37,37 @@ class TestTextInput {
   /// The messenger which sends the bytes for this channel, not null.
   BinaryMessenger get _binaryMessenger => ServicesBinding.instance!.defaultBinaryMessenger;
 
+  /// Resets any internal state of this object and calls [register].
+  ///
+  /// This method is invoked by the testing framework between tests. It should
+  /// not ordinarily be called by tests directly.
+  void resetAndRegister() {
+    log.clear();
+    editingState = null;
+    setClientArgs = null;
+    _client = 0;
+    _isVisible = false;
+    register();
+  }
+  /// Installs this object as a mock handler for [SystemChannels.textInput].
+  void register() => SystemChannels.textInput.setMockMethodCallHandler(_handleTextInputCall);
+
+  /// Removes this object as a mock handler for [SystemChannels.textInput].
+  ///
+  /// After calling this method, the channel will exchange messages with the
+  /// Flutter engine. Use this with [FlutterDriver] tests that need to display
+  /// on-screen keyboard provided by the operating system.
+  void unregister() => SystemChannels.textInput.setMockMethodCallHandler(null);
+
   /// Log for method calls.
   ///
   /// For all registered channels, handled calls are added to the list. Can
   /// be cleaned using `log.clear()`.
   final List<MethodCall> log = <MethodCall>[];
 
-  /// Resets any internal state of this object.
-  ///
-  /// This method is invoked by the testing framework between tests. It should
-  /// not ordinarily be called by tests directly.
-  void reset() {
-    log.clear();
-    editingState = null;
-    setClientArgs = null;
-    _client = 0;
-    _isVisible = false;
-  }
-
-  /// Installs this object as a mock handler for [SystemChannels.textInput].
-  ///
-  /// Called by the binding at the top of a test when
-  /// [TestWidgetsFlutterBinding.registerTestTextInput] is true.
-  void register() => SystemChannels.textInput.setMockMethodCallHandler(_handleTextInputCall);
-
-  /// Removes this object as a mock handler for [SystemChannels.textInput].
-  ///
-  /// After calling this method, the channel will exchange messages with the
-  /// Flutter engine instead of the stub.
-  ///
-  /// Called by the binding at the end of a (successful) test when
-  /// [TestWidgetsFlutterBinding.registerTestTextInput] is true.
-  void unregister() => SystemChannels.textInput.setMockMethodCallHandler(null);
-
   /// Whether this [TestTextInput] is registered with [SystemChannels.textInput].
   ///
-  /// The binding uses the [register] and [unregister] methods to control this
-  /// value when [TestWidgetsFlutterBinding.registerTestTextInput] is true.
+  /// Use [register] and [unregister] methods to control this value.
   bool get isRegistered => SystemChannels.textInput.checkMockMethodCallHandler(_handleTextInputCall);
 
   /// Whether there are any active clients listening to text input.
@@ -96,13 +78,11 @@ class TestTextInput {
 
   int _client = 0;
 
-  /// The last set of arguments supplied to the `TextInput.setClient` and
-  /// `TextInput.updateConfig` methods of this stub implementation.
+  /// Arguments supplied to the TextInput.setClient method call.
   Map<String, dynamic>? setClientArgs;
 
   /// The last set of arguments that [TextInputConnection.setEditingState] sent
-  /// to this stub implementation (i.e. the arguments set to
-  /// `TextInput.setEditingState`).
+  /// to the embedder.
   ///
   /// This is a map representation of a [TextEditingValue] object. For example,
   /// it will have a `text` entry whose value matches the most recent
@@ -138,27 +118,15 @@ class TestTextInput {
   }
 
   /// Whether the onscreen keyboard is visible to the user.
-  ///
-  /// Specifically, this reflects the last call to `TextInput.show` or
-  /// `TextInput.hide` received by the stub implementation.
   bool get isVisible {
     assert(isRegistered);
     return _isVisible;
   }
   bool _isVisible = false;
 
-  /// Simulates the user hiding the onscreen keyboard.
-  ///
-  /// This does nothing but set the internal flag.
-  void hide() {
-    assert(isRegistered);
-    _isVisible = false;
-  }
-
   /// Simulates the user changing the [TextEditingValue] to the given value.
-  ///
-  /// This can be called even if the [TestTextInput] has not been [register]ed.
   void updateEditingValue(TextEditingValue value) {
+    assert(isRegistered);
     // Not using the `expect` function because in the case of a FlutterDriver
     // test this code does not run in a package:test test zone.
     if (_client == 0)
@@ -178,7 +146,6 @@ class TestTextInput {
   /// Simulates the user closing the text input connection.
   ///
   /// For example:
-  ///
   /// - User pressed the home button and sent the application to background.
   /// - User closed the virtual keyboard.
   void closeConnection() {
@@ -200,9 +167,8 @@ class TestTextInput {
   }
 
   /// Simulates the user typing the given text.
-  ///
-  /// This can be called even if the [TestTextInput] has not been [register]ed.
   void enterText(String text) {
+    assert(isRegistered);
     updateEditingValue(TextEditingValue(
       text: text,
     ));
@@ -211,9 +177,8 @@ class TestTextInput {
   /// Simulates the user pressing one of the [TextInputAction] buttons.
   /// Does not check that the [TextInputAction] performed is an acceptable one
   /// based on the `inputAction` [setClientArgs].
-  ///
-  /// This can be called even if the [TestTextInput] has not been [register]ed.
   Future<void> receiveAction(TextInputAction action) async {
+    assert(isRegistered);
     return TestAsyncUtils.guard(() {
       // Not using the `expect` function because in the case of a FlutterDriver
       // test this code does not run in a package:test test zone.
@@ -250,5 +215,11 @@ class TestTextInput {
 
       return completer.future;
     });
+  }
+
+  /// Simulates the user hiding the onscreen keyboard.
+  void hide() {
+    assert(isRegistered);
+    _isVisible = false;
   }
 }

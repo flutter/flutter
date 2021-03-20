@@ -5888,8 +5888,11 @@ void main() {
     testWidgets('TextEditingController.buildTextSpan receives build context', (WidgetTester tester) async {
       final _AccentColorTextEditingController controller = _AccentColorTextEditingController('a');
       const Color color = Color.fromARGB(255, 1, 2, 3);
+      final ThemeData lightTheme = ThemeData.light();
       await tester.pumpWidget(MaterialApp(
-        theme: ThemeData.light().copyWith(accentColor: color),
+        theme: lightTheme.copyWith(
+          colorScheme: lightTheme.colorScheme.copyWith(secondary: color),
+        ),
         home: EditableText(
           controller: controller,
           focusNode: FocusNode(),
@@ -7559,7 +7562,7 @@ class _AccentColorTextEditingController extends TextEditingController {
 
   @override
   TextSpan buildTextSpan({required BuildContext context, TextStyle? style, required bool withComposing}) {
-    final Color color = Theme.of(context).accentColor;
+    final Color color = Theme.of(context).colorScheme.secondary;
     return super.buildTextSpan(context: context, style: TextStyle(color: color), withComposing: withComposing);
   }
 }

@@ -219,7 +219,7 @@ linter:
     - use_is_even_rather_than_modulo
     - use_key_in_widget_constructors
     - use_late_for_private_fields_and_variables
-    # - use_named_constants # not yet yested
+    # - use_named_constants # not yet tested
     - use_raw_strings
     - use_rethrow_when_possible
     # - use_setters_to_change_properties # not yet tested

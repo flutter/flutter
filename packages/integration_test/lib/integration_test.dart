@@ -202,7 +202,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
     List<String> streams = const <String>['all'],
     @visibleForTesting vm.VmService? vmService,
   }) async {
-    assert(streams != null); // ignore: unnecessary_null_comparison
+    assert(streams != null);
     assert(streams.isNotEmpty);
     if (vmService != null) {
       _vmService = vmService;
