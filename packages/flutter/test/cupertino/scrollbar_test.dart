@@ -94,6 +94,67 @@ void main() {
     ));
   });
 
+  testWidgets('Scrollbar thumb can be flung after a long press', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: const CupertinoScrollbar(
+              child: SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0)),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(scrollController.offset, 0.0);
+
+    // Scroll a bit.
+    const double scrollAmount = 10.0;
+    final TestGesture scrollGesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
+    // Scroll down by swiping up.
+    await scrollGesture.moveBy(const Offset(0.0, -scrollAmount));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    // Scrollbar thumb is fully showing and scroll offset has moved by
+    // scrollAmount.
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+      color: _kScrollbarColor.color,
+    ));
+    expect(scrollController.offset, scrollAmount);
+    await scrollGesture.up();
+    await tester.pump();
+
+    int hapticFeedbackCalls = 0;
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+      if (methodCall.method == 'HapticFeedback.vibrate') {
+        hapticFeedbackCalls++;
+      }
+    });
+
+    // Long press on the scrollbar thumb and expect a vibration after it resizes.
+    expect(hapticFeedbackCalls, 0);
+    await tester.flingFrom(
+      const Offset(796.0, 50.0),
+      const Offset(0.0, 20.0),
+      500.0,
+      initialOffset: const Offset(0.0, 10.0),
+      initialOffsetDelay: _kLongPressDuration,
+    );
+    await tester.pump();
+
+    // There has no time passed so we only expect to have scrolled a little
+    expect(scrollController.offset, lessThan(500.0));
+
+    // Let the inertia of the fling do its thing, we now expect it to have scrolled a lot more
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(scrollController.offset, greaterThan(1000.0));
+  });
+
   testWidgets('Scrollbar thumb can be dragged with long press', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
