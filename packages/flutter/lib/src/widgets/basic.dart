@@ -2353,11 +2353,11 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 ///
 /// ```dart
 /// Container(
-///   constraints: BoxConstraints(minHeight: 40, maxHeight: 100),
+///   constraints: const BoxConstraints(minHeight: 40, maxHeight: 100),
 ///   alignment: Alignment.center,
-///   child: ConstraintsTransformBox(
+///   child: const ConstraintsTransformBox(
 ///     constraintsTransform: ConstraintsTransformBox.maxHeightUnconstrained,
-///     child: const Card(child: Text('Hello World!')),
+///     child: Card(child: Text('Hello World!')),
 ///   )
 /// )
 /// ```
