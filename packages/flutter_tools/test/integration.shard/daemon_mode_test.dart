@@ -6,10 +6,11 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' hide Directory;
 
 import 'package:process/process.dart';
 
+import 'package:file/file.dart';
 import '../src/common.dart';
 import 'test_data/basic_project.dart';
 import 'test_driver.dart';
