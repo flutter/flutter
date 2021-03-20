@@ -146,6 +146,7 @@ void main() {
       initialOffsetDelay: _kLongPressDuration,
     );
     await tester.pump();
+    expect(hapticFeedbackCalls, 1);
 
     // There has no time passed so we only expect to have scrolled a little
     expect(scrollController.offset, lessThan(500.0));
