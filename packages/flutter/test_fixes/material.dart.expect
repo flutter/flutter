@@ -178,4 +178,17 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/59127
   const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem(label: myTitle);
   bottomNavigationBarItem.label;
+
+  // Changes made in https://github.com/flutter/flutter/pull/46115
+  const InputDecoration inputDecoration = InputDecoration(floatingLabelBehavior: FloatingLabelBehavior.auto);
+  InputDecoration(floatingLabelBehavior: FloatingLabelBehavior.never);
+  InputDecoration();
+  InputDecoration.collapsed(floatingLabelBehavior: FloatingLabelBehavior.auto);
+  InputDecoration.collapsed(floatingLabelBehavior: FloatingLabelBehavior.never);
+  InputDecoration.collapsed();
+  inputDecoration.floatingLabelBehavior;
+  const InputDecorationTheme inputDecorationTheme = InputDecorationTheme(floatingLabelBehavior: FloatingLabelBehavior.auto);
+  InputDecorationTheme(floatingLabelBehavior: FloatingLabelBehavior.never);
+  InputDecorationTheme();
+  inputDecorationTheme.floatingLabelBehavior;
 }
