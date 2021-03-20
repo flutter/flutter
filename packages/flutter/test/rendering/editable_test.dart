@@ -1542,10 +1542,48 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteByWord(SelectionChangedCause.keyboard);
+      editable.deleteByWord(SelectionChangedCause.keyboard, false);
       expect(delegate.textEditingValue.text, 'test h multiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 5);
+    }, skip: isBrowser);
+
+    test('when includeWhiteSpace is true, it should treat a whiteSpace as a single word', () async {
+      const String text = 'test with multiple blocks';
+      const int offset = 10;
+      final TextSelectionDelegate delegate = FakeEditableTextState()
+        ..textEditingValue = const TextEditingValue(
+            text: text,
+            selection: TextSelection.collapsed(offset: offset),
+          );
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          text: text,
+          style: TextStyle(
+            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          ),
+        ),
+        selection: const TextSelection.collapsed(offset: offset),
+      );
+
+      layout(editable);
+      editable.hasFocus = true;
+      pumpFrame();
+
+      editable.deleteByWord(SelectionChangedCause.keyboard);
+      expect(delegate.textEditingValue.text, 'test withmultiple blocks');
+      expect(delegate.textEditingValue.selection.isCollapsed, true);
+      expect(delegate.textEditingValue.selection.baseOffset, 9);
     }, skip: isBrowser);
 
     test('when cursor is after a word, it should delete the whole word', () async {
@@ -1580,7 +1618,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteByWord(SelectionChangedCause.keyboard);
+      editable.deleteByWord(SelectionChangedCause.keyboard, false);
       expect(delegate.textEditingValue.text, 'test  multiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 5);
@@ -1618,7 +1656,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteByWord(SelectionChangedCause.keyboard);
+      editable.deleteByWord(SelectionChangedCause.keyboard, false);
       expect(delegate.textEditingValue.text, 'test multiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 5);
@@ -1656,7 +1694,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteByWord(SelectionChangedCause.keyboard);
+      editable.deleteByWord(SelectionChangedCause.keyboard, false);
       expect(delegate.textEditingValue.text, 'test multiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 5);
@@ -1694,7 +1732,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteByWord(SelectionChangedCause.keyboard);
+      editable.deleteByWord(SelectionChangedCause.keyboard, false);
       expect(delegate.textEditingValue.text, 'test multiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 5);
@@ -1732,7 +1770,7 @@ void main() {
         editable.hasFocus = true;
         pumpFrame();
 
-        editable.deleteByWord(SelectionChangedCause.keyboard);
+        editable.deleteByWord(SelectionChangedCause.keyboard, false);
         expect(delegate.textEditingValue.text, '用多個測試');
         expect(delegate.textEditingValue.selection.isCollapsed, true);
         expect(delegate.textEditingValue.selection.baseOffset, 3);
@@ -1770,7 +1808,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteByWord(SelectionChangedCause.keyboard);
+      editable.deleteByWord(SelectionChangedCause.keyboard, false);
       expect(delegate.textEditingValue.text, 'برنامج أهلا ');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 12);
@@ -1809,7 +1847,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteByWord(SelectionChangedCause.keyboard);
+      editable.deleteByWord(SelectionChangedCause.keyboard, false);
       expect(delegate.textEditingValue.text, 'words');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 0);
@@ -2046,6 +2084,44 @@ void main() {
       expect(delegate.textEditingValue.selection.baseOffset, 1);
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
+    test('when includeWhiteSpace is true, it should treat a whiteSpace as a single word', () async {
+      const String text = 'test with multiple blocks';
+      const int offset = 9;
+      final TextSelectionDelegate delegate = FakeEditableTextState()
+        ..textEditingValue = const TextEditingValue(
+            text: text,
+            selection: TextSelection.collapsed(offset: offset),
+          );
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          text: text,
+          style: TextStyle(
+            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          ),
+        ),
+        selection: const TextSelection.collapsed(offset: offset),
+      );
+
+      layout(editable);
+      editable.hasFocus = true;
+      pumpFrame();
+
+      editable.deleteForwardByWord(SelectionChangedCause.keyboard);
+      expect(delegate.textEditingValue.text, 'test withmultiple blocks');
+      expect(delegate.textEditingValue.selection.isCollapsed, true);
+      expect(delegate.textEditingValue.selection.baseOffset, 9);
+    }, skip: isBrowser);
+
     test('when at the end of a text, it should be a no-op', () async {
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
@@ -2231,7 +2307,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteForwardByWord(SelectionChangedCause.keyboard);
+      editable.deleteForwardByWord(SelectionChangedCause.keyboard, false);
       expect(delegate.textEditingValue.text, 'test w multiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
@@ -2269,7 +2345,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteForwardByWord(SelectionChangedCause.keyboard);
+      editable.deleteForwardByWord(SelectionChangedCause.keyboard, false);
       expect(delegate.textEditingValue.text, 'test with  blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
@@ -2307,7 +2383,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteForwardByWord(SelectionChangedCause.keyboard);
+      editable.deleteForwardByWord(SelectionChangedCause.keyboard, false);
       expect(delegate.textEditingValue.text, 'test with blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
@@ -2345,7 +2421,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteForwardByWord(SelectionChangedCause.keyboard);
+      editable.deleteForwardByWord(SelectionChangedCause.keyboard, false);
       expect(delegate.textEditingValue.text, 'test with blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
@@ -2383,7 +2459,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteForwardByWord(SelectionChangedCause.keyboard);
+      editable.deleteForwardByWord(SelectionChangedCause.keyboard, false);
       expect(delegate.textEditingValue.text, 'test with blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
@@ -2421,7 +2497,7 @@ void main() {
         editable.hasFocus = true;
         pumpFrame();
 
-        editable.deleteForwardByWord(SelectionChangedCause.keyboard);
+        editable.deleteForwardByWord(SelectionChangedCause.keyboard, false);
         expect(delegate.textEditingValue.text, '多個塊測試');
         expect(delegate.textEditingValue.selection.isCollapsed, true);
         expect(delegate.textEditingValue.selection.baseOffset, offset);
@@ -2459,7 +2535,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteForwardByWord(SelectionChangedCause.keyboard);
+      editable.deleteForwardByWord(SelectionChangedCause.keyboard, false);
       expect(delegate.textEditingValue.text, ' أهلا بالعالم');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
@@ -2498,7 +2574,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteForwardByWord(SelectionChangedCause.keyboard);
+      editable.deleteForwardByWord(SelectionChangedCause.keyboard, false);
       expect(delegate.textEditingValue.text, 'test');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);

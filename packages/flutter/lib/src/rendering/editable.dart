@@ -1122,11 +1122,17 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// a single word.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
+  /// 
+  /// {@template flutter.rendering.RenderEditable.whiteSpace}
+  /// By default, includeWhitespace is set to true, meaning that whitespace can
+  /// be considered a word in itself.  If set to false, the selection will be
+  /// extended past any whitespace and the first word following the whitespace.
+  /// {@endtemplate}
   ///
   /// See also:
   ///
   ///   * [deleteForwardByWord], which is same but in the opposite direction.
-  void deleteByWord(SelectionChangedCause cause) {
+  void deleteByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
     assert(_selection != null);
 
     if (_readOnly || !_selection!.isValid) {
@@ -1148,7 +1154,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
 
-    final int characterBoundary = _getLeftByWord(_textPainter, textBefore.length, false);
+    final int characterBoundary = _getLeftByWord(_textPainter, textBefore.length, includeWhitespace);
     textBefore = textBefore.trimRight().substring(0, characterBoundary);
 
     final String textAfter = _selection!.textAfter(text);
@@ -1255,11 +1261,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// a single word.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
+  /// 
+  /// {@macro flutter.rendering.RenderEditable.whiteSpace}
   ///
   /// See also:
   ///
   ///   * [deleteByWord], which is same but in the opposite direction.
-  void deleteForwardByWord(SelectionChangedCause cause) {
+  void deleteForwardByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
     assert(_selection != null);
 
     if (_readOnly || !_selection!.isValid) {
@@ -1283,7 +1291,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     final String textBefore = _selection!.textBefore(text);
-    final int characterBoundary = _getRightByWord(_textPainter, textBefore.length, false);
+    final int characterBoundary = _getRightByWord(_textPainter, textBefore.length, includeWhitespace);
     textAfter = textAfter.substring(characterBoundary - textBefore.length);
 
     _setTextEditingValue(
@@ -1701,10 +1709,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
-  /// By default, `includeWhitespace` is set to true, meaning that whitespace
-  /// can be considered a word in itself.  If set to false, the selection will
-  /// be extended past any whitespace and the first word following the
-  /// whitespace.
+  /// {@macro flutter.rendering.RenderEditable.whiteSpace}
   ///
   /// {@template flutter.rendering.RenderEditable.stopAtReversal}
   /// The `stopAtReversal` parameter is false by default, meaning that it's
@@ -1744,12 +1749,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
-  /// By default, `includeWhitespace` is set to true, meaning that whitespace
-  /// can be considered a word in itself.  If set to false, the selection will
-  /// be extended past any whitespace and the first word following the
-  /// whitespace.
+  /// {@macro flutter.rendering.RenderEditable.whiteSpace}
   ///
   /// {@macro flutter.rendering.RenderEditable.stopAtReversal}
+  /// 
   ///
   /// See also:
   ///
@@ -1907,9 +1910,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
-  /// By default, includeWhitespace is set to true, meaning that whitespace can
-  /// be considered a word in itself.  If set to false, the selection will be
-  /// moved past any whitespace and the first word following the whitespace.
+  /// {@macro flutter.rendering.RenderEditable.whiteSpace}
   ///
   /// See also:
   ///
@@ -1993,9 +1994,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
-  /// By default, includeWhitespace is set to true, meaning that whitespace can
-  /// be considered a word in itself.  If set to false, the selection will be
-  /// moved past any whitespace and the first word following the whitespace.
+  /// {@macro flutter.rendering.RenderEditable.whiteSpace}
   ///
   /// See also:
   ///
