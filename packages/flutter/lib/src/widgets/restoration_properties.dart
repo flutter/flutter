@@ -27,7 +27,7 @@ import 'restoration.dart';
 ///   // During state restoration it is automatically restored to its old value.
 ///   // If no restoration data is available to restore the answer from, it is
 ///   // initialized to the specified default value, in this case 42.
-///   RestorableInt _answer = RestorableInt(42);
+///   final RestorableInt _answer = RestorableInt(42);
 ///
 ///   @override
 ///   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
@@ -306,11 +306,11 @@ class RestorableBoolN extends _RestorablePrimitiveValueN<bool?> {
 /// See also:
 ///
 ///  * [RestorableNum] for the non-nullable version of this class.
-class RestorableNumN<T extends num?> extends _RestorablePrimitiveValueN<num?> {
+class RestorableNumN<T extends num?> extends _RestorablePrimitiveValueN<T> {
   /// Creates a [RestorableNumN].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
-  RestorableNumN(num? defaultValue) : super(defaultValue);
+  RestorableNumN(T defaultValue) : super(defaultValue);
 }
 
 /// A [RestorableProperty] that knows how to store and restore a [double]
@@ -321,7 +321,7 @@ class RestorableNumN<T extends num?> extends _RestorablePrimitiveValueN<num?> {
 /// See also:
 ///
 ///  * [RestorableDouble] for the non-nullable version of this class.
-class RestorableDoubleN extends RestorableNumN<double> {
+class RestorableDoubleN extends RestorableNumN<double?> {
   /// Creates a [RestorableDoubleN].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
@@ -336,7 +336,7 @@ class RestorableDoubleN extends RestorableNumN<double> {
 /// See also:
 ///
 ///  * [RestorableInt] for the non-nullable version of this class.
-class RestorableIntN extends RestorableNumN<int> {
+class RestorableIntN extends RestorableNumN<int?> {
   /// Creates a [RestorableIntN].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
@@ -356,6 +356,33 @@ class RestorableStringN extends _RestorablePrimitiveValueN<String?> {
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
   RestorableStringN(String? defaultValue) : super(defaultValue);
+}
+
+/// A [RestorableValue] that knows how to save and restore [DateTime].
+///
+/// {@macro flutter.widgets.RestorableNum}.
+class RestorableDateTime extends RestorableValue<DateTime> {
+  /// Creates a [RestorableDateTime].
+  ///
+  /// {@macro flutter.widgets.RestorableNum.constructor}
+  RestorableDateTime(DateTime defaultValue) : _defaultValue = defaultValue;
+
+  final DateTime _defaultValue;
+
+  @override
+  DateTime createDefaultValue() => _defaultValue;
+
+  @override
+  void didUpdateValue(DateTime? oldValue) {
+    assert(debugIsSerializableForRestoration(value.millisecondsSinceEpoch));
+    notifyListeners();
+  }
+
+  @override
+  DateTime fromPrimitives(Object? data) => DateTime.fromMillisecondsSinceEpoch(data! as int);
+
+  @override
+  Object? toPrimitives() => value.millisecondsSinceEpoch;
 }
 
 /// A base class for creating a [RestorableProperty] that stores and restores a

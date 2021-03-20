@@ -1075,8 +1075,8 @@ class ListTile extends StatelessWidget {
 
     switch (theme.brightness) {
       case Brightness.light:
-      // For the sake of backwards compatibility, the default for unselected
-      // tiles is Colors.black45 rather than colorScheme.onSurface.withAlpha(0x73).
+        // For the sake of backwards compatibility, the default for unselected
+        // tiles is Colors.black45 rather than colorScheme.onSurface.withAlpha(0x73).
         return selected ? theme.colorScheme.primary : Colors.black45;
       case Brightness.dark:
         return selected ? theme.colorScheme.primary : null; // null - use current icon theme color
@@ -1129,6 +1129,12 @@ class ListTile extends StatelessWidget {
     return _isDenseLayout(tileTheme)
         ? style.copyWith(color: color, fontSize: 12.0)
         : style.copyWith(color: color);
+  }
+
+  TextStyle _trailingAndLeadingTextStyle(ThemeData theme, ListTileTheme? tileTheme) {
+    final TextStyle style = theme.textTheme.bodyText2!;
+    final Color? color = _textColor(theme, tileTheme, style.color);
+    return style.copyWith(color: color);
   }
 
   TextStyle _trailingAndLeadingTextStyle(ThemeData theme, ListTileTheme? tileTheme) {

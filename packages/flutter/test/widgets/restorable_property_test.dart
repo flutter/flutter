@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -13,12 +12,13 @@ void main() {
     expect(() => RestorableInt(1).value, throwsAssertionError);
     expect(() => RestorableString('hello').value, throwsAssertionError);
     expect(() => RestorableBool(true).value, throwsAssertionError);
-    expect(() => RestorableNumN<num>(0).value, throwsAssertionError);
+    expect(() => RestorableNumN<num?>(0).value, throwsAssertionError);
     expect(() => RestorableDoubleN(1.0).value, throwsAssertionError);
     expect(() => RestorableIntN(1).value, throwsAssertionError);
     expect(() => RestorableStringN('hello').value, throwsAssertionError);
     expect(() => RestorableBoolN(true).value, throwsAssertionError);
     expect(() => RestorableTextEditingController().value, throwsAssertionError);
+    expect(() => RestorableDateTime(DateTime(2020, 4, 3)).value, throwsAssertionError);
     expect(() => _TestRestorableValue().value, throwsAssertionError);
   });
 
@@ -35,6 +35,7 @@ void main() {
     expect(state.stringValue.value, 'hello world');
     expect(state.boolValue.value, false);
     expect(state.controllerValue.value.text, 'FooBar');
+    expect(state.dateTimeValue.value, DateTime(2021, 3, 16));
     expect(state.objectValue.value, 55);
 
     // Modify values.
@@ -45,6 +46,7 @@ void main() {
       state.stringValue.value = 'guten tag';
       state.boolValue.value = true;
       state.controllerValue.value.text = 'blabla';
+      state.dateTimeValue.value = DateTime(2020, 7, 4);
       state.objectValue.value = 53;
     });
     await tester.pump();
@@ -55,6 +57,7 @@ void main() {
     expect(state.stringValue.value, 'guten tag');
     expect(state.boolValue.value, true);
     expect(state.controllerValue.value.text, 'blabla');
+    expect(state.dateTimeValue.value, DateTime(2020, 7, 4));
     expect(state.objectValue.value, 53);
     expect(find.text('guten tag'), findsOneWidget);
   });
@@ -75,6 +78,7 @@ void main() {
     expect(state.stringValue.value, 'hello world');
     expect(state.boolValue.value, false);
     expect(state.controllerValue.value.text, 'FooBar');
+    expect(state.dateTimeValue.value, DateTime(2021, 3, 16));
     expect(state.objectValue.value, 55);
 
     // Modify values.
@@ -85,6 +89,7 @@ void main() {
       state.stringValue.value = 'guten tag';
       state.boolValue.value = true;
       state.controllerValue.value.text = 'blabla';
+      state.dateTimeValue.value = DateTime(2020, 7, 4);
       state.objectValue.value = 53;
     });
     await tester.pump();
@@ -95,6 +100,7 @@ void main() {
     expect(state.stringValue.value, 'guten tag');
     expect(state.boolValue.value, true);
     expect(state.controllerValue.value.text, 'blabla');
+    expect(state.dateTimeValue.value, DateTime(2020, 7, 4));
     expect(state.objectValue.value, 53);
     expect(find.text('guten tag'), findsOneWidget);
 
@@ -110,6 +116,7 @@ void main() {
     expect(state.stringValue.value, 'guten tag');
     expect(state.boolValue.value, true);
     expect(state.controllerValue.value.text, 'blabla');
+    expect(state.dateTimeValue.value, DateTime(2020, 7, 4));
     expect(state.objectValue.value, 53);
     expect(find.text('guten tag'), findsOneWidget);
   });
@@ -136,6 +143,7 @@ void main() {
       state.nullableStringValue.value = 'hullo';
       state.nullableBoolValue.value = false;
       state.controllerValue.value.text = 'blabla';
+      state.dateTimeValue.value = DateTime(2020, 7, 4);
       state.objectValue.value = 53;
     });
     await tester.pump();
@@ -156,6 +164,7 @@ void main() {
       state.nullableStringValue.value = 'ni hao';
       state.nullableBoolValue.value = null;
       state.controllerValue.value.text = 'blub';
+      state.dateTimeValue.value = DateTime(2020, 3, 2);
       state.objectValue.value = 20;
     });
     await tester.pump();
@@ -175,6 +184,7 @@ void main() {
     expect(state.nullableStringValue.value, 'hullo');
     expect(state.nullableBoolValue.value, false);
     expect(state.controllerValue.value.text, 'blabla');
+    expect(state.dateTimeValue.value, DateTime(2020, 7, 4));
     expect(state.objectValue.value, 53);
     expect(find.text('guten tag'), findsOneWidget);
     expect(state.controllerValue.value, isNot(same(controller)));
@@ -192,6 +202,7 @@ void main() {
     expect(state.nullableStringValue.value, null);
     expect(state.nullableBoolValue.value, null);
     expect(state.controllerValue.value.text, 'FooBar');
+    expect(state.dateTimeValue.value, DateTime(2021, 3, 16));
     expect(state.objectValue.value, 55);
     expect(find.text('hello world'), findsOneWidget);
   });
@@ -308,6 +319,43 @@ void main() {
     });
     expect(state.objectValue.didUpdateValueCallCount, 1);
   });
+
+
+  testWidgets('RestorableN types are properly defined', (WidgetTester tester) async {
+    await tester.pumpWidget(const RootRestorationScope(
+      restorationId: 'root-child',
+      child: _RestorableWidget(),
+    ));
+
+    expect(find.text('hello world'), findsOneWidget);
+    final _RestorableWidgetState state = tester.state(find.byType(_RestorableWidget));
+    state.setProperties(() {
+      state.nullableIntValue.value = 24;
+      state.nullableDoubleValue.value = 1.5;
+    });
+
+    // The following types of asserts do not work. They pass even when the
+    // type of `value` is a `num` and not an `int` because `num` is a
+    // superclass of `int`. This test is intended to prevent a regression
+    // where RestorableIntN's value is of type `num?`, but it is passed into
+    // a function which requires an `int?` value. This resulted in Dart
+    // compile-time errors.
+    //
+    // expect(state.nullableIntValue.value, isA<int>());
+    // expect(state.nullableIntValue.value.runtimeType, int);
+
+    // A function that takes a nullable int value.
+    void takesInt(int? value) {}
+    // The following would result in a Dart compile-time error if `value` is
+    // a `num?` instead of an `int?`.
+    takesInt(state.nullableIntValue.value);
+
+    // A function that takes a nullable double value.
+    void takesDouble(double? value) {}
+    // The following would result in a Dart compile-time error if `value` is
+    // a `num?` instead of a `double?`.
+    takesDouble(state.nullableDoubleValue.value);
+  });
 }
 
 class _TestRestorableValue extends RestorableValue<Object?> {
@@ -348,12 +396,13 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
   final RestorableInt intValue = RestorableInt(42);
   final RestorableString stringValue = RestorableString('hello world');
   final RestorableBool boolValue = RestorableBool(false);
-  final RestorableNumN<num> nullableNumValue = RestorableNumN<num>(null);
+  final RestorableNumN<num?> nullableNumValue = RestorableNumN<num?>(null);
   final RestorableDoubleN nullableDoubleValue = RestorableDoubleN(null);
   final RestorableIntN nullableIntValue = RestorableIntN(null);
   final RestorableStringN nullableStringValue = RestorableStringN(null);
   final RestorableBoolN nullableBoolValue = RestorableBoolN(null);
   final RestorableTextEditingController controllerValue = RestorableTextEditingController(text: 'FooBar');
+  final RestorableDateTime dateTimeValue = RestorableDateTime(DateTime(2021, 3, 16));
   final _TestRestorableValue objectValue = _TestRestorableValue();
 
   @override
@@ -369,6 +418,7 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
     registerForRestoration(nullableStringValue, 'nullableString');
     registerForRestoration(nullableBoolValue, 'nullableBool');
     registerForRestoration(controllerValue, 'controller');
+    registerForRestoration(dateTimeValue, 'dateTime');
     registerForRestoration(objectValue, 'object');
   }
 

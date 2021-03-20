@@ -76,6 +76,7 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 /// ```
 ///
 /// ```dart
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Material(
 ///     child: Center(
@@ -157,7 +158,7 @@ class TextFormField extends FormField<String> {
     SmartQuotesType? smartQuotesType,
     bool enableSuggestions = true,
     @Deprecated(
-      'Use autoValidateMode parameter which provide more specific '
+      'Use autovalidateMode parameter which provide more specific '
       'behaviour related to auto validation. '
       'This feature was deprecated after v1.19.0.'
     )
@@ -193,6 +194,7 @@ class TextFormField extends FormField<String> {
     ScrollPhysics? scrollPhysics,
     Iterable<String>? autofillHints,
     AutovalidateMode? autovalidateMode,
+    ScrollController? scrollController,
   }) : assert(initialValue == null || controller == null),
        assert(textAlign != null),
        assert(autofocus != null),
@@ -291,6 +293,7 @@ class TextFormField extends FormField<String> {
            selectionControls: selectionControls,
            buildCounter: buildCounter,
            autofillHints: autofillHints,
+           scrollController: scrollController,
          );
        },
      );

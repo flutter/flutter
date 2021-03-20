@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 class PictureCachePage extends StatelessWidget {
+  const PictureCachePage({Key key}) : super(key: key);
+
   static const List<String> kTabNames = <String>['1', '2', '3', '4', '5'];
 
   @override

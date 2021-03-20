@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -479,9 +478,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     return _paintScrollbar(canvas, size, thumbExtent, _lastAxisDirection!);
   }
 
-  /// Same as hitTest, but includes some padding to make sure that the region
+  /// Same as hitTest, but includes some padding when the [PointerEvent] is
+  /// caused by [PointerDeviceKind.touch] to make sure that the region
   /// isn't too small to be interacted with by the user.
-  bool hitTestInteractive(Offset position) {
+  bool hitTestInteractive(Offset position, PointerDeviceKind kind) {
     if (_thumbRect == null) {
       return false;
     }
@@ -489,19 +489,25 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     if (fadeoutOpacityAnimation.value == 0.0) {
       return false;
     }
-    final Rect interactiveScrollbarRect = _trackRect == null
-      ? _thumbRect!.expandToInclude(
-          Rect.fromCircle(center: _thumbRect!.center, radius: _kMinInteractiveSize / 2),
-        )
-      : _trackRect!.expandToInclude(
+
+    final Rect interactiveRect = _trackRect ?? _thumbRect!;
+    switch (kind) {
+      case PointerDeviceKind.touch:
+        final Rect touchScrollbarRect = interactiveRect.expandToInclude(
           Rect.fromCircle(center: _thumbRect!.center, radius: _kMinInteractiveSize / 2),
         );
-    return interactiveScrollbarRect.contains(position);
+        return touchScrollbarRect.contains(position);
+      case PointerDeviceKind.mouse:
+      case PointerDeviceKind.stylus:
+      case PointerDeviceKind.invertedStylus:
+      case PointerDeviceKind.unknown:
+        return interactiveRect.contains(position);
+    }
   }
 
   /// Same as hitTestInteractive, but excludes the track portion of the scrollbar.
   /// Used to evaluate interactions with only the scrollbar thumb.
-  bool hitTestOnlyThumbInteractive(Offset position) {
+  bool hitTestOnlyThumbInteractive(Offset position, PointerDeviceKind kind) {
     if (_thumbRect == null) {
       return false;
     }
@@ -509,10 +515,19 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     if (fadeoutOpacityAnimation.value == 0.0) {
       return false;
     }
-    final Rect interactiveThumbRect = _thumbRect!.expandToInclude(
-      Rect.fromCircle(center: _thumbRect!.center, radius: _kMinInteractiveSize / 2),
-    );
-    return interactiveThumbRect.contains(position);
+
+    switch (kind) {
+      case PointerDeviceKind.touch:
+        final Rect touchThumbRect = _thumbRect!.expandToInclude(
+          Rect.fromCircle(center: _thumbRect!.center, radius: _kMinInteractiveSize / 2),
+        );
+        return touchThumbRect.contains(position);
+      case PointerDeviceKind.mouse:
+      case PointerDeviceKind.stylus:
+      case PointerDeviceKind.invertedStylus:
+      case PointerDeviceKind.unknown:
+        return _thumbRect!.contains(position);
+    }
   }
 
   // Scrollbars are interactive.
@@ -566,6 +581,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// visible without the fade animation. This requires that a [ScrollController]
 /// is provided to [controller], or that the [PrimaryScrollController] is available.
 ///
+/// If the scrollbar is wrapped around multiple [ScrollView]s, it only responds to
+/// the nearest scrollView and shows the corresponding scrollbar thumb by default.
+/// Set [notificationPredicate] to something else for more complicated behaviors.
+///
 /// Scrollbars are interactive and will also use the [PrimaryScrollController] if
 /// a [controller] is not set. Scrollbar thumbs can be dragged along the main axis
 /// of the [ScrollView] to change the [ScrollPosition]. Tapping along the track
@@ -601,28 +620,32 @@ class RawScrollbar extends StatefulWidget {
     Key? key,
     required this.child,
     this.controller,
-    this.isAlwaysShown = false,
+    this.isAlwaysShown,
     this.radius,
     this.thickness,
     this.thumbColor,
     this.fadeDuration = _kScrollbarFadeDuration,
     this.timeToFade = _kScrollbarTimeToFade,
     this.pressDuration = Duration.zero,
-  }) : assert(isAlwaysShown != null),
-       assert(child != null),
+    this.notificationPredicate = defaultScrollNotificationPredicate,
+    this.interactive,
+  }) : assert(child != null),
        assert(fadeDuration != null),
        assert(timeToFade != null),
        assert(pressDuration != null),
        super(key: key);
 
+  /// {@template flutter.widgets.Scrollbar.child}
   /// The widget below this widget in the tree.
   ///
   /// The scrollbar will be stacked on top of this child. This child (and its
   /// subtree) should include a source of [ScrollNotification] notifications.
   ///
   /// Typically a [ListView] or [CustomScrollView].
+  /// {@endtemplate}
   final Widget child;
 
+  /// {@template flutter.widgets.Scrollbar.controller}
   /// The [ScrollController] used to implement Scrollbar dragging.
   ///
   /// If nothing is passed to controller, the default behavior is to automatically
@@ -642,10 +665,10 @@ class RawScrollbar extends StatefulWidget {
   /// final ScrollController _controllerOne = ScrollController();
   /// final ScrollController _controllerTwo = ScrollController();
   ///
-  /// build(BuildContext context) {
+  /// Widget build(BuildContext context) {
   ///   return Column(
   ///     children: <Widget>[
-  ///       Container(
+  ///       SizedBox(
   ///        height: 200,
   ///        child: CupertinoScrollbar(
   ///          controller: _controllerOne,
@@ -656,7 +679,7 @@ class RawScrollbar extends StatefulWidget {
   ///          ),
   ///        ),
   ///      ),
-  ///      Container(
+  ///      SizedBox(
   ///        height: 200,
   ///        child: CupertinoScrollbar(
   ///          controller: _controllerTwo,
@@ -672,8 +695,10 @@ class RawScrollbar extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
+  /// {@endtemplate}
   final ScrollController? controller;
 
+  /// {@template flutter.widgets.Scrollbar.isAlwaysShown}
   /// Indicates that the scrollbar should be visible, even when a scroll is not
   /// underway.
   ///
@@ -684,7 +709,7 @@ class RawScrollbar extends StatefulWidget {
   /// [controller] property has not been set, the [PrimaryScrollController] will
   /// be used.
   ///
-  /// Defaults to false.
+  /// Defaults to false when null.
   ///
   /// {@tool snippet}
   ///
@@ -692,7 +717,7 @@ class RawScrollbar extends StatefulWidget {
   /// final ScrollController _controllerOne = ScrollController();
   /// final ScrollController _controllerTwo = ScrollController();
   ///
-  /// build(BuildContext context) {
+  /// Widget build(BuildContext context) {
   /// return Column(
   ///   children: <Widget>[
   ///     SizedBox(
@@ -716,7 +741,7 @@ class RawScrollbar extends StatefulWidget {
   ///          controller: _controllerTwo,
   ///          child: SingleChildScrollView(
   ///            controller: _controllerTwo,
-  ///            child: SizedBox(
+  ///            child: const SizedBox(
   ///              height: 2000,
   ///              width: 500,
   ///              child: Placeholder(),
@@ -729,7 +754,13 @@ class RawScrollbar extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
-  final bool isAlwaysShown;
+  ///
+  /// See also:
+  ///
+  ///   * [RawScrollbarState.showScrollbar], an overridable getter which uses
+  ///     this value to override the default behavior.
+  /// {@endtemplate}
+  final bool? isAlwaysShown;
 
   /// The [Radius] of the scrollbar thumb's rounded rectangle corners.
   ///
@@ -763,6 +794,36 @@ class RawScrollbar extends StatefulWidget {
   /// Cannot be null, defaults to [Duration.zero].
   final Duration pressDuration;
 
+  /// {@template flutter.widgets.Scrollbar.notificationPredicate}
+  /// A check that specifies whether a [ScrollNotification] should be
+  /// handled by this widget.
+  ///
+  /// By default, checks whether `notification.depth == 0`. That means if the
+  /// scrollbar is wrapped around multiple [ScrollView]s, it only responds to the
+  /// nearest scrollView and shows the corresponding scrollbar thumb.
+  /// {@endtemplate}
+  final ScrollNotificationPredicate notificationPredicate;
+
+  /// {@template flutter.widgets.Scrollbar.interactive}
+  /// Whether the Scrollbar should be interactive and respond to dragging on the
+  /// thumb, or tapping in the track area.
+  ///
+  /// Does not apply to the [CupertinoScrollbar], which is always interactive to
+  /// match native behavior. On Android, the scrollbar is not interactive by
+  /// default.
+  ///
+  /// When false, the scrollbar will not respond to gesture or hover events.
+  ///
+  /// Defaults to true when null, unless on Android, which will default to false
+  /// when null.
+  ///
+  /// See also:
+  ///
+  ///   * [RawScrollbarState.enableGestures], an overridable getter which uses
+  ///     this value to override the default behavior.
+  /// {@endtemplate}
+  final bool? interactive;
+
   @override
   RawScrollbarState<RawScrollbar> createState() => RawScrollbarState<RawScrollbar>();
 }
@@ -790,6 +851,34 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// [updateScrollbarPainter].
   @protected
   late final ScrollbarPainter scrollbarPainter;
+
+  /// Overridable getter to indicate that the scrollbar should be visible, even
+  /// when a scroll is not underway.
+  ///
+  /// Subclasses can override this getter to make its value depend on an inherited
+  /// theme.
+  ///
+  /// Defaults to false when [RawScrollbar.isAlwaysShown] is null.
+  ///
+  /// See also:
+  ///
+  ///   * [RawScrollbar.isAlwaysShown], which overrides the default behavior.
+  @protected
+  bool get showScrollbar => widget.isAlwaysShown ?? false;
+
+  /// Overridable getter to indicate is gestures should be enabled on the
+  /// scrollbar.
+  ///
+  /// Subclasses can override this getter to make its value depend on an inherited
+  /// theme.
+  ///
+  /// Defaults to true when [RawScrollbar.interactive] is null.
+  ///
+  /// See also:
+  ///
+  ///   * [RawScrollbar.interactive], which overrides the default behavior.
+  @protected
+  bool get enableGestures => widget.interactive ?? true;
 
   @override
   void initState() {
@@ -821,7 +910,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   // A scroll event is required in order to paint the thumb.
   void _maybeTriggerScrollbar() {
     WidgetsBinding.instance!.addPostFrameCallback((Duration duration) {
-      if (widget.isAlwaysShown) {
+      if (showScrollbar) {
         _fadeoutTimer?.cancel();
         // Wait one frame and cause an empty scroll event.  This allows the
         // thumb to show immediately when isAlwaysShown is true. A scroll
@@ -882,7 +971,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   void _maybeStartFadeoutTimer() {
-    if (!widget.isAlwaysShown) {
+    if (!showScrollbar) {
       _fadeoutTimer?.cancel();
       _fadeoutTimer = Timer(widget.timeToFade, () {
         _fadeoutAnimationController.reverse();
@@ -1019,6 +1108,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
+    if (!widget.notificationPredicate(notification))
+      return false;
 
     final ScrollMetrics metrics = notification.metrics;
     if (metrics.maxScrollExtent <= metrics.minScrollExtent)
@@ -1042,7 +1133,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   Map<Type, GestureRecognizerFactory> get _gestures {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
     final ScrollController? controller = widget.controller ?? PrimaryScrollController.of(context);
-    if (controller == null)
+    if (controller == null || !enableGestures)
       return gestures;
 
     gestures[_ThumbPressGestureRecognizer] =
@@ -1078,33 +1169,33 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   ///
   /// Excludes the [RawScrollbar] thumb.
   @protected
-  bool isPointerOverTrack(Offset position) {
+  bool isPointerOverTrack(Offset position, PointerDeviceKind kind) {
     if (_scrollbarPainterKey.currentContext == null) {
       return false;
     }
     final Offset localOffset = _getLocalOffset(_scrollbarPainterKey, position);
-    return scrollbarPainter.hitTestInteractive(localOffset)
-      && !scrollbarPainter.hitTestOnlyThumbInteractive(localOffset);
+    return scrollbarPainter.hitTestInteractive(localOffset, kind)
+      && !scrollbarPainter.hitTestOnlyThumbInteractive(localOffset, kind);
   }
   /// Returns true if the provided [Offset] is located over the thumb of the
   /// [RawScrollbar].
   @protected
-  bool isPointerOverThumb(Offset position) {
+  bool isPointerOverThumb(Offset position, PointerDeviceKind kind) {
     if (_scrollbarPainterKey.currentContext == null) {
       return false;
     }
     final Offset localOffset = _getLocalOffset(_scrollbarPainterKey, position);
-    return scrollbarPainter.hitTestOnlyThumbInteractive(localOffset);
+    return scrollbarPainter.hitTestOnlyThumbInteractive(localOffset, kind);
   }
   /// Returns true if the provided [Offset] is located over the track or thumb
   /// of the [RawScrollbar].
   @protected
-  bool isPointerOverScrollbar(Offset position) {
+  bool isPointerOverScrollbar(Offset position, PointerDeviceKind kind) {
     if (_scrollbarPainterKey.currentContext == null) {
       return false;
     }
     final Offset localOffset = _getLocalOffset(_scrollbarPainterKey, position);
-    return scrollbarPainter.hitTestInteractive(localOffset);
+    return scrollbarPainter.hitTestInteractive(localOffset, kind);
   }
 
   /// Cancels the fade out animation so the scrollbar will remain visible for
@@ -1119,7 +1210,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @mustCallSuper
   void handleHover(PointerHoverEvent event) {
     // Check if the position of the pointer falls over the painted scrollbar
-    if (isPointerOverScrollbar(event.position)) {
+    if (isPointerOverScrollbar(event.position, event.kind)) {
       _hoverIsActive = true;
       _fadeoutTimer?.cancel();
     } else if (_hoverIsActive) {
@@ -1161,7 +1252,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
             onExit: (PointerExitEvent event) {
               switch(event.kind) {
                 case PointerDeviceKind.mouse:
-                  handleHoverExit(event);
+                  if (enableGestures)
+                    handleHoverExit(event);
                   break;
                 case PointerDeviceKind.stylus:
                 case PointerDeviceKind.invertedStylus:
@@ -1173,7 +1265,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
             onHover: (PointerHoverEvent event) {
               switch(event.kind) {
                 case PointerDeviceKind.mouse:
-                  handleHover(event);
+                  if (enableGestures)
+                    handleHover(event);
                   break;
                 case PointerDeviceKind.stylus:
                 case PointerDeviceKind.invertedStylus:
@@ -1215,20 +1308,20 @@ class _ThumbPressGestureRecognizer extends LongPressGestureRecognizer {
 
   @override
   bool isPointerAllowed(PointerDownEvent event) {
-    if (!_hitTestInteractive(_customPaintKey, event.position)) {
+    if (!_hitTestInteractive(_customPaintKey, event.position, event.kind)) {
       return false;
     }
     return super.isPointerAllowed(event);
   }
 
-  bool _hitTestInteractive(GlobalKey customPaintKey, Offset offset) {
+  bool _hitTestInteractive(GlobalKey customPaintKey, Offset offset, PointerDeviceKind kind) {
     if (customPaintKey.currentContext == null) {
       return false;
     }
     final CustomPaint customPaint = customPaintKey.currentContext!.widget as CustomPaint;
     final ScrollbarPainter painter = customPaint.foregroundPainter! as ScrollbarPainter;
     final Offset localOffset = _getLocalOffset(customPaintKey, offset);
-    return painter.hitTestOnlyThumbInteractive(localOffset);
+    return painter.hitTestOnlyThumbInteractive(localOffset, kind);
   }
 }
 
@@ -1245,13 +1338,13 @@ class _TrackTapGestureRecognizer extends TapGestureRecognizer {
 
   @override
   bool isPointerAllowed(PointerDownEvent event) {
-    if (!_hitTestInteractive(_customPaintKey, event.position)) {
+    if (!_hitTestInteractive(_customPaintKey, event.position, event.kind)) {
       return false;
     }
     return super.isPointerAllowed(event);
   }
 
-  bool _hitTestInteractive(GlobalKey customPaintKey, Offset offset) {
+  bool _hitTestInteractive(GlobalKey customPaintKey, Offset offset, PointerDeviceKind kind) {
     if (customPaintKey.currentContext == null) {
       return false;
     }
@@ -1259,7 +1352,7 @@ class _TrackTapGestureRecognizer extends TapGestureRecognizer {
     final ScrollbarPainter painter = customPaint.foregroundPainter! as ScrollbarPainter;
     final Offset localOffset = _getLocalOffset(customPaintKey, offset);
     // We only receive track taps that are not on the thumb.
-    return painter.hitTestInteractive(localOffset) && !painter.hitTestOnlyThumbInteractive(localOffset);
+    return painter.hitTestInteractive(localOffset, kind) && !painter.hitTestOnlyThumbInteractive(localOffset, kind);
   }
 }
 

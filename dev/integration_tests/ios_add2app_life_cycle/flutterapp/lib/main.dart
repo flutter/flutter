@@ -6,7 +6,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart';
 import 'package:collection/collection.dart';
 
 VoidCallback originalSemanticsListener;
@@ -29,7 +28,7 @@ void main() {
 ///
 /// Rewiring semantics is a signal to native IOS test that the test has passed.
 class LifeCycleSpy extends StatefulWidget {
-  const LifeCycleSpy();
+  const LifeCycleSpy({Key key}) : super(key: key);
 
   @override
   _LifeCycleSpyState createState() => _LifeCycleSpyState();

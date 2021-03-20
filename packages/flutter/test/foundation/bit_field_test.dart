@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 // ignore: unused_field
-enum _TestEnum { a, b, c, d, e, f, g, h, }
+enum _TestEnum { a, b, c, d, e, f, g, h }
 
 void main() {
   test('BitField control test', () {

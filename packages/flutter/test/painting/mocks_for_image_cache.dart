@@ -8,7 +8,6 @@ import 'dart:ui' as ui show Image;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
-// ignore: must_be_immutable
 class TestImageInfo implements ImageInfo {
   const TestImageInfo(this.value, { required this.image, this.scale = 1.0, this.debugLabel });
 

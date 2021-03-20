@@ -5,7 +5,6 @@
 import 'dart:ui' as ui show window;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stocks/main.dart' as stocks;
 import 'package:stocks/stock_data.dart' as stock_data;
@@ -84,7 +83,7 @@ void main() {
     await tester.pump(const Duration(seconds: 5)); // end the transition
 
     // check the color of the icon - dark mode
-    checkIconColor(tester, 'Stock List', Colors.redAccent); // theme accent color
+    checkIconColor(tester, 'Stock List', Colors.purple); // theme primary color
     checkIconColor(tester, 'Account Balance', Colors.white38); // disabled
     checkIconColor(tester, 'About', Colors.white); // enabled
   });

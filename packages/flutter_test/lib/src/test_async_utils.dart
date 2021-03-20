@@ -47,7 +47,6 @@ class _AsyncScope {
 class TestAsyncUtils {
   // This class is not meant to be instatiated or extended; this constructor
   // prevents instantiation and extension.
-  // ignore: unused_element
   TestAsyncUtils._();
   static const String _className = 'TestAsyncUtils';
 
@@ -60,7 +59,7 @@ class TestAsyncUtils {
   /// this one before this one has finished will throw an exception.
   ///
   /// This method first calls [guardSync].
-  static Future<T> guard<T>(Future<T> body()) {
+  static Future<T> guard<T>(Future<T> Function() body) {
     guardSync();
     final Zone zone = Zone.current.fork(
       zoneValues: <dynamic, dynamic>{

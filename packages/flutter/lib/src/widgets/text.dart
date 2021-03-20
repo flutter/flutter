@@ -5,7 +5,6 @@
 import 'dart:ui' as ui show TextHeightBehavior;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -305,7 +304,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 ///   'Hello, $_name! How are you?',
 ///   textAlign: TextAlign.center,
 ///   overflow: TextOverflow.ellipsis,
-///   style: TextStyle(fontWeight: FontWeight.bold),
+///   style: const TextStyle(fontWeight: FontWeight.bold),
 /// )
 /// ```
 /// {@end-tool}

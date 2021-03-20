@@ -20,7 +20,7 @@ void main() {
       textDirection: TextDirection.rtl,
       child: child,
     ));
-    expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(0.0, 0.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)), Offset.zero);
 
     await tester.pumpWidget(
       const Padding(
@@ -84,7 +84,7 @@ void main() {
   });
 
   testWidgets('EdgeInsetsDirectional without Directionality', (WidgetTester tester) async {
-    await tester.pumpWidget(const Padding(padding: EdgeInsetsDirectional.only()));
+    await tester.pumpWidget(const Padding(padding: EdgeInsetsDirectional.zero));
     expect(tester.takeException(), isAssertionError);
   });
 }

@@ -46,6 +46,8 @@ const String _actionText =
 const String _actionCode = 'buttons_action';
 
 class ButtonsDemo extends StatefulWidget {
+  const ButtonsDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/material/buttons';
 
   @override
@@ -63,42 +65,42 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
         description: _elevatedText,
         demoWidget: buildElevatedButton(_buttonShape),
         exampleCodeTag: _elevatedCode,
-        documentationUrl: 'https://docs.flutter.io/flutter/material/ElevatedButton-class.html',
+        documentationUrl: 'https://api.flutter.dev/flutter/material/ElevatedButton-class.html',
       ),
       ComponentDemoTabData(
         tabName: 'TEXT',
         description: _textText,
         demoWidget: buildTextButton(_buttonShape),
         exampleCodeTag: _textCode,
-        documentationUrl: 'https://docs.flutter.io/flutter/material/TextButton-class.html',
+        documentationUrl: 'https://api.flutter.dev/flutter/material/TextButton-class.html',
       ),
       ComponentDemoTabData(
         tabName: 'OUTLINED',
         description: _outlinedText,
         demoWidget: buildOutlinedButton(_buttonShape),
         exampleCodeTag: _outlinedCode,
-        documentationUrl: 'https://docs.flutter.io/flutter/material/OutlinedButton-class.html',
+        documentationUrl: 'https://api.flutter.dev/flutter/material/OutlinedButton-class.html',
       ),
       ComponentDemoTabData(
         tabName: 'DROPDOWN',
         description: _dropdownText,
         demoWidget: buildDropdownButton(),
         exampleCodeTag: _dropdownCode,
-        documentationUrl: 'https://docs.flutter.io/flutter/material/DropdownButton-class.html',
+        documentationUrl: 'https://api.flutter.dev/flutter/material/DropdownButton-class.html',
       ),
       ComponentDemoTabData(
         tabName: 'ICON',
         description: _iconText,
         demoWidget: buildIconButton(),
         exampleCodeTag: _iconCode,
-        documentationUrl: 'https://docs.flutter.io/flutter/material/IconButton-class.html',
+        documentationUrl: 'https://api.flutter.dev/flutter/material/IconButton-class.html',
       ),
       ComponentDemoTabData(
         tabName: 'ACTION',
         description: _actionText,
         demoWidget: buildActionButton(),
         exampleCodeTag: _actionCode,
-        documentationUrl: 'https://docs.flutter.io/flutter/material/FloatingActionButton-class.html',
+        documentationUrl: 'https://api.flutter.dev/flutter/material/FloatingActionButton-class.html',
       ),
     ];
 

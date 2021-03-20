@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -27,6 +25,8 @@ import 'text_field.dart';
 ///
 /// ```dart
 /// class MyPrefilledSearch extends StatefulWidget {
+///   const MyPrefilledSearch({Key? key}) : super(key: key);
+///
 ///   @override
 ///   _MyPrefilledSearchState createState() => _MyPrefilledSearchState();
 /// }
@@ -56,6 +56,8 @@ import 'text_field.dart';
 ///
 /// ```dart
 /// class MyPrefilledSearch extends StatefulWidget {
+///   const MyPrefilledSearch({Key? key}) : super(key: key);
+///
 ///   @override
 ///   _MyPrefilledSearchState createState() => _MyPrefilledSearchState();
 /// }
@@ -64,11 +66,11 @@ import 'text_field.dart';
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return CupertinoSearchTextField(
-///       onChanged: (value) {
-///         print("The text has changed to: " + value);
+///       onChanged: (String value) {
+///         print('The text has changed to: $value');
 ///       },
-///       onSubmitted: (value) {
-///         print("Submitted text: " + value);
+///       onSubmitted: (String value) {
+///         print('Submitted text: $value');
 ///       },
 ///     );
 ///   }

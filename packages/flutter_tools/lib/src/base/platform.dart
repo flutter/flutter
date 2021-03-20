@@ -101,7 +101,7 @@ abstract class Platform {
   /// specifies how Dart packages are looked up.
   ///
   /// If there is no `--packages` flag, `null` is returned.
-  String get packageConfig;
+  String? get packageConfig;
 
   /// The version of the current Dart runtime.
   ///
@@ -156,7 +156,7 @@ class LocalPlatform extends Platform {
   List<String> get executableArguments => io.Platform.executableArguments;
 
   @override
-  String get packageConfig => io.Platform.packageConfig;
+  String? get packageConfig => io.Platform.packageConfig;
 
   @override
   String get version => io.Platform.version;
@@ -171,29 +171,30 @@ class LocalPlatform extends Platform {
   String get localeName => io.Platform.localeName;
 }
 
+final Uri _empty = Uri.parse('');
+
 /// Provides a mutable implementation of the [Platform] interface.
 class FakePlatform extends Platform {
   /// Creates a new [FakePlatform] with the specified properties.
   ///
-  /// Unspecified properties will *not* be assigned default values (they will
-  /// remain `null`).
+  /// Unspecified properties will default to a 'linux' OS.
   FakePlatform({
-    this.numberOfProcessors,
-    this.pathSeparator,
-    this.operatingSystem,
-    this.operatingSystemVersion,
-    this.localHostname,
-    this.environment,
-    this.executable,
-    this.resolvedExecutable,
-    this.script,
-    this.executableArguments,
+    this.numberOfProcessors = 1,
+    this.pathSeparator = '/',
+    this.operatingSystem = 'linux',
+    this.operatingSystemVersion = '',
+    this.localHostname = '',
+    this.environment = const <String, String>{},
+    this.executable = '',
+    this.resolvedExecutable = '',
+    Uri? script,
+    this.executableArguments = const <String>[],
     this.packageConfig,
-    this.version,
-    this.stdinSupportsAnsi,
-    this.stdoutSupportsAnsi,
-    this.localeName,
-  });
+    this.version = '',
+    this.stdinSupportsAnsi = false,
+    this.stdoutSupportsAnsi = false,
+    this.localeName = '',
+  }) : script = script ?? _empty;
 
   /// Creates a new [FakePlatform] with properties whose initial values mirror
   /// the specified [platform].
@@ -246,7 +247,7 @@ class FakePlatform extends Platform {
   List<String> executableArguments;
 
   @override
-  String packageConfig;
+  String? packageConfig;
 
   @override
   String version;

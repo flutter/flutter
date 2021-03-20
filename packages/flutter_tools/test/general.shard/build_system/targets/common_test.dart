@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -104,7 +106,7 @@ void main() {
 
     await expectLater(() => const KernelSnapshot().build(androidEnvironment),
       throwsA(isA<Exception>()));
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('KernelSnapshot does not use track widget creation on profile builds', () async {
@@ -140,7 +142,7 @@ void main() {
 
     await const KernelSnapshot().build(androidEnvironment);
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('KernelSnapshot correctly handles an empty string in ExtraFrontEndOptions', () async {
@@ -177,7 +179,7 @@ void main() {
     await const KernelSnapshot()
       .build(androidEnvironment..defines[kExtraFrontEndOptions] = '');
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('KernelSnapshot correctly forwards ExtraFrontEndOptions', () async {
@@ -216,7 +218,7 @@ void main() {
     await const KernelSnapshot()
       .build(androidEnvironment..defines[kExtraFrontEndOptions] = 'foo,bar');
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('KernelSnapshot can disable track-widget-creation on debug builds', () async {
@@ -253,7 +255,7 @@ void main() {
       ..defines[kBuildMode] = getNameForBuildMode(BuildMode.debug)
       ..defines[kTrackWidgetCreation] = 'false');
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('KernelSnapshot forces platform linking on debug for darwin target platforms', () async {
@@ -291,7 +293,7 @@ void main() {
       ..defines[kTrackWidgetCreation] = 'false'
     );
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('KernelSnapshot does use track widget creation on debug builds', () async {
@@ -338,7 +340,7 @@ void main() {
 
     await const KernelSnapshot().build(testEnvironment);
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testUsingContext('AotElfProfile Produces correct output directory', () async {
@@ -363,7 +365,7 @@ void main() {
 
     await const AotElfProfile(TargetPlatform.android_arm).build(androidEnvironment);
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testUsingContext('AotElfRelease configures gen_snapshot with code size directory', () async {
@@ -391,7 +393,7 @@ void main() {
 
     await const AotElfRelease(TargetPlatform.android_arm).build(androidEnvironment);
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testUsingContext('AotElfProfile throws error if missing build mode', () async {
@@ -547,7 +549,7 @@ void main() {
 
     await const AotAssemblyProfile().build(iosEnvironment);
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     Platform: () => macPlatform,
     FileSystem: () => fileSystem,
@@ -619,7 +621,7 @@ void main() {
 
     await const AotAssemblyProfile().build(iosEnvironment);
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     Platform: () => macPlatform,
     FileSystem: () => fileSystem,
@@ -694,7 +696,7 @@ void main() {
 
     await const AotAssemblyProfile().build(iosEnvironment);
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     Platform: () => macPlatform,
     FileSystem: () => fileSystem,
@@ -728,6 +730,6 @@ void main() {
 
     await const AotElfRelease(TargetPlatform.android_arm).build(androidEnvironment);
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 }

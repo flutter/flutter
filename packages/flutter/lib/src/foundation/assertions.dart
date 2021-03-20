@@ -93,7 +93,8 @@ class PartialStackFrame {
 /// A class that filters stack frames for additional filtering on
 /// [FlutterError.defaultStackFilter].
 abstract class StackFilter {
-  /// A const constructor to allow subclasses to be const.
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const StackFilter();
 
   /// Filters the list of [StackFrame]s by updating corresponding indices in
@@ -875,7 +876,9 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   ///
   /// Do not call [onError] directly, instead, call [reportError], which
   /// forwards to [onError] if it is not null.
-  static FlutterExceptionHandler? onError = (FlutterErrorDetails details) => presentError(details);
+  static FlutterExceptionHandler? onError = _defaultErrorHandler;
+
+  static void _defaultErrorHandler(FlutterErrorDetails details) => presentError(details);
 
   /// Called by the Flutter framework before attempting to parse a [StackTrace].
   ///
@@ -900,7 +903,9 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   ///   return stack;
   /// };
   /// ```
-  static StackTraceDemangler demangleStackTrace = (StackTrace stackTrace) => stackTrace;
+  static StackTraceDemangler demangleStackTrace = _defaultStackTraceDemangler;
+
+  static StackTrace _defaultStackTraceDemangler(StackTrace stackTrace) => stackTrace;
 
   /// Called whenever the Flutter framework wants to present an error to the
   /// users.

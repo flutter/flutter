@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:io';
 
@@ -17,7 +19,6 @@ import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
-import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
@@ -72,14 +73,13 @@ void main() {
       const int devicePort = 499;
       const int hostPort = 42;
 
-      FakeDeviceLogReader mockLogReader;
+      FakeDeviceLogReader fakeLogReader;
       MockPortForwarder portForwarder;
       MockDartDevelopmentService mockDds;
       MockAndroidDevice device;
-      MockHttpClient httpClient;
 
       setUp(() {
-        mockLogReader = FakeDeviceLogReader();
+        fakeLogReader = FakeDeviceLogReader();
         portForwarder = MockPortForwarder();
         device = MockAndroidDevice();
         mockDds = MockDartDevelopmentService();
@@ -96,13 +96,6 @@ void main() {
         when(mockDds.startDartDevelopmentService(any, any, false, any)).thenReturn(null);
         when(mockDds.uri).thenReturn(Uri.parse('http://localhost:8181'));
         when(mockDds.done).thenAnswer((_) => noopCompleter.future);
-        final HttpClientRequest httpClientRequest = MockHttpClientRequest();
-        httpClient = MockHttpClient();
-        when(httpClient.putUrl(any))
-          .thenAnswer((_) => Future<HttpClientRequest>.value(httpClientRequest));
-        when(httpClientRequest.headers).thenReturn(MockHttpHeaders());
-        when(httpClientRequest.close())
-          .thenAnswer((_) => Future<HttpClientResponse>.value(MockHttpClientResponse()));
 
         // We cannot add the device to a device manager because that is
         // only enabled by the context of each testUsingContext call.
@@ -112,16 +105,16 @@ void main() {
       });
 
       tearDown(() {
-        mockLogReader.dispose();
+        fakeLogReader.dispose();
       });
 
       testUsingContext('finds observatory port and forwards', () async {
         when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
           .thenAnswer((_) {
             // Now that the reader is used, start writing messages to it.
-            mockLogReader.addLine('Foo');
-            mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
-            return mockLogReader;
+            fakeLogReader.addLine('Foo');
+            fakeLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
+            return fakeLogReader;
           });
         testDeviceManager.addDevice(device);
         final Completer<void> completer = Completer<void>();
@@ -136,7 +129,7 @@ void main() {
         verify(
           portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')),
         ).called(1);
-        await mockLogReader.dispose();
+        await fakeLogReader.dispose();
         await expectLoggerInterruptEndsTask(task, logger);
         await loggerSubscription.cancel();
       }, overrides: <Type, Generator>{
@@ -149,10 +142,10 @@ void main() {
         when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
           .thenAnswer((_) {
             // Now that the reader is used, start writing messages to it.
-            mockLogReader.addLine('Foo');
-            mockLogReader.addLine('Observatory listening on http:/:/127.0.0.1:$devicePort');
-            mockLogReader.dispose();
-            return mockLogReader;
+            fakeLogReader.addLine('Foo');
+            fakeLogReader.addLine('Observatory listening on http:/:/127.0.0.1:$devicePort');
+            fakeLogReader.dispose();
+            return fakeLogReader;
           });
         testDeviceManager.addDevice(device);
         expect(createTestCommandRunner(AttachCommand()).run(<String>['attach']),
@@ -167,9 +160,9 @@ void main() {
         when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
           .thenAnswer((_) {
             // Now that the reader is used, start writing messages to it.
-            mockLogReader.addLine('Foo');
-            mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
-            return mockLogReader;
+            fakeLogReader.addLine('Foo');
+            fakeLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
+            return fakeLogReader;
           });
         testDeviceManager.addDevice(device);
 
@@ -179,8 +172,11 @@ void main() {
         const String outputDill = '/tmp/output.dill';
 
         final MockHotRunner mockHotRunner = MockHotRunner();
-        when(mockHotRunner.attach(appStartedCompleter: anyNamed('appStartedCompleter'), allowExistingDdsInstance: true))
-            .thenAnswer((_) async => 0);
+        when(mockHotRunner.attach(
+          appStartedCompleter: anyNamed('appStartedCompleter'),
+          allowExistingDdsInstance: true,
+          enableDevTools: anyNamed('enableDevTools'),
+        )).thenAnswer((_) async => 0);
         when(mockHotRunner.exited).thenReturn(false);
         when(mockHotRunner.isWaitingForObservatory).thenReturn(false);
 
@@ -247,9 +243,9 @@ void main() {
         when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
           .thenAnswer((_) {
             // Now that the reader is used, start writing messages to it.
-            mockLogReader.addLine('Foo');
-            mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
-            return mockLogReader;
+            fakeLogReader.addLine('Foo');
+            fakeLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
+            return fakeLogReader;
           });
         testDeviceManager.addDevice(device);
 
@@ -270,9 +266,9 @@ void main() {
         when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
           .thenAnswer((_) {
             // Now that the reader is used, start writing messages to it.
-            mockLogReader.addLine('Foo');
-            mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
-            return mockLogReader;
+            fakeLogReader.addLine('Foo');
+            fakeLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
+            return fakeLogReader;
           });
         testDeviceManager.addDevice(device);
 
@@ -293,7 +289,7 @@ void main() {
     testUsingContext('selects specified target', () async {
       const int devicePort = 499;
       const int hostPort = 42;
-      final FakeDeviceLogReader mockLogReader = FakeDeviceLogReader();
+      final FakeDeviceLogReader fakeLogReader = FakeDeviceLogReader();
       final MockPortForwarder portForwarder = MockPortForwarder();
       final MockDartDevelopmentService mockDds = MockDartDevelopmentService();
       final MockAndroidDevice device = MockAndroidDevice();
@@ -311,8 +307,11 @@ void main() {
         .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
       when(portForwarder.unforward(any))
         .thenAnswer((_) async {});
-      when(mockHotRunner.attach(appStartedCompleter: anyNamed('appStartedCompleter'), allowExistingDdsInstance: true))
-        .thenAnswer((_) async => 0);
+      when(mockHotRunner.attach(
+        appStartedCompleter: anyNamed('appStartedCompleter'),
+        allowExistingDdsInstance: true,
+        enableDevTools: anyNamed('enableDevTools'),
+      )).thenAnswer((_) async => 0);
       when(mockHotRunnerFactory.build(
         any,
         target: anyNamed('target'),
@@ -330,10 +329,10 @@ void main() {
       when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
         .thenAnswer((_) {
           // Now that the reader is used, start writing messages to it.
-          mockLogReader.addLine('Foo');
-          mockLogReader.addLine(
+          fakeLogReader.addLine('Foo');
+          fakeLogReader.addLine(
               'Observatory listening on http://127.0.0.1:$devicePort');
-          return mockLogReader;
+          return fakeLogReader;
         });
       final File foo = globals.fs.file('lib/foo.dart')
         ..createSync();
@@ -375,7 +374,7 @@ void main() {
     testUsingContext('fallbacks to protocol observatory if MDNS failed on iOS', () async {
       const int devicePort = 499;
       const int hostPort = 42;
-      final FakeDeviceLogReader mockLogReader = FakeDeviceLogReader();
+      final FakeDeviceLogReader fakeLogReader = FakeDeviceLogReader();
       final MockPortForwarder portForwarder = MockPortForwarder();
       final MockDartDevelopmentService mockDds = MockDartDevelopmentService();
       final MockIOSDevice device = MockIOSDevice();
@@ -388,15 +387,18 @@ void main() {
       final Completer<void> noopCompleter = Completer<void>();
       when(mockDds.done).thenAnswer((_) => noopCompleter.future);
       when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
-        .thenAnswer((_) => mockLogReader);
+        .thenAnswer((_) => fakeLogReader);
       when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
         .thenAnswer((_) async => hostPort);
       when(portForwarder.forwardedPorts)
         .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
       when(portForwarder.unforward(any))
         .thenAnswer((_) async {});
-      when(mockHotRunner.attach(appStartedCompleter: anyNamed('appStartedCompleter'), allowExistingDdsInstance: true))
-        .thenAnswer((_) async => 0);
+      when(mockHotRunner.attach(
+        appStartedCompleter: anyNamed('appStartedCompleter'),
+        allowExistingDdsInstance: true,
+        enableDevTools: anyNamed('enableDevTools'),
+      )).thenAnswer((_) async => 0);
       when(mockHotRunnerFactory.build(
         any,
         target: anyNamed('target'),
@@ -631,13 +633,90 @@ void main() {
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
+
+    testUsingContext('Catches service disappeared error', () async {
+      final MockAndroidDevice device = MockAndroidDevice();
+      final MockHotRunner mockHotRunner = MockHotRunner();
+      final MockHotRunnerFactory mockHotRunnerFactory = MockHotRunnerFactory();
+      when(device.portForwarder).thenReturn(const NoOpDevicePortForwarder());
+
+      when(mockHotRunner.attach(
+        appStartedCompleter: anyNamed('appStartedCompleter'),
+        allowExistingDdsInstance: true,
+        enableDevTools: anyNamed('enableDevTools'),
+      )).thenAnswer((_) async {
+        await null;
+        throw vm_service.RPCError('flutter._listViews', RPCErrorCodes.kServiceDisappeared, '');
+      });
+      when(mockHotRunnerFactory.build(
+        any,
+        target: anyNamed('target'),
+        debuggingOptions: anyNamed('debuggingOptions'),
+        packagesFilePath: anyNamed('packagesFilePath'),
+        flutterProject: anyNamed('flutterProject'),
+        ipv6: false,
+      )).thenReturn(mockHotRunner);
+
+      testDeviceManager.addDevice(device);
+      when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
+        .thenAnswer((_) {
+          return NoOpDeviceLogReader('test');
+        });
+      testFileSystem.file('lib/main.dart').createSync();
+
+      final AttachCommand command = AttachCommand(hotRunnerFactory: mockHotRunnerFactory);
+      await expectLater(createTestCommandRunner(command).run(<String>[
+        'attach',
+      ]), throwsToolExit(message: 'Lost connection to device.'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('Does not catch generic RPC error', () async {
+      final MockAndroidDevice device = MockAndroidDevice();
+      final MockHotRunner mockHotRunner = MockHotRunner();
+      final MockHotRunnerFactory mockHotRunnerFactory = MockHotRunnerFactory();
+      when(device.portForwarder).thenReturn(const NoOpDevicePortForwarder());
+
+      when(mockHotRunner.attach(
+        appStartedCompleter: anyNamed('appStartedCompleter'),
+        allowExistingDdsInstance: true,
+        enableDevTools: anyNamed('enableDevTools'),
+      )).thenAnswer((_) async {
+        await null;
+        throw vm_service.RPCError('flutter._listViews', RPCErrorCodes.kInvalidParams, '');
+      });
+      when(mockHotRunnerFactory.build(
+        any,
+        target: anyNamed('target'),
+        debuggingOptions: anyNamed('debuggingOptions'),
+        packagesFilePath: anyNamed('packagesFilePath'),
+        flutterProject: anyNamed('flutterProject'),
+        ipv6: false,
+      )).thenReturn(mockHotRunner);
+
+      testDeviceManager.addDevice(device);
+      when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
+        .thenAnswer((_) {
+          return NoOpDeviceLogReader('test');
+        });
+      testFileSystem.file('lib/main.dart').createSync();
+
+      final AttachCommand command = AttachCommand(hotRunnerFactory: mockHotRunnerFactory);
+      await expectLater(createTestCommandRunner(command).run(<String>[
+        'attach',
+      ]), throwsA(isA<vm_service.RPCError>()));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
   });
 }
 
 class MockHotRunner extends Mock implements HotRunner {}
 class MockHotRunnerFactory extends Mock implements HotRunnerFactory {}
 class MockIOSDevice extends Mock implements IOSDevice {}
-class MockMDnsObservatoryDiscovery extends Mock implements MDnsObservatoryDiscovery {}
 class MockPortForwarder extends Mock implements DevicePortForwarder {}
 
 class StreamLogger extends Logger {
@@ -681,11 +760,20 @@ class StreamLogger extends Logger {
     @required Duration timeout,
     String progressId,
     bool multilineOutput = false,
+    bool includeTiming = true,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     _log('[progress] $message');
     return SilentStatus(
       stopwatch: Stopwatch(),
+    )..start();
+  }
+
+  @override
+  Status startSpinner({ VoidCallback onFinish }) {
+    return SilentStatus(
+      stopwatch: Stopwatch(),
+      onFinish: onFinish,
     )..start();
   }
 
@@ -718,6 +806,9 @@ class StreamLogger extends Logger {
 
   @override
   void clear() => _log('[stdout] ${globals.terminal.clearScreen()}\n');
+
+  @override
+  Terminal get terminal => Terminal.test();
 }
 
 class LoggerInterrupted implements Exception {
@@ -836,6 +927,3 @@ class TestHotRunnerFactory extends HotRunnerFactory {
 }
 
 class MockDartDevelopmentService extends Mock implements DartDevelopmentService {}
-class MockHttpClientRequest extends Mock implements HttpClientRequest {}
-class MockHttpClientResponse extends Mock implements HttpClientResponse {}
-class MockHttpHeaders extends Mock implements HttpHeaders {}
