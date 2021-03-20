@@ -33,7 +33,7 @@ task:
     builder_image_project: flutter-cirrus
     cluster_name: test-cluster
     zone: us-central1
-    namespace: default
+    namespace: flutter
     cpu: $CPU
     memory: $MEMORY
     use_in_memory_disk: $USE_IN_MEMORY_DISK
