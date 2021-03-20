@@ -938,6 +938,11 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// changed in [deactivate] and [reactivate].
   bool get active => _element?._lifecycleState == _ElementLifecycle.active;
 
+  /// This field is used tracks [reactivate] and [deactivate], to assert that
+  /// they are called alternatively, and that _debugActive is synchronized with
+  /// the returned value of [active]
+  bool _debugActive = true;
+
   /// Called when this object is inserted into the tree.
   ///
   /// The framework will call this method exactly once for each [State] object
@@ -1144,7 +1149,10 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///    from the tree permanently.
   @protected
   @mustCallSuper
-  void deactivate() { }
+  void deactivate() {
+    // After Element.deactivate is called, active is changed.
+    assert(_debugActive == active);
+  }
 
   /// Called when this object is reactivated.
   ///
@@ -1162,7 +1170,12 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///  lifecycle.
   @protected
   @mustCallSuper
-  void reactivate() { }
+  void reactivate() {
+    assert(() {
+      _debugActive = true;
+      return _debugActive == active;
+    }());
+  }
 
   /// Called when this object is removed from the tree permanently.
   ///
@@ -4817,6 +4830,10 @@ class StatefulElement extends ComponentElement {
   void deactivate() {
     state.deactivate();
     super.deactivate();
+    assert(() {
+      state._debugActive = false;
+      return state._debugActive == state.active;
+    }());
   }
 
   @override
