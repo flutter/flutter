@@ -2245,6 +2245,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   late final _WhitespaceDirectionalityFormatter _whitespaceFormatter = _WhitespaceDirectionalityFormatter(textDirection: _textDirection);
 
+  // This method is often called by platform message handlers that catch and
+  // send unrecognized exceptions to the engine/platform. Make sure the
+  // exceptions user callbacks throw are handled within this method.
   void _formatAndSetValue(TextEditingValue newTextEditingValue, SelectionChangedCause? cause, {bool userInteraction = false}) {
     // Only apply input formatters if the text has changed (including uncommited
     // text in the composing region), or when the user committed the composing
@@ -2254,14 +2257,25 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // current composing region) is very infinite-loop-prone: the formatters
     // will keep trying to modify the composing region while Gboard will keep
     // trying to restore the original composing region.
-    final bool preformattedTextChanged = _value.text != newTextEditingValue.text
+    final bool preformatTextChanged = _value.text != newTextEditingValue.text
                                       || (!_value.composing.isCollapsed && newTextEditingValue.composing.isCollapsed);
 
-    if (preformattedTextChanged) {
-      newTextEditingValue = widget.inputFormatters?.fold<TextEditingValue>(
-        newTextEditingValue,
-        (TextEditingValue newValue, TextInputFormatter formatter) => formatter.formatEditUpdate(_value, newValue),
-      ) ?? newTextEditingValue;
+    final List<TextInputFormatter>? formatters = widget.inputFormatters;
+    if (preformatTextChanged && formatters != null && formatters.isNotEmpty) {
+      for (final TextInputFormatter formatter in formatters) {
+        try {
+          newTextEditingValue = formatter.formatEditUpdate(_value, newTextEditingValue);
+        } catch (exception, stack) {
+          FlutterError.reportError(FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets',
+            context: ErrorDescription(
+              'while applying ${formatter.runtimeType} on $newTextEditingValue',
+            ),
+          ));
+        }
+      }
 
       // Always pass the text through the whitespace directionality formatter to
       // maintain expected behavior with carets on trailing whitespace.
@@ -2276,7 +2290,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // sending multiple `TextInput.updateEditingValue` messages.
     beginBatchEdit();
     final bool selectionChanged = _value.selection != newTextEditingValue.selection;
-    final bool textChanged = preformattedTextChanged && _value != newTextEditingValue;
+    final bool textChanged = preformatTextChanged && _value != newTextEditingValue;
     _value = newTextEditingValue;
     // Changes made by the keyboard can sometimes be "out of band" for listening
     // components, so always send those events, even if we didn't think it

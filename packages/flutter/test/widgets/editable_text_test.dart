@@ -7202,6 +7202,34 @@ void main() {
       expect(error.toString(), contains(errorText));
     });
 
+    testWidgets('TextInputFormatters can throw errors', (WidgetTester tester) async {
+      final TextInputFormatter alwaysThrowFormatter = TextInputFormatter.withFunction(
+        (TextEditingValue old, TextEditingValue value) {
+          throw FlutterError(errorText);
+        },
+      );
+      await tester.pumpWidget(MaterialApp(
+        home: EditableText(
+          showSelectionHandles: true,
+          maxLines: 2,
+          controller: TextEditingController(
+            text: 'flutter is the best!',
+          ),
+          focusNode: FocusNode(),
+          cursorColor: Colors.red,
+          backgroundCursorColor: Colors.blue,
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+          keyboardType: TextInputType.text,
+          inputFormatters: <TextInputFormatter>[alwaysThrowFormatter],
+        ),
+      ));
+
+      await tester.enterText(find.byType(EditableText), '...');
+      final dynamic error = tester.takeException();
+      expect(error, isFlutterError);
+      expect(error.toString(), contains(errorText));
+    });
+
     // Regression test for https://github.com/flutter/flutter/issues/44979.
     testWidgets('onChanged callback takes formatter into account', (WidgetTester tester) async {
       bool onChangedCalled = false;
