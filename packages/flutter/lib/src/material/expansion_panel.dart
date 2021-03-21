@@ -347,7 +347,7 @@ class ExpansionPanel {
   /// ```
   /// {@end-tool}
   final ExpansionPanelIconBuilder? expandIconBuilder;
-  
+
   /// Defines the background color of the panel.
   ///
   /// Defaults to [ThemeData.cardColor].
