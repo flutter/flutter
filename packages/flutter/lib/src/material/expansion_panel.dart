@@ -159,8 +159,8 @@ class ExpansionPanel {
   ///       children: <ExpansionPanel>[
   ///         ExpansionPanel(
   ///           isExpanded: _isExpanded,
-  ///           headerBuilder: (context, isExpanded) {
-  ///             return ListTile(
+  ///           headerBuilder: (BuildContext context, bool isExpanded) {
+  ///             return const ListTile(
   ///               title: Text('Header Text'),
   ///             );
   ///           },
@@ -172,11 +172,11 @@ class ExpansionPanel {
   ///         ) {
   ///           return Checkbox(
   ///             value: isExpanded,
-  ///             onChanged: (bool value) {
+  ///             onChanged: (bool? value) {
   ///               handlePressed();
   ///             });
   ///           },
-  ///           body: ListTile(
+  ///           body: const ListTile(
   ///             title: Text('Title Text'),
   ///             subtitle: Text('Subtitle Text'),
   ///           ),
@@ -207,11 +207,11 @@ class ExpansionPanel {
   ///           _isExpanded = !_isExpanded;
   ///         });
   ///       },
-  ///       children: [
+  ///       children: <Widget>[
   ///         ExpansionPanel(
   ///           isExpanded: _isExpanded,
   ///           headerBuilder: (BuildContext context, bool isExpanded) {
-  ///             return ListTile(title: Text('Header Text'));
+  ///             return const ListTile(title: Text('Header Text'));
   ///           },
   ///           expandIconBuilder: (
   ///             BuildContext context,
@@ -220,19 +220,19 @@ class ExpansionPanel {
   ///             Duration animationDuration,
   ///           ) {
   ///             return InkWell(
-  ///               customBorder: CircleBorder(),
+  ///               customBorder: const CircleBorder(),
   ///               onTap: () {
   ///                 handlePressed();
   ///               },
   ///               child: Padding(
-  ///                 padding: EdgeInsets.all(12.0),
+  ///                 padding: const EdgeInsets.all(12.0),
   ///                 child: isExpanded
-  ///                   ? Icon(Icons.check_box)
-  ///                   : Icon(Icons.check_box_outline_blank),
+  ///                   ? const Icon(Icons.check_box)
+  ///                   : const Icon(Icons.check_box_outline_blank),
   ///               ),
   ///             );
   ///           },
-  ///           body: ListTile(
+  ///           body: const ListTile(
   ///             title: Text('Title Text'),
   ///             subtitle: Text('Subtitle Text'),
   ///           ),
@@ -254,7 +254,7 @@ class ExpansionPanel {
   ///
   /// ```dart preamble
   /// class CustomAnimatedIcon extends StatefulWidget{
-  ///   CustomAnimatedIcon(
+  ///   const CustomAnimatedIcon(
   ///     this.isExpanded,
   ///     this.duration,
   ///   );
@@ -267,7 +267,7 @@ class ExpansionPanel {
   /// }
   ///
   /// class _CustomAnimatedIconState extends State<CustomAnimatedIcon> with SingleTickerProviderStateMixin {
-  ///   AnimationController animationController;
+  ///   late AnimationController animationController;
   ///
   ///   @override
   ///   void initState() {
@@ -312,7 +312,7 @@ class ExpansionPanel {
   ///           _isExpanded = !isExpanded;
   ///         });
   ///       },
-  ///       children: [
+  ///       children: <Widget>[
   ///         ExpansionPanel(
   ///           isExpanded: _isExpanded,
   ///           headerBuilder: (BuildContext context, bool isExpanded) {
@@ -325,17 +325,17 @@ class ExpansionPanel {
   ///             Duration animationDuration,
   ///           ) {
   ///             return InkWell(
-  ///               customBorder: CircleBorder(),
+  ///               customBorder: const CircleBorder(),
   ///               onTap: () {
   ///                 handlePressed();
   ///               },
   ///               child: Padding(
-  ///                 padding: EdgeInsets.all(12.0),
+  ///                 padding: const EdgeInsets.all(12.0),
   ///                 child: CustomAnimatedIcon(isExpanded, animationDuration),
   ///               ),
   ///             );
   ///           },
-  ///           body: ListTile(
+  ///           body: const ListTile(
   ///             title: Text('Title Text'),
   ///             subtitle: Text('Subtitle Text'),
   ///           ),
