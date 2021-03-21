@@ -1172,7 +1172,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   @mustCallSuper
   void reactivate() {
     assert(() {
-      _debugActive = true;
+      _debugActive = !_debugActive;
       return _debugActive == active;
     }());
   }
@@ -4831,7 +4831,7 @@ class StatefulElement extends ComponentElement {
     state.deactivate();
     super.deactivate();
     assert(() {
-      state._debugActive = false;
+      state._debugActive = !state._debugActive;
       return state._debugActive == state.active;
     }());
   }
