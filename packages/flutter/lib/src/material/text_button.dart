@@ -224,6 +224,9 @@ class TextButton extends ButtonStyleButton {
     final MaterialStateProperty<MouseCursor>? mouseCursor = (enabledMouseCursor == null && disabledMouseCursor == null)
       ? null
       : _TextButtonDefaultMouseCursor(enabledMouseCursor!, disabledMouseCursor!);
+    final MaterialStateProperty<BorderSide?>? _side = (side is MaterialStateProperty
+      ? side
+      : ButtonStyleButton.allOrNull<BorderSide>(side)) as MaterialStateProperty<BorderSide?>?;
 
     return ButtonStyle(
       textStyle: ButtonStyleButton.allOrNull<TextStyle>(textStyle),
@@ -235,7 +238,7 @@ class TextButton extends ButtonStyleButton {
       padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
       minimumSize: ButtonStyleButton.allOrNull<Size>(minimumSize),
       fixedSize: ButtonStyleButton.allOrNull<Size>(fixedSize),
-      side: ButtonStyleButton.allOrNull<BorderSide>(side),
+      side: _side,
       shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
       mouseCursor: mouseCursor,
       visualDensity: visualDensity,
