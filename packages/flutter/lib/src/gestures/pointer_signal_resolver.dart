@@ -62,30 +62,37 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 /// HSVColor innerColor = const HSVColor.fromAHSV(1, 60.0, 1, 1);
 /// bool useResolver = false;
 ///
+/// void rotateOuterColor() {
+///   setState(() {
+///     outerColor = outerColor.withHue((outerColor.hue + 6) % 360.0);
+///   });
+/// }
+///
+/// void rotateInnerColor() {
+///   setState(() {
+///     innerColor = innerColor.withHue((innerColor.hue + 6) % 360.0);
+///   });
+/// }
+///
 /// @override
 /// Widget build(BuildContext context) {
 ///   return Material(
 ///     child: Stack(
 ///       fit: StackFit.expand,
-///       children: [
+///       children: <Widget>[
 ///         Listener(
 ///           onPointerSignal: (PointerSignalEvent event) {
-///             VoidCallback callback = () {
-///               setState(() {
-///                 outerColor = outerColor.withHue((outerColor.hue + 6) % 360.0);
-///               });
-///             };
 ///             if (useResolver) {
 ///               GestureBinding.instance!.pointerSignalResolver.register(event, (PointerSignalEvent event) {
-///                 callback();
+///                 rotateOuterColor();
 ///               });
 ///             } else {
-///               callback();
+///               rotateOuterColor();
 ///             }
 ///           },
 ///           child: DecoratedBox(
 ///             decoration: BoxDecoration(
-///               border: Border.fromBorderSide(BorderSide()),
+///               border: const Border.fromBorderSide(BorderSide()),
 ///               color: outerColor.toColor(),
 ///             ),
 ///             child: FractionallySizedBox(
@@ -93,25 +100,20 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 ///               heightFactor: 0.5,
 ///               child: DecoratedBox(
 ///                 decoration: BoxDecoration(
-///                   border: Border.fromBorderSide(BorderSide()),
+///                   border: const Border.fromBorderSide(BorderSide()),
 ///                   color: innerColor.toColor(),
 ///                 ),
 ///                 child: Listener(
 ///                   onPointerSignal: (PointerSignalEvent event) {
-///                     VoidCallback callback = () {
-///                       setState(() {
-///                         innerColor = innerColor.withHue((innerColor.hue + 3) % 360.0);
-///                       });
-///                     };
 ///                     if (useResolver) {
 ///                       GestureBinding.instance!.pointerSignalResolver.register(event, (PointerSignalEvent event) {
-///                         callback();
+///                         rotateInnerColor();
 ///                       });
 ///                     } else {
-///                       callback();
+///                       rotateInnerColor();
 ///                     }
 ///                   },
-///                   child: AbsorbPointer(),
+///                   child: const AbsorbPointer(),
 ///                 ),
 ///               ),
 ///             ),
@@ -121,7 +123,7 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 ///           alignment: Alignment.topLeft,
 ///           child: Row(
 ///             crossAxisAlignment: CrossAxisAlignment.center,
-///             children: [
+///             children: <Widget>[
 ///               Switch(
 ///                 value: useResolver,
 ///                 onChanged: (bool value) {
