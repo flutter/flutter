@@ -314,6 +314,7 @@ class MediaQueryData {
 
   /// Whether the device is inverting the colors of the platform.
   ///
+  /// {@tool snippet}
   /// Setting it, for instance by using:
   ///
   /// ```dart
@@ -325,6 +326,7 @@ class MediaQueryData {
   /// ```
   ///
   /// will have no effect on `child`, and the platform requested value will be used.
+  /// {@end-tool}
   ///
   /// This flag is currently only updated on iOS devices.
   ///
@@ -337,6 +339,7 @@ class MediaQueryData {
   /// Whether the user requested a high contrast between foreground and background
   /// content on iOS, via Settings -> Accessibility -> Increase Contrast.
   ///
+  /// {@tool snippet}
   /// Setting it, for instance by using:
   ///
   /// ```dart
@@ -348,6 +351,7 @@ class MediaQueryData {
   /// ```
   ///
   /// will have no effect on `child`, and the platform requested value will be used.
+  /// {@end-tool}
   ///
   /// This flag is currently only updated on iOS devices that are running iOS 13
   /// or above.
@@ -365,6 +369,7 @@ class MediaQueryData {
   /// Whether the platform is requesting that text be drawn with a bold font
   /// weight.
   ///
+  /// {@tool snippet}
   /// Setting it, for instance by using:
   ///
   /// ```dart
@@ -376,6 +381,7 @@ class MediaQueryData {
   /// ```
   ///
   /// will override the value that the platform is requesting.
+  /// {@end-tool}
   ///
   /// See also:
   ///
