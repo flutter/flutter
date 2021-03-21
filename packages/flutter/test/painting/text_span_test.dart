@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -231,5 +230,12 @@ void main() {
     expect(textSpan.getSpanForPosition(const TextPosition(offset: 1)).runtimeType, TextSpan);
     expect(textSpan.getSpanForPosition(const TextPosition(offset: 2)).runtimeType, WidgetSpan);
     expect(textSpan.getSpanForPosition(const TextPosition(offset: 3)).runtimeType, TextSpan);
+  });
+
+  test('TextSpan computeSemanticsInformation', () {
+    final List<InlineSpanSemanticsInformation> collector = <InlineSpanSemanticsInformation>[];
+    const TextSpan(text: 'aaa', semanticsLabel: 'bbb').computeSemanticsInformation(collector);
+    expect(collector[0].text, 'aaa');
+    expect(collector[0].semanticsLabel, 'bbb');
   });
 }

@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
 import '../artifacts.dart';
@@ -48,7 +49,7 @@ final String _ipv4Loopback = InternetAddress.loopbackIPv4.address;
 final String _ipv6Loopback = InternetAddress.loopbackIPv6.address;
 
 // Enables testing the fuchsia isolate discovery
-Future<vm_service.VmService> _kDefaultFuchsiaIsolateDiscoveryConnector(Uri uri) {
+Future<FlutterVmService> _kDefaultFuchsiaIsolateDiscoveryConnector(Uri uri) {
   return connectToVmService(uri);
 }
 
@@ -180,8 +181,11 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
     if (!_fuchsiaWorkflow.canListDevices) {
       return <Device>[];
     }
-    final List<String> text = (await _fuchsiaSdk.listDevices(timeout: timeout))
-      ?.split('\n');
+    // TODO(omerlevran): Remove once soft transition is complete fxb/67602.
+    final List<String> text = (await _fuchsiaSdk.listDevices(
+      timeout: timeout,
+      useDeviceFinder: _fuchsiaWorkflow.shouldUseDeviceFinder,
+    ))?.split('\n');
     if (text == null || text.isEmpty) {
       return <Device>[];
     }
@@ -207,10 +211,18 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
       return null;
     }
     final String name = words[1];
-    final String resolvedHost = await _fuchsiaSdk.fuchsiaDevFinder.resolve(
-      name,
-      local: false,
-    );
+    String resolvedHost;
+
+    // TODO(omerlevran): Remove once soft transition is complete fxb/67602.
+    if (_fuchsiaWorkflow.shouldUseDeviceFinder) {
+      // TODO(omerlevran): Add support for resolve on the FuchsiaSdk Object.
+      resolvedHost = await _fuchsiaSdk.fuchsiaDevFinder.resolve(
+        name,
+      );
+    } else {
+      // TODO(omerlevran): Add support for resolve on the FuchsiaSdk Object.
+      resolvedHost = await _fuchsiaSdk.fuchsiaFfx.resolve(name);
+    }
     if (resolvedHost == null) {
       _logger.printError('Failed to resolve host for Fuchsia device `$name`');
       return null;
@@ -295,14 +307,7 @@ class FuchsiaDevice extends Device {
     }
     // Stop the app if it's currently running.
     await stopApp(package);
-    final String host = await fuchsiaSdk.fuchsiaDevFinder.resolve(
-      name,
-      local: true,
-    );
-    if (host == null) {
-      globals.printError('Failed to resolve host for Fuchsia device');
-      return LaunchResult.failed();
-    }
+    final String host = await hostAddress;
     // Find out who the device thinks we are.
     final int port = await globals.os.findFreePort();
     if (port == 0) {
@@ -656,7 +661,7 @@ class FuchsiaDevice extends Device {
       throwToolExit('Cannot interact with device. No ssh config.\n'
                     'Try setting FUCHSIA_SSH_CONFIG or FUCHSIA_BUILD_DIR.');
     }
-    return await globals.processUtils.run(<String>[
+    return globals.processUtils.run(<String>[
       'ssh',
       '-F',
       globals.fuchsiaArtifacts.sshConfig.absolute.path,
@@ -671,7 +676,7 @@ class FuchsiaDevice extends Device {
       throwToolExit('Cannot interact with device. No ssh config.\n'
                     'Try setting FUCHSIA_SSH_CONFIG or FUCHSIA_BUILD_DIR.');
     }
-    return await globals.processUtils.run(<String>[
+    return globals.processUtils.run(<String>[
       'scp',
       '-F',
       globals.fuchsiaArtifacts.sshConfig.absolute.path,
@@ -695,7 +700,7 @@ class FuchsiaDevice extends Device {
         // netstat shows that the local port is actually being used on the IPv6
         // loopback (::1).
         final Uri uri = Uri.parse('http://[$_ipv6Loopback]:$port');
-        final vm_service.VmService vmService = await connectToVmService(uri);
+        final FlutterVmService vmService = await connectToVmService(uri);
         final List<FlutterView> flutterViews = await vmService.getFlutterViews();
         for (final FlutterView flutterView in flutterViews) {
           if (flutterView.uiIsolate == null) {
@@ -738,11 +743,11 @@ class FuchsiaIsolateDiscoveryProtocol {
   ]);
 
   static const Duration _pollDuration = Duration(seconds: 10);
-  final Map<int, vm_service.VmService> _ports = <int, vm_service.VmService>{};
+  final Map<int, FlutterVmService> _ports = <int, FlutterVmService>{};
   final FuchsiaDevice _device;
   final String _isolateName;
   final Completer<Uri> _foundUri = Completer<Uri>();
-  final Future<vm_service.VmService> Function(Uri) _vmServiceConnector;
+  final Future<FlutterVmService> Function(Uri) _vmServiceConnector;
   final Future<void> Function(Device, Uri, bool) _ddsStarter;
   // whether to only poll once.
   final bool _pollOnce;
@@ -778,7 +783,7 @@ class FuchsiaIsolateDiscoveryProtocol {
   Future<void> _findIsolate() async {
     final List<int> ports = await _device.servicePorts();
     for (final int port in ports) {
-      vm_service.VmService service;
+      FlutterVmService service;
       if (_ports.containsKey(port)) {
         service = _ports[port];
       } else {

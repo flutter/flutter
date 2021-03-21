@@ -138,10 +138,10 @@ void main() {
         Semantics(
           label: 'This is not text',
           container: true,
-          child: Container(
+          child: const SizedBox(
             width: 200.0,
             height: 200.0,
-            child: const Placeholder(),
+            child: Placeholder(),
           ),
         ),
       ));

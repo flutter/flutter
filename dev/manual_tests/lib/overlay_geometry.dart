@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 class CardModel {
   CardModel(this.value, this.height, this.color);
@@ -89,6 +86,8 @@ class Marker extends StatelessWidget {
 }
 
 class OverlayGeometryApp extends StatefulWidget {
+  const OverlayGeometryApp({Key key}) : super(key: key);
+
   @override
   OverlayGeometryAppState createState() => OverlayGeometryAppState();
 }
@@ -170,7 +169,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
     setState(() {
       markers[MarkerType.touch] = globalPosition;
       final RenderBox box = target.currentContext.findRenderObject() as RenderBox;
-      markers[MarkerType.topLeft] = box.localToGlobal(const Offset(0.0, 0.0));
+      markers[MarkerType.topLeft] = box.localToGlobal(Offset.zero);
       final Size size = box.size;
       markers[MarkerType.bottomRight] = box.localToGlobal(Offset(size.width, size.height));
       final ScrollableState scrollable = Scrollable.of(target.currentContext);
@@ -205,13 +204,10 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
 }
 
 void main() {
-  runApp(MaterialApp(
-    theme: ThemeData(
-      brightness: Brightness.light,
-      primarySwatch: Colors.blue,
-      accentColor: Colors.redAccent,
+  runApp(
+    const MaterialApp(
+      title: 'Cards',
+      home: OverlayGeometryApp(),
     ),
-    title: 'Cards',
-    home: OverlayGeometryApp(),
-  ));
+  );
 }

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -416,7 +415,7 @@ class ExpansionPanelRadio extends ExpansionPanel {
 /// }
 ///
 /// List<Item> generateItems(int numberOfItems) {
-///   return List.generate(numberOfItems, (int index) {
+///   return List<Item>.generate(numberOfItems, (int index) {
 ///     return Item(
 ///       headerValue: 'Panel $index',
 ///       expandedValue: 'This is item number $index',
@@ -426,7 +425,7 @@ class ExpansionPanelRadio extends ExpansionPanel {
 /// ```
 ///
 /// ```dart
-/// List<Item> _data = generateItems(8);
+/// final List<Item> _data = generateItems(8);
 ///
 /// @override
 /// Widget build(BuildContext context) {
@@ -453,11 +452,11 @@ class ExpansionPanelRadio extends ExpansionPanel {
 ///         },
 ///         body: ListTile(
 ///           title: Text(item.expandedValue),
-///           subtitle: Text('To delete this panel, tap the trash can icon'),
-///           trailing: Icon(Icons.delete),
+///           subtitle: const Text('To delete this panel, tap the trash can icon'),
+///           trailing: const Icon(Icons.delete),
 ///           onTap: () {
 ///             setState(() {
-///               _data.removeWhere((currentItem) => item == currentItem);
+///               _data.removeWhere((Item currentItem) => item == currentItem);
 ///             });
 ///           }
 ///         ),
@@ -520,7 +519,7 @@ class ExpansionPanelList extends StatefulWidget {
   /// }
   ///
   /// List<Item> generateItems(int numberOfItems) {
-  ///   return List.generate(numberOfItems, (int index) {
+  ///   return List<Item>.generate(numberOfItems, (int index) {
   ///     return Item(
   ///       id: index,
   ///       headerValue: 'Panel $index',
@@ -531,7 +530,7 @@ class ExpansionPanelList extends StatefulWidget {
   /// ```
   ///
   /// ```dart
-  /// List<Item> _data = generateItems(8);
+  /// final List<Item> _data = generateItems(8);
   ///
   /// @override
   /// Widget build(BuildContext context) {
@@ -555,11 +554,11 @@ class ExpansionPanelList extends StatefulWidget {
   ///         },
   ///         body: ListTile(
   ///           title: Text(item.expandedValue),
-  ///           subtitle: Text('To delete this panel, tap the trash can icon'),
-  ///           trailing: Icon(Icons.delete),
+  ///           subtitle: const Text('To delete this panel, tap the trash can icon'),
+  ///           trailing: const Icon(Icons.delete),
   ///           onTap: () {
   ///             setState(() {
-  ///               _data.removeWhere((currentItem) => item == currentItem);
+  ///               _data.removeWhere((Item currentItem) => item == currentItem);
   ///             });
   ///           }
   ///         )

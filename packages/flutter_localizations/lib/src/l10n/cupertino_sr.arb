@@ -26,5 +26,5 @@
   "selectAllButtonLabel": "Изабери све",
   "tabSemanticsLabel": "$tabIndex. картица од $tabCount",
   "modalBarrierDismissLabel": "Одбаци",
-  "searchTextFieldPlaceholderLabel": "Претрага"
+  "searchTextFieldPlaceholderLabel": "Претражите"
 }

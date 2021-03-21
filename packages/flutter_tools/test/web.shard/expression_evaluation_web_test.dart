@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:matcher/matcher.dart';
 import 'package:vm_service/vm_service.dart';
@@ -166,7 +168,7 @@ void batch2() {
     await breakInMethod(_flutter);
     await evaluateComplexExpressions(_flutter);
     await cleanProject();
-  }, skip: 'https://github.com/dart-lang/sdk/issues/41480');
+  });
 }
 
 Future<void> failToEvaluateExpression(FlutterTestDriver flutter) async {

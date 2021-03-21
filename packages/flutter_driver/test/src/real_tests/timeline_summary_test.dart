@@ -2,13 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert' show json;
 
 import 'package:file/file.dart';
 import 'package:flutter_driver/flutter_driver.dart';
-import 'package:flutter_driver/src/driver/common.dart';
 import 'package:flutter_driver/src/driver/profiling_summarizer.dart';
 import 'package:flutter_driver/src/driver/scene_display_lag_summarizer.dart';
 import 'package:path/path.dart' as path;
@@ -409,7 +406,7 @@ void main() {
 
     group('writeTimelineToFile', () {
 
-      Directory tempDir;
+      late Directory tempDir;
 
       setUp(() {
         useMemoryFileSystemForTesting();
@@ -480,7 +477,7 @@ void main() {
           final Timeline timeline = Timeline.fromJson(<String, dynamic>{
           'traceEvents': traceEvents,
           });
-          return SceneDisplayLagSummarizer(timeline.events);
+          return SceneDisplayLagSummarizer(timeline.events!);
       }
 
       test('average_vsyncs_missed', () async {
@@ -531,7 +528,7 @@ void main() {
           final Timeline timeline = Timeline.fromJson(<String, dynamic>{
             'traceEvents': traceEvents,
           });
-          return ProfilingSummarizer.fromEvents(timeline.events);
+          return ProfilingSummarizer.fromEvents(timeline.events!);
       }
 
       test('has_both_cpu_and_memory_usage', () async {

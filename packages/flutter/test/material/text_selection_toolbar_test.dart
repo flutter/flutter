@@ -6,9 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 
-import '../widgets/text.dart' show textOffsetToPosition;
+import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 
 // A custom text selection menu that just displays a single custom button.
 class _CustomMaterialTextSelectionControls extends MaterialTextSelectionControls {
@@ -24,6 +23,7 @@ class _CustomMaterialTextSelectionControls extends MaterialTextSelectionControls
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
     ClipboardStatusNotifier clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
   ) {
     final TextSelectionPoint startTextSelectionPoint = endpoints[0];
     final TextSelectionPoint endTextSelectionPoint = endpoints.length > 1
@@ -52,6 +52,13 @@ class _CustomMaterialTextSelectionControls extends MaterialTextSelectionControls
   }
 }
 
+class TestBox extends SizedBox {
+  const TestBox({Key? key}) : super(key: key, width: itemWidth, height: itemHeight);
+
+  static const double itemHeight = 44.0;
+  static const double itemWidth = 100.0;
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -72,17 +79,7 @@ void main() {
 
   testWidgets('puts children in an overflow menu if they overflow', (WidgetTester tester) async {
     late StateSetter setState;
-    const double height = 44.0;
-    const double itemWidth = 100.0;
-    final List<Widget> children = <Widget>[
-      Container(width: itemWidth, height: height),
-      Container(width: itemWidth, height: height),
-      Container(width: itemWidth, height: height),
-      Container(width: itemWidth, height: height),
-      Container(width: itemWidth, height: height),
-      Container(width: itemWidth, height: height),
-      Container(width: itemWidth, height: height),
-    ];
+    final List<Widget> children = List<Widget>.generate(7, (int i) => const TestBox());
 
     await tester.pumpWidget(
       MaterialApp(
@@ -102,29 +99,29 @@ void main() {
     );
 
     // All children fit on the screen, so they are all rendered.
-    expect(find.byType(Container), findsNWidgets(children.length));
+    expect(find.byType(TestBox), findsNWidgets(children.length));
     expect(_findOverflowButton(), findsNothing);
 
     // Adding one more child makes the children overflow.
     setState(() {
       children.add(
-        Container(width: itemWidth, height: height),
+        const TestBox(),
       );
     });
     await tester.pumpAndSettle();
-    expect(find.byType(Container), findsNWidgets(children.length - 1));
+    expect(find.byType(TestBox), findsNWidgets(children.length - 1));
     expect(_findOverflowButton(), findsOneWidget);
 
     // Tap the overflow button to show the overflow menu.
     await tester.tap(_findOverflowButton());
     await tester.pumpAndSettle();
-    expect(find.byType(Container), findsNWidgets(1));
+    expect(find.byType(TestBox), findsNWidgets(1));
     expect(_findOverflowButton(), findsOneWidget);
 
     // Tap the overflow button again to hide the overflow menu.
     await tester.tap(_findOverflowButton());
     await tester.pumpAndSettle();
-    expect(find.byType(Container), findsNWidgets(children.length - 1));
+    expect(find.byType(TestBox), findsNWidgets(children.length - 1));
     expect(_findOverflowButton(), findsOneWidget);
   });
 

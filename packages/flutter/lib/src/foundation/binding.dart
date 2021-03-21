@@ -245,6 +245,23 @@ abstract class BindingBase {
           };
         },
       );
+
+      registerStringServiceExtension(
+        name: 'connectedVmServiceUri',
+        getter: () async => connectedVmServiceUri ?? '',
+        setter: (String uri) async {
+          connectedVmServiceUri = uri;
+        },
+      );
+
+      registerStringServiceExtension(
+        name: 'activeDevToolsServerAddress',
+        getter: () async => activeDevToolsServerAddress ?? '',
+        setter: (String serverAddress) async {
+          activeDevToolsServerAddress = serverAddress;
+        },
+      );
+
       return true;
     }());
     assert(() {
@@ -273,7 +290,7 @@ abstract class BindingBase {
   ///
   /// The [Future] returned by the `callback` argument is returned by [lockEvents].
   @protected
-  Future<void> lockEvents(Future<void> callback()) {
+  Future<void> lockEvents(Future<void> Function() callback) {
     developer.Timeline.startSync('Lock events');
 
     assert(callback != null);

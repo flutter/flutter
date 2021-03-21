@@ -456,6 +456,8 @@ List<String> flutterCommandArgs(String command, List<String> options) {
   ];
 }
 
+/// Runs the flutter `command`, and returns the exit code.
+/// If `canFail` is `false`, the future completes with an error.
 Future<int> flutter(String command, {
   List<String> options = const <String>[],
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
@@ -510,7 +512,7 @@ Future<String> findJavaHome() async {
   return path.dirname(path.dirname(javaBinary));
 }
 
-Future<T> inDirectory<T>(dynamic directory, Future<T> action()) async {
+Future<T> inDirectory<T>(dynamic directory, Future<T> Function() action) async {
   final String previousCwd = cwd;
   try {
     cd(directory);
@@ -625,7 +627,7 @@ Iterable<String> grep(Pattern pattern, {@required String from}) {
 ///     } catch (error, chain) {
 ///
 ///     }
-Future<void> runAndCaptureAsyncStacks(Future<void> callback()) {
+Future<void> runAndCaptureAsyncStacks(Future<void> Function() callback) {
   final Completer<void> completer = Completer<void>();
   Chain.capture(() async {
     await callback();
@@ -746,7 +748,7 @@ Future<int> gitClone({String path, String repo}) async {
 
   await Directory(path).create(recursive: true);
 
-  return await inDirectory<int>(
+  return inDirectory<int>(
     path,
         () => exec('git', <String>['clone', repo]),
   );

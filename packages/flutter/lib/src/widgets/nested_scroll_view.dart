@@ -66,7 +66,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   final List<String> _tabs = ['Tab 1', 'Tab 2'];
+///   final List<String> _tabs = <String>['Tab 1', 'Tab 2'];
 ///   return DefaultTabController(
 ///     length: _tabs.length, // This is the number of tabs.
 ///     child: Scaffold(
@@ -244,7 +244,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///         padding: const EdgeInsets.all(8),
 ///         itemCount: 30,
 ///         itemBuilder: (BuildContext context, int index) {
-///           return Container(
+///           return SizedBox(
 ///             height: 50,
 ///             child: Center(child: Text('Item $index')),
 ///           );
@@ -510,13 +510,13 @@ class NestedScrollView extends StatefulWidget {
 ///   return NestedScrollView(
 ///     key: globalKey,
 ///     headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-///       return <Widget>[
+///       return const <Widget>[
 ///         SliverAppBar(
 ///           title: Text('NestedScrollViewState Demo!'),
 ///         ),
 ///       ];
 ///     },
-///     body: CustomScrollView(
+///     body: const CustomScrollView(
 ///       // Body slivers go here!
 ///     ),
 ///   );
@@ -795,8 +795,13 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   bool get hasScrolledBody {
     for (final _NestedScrollPosition position in _innerPositions) {
-      assert(position.hasContentDimensions && position.hasPixels);
-      if (position.pixels > position.minScrollExtent) {
+      if (!position.hasContentDimensions || !position.hasPixels) {
+        // It's possible that NestedScrollView built twice before layout phase
+        // in the same frame. This can happen when the FocusManager schedules a microTask
+        // that marks NestedScrollView dirty during the warm up frame.
+        // https://github.com/flutter/flutter/pull/75308
+        continue;
+      } else if (position.pixels > position.minScrollExtent) {
         return true;
       }
     }
@@ -1895,7 +1900,7 @@ class RenderSliverOverlapAbsorber extends RenderSliver with RenderObjectWithChil
       'A SliverOverlapAbsorberHandle cannot be passed to multiple RenderSliverOverlapAbsorber objects at the same time.',
     );
     if (child == null) {
-      geometry = const SliverGeometry();
+      geometry = SliverGeometry.zero;
       return;
     }
     child!.layout(constraints, parentUsesSize: true);

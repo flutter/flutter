@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/widgets.dart';
 
 import 'page_transitions_theme.dart';
 import 'theme.dart';
@@ -157,10 +156,11 @@ class MaterialPage<T> extends Page<T> {
     LocalKey? key,
     String? name,
     Object? arguments,
+    String? restorationId,
   }) : assert(child != null),
        assert(maintainState != null),
        assert(fullscreenDialog != null),
-       super(key: key, name: name, arguments: arguments);
+       super(key: key, name: name, arguments: arguments, restorationId: restorationId);
 
   /// The content to be shown in the [Route] created by this page.
   final Widget child;

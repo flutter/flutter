@@ -32,7 +32,6 @@ enum CacheExtentStyle {
 abstract class RenderAbstractViewport extends RenderObject {
   // This class is intended to be used as an interface, and should not be
   // extended directly; this constructor prevents instantiation and extension.
-  // ignore: unused_element
   factory RenderAbstractViewport._() => throw Error();
 
   /// Returns the [RenderAbstractViewport] that most tightly encloses the given
@@ -99,7 +98,6 @@ abstract class RenderAbstractViewport extends RenderObject {
 /// the [rect] position said element would have in the viewport at that
 /// [offset].
 class RevealedOffset {
-
   /// Instantiates a return value for [RenderAbstractViewport.getOffsetToReveal].
   const RevealedOffset({
     required this.offset,

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import 'base/config.dart';
@@ -50,7 +52,10 @@ abstract class FeatureFlags {
   bool get isSingleWidgetReloadEnabled => false;
 
   /// Whether the CFE experimental invalidation strategy is enabled.
-  bool get isExperimentalInvalidationStrategyEnabled => false;
+  bool get isExperimentalInvalidationStrategyEnabled => true;
+
+  /// Whether the windows UWP embedding is enabled.
+  bool get isWindowsUwpEnabled => false;
 
   /// Whether a particular feature is enabled for the current channel.
   ///
@@ -99,6 +104,9 @@ class FlutterFeatureFlags implements FeatureFlags {
   bool get isExperimentalInvalidationStrategyEnabled => isEnabled(experimentalInvalidationStrategy);
 
   @override
+  bool get isWindowsUwpEnabled => isEnabled(windowsUwpEmbedding);
+
+  @override
   bool isEnabled(Feature feature) {
     final String currentChannel = _flutterVersion.channel;
     final FeatureChannelSetting featureSetting = feature.getSettingForChannel(currentChannel);
@@ -127,6 +135,7 @@ const List<Feature> allFeatures = <Feature>[
   flutterLinuxDesktopFeature,
   flutterMacOSDesktopFeature,
   flutterWindowsDesktopFeature,
+  windowsUwpEmbedding,
   singleWidgetReload,
   flutterAndroidFeature,
   flutterIOSFeature,
@@ -159,45 +168,75 @@ const Feature flutterWebFeature = Feature(
 
 /// The [Feature] for macOS desktop.
 const Feature flutterMacOSDesktopFeature = Feature(
-  name: 'Flutter for desktop on macOS',
+  name: 'beta-quality support for desktop on macOS',
   configSetting: 'enable-macos-desktop',
   environmentOverride: 'FLUTTER_MACOS',
+  extraHelpText: flutterNext ?
+      'Newer beta versions are available on the beta channel.' : null,
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
   ),
   dev: FeatureChannelSetting(
     available: true,
+    enabledByDefault: false,
+  ),
+  beta: FeatureChannelSetting(
+    available: flutterNext,
+    enabledByDefault: false,
+  ),
+  stable: FeatureChannelSetting(
+    available: flutterNext,
     enabledByDefault: false,
   ),
 );
 
 /// The [Feature] for Linux desktop.
 const Feature flutterLinuxDesktopFeature = Feature(
-  name: 'Flutter for desktop on Linux',
+  name: 'beta-quality support for desktop on Linux',
   configSetting: 'enable-linux-desktop',
   environmentOverride: 'FLUTTER_LINUX',
+  extraHelpText: flutterNext ?
+      'Newer beta versions are available on the beta channel.' : null,
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
   ),
   dev: FeatureChannelSetting(
     available: true,
+    enabledByDefault: false,
+  ),
+  beta: FeatureChannelSetting(
+    available: flutterNext,
+    enabledByDefault: false,
+  ),
+  stable: FeatureChannelSetting(
+    available: flutterNext,
     enabledByDefault: false,
   ),
 );
 
 /// The [Feature] for Windows desktop.
 const Feature flutterWindowsDesktopFeature = Feature(
-  name: 'Flutter for desktop on Windows',
+  name: 'beta-quality support for desktop on Windows',
   configSetting: 'enable-windows-desktop',
   environmentOverride: 'FLUTTER_WINDOWS',
+  extraHelpText: flutterNext ?
+      'Newer beta versions are available on the beta channel.' : null,
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
   ),
   dev: FeatureChannelSetting(
     available: true,
+    enabledByDefault: false,
+  ),
+  beta: FeatureChannelSetting(
+    available: flutterNext,
+    enabledByDefault: false,
+  ),
+  stable: FeatureChannelSetting(
+    available: flutterNext,
     enabledByDefault: false,
   ),
 );
@@ -276,7 +315,7 @@ const Feature singleWidgetReload = Feature(
     enabledByDefault: false,
   ),
   stable: FeatureChannelSetting(
-    available: true,
+    available: false,
     enabledByDefault: false,
   ),
 );
@@ -292,13 +331,23 @@ const Feature experimentalInvalidationStrategy = Feature(
   ),
   dev: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
+    enabledByDefault: true,
   ),
   beta: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
+    enabledByDefault: true,
   ),
   stable: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: true,
+  ),
+);
+
+/// The feature for enabling the Windows UWP embeding.
+const Feature windowsUwpEmbedding = Feature(
+  name: 'Flutter for Windows UWP',
+  configSetting: 'enable-windows-uwp-desktop',
+  master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
   ),
@@ -318,6 +367,7 @@ class Feature {
     @required this.name,
     this.environmentOverride,
     this.configSetting,
+    this.extraHelpText,
     this.master = const FeatureChannelSetting(),
     this.dev = const FeatureChannelSetting(),
     this.beta = const FeatureChannelSetting(),
@@ -353,6 +403,11 @@ class Feature {
   /// If not provided, defaults to `null` meaning there is no config setting.
   final String configSetting;
 
+  /// Additional text to add to the end of the help message.
+  ///
+  /// If not provided, defaults to `null` meaning there is no additional text.
+  final String extraHelpText;
+
   /// A help message for the `flutter config` command, or null if unsupported.
   String generateHelpMessage() {
     if (configSetting == null) {
@@ -374,6 +429,9 @@ class Feature {
       final String prefix = (channels.toList()
         ..removeLast()).join(', ');
       buffer.write('the $prefix, and ${channels.last} channels.');
+    }
+    if (extraHelpText != null) {
+      buffer.write(' $extraHelpText');
     }
     return buffer.toString();
   }
@@ -413,4 +471,4 @@ class FeatureChannelSetting {
   final bool enabledByDefault;
 }
 
-const bool flutterNext = false;
+const bool flutterNext = true;

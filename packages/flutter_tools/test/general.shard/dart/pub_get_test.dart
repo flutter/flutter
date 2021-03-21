@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
@@ -13,21 +15,17 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:fake_async/fake_async.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/mocks.dart' as mocks;
 
 void main() {
   setUpAll(() {
     Cache.flutterRoot = '';
-  });
-
-  tearDown(() {
-    MockDirectory.findCache = false;
   });
 
   testWithoutContext('checkUpToDate skips pub get if the package config is newer than the pubspec '
@@ -46,7 +44,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: MockUsage(),
+      usage: TestUsage(),
       platform: FakePlatform(
         environment: const <String, String>{},
       ),
@@ -84,7 +82,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: MockUsage(),
+      usage: TestUsage(),
       platform: FakePlatform(
         environment: const <String, String>{},
       ),
@@ -96,7 +94,7 @@ void main() {
       checkUpToDate: true,
     );
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
     expect(fileSystem.file('.dart_tool/version').readAsStringSync(), 'b');
   });
 
@@ -122,7 +120,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: MockUsage(),
+      usage: TestUsage(),
       platform: FakePlatform(
         environment: const <String, String>{},
       ),
@@ -134,7 +132,7 @@ void main() {
       checkUpToDate: true,
     );
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
     expect(fileSystem.file('.dart_tool/version').readAsStringSync(), 'b');
   });
 
@@ -160,7 +158,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: MockUsage(),
+      usage: TestUsage(),
       platform: FakePlatform(
         environment: const <String, String>{},
       ),
@@ -172,7 +170,7 @@ void main() {
       checkUpToDate: true,
     );
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
     expect(fileSystem.file('.dart_tool/version').readAsStringSync(), 'b');
   });
 
@@ -197,7 +195,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: MockUsage(),
+      usage: TestUsage(),
       platform: FakePlatform(
         environment: const <String, String>{},
       ),
@@ -209,7 +207,7 @@ void main() {
       checkUpToDate: true,
     );
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
     expect(fileSystem.file('.dart_tool/version').readAsStringSync(), 'b');
   });
 
@@ -236,7 +234,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: MockUsage(),
+      usage: TestUsage(),
       platform: FakePlatform(
         environment: const <String, String>{},
       ),
@@ -248,7 +246,7 @@ void main() {
       checkUpToDate: true,
     );
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
     expect(fileSystem.file('.dart_tool/version').readAsStringSync(), 'b');
   });
 
@@ -277,7 +275,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: MockUsage(),
+      usage: TestUsage(),
       platform: FakePlatform(
         environment: const <String, String>{},
       ),
@@ -289,7 +287,7 @@ void main() {
       checkUpToDate: true,
     );
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
     expect(fileSystem.file('.dart_tool/version').readAsStringSync(), 'b');
   });
 
@@ -298,11 +296,12 @@ void main() {
 
     final MockProcessManager processMock = MockProcessManager(69);
     final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
     final Pub pub = Pub(
-      fileSystem: MockFileSystem(),
+      fileSystem: fileSystem,
       logger: logger,
       processManager: processMock,
-      usage: MockUsage(),
+      usage: TestUsage(),
       platform: FakePlatform(
         environment: const <String, String>{},
       ),
@@ -368,11 +367,12 @@ void main() {
 
   testWithoutContext('pub get 66 shows message from pub', () async {
     final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
     final Pub pub = Pub(
       platform: FakePlatform(environment: const <String, String>{}),
-      fileSystem: MockFileSystem(),
+      fileSystem: fileSystem,
       logger: logger,
-      usage: MockUsage(),
+      usage: TestUsage(),
       botDetector: const BotDetectorAlwaysNo(),
       processManager: MockProcessManager(66, stderr: 'err1\nerr2\nerr3\n', stdout: 'out1\nout2\nout3\n'),
     );
@@ -398,18 +398,19 @@ void main() {
   testWithoutContext('pub cache in root is used', () async {
     String error;
     final MockProcessManager processMock = MockProcessManager(69);
-    final MockFileSystem fsMock = MockFileSystem();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    fileSystem.directory(Cache.flutterRoot).childDirectory('.pub-cache').createSync();
+
     final Pub pub = Pub(
       platform: FakePlatform(environment: const <String, String>{}),
-      usage: MockUsage(),
-      fileSystem: fsMock,
+      usage: TestUsage(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       processManager: processMock,
       botDetector: const BotDetectorAlwaysNo(),
     );
 
     FakeAsync().run((FakeAsync time) {
-      MockDirectory.findCache = true;
       expect(processMock.lastPubEnvironment, isNull);
       expect(processMock.lastPubCache, isNull);
       pub.get(context: PubContext.flutterTests).then((void value) {
@@ -419,18 +420,20 @@ void main() {
       });
       time.elapse(const Duration(milliseconds: 500));
 
-      expect(processMock.lastPubCache, equals(fsMock.path.join(Cache.flutterRoot, '.pub-cache')));
+      expect(processMock.lastPubCache, equals(fileSystem.path.join(Cache.flutterRoot, '.pub-cache')));
       expect(error, isNull);
     });
   });
 
   testWithoutContext('pub cache in environment is used', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    fileSystem.directory('custom/pub-cache/path').createSync(recursive: true);
     final MockProcessManager processMock = MockProcessManager(69);
     final Pub pub = Pub(
-      fileSystem: MockFileSystem(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       processManager: processMock,
-      usage: MockUsage(),
+      usage: TestUsage(),
       botDetector: const BotDetectorAlwaysNo(),
       platform: FakePlatform(
         environment: const <String, String>{
@@ -440,7 +443,6 @@ void main() {
     );
 
     FakeAsync().run((FakeAsync time) {
-      MockDirectory.findCache = true;
       expect(processMock.lastPubEnvironment, isNull);
       expect(processMock.lastPubCache, isNull);
 
@@ -459,7 +461,7 @@ void main() {
 
   testWithoutContext('analytics sent on success', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final MockUsage usage = MockUsage();
+    final TestUsage usage = TestUsage();
     final Pub pub = Pub(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -482,13 +484,14 @@ void main() {
       context: PubContext.flutterTests,
       generateSyntheticPackage: true,
     );
-
-    verify(usage.sendEvent('pub-result', 'flutter-tests', label: 'success')).called(1);
+    expect(usage.events, contains(
+      const TestUsageEvent('pub-result', 'flutter-tests', label: 'success'),
+    ));
   });
 
   testWithoutContext('package_config_subset file is generated from packages and not timestamp', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final MockUsage usage = MockUsage();
+    final TestUsage usage = TestUsage();
     final Pub pub = Pub(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -531,13 +534,13 @@ void main() {
     );
   });
 
-
   testWithoutContext('analytics sent on failure', () async {
-    MockDirectory.findCache = true;
-    final MockUsage usage = MockUsage();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    fileSystem.directory('custom/pub-cache/path').createSync(recursive: true);
+    final TestUsage usage = TestUsage();
     final Pub pub = Pub(
       usage: usage,
-      fileSystem: MockFileSystem(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       processManager: MockProcessManager(1),
       botDetector: const BotDetectorAlwaysNo(),
@@ -553,11 +556,13 @@ void main() {
       // Ignore.
     }
 
-    verify(usage.sendEvent('pub-result', 'flutter-tests', label: 'failure')).called(1);
+    expect(usage.events, contains(
+      const TestUsageEvent('pub-result', 'flutter-tests', label: 'failure'),
+    ));
   });
 
   testWithoutContext('analytics sent on failed version solve', () async {
-    final MockUsage usage = MockUsage();
+    final TestUsage usage = TestUsage();
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Pub pub = Pub(
       fileSystem: fileSystem,
@@ -582,7 +587,9 @@ void main() {
       // Ignore.
     }
 
-    verify(usage.sendEvent('pub-result', 'flutter-tests', label: 'version-solving-failed')).called(1);
+    expect(usage.events, contains(
+      const TestUsageEvent('pub-result', 'flutter-tests', label: 'version-solving-failed'),
+    ));
   });
 
   testWithoutContext('Pub error handling', () async {
@@ -631,7 +638,7 @@ void main() {
       ),
     ]);
     final Pub pub = Pub(
-      usage: MockUsage(),
+      usage: TestUsage(),
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
@@ -714,52 +721,3 @@ class MockProcessManager implements ProcessManager {
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
 }
-
-class MockFileSystem extends ForwardingFileSystem {
-  MockFileSystem() : super(MemoryFileSystem.test());
-
-  @override
-  File file(dynamic path) {
-    return MockFile();
-  }
-
-  @override
-  Directory directory(dynamic path) {
-    return MockDirectory(path as String);
-  }
-}
-
-class MockFile implements File {
-  @override
-  Future<RandomAccessFile> open({ FileMode mode = FileMode.read }) async {
-    return MockRandomAccessFile();
-  }
-
-  @override
-  bool existsSync() => true;
-
-  @override
-  DateTime lastModifiedSync() => DateTime(0);
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => null;
-}
-
-class MockDirectory implements Directory {
-  MockDirectory(this.path);
-
-  @override
-  final String path;
-
-  static bool findCache = false;
-
-  @override
-  bool existsSync() => findCache && path.endsWith('.pub-cache');
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => null;
-}
-
-class MockRandomAccessFile extends Mock implements RandomAccessFile {}
-
-class MockUsage extends Mock implements Usage {}

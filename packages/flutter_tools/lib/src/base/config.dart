@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
+import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 
 import '../convert.dart';
@@ -36,11 +39,16 @@ class Config {
 
   /// Constructs a new [Config] object from a file called [name] in
   /// the given [Directory].
-  factory Config.test(
-    String name, {
-    @required Directory directory,
-    @required Logger logger,
-  }) => Config.createForTesting(directory.childFile('.${kConfigDir}_$name'), logger);
+  ///
+  /// Defaults to [BufferLogger], [MemoryFileSystem], and [name]=test.
+  factory Config.test({
+    String name = 'test',
+    Directory directory,
+    Logger logger,
+  }) {
+    directory ??= MemoryFileSystem.test().directory('/');
+    return Config.createForTesting(directory.childFile('.${kConfigDir}_$name'), logger ?? BufferLogger.test());
+  }
 
   /// Test only access to the Config constructor.
   @visibleForTesting

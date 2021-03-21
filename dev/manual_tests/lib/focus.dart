@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 void main() {
   runApp(const MaterialApp(
@@ -15,7 +13,7 @@ void main() {
 }
 
 class DemoButton extends StatefulWidget {
-  const DemoButton({this.name, this.canRequestFocus = true, this.autofocus = false});
+  const DemoButton({Key key, this.name, this.canRequestFocus = true, this.autofocus = false}) : super(key: key);
 
   final String name;
   final bool canRequestFocus;

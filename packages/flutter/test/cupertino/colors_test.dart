@@ -5,7 +5,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/rendering.dart';
 
 import '../rendering/mock_canvas.dart';
 
@@ -497,7 +496,7 @@ void main() {
     setUp(() { color = null; });
 
     testWidgets('dynamic color works in cupertino override theme', (WidgetTester tester) async {
-      final CupertinoDynamicColor Function() typedColor = () => color! as CupertinoDynamicColor;
+      CupertinoDynamicColor typedColor() => color! as CupertinoDynamicColor;
 
       await tester.pumpWidget(
         MaterialApp(
