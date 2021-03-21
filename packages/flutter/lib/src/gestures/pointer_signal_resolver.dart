@@ -15,8 +15,8 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
   return (event1.original ?? event1) == (event2.original ?? event2);
 }
 
-/// An object that mediates disputes over which listener should handle pointer
-/// signal events when multiple listeners wish to handle those events.
+/// Mediates disputes over which listener should handle pointer signal events
+/// when multiple listeners wish to handle those events.
 ///
 /// Pointer signals (such as [PointerScrollEvent]) are immediate, so unlike
 /// events that participate in the gesture arena, pointer signals always
@@ -35,6 +35,111 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 ///   GestureBinding.instance!.pointerSignalResolver.register(event, (PointerSignalEvent event) {
 ///     // handle the event...
 ///   });
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad --template=stateful_widget_material}
+/// Here is an example that demonstrates the effect of not using the resolver
+/// versus using it.
+///
+/// When this example is set to _not_ use the resolver, then scrolling the
+/// mouse wheel over the outer box will cause only the outer box to change
+/// color, but scrolling the mouse wheel over inner box will cause _both_ the
+/// outer and the inner boxes to change color (because they're both receiving
+/// the scroll event).
+///
+/// When this excample is set to _use_ the resolver, then only the box located
+/// directly under the cursor will change color when the mouse wheel is
+/// scrolled.
+///
+/// ```dart imports
+/// import 'package:flutter/gestures.dart';
+/// ```
+///
+/// ```dart
+/// HSVColor outerColor = const HSVColor.fromAHSV(0.2, 120.0, 1, 1);
+/// HSVColor innerColor = const HSVColor.fromAHSV(1, 60.0, 1, 1);
+/// bool useResolver = false;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Material(
+///     child: Stack(
+///       fit: StackFit.expand,
+///       children: [
+///         Listener(
+///           onPointerSignal: (PointerSignalEvent event) {
+///             VoidCallback callback = () {
+///               setState(() {
+///                 outerColor = outerColor.withHue((outerColor.hue + 6) % 360.0);
+///               });
+///             };
+///             if (useResolver) {
+///               GestureBinding.instance!.pointerSignalResolver.register(event, (PointerSignalEvent event) {
+///                 callback();
+///               });
+///             } else {
+///               callback();
+///             }
+///           },
+///           child: DecoratedBox(
+///             decoration: BoxDecoration(
+///               border: Border.fromBorderSide(BorderSide()),
+///               color: outerColor.toColor(),
+///             ),
+///             child: FractionallySizedBox(
+///               widthFactor: 0.5,
+///               heightFactor: 0.5,
+///               child: DecoratedBox(
+///                 decoration: BoxDecoration(
+///                   border: Border.fromBorderSide(BorderSide()),
+///                   color: innerColor.toColor(),
+///                 ),
+///                 child: Listener(
+///                   onPointerSignal: (PointerSignalEvent event) {
+///                     VoidCallback callback = () {
+///                       setState(() {
+///                         innerColor = innerColor.withHue((innerColor.hue + 3) % 360.0);
+///                       });
+///                     };
+///                     if (useResolver) {
+///                       GestureBinding.instance!.pointerSignalResolver.register(event, (PointerSignalEvent event) {
+///                         callback();
+///                       });
+///                     } else {
+///                       callback();
+///                     }
+///                   },
+///                   child: AbsorbPointer(),
+///                 ),
+///               ),
+///             ),
+///           ),
+///         ),
+///         Align(
+///           alignment: Alignment.topLeft,
+///           child: Row(
+///             crossAxisAlignment: CrossAxisAlignment.center,
+///             children: [
+///               Switch(
+///                 value: useResolver,
+///                 onChanged: (bool value) {
+///                   setState(() {
+///                     useResolver = value;
+///                   });
+///                 },
+///               ),
+///               Text(
+///                 'Use the PointerSignalResolver?',
+///                 style: DefaultTextStyle.of(context).style.copyWith(fontWeight: FontWeight.bold),
+///               ),
+///             ],
+///           ),
+///         ),
+///       ],
+///     ),
+///   );
 /// }
 /// ```
 /// {@end-tool}

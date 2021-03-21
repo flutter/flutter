@@ -1847,9 +1847,8 @@ class _TransformedPointerUpEvent extends _TransformedPointerEvent with _CopyPoin
 ///
 ///  * [Listener.onPointerSignal], which allows callers to be notified of these
 ///    events in a widget tree.
-///  * [PointerSignalResolver], which ensures that these events will only be
-///    dispatched to one registered handler when multiple objects are
-///    interested in the event.
+///  * [PointerSignalResolver], which provides an opt-in mechanism whereby
+///    participating agents may disambiguate an event's target.
 abstract class PointerSignalEvent extends PointerEvent {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1919,9 +1918,8 @@ mixin _CopyPointerScrollEvent on PointerEvent {
 ///
 ///  * [Listener.onPointerSignal], which allows callers to be notified of these
 ///    events in a widget tree.
-///  * [PointerSignalResolver], which ensures that these events will only be
-///    dispatched to one registered handler when multiple objects are
-///    interested in the event.
+///  * [PointerSignalResolver], which provides an opt-in mechanism whereby
+///    participating agents may disambiguate an event's target.
 class PointerScrollEvent extends PointerSignalEvent with _PointerEventDescription, _CopyPointerScrollEvent {
   /// Creates a pointer scroll event.
   ///
