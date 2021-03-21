@@ -932,6 +932,8 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
 
   /// This field is used tracks [reactivate] and [deactivate], to assert that
   /// they are called alternatively.
+  ///
+  /// This field is not set in release mode.
   bool _debugActive = true;
 
   /// Called when this object is inserted into the tree.
@@ -1143,9 +1145,8 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   void deactivate() {
     assert(() {
       _debugActive = !_debugActive;
-      return true;
+      return _debugActive == false;
     }());
-    assert(_debugActive == false);
   }
 
   /// Called when this object is reactivated.
@@ -1167,9 +1168,8 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   void reactivate() {
     assert(() {
       _debugActive = !_debugActive;
-      return true;
+      return _debugActive == true;
     }());
-    assert(_debugActive == true);
   }
 
   /// Called when this object is removed from the tree permanently.
