@@ -207,7 +207,7 @@ class ExpansionPanel {
   ///           _isExpanded = !_isExpanded;
   ///         });
   ///       },
-  ///       children: <Widget>[
+  ///       children: <ExpansionPanel>[
   ///         ExpansionPanel(
   ///           isExpanded: _isExpanded,
   ///           headerBuilder: (BuildContext context, bool isExpanded) {
@@ -312,11 +312,11 @@ class ExpansionPanel {
   ///           _isExpanded = !isExpanded;
   ///         });
   ///       },
-  ///       children: <Widget>[
+  ///       children: <ExpansionPanel>[
   ///         ExpansionPanel(
   ///           isExpanded: _isExpanded,
   ///           headerBuilder: (BuildContext context, bool isExpanded) {
-  ///             return ListTile(title: Text('Header Text'));
+  ///             return const ListTile(title: Text('Header Text'));
   ///           },
   ///           expandIconBuilder: (
   ///             BuildContext context,
