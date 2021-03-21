@@ -733,6 +733,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     implements _ParentInkResponseState {
   Set<InteractiveInkFeature>? _splashes;
   InteractiveInkFeature? _currentSplash;
+  bool _active = true;
   bool _hovering = false;
   final Map<_HighlightType, InkHighlight?> _highlights = <_HighlightType, InkHighlight?>{};
   late final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
@@ -874,7 +875,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     void handleInkRemoval() {
       assert(_highlights[type] != null);
       _highlights[type] = null;
-      if (active)
+      if (_active)
         updateKeepAlive();
     }
 
@@ -1073,12 +1074,14 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   @override
   void deactivate() {
+    _active = !_active;
     _setAllFeaturesVisible(false);
     super.deactivate();
   }
 
   @override
   void reactivate() {
+    _active = !_active;
     _setAllFeaturesVisible(true);
     updateKeepAlive();
     super.reactivate();

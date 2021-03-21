@@ -930,17 +930,8 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// It is an error to call [setState] unless [mounted] is true.
   bool get mounted => _element != null;
 
-  /// Whether this object is active in the tree.
-  ///
-  /// Usually starts with true when calling [initState].
-  ///
-  /// If the [widget] or one of its ancestors has a [GlobalKey], then active is
-  /// changed in [deactivate] and [reactivate].
-  bool get active => _element?._lifecycleState == _ElementLifecycle.active;
-
   /// This field is used tracks [reactivate] and [deactivate], to assert that
-  /// they are called alternatively, and that _debugActive is synchronized with
-  /// the returned value of [active]
+  /// they are called alternatively.
   bool _debugActive = true;
 
   /// Called when this object is inserted into the tree.
@@ -1150,8 +1141,11 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   @protected
   @mustCallSuper
   void deactivate() {
-    // After Element.deactivate is called, active is changed.
-    assert(_debugActive == active);
+    assert(() {
+      _debugActive = !_debugActive;
+      return true;
+    }());
+    assert(_debugActive == false);
   }
 
   /// Called when this object is reactivated.
@@ -1173,8 +1167,9 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   void reactivate() {
     assert(() {
       _debugActive = !_debugActive;
-      return _debugActive == active;
+      return true;
     }());
+    assert(_debugActive == true);
   }
 
   /// Called when this object is removed from the tree permanently.
@@ -4830,10 +4825,6 @@ class StatefulElement extends ComponentElement {
   void deactivate() {
     state.deactivate();
     super.deactivate();
-    assert(() {
-      state._debugActive = !state._debugActive;
-      return state._debugActive == state.active;
-    }());
   }
 
   @override
