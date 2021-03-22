@@ -941,42 +941,14 @@ class _DatePickerHeader extends StatelessWidget {
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
-/// {@tool sample --template=freeform}
+/// {@tool sample --template=stateful_widget_restoration_material}
 ///
 /// This sample demonstrates how to create a restorable Material date range picker.
 /// This is accomplished by enabling state restoration by specifying
 /// [MaterialApp.restorationScopeId] and using [Navigator.restorablePush] to
 /// push [DateRangePickerDialog] when the button is tapped.
 ///
-/// ```dart imports
-/// import 'package:flutter/material.dart';
-/// ```
-///
 /// ```dart
-/// void main() {
-///   runApp(const MyApp());
-/// }
-///
-/// class MyApp extends StatelessWidget {
-///   const MyApp({Key? key}) : super(key: key);
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return const MaterialApp(
-///       restorationScopeId: 'app',
-///       title: 'Restorable Date Range Picker Demo',
-///       home: MyHomePage(),
-///     );
-///   }
-/// }
-///
-/// class MyHomePage extends StatefulWidget {
-///   const MyHomePage({Key? key}) : super(key: key);
-///
-///   @override
-///   _MyHomePageState createState() => _MyHomePageState();
-/// }
-///
 /// class _MyHomePageState extends State<MyHomePage> with RestorationMixin {
 ///   final RestorableDateTimeN _startDate = RestorableDateTimeN(DateTime(2021, 1, 1));
 ///   final RestorableDateTimeN _endDate = RestorableDateTimeN(DateTime(2021, 1, 5));
