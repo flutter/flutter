@@ -29,7 +29,6 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 ///
 /// To use this class, objects should register their event handler like so:
 ///
-/// {@tool snippet}
 /// ```dart
 /// void handleSignalEvent(PointerSignalEvent event) {
 ///   GestureBinding.instance!.pointerSignalResolver.register(event, (PointerSignalEvent event) {
@@ -37,7 +36,6 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 ///   });
 /// }
 /// ```
-/// {@end-tool}
 ///
 /// {@tool dartpad --template=stateful_widget_material}
 /// Here is an example that demonstrates the effect of not using the resolver
@@ -132,10 +130,7 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 ///                   });
 ///                 },
 ///               ),
-///               Text(
-///                 'Use the PointerSignalResolver?',
-///                 style: DefaultTextStyle.of(context).style.copyWith(fontWeight: FontWeight.bold),
-///               ),
+///               Text('Use the PointerSignalResolver?'),
 ///             ],
 ///           ),
 ///         ),
