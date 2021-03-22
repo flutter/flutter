@@ -201,35 +201,6 @@ abstract class ShortcutActivator {
   String debugDescribeKeys();
 }
 
-@immutable
-class _StandardPromptCore {
-  const _StandardPromptCore({
-    required this.control,
-    required this.shift,
-    required this.alt,
-    required this.meta,
-    required this.triggeringKeys,
-    required this.stateKeys,
-  });
-
-  final bool? control;
-  final bool? shift;
-  final bool? alt;
-  final bool? meta;
-  final Set<LogicalKeyboardKey> triggeringKeys;
-  final Set<LogicalKeyboardKey> stateKeys;
-
-  bool requiresState(RawKeyboard state) {
-    final Set<LogicalKeyboardKey> pressed = LogicalKeyboardKey.collapseSynonyms(state.keysPressed)
-      ..addAll(state.keysPressed);
-    return (control == null || control == pressed.contains(LogicalKeyboardKey.control))
-        && (shift == null || shift == pressed.contains(LogicalKeyboardKey.shift))
-        && (alt == null || alt == pressed.contains(LogicalKeyboardKey.alt))
-        && (meta == null || meta == pressed.contains(LogicalKeyboardKey.meta))
-        && stateKeys.every((LogicalKeyboardKey key) => pressed.contains(key));
-  }
-}
-
 /// A set of [LogicalKeyboardKey]s that can be used as the keys in a map.
 ///
 /// [LogicalKeySet] can also be used as a [ShortcutActivator]. It will activate
