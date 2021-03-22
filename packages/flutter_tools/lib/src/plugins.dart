@@ -952,7 +952,6 @@ Future<void> generateMainDartWithPluginRegistrant(
   bool throwOnPluginPubspecError,
 }) async {
   final List<Plugin> plugins = await findPlugins(rootProject);
-  print('plugins: $plugins');
   final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
     plugins,
     throwOnPluginPubspecError: throwOnPluginPubspecError,
@@ -968,12 +967,10 @@ Future<void> generateMainDartWithPluginRegistrant(
     MacOSPlugin.kConfigKey: <dynamic>[],
     WindowsPlugin.kConfigKey: <dynamic>[],
   };
-  print('resolutions: $resolutions');
   for (final PluginInterfaceResolution resolution in resolutions) {
     assert(templateContext.containsKey(resolution.platform));
     (templateContext[resolution.platform] as List<dynamic>).add(resolution.toMap());
   }
-  print('template context $templateContext');
   try {
     _renderTemplateToFile(
       _dartPluginRegistryForDesktopTemplate,
