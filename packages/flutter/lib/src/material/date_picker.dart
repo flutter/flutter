@@ -102,13 +102,17 @@ const double _inputFormLandscapeHeight = 108.0;
 /// [DatePickerMode.day] mode. It defaults to [DatePickerMode.day], and
 /// must be non-null.
 ///
+/// The [anchorPoint] argument is used to pick the closest area without
+/// [DisplayFeature]s, where the dialog will be rendered.
+///
 /// See also:
 ///
 ///  * [showDateRangePicker], which shows a material design date range picker
 ///    used to select a range of dates.
 ///  * [CalendarDatePicker], which provides the calendar grid used by the date picker dialog.
 ///  * [InputDatePickerFormField], which provides a text input field for entering dates.
-///
+///  * [AvoidDisplayFeatures], which is used for avoiding [DisplayFeature]s when
+///    displaying the picker.
 Future<DateTime?> showDatePicker({
   required BuildContext context,
   required DateTime initialDate,
@@ -130,6 +134,7 @@ Future<DateTime?> showDatePicker({
   String? errorInvalidText,
   String? fieldHintText,
   String? fieldLabelText,
+  Offset? anchorPoint,
 }) async {
   assert(context != null);
   assert(initialDate != null);
@@ -198,6 +203,7 @@ Future<DateTime?> showDatePicker({
     builder: (BuildContext context) {
       return builder == null ? dialog : builder(context, dialog);
     },
+    anchorPoint: anchorPoint,
   );
 }
 
@@ -770,12 +776,16 @@ class _DatePickerHeader extends StatelessWidget {
 /// The [builder] parameter can be used to wrap the dialog widget
 /// to add inherited widgets like [Theme].
 ///
+/// The [anchorPoint] argument is used to pick the closest area without
+/// [DisplayFeature]s, where the dialog will be rendered.
+///
 /// See also:
 ///
 ///  * [showDatePicker], which shows a material design date picker used to
 ///    select a single date.
 ///  * [DateTimeRange], which is used to describe a date range.
-///
+///  * [AvoidDisplayFeatures], which is used for avoiding [DisplayFeature]s when
+///    displaying the picker.
 Future<DateTimeRange?> showDateRangePicker({
   required BuildContext context,
   DateTimeRange? initialDateRange,
@@ -799,6 +809,7 @@ Future<DateTimeRange?> showDateRangePicker({
   RouteSettings? routeSettings,
   TextDirection? textDirection,
   TransitionBuilder? builder,
+  Offset? anchorPoint,
 }) async {
   assert(context != null);
   assert(
@@ -881,6 +892,7 @@ Future<DateTimeRange?> showDateRangePicker({
     builder: (BuildContext context) {
       return builder == null ? dialog : builder(context, dialog);
     },
+    anchorPoint: anchorPoint,
   );
 }
 

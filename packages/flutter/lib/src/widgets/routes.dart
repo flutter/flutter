@@ -1779,10 +1779,8 @@ abstract class RouteAware {
 /// The `settings` argument define the settings for this route. See
 /// [RouteSettings] for details.
 ///
-/// The `screen` argument is used to determine which screen to use when showing
-/// this dialog on devices with multiple screens, e.g. a dual-screen device. If
-/// `screen` value exceeds the number of screens available, the last screen is
-/// used.
+/// The [anchorPoint] argument is used to pick the closest area without
+/// [DisplayFeature]s, where the dialog will be rendered.
 ///
 /// See also:
 ///
@@ -1799,7 +1797,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
     Duration transitionDuration = const Duration(milliseconds: 200),
     RouteTransitionsBuilder? transitionBuilder,
     RouteSettings? settings,
-    int screen = 0,
+    Offset? anchorPoint,
   }) : assert(barrierDismissible != null),
        _pageBuilder = pageBuilder,
        _barrierDismissible = barrierDismissible,
@@ -1807,7 +1805,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
        _barrierColor = barrierColor,
        _transitionDuration = transitionDuration,
        _transitionBuilder = transitionBuilder,
-       _screen = screen,
+       _anchorPoint = anchorPoint,
        super(settings: settings);
 
   final RoutePageBuilder _pageBuilder;
@@ -1830,14 +1828,14 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 
   final RouteTransitionsBuilder? _transitionBuilder;
 
-  final int _screen;
+  final Offset? _anchorPoint;
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     return Semantics(
-      child: HingeAvoidingModalWrapper(
+      child: AvoidDisplayFeatures(
         child: _pageBuilder(context, animation, secondaryAnimation),
-        screen: _screen,
+        anchorPoint: _anchorPoint,
       ),
       scopesRoute: true,
       explicitChildNodes: true,
@@ -1859,43 +1857,51 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 }
 
 /// Widget that can be added at the root of a popup route in order to make
-/// the contents avoid any [dart:ui.DisplayFeature] present on the device.
+/// the contents avoid any [DisplayFeature] present on the device.
 ///
-/// This widget first looks at the positioning of the [dart:ui.DisplayFeature]
-/// and determines where the safe areas are located, which no longer overlap any
-/// of the display features. Then the [screen] paramenter is used to pick which
-/// safe area to use.
+/// This widget first looks at the positioning of the [DisplayFeature]
+/// and determines where the safe areas are located, which do not overlap any
+/// of the display features. Then the [anchorPoint] paramenter is used to pick the
+/// closest area.
+///
+/// If no [anchorPoint] is provided, then [Directionality] is used to pick the
+/// first area from the top, so for a [TextDirection.ltr] layout, the area from
+/// the top-left is selected.
 ///
 /// For example, a device with two screens and a display cutout for cameras on
 /// the left screen will have two safe areas:
 ///
-///  * First safe area will be the left screen, excluding the camera cutout,
-///  similar to how [SafeArea] works. This is `screen` 0.
-///  * Second safe area will be the right screen. This is `screen` 1.
+///  * One safe area will be the left screen, excluding the camera cutout,
+///  similar to how [SafeArea] works.
+///  * One safe area will be the right screen.
 ///
 /// See also:
 ///
 ///  * [showGeneralDialog], which is a way to display a RawDialogRoute.
 ///  * [showDialog], which is a way to display a DialogRoute.
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
-class HingeAvoidingModalWrapper extends StatelessWidget {
+class AvoidDisplayFeatures extends StatelessWidget {
   /// Creates a widget that positions its child so that it avoids display features.
-  const HingeAvoidingModalWrapper({
+  const AvoidDisplayFeatures({
     Key? key,
     required this.child,
-    this.screen = 0,
+    this.anchorPoint,
   }) : super(key: key);
 
   /// The child that will avoid the display features.
   final Widget child;
 
-  /// The screen on which to display the child.
-  final int screen;
+  /// The anchor point used to pick the closest area that has no display features.
+  /// `Offset(0,0)` is the top-left corner of the available screen space. For
+  /// a dual-screen device, this is the top-left corner of the left screen.
+  final Offset? anchorPoint;
 
   @override
   Widget build(BuildContext context) {
     final List<Rect> safeAreas = _safeAreasInNavigator(context);
-    final Rect safeArea = safeAreas.length > screen ? safeAreas[screen] : safeAreas.last;
+    final Rect safeArea = anchorPoint == null
+        ? _firstSafeArea(safeAreas, context)
+        : _closestToAnchorPoint(safeAreas, anchorPoint!);
 
     return Stack(
       children: <Widget>[
@@ -1904,8 +1910,27 @@ class HingeAvoidingModalWrapper extends StatelessWidget {
     );
   }
 
+  Rect _firstSafeArea(List<Rect> safeAreas, BuildContext context) {
+    final TextDirection? direction = Directionality.maybeOf(context);
+    if (direction == null || direction == TextDirection.ltr)
+      return _closestToAnchorPoint(safeAreas, Offset.zero);
+    else
+      return _closestToAnchorPoint(safeAreas, const Offset(double.maxFinite, 0));
+  }
+
+  Rect _closestToAnchorPoint(List<Rect> safeAreas, Offset anchorPoint) {
+    return safeAreas.fold(safeAreas.first, (Rect previousValue, Rect element) {
+      final double previousDistance = (previousValue.center - anchorPoint).distanceSquared;
+      final double elementDistance = (element.center - anchorPoint).distanceSquared;
+      if (previousDistance < elementDistance)
+        return previousValue;
+      else
+        return element;
+    });
+  }
+
   List<Rect> _safeAreasInNavigator(BuildContext context) {
-    final RenderObject? renderObject = Overlay.of(context)?.context.findRenderObject(); //navigatorRenderObject;
+    final RenderObject? renderObject = Overlay.of(context)?.context.findRenderObject();
     Rect? navigatorBounds;
     final Vector3? translation = renderObject?.getTransformTo(null).getTranslation();
     if (translation != null) {
@@ -2096,6 +2121,7 @@ Future<T?> showGeneralDialog<T extends Object?>({
   RouteTransitionsBuilder? transitionBuilder,
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
+  Offset? anchorPoint,
 }) {
   assert(pageBuilder != null);
   assert(useRootNavigator != null);
@@ -2108,6 +2134,7 @@ Future<T?> showGeneralDialog<T extends Object?>({
     transitionDuration: transitionDuration,
     transitionBuilder: transitionBuilder,
     settings: routeSettings,
+    anchorPoint: anchorPoint,
   ));
 }
 
