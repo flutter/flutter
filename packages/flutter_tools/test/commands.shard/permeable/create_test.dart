@@ -693,6 +693,44 @@ void main() {
     Logger: () => logger,
   });
 
+  testUsingContext('app supports android and ios by default', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+
+    expect(projectDir.childDirectory('android'), exists);
+    expect(projectDir.childDirectory('ios'), exists);
+  }, overrides: <Type, Generator>{});
+
+  testUsingContext('app does not include android if disabled in config', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+
+    expect(projectDir.childDirectory('android'), isNot(exists));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false),
+  });
+
+  testUsingContext('app does not include ios if disabled in config', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+
+    expect(projectDir.childDirectory('ios'), isNot(exists));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isIOSEnabled: false),
+  });
+
   testUsingContext('app does not include desktop or web by default', () async {
     Cache.flutterRoot = '../..';
 
