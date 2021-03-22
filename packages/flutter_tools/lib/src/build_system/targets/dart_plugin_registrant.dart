@@ -52,7 +52,6 @@ class DartPluginRegistrantTarget extends Target {
         .childDirectory('.dart_tool')
         .childDirectory('flutter_build')
         .childFile('generated_main.dart');
-    assert(newMainDart.existsSync());
     await generateMainDartWithPluginRegistrant(
       _project ?? FlutterProject.fromDirectory(environment.projectDir),
       packageConfig,

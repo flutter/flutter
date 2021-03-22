@@ -4,6 +4,8 @@
 
 // @dart = 2.8
 
+import 'dart:io';
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -20,7 +22,7 @@ const String _kSamplePackageJson = '''
   "packages": [
     {
       "name": "path_provider_linux",
-      "rootUri": "/path_provider_linux",
+      "rootUri": "path_provider_linux",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     }
@@ -29,7 +31,25 @@ const String _kSamplePackageJson = '''
 ''';
 
 const String _kSamplePackagesFile = '''
-path_provider_linux:/path_provider_linux/lib/
+path_provider_linux:path_provider_linux/lib/
+''';
+
+const String _kSamplePackageJsonWindows = '''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "path_provider_linux",
+      "rootUri": "file:///C:/path_provider_linux",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    }
+  ]
+}
+''';
+
+const String _kSamplePackagesFileWindows = '''
+path_provider_linux:file:///C:/path_provider_linux/lib/
 ''';
 
 const String _kSamplePubspecFile = '''
@@ -85,7 +105,7 @@ environment:
 void main() {
   testWithoutContext('skipped based on environment.generateDartPluginRegistry',
       () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
+    final FileSystem fileSystem = _getFileSystem();
     final Environment environment = Environment.test(
         fileSystem.currentDirectory,
         artifacts: null,
@@ -107,29 +127,8 @@ void main() {
     expect(const DartPluginRegistrantTarget().canSkip(environment2), false);
   });
 
-  testWithoutContext(
-      'throws assertion error if generated_main.dart does not exist', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-
-    final Environment environment = Environment.test(
-        fileSystem.currentDirectory,
-        artifacts: null,
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        processManager: FakeProcessManager.any(),
-        generateDartPluginRegistry: true);
-    final File config = environment.projectDir
-        .childDirectory('.dart_tool')
-        .childFile('package_config.json');
-    config.createSync(recursive: true);
-    config.writeAsStringSync(_kSamplePackageJson);
-
-    await expectLater(const DartPluginRegistrantTarget().build(environment),
-        throwsAssertionError);
-  });
-
   testUsingContext('regenerates generated_main.dart with no desktop plugins', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
+    final FileSystem fileSystem = _getFileSystem();
 
     final Environment environment = Environment.test(
         fileSystem.currentDirectory,
@@ -144,7 +143,7 @@ void main() {
         .childDirectory('.dart_tool')
         .childFile('package_config.json');
     config.createSync(recursive: true);
-    config.writeAsStringSync(_kSamplePackageJson);
+    config.writeAsStringSync(Platform.isWindows ? _kSamplePackageJsonWindows : _kSamplePackageJson);
 
     final File pubspec = environment.projectDir.childFile('pubspec.yaml');
     pubspec.createSync();
@@ -165,7 +164,7 @@ void main() {
   });
 
   testUsingContext('regenerates generated_main.dart', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
+    final FileSystem fileSystem = _getFileSystem();
     final Environment environment = Environment.test(
         fileSystem.currentDirectory,
         projectDir: fileSystem.directory('project')..createSync(),
@@ -178,14 +177,14 @@ void main() {
         .childDirectory('.dart_tool')
         .childFile('package_config.json');
     config.createSync(recursive: true);
-    config.writeAsStringSync(_kSamplePackageJson);
+    config.writeAsStringSync(Platform.isWindows ? _kSamplePackageJsonWindows : _kSamplePackageJson);
 
     final File pubspec = environment.projectDir.childFile('pubspec.yaml');
     pubspec.createSync();
     pubspec.writeAsStringSync(_kSamplePubspecFile);
     final File packages = environment.projectDir.childFile('.packages');
     packages.createSync();
-    packages.writeAsStringSync(_kSamplePackagesFile);
+    packages.writeAsStringSync(Platform.isWindows ? _kSamplePackagesFileWindows : _kSamplePackagesFile);
 
     final File generatedMain = environment.projectDir
         .childDirectory('.dart_tool')
@@ -196,10 +195,18 @@ void main() {
     final File pluginPubspec = environment.fileSystem.currentDirectory.childDirectory('path_provider_linux').childFile('pubspec.yaml');
     pluginPubspec.createSync(recursive: true);
     pluginPubspec.writeAsStringSync(_kSamplePluginPubspec);
+    print('pubspec path: ${pluginPubspec.path} \n ${pluginPubspec.absolute.path}');
     final FlutterProject testProject = FlutterProject.fromDirectoryTest(environment.projectDir);
     await DartPluginRegistrantTarget.test(testProject).build(environment);
 
     final String mainContent = generatedMain.readAsStringSync();
     expect(mainContent, contains(_kLinuxRegistrant));
   });
+}
+
+FileSystem _getFileSystem() {
+  if (Platform.isWindows) {
+    return MemoryFileSystem.test(style: FileSystemStyle.windows);
+  }
+  return MemoryFileSystem.test();
 }
