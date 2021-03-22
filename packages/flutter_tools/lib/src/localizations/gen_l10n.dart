@@ -211,9 +211,9 @@ String generatePluralMethod(Message message, AppResourceBundle bundle) {
       String argValue = generateString(match.group(2));
       for (final Placeholder placeholder in message.placeholders) {
         if (placeholder != countPlaceholder && placeholder.requiresFormatting) {
-          argValue = argValue.replaceAll('#${placeholder.name}#', '\${${placeholder.name}String}');
+          argValue = argValue.replaceAll('#${placeholder.name}#', '\$${placeholder.name}String');
         } else {
-          argValue = argValue.replaceAll('#${placeholder.name}#', '\${${placeholder.name}}');
+          argValue = argValue.replaceAll('#${placeholder.name}#', '\$${placeholder.name}');
         }
       }
       pluralLogicArgs.add('      ${pluralIds[pluralKey]}: $argValue');
@@ -243,9 +243,9 @@ String generateMethod(Message message, AppResourceBundle bundle) {
     String messageValue = generateString(bundle.translationFor(message));
     for (final Placeholder placeholder in message.placeholders) {
       if (placeholder.requiresFormatting) {
-        messageValue = messageValue.replaceAll('{${placeholder.name}}', '\${${placeholder.name}String}');
+        messageValue = messageValue.replaceAll('{${placeholder.name}}', '\$${placeholder.name}String');
       } else {
-        messageValue = messageValue.replaceAll('{${placeholder.name}}', '\${${placeholder.name}}');
+        messageValue = messageValue.replaceAll('{${placeholder.name}}', '\$${placeholder.name}');
       }
     }
 
@@ -964,7 +964,8 @@ class LocalizationsGenerator {
       .replaceAll('@(fileName)', fileName)
       .replaceAll('@(class)', '$className${locale.camelCase()}')
       .replaceAll('@(localeName)', locale.toString())
-      .replaceAll('@(methods)', methods.join('\n\n'));
+      .replaceAll('@(methods)', methods.join('\n\n'))
+      .replaceAll('@(requiresIntlImport)', _containsPluralMessage() ? "import 'package:intl/intl.dart' as intl;" : '');
   }
 
   String _generateSubclass(
@@ -1103,8 +1104,11 @@ class LocalizationsGenerator {
       .replaceAll('@(supportedLocales)', supportedLocalesCode.join(',\n    '))
       .replaceAll('@(supportedLanguageCodes)', supportedLanguageCodes.join(', '))
       .replaceAll('@(messageClassImports)', sortedClassImports.join('\n'))
-      .replaceAll('@(delegateClass)', delegateClass);
+      .replaceAll('@(delegateClass)', delegateClass)
+      .replaceAll('@(requiresIntlImport)', _containsPluralMessage() ? "import 'package:intl/intl.dart' as intl;" : '');
   }
+
+  bool _containsPluralMessage() => _allMessages.any((Message message) => message.isPlural);
 
   void writeOutputFiles(Logger logger, { bool isFromYaml = false }) {
     // First, generate the string contents of all necessary files.
