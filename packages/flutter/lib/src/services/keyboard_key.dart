@@ -78,7 +78,7 @@ abstract class KeyboardKey with Diagnosticable {
 ///       if (kReleaseMode) {
 ///         _message = 'Not a Q: Pressed 0x${event.logicalKey.keyId.toRadixString(16)}';
 ///       } else {
-///         // This will only print useful information in debug mode.
+///         // The debugName will only print useful information in debug mode.
 ///         _message = 'Not a Q: Pressed ${event.logicalKey.debugName}';
 ///       }
 ///     }

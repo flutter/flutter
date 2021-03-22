@@ -892,9 +892,6 @@ class FlutterVmService {
   }
 
   Future<void> dispose() async {
-    // TODO(dnfield): Remove ignore once internal repo is up to date
-    // https://github.com/flutter/flutter/issues/74518
-    // ignore: await_only_futures
      await service.dispose();
   }
 }

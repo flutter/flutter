@@ -130,8 +130,8 @@ String generateTestBootstrap({
   buffer.write('''
 $languageVersionHeader
 import 'dart:async';
-import 'dart:convert';  // ignore: dart_convert_import
-import 'dart:io';  // ignore: dart_io_import
+import 'dart:convert';  // flutter_ignore: dart_convert_import
+import 'dart:io';  // flutter_ignore: dart_io_import
 import 'dart:isolate';
 ''');
   if (flutterTestDep) {
