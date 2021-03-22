@@ -632,7 +632,7 @@ class NestedScrollViewState extends State<NestedScrollView> {
             scrollDirection: widget.scrollDirection,
             reverse: widget.reverse,
             physics: _scrollPhysics,
-            scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbarPlatforms: const <TargetPlatform>{}),
+            scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false),
             controller: _coordinator!._outerController,
             slivers: widget._buildSlivers(
               context,

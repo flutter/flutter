@@ -10,7 +10,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import 'app.dart';
 import 'button_theme.dart';
 import 'colors.dart';
 import 'constants.dart';
@@ -92,8 +91,16 @@ class _DropdownMenuPainter extends CustomPainter {
 // Do not use the platform-specific default scroll configuration.
 // Dropdown menus should never overscroll or display an overscroll indicator.
 // The default scrollbar platforms will apply.
-class _DropdownScrollBehavior extends MaterialScrollBehavior {
-  const _DropdownScrollBehavior() : super(glowingPlatforms: const <TargetPlatform>{});
+class _DropdownScrollBehavior extends ScrollBehavior {
+  const _DropdownScrollBehavior() : super(useDecoration: true);
+
+  @override
+  TargetPlatform getPlatform(BuildContext context) => Theme.of(context).platform;
+
+  @override
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, AxisDirection direction) {
+    return child;
+  }
 
   @override
   ScrollPhysics getScrollPhysics(BuildContext context) => const ClampingScrollPhysics();

@@ -50,11 +50,18 @@ Widget _buildBoilerplate({
     child: MediaQuery(
       data: MediaQueryData(padding: padding),
       child: ScrollConfiguration(
-        behavior: const ScrollBehavior(scrollbarPlatforms: <TargetPlatform>{}),
+        behavior: const NoScrollbarBehavior(),
         child: child,
       ),
     ),
   );
+}
+
+class NoScrollbarBehavior extends ScrollBehavior {
+  const NoScrollbarBehavior() : super(useDecoration: true);
+
+  @override
+  Widget buildScrollbar(Widget child, ScrollController controller) => child;
 }
 
 void main() {

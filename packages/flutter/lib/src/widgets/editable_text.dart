@@ -2618,11 +2618,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         physics: widget.scrollPhysics ?? widget.scrollBehavior?.getScrollPhysics(context),
         dragStartBehavior: widget.dragStartBehavior,
         restorationId: widget.restorationId,
-        scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(
-          scrollbarPlatforms: _isMultiline
-            ? null
-            : const <TargetPlatform>{}
-        ),
+        scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: _isMultiline),
         viewportBuilder: (BuildContext context, ViewportOffset offset) {
           return CompositedTransformTarget(
             link: _toolbarLayerLink,

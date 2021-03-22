@@ -41,21 +41,7 @@ class ScrollBehavior {
       'This feature was deprecated after v2.1.0-11.0.pre.'
     )
     bool useDecoration = false,
-    this.scrollbarPlatforms,
-    this.glowingPlatforms,
   }) : _useDecoration = useDecoration;
-
-  ///
-  ScrollBehavior copyWith({
-    Set<TargetPlatform>? scrollbarPlatforms,
-    Set<TargetPlatform>? glowingPlatforms,
-  }) {
-    return ScrollBehavior(
-      scrollbarPlatforms: scrollbarPlatforms ?? this.scrollbarPlatforms ?? ScrollBehavior.defaultScrollbarPlatforms,
-      glowingPlatforms: glowingPlatforms ?? this.glowingPlatforms ?? ScrollBehavior.defaultGlowingPlatforms,
-      useDecoration: true,
-    );
-  }
 
   // Whether [buildViewportChrome] or [buildViewportDecoration] should be used
   // in wrapping the Scrollable widget.
@@ -64,23 +50,9 @@ class ScrollBehavior {
   final bool _useDecoration;
 
   ///
-  final Set<TargetPlatform>? scrollbarPlatforms;
-
-  ///
-  static Set<TargetPlatform> get defaultScrollbarPlatforms => <TargetPlatform>{
-    TargetPlatform.linux,
-    TargetPlatform.macOS,
-    TargetPlatform.windows,
-  };
-
-  ///
-  final Set<TargetPlatform>? glowingPlatforms;
-
-  ///
-  static Set<TargetPlatform> get defaultGlowingPlatforms => <TargetPlatform>{
-    TargetPlatform.android,
-    TargetPlatform.fuchsia,
-  };
+  ScrollBehavior copyWith({ bool scrollbars = true, bool overscroll = true}) {
+    return _WrappedScrollBehavior(delegate: this, scrollbars: scrollbars, overscroll: true);
+  }
 
   /// The platform whose scroll physics should be implemented.
   ///
@@ -93,22 +65,22 @@ class ScrollBehavior {
   /// [GlowingOverscrollIndicator] to provide visual feedback when the user
   /// overscrolls.
   ///
-  /// This method is deprecated. Use [ScrollBehavior.buildViewportDecoration].
+  /// This method is deprecated. Use [ScrollBehavior.buildViewportDecoration] instead.
   @Deprecated(
     'Migrate to buildViewportDecoration. '
     'This feature was deprecated after v2.1.0-11.0.pre.'
   )
   Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
-    // When modifying this function, consider modifying the implementation in
-    // MaterialScrollBehavior and CupertinoScrollBehavior as well.
-    if ((glowingPlatforms ?? ScrollBehavior.defaultGlowingPlatforms).contains(getPlatform(context))) {
-      child = GlowingOverscrollIndicator(
-        child: child,
-        axisDirection: axisDirection,
-        color: _kDefaultGlowColor,
-      );
+    switch (getPlatform(context)) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return child;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        return buildOverscrollIndicator(context, child, axisDirection);
     }
-    return child;
   }
 
   /// Wraps the given widget with the information provided by [ScrollableDetails].
@@ -134,24 +106,35 @@ class ScrollBehavior {
     // MaterialScrollBehavior and CupertinoScrollBehavior as well.
     // By default:
     //   * On Android and Fuchsia, we add a GlowingOverscrollIndicator.
-    //   * On Desktop platforms, when a controller is provided, we add a
-    //     RawScrollbar.
-    final TargetPlatform platform = getPlatform(context);
+    //   * On Desktop platforms, we add a RawScrollbar.
+    switch (getPlatform(context)) {
+      case TargetPlatform.iOS:
+        return child;
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return buildScrollbar(child, details.controller);
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        return buildOverscrollIndicator(context, child, details.direction);
+    }
+  }
 
-    if ((glowingPlatforms ?? ScrollBehavior.defaultGlowingPlatforms).contains(platform)) {
-      child = GlowingOverscrollIndicator(
+  ///
+  Widget buildScrollbar(Widget child, ScrollController controller) {
+      return RawScrollbar(
         child: child,
-        axisDirection: details.direction,
+        controller: controller,
+      );
+  }
+
+  ///
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, AxisDirection direction) {
+      return GlowingOverscrollIndicator(
+        child: child,
+        axisDirection: direction,
         color: _kDefaultGlowColor,
       );
-    }
-    if ((scrollbarPlatforms ?? ScrollBehavior.defaultScrollbarPlatforms).contains(platform)) {
-      child = RawScrollbar (
-        child: child,
-        controller: details.controller,
-      );
-    }
-    return child;
   }
 
   /// Specifies the type of velocity tracker to use in the descendant
@@ -218,6 +201,71 @@ class ScrollBehavior {
 
   @override
   String toString() => objectRuntimeType(this, 'ScrollBehavior');
+}
+
+class _WrappedScrollBehavior implements ScrollBehavior {
+  const _WrappedScrollBehavior({
+    required this.delegate,
+    this.scrollbars = true,
+    this.overscroll = true,
+  });
+
+  final ScrollBehavior delegate;
+  final bool scrollbars;
+  final bool overscroll;
+
+  @override
+  bool get _useDecoration => true;
+
+  @override
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, AxisDirection direction) {
+    if (overscroll)
+      return delegate.buildOverscrollIndicator(context, child, direction);
+    return child;
+  }
+
+  @override
+  Widget buildScrollbar(Widget child, ScrollController controller) {
+    if (scrollbars)
+      return delegate.buildScrollbar(child, controller);
+    return child;
+  }
+
+  @override
+  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+    return delegate.buildViewportChrome(context, child, axisDirection);
+  }
+
+  @override
+  Widget buildViewportDecoration(BuildContext context, Widget child, ScrollableDetails details) {
+    return delegate.buildViewportDecoration(context, child, details);
+  }
+
+  @override
+  ScrollBehavior copyWith({bool scrollbars = true, bool overscroll = true}) {
+    return delegate.copyWith(scrollbars: scrollbars, overscroll: overscroll);
+  }
+
+  @override
+  TargetPlatform getPlatform(BuildContext context) {
+    return delegate.getPlatform(context);
+  }
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) {
+    return delegate.getScrollPhysics(context);
+  }
+
+  @override
+  bool shouldNotify(covariant ScrollBehavior oldDelegate) {
+    return delegate.shouldNotify(oldDelegate);
+  }
+
+  @override
+  GestureVelocityTrackerBuilder velocityTrackerBuilder(BuildContext context) {
+    return delegate.velocityTrackerBuilder(context);
+  }
+
 }
 
 /// Controls how [Scrollable] widgets behave in a subtree.

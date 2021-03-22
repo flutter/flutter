@@ -30,7 +30,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: ScrollConfiguration(
-          behavior: const ScrollBehavior(scrollbarPlatforms: <TargetPlatform>{}),
+          behavior: const NoScrollbarBehavior(),
           child: Scrollbar(
             isAlwaysShown: true,
             showTrackOnHover: true,
@@ -124,7 +124,7 @@ void main() {
         scrollbarTheme: scrollbarTheme,
       ),
       home: ScrollConfiguration(
-        behavior: const ScrollBehavior(scrollbarPlatforms: <TargetPlatform>{}),
+        behavior: const NoScrollbarBehavior(),
         child: Scrollbar(
           isAlwaysShown: true,
           controller: scrollController,
@@ -316,7 +316,7 @@ void main() {
           colorScheme: const ColorScheme.light(),
         ),
         home: ScrollConfiguration(
-          behavior: const ScrollBehavior(scrollbarPlatforms: <TargetPlatform>{}),
+          behavior: const NoScrollbarBehavior(),
           child: Scrollbar(
             thickness: thickness,
             hoverThickness: hoverThickness,
@@ -412,7 +412,7 @@ void main() {
       return MaterialApp(
         theme: appTheme,
         home: ScrollConfiguration(
-          behavior: const ScrollBehavior(scrollbarPlatforms: <TargetPlatform>{}),
+          behavior: const NoScrollbarBehavior(),
           child: Scrollbar(
             isAlwaysShown: true,
             showTrackOnHover: true,
@@ -625,6 +625,13 @@ void main() {
     // one is used. This results in a difference for doubles in debugFillProperties between
     // the web and the rest of Flutter's target platforms.
   }, skip: kIsWeb);
+}
+
+class NoScrollbarBehavior extends ScrollBehavior {
+  const NoScrollbarBehavior() : super(useDecoration: true);
+
+  @override
+  Widget buildScrollbar(Widget child, ScrollController controller) => child;
 }
 
 ScrollbarThemeData _scrollbarTheme({

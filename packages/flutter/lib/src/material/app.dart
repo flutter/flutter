@@ -692,48 +692,27 @@ class MaterialScrollBehavior extends ScrollBehavior {
   /// Creates a MaterialScrollBehavior that decorates [Scrollable]s with
   /// [GlowingOverscrollIndicator]s and [Scrollbar]s based on the current
   /// platform.
-  const MaterialScrollBehavior({
-    Set<TargetPlatform>? scrollbarPlatforms,
-    Set<TargetPlatform>? glowingPlatforms,
-  }) : super(
-    scrollbarPlatforms: scrollbarPlatforms,
-    glowingPlatforms: glowingPlatforms,
-  );
+  const MaterialScrollBehavior() : super(useDecoration: true);
 
   @override
-  TargetPlatform getPlatform(BuildContext context) {
-    return Theme.of(context).platform;
+  TargetPlatform getPlatform(BuildContext context) => Theme.of(context).platform;
+
+  @override
+  Widget buildScrollbar(Widget child, ScrollController controller) {
+    return Scrollbar (
+      child: child,
+      controller: controller,
+    );
   }
 
   @override
-  Widget buildViewportDecoration(
-    BuildContext context,
-    Widget child,
-    ScrollableDetails details,
-  ) {
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, AxisDirection direction) {
     final ThemeData theme = Theme.of(context);
-    // When modifying this function, consider modifying the implementation in
-    // the base class and CupertinoScrollBehavior as well.
-    // By default:
-    //   * On Android and Fuchsia, we add a GlowingOverscrollIndicator.
-    //   * On Desktop platforms, when a controller is provided, we add a
-    //     RawScrollbar.
-    final TargetPlatform platform = getPlatform(context);
-
-    if ((glowingPlatforms ?? ScrollBehavior.defaultGlowingPlatforms).contains(platform)) {
-      child = GlowingOverscrollIndicator(
-        child: child,
-        axisDirection: details.direction,
-        color: theme.accentColor,
-      );
-    }
-    if ((scrollbarPlatforms ?? ScrollBehavior.defaultScrollbarPlatforms).contains(platform)) {
-      child = RawScrollbar (
-        child: child,
-        controller: details.controller,
-      );
-    }
-    return child;
+    return GlowingOverscrollIndicator(
+      child: child,
+      axisDirection: direction,
+      color: theme.accentColor,
+    );
   }
 }
 

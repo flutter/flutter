@@ -15,7 +15,6 @@ import 'framework.dart';
 import 'media_query.dart';
 import 'notification_listener.dart';
 import 'primary_scroll_controller.dart';
-import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
 import 'scroll_notification.dart';
 import 'scroll_physics.dart';
@@ -93,7 +92,6 @@ abstract class ScrollView extends StatelessWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-    this.scrollBehavior,
   }) : assert(scrollDirection != null),
        assert(reverse != null),
        assert(shrinkWrap != null),
@@ -293,9 +291,6 @@ abstract class ScrollView extends StatelessWidget {
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
-  ///
-  final ScrollBehavior? scrollBehavior;
-
   /// Returns the [AxisDirection] in which the scroll view scrolls.
   ///
   /// Combines the [scrollDirection] with the [reverse] boolean to obtain the
@@ -384,8 +379,7 @@ abstract class ScrollView extends StatelessWidget {
       dragStartBehavior: dragStartBehavior,
       axisDirection: axisDirection,
       controller: scrollController,
-      physics: physics ?? scrollBehavior?.getScrollPhysics(context),
-      scrollBehavior: scrollBehavior,
+      physics: physics,
       semanticChildCount: semanticChildCount,
       restorationId: restorationId,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
@@ -605,74 +599,11 @@ abstract class ScrollView extends StatelessWidget {
 ///    the scroll position without using a [ScrollController].
 ///  * [IndexedSemantics], which allows annotating child lists with an index
 ///    for scroll announcements.
-///
-class CustomScrollView extends StatelessWidget {
+class CustomScrollView extends ScrollView {
   /// Creates a [ScrollView] that creates custom scroll effects using slivers.
   ///
   /// See the [ScrollView] constructor for more details on these arguments.
   const CustomScrollView({
-    this.key,
-    this.scrollDirection = Axis.vertical,
-    this.reverse = false,
-    this.controller,
-    this.primary,
-    this.physics,
-    this.shrinkWrap = false,
-    this.center,
-    this.anchor = 0.0,
-    this.cacheExtent,
-    this.slivers = const <Widget>[],
-    this.semanticChildCount,
-    this.dragStartBehavior = DragStartBehavior.start,
-    this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
-    this.restorationId,
-    this.clipBehavior = Clip.hardEdge,
-    this.scrollBehavior,
-  }) : super(key: key);
-
-  // TODO(Piinks): All of these need public docs now
-  final Key? key;
-  final Axis scrollDirection;
-  final bool reverse;
-  final ScrollController? controller;
-  final bool? primary;
-  final ScrollPhysics? physics;
-  final bool shrinkWrap;
-  final Key? center;
-  final double anchor;
-  final double? cacheExtent;
-  final List<Widget> slivers;
-  final int? semanticChildCount;
-  final DragStartBehavior dragStartBehavior;
-  final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
-  final String? restorationId;
-  final Clip clipBehavior;
-  final ScrollBehavior? scrollBehavior;
-
-  @override
-  Widget build(BuildContext context) {
-    return _CustomScrollView(
-      key: key,
-      scrollDirection: scrollDirection,
-      reverse: reverse,
-      controller: controller,
-      primary: primary,
-      physics: physics ?? scrollBehavior?.getScrollPhysics(context),
-      shrinkWrap: shrinkWrap,
-      center: center,
-      anchor: anchor,
-      cacheExtent: cacheExtent,
-      semanticChildCount: semanticChildCount,
-      dragStartBehavior: dragStartBehavior,
-      keyboardDismissBehavior: keyboardDismissBehavior,
-      restorationId: restorationId,
-      clipBehavior: clipBehavior,
-      scrollBehavior: scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbarPlatforms: <TargetPlatform>{}),
-    );
-  }
-}
-class _CustomScrollView extends ScrollView {
-  const _CustomScrollView({
     Key? key,
     Axis scrollDirection = Axis.vertical,
     bool reverse = false,
@@ -689,7 +620,6 @@ class _CustomScrollView extends ScrollView {
     ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     String? restorationId,
     Clip clipBehavior = Clip.hardEdge,
-    ScrollBehavior? scrollBehavior,
   }) : super(
     key: key,
     scrollDirection: scrollDirection,
@@ -706,7 +636,6 @@ class _CustomScrollView extends ScrollView {
     keyboardDismissBehavior: keyboardDismissBehavior,
     restorationId: restorationId,
     clipBehavior: clipBehavior,
-    scrollBehavior: scrollBehavior,
   );
 
   /// The slivers to place inside the viewport.
@@ -1349,7 +1278,7 @@ class ListView extends BoxScrollView {
            } else {
              widget = separatorBuilder(context, itemIndex);
              assert(() {
-               if (widget == null) { // ignore: dead_code
+               if (widget == null) {
                  throw FlutterError('separatorBuilder cannot return null.');
                }
                return true;
