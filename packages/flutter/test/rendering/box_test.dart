@@ -390,6 +390,7 @@ void main() {
 
     tearDown(() {
       firstErrorDetails = null;
+      RenderObject.debugCheckingIntrinsics = false;
     });
 
     test('throws if the resulting constraints are not normalized', () {
@@ -415,7 +416,6 @@ void main() {
         child: child,
       );
 
-      // No error reported.
       layout(box, constraints: const BoxConstraints(), phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
     });
   });
