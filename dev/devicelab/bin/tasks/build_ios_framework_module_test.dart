@@ -66,7 +66,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
   String content = pubspec.readAsStringSync();
   content = content.replaceFirst(
     '\ndependencies:\n',
-    '\ndependencies:\n  device_info: 0.4.1\n  package_info: 0.4.0+9\n',
+    '\ndependencies:\n  device_info: 0.4.1\n  package_info: 0.4.0+9\n  connectivity: 3.0.3\n',
   );
   pubspec.writeAsStringSync(content, flush: true);
   await inDirectory(projectDir, () async {
@@ -284,6 +284,21 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       'device_info',
     );
     await _checkBitcode(pluginFrameworkPath, mode);
+    if (!await _linksOnFlutter(pluginFrameworkPath)) {
+      throw TaskResult.failure('$pluginFrameworkPath does not link on Flutter');
+    }
+
+    final String transitiveDependencyFrameworkPath = path.join(
+      outputPath,
+      mode,
+      'Reachability.xcframework',
+      localXcodeArmDirectoryName,
+      'Reachability.framework',
+      'Reachability',
+    );
+    if (await _linksOnFlutter(transitiveDependencyFrameworkPath)) {
+      throw TaskResult.failure('Transitive dependency $transitiveDependencyFrameworkPath unexpectedly links on Flutter');
+    }
 
     checkFileExists(path.join(
       outputPath,
@@ -407,6 +422,18 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       mode,
       'package_info.xcframework',
     ));
+
+    checkDirectoryExists(path.join(
+      cocoapodsOutputPath,
+      mode,
+      'connectivity.xcframework',
+    ));
+
+    checkDirectoryExists(path.join(
+      cocoapodsOutputPath,
+      mode,
+      'Reachability.xcframework',
+    ));
   }
 
   if (File(path.join(
@@ -442,4 +469,14 @@ Future<String> _dylibSymbols(String pathToDylib) {
     '-arch',
     'arm64',
   ]);
+}
+
+Future<bool> _linksOnFlutter(String pathToBinary) async {
+  final String loadCommands = await eval('otool', <String>[
+    '-l',
+    '-arch',
+    'arm64',
+    pathToBinary,
+  ]);
+  return loadCommands.contains('Flutter.framework');
 }

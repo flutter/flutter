@@ -5,7 +5,7 @@
 @TestOn('chrome') // Uses web-only Flutter SDK
 
 import 'dart:async';
-import 'dart:ui' as ui; // ignore: unused_import, it looks unused as web-only elements are the only elements used.
+import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';

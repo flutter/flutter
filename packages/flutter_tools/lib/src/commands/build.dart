@@ -20,6 +20,7 @@ import 'build_fuchsia.dart';
 import 'build_ios.dart';
 import 'build_ios_framework.dart';
 import 'build_web.dart';
+import 'build_winuwp.dart';
 
 class BuildCommand extends FlutterCommand {
   BuildCommand({ bool verboseHelp = false }) {
@@ -40,6 +41,7 @@ class BuildCommand extends FlutterCommand {
       verboseHelp: verboseHelp
     ));
     addSubcommand(BuildWindowsCommand(verboseHelp: verboseHelp));
+    addSubcommand(BuildWindowsUwpCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildFuchsiaCommand(verboseHelp: verboseHelp));
   }
 

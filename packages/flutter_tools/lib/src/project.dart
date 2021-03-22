@@ -1211,7 +1211,7 @@ class WindowsUwpProject extends WindowsProject {
   WindowsUwpProject._(FlutterProject parent) : super._(parent);
 
   @override
-  String get _childDirectory => 'windows-uwp';
+  String get _childDirectory => 'winuwp';
 
   /// Eventually this will be used to check if the user's unstable project needs to be regenerated.
   int get projectVersion => int.tryParse(_editableDirectory.childFile('project_version').readAsStringSync());

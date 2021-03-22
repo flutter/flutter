@@ -32,7 +32,7 @@ Future<void> writeResponseData(
   String testOutputFilename = 'integration_response_data',
   String? destinationDirectory,
 }) async {
-  assert(testOutputFilename != null); // ignore: unnecessary_null_comparison
+  assert(testOutputFilename != null);
   destinationDirectory ??= testOutputsDirectory;
   await fs.directory(destinationDirectory).create(recursive: true);
   final File file = fs.file(path.join(

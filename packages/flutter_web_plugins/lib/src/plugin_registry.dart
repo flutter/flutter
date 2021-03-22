@@ -205,7 +205,7 @@ class PluginRegistry extends Registrar {
       'This feature was deprecated after v1.26.0-18.0.pre.'
     )
     BinaryMessenger? binaryMessenger,
-  ]) : super(); // ignore: avoid_unused_constructor_parameters
+  ]) : super();
 
   /// Returns `this`. The argument is ignored.
   @Deprecated(

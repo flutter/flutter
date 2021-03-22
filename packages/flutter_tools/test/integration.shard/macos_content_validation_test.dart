@@ -107,7 +107,7 @@ void main() {
       expect(outputFlutterFramework.childDirectory('Modules'), isNot(exists));
 
       // Archiving should contain a bitcode blob, but not building.
-      // This mimics Xcode behavior and present a developer from having to install a
+      // This mimics Xcode behavior and prevents a developer from having to install a
       // 300+MB app.
       final File outputFlutterFrameworkBinary = outputFlutterFramework
           .childDirectory('Versions')

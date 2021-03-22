@@ -263,16 +263,16 @@ class DayPicker extends StatelessWidget {
         final bool isSelectedDay = selectedDate.year == year && selectedDate.month == month && selectedDate.day == day;
         if (isSelectedDay) {
           // The selected day gets a circle background highlight, and a contrasting text color.
-          itemStyle = themeData.accentTextTheme.bodyText1;
+          itemStyle = themeData.textTheme.bodyText1;
           decoration = BoxDecoration(
-            color: themeData.accentColor,
+            color: themeData.colorScheme.secondary,
             shape: BoxShape.circle,
           );
         } else if (disabled) {
           itemStyle = themeData.textTheme.bodyText2!.copyWith(color: themeData.disabledColor);
         } else if (currentDate.year == year && currentDate.month == month && currentDate.day == day) {
           // The current day gets a different text color.
-          itemStyle = themeData.textTheme.bodyText1!.copyWith(color: themeData.accentColor);
+          itemStyle = themeData.textTheme.bodyText1!.copyWith(color: themeData.colorScheme.secondary);
         }
 
         Widget dayWidget = Container(

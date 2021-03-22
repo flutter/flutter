@@ -26,7 +26,7 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
-import 'package:path/path.dart' as path; // ignore: package_path_import
+import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:test_api/test_api.dart' as test_package show test; // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' hide test; // ignore: deprecated_member_use
 import 'package:vm_service/vm_service.dart' as vm_service;

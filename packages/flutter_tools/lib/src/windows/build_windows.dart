@@ -26,6 +26,9 @@ import 'visual_studio.dart';
 // future major versions of Visual Studio.
 const String _cmakeVisualStudioGeneratorIdentifier = 'Visual Studio 16 2019';
 
+/// Update the string when non-backwards compatible changes are made to the UWP template.
+const int kCurrentUwpTemplateVersion = 0;
+
 /// Builds the Windows project using msbuild.
 Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   String target,
@@ -108,6 +111,29 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
       '--appSizeBase=$relativeAppSizePath'
     );
   }
+}
+
+/// Build the Windows UWP project.
+///
+/// Note that this feature is currently unfinished.
+Future<void> buildWindowsUwp(WindowsUwpProject windowsProject, BuildInfo buildInfo, {
+  String target,
+  VisualStudio visualStudioOverride,
+}) async {
+  if (!windowsProject.existsSync()) {
+    throwToolExit(
+      'No Windows UWP desktop project configured. See '
+      'https://flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'to learn about adding Windows support to a project.',
+    );
+  }
+  if (windowsProject.projectVersion != kCurrentUwpTemplateVersion) {
+    throwToolExit(
+      'The Windows UWP project template and build process has changed. In order to build '
+      'you must delete the winuwp directory and re-create the project.',
+    );
+  }
+  throwToolExit('Windows UWP builds are not implemented.');
 }
 
 Future<void> _runCmakeGeneration(String cmakePath, Directory buildDir, Directory sourceDir) async {

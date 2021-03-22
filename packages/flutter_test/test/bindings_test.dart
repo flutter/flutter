@@ -11,8 +11,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:test_api/test_api.dart' as test_package;
 
 void main() {
-  final AutomatedTestWidgetsFlutterBinding binding = AutomatedTestWidgetsFlutterBinding();
-
   group(TestViewConfiguration, () {
     test('is initialized with top-level window if one is not provided', () {
       // The code below will throw without the default.
@@ -22,32 +20,15 @@ void main() {
 
   group(AutomatedTestWidgetsFlutterBinding, () {
     test('allows setting defaultTestTimeout to 5 minutes', () {
+      final AutomatedTestWidgetsFlutterBinding binding = AutomatedTestWidgetsFlutterBinding();
       binding.defaultTestTimeout = const test_package.Timeout(Duration(minutes: 5));
       expect(binding.defaultTestTimeout.duration, const Duration(minutes: 5));
     });
   });
 
-  // The next three tests must run in order -- first using `test`, then `testWidgets`, then `test` again.
-
-  int order = 0;
-
   test('Initializes httpOverrides and testTextInput', () async {
-    assert(order == 0);
-    expect(binding.testTextInput, isNotNull);
-    expect(binding.testTextInput.isRegistered, isFalse);
+    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+    expect(binding.testTextInput.isRegistered, true);
     expect(HttpOverrides.current, isNotNull);
-    order += 1;
-  });
-
-  testWidgets('Registers testTextInput', (WidgetTester tester) async {
-    assert(order == 1);
-    expect(tester.testTextInput.isRegistered, isTrue);
-    order += 1;
-  });
-
-  test('Unregisters testTextInput', () async {
-    assert(order == 2);
-    expect(binding.testTextInput.isRegistered, isFalse);
-    order += 1;
   });
 }

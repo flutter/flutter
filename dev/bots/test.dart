@@ -106,8 +106,8 @@ Future<void> main(List<String> args) async {
       'framework_coverage': _runFrameworkCoverage,
       'framework_tests': _runFrameworkTests,
       'tool_tests': _runToolTests,
+      'web_tool_tests': _runToolTests,
       'tool_integration_tests': _runIntegrationToolTests,
-      'web_tool_tests': _runWebToolTests,
       'web_tests': _runWebUnitTests,
       'web_integration_tests': _runWebIntegrationTests,
       'web_long_running_tests': _runWebLongRunningTests,
@@ -274,6 +274,16 @@ Future<void> _runCommandsToolTests() async {
   );
 }
 
+Future<void> _runWebToolTests() async {
+  await _pubRunTest(
+    path.join(flutterRoot, 'packages', 'flutter_tools'),
+    forceSingleCore: true,
+    testPaths: <String>[path.join('test', 'web.shard')],
+    enableFlutterToolAsserts: true,
+    perTestTimeout: const Duration(minutes: 3),
+  );
+}
+
 Future<void> _runIntegrationToolTests() async {
   final String toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
   final List<String> allTests = Directory(path.join(toolsPath, 'test', 'integration.shard'))
@@ -292,29 +302,8 @@ Future<void> _runToolTests() async {
   await selectSubshard(<String, ShardRunner>{
     'general': _runGeneralToolTests,
     'commands': _runCommandsToolTests,
+    'web': _runWebToolTests,
   });
-}
-
-Future<void> _runWebToolTests() async {
-  const String kDotShard = '.shard';
-  const String kWeb = 'web';
-  const String kTest = 'test';
-  final String toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
-
-  final Map<String, ShardRunner> subshards = <String, ShardRunner>{
-      kWeb:
-      () async {
-        await _pubRunTest(
-          toolsPath,
-          forceSingleCore: true,
-          testPaths: <String>[path.join(kTest, '$kWeb$kDotShard', '')],
-          enableFlutterToolAsserts: true,
-          perTestTimeout: const Duration(minutes: 3),
-        );
-      }
-  };
-
-  await selectSubshard(subshards);
 }
 
 /// Verifies that APK, and IPA (if on macOS) builds the examples apps

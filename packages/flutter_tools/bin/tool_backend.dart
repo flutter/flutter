@@ -5,8 +5,8 @@
 // @dart = 2.8
 
 // Do not add package imports to this file.
-import 'dart:convert'; // ignore: dart_convert_import.
-import 'dart:io'; // ignore: dart_io_import.
+import 'dart:convert'; // flutter_ignore: dart_convert_import.
+import 'dart:io'; // flutter_ignore: dart_io_import.
 
 /// Executes the required flutter tasks for a desktop build.
 Future<void> main(List<String> arguments) async {
