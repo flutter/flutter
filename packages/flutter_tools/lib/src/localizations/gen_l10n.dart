@@ -200,7 +200,7 @@ String generatePluralMethod(Message message, AppResourceBundle bundle) {
     '=2': 'two',
     'few': 'few',
     'many': 'many',
-    'other': 'other'
+    'other': 'other',
   };
 
   final List<String> pluralLogicArgs = <String>[];
@@ -211,9 +211,17 @@ String generatePluralMethod(Message message, AppResourceBundle bundle) {
       String argValue = generateString(match.group(2));
       for (final Placeholder placeholder in message.placeholders) {
         if (placeholder != countPlaceholder && placeholder.requiresFormatting) {
-          argValue = argValue.replaceAll('#${placeholder.name}#', '\$${placeholder.name}String');
+          if (needsCurlyBracketStringInterpolation(argValue, placeholder.name, true)) {
+            argValue = argValue.replaceAll('#${placeholder.name}#', '\${${placeholder.name}String}');
+          } else {
+            argValue = argValue.replaceAll('#${placeholder.name}#', '\$${placeholder.name}String');
+          }
         } else {
-          argValue = argValue.replaceAll('#${placeholder.name}#', '\$${placeholder.name}');
+          if (needsCurlyBracketStringInterpolation(argValue, placeholder.name, true)) {
+            argValue = argValue.replaceAll('#${placeholder.name}#', '\${${placeholder.name}}');
+          } else {
+            argValue = argValue.replaceAll('#${placeholder.name}#', '\$${placeholder.name}');
+          }
         }
       }
       pluralLogicArgs.add('      ${pluralIds[pluralKey]}: $argValue');
@@ -238,14 +246,50 @@ String generatePluralMethod(Message message, AppResourceBundle bundle) {
     .replaceAll('@(none)\n', '');
 }
 
+bool needsCurlyBracketStringInterpolation(String messageString, String placeholder, bool isPlural) {
+  final int placeholderIndex = messageString.indexOf(placeholder);
+  // This means that there is no need for a placeholder, since one was not found
+  // in the message
+  if (placeholderIndex == -1) {
+    return false;
+  }
+
+  final RegExp alphabetRE = RegExp(r'[a-zA-Z]');
+
+  if (placeholderIndex == 2) {
+    // Example: "'{hours} elapsed.'"
+    // "'{" = 2, '{' = 1, so placeholder string length + 3.
+    return alphabetRE.hasMatch(messageString[placeholderIndex + placeholder.length + 1]);
+  } else if (placeholderIndex + placeholder.length + 2 == messageString.length) {
+    // Example: "'We will count to {count}'"
+    // placeholderIndex starts at 'c', so subtract two to check if preceded
+    // by alphabet character.
+    return alphabetRE.hasMatch(messageString[placeholderIndex - 2]);
+  } else {
+    // Example: "'Waiting for {hours} hours.'"
+    // placeholderIndex starts at 'h' in '{hours}', so subtract two and add
+    // to length + 2
+    return alphabetRE.hasMatch(messageString[placeholderIndex - 2])
+        && alphabetRE.hasMatch(messageString[placeholderIndex + placeholder.length + 1]);
+  }
+}
+
 String generateMethod(Message message, AppResourceBundle bundle) {
   String generateMessage() {
     String messageValue = generateString(bundle.translationFor(message));
     for (final Placeholder placeholder in message.placeholders) {
       if (placeholder.requiresFormatting) {
-        messageValue = messageValue.replaceAll('{${placeholder.name}}', '\$${placeholder.name}String');
+        if (needsCurlyBracketStringInterpolation(messageValue, placeholder.name, false)) {
+          messageValue = messageValue.replaceAll('{${placeholder.name}}', '\${${placeholder.name}String}');
+        } else {
+          messageValue = messageValue.replaceAll('{${placeholder.name}}', '\$${placeholder.name}String');
+        }
       } else {
-        messageValue = messageValue.replaceAll('{${placeholder.name}}', '\$${placeholder.name}');
+        if (needsCurlyBracketStringInterpolation(messageValue, placeholder.name, false)) {
+          messageValue = messageValue.replaceAll('{${placeholder.name}}', '\${${placeholder.name}}');
+        } else {
+          messageValue = messageValue.replaceAll('{${placeholder.name}}', '\$${placeholder.name}');
+        }
       }
     }
 
