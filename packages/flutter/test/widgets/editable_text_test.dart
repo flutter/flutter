@@ -5888,8 +5888,11 @@ void main() {
     testWidgets('TextEditingController.buildTextSpan receives build context', (WidgetTester tester) async {
       final _AccentColorTextEditingController controller = _AccentColorTextEditingController('a');
       const Color color = Color.fromARGB(255, 1, 2, 3);
+      final ThemeData lightTheme = ThemeData.light();
       await tester.pumpWidget(MaterialApp(
-        theme: ThemeData.light().copyWith(accentColor: color),
+        theme: lightTheme.copyWith(
+          colorScheme: lightTheme.colorScheme.copyWith(secondary: color),
+        ),
         home: EditableText(
           controller: controller,
           focusNode: FocusNode(),
@@ -7221,6 +7224,147 @@ void main() {
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb);
 
+  testWidgets('navigating by word', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'word word word');
+    // word wo|rd| word
+    controller.selection = const TextSelection(
+      baseOffset: 7,
+      extentOffset: 9,
+      affinity: TextAffinity.upstream,
+    );
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: EditableText(
+            maxLines: 10,
+            controller: controller,
+            autofocus: true,
+            focusNode: focusNode,
+            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            keyboardType: TextInputType.text,
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 7);
+    expect(controller.selection.extentOffset, 9);
+
+    final String targetPlatform = defaultTargetPlatform.toString();
+    final String platform = targetPlatform.substring(targetPlatform.indexOf('.') + 1).toLowerCase();
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.arrowRight],
+      shift: true,
+      wordModifier: true,
+      platform: platform,
+    );
+    await tester.pump();
+    // word wo|rd word|
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 7);
+    expect(controller.selection.extentOffset, 14);
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.arrowLeft],
+      shift: true,
+      wordModifier: true,
+      platform: platform,
+    );
+    // word wo|rd |word
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 7);
+    expect(controller.selection.extentOffset, 10);
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.arrowLeft],
+      shift: true,
+      wordModifier: true,
+      platform: platform,
+    );
+    if (platform == 'macos') {
+      // word wo|rd word
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 7);
+      expect(controller.selection.extentOffset, 7);
+
+      await sendKeys(
+        tester,
+        <LogicalKeyboardKey>[LogicalKeyboardKey.arrowLeft],
+        shift: true,
+        wordModifier: true,
+        platform: platform,
+      );
+    }
+
+    // word |wo|rd word
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 7);
+    expect(controller.selection.extentOffset, 5);
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.arrowLeft],
+      shift: true,
+      wordModifier: true,
+      platform: platform,
+    );
+    // |word wo|rd word
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 7);
+    expect(controller.selection.extentOffset, 0);
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.arrowRight],
+      shift: true,
+      wordModifier: true,
+      platform: platform,
+    );
+    // word| wo|rd word
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 7);
+    expect(controller.selection.extentOffset, 4);
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.arrowRight],
+      shift: true,
+      wordModifier: true,
+      platform: platform,
+    );
+    if (platform == 'macos') {
+      // word wo|rd word
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 7);
+      expect(controller.selection.extentOffset, 7);
+
+      await sendKeys(
+        tester,
+        <LogicalKeyboardKey>[LogicalKeyboardKey.arrowRight],
+        shift: true,
+        wordModifier: true,
+        platform: platform,
+      );
+    }
+
+    // word wo|rd| word
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 7);
+    expect(controller.selection.extentOffset, 9);
+
+    // On web, using keyboard for selection is handled by the browser.
+  }, skip: kIsWeb, variant: TargetPlatformVariant.all());
+
   testWidgets('can change behavior by overriding text editing actions', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: testText);
     controller.selection = const TextSelection(
@@ -7559,7 +7703,7 @@ class _AccentColorTextEditingController extends TextEditingController {
 
   @override
   TextSpan buildTextSpan({required BuildContext context, TextStyle? style, required bool withComposing}) {
-    final Color color = Theme.of(context).accentColor;
+    final Color color = Theme.of(context).colorScheme.secondary;
     return super.buildTextSpan(context: context, style: TextStyle(color: color), withComposing: withComposing);
   }
 }

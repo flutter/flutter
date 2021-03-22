@@ -30,7 +30,8 @@ import 'ticker_provider.dart';
 /// Created automatically by [ScrollBehavior.buildViewportChrome] on platforms
 /// (e.g., Android) that commonly use this type of overscroll indication.
 ///
-/// In a [MaterialApp], the edge glow color is the [ThemeData.accentColor].
+/// In a [MaterialApp], the edge glow color is the overall theme's
+/// [ColorScheme.secondary] color.
 ///
 /// ## Customizing the Glow Position for Advanced Scroll Views
 ///

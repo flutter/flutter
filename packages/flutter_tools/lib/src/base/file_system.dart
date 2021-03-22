@@ -163,31 +163,19 @@ void copyDirectory(
 /// directories and files that the tool creates under the system temporary
 /// directory when the tool exits either normally or when killed by a signal.
 class LocalFileSystem extends local_fs.LocalFileSystem {
-  LocalFileSystem._(Signals signals, List<ProcessSignal> fatalSignals) :
-    _signals = signals, _fatalSignals = fatalSignals;
+  LocalFileSystem(this._signals, this._fatalSignals, this._shutdownHooks);
 
   @visibleForTesting
   LocalFileSystem.test({
     @required Signals signals,
     List<ProcessSignal> fatalSignals = Signals.defaultExitSignals,
-  }) : this._(signals, fatalSignals);
-
-  // Unless we're in a test of this class's signal handling features, we must
-  // have only one instance created with the singleton LocalSignals instance
-  // and the catchable signals it considers to be fatal.
-  static LocalFileSystem _instance;
-  static LocalFileSystem get instance => _instance ??= LocalFileSystem._(
-    LocalSignals.instance,
-    Signals.defaultExitSignals,
-  );
+  }) : this(signals, fatalSignals, null);
 
   Directory _systemTemp;
   final Map<ProcessSignal, Object> _signalTokens = <ProcessSignal, Object>{};
+  final ShutdownHooks _shutdownHooks;
 
-  @visibleForTesting
-  static Future<void> dispose() => LocalFileSystem.instance?._dispose();
-
-  Future<void> _dispose() async {
+  Future<void> dispose() async {
     _tryToDeleteTemp();
     for (final MapEntry<ProcessSignal, Object> signalToken in _signalTokens.entries) {
       await _signals.removeHandler(signalToken.key, signalToken.value);
@@ -233,7 +221,7 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
       }
       // Make sure that the temporary directory is cleaned up when the tool
       // exits normally.
-      shutdownHooks?.addShutdownHook(
+      _shutdownHooks?.addShutdownHook(
         _tryToDeleteTemp,
       );
     }

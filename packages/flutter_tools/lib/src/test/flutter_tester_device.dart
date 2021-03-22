@@ -5,7 +5,7 @@
 // @dart = 2.8
 
 import 'dart:async';
-import 'dart:io' as io; // ignore: dart_io_import;
+import 'dart:io' as io; // flutter_ignore: dart_io_import;
 
 import 'package:dds/dds.dart';
 import 'package:meta/meta.dart';

@@ -135,6 +135,20 @@ void main() {
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
+  testUsingContext('ipa build fails in debug with code analysis', () async {
+    final BuildCommand command = BuildCommand();
+    createCoreMockProjectFiles();
+
+    expect(createTestCommandRunner(command).run(
+      const <String>['build', 'ipa', '--no-pub', '--debug', '--analyze-size']
+    ), throwsToolExit(message: '--analyze-size" can only be used on release builds'));
+  }, overrides: <Type, Generator>{
+    Platform: () => macosPlatform,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
   testUsingContext('ipa build fails on non-macOS platform', () async {
     final BuildCommand command = BuildCommand();
     fileSystem.file('pubspec.yaml').createSync();
@@ -234,11 +248,29 @@ void main() {
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
+  testUsingContext('code size analysis fails when app not found', () async {
+    final BuildCommand command = BuildCommand();
+    createMinimalMockProjectFiles();
+
+    await expectToolExitLater(
+      createTestCommandRunner(command).run(
+          const <String>['build', 'ipa', '--no-pub', '--analyze-size']
+      ),
+      contains('Could not find app to analyze code size'),
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () =>
+        FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
   testUsingContext('Performs code size analysis and sends analytics', () async {
     final BuildCommand command = BuildCommand();
     createMinimalMockProjectFiles();
 
-    fileSystem.file('build/ios/Release-iphoneos/Runner.app/Frameworks/App.framework/App')
+    fileSystem.file('build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Frameworks/App.framework/App')
       ..createSync(recursive: true)
       ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
 
