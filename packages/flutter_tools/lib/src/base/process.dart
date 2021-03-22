@@ -11,7 +11,6 @@ import 'package:process/process.dart';
 
 import '../convert.dart';
 import 'common.dart';
-import 'context.dart';
 import 'io.dart';
 import 'logger.dart';
 
@@ -26,16 +25,12 @@ typedef ShutdownHook = FutureOr<dynamic> Function();
 // See [here](https://github.com/flutter/flutter/pull/14535#discussion_r167041161)
 // for more details.
 
-ShutdownHooks get shutdownHooks => ShutdownHooks.instance;
-
 abstract class ShutdownHooks {
   factory ShutdownHooks({
     @required Logger logger,
   }) => _DefaultShutdownHooks(
     logger: logger,
   );
-
-  static ShutdownHooks get instance => context.get<ShutdownHooks>();
 
   /// Registers a [ShutdownHook] to be executed before the VM exits.
   void addShutdownHook(
