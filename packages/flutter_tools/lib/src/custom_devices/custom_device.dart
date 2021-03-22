@@ -644,6 +644,8 @@ class CustomDevice extends Device {
 }
 
 class CustomDevices extends PollingDeviceDiscovery {
+  /// Create a custom device discovery that using the [CustomDeviceConfig]
+  /// in the context.
   CustomDevices({
     @required FeatureFlags featureFlags,
     @required ProcessManager processManager,
@@ -656,6 +658,8 @@ class CustomDevices extends PollingDeviceDiscovery {
        _config = null,
        super('custom devices');
 
+  /// Create a custom device discovery for the given [CustomDevicesConfig] instead
+  /// of sourcing it from the context.
   @visibleForTesting
   CustomDevices.test({
     @required FeatureFlags featureFlags,
