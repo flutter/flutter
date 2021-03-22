@@ -130,7 +130,7 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 ///                   });
 ///                 },
 ///               ),
-///               Text('Use the PointerSignalResolver?'),
+///               const Text('Use the PointerSignalResolver?'),
 ///             ],
 ///           ),
 ///         ),
