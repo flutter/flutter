@@ -96,7 +96,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
         // The network may be only temporarily unavailable, or the file will be
         // added on the server later. Avoid having future calls to resolve
         // fail to check the network again.
-        response.listen((_) {}).cancel();
+        response.listen(null, onError: (_) {}, cancelOnError: true);
         throw image_provider.NetworkImageLoadException(statusCode: response.statusCode, uri: resolved);
       }
 
