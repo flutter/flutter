@@ -55,22 +55,64 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 /// import 'package:flutter/gestures.dart';
 /// ```
 ///
+/// ```dart preamble
+/// class ColorChanger extends StatefulWidget {
+///   const ColorChanger({
+///     Key? key,
+///     required this.initialColor,
+///     required this.useResolver,
+///     required this.child,
+///   }) : super(key: key);
+///
+///   final HSVColor initialColor;
+///   final bool useResolver;
+///   final Widget child;
+///
+///   @override
+///   _ColorChangerState createState() => _ColorChangerState();
+/// }
+///
+/// class _ColorChangerState extends State<ColorChanger> {
+///   late HSVColor color;
+///
+///   void rotateColor() {
+///     setState(() {
+///       color = color.withHue((color.hue + 6) % 360.0);
+///     });
+///   }
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     color = widget.initialColor;
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return DecoratedBox(
+///       decoration: BoxDecoration(
+///         border: const Border.fromBorderSide(BorderSide()),
+///         color: color.toColor(),
+///       ),
+///       child: Listener(
+///         onPointerSignal: (PointerSignalEvent event) {
+///           if (widget.useResolver) {
+///             GestureBinding.instance!.pointerSignalResolver.register(event, (PointerSignalEvent event) {
+///               rotateColor();
+///             });
+///           } else {
+///             rotateColor();
+///           }
+///         },
+///         child: widget.child,
+///       ),
+///     );
+///   }
+/// }
+/// ```
+///
 /// ```dart
-/// HSVColor outerColor = const HSVColor.fromAHSV(0.2, 120.0, 1, 1);
-/// HSVColor innerColor = const HSVColor.fromAHSV(1, 60.0, 1, 1);
 /// bool useResolver = false;
-///
-/// void rotateOuterColor() {
-///   setState(() {
-///     outerColor = outerColor.withHue((outerColor.hue + 6) % 360.0);
-///   });
-/// }
-///
-/// void rotateInnerColor() {
-///   setState(() {
-///     innerColor = innerColor.withHue((innerColor.hue + 6) % 360.0);
-///   });
-/// }
 ///
 /// @override
 /// Widget build(BuildContext context) {
@@ -78,42 +120,16 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 ///     child: Stack(
 ///       fit: StackFit.expand,
 ///       children: <Widget>[
-///         Listener(
-///           onPointerSignal: (PointerSignalEvent event) {
-///             if (useResolver) {
-///               GestureBinding.instance!.pointerSignalResolver.register(event, (PointerSignalEvent event) {
-///                 rotateOuterColor();
-///               });
-///             } else {
-///               rotateOuterColor();
-///             }
-///           },
-///           child: DecoratedBox(
-///             decoration: BoxDecoration(
-///               border: const Border.fromBorderSide(BorderSide()),
-///               color: outerColor.toColor(),
-///             ),
-///             child: FractionallySizedBox(
-///               widthFactor: 0.5,
-///               heightFactor: 0.5,
-///               child: DecoratedBox(
-///                 decoration: BoxDecoration(
-///                   border: const Border.fromBorderSide(BorderSide()),
-///                   color: innerColor.toColor(),
-///                 ),
-///                 child: Listener(
-///                   onPointerSignal: (PointerSignalEvent event) {
-///                     if (useResolver) {
-///                       GestureBinding.instance!.pointerSignalResolver.register(event, (PointerSignalEvent event) {
-///                         rotateInnerColor();
-///                       });
-///                     } else {
-///                       rotateInnerColor();
-///                     }
-///                   },
-///                   child: const AbsorbPointer(),
-///                 ),
-///               ),
+///         ColorChanger(
+///           initialColor: const HSVColor.fromAHSV(0.2, 120.0, 1, 1),
+///           useResolver: useResolver,
+///           child: FractionallySizedBox(
+///             widthFactor: 0.5,
+///             heightFactor: 0.5,
+///             child: ColorChanger(
+///               initialColor: const HSVColor.fromAHSV(1, 60.0, 1, 1),
+///               useResolver: useResolver,
+///               child: const AbsorbPointer(),
 ///             ),
 ///           ),
 ///         ),
@@ -130,7 +146,10 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 ///                   });
 ///                 },
 ///               ),
-///               const Text('Use the PointerSignalResolver?'),
+///               const Text(
+///                 'Use the PointerSignalResolver?',
+///                 style: TextStyle(fontWeight: FontWeight.bold),
+///               ),
 ///             ],
 ///           ),
 ///         ),
