@@ -22,7 +22,7 @@ const String _kSamplePackageJson = '''
   "packages": [
     {
       "name": "path_provider_linux",
-      "rootUri": "path_provider_linux",
+      "rootUri": "/path_provider_linux",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     }
@@ -31,7 +31,7 @@ const String _kSamplePackageJson = '''
 ''';
 
 const String _kSamplePackagesFile = '''
-path_provider_linux:path_provider_linux/lib/
+path_provider_linux:/path_provider_linux/lib/
 ''';
 
 const String _kSamplePackageJsonWindows = '''
@@ -195,7 +195,6 @@ void main() {
     final File pluginPubspec = environment.fileSystem.currentDirectory.childDirectory('path_provider_linux').childFile('pubspec.yaml');
     pluginPubspec.createSync(recursive: true);
     pluginPubspec.writeAsStringSync(_kSamplePluginPubspec);
-    print('pubspec path: ${pluginPubspec.path} \n ${pluginPubspec.absolute.path}');
     final FlutterProject testProject = FlutterProject.fromDirectoryTest(environment.projectDir);
     await DartPluginRegistrantTarget.test(testProject).build(environment);
 
