@@ -41,15 +41,15 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 /// Here is an example that demonstrates the effect of not using the resolver
 /// versus using it.
 ///
-/// When this example is set to _not_ use the resolver, then scrolling the
+/// When this example is set to _not_ use the resolver, then triggering the
 /// mouse wheel over the outer box will cause only the outer box to change
-/// color, but scrolling the mouse wheel over inner box will cause _both_ the
-/// outer and the inner boxes to change color (because they're both receiving
-/// the scroll event).
+/// color, but triggering the mouse wheel over the inner box will cause _both_
+/// the outer and the inner boxes to change color (because they're both
+/// receiving the event).
 ///
-/// When this excample is set to _use_ the resolver, then only the box located
+/// When this example is set to _use_ the resolver, then only the box located
 /// directly under the cursor will change color when the mouse wheel is
-/// scrolled.
+/// triggered.
 ///
 /// ```dart imports
 /// import 'package:flutter/gestures.dart';
