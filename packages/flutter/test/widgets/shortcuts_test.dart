@@ -302,6 +302,19 @@ void main() {
       expect(invoked, 1);
       invoked = 0;
 
+      // While holding Ctrl-C, press KeyA: Reject
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      expect(invoked, 0);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+      expect(invoked, 1);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+      expect(invoked, 1);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      expect(invoked, 1);
+      invoked = 0;
+
       expect(RawKeyboard.instance.keysPressed, isEmpty);
     });
 

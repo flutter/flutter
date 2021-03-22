@@ -141,19 +141,23 @@ class KeySet<T extends KeyboardKey> {
 
 /// An interface to define the keyboard key combination to trigger a shortcut.
 ///
-/// A [Shortcuts] widget maps [ShortcutActivator]s to [Intent]s to define the
-/// behavior that a key combination should trigger. When a [Shortcuts] widget
-/// receives a key event, it checks the following conditions for every registered
-/// activator in insertion order and chooses the first `Intent` whose activator
-/// matches all conditions, if any:
+/// [ShortcutActivator]s are used by [Shortcuts] widgets, and are mapped to to
+/// [Intent]s, the behavior that the key combination should trigger. When a
+/// [Shortcuts] widget receives a key event, it looks up a matching activator
+/// in the following way, and triggers the intent it maps to:
 ///
-///  * The event's [RawKeyEvent.logicalKey] is one of [triggers].
-///  * The [accepts] returns true.
+///  * Find the registered [ShortcutActivator]s whose [trigger]s contain the
+///    incoming event in asertion order.
+///  * Of the previous list, finds the first activator whose [accepts] returns
+///    true.
 ///
 /// See also:
 ///
+///  * [SingleActivator], an implementation that represents a single key combined
+///    with modifiers (control, shift, alt, meta).
 ///  * [LogicalKeySet], an implementation that requires one or more
-///    [LogicalKeyboardKey]s to be pressed at the same time.
+///    [LogicalKeyboardKey]s to be pressed at the same time. Prefer
+///    [SingleActivator] when possible.
 abstract class ShortcutActivator {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -226,61 +230,17 @@ class _StandardPromptCore {
   }
 }
 
-/// A [ShortcutActivator] that requires one or more [LogicalKeyboardKey]s
-/// to be pressed at the same time.
+/// A set of [LogicalKeyboardKey]s that can be used as the keys in a map.
 ///
-/// More restrictions might be given to approach the typical expectation for
-/// shorcut combinations, depending on whether the given set of keys contain any
-/// non-modifier keys, where modifier keys are defined as both side of Ctrl keys,
-/// Shift keys, Alt keys, and Meta keys.
+/// [LogicalKeySet] can also be used as a [ShortcutActivator]. It will activate
+/// the intent when all [keys] are pressed. Always prefer [SingleActivator]
+/// instead whenever possible, whose behavior more closely resembles that of
+/// typical applications.
 ///
-/// If the keys contains non-modifier keys, then the non-modifier keys are used
-/// as trigger keys, and requires all of the following conditions:
-///
-///  * All non-modifier keys are pressed.
-///  * *Either* side of the mentioned modifier keys, even if side-specific
-///    variations are given, are pressed.
-///  * No other modifier keys are pressed.
-///
-/// {@tool snippet}
-/// The following object can be used for shorcut Ctrl-A. It:
-///
-///  * Accepts pressing ContrlLeft then KeyA.
-///  * Accepts pressing ContrlRight then KeyA.
-///  * Rejects pressing KeyA then ContrlLeft.
-///  * Rejects pressing ShiftLeft, ContrlLeft, then KeyA.
-/// ```dart
-/// final LogicalKeySet set1 = LogicalKeySet(
-///   LogicalKeyboardKey.controlLeft,
-///   LogicalKeyboardKey.keyA,
-/// );
-/// ```
-/// {@end-tool}
-///
-/// If the keys contains only modifier keys, then all modifier keys are used
-/// as trigger keys, and their given variations (side-specific or any side)
-/// are required to be held at the event, and it doesn't check the state of other
-/// modifiers.
-///
-/// {@tool snippet}
-/// The following object can be used for shorcut CtrlLeft-Shift. It:
-///
-///  * Accepts pressing ContrlLeft then ShiftLeft.
-///  * Accepts pressing ContrlLeft then ShiftRight.
-///  * Accepts pressing ShiftLeft then ContrlLeft.
-///  * Rejects pressing ControlLeft then ShiftRight.
-///  * Accepts pressing ShiftLeft, AltLeft, then ContrlLeft.
-/// ```dart
-/// final LogicalKeySet set2 = LogicalKeySet(
-///   LogicalKeyboardKey.controlLeft,
-///   LogicalKeyboardKey.shift,
-/// );
-/// ```
-/// {@end-tool}
-///
-/// This class is also a thin wrapper around a [Set], but changes the equality
-/// comparison from an identity comparison to a contents comparison so that
-/// non-identical sets with the same keys in them will compare as equal.
+/// This is a thin wrapper around a [Set], but changes the equality comparison
+/// from an identity comparison to a contents comparison so that non-identical
+/// sets with the same keys in them will compare as equal.
+
 class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
     implements ShortcutActivator {
   /// A constructor for making a [LogicalKeySet] of up to four keys.
@@ -386,12 +346,80 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutActivator, Int
   }
 }
 
+/// A shortcut key combination of a single key and modifiers.
+///
+/// This [ShortcutActivator] implements the typical shortcuts: a [trigger] key,
+/// and zero, some, or all of the four modifiers (control, shift, alt, meta),
+/// such as:
+///
+///  * Arrow Left
+///  * Shift + Delete
+///  * Control + Alt + Meta + Shift + Key A
+///
+/// More specifically, the shortcut is activated when the following conditions
+/// are met:
+///
+///  * The incoming event is a down event for the [trigger] key.
+///  * If [control] is true, then either or all control keys must be held.
+///    Otherwise, no control keys must be held.
+///  * The same goes for [alt], [shift], and [meta].
+///
+/// This means that additional non-modifier keys are allowed. For example,
+/// pressing key X while holding ControlLeft and key A *will* activate a
+/// `SingleActivator(LogicalKeyboardKey.keyX, control: true)`, which resembles
+/// typical behavior of operation systems. This is a major difference of
+/// [SingleActivator] from [LogicalKeySet].
 class SingleActivator with Diagnosticable implements ShortcutActivator {
-  /// A constructor for making a [LogicalKeySet] of up to four keys.
+  /// Create an activator of a trigger key and modifiers.
   ///
-  /// If you need a set of more than four keys, use [LogicalKeySet.fromSet].
+  /// The `trigger` should be the non-modifier key, pressed after all the
+  /// modifiers, while `control`, `shift`, `alt`, and `meta` represents whether
+  /// the respect modifier keys should be held (true) or released (false).
   ///
-  /// The same [LogicalKeyboardKey] may not be appear more than once in the set.
+  /// {@tool dartpad --template=stateful_widget_scaffold_center}
+  /// In the following example, the shortcut `Control + C` increases the counter:
+  ///
+  /// ```dart imports
+  /// import 'package:flutter/services.dart';
+  /// ```
+  ///
+  /// ```dart preamble
+  /// class IncrementIntent extends Intent {
+  ///   const IncrementIntent();
+  /// }
+  /// ```
+  ///
+  /// ```dart
+  /// int count = 0;
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return Shortcuts(
+  ///     shortcuts: <ShortcutActivator, Intent>{
+  ///       SingleActivator(LogicalKeyboardKey.keyC, control: true): const IncrementIntent(),
+  ///     },
+  ///     child: Actions(
+  ///       actions: <Type, Action<Intent>>{
+  ///         IncrementIntent: CallbackAction<IncrementIntent>(
+  ///           onInvoke: (IncrementIntent intent) => setState(() {
+  ///             count = count + 1;
+  ///           }),
+  ///         ),
+  ///       },
+  ///       child: Focus(
+  ///         autofocus: true,
+  ///         child: Column(
+  ///           children: <Widget>[
+  ///             const Text('Add to the counter by pressing Ctrl+C'),
+  ///             Text('count: $count'),
+  ///           ],
+  ///         ),
+  ///       ),
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
   const SingleActivator(
     this.trigger, {
     this.control = false,
@@ -400,10 +428,51 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
     this.meta = false,
   });
 
+  /// The non-modifier key of the shortcut that is pressed after all modifiers
+  /// to activate the shortcut.
+  ///
+  /// For example, for `Control + C`, [trigger] should be
+  /// [LogicalKeyboardKey.keyC].
   final LogicalKeyboardKey trigger;
+
+  /// Whether either (or both) control key should be held for [trigger] to
+  /// activate the shortcut.
+  ///
+  /// If false, then all control keys must be released at the event.
+  ///
+  /// See also:
+  ///
+  ///  * [LogicalKeyboardKey.controlLeft], [LogicalKeyboardKey.controlRight].
   final bool control;
+
+  /// Whether either (or both) shift key should be held for [trigger] to
+  /// activate the shortcut.
+  ///
+  /// If false, then all shift keys must be released at the event.
+  ///
+  /// See also:
+  ///
+  ///  * [LogicalKeyboardKey.shiftLeft], [LogicalKeyboardKey.shiftRight].
   final bool shift;
+
+  /// Whether either (or both) alt key should be held for [trigger] to
+  /// activate the shortcut.
+  ///
+  /// If false, then all alt keys must be released at the event.
+  ///
+  /// See also:
+  ///
+  ///  * [LogicalKeyboardKey.altLeft], [LogicalKeyboardKey.altRight].
   final bool alt;
+
+  /// Whether either (or both) meta key should be held for [trigger] to
+  /// activate the shortcut.
+  ///
+  /// If false, then all meta keys must be released at the event.
+  ///
+  /// See also:
+  ///
+  ///  * [LogicalKeyboardKey.metaLeft], [LogicalKeyboardKey.metaRight].
   final bool meta;
 
   @override
