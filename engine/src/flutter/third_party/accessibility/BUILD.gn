@@ -47,9 +47,7 @@ if (enable_unittests) {
 
     public_configs = [ ":accessibility_config" ]
 
-    # TODO(cbracken): make this block unconditional once Windows node support
-    # is landed.
-    if (is_mac) {
+    if (is_mac || is_win) {
       sources = [
         "ax/ax_enum_util_unittest.cc",
         "ax/ax_event_generator_unittest.cc",
@@ -74,31 +72,21 @@ if (enable_unittests) {
         "ax/platform/test_ax_node_wrapper.h",
       ]
 
-      deps = [
-        ":accessibility",
-        ":accessibility_fixtures",
-        "//flutter/testing",
-        "//flutter/testing:dart",
-      ]
-    } else if (is_win) {
-      sources = [
-        "base/win/dispatch_stub.cc",
-        "base/win/dispatch_stub.h",
-        "base/win/scoped_bstr_unittest.cc",
-        "base/win/scoped_safearray_unittest.cc",
-        "base/win/scoped_variant_unittest.cc",
-      ]
+      if (is_win) {
+        sources += [
+          "ax/platform/ax_fragment_root_win_unittest.cc",
+          "ax/platform/ax_platform_node_win_unittest.cc",
+          "base/win/dispatch_stub.cc",
+          "base/win/dispatch_stub.h",
+          "base/win/scoped_bstr_unittest.cc",
+          "base/win/scoped_safearray_unittest.cc",
+          "base/win/scoped_variant_unittest.cc",
+        ]
+      }
 
-      deps = [
-        ":accessibility_fixtures",
-        "//flutter/testing",
-        "//flutter/testing:dart",
-        "//flutter/third_party/accessibility/base",
-      ]
-    }
-
-    if (is_mac || is_win) {
       sources += [
+        "base/logging_unittests.cc",
+        "base/string_utils_unittest.cc",
         "gfx/geometry/insets_unittest.cc",
         "gfx/geometry/point_unittest.cc",
         "gfx/geometry/rect_unittest.cc",
@@ -109,7 +97,12 @@ if (enable_unittests) {
         "gfx/test/gfx_util.h",
       ]
 
-      deps += [ "//flutter/third_party/accessibility/gfx" ]
+      deps = [
+        ":accessibility",
+        ":accessibility_fixtures",
+        "//flutter/testing",
+        "//flutter/testing:dart",
+      ]
     }
   }
 }

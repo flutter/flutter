@@ -5,18 +5,21 @@
 #ifndef UI_ACCESSIBILITY_PLATFORM_AX_PLATFORM_NODE_WIN_UNITTEST_H_
 #define UI_ACCESSIBILITY_PLATFORM_AX_PLATFORM_NODE_WIN_UNITTEST_H_
 
-#include "ui/accessibility/platform/ax_platform_node_unittest.h"
+#include "ax_platform_node_unittest.h"
+// clang-format off
+#include "third_party/accessibility/base/win/atl.h"  // Must be before UIAutomationCore.h
+// clang-format on
+
+#include <UIAutomationCore.h>
+#include <wrl.h>
 
 #include <memory>
+#include <string>
 #include <unordered_set>
 
-#include "base/test/scoped_feature_list.h"
-#include "ui/accessibility/platform/ax_fragment_root_delegate_win.h"
-#include "ui/base/win/accessibility_misc_utils.h"
+#include "third_party/accessibility/ax/platform/ax_fragment_root_delegate_win.h"
 
 struct IAccessible;
-struct IAccessible2;
-struct IAccessible2_2;
 struct IAccessibleTableCell;
 struct IRawElementProviderFragment;
 struct IRawElementProviderFragmentRoot;
@@ -86,7 +89,7 @@ class AXPlatformNodeWinTest : public AXPlatformNodeTest {
   void TearDown() override;
 
  protected:
-  static const base::string16 kEmbeddedCharacterAsString;
+  static const std::u16string kEmbeddedCharacterAsString;
 
   AXPlatformNode* AXPlatformNodeFromNode(AXNode* node);
   template <typename T>
@@ -106,12 +109,6 @@ class AXPlatformNodeWinTest : public AXPlatformNodeTest {
   IRawElementProviderFragmentFromNode(AXNode* node);
   Microsoft::WRL::ComPtr<IAccessible> IAccessibleFromNode(AXNode* node);
   Microsoft::WRL::ComPtr<IAccessible> GetRootIAccessible();
-  Microsoft::WRL::ComPtr<IAccessible2> ToIAccessible2(
-      Microsoft::WRL::ComPtr<IUnknown> unknown);
-  Microsoft::WRL::ComPtr<IAccessible2> ToIAccessible2(
-      Microsoft::WRL::ComPtr<IAccessible> accessible);
-  Microsoft::WRL::ComPtr<IAccessible2_2> ToIAccessible2_2(
-      Microsoft::WRL::ComPtr<IAccessible> accessible);
   void CheckVariantHasName(const base::win::ScopedVariant& variant,
                            const wchar_t* expected_name);
   void CheckIUnknownHasName(Microsoft::WRL::ComPtr<IUnknown> unknown,
@@ -129,8 +126,6 @@ class AXPlatformNodeWinTest : public AXPlatformNodeTest {
   std::unique_ptr<AXFragmentRootWin> ax_fragment_root_;
 
   std::unique_ptr<TestFragmentRootDelegate> test_fragment_root_delegate_;
-
-  base::test::ScopedFeatureList scoped_feature_list_;
 };
 
 }  // namespace ui
