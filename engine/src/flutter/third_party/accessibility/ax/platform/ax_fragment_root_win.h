@@ -5,7 +5,7 @@
 #ifndef UI_ACCESSIBILITY_PLATFORM_AX_FRAGMENT_ROOT_WIN_H_
 #define UI_ACCESSIBILITY_PLATFORM_AX_FRAGMENT_ROOT_WIN_H_
 
-#include "ui/accessibility/platform/ax_platform_node_delegate_base.h"
+#include "ax_platform_node_delegate_base.h"
 
 #include <wrl/client.h>
 

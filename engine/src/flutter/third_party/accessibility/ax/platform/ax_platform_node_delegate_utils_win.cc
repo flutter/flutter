@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/accessibility/platform/ax_platform_node_delegate_utils_win.h"
+#include "ax_platform_node_delegate_utils_win.h"
 
-#include "ui/accessibility/ax_enums.mojom.h"
-#include "ui/accessibility/ax_node_data.h"
-#include "ui/accessibility/ax_role_properties.h"
-#include "ui/accessibility/platform/ax_platform_node.h"
-#include "ui/accessibility/platform/ax_platform_node_delegate.h"
+#include "ax/ax_node_data.h"
+#include "ax/ax_role_properties.h"
+#include "ax/platform/ax_platform_node.h"
+#include "ax/platform/ax_platform_node_delegate.h"
 
 namespace ui {
 
