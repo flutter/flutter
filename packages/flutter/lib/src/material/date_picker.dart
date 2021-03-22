@@ -1049,7 +1049,7 @@ class _DatePickerHeader extends StatelessWidget {
 ///       builder: (BuildContext context) {
 ///         return DateRangePickerDialog(
 ///           restorationId: 'date_picker_dialog',
-///           initialDateRange: _initialDateTimeRange(arguments as Map<dynamic, dynamic>),
+///           initialDateRange: _initialDateTimeRange(arguments! as Map<dynamic, dynamic>),
 ///           firstDate: DateTime(2021, 1, 1),
 ///           currentDate: DateTime(2021, 1, 25),
 ///           lastDate: DateTime(2022, 1, 1),
