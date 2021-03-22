@@ -1127,7 +1127,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 ///
 /// For more information about state restoration, see [RestorationManager].
 ///
-/// {@tool sample --template=state_restoration_cupertino}
+/// {@tool sample --template=stateless_widget_restoration_cupertino}
 ///
 /// This sample demonstrates how to create a restorable Cupertino modal route.
 /// This is accomplished by enabling state restoration by specifying

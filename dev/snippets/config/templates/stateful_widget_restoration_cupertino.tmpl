@@ -4,7 +4,7 @@
 
 {{code-dartImports}}
 
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 {{code-imports}}
 
 void main() => runApp(const MyApp());
@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return const CupertinoApp(
       restorationScopeId: 'app',
       title: _title,
       home: MyStatefulWidget(),
@@ -36,6 +36,6 @@ class MyStatefulWidget extends StatefulWidget {
 }
 
 /// This is the private State class that goes with MyStatefulWidget.
-class _MyStatefulWidgetState extends State<MyStatefulWidget> with RestorationMixin{
+class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   {{code}}
 }
