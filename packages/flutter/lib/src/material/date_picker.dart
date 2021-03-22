@@ -969,12 +969,6 @@ class _DatePickerHeader extends StatelessWidget {
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
-/// ```dart imports
-/// import 'package:flutter/material.dart';
-/// ```
-///
-/// ```dart
-///
 /// {@tool sample --template=freeform}
 ///
 /// This sample demonstrates how to create a restorable Material date range picker.
@@ -982,7 +976,11 @@ class _DatePickerHeader extends StatelessWidget {
 /// [MaterialApp.restorationScopeId] and using [Navigator.restorablePush] to
 /// push [DateRangePickerDialog] when the button is tapped.
 ///
+/// ```dart imports
+/// import 'package:flutter/material.dart';
+/// ```
 ///
+/// ```dart
 /// void main() {
 ///   runApp(const MyApp());
 /// }
