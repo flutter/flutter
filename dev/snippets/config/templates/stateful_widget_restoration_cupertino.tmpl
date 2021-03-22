@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
     return const CupertinoApp(
       restorationScopeId: 'app',
       title: _title,
-      home: MyStatefulWidget(),
+      home: MyStatefulWidget(restorationId: 'main'),
     );
   }
 }
@@ -29,11 +29,21 @@ class MyApp extends StatelessWidget {
 
 /// This is the stateful widget that the main application instantiates.
 class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+  const MyStatefulWidget({Key? key, this.restorationId}) : super(key: key);
+
+  final String? restorationId;
 
   @override
   _MyStatefulWidgetState createState() => _MyStatefulWidgetState();
 }
 
 /// This is the private State class that goes with MyStatefulWidget.
+/// RestorationProperty objects can be used because of RestorationMixin.
+class _MyStatefulWidgetState extends State<MyStatefulWidget> with RestorationMixin {
+  // In this example, the restoration ID for the mixin is passed in through
+  // the [StatefulWidget]'s constructor.
+  @override
+  String? get restorationId => widget.restorationId;
+
 {{code}}
+}
