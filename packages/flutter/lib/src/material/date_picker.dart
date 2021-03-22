@@ -111,7 +111,7 @@ const double _inputFormLandscapeHeight = 108.0;
 ///
 /// For more information about state restoration, see [RestorationManager].
 ///
-/// {@tool sample --template=freeform}
+/// {@tool sample --template=stateful_widget_restoration_material}
 ///
 /// This sample demonstrates how to create a restorable Material date picker.
 /// This is accomplished by enabling state restoration by specifying
@@ -120,35 +120,7 @@ const double _inputFormLandscapeHeight = 108.0;
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
-/// ```dart imports
-/// import 'package:flutter/material.dart';
-/// ```
-///
 /// ```dart
-/// void main() {
-///   runApp(const MyApp());
-/// }
-///
-/// class MyApp extends StatelessWidget {
-///   const MyApp({Key? key}) : super(key: key);
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return const MaterialApp(
-///       restorationScopeId: 'app',
-///       title: 'Restorable Date Picker Demo',
-///       home: MyHomePage(),
-///     );
-///   }
-/// }
-///
-/// class MyHomePage extends StatefulWidget {
-///   const MyHomePage({Key? key}) : super(key: key);
-///
-///   @override
-///   _MyHomePageState createState() => _MyHomePageState();
-/// }
-///
 /// class _MyHomePageState extends State<MyHomePage> with RestorationMixin {
 ///   @override
 ///   String get restorationId => 'scaffold_state';
