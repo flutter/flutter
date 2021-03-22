@@ -698,6 +698,12 @@ class SemanticsProperties extends DiagnosticableTree {
   /// slider is focused.
   final bool? slider;
 
+  /// If non-null, indicates that this subtree represents a slider.
+  ///
+  /// Talkback/\VoiceOver provides users with the hint "slider" when a
+  /// slider is focused.
+  final bool slider;
+
   /// If non-null, indicates that this subtree is read only.
   ///
   /// Only applicable when [textField] is true.
