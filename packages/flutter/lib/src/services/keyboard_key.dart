@@ -143,6 +143,26 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// from it, as the representation of the code could change at any time.
   final int keyId;
 
+  // Returns the bits that are not included in [valueMask], shifted to the
+  // right.
+  //
+  // For example, if the input is 0x12abcdabcd, then the result is 0x12.
+  //
+  // This could have been a trivial shifting for non-Web environment, but in
+  // order to support JavaScript, which only supports bitwise operation of up to
+  // 32 bits, this function extracts them using division.
+  //
+  // It returns 0 for release mode.
+  static int _debugNonValueBits(int numOf64Bits) {
+    int result = 0;
+    assert(() {
+      const int kDivisorForValueMask = valueMask + 1;
+      result = (numOf64Bits / kDivisorForValueMask).floor();
+      return true;
+    }());
+    return result;
+  }
+
   /// The debug string to print for this keyboard key, which will be null in
   /// release mode.
   String? get debugName {
@@ -150,7 +170,7 @@ class LogicalKeyboardKey extends KeyboardKey {
     assert(() {
       result = _debugNames[keyId];
       if (result == null) {
-        if (keyId & ~valueMask == unicodePlane) {
+        if (_debugNonValueBits(keyId) == 0) {
           result = 'Key ${String.fromCharCode(keyId)}';
         } else {
           result = 'Key with ID 0x${keyId.toRadixString(16).padLeft(11, '0')}';
