@@ -5,7 +5,7 @@
 #ifndef UI_ACCESSIBILITY_PLATFORM_AX_PLATFORM_NODE_DELEGATE_UTILS_WIN_H_
 #define UI_ACCESSIBILITY_PLATFORM_AX_PLATFORM_NODE_DELEGATE_UTILS_WIN_H_
 
-#include "ui/accessibility/ax_export.h"
+#include "ax/ax_export.h"
 
 namespace ui {
 

@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/accessibility/platform/ax_fragment_root_win.h"
-#include "ui/accessibility/accessibility_switches.h"
-#include "ui/accessibility/platform/ax_platform_node_win.h"
-#include "ui/accessibility/platform/ax_platform_node_win_unittest.h"
-#include "ui/accessibility/platform/test_ax_node_wrapper.h"
+#include "ax_fragment_root_win.h"
+#include "ax_platform_node_win.h"
+#include "ax_platform_node_win_unittest.h"
+#include "test_ax_node_wrapper.h"
 
 #include <UIAutomationClient.h>
 #include <UIAutomationCoreApi.h>
@@ -14,8 +13,8 @@
 #include "base/auto_reset.h"
 #include "base/win/scoped_safearray.h"
 #include "base/win/scoped_variant.h"
-#include "testing/gtest/include/gtest/gtest.h"
-#include "ui/accessibility/platform/uia_registrar_win.h"
+#include "gtest/gtest.h"
+#include "uia_registrar_win.h"
 
 using base::win::ScopedVariant;
 using Microsoft::WRL::ComPtr;
@@ -93,8 +92,8 @@ TEST_F(AXFragmentRootTest, UIAFindItemByPropertyUniqueId) {
   // the item.
   {
     unique_id = AXPlatformNodeFromNode(GetRootAsAXNode())->GetUniqueId();
-    unique_id_variant.Set(
-        SysAllocString(base::NumberToString16(-unique_id).c_str()));
+    unique_id_variant.Set(SysAllocString(reinterpret_cast<const wchar_t*>(
+        base::NumberToString16(-unique_id).c_str())));
 
     ComPtr<IRawElementProviderSimple> invalid_element_provider_simple;
     EXPECT_HRESULT_SUCCEEDED(
@@ -113,8 +112,8 @@ TEST_F(AXFragmentRootTest, UIAFindItemByPropertyUniqueId) {
   // corresponding IRawElementProviderSimple through FindItemByProperty().
   {
     unique_id = AXPlatformNodeFromNode(GetRootAsAXNode())->GetUniqueId();
-    unique_id_variant.Set(
-        SysAllocString(base::NumberToString16(-unique_id).c_str()));
+    unique_id_variant.Set(SysAllocString(reinterpret_cast<const wchar_t*>(
+        base::NumberToString16(-unique_id).c_str())));
 
     // When |start_after_element| of FindItemByProperty() is nullptr, we should
     // be able to find "text1".
@@ -151,8 +150,8 @@ TEST_F(AXFragmentRootTest, UIAFindItemByPropertyUniqueId) {
   // corresponding IRawElementProviderSimple through FindItemByProperty().
   {
     unique_id = AXPlatformNodeFromNode(text1_node)->GetUniqueId();
-    unique_id_variant.Set(
-        SysAllocString(base::NumberToString16(-unique_id).c_str()));
+    unique_id_variant.Set(SysAllocString(reinterpret_cast<const wchar_t*>(
+        base::NumberToString16(-unique_id).c_str())));
 
     // When |start_after_element| of FindItemByProperty() is nullptr, we should
     // be able to find "text1".
@@ -188,8 +187,8 @@ TEST_F(AXFragmentRootTest, UIAFindItemByPropertyUniqueId) {
   // corresponding IRawElementProviderSimple through FindItemByProperty().
   {
     unique_id = AXPlatformNodeFromNode(button_node)->GetUniqueId();
-    unique_id_variant.Set(
-        SysAllocString(base::NumberToString16(-unique_id).c_str()));
+    unique_id_variant.Set(SysAllocString(reinterpret_cast<const wchar_t*>(
+        base::NumberToString16(-unique_id).c_str())));
 
     // When |start_after_element| of FindItemByProperty() is nullptr, we should
     // be able to find "button".
@@ -225,8 +224,8 @@ TEST_F(AXFragmentRootTest, UIAFindItemByPropertyUniqueId) {
   {
     unique_id =
         AXPlatformNodeFromNode(button_node->children()[0])->GetUniqueId();
-    unique_id_variant.Set(
-        SysAllocString(base::NumberToString16(-unique_id).c_str()));
+    unique_id_variant.Set(SysAllocString(reinterpret_cast<const wchar_t*>(
+        base::NumberToString16(-unique_id).c_str())));
 
     // When |start_after_element| of FindItemByProperty() is nullptr, we should
     // be able to find "text2".
@@ -263,6 +262,7 @@ TEST_F(AXFragmentRootTest, UIAFindItemByPropertyUniqueId) {
 
 TEST_F(AXFragmentRootTest, TestUIAGetFragmentRoot) {
   AXNodeData root;
+  root.id = 1;
   Init(root);
   InitFragmentRoot();
 
@@ -371,6 +371,7 @@ TEST_F(AXFragmentRootTest, TestUIAGetFocus) {
 
 TEST_F(AXFragmentRootTest, TestUIAErrorHandling) {
   AXNodeData root;
+  root.id = 1;
   Init(root);
   InitFragmentRoot();
 
@@ -410,6 +411,7 @@ TEST_F(AXFragmentRootTest, TestUIAErrorHandling) {
 
 TEST_F(AXFragmentRootTest, TestGetChildCount) {
   AXNodeData root;
+  root.id = 1;
   Init(root);
   InitFragmentRoot();
 
@@ -422,6 +424,7 @@ TEST_F(AXFragmentRootTest, TestGetChildCount) {
 
 TEST_F(AXFragmentRootTest, TestChildAtIndex) {
   AXNodeData root;
+  root.id = 1;
   Init(root);
   InitFragmentRoot();
 
@@ -437,6 +440,7 @@ TEST_F(AXFragmentRootTest, TestChildAtIndex) {
 
 TEST_F(AXFragmentRootTest, TestGetParent) {
   AXNodeData root;
+  root.id = 1;
   Init(root);
   InitFragmentRoot();
 
@@ -451,6 +455,7 @@ TEST_F(AXFragmentRootTest, TestGetParent) {
 
 TEST_F(AXFragmentRootTest, TestGetPropertyValue) {
   AXNodeData root;
+  root.id = 1;
   Init(root);
   InitFragmentRoot();
 
@@ -666,6 +671,7 @@ TEST_F(AXFragmentRootTest, TestUIAMultipleFragmentRoots) {
 
 TEST_F(AXFragmentRootTest, TestFragmentRootMap) {
   AXNodeData root;
+  root.id = 1;
   Init(root);
 
   // There should be nothing in the map before we create a fragment root.

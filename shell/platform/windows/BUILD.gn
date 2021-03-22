@@ -155,6 +155,7 @@ source_set("flutter_windows_source") {
     "//flutter/shell/platform/common/client_wrapper:client_wrapper",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/platform/windows/client_wrapper:client_wrapper_windows",
+    "//flutter/third_party/accessibility",
     "//third_party/angle:libEGL_static",  # the order of libEGL_static and
                                           # libGLESv2_static is important.. if
                                           # reversed, will cause a linker error

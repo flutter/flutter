@@ -86,10 +86,20 @@ source_set("ax") {
     ]
   } else if (is_win) {
     sources += [
+      "platform/ax_fragment_root_delegate_win.h",
+      "platform/ax_fragment_root_win.cc",
+      "platform/ax_fragment_root_win.h",
+      "platform/ax_platform_node_delegate_utils_win.cc",
+      "platform/ax_platform_node_delegate_utils_win.h",
+      "platform/ax_platform_node_win.cc",
+      "platform/ax_platform_node_win.h",
       "platform/uia_registrar_win.cc",
       "platform/uia_registrar_win.h",
     ]
-    libs = [ "uiautomationcore.lib" ]
+    libs = [
+      "oleacc.lib",
+      "uiautomationcore.lib",
+    ]
   }
 
   public_deps = [
