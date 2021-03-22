@@ -452,7 +452,8 @@ class WebAssetServer implements AssetReader {
   }
 
   /// Tear down the http server running.
-  Future<void> dispose() {
+  Future<void> dispose() async {
+    await dwds?.stop();
     return _httpServer.close();
   }
 
