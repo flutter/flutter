@@ -119,7 +119,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
     //
     // See <https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/getModifierState>
     // for more information.
-    return KeyboardSide.all;
+    return KeyboardSide.any;
   }
 
   // Modifier key masks.
