@@ -1137,6 +1137,20 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 /// {@macro flutter.widgets.RestorationManager}
 ///
 /// ```dart
+/// Widget build(BuildContext context) {
+///   return CupertinoPageScaffold(
+///     navigationBar: const CupertinoNavigationBar(
+///       middle: Text('Home'),
+///     ),
+///     child: Center(child: CupertinoButton(
+///       onPressed: () {
+///         Navigator.of(context).restorablePush(_modalBuilder);
+///       },
+///       child: const Text('Open Modal'),
+///     )),
+///   );
+/// }
+///
 /// static Route<void> _modalBuilder(BuildContext context, Object? arguments) {
 ///   return CupertinoModalPopupRoute<void>(
 ///     builder: (BuildContext context) {
@@ -1159,21 +1173,6 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 ///         ],
 ///       );
 ///     },
-///   );
-/// }
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return CupertinoPageScaffold(
-///     navigationBar: const CupertinoNavigationBar(
-///       middle: Text('Home'),
-///     ),
-///     child: Center(child: CupertinoButton(
-///       onPressed: () {
-///         Navigator.of(context).restorablePush(_modalBuilder);
-///       },
-///       child: const Text('Open Modal'),
-///     )),
 ///   );
 /// }
 /// ```
@@ -1269,7 +1268,7 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 ///
 /// For more information about state restoration, see [RestorationManager].
 ///
-/// {@tool sample --template=freeform}
+/// {@tool sample --template=stateless_widget_restoration_cupertino}
 ///
 /// This sample demonstrates how to create a restorable Cupertino dialog. This is
 /// accomplished by enabling state restoration by specifying
@@ -1278,60 +1277,35 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
-/// ```dart imports
-/// import 'package:flutter/cupertino.dart';
-/// ```
-///
 /// ```dart
-/// void main() {
-///   runApp(const MyApp());
-/// }
-///
-/// class MyApp extends StatelessWidget {
-///   const MyApp({Key? key}) : super(key: key);
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return const CupertinoApp(
-///       restorationScopeId: 'app',
-///       home: MyHomePage(),
-///     );
-///   }
-/// }
-///
-/// class MyHomePage extends StatelessWidget {
-///   const MyHomePage({Key? key}) : super(key: key);
-///
-///   static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
-///     return CupertinoDialogRoute<void>(
-///       context: context,
-///       builder: (BuildContext context) {
-///         return const CupertinoAlertDialog(
-///           title: Text('Title'),
-///           content: Text('Content'),
-///           actions: <Widget>[
-///             CupertinoDialogAction(child: Text('Yes')),
-///             CupertinoDialogAction(child: Text('No')),
-///           ],
-///         );
+/// Widget build(BuildContext context) {
+///   return CupertinoPageScaffold(
+///     navigationBar: const CupertinoNavigationBar(
+///       middle: Text('Home'),
+///     ),
+///     child: Center(child: CupertinoButton(
+///       onPressed: () {
+///         Navigator.of(context).restorablePush(_dialogBuilder);
 ///       },
-///     );
-///   }
+///       child: const Text('Open Dialog'),
+///     )),
+///   );
+/// }
 ///
-///   @override
-///   Widget build(BuildContext context) {
-///     return CupertinoPageScaffold(
-///       navigationBar: const CupertinoNavigationBar(
-///         middle: Text('Home'),
-///       ),
-///       child: Center(child: CupertinoButton(
-///         onPressed: () {
-///           Navigator.of(context).restorablePush(_dialogBuilder);
-///         },
-///         child: const Text('Open Dialog'),
-///       )),
-///     );
-///   }
+/// static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
+///   return CupertinoDialogRoute<void>(
+///     context: context,
+///     builder: (BuildContext context) {
+///       return const CupertinoAlertDialog(
+///         title: Text('Title'),
+///         content: Text('Content'),
+///         actions: <Widget>[
+///           CupertinoDialogAction(child: Text('Yes')),
+///           CupertinoDialogAction(child: Text('No')),
+///         ],
+///       );
+///     },
+///   );
 /// }
 /// ```
 ///
