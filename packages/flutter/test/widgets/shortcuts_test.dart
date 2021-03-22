@@ -59,7 +59,7 @@ Widget logicalKeySetTester(LogicalKeySet prompt, ValueSetter<Intent> onInvoke) {
       }),
     },
     child: Shortcuts(
-      shortcuts: <ShortcutPrompt, Intent>{
+      shortcuts: <ShortcutActivator, Intent>{
         prompt: const TestIntent(),
       },
       child: const Focus(

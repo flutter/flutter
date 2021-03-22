@@ -141,11 +141,11 @@ class KeySet<T extends KeyboardKey> {
 
 /// An interface to define the keyboard key combination to trigger a shortcut.
 ///
-/// A [Shortcuts] widget maps [ShortcutPrompt]s to [Intent]s to define the
+/// A [Shortcuts] widget maps [ShortcutActivator]s to [Intent]s to define the
 /// behavior that a key combination should trigger. When a [Shortcuts] widget
 /// receives a key event, it checks the following conditions for every registered
-/// prompt in insertion order and chooses the first `Intent` whose prompt matches
-/// all conditions, if any:
+/// activator in insertion order and chooses the first `Intent` whose activator
+/// matches all conditions, if any:
 ///
 ///  * The event's [RawKeyEvent.logicalKey] is one of [triggers].
 ///  * The [accepts] returns true.
@@ -154,10 +154,10 @@ class KeySet<T extends KeyboardKey> {
 ///
 ///  * [LogicalKeySet], an implementation that requires one or more
 ///    [LogicalKeyboardKey]s to be pressed at the same time.
-abstract class ShortcutPrompt {
+abstract class ShortcutActivator {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const ShortcutPrompt();
+  const ShortcutActivator();
 
   /// All the keys that might be the final event to trigger this shortcut.
   ///
@@ -226,7 +226,7 @@ class _StandardPromptCore {
   }
 }
 
-/// A [ShortcutPrompt] that requires one or more [LogicalKeyboardKey]s
+/// A [ShortcutActivator] that requires one or more [LogicalKeyboardKey]s
 /// to be pressed at the same time.
 ///
 /// More restrictions might be given to approach the typical expectation for
@@ -282,7 +282,7 @@ class _StandardPromptCore {
 /// comparison from an identity comparison to a contents comparison so that
 /// non-identical sets with the same keys in them will compare as equal.
 class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
-    implements ShortcutPrompt {
+    implements ShortcutActivator {
   /// A constructor for making a [LogicalKeySet] of up to four keys.
   ///
   /// If you need a set of more than four keys, use [LogicalKeySet.fromSet].
@@ -300,14 +300,12 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
   /// Do not mutate the `keys` set after passing it to this object.
   LogicalKeySet.fromSet(Set<LogicalKeyboardKey> keys) : super.fromSet(keys);
 
-  late final _StandardPromptCore _promptCore = _computePromptCore(keys);
-
   @override
-  Iterable<LogicalKeyboardKey>? get triggers => _promptCore.triggeringKeys;
+  Iterable<LogicalKeyboardKey>? get triggers => keys;
 
   @override
   bool accepts(RawKeyEvent event, RawKeyboard state) {
-    return event is RawKeyDownEvent && _promptCore.requiresState(state);
+    return event is RawKeyDownEvent && keys.every(state.keysPressed.contains);
   }
 
   static const Set<LogicalKeyboardKey> _modifiers = <LogicalKeyboardKey>{
@@ -315,12 +313,6 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
     LogicalKeyboardKey.control,
     LogicalKeyboardKey.meta,
     LogicalKeyboardKey.shift,
-  };
-  static const Map<LogicalKeyboardKey, List<LogicalKeyboardKey>> _unmapSynonyms = <LogicalKeyboardKey, List<LogicalKeyboardKey>>{
-    LogicalKeyboardKey.control: <LogicalKeyboardKey>[LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.controlRight],
-    LogicalKeyboardKey.shift: <LogicalKeyboardKey>[LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.shiftRight],
-    LogicalKeyboardKey.alt: <LogicalKeyboardKey>[LogicalKeyboardKey.altLeft, LogicalKeyboardKey.altRight],
-    LogicalKeyboardKey.meta: <LogicalKeyboardKey>[LogicalKeyboardKey.metaLeft, LogicalKeyboardKey.metaRight],
   };
 
   /// Returns a description of the key set that is short and readable.
@@ -350,46 +342,17 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Set<LogicalKeyboardKey>>('keys', _keys, description: debugDescribeKeys()));
   }
-
-  static _StandardPromptCore _computePromptCore(Set<LogicalKeyboardKey> keys) {
-    final Set<LogicalKeyboardKey> collapsed = LogicalKeyboardKey.collapseSynonyms(keys);
-    assert(collapsed.isNotEmpty);
-    final Set<LogicalKeyboardKey> nonModifierKeys = collapsed.difference(_modifiers);
-    if (nonModifierKeys.isEmpty) {
-      // If there are no keys left with all modifiers excluded, consider
-      // modifier keys as normal triggering keys.
-      final Set<LogicalKeyboardKey> triggeringKeys = keys.expand(
-        (LogicalKeyboardKey key) => _unmapSynonyms[key] ?? <LogicalKeyboardKey>[key],
-      ).toSet();
-      return _StandardPromptCore(
-        control: null,
-        shift: null,
-        alt: null,
-        meta: null,
-        triggeringKeys: triggeringKeys,
-        stateKeys: keys,
-      );
-    }
-    return _StandardPromptCore(
-      control: collapsed.contains(LogicalKeyboardKey.control),
-      shift: collapsed.contains(LogicalKeyboardKey.shift),
-      alt: collapsed.contains(LogicalKeyboardKey.alt),
-      meta: collapsed.contains(LogicalKeyboardKey.meta),
-      triggeringKeys: nonModifierKeys,
-      stateKeys: nonModifierKeys,
-    );
-  }
 }
 
 /// A [DiagnosticsProperty] which handles formatting a `Map<LogicalKeySet,
 /// Intent>` (the same type as the [Shortcuts.shortcuts] property) so that its
 /// diagnostic output is human-readable.
-class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutPrompt, Intent>> {
+class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutActivator, Intent>> {
   /// Create a diagnostics property for `Map<LogicalKeySet, Intent>` objects,
   /// which are the same type as the [Shortcuts.shortcuts] property.
   ShortcutMapProperty(
     String name,
-    Map<ShortcutPrompt, Intent> value, {
+    Map<ShortcutActivator, Intent> value, {
     bool showName = true,
     Object defaultValue = kNoDefaultValue,
     DiagnosticLevel level = DiagnosticLevel.info,
@@ -406,23 +369,80 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutPrompt, Intent
        );
 
   @override
-  Map<ShortcutPrompt, Intent> get value => super.value!;
+  Map<ShortcutActivator, Intent> get value => super.value!;
 
   @override
   String valueToString({ TextTreeConfiguration? parentConfiguration }) {
-    return '{${value.keys.map<String>((ShortcutPrompt keySet) => '{${keySet.debugDescribeKeys()}}: ${value[keySet]}').join(', ')}}';
+    return '{${value.keys.map<String>((ShortcutActivator keySet) => '{${keySet.debugDescribeKeys()}}: ${value[keySet]}').join(', ')}}';
+  }
+}
+
+class SingleTriggerActivator with Diagnosticable implements ShortcutActivator {
+  /// A constructor for making a [LogicalKeySet] of up to four keys.
+  ///
+  /// If you need a set of more than four keys, use [LogicalKeySet.fromSet].
+  ///
+  /// The same [LogicalKeyboardKey] may not be appear more than once in the set.
+  const SingleTriggerActivator(
+    this.trigger, {
+    this.control = false,
+    this.shift = false,
+    this.alt = false,
+    this.meta = false,
+  );
+
+  final LogicalKeyboardKey trigger;
+  final bool control;
+  final bool shift;
+  final bool alt;
+  final bool meta;
+
+  @override
+  Iterable<LogicalKeyboardKey>? get triggers sync* {
+    yield trigger;
+  }
+
+  @override
+  bool accepts(RawKeyEvent event, RawKeyboard state) {
+    final Set<LogicalKeyboardKey> pressed = state.keysPressed;
+    return event is RawKeyDownEvent
+      && (control == (pressed.contains(LogicalKeyboardKey.controlLeft) || pressed.contains(LogicalKeyboardKey.controlRight)))
+      && (shift == (pressed.contains(LogicalKeyboardKey.shiftLeft) || pressed.contains(LogicalKeyboardKey.shiftRight)))
+      && (alt == (pressed.contains(LogicalKeyboardKey.altLeft) || pressed.contains(LogicalKeyboardKey.altRight)))
+      && (meta == (pressed.contains(LogicalKeyboardKey.metaLeft) || pressed.contains(LogicalKeyboardKey.metaRight)));
+  }
+
+  /// Returns a description of the key set that is short and readable.
+  ///
+  /// Intended to be used in debug mode for logging purposes.
+  @override
+  String debugDescribeKeys() {
+    final List<String> keys = <String>[
+      if (control) 'Ctrl',
+      if (alt) 'Alt',
+      if (shift) 'Shift',
+      if (meta) 'Meta',
+      trigger.debugName ?? trigger.toStringShort(),
+    ];
+    return keys.join(' + ');
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<String>('key', debugDescribeKeys()));
   }
 }
 
 class _PromptIntent with Diagnosticable {
-  const _PromptIntent(this.prompt, this.intent);
-  final ShortcutPrompt prompt;
+  const _PromptIntent(this.activator, this.intent);
+  final ShortcutActivator activator;
   final Intent intent;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<String>('prompt', prompt.debugDescribeKeys()));
+    properties.add(DiagnosticsProperty<String>('activator', activator.debugDescribeKeys()));
     properties.add(DiagnosticsProperty<Intent>('intent', intent));
   }
 }
@@ -434,7 +454,7 @@ class _PromptIntent with Diagnosticable {
 class ShortcutManager extends ChangeNotifier with Diagnosticable {
   /// Constructs a [ShortcutManager].
   ShortcutManager({
-    Map<ShortcutPrompt, Intent> shortcuts = const <ShortcutPrompt, Intent>{},
+    Map<ShortcutActivator, Intent> shortcuts = const <ShortcutActivator, Intent>{},
     this.modal = false,
   })  : assert(shortcuts != null),
         _shortcuts = shortcuts;
@@ -457,24 +477,24 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   /// When the map is changed, listeners to this manager will be notified.
   ///
   /// The returned map should not be modified.
-  Map<ShortcutPrompt, Intent> get shortcuts => _shortcuts;
-  Map<ShortcutPrompt, Intent> _shortcuts = <ShortcutPrompt, Intent>{};
-  set shortcuts(Map<ShortcutPrompt, Intent> value) {
+  Map<ShortcutActivator, Intent> get shortcuts => _shortcuts;
+  Map<ShortcutActivator, Intent> _shortcuts = <ShortcutActivator, Intent>{};
+  set shortcuts(Map<ShortcutActivator, Intent> value) {
     assert(value != null);
-    if (!mapEquals<ShortcutPrompt, Intent>(_shortcuts, value)) {
+    if (!mapEquals<ShortcutActivator, Intent>(_shortcuts, value)) {
       _shortcuts = value;
       _indexedShortcutsCache = null;
       notifyListeners();
     }
   }
 
-  static Map<LogicalKeyboardKey?, List<_PromptIntent>> _indexShortcuts(Map<ShortcutPrompt, Intent> source) {
+  static Map<LogicalKeyboardKey?, List<_PromptIntent>> _indexShortcuts(Map<ShortcutActivator, Intent> source) {
     final Map<LogicalKeyboardKey?, List<_PromptIntent>> result = <LogicalKeyboardKey?, List<_PromptIntent>>{};
-    source.forEach((ShortcutPrompt prompt, Intent intent) {
-      final Iterable<LogicalKeyboardKey?>? triggeringKeys = prompt.triggers;
+    source.forEach((ShortcutActivator activator, Intent intent) {
+      final Iterable<LogicalKeyboardKey?>? triggeringKeys = activator.triggers;
       for (final LogicalKeyboardKey? trigger in triggeringKeys ?? <LogicalKeyboardKey?>[null]) {
         result.putIfAbsent(trigger, () => <_PromptIntent>[])
-          .add(_PromptIntent(prompt, intent));
+          .add(_PromptIntent(activator, intent));
       }
     });
     return result;
@@ -495,9 +515,9 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
     final List<_PromptIntent>? candidates = _indexedShortcuts[event.logicalKey];
     if (candidates == null)
       return null;
-    for (final _PromptIntent promptIntent in candidates) {
-      if (promptIntent.prompt.accepts(event, state)) {
-        return promptIntent.intent;
+    for (final _PromptIntent activatorIntent in candidates) {
+      if (activatorIntent.activator.accepts(event, state)) {
+        return activatorIntent.intent;
       }
     }
     return null;
@@ -549,7 +569,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Map<ShortcutPrompt, Intent>>('shortcuts', _shortcuts));
+    properties.add(DiagnosticsProperty<Map<ShortcutActivator, Intent>>('shortcuts', _shortcuts));
     properties.add(FlagProperty('modal', value: modal, ifTrue: 'modal', defaultValue: false));
   }
 }
@@ -591,7 +611,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 /// @override
 /// Widget build(BuildContext context) {
 ///   return Shortcuts(
-///     shortcuts: <ShortcutPrompt, Intent>{
+///     shortcuts: <ShortcutActivator, Intent>{
 ///       LogicalKeySet(LogicalKeyboardKey.arrowUp): const IncrementIntent(),
 ///       LogicalKeySet(LogicalKeyboardKey.arrowDown): const DecrementIntent(),
 ///     },
@@ -698,7 +718,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 /// @override
 /// Widget build(BuildContext context) {
 ///   return Shortcuts(
-///     shortcuts: <ShortcutPrompt, Intent>{
+///     shortcuts: <ShortcutActivator, Intent>{
 ///       LogicalKeySet(LogicalKeyboardKey.arrowUp): const IncrementIntent(2),
 ///       LogicalKeySet(LogicalKeyboardKey.arrowDown): const DecrementIntent(2),
 ///     },
@@ -765,7 +785,7 @@ class Shortcuts extends StatefulWidget {
   /// in here (e.g. a final variable from your widget class) instead of defining
   /// it inline in the build function.
   /// {@endtemplate}
-  final Map<ShortcutPrompt, Intent> shortcuts;
+  final Map<ShortcutActivator, Intent> shortcuts;
 
   /// The child widget for this [Shortcuts] widget.
   ///
