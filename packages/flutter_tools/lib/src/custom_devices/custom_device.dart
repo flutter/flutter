@@ -62,15 +62,11 @@ class CustomDeviceLogReader extends DeviceLogReader {
 
     process.stdout.transform<String>(decoder)
       .transform<String>(const LineSplitter())
-      .listen(
-        (String stdoutLine) {
-        _logLinesController.add(stdoutLine);
-        }
-      );
+      .listen(_logLinesController.add);
 
     process.stderr.transform<String>(decoder)
       .transform<String>(const LineSplitter())
-      .listen((String stderrLine) => _logLinesController.add(stderrLine));
+      .listen(_logLinesController.add);
   }
 
   /// Add all lines emitted by [lines] to this [CustomDeviceLogReader]s [logLines]
@@ -160,7 +156,7 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
 
     // if the process exits (even with exitCode == 0), that is considered
     // a port forwarding failure and we complete with a null value.
-    unawaited(process.exitCode.then((int exitCode) {
+    unawaited(process.exitCode.whenComplete(() {
       if (!completer.isCompleted) {
         completer.complete(null);
       }
@@ -256,37 +252,37 @@ class CustomDeviceAppSession {
     );
 
     final Process process = await _processManager.start(interpolated);
-
     assert(_process == null);
     _process = process;
 
     final ProtocolDiscovery discovery = ProtocolDiscovery.observatory(
       logReader,
       portForwarder: _device._config.usesPortForwarding ? _device.portForwarder : null,
-      hostPort: null,
-      devicePort: null,
+      hostPort: null, devicePort: null,
       logger: _logger,
       ipv6: ipv6,
     );
 
+    // We need to make the discovery listen to the logReader before the logReader
+    // listens to the process output since logReader.lines is a broadcast stream
+    // and events may be discarded.
+    // Whether that actually happens is another thing since this is all executed
+    // in the same microtask AFAICT but this way we're on the safe side.
     logReader.listenToProcessOutput(process);
 
     final Uri observatoryUri = await discovery.uri;
-
     await discovery.cancel();
-
     return LaunchResult.succeeded(observatoryUri: observatoryUri);
   }
 
   Future<bool> stop() async {
     if (_process == null) {
       return false;
-    } else {
-      final bool result = _processManager.killPid(_process.pid);
-      _process = null;
-
-      return result;
     }
+
+    final bool result = _processManager.killPid(_process.pid);
+    _process = null;
+    return result;
   }
 
   void dispose() {
@@ -517,9 +513,9 @@ class CustomDevice extends Device {
   }) {
     if (app != null) {
       return _getOrCreateAppSession(app).logReader;
-    } else {
-      return _globalLogReader;
     }
+
+    return _globalLogReader;
   }
 
   @override
@@ -660,6 +656,7 @@ class CustomDevices extends PollingDeviceDiscovery {
        _config = null,
        super('custom devices');
 
+  @visibleForTesting
   CustomDevices.test({
     @required FeatureFlags featureFlags,
     @required ProcessManager processManager,

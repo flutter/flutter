@@ -34,6 +34,7 @@ class CustomDevicesConfig {
          deleteFileOnFormatException: false
        );
 
+  @visibleForTesting
   CustomDevicesConfig.test({
     @required FileSystem fileSystem,
     Directory directory,
