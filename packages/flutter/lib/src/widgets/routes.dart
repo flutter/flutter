@@ -5,15 +5,18 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
+import 'dart:ui' show DisplayFeature;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import 'actions.dart';
 import 'basic.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
+import 'media_query.dart';
 import 'modal_barrier.dart';
 import 'navigator.dart';
 import 'overlay.dart';
@@ -22,7 +25,6 @@ import 'primary_scroll_controller.dart';
 import 'restoration.dart';
 import 'scroll_controller.dart';
 import 'transitions.dart';
-import 'media_query.dart';
 
 // Examples can assume:
 // dynamic routeObserver;
@@ -1877,47 +1879,58 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 ///  * [showDialog], which is a way to display a DialogRoute.
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
 class HingeAvoidingModalWrapper extends StatelessWidget {
+  /// Creates a widget that positions its child so that it avoids display features.
+  const HingeAvoidingModalWrapper({
+    Key? key,
+    required this.child,
+    this.screen = 0,
+  }) : super(key: key);
+
+  /// The child that will avoid the display features.
   final Widget child;
+
+  /// The screen on which to display the child.
   final int screen;
 
-  HingeAvoidingModalWrapper({required this.child, this.screen = 0});
-  
   @override
   Widget build(BuildContext context) {
-    final safeAreas = _safeAreasInNavigator(context);
-    final safeArea = safeAreas.length > screen ? safeAreas[screen] : safeAreas.last;
+    final List<Rect> safeAreas = _safeAreasInNavigator(context);
+    final Rect safeArea = safeAreas.length > screen ? safeAreas[screen] : safeAreas.last;
 
     return Stack(
-      children: [
+      children: <Widget>[
         Positioned.fromRect(rect: safeArea, child: child),
       ],
     );
   }
 
   List<Rect> _safeAreasInNavigator(BuildContext context) {
-    final renderObject = Overlay.of(context)?.context.findRenderObject(); //navigatorRenderObject;
+    final RenderObject? renderObject = Overlay.of(context)?.context.findRenderObject(); //navigatorRenderObject;
     Rect? navigatorBounds;
-    var translation = renderObject?.getTransformTo(null)?.getTranslation();
+    final Vector3? translation = renderObject?.getTransformTo(null).getTranslation();
     if (translation != null) {
-      navigatorBounds = renderObject?.paintBounds?.shift(Offset(translation.x, translation.y));
+      navigatorBounds = renderObject?.paintBounds.shift(Offset(translation.x, translation.y));
     }
     List<Rect> avoidBounds;
     if (navigatorBounds == null) {
-      final screenSize = MediaQuery.of(context).size;
+      final Size screenSize = MediaQuery.of(context).size;
       navigatorBounds = Rect.fromLTWH(0, 0, screenSize.width, screenSize.height);
-      avoidBounds = MediaQuery.of(context).displayFeatures.map((e) => e.bounds).toList();
+      avoidBounds = MediaQuery.of(context).displayFeatures
+          .map((DisplayFeature displayFeature) => displayFeature.bounds)
+          .toList();
     } else {
       avoidBounds = MediaQuery.of(context).displayFeatures
-          .where((e) => e.bounds.overlaps(navigatorBounds!))
-          .map((e) => e.bounds.shift(-navigatorBounds!.topLeft)).toList();
+          .where((DisplayFeature displayFeature) => displayFeature.bounds.overlaps(navigatorBounds!))
+          .map((DisplayFeature displayFeature) => displayFeature.bounds.shift(-navigatorBounds!.topLeft))
+          .toList();
     }
     return _safeAreas(Rect.fromLTWH(0, 0, navigatorBounds.width, navigatorBounds.height), avoidBounds);
   }
 
   List<Rect> _safeAreas(Rect screen, List<Rect> avoidBounds) {
-    Iterable<Rect> areas = [screen];
-    avoidBounds.forEach((bounds) {
-      areas = areas.expand((area) sync* {
+    Iterable<Rect> areas = <Rect>[screen];
+    for (final Rect bounds in avoidBounds) {
+      areas = areas.expand((Rect area) sync* {
         if (area.top >= bounds.top
             && area.bottom <= bounds.bottom) {
           // Display feature splits the area vertically
@@ -1942,7 +1955,7 @@ class HingeAvoidingModalWrapper extends StatelessWidget {
           }
         }
       });
-    });
+    }
     return areas.toList();
   }
 }

@@ -406,8 +406,9 @@ class MediaQueryData {
   ///  * [HingeAvoidingModalWrapper], which helps with making popups and dialogs
   ///  avoid areas obstructed by display features.
   ui.DisplayFeature? get hinge {
-    for (ui.DisplayFeature e in displayFeatures) {
-      if (e.type == ui.DisplayFeatureType.hinge) return e;
+    for (final ui.DisplayFeature e in displayFeatures) {
+      if (e.type == ui.DisplayFeatureType.hinge)
+        return e;
     }
     return null;
   }

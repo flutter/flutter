@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show DisplayFeature;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import 'constants.dart';
 import 'debug.dart';
@@ -19,7 +21,6 @@ import 'material_state.dart';
 import 'popup_menu_theme.dart';
 import 'theme.dart';
 import 'tooltip.dart';
-
 // Examples can assume:
 // enum Commands { heroAndScholar, hurricaneCame }
 // late bool _heroAndScholar;
@@ -665,14 +666,14 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
           break;
       }
     }
-    final wantedPosition = Offset(x,y);
-    final correctedPositions =  _screens(size).map((e) => _fitInsideScreen(e, childSize, wantedPosition));
+    final Offset wantedPosition = Offset(x,y);
+    final Iterable<Offset> correctedPositions =  _screens(size).map((Rect screen) => _fitInsideScreen(screen, childSize, wantedPosition));
     Offset closest = correctedPositions.first;
-    correctedPositions.forEach((Offset corrected) {
+    for (final Offset corrected in correctedPositions) {
       if ((corrected - wantedPosition).distance < (closest - wantedPosition).distance) {
         closest = corrected;
       }
-    });
+    }
     return closest;
   }
 
@@ -697,9 +698,9 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
   /// which are not split by any display feature.
   /// If the device has a hinge, this returns the 2 screens
   List<Rect> _screens(Size size) {
-    Iterable<Rect> areas = [Rect.fromLTWH(0, 0, size.width, size.height)];
-    avoidBounds.forEach((bounds) {
-      areas = areas.expand((area) sync* {
+    Iterable<Rect> areas = <Rect>[Rect.fromLTWH(0, 0, size.width, size.height)];
+    for (final Rect bounds in avoidBounds) {
+      areas = areas.expand((Rect area) sync* {
         if (area.top >= bounds.top
             && area.bottom <= bounds.bottom) {
           // Display feature splits the area vertically
@@ -724,7 +725,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
           }
         }
       });
-    });
+    }
     return areas.toList();
   }
 
@@ -821,17 +822,20 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 
   List<Rect> _displayFeaturesInNavigator(BuildContext context) {
     Rect? rootRect;
-    final renderObject = navigator?.context.findRenderObject();
-    var translation = renderObject?.getTransformTo(null)?.getTranslation();
+    final RenderObject? renderObject = navigator?.context.findRenderObject();
+    final Vector3? translation = renderObject?.getTransformTo(null).getTranslation();
     if (translation != null) {
-      rootRect = renderObject?.paintBounds?.shift(Offset(translation.x, translation.y));
+      rootRect = renderObject?.paintBounds.shift(Offset(translation.x, translation.y));
     }
     if (rootRect == null) {
-      return MediaQuery.of(context).displayFeatures.map((e) => e.bounds).toList();
+      return MediaQuery.of(context).displayFeatures
+          .map<Rect>((final DisplayFeature displayFeature) => displayFeature.bounds)
+          .toList();
     } else {
       return MediaQuery.of(context).displayFeatures
-          .where((e) => e.bounds.overlaps(rootRect!))
-          .map((e) => e.bounds.shift(-rootRect!.topLeft)).toList();
+          .where((final DisplayFeature displayFeature) => displayFeature.bounds.overlaps(rootRect!))
+          .map<Rect>((final DisplayFeature displayFeature) => displayFeature.bounds.shift(-rootRect!.topLeft))
+          .toList();
     }
   }
 }

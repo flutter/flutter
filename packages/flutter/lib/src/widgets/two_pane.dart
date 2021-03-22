@@ -2,21 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
-import 'dart:ui' as ui;
+import 'dart:ui' show DisplayFeature;
 
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
-import 'debug.dart';
+import 'container.dart';
 import 'framework.dart';
 import 'media_query.dart';
-import 'container.dart';
 
 /// A widget that displays 2 children side-by-side or one below the other, while
 /// also avoiding any hinge or fold that the screen might contain.
 ///
-///  * By "hinge" we mean any [ui.DisplayFeature] reported by [MediaQueryData.displayFeatures]
+///  * By "hinge" we mean any [DisplayFeature] reported by [MediaQueryData.displayFeatures]
 ///  that completely splits the screen area in 2 parts. For phones with a
 ///  continuous screen that folds, the "fold" area is 0-width and does not visualy
 ///  create 2 separate screens.
@@ -43,9 +41,22 @@ import 'container.dart';
 ///
 /// See also
 ///
-///  * [ui.DisplayFeature] and [MediaQueryData.displayFeatures], to further
+///  * [DisplayFeature] and [MediaQueryData.displayFeatures], to further
 ///  understand display features, such as hinge areas
 class TwoPane extends StatelessWidget {
+  /// Create a layout that shows both child widgets or just one of them according
+  /// to available space and device form factor.
+  const TwoPane({
+    Key? key,
+    required this.pane1,
+    required this.pane2,
+    this.paneProportion = 0.5,
+    this.textDirection,
+    this.verticalDirection = VerticalDirection.down,
+    this.direction = Axis.horizontal,
+    this.panePriority = TwoPanePriority.both,
+  }) : super(key: key);
+
   /// First pane, which can sit on the left for left to right layouts,
   /// or at the top for top to bottom layouts.
   /// If [panePriority] is [TwoPanePriority.pane1], this is the only pane visible.
@@ -86,40 +97,27 @@ class TwoPane extends StatelessWidget {
   /// Defaults to [TwoPanePriority.both]
   final TwoPanePriority panePriority;
 
-  const TwoPane({
-    Key? key,
-    required this.pane1,
-    required this.pane2,
-    this.paneProportion = 0.5,
-    this.textDirection,
-    this.verticalDirection = VerticalDirection.down,
-    this.direction = Axis.horizontal,
-    this.panePriority = TwoPanePriority.both,
-  }) : super(key: key);
-
   TextDirection _textDirection(BuildContext context) =>
       textDirection ?? Directionality.maybeOf(context) ?? TextDirection.ltr;
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    Size size = mediaQuery.size;
-    ui.DisplayFeature? displayFeature;
-    for (final e in mediaQuery.displayFeatures) {
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    final Size size = mediaQuery.size;
+    DisplayFeature? displayFeature;
+    for (final DisplayFeature e in mediaQuery.displayFeatures) {
       if (e.bounds.width >= size.width || e.bounds.height >= size.height) {
         displayFeature = e;
         break;
       }
     }
-    Rect? seam = displayFeature?.bounds;
+    final Rect? seam = displayFeature?.bounds;
 
     late Axis _direction;
     late double _paneProportion;
     late Widget _pane1;
     late Widget _pane2;
     late Widget _delimiter;
-    late Rect _pane1Bounds;
-    late Rect _pane2Bounds;
     if (seam == null) {
       // There is no seam
       _direction = direction;
@@ -127,95 +125,62 @@ class TwoPane extends StatelessWidget {
       _pane1 = pane1;
       _pane2 = pane2;
       _delimiter = Container();
-      if (direction == Axis.horizontal) {
-        _pane1Bounds =
-            Rect.fromLTWH(0, 0, size.width * _paneProportion, size.height);
-        _pane2Bounds = Rect.fromLTWH(
-            _pane1Bounds.width, 0, size.width - _pane1Bounds.width, size.height);
-      } else {
-        _pane1Bounds =
-            Rect.fromLTWH(0, 0, size.width, size.height * _paneProportion);
-        _pane2Bounds = Rect.fromLTWH(
-            0, _pane1Bounds.height, size.width, size.height - _pane1Bounds.height);
-      }
     } else if (seam.width < seam.height) {
       // Seam is tall. Panels are one left and one right
       _direction = Axis.horizontal;
       _delimiter = Container(width: seam.size.width);
       _paneProportion = seam.left / (size.width - seam.width);
-      _pane1Bounds = Rect.fromLTWH(0, 0, seam.left, size.height);
-      _pane2Bounds =
-          Rect.fromLTWH(seam.right, 0, size.width - seam.right, size.height);
     } else {
       // Seam is wide. Panels are one above and one below
       _direction = Axis.vertical;
       _delimiter = Container(height: seam.size.height);
       _paneProportion = seam.top / (size.height - seam.height);
-      _pane1Bounds = Rect.fromLTWH(0, 0, size.width, seam.top);
-      _pane2Bounds =
-          Rect.fromLTWH(0, seam.bottom, size.width, size.height - seam.bottom);
     }
 
     if (_direction == Axis.vertical) {
       _pane1 = MediaQuery(
         data: mediaQuery.copyWith(
-          // size: _pane1Bounds.size,
           padding: mediaQuery.padding.copyWith(bottom: 0),
           viewPadding: mediaQuery.viewPadding.copyWith(bottom: 0),
           viewInsets: mediaQuery.viewInsets.copyWith(bottom: 0),
           systemGestureInsets:
           mediaQuery.systemGestureInsets.copyWith(bottom: 0),
-          // displayFeatures: mediaQuery.displayFeatures
-          //     .where((e) => e.bounds.overlaps(_pane1Bounds))
-          //     .toList(),
         ),
         child: pane1,
       );
       _pane2 = MediaQuery(
         data: mediaQuery.copyWith(
-          // size: _pane2Bounds.size,
           padding: mediaQuery.padding.copyWith(top: 0),
           viewPadding: mediaQuery.viewPadding.copyWith(top: 0),
           viewInsets: mediaQuery.viewInsets.copyWith(top: 0),
           systemGestureInsets: mediaQuery.systemGestureInsets.copyWith(top: 0),
-          // displayFeatures: mediaQuery.displayFeatures
-          //     .where((e) => e.bounds.overlaps(_pane2Bounds))
-          //     .toList(),
         ),
         child: pane2,
       );
     } else {
       _pane1 = MediaQuery(
         data: mediaQuery.copyWith(
-          // size: _pane1Bounds.size,
           padding: mediaQuery.padding.copyWith(right: 0),
           viewPadding: mediaQuery.viewPadding.copyWith(right: 0),
           viewInsets: mediaQuery.viewInsets.copyWith(right: 0),
           systemGestureInsets:
           mediaQuery.systemGestureInsets.copyWith(right: 0),
-          // displayFeatures: mediaQuery.displayFeatures
-          //     .where((e) => e.bounds.overlaps(_pane1Bounds))
-          //     .toList(),
         ),
         child: pane1,
       );
       _pane2 = MediaQuery(
         data: mediaQuery.copyWith(
-          // size: _pane2Bounds.size,
           padding: mediaQuery.padding.copyWith(left: 0),
           viewPadding: mediaQuery.viewPadding.copyWith(left: 0),
           viewInsets: mediaQuery.viewInsets.copyWith(left: 0),
           systemGestureInsets: mediaQuery.systemGestureInsets.copyWith(left: 0),
-          // displayFeatures: mediaQuery.displayFeatures
-          //     .where((e) => e.bounds.overlaps(_pane2Bounds))
-          //     .toList(),
         ),
         child: pane2,
       );
     }
 
     return Flex(
-      children: [
+      children: <Widget>[
         if (panePriority != TwoPanePriority.pane2)
           Expanded(
             flex: (100 * _paneProportion).toInt(),
@@ -239,5 +204,10 @@ class TwoPane extends StatelessWidget {
 
 /// Describes which pane to show or if both should be shown.
 enum TwoPanePriority{
-  both, pane1, pane2,
+  /// Show both panes
+  both,
+  /// Show only the first pane
+  pane1,
+  /// Show only the second pane
+  pane2,
 }
