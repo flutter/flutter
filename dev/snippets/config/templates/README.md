@@ -159,5 +159,4 @@ These templates follow the same conventions as the `WidgetsApp` templates above 
   defined.
 
 - [`stateful_widget_restoration_cupertino`](stateful_widget_restoration_material.tmpl) :
-  Similar to the `stateful_widget_restoration` template. However, the `StatefulWidget`
-  has to be completely defined since `RestorationMixin` may or may not be needed.
+  Similar to the `stateful_widget_restoration` template, but for `CupertinoApp`.
