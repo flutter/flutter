@@ -427,10 +427,10 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   @override
   String debugDescribeKeys() {
     final List<String> keys = <String>[
-      if (control) 'Ctrl',
+      if (control) 'Control',
       if (alt) 'Alt',
-      if (shift) 'Shift',
       if (meta) 'Meta',
+      if (shift) 'Shift',
       trigger.debugName ?? trigger.toStringShort(),
     ];
     return keys.join(' + ');
@@ -439,7 +439,7 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<String>('key', debugDescribeKeys()));
+    properties.add(DiagnosticsProperty<String>('keys', debugDescribeKeys()));
   }
 }
 

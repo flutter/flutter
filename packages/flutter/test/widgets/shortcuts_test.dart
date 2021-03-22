@@ -354,6 +354,42 @@ void main() {
 
       expect(RawKeyboard.instance.keysPressed, isEmpty);
     });
+
+    test('diagnostics.', () {
+      {
+        final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+
+        const SingleActivator(
+          LogicalKeyboardKey.keyA,
+        ).debugFillProperties(builder);
+
+        final List<String> description = builder.properties.where((DiagnosticsNode node) {
+          return !node.isFiltered(DiagnosticLevel.info);
+        }).map((DiagnosticsNode node) => node.toString()).toList();
+
+        expect(description.length, equals(1));
+        expect(description[0], equals('keys: Key A'));
+      }
+
+      {
+        final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+
+        const SingleActivator(
+          LogicalKeyboardKey.keyA,
+          control: true,
+          shift: true,
+          alt: true,
+          meta: true,
+        ).debugFillProperties(builder);
+
+        final List<String> description = builder.properties.where((DiagnosticsNode node) {
+          return !node.isFiltered(DiagnosticLevel.info);
+        }).map((DiagnosticsNode node) => node.toString()).toList();
+
+        expect(description.length, equals(1));
+        expect(description[0], equals('keys: Control + Alt + Meta + Shift + Key A'));
+      }
+    });
   });
 
   group(Shortcuts, () {
