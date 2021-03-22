@@ -4,7 +4,7 @@
 
 // @dart = 2.8
 
-import 'dart:io' as io; // ignore: dart_io_import;
+import 'dart:io' as io; // flutter_ignore: dart_io_import;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -17,7 +17,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/globals.dart' as globals show flutterUsage;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
-import 'package:path/path.dart' as path; // ignore: package_path_import
+import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
