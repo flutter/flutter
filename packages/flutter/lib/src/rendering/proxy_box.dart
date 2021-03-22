@@ -41,7 +41,7 @@ export 'package:flutter/gestures.dart' show
 ///
 ///  * [RenderProxySliver], a base class for render slivers that resemble their
 ///    children.
-class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
+class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
   /// Creates a proxy render box.
   ///
   /// Proxy render boxes are rarely created directly because they simply proxy
@@ -49,96 +49,6 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
   /// subclasses.
   RenderProxyBox([RenderBox? child]) {
     this.child = child;
-  }
-}
-
-/// Implementation of [RenderProxyBox].
-///
-/// Use this mixin in situations where the proxying behavior
-/// of [RenderProxyBox] is desired but inheriting from [RenderProxyBox] is
-/// impractical (e.g. because you want to mix in other classes as well).
-// TODO(ianh): Remove this class once https://github.com/dart-lang/sdk/issues/31543 is fixed
-@optionalTypeArgs
-mixin RenderProxyBoxMixin<T extends RenderBox> on RenderBox, RenderObjectWithChildMixin<T> {
-  @override
-  void setupParentData(RenderObject child) {
-    // We don't actually use the offset argument in BoxParentData, so let's
-    // avoid allocating it at all.
-    if (child.parentData is! ParentData)
-      child.parentData = ParentData();
-  }
-
-  @override
-  double computeMinIntrinsicWidth(double height) {
-    if (child != null)
-      return child!.getMinIntrinsicWidth(height);
-    return 0.0;
-  }
-
-  @override
-  double computeMaxIntrinsicWidth(double height) {
-    if (child != null)
-      return child!.getMaxIntrinsicWidth(height);
-    return 0.0;
-  }
-
-  @override
-  double computeMinIntrinsicHeight(double width) {
-    if (child != null)
-      return child!.getMinIntrinsicHeight(width);
-    return 0.0;
-  }
-
-  @override
-  double computeMaxIntrinsicHeight(double width) {
-    if (child != null)
-      return child!.getMaxIntrinsicHeight(width);
-    return 0.0;
-  }
-
-  @override
-  double? computeDistanceToActualBaseline(TextBaseline baseline) {
-    if (child != null)
-      return child!.getDistanceToActualBaseline(baseline);
-    return super.computeDistanceToActualBaseline(baseline);
-  }
-
-  @override
-  Size computeDryLayout(BoxConstraints constraints) {
-    if (child != null) {
-      return child!.getDryLayout(constraints);
-    }
-    return computeSizeForNoChild(constraints);
-  }
-
-  @override
-  void performLayout() {
-    if (child != null) {
-      child!.layout(constraints, parentUsesSize: true);
-      size = child!.size;
-    } else {
-      size = computeSizeForNoChild(constraints);
-    }
-  }
-
-  /// Calculate the size the [RenderProxyBox] would have under the given
-  /// [BoxConstraints] for the case where it does not have a child.
-  Size computeSizeForNoChild(BoxConstraints constraints) {
-    return constraints.smallest;
-  }
-
-  @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    return child?.hitTest(result, position: position) ?? false;
-  }
-
-  @override
-  void applyPaintTransform(RenderObject child, Matrix4 transform) { }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    if (child != null)
-      context.paintChild(child!, offset);
   }
 }
 
@@ -1040,7 +950,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
 ///
 /// This is a variant of [RenderOpacity] that uses an [Animation<double>] rather
 /// than a [double] to control the opacity.
-class RenderAnimatedOpacity extends RenderProxyBox with RenderProxyBoxMixin, RenderAnimatedOpacityMixin<RenderBox> {
+class RenderAnimatedOpacity extends RenderProxyBox with RenderAnimatedOpacityMixin<RenderBox> {
   /// Creates a partially transparent render object.
   ///
   /// The [opacity] argument must not be null.
