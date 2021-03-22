@@ -1278,7 +1278,7 @@ class ListView extends BoxScrollView {
            } else {
              widget = separatorBuilder(context, itemIndex);
              assert(() {
-               if (widget == null) { // ignore: dead_code
+               if (widget == null) {
                  throw FlutterError('separatorBuilder cannot return null.');
                }
                return true;

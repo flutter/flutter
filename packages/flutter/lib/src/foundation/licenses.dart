@@ -288,7 +288,6 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
 class LicenseRegistry {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
-  // ignore: unused_element
   LicenseRegistry._();
 
   static List<LicenseEntryCollector>? _collectors;
