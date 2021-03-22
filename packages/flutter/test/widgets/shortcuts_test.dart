@@ -49,7 +49,7 @@ class TestShortcutManager extends ShortcutManager {
   }
 }
 
-Widget logicalKeySetTester(LogicalKeySet prompt, ValueSetter<Intent> onInvoke) {
+Widget activatorTester(ShortcutActivator activator, ValueSetter<Intent> onInvoke) {
   return Actions(
     key: GlobalKey(),
     actions: <Type, Action<Intent>>{
@@ -60,7 +60,7 @@ Widget logicalKeySetTester(LogicalKeySet prompt, ValueSetter<Intent> onInvoke) {
     },
     child: Shortcuts(
       shortcuts: <ShortcutActivator, Intent>{
-        prompt: const TestIntent(),
+        activator: const TestIntent(),
       },
       child: const Focus(
         autofocus: true,
@@ -216,13 +216,15 @@ void main() {
       expect(description.length, equals(1));
       expect(description[0], equals('keys: Key A + Key B'));
     });
+  });
 
+  group(SingleActivator, () {
     testWidgets('handles Ctrl-C', (WidgetTester tester) async {
       int invoked = 0;
-      await tester.pumpWidget(logicalKeySetTester(
-        LogicalKeySet(
-          LogicalKeyboardKey.control,
+      await tester.pumpWidget(activatorTester(
+        const SingleActivator(
           LogicalKeyboardKey.keyC,
+          control: true,
         ),
         (Intent intent) { invoked += 1; },
       ));
@@ -301,36 +303,15 @@ void main() {
       invoked = 0;
 
       expect(RawKeyboard.instance.keysPressed, isEmpty);
-
-      WidgetsBinding.instance!.focusManager.primaryFocus!.unfocus();
-      // Specified side should be ignored
-      await tester.pumpWidget(logicalKeySetTester(
-        LogicalKeySet(
-          LogicalKeyboardKey.controlLeft,
-          LogicalKeyboardKey.keyC,
-        ),
-        (Intent intent) { invoked += 1; },
-      ));
-      await tester.pump();
-
-      // RCtrl -> KeyC: Accept
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlRight);
-      expect(invoked, 0);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
-      expect(invoked, 1);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlRight);
-      expect(invoked, 1);
-      invoked = 0;
     });
 
     testWidgets('handles Shift-Ctrl-C', (WidgetTester tester) async {
       int invoked = 0;
-      await tester.pumpWidget(logicalKeySetTester(
-        LogicalKeySet(
-          LogicalKeyboardKey.shift,
-          LogicalKeyboardKey.control,
+      await tester.pumpWidget(activatorTester(
+        const SingleActivator(
           LogicalKeyboardKey.keyC,
+          shift: true,
+          control: true,
         ),
         (Intent intent) { invoked += 1; },
       ));
@@ -359,94 +340,19 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
       expect(invoked, 1);
       invoked = 0;
-    });
 
-    testWidgets('handles Ctrl-C-A', (WidgetTester tester) async {
-      int invoked = 0;
-      await tester.pumpWidget(logicalKeySetTester(
-        LogicalKeySet(
-          LogicalKeyboardKey.control,
-          LogicalKeyboardKey.keyC,
-          LogicalKeyboardKey.keyA,
-        ),
-        (Intent intent) { invoked += 1; },
-      ));
-      await tester.pump();
-
-      // LCtrl -> KeyC -> KeyA: Accept
+      // LCtrl -> KeyC -> LShift: Reject
       await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
-      expect(invoked, 0);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
-      expect(invoked, 1);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
-      expect(invoked, 1);
-      invoked = 0;
-
-      // LCtrl -> KeyA -> KeyC: Accept
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
-      expect(invoked, 0);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
-      expect(invoked, 1);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
-      expect(invoked, 1);
-      invoked = 0;
-    });
-
-    testWidgets('handles Ctrl-Shift', (WidgetTester tester) async {
-      int invoked = 0;
-      await tester.pumpWidget(logicalKeySetTester(
-        LogicalKeySet(
-          LogicalKeyboardKey.control,
-          LogicalKeyboardKey.shiftLeft,
-        ),
-        (Intent intent) { invoked += 1; },
-      ));
-      await tester.pump();
-
-      // LCtrl -> LShift: Accept
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
-      expect(invoked, 0);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
-      expect(invoked, 1);
+      expect(invoked, 0);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
-      expect(invoked, 1);
+      expect(invoked, 0);
       invoked = 0;
 
-      // LShift -> LCtrl: Accept
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
-      expect(invoked, 0);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
-      expect(invoked, 1);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
-      expect(invoked, 1);
-      invoked = 0;
-
-      // LShift -> RCtrl: Accept
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
-      expect(invoked, 0);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlRight);
-      expect(invoked, 1);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlRight);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
-      expect(invoked, 1);
-      invoked = 0;
-
-      // RShift -> RCtrl: Reject
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftRight);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlRight);
-      expect(invoked, 0);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlRight);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftRight);
-      expect(invoked, 0);
-      invoked = 0;
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
     });
   });
 

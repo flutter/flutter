@@ -301,11 +301,14 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
   LogicalKeySet.fromSet(Set<LogicalKeyboardKey> keys) : super.fromSet(keys);
 
   @override
-  Iterable<LogicalKeyboardKey>? get triggers => keys;
+  Iterable<LogicalKeyboardKey>? get triggers => _triggers;
+  late final Set<LogicalKeyboardKey> _triggers = keys.expand(
+    (LogicalKeyboardKey key) => _unmapSynonyms[key] ?? <LogicalKeyboardKey>[key]).toSet();
 
   @override
   bool accepts(RawKeyEvent event, RawKeyboard state) {
-    return event is RawKeyDownEvent && keys.every(state.keysPressed.contains);
+    final Set<LogicalKeyboardKey> keysPressed = LogicalKeyboardKey.collapseSynonyms(state.keysPressed);
+    return event is RawKeyDownEvent && keys.every(keysPressed.contains);
   }
 
   static const Set<LogicalKeyboardKey> _modifiers = <LogicalKeyboardKey>{
@@ -313,6 +316,12 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
     LogicalKeyboardKey.control,
     LogicalKeyboardKey.meta,
     LogicalKeyboardKey.shift,
+  };
+  static const Map<LogicalKeyboardKey, List<LogicalKeyboardKey>> _unmapSynonyms = <LogicalKeyboardKey, List<LogicalKeyboardKey>>{
+    LogicalKeyboardKey.control: <LogicalKeyboardKey>[LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.controlRight],
+    LogicalKeyboardKey.shift: <LogicalKeyboardKey>[LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.shiftRight],
+    LogicalKeyboardKey.alt: <LogicalKeyboardKey>[LogicalKeyboardKey.altLeft, LogicalKeyboardKey.altRight],
+    LogicalKeyboardKey.meta: <LogicalKeyboardKey>[LogicalKeyboardKey.metaLeft, LogicalKeyboardKey.metaRight],
   };
 
   /// Returns a description of the key set that is short and readable.
@@ -377,19 +386,19 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutActivator, Int
   }
 }
 
-class SingleTriggerActivator with Diagnosticable implements ShortcutActivator {
+class SingleActivator with Diagnosticable implements ShortcutActivator {
   /// A constructor for making a [LogicalKeySet] of up to four keys.
   ///
   /// If you need a set of more than four keys, use [LogicalKeySet.fromSet].
   ///
   /// The same [LogicalKeyboardKey] may not be appear more than once in the set.
-  const SingleTriggerActivator(
+  const SingleActivator(
     this.trigger, {
     this.control = false,
     this.shift = false,
     this.alt = false,
     this.meta = false,
-  );
+  });
 
   final LogicalKeyboardKey trigger;
   final bool control;
