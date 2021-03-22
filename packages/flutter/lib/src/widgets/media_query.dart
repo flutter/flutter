@@ -383,11 +383,11 @@ class MediaQueryData {
   /// Folding [dart:ui.DisplayFeature]s like the [dart:ui.DisplayFeatureType.hinge] and
   /// [dart:ui.DisplayFeatureType.fold] also have a [dart:ui.DisplayFeature.state] which can be
   /// used to determine the posture the device is in.
-  /// 
+  ///
   /// See also:
   ///
   ///  * [dart:ui.DisplayFeatureType], where you can see types of display features.
-  ///  * [dart:ui.DisplayFeatureState], where you can see possible states for 
+  ///  * [dart:ui.DisplayFeatureState], where you can see possible states for
   ///  folding features ([dart:ui.DisplayFeatureType.fold] and
   ///  [dart:ui.DisplayFeatureType.hinge])
   final List<ui.DisplayFeature> displayFeatures;
