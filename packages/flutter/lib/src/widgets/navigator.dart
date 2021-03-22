@@ -561,7 +561,7 @@ abstract class Page<T> extends RouteSettings {
   /// Creates a page and initializes [key] for subclasses.
   ///
   /// The [arguments] argument must not be null.
-  const Page({
+  Page({
     this.key,
     String? name,
     Object? arguments,
@@ -583,6 +583,11 @@ abstract class Page<T> extends RouteSettings {
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
   final String? restorationId;
+
+  /// A completer which produce [Future] and completes when this page is popped off the navigator.
+  ///
+  /// The future completes with the value given to [Navigator.pop].
+  final Completer<T?> popCompleter = Completer<T?>();
 
   /// Whether this page can be updated with the [other] page.
   ///
@@ -5070,6 +5075,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }());
     final _RouteEntry entry = _history.lastWhere(_RouteEntry.isPresentPredicate);
     if (entry.hasPage) {
+      final Page<T> page = entry.route.settings as Page<T>;
+      page.popCompleter.complete(result);
       if (widget.onPopPage!(entry.route, result))
         entry.currentState = _RouteLifecycle.pop;
     } else {
