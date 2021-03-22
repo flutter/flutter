@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-// ignore_for_file: implementation_imports
 
 import 'dart:async';
 import 'dart:typed_data';
@@ -151,8 +150,8 @@ class TestGoldenComparatorProcess {
     final File testConfigFile = findTestConfigFile(globals.fs.file(testUri));
     // Generate comparator process for the file.
     return '''
-import 'dart:convert'; // ignore: dart_convert_import
-import 'dart:io'; // ignore: dart_io_import
+import 'dart:convert'; // flutter_ignore: dart_convert_import
+import 'dart:io'; // flutter_ignore: dart_io_import
 
 import 'package:flutter_test/flutter_test.dart';
 
