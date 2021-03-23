@@ -56,6 +56,9 @@ const String singleZhMessageArbFileString = '''
 {
   "title": "标题"
 }''';
+const String intlImportDartCode = '''
+import 'package:intl/intl.dart' as intl;
+''';
 
 void _standardFlutterDirectoryL10nSetup(FileSystem fs) {
   final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
@@ -1726,6 +1729,76 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         }
         fail('Generating class methods with incorrect placeholder format should not succeed');
       });
+    });
+
+    test('intl package import should be omitted in subclass files when no plurals are included', () {
+      fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
+        ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString)
+        ..childFile('app_es.arb').writeAsStringSync(singleEsMessageArbFileString);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.loadResources();
+        generator.writeOutputFiles(BufferLogger.test());
+      } on Exception catch (e) {
+        fail('Generating output files should not fail: $e');
+      }
+
+      final String localizationsFile = fs.file(
+        fs.path.join(syntheticL10nPackagePath, 'output-localization-file_es.dart'),
+      ).readAsStringSync();
+      expect(localizationsFile, isNot(contains(intlImportDartCode)));
+    });
+
+    test('intl package import should be kept in subclass files when plurals are included', () {
+      const String pluralMessageArb = '''
+{
+  "helloWorlds": "{count,plural, =0{Hello} =1{Hello World} =2{Hello two worlds} few{Hello {count} worlds} many{Hello all {count} worlds} other{Hello other {count} worlds}}",
+  "@helloWorlds": {
+    "description": "A plural message",
+    "placeholders": {
+      "count": {}
+    }
+  }
+}
+''';
+
+      const String pluralMessageEsArb = '''
+{
+  "helloWorlds": "{count,plural, =0{ES - Hello} =1{ES - Hello World} =2{ES - Hello two worlds} few{ES - Hello {count} worlds} many{ES - Hello all {count} worlds} other{ES - Hello other {count} worlds}}"
+}
+''';
+
+      fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
+        ..childFile(defaultTemplateArbFileName).writeAsStringSync(pluralMessageArb)
+        ..childFile('app_es.arb').writeAsStringSync(pluralMessageEsArb);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.loadResources();
+        generator.writeOutputFiles(BufferLogger.test());
+      } on Exception catch (e) {
+        fail('Generating output files should not fail: $e');
+      }
+
+      final String localizationsFile = fs.file(
+        fs.path.join(syntheticL10nPackagePath, 'output-localization-file_es.dart'),
+      ).readAsStringSync();
+      expect(localizationsFile, contains(intlImportDartCode));
     });
 
     test(
