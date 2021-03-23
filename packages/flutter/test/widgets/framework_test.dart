@@ -595,6 +595,12 @@ void main() {
         Container(key: const ValueKey<int>(2)),
       ],
     ));
+
+    final List<dynamic> exceptions = <dynamic>[];
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) => exceptions.add(details.exception);
+    addTearDown(() => FlutterError.onError = oldHandler);
+
     await tester.pumpWidget(Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
@@ -602,7 +608,12 @@ void main() {
         Container(key: const ValueKey<int>(2), child: Container(key: key)),
       ],
     ));
-    expect(tester.takeException(), isFlutterError);
+
+    expect(exceptions.length, 2);
+    final AssertionError error0 = exceptions.first as FlutterError;
+    final AssertionError error1 = exceptions.last as FlutterError;
+    expect(error0.message, contains('The subtree of `MultiChildRenderObjectElement` must have an associated render object.'));
+    expect(error1.message, contains('Duplicate GlobalKey detected in widget tree.'));
   });
 
   testWidgets('GlobalKey duplication 8 - appearing earlier', (WidgetTester tester) async {
@@ -614,6 +625,12 @@ void main() {
         Container(key: const ValueKey<int>(2), child: Container(key: key)),
       ],
     ));
+
+    final List<dynamic> exceptions = <dynamic>[];
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) => exceptions.add(details.exception);
+    addTearDown(() => FlutterError.onError = oldHandler);
+
     await tester.pumpWidget(Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
@@ -621,7 +638,12 @@ void main() {
         Container(key: const ValueKey<int>(2), child: Container(key: key)),
       ],
     ));
-    expect(tester.takeException(), isFlutterError);
+
+    expect(exceptions.length, 2);
+    final AssertionError error0 = exceptions.first as FlutterError;
+    final AssertionError error1 = exceptions.last as FlutterError;
+    expect(error0.message, contains('The subtree of `MultiChildRenderObjectElement` must have an associated render object.'));
+    expect(error1.message, contains('Duplicate GlobalKey detected in widget tree.'));
   });
 
   testWidgets('GlobalKey duplication 9 - moving and appearing later', (WidgetTester tester) async {
@@ -634,6 +656,12 @@ void main() {
         Container(key: const ValueKey<int>(2)),
       ],
     ));
+
+    final List<dynamic> exceptions = <dynamic>[];
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) => exceptions.add(details.exception);
+    addTearDown(() => FlutterError.onError = oldHandler);
+
     await tester.pumpWidget(Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
@@ -642,7 +670,12 @@ void main() {
         Container(key: const ValueKey<int>(2), child: Container(key: key)),
       ],
     ));
-    expect(tester.takeException(), isFlutterError);
+
+    expect(exceptions.length, 2);
+    final AssertionError error0 = exceptions.first as FlutterError;
+    final AssertionError error1 = exceptions.last as FlutterError;
+    expect(error0.message, contains('The subtree of `MultiChildRenderObjectElement` must have an associated render object.'));
+    expect(error1.message, contains('Duplicate GlobalKey detected in widget tree.'));
   });
 
   testWidgets('GlobalKey duplication 10 - moving and appearing earlier', (WidgetTester tester) async {
@@ -655,6 +688,12 @@ void main() {
         Container(key: const ValueKey<int>(3), child: Container(key: key)),
       ],
     ));
+
+    final List<dynamic> exceptions = <dynamic>[];
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) => exceptions.add(details.exception);
+    addTearDown(() => FlutterError.onError = oldHandler);
+
     await tester.pumpWidget(Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
@@ -663,7 +702,12 @@ void main() {
         Container(key: const ValueKey<int>(3)),
       ],
     ));
-    expect(tester.takeException(), isFlutterError);
+
+    expect(exceptions.length, 2);
+    final AssertionError error0 = exceptions.first as FlutterError;
+    final AssertionError error1 = exceptions.last as FlutterError;
+    expect(error0.message, contains('The subtree of `MultiChildRenderObjectElement` must have an associated render object.'));
+    expect(error1.message, contains('Duplicate GlobalKey detected in widget tree.'));
   });
 
   testWidgets('GlobalKey duplication 11 - double sibling appearance', (WidgetTester tester) async {
@@ -842,12 +886,12 @@ void main() {
         Container(key: key),
       ],
     ));
-    int count = 0;
+
+    final List<dynamic> exceptions = <dynamic>[];
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
-    FlutterError.onError = (FlutterErrorDetails details) {
-      expect(details.exception, isFlutterError);
-      count += 1;
-    };
+    FlutterError.onError = (FlutterErrorDetails details) => exceptions.add(details.exception);
+    addTearDown(() => FlutterError.onError = oldHandler);
+
     await tester.pumpWidget(Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
@@ -856,8 +900,12 @@ void main() {
         Container(key: key),
       ],
     ));
-    FlutterError.onError = oldHandler;
-    expect(count, 1);
+
+    expect(exceptions.length, 2);
+    final AssertionError error0 = exceptions.first as FlutterError;
+    final AssertionError error1 = exceptions.last as FlutterError;
+    expect(error0.message, contains('The subtree of `MultiChildRenderObjectElement` must have an associated render object.'));
+    expect(error1.message, contains('Duplicate GlobalKey detected in widget tree.'));
   });
 
   testWidgets('GlobalKey duplication 18 - subtree build duplicate key with same type', (WidgetTester tester) async {
@@ -926,6 +974,11 @@ void main() {
   });
 
   testWidgets('GlobalKey duplication 20 - real duplication with early rebuild in layoutbuilder will throw', (WidgetTester tester) async {
+    final List<dynamic> exceptions = <dynamic>[];
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) => exceptions.add(details.exception);
+    addTearDown(() => FlutterError.onError = oldHandler);
+
     const Key key1 = GlobalObjectKey('Text1');
     const Key key2 = GlobalObjectKey('Text2');
     Key? rebuiltKeyOfSecondChildBeforeLayout;
@@ -964,10 +1017,8 @@ void main() {
     // Result will be written during first build and need to clear it to remove
     // noise.
     rebuiltKeyOfSecondChildBeforeLayout = null;
-
     final _StatefulState state = tester.firstState(find.byType(_Stateful).at(1));
     state.rebuild();
-
     await tester.pumpWidget(
       LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
@@ -1011,10 +1062,14 @@ void main() {
     expect(rebuiltKeyOfSecondChildBeforeLayout, key2);
     expect(rebuiltKeyOfFirstChildAfterLayout, key2);
     expect(rebuiltKeyOfSecondChildAfterLayout, key2);
-    final dynamic exception = tester.takeException();
-    expect(exception, isFlutterError);
+
+    expect(exceptions.length, 3);
+    final AssertionError error0 = exceptions.first as FlutterError;
+    final AssertionError error1 = exceptions.last as FlutterError;
+    expect(error0.message, contains('The subtree of `MultiChildRenderObjectElement` must have an associated render object.'));
+    expect(error1, isFlutterError);
     expect(
-      exception.toString(),
+      error1.toString(),
       equalsIgnoringHashCodes(
         'Multiple widgets used the same GlobalKey.\n'
         'The key [GlobalObjectKey String#00000] was used by multiple widgets. The '
@@ -1169,6 +1224,62 @@ void main() {
     expect(
       element.children.map((Element element) => element.widget.key),
       <Key?>[null, key1, null, key2, null],
+    );
+  });
+
+  testWidgets('Can not attach a non-RenderObjectElement to the MultiChildRenderObjectElement - mount', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Column(
+        children: <Widget>[
+          Container(),
+          const _EmptyWidget(),
+        ],
+      ),
+    );
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(
+      exception.toString(),
+      equalsIgnoringHashCodes(
+        'The subtree of `MultiChildRenderObjectElement` must have an associated render object.\n'
+        'This typically means that the `_EmptyWidget` or its children are not a subtype of `RenderObjectWidget`\n'
+        'or multiple widgets used the same GlobalKey, causing the render object to be re-parented.\n'
+        'The following element does not have an associated render object:\n'
+        '  _EmptyWidget'
+      ),
+    );
+  });
+
+  testWidgets('Can not attach a non-RenderObjectElement to the MultiChildRenderObjectElement - update', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Column(
+        children: <Widget>[
+          Container(),
+        ],
+      ),
+    );
+
+    await tester.pumpWidget(
+      Column(
+        children: <Widget>[
+          Container(),
+          const _EmptyWidget(),
+        ],
+      ),
+    );
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(
+      exception.toString(),
+      equalsIgnoringHashCodes(
+        'The subtree of `MultiChildRenderObjectElement` must have an associated render object.\n'
+        'This typically means that the `_EmptyWidget` or its children are not a subtype of `RenderObjectWidget`\n'
+        'or multiple widgets used the same GlobalKey, causing the render object to be re-parented.\n'
+        'The following element does not have an associated render object:\n'
+        '  _EmptyWidget'
+      ),
     );
   });
 
@@ -1848,4 +1959,21 @@ class FakeLeafRenderObject extends RenderBox {
 
 class TestRenderObjectElement extends RenderObjectElement {
   TestRenderObjectElement() : super(Table());
+}
+
+class _EmptyWidget extends Widget {
+  const _EmptyWidget({Key? key}) : super(key: key);
+
+  @override
+  Element createElement() => _EmptyElement(this);
+}
+
+class _EmptyElement extends Element {
+  _EmptyElement(_EmptyWidget widget) : super(widget);
+
+  @override
+  bool get debugDoingBuild => false;
+
+  @override
+  void performRebuild() {}
 }
