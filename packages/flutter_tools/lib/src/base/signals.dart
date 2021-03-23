@@ -104,14 +104,17 @@ class LocalSignals implements Signals {
   Future<bool> removeHandler(ProcessSignal signal, Object token) async {
     // We don't know about this signal.
     if (!_handlersTable.containsKey(signal)) {
+      print('no signal');
       return false;
     }
     // We don't know about this token.
     if (!_handlersTable[signal]!.containsKey(token)) {
+       print('no token');
       return false;
     }
     final SignalHandler? handler = _handlersTable[signal]!.remove(token);
     if (handler == null) {
+       print('no handle');
       return false;
     }
     final bool removed = _handlersList[signal]!.remove(handler);
@@ -128,12 +131,16 @@ class LocalSignals implements Signals {
   }
 
   Future<void> _handleSignal(ProcessSignal s) async {
-    for (final SignalHandler handler in _handlersList[s] ?? <SignalHandler>[]) {
-      try {
-        await asyncGuard<void>(() async => handler(s));
-      } on Exception catch (e) {
-        if (_errorStreamController.hasListener) {
-          _errorStreamController.add(e);
+    final List<SignalHandler>? handlers = _handlersList[s];
+    if (handlers != null) {
+      final List<SignalHandler> handlersCopy = handlers.toList();
+      for (final SignalHandler handler in handlersCopy) {
+        try {
+          await asyncGuard<void>(() async => handler(s));
+        } on Exception catch (e) {
+          if (_errorStreamController.hasListener) {
+            _errorStreamController.add(e);
+          }
         }
       }
     }
