@@ -157,6 +157,7 @@ List<FlutterCommand> generateCommands({
   DriveCommand(verboseHelp: verboseHelp,
     fileSystem: globals.fs,
     logger: globals.logger,
+    platform: globals.platform,
   ),
   EmulatorsCommand(),
   FormatCommand(),
