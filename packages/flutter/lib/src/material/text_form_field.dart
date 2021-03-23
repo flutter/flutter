@@ -195,6 +195,7 @@ class TextFormField extends FormField<String> {
     Iterable<String>? autofillHints,
     AutovalidateMode? autovalidateMode,
     ScrollController? scrollController,
+    String? restorationId,
   }) : assert(initialValue == null || controller == null),
        assert(textAlign != null),
        assert(autofocus != null),
@@ -230,73 +231,75 @@ class TextFormField extends FormField<String> {
        assert(maxLength == null || maxLength > 0),
        assert(enableInteractiveSelection != null),
        super(
-       key: key,
-       initialValue: controller != null ? controller.text : (initialValue ?? ''),
-       onSaved: onSaved,
-       validator: validator,
-       enabled: enabled ?? decoration?.enabled ?? true,
-       autovalidateMode: autovalidate
-           ? AutovalidateMode.always
-           : (autovalidateMode ?? AutovalidateMode.disabled),
-       builder: (FormFieldState<String> field) {
-         final _TextFormFieldState state = field as _TextFormFieldState;
-         final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
-             .applyDefaults(Theme.of(field.context).inputDecorationTheme);
-         void onChangedHandler(String value) {
-           field.didChange(value);
-           if (onChanged != null) {
-             onChanged(value);
+         key: key,
+         initialValue: controller != null ? controller.text : (initialValue ?? ''),
+         onSaved: onSaved,
+         validator: validator,
+         enabled: enabled ?? decoration?.enabled ?? true,
+         autovalidateMode: autovalidate
+             ? AutovalidateMode.always
+             : (autovalidateMode ?? AutovalidateMode.disabled),
+         builder: (FormFieldState<String> field) {
+           final _TextFormFieldState state = field as _TextFormFieldState;
+           final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
+               .applyDefaults(Theme.of(field.context).inputDecorationTheme);
+           void onChangedHandler(String value) {
+             field.didChange(value);
+             if (onChanged != null) {
+               onChanged(value);
+             }
            }
-         }
-         return TextField(
-           controller: state._effectiveController,
-           focusNode: focusNode,
-           decoration: effectiveDecoration.copyWith(errorText: field.errorText),
-           keyboardType: keyboardType,
-           textInputAction: textInputAction,
-           style: style,
-           strutStyle: strutStyle,
-           textAlign: textAlign,
-           textAlignVertical: textAlignVertical,
-           textDirection: textDirection,
-           textCapitalization: textCapitalization,
-           autofocus: autofocus,
-           toolbarOptions: toolbarOptions,
-           readOnly: readOnly,
-           showCursor: showCursor,
-           obscuringCharacter: obscuringCharacter,
-           obscureText: obscureText,
-           autocorrect: autocorrect,
-           smartDashesType: smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-           smartQuotesType: smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
-           enableSuggestions: enableSuggestions,
-           maxLengthEnforced: maxLengthEnforced,
-           maxLengthEnforcement: maxLengthEnforcement,
-           maxLines: maxLines,
-           minLines: minLines,
-           expands: expands,
-           maxLength: maxLength,
-           onChanged: onChangedHandler,
-           onTap: onTap,
-           onEditingComplete: onEditingComplete,
-           onSubmitted: onFieldSubmitted,
-           inputFormatters: inputFormatters,
-           enabled: enabled ?? decoration?.enabled ?? true,
-           cursorWidth: cursorWidth,
-           cursorHeight: cursorHeight,
-           cursorRadius: cursorRadius,
-           cursorColor: cursorColor,
-           scrollPadding: scrollPadding,
-           scrollPhysics: scrollPhysics,
-           keyboardAppearance: keyboardAppearance,
-           enableInteractiveSelection: enableInteractiveSelection,
-           selectionControls: selectionControls,
-           buildCounter: buildCounter,
-           autofillHints: autofillHints,
-           scrollController: scrollController,
-         );
-       },
-     );
+           return TextField(
+             restorationId: '${restorationId}_field',
+             controller: state._effectiveController,
+             focusNode: focusNode,
+             decoration: effectiveDecoration.copyWith(errorText: field.errorText),
+             keyboardType: keyboardType,
+             textInputAction: textInputAction,
+             style: style,
+             strutStyle: strutStyle,
+             textAlign: textAlign,
+             textAlignVertical: textAlignVertical,
+             textDirection: textDirection,
+             textCapitalization: textCapitalization,
+             autofocus: autofocus,
+             toolbarOptions: toolbarOptions,
+             readOnly: readOnly,
+             showCursor: showCursor,
+             obscuringCharacter: obscuringCharacter,
+             obscureText: obscureText,
+             autocorrect: autocorrect,
+             smartDashesType: smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+             smartQuotesType: smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
+             enableSuggestions: enableSuggestions,
+             maxLengthEnforced: maxLengthEnforced,
+             maxLengthEnforcement: maxLengthEnforcement,
+             maxLines: maxLines,
+             minLines: minLines,
+             expands: expands,
+             maxLength: maxLength,
+             onChanged: onChangedHandler,
+             onTap: onTap,
+             onEditingComplete: onEditingComplete,
+             onSubmitted: onFieldSubmitted,
+             inputFormatters: inputFormatters,
+             enabled: enabled ?? decoration?.enabled ?? true,
+             cursorWidth: cursorWidth,
+             cursorHeight: cursorHeight,
+             cursorRadius: cursorRadius,
+             cursorColor: cursorColor,
+             scrollPadding: scrollPadding,
+             scrollPhysics: scrollPhysics,
+             keyboardAppearance: keyboardAppearance,
+             enableInteractiveSelection: enableInteractiveSelection,
+             selectionControls: selectionControls,
+             buildCounter: buildCounter,
+             autofillHints: autofillHints,
+             scrollController: scrollController,
+           );
+         },
+         restorationId: restorationId,
+       );
 
   /// Controls the text being edited.
   ///
@@ -309,19 +312,23 @@ class TextFormField extends FormField<String> {
 }
 
 class _TextFormFieldState extends FormFieldState<String> {
-  TextEditingController? _controller;
+  late final RestorableTextEditingController _controller = RestorableTextEditingController(text: widget.initialValue);
 
-  TextEditingController? get _effectiveController => widget.controller ?? _controller;
+  TextEditingController? get _effectiveController => widget.controller ?? _controller.value;
 
   @override
   TextFormField get widget => super.widget as TextFormField;
 
   @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    super.restoreState(oldBucket, initialRestore);
+    registerForRestoration(_controller, 'text_editing_controller');
+  }
+
+  @override
   void initState() {
     super.initState();
-    if (widget.controller == null) {
-      _controller = TextEditingController(text: widget.initialValue);
-    } else {
+    if (widget.controller != null) {
       widget.controller!.addListener(_handleControllerChanged);
     }
   }
@@ -334,12 +341,9 @@ class _TextFormFieldState extends FormFieldState<String> {
       widget.controller?.addListener(_handleControllerChanged);
 
       if (oldWidget.controller != null && widget.controller == null)
-        _controller = TextEditingController.fromValue(oldWidget.controller!.value);
-      if (widget.controller != null) {
+        _controller.value.value = oldWidget.controller!.value;
+      if (widget.controller != null)
         setValue(widget.controller!.text);
-        if (oldWidget.controller == null)
-          _controller = null;
-      }
     }
   }
 
