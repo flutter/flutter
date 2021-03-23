@@ -104,17 +104,14 @@ class LocalSignals implements Signals {
   Future<bool> removeHandler(ProcessSignal signal, Object token) async {
     // We don't know about this signal.
     if (!_handlersTable.containsKey(signal)) {
-      print('no signal');
       return false;
     }
     // We don't know about this token.
     if (!_handlersTable[signal]!.containsKey(token)) {
-       print('no token');
       return false;
     }
     final SignalHandler? handler = _handlersTable[signal]!.remove(token);
     if (handler == null) {
-       print('no handle');
       return false;
     }
     final bool removed = _handlersList[signal]!.remove(handler);
