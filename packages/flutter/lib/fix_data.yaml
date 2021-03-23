@@ -13,17 +13,6 @@ version: 1
 transforms:
 
   # Changes made in https://github.com/flutter/flutter/pull/66482
-  - title: "Remove 'brightness'"
-    date: 2020-09-24
-    element:
-      uris: [ 'material.dart' ]
-      constructor: ''
-      inClass: 'ThemeData'
-    changes:
-      - kind: 'removeParameter'
-        name: 'useTextSelectionTheme'
-
-  # Changes made in https://github.com/flutter/flutter/pull/66482
   - title: "Migrate to 'TextSelectionThemeData'"
     date: 2020-09-24
     element:
@@ -132,6 +121,10 @@ transforms:
             name: 'textSelectionHandleColor'
           - kind: 'removeParameter'
             name: 'useTextSelectionTheme'
+      - if: "useTextSelectionTheme != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
     variables:
       textSelectionColor:
         kind: 'fragment'
@@ -142,6 +135,9 @@ transforms:
       textSelectionHandleColor:
         kind: 'fragment'
         value: 'arguments[textSelectionHandleColor]'
+      useTextSelectionTheme:
+        kind: 'fragment'
+        value: 'arguments[useTextSelectionTheme]'
 
   # Changes made in https://github.com/flutter/flutter/pull/46115
   - title: "Migrate to 'floatingLabelBehavior'"
