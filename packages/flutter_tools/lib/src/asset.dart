@@ -530,17 +530,27 @@ class ManifestAssetBundle implements AssetBundle {
   }) {
     final Map<String, List<String>> jsonObject = <String, List<String>>{};
     final List<_Asset> assets = assetVariants.keys.toList();
-    if (deferredComponentsAssetVariants != null) {
-      for (Map<_Asset, List<_Asset>> componentAssets in deferredComponentsAssetVariants.values()) {
-        assets.addAll(componentAssets.keys.toList());
-      }
-    }
-    assets.sort((_Asset left, _Asset right) => left.entryUri.path.compareTo(right.entryUri.path));
+    final Map<_Asset, List<String>> jsonEntries = <_Asset, List<String>>{};
     for (final _Asset main in assets) {
-      jsonObject[main.entryUri.path] = <String>[
+      jsonEntries[main] = <String>[
         for (final _Asset variant in assetVariants[main])
           variant.entryUri.path,
       ];
+    }
+    if (deferredComponentsAssetVariants != null) {
+      for (Map<_Asset, List<_Asset>> componentAssets in deferredComponentsAssetVariants.values) {
+        for (final _Asset main in componentAssets.keys) {
+          jsonEntries[main] = <String>[
+            for (final _Asset variant in componentAssets[main])
+              variant.entryUri.path,
+          ];
+        }
+      }
+    }
+    final List<_Asset> sortedKeys = jsonEntries.keys.toList()
+        ..sort((_Asset left, _Asset right) => left.entryUri.path.compareTo(right.entryUri.path));
+    for (final _Asset main in sortedKeys) {
+      jsonObject[main.entryUri.path] = jsonEntries[main];
     }
     return DevFSStringContent(json.encode(jsonObject));
   }
