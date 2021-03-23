@@ -217,6 +217,7 @@ class BitmapCanvas extends EngineCanvas {
       }
     }
     _children.clear();
+    _childOverdraw = false;
     _cachedLastCssFont = null;
     _setupInitialTransform();
   }
@@ -441,8 +442,8 @@ class BitmapCanvas extends EngineCanvas {
     if (blendMode != null) {
       element.style.mixBlendMode = _stringForBlendMode(blendMode) ?? '';
     }
-    // Switch to preferring DOM from now on.
-    _childOverdraw = true;
+    // Switch to preferring DOM from now on, and close the current canvas.
+    _closeCurrentCanvas();
   }
 
   @override
@@ -601,9 +602,7 @@ class BitmapCanvas extends EngineCanvas {
       _applyTargetSize(
           imageElement, image.width.toDouble(), image.height.toDouble());
     }
-    _childOverdraw = true;
-    _canvasPool.closeCurrentCanvas();
-    _cachedLastCssFont = null;
+    _closeCurrentCanvas();
   }
 
   html.ImageElement _reuseOrCreateImage(HtmlImage htmlImage) {
@@ -847,6 +846,7 @@ class BitmapCanvas extends EngineCanvas {
   void _closeCurrentCanvas() {
     _canvasPool.closeCurrentCanvas();
     _childOverdraw = true;
+    _cachedLastCssFont = null;
   }
 
   void setCssFont(String cssFont) {
