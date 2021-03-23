@@ -25,7 +25,6 @@ import 'scroll_controller.dart';
 import 'scroll_metrics.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
-import 'scroll_position_with_single_context.dart';
 import 'ticker_provider.dart';
 import 'viewport.dart';
 
@@ -389,30 +388,31 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   late ScrollBehavior _configuration;
   ScrollPhysics? _physics;
+  late ScrollController _scrollController;
 
   // Only call this from places that will definitely trigger a rebuild.
   void _updatePosition() {
-    _configuration = ScrollConfiguration.of(context);
+    _configuration = widget.scrollBehavior ?? ScrollConfiguration.of(context);
     _physics = _configuration.getScrollPhysics(context);
     if (widget.physics != null) {
       _physics = widget.physics!.applyTo(_physics);
     } else if (widget.scrollBehavior != null) {
       _physics = widget.scrollBehavior!.getScrollPhysics(context).applyTo(_physics);
     }
-    final ScrollController? controller = widget.controller;
+    final ScrollController controller = widget.controller ?? _scrollController;
     final ScrollPosition? oldPosition = _position;
     if (oldPosition != null) {
-      controller?.detach(oldPosition);
+      controller.detach(oldPosition);
       // It's important that we not dispose the old position until after the
       // viewport has had a chance to unregister its listeners from the old
       // position. So, schedule a microtask to do it.
       scheduleMicrotask(oldPosition.dispose);
     }
 
-    _position = controller?.createScrollPosition(_physics!, this, oldPosition)
-      ?? ScrollPositionWithSingleContext(physics: _physics!, context: this, oldPosition: oldPosition);
+    _position = controller.createScrollPosition(_physics!, this, oldPosition);
+      //?? ScrollPositionWithSingleContext(physics: _physics!, context: this, oldPosition: oldPosition);
     assert(_position != null);
-    controller?.attach(position);
+    controller.attach(position);
   }
 
   @override
@@ -431,6 +431,12 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     // [saveOffset] is called after a scrolling ends and it is usually not
     // followed by a frame. Therefore, manually flush restoration data.
     ServicesBinding.instance!.restorationManager.flushData();
+  }
+
+  @override
+  void initState() {
+    _scrollController = ScrollController();
+    super.initState();
   }
 
   @override
@@ -470,6 +476,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     widget.controller?.detach(position);
     position.dispose();
     _persistedScrollOffset.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -729,7 +736,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       result,
       ScrollableDetails(
         direction: widget.axisDirection,
-        controller: widget.controller ?? ScrollController(),
+        controller: widget.controller ?? _scrollController,
       ),
     );
   }

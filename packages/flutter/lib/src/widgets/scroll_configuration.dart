@@ -51,7 +51,7 @@ class ScrollBehavior {
 
   ///
   ScrollBehavior copyWith({ bool scrollbars = true, bool overscroll = true}) {
-    return _WrappedScrollBehavior(delegate: this, scrollbars: scrollbars, overscroll: true);
+    return _WrappedScrollBehavior(delegate: this, scrollbars: scrollbars, overscroll: overscroll);
   }
 
   /// The platform whose scroll physics should be implemented.
@@ -122,19 +122,19 @@ class ScrollBehavior {
 
   ///
   Widget buildScrollbar(Widget child, ScrollController controller) {
-      return RawScrollbar(
-        child: child,
-        controller: controller,
-      );
+    return RawScrollbar(
+      child: child,
+      controller: controller,
+    );
   }
 
   ///
   Widget buildOverscrollIndicator(BuildContext context, Widget child, AxisDirection direction) {
-      return GlowingOverscrollIndicator(
-        child: child,
-        axisDirection: direction,
-        color: _kDefaultGlowColor,
-      );
+    return GlowingOverscrollIndicator(
+      child: child,
+      axisDirection: direction,
+      color: _kDefaultGlowColor,
+    );
   }
 
   /// Specifies the type of velocity tracker to use in the descendant

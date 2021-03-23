@@ -624,26 +624,28 @@ class NestedScrollViewState extends State<NestedScrollView> {
 
     return _InheritedNestedScrollView(
       state: this,
-      child: Builder(
-        builder: (BuildContext context) {
-          _lastHasScrolledBody = _coordinator!.hasScrolledBody;
-          return _NestedScrollViewCustomScrollView(
-            dragStartBehavior: widget.dragStartBehavior,
-            scrollDirection: widget.scrollDirection,
-            reverse: widget.reverse,
-            physics: _scrollPhysics,
-            scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false),
-            controller: _coordinator!._outerController,
-            slivers: widget._buildSlivers(
-              context,
-              _coordinator!._innerController,
-              _lastHasScrolledBody!,
-            ),
-            handle: _absorberHandle,
-            clipBehavior: widget.clipBehavior,
-            restorationId: widget.restorationId,
-          );
-        },
+      child: ScrollConfiguration(
+        behavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false),
+        child: Builder(
+          builder: (BuildContext context) {
+            _lastHasScrolledBody = _coordinator!.hasScrolledBody;
+            return _NestedScrollViewCustomScrollView(
+              dragStartBehavior: widget.dragStartBehavior,
+              scrollDirection: widget.scrollDirection,
+              reverse: widget.reverse,
+              physics: _scrollPhysics,
+              controller: _coordinator!._outerController,
+              slivers: widget._buildSlivers(
+                context,
+                _coordinator!._innerController,
+                _lastHasScrolledBody!,
+              ),
+              handle: _absorberHandle,
+              clipBehavior: widget.clipBehavior,
+              restorationId: widget.restorationId,
+            );
+          },
+        ),
       ),
     );
   }
@@ -660,7 +662,6 @@ class _NestedScrollViewCustomScrollView extends CustomScrollView {
     required Clip clipBehavior,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     String? restorationId,
-    ScrollBehavior? scrollBehavior,
   }) : super(
          scrollDirection: scrollDirection,
          reverse: reverse,
@@ -670,7 +671,6 @@ class _NestedScrollViewCustomScrollView extends CustomScrollView {
          dragStartBehavior: dragStartBehavior,
          restorationId: restorationId,
          clipBehavior: clipBehavior,
-         scrollBehavior: scrollBehavior,
        );
 
   final SliverOverlapAbsorberHandle handle;
