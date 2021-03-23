@@ -1802,25 +1802,49 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     });
 
     test('check for string interpolation rules', () {
-    // "'The number of {hours} elapsed is: 44'" // no curly brackets.
-    // "'哈{hours}哈'" // no curly brackets.
-    // "'m#hours#m'" // curly brackets.
-    // "'I have to work _#hours#_' sometimes." // curly brackets.
-    // "'{hours} elapsed.'" // no curly brackets
-    // '#placeholder# ' // no curly brackets
-    // '#placeholder#m' // curly brackets
-    // "'hours elapsed: {hours}'"
-    // "'Time elapsed: {hours}'" // no curly brackets
-    // ' #placeholder#' // no curly brackets
-    // 'm#placeholder#' // curly brackets
-
       const String enArbCheckList = '''
 {
-  "one": "The number of {hours} elapsed is: 44",
+  "one": "The number of {one} elapsed is: 44",
   "@one": {
     "description": "test one",
     "placeholders": {
-      "hours": {
+      "one": {
+        "type": "String"
+      }
+    }
+  },
+  "two": "哈{two}哈",
+  "@two": {
+    "description": "test two",
+    "placeholders": {
+      "two": {
+        "type": "String"
+      }
+    }
+  },
+  "three": "m{three}m",
+  "@three": {
+    "description": "test three",
+    "placeholders": {
+      "three": {
+        "type": "String"
+      }
+    }
+  },
+  "four": "I have to work _{four}_ sometimes.",
+  "@four": {
+    "description": "test four",
+    "placeholders": {
+      "four": {
+        "type": "String"
+      }
+    }
+  },
+  "five": "{hours} elapsed.",
+  "@five": {
+    "description": "test five",
+    "placeholders": {
+      "five": {
         "type": "String"
       }
     }
@@ -1828,11 +1852,22 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 }
 ''';
 
+    // '#placeholder# ' // no curly brackets
+    // '#placeholder#m' // curly brackets
+    // "'hours elapsed: {hours}'"
+    // "'Time elapsed: {hours}'" // no curly brackets
+    // ' #placeholder#' // no curly brackets
+    // 'm#placeholder#' // curly brackets
+
       // It's fine that the arb is identical -- Just checking
       // generated code for use of '${variable}' vs '$variable'
       const String esArbCheckList = '''
 {
-  "one": "The number of {hours} elapsed is: 44"
+  "one": "The number of {one} elapsed is: 44",
+  "two": "哈{two}哈",
+  "three": "m{three}m",
+  "four": "I have to work _{four}_ sometimes.",
+  "five": "{five} elapsed."
 }
 ''';
 
@@ -1862,7 +1897,11 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         fs.path.join(syntheticL10nPackagePath, 'output-localization-file_es.dart'),
       ).readAsStringSync();
 
-      expect(localizationsFile, contains(r'$hours'));
+      expect(localizationsFile, contains(r'$one'));
+      expect(localizationsFile, contains(r'$two'));
+      expect(localizationsFile, contains(r'${three}'));
+      expect(localizationsFile, contains(r'${four}'));
+      expect(localizationsFile, contains(r'$five'));
     });
 
     test(
