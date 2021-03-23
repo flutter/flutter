@@ -192,6 +192,8 @@ function shared::execute() {
 
   # Test if running as superuser – but don't warn if running within Docker
   if [[ "$EUID" == "0" && ! -f /.dockerenv ]]; then
+    a=$(ls)
+    >&2 echo " Content of directory: $a"
     >&2 echo "   Woah! You appear to be trying to run flutter as root."
     >&2 echo "   We strongly recommend running the flutter tool without superuser privileges."
     >&2 echo "  /"
