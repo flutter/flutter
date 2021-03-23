@@ -920,7 +920,6 @@ abstract class ResidentRunner {
       outputDir: globals.fs.directory(getBuildDirectory()),
       processManager: globals.processManager,
       projectDir: globals.fs.currentDirectory,
-      generateDartPluginRegistry: true,
     );
     _lastBuild = await globals.buildSystem.buildIncremental(
       const GenerateLocalizationsTarget(),

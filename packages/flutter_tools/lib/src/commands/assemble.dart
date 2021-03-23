@@ -241,8 +241,7 @@ class AssembleCommand extends FlutterCommand {
       processManager: globals.processManager,
       engineVersion: globals.artifacts.isLocalEngine
         ? null
-        : globals.flutterVersion.engineRevision,
-      generateDartPluginRegistry: true,
+        : globals.flutterVersion.engineRevision
     );
     return result;
   }
