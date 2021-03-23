@@ -2,16 +2,27 @@
 import 'base/io.dart';
 import 'base/platform.dart';
 import 'doctor.dart';
+import 'globals.dart' as globals;
+
+// The environment variables used to override some URLs
+const String kPubHostedUrl = 'PUB_HOSTED_URL';
+const String kCloudUrl = 'FLUTTER_STORAGE_BASE_URL';
 
 /// Hosts used by flutter on all machines
-const List<String> commonRequiredHostUrls = <String>[
-  'https://cloud.google.com/',
+List<String> commonRequiredHostUrls = <String>[
   'https://maven.google.com/',
-  'https://pub.dev/',
+  if (globals.platform.environment.containsKey(kCloudUrl)) 
+    globals.platform.environment[kCloudUrl] 
+  else 
+    'https://cloud.google.com/',
+  if (globals.platform.environment.containsKey(kPubHostedUrl)) 
+    globals.platform.environment[kPubHostedUrl] 
+  else 
+    'https://pub.dev/',
 ];
 
 /// Hosts used only on MacOS
-const List<String> macOsRequiredHostUrls = <String>[
+List<String> macOsRequiredHostUrls = <String>[
   'https://cocoapods.org/',
 ];
 
@@ -34,9 +45,8 @@ class HttpHostAvailabilityValidator extends DoctorValidator {
   List<String> get _allRequiredHosts {
     if (_platform.isMacOS) {
       return commonRequiredHostUrls + macOsRequiredHostUrls;
-    } else {
-      return commonRequiredHostUrls;
     }
+    return commonRequiredHostUrls;
   }
 
   /// Make an HTTP HEAD request to the given URL. If there is no exception,
@@ -77,30 +87,30 @@ class HttpHostAvailabilityValidator extends DoctorValidator {
         ValidationType.installed,
         messages,
       );
-    } else {
-      // Else not all URLs are available. Get the number of URLs that are not 
-      // available
-      final int unavailableUrls = availabilityResults
-        .where((_HttpHostAvailabilityResult result) => !result.hostAvailable).length;
-      final int totalUrls = availabilityResults.length;
-      
-      // Filter the list to only include those that have not passed
-      availabilityResults
-        .removeWhere((_HttpHostAvailabilityResult result) => result.hostAvailable);
-
-      // Add the error messages to be displayed
-      for (final _HttpHostAvailabilityResult result in availabilityResults) {
-        messages.add(ValidationMessage.error('HTTP host ${result.hostUrl} is not available: ${result.errorMessage}'));
-      }
-
-      // Return a partially successfull or completely errored result
-      return ValidationResult(
-        unavailableUrls == totalUrls 
-          ? ValidationType.notAvailable 
-          : ValidationType.partial, 
-        messages
-      );
     }
+
+    // Else not all URLs are available. Get the number of URLs that are not 
+    // available
+    final int unavailableUrls = availabilityResults
+      .where((_HttpHostAvailabilityResult result) => !result.hostAvailable).length;
+    final int totalUrls = availabilityResults.length;
+    
+    // Filter the list to only include those that have not passed
+    availabilityResults
+      .removeWhere((_HttpHostAvailabilityResult result) => result.hostAvailable);
+
+    // Add the error messages to be displayed
+    for (final _HttpHostAvailabilityResult result in availabilityResults) {
+      messages.add(ValidationMessage.error('HTTP host ${result.hostUrl} is not available: ${result.errorMessage}'));
+    }
+
+    // Return a partially successfull or completely errored result
+    return ValidationResult(
+      unavailableUrls == totalUrls 
+        ? ValidationType.notAvailable 
+        : ValidationType.partial, 
+      messages
+    );
   }
 }
 
