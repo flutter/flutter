@@ -399,7 +399,7 @@ class ManifestAssetBundle implements AssetBundle {
       _wildcardDirectories[uri] ??= _fileSystem.directory(uri);
     }
 
-    final DevFSStringContent assetManifest  = _createAssetManifest(assetVariants);
+    final DevFSStringContent assetManifest  = _createAssetManifest(assetVariants, deferredComponentsAssetVariants: deferredComponentsAssetVariants);
     final DevFSStringContent fontManifest = DevFSStringContent(json.encode(fonts));
     final LicenseResult licenseResult = _licenseCollector.obtainLicenses(packageConfig, additionalLicenseFiles);
     if (licenseResult.errorMessages.isNotEmpty) {
@@ -524,10 +524,18 @@ class ManifestAssetBundle implements AssetBundle {
     return deferredComponentsAssetVariants;
   }
 
-  DevFSStringContent _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants) {
+  DevFSStringContent _createAssetManifest(
+    Map<_Asset, List<_Asset>> assetVariants, {
+    Map<String, Map<_Asset, List<_Asset>>> deferredComponentsAssetVariants
+  }) {
     final Map<String, List<String>> jsonObject = <String, List<String>>{};
-    final List<_Asset> assets = assetVariants.keys.toList()
-      ..sort((_Asset left, _Asset right) => left.entryUri.path.compareTo(right.entryUri.path));
+    final List<_Asset> assets = assetVariants.keys.toList();
+    if (deferredComponentsAssetVariants != null) {
+      for (Map<_Asset, List<_Asset>> componentAssets in deferredComponentsAssetVariants.values()) {
+        assets.addAll(componentAssets.keys.toList());
+      }
+    }
+    assets.sort((_Asset left, _Asset right) => left.entryUri.path.compareTo(right.entryUri.path));
     for (final _Asset main in assets) {
       jsonObject[main.entryUri.path] = <String>[
         for (final _Asset variant in assetVariants[main])
