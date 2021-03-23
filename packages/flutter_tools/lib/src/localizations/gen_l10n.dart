@@ -248,7 +248,7 @@ String generatePluralMethod(Message message, AppResourceBundle bundle) {
 
 bool _needsCurlyBracketStringInterpolation(String messageString, String placeholder) {
   final int placeholderIndex = messageString.indexOf(placeholder);
-  // This means that there is no need for a placeholder,
+  // This means that this message does not contain placeholders/parameters,
   // since one was not found in the message.
   if (placeholderIndex == -1) {
     return false;
