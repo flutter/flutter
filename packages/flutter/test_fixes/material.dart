@@ -193,6 +193,30 @@ void main() {
   inputDecorationTheme.hasFloatingPlaceholder;
 
   // Changes made in https://github.com/flutter/flutter/pull/66482
+  ThemeData(textSelectionColor: Colors.red);
+  ThemeData(cursorColor: Colors.red);
+  ThemeData(textSelectionHandleColor: Colors.red);
+  ThemeData(useTextSelectionTheme: false);
+  ThemeData(textSelectionColor: Colors.red, useTextSelectionTheme: false);
+  ThemeData(cursorColor: Colors.red, useTextSelectionTheme: false);
+  ThemeData(textSelectionHandleColor: Colors.red, useTextSelectionTheme: false);
+  ThemeData(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.red,
+  );
+  ThemeData(
+    textSelectionHandleColor: Colors.red,
+    cursorColor: Colors.red,
+  );
+  ThemeData(
+    textSelectionColor: Colors.red,
+    textSelectionHandleColor: Colors.red,
+  );
+  ThemeData(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.red,
+    textSelectionHandleColor: Colors.red,
+  );
   ThemeData(
     textSelectionColor: Colors.red,
     cursorColor: Colors.red,
@@ -200,5 +224,5 @@ void main() {
     useTextSelectionTheme: false,
   );
 
-  // raw constructor
+  // + ThemeData.raw constructor
 }

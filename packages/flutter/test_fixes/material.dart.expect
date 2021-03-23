@@ -193,9 +193,23 @@ void main() {
   inputDecorationTheme.floatingLabelBehavior;
 
   // Changes made in https://github.com/flutter/flutter/pull/66482
-  ThemeData(
-    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.red, selectionColor: Colors.red, selectionHandleColor: Colors.red,)
+  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red));
+  ThemeData(textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.red));
+  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colors.red));
+  ThemeData();
+  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red));
+  ThemeData(textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.red));
+  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colors.red));
+  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, cursorColor: Colors.red,)
+  );
+  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colors.red, cursorColor: Colors.red,)
+  );
+  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, selectionHandleColor: Colors.red,)
+  );
+  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, cursorColor: Colors.red, selectionHandleColor: Colors.red,)
+  );
+  ThemeData(textSelectionTheme: TextSelectionThemeData(textSelectionColor: Colors.red, cursorColor: Colors.red, textSelectionHandleColor: Colors.red,)
   );
 
-  // raw constructor
+  // + ThemeData.raw constructor
 }

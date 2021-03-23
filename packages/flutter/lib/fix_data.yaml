@@ -13,7 +13,18 @@ version: 1
 transforms:
 
   # Changes made in https://github.com/flutter/flutter/pull/66482
-  - title: "Migrate to 'TextSelectionThemeData.selectionColor'"
+  - title: "Remove 'brightness'"
+    date: 2020-09-24
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'useTextSelectionTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/66482
+  - title: "Migrate to 'TextSelectionThemeData'"
     date: 2020-09-24
     element:
       uris: [ 'material.dart' ]
