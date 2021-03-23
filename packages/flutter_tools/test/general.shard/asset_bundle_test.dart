@@ -612,14 +612,10 @@ flutter:
         - assets/bar.jpg
         - assets/apple.jpg
 ''');
-    globals.fs.file('assets/foo.jpg')
-      ..createSync(recursive: true);
-    globals.fs.file('assets/bar.jpg')
-      ..createSync();
-    globals.fs.file('assets/apple.jpg')
-      ..createSync();
-    globals.fs.file('assets/zebra.jpg')
-      ..createSync();
+    globals.fs.file('assets/foo.jpg').createSync(recursive: true);
+    globals.fs.file('assets/bar.jpg').createSync();
+    globals.fs.file('assets/apple.jpg').createSync();
+    globals.fs.file('assets/zebra.jpg').createSync();
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
     expect(await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages'), 0);

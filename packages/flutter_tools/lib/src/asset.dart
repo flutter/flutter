@@ -538,7 +538,7 @@ class ManifestAssetBundle implements AssetBundle {
       ];
     }
     if (deferredComponentsAssetVariants != null) {
-      for (Map<_Asset, List<_Asset>> componentAssets in deferredComponentsAssetVariants.values) {
+      for (final Map<_Asset, List<_Asset>> componentAssets in deferredComponentsAssetVariants.values) {
         for (final _Asset main in componentAssets.keys) {
           jsonEntries[main] = <String>[
             for (final _Asset variant in componentAssets[main])
