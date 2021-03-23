@@ -7,6 +7,10 @@ import 'package:flutter_tools/src/base/platform.dart';
 import '../../src/common.dart';
 import '../../src/fake_http_client.dart';
 
+// The environment variables used to override some URLs
+const String kPubHostedUrl = 'PUB_HOSTED_URL';
+const String kCloudUrl = 'FLUTTER_STORAGE_BASE_URL';
+
 void main() {
   group('http host availability validator', () {
     const List<String> operatingSystemsToTest = <String>['windows', 'macos', 'linux'];
@@ -26,10 +30,8 @@ void main() {
         // Run the validation check and get the results
         final ValidationResult result = await httpHostValidator.validate();
 
-        // Check for only one information message
-        expect(result.messages..removeWhere(
-          (ValidationMessage message) => message.isHint || message.isError
-        ), hasLength(1));
+        // Check that the returned result is ValidationType.installed
+        expect(result.type, equals(ValidationType.installed));
       }
     });
 
@@ -49,10 +51,8 @@ void main() {
         // Run the validation check and get the results
         final ValidationResult result = await httpHostValidator.validate();
 
-        // Check that all messages are errors
-        expect(result.messages..where(
-          (ValidationMessage message) => message.isHint || message.isError
-        ), equals(result.messages));
+        // Check that the returned result is ValidationType.notAvailable
+        expect(result.type, equals(ValidationType.notAvailable));
       }
     });
 
@@ -72,10 +72,8 @@ void main() {
         // Run the validation check and get the results
         final ValidationResult result = await httpHostValidator.validate();
 
-        // Check that only one message is an error
-        expect(result.messages..where(
-          (ValidationMessage message) => message.isHint || message.isError
-        ), hasLength(1));
+        // Check that the returned result is ValidationType.partial
+        expect(result.type, equals(ValidationType.partial));
       }
     });
   });
