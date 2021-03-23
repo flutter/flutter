@@ -25,6 +25,7 @@
 		0DB7820222EA493B00E9B371 /* FlutterViewControllerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 0DB781FC22EA2C0300E9B371 /* FlutterViewControllerTest.m */; };
 		0DDEBC89258830B40065D0E8 /* SpawnEngineTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 0DDEBC88258830B40065D0E8 /* SpawnEngineTest.m */; };
 		0DDEBC8B258839760065D0E8 /* golden_spawn_engine_works_iPhone 8_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = 0DDEBC8A258839760065D0E8 /* golden_spawn_engine_works_iPhone 8_simulator.png */; };
+		0EE8986D2609D05E0061D5E5 /* golden_non_full_screen_flutter_view_platform_view_iPhone 8_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = 0EE8986C2609D05E0061D5E5 /* golden_non_full_screen_flutter_view_platform_view_iPhone 8_simulator.png */; };
 		242F37A222E636DE001E83D4 /* Flutter.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 246B4E4522E3B61000073EBF /* Flutter.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		242F37A322E636DE001E83D4 /* App.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 246B4E4122E3B5F700073EBF /* App.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		244EA6D0230DBE8900B2D26E /* golden_platform_view_D21AP.png in Resources */ = {isa = PBXBuildFile; fileRef = 244EA6CF230DBE8900B2D26E /* golden_platform_view_D21AP.png */; };
@@ -129,6 +130,7 @@
 		0DDEBC87258830B40065D0E8 /* SpawnEngineTest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SpawnEngineTest.h; sourceTree = "<group>"; };
 		0DDEBC88258830B40065D0E8 /* SpawnEngineTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SpawnEngineTest.m; sourceTree = "<group>"; };
 		0DDEBC8A258839760065D0E8 /* golden_spawn_engine_works_iPhone 8_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_spawn_engine_works_iPhone 8_simulator.png"; sourceTree = "<group>"; };
+		0EE8986C2609D05E0061D5E5 /* golden_non_full_screen_flutter_view_platform_view_iPhone 8_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_non_full_screen_flutter_view_platform_view_iPhone 8_simulator.png"; sourceTree = "<group>"; };
 		244EA6CF230DBE8900B2D26E /* golden_platform_view_D21AP.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = golden_platform_view_D21AP.png; sourceTree = "<group>"; };
 		246A6610252E693A00EAB0F3 /* RenderingSelectionTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RenderingSelectionTest.m; sourceTree = "<group>"; };
 		246B4E4122E3B5F700073EBF /* App.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = App.framework; sourceTree = "<group>"; };
@@ -266,6 +268,7 @@
 				3DE09E9223C010BD006C9851 /* golden_platform_view_cliprect_iPhone 8_simulator.png */,
 				3DE09E8C23C010BD006C9851 /* golden_platform_view_cliprrect_iPhone 8_simulator.png */,
 				3DE09E9023C010BD006C9851 /* golden_platform_view_iPhone 8_simulator.png */,
+				0EE8986C2609D05E0061D5E5 /* golden_non_full_screen_flutter_view_platform_view_iPhone 8_simulator.png */,
 				3DE09E8A23C010BC006C9851 /* golden_platform_view_multiple_background_foreground_iPhone 8_simulator.png */,
 				3DE09E8D23C010BD006C9851 /* golden_platform_view_multiple_iPhone 8_simulator.png */,
 				3DE09E8F23C010BD006C9851 /* golden_platform_view_opacity_iPhone 8_simulator.png */,
@@ -434,6 +437,7 @@
 				3DEF491523C3BE6500184216 /* golden_platform_view_iPhone 8_simulator.png in Resources */,
 				0D14A3FE239743190013D873 /* golden_platform_view_rotate_iPhone SE_simulator.png in Resources */,
 				3DEF491823C3BE6500184216 /* golden_platform_view_opacity_iPhone 8_simulator.png in Resources */,
+				0EE8986D2609D05E0061D5E5 /* golden_non_full_screen_flutter_view_platform_view_iPhone 8_simulator.png in Resources */,
 				0AC83146256E534E00DAE6BE /* golden_bogus_font_text_iPhone 8_simulator.png in Resources */,
 				3DEF491723C3BE6500184216 /* golden_platform_view_multiple_iPhone 8_simulator.png in Resources */,
 				3DEF491223C3BE6500184216 /* golden_platform_view_clippath_iPhone 8_simulator.png in Resources */,

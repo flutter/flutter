@@ -47,6 +47,7 @@
     @"--platform-view-transform" : @"platform_view_transform",
     @"--platform-view-opacity" : @"platform_view_opacity",
     @"--platform-view-rotate" : @"platform_view_rotate",
+    @"--non-full-screen-flutter-view-platform-view" : @"non_full_screen_flutter_view_platform_view",
     @"--gesture-reject-after-touches-ended" : @"platform_view_gesture_reject_after_touches_ended",
     @"--gesture-reject-eager" : @"platform_view_gesture_reject_eager",
     @"--gesture-accept" : @"platform_view_gesture_accept",
@@ -141,7 +142,16 @@
                                 withId:@"scenarios/textPlatformView_blockPolicyUntilTouchesEnded"
       gestureRecognizersBlockingPolicy:
           FlutterPlatformViewGestureRecognizersBlockingPolicyWaitUntilTouchesEnded];
-  self.window.rootViewController = flutterViewController;
+
+  UIViewController* rootViewController = flutterViewController;
+  // Make Flutter View's origin x/y not 0.
+  if ([scenarioIdentifier isEqualToString:@"non_full_screen_flutter_view_platform_view"]) {
+    rootViewController = [UIViewController new];
+    [rootViewController.view addSubview:flutterViewController.view];
+    flutterViewController.view.frame = CGRectMake(150, 150, 500, 500);
+  }
+
+  self.window.rootViewController = rootViewController;
 
   if ([[[NSProcessInfo processInfo] arguments] containsObject:@"--assert-ca-layer-type"]) {
     if ([[[NSProcessInfo processInfo] arguments] containsObject:@"--enable-software-rendering"]) {
