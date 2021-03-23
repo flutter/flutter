@@ -204,9 +204,11 @@ abstract class ShortcutActivator {
 /// A set of [LogicalKeyboardKey]s that can be used as the keys in a map.
 ///
 /// [LogicalKeySet] can also be used as a [ShortcutActivator]. It will activate
-/// the intent when all [keys] are pressed. Always prefer [SingleActivator]
-/// instead whenever possible, whose behavior more closely resembles that of
-/// typical applications.
+/// the intent when all [keys] are pressed, and no others, except that modifier
+/// keys are considered without considering sides (e.g. control left and control right
+/// are considered the same). If you're building a common shortcut such as
+/// `Delete` or `Ctrl+C`, prefer [SingleActivator] when possible, whose behavior
+/// more closely resembles that of typical platforms.
 ///
 /// This is a thin wrapper around a [Set], but changes the equality comparison
 /// from an identity comparison to a contents comparison so that non-identical
@@ -238,8 +240,11 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
 
   @override
   bool accepts(RawKeyEvent event, RawKeyboard state) {
-    final Set<LogicalKeyboardKey> keysPressed = LogicalKeyboardKey.collapseSynonyms(state.keysPressed);
-    return event is RawKeyDownEvent && keys.every(keysPressed.contains);
+    final Set<LogicalKeyboardKey> collapsedRequired = LogicalKeyboardKey.collapseSynonyms(keys);
+    final Set<LogicalKeyboardKey> collapsedPressed = LogicalKeyboardKey.collapseSynonyms(state.keysPressed);
+    final bool keysEqual = collapsedRequired.difference(collapsedPressed).isEmpty
+      && collapsedRequired.length == collapsedPressed.length;
+    return event is RawKeyDownEvent && keysEqual;
   }
 
   static const Set<LogicalKeyboardKey> _modifiers = <LogicalKeyboardKey>{
@@ -312,34 +317,37 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutActivator, Int
   Map<ShortcutActivator, Intent> get value => super.value!;
 
   @override
-  String valueToString({ TextTreeConfiguration? parentConfiguration }) {
+  String valueToString({TextTreeConfiguration? parentConfiguration}) {
     return '{${value.keys.map<String>((ShortcutActivator keySet) => '{${keySet.debugDescribeKeys()}}: ${value[keySet]}').join(', ')}}';
   }
 }
 
 /// A shortcut key combination of a single key and modifiers.
 ///
-/// This [ShortcutActivator] implements the typical shortcuts: a [trigger] key,
-/// and zero, some, or all of the four modifiers (control, shift, alt, meta),
-/// such as:
+/// This [ShortcutActivator] implements the typical shortcuts such as:
 ///
-///  * Arrow Left
+///  * ArrowLeft
 ///  * Shift + Delete
-///  * Control + Alt + Meta + Shift + Key A
+///  * Control + Alt + Meta + Shift + A
 ///
-/// More specifically, the shortcut is activated when the following conditions
-/// are met:
+/// More specifically, it create shortcut key combinations that are composed of a
+/// [trigger] key, and zero, some, or all of the four modifiers (control, shift,
+/// alt, meta). The shortcut is activated when the following conditions are met:
 ///
-///  * The incoming event is a down event for the [trigger] key.
+///  * The incoming event is a down event with the [trigger] key.
 ///  * If [control] is true, then either or all control keys must be held.
 ///    Otherwise, no control keys must be held.
-///  * The same goes for [alt], [shift], and [meta].
+///  * The similar condition goes for [alt], [shift], and [meta].
 ///
-/// This means that additional non-modifier keys are allowed. For example,
-/// pressing key X while holding ControlLeft and key A *will* activate a
-/// `SingleActivator(LogicalKeyboardKey.keyX, control: true)`, which resembles
-/// typical behavior of operation systems. This is a major difference of
-/// [SingleActivator] from [LogicalKeySet].
+/// This resembles the typical behavior of operation systems, and marks a major
+/// difference from [LogicalKeySet]:
+///
+///  * Additional non-modifier keys are allowed. For example,
+///    pressing key X while holding ControlLeft and key A *will* activate a
+///    `SingleActivator(LogicalKeyboardKey.keyX, control: true)`
+///  * The modifiers must not be the trigger key. For example, pressing
+///    ControlLeft while holding key X *will not* activate a
+///    `SingleActivator(LogicalKeyboardKey.keyX, control: true)`
 class SingleActivator with Diagnosticable implements ShortcutActivator {
   /// Create an activator of a trigger key and modifiers.
   ///
