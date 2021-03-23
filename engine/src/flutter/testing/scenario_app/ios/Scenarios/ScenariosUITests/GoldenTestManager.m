@@ -33,6 +33,8 @@ NSDictionary* launchArgsMap;
         @"--platform-view-transform" : @"platform_view_transform",
         @"--platform-view-opacity" : @"platform_view_opacity",
         @"--platform-view-rotate" : @"platform_view_rotate",
+        @"--non-full-screen-flutter-view-platform-view" :
+            @"non_full_screen_flutter_view_platform_view",
         @"--bogus-font-text" : @"bogus_font_text",
       };
     });
