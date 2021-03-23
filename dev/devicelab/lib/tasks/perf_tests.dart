@@ -12,6 +12,7 @@ import 'package:path/path.dart' as path;
 
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/host_agent.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
@@ -292,6 +293,8 @@ TaskFunction createStackSizeTest() {
         '--driver', testDriver,
         '-d',
         deviceId,
+        '--screenshot',
+        hostAgent.dumpDirectory.path,
       ]);
       final Map<String, dynamic> data = json.decode(
         file('$testDirectory/build/stack_size.json').readAsStringSync(),
@@ -387,6 +390,8 @@ TaskFunction createsScrollSmoothnessPerfTest() {
         '-t', testTarget,
         '-d',
         deviceId,
+        '--screenshot',
+        hostAgent.dumpDirectory.path,
       ]);
       final Map<String, dynamic> data = json.decode(
         file('$testDirectory/build/scroll_smoothness_test.json').readAsStringSync(),
@@ -436,6 +441,8 @@ TaskFunction createFramePolicyIntegrationTest() {
         '-t', testTarget,
         '-d',
         deviceId,
+        '--screenshot',
+        hostAgent.dumpDirectory.path,
       ]);
       final Map<String, dynamic> data = json.decode(
         file('$testDirectory/build/frame_policy_event_delay.json').readAsStringSync(),
@@ -689,6 +696,8 @@ class PerfTest {
           ...<String>['--dart-define', dartDefine],
         '-d',
         deviceId,
+        '--screenshot',
+        hostAgent.dumpDirectory.path,
       ]);
       final Map<String, dynamic> data = json.decode(
         file('$testDirectory/build/$resultFilename.json').readAsStringSync(),
@@ -1334,6 +1343,8 @@ class DevToolsMemoryTest {
         options: <String>[
           '--use-existing-app', _observatoryUri,
           '-d', _device.deviceId,
+          '--screenshot',
+          hostAgent.dumpDirectory.path,
           '--profile',
           driverTest,
         ],
