@@ -251,17 +251,29 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
     value = const TextEditingValue(selection: TextSelection.collapsed(offset: 0));
   }
 
-  /// Set the composing region to an empty range.
+  /// Set the composing region to [TextRange.empty] and commit the composing
+  /// text, if any.
   ///
-  /// The composing region is the range of text that is still being composed.
-  /// Calling this function indicates that the user is done composing that
-  /// region.
+  /// The composing region is the range of provisional text that is still
+  /// considered being composed by the input method (IME). Calling this function
+  /// indicates that the user is done composing that region.
+  ///
+  /// ### Limitations and Best Practices
+  ///
+  /// Typically, whether and when the composing text should be committed is
+  /// entirely up to the IME. It is strongly recommended to **NOT** call this
+  /// method when the input field is currently focused, since some IMEs don't
+  /// expect the editor to change the composing range.
   ///
   /// Calling this will notify all the listeners of this [TextEditingController]
   /// that they need to update (it calls [notifyListeners]). For this reason,
   /// this method should only be called between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   void clearComposing() {
+    // On Android if the composing range is changed by anyone other than the
+    // IME itself, the current implementation restarts the IME to ensure the
+    // internal states of the IME gets invalidated. This can hurt performance
+    // when typing.
     value = value.copyWith(composing: TextRange.empty);
   }
 
@@ -1074,9 +1086,15 @@ class EditableText extends StatefulWidget {
   /// {@template flutter.widgets.editableText.inputFormatters}
   /// Optional input validation and formatting overrides.
   ///
-  /// Formatters are run in the provided order when the text input changes. When
-  /// this parameter changes, the new formatters will not be applied until the
-  /// next time the user inserts or deletes text.
+  /// Formatters are run in the provided order when the text input is changed by
+  /// the user, or the composing text is committed.
+  ///
+  /// Typically, text modification should only be applied when text is being
+  /// committed by the IME and not on text under composition (i.e., only when
+  /// [TextEditingValue.composing] is collapsed).
+  ///
+  /// When this parameter changes, the new formatters will not be applied until
+  /// the next time the user inserts or deletes text.
   /// {@endtemplate}
   final List<TextInputFormatter>? inputFormatters;
 
@@ -1875,7 +1893,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // Default behavior if the developer did not provide an
       // onEditingComplete callback: Finalize editing and remove focus, or move
       // it to the next/previous field, depending on the action.
-      widget.controller.clearComposing();
       if (shouldUnfocus) {
         switch (action) {
           case TextInputAction.none:
