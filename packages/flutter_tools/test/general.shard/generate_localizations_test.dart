@@ -1840,7 +1840,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       }
     }
   },
-  "five": "{hours} elapsed.",
+  "five": "{five} elapsed.",
   "@five": {
     "description": "test five",
     "placeholders": {
@@ -1848,16 +1848,45 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         "type": "String"
       }
     }
+  },
+  "six": "{six}m",
+  "@six": {
+    "description": "test six",
+    "placeholders": {
+      "six": {
+        "type": "String"
+      }
+    }
+  },
+  "seven": "hours elapsed: {seven}",
+  "@seven": {
+    "description": "test seven",
+    "placeholders": {
+      "seven": {
+        "type": "String"
+      }
+    }
+  },
+  "eight": " {eight}",
+  "@eight": {
+    "description": "test eight",
+    "placeholders": {
+      "eight": {
+        "type": "String"
+      }
+    }
+  },
+  "nine": "m{nine}",
+  "@nine": {
+    "description": "test nine",
+    "placeholders": {
+      "nine": {
+        "type": "String"
+      }
+    }
   }
 }
 ''';
-
-    // '#placeholder# ' // no curly brackets
-    // '#placeholder#m' // curly brackets
-    // "'hours elapsed: {hours}'"
-    // "'Time elapsed: {hours}'" // no curly brackets
-    // ' #placeholder#' // no curly brackets
-    // 'm#placeholder#' // curly brackets
 
       // It's fine that the arb is identical -- Just checking
       // generated code for use of '${variable}' vs '$variable'
@@ -1867,7 +1896,11 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
   "two": "哈{two}哈",
   "three": "m{three}m",
   "four": "I have to work _{four}_ sometimes.",
-  "five": "{five} elapsed."
+  "five": "{five} elapsed.",
+  "six": "{six}m",
+  "seven": "hours elapsed: {seven}",
+  "eight": " {eight}",
+  "nine": "m{nine}"
 }
 ''';
 
@@ -1902,6 +1935,10 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       expect(localizationsFile, contains(r'${three}'));
       expect(localizationsFile, contains(r'${four}'));
       expect(localizationsFile, contains(r'$five'));
+      expect(localizationsFile, contains(r'${six}m'));
+      expect(localizationsFile, contains(r'$seven'));
+      expect(localizationsFile, contains(r'$eight'));
+      expect(localizationsFile, contains(r'${nine}'));
     });
 
     test(
