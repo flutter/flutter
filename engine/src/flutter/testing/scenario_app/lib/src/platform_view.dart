@@ -50,6 +50,31 @@ class PlatformViewScenario extends Scenario with _BasePlatformViewScenarioMixin 
   }
 }
 
+/// A simple platform view.
+class NonFullScreenFlutterViewPlatformViewScenario extends Scenario
+    with _BasePlatformViewScenarioMixin {
+  /// Creates the PlatformView scenario.
+  ///
+  /// The [dispatcher] parameter must not be null.
+  NonFullScreenFlutterViewPlatformViewScenario(
+      PlatformDispatcher dispatcher, String text,
+      {this.id})
+      : assert(dispatcher != null),
+        super(dispatcher) {
+    createPlatformView(dispatcher, text, id);
+  }
+
+  /// The platform view identifier.
+  final int id;
+
+  @override
+  void onBeginFrame(Duration duration) {
+    final SceneBuilder builder = SceneBuilder();
+
+    finishBuilderByAddingPlatformViewAndPicture(builder, id);
+  }
+}
+
 /// A simple platform view with overlay that doesn't intersect with the platform view.
 class PlatformViewNoOverlayIntersectionScenario extends Scenario with _BasePlatformViewScenarioMixin {
   /// Creates the PlatformView scenario.

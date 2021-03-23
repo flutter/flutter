@@ -357,13 +357,12 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
   CGFloat screenScale = [UIScreen mainScreen].scale;
   CATransform3D finalTransform = CATransform3DMakeScale(1 / screenScale, 1 / screenScale, 1);
 
-  // Mask view needs to be full screen because we might draw platform view pixels outside of the
-  // `ChildClippingView`. Since the mask view's frame will be based on the `clipView`'s coordinate
-  // system, we need to convert the flutter_view's frame to the clipView's coordinate system. The
-  // mask view is not displayed on the screen.
-  CGRect maskViewFrame = [flutter_view_ convertRect:flutter_view_.get().frame toView:clipView];
-  FlutterClippingMaskView* maskView =
-      [[[FlutterClippingMaskView alloc] initWithFrame:maskViewFrame] autorelease];
+  UIView* flutter_view = flutter_view_.get();
+  FlutterClippingMaskView* maskView = [[[FlutterClippingMaskView alloc]
+      initWithFrame:CGRectMake(-clipView.frame.origin.x, -clipView.frame.origin.y,
+                               CGRectGetWidth(flutter_view.bounds),
+                               CGRectGetHeight(flutter_view.bounds))] autorelease];
+
   auto iter = mutators_stack.Begin();
   while (iter != mutators_stack.End()) {
     switch ((*iter)->GetType()) {
@@ -392,7 +391,7 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
   // So we need to revese this translate so the platform view can layout at the correct offset.
   //
   // Note that we don't apply this transform matrix the clippings because clippings happen on the
-  // mask view, whose origin is alwasy (0,0) to the flutter_view.
+  // mask view, whose origin is always (0,0) to the flutter_view.
   CATransform3D reverseTranslate =
       CATransform3DMakeTranslation(-clipView.frame.origin.x, -clipView.frame.origin.y, 0);
   embedded_view.layer.transform = CATransform3DConcat(finalTransform, reverseTranslate);

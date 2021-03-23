@@ -23,6 +23,24 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
 
 @end
 
+@interface NonFullScreenFlutterViewPlatformViewUITests : GoldenPlatformViewTests
+
+@end
+
+@implementation NonFullScreenFlutterViewPlatformViewUITests
+
+- (instancetype)initWithInvocation:(NSInvocation*)invocation {
+  GoldenTestManager* manager =
+      [[GoldenTestManager alloc] initWithLaunchArg:@"--non-full-screen-flutter-view-platform-view"];
+  return [super initWithManager:manager invocation:invocation];
+}
+
+- (void)testPlatformView {
+  [self checkPlatformViewGolden];
+}
+
+@end
+
 @interface MultiplePlatformViewsTest : GoldenPlatformViewTests
 
 @end
