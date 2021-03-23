@@ -61,6 +61,11 @@ public class DartExecutor implements BinaryMessenger {
     this.dartMessenger = new DartMessenger(flutterJNI);
     dartMessenger.setMessageHandler("flutter/isolate", isolateChannelMessageHandler);
     this.binaryMessenger = new DefaultBinaryMessenger(dartMessenger);
+    // The JNI might already be attached if coming from a spawned engine. If so, correctly report
+    // that this DartExecutor is already running.
+    if (flutterJNI.isAttached()) {
+      isApplicationRunning = true;
+    }
   }
 
   /**
