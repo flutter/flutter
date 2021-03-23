@@ -56,7 +56,9 @@ class HttpHostAvailabilityValidator extends DoctorValidator {
   ) async {
     try {
       // Make the HEAD request
-      await _httpClient.headUrl(Uri.parse(hostUrl));
+      final HttpClientRequest headReq = await _httpClient.headUrl(Uri.parse(hostUrl));
+      await headReq.close();
+
       // If there is an error, it will be caught in the on ... catch blocks below.
       // Else return a successful result
       return _HttpHostAvailabilityResult.pass(hostUrl);
@@ -66,6 +68,9 @@ class HttpHostAvailabilityValidator extends DoctorValidator {
     } on HttpException catch (httpError) {
       // Return a failed result
       return _HttpHostAvailabilityResult.fail(hostUrl, httpError.message);
+    } on OSError catch (osError) {
+      // Return a failed result
+      return _HttpHostAvailabilityResult.fail(hostUrl, osError.message);
     }
   }
 
@@ -88,7 +93,7 @@ class HttpHostAvailabilityValidator extends DoctorValidator {
         messages,
       );
     }
-
+    
     // Else not all URLs are available. Get the number of URLs that are not 
     // available
     final int unavailableUrls = availabilityResults

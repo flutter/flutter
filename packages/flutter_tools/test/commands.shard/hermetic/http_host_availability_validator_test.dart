@@ -30,7 +30,7 @@ void main() {
         // Run the validation check and get the results
         final ValidationResult result = await httpHostValidator.validate();
 
-        // Check that the returned result is ValidationType.installed
+        // Check for a ValidationType.installed result
         expect(result.type, equals(ValidationType.installed));
       }
     });
@@ -51,7 +51,7 @@ void main() {
         // Run the validation check and get the results
         final ValidationResult result = await httpHostValidator.validate();
 
-        // Check that the returned result is ValidationType.notAvailable
+        // Check for a ValidationType.notAvailable result
         expect(result.type, equals(ValidationType.notAvailable));
       }
     });
@@ -72,7 +72,7 @@ void main() {
         // Run the validation check and get the results
         final ValidationResult result = await httpHostValidator.validate();
 
-        // Check that the returned result is ValidationType.partial
+        // Check for a ValidationType.partial result
         expect(result.type, equals(ValidationType.partial));
       }
     });
