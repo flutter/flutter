@@ -57,7 +57,7 @@ class AnalyzeCommand extends FlutterCommand {
         hide: !verboseHelp);
     argParser.addOption('protocol-traffic-log',
         valueHelp: 'path-to-protocol-traffic-log',
-        help: 'The path to write the request and response protocol. This is'
+        help: 'The path to write the request and response protocol. This is '
               'only intended to be used for debugging the tooling.',
         hide: !verboseHelp);
 
