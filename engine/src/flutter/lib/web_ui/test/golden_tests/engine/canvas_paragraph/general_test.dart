@@ -312,4 +312,51 @@ void testMain() async {
     canvas.drawParagraph(paragraph, Offset.zero);
     return takeScreenshot(canvas, bounds, 'canvas_paragraph_decoration');
   });
+
+  void testFontFeatures(EngineCanvas canvas) {
+    final String text = 'Aa Bb Dd Ee Ff';
+    final FontFeature enableSmallCaps = FontFeature('smcp');
+    final FontFeature disableSmallCaps = FontFeature('smcp', 0);
+    final CanvasParagraph paragraph = rich(
+      ParagraphStyle(fontFamily: 'Roboto'),
+      (CanvasParagraphBuilder builder) {
+        builder.pushStyle(EngineTextStyle.only(
+          height: 2,
+          color: black,
+          fontSize: 32.0,
+        ));
+        builder.addText('Small Caps: ');
+        builder.pushStyle(EngineTextStyle.only(
+          color: blue,
+          fontFeatures: <FontFeature>[enableSmallCaps],
+        ));
+        builder.addText('$text\n');
+        // Make sure disabling a font feature also works.
+        builder.pushStyle(EngineTextStyle.only(
+          color: black,
+          fontFeatures: <FontFeature>[disableSmallCaps],
+        ));
+        builder.addText('Normal Caps: ');
+        builder.pushStyle(EngineTextStyle.only(
+          color: blue,
+        ));
+        builder.addText(text);
+      },
+    )..layout(constrain(double.infinity));
+    canvas.drawParagraph(paragraph, Offset.zero);
+  }
+
+  test('font features', () {
+    const Rect bounds = Rect.fromLTWH(0, 0, 500, 300);
+    final canvas = BitmapCanvas(bounds, RenderStrategy());
+    testFontFeatures(canvas);
+    return takeScreenshot(canvas, bounds, 'canvas_paragraph_font_features');
+  });
+
+  test('font features (DOM)', () {
+    const Rect bounds = Rect.fromLTWH(0, 0, 500, 300);
+    final canvas = DomCanvas(domRenderer.createElement('flt-picture'));
+    testFontFeatures(canvas);
+    return takeScreenshot(canvas, bounds, 'canvas_paragraph_font_features_dom');
+  });
 }
