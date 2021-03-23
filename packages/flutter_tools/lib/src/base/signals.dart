@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -54,8 +52,7 @@ abstract class Signals {
 class LocalSignals implements Signals {
   LocalSignals._(this.exitSignals);
 
-  static LocalSignals _instance;
-  static LocalSignals get instance => _instance ??= LocalSignals._(
+  static LocalSignals instance = LocalSignals._(
     Signals.defaultExitSignals,
   );
 
@@ -84,19 +81,19 @@ class LocalSignals implements Signals {
   Object addHandler(ProcessSignal signal, SignalHandler handler) {
     final Object token = Object();
     _handlersTable.putIfAbsent(signal, () => <Object, SignalHandler>{});
-    _handlersTable[signal][token] = handler;
+    _handlersTable[signal]![token] = handler;
 
     _handlersList.putIfAbsent(signal, () => <SignalHandler>[]);
-    _handlersList[signal].add(handler);
+    _handlersList[signal]!.add(handler);
 
     // If we added the first one, then call signal.watch(), listen, and cache
     // the stream controller.
-    if (_handlersList[signal].length == 1) {
+    if (_handlersList[signal]!.length == 1) {
       _streamSubscriptions[signal] = signal.watch().listen(
         _handleSignal,
         onError: (Object e) {
-          _handlersTable[signal].remove(token);
-          _handlersList[signal].remove(handler);
+          _handlersTable[signal]?.remove(token);
+          _handlersList[signal]?.remove(handler);
         },
       );
     }
@@ -110,14 +107,14 @@ class LocalSignals implements Signals {
       return false;
     }
     // We don't know about this token.
-    if (!_handlersTable[signal].containsKey(token)) {
+    if (!_handlersTable[signal]!.containsKey(token)) {
       return false;
     }
-    final SignalHandler handler = _handlersTable[signal].remove(token);
+    final SignalHandler? handler = _handlersTable[signal]!.remove(token);
     if (handler == null) {
       return false;
     }
-    final bool removed = _handlersList[signal].remove(handler);
+    final bool removed = _handlersList[signal]!.remove(handler);
     if (!removed) {
       return false;
     }
@@ -125,13 +122,13 @@ class LocalSignals implements Signals {
     // If _handlersList[signal] is empty, then lookup the cached stream
     // controller and unsubscribe from the stream.
     if (_handlersList.isEmpty) {
-      await _streamSubscriptions[signal].cancel();
+      await _streamSubscriptions[signal]?.cancel();
     }
     return true;
   }
 
   Future<void> _handleSignal(ProcessSignal s) async {
-    for (final SignalHandler handler in _handlersList[s]) {
+    for (final SignalHandler handler in _handlersList[s] ?? <SignalHandler>[]) {
       try {
         await asyncGuard<void>(() async => handler(s));
       } on Exception catch (e) {

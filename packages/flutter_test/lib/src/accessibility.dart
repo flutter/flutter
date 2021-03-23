@@ -436,7 +436,7 @@ class _ContrastReport {
   ///
   /// Given a list of integers [colors], each representing the color of a pixel
   /// on a part of the screen, generates a contrast ratio report.
-  /// Each colors is given in in ARGB format, as is the parameter for the
+  /// Each colors is given in ARGB format, as is the parameter for the
   /// constructor [Color].
   ///
   /// The contrast ratio of the most frequent light color and the most
