@@ -399,7 +399,7 @@ class ManifestAssetBundle implements AssetBundle {
       _wildcardDirectories[uri] ??= _fileSystem.directory(uri);
     }
 
-    final DevFSStringContent assetManifest  = _createAssetManifest(assetVariants, deferredComponentsAssetVariants: deferredComponentsAssetVariants);
+    final DevFSStringContent assetManifest  = _createAssetManifest(assetVariants, deferredComponentsAssetVariants);
     final DevFSStringContent fontManifest = DevFSStringContent(json.encode(fonts));
     final LicenseResult licenseResult = _licenseCollector.obtainLicenses(packageConfig, additionalLicenseFiles);
     if (licenseResult.errorMessages.isNotEmpty) {
@@ -525,9 +525,9 @@ class ManifestAssetBundle implements AssetBundle {
   }
 
   DevFSStringContent _createAssetManifest(
-    Map<_Asset, List<_Asset>> assetVariants, {
+    Map<_Asset, List<_Asset>> assetVariants,
     Map<String, Map<_Asset, List<_Asset>>> deferredComponentsAssetVariants
-  }) {
+  ) {
     final Map<String, List<String>> jsonObject = <String, List<String>>{};
     final List<_Asset> assets = assetVariants.keys.toList();
     final Map<_Asset, List<String>> jsonEntries = <_Asset, List<String>>{};
