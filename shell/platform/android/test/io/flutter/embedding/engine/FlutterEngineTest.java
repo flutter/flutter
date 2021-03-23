@@ -232,4 +232,23 @@ public class FlutterEngineTest {
 
     verify(flutterJNI, never()).attachToNative(false);
   }
+
+  @Test
+  public void itComesWithARunningDartExecutorIfJNIIsAlreadyAttached() throws NameNotFoundException {
+    Context context = mock(Context.class);
+    Context packageContext = mock(Context.class);
+
+    when(context.createPackageContext(any(), anyInt())).thenReturn(packageContext);
+    when(flutterJNI.isAttached()).thenReturn(true);
+
+    FlutterEngine engineUnderTest =
+        new FlutterEngine(
+            context,
+            mock(FlutterLoader.class),
+            flutterJNI,
+            /*dartVmArgs=*/ new String[] {},
+            /*automaticallyRegisterPlugins=*/ false);
+
+    assertTrue(engineUnderTest.getDartExecutor().isExecutingDart());
+  }
 }
