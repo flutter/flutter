@@ -314,7 +314,7 @@ class TextFormField extends FormField<String> {
 class _TextFormFieldState extends FormFieldState<String> {
   late final RestorableTextEditingController _controller = RestorableTextEditingController(text: widget.initialValue);
 
-  TextEditingController? get _effectiveController => widget.controller ?? _controller.value;
+  TextEditingController get _effectiveController => widget.controller ?? _controller.value;
 
   @override
   TextFormField get widget => super.widget as TextFormField;
@@ -323,14 +323,16 @@ class _TextFormFieldState extends FormFieldState<String> {
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     super.restoreState(oldBucket, initialRestore);
     registerForRestoration(_controller, 'text_editing_controller');
+    // Make sure to update the internal [FormFieldState] value to sync up with
+    // text editing controller value.
+    setValue(_effectiveController.text);
   }
 
   @override
   void initState() {
     super.initState();
-    if (widget.controller != null) {
+    if (widget.controller != null)
       widget.controller!.addListener(_handleControllerChanged);
-    }
   }
 
   @override
@@ -357,15 +359,15 @@ class _TextFormFieldState extends FormFieldState<String> {
   void didChange(String? value) {
     super.didChange(value);
 
-    if (_effectiveController!.text != value)
-      _effectiveController!.text = value ?? '';
+    if (_effectiveController.text != value)
+      _effectiveController.text = value ?? '';
   }
 
   @override
   void reset() {
     // setState will be called in the superclass, so even though state is being
     // manipulated, no setState call is needed here.
-    _effectiveController!.text = widget.initialValue ?? '';
+    _effectiveController.text = widget.initialValue ?? '';
     super.reset();
   }
 
@@ -377,7 +379,7 @@ class _TextFormFieldState extends FormFieldState<String> {
     // notifications for changes originating from within this class -- for
     // example, the reset() method. In such cases, the FormField value will
     // already have been set.
-    if (_effectiveController!.text != value)
-      didChange(_effectiveController!.text);
+    if (_effectiveController.text != value)
+      didChange(_effectiveController.text);
   }
 }

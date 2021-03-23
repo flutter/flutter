@@ -421,7 +421,7 @@ class FormField<T> extends StatefulWidget {
 /// The current state of a [FormField]. Passed to the [FormFieldBuilder] method
 /// for use in constructing the form field's widget.
 class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
-  T? _value;
+  late T? _value = widget.initialValue;
   final RestorableStringN _errorText = RestorableStringN(null);
   final RestorableBool _hasInteractedByUser = RestorableBool(false);
 
@@ -508,17 +508,10 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _value = widget.initialValue;
-  }
-
-  @override
   String? get restorationId => widget.restorationId;
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
-    // registerForRestoration(_value, 'form_value'); // T?
     registerForRestoration(_errorText, 'error_text');
     registerForRestoration(_hasInteractedByUser, 'has_interacted_by_user');
   }
