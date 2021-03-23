@@ -84,8 +84,8 @@ class _NestedTabBarContainer extends StatelessWidget {
           TabBar(
             controller: tabController,
             tabs: const <Tab>[
-              Tab(text: 'Yellow'),
-              Tab(text: 'Grey'),
+              Tab(label: 'Yellow'),
+              Tab(label: 'Grey'),
             ],
           ),
           Expanded(
@@ -117,7 +117,7 @@ Widget buildFrame({
       length: tabs.length,
       child: TabBar(
         key: tabBarKey,
-        tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+        tabs: tabs.map<Widget>((String tab) => Tab(label: tab)).toList(),
         isScrollable: isScrollable,
         indicatorColor: indicatorColor,
       ),
@@ -178,7 +178,7 @@ Widget buildLeftRightApp({required List<String> tabs, required String value, boo
         appBar: AppBar(
           title: const Text('tabs'),
           bottom: TabBar(
-            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+            tabs: tabs.map<Widget>((String tab) => Tab(label: tab)).toList(),
             automaticIndicatorColorAdjustment: automaticIndicatorColorAdjustment,
           ),
         ),
@@ -252,7 +252,7 @@ void main() {
 
   testWidgets('Tab sizing - text', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(theme: ThemeData(fontFamily: 'Ahem'), home: const Center(child: Material(child: Tab(text: 'x')))),
+      MaterialApp(theme: ThemeData(fontFamily: 'Ahem'), home: const Center(child: Material(child: Tab(label: 'x')))),
     );
     expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily, 'Ahem');
     expect(tester.getSize(find.byType(Tab)), const Size(14.0, 46.0));
@@ -619,7 +619,7 @@ void main() {
                   title: const Text('tabs'),
                   bottom: TabBar(
                     isScrollable: true,
-                    tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+                    tabs: tabs.map<Widget>((String tab) => Tab(label: tab)).toList(),
                   ),
                 ),
                 body: TabBarView(
@@ -686,7 +686,7 @@ void main() {
             title: const Text('tabs'),
             bottom: TabBar(
               controller: controller,
-              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+              tabs: tabs.map<Widget>((String tab) => Tab(label: tab)).toList(),
             ),
           ),
           body: TabBarView(
@@ -745,7 +745,7 @@ void main() {
             title: const Text('tabs'),
             bottom: TabBar(
               controller: controller,
-              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+              tabs: tabs.map<Widget>((String tab) => Tab(label: tab)).toList(),
             ),
           ),
           body: TabBarView(
@@ -1153,7 +1153,7 @@ void main() {
 
   testWidgets('TabBar accepts custom physics', (WidgetTester tester) async {
     final List<Tab> tabs = List<Tab>.generate(20, (int index) {
-      return Tab(text: 'TAB #$index');
+      return Tab(label: 'TAB #$index');
     });
 
     final TabController controller = TabController(
@@ -1183,7 +1183,7 @@ void main() {
     // This is a regression test for https://github.com/flutter/flutter/issues/9374
 
     final List<Tab> tabs = List<Tab>.generate(20, (int index) {
-      return Tab(text: 'TAB #$index');
+      return Tab(label: 'TAB #$index');
     });
 
     final TabController controller = TabController(
@@ -1219,7 +1219,7 @@ void main() {
     const double padRight = 4.0;
 
     final List<Widget> tabs = List<Widget>.generate(4, (int index) {
-      return Tab(text: 'Tab $index');
+      return Tab(label: 'Tab $index');
     });
 
     final TabController controller = TabController(
@@ -1278,7 +1278,7 @@ void main() {
     const double padRight = 4.0;
 
     final List<Widget> tabs = List<Widget>.generate(4, (int index) {
-      return Tab(text: 'Tab $index');
+      return Tab(label: 'Tab $index');
     });
 
     final TabController controller = TabController(
@@ -1334,7 +1334,7 @@ void main() {
 
   testWidgets('TabBar changes indicator attributes', (WidgetTester tester) async {
     final List<Widget> tabs = List<Widget>.generate(4, (int index) {
-      return Tab(text: 'Tab $index');
+      return Tab(label: 'Tab $index');
     });
 
     final TabController controller = TabController(
@@ -1545,7 +1545,7 @@ void main() {
     const Decoration indicator = BoxDecoration(color: indicatorColor);
 
     final List<Widget> tabs = List<Widget>.generate(4, (int index) {
-      return Tab(text: 'Tab $index');
+      return Tab(label: 'Tab $index');
     });
 
     final TabController controller = TabController(
@@ -1615,7 +1615,7 @@ void main() {
     const Decoration indicator = BoxDecoration(color: indicatorColor);
 
     final List<Widget> tabs = List<Widget>.generate(4, (int index) {
-      return Tab(text: 'Tab $index');
+      return Tab(label: 'Tab $index');
     });
 
     final TabController controller = TabController(
@@ -1975,7 +1975,7 @@ void main() {
     const double indicatorWeight = 8.0;
 
     final List<Widget> tabs = List<Widget>.generate(4, (int index) {
-      return Tab(text: 'Tab $index');
+      return Tab(label: 'Tab $index');
     });
 
     final TabController controller = TabController(
@@ -2051,7 +2051,7 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final List<Tab> tabs = List<Tab>.generate(2, (int index) {
-      return Tab(text: 'TAB #$index');
+      return Tab(label: 'TAB #$index');
     });
 
     final TabController controller = TabController(
@@ -2125,7 +2125,7 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final List<Tab> tabs = List<Tab>.generate(20, (int index) {
-      return Tab(text: 'This is a very wide tab #$index');
+      return Tab(label: 'This is a very wide tab #$index');
     });
 
     final TabController controller = TabController(
@@ -2228,7 +2228,7 @@ void main() {
           children: <Widget>[
             TabBar(
               controller: controller,
-              tabs: const <Widget>[Tab(text: 'TAB')],
+              tabs: const <Widget>[Tab(label: 'TAB')],
             ),
             Flexible(
               child: TabBarView(
@@ -2285,7 +2285,7 @@ void main() {
             TabBar(
               controller: controller,
               indicatorWeight: 30.0,
-              tabs: const <Widget>[Tab(text: 'TAB1'), Tab(text: 'TAB2')],
+              tabs: const <Widget>[Tab(label: 'TAB1'), Tab(label: 'TAB2')],
             ),
             Flexible(
               child: TabBarView(
@@ -2399,7 +2399,7 @@ void main() {
       return boilerplate(
         child: TabBar(
           controller: controller,
-          tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+          tabs: tabs.map<Widget>((String tab) => Tab(label: tab)).toList(),
           onTap: (int index) {
             tabIndex = index;
           },
@@ -2471,7 +2471,7 @@ void main() {
   test('illegal constructor combinations', () {
     expect(() => Tab(icon: nonconst(null)), throwsAssertionError);
     expect(() => Tab(icon: Container(), text: 'foo', child: Container()), throwsAssertionError);
-    expect(() => Tab(text: 'foo', child: Container()), throwsAssertionError);
+    expect(() => Tab(label: 'foo', child: Container()), throwsAssertionError);
   });
 
   testWidgets('Tabs changes mouse cursor when a tab is hovered', (WidgetTester tester) async {
@@ -2483,7 +2483,7 @@ void main() {
             cursor: SystemMouseCursors.forbidden,
             child: TabBar(
               mouseCursor: SystemMouseCursors.text,
-              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+              tabs: tabs.map<Widget>((String tab) => Tab(label: tab)).toList(),
             ),
           ),
         ),
@@ -2505,7 +2505,7 @@ void main() {
           body: MouseRegion(
             cursor: SystemMouseCursors.forbidden,
             child: TabBar(
-              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+              tabs: tabs.map<Widget>((String tab) => Tab(label: tab)).toList(),
             ),
           ),
         ),
@@ -2524,8 +2524,8 @@ void main() {
           child: TabBar(
             controller: controller,
             tabs: const <Tab>[
-              Tab(text: 'LEFT'),
-              Tab(text: 'RIGHT'),
+              Tab(label: 'LEFT'),
+              Tab(label: 'RIGHT'),
             ],
           ),
         ),
@@ -2617,7 +2617,7 @@ void main() {
             length: 1,
             child: TabBar(
               tabs: <Tab>[
-                Tab(text: 'A',)
+                Tab(label: 'A',)
               ],
             )
           )
@@ -2641,7 +2641,7 @@ void main() {
             length: 1,
             child: TabBar(
               tabs: <Tab>[
-                Tab(text: 'A',)
+                Tab(label: 'A',)
               ],
               enableFeedback: false,
             ),
@@ -2669,7 +2669,7 @@ void main() {
             length: 1,
             child: TabBar(
               tabs: const <Tab>[
-                Tab(text: 'A',)
+                Tab(label: 'A',)
               ],
               overlayColor: MaterialStateProperty.resolveWith<Color>(
                 (Set<MaterialState> states) {
@@ -2702,7 +2702,7 @@ void main() {
           length: 1,
           child: TabBar(
             tabs: const <Tab>[
-              Tab(text: 'A',)
+              Tab(label: 'A',)
             ],
             overlayColor: MaterialStateProperty.resolveWith<Color>(
               (Set<MaterialState> states) {
@@ -2749,7 +2749,7 @@ void main() {
                 title: const Text('tabs'),
                 bottom: TabBar(
                   controller: controller,
-                  tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+                  tabs: tabs.map<Widget>((String tab) => Tab(label: tab)).toList(),
                 ),
               ),
               body: TabBarView(
@@ -2800,7 +2800,7 @@ void main() {
                 title: const Text('tabs'),
                 bottom: TabBar(
                   controller: controller,
-                  tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+                  tabs: tabs.map<Widget>((String tab) => Tab(label: tab)).toList(),
                 ),
               ),
               body: TabBarView(
@@ -2832,9 +2832,9 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/10531.
 
     const List<Widget> tabs = <Widget>[
-      Tab(text: 'NEW MEXICO'),
-      Tab(text: 'GABBA'),
-      Tab(text: 'HEY'),
+      Tab(label: 'NEW MEXICO'),
+      Tab(label: 'GABBA'),
+      Tab(label: 'HEY'),
     ];
     final TabController controller = TabController(vsync: const TestVSync(), length: tabs.length);
 
@@ -2901,7 +2901,7 @@ void main() {
           key: key,
           length: tabs.length,
           child: TabBar(
-            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+            tabs: tabs.map<Widget>((String tab) => Tab(label: tab)).toList(),
           ),
         ),
       );
@@ -2937,7 +2937,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/15008.
   testWidgets('TabBar with one tab has correct color', (WidgetTester tester) async {
-    const Tab tab = Tab(text: 'A');
+    const Tab tab = Tab(label: 'A');
     const Color selectedTabColor = Color(0x00000001);
     const Color unselectedTabColor = Color(0x00000002);
 
@@ -2968,7 +2968,7 @@ void main() {
               appBar: AppBar(
                 bottom: TabBar(
                   controller: controller,
-                  tabs: List<Widget>.generate(controller.length, (int index) => Tab(text: 'Tab$index')),
+                  tabs: List<Widget>.generate(controller.length, (int index) => Tab(label: 'Tab$index')),
                 ),
                 actions: <Widget>[
                   TextButton(
@@ -3023,13 +3023,13 @@ void main() {
                   bottom: tabTextContent.isNotEmpty
                     ? TabBar(
                        isScrollable: true,
-                       tabs: tabTextContent.map((String textContent) => Tab(text: textContent)).toList(),
+                       tabs: tabTextContent.map((String textContent) => Tab(label: textContent)).toList(),
                      )
                     : null,
                 ),
                 body: tabTextContent.isNotEmpty
                   ? TabBarView(
-                      children: tabTextContent.map((String textContent) => Tab(text: "$textContent's view")).toList()
+                      children: tabTextContent.map((String textContent) => Tab(label: "$textContent's view")).toList()
                     )
                   : const Center(child: Text('No tabs')),
                 bottomNavigationBar: BottomAppBar(
@@ -3132,7 +3132,7 @@ void main() {
                     child: TabBar(
                       controller: _tabController,
                       tabs: tabTitles
-                        .map((String title) => Tab(text: title))
+                        .map((String title) => Tab(label: title))
                         .toList(),
                     ),
                   ),
@@ -3173,7 +3173,7 @@ void main() {
 
   testWidgets('Setting TabController index should make TabBar indicator immediately pop into the position', (WidgetTester tester) async {
     const List<Tab> tabs = <Tab>[
-      Tab(text: 'A'), Tab(text: 'B'), Tab(text: 'C')
+      Tab(label: 'A'), Tab(label: 'B'), Tab(label: 'C')
     ];
     const Color indicatorColor = Color(0xFFFF0000);
     late TabController tabController;
@@ -3366,11 +3366,11 @@ void main() {
           appBar: AppBar(
             bottom: const TabBar(
               tabs: <Widget>[
-                Tab(text: 'car'),
-                Tab(text: 'transit'),
-                Tab(text: 'bike'),
-                Tab(text: 'boat'),
-                Tab(text: 'bus'),
+                Tab(label: 'car'),
+                Tab(label: 'transit'),
+                Tab(label: 'bike'),
+                Tab(label: 'boat'),
+                Tab(label: 'bus'),
               ],
             ),
             title: const Text('Tabs Test'),

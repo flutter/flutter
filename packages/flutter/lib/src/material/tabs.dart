@@ -66,24 +66,37 @@ class Tab extends StatelessWidget {
   /// [child] is non-null.
   const Tab({
     Key? key,
+    @Deprecated(
+      'Use "label" instead, as it allows for an improved text-scaling experience. '
+      'This feature was deprecated after v2.0.3.'
+    )
     this.text,
+    this.label,
     this.icon,
     this.iconMargin = const EdgeInsets.only(bottom: 10.0),
     this.child,
-  }) : assert(text != null || child != null || icon != null),
-       assert(text == null || child == null),
+  }) : assert(text != null || child != null || icon != null || label != null),
+       assert(text == null || child == null || label != null),
        super(key: key);
 
   /// The text to display as the tab's label.
   ///
   /// Must not be used in combination with [child].
+  /// This field is deprecated, use [label] instead.
+  @Deprecated(
+    'Use "label" instead, as it allows for an improved text-scaling experience. '
+    'This feature was deprecated after v1.19.0.'
+  )
   final String? text;
+
+  /// the tab's label
+  final String? label;
 
   /// The widget to be used as the tab's label.
   ///
-  /// Usually a [Text] widget, possibly wrapped in a [Semantics] widget.
+  /// Usually a [label] widget, possibly wrapped in a [Semantics] widget.
   ///
-  /// Must not be used in combination with [text].
+  /// Must not be used in combination with [label].
   final Widget? child;
 
   /// An icon to display as the tab's label.
@@ -92,11 +105,11 @@ class Tab extends StatelessWidget {
   /// The margin added around the tab's icon.
   ///
   /// Only useful when used in combination with [icon], and either one of
-  /// [text] or [child] is non-null.
+  /// [label] or [child] is non-null.
   final EdgeInsetsGeometry iconMargin;
 
   Widget _buildLabelText() {
-    return child ?? Text(text!, softWrap: false, overflow: TextOverflow.fade);
+    return child ?? Text(label == null ? text! : label!, softWrap: false, overflow: TextOverflow.fade);
   }
 
   @override
@@ -104,16 +117,16 @@ class Tab extends StatelessWidget {
     assert(debugCheckHasMaterial(context));
 
     final double height;
-    final Widget label;
+    final Widget labelWidget;
     if (icon == null) {
       height = _kTabHeight;
-      label = _buildLabelText();
-    } else if (text == null && child == null) {
+      labelWidget = _buildLabelText();
+    } else if ((text == null || label == null) && child == null) {
       height = _kTabHeight;
-      label = icon!;
+      labelWidget = icon!;
     } else {
       height = _kTextAndIconTabHeight;
-      label = Column(
+      labelWidget = Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
@@ -129,7 +142,7 @@ class Tab extends StatelessWidget {
     return SizedBox(
       height: height,
       child: Center(
-        child: label,
+        child: labelWidget,
         widthFactor: 1.0,
       ),
     );
@@ -139,6 +152,7 @@ class Tab extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('text', text, defaultValue: null));
+    properties.add(StringProperty('label', label, defaultValue: null));
     properties.add(DiagnosticsProperty<Widget>('icon', icon, defaultValue: null));
   }
 }
