@@ -12,6 +12,126 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/66482
+  - title: "Migrate to 'TextSelectionThemeData.selectionColor'"
+    date: 2020-09-24
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    oneOf:
+      - if: "textSelectionColor != '' && cursorColor != '' && textSelectionHandleColor != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(cursorColor: {% cursorColor %}, selectionColor: {% textSelectionColor %}, selectionHandleColor: {% textSelectionHandleColor %},)'
+              requiredIf: "textSelectionColor != '' && cursorColor != '' && textSelectionHandleColor != ''"
+          - kind: 'removeParameter'
+            name: 'textSelectionColor'
+          - kind: 'removeParameter'
+            name: 'cursorColor'
+          - kind: 'removeParameter'
+            name: 'textSelectionHandleColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor == '' && cursorColor != '' && textSelectionHandleColor != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(cursorColor: {% cursorColor %}, selectionHandleColor: {% textSelectionHandleColor %},)'
+              requiredIf: "textSelectionColor == '' && cursorColor != '' && textSelectionHandleColor != ''"
+          - kind: 'removeParameter'
+            name: 'cursorColor'
+          - kind: 'removeParameter'
+            name: 'textSelectionHandleColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor != '' && cursorColor != '' && textSelectionHandleColor == ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(cursorColor: {% cursorColor %}, selectionColor: {% textSelectionColor %},)'
+              requiredIf: "textSelectionColor != '' && cursorColor != '' && textSelectionHandleColor == ''"
+          - kind: 'removeParameter'
+            name: 'textSelectionColor'
+          - kind: 'removeParameter'
+            name: 'cursorColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor != '' && cursorColor == '' && textSelectionHandleColor != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(selectionColor: {% textSelectionColor %}, selectionHandleColor: {% textSelectionHandleColor %},)'
+              requiredIf: "textSelectionColor != '' && cursorColor == '' && textSelectionHandleColor != ''"
+          - kind: 'removeParameter'
+            name: 'textSelectionColor'
+          - kind: 'removeParameter'
+            name: 'textSelectionHandleColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor == '' && cursorColor != '' && textSelectionHandleColor == ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(cursorColor: {% cursorColor %})'
+              requiredIf: "textSelectionColor == '' && cursorColor != '' && textSelectionHandleColor == ''"
+          - kind: 'removeParameter'
+            name: 'cursorColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor != '' && cursorColor == '' && textSelectionHandleColor == ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(selectionColor: {% textSelectionColor %})'
+              requiredIf: "textSelectionColor != '' && cursorColor == '' && textSelectionHandleColor == ''"
+          - kind: 'removeParameter'
+            name: 'textSelectionColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor == '' && cursorColor == '' && textSelectionHandleColor != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(selectionHandleColor: {% textSelectionHandleColor %})'
+              requiredIf: "textSelectionColor == '' && cursorColor == '' && textSelectionHandleColor != ''"
+          - kind: 'removeParameter'
+            name: 'textSelectionHandleColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+    variables:
+      textSelectionColor:
+        kind: 'fragment'
+        value: 'arguments[textSelectionColor]'
+      cursorColor:
+        kind: 'fragment'
+        value: 'arguments[cursorColor]'
+      textSelectionHandleColor:
+        kind: 'fragment'
+        value: 'arguments[textSelectionHandleColor]'
+
   # Changes made in https://github.com/flutter/flutter/pull/46115
   - title: "Migrate to 'floatingLabelBehavior'"
     date: 2020-01-15

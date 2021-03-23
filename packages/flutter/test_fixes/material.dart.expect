@@ -191,4 +191,11 @@ void main() {
   InputDecorationTheme(floatingLabelBehavior: FloatingLabelBehavior.never);
   InputDecorationTheme();
   inputDecorationTheme.floatingLabelBehavior;
+
+  // Changes made in https://github.com/flutter/flutter/pull/66482
+  ThemeData(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.red, selectionColor: Colors.red, selectionHandleColor: Colors.red,)
+  );
+
+  // raw constructor
 }

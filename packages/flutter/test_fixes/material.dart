@@ -192,5 +192,13 @@ void main() {
   InputDecorationTheme();
   inputDecorationTheme.hasFloatingPlaceholder;
 
+  // Changes made in https://github.com/flutter/flutter/pull/66482
+  ThemeData(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.red,
+    textSelectionHandleColor: Colors.red,
+    useTextSelectionTheme: false,
+  );
 
+  // raw constructor
 }
