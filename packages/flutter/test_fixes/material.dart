@@ -181,4 +181,17 @@ void main() {
 
   // Changes made in https://github.com/flutter/flutter/pull/65246
   RectangularSliderTrackShape(disabledThumbGapWidth: 2.0);
+
+  // Changes made in https://github.com/flutter/flutter/pull/46115
+  const InputDecoration inputDecoration = InputDecoration(hasFloatingPlaceholder: true);
+  InputDecoration(hasFloatingPlaceholder: false);
+  InputDecoration();
+  InputDecoration.collapsed(hasFloatingPlaceholder: true);
+  InputDecoration.collapsed(hasFloatingPlaceholder: false);
+  InputDecoration.collapsed();
+  inputDecoration.hasFloatingPlaceholder;
+  const InputDecorationTheme inputDecorationTheme = InputDecorationTheme(hasFloatingPlaceholder: true);
+  InputDecorationTheme(hasFloatingPlaceholder: false);
+  InputDecorationTheme();
+  inputDecorationTheme.hasFloatingPlaceholder;
 }

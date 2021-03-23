@@ -1222,26 +1222,6 @@ void main() {
     expect(box.size, equals(const Size(76, 36)));
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
   });
-
-  testWidgets('Fixed OutlineButton.icon RenderFlex overflow', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: SizedBox(
-            width: 200,
-            child: OutlineButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.add),
-              label: const Text(
-                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut a euismod nibh. Morbi laoreet purus.',
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-    expect(tester.takeException(), null);
-  });
 }
 
 PhysicalModelLayer _findPhysicalLayer(Element element) {
