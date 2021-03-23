@@ -82,6 +82,7 @@ fuchsia::feedback::CrashReport BuildCrashReport(
   fuchsia::feedback::CrashReport report;
   report.set_program_name(component_url);
   report.set_specific_report(std::move(specific_report));
+  report.set_is_fatal(false);
   return report;
 }
 
