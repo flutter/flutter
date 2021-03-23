@@ -137,7 +137,7 @@ class RefreshIndicator extends StatefulWidget {
   /// Typically a [ListView] or [CustomScrollView].
   final Widget child;
 
-  /// The distance from the child's top or bottom [edge offset][edgeOffset] where
+  /// The distance from the child's top or bottom [bottom][edgeOffset] where
   /// the refresh indicator will settle. During the drag that exposes the refresh
   /// indicator, its actual displacement may significantly exceed this value.
   ///
@@ -155,6 +155,11 @@ class RefreshIndicator extends StatefulWidget {
   /// indicator would otherwise appear.
   ///
   /// By default, the edge offset is set to 0.
+  ///
+  /// See also:
+  ///
+  ///  * [displacement], can be used to change the distance from the edge that
+  ///    the indicator settles.
   final double edgeOffset;
 
   /// A function that's called when the user has dragged the refresh indicator
