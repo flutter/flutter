@@ -1544,7 +1544,7 @@ void main() {
               TestSemantics(
                 id: 5,
                 rect: TestSemantics.fullScreen,
-                actions: <SemanticsAction>[SemanticsAction.tap],
+                actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
                 label: 'test label',
                 textDirection: TextDirection.ltr,
               ),
