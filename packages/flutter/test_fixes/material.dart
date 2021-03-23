@@ -179,6 +179,9 @@ void main() {
   const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem(title: myTitle);
   bottomNavigationBarItem.title;
 
+  // Changes made in https://github.com/flutter/flutter/pull/65246
+  RectangularSliderTrackShape(disabledThumbGapWidth: 2.0);
+
   // Changes made in https://github.com/flutter/flutter/pull/46115
   const InputDecoration inputDecoration = InputDecoration(hasFloatingPlaceholder: true);
   InputDecoration(hasFloatingPlaceholder: false);
@@ -191,6 +194,4 @@ void main() {
   InputDecorationTheme(hasFloatingPlaceholder: false);
   InputDecorationTheme();
   inputDecorationTheme.hasFloatingPlaceholder;
-
-
 }

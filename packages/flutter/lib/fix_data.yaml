@@ -12,6 +12,17 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/65246
+  - title: "Remove 'disabledThumbGapWidth'"
+    date: 2020-11-17
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'RectangularSliderTrackShape'
+    changes:
+      - kind: 'removeParameter'
+        name: 'disabledThumbGapWidth'
+
   # Changes made in https://github.com/flutter/flutter/pull/46115
   - title: "Migrate to 'floatingLabelBehavior'"
     date: 2020-01-15
