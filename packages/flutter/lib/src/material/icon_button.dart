@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -141,7 +142,7 @@ class IconButton extends StatelessWidget {
   /// or an [ImageIcon].
   const IconButton({
     Key? key,
-    this.iconSize = 24.0,
+    this.iconSize,
     this.visualDensity,
     this.padding = const EdgeInsets.all(8.0),
     this.alignment = Alignment.center,
@@ -160,8 +161,7 @@ class IconButton extends StatelessWidget {
     this.enableFeedback = true,
     this.constraints,
     required this.icon,
-  }) : assert(iconSize != null),
-       assert(padding != null),
+  }) : assert(padding != null),
        assert(alignment != null),
        assert(splashRadius == null || splashRadius > 0),
        assert(autofocus != null),
@@ -170,7 +170,7 @@ class IconButton extends StatelessWidget {
 
   /// The size of the icon inside the button.
   ///
-  /// This property must not be null. It defaults to 24.0.
+  /// Optional override of the nearest [IconTheme], which defaults to 24.0.
   ///
   /// The size given here is passed down to the widget in the [icon] property
   /// via an [IconTheme]. Setting the size here instead of in, for example, the
@@ -178,7 +178,7 @@ class IconButton extends StatelessWidget {
   /// fit the [Icon]. If you were to set the size of the [Icon] using
   /// [Icon.size] instead, then the [IconButton] would default to 24.0 and then
   /// the [Icon] itself would likely get clipped.
-  final double iconSize;
+  final double? iconSize;
 
   /// Defines how compact the icon button's layout will be.
   ///
@@ -329,12 +329,24 @@ class IconButton extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ThemeData theme = Theme.of(context);
+
+    // Ancestor IconThemes could be found in the direct ancestor path, or, if
+    // this IconButton appears in an AppBar, then in that AppBar's `iconTheme`
+    // attribute.
+    final AppBar? appBar = context.findAncestorWidgetOfExactType<AppBar>();
+    final IconThemeData iconTheme = appBar?.actionsIconTheme ?? appBar?.iconTheme ?? theme.iconTheme;
+
+
     Color? currentColor;
     if (onPressed != null)
       currentColor = color;
     else
       currentColor = disabledColor ?? theme.disabledColor;
 
+    // Note that size must be fully resolved here, instead of deferring to the
+    // call to `IconTheme.merge()` in the actual widget composition, because the
+    // finalized size is needed for the wrapping SizedBox and Inkwell constructors.
+    final double? _iconSize = iconSize ?? iconTheme.size ?? const IconThemeData.fallback().size;
     final VisualDensity effectiveVisualDensity = visualDensity ?? theme.visualDensity;
 
     final BoxConstraints unadjustedConstraints = constraints ?? const BoxConstraints(
@@ -348,13 +360,13 @@ class IconButton extends StatelessWidget {
       child: Padding(
         padding: padding,
         child: SizedBox(
-          height: iconSize,
-          width: iconSize,
+          height: _iconSize,
+          width: _iconSize,
           child: Align(
             alignment: alignment,
             child: IconTheme.merge(
               data: IconThemeData(
-                size: iconSize,
+                size: _iconSize,
                 color: currentColor,
               ),
               child: icon,
@@ -388,7 +400,7 @@ class IconButton extends StatelessWidget {
         splashColor: splashColor ?? theme.splashColor,
         radius: splashRadius ?? math.max(
           Material.defaultSplashRadius,
-          (iconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
+          (_iconSize! + math.min(padding.horizontal, padding.vertical)) * 0.7,
           // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
         ),
       ),

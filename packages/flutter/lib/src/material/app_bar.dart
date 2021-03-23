@@ -818,13 +818,15 @@ class _AppBarState extends State<AppBar> {
       ?? appBarTheme.foregroundColor
       ?? (colorScheme.brightness == Brightness.dark ? colorScheme.onSurface : colorScheme.onPrimary);
 
+    final double size = appBarTheme.iconTheme?.size ?? const IconThemeData.fallback().size!;
+
     IconThemeData overallIconTheme = backwardsCompatibility
       ? widget.iconTheme
         ?? appBarTheme.iconTheme
         ?? theme.primaryIconTheme
       : widget.iconTheme
         ?? appBarTheme.iconTheme
-        ?? theme.iconTheme.copyWith(color: foregroundColor);
+        ?? theme.iconTheme.copyWith(color: foregroundColor, size: size);
 
     IconThemeData actionsIconTheme = widget.actionsIconTheme
       ?? appBarTheme.actionsIconTheme
