@@ -1,4 +1,4 @@
-Signature: 85ae575d83481934e4827ba7b667a1b2
+Signature: 1c761e76fa4bcfe601923b6ad295dc68
 
 UNUSED LICENSES:
 
@@ -5077,6 +5077,9 @@ FILE: ../../../third_party/skia/src/core/SkPixelRefPriv.h
 FILE: ../../../third_party/skia/src/core/SkTextBlobTrace.cpp
 FILE: ../../../third_party/skia/src/core/SkTextBlobTrace.h
 FILE: ../../../third_party/skia/src/gpu/GrPersistentCacheUtils.h
+FILE: ../../../third_party/skia/src/gpu/effects/GrComposeLerpEffect.fp
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrComposeLerpEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrComposeLerpEffect.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathInnerTriangulateOp.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathInnerTriangulateOp.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStencilPathShader.cpp
