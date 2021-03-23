@@ -26,7 +26,7 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
-import 'package:path/path.dart' as path; // ignore: package_path_import
+import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:test_api/test_api.dart' as test_package show test; // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' hide test; // ignore: deprecated_member_use
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -79,7 +79,7 @@ String getFlutterRoot() {
       throw invalidScript();
   }
 
-  final List<String> parts = path.split(LocalFileSystem.instance.path.fromUri(scriptUri));
+  final List<String> parts = path.split(globals.localFileSystem.path.fromUri(scriptUri));
   final int toolsIndex = parts.indexOf('flutter_tools');
   if (toolsIndex == -1) {
     throw invalidScript();
@@ -198,7 +198,7 @@ void test(String description, FutureOr<void> Function() body, {
     description,
     () async {
       addTearDown(() async {
-        await LocalFileSystem.dispose();
+        await globals.localFileSystem.dispose();
       });
       return body();
     },

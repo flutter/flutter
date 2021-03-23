@@ -187,10 +187,7 @@ abstract class MultiChildLayoutDelegate {
           'There is no child with the id "$childId".'
         );
       }
-      // `offset` has a non-nullable return type, but might be null when
-      // running with weak checking, so we need to null check it anyway (and
-      // ignore the warning that the null-handling logic is dead code).
-      if (offset == null) { // ignore: dead_code
+      if (offset == null) {
         throw FlutterError(
           'The $this custom multichild layout delegate provided a null position for the child with id "$childId".'
         );
