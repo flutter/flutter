@@ -29,7 +29,6 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 ///
 /// To use this class, objects should register their event handler like so:
 ///
-/// {@tool snippet}
 /// ```dart
 /// void handleSignalEvent(PointerSignalEvent event) {
 ///   GestureBinding.instance!.pointerSignalResolver.register(event, (PointerSignalEvent event) {
@@ -37,42 +36,83 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 ///   });
 /// }
 /// ```
-/// {@end-tool}
 ///
 /// {@tool dartpad --template=stateful_widget_material}
 /// Here is an example that demonstrates the effect of not using the resolver
 /// versus using it.
 ///
-/// When this example is set to _not_ use the resolver, then scrolling the
+/// When this example is set to _not_ use the resolver, then triggering the
 /// mouse wheel over the outer box will cause only the outer box to change
-/// color, but scrolling the mouse wheel over inner box will cause _both_ the
-/// outer and the inner boxes to change color (because they're both receiving
-/// the scroll event).
+/// color, but triggering the mouse wheel over the inner box will cause _both_
+/// the outer and the inner boxes to change color (because they're both
+/// receiving the event).
 ///
-/// When this excample is set to _use_ the resolver, then only the box located
+/// When this example is set to _use_ the resolver, then only the box located
 /// directly under the cursor will change color when the mouse wheel is
-/// scrolled.
+/// triggered.
 ///
 /// ```dart imports
 /// import 'package:flutter/gestures.dart';
 /// ```
 ///
+/// ```dart preamble
+/// class ColorChanger extends StatefulWidget {
+///   const ColorChanger({
+///     Key? key,
+///     required this.initialColor,
+///     required this.useResolver,
+///     required this.child,
+///   }) : super(key: key);
+///
+///   final HSVColor initialColor;
+///   final bool useResolver;
+///   final Widget child;
+///
+///   @override
+///   _ColorChangerState createState() => _ColorChangerState();
+/// }
+///
+/// class _ColorChangerState extends State<ColorChanger> {
+///   late HSVColor color;
+///
+///   void rotateColor() {
+///     setState(() {
+///       color = color.withHue((color.hue + 6) % 360.0);
+///     });
+///   }
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     color = widget.initialColor;
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return DecoratedBox(
+///       decoration: BoxDecoration(
+///         border: const Border.fromBorderSide(BorderSide()),
+///         color: color.toColor(),
+///       ),
+///       child: Listener(
+///         onPointerSignal: (PointerSignalEvent event) {
+///           if (widget.useResolver) {
+///             GestureBinding.instance!.pointerSignalResolver.register(event, (PointerSignalEvent event) {
+///               rotateColor();
+///             });
+///           } else {
+///             rotateColor();
+///           }
+///         },
+///         child: widget.child,
+///       ),
+///     );
+///   }
+/// }
+/// ```
+///
 /// ```dart
-/// HSVColor outerColor = const HSVColor.fromAHSV(0.2, 120.0, 1, 1);
-/// HSVColor innerColor = const HSVColor.fromAHSV(1, 60.0, 1, 1);
 /// bool useResolver = false;
-///
-/// void rotateOuterColor() {
-///   setState(() {
-///     outerColor = outerColor.withHue((outerColor.hue + 6) % 360.0);
-///   });
-/// }
-///
-/// void rotateInnerColor() {
-///   setState(() {
-///     innerColor = innerColor.withHue((innerColor.hue + 6) % 360.0);
-///   });
-/// }
 ///
 /// @override
 /// Widget build(BuildContext context) {
@@ -80,42 +120,16 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 ///     child: Stack(
 ///       fit: StackFit.expand,
 ///       children: <Widget>[
-///         Listener(
-///           onPointerSignal: (PointerSignalEvent event) {
-///             if (useResolver) {
-///               GestureBinding.instance!.pointerSignalResolver.register(event, (PointerSignalEvent event) {
-///                 rotateOuterColor();
-///               });
-///             } else {
-///               rotateOuterColor();
-///             }
-///           },
-///           child: DecoratedBox(
-///             decoration: BoxDecoration(
-///               border: const Border.fromBorderSide(BorderSide()),
-///               color: outerColor.toColor(),
-///             ),
-///             child: FractionallySizedBox(
-///               widthFactor: 0.5,
-///               heightFactor: 0.5,
-///               child: DecoratedBox(
-///                 decoration: BoxDecoration(
-///                   border: const Border.fromBorderSide(BorderSide()),
-///                   color: innerColor.toColor(),
-///                 ),
-///                 child: Listener(
-///                   onPointerSignal: (PointerSignalEvent event) {
-///                     if (useResolver) {
-///                       GestureBinding.instance!.pointerSignalResolver.register(event, (PointerSignalEvent event) {
-///                         rotateInnerColor();
-///                       });
-///                     } else {
-///                       rotateInnerColor();
-///                     }
-///                   },
-///                   child: const AbsorbPointer(),
-///                 ),
-///               ),
+///         ColorChanger(
+///           initialColor: const HSVColor.fromAHSV(0.2, 120.0, 1, 1),
+///           useResolver: useResolver,
+///           child: FractionallySizedBox(
+///             widthFactor: 0.5,
+///             heightFactor: 0.5,
+///             child: ColorChanger(
+///               initialColor: const HSVColor.fromAHSV(1, 60.0, 1, 1),
+///               useResolver: useResolver,
+///               child: const AbsorbPointer(),
 ///             ),
 ///           ),
 ///         ),
@@ -132,9 +146,9 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 ///                   });
 ///                 },
 ///               ),
-///               Text(
+///               const Text(
 ///                 'Use the PointerSignalResolver?',
-///                 style: DefaultTextStyle.of(context).style.copyWith(fontWeight: FontWeight.bold),
+///                 style: TextStyle(fontWeight: FontWeight.bold),
 ///               ),
 ///             ],
 ///           ),
