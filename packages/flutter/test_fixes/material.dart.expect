@@ -194,22 +194,49 @@ void main() {
 
   // Changes made in https://github.com/flutter/flutter/pull/66482
   ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red));
-  ThemeData(textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.red));
-  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colors.red));
+  ThemeData(textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue));
+  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colors.yellow));
   ThemeData();
   ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red));
-  ThemeData(textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.red));
-  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colors.red));
-  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, cursorColor: Colors.red,)
+  ThemeData(textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue));
+  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colors.yellow));
+  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, cursorColor: Colors.blue,)
   );
-  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colors.red, cursorColor: Colors.red,)
+  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colors.yellow, cursorColor: Colors.blue,)
   );
-  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, selectionHandleColor: Colors.red,)
+  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, selectionHandleColor: Colors.yellow,)
   );
-  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, cursorColor: Colors.red, selectionHandleColor: Colors.red,)
+  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, cursorColor: Colors.blue,)
   );
-  ThemeData(textSelectionTheme: TextSelectionThemeData(textSelectionColor: Colors.red, cursorColor: Colors.red, textSelectionHandleColor: Colors.red,)
+  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colors.yellow, cursorColor: Colors.blue,)
   );
-
-  // + ThemeData.raw constructor
+  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, selectionHandleColor: Colors.yellow,)
+  );
+  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, cursorColor: Colors.blue, selectionHandleColor: Colors.yellow,)
+  );
+  ThemeData(textSelectionTheme: TextSelectionThemeData(textSelectionColor: Colors.red, cursorColor: Colors.blue, textSelectionHandleColor: Colors.yellow,)
+  );
+  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red));
+  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue));
+  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colors.yellow));
+  ThemeData.raw();
+  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red));
+  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue));
+  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colors.yellow));
+  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, cursorColor: Colors.blue,)
+  );
+  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colors.yellow, cursorColor: Colors.blue,)
+  );
+  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, selectionHandleColor: Colors.yellow,)
+  );
+  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, cursorColor: Colors.blue,)
+  );
+  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colors.yellow, cursorColor: Colors.blue,)
+  );
+  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, selectionHandleColor: Colors.yellow,)
+  );
+  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, cursorColor: Colors.blue, selectionHandleColor: Colors.yellow,)
+  );
+  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(textSelectionColor: Colors.red, cursorColor: Colors.blue, textSelectionHandleColor: Colors.yellow,)
+  );
 }
