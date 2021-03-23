@@ -1801,6 +1801,70 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       expect(localizationsFile, contains(intlImportDartCode));
     });
 
+    test('check for string interpolation rules', () {
+    // "'The number of {hours} elapsed is: 44'" // no curly brackets.
+    // "'哈{hours}哈'" // no curly brackets.
+    // "'m#hours#m'" // curly brackets.
+    // "'I have to work _#hours#_' sometimes." // curly brackets.
+    // "'{hours} elapsed.'" // no curly brackets
+    // '#placeholder# ' // no curly brackets
+    // '#placeholder#m' // curly brackets
+    // "'hours elapsed: {hours}'"
+    // "'Time elapsed: {hours}'" // no curly brackets
+    // ' #placeholder#' // no curly brackets
+    // 'm#placeholder#' // curly brackets
+
+      const String enArbCheckList = '''
+{
+  "one": "The number of {hours} elapsed is: 44",
+  "@one": {
+    "description": "test one",
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  }
+}
+''';
+
+      // It's fine that the arb is identical -- Just checking
+      // generated code for use of '${variable}' vs '$variable'
+      const String esArbCheckList = '''
+{
+  "one": "The number of {hours} elapsed is: 44"
+}
+''';
+
+      fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
+        ..childFile(defaultTemplateArbFileName).writeAsStringSync(enArbCheckList)
+        ..childFile('app_es.arb').writeAsStringSync(esArbCheckList);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.loadResources();
+        generator.writeOutputFiles(BufferLogger.test());
+      } on Exception catch (e) {
+        if (e is L10nException) {
+          print(e.message);
+        }
+        fail('Generating output files should not fail: $e');
+      }
+
+      final String localizationsFile = fs.file(
+        fs.path.join(syntheticL10nPackagePath, 'output-localization-file_es.dart'),
+      ).readAsStringSync();
+
+      expect(localizationsFile, contains(r'$hours'));
+    });
+
     test(
       'should throw with descriptive error message when failing to parse the '
       'arb file',
