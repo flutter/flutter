@@ -211,13 +211,13 @@ String generatePluralMethod(Message message, AppResourceBundle bundle) {
       String argValue = generateString(match.group(2));
       for (final Placeholder placeholder in message.placeholders) {
         if (placeholder != countPlaceholder && placeholder.requiresFormatting) {
-          if (needsCurlyBracketStringInterpolation(argValue, placeholder.name, true)) {
+          if (_needsCurlyBracketStringInterpolation(argValue, placeholder.name)) {
             argValue = argValue.replaceAll('#${placeholder.name}#', '\${${placeholder.name}String}');
           } else {
             argValue = argValue.replaceAll('#${placeholder.name}#', '\$${placeholder.name}String');
           }
         } else {
-          if (needsCurlyBracketStringInterpolation(argValue, placeholder.name, true)) {
+          if (_needsCurlyBracketStringInterpolation(argValue, placeholder.name)) {
             argValue = argValue.replaceAll('#${placeholder.name}#', '\${${placeholder.name}}');
           } else {
             argValue = argValue.replaceAll('#${placeholder.name}#', '\$${placeholder.name}');
@@ -246,31 +246,40 @@ String generatePluralMethod(Message message, AppResourceBundle bundle) {
     .replaceAll('@(none)\n', '');
 }
 
-bool needsCurlyBracketStringInterpolation(String messageString, String placeholder, bool isPlural) {
+bool _needsCurlyBracketStringInterpolation(String messageString, String placeholder) {
   final int placeholderIndex = messageString.indexOf(placeholder);
-  // This means that there is no need for a placeholder, since one was not found
-  // in the message
+  // This means that there is no need for a placeholder,
+  // since one was not found in the message.
   if (placeholderIndex == -1) {
     return false;
   }
 
-  final RegExp alphabetRE = RegExp(r'[a-zA-Z]');
+  final bool isPlaceholderEndOfSubstring = placeholderIndex + placeholder.length + 2 == messageString.length;
 
-  if (placeholderIndex == 2) {
-    // Example: "'{hours} elapsed.'"
-    // "'{" = 2, '{' = 1, so placeholder string length + 3.
-    return alphabetRE.hasMatch(messageString[placeholderIndex + placeholder.length + 1]);
-  } else if (placeholderIndex + placeholder.length + 2 == messageString.length) {
-    // Example: "'We will count to {count}'"
-    // placeholderIndex starts at 'c', so subtract two to check if preceded
-    // by alphabet character.
-    return alphabetRE.hasMatch(messageString[placeholderIndex - 2]);
+  if (placeholderIndex > 2 && !isPlaceholderEndOfSubstring) {
+    // Normal case
+    // Examples:
+    // "'The number of {hours} elapsed is: 44'" // no curly brackets.
+    // "'哈{hours}哈'" // no curly brackets.
+    // "'m#hours#m'" // curly brackets.
+    // "'I have to work _#hours#_' sometimes." // curly brackets.
+    final RegExp commonCaseRE = RegExp('[^a-zA-Z_][#{]$placeholder[#}][^a-zA-Z_]');
+    return !commonCaseRE.hasMatch(messageString);
+  } else if (placeholderIndex == 2) {
+    // Example:
+    // "'{hours} elapsed.'" // no curly brackets
+    // '#placeholder# ' // no curly brackets
+    // '#placeholder#m' // curly brackets
+    final RegExp startOfString = RegExp('[#{]$placeholder[#}][^a-zA-Z_]');
+    return !startOfString.hasMatch(messageString);
   } else {
-    // Example: "'Waiting for {hours} hours.'"
-    // placeholderIndex starts at 'h' in '{hours}', so subtract two and add
-    // to length + 2
-    return alphabetRE.hasMatch(messageString[placeholderIndex - 2])
-        && alphabetRE.hasMatch(messageString[placeholderIndex + placeholder.length + 1]);
+    // Example:
+    // "'hours elapsed: {hours}'"
+    // "'Time elapsed: {hours}'" // no curly brackets
+    // ' #placeholder#' // no curly brackets
+    // 'm#placeholder#' // curly brackets
+    final RegExp endOfString = RegExp('[^a-zA-Z_][#{]$placeholder[#}]');
+    return !endOfString.hasMatch(messageString);
   }
 }
 
@@ -279,13 +288,13 @@ String generateMethod(Message message, AppResourceBundle bundle) {
     String messageValue = generateString(bundle.translationFor(message));
     for (final Placeholder placeholder in message.placeholders) {
       if (placeholder.requiresFormatting) {
-        if (needsCurlyBracketStringInterpolation(messageValue, placeholder.name, false)) {
+        if (_needsCurlyBracketStringInterpolation(messageValue, placeholder.name)) {
           messageValue = messageValue.replaceAll('{${placeholder.name}}', '\${${placeholder.name}String}');
         } else {
           messageValue = messageValue.replaceAll('{${placeholder.name}}', '\$${placeholder.name}String');
         }
       } else {
-        if (needsCurlyBracketStringInterpolation(messageValue, placeholder.name, false)) {
+        if (_needsCurlyBracketStringInterpolation(messageValue, placeholder.name)) {
           messageValue = messageValue.replaceAll('{${placeholder.name}}', '\${${placeholder.name}}');
         } else {
           messageValue = messageValue.replaceAll('{${placeholder.name}}', '\$${placeholder.name}');
