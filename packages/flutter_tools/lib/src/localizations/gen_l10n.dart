@@ -211,17 +211,19 @@ String generatePluralMethod(Message message, AppResourceBundle bundle) {
       String argValue = generateString(match.group(2));
       for (final Placeholder placeholder in message.placeholders) {
         if (placeholder != countPlaceholder && placeholder.requiresFormatting) {
-          if (_needsCurlyBracketStringInterpolation(argValue, placeholder.name)) {
-            argValue = argValue.replaceAll('#${placeholder.name}#', '\${${placeholder.name}String}');
-          } else {
-            argValue = argValue.replaceAll('#${placeholder.name}#', '\$${placeholder.name}String');
-          }
+          argValue = argValue.replaceAll(
+            '#${placeholder.name}#',
+            _needsCurlyBracketStringInterpolation(argValue, placeholder.name)
+              ? '\${${placeholder.name}String}'
+              : '\$${placeholder.name}String'
+          );
         } else {
-          if (_needsCurlyBracketStringInterpolation(argValue, placeholder.name)) {
-            argValue = argValue.replaceAll('#${placeholder.name}#', '\${${placeholder.name}}');
-          } else {
-            argValue = argValue.replaceAll('#${placeholder.name}#', '\$${placeholder.name}');
-          }
+          argValue = argValue.replaceAll(
+            '#${placeholder.name}#',
+            _needsCurlyBracketStringInterpolation(argValue, placeholder.name)
+              ? '\${${placeholder.name}}'
+              : '\$${placeholder.name}'
+          );
         }
       }
       pluralLogicArgs.add('      ${pluralIds[pluralKey]}: $argValue');
@@ -288,17 +290,19 @@ String generateMethod(Message message, AppResourceBundle bundle) {
     String messageValue = generateString(bundle.translationFor(message));
     for (final Placeholder placeholder in message.placeholders) {
       if (placeholder.requiresFormatting) {
-        if (_needsCurlyBracketStringInterpolation(messageValue, placeholder.name)) {
-          messageValue = messageValue.replaceAll('{${placeholder.name}}', '\${${placeholder.name}String}');
-        } else {
-          messageValue = messageValue.replaceAll('{${placeholder.name}}', '\$${placeholder.name}String');
-        }
+        messageValue = messageValue.replaceAll(
+          '{${placeholder.name}}',
+          _needsCurlyBracketStringInterpolation(messageValue, placeholder.name)
+            ? '\${${placeholder.name}String}'
+            : '\$${placeholder.name}String'
+        );
       } else {
-        if (_needsCurlyBracketStringInterpolation(messageValue, placeholder.name)) {
-          messageValue = messageValue.replaceAll('{${placeholder.name}}', '\${${placeholder.name}}');
-        } else {
-          messageValue = messageValue.replaceAll('{${placeholder.name}}', '\$${placeholder.name}');
-        }
+        messageValue = messageValue.replaceAll(
+          '{${placeholder.name}}',
+          _needsCurlyBracketStringInterpolation(messageValue, placeholder.name)
+            ? '\${${placeholder.name}}'
+            : '\$${placeholder.name}'
+        );
       }
     }
 
