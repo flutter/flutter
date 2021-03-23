@@ -2344,7 +2344,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   ///
   ///   * [ScaffoldMessenger], this should be used instead to manage [SnackBar]s.
   @Deprecated(
-    'Use ScaffoldMessenger.hideCurrentSnackBar. '
+    'Use ScaffoldMessenger.of(context).hideCurrentSnackBar'
     'This feature was deprecated after v1.23.0-14.0.pre.'
   )
   void hideCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.hide }) {
