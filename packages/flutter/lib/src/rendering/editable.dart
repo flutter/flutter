@@ -1782,9 +1782,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
       if (data != null) {
         value = TextEditingValue(
-          text: selection.textBefore(text) + data.text! + selection.textAfter(text),
+          text: selection.isValid ? selection.textBefore(text) + data.text! + selection.textAfter(text) : data.text! + text,
           selection: TextSelection.collapsed(
-            offset: math.min(selection.start, selection.end) + data.text!.length,
+            offset: math.max(math.min(selection.start, selection.end), 0) + data.text!.length,
           ),
         );
       }
