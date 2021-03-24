@@ -104,6 +104,11 @@ typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 /// to provide a `defaultValue` to the super constructor, so that we can know
 /// at compile-time what its default color is.
 ///
+/// The [MaterialStateColor] class cannot universally be used in class
+/// constructors that were written to accept plain [Color] instances, and
+/// is intended to help bridge the gap between that original API and the newer
+/// MaterialStateProperty API.
+///
 /// {@tool snippet}
 ///
 /// This example defines a `MaterialStateColor` with a const constructor.
@@ -294,6 +299,11 @@ class _EnabledAndDisabledMouseCursor extends MaterialStateMouseCursor {
 ///
 /// To use a [MaterialStateBorderSide], you should create a subclass of a
 /// [MaterialStateBorderSide] and override the abstract `resolve` method.
+///
+/// The [MaterialStateBorderSide] class cannot universally be used in class
+/// constructors that were written to accept plain [BorderSide] instances, and
+/// is intended to help bridge the gap between that original API and the newer
+/// MaterialStateProperty API.
 ///
 /// {@tool dartpad --template=stateful_widget_material}
 ///
