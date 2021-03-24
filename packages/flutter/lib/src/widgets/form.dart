@@ -146,9 +146,10 @@ class Form extends StatefulWidget {
   /// Restoration ID to save and restore the state of the form.
   ///
   /// Setting the restoration ID to a non-null value results in whether or not
-  /// the form field validation persists. Each [FormField]'s value will need
-  /// to be independently restored. For an example of a restorable
-  /// [FormField], please see `TextFormField`.
+  /// the form field validation persists. It will not restore the value of each
+  /// [FormField], so each [FormField]'s value will need
+  /// to be independently restored. For an example of a state restorable
+  /// [FormField], see `TextFormField`.
   ///
   /// The state of this widget is persisted in a [RestorationBucket] claimed
   /// from the surrounding [RestorationScope] using the provided restoration ID.
