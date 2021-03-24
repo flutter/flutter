@@ -6182,8 +6182,8 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The subtree of `MultiChildRenderObjectElement` must have an associated render object.'),
           ErrorHint(
-            'This typically means that the `${newChild.widget}` or its children are not a subtype of `RenderObjectWidget`\n'
-            'or multiple widgets used the same GlobalKey, causing the render object to be re-parented.'
+            'This typically means that the `${newChild.widget}` or its children\n'
+            'are not a subtype of `RenderObjectWidget`.'
           ),
           newChild.describeElement('The following element does not have an associated render object'),
         ]);
@@ -6194,13 +6194,19 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   }
 
   @override
+  Element inflateWidget(Widget newWidget, Object? newSlot) {
+    final Element newChild = super.inflateWidget(newWidget, newSlot);
+    assert(_debugCheckHasAssociatedRenderObject(newChild));
+    return newChild;
+  }
+
+  @override
   void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     final List<Element> children = List<Element>.filled(widget.children.length, _NullElement.instance, growable: false);
     Element? previousChild;
     for (int i = 0; i < children.length; i += 1) {
       final Element newChild = inflateWidget(widget.children[i], IndexedSlot<Element?>(i, previousChild));
-      assert(_debugCheckHasAssociatedRenderObject(newChild));
       children[i] = newChild;
       previousChild = newChild;
     }
@@ -6212,10 +6218,6 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
     super.update(newWidget);
     assert(widget == newWidget);
     _children = updateChildren(_children, widget.children, forgottenChildren: _forgottenChildren);
-    assert(() {
-      _children.forEach(_debugCheckHasAssociatedRenderObject);
-      return true;
-    }());
     _forgottenChildren.clear();
   }
 }
