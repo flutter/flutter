@@ -584,10 +584,13 @@ abstract class Page<T> extends RouteSettings {
   ///    Flutter.
   final String? restorationId;
 
-  /// A completer which produce [Future] and completes when this page is popped off the navigator.
+  /// A future that completes when this route is popped off the navigator.
   ///
-  /// The future completes with the value given to [Navigator.pop].
-  final Completer<T?> popCompleter = Completer<T?>();
+  /// The future completes with the value given to [Navigator.pop], if any, or
+  /// else the value of [Route.currentResult]. See [didComplete] for more discussion
+  /// on this topic.
+  Future<T?> get popped => _popCompleter.future;
+  final Completer<T?> _popCompleter = Completer<T?>();
 
   /// Whether this page can be updated with the [other] page.
   ///
@@ -596,6 +599,17 @@ abstract class Page<T> extends RouteSettings {
   bool canUpdate(Page<dynamic> other) {
     return other.runtimeType == runtimeType &&
            other.key == key;
+  }
+
+  /// A request was made to pop this route. If the route can handle it
+  /// internally (e.g. because it has its own stack of internal state) then
+  /// return false, otherwise return true (by returning the value of calling
+  /// `super.didPop`). Returning false will prevent the default behavior of
+  /// [NavigatorState.pop].
+  @mustCallSuper
+  bool didPop(T? result) {
+    _popCompleter.complete(result);
+    return true;
   }
 
   /// Creates the [Route] that corresponds to this page.
@@ -5076,8 +5090,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     final _RouteEntry entry = _history.lastWhere(_RouteEntry.isPresentPredicate);
     if (entry.hasPage) {
       final Page<T> page = entry.route.settings as Page<T>;
-      page.popCompleter.complete(result);
-      if (widget.onPopPage!(entry.route, result))
+      if (widget.onPopPage!(entry.route, result) && page.didPop(result))
         entry.currentState = _RouteLifecycle.pop;
     } else {
       entry.pop<T>(result);
