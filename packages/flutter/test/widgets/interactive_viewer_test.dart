@@ -717,15 +717,15 @@ void main() {
             body: Center(
               child: InteractiveViewer(
                 transformationController: transformationController,
-                onInteractionStart: (ScaleStartDetails details){
+                onInteractionStart: (ScaleStartDetails details) {
                   calledStart = true;
                 },
-                onInteractionUpdate: (ScaleUpdateDetails details){
+                onInteractionUpdate: (ScaleUpdateDetails details) {
                   scaleChange = details.scale;
                   focalPoint = details.focalPoint;
                   localFocalPoint = details.localFocalPoint;
                 },
-                onInteractionEnd: (ScaleEndDetails details){
+                onInteractionEnd: (ScaleEndDetails details) {
                   currentVelocity = details.velocity;
                 },
                 child: const SizedBox(width: 200.0, height: 200.0),
@@ -756,6 +756,79 @@ void main() {
       final Offset scenePoint = transformationController.toScene(Offset.zero);
       expect(scenePoint.dx, greaterThan(0.0));
       expect(scenePoint.dy, greaterThan(0.0));
+    });
+
+    testWidgets('onInteraction is called even when disabled', (WidgetTester tester) async{
+      final TransformationController transformationController = TransformationController();
+      bool calledStart = false;
+      bool calledUpdate = false;
+      bool calledEnd = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                transformationController: transformationController,
+                scaleEnabled: false,
+                onInteractionStart: (ScaleStartDetails details) {
+                  calledStart = true;
+                },
+                onInteractionUpdate: (ScaleUpdateDetails details) {
+                  calledUpdate = true;
+                },
+                onInteractionEnd: (ScaleEndDetails details) {
+                  calledEnd = true;
+                },
+                child: const SizedBox(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset childOffset = tester.getTopLeft(find.byType(SizedBox));
+      final Offset childInterior = Offset(
+        childOffset.dx + 20.0,
+        childOffset.dy + 20.0,
+      );
+      TestGesture gesture = await tester.startGesture(childOffset);
+
+      // Attempting to pan doesn't work because it's disabled, but the
+      // interaction methods are still called.
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.moveTo(childInterior);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(transformationController.value, equals(Matrix4.identity()));
+      expect(calledStart, isTrue);
+      expect(calledUpdate, isTrue);
+      expect(calledEnd, isTrue);
+
+      // Attempting to pinch to zoom doesn't work because it's disabled, but the
+      // interaction methods are still called.
+      calledStart = false;
+      calledUpdate = false;
+      calledEnd = false;
+      final Offset scaleStart1 = childInterior;
+      final Offset scaleStart2 = Offset(childInterior.dx + 10.0, childInterior.dy);
+      final Offset scaleEnd1 = Offset(childInterior.dx - 10.0, childInterior.dy);
+      final Offset scaleEnd2 = Offset(childInterior.dx + 20.0, childInterior.dy);
+      gesture = await tester.startGesture(scaleStart1);
+      final TestGesture gesture2 = await tester.startGesture(scaleStart2);
+      addTearDown(gesture2.removePointer);
+      await tester.pump();
+      await gesture.moveTo(scaleEnd1);
+      await gesture2.moveTo(scaleEnd2);
+      await tester.pump();
+      await gesture.up();
+      await gesture2.up();
+      await tester.pumpAndSettle();
+      expect(transformationController.value, equals(Matrix4.identity()));
+      expect(calledStart, isTrue);
+      expect(calledUpdate, isTrue);
+      expect(calledEnd, isTrue);
     });
 
     testWidgets('viewport changes size', (WidgetTester tester) async {

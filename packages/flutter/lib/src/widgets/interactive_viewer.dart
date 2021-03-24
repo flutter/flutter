@@ -781,6 +781,12 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // Handle an update to an ongoing gesture. All of pan, scale, and rotate are
   // handled with GestureDetector's scale gesture.
   void _onScaleUpdate(ScaleUpdateDetails details) {
+    widget.onInteractionUpdate?.call(ScaleUpdateDetails(
+      focalPoint: details.focalPoint,
+      localFocalPoint: details.localFocalPoint,
+      scale: details.scale,
+      rotation: details.rotation,
+    ));
     final double scale = _transformationController!.value.getMaxScaleOnAxis();
     final Offset focalPointScene = _transformationController!.toScene(
       details.localFocalPoint,
@@ -871,12 +877,6 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         );
         break;
     }
-    widget.onInteractionUpdate?.call(ScaleUpdateDetails(
-      focalPoint: details.focalPoint,
-      localFocalPoint: details.localFocalPoint,
-      scale: details.scale,
-      rotation: details.rotation,
-    ));
   }
 
   // Handle the end of a gesture of _GestureType. All of pan, scale, and rotate
