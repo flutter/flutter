@@ -11,10 +11,10 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:pool/pool.dart';
 import 'package:test_core/src/runner/hack_register_platform.dart'
-    as hack; // ignore: implementation_imports
-import 'package:test_api/src/backend/runtime.dart'; // ignore: implementation_imports
+    as hack;
+import 'package:test_api/src/backend/runtime.dart';
 import 'package:test_core/src/executable.dart'
-    as test; // ignore: implementation_imports
+    as test;
 import 'package:web_test_utils/goldens.dart';
 
 import 'common.dart';

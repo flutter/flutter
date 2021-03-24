@@ -577,7 +577,7 @@ class BitmapCanvas extends EngineCanvas {
       String cssColor = paint.color == null
           ? '#000000'
           : colorToCssString(
-              paint.color)!; // ignore: unnecessary_null_comparison
+              paint.color)!;
       final double sigma = paint.maskFilter!.webOnlySigma;
       if (browserEngine == BrowserEngine.webkit && !isStroke) {
         // A bug in webkit leaves artifacts when this element is animated
