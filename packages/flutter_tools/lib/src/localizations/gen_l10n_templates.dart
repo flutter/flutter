@@ -73,7 +73,6 @@ import 'package:intl/intl.dart' as intl;
 abstract class @(class) {
   @(class)(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
-  // ignore: unused_field
   final String localeName;
 
   static @(class)? of(BuildContext context) {
