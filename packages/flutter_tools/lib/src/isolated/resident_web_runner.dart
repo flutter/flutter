@@ -504,6 +504,7 @@ class ResidentWebRunner extends ResidentRunner {
           useSseForDebugBackend: debuggingOptions.webUseSseForDebugBackend,
           buildInfo: debuggingOptions.buildInfo,
           enableDwds: _enableDwds,
+          enableDds: !debuggingOptions.disableDds,
           entrypoint: _fileSystem.file(target).uri,
           expressionCompiler: expressionCompiler,
           chromiumLauncher: _chromiumLauncher,

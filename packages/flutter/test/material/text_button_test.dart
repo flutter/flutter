@@ -1087,26 +1087,6 @@ void main() {
       await tester.pumpAndSettle();
     }
   });
-
-  testWidgets('Fixed TextButton.icon RenderFlex overflow', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: SizedBox(
-            width: 200,
-            child: TextButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.add),
-              label: const Text(
-                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut a euismod nibh. Morbi laoreet purus.',
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-    expect(tester.takeException(), null);
-  });
 }
 
 TextStyle? _iconStyle(WidgetTester tester, IconData icon) {

@@ -79,7 +79,7 @@ String getFlutterRoot() {
       throw invalidScript();
   }
 
-  final List<String> parts = path.split(LocalFileSystem.instance.path.fromUri(scriptUri));
+  final List<String> parts = path.split(globals.localFileSystem.path.fromUri(scriptUri));
   final int toolsIndex = parts.indexOf('flutter_tools');
   if (toolsIndex == -1) {
     throw invalidScript();
@@ -198,7 +198,7 @@ void test(String description, FutureOr<void> Function() body, {
     description,
     () async {
       addTearDown(() async {
-        await LocalFileSystem.dispose();
+        await globals.localFileSystem.dispose();
       });
       return body();
     },
