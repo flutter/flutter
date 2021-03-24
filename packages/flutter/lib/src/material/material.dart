@@ -631,6 +631,12 @@ abstract class InkFeature {
   bool _debugDisposed = false;
 
   /// Whether or not visual reaction is activated.
+  ///
+  /// Change this field will affect whether this InkFeature is render in next
+  /// frame.
+  ///
+  /// For this InkFeature to render properly, it should usually be change in
+  /// [State.deactivate] and [State.reactivate].
   bool visible = true;
 
   /// Free up the resources associated with this ink feature.

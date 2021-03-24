@@ -1145,7 +1145,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   void deactivate() {
     assert(() {
       _debugActive = !_debugActive;
-      return _debugActive == false;
+      return !_debugActive;
     }());
   }
 
@@ -1168,7 +1168,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   void reactivate() {
     assert(() {
       _debugActive = !_debugActive;
-      return _debugActive == true;
+      return _debugActive;
     }());
   }
 
