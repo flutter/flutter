@@ -6,7 +6,7 @@
 import 'dart:ui' as ui show ParagraphStyle, TextStyle, StrutStyle, lerpDouble, Shadow, FontFeature, TextHeightBehavior, TextLeadingDistribution;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import 'basic_types.dart';
 import 'colors.dart';
