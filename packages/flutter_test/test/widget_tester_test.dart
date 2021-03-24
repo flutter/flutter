@@ -611,25 +611,42 @@ void main() {
     });
   });
 
-  testWidgets('showKeyboard can be called twice', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Center(
-            child: TextFormField(),
+  group('showKeyboard', () {
+    testWidgets('can be called twice', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextFormField(),
+            ),
           ),
         ),
-      ),
-    );
-    await tester.showKeyboard(find.byType(TextField));
-    await tester.testTextInput.receiveAction(TextInputAction.done);
-    await tester.pump();
-    await tester.showKeyboard(find.byType(TextField));
-    await tester.testTextInput.receiveAction(TextInputAction.done);
-    await tester.pump();
-    await tester.showKeyboard(find.byType(TextField));
-    await tester.showKeyboard(find.byType(TextField));
-    await tester.pump();
+      );
+      await tester.showKeyboard(find.byType(TextField));
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+      await tester.showKeyboard(find.byType(TextField));
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+      await tester.showKeyboard(find.byType(TextField));
+      await tester.showKeyboard(find.byType(TextField));
+      await tester.pump();
+    });
+
+    testWidgets(
+      'can focus on offstage text input field if finder says not to skip offstage nodes',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Material(
+              child: Offstage(
+                child: TextFormField(),
+              ),
+            ),
+          ),
+        );
+        await tester.showKeyboard(find.byType(TextField, skipOffstage: false));
+      });
   });
 
   testWidgets('verifyTickersWereDisposed control test', (WidgetTester tester) async {
