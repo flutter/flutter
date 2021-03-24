@@ -4490,6 +4490,6 @@ void main() {
       FlutterError.onError = oldHandler;
     }
     
-    expect(errorDetails?.toString(), isNot(contains("A RenderFlex overflowed by ")));
+    expect(errorDetails?.toString() ?? "", isNot(contains("A RenderFlex overflowed by ")));
   });
 }
