@@ -1806,6 +1806,47 @@ void main() {
   });
 
   testWidgets(
+    'Default TextInputActions should not call clearComposing themselves',
+    (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      final TextEditingController controller = TextEditingController.fromValue(
+        const TextEditingValue(
+          text: 'initial text',
+          selection: TextSelection.collapsed(offset: 12),
+          composing: TextSelection(baseOffset: 0, extentOffset: 12),
+        ),
+      );
+
+      final Widget widget = MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: controller,
+          focusNode: focusNode,
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+          cursorColor: Colors.blue,
+        ),
+      );
+      await tester.pumpWidget(widget);
+
+      // Select EditableText to give it focus.
+      final Finder textFinder = find.byType(EditableText);
+      await tester.tap(textFinder);
+      await tester.pump();
+
+      assert(focusNode.hasFocus);
+
+      final EditableTextState state = tester.state<EditableTextState>(textFinder);
+      state.performAction(TextInputAction.done);
+      expect(controller.value.composing.isValid, isTrue);
+
+      // Now the EditableText should lose focus and the composing region should
+      // be removed.
+      await tester.pump();
+      expect(controller.value.composing.isValid, isFalse);
+    },
+  );
+
+  testWidgets(
     'iOS autocorrection rectangle should appear on demand and dismiss when the text changes or when focus is lost',
     (WidgetTester tester) async {
       const Color rectColor = Color(0xFFFF0000);

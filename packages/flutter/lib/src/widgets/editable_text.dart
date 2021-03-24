@@ -251,11 +251,11 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
     value = const TextEditingValue(selection: TextSelection.collapsed(offset: 0));
   }
 
-  /// Set the composing region to [TextRange.empty] and commit the composing
+  /// Sets the composing region to [TextRange.empty] and commits the composing
   /// text, if any.
   ///
   /// The composing region is the range of provisional text that is still
-  /// considered being composed by the input method (IME). Calling this function
+  /// considered being composed by the input method (IME). Calling this method
   /// indicates that the user is done composing that region.
   ///
   /// ### Limitations and Best Practices
