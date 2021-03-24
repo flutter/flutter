@@ -1308,11 +1308,25 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///             const SliverToBoxAdapter(
 ///               child: Center(
 ///                 child: SizedBox(
-///                   height: 2000,
+///                   height: 20,
 ///                   child: const Text('Scroll to see SliverAppBar in effect .'),
 ///                 ),
 ///               ),
 ///             ),
+///             SliverList(
+///              delegate: SliverChildBuilderDelegate(
+///                (BuildContext context, int index) {
+///                  return Container(
+///                    color: index % 2 == 0 ? Colors.white : Colors.black12,
+///                    height: 100.0,
+///                    child: Center(
+///                      child: Text('$index', textScaleFactor: 5),
+///                    ),
+///                  );
+///                },
+///                childCount: 20,
+///              ),
+///            ),
 ///           ],
 ///         ),
 ///         bottomNavigationBar: BottomAppBar(
