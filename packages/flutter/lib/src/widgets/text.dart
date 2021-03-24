@@ -467,7 +467,7 @@ class Text extends StatelessWidget {
 
   /// How visual overflow should be handled.
   ///
-  /// If this is null [TextStyle.overflow] will be used otherwise the value
+  /// If this is null [TextStyle.overflow] will be used, otherwise the value
   /// from the nearest [DefaultTextStyle] ancestor will be used.
   final TextOverflow? overflow;
 
