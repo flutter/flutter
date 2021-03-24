@@ -6,7 +6,6 @@
 
 import 'dart:io' hide Directory, File;
 
-import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -626,6 +625,7 @@ void main() {
         nullSafetyMode: NullSafetyMode.unsound,
       ),
       enableDwds: false,
+      enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null,
@@ -742,6 +742,7 @@ void main() {
         nullSafetyMode: NullSafetyMode.sound,
       ),
       enableDwds: false,
+      enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null,
@@ -848,6 +849,7 @@ void main() {
       useSseForDebugBackend: true,
       buildInfo: BuildInfo.debug,
       enableDwds: false,
+      enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null,
@@ -900,6 +902,7 @@ void main() {
         ]
       ),
       enableDwds: false,
+      enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null,
@@ -951,6 +954,7 @@ void main() {
         ]
       ),
       enableDwds: false,
+      enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null,
@@ -980,6 +984,7 @@ void main() {
         '',
         treeShakeIcons: false,
       ),
+      false,
       false,
       Uri.base,
       null,
@@ -1060,6 +1065,7 @@ void main() {
       nativeNullAssertions: true,
       buildInfo: BuildInfo.debug,
       enableDwds: false,
+      enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null,
@@ -1084,4 +1090,3 @@ void main() {
 
 class MockHttpServer extends Mock implements HttpServer {}
 class MockResidentCompiler extends Mock implements ResidentCompiler {}
-class MockDwds extends Mock implements Dwds {}

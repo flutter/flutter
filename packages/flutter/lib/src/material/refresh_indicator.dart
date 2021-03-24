@@ -147,7 +147,7 @@ class RefreshIndicator extends StatefulWidget {
   final RefreshCallback onRefresh;
 
   /// The progress indicator's foreground color. The current theme's
-  /// [ThemeData.accentColor] by default.
+  /// [ColorScheme.primary] by default.
   final Color? color;
 
   /// The progress indicator's background color. The current theme's
@@ -229,8 +229,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     final ThemeData theme = Theme.of(context);
     _valueColor = _positionController.drive(
       ColorTween(
-        begin: (widget.color ?? theme.accentColor).withOpacity(0.0),
-        end: (widget.color ?? theme.accentColor).withOpacity(1.0),
+        begin: (widget.color ?? theme.colorScheme.primary).withOpacity(0.0),
+        end: (widget.color ?? theme.colorScheme.primary).withOpacity(1.0),
       ).chain(CurveTween(
         curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit)
       )),
@@ -245,8 +245,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       final ThemeData theme = Theme.of(context);
       _valueColor = _positionController.drive(
         ColorTween(
-          begin: (widget.color ?? theme.accentColor).withOpacity(0.0),
-          end: (widget.color ?? theme.accentColor).withOpacity(1.0),
+          begin: (widget.color ?? theme.colorScheme.primary).withOpacity(0.0),
+          end: (widget.color ?? theme.colorScheme.primary).withOpacity(1.0),
         ).chain(CurveTween(
             curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit)
         )),
@@ -434,10 +434,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
               ));
             return true;
           }());
-          // `refreshResult` has a non-nullable type, but might be null when
-          // running with weak checking, so we need to null check it anyway (and
-          // ignore the warning that the null-handling logic is dead code).
-          if (refreshResult == null) // ignore: dead_code
+          if (refreshResult == null)
             return;
           refreshResult.whenComplete(() {
             if (mounted && _mode == _RefreshIndicatorMode.refresh) {

@@ -25,6 +25,8 @@ import 'text_field.dart';
 ///
 /// ```dart
 /// class MyPrefilledSearch extends StatefulWidget {
+///   const MyPrefilledSearch({Key? key}) : super(key: key);
+///
 ///   @override
 ///   _MyPrefilledSearchState createState() => _MyPrefilledSearchState();
 /// }
@@ -54,6 +56,8 @@ import 'text_field.dart';
 ///
 /// ```dart
 /// class MyPrefilledSearch extends StatefulWidget {
+///   const MyPrefilledSearch({Key? key}) : super(key: key);
+///
 ///   @override
 ///   _MyPrefilledSearchState createState() => _MyPrefilledSearchState();
 /// }
@@ -62,11 +66,11 @@ import 'text_field.dart';
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return CupertinoSearchTextField(
-///       onChanged: (value) {
-///         print("The text has changed to: " + value);
+///       onChanged: (String value) {
+///         print('The text has changed to: $value');
 ///       },
-///       onSubmitted: (value) {
-///         print("Submitted text: " + value);
+///       onSubmitted: (String value) {
+///         print('Submitted text: $value');
 ///       },
 ///     );
 ///   }

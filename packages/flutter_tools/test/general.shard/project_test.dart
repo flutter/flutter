@@ -110,17 +110,6 @@ void main() {
         );
       });
 
-      _testInMemory('reads dependencies from pubspec.yaml', () async {
-        final Directory directory = globals.fs.directory('myproject');
-        directory.childFile('pubspec.yaml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(validPubspecWithDependencies);
-        expect(
-          FlutterProject.fromDirectory(directory).manifest.dependencies,
-          <String>{'plugin_a', 'plugin_b'},
-        );
-      });
-
       _testInMemory('sets up location', () async {
         final Directory directory = globals.fs.directory('myproject');
         expect(
@@ -924,16 +913,6 @@ String get validPubspec => '''
 name: hello
 flutter:
 ''';
-
-String get validPubspecWithDependencies => '''
-name: hello
-flutter:
-
-dependencies:
-  plugin_a:
-  plugin_b:
-''';
-
 
 String get invalidPubspec => '''
 name: hello

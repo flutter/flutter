@@ -38,9 +38,9 @@ import 'tooltip_theme.dart';
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return Tooltip(
-///     message: "I am a Tooltip",
-///     child: Text("Hover over the text to show a tooltip."),
+///   return const Tooltip(
+///     message: 'I am a Tooltip',
+///     child: Text('Hover over the text to show a tooltip.'),
 ///   );
 /// }
 /// ```
@@ -63,20 +63,20 @@ import 'tooltip_theme.dart';
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Tooltip(
-///     message: "I am a Tooltip",
-///     child: Text("Tap this text and hold down to show a tooltip."),
+///     message: 'I am a Tooltip',
+///     child: const Text('Tap this text and hold down to show a tooltip.'),
 ///     decoration: BoxDecoration(
 ///       borderRadius: BorderRadius.circular(25),
-///       gradient: LinearGradient(colors: [Colors.amber, Colors.red]),
+///       gradient: const LinearGradient(colors: <Color>[Colors.amber, Colors.red]),
 ///     ),
 ///     height: 50,
-///     padding: EdgeInsets.all(8.0),
+///     padding: const EdgeInsets.all(8.0),
 ///     preferBelow: false,
-///     textStyle: TextStyle(
+///     textStyle: const TextStyle(
 ///       fontSize: 24,
 ///     ),
-///     showDuration: Duration(seconds: 2),
-///     waitDuration: Duration(seconds: 1),
+///     showDuration: const Duration(seconds: 2),
+///     waitDuration: const Duration(seconds: 1),
 ///   );
 /// }
 /// ```

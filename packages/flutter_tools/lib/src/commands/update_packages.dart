@@ -29,8 +29,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // existing tests do not fail when the package has a new version.
   'flutter_gallery_assets': '^1.0.1',
   'flutter_template_images': '1.0.1', // Must always exactly match flutter_tools template.
-  'mockito': '4.1.1', // Prevent mockito from upgrading to the source gen version.
-  'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
+  'mockito': '4.1.1+1', // Prevent mockito from upgrading to the source gen version.
   // DART TEAM OWNED NNBD DEPS
   'archive': '">=3.0.0-nullsafety.0"',
   'async': '">=2.5.0-nullsafety.3"',
