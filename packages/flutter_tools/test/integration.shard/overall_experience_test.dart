@@ -572,7 +572,6 @@ void main() {
       'z Toggle elevation checker.',
       'g Run source code generators.',
       'M Write SkSL shaders to a unique file in the project directory.',
-      'v Launch DevTools.', // TODO(ianh): hide this when devtools isn't available
       'P Toggle performance overlay.                                    (WidgetsApp.showPerformanceOverlay)',
       'a Toggle timeline events for all widget build methods.                    (debugProfileWidgetBuilds)',
       '',
