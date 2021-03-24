@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 
 void main() {
   test('Locale', () {
-    const Null $null = null;
+    const Null $null = null; // ignore: prefer_void_to_null
     expect(const Locale('en').toLanguageTag(), 'en');
     expect(const Locale('en'), const Locale('en', $null));
     expect(const Locale('en').hashCode, const Locale('en', $null).hashCode);

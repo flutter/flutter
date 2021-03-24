@@ -154,5 +154,5 @@ Future<Uint8List> readFile(String fileName) async {
     'resources',
     fileName,
   ));
-  return await file.readAsBytes();
+  return file.readAsBytes();
 }

@@ -1497,7 +1497,7 @@ class TextDecoration {
   /// Creates a decoration that paints the union of all the given decorations.
   factory TextDecoration.combine(List<TextDecoration> decorations) {
     int mask = 0;
-    for (TextDecoration decoration in decorations)
+    for (final TextDecoration decoration in decorations)
       mask |= decoration._mask;
     return TextDecoration._(mask);
   }
@@ -3335,7 +3335,7 @@ class ParagraphBuilder extends NativeFieldWrapperClass2 {
     if (fontFeatures != null) {
       encodedFontFeatures = ByteData(fontFeatures.length * FontFeature._kEncodedSize);
       int byteOffset = 0;
-      for (FontFeature feature in fontFeatures) {
+      for (final FontFeature feature in fontFeatures) {
         feature._encode(ByteData.view(encodedFontFeatures.buffer, byteOffset, FontFeature._kEncodedSize));
         byteOffset += FontFeature._kEncodedSize;
       }
@@ -3449,13 +3449,13 @@ class ParagraphBuilder extends NativeFieldWrapperClass2 {
     TextBaseline? baseline,
   }) {
     // Require a baseline to be specified if using a baseline-based alignment.
-    assert((alignment == PlaceholderAlignment.aboveBaseline ||
+    assert(!(alignment == PlaceholderAlignment.aboveBaseline ||
             alignment == PlaceholderAlignment.belowBaseline ||
-            alignment == PlaceholderAlignment.baseline) ? baseline != null : true);
+            alignment == PlaceholderAlignment.baseline) || baseline != null);
     // Default the baselineOffset to height if null. This will place the placeholder
     // fully above the baseline, similar to [PlaceholderAlignment.aboveBaseline].
     baselineOffset = baselineOffset ?? height;
-    _addPlaceholder(width * scale, height * scale, alignment.index, baselineOffset * scale, baseline == null ? null : baseline.index);
+    _addPlaceholder(width * scale, height * scale, alignment.index, baselineOffset * scale, baseline?.index);
     _placeholderCount++;
     _placeholderScales.add(scale);
   }

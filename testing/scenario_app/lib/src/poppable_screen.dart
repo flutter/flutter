@@ -63,7 +63,7 @@ class PoppableScreenScenario extends Scenario with PlatformEchoMixin {
 
   @override
   void onPointerDataPacket(PointerDataPacket packet) {
-    for (PointerData data in packet.data) {
+    for (final PointerData data in packet.data) {
       if (data.change == PointerChange.up &&
           _buttonRect?.contains(Offset(data.physicalX, data.physicalY)) == true
       ) {

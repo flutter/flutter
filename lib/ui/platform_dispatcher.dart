@@ -358,7 +358,7 @@ class PlatformDispatcher {
   void _dispatchKeyData(ByteData packet, int responseId) {
     _invoke2<KeyData, _KeyDataResponseCallback>(
       (KeyData data, _KeyDataResponseCallback callback) {
-        callback(responseId, onKeyData == null ? false : onKeyData!(data));
+        callback(responseId, onKeyData != null && onKeyData!(data));
       },
       _onKeyDataZone,
       _unpackKeyData(packet),
@@ -644,7 +644,7 @@ class PlatformDispatcher {
   /// platform specific APIs without invoking method channels.
   Locale? computePlatformResolvedLocale(List<Locale> supportedLocales) {
     final List<String?> supportedLocalesData = <String?>[];
-    for (Locale locale in supportedLocales) {
+    for (final Locale locale in supportedLocales) {
       supportedLocalesData.add(locale.languageCode);
       supportedLocalesData.add(locale.countryCode);
       supportedLocalesData.add(locale.scriptCode);
