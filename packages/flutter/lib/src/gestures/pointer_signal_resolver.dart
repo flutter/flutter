@@ -106,8 +106,8 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 ///         },
 ///         child: Stack(
 ///           fit: StackFit.expand,
-///           children: [
-///             AbsorbPointer(),
+///           children: <Widget>[
+///             const AbsorbPointer(),
 ///             if (widget.child != null) widget.child!,
 ///           ],
 ///         ),
