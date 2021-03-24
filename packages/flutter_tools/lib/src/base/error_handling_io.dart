@@ -349,7 +349,6 @@ class ErrorHandlingFile
       }
     }, platform: _platform, failureMessage: 'Flutter failed to copy $path to $newPath due to unknown error');
     // The original copy failed, but the manual copy worked.
-    // TODO(jmagman): Report a 'copy-fallback' ErrorHandlingEvent event to track this to determine if this code path is actually hit.
     return wrapFile(resultFile);
   }
 
