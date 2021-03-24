@@ -124,7 +124,7 @@ class AndroidPlugin extends PluginPlatform {
         break;
       }
     }
-    if (!mainClassFound) {
+    if (mainPluginClass == null || !mainClassFound) {
       assert(mainClassCandidates.length <= 2);
       throwToolExit(
         "The plugin `$name` doesn't have a main class defined in ${mainClassCandidates.join(' or ')}. "
@@ -134,7 +134,7 @@ class AndroidPlugin extends PluginPlatform {
       );
     }
 
-    final String mainClassContent = mainPluginClass!.readAsStringSync();
+    final String mainClassContent = mainPluginClass.readAsStringSync();
     if (mainClassContent
         .contains('io.flutter.embedding.engine.plugins.FlutterPlugin')) {
       supportedEmbeddings.add('2');
@@ -156,7 +156,7 @@ class AndroidPlugin extends PluginPlatform {
 class IOSPlugin extends PluginPlatform {
   const IOSPlugin({
     required this.name,
-    this.classPrefix,
+    required this.classPrefix,
     required this.pluginClass,
   });
 
@@ -182,7 +182,7 @@ class IOSPlugin extends PluginPlatform {
 
   /// Note, this is here only for legacy reasons. Multi-platform format
   /// always sets it to empty String.
-  final String? classPrefix;
+  final String classPrefix;
   final String pluginClass;
 
   @override
