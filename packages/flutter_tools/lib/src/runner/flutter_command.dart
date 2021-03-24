@@ -378,7 +378,6 @@ abstract class FlutterCommand extends Command<void> {
     } on FormatException catch (error) {
       throwToolExit('Invalid port for `--observatory-port/--host-vmservice-port`: $error');
     }
-    return null;
   }
 
   int get ddsPort {
@@ -440,7 +439,6 @@ abstract class FlutterCommand extends Command<void> {
     } on FormatException catch (error) {
       throwToolExit('Invalid port for `--device-vmservice-port`: $error');
     }
-    return null;
   }
 
   void addPublishPort({ bool enabledByDefault = true, bool verboseHelp = false }) {

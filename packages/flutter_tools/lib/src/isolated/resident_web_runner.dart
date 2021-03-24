@@ -563,7 +563,6 @@ class ResidentWebRunner extends ResidentRunner {
       appFailedToStart();
       rethrow;
     }
-    return 0;
   }
 
   @override
