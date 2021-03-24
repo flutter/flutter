@@ -564,7 +564,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   void _setSelection(TextSelection nextSelection, SelectionChangedCause cause) {
-    if (nextSelection != const TextSelection.collapsed(offset: -1)) {
+    if (nextSelection.isValid) {
       // The nextSelection is calculated based on _plainText, which can be out
       // of sync with the textSelectionDelegate.textEditingValue by one frame.
       // This is due to the render editable and editable text handle pointer
