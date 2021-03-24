@@ -862,6 +862,7 @@ class DebuggingOptions {
     this.webEnableExposeUrl,
     this.webUseSseForDebugProxy = true,
     this.webUseSseForDebugBackend = true,
+    this.webUseSseForInjectedClient = true,
     this.webRunHeadless = false,
     this.webBrowserDebugPort,
     this.webEnableExpressionEvaluation = false,
@@ -878,6 +879,7 @@ class DebuggingOptions {
       this.webEnableExposeUrl,
       this.webUseSseForDebugProxy = true,
       this.webUseSseForDebugBackend = true,
+      this.webUseSseForInjectedClient = true,
       this.webRunHeadless = false,
       this.webBrowserDebugPort,
       this.cacheSkSL = false,
@@ -936,6 +938,7 @@ class DebuggingOptions {
   final bool webEnableExposeUrl;
   final bool webUseSseForDebugProxy;
   final bool webUseSseForDebugBackend;
+  final bool webUseSseForInjectedClient;
 
   /// Whether to run the browser in headless mode.
   ///
