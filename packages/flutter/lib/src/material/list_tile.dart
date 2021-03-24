@@ -1327,7 +1327,7 @@ class _ListTileElement extends RenderObjectElement {
   }
 
   @override
-  void mount(Element? parent, dynamic newSlot) {
+  void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     _mountChild(widget.leading, _ListTileSlot.leading);
     _mountChild(widget.title, _ListTileSlot.title);
@@ -1389,7 +1389,7 @@ class _ListTileElement extends RenderObjectElement {
   }
 
   @override
-  void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
+  void moveRenderObjectChild(RenderObject child, Object? oldSlot, Object? newSlot) {
     assert(false, 'not reachable');
   }
 }
