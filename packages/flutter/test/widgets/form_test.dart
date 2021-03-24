@@ -969,4 +969,140 @@ void main() {
     expect(formWidget.autovalidate, isFalse);
     expect(formWidget.autovalidateMode, equals(AutovalidateMode.disabled));
   });
+
+  testWidgets('State restoration - onUserInteraction error text validation', (WidgetTester tester) async {
+    String? errorText(String? value) => '$value/error';
+    late GlobalKey<FormState> formState;
+
+    Widget builder() {
+      return MaterialApp(
+        restorationScopeId: 'app',
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter state) {
+                  formState = GlobalKey<FormState>();
+                  return Form(
+                    key: formState,
+                    child: Material(
+                      child: TextFormField(
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        restorationId: 'test',
+                        initialValue: 'foo',
+                        validator: errorText,
+                      ),
+                    ),
+                  );
+                }
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+
+    // No error text is visible yet.
+    expect(find.text(errorText('foo')!), findsNothing);
+
+    await tester.enterText(find.byType(TextFormField), 'bar');
+    await tester.pumpAndSettle();
+    expect(find.text(errorText('bar')!), findsOneWidget);
+
+    final TestRestorationData data = await tester.getRestorationData();
+    await tester.restartAndRestore();
+    // Error text should be present after restart and restore.
+    expect(find.text(errorText('bar')!), findsOneWidget);
+
+    // Resetting the form state should remove the error text.
+    formState.currentState!.reset();
+    await tester.pumpAndSettle();
+    expect(find.text(errorText('bar')!), findsNothing);
+    await tester.restartAndRestore();
+    // Error text should still be removed after restart and restore.
+    expect(find.text(errorText('bar')!), findsNothing);
+
+    await tester.restoreFrom(data);
+    expect(find.text(errorText('bar')!), findsOneWidget);
+  });
+
+  testWidgets('State Restoration - validator sets the error text only when validate is called', (WidgetTester tester) async {
+    String? errorText(String? value) => '$value/error';
+    late GlobalKey<FormState> formState;
+
+    Widget builder(AutovalidateMode mode) {
+      return MaterialApp(
+        restorationScopeId: 'app',
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter state) {
+                  formState = GlobalKey<FormState>();
+                  return Form(
+                    key: formState,
+                    autovalidateMode: mode,
+                    child: Material(
+                      child: TextFormField(
+                        restorationId: 'test',
+                        initialValue: 'foo',
+                        validator: errorText,
+                      ),
+                    ),
+                  );
+                }
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Start off not autovalidating.
+    await tester.pumpWidget(builder(AutovalidateMode.disabled));
+
+    Future<void> checkErrorText(String testValue) async {
+      formState.currentState!.reset();
+      await tester.pumpWidget(builder(AutovalidateMode.disabled));
+      await tester.enterText(find.byType(TextFormField), testValue);
+      await tester.pump();
+
+      // We have to manually validate if we're not autovalidating.
+      expect(find.text(errorText(testValue)!), findsNothing);
+      formState.currentState!.validate();
+      await tester.pump();
+      expect(find.text(errorText(testValue)!), findsOneWidget);
+      final TestRestorationData data = await tester.getRestorationData();
+      await tester.restartAndRestore();
+      // Error text should be present after restart and restore.
+      expect(find.text(errorText(testValue)!), findsOneWidget);
+
+      formState.currentState!.reset();
+      await tester.pumpAndSettle();
+      expect(find.text(errorText(testValue)!), findsNothing);
+
+      await tester.restoreFrom(data);
+      expect(find.text(errorText(testValue)!), findsOneWidget);
+
+      // Try again with autovalidation. Should validate immediately.
+      formState.currentState!.reset();
+      await tester.pumpWidget(builder(AutovalidateMode.always));
+      await tester.enterText(find.byType(TextFormField), testValue);
+      await tester.pump();
+
+      expect(find.text(errorText(testValue)!), findsOneWidget);
+      await tester.restartAndRestore();
+      // Error text should be present after restart and restore.
+      expect(find.text(errorText(testValue)!), findsOneWidget);
+    }
+
+    await checkErrorText('Test');
+    await checkErrorText('');
+  });
 }
