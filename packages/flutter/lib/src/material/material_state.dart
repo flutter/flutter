@@ -350,11 +350,11 @@ abstract class MaterialStateBorderSide extends BorderSide implements MaterialSta
   /// Creates a [MaterialStateBorderSide] from a
   /// [MaterialPropertyResolver<BorderSide>] callback function.
   ///
-  /// If used as a regular BorderSide, the border resolved in the default state
+  /// If used as a regular [BorderSide], the border resolved in the default state
   /// (the empty set of states) will be used.
   ///
-  /// The given callback parameter must return a non-null color in the default
-  /// state.
+  /// The given callback parameter must return a non-null [BorderSide] in the
+  /// default state.
   static MaterialStateBorderSide resolveWith(MaterialPropertyResolver<BorderSide> callback) =>
       _MaterialStateBorderSide(callback);
 }
