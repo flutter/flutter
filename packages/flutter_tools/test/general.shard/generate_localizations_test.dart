@@ -1941,6 +1941,71 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       expect(localizationsFile, contains(r'${nine}'));
     });
 
+    test('check for string interpolation rules - plurals', () {
+      const String enArbCheckList = '''
+{
+  "first": "{count,plural, =0{test {count} test} =1{哈{count}哈} =2{m{count}m} few{_{count}_} many{{count} test} other{{count}m}",
+  "@first": {
+    "description": "First set of plural messages to test.",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "second": "{count,plural, =0{test {count}} other{ {count}}",
+  "@second": {
+    "description": "Second set of plural messages to test.",
+    "placeholders": {
+      "count": {}
+    }
+  }
+}
+''';
+
+      // It's fine that the arb is identical -- Just checking
+      // generated code for use of '${variable}' vs '$variable'
+      const String esArbCheckList = '''
+{
+  "first": "{count,plural, =0{test {count} test} =1{哈{count}哈} =2{m{count}m} few{_{count}_} many{{count} test} other{{count}m}",
+  "second": "{count,plural, =0{test {count}} other{ {count}}"
+}
+''';
+
+      fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
+        ..childFile(defaultTemplateArbFileName).writeAsStringSync(enArbCheckList)
+        ..childFile('app_es.arb').writeAsStringSync(esArbCheckList);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.loadResources();
+        generator.writeOutputFiles(BufferLogger.test());
+      } on Exception catch (e) {
+        if (e is L10nException) {
+          print(e.message);
+        }
+        fail('Generating output files should not fail: $e');
+      }
+
+      final String localizationsFile = fs.file(
+        fs.path.join(syntheticL10nPackagePath, 'output-localization-file_es.dart'),
+      ).readAsStringSync();
+
+      expect(localizationsFile, contains(r'test $count test'));
+      expect(localizationsFile, contains(r'哈$count哈'));
+      expect(localizationsFile, contains(r'm${count}m'));
+      expect(localizationsFile, contains(r'_${count}_'));
+      expect(localizationsFile, contains(r'$count test'));
+      expect(localizationsFile, contains(r'${count}m'));
+      expect(localizationsFile, contains(r'test $count'));
+      expect(localizationsFile, contains(r' $count'));
+    });
+
     test(
       'should throw with descriptive error message when failing to parse the '
       'arb file',
