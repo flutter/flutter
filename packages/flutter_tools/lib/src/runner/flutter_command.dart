@@ -1152,7 +1152,6 @@ abstract class FlutterCommand extends Command<void> {
         outputDir: globals.fs.directory(getBuildDirectory()),
         processManager: globals.processManager,
         projectDir: project.directory,
-        generateDartPluginRegistry: true,
       );
 
       await generateLocalizationsSyntheticPackage(
