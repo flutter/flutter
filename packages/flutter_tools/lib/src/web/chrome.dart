@@ -81,7 +81,6 @@ String findChromeExecutable(Platform platform, FileSystem fileSystem) {
     return fileSystem.path.join(windowsPrefix, kWindowsExecutable);
   }
   throwToolExit('Platform ${platform.operatingSystem} is not supported.');
-  return null;
 }
 
 /// Find the Microsoft Edge executable on the current platform.

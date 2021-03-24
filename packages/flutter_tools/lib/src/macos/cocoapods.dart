@@ -392,7 +392,6 @@ class CocoaPods {
               'To regenerate the Podfile, run:\n'
               '$podfileIosMigrationInstructions\n',
         );
-        return;
       }
     }
     // Most of the pod and plugin parsing logic was moved from the Podfile
