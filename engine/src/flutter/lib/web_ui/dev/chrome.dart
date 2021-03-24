@@ -9,7 +9,7 @@ import 'dart:io';
 
 import 'package:pedantic/pedantic.dart';
 
-import 'package:test_core/src/util/io.dart'; // ignore: implementation_imports
+import 'package:test_core/src/util/io.dart';
 
 import 'browser.dart';
 import 'chrome_installer.dart';
