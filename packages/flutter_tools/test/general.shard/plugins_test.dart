@@ -27,7 +27,7 @@ import 'package:package_config/package_config.dart';
 import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
+import '../src/context.dart' hide FakeOperatingSystemUtils;
 import '../src/fakes.dart';
 import '../src/pubspec_schema.dart';
 import '../src/testbed.dart';
@@ -1919,7 +1919,7 @@ void main() {
             '// @dart = 2.8\n'
             '\n'
             'import \'package:app/main.dart\' as entrypoint;\n'
-            'import \'dart:io\'; // ignore: dart_io_import.\n'
+            'import \'dart:io\'; // flutter_ignore: dart_io_import.\n'
             'import \'package:url_launcher_linux${fs.path.separator}url_launcher_linux.dart\';\n'
             'import \'package:awesome_macos/awesome_macos.dart\';\n'
             'import \'package:url_launcher_macos${fs.path.separator}url_launcher_macos.dart\';\n'
@@ -2159,8 +2159,7 @@ void main() {
 
     testWithoutContext('Symlink failures give developer mode instructions on recent versions of Windows', () async {
       final Platform platform = FakePlatform(operatingSystem: 'windows');
-      final MockOperatingSystemUtils os = MockOperatingSystemUtils();
-      when(os.name).thenReturn('Microsoft Windows [Version 10.0.14972.1]');
+      final FakeOperatingSystemUtils os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14972.1]');
 
       const FileSystemException e = FileSystemException('', '', OSError('', 1314));
 
@@ -2170,8 +2169,7 @@ void main() {
 
     testWithoutContext('Symlink failures instruct developers to run as administrator on older versions of Windows', () async {
       final Platform platform = FakePlatform(operatingSystem: 'windows');
-      final MockOperatingSystemUtils os = MockOperatingSystemUtils();
-      when(os.name).thenReturn('Microsoft Windows [Version 10.0.14393]');
+      final FakeOperatingSystemUtils os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14393]');
 
       const FileSystemException e = FileSystemException('', '', OSError('', 1314));
 
@@ -2181,8 +2179,7 @@ void main() {
 
     testWithoutContext('Symlink failures only give instructions for specific errors', () async {
       final Platform platform = FakePlatform(operatingSystem: 'windows');
-      final MockOperatingSystemUtils os = MockOperatingSystemUtils();
-      when(os.name).thenReturn('Microsoft Windows [Version 10.0.14393]');
+      final FakeOperatingSystemUtils os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14393]');
 
       const FileSystemException e = FileSystemException('', '', OSError('', 999));
 
@@ -2200,7 +2197,13 @@ class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterprete
 class MockWebProject extends Mock implements WebProject {}
 class MockWindowsProject extends Mock implements WindowsProject {}
 class MockLinuxProject extends Mock implements LinuxProject {}
-class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
+
+class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
+  FakeOperatingSystemUtils(this.name);
+
+  @override
+  final String name;
+}
 
 class FakeSystemClock extends Fake implements SystemClock {
   DateTime currentTime;

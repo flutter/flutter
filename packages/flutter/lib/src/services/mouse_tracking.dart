@@ -25,14 +25,14 @@ typedef PointerHoverEventListener = void Function(PointerHoverEvent event);
 /// The annotation object used to annotate regions that are interested in mouse
 /// movements.
 ///
-/// To use an annotation, return this object as an [HitTestEntry] in a hit test.
+/// To use an annotation, return this object as a [HitTestEntry] in a hit test.
 /// Typically this is implemented by making a [RenderBox] implement this class
 /// (see [RenderMouseRegion]).
 ///
-/// [MouseTracker] use this class as a label to filter the hit test result. Hit
-/// test entries that is also a [MouseTrackerAnnotation] is considered as a valid
-/// target in terms of computing mouse related effects, such as enter events,
-/// exit events, and mouse cursor.
+/// [MouseTracker] uses this class as a label to filter the hit test results. Hit
+/// test entries that are also [MouseTrackerAnnotation]s are considered as valid
+/// targets in terms of computing mouse related effects, such as enter events,
+/// exit events, and mouse cursor events.
 ///
 /// See also:
 ///
@@ -91,13 +91,16 @@ class MouseTrackerAnnotation with Diagnosticable {
   ///  * [MouseRegion.cursor], which provide values to this field.
   final MouseCursor cursor;
 
-  /// Whether this is included when [MouseTracker] collects the list of annotations.
+  /// Whether this is included when [MouseTracker] collects the list of
+  /// annotations.
   ///
-  /// If [validForMouseTracker] is false, this object is excluded from the current annotation list
-  /// even if it's included in the hit test, affecting mouse-related behavior such as enter events,
-  /// exit events, and mouse cursors. The [validForMouseTracker] does not affect hit testing.
+  /// If [validForMouseTracker] is false, this object is excluded from the
+  /// current annotation list even if it's included in the hit test, affecting
+  /// mouse-related behavior such as enter events, exit events, and mouse
+  /// cursors. The [validForMouseTracker] does not affect hit testing.
   ///
-  /// The [validForMouseTracker] is true for [MouseTrackerAnnotation]s built by the constructor.
+  /// The [validForMouseTracker] is true for [MouseTrackerAnnotation]s built by
+  /// the constructor.
   final bool validForMouseTracker;
 
   @override

@@ -284,20 +284,22 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Text.rich(
-          TextSpan(
-            text: 'xxxxx',
-            children: <InlineSpan>[
-              TextSpan(
-                text: 'yyyyy',
-                mouseCursor: SystemMouseCursors.forbidden,
-              ),
-              TextSpan(
-                text: 'xxxxx',
-              ),
-            ],
+        child: Center(
+          child: Text.rich(
+            TextSpan(
+              text: 'xxxxx',
+              children: <InlineSpan>[
+                TextSpan(
+                  text: 'yyyyy',
+                  mouseCursor: SystemMouseCursors.forbidden,
+                ),
+                TextSpan(
+                  text: 'xxxxx',
+                ),
+              ],
+            ),
+            textAlign: TextAlign.center,
           ),
-          textAlign: TextAlign.center,
         ),
       ),
     );
@@ -321,25 +323,27 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Text.rich(
-          TextSpan(
-            text: 'xxxxx',
-            children: <InlineSpan>[
-              TextSpan(
-                text: 'yyyyy',
-                onEnter: (PointerEnterEvent event) {
-                  logEvents.add(event);
-                },
-                onExit: (PointerExitEvent event) {
-                  logEvents.add(event);
-                }
-              ),
-              const TextSpan(
-                text: 'xxxxx',
-              ),
-            ],
+        child: Center(
+          child: Text.rich(
+            TextSpan(
+              text: 'xxxxx',
+              children: <InlineSpan>[
+                TextSpan(
+                  text: 'yyyyy',
+                  onEnter: (PointerEnterEvent event) {
+                    logEvents.add(event);
+                  },
+                  onExit: (PointerExitEvent event) {
+                    logEvents.add(event);
+                  }
+                ),
+                const TextSpan(
+                  text: 'xxxxx',
+                ),
+              ],
+            ),
+            textAlign: TextAlign.center,
           ),
-          textAlign: TextAlign.center,
         ),
       ),
     );

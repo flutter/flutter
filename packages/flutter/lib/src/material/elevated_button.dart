@@ -52,9 +52,10 @@ import 'theme_data.dart';
 /// This sample produces an enabled and a disabled ElevatedButton.
 ///
 /// ```dart
+/// @override
 /// Widget build(BuildContext context) {
 ///   final ButtonStyle style =
-///     ElevatedButton.styleFrom(textStyle: TextStyle(fontSize: 20));
+///     ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));
 ///
 ///   return Center(
 ///     child: Column(

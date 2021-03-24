@@ -48,35 +48,17 @@ void main() {
   group('shutdownHooks', () {
     testWithoutContext('runInExpectedOrder', () async {
       int i = 1;
-      int serializeRecording1;
-      int serializeRecording2;
-      int postProcessRecording;
       int cleanup;
 
       final ShutdownHooks shutdownHooks = ShutdownHooks(logger: BufferLogger.test());
 
       shutdownHooks.addShutdownHook(() async {
-        serializeRecording1 = i++;
-      }, ShutdownStage.SERIALIZE_RECORDING);
-
-      shutdownHooks.addShutdownHook(() async {
         cleanup = i++;
-      }, ShutdownStage.CLEANUP);
-
-      shutdownHooks.addShutdownHook(() async {
-        postProcessRecording = i++;
-      }, ShutdownStage.POST_PROCESS_RECORDING);
-
-      shutdownHooks.addShutdownHook(() async {
-        serializeRecording2 = i++;
-      }, ShutdownStage.SERIALIZE_RECORDING);
+      });
 
       await shutdownHooks.runShutdownHooks();
 
-      expect(serializeRecording1, lessThanOrEqualTo(2));
-      expect(serializeRecording2, lessThanOrEqualTo(2));
-      expect(postProcessRecording, 3);
-      expect(cleanup, 4);
+      expect(cleanup, 1);
     });
   });
 

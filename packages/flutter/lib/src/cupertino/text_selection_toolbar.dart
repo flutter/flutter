@@ -358,8 +358,7 @@ class _CupertinoTextSelectionToolbarContent extends StatefulWidget {
     required this.toolbarBuilder,
     required this.children,
   }) : assert(children != null),
-       // This ignore is used because .isNotEmpty isn't compatible with const.
-       assert(children.length > 0), // ignore: prefer_is_empty
+       assert(children.length > 0),
        super(key: key);
 
   final Offset anchor;

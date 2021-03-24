@@ -160,12 +160,12 @@ class _MouseTrackerUpdateDetails with Diagnosticable {
 ///
 ///  * Dispatches mouse-related pointer events (pointer enter, hover, and exit).
 ///  * Changes mouse cursors.
-///  * Notifies changes of [mouseIsConnected].
+///  * Notifies when [mouseIsConnected] changes.
 ///
 /// This class is a [ChangeNotifier] that notifies its listeners if the value of
 /// [mouseIsConnected] changes.
 ///
-/// An instance of [MouseTracker] is owned by the global singleton of
+/// An instance of [MouseTracker] is owned by the global singleton
 /// [RendererBinding].
 class MouseTracker extends ChangeNotifier {
   final MouseCursorManager _mouseCursorMixin = MouseCursorManager(
@@ -174,7 +174,7 @@ class MouseTracker extends ChangeNotifier {
 
   // Tracks the state of connected mouse devices.
   //
-  // It is the source of truth for the list of connected mouse devices, and is
+  // It is the source of truth for the list of connected mouse devices, and
   // consists of two parts:
   //
   //  * The mouse devices that are connected.
@@ -259,18 +259,18 @@ class MouseTracker extends ChangeNotifier {
 
   // A callback that is called on the update of a device.
   //
-  // An event (not necessarily a pointer event) that might change the relationship
-  // between mouse devices and [MouseTrackerAnnotation]s is called a _device
-  // update_. This method should be called at each such update.
+  // An event (not necessarily a pointer event) that might change the
+  // relationship between mouse devices and [MouseTrackerAnnotation]s is called
+  // a _device update_. This method should be called at each such update.
   //
   // The update can be caused by two kinds of triggers:
   //
-  //   * Triggered by the addition, movement, or removal of a pointer. Such
-  //     calls occur during the handler of the event, indicated by
-  //     `details.triggeringEvent` being non-null.
-  //   * Triggered by the appearance, movement, or disappearance of an annotation.
-  //     Such calls occur after each new frame, during the post-frame callbacks,
-  //     indicated by `details.triggeringEvent` being null.
+  //  * Triggered by the addition, movement, or removal of a pointer. Such calls
+  //    occur during the handler of the event, indicated by
+  //    `details.triggeringEvent` being non-null.
+  //  * Triggered by the appearance, movement, or disappearance of an annotation.
+  //    Such calls occur after each new frame, during the post-frame callbacks,
+  //    indicated by `details.triggeringEvent` being null.
   //
   // Calls of this method must be wrapped in `_deviceUpdatePhase`.
   void _handleDeviceUpdate(_MouseTrackerUpdateDetails details) {
@@ -340,8 +340,8 @@ class MouseTracker extends ChangeNotifier {
   ///
   /// The [updateAllDevices] is typically called during the post frame phase,
   /// indicating a frame has passed and all objects have potentially moved. The
-  /// `hitTest` is a function to acquire the hit test result at a given position,
-  /// and must not be empty.
+  /// `hitTest` is a function that acquires the hit test result at a given
+  /// position, and must not be empty.
   ///
   /// For each connected device, the [updateAllDevices] will make a hit test on
   /// the device's last seen position, and check if necessary changes need to be
@@ -362,13 +362,13 @@ class MouseTracker extends ChangeNotifier {
     });
   }
 
-  /// Returns the active mouse cursor of a device.
+  /// Returns the active mouse cursor for a device.
   ///
-  /// The return value is the last [MouseCursor] activated onto this
-  /// device, even if the activation failed.
+  /// The return value is the last [MouseCursor] activated onto this device, even
+  /// if the activation failed.
   ///
-  /// Only valid when asserts are enabled. In release builds, always returns
-  /// null.
+  /// This function is only active when asserts are enabled. In release builds,
+  /// it always returns null.
   @visibleForTesting
   MouseCursor? debugDeviceActiveCursor(int device) {
     return _mouseCursorMixin.debugDeviceActiveCursor(device);
@@ -381,14 +381,13 @@ class MouseTracker extends ChangeNotifier {
     final LinkedHashMap<MouseTrackerAnnotation, Matrix4> lastAnnotations = details.lastAnnotations;
     final LinkedHashMap<MouseTrackerAnnotation, Matrix4> nextAnnotations = details.nextAnnotations;
 
-    // Order is important for mouse event callbacks. The `findAnnotations`
-    // returns annotations in the visual order from front to back. We call
-    // it the "visual order", and the opposite one "reverse visual order".
-    // The algorithm here is explained in
-    // https://github.com/flutter/flutter/issues/41420
+    // Order is important for mouse event callbacks. The
+    // `_hitTestResultToAnnotations` returns annotations in the visual order
+    // from front to back, called the "hit-test order". The algorithm here is
+    // explained in https://github.com/flutter/flutter/issues/41420
 
     // Send exit events to annotations that are in last but not in next, in
-    // visual order.
+    // hit-test order.
     final PointerExitEvent baseExitEvent = PointerExitEvent.fromMouseEvent(latestEvent);
     lastAnnotations.forEach((MouseTrackerAnnotation annotation, Matrix4 transform) {
       if (!nextAnnotations.containsKey(annotation))
@@ -397,7 +396,7 @@ class MouseTracker extends ChangeNotifier {
     });
 
     // Send enter events to annotations that are not in last but in next, in
-    // reverse visual order.
+    // reverse hit-test order.
     final List<MouseTrackerAnnotation> enteringAnnotations = nextAnnotations.keys.where(
       (MouseTrackerAnnotation annotation) => !lastAnnotations.containsKey(annotation),
     ).toList();

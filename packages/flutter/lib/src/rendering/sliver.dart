@@ -465,9 +465,8 @@ class SliverConstraints extends Constraints {
       return true;
     if (other is! SliverConstraints)
       return false;
-    assert(other is SliverConstraints && other.debugAssertIsValid());
-    return other is SliverConstraints
-        && other.axisDirection == axisDirection
+    assert(other.debugAssertIsValid());
+    return other.axisDirection == axisDirection
         && other.growthDirection == growthDirection
         && other.scrollOffset == scrollOffset
         && other.overlap == overlap
@@ -1597,8 +1596,7 @@ abstract class RenderSliver extends RenderObject {
 }
 
 /// Mixin for [RenderSliver] subclasses that provides some utility functions.
-abstract class RenderSliverHelpers implements RenderSliver {
-
+mixin RenderSliverHelpers implements RenderSliver {
   bool _getRightWayUp(SliverConstraints constraints) {
     assert(constraints != null);
     assert(constraints.axisDirection != null);
