@@ -86,7 +86,6 @@ class Form extends StatefulWidget {
     this.autovalidate = false,
     this.onWillPop,
     this.onChanged,
-    this.restorationId,
     AutovalidateMode? autovalidateMode,
   }) : assert(child != null),
        assert(autovalidate != null),
@@ -143,23 +142,6 @@ class Form extends StatefulWidget {
   /// {@macro flutter.widgets.FormField.autovalidateMode}
   final AutovalidateMode autovalidateMode;
 
-  /// Restoration ID to save and restore the state of the form.
-  ///
-  /// Setting the restoration ID to a non-null value results in whether or not
-  /// the form field validation persists. It will not restore the value of each
-  /// [FormField], so each [FormField]'s value will need
-  /// to be independently restored. For an example of a state restorable
-  /// [FormField], see `TextFormField`.
-  ///
-  /// The state of this widget is persisted in a [RestorationBucket] claimed
-  /// from the surrounding [RestorationScope] using the provided restoration ID.
-  ///
-  /// See also:
-  ///
-  ///  * [RestorationManager], which explains how state restoration works in
-  ///    Flutter.
-  final String? restorationId;
-
   /// Used to enable/disable form fields auto validation and update their error
   /// text.
   @Deprecated(
@@ -179,19 +161,10 @@ class Form extends StatefulWidget {
 /// [FormField] that is a descendant of the associated [Form].
 ///
 /// Typically obtained via [Form.of].
-class FormState extends State<Form> with RestorationMixin {
-  final RestorableInt _generation = RestorableInt(0);
-  final RestorableBool _hasInteractedByUser = RestorableBool(false);
+class FormState extends State<Form> {
+  int _generation = 0;
+  bool _hasInteractedByUser = false;
   final Set<FormFieldState<dynamic>> _fields = <FormFieldState<dynamic>>{};
-
-  @override
-  String? get restorationId => widget.restorationId;
-
-  @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
-    registerForRestoration(_generation, 'generation');
-    registerForRestoration(_hasInteractedByUser, 'has_interacted_by_user');
-  }
 
   // Called when a form field has changed. This will cause all form fields
   // to rebuild, useful if form fields have interdependencies.
@@ -199,14 +172,14 @@ class FormState extends State<Form> with RestorationMixin {
     if (widget.onChanged != null)
       widget.onChanged!();
 
-    _hasInteractedByUser.value = _fields
+    _hasInteractedByUser = _fields
         .any((FormFieldState<dynamic> field) => field._hasInteractedByUser.value);
     _forceRebuild();
   }
 
   void _forceRebuild() {
     setState(() {
-      ++_generation.value;
+      ++_generation;
     });
   }
 
@@ -225,7 +198,7 @@ class FormState extends State<Form> with RestorationMixin {
         _validate();
         break;
       case AutovalidateMode.onUserInteraction:
-        if (_hasInteractedByUser.value) {
+        if (_hasInteractedByUser) {
           _validate();
         }
         break;
@@ -237,7 +210,7 @@ class FormState extends State<Form> with RestorationMixin {
       onWillPop: widget.onWillPop,
       child: _FormScope(
         formState: this,
-        generation: _generation.value,
+        generation: _generation,
         child: widget.child,
       ),
     );
@@ -259,7 +232,7 @@ class FormState extends State<Form> with RestorationMixin {
   void reset() {
     for (final FormFieldState<dynamic> field in _fields)
       field.reset();
-    _hasInteractedByUser.value = false;
+    _hasInteractedByUser = false;
     _fieldDidChange();
   }
 
@@ -268,7 +241,7 @@ class FormState extends State<Form> with RestorationMixin {
   ///
   /// The form will rebuild to report the results.
   bool validate() {
-    _hasInteractedByUser.value = true;
+    _hasInteractedByUser = true;
     _forceRebuild();
     return _validate();
   }
