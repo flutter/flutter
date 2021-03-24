@@ -36,7 +36,6 @@ void main() {
       logger: logger,
       processManager: globals.processManager,
       engineVersion: 'invalidEngineVersion',
-      generateDartPluginRegistry: false,
     );
     return result;
   }
