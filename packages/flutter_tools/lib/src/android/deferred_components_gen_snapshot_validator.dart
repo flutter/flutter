@@ -33,7 +33,7 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
   DeferredComponentsGenSnapshotValidator(this.env, {
     bool exitOnFail = true,
     String title,
-  }) : super(env.projectDir, env.logger, exitOnFail: exitOnFail, title: title);
+  }) : super(env.projectDir, env.logger, env.platform, exitOnFail: exitOnFail, title: title);
 
   /// The build environment that should be used to find the input files to run
   /// checks against.
