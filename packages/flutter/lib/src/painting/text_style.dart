@@ -719,9 +719,6 @@ class TextStyle with Diagnosticable {
   final List<ui.FontFeature>? fontFeatures;
 
   /// How visual text overflow should be handled.
-  ///
-  /// If [Text.softWrap] is true or null, the glyph causing overflow, and those that follow,
-  /// will not be rendered. Otherwise, it will be shown with the given overflow option.
   final TextOverflow? overflow;
 
   /// Creates a copy of this text style but with the given fields replaced with
