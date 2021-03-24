@@ -12,8 +12,7 @@ const String fileTemplate = '''
 @(header)
 import 'dart:async';
 
-// ignore: unused_import
-import 'package:flutter/foundation.dart';
+@(requiresFoundationImport)
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;

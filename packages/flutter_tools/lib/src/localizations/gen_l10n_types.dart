@@ -10,7 +10,6 @@ import '../base/file_system.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 
-
 import 'localizations_utils.dart';
 
 // The set of date formats that can be automatically localized.
