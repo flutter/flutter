@@ -749,36 +749,4 @@ void main() {
     final TextField textFieldWidget = tester.widget(textFieldFinder);
     expect(textFieldWidget.scrollController, scrollController);
   });
-
-  testWidgets('State restoration', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        restorationScopeId: 'app',
-        home: Scaffold(
-          body: TextFormField(
-            restorationId: 'text_form_field',
-            initialValue: 'initialValue',
-          ),
-        ),
-      ),
-    );
-
-    await tester.enterText(find.byType(TextFormField), 'changedValue');
-    await tester.pump();
-    expect(find.text('changedValue'), findsOneWidget);
-
-    final TestRestorationData data = await tester.getRestorationData();
-    await tester.restartAndRestore();
-    expect(find.text('changedValue'), findsOneWidget);
-    expect(find.text('initialValue'), findsNothing);
-
-    final FormFieldState<String> state = tester.state<FormFieldState<String>>(find.byType(TextFormField));
-    state.reset();
-    expect(find.text('changedValue'), findsNothing);
-    expect(find.text('initialValue'), findsOneWidget);
-
-    await tester.restoreFrom(data);
-    expect(find.text('changedValue'), findsOneWidget);
-    expect(find.text('initialValue'), findsNothing);
-  });
 }
