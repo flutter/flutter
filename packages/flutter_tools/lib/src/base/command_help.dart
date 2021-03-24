@@ -140,11 +140,6 @@ class CommandHelp {
     'debugDumpRenderTree',
   );
 
-  late final CommandHelpOption v = _makeOption(
-    'v',
-    'Launch DevTools.',
-  );
-
   late final CommandHelpOption w = _makeOption(
     'w',
     'Dump widget hierarchy to the console.',

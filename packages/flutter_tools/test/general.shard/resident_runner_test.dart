@@ -1500,7 +1500,6 @@ void main() {
           commandHelp.z,
           commandHelp.g,
           commandHelp.M,
-          commandHelp.v,
           commandHelp.P,
           commandHelp.a,
           '',

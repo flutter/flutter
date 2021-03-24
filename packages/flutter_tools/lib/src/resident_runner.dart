@@ -1402,7 +1402,6 @@ abstract class ResidentRunner {
       if (supportsWriteSkSL) {
         commandHelp.M.print();
       }
-      commandHelp.v.print();
       // `P` should precede `a`
       commandHelp.P.print();
       commandHelp.a.print();
