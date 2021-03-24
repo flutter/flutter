@@ -1874,7 +1874,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 /// provided.
 ///
 /// The `barrierLabel` argument is the semantic label used for a dismissible
-/// barrier. This argument defaults to "Dismiss".
+/// barrier. This argument defaults to `null`.
 ///
 /// The `barrierColor` argument is the color used for the modal barrier. This
 /// argument defaults to `Color(0x80000000)`.
@@ -1947,7 +1947,7 @@ Future<T?> showGeneralDialog<T extends Object?>({
   required BuildContext context,
   required RoutePageBuilder pageBuilder,
   bool barrierDismissible = false,
-  String? barrierLabel = 'Dismiss',
+  String? barrierLabel,
   Color barrierColor = const Color(0x80000000),
   Duration transitionDuration = const Duration(milliseconds: 200),
   RouteTransitionsBuilder? transitionBuilder,

@@ -1015,7 +1015,7 @@ void main() {
       expect(find.byType(ModalBarrier), findsNWidgets(1));
     });
 
-    testWidgets('showGeneralDialog uses \'Dismiss\' as a barrierLabel by default', (WidgetTester tester) async {
+    testWidgets('showGeneralDialog uses null as a barrierLabel by default', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Builder(
           builder: (BuildContext context) {
@@ -1040,7 +1040,7 @@ void main() {
       await tester.pump();
       expect(find.byType(ModalBarrier), findsNWidgets(2));
       final ModalBarrier barrier = find.byType(ModalBarrier).evaluate().last.widget as ModalBarrier;
-      expect(barrier.semanticsLabel, same('Dismiss'));
+      expect(barrier.semanticsLabel, same(null));
 
       // Close the dialog.
       final StatefulElement navigatorElement = find.byType(Navigator).evaluate().last as StatefulElement;
