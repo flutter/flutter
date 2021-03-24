@@ -840,20 +840,8 @@ Future<void> _runFlutterPluginsTests() async {
       workingDirectory: checkout.path,
     );
     await runCommand(
-      pub,
+      './script/incremental_build.sh',
       <String>[
-        'global',
-        'activate',
-        'flutter_plugin_tools',
-      ],
-      workingDirectory: checkout.path,
-    );
-    await runCommand(
-      pub,
-      <String>[
-        'global',
-        'run',
-        'flutter_plugin_tools',
         'analyze',
       ],
       workingDirectory: checkout.path,
