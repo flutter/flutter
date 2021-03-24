@@ -29,9 +29,9 @@ void main() {
     final ByteData data = _makeByteData('bar');
     final ui.ChannelBuffers buffers = ui.ChannelBuffers();
     bool called = false;
-    final ui.PlatformMessageResponseCallback callback = (ByteData responseData) {
+    void callback(ByteData responseData) {
       called = true;
-    };
+    }
     buffers.push(channel, data, callback);
     await buffers.drain(channel, (ByteData drainedData, ui.PlatformMessageResponseCallback drainedCallback) {
       expect(drainedData, equals(data));
@@ -46,7 +46,7 @@ void main() {
     const String channel = 'foo';
     final ByteData data = _makeByteData('message');
     final ui.ChannelBuffers buffers = ui.ChannelBuffers();
-    final ui.PlatformMessageResponseCallback callback = (ByteData responseData) {};
+    void callback(ByteData responseData) {}
     buffers.push(channel, data, callback);
     final List<String> log = <String>[];
     final Completer<void> completer = Completer<void>();
@@ -73,7 +73,7 @@ void main() {
     final ByteData data = _makeByteData('bar');
     final
     ui.ChannelBuffers buffers = ui.ChannelBuffers();
-    final ui.PlatformMessageResponseCallback callback = (ByteData responseData) {};
+    void callback(ByteData responseData) {}
     _resize(buffers, channel, 0);
     buffers.push(channel, data, callback);
     bool didCall = false;
@@ -102,7 +102,7 @@ void main() {
     final ByteData three = _makeByteData('three');
     final ByteData four = _makeByteData('four');
     final ui.ChannelBuffers buffers = ui.ChannelBuffers();
-    final ui.PlatformMessageResponseCallback callback = (ByteData responseData) {};
+    void callback(ByteData responseData) {}
     _resize(buffers, channel, 3);
     buffers.push(channel, one, callback);
     buffers.push(channel, two, callback);
@@ -133,7 +133,7 @@ void main() {
     final ByteData two = _makeByteData('two');
     final ui.ChannelBuffers buffers = ui.ChannelBuffers();
     _resize(buffers, channel, 100);
-    final ui.PlatformMessageResponseCallback callback = (ByteData responseData) {};
+    void callback(ByteData responseData) {}
     buffers.push(channel, one, callback);
     buffers.push(channel, two, callback);
     _resize(buffers, channel, 1);
@@ -155,13 +155,13 @@ void main() {
     final ByteData two = _makeByteData('two');
     final ui.ChannelBuffers buffers = ui.ChannelBuffers();
     bool didCallCallback = false;
-    final ui.PlatformMessageResponseCallback oneCallback = (ByteData responseData) {
+    void oneCallback(ByteData responseData) {
       expect(responseData, isNull);
       didCallCallback = true;
-    };
-    final ui.PlatformMessageResponseCallback twoCallback = (ByteData responseData) {
+    }
+    void twoCallback(ByteData responseData) {
       throw TestFailure('wrong callback called');
-    };
+    }
     _resize(buffers, channel, 100);
     buffers.push(channel, one, oneCallback);
     buffers.push(channel, two, twoCallback);
@@ -176,13 +176,13 @@ void main() {
     final ByteData two = _makeByteData('two');
     final ui.ChannelBuffers buffers = ui.ChannelBuffers();
     bool didCallCallback = false;
-    final ui.PlatformMessageResponseCallback oneCallback = (ByteData responseData) {
+    void oneCallback(ByteData responseData) {
       expect(responseData, isNull);
       didCallCallback = true;
-    };
-    final ui.PlatformMessageResponseCallback twoCallback = (ByteData responseData) {
+    }
+    void twoCallback(ByteData responseData) {
       throw TestFailure('wrong callback called');
-    };
+    }
     _resize(buffers, channel, 1);
     buffers.push(channel, one, oneCallback);
     buffers.push(channel, two, twoCallback);

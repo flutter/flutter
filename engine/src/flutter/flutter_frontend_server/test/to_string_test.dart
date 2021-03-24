@@ -12,7 +12,7 @@ import 'package:path/path.dart' as path;
 
 import 'package:test/test.dart';
 
-void main(List<String> args) async {
+Future<void> main(List<String> args) async {
   if (args.length != 2) {
     stderr.writeln('The first argument must be the path to the forntend server dill.');
     stderr.writeln('The second argument must be the path to the flutter_patched_sdk');

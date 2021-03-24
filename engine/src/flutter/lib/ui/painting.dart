@@ -1984,7 +1984,7 @@ class Codec extends NativeFieldWrapperClass2 {
     if (error != null) {
       throw Exception(error);
     }
-    return await completer.future;
+    return completer.future;
   }
 
   /// Returns an error message on failure, null on success.
@@ -2699,7 +2699,7 @@ class PathMetricIterator implements Iterator<PathMetric> {
     if (currentMetric == null) {
       throw RangeError(
         'PathMetricIterator is not pointing to a PathMetric. This can happen in two situations:\n'
-        '- The iteration has not started yet. If so, call "moveNext" to start iteration.'
+        '- The iteration has not started yet. If so, call "moveNext" to start iteration.\n'
         '- The iterator ran out of elements. If so, check that "moveNext" returns true prior to calling "current".'
       );
     }
