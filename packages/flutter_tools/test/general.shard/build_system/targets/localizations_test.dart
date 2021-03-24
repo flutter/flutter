@@ -19,7 +19,7 @@ import '../../../src/context.dart';
 void main() {
   // Verifies that values are correctly passed through the localizations
   // target, but does not validate them beyond the serialized data type.
-  testUsingContext('generateLocalizations forwards arguments correctly', () async {
+  testWithoutContext('generateLocalizations forwards arguments correctly', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Logger logger = BufferLogger.test();
     final Directory flutterProjectDirectory = fileSystem
@@ -76,7 +76,7 @@ void main() {
     verify(mockLocalizationsGenerator.writeOutputFiles(logger, isFromYaml: true)).called(1);
   });
 
-  testUsingContext('generateLocalizations throws exception on missing flutter: generate: true flag', () async {
+  testWithoutContext('generateLocalizations throws exception on missing flutter: generate: true flag', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final Directory arbDirectory = fileSystem.directory('arb')
