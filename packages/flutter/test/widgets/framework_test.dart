@@ -1016,12 +1016,12 @@ void main() {
     expect(
       exception.toString(),
       equalsIgnoringHashCodes(
-          'Multiple widgets used the same GlobalKey.\n'
-              'The key [GlobalObjectKey String#00000] was used by multiple widgets. The '
-              'parents of those widgets were:\n'
-              '- _Stateful(state: _StatefulState#00000)\n'
-              '- _Stateful(state: _StatefulState#00000)\n'
-              'A GlobalKey can only be specified on one widget at a time in the widget tree.'
+        'Multiple widgets used the same GlobalKey.\n'
+        'The key [GlobalObjectKey String#00000] was used by multiple widgets. The '
+        'parents of those widgets were:\n'
+        '- _Stateful(state: _StatefulState#00000)\n'
+        '- _Stateful(state: _StatefulState#00000)\n'
+        'A GlobalKey can only be specified on one widget at a time in the widget tree.'
       ),
     );
   });
