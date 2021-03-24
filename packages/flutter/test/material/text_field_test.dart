@@ -393,6 +393,7 @@ void main() {
     expect(renderEditable.cursorColor!.alpha, 0);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
+  // Regression test for https://github.com/flutter/flutter/issues/78918.
   testWidgets('RenderEditable sets correct text editing value', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'how are you');
     final UniqueKey icon = UniqueKey();
