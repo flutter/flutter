@@ -310,21 +310,6 @@ class _EnabledAndDisabledMouseCursor extends MaterialStateMouseCursor {
 /// This example defines a subclass of [MaterialStateBorderSide], that resolves
 /// to a red border side when its widget is selected.
 ///
-/// ```dart preamble
-/// class RedSelectedBorderSide extends MaterialStateBorderSide {
-///   @override
-///   BorderSide? resolve(Set<MaterialState> states) {
-///     if (states.contains(MaterialState.selected)) {
-///       return const BorderSide(
-///         width: 1,
-///         color: Colors.red,
-///       );
-///     }
-///     return null;  // Defer to default value on the theme or widget.
-///   }
-/// }
-/// ```
-///
 /// ```dart
 /// bool isSelected = true;
 ///
@@ -338,7 +323,12 @@ class _EnabledAndDisabledMouseCursor extends MaterialStateMouseCursor {
 ///         isSelected = value;
 ///       });
 ///     },
-///     side: RedSelectedBorderSide(),
+///     side: MaterialStateBorderSide.resolveWith((Set<MaterialState>States) {
+///       if (states.contains(MaterialState.selected)) {
+///         return const BorderSide(width: 1, color: Colors.red);
+///       }
+///       return null;  // Defer to default value on the theme or widget.
+///     }),
 ///   );
 /// }
 /// ```
@@ -370,7 +360,12 @@ abstract class MaterialStateBorderSide extends BorderSide implements MaterialSta
   /// ```dart
   /// ChipTheme(
   ///   data: Theme.of(context).chipTheme.copyWith(
-  ///     side: MaterialStateBorderSide.resolveWith(getBorder),
+  ///     side: MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
+  ///       if (states.contains(MaterialState.selected)) {
+  ///         return const BorderSide(width: 1, color: Colors.red);
+  ///       }
+  ///       return null;  // Defer to default value on the theme or widget.
+  ///     }),
   ///   ),
   ///   child: Chip(),
   /// )
@@ -379,7 +374,12 @@ abstract class MaterialStateBorderSide extends BorderSide implements MaterialSta
   ///
   /// Chip(
   ///   ...
-  ///   side: MaterialStateBorderSide.resolveWith(getBorder),
+  ///   side: MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
+  ///     if (states.contains(MaterialState.selected)) {
+  ///       return const BorderSide(width: 1, color: Colors.red);
+  ///     }
+  ///     return null;  // Defer to default value on the theme or widget.
+  ///   }),
   /// )
   /// ```
   static MaterialStateBorderSide resolveWith(MaterialPropertyResolver<BorderSide> callback) =>
