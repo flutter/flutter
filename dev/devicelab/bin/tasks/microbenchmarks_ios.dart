@@ -10,4 +10,6 @@ import 'package:flutter_devicelab/tasks/microbenchmarks.dart';
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.ios;
   await task(createMicrobenchmarkTask());
+  // TODO(jmagman): https://github.com/flutter/flutter/issues/78917
+  throw Exception('Tree closed, see https://github.com/flutter/flutter/issues/78917');
 }
