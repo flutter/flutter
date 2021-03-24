@@ -104,10 +104,10 @@ typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 /// to provide a `defaultValue` to the super constructor, so that we can know
 /// at compile-time what its default color is.
 ///
-/// The [MaterialStateColor] class cannot universally be used in class
-/// constructors that were written to accept plain [Color] instances, and
-/// is intended to help bridge the gap between that original API and the newer
-/// MaterialStateProperty API.
+/// This class enables existing widget implementations with [Color]
+/// properties to be extended to also effectively support `MaterialStateProperty<Color>`
+/// property values. [MaterialStateColor] should only be used with widgets that document
+/// their support, like [ActionChip].
 ///
 /// {@tool snippet}
 ///
@@ -300,10 +300,10 @@ class _EnabledAndDisabledMouseCursor extends MaterialStateMouseCursor {
 /// To use a [MaterialStateBorderSide], you should create a subclass of a
 /// [MaterialStateBorderSide] and override the abstract `resolve` method.
 ///
-/// The [MaterialStateBorderSide] class cannot universally be used in class
-/// constructors that were written to accept plain [BorderSide] instances, and
-/// is intended to help bridge the gap between that original API and the newer
-/// MaterialStateProperty API.
+/// This class enables existing widget implementations with [BorderSide]
+/// properties to be extended to also effectively support `MaterialStateProperty<BorderSide>`
+/// property values. [MaterialStateBorderSide] should only be used with widgets that document
+/// their support, like [ActionChip.side].
 ///
 /// {@tool dartpad --template=stateful_widget_material}
 ///
@@ -365,6 +365,23 @@ abstract class MaterialStateBorderSide extends BorderSide implements MaterialSta
   ///
   /// The given callback parameter must return a non-null [BorderSide] in the
   /// default state.
+  ///
+  /// Usage:
+  /// ```dart
+  /// ChipTheme(
+  ///   data: Theme.of(context).chipTheme.copyWith(
+  ///     side: MaterialStateBorderSide.resolveWith(getBorder),
+  ///   ),
+  ///   child: Chip(),
+  /// )
+  ///
+  /// // OR
+  ///
+  /// Chip(
+  ///   ...
+  ///   side: MaterialStateBorderSide.resolveWith(getBorder),
+  /// )
+  /// ```
   static MaterialStateBorderSide resolveWith(MaterialPropertyResolver<BorderSide> callback) =>
       _MaterialStateBorderSide(callback);
 }
