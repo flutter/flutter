@@ -232,6 +232,7 @@ class TextFormField extends FormField<String> {
        assert(enableInteractiveSelection != null),
        super(
          key: key,
+         restorationId: restorationId,
          initialValue: controller != null ? controller.text : (initialValue ?? ''),
          onSaved: onSaved,
          validator: validator,
@@ -301,7 +302,6 @@ class TextFormField extends FormField<String> {
              ),
            );
          },
-         restorationId: restorationId,
        );
 
   /// Controls the text being edited.
