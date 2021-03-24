@@ -56,6 +56,9 @@ const String singleZhMessageArbFileString = '''
 {
   "title": "标题"
 }''';
+const String intlImportDartCode = '''
+import 'package:intl/intl.dart' as intl;
+''';
 
 void _standardFlutterDirectoryL10nSetup(FileSystem fs) {
   final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
@@ -1726,6 +1729,281 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         }
         fail('Generating class methods with incorrect placeholder format should not succeed');
       });
+    });
+
+    test('intl package import should be omitted in subclass files when no plurals are included', () {
+      fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
+        ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString)
+        ..childFile('app_es.arb').writeAsStringSync(singleEsMessageArbFileString);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.loadResources();
+        generator.writeOutputFiles(BufferLogger.test());
+      } on Exception catch (e) {
+        fail('Generating output files should not fail: $e');
+      }
+
+      final String localizationsFile = fs.file(
+        fs.path.join(syntheticL10nPackagePath, 'output-localization-file_es.dart'),
+      ).readAsStringSync();
+      expect(localizationsFile, isNot(contains(intlImportDartCode)));
+    });
+
+    test('intl package import should be kept in subclass files when plurals are included', () {
+      const String pluralMessageArb = '''
+{
+  "helloWorlds": "{count,plural, =0{Hello} =1{Hello World} =2{Hello two worlds} few{Hello {count} worlds} many{Hello all {count} worlds} other{Hello other {count} worlds}}",
+  "@helloWorlds": {
+    "description": "A plural message",
+    "placeholders": {
+      "count": {}
+    }
+  }
+}
+''';
+
+      const String pluralMessageEsArb = '''
+{
+  "helloWorlds": "{count,plural, =0{ES - Hello} =1{ES - Hello World} =2{ES - Hello two worlds} few{ES - Hello {count} worlds} many{ES - Hello all {count} worlds} other{ES - Hello other {count} worlds}}"
+}
+''';
+
+      fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
+        ..childFile(defaultTemplateArbFileName).writeAsStringSync(pluralMessageArb)
+        ..childFile('app_es.arb').writeAsStringSync(pluralMessageEsArb);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.loadResources();
+        generator.writeOutputFiles(BufferLogger.test());
+      } on Exception catch (e) {
+        fail('Generating output files should not fail: $e');
+      }
+
+      final String localizationsFile = fs.file(
+        fs.path.join(syntheticL10nPackagePath, 'output-localization-file_es.dart'),
+      ).readAsStringSync();
+      expect(localizationsFile, contains(intlImportDartCode));
+    });
+
+    test('check for string interpolation rules', () {
+      const String enArbCheckList = '''
+{
+  "one": "The number of {one} elapsed is: 44",
+  "@one": {
+    "description": "test one",
+    "placeholders": {
+      "one": {
+        "type": "String"
+      }
+    }
+  },
+  "two": "哈{two}哈",
+  "@two": {
+    "description": "test two",
+    "placeholders": {
+      "two": {
+        "type": "String"
+      }
+    }
+  },
+  "three": "m{three}m",
+  "@three": {
+    "description": "test three",
+    "placeholders": {
+      "three": {
+        "type": "String"
+      }
+    }
+  },
+  "four": "I have to work _{four}_ sometimes.",
+  "@four": {
+    "description": "test four",
+    "placeholders": {
+      "four": {
+        "type": "String"
+      }
+    }
+  },
+  "five": "{five} elapsed.",
+  "@five": {
+    "description": "test five",
+    "placeholders": {
+      "five": {
+        "type": "String"
+      }
+    }
+  },
+  "six": "{six}m",
+  "@six": {
+    "description": "test six",
+    "placeholders": {
+      "six": {
+        "type": "String"
+      }
+    }
+  },
+  "seven": "hours elapsed: {seven}",
+  "@seven": {
+    "description": "test seven",
+    "placeholders": {
+      "seven": {
+        "type": "String"
+      }
+    }
+  },
+  "eight": " {eight}",
+  "@eight": {
+    "description": "test eight",
+    "placeholders": {
+      "eight": {
+        "type": "String"
+      }
+    }
+  },
+  "nine": "m{nine}",
+  "@nine": {
+    "description": "test nine",
+    "placeholders": {
+      "nine": {
+        "type": "String"
+      }
+    }
+  }
+}
+''';
+
+      // It's fine that the arb is identical -- Just checking
+      // generated code for use of '${variable}' vs '$variable'
+      const String esArbCheckList = '''
+{
+  "one": "The number of {one} elapsed is: 44",
+  "two": "哈{two}哈",
+  "three": "m{three}m",
+  "four": "I have to work _{four}_ sometimes.",
+  "five": "{five} elapsed.",
+  "six": "{six}m",
+  "seven": "hours elapsed: {seven}",
+  "eight": " {eight}",
+  "nine": "m{nine}"
+}
+''';
+
+      fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
+        ..childFile(defaultTemplateArbFileName).writeAsStringSync(enArbCheckList)
+        ..childFile('app_es.arb').writeAsStringSync(esArbCheckList);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.loadResources();
+        generator.writeOutputFiles(BufferLogger.test());
+      } on Exception catch (e) {
+        if (e is L10nException) {
+          print(e.message);
+        }
+        fail('Generating output files should not fail: $e');
+      }
+
+      final String localizationsFile = fs.file(
+        fs.path.join(syntheticL10nPackagePath, 'output-localization-file_es.dart'),
+      ).readAsStringSync();
+
+      expect(localizationsFile, contains(r'$one'));
+      expect(localizationsFile, contains(r'$two'));
+      expect(localizationsFile, contains(r'${three}'));
+      expect(localizationsFile, contains(r'${four}'));
+      expect(localizationsFile, contains(r'$five'));
+      expect(localizationsFile, contains(r'${six}m'));
+      expect(localizationsFile, contains(r'$seven'));
+      expect(localizationsFile, contains(r'$eight'));
+      expect(localizationsFile, contains(r'${nine}'));
+    });
+
+    test('check for string interpolation rules - plurals', () {
+      const String enArbCheckList = '''
+{
+  "first": "{count,plural, =0{test {count} test} =1{哈{count}哈} =2{m{count}m} few{_{count}_} many{{count} test} other{{count}m}",
+  "@first": {
+    "description": "First set of plural messages to test.",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "second": "{count,plural, =0{test {count}} other{ {count}}",
+  "@second": {
+    "description": "Second set of plural messages to test.",
+    "placeholders": {
+      "count": {}
+    }
+  }
+}
+''';
+
+      // It's fine that the arb is identical -- Just checking
+      // generated code for use of '${variable}' vs '$variable'
+      const String esArbCheckList = '''
+{
+  "first": "{count,plural, =0{test {count} test} =1{哈{count}哈} =2{m{count}m} few{_{count}_} many{{count} test} other{{count}m}",
+  "second": "{count,plural, =0{test {count}} other{ {count}}"
+}
+''';
+
+      fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
+        ..childFile(defaultTemplateArbFileName).writeAsStringSync(enArbCheckList)
+        ..childFile('app_es.arb').writeAsStringSync(esArbCheckList);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.loadResources();
+        generator.writeOutputFiles(BufferLogger.test());
+      } on Exception catch (e) {
+        if (e is L10nException) {
+          print(e.message);
+        }
+        fail('Generating output files should not fail: $e');
+      }
+
+      final String localizationsFile = fs.file(
+        fs.path.join(syntheticL10nPackagePath, 'output-localization-file_es.dart'),
+      ).readAsStringSync();
+
+      expect(localizationsFile, contains(r'test $count test'));
+      expect(localizationsFile, contains(r'哈$count哈'));
+      expect(localizationsFile, contains(r'm${count}m'));
+      expect(localizationsFile, contains(r'_${count}_'));
+      expect(localizationsFile, contains(r'$count test'));
+      expect(localizationsFile, contains(r'${count}m'));
+      expect(localizationsFile, contains(r'test $count'));
+      expect(localizationsFile, contains(r' $count'));
     });
 
     test(
