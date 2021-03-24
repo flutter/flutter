@@ -62,7 +62,6 @@ const Icon _kDefaultDeleteIcon = Icon(Icons.cancel, size: _kDeleteIconSize);
 abstract class ChipAttributes {
   // This class is intended to be used as an interface, and should not be
   // extended directly; this constructor prevents instantiation and extension.
-  // ignore: unused_element
   ChipAttributes._();
 
   /// The primary content of the chip.
@@ -203,7 +202,6 @@ abstract class ChipAttributes {
 abstract class DeletableChipAttributes {
   // This class is intended to be used as an interface, and should not be
   // extended directly; this constructor prevents instantiation and extension.
-  // ignore: unused_element
   DeletableChipAttributes._();
 
   /// The icon displayed when [onDeleted] is set.
@@ -315,7 +313,6 @@ abstract class DeletableChipAttributes {
 abstract class CheckmarkableChipAttributes {
   // This class is intended to be used as an interface, and should not be
   // extended directly; this constructor prevents instantiation and extension.
-  // ignore: unused_element
   CheckmarkableChipAttributes._();
 
   /// Whether or not to show a check mark when
@@ -351,7 +348,6 @@ abstract class CheckmarkableChipAttributes {
 abstract class SelectableChipAttributes {
   // This class is intended to be used as an interface, and should not be
   // extended directly; this constructor prevents instantiation and extension.
-  // ignore: unused_element
   SelectableChipAttributes._();
 
   /// Whether or not this chip is selected.
@@ -462,7 +458,6 @@ abstract class SelectableChipAttributes {
 abstract class DisabledChipAttributes {
   // This class is intended to be used as an interface, and should not be
   // extended directly; this constructor prevents instantiation and extension.
-  // ignore: unused_element
   DisabledChipAttributes._();
 
   /// Whether or not this chip is enabled for input.
@@ -510,7 +505,6 @@ abstract class DisabledChipAttributes {
 abstract class TappableChipAttributes {
   // This class is intended to be used as an interface, and should not be
   // extended directly; this constructor prevents instantiation and extension.
-  // ignore: unused_element
   TappableChipAttributes._();
 
   /// Called when the user taps the chip.

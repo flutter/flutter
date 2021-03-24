@@ -146,7 +146,7 @@ class RouteInformation {
 /// considered unusual for these delegates to change during the lifetime of the
 /// [Router].
 ///
-/// If the [Router] itself is disposed while an an asynchronous operation is in
+/// If the [Router] itself is disposed while an asynchronous operation is in
 /// progress, all active asynchronous operations will have their results
 /// discarded also.
 ///
@@ -1108,7 +1108,7 @@ abstract class RouterDelegate<T> extends Listenable {
   /// When overriding this method, the configuration returned by this getter
   /// must be able to construct the current app state and build the widget
   /// with the same configuration in the [build] method if it is passed back
-  /// to the the [setNewRoutePath]. Otherwise, the browser backward and forward
+  /// to the [setNewRoutePath]. Otherwise, the browser backward and forward
   /// buttons will not work properly.
   ///
   /// By default, this getter returns null, which prevents the [Router] from

@@ -100,12 +100,16 @@ void main() {
 
       await commandRunner.run(<String>[
         'config',
+        '--enable-android',
+        '--enable-ios',
         '--enable-web',
         '--enable-linux-desktop',
         '--enable-windows-desktop',
         '--enable-macos-desktop',
       ]);
 
+      expect(globals.config.getValue('enable-android'), true);
+      expect(globals.config.getValue('enable-ios'), true);
       expect(globals.config.getValue('enable-web'), true);
       expect(globals.config.getValue('enable-linux-desktop'), true);
       expect(globals.config.getValue('enable-windows-desktop'), true);
@@ -115,6 +119,8 @@ void main() {
         'config', '--clear-features',
       ]);
 
+      expect(globals.config.getValue('enable-android'), null);
+      expect(globals.config.getValue('enable-ios'), null);
       expect(globals.config.getValue('enable-web'), null);
       expect(globals.config.getValue('enable-linux-desktop'), null);
       expect(globals.config.getValue('enable-windows-desktop'), null);
@@ -122,12 +128,16 @@ void main() {
 
       await commandRunner.run(<String>[
         'config',
+        '--no-enable-android',
+        '--no-enable-ios',
         '--no-enable-web',
         '--no-enable-linux-desktop',
         '--no-enable-windows-desktop',
         '--no-enable-macos-desktop',
       ]);
 
+      expect(globals.config.getValue('enable-android'), false);
+      expect(globals.config.getValue('enable-ios'), false);
       expect(globals.config.getValue('enable-web'), false);
       expect(globals.config.getValue('enable-linux-desktop'), false);
       expect(globals.config.getValue('enable-windows-desktop'), false);
