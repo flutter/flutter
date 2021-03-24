@@ -84,7 +84,7 @@ class PackagesGetCommand extends FlutterCommand {
   Future<Map<CustomDimensions, String>> get usageValues async {
     final Map<CustomDimensions, String> usageValues = <CustomDimensions, String>{};
     final String workingDirectory = argResults.rest.length == 1 ? argResults.rest[0] : null;
-    final String target = findProjectRoot(workingDirectory);
+    final String target = findProjectRoot(globals.fs, workingDirectory);
     if (target == null) {
       return usageValues;
     }
@@ -153,7 +153,7 @@ class PackagesGetCommand extends FlutterCommand {
     }
 
     final String workingDirectory = argResults.rest.length == 1 ? argResults.rest[0] : null;
-    final String target = findProjectRoot(workingDirectory);
+    final String target = findProjectRoot(globals.fs, workingDirectory);
     if (target == null) {
       throwToolExit(
        'Expected to find project root in '
@@ -302,10 +302,10 @@ class PackagesInteractiveGetCommand extends FlutterCommand {
             rest[0].contains(r'\'))) {
       // HACK: Supporting flutter specific behavior where you can pass a
       //       folder to the command.
-      target = findProjectRoot(rest[0]);
+      target = findProjectRoot(globals.fs, rest[0]);
       rest = <String>[];
     } else {
-      target = findProjectRoot();
+      target = findProjectRoot(globals.fs);
     }
     if (target == null) {
       throwToolExit('Expected to find project root in '
