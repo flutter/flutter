@@ -399,7 +399,7 @@ class ManifestAssetBundle implements AssetBundle {
       _wildcardDirectories[uri] ??= _fileSystem.directory(uri);
     }
 
-    final DevFSStringContent assetManifest  = _createAssetManifest(assetVariants);
+    final DevFSStringContent assetManifest  = _createAssetManifest(assetVariants, deferredComponentsAssetVariants);
     final DevFSStringContent fontManifest = DevFSStringContent(json.encode(fonts));
     final LicenseResult licenseResult = _licenseCollector.obtainLicenses(packageConfig, additionalLicenseFiles);
     if (licenseResult.errorMessages.isNotEmpty) {
@@ -524,15 +524,33 @@ class ManifestAssetBundle implements AssetBundle {
     return deferredComponentsAssetVariants;
   }
 
-  DevFSStringContent _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants) {
+  DevFSStringContent _createAssetManifest(
+    Map<_Asset, List<_Asset>> assetVariants,
+    Map<String, Map<_Asset, List<_Asset>>> deferredComponentsAssetVariants
+  ) {
     final Map<String, List<String>> jsonObject = <String, List<String>>{};
-    final List<_Asset> assets = assetVariants.keys.toList()
-      ..sort((_Asset left, _Asset right) => left.entryUri.path.compareTo(right.entryUri.path));
+    final List<_Asset> assets = assetVariants.keys.toList();
+    final Map<_Asset, List<String>> jsonEntries = <_Asset, List<String>>{};
     for (final _Asset main in assets) {
-      jsonObject[main.entryUri.path] = <String>[
+      jsonEntries[main] = <String>[
         for (final _Asset variant in assetVariants[main])
           variant.entryUri.path,
       ];
+    }
+    if (deferredComponentsAssetVariants != null) {
+      for (final Map<_Asset, List<_Asset>> componentAssets in deferredComponentsAssetVariants.values) {
+        for (final _Asset main in componentAssets.keys) {
+          jsonEntries[main] = <String>[
+            for (final _Asset variant in componentAssets[main])
+              variant.entryUri.path,
+          ];
+        }
+      }
+    }
+    final List<_Asset> sortedKeys = jsonEntries.keys.toList()
+        ..sort((_Asset left, _Asset right) => left.entryUri.path.compareTo(right.entryUri.path));
+    for (final _Asset main in sortedKeys) {
+      jsonObject[main.entryUri.path] = jsonEntries[main];
     }
     return DevFSStringContent(json.encode(jsonObject));
   }
