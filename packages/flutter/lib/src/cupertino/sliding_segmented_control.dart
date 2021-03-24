@@ -976,7 +976,7 @@ class _RenderSegmentedControl<T> extends RenderBox
 
   // This method is used to convert the original unscaled thumb rect painted in
   // the previous frame, to a Rect that is within the valid boundary defined by
-  // the the child segments.
+  // the child segments.
   //
   // The overall size does not include that of the thumb. That is, if the thumb
   // is located at the first or the last segment, the thumb can get cut off if

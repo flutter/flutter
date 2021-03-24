@@ -69,6 +69,16 @@ class ExtendSelectionLeftByLineTextIntent extends Intent{
   const ExtendSelectionLeftByLineTextIntent();
 }
 
+/// An [Intent] to extend the selection left past the nearest word, collapsing
+/// the selection if the order of [TextSelection.extentOffset] and
+/// [TextSelection.baseOffset] would reverse.
+///
+/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
+class ExtendSelectionLeftByWordAndStopAtReversalTextIntent extends Intent{
+  /// Creates an instance of ExtendSelectionLeftByWordAndStopAtReversalTextIntent.
+  const ExtendSelectionLeftByWordAndStopAtReversalTextIntent();
+}
+
 /// An [Intent] to extend the selection left past the nearest word.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
@@ -93,6 +103,16 @@ class ExtendSelectionLeftTextIntent extends Intent{
 class ExtendSelectionRightByLineTextIntent extends Intent{
   /// Creates an instance of ExtendSelectionRightByLineTextIntent.
   const ExtendSelectionRightByLineTextIntent();
+}
+
+/// An [Intent] to extend the selection right past the nearest word, collapsing
+/// the selection if the order of [TextSelection.extentOffset] and
+/// [TextSelection.baseOffset] would reverse.
+///
+/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
+class ExtendSelectionRightByWordAndStopAtReversalTextIntent extends Intent{
+  /// Creates an instance of ExtendSelectionRightByWordAndStopAtReversalTextIntent.
+  const ExtendSelectionRightByWordAndStopAtReversalTextIntent();
 }
 
 /// An [Intent] to extend the selection right past the nearest word.
