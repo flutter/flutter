@@ -149,7 +149,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     } on Exception catch (error) {
       throwToolExit('Invalid port for `--debug-port`: $error');
     }
-    return null;
   }
 
   Uri get debugUri {

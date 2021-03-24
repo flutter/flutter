@@ -145,6 +145,6 @@ class BuildAarCommand extends BuildSubCommand {
     if (argResults.rest.isEmpty) {
       return FlutterProject.current();
     }
-    return FlutterProject.fromDirectory(globals.fs.directory(findProjectRoot(argResults.rest.first)));
+    return FlutterProject.fromDirectory(globals.fs.directory(findProjectRoot(globals.fs, argResults.rest.first)));
   }
 }

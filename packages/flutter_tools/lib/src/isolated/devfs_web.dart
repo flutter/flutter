@@ -51,6 +51,7 @@ typedef DwdsLauncher = Future<Dwds> Function(
     String hostname,
     bool useSseForDebugProxy,
     bool useSseForDebugBackend,
+    bool useSseForInjectedClient,
     bool serveDevTools,
     UrlEncoder urlEncoder,
     bool spawnDds});
@@ -172,6 +173,7 @@ class WebAssetServer implements AssetReader {
     UrlTunneller urlTunneller,
     bool useSseForDebugProxy,
     bool useSseForDebugBackend,
+    bool useSseForInjectedClient,
     BuildInfo buildInfo,
     bool enableDwds,
     bool enableDds,
@@ -274,6 +276,7 @@ class WebAssetServer implements AssetReader {
       enableDebugging: true,
       useSseForDebugProxy: useSseForDebugProxy,
       useSseForDebugBackend: useSseForDebugBackend,
+      useSseForInjectedClient: useSseForInjectedClient,
       serveDevTools: false,
       loadStrategy: FrontendServerRequireStrategyProvider(
         ReloadConfiguration.none,
@@ -608,6 +611,7 @@ class WebDevFS implements DevFS {
     @required this.urlTunneller,
     @required this.useSseForDebugProxy,
     @required this.useSseForDebugBackend,
+    @required this.useSseForInjectedClient,
     @required this.buildInfo,
     @required this.enableDwds,
     @required this.enableDds,
@@ -626,6 +630,7 @@ class WebDevFS implements DevFS {
   final UrlTunneller urlTunneller;
   final bool useSseForDebugProxy;
   final bool useSseForDebugBackend;
+  final bool useSseForInjectedClient;
   final BuildInfo buildInfo;
   final bool enableDwds;
   final bool enableDds;
@@ -704,6 +709,7 @@ class WebDevFS implements DevFS {
       urlTunneller,
       useSseForDebugProxy,
       useSseForDebugBackend,
+      useSseForInjectedClient,
       buildInfo,
       enableDwds,
       enableDds,
