@@ -1236,7 +1236,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   }
 
   @override
-  Element? updateChild(Element? child, Widget? newWidget, dynamic newSlot) {
+  Element? updateChild(Element? child, Widget? newWidget, Object? newSlot) {
     final SliverMultiBoxAdaptorParentData? oldParentData = child?.renderObject?.parentData as SliverMultiBoxAdaptorParentData?;
     final Element? newChild = super.updateChild(child, newWidget, newSlot);
     final SliverMultiBoxAdaptorParentData? newParentData = newChild?.renderObject?.parentData as SliverMultiBoxAdaptorParentData?;
