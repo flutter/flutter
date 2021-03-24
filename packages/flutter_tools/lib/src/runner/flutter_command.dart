@@ -228,6 +228,15 @@ abstract class FlutterCommand extends Command<void> {
       'some proxy servers.',
       hide: !verboseHelp,
     );
+    argParser.addOption('web-server-debug-injected-client-protocol',
+      allowed: <String>['sse', 'ws'],
+      defaultsTo: 'sse',
+      help: 'The protocol (SSE or WebSockets) to use for the injected client '
+      'when using the Web Server device. '
+      'Using WebSockets can improve performance but may fail when connecting through '
+      'some proxy servers.',
+      hide: !verboseHelp,
+    );
     argParser.addFlag('web-allow-expose-url',
       defaultsTo: false,
       help: 'Enables daemon-to-editor requests (app.exposeUrl) for exposing URLs '
