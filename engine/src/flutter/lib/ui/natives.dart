@@ -78,7 +78,7 @@ List<int> saveCompilationTrace() {
 
 dynamic _saveCompilationTrace() native 'SaveCompilationTrace';
 
-void _scheduleMicrotask(void callback()) native 'ScheduleMicrotask';
+void _scheduleMicrotask(void Function() callback) native 'ScheduleMicrotask';
 
 int? _getCallbackHandle(Function closure) native 'GetCallbackHandle';
 Function? _getCallbackFromHandle(int handle) native 'GetCallbackFromHandle';

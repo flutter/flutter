@@ -88,7 +88,7 @@ void main() {
 Future<Uint8List> readFile(String fileName, ) async {
   final File file =
       File(path.join('flutter', 'testing', 'resources', fileName));
-  return await file.readAsBytes();
+  return file.readAsBytes();
 }
 
 /// Returns a File handle to a file in the skia/resources directory.

@@ -10,6 +10,6 @@ import 'package:test/test.dart';
 void main() {
   test('Invalid isolate URI', () async {
     final Future<Isolate> isolate = Isolate.spawnUri(Uri.parse('http://127.0.0.1/foo.dart'), <String>[], null);
-    expect(() async => await isolate, throwsA(const TypeMatcher<IsolateSpawnException>()));
+    expect(() async => isolate, throwsA(const TypeMatcher<IsolateSpawnException>()));
   });
 }

@@ -42,7 +42,7 @@ void main() {
     expect(PluginUtilities.getCallbackHandle(foo.getDouble), isNull);
 
     // Anonymous closures cannot be looked up.
-    final Function anon = (int a, int b) => a + b;
+    final Function anon = (int a, int b) => a + b; // ignore: prefer_function_declarations_over_variables
     expect(PluginUtilities.getCallbackHandle(anon), isNull);
   });
 }

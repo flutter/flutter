@@ -84,7 +84,7 @@ class Square4x4Image {
     canvas.drawRect(Rect.fromLTWH(0.0, 0.0, width, width), black);
     canvas.drawRect(
         Rect.fromLTWH(radius, radius, innerWidth, innerWidth), green);
-    return await recorder.endRecording().toImage(_kWidth, _kWidth);
+    return recorder.endRecording().toImage(_kWidth, _kWidth);
   }
 
   static List<int> get bytes {
@@ -118,7 +118,7 @@ class GrayscaleImage {
     final Uint8List bytes = await readFile('2x2.png');
     final Completer<Image> completer = Completer<Image>();
     decodeImageFromList(bytes, (Image image) => completer.complete(image));
-    return await completer.future;
+    return completer.future;
   }
 
   static List<int> get bytesAsRgba {
@@ -135,5 +135,5 @@ class GrayscaleImage {
 
 Future<Uint8List> readFile(String fileName) async {
   final File file = File(path.join('flutter', 'testing', 'resources', fileName));
-  return await file.readAsBytes();
+  return file.readAsBytes();
 }
