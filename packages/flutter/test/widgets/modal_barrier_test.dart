@@ -378,7 +378,7 @@ void main() {
       children: <TestSemantics>[
         TestSemantics.rootChild(
           rect: TestSemantics.fullScreen,
-          actions: SemanticsAction.tap.index,
+          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
           label: 'Dismiss',
           textDirection: TextDirection.ltr,
         ),

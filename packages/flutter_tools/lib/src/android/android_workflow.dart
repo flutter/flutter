@@ -16,7 +16,6 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/user_messages.dart' hide userMessages;
 import '../base/version.dart';
-import '../build_info.dart';
 import '../convert.dart';
 import '../doctor.dart';
 import '../features.dart';
