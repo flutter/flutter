@@ -265,12 +265,14 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
 
     final String currentDirectory = globals.fs.currentDirectory.absolute.path;
-    if (_testFiles.any((String file) => file.startsWith('$currentDirectory/integration_test/'))) {
+    final String integrationTestPathPrefix = globals.fs.path.join(currentDirectory, 'integration_test');
+    if (_testFiles.any((String file) => file.startsWith(integrationTestPathPrefix))) {
       // This needs to happen before [super.verifyThenRunCommand] so that the
       // correct [requiredArtifacts] can be identified before [run] takes place.
       _isIntegrationTest = true;
     }
-    if (_isIntegrationTest && !_testFiles.every((String file) => file.startsWith('$currentDirectory/integration_test/'))) {
+
+    if (_isIntegrationTest && !_testFiles.every((String file) => file.startsWith(integrationTestPathPrefix))) {
       throwToolExit(
         'Integration tests and unit tests cannot be run in a single invocation.'
         ' Use separate invocations of `flutter test` to run integration tests'
@@ -379,6 +381,17 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     Device integrationTestDevice;
     if (_isIntegrationTest) {
       integrationTestDevice = await findTargetDevice();
+
+      if (integrationTestDevice == null) {
+        throwToolExit(
+          'No devices are connected. '
+          'Ensure that `flutter doctor` shows at least one connected device',
+        );
+      }
+      if (integrationTestDevice.platformType == PlatformType.web) {
+        // TODO(jiahaog): Support web. https://github.com/flutter/flutter/pull/74236
+        throwToolExit('Web devices are not supported for integration tests yet.');
+      }
 
       if (buildInfo.packageConfig['integration_test'] == null) {
         throwToolExit(

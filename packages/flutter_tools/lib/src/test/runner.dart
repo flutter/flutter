@@ -184,7 +184,8 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     }
 
     if (integrationTestDevice != null) {
-      // Running on a real device doesn't work with concurrency.
+      // Running with concurrency will result in deploying multiple test apps
+      // on the connected device concurrently, which is not supported.
       testArgs.add('--concurrency=1');
       // Without this, some async exceptions which are caught will surface when
       // debugging tests.

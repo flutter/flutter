@@ -111,17 +111,21 @@ FlutterPlatform installHook({
 ///
 /// The [updateGoldens] argument will set the [autoUpdateGoldens] global
 /// variable in the [flutter_test] package before invoking the test.
+///
+/// The [integrationTest] argument can be specified to generate the bootstrap
+/// for integration tests.
+///
 // NOTE: this API is used by the fuchsia source tree, do not add new
 // required or position parameters.
 String generateTestBootstrap({
   @required Uri testUrl,
   @required InternetAddress host,
-  @required bool isIntegrationTest,
   File testConfigFile,
   bool updateGoldens = false,
   String languageVersionHeader = '',
   bool nullSafety = false,
   bool flutterTestDep = true,
+  bool integrationTest = false,
 }) {
   assert(testUrl != null);
   assert(host != null);
@@ -145,7 +149,7 @@ import 'dart:isolate';
 import 'package:flutter_test/flutter_test.dart';
 ''');
   }
-  if (isIntegrationTest) {
+  if (integrationTest) {
     buffer.write('''
 import 'package:integration_test/integration_test.dart';
 import 'dart:developer' as developer;
@@ -172,7 +176,7 @@ StreamChannel<dynamic> serializeSuite(Function getMain()) {
 
 Future<void> _testMain() async {
 ''');
-  if (isIntegrationTest) {
+  if (integrationTest) {
     buffer.write('''
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 ''');
@@ -223,7 +227,7 @@ void main() {
   buffer.write('''
   });
 ''');
-  if (isIntegrationTest) {
+  if (integrationTest) {
     buffer.write('''
   final callback = (method, params) async {
     testChannel.sink.add(json.decode(params['$kIntegrationTestData'] as String));
@@ -293,7 +297,14 @@ class FlutterPlatform extends PlatformPlugin {
   final Uri projectRootDirectory;
   final FlutterProject flutterProject;
   final String icudtlPath;
+
+  /// The device to run the test on for Integration Tests.
+  ///
+  /// If this is null, the test will run as a regular test with the Flutter
+  /// Tester; otherwise it will run as a Integration Test on this device.
   final Device integrationTestDevice;
+  bool get _isIntegrationTest => integrationTestDevice != null;
+
   final String integrationTestUserIdentifier;
 
   final FontConfigManager _fontConfigManager = FontConfigManager();
@@ -386,7 +397,7 @@ class FlutterPlatform extends PlatformPlugin {
   }
 
   TestDevice _createTestDevice(int ourTestCount) {
-    if (integrationTestDevice != null) {
+    if (_isIntegrationTest) {
       return IntegrationTestTestDevice(
         id: ourTestCount,
         debuggingOptions: debuggingOptions,
@@ -578,7 +589,7 @@ class FlutterPlatform extends PlatformPlugin {
       updateGoldens: updateGoldens,
       flutterTestDep: packageConfig['flutter_test'] != null,
       languageVersionHeader: '// @dart=${languageVersion.major}.${languageVersion.minor}',
-      isIntegrationTest: integrationTestDevice != null,
+      integrationTest: _isIntegrationTest,
     );
   }
 

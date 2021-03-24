@@ -60,7 +60,9 @@ class IntegrationTestTestDevice implements TestDevice {
     if (!launchResult.started) {
       throw TestDeviceException('Unable to start the app on the device.', StackTrace.current);
     }
-    assert(launchResult.started);
+    if (launchResult.observatoryUri == null) {
+      throw TestDeviceException('Observatory is not available on the test device.', StackTrace.current);
+    }
 
     // No need to set up the log reader because the logs are captured and
     // streamed to the package:test_core runner.
@@ -68,7 +70,10 @@ class IntegrationTestTestDevice implements TestDevice {
     _gotProcessObservatoryUri.complete(launchResult.observatoryUri);
 
     globals.printTrace('test $id: Connecting to vm service');
-    final FlutterVmService vmService = await connectToVmService(launchResult.observatoryUri);
+    final FlutterVmService vmService = await connectToVmService(launchResult.observatoryUri).timeout(
+      const Duration(seconds: 5),
+      onTimeout: () => throw TimeoutException('Connecting to the VM Service timed out.'),
+    );
 
     globals.printTrace('test $id: Finding the correct isolate with the integration test service extension');
     final vm_service.IsolateRef isolateRef = await vmService.findExtensionIsolate(kIntegrationTestMethod);
@@ -80,16 +85,15 @@ class IntegrationTestTestDevice implements TestDevice {
 
     final StreamChannelController<String> controller = StreamChannelController<String>();
 
-    controller.local.stream
-      .listen((String event) {
-        vmService.service.callServiceExtension(
-          kIntegrationTestMethod,
-          isolateId: isolateRef.id,
-          args: <String, String>{
-            kIntegrationTestData: event,
-          },
-        );
-      });
+    controller.local.stream.listen((String event) {
+      vmService.service.callServiceExtension(
+        kIntegrationTestMethod,
+        isolateId: isolateRef.id,
+        args: <String, String>{
+          kIntegrationTestData: event,
+        },
+      );
+    });
 
     unawaited(remoteMessages.pipe(controller.local.sink));
     return controller.foreign;
