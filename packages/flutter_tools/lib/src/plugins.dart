@@ -620,7 +620,12 @@ AndroidEmbeddingVersion _getAndroidEmbeddingVersion(FlutterProject project) {
 Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
   final List<Map<String, dynamic>> androidPlugins =
     _extractPlatformMaps(plugins, AndroidPlugin.kConfigKey);
-
+  androidPlugins.sort((Map<String, dynamic> left, Map<String, dynamic> right) {
+    if (left["supportsEmbeddingV2"] != right["supportsEmbeddingV2"]) {
+      return left["supportsEmbeddingV2"] ? -1 : 1;
+    }
+    return left["name"].compareTo(right["name"]);
+  });
   final Map<String, dynamic> templateContext = <String, dynamic>{
     'plugins': androidPlugins,
     'androidX': isAppUsingAndroidX(project.android.hostAppGradleRoot),
