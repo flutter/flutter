@@ -272,7 +272,6 @@ typedef _JsSetUrlStrategy = void Function(JsUrlStrategy?);
 //
 // TODO: Add integration test https://github.com/flutter/flutter/issues/66852
 @JS('_flutter_web_set_location_strategy')
-// ignore: unused_element
 external set _jsSetUrlStrategy(_JsSetUrlStrategy? newJsSetUrlStrategy);
 
 UrlStrategy? _createDefaultUrlStrategy() {
