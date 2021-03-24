@@ -9,7 +9,6 @@ import 'package:meta/meta.dart';
 import 'runner.dart' as runner;
 import 'src/artifacts.dart';
 import 'src/base/context.dart';
-import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/platform.dart';
@@ -85,7 +84,7 @@ Future<void> main(List<String> args) async {
   // instances of the platform or filesystem, so just use those.
   Cache.flutterRoot = Cache.defaultFlutterRoot(
     platform: const LocalPlatform(),
-    fileSystem: LocalFileSystem.instance,
+    fileSystem: globals.localFileSystem,
     userMessages: UserMessages(),
   );
 
@@ -158,6 +157,7 @@ List<FlutterCommand> generateCommands({
   DriveCommand(verboseHelp: verboseHelp,
     fileSystem: globals.fs,
     logger: globals.logger,
+    platform: globals.platform,
   ),
   EmulatorsCommand(),
   FormatCommand(),

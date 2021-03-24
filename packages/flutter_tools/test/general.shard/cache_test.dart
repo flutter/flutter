@@ -136,6 +136,28 @@ void main() {
       expect(gradleWrapper.isUpToDateInner(fileSystem), false);
     });
 
+    testWithoutContext('Gradle wrapper will delete .properties/NOTICES if they exist', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Cache cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
+      final OperatingSystemUtils operatingSystemUtils = OperatingSystemUtils(
+        processManager: FakeProcessManager.any(),
+        platform: FakePlatform(),
+        logger: BufferLogger.test(),
+        fileSystem: fileSystem,
+      );
+      final GradleWrapper gradleWrapper = GradleWrapper(cache);
+      final Directory directory = cache.getCacheDir(fileSystem.path.join('artifacts', 'gradle_wrapper'));
+      final File propertiesFile = fileSystem.file(fileSystem.path.join(directory.path, 'gradle', 'wrapper', 'gradle-wrapper.properties'))
+        ..createSync(recursive: true);
+      final File noticeFile = fileSystem.file(fileSystem.path.join(directory.path, 'NOTICE'))
+        ..createSync(recursive: true);
+
+      await gradleWrapper.updateInner(FakeArtifactUpdater(), fileSystem, operatingSystemUtils);
+
+      expect(propertiesFile, isNot(exists));
+      expect(noticeFile, isNot(exists));
+    });
+
     testWithoutContext('Gradle wrapper should be up to date, only if all cached artifact are available', () {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final Cache cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
@@ -939,5 +961,12 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
   @override
   void reinitialize() {
     reinitialized = true;
+  }
+}
+
+class FakeArtifactUpdater extends Fake implements ArtifactUpdater {
+  @override
+  Future<void> downloadZippedTarball(String message, Uri url, Directory location) async {
+    return;
   }
 }
