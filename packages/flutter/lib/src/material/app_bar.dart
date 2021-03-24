@@ -1309,7 +1309,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///               child: Center(
 ///                 child: SizedBox(
 ///                   height: 20,
-///                   child: const Text('Scroll to see the sliverAppBar in effect.'),
+///                   child: const Text('Scroll to see the SliverAppBar in effect.'),
 ///                 ),
 ///               ),
 ///             ),
@@ -1317,7 +1317,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///              delegate: SliverChildBuilderDelegate(
 ///                (BuildContext context, int index) {
 ///                  return Container(
-///                    color: index % 2 == 0 ? Colors.white : Colors.black12,
+///                    color: index.isOdd ? Colors.white : Colors.black12,
 ///                    height: 100.0,
 ///                    child: Center(
 ///                      child: Text('$index', textScaleFactor: 5),
