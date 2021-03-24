@@ -807,7 +807,7 @@ class ResidentWebRunner extends ResidentRunner {
         // It is safe to ignore this error because we expect an error to be
         // thrown if we're not already subscribed.
       }
-      setUpVmService(
+      await setUpVmService(
         (String isolateId, {
           bool force,
           bool pause,

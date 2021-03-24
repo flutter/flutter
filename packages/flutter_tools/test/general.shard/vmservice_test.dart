@@ -94,7 +94,7 @@ void main() {
     Future<void> reloadSources(String isolateId, { bool pause, bool force}) async {}
 
     final MockVMService mockVMService = MockVMService();
-    setUpVmService(
+    await setUpVmService(
       reloadSources,
       null,
       null,
@@ -113,7 +113,7 @@ void main() {
     final FakeDevice mockDevice = FakeDevice();
 
     final MockVMService mockVMService = MockVMService();
-    setUpVmService(
+    await setUpVmService(
       null,
       null,
       null,
@@ -130,7 +130,7 @@ void main() {
 
   testUsingContext('VmService registers flutterGetSkSL service', () async {
     final MockVMService mockVMService = MockVMService();
-    setUpVmService(
+    await setUpVmService(
       null,
       null,
       null,
@@ -150,7 +150,7 @@ void main() {
     when(mockVMService.onExtensionEvent).thenAnswer((Invocation invocation) {
       return const Stream<vm_service.Event>.empty();
     });
-    setUpVmService(
+    await setUpVmService(
       null,
       null,
       null,
@@ -166,7 +166,7 @@ void main() {
 
   testUsingContext('VMService returns correct FlutterVersion', () async {
     final MockVMService mockVMService = MockVMService();
-    setUpVmService(
+    await setUpVmService(
       null,
       null,
       null,

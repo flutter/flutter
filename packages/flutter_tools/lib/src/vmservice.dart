@@ -159,7 +159,7 @@ typedef VMServiceConnector = Future<FlutterVmService> Function(Uri httpUri, {
 });
 
 /// A connection to the Dart VM Service.
-vm_service.VmService setUpVmService(
+Future<vm_service.VmService> setUpVmService(
   ReloadSources reloadSources,
   Restart restart,
   CompileExpression compileExpression,
@@ -167,7 +167,8 @@ vm_service.VmService setUpVmService(
   GetSkSLMethod skSLMethod,
   PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   vm_service.VmService vmService
-) {
+) async {
+  final List<Future<void>> registrationRequests = <Future<void>>[];
   if (reloadSources != null) {
     vmService.registerServiceCallback('reloadSources', (Map<String, dynamic> params) async {
       final String isolateId = _validateRpcStringParam('reloadSources', params, 'isolateId');
@@ -182,7 +183,7 @@ vm_service.VmService setUpVmService(
         }
       };
     });
-    vmService.registerService('reloadSources', 'Flutter Tools');
+    registrationRequests.add(vmService.registerService('reloadSources', 'Flutter Tools'));
   }
 
   if (restart != null) {
@@ -195,7 +196,7 @@ vm_service.VmService setUpVmService(
         }
       };
     });
-    vmService.registerService('hotRestart', 'Flutter Tools');
+    registrationRequests.add(vmService.registerService('hotRestart', 'Flutter Tools'));
   }
 
   vmService.registerServiceCallback('flutterVersion', (Map<String, dynamic> params) async {
@@ -210,7 +211,7 @@ vm_service.VmService setUpVmService(
       }
     };
   });
-  vmService.registerService('flutterVersion', 'Flutter Tools');
+  registrationRequests.add(vmService.registerService('flutterVersion', 'Flutter Tools'));
 
   if (compileExpression != null) {
     vmService.registerServiceCallback('compileExpression', (Map<String, dynamic> params) async {
@@ -230,7 +231,7 @@ vm_service.VmService setUpVmService(
         'result': <String, dynamic>{'kernelBytes': kernelBytesBase64},
       };
     });
-    vmService.registerService('compileExpression', 'Flutter Tools');
+    registrationRequests.add(vmService.registerService('compileExpression', 'Flutter Tools'));
   }
   if (device != null) {
     vmService.registerServiceCallback('flutterMemoryInfo', (Map<String, dynamic> params) async {
@@ -242,7 +243,7 @@ vm_service.VmService setUpVmService(
         }
       };
     });
-    vmService.registerService('flutterMemoryInfo', 'Flutter Tools');
+    registrationRequests.add(vmService.registerService('flutterMemoryInfo', 'Flutter Tools'));
   }
   if (skSLMethod != null) {
     vmService.registerServiceCallback('flutterGetSkSL', (Map<String, dynamic> params) async {
@@ -254,17 +255,18 @@ vm_service.VmService setUpVmService(
         }
       };
     });
-    vmService.registerService('flutterGetSkSL', 'Flutter Tools');
+    registrationRequests.add(vmService.registerService('flutterGetSkSL', 'Flutter Tools'));
   }
   if (printStructuredErrorLogMethod != null) {
     try {
-      vmService.streamListen(vm_service.EventStreams.kExtension);
+      await vmService.streamListen(vm_service.EventStreams.kExtension);
     } on vm_service.RPCError {
       // It is safe to ignore this error because we expect an error to be
       // thrown if we're already subscribed.
     }
     vmService.onExtensionEvent.listen(printStructuredErrorLogMethod);
   }
+  await Future.wait(registrationRequests.where((Future<void> x) => x != null));
   return vmService;
 }
 
@@ -319,7 +321,7 @@ Future<FlutterVmService> _connect(
     },
   );
 
-  final vm_service.VmService service = setUpVmService(
+  final vm_service.VmService service = await setUpVmService(
     reloadSources,
     restart,
     compileExpression,
