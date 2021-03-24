@@ -829,6 +829,18 @@ void main() {
       expect(calledStart, isTrue);
       expect(calledUpdate, isTrue);
       expect(calledEnd, isTrue);
+
+      // Attempting to scroll with a mouse to zoom doesn't work because it's
+      // disabled, but the interaction methods are still called.
+      calledStart = false;
+      calledUpdate = false;
+      calledEnd = false;
+      await scrollAt(childInterior, tester, const Offset(0.0, -20.0));
+      await tester.pumpAndSettle();
+      expect(transformationController.value, equals(Matrix4.identity()));
+      expect(calledStart, isTrue);
+      expect(calledUpdate, isTrue);
+      expect(calledEnd, isTrue);
     });
 
     testWidgets('viewport changes size', (WidgetTester tester) async {

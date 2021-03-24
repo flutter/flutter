@@ -256,8 +256,8 @@ class InteractiveViewer extends StatefulWidget {
   /// already been updated to reflect the change caused by the interaction.
   ///
   /// {@template flutter.widgets.InteractiveViewer.onInteractionEnd}
-  /// Will be called even if the interaction is disabled with
-  /// [panEnabled] or [scaleEnabled].
+  /// Will be called even if the interaction is disabled with [panEnabled] or
+  /// [scaleEnabled] for both touch gestures and mouse interactions.
   ///
   /// A [GestureDetector] wrapping the InteractiveViewer will not respond to
   /// [GestureDetector.onScaleStart], [GestureDetector.onScaleUpdate], and
@@ -932,25 +932,36 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // Handle mousewheel scroll events.
   void _receivedPointerSignal(PointerSignalEvent event) {
     if (event is PointerScrollEvent) {
+      // Ignore left and right scroll.
+      if (event.scrollDelta.dy == 0.0) {
+        return;
+      }
       widget.onInteractionStart?.call(
         ScaleStartDetails(
           focalPoint: event.position,
           localFocalPoint: event.localPosition,
         ),
       );
+
+      // In the Flutter engine, the mousewheel scrollDelta is hardcoded to 20
+      // per scroll, while a trackpad scroll can be any amount. The calculation
+      // for scaleChange here was arbitrarily chosen to feel natural for both
+      // trackpads and mousewheels on all platforms.
+      final double scaleChange = math.exp(-event.scrollDelta.dy / 200);
+
       if (!_gestureIsSupported(_GestureType.scale)) {
+        widget.onInteractionUpdate?.call(ScaleUpdateDetails(
+          focalPoint: event.position,
+          localFocalPoint: event.localPosition,
+          rotation: 0.0,
+          scale: scaleChange,
+          horizontalScale: 1.0,
+          verticalScale: 1.0,
+        ));
         widget.onInteractionEnd?.call(ScaleEndDetails());
         return;
       }
 
-      // Ignore left and right scroll.
-      if (event.scrollDelta.dy == 0.0) {
-        return;
-      }
-
-      // In the Flutter engine, the mousewheel scrollDelta is hardcoded to 20 per scroll, while a trackpad scroll can be any amount.
-      // The calculation for scaleChange here was arbitrarily chosen to feel natural for both trackpads and mousewheels on all platforms.
-      final double scaleChange = math.exp(-event.scrollDelta.dy / 200);
       final Offset focalPointScene = _transformationController!.toScene(
         event.localPosition,
       );
