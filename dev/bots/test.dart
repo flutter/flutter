@@ -845,6 +845,9 @@ Future<void> _runFlutterPluginsTests() async {
         'analyze',
       ],
       workingDirectory: checkout.path,
+      environment: <String, String>{
+        'BRANCH_NAME': 'master',
+      },
     );
   }
   await selectSubshard(<String, ShardRunner>{
