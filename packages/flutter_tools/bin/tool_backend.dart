@@ -29,6 +29,15 @@ Future<void> main(List<String> arguments) async {
   final bool verbose = Platform.environment['VERBOSE_SCRIPT_LOGGING'] == 'true';
   final bool prefixedErrors = Platform.environment['PREFIXED_ERROR_LOGGING'] == 'true';
 
+  if (projectDirectory == null) {
+    stderr.write('PROJECT_DIR environment variable must be set to the location of Flutter project to be built.');
+    exit(1);
+  }
+  if (flutterRoot == null || flutterRoot.isEmpty) {
+    stderr.write('FLUTTER_ROOT environment variable must be set to the location of the Flutter SDK.');
+    exit(1);
+  }
+
   Directory.current = projectDirectory;
 
   if (localEngine != null && !localEngine.contains(buildMode)) {
@@ -42,10 +51,6 @@ or
   flutter build <platform> --local-engine=host_${buildMode}_unopt
 ========================================================================
 ''');
-    exit(1);
-  }
-  if (flutterRoot == null) {
-    stderr.write('FLUTTER_ROOT environment variable must be set.');
     exit(1);
   }
   final String flutterExecutable = pathJoin(<String>[
