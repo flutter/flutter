@@ -1105,7 +1105,7 @@ abstract class FlutterCommand extends Command<void> {
     }
     assert(commandResult != null);
     // Send command result.
-    CommandResultEvent(commandPath, commandResult).send();
+    CommandResultEvent(commandPath, commandResult.toString()).send();
 
     // Send timing.
     final List<String> labels = <String>[

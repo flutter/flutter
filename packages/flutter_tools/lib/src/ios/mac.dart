@@ -383,6 +383,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   } on ProcessException catch (e) {
     if (e.toString().contains('timed out')) {
       BuildEvent('xcode-show-build-settings-timeout',
+        type: 'ios',
         command: showBuildSettingsCommand.join(' '),
         flutterUsage: globals.flutterUsage,
       ).send();
@@ -535,6 +536,7 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsa
       result.xcodeBuildExecution.buildForPhysicalDevice &&
       result.stdout?.toUpperCase()?.contains('BITCODE') == true) {
     BuildEvent('xcode-bitcode-failure',
+      type: 'ios',
       command: result.xcodeBuildExecution.buildCommands.toString(),
       settings: result.xcodeBuildExecution.buildSettings.toString(),
       flutterUsage: flutterUsage,

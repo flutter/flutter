@@ -436,6 +436,7 @@ class XcodeProjectInterpreter {
     } on Exception catch (error) {
       if (error is ProcessException && error.toString().contains('timed out')) {
         BuildEvent('xcode-show-build-settings-timeout',
+          type: 'ios',
           command: showBuildSettingsCommand.join(' '),
           flutterUsage: _usage,
         ).send();
