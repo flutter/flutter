@@ -107,7 +107,7 @@ typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 /// This class enables existing widget implementations with [Color]
 /// properties to be extended to also effectively support `MaterialStateProperty<Color>`
 /// property values. [MaterialStateColor] should only be used with widgets that document
-/// their support, like [ActionChip].
+/// their support, like [TimePickerTheme].
 ///
 /// {@tool snippet}
 ///
