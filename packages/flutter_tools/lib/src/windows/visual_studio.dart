@@ -4,6 +4,7 @@
 
 import 'package:process/process.dart';
 
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -175,12 +176,18 @@ class VisualStudio {
   /// present then there isn't a new enough installation of VS. This path is
   /// not user-controllable, unlike the install location of Visual Studio
   /// itself.
-  String get _vswherePath => _fileSystem.path.join(
-    _platform.environment['PROGRAMFILES(X86)']!,
-    'Microsoft Visual Studio',
-    'Installer',
-    'vswhere.exe',
-  );
+  String get _vswherePath {
+    const String programFilesEnv = 'PROGRAMFILES(X86)';
+    if (!_platform.environment.containsKey(programFilesEnv)) {
+      throwToolExit('%$programFilesEnv% environment variable not found.');
+    }
+    return _fileSystem.path.join(
+      _platform.environment[programFilesEnv]!,
+      'Microsoft Visual Studio',
+      'Installer',
+      'vswhere.exe',
+    );
+  }
 
   /// Workload ID for use with vswhere requirements.
   ///
@@ -275,10 +282,12 @@ class VisualStudio {
       List<String>? additionalArguments,
       String? requiredWorkload
     }) {
-    final List<String> requirementArguments = validateRequirements && requiredWorkload != null
+    final List<String> requirementArguments = validateRequirements
         ? <String>[
-            '-requires',
-            requiredWorkload,
+            if (requiredWorkload != null) ...<String>[
+              '-requires',
+              requiredWorkload,
+            ],
             ..._requiredComponents(_minimumSupportedVersion).keys
           ]
         : <String>[];
