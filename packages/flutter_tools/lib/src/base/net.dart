@@ -138,9 +138,9 @@ class Net {
     // If we're making a HEAD request, we're only checking to see if the URL is
     // valid.
     if (onlyHeaders) {
-      return response!.statusCode == HttpStatus.ok;
+      return response.statusCode == HttpStatus.ok;
     }
-    if (response!.statusCode != HttpStatus.ok) {
+    if (response.statusCode != HttpStatus.ok) {
       if (response.statusCode > 0 && response.statusCode < 500) {
         throwToolExit(
           'Download failed.\n'
