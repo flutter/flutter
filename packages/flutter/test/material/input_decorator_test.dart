@@ -4469,7 +4469,7 @@ void main() {
             child: Column(
               children: const <Widget>[
                 TextField(
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Label Text',
                     helperText: 'Helper Text',
                     contentPadding: EdgeInsets.zero,
