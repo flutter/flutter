@@ -278,22 +278,28 @@ void transformLTRB(Matrix4 transform, Float32List ltrb) {
 
   _tempPointMatrix.multiplyTranspose(transform);
 
+  // Handle non-homogenous matrices.
+  double w = transform[15];
+  if (w == 0.0) {
+    w = 1.0;
+  }
+
   ltrb[0] = math.min(
       math.min(
           math.min(_tempPointData[0], _tempPointData[1]), _tempPointData[2]),
-      _tempPointData[3]);
+      _tempPointData[3]) / w;
   ltrb[1] = math.min(
       math.min(
           math.min(_tempPointData[4], _tempPointData[5]), _tempPointData[6]),
-      _tempPointData[7]);
+      _tempPointData[7]) / w;
   ltrb[2] = math.max(
       math.max(
           math.max(_tempPointData[0], _tempPointData[1]), _tempPointData[2]),
-      _tempPointData[3]);
+      _tempPointData[3]) / w;
   ltrb[3] = math.max(
       math.max(
           math.max(_tempPointData[4], _tempPointData[5]), _tempPointData[6]),
-      _tempPointData[7]);
+      _tempPointData[7]) / w;
 }
 
 /// Returns true if [rect] contains every point that is also contained by the
