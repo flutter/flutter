@@ -65,6 +65,12 @@ struct FlutterDesktopWindowControllerState {
   // has been added since it was last removed).
   bool pointer_currently_added = false;
 
+  // Whether or not the pointer is down.
+  bool pointer_currently_down = false;
+
+  // The currently pressed buttons, as represented in FlutterPointerEvent.
+  int64_t buttons = 0;
+
   // The screen coordinates per inch on the primary monitor. Defaults to a sane
   // value based on pixel_ratio 1.0.
   double monitor_screen_coordinates_per_inch = kDpPerInch;
@@ -301,6 +307,10 @@ static void SendPointerEventWithData(GLFWwindow* window,
       std::chrono::duration_cast<std::chrono::microseconds>(
           std::chrono::high_resolution_clock::now().time_since_epoch())
           .count();
+  event.device_kind = FlutterPointerDeviceKind::kFlutterPointerDeviceKindMouse;
+  event.buttons =
+      (event.phase == FlutterPointerPhase::kAdd) ? 0 : controller->buttons;
+
   // Convert all screen coordinates to pixel coordinates.
   double pixels_per_coordinate =
       controller->window_wrapper->pixels_per_screen_coordinate;
@@ -315,6 +325,10 @@ static void SendPointerEventWithData(GLFWwindow* window,
     controller->pointer_currently_added = true;
   } else if (event_data.phase == FlutterPointerPhase::kRemove) {
     controller->pointer_currently_added = false;
+  } else if (event_data.phase == FlutterPointerPhase::kDown) {
+    controller->pointer_currently_down = true;
+  } else if (event_data.phase == FlutterPointerPhase::kUp) {
+    controller->pointer_currently_down = false;
   }
 }
 
@@ -325,15 +339,20 @@ static void SetEventLocationFromCursorPosition(
   glfwGetCursorPos(window, &event_data->x, &event_data->y);
 }
 
-// Set's |event_data|'s phase to either kMove or kHover depending on the current
-// primary mouse button state.
-static void SetEventPhaseFromCursorButtonState(
-    GLFWwindow* window,
-    FlutterPointerEvent* event_data) {
+// Set's |event_data|'s phase depending on the current mouse state.
+// If a kUp or kDown event is triggered while the current state is already
+// up/down, a hover/move will be called instead to avoid a crash in the Flutter
+// engine.
+static void SetEventPhaseFromCursorButtonState(GLFWwindow* window,
+                                               FlutterPointerEvent* event_data,
+                                               int64_t buttons) {
+  auto* controller = GetWindowController(window);
   event_data->phase =
-      glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS
-          ? FlutterPointerPhase::kMove
-          : FlutterPointerPhase::kHover;
+      (buttons == 0)
+          ? (controller->pointer_currently_down ? FlutterPointerPhase::kUp
+                                                : FlutterPointerPhase::kHover)
+          : (controller->pointer_currently_down ? FlutterPointerPhase::kMove
+                                                : FlutterPointerPhase::kDown);
 }
 
 // Reports the mouse entering or leaving the Flutter view.
@@ -350,7 +369,8 @@ static void GLFWCursorPositionCallback(GLFWwindow* window, double x, double y) {
   FlutterPointerEvent event = {};
   event.x = x;
   event.y = y;
-  SetEventPhaseFromCursorButtonState(window, &event);
+  auto* controller = GetWindowController(window);
+  SetEventPhaseFromCursorButtonState(window, &event, controller->buttons);
   SendPointerEventWithData(window, event);
 }
 
@@ -359,15 +379,21 @@ static void GLFWMouseButtonCallback(GLFWwindow* window,
                                     int key,
                                     int action,
                                     int mods) {
-  // Flutter currently doesn't understand other buttons, so ignore anything
-  // other than left.
-  if (key != GLFW_MOUSE_BUTTON_LEFT) {
+  int64_t button;
+  if (key == GLFW_MOUSE_BUTTON_LEFT) {
+    button = FlutterPointerMouseButtons::kFlutterPointerButtonMousePrimary;
+  } else if (key == GLFW_MOUSE_BUTTON_RIGHT) {
+    button = FlutterPointerMouseButtons::kFlutterPointerButtonMouseSecondary;
+  } else {
     return;
   }
 
+  auto* controller = GetWindowController(window);
+  controller->buttons = (action == GLFW_PRESS) ? controller->buttons | button
+                                               : controller->buttons & ~button;
+
   FlutterPointerEvent event = {};
-  event.phase = (action == GLFW_PRESS) ? FlutterPointerPhase::kDown
-                                       : FlutterPointerPhase::kUp;
+  SetEventPhaseFromCursorButtonState(window, &event, controller->buttons);
   SetEventLocationFromCursorPosition(window, &event);
   SendPointerEventWithData(window, event);
 
@@ -376,15 +402,16 @@ static void GLFWMouseButtonCallback(GLFWwindow* window,
   bool hover_enabled =
       GetWindowController(window)->window_wrapper->hover_tracking_enabled;
   if (!hover_enabled) {
-    glfwSetCursorPosCallback(
-        window, (action == GLFW_PRESS) ? GLFWCursorPositionCallback : nullptr);
+    glfwSetCursorPosCallback(window, (controller->buttons != 0)
+                                         ? GLFWCursorPositionCallback
+                                         : nullptr);
   }
   // Disable enter/exit events while the mouse button is down; GLFW will send
   // an exit event when the mouse button is released, and the pointer should
   // stay valid until then.
   if (hover_enabled) {
     glfwSetCursorEnterCallback(
-        window, (action == GLFW_PRESS) ? nullptr : GLFWCursorEnterCallback);
+        window, (controller->buttons != 0) ? nullptr : GLFWCursorEnterCallback);
   }
 }
 
@@ -394,7 +421,8 @@ static void GLFWScrollCallback(GLFWwindow* window,
                                double delta_y) {
   FlutterPointerEvent event = {};
   SetEventLocationFromCursorPosition(window, &event);
-  SetEventPhaseFromCursorButtonState(window, &event);
+  auto* controller = GetWindowController(window);
+  SetEventPhaseFromCursorButtonState(window, &event, controller->buttons);
   event.signal_kind = FlutterPointerSignalKind::kFlutterPointerSignalKindScroll;
   // TODO: See if this can be queried from the OS; this value is chosen
   // arbitrarily to get something that feels reasonable.
