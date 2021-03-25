@@ -1187,11 +1187,12 @@ void main() {
     expect(
       exception.toString(),
       equalsIgnoringHashCodes(
-        'The subtree of `MultiChildRenderObjectElement` must have an associated render object.\n'
+        'The children of `MultiChildRenderObjectElement` must each has an associated render object.\n'
         'This typically means that the `_EmptyWidget` or its children\n'
         'are not a subtype of `RenderObjectWidget`.\n'
         'The following element does not have an associated render object:\n'
-        '  _EmptyWidget'
+        '  _EmptyWidget\n'
+        'debugCreator: _EmptyWidget ← Column ← [root]'
       ),
     );
   });
@@ -1219,11 +1220,12 @@ void main() {
     expect(
       exception.toString(),
       equalsIgnoringHashCodes(
-        'The subtree of `MultiChildRenderObjectElement` must have an associated render object.\n'
+        'The children of `MultiChildRenderObjectElement` must each has an associated render object.\n'
         'This typically means that the `_EmptyWidget` or its children\n'
         'are not a subtype of `RenderObjectWidget`.\n'
         'The following element does not have an associated render object:\n'
-        '  _EmptyWidget'
+        '  _EmptyWidget\n'
+        'debugCreator: _EmptyWidget ← Column ← [root]'
       ),
     );
   });

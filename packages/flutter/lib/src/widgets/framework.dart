@@ -6179,14 +6179,19 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   bool _debugCheckHasAssociatedRenderObject(Element newChild) {
     assert(() {
       if (newChild.renderObject == null) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('The subtree of `MultiChildRenderObjectElement` must have an associated render object.'),
-          ErrorHint(
-            'This typically means that the `${newChild.widget}` or its children\n'
-            'are not a subtype of `RenderObjectWidget`.'
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary('The children of `MultiChildRenderObjectElement` must each has an associated render object.'),
+              ErrorHint(
+                'This typically means that the `${newChild.widget}` or its children\n'
+                'are not a subtype of `RenderObjectWidget`.'
+              ),
+              newChild.describeElement('The following element does not have an associated render object'),
+              DiagnosticsDebugCreator(DebugCreator(newChild)),
+            ]),
           ),
-          newChild.describeElement('The following element does not have an associated render object'),
-        ]);
+        );
       }
       return true;
     }());
