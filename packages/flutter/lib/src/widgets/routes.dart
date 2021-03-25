@@ -1870,11 +1870,11 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 ///
 /// The `barrierDismissible` argument is used to determine whether this route
 /// can be dismissed by tapping the modal barrier. This argument defaults
-/// to true. If `barrierDismissible` is true, a non-null `barrierLabel` must be
+/// to false. If `barrierDismissible` is true, a non-null `barrierLabel` must be
 /// provided.
 ///
 /// The `barrierLabel` argument is the semantic label used for a dismissible
-/// barrier. This argument defaults to "Dismiss".
+/// barrier. This argument defaults to `null`.
 ///
 /// The `barrierColor` argument is the color used for the modal barrier. This
 /// argument defaults to `Color(0x80000000)`.

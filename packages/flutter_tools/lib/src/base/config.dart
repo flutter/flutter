@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 
@@ -27,9 +25,9 @@ class Config {
   /// home directory.
   factory Config(
     String name, {
-    @required FileSystem fileSystem,
-    @required Logger logger,
-    @required Platform platform,
+    required FileSystem fileSystem,
+    required Logger logger,
+    required Platform platform,
   }) {
     final String filePath = _configPath(platform, fileSystem, name);
     final File file = fileSystem.file(filePath);
@@ -43,8 +41,8 @@ class Config {
   /// Defaults to [BufferLogger], [MemoryFileSystem], and [name]=test.
   factory Config.test({
     String name = 'test',
-    Directory directory,
-    Logger logger,
+    Directory? directory,
+    Logger? logger,
   }) {
     directory ??= MemoryFileSystem.test().directory('/');
     return Config.createForTesting(directory.childFile('.${kConfigDir}_$name'), logger ?? BufferLogger.test());
@@ -58,7 +56,7 @@ class Config {
     }
     try {
       ErrorHandlingFileSystem.noExitOnFailure(() {
-        _values = castStringKeyedMap(json.decode(_file.readAsStringSync()));
+        _values = castStringKeyedMap(json.decode(_file.readAsStringSync())) ?? <String, dynamic>{};
       });
     } on FormatException {
       _logger
