@@ -8,15 +8,19 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 
+class TestLeftIntent extends Intent {}
+class TestRightIntent extends Intent {}
+
 void main() {
   testWidgets('DoNothingAndStopPropagationTextIntent', (WidgetTester tester) async {
-    bool moveSelectionLeftCalled = false;
-    bool moveSelectionRightCalled = false;
+    bool leftCalled = false;
+    bool rightCalled = false;
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
+    final FocusNode focusNodeTarget = FocusNode();
+    final FocusNode focusNodeNonTarget = FocusNode();
 
-    // MaterialApp sets up DefaultTextEditingActions and Shortcuts internally.
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(),
       home: Scaffold(
@@ -24,29 +28,40 @@ void main() {
           builder: (BuildContext context) {
             return Shortcuts(
               shortcuts: <LogicalKeySet, Intent>{
-                LogicalKeySet(LogicalKeyboardKey.arrowRight): const DoNothingAndStopPropagationTextIntent(),
+                LogicalKeySet(LogicalKeyboardKey.arrowLeft): TestLeftIntent(),
+                LogicalKeySet(LogicalKeyboardKey.arrowRight): TestRightIntent(),
               },
-              child: Actions(
-                // These Actions intercept default Intents, set a flag that they
-                // were called, and then call through to the default Action.
-                actions: <Type, Action<Intent>>{
-                  MoveSelectionLeftTextIntent: CallbackAction<MoveSelectionLeftTextIntent>(onInvoke: (Intent intent) {
-                    moveSelectionLeftCalled = true;
-                    Actions.invoke<MoveSelectionLeftTextIntent>(context, const MoveSelectionLeftTextIntent());
-                  }),
-                  MoveSelectionRightTextIntent: CallbackAction<MoveSelectionRightTextIntent>(onInvoke: (Intent intent) {
-                    moveSelectionRightCalled = true;
-                    Actions.invoke<MoveSelectionRightTextIntent>(context, const MoveSelectionRightTextIntent());
-                  }),
+              child: Shortcuts(
+                shortcuts: <LogicalKeySet, Intent>{
+                  LogicalKeySet(LogicalKeyboardKey.arrowRight): const DoNothingAndStopPropagationTextIntent(),
                 },
-                child: Center(
-                  child: EditableText(
-                    controller: controller,
-                    focusNode: FocusNode(),
-                    style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
-                    cursorColor: Colors.blue,
-                    backgroundCursorColor: Colors.grey,
-                    autofocus: true,
+                child: Actions(
+                  // These Actions intercept default Intents, set a flag that they
+                  // were called, and then call through to the default Action.
+                  actions: <Type, Action<Intent>>{
+                    TestLeftIntent: CallbackAction<TestLeftIntent>(onInvoke: (Intent intent) {
+                      leftCalled = true;
+                    }),
+                    TestRightIntent: CallbackAction<TestRightIntent>(onInvoke: (Intent intent) {
+                      rightCalled = true;
+                    }),
+                  },
+                  child: Center(
+                    child: Column(
+                      children: <Widget>[
+                        EditableText(
+                          controller: controller,
+                          focusNode: focusNodeTarget,
+                          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+                          cursorColor: Colors.blue,
+                          backgroundCursorColor: Colors.grey,
+                        ),
+                        Focus(
+                          focusNode: focusNodeNonTarget,
+                          child: const Text('focusable'),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -56,25 +71,46 @@ void main() {
       ),
     ));
 
+    // Focus on the EditableText, which is a TextEditingActionTarget.
+    focusNodeTarget.requestFocus();
     await tester.pump();
+    expect(focusNodeTarget.hasFocus, isTrue);
+    expect(focusNodeNonTarget.hasFocus, isFalse);
     expect(controller.selection.isCollapsed, isTrue);
     expect(controller.selection.baseOffset, 11);
 
-    // The left arrow key calls its custom Action and also works as normal.
+    // The left arrow key's Action is called.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pump();
-    expect(controller.selection.isCollapsed, isTrue);
-    expect(controller.selection.baseOffset, 10);
-    expect(moveSelectionLeftCalled, isTrue);
-    expect(moveSelectionRightCalled, isFalse);
+    expect(leftCalled, isTrue);
+    expect(rightCalled, isFalse);
+    leftCalled = false;
 
     // The right arrow key is blocked by DoNothingAndStopPropagationTextIntent.
-    moveSelectionLeftCalled = false;
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pump();
-    expect(controller.selection.isCollapsed, isTrue);
-    expect(controller.selection.baseOffset, 10);
-    expect(moveSelectionLeftCalled, isFalse);
-    expect(moveSelectionRightCalled, isFalse);
+    expect(rightCalled, isFalse);
+    expect(leftCalled, isFalse);
+
+    // Focus on the other node, which is not a TextEditingActionTarget.
+    focusNodeNonTarget.requestFocus();
+    await tester.pump();
+    expect(focusNodeTarget.hasFocus, isFalse);
+    expect(focusNodeNonTarget.hasFocus, isTrue);
+
+    // The left arrow key's Action is called as normal.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    expect(leftCalled, isTrue);
+    expect(rightCalled, isFalse);
+    leftCalled = false;
+
+    // The right arrow key's Action is also called. That's because
+    // DoNothingAndStopPropagationTextIntent only applies if a
+    // TextEditingActionTarget is currently focused.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(leftCalled, isFalse);
+    expect(rightCalled, isTrue);
   });
 }
