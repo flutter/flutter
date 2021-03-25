@@ -148,19 +148,58 @@ class LogicalKeyboardKey extends KeyboardKey {
   //
   // For example, if the input is 0x12abcdabcd, then the result is 0x12.
   //
-  // This could have been a trivial shifting for non-Web environment, but in
-  // order to support JavaScript, which only supports bitwise operation of up to
-  // 32 bits, this function extracts them using division.
-  //
-  // It returns 0 for release mode.
-  static int _debugNonValueBits(int numOf64Bits) {
-    int result = 0;
-    assert(() {
-      const int kDivisorForValueMask = valueMask + 1;
-      result = (numOf64Bits / kDivisorForValueMask).floor();
-      return true;
-    }());
-    return result;
+  // This is mostly equivalent to a right shift, resolving the problem that
+  // JavaScript only support 32-bit bitwise operation and needs to use division
+  // instead.
+  static int _nonValueBits(int n) {
+    // `n >> valueMaskWidth` is equivalent to `n / divisorForValueMask`.
+    const int divisorForValueMask = valueMask + 1;
+    const int valueMaskWidth = 32;
+
+    // Equivalent to assert(divisorForValueMask == (1 << valueMaskWidth)).
+    const int _firstDivisorWidth = 28;
+    assert(divisorForValueMask ==
+      (1 << _firstDivisorWidth) * (1 << (valueMaskWidth - _firstDivisorWidth)));
+
+    // JS only supports up to 2^53 - 1, therefore non-value bits can only
+    // contain (maxSafeIntegerWidth - valueMaskWidth) bits.
+    const int maxSafeIntegerWidth = 52;
+    const int nonValueMask = (1 << (maxSafeIntegerWidth - valueMaskWidth)) - 1;
+
+    if (kIsWeb) {
+      return (n / divisorForValueMask).floor() & nonValueMask;
+    } else {
+      return (n >> valueMaskWidth) & nonValueMask;
+    }
+  }
+
+  static String? _unicodeKeyLabel(int keyId) {
+    if (_nonValueBits(keyId) == 0) {
+      return String.fromCharCode(keyId).toUpperCase();
+    }
+    return null;
+  }
+
+  /// A description representing the character produced by a [RawKeyEvent].
+  ///
+  /// This value is useful for describing mnemonic keyboard shortcuts, such
+  /// as describing a shortcut combination. Do not use this value to match keys;
+  /// compare [keyId] instead.
+  ///
+  /// This value is an empty string if there's no key label data for a key.
+  ///
+  /// On most platforms this is a single code point, but it could contain any
+  /// Unicode string. The `keyLabel` differs from [RawKeyEvent.character]
+  /// because `keyLabel` only takes into account the key being pressed, not any
+  /// combining keys pressed before it, so, for example, an “o” that follows a
+  /// combining dieresis (“¨”, COMBINING DIAERESIS (U+0308)) would just return
+  /// “o” for [keyLabel], but would return “ö” for [RawKeyEvent.character].
+  ///
+  /// {@macro flutter.services.RawKeyEventData.keyLabel}
+  String get keyLabel {
+    return _unicodeKeyLabel(keyId)
+        ?? _keyLabels[keyId]
+        ?? '';
   }
 
   /// The debug string to print for this keyboard key, which will be null in
@@ -168,10 +207,11 @@ class LogicalKeyboardKey extends KeyboardKey {
   String? get debugName {
     String? result;
     assert(() {
-      result = _debugNames[keyId];
+      result = _keyLabels[keyId];
       if (result == null) {
-        if (_debugNonValueBits(keyId) == 0) {
-          result = 'Key ${String.fromCharCode(keyId)}';
+        final String? unicodeKeyLabel = _unicodeKeyLabel(keyId);
+        if (unicodeKeyLabel != null) {
+          result = 'Key $unicodeKeyLabel';
         } else {
           result = 'Key with ID 0x${keyId.toRadixString(16).padLeft(11, '0')}';
         }
@@ -317,10 +357,9 @@ class LogicalKeyboardKey extends KeyboardKey {
   static final Map<LogicalKeyboardKey, LogicalKeyboardKey> _synonyms = <LogicalKeyboardKey, LogicalKeyboardKey>{
 @@@LOGICAL_KEY_SYNONYMS@@@  };
 
-  static const Map<int, String> _debugNames = kReleaseMode ?
-    <int, String>{} :
+  static const Map<int, String> _keyLabels =
     <int, String>{
-@@@LOGICAL_KEY_DEBUG_NAMES@@@    };
+@@@LOGICAL_KEY_KEY_LABELS@@@    };
 }
 
 /// A class with static values that describe the keys that are returned from

@@ -254,13 +254,6 @@ Future<void> main(List<String> rawArguments) async {
   print('Writing ${'key maps'.padRight(15)}${mapsFile.absolute}');
   await mapsFile.writeAsString(KeyboardMapsCodeGenerator(data).generate());
 
-  final File keyLabelsFile = File(path.join(flutterRoot.path, 'packages', 'flutter_test', 'lib', 'src', 'key_labels.dart'));
-  if (!keyLabelsFile.existsSync()) {
-    mapsFile.createSync(recursive: true);
-  }
-  print('Writing ${'key labels'.padRight(15)}${mapsFile.absolute}');
-  await keyLabelsFile.writeAsString(KeyLabelsCodeGenerator(data).generate());
-
   for (final String platform in <String>['android', 'macos', 'ios', 'glfw', 'fuchsia', 'linux', 'windows', 'web']) {
     PlatformCodeGenerator codeGenerator;
     switch (platform) {

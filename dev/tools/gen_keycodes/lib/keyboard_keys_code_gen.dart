@@ -108,7 +108,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
     return synonyms.toString();
   }
 
-  String get _logicalDebugNames {
+  String get _logicalKeyLabels {
     final StringBuffer result = StringBuffer();
     for (final Key entry in keyData.data) {
       result.write('''
@@ -165,7 +165,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
       'LOGICAL_KEY_MAP': _predefinedKeyCodeMap,
       'LOGICAL_KEY_DEFINITIONS': _logicalDefinitions,
       'LOGICAL_KEY_SYNONYMS': _logicalSynonyms,
-      'LOGICAL_KEY_DEBUG_NAMES': _logicalDebugNames,
+      'LOGICAL_KEY_KEY_LABELS': _logicalKeyLabels,
       'PHYSICAL_KEY_DEFINITIONS': _physicalDefinitions,
       'PHYSICAL_KEY_DEBUG_NAMES': _physicalDebugNames,
     };

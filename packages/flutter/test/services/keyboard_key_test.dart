@@ -107,7 +107,19 @@ void main() {
       expect(identical(LogicalKeyboardKey.keyA, LogicalKeyboardKey(LogicalKeyboardKey.keyA.keyId)), true);
       expect(identical(LogicalKeyboardKey(0x12345), LogicalKeyboardKey(0x12345)), true);
     });
-    test('debugNames', () async {
+    test('keyLabel', () async {
+      expect(LogicalKeyboardKey.keyA.keyLabel, 'A');
+      expect(LogicalKeyboardKey.backslash.keyLabel, r'\');
+      expect(LogicalKeyboardKey(0xD9).keyLabel, 'Ù');
+      expect(LogicalKeyboardKey(0xF9).keyLabel, 'Ù');
+      expect(LogicalKeyboardKey.shiftLeft.keyLabel, 'Shift Left');
+      expect(LogicalKeyboardKey.numpadDecimal.keyLabel, 'Numpad Decimal');
+      expect(LogicalKeyboardKey.numpad1.keyLabel, 'Numpad 1');
+      expect(LogicalKeyboardKey.delete.keyLabel, 'Delete');
+      expect(LogicalKeyboardKey.mediaPlay.keyLabel, 'Media Play');
+      expect(LogicalKeyboardKey(0x100012345).keyLabel, '');
+    });
+    test('debugName', () async {
       expect(LogicalKeyboardKey.keyA.debugName, 'Key A');
       expect(LogicalKeyboardKey.backslash.debugName, 'Backslash');
       expect(LogicalKeyboardKey(0xD9).debugName, 'Key Ù');
