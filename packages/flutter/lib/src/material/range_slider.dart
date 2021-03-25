@@ -1131,9 +1131,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       }
       _updateLabelPainter(_lastThumbSelection!);
 
-      if (onChangeStart != null) {
-        onChangeStart!(currentValues);
-      }
+      onChangeStart?.call(currentValues);
 
       onChanged!(_discretizeRangeValues(_newValues));
 
@@ -1202,9 +1200,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
 
     if (_active && _state.mounted && _lastThumbSelection != null) {
       final RangeValues discreteValues = _discretizeRangeValues(_newValues);
-      if (onChangeEnd != null) {
-        onChangeEnd!(discreteValues);
-      }
+      onChangeEnd?.call(discreteValues);
       _active = false;
     }
     _state.overlayController.reverse();
@@ -1710,12 +1706,8 @@ class _RenderValueIndicator extends RenderBox with RelayoutWhenSystemFontsChange
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_state.paintBottomValueIndicator != null) {
-      _state.paintBottomValueIndicator!(context, offset);
-    }
-    if (_state.paintTopValueIndicator != null) {
-      _state.paintTopValueIndicator!(context, offset);
-    }
+    _state.paintBottomValueIndicator?.call(context, offset);
+    _state.paintTopValueIndicator?.call(context, offset);
   }
 
   @override
