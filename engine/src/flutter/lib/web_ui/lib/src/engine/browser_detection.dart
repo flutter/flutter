@@ -23,6 +23,9 @@ enum BrowserEngine {
   /// The engine that powers Internet Explorer 11.
   ie11,
 
+  /// The engine that powers Samsung stock browser. It is based on blink.
+  samsung,
+
   /// We were unable to detect the current browser engine.
   unknown,
 }
@@ -56,7 +59,31 @@ BrowserEngine get browserEngine {
 BrowserEngine _detectBrowserEngine() {
   final String vendor = html.window.navigator.vendor;
   final String agent = html.window.navigator.userAgent.toLowerCase();
+  return detectBrowserEngineByVendorAgent(vendor, agent);
+}
+
+/// Detects samsung blink variants.
+///
+///  Example patterns:
+///    Note 2 : GT-N7100
+///    Note 3 : SM-N900T
+///    Tab 4 : SM-T330NU
+///    Galaxy S4: SHV-E330S
+///    Galaxy Note2: SHV-E250L
+///    Note: SAMSUNG-SGH-I717
+///    SPH/SCH are very old Palm models.
+bool _isSamsungBrowser(String agent) {
+  final RegExp exp = new RegExp(r"SAMSUNG|SGH-[I|N|T]|GT-[I|N]|SM-[A|N|P|T|Z]|SHV-E|SCH-[I|J|R|S]|SPH-L");
+  return exp.hasMatch(agent.toUpperCase());
+}
+
+@visibleForTesting
+BrowserEngine detectBrowserEngineByVendorAgent(String vendor, String agent) {
   if (vendor == 'Google Inc.') {
+    // Samsung browser is based on blink, check for variant.
+    if (_isSamsungBrowser(agent)) {
+      return BrowserEngine.samsung;
+    }
     return BrowserEngine.blink;
   } else if (vendor == 'Apple Computer, Inc.') {
     return BrowserEngine.webkit;
@@ -73,7 +100,6 @@ BrowserEngine _detectBrowserEngine() {
     // https://developer.mozilla.org/en-US/docs/Web/API/Navigator/vendor
     return BrowserEngine.firefox;
   }
-
   // Assume unknown otherwise, but issue a warning.
   print('WARNING: failed to detect current browser engine.');
   return BrowserEngine.unknown;

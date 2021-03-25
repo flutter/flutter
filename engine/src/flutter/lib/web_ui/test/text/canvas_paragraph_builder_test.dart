@@ -15,7 +15,9 @@ String get defaultFontFamily {
   String fontFamily = canonicalizeFontFamily('Ahem')!;
   if (browserEngine == BrowserEngine.firefox) {
     fontFamily = fontFamily.replaceAll('"', '&quot;');
-  } else if (browserEngine == BrowserEngine.blink || browserEngine == BrowserEngine.webkit) {
+  } else if (browserEngine == BrowserEngine.blink ||
+      browserEngine == BrowserEngine.samsung ||
+      browserEngine == BrowserEngine.webkit) {
     fontFamily = fontFamily.replaceAll('"', '');
   }
   return 'font-family: $fontFamily;';
