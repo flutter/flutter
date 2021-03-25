@@ -204,6 +204,13 @@ class LogicalKeyboardKey extends KeyboardKey {
 
   /// The debug string to print for this keyboard key, which will be null in
   /// release mode.
+  ///
+  /// This is different from [keyLabel] for 2 cases:
+  ///
+  ///  * When the key is a printable key, it returns a more formal name
+  ///    ('Key A' instead of 'A').
+  ///  * When the key is unknown, it returns a name generated with its ID
+  ///    ('Key with ID 0x00100012345' instead of an empty string).
   String? get debugName {
     String? result;
     assert(() {

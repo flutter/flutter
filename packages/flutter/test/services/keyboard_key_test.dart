@@ -116,6 +116,7 @@ void main() {
       expect(LogicalKeyboardKey.numpadDecimal.keyLabel, 'Numpad Decimal');
       expect(LogicalKeyboardKey.numpad1.keyLabel, 'Numpad 1');
       expect(LogicalKeyboardKey.delete.keyLabel, 'Delete');
+      expect(LogicalKeyboardKey.f12.keyLabel, 'F12');
       expect(LogicalKeyboardKey.mediaPlay.keyLabel, 'Media Play');
       expect(LogicalKeyboardKey(0x100012345).keyLabel, '');
     });
