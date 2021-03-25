@@ -47,7 +47,7 @@ void main() {
 // @dart=2.12
 ''');
 
-    expect(determineLanguageVersion(file, null), LanguageVersion(2, 12));
+    expect(determineLanguageVersion(file, null), nullSafeVersion);
   });
 
   testWithoutContext('does not detect invalid language version', () {
@@ -59,7 +59,7 @@ void main() {
 // @dart
 ''');
 
-    expect(determineLanguageVersion(file, null), LanguageVersion(2, 12));
+    expect(determineLanguageVersion(file, null), currentLanguageVersion);
   });
 
   testWithoutContext('detects language version with leading whitespace', () {
@@ -107,7 +107,7 @@ void main() {
 /// @dart = 2.9
 ''');
 
-    expect(determineLanguageVersion(file, null), LanguageVersion(2, 12));
+    expect(determineLanguageVersion(file, null), currentLanguageVersion);
   });
 
   testWithoutContext('does not detect language version in block comment', () {
@@ -121,7 +121,7 @@ void main() {
 */
 ''');
 
-    expect(determineLanguageVersion(file, null), LanguageVersion(2, 12));
+    expect(determineLanguageVersion(file, null), currentLanguageVersion);
   });
 
   testWithoutContext('does not detect language version in nested block comment', () {
@@ -137,7 +137,7 @@ void main() {
 */
 ''');
 
-    expect(determineLanguageVersion(file, null), LanguageVersion(2, 12));
+    expect(determineLanguageVersion(file, null), currentLanguageVersion);
   });
 
   testWithoutContext('detects language version after nested block comment', () {
@@ -167,7 +167,7 @@ void main() {
 // @dart = 2.9
 ''');
 
-    expect(determineLanguageVersion(file, null), LanguageVersion(2, 12));
+    expect(determineLanguageVersion(file, null), currentLanguageVersion);
   });
 
   testWithoutContext('does not crash with unbalanced closing block comments', () {
@@ -182,7 +182,7 @@ void main() {
 // @dart = 2.9
 ''');
 
-    expect(determineLanguageVersion(file, null), LanguageVersion(2, 12));
+    expect(determineLanguageVersion(file, null), currentLanguageVersion);
   });
 
   testWithoutContext('does not detect language version in single line block comment', () {
@@ -194,7 +194,7 @@ void main() {
 /* // @dart = 2.9 */
 ''');
 
-    expect(determineLanguageVersion(file, null), LanguageVersion(2, 12));
+    expect(determineLanguageVersion(file, null), currentLanguageVersion);
   });
 
   testWithoutContext('does not detect language version after import declaration', () {
@@ -208,7 +208,7 @@ import 'dart:ui' as ui;
 // @dart = 2.9
 ''');
 
-    expect(determineLanguageVersion(file, null), LanguageVersion(2, 12));
+    expect(determineLanguageVersion(file, null), currentLanguageVersion);
   });
 
   testWithoutContext('does not detect language version after part declaration', () {
@@ -222,7 +222,7 @@ part of 'foo.dart';
 // @dart = 2.9
 ''');
 
-    expect(determineLanguageVersion(file, null), LanguageVersion(2, 12));
+    expect(determineLanguageVersion(file, null), currentLanguageVersion);
   });
 
   testWithoutContext('does not detect language version after library declaration', () {
@@ -236,7 +236,7 @@ library funstuff;
 // @dart = 2.9
 ''');
 
-    expect(determineLanguageVersion(file, null), LanguageVersion(2, 12));
+    expect(determineLanguageVersion(file, null), currentLanguageVersion);
   });
 
   testWithoutContext('looks up language version from package if not found in file', () {
@@ -254,7 +254,7 @@ library funstuff;
     expect(determineLanguageVersion(file, package), LanguageVersion(2, 7));
   });
 
-  testWithoutContext('defaults to null safe version if package lookup returns null', () {
+  testWithoutContext('defaults to current version if package lookup returns null', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File file = fileSystem.file('example.dart')
       ..writeAsStringSync('''
@@ -266,7 +266,7 @@ library funstuff;
       languageVersion: null,
     );
 
-    expect(determineLanguageVersion(file, package), LanguageVersion(2, 12));
+    expect(determineLanguageVersion(file, package), currentLanguageVersion);
   });
 
   testWithoutContext('Returns null safe error if reading the file throws a FileSystemException', () {
@@ -276,7 +276,7 @@ library funstuff;
       languageVersion: LanguageVersion(2, 7),
     );
 
-    expect(determineLanguageVersion(FakeFile(), package), nullSafeVersion);
+    expect(determineLanguageVersion(FakeFile(), package), currentLanguageVersion);
   });
 }
 

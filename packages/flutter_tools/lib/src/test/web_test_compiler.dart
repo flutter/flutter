@@ -63,7 +63,7 @@ class WebTestCompiler {
       }
     } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
       platformDillArtifact = Artifact.webPlatformSoundKernelDill;
-      languageVersion = nullSafeVersion;
+      languageVersion = currentLanguageVersion;
       if (!extraFrontEndOptions.contains('--sound-null-safety')) {
         extraFrontEndOptions.add('--sound-null-safety');
       }
