@@ -18,7 +18,6 @@ import 'package:gen_keycodes/glfw_code_gen.dart';
 import 'package:gen_keycodes/gtk_code_gen.dart';
 import 'package:gen_keycodes/windows_code_gen.dart';
 import 'package:gen_keycodes/web_code_gen.dart';
-import 'package:gen_keycodes/key_labels_code_gen.dart';
 import 'package:gen_keycodes/keyboard_keys_code_gen.dart';
 import 'package:gen_keycodes/keyboard_maps_code_gen.dart';
 import 'package:gen_keycodes/key_data.dart';
