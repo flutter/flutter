@@ -7,6 +7,7 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:meta/meta.dart' show required;
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -174,7 +175,7 @@ Future<vm_service.VmService> setUpVmService(
   // Each service registration requires a request to the attached VM service. Since the
   // order of these requests does not mattter, store each future in a list and await
   // all at the end of this method.
-  final List<Future<void>> registrationRequests = <Future<void>>[];
+  final List<Future<vm_service.Success>> registrationRequests = <Future<vm_service.Success>>[];
   if (reloadSources != null) {
     vmService.registerServiceCallback('reloadSources', (Map<String, dynamic> params) async {
       final String isolateId = _validateRpcStringParam('reloadSources', params, 'isolateId');
@@ -272,8 +273,12 @@ Future<vm_service.VmService> setUpVmService(
     }
     vmService.onExtensionEvent.listen(printStructuredErrorLogMethod);
   }
-  // TODO(jonahwilliams): remove the null filtering here once test mocks are cleaned up.
-  await Future.wait(registrationRequests.where((Future<void> x) => x != null));
+
+  try {
+    await Future.wait(registrationRequests);
+  } on vm_service.RPCError catch (e) {
+    throwToolExit('Failed to register service methods on attached VM Service: $e');
+  }
   return vmService;
 }
 
