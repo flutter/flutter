@@ -18,6 +18,16 @@ import 'theme.dart';
 
 export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization, SmartQuotesType, SmartDashesType;
 
+// This is a temporary fix for: https://github.com/flutter/flutter/issues/79012
+/// A map used to disable scrolling shortcuts in text fields.
+final Map<LogicalKeySet, Intent> _webScrollShortcutOverrides = <LogicalKeySet, Intent>{
+  LogicalKeySet(LogicalKeyboardKey.space): DoNothingAndStopPropagationIntent(),
+  LogicalKeySet(LogicalKeyboardKey.arrowUp): DoNothingAndStopPropagationIntent(),
+  LogicalKeySet(LogicalKeyboardKey.arrowDown): DoNothingAndStopPropagationIntent(),
+  LogicalKeySet(LogicalKeyboardKey.arrowLeft): DoNothingAndStopPropagationIntent(),
+  LogicalKeySet(LogicalKeyboardKey.arrowRight): DoNothingAndStopPropagationIntent(),
+};
+
 const TextStyle _kDefaultPlaceholderStyle = TextStyle(
   fontWeight: FontWeight.w400,
   color: CupertinoColors.placeholderText,
@@ -1232,7 +1242,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
     if (kIsWeb) {
       return Shortcuts(
-        shortcuts: scrollShortcutOverrides,
+        shortcuts: _webScrollShortcutOverrides,
         child: child,
       );
     }
