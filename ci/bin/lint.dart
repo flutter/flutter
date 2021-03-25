@@ -141,7 +141,7 @@ Future<LintAction> getLintAction(File file) async {
     .transform(utf8.decoder)
     .transform(const LineSplitter());
   await for (String line in lines) {
-    final RegExpMatch match = exp.firstMatch(line);
+    final RegExpMatch? match = exp.firstMatch(line);
     if (match != null) {
       return match.group(1) != null
         ? LintAction.skipNoLint
@@ -158,7 +158,7 @@ Future<LintAction> getLintAction(File file) async {
 WorkerJob createLintJob(Command command, String checks, String tidyPath) {
   final String tidyArgs = calcTidyArgs(command);
   final List<String> args = <String>[command.file.path, checks, '--'];
-  args.addAll(tidyArgs?.split(' ') ?? <String>[]);
+  args.addAll(tidyArgs.split(' '));
   return WorkerJob(
     <String>[tidyPath, ...args],
     workingDirectory: command.directory,
@@ -286,10 +286,10 @@ void main(List<String> arguments) async {
   final ProcessPool pool = ProcessPool();
 
   await for (final WorkerJob job in pool.startWorkers(jobs)) {
-    if (job.result?.exitCode == 0) {
+    if (job.result.exitCode == 0) {
       continue;
     }
-    if (job.result == null) {
+    if (job.exception != null) {
       print('\n❗ A clang-tidy job failed to run, aborting:\n${job.exception}');
       exitCode = 1;
       break;

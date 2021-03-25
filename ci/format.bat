@@ -29,4 +29,5 @@ cd "%ci_dir%"
 REM Do not use the CALL command in the next line to execute Dart. CALL causes
 REM Windows to re-read the line from disk after the CALL command has finished
 REM regardless of the ampersand chain.
-"%pub%" get & "%dart%" --disable-dart-dev bin\format.dart %* & exit /B !ERRORLEVEL!
+REM TODO(gspencergoog): Remove --no-sound-null-safety once isolate package is null-safe.
+"%pub%" get & "%dart%" --no-sound-null-safety --disable-dart-dev bin\format.dart %* & exit /B !ERRORLEVEL!
