@@ -7,10 +7,10 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:meta/meta.dart' show required;
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import 'base/common.dart';
 import 'base/context.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
