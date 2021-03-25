@@ -4467,11 +4467,11 @@ void main() {
         child: Center(
           child: IntrinsicHeight(
             child: Column(
-              children: <Widget>[
+              children: const <Widget>[
                 TextField(
-                  decoration: InputDecoration(
-                    labelText: "Label Text",
-                    helperText: "Helper Text",
+                  decoration: const InputDecoration(
+                    labelText: 'Label Text',
+                    helperText: 'Helper Text',
                     contentPadding: EdgeInsets.zero,
                   ),
                 ),
