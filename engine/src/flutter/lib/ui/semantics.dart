@@ -15,7 +15,7 @@ part of dart.ui;
 /// See also:
 ///   - file://./../../lib/ui/semantics/semantics_node.h
 class SemanticsAction {
-  const SemanticsAction._(this.index) : assert(index != null); // ignore: unnecessary_null_comparison
+  const SemanticsAction._(this.index) : assert(index != null);
 
   static const int _kTapIndex = 1 << 0;
   static const int _kLongPressIndex = 1 << 1;
@@ -319,7 +319,7 @@ class SemanticsFlag {
   // flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java,
   // and the SemanticsFlag class in lib/web_ui/lib/src/ui/semantics.dart.
 
-  const SemanticsFlag._(this.index) : assert(index != null); // ignore: unnecessary_null_comparison
+  const SemanticsFlag._(this.index) : assert(index != null);
 
   /// The numerical value for this flag.
   ///
@@ -748,7 +748,6 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
   }) {
     assert(_matrix4IsValid(transform));
     assert(
-      // ignore: unnecessary_null_comparison
       scrollChildren == 0 || scrollChildren == null || (scrollChildren > 0 && childrenInHitTestOrder != null),
       'If a node has scrollChildren, it must have childrenInHitTestOrder',
     );
@@ -832,8 +831,8 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
   /// [SemanticsAction.index] value. For custom actions this argument should not be
   /// provided.
   void updateCustomAction({required int id, String? label, String? hint, int overrideId = -1}) {
-    assert(id != null); // ignore: unnecessary_null_comparison
-    assert(overrideId != null); // ignore: unnecessary_null_comparison
+    assert(id != null);
+    assert(overrideId != null);
     _updateCustomAction(id, label, hint, overrideId);
   }
   void _updateCustomAction(
