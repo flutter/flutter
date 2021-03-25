@@ -158,7 +158,10 @@ typedef VMServiceConnector = Future<FlutterVmService> Function(Uri httpUri, {
   Device device,
 });
 
-/// A connection to the Dart VM Service.
+/// Set up the VM Service client by attaching services for each of the provided
+/// callbacks.
+///
+/// All parameters besides [vmService] may be null.
 Future<vm_service.VmService> setUpVmService(
   ReloadSources reloadSources,
   Restart restart,
@@ -168,6 +171,9 @@ Future<vm_service.VmService> setUpVmService(
   PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   vm_service.VmService vmService
 ) async {
+  // Each service registration requires a request to the attached VM service. Since the
+  // order of these requests does not mattter, store each future in a list and await
+  // all at the end of this method.
   final List<Future<void>> registrationRequests = <Future<void>>[];
   if (reloadSources != null) {
     vmService.registerServiceCallback('reloadSources', (Map<String, dynamic> params) async {
@@ -266,6 +272,7 @@ Future<vm_service.VmService> setUpVmService(
     }
     vmService.onExtensionEvent.listen(printStructuredErrorLogMethod);
   }
+  // TODO(jonahwilliams): remove the null filtering here once test mocks are cleaned up.
   await Future.wait(registrationRequests.where((Future<void> x) => x != null));
   return vmService;
 }
