@@ -194,4 +194,9 @@ void main() {
   InputDecorationTheme(floatingLabelBehavior: FloatingLabelBehavior.never);
   InputDecorationTheme();
   inputDecorationTheme.floatingLabelBehavior;
+
+  // Changes made in https://github.com/flutter/flutter/pull/73510
+  final TextEditingController controller = TextEditingController();
+  controller.buildTextSpan(context: context, withComposing: true);
+  controller.buildTextSpan(context: context, style: TextStyle(), withComposing: false);
 }

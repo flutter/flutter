@@ -95,4 +95,9 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/59127
   const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem(title: myTitle);
   bottomNavigationBarItem.title;
+
+  // Changes made in https://github.com/flutter/flutter/pull/73510
+  final TextEditingController controller = TextEditingController();
+  controller.buildTextSpan(withComposing: true);
+  controller.buildTextSpan(style: TextStyle(), withComposing: false);
 }

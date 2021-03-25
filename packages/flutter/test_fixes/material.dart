@@ -194,4 +194,9 @@ void main() {
   InputDecorationTheme(hasFloatingPlaceholder: false);
   InputDecorationTheme();
   inputDecorationTheme.hasFloatingPlaceholder;
+
+  // Changes made in https://github.com/flutter/flutter/pull/73510
+  final TextEditingController controller = TextEditingController();
+  controller.buildTextSpan(withComposing: true);
+  controller.buildTextSpan(style: TextStyle(), withComposing: false);
 }

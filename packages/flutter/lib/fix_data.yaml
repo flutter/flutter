@@ -12,6 +12,21 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/73510
+  - title: "Provide BuildContext to buildTextSpan"
+    date: 2021-01-28
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      method: 'buildTextSpan'
+      inClass: 'TextEditingController'
+    changes:
+      - kind: 'addParameter'
+        index: 0
+        name: 'context'
+        style: required_named
+        argumentValue:
+          expression: 'context'
+
   # Changes made in https://github.com/flutter/flutter/pull/65246
   - title: "Remove 'disabledThumbGapWidth'"
     date: 2020-11-17
