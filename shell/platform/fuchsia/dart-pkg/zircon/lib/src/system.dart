@@ -8,14 +8,14 @@ part of zircon;
 // ignore_for_file: public_member_api_docs
 
 @pragma('vm:entry-point')
-class _Namespace { // ignore: unused_element
+class _Namespace {
   // No public constructor - this only has static methods.
   _Namespace._();
 
   // Library private variable set by the embedder used to cache the
   // namespace (as an fdio_ns_t*).
   @pragma('vm:entry-point')
-  static int? _namespace; // ignore: unused_field
+  static int? _namespace;
 }
 
 /// An exception representing an error returned as an zx_status_t.

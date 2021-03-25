@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:html' as html;
-// ignore: undefined_shown_name
 import 'dart:ui' as ui show platformViewRegistry;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -37,7 +36,6 @@ void main() async {
     int viewInstanceCount = 0;
 
     platformViewsRegistry.getNextPlatformViewId();
-    // ignore: undefined_prefixed_name
     ui.platformViewRegistry.registerViewFactory('MyView', (int viewId) {
       ++viewInstanceCount;
       return html.DivElement();

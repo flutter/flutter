@@ -93,7 +93,7 @@ Future<SemanticsActionData> get semanticsAction {
 }
 
 @pragma('vm:entry-point')
-void a11y_main() async { // ignore: non_constant_identifier_names
+void a11y_main() async {
   // Return initial state (semantics disabled).
   notifySemanticsEnabled(PlatformDispatcher.instance.semanticsEnabled);
 
@@ -521,7 +521,7 @@ int _serializeKeyEventType(KeyEventType change) {
 
 // Echo the event data with `_echoKeyEvent`, and returns synthesized as handled.
 @pragma('vm:entry-point')
-void key_data_echo() async { // ignore: non_constant_identifier_names
+void key_data_echo() async {
   PlatformDispatcher.instance.onKeyData = (KeyData data) {
     _echoKeyEvent(
       _serializeKeyEventType(data.type),

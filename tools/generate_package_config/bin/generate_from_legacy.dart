@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:package_config/package_config.dart';
-import 'package:package_config/packages_file.dart'; // ignore: deprecated_member_use
+import 'package:package_config/packages_file.dart';
 import 'package:package_config/src/package_config_json.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';

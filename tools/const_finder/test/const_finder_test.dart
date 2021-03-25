@@ -140,22 +140,22 @@ void _checkNonConsts() {
         },
         <String, dynamic>{
           'file': 'file://$fixtures/lib/consts_and_non.dart',
-          'line': 17,
+          'line': 16,
           'column': 26,
         },
         <String, dynamic>{
           'file': 'file://$fixtures/lib/consts_and_non.dart',
-          'line': 17,
+          'line': 16,
           'column': 41,
         },
         <String, dynamic>{
           'file': 'file://$fixtures/lib/consts_and_non.dart',
-          'line': 19,
+          'line': 17,
           'column': 26,
         },
         <String, dynamic>{
           'file': 'file://$fixtures/pkg/package.dart',
-          'line': 14,
+          'line': 13,
           'column': 25,
         }
       ]
