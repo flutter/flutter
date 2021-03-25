@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/version.dart';
 import 'package:package_config/package_config.dart';
+
+import '../base/version.dart';
 
 final RegExp _languageVersion = RegExp(r'\/\/\s*@dart\s*=\s*([0-9])\.([0-9]+)');
 final RegExp _declarationEnd = RegExp('(import)|(library)|(part)');
