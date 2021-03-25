@@ -1046,6 +1046,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     final String text = textSelectionDelegate.textEditingValue.text;
+    final String textBefore = selection.textBefore(text);
+
+    if (textBefore.isEmpty) {
+      return;
+    }
+
     final String textAfter = selection.textAfter(text);
     const TextSelection newSelection = TextSelection.collapsed(offset: 0);
     _setTextEditingValue(
@@ -1069,6 +1075,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     final String text = textSelectionDelegate.textEditingValue.text;
+    final String textAfter = selection.textAfter(text);
+
+    if (textAfter.isEmpty) {
+      return;
+    }
+
     final String textBefore = selection.textBefore(text);
     final TextSelection newSelection = TextSelection.collapsed(offset: textBefore.length);
     _setTextEditingValue(
@@ -1101,11 +1113,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     if (!_selection!.isCollapsed) {
       return _deleteSelection(_selection!, cause);
-    }
-
-    // When the text is obscured, the whole thing is treated as one big word.
-    if (obscureText) {
-      return _deleteToStart(_selection!, cause);
     }
 
     final String text = textSelectionDelegate.textEditingValue.text;
@@ -1203,6 +1210,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return _deleteSelection(_selection!, cause);
     }
 
+    // When the text is obscured, the whole thing is treated as one big line.
+    if (obscureText) {
+      return _deleteToStart(_selection!, cause);
+    }
+
     final String text = textSelectionDelegate.textEditingValue.text;
     String textBefore = _selection!.textBefore(text);
     if (textBefore.isEmpty) {
@@ -1253,10 +1265,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final String textBefore = _selection!.textBefore(text);
     String textAfter = _selection!.textAfter(text);
 
-    if (textAfter.isNotEmpty) {
-      final int deleteCount = nextCharacter(0, textAfter);
-      textAfter = textAfter.substring(deleteCount);
+    if (textAfter.isEmpty) {
+      return;
     }
+
+    final int deleteCount = nextCharacter(0, textAfter);
+    textAfter = textAfter.substring(deleteCount);
 
     _setTextEditingValue(
       TextEditingValue(text: textBefore + textAfter, selection: _selection!),
@@ -1765,7 +1779,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// {@macro flutter.rendering.RenderEditable.whiteSpace}
   ///
   /// {@macro flutter.rendering.RenderEditable.stopAtReversal}
-  /// 
+  ///
   ///
   /// See also:
   ///
