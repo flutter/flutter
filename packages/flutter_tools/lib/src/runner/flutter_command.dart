@@ -885,6 +885,7 @@ abstract class FlutterCommand extends Command<void> {
         final LanguageVersion languageVersion = determineLanguageVersion(
           entrypointFile,
           packageConfig.packageOf(entrypointFile.absolute.uri),
+          Cache.flutterRoot,
         );
         // Extra frontend options are only provided if explicitly
         // requested.
