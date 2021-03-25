@@ -314,47 +314,97 @@ void testMain() async {
   });
 
   void testFontFeatures(EngineCanvas canvas) {
-    final String text = 'Aa Bb Dd Ee Ff';
+    final String text = 'Aa Bb Dd Ee Ff Difficult';
     final FontFeature enableSmallCaps = FontFeature('smcp');
     final FontFeature disableSmallCaps = FontFeature('smcp', 0);
+
+    final String numeric = '123.4560';
+    final FontFeature enableOnum = FontFeature('onum');
+
+    final FontFeature disableLigatures = FontFeature('liga', 0);
+
     final CanvasParagraph paragraph = rich(
       ParagraphStyle(fontFamily: 'Roboto'),
       (CanvasParagraphBuilder builder) {
+        // Small Caps
         builder.pushStyle(EngineTextStyle.only(
-          height: 2,
+          height: 1.5,
           color: black,
           fontSize: 32.0,
         ));
-        builder.addText('Small Caps: ');
         builder.pushStyle(EngineTextStyle.only(
           color: blue,
           fontFeatures: <FontFeature>[enableSmallCaps],
         ));
-        builder.addText('$text\n');
+        builder.addText(text);
         // Make sure disabling a font feature also works.
         builder.pushStyle(EngineTextStyle.only(
           color: black,
           fontFeatures: <FontFeature>[disableSmallCaps],
         ));
-        builder.addText('Normal Caps: ');
+        builder.addText(' (smcp)\n');
+        builder.pop(); // disableSmallCaps
+        builder.pop(); // enableSmallCaps
+
+        // No ligatures
+        builder.pushStyle(EngineTextStyle.only(
+          color: blue,
+          fontFeatures: <FontFeature>[disableLigatures],
+        ));
+        builder.addText(text);
+        builder.pop(); // disableLigatures
+        builder.addText(' (no liga)\n');
+
+        // No font features
         builder.pushStyle(EngineTextStyle.only(
           color: blue,
         ));
         builder.addText(text);
+        builder.pop(); // color: blue
+        builder.addText(' (none)\n');
+
+        // Onum
+        builder.pushStyle(EngineTextStyle.only(
+          color: blue,
+          fontFeatures: <FontFeature>[enableOnum],
+        ));
+        builder.addText(numeric);
+        builder.pop(); // enableOnum
+        builder.addText(' (onum)\n');
+
+        // No font features
+        builder.pushStyle(EngineTextStyle.only(
+          color: blue,
+        ));
+        builder.addText(numeric);
+        builder.pop(); // color: blue
+        builder.addText(' (none)\n\n');
+
+        // Multiple font features
+        builder.addText('Combined (smcp, onum):\n');
+        builder.pushStyle(EngineTextStyle.only(
+          color: blue,
+          fontFeatures: <FontFeature>[
+            enableSmallCaps,
+            enableOnum,
+          ],
+        ));
+        builder.addText('$text - $numeric');
+        builder.pop(); // enableSmallCaps, enableOnum
       },
     )..layout(constrain(double.infinity));
     canvas.drawParagraph(paragraph, Offset.zero);
   }
 
   test('font features', () {
-    const Rect bounds = Rect.fromLTWH(0, 0, 500, 300);
+    const Rect bounds = Rect.fromLTWH(0, 0, 600, 500);
     final canvas = BitmapCanvas(bounds, RenderStrategy());
     testFontFeatures(canvas);
     return takeScreenshot(canvas, bounds, 'canvas_paragraph_font_features');
   });
 
   test('font features (DOM)', () {
-    const Rect bounds = Rect.fromLTWH(0, 0, 500, 300);
+    const Rect bounds = Rect.fromLTWH(0, 0, 600, 500);
     final canvas = DomCanvas(domRenderer.createElement('flt-picture'));
     testFontFeatures(canvas);
     return takeScreenshot(canvas, bounds, 'canvas_paragraph_font_features_dom');
