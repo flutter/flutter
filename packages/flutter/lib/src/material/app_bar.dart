@@ -1354,7 +1354,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///                       setState(() {
 ///                         _snap = val;
 ///                         // Snapping only applies when the app bar is floating.
-///                         _floating = _floating || val;
+///                         _floating = _floating || _snap;
 ///                       });
 ///                     },
 ///                     value: _snap,
@@ -1368,11 +1368,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///                     onChanged: (bool val) {
 ///                       setState(() {
 ///                         _floating = val;
-///                         if (_snap == true) {
-///                           if (_floating != true) {
-///                             _snap = false;
-///                           }
-///                         }
+///                         _snap = _snap && _floating;
 ///                       });
 ///                     },
 ///                     value: _floating,
