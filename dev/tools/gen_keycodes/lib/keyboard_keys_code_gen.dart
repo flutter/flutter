@@ -112,7 +112,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
     final StringBuffer result = StringBuffer();
     for (final Key entry in keyData.data) {
       result.write('''
-      ${toHex(entry.flutterId, digits: 11)}: '${entry.commentName}',
+    ${toHex(entry.flutterId, digits: 11)}: '${entry.commentName}',
 ''');
     }
     for (final String name in Key.synonyms.keys) {
