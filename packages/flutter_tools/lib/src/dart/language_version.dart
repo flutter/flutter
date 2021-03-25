@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/file.dart';
 import 'package:package_config/package_config.dart';
 
@@ -25,8 +27,16 @@ LanguageVersion currentLanguageVersion(FileSystem fileSystem, String flutterRoot
   // Either reading the file or parsing the version could fail on a corrupt Dart SDK.
   // let it crash so it shows up in crash logging.
   final File versionFile = fileSystem.file(fileSystem.path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'version'));
+  if (!versionFile.existsSync() && _inUnitTest()) {
+    return LanguageVersion(2, 12);
+  }
   final Version version = Version.parse(versionFile.readAsStringSync())!;
   return _currentLanguageVersion = LanguageVersion(version.major, version.minor);
+}
+
+// Whether the tool is executing in a unit test.
+bool _inUnitTest() {
+  return Zone.current[#test.declarer] != null;
 }
 
 /// Attempts to read the language version of a dart [file].
