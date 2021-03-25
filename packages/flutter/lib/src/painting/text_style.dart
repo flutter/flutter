@@ -179,9 +179,9 @@ const double _kDefaultFontSize = 14.0;
 /// (Configuration 1), `Top Leading : Bottom Leading = Font Ascent : Font
 /// Descent`, which also means the alphabetic baseline divides the line height
 /// into 2 parts proportional to the font's ascent and descent. With
-/// [TextLeadingDistribution.proportional] (Configuration 3), `Top Leading`
-/// equals `Bottom Leading`, and the glyphs are roughly centered within the
-/// allotted line height.
+/// [TextLeadingDistribution.even] (Configuration 3), `Top Leading` equals
+/// `Bottom Leading`, and the glyphs are roughly centered within the allotted
+/// line height.
 ///
 /// The [TextPainter.textHeightBehavior] is a property that controls leading at
 /// the paragraph level. The `applyHeightToFirstAscent` property is applied
