@@ -91,7 +91,8 @@ class _PlatformAdaptiveIcons {
 ///
 /// Use with the [Icon] class to show specific icons.
 ///
-/// Icons are identified by their name as listed below.
+/// Icons are identified by their name as listed below. **Do not use codepoints
+/// directly, as they are subject to change.**
 ///
 /// To use this class, make sure you set `uses-material-design: true` in your
 /// project's `pubspec.yaml` file in the `flutter` section. This ensures that
