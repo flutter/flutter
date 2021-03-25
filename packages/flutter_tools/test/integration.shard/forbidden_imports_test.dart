@@ -51,10 +51,11 @@ void main() {
       .map(_asFile);
     for (final File file in files) {
       for (final String line in file.readAsLinesSync()) {
-        if (line.startsWith(RegExp(r'import.*globals.dart'))
-         && !line.contains(r'as globals')) {
+        if ((line.startsWith(RegExp(r'import.*globals.dart')) ||
+                line.startsWith(RegExp(r'import.*globals_null_migrated.dart'))) &&
+            !line.contains(r'as globals')) {
           final String relativePath = fileSystem.path.relative(file.path, from:flutterTools);
-          fail('$relativePath imports globals.dart without a globals prefix.');
+          fail('$relativePath imports globals_null_migrated.dart or globals.dart without a globals prefix.');
         }
       }
     }

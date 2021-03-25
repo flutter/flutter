@@ -15,7 +15,7 @@ import 'base/os.dart';
 import 'base/utils.dart';
 import 'build_system/targets/icon_tree_shaker.dart';
 import 'convert.dart';
-import 'globals.dart' as globals;
+import 'globals_null_migrated.dart' as globals;
 
 /// Information about a build to be performed or used.
 class BuildInfo {
