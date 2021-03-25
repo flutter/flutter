@@ -68,7 +68,7 @@ class Tab extends StatelessWidget {
     Key? key,
     @Deprecated(
       'Use "label" instead, as it allows for an improved text-scaling experience. '
-      'This feature was deprecated after v2.0.3.'
+      'This feature was deprecated after v2.1.0-12.1.pre.'
     )
     this.text,
     this.label,
@@ -85,7 +85,7 @@ class Tab extends StatelessWidget {
   /// This field is deprecated, use [label] instead.
   @Deprecated(
     'Use "label" instead, as it allows for an improved text-scaling experience. '
-    'This feature was deprecated after v1.19.0.'
+    'This feature was deprecated after v2.1.0-12.1.pre.'
   )
   final String? text;
 
