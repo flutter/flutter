@@ -289,115 +289,7 @@ class ReorderableListView extends StatefulWidget {
   _ReorderableListViewState createState() => _ReorderableListViewState();
 }
 
-// This top-level state manages an Overlay that contains the list and
-// also any items being dragged on top fo the list.
-//
-// The Overlay doesn't properly keep state by building new overlay entries,
-// and so we cache a single OverlayEntry for use as the list layer.
-// That overlay entry then builds a _ReorderableListContent which may
-// insert items being dragged into the Overlay above itself.
 class _ReorderableListViewState extends State<ReorderableListView> {
-  // This entry contains the scrolling list itself.
-  late OverlayEntry _listOverlayEntry;
-
-  @override
-  void initState() {
-    super.initState();
-    _listOverlayEntry = OverlayEntry(
-      opaque: true,
-      builder: (BuildContext context) {
-        return _ReorderableListContent(
-          itemBuilder: widget.itemBuilder,
-          itemCount: widget.itemCount,
-          onReorder: widget.onReorder,
-          proxyDecorator: widget.proxyDecorator,
-          buildDefaultDragHandles: widget.buildDefaultDragHandles,
-          padding: widget.padding,
-          header: widget.header,
-          scrollDirection: widget.scrollDirection,
-          reverse: widget.reverse,
-          scrollController: widget.scrollController,
-          primary: widget.primary,
-          physics: widget.physics,
-          shrinkWrap: widget.shrinkWrap,
-          anchor: widget.anchor,
-          cacheExtent: widget.cacheExtent,
-          dragStartBehavior: widget.dragStartBehavior,
-          keyboardDismissBehavior: widget.keyboardDismissBehavior,
-          restorationId: widget.restorationId,
-          clipBehavior: widget.clipBehavior,
-        );
-      },
-    );
-  }
-
-  @override
-  void didUpdateWidget(ReorderableListView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // As this depends on pretty much everything, it
-    // is ok to mark this as dirty unconditionally.
-    _listOverlayEntry.markNeedsBuild();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    assert(debugCheckHasMaterialLocalizations(context));
-    return Overlay(
-      initialEntries: <OverlayEntry>[
-        _listOverlayEntry
-      ],
-    );
-  }
-}
-
-class _ReorderableListContent extends StatefulWidget {
-  const _ReorderableListContent({
-    required this.itemBuilder,
-    required this.itemCount,
-    required this.onReorder,
-    required this.proxyDecorator,
-    required this.buildDefaultDragHandles,
-    required this.padding,
-    required this.header,
-    required this.scrollDirection,
-    required this.reverse,
-    required this.scrollController,
-    required this.primary,
-    required this.physics,
-    required this.shrinkWrap,
-    required this.anchor,
-    required this.cacheExtent,
-    required this.dragStartBehavior,
-    required this.keyboardDismissBehavior,
-    required this.restorationId,
-    required this.clipBehavior,
-  });
-
-  final IndexedWidgetBuilder itemBuilder;
-  final int itemCount;
-  final ReorderCallback onReorder;
-  final ReorderItemProxyDecorator? proxyDecorator;
-  final bool buildDefaultDragHandles;
-  final EdgeInsets? padding;
-  final Widget? header;
-  final Axis scrollDirection;
-  final bool reverse;
-  final ScrollController? scrollController;
-  final bool? primary;
-  final ScrollPhysics? physics;
-  final bool shrinkWrap;
-  final double anchor;
-  final double? cacheExtent;
-  final DragStartBehavior dragStartBehavior;
-  final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
-  final String? restorationId;
-  final Clip clipBehavior;
-
-  @override
-  _ReorderableListContentState createState() => _ReorderableListContentState();
-}
-
-class _ReorderableListContentState extends State<_ReorderableListContent> {
   Widget _wrapWithSemantics(Widget child, int index) {
     void reorder(int startIndex, int endIndex) {
       if (startIndex != endIndex)
@@ -530,6 +422,9 @@ class _ReorderableListContentState extends State<_ReorderableListContent> {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context));
+    assert(debugCheckHasOverlay(context));
+
     // If there is a header we can't just apply the padding to the list,
     // so we wrap the CustomScrollView in the padding for the top, left and right
     // and only add the padding from the bottom to the sliver list (or the equivalent

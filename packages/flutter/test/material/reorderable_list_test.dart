@@ -212,47 +212,6 @@ void main() {
         expect(getListHeight(), kDraggingListHeight);
       });
 
-      testWidgets('Vertical drop area golden', (WidgetTester tester) async {
-        final Widget reorderableListView = ReorderableListView(
-          children: <Widget>[
-            Container(
-              key: const Key('pink'),
-              width: double.infinity,
-              height: itemHeight,
-              color: Colors.pink,
-            ),
-            Container(
-              key: const Key('blue'),
-              width: double.infinity,
-              height: itemHeight,
-              color: Colors.blue,
-            ),
-            Container(
-              key: const Key('green'),
-              width: double.infinity,
-              height: itemHeight,
-              color: Colors.green,
-            ),
-          ],
-          scrollDirection: Axis.vertical,
-          onReorder: (int oldIndex, int newIndex) { },
-        );
-        await tester.pumpWidget(MaterialApp(
-          home: SizedBox(
-            height: itemHeight * 3,
-            child: reorderableListView,
-          ),
-        ));
-
-        await tester.startGesture(tester.getCenter(find.byKey(const Key('blue'))));
-        await tester.pump(kLongPressTimeout + kPressTimeout);
-        await tester.pumpAndSettle();
-        await expectLater(
-          find.byKey(const Key('blue')),
-          matchesGoldenFile('reorderable_list_test.vertical.drop_area.png'),
-        );
-      });
-
       testWidgets('Preserves children states when the list parent changes the order', (WidgetTester tester) async {
         _StatefulState findState(Key key) {
           return find.byElementPredicate((Element element) => element.findAncestorWidgetOfExactType<_Stateful>()?.key == key)
@@ -432,6 +391,11 @@ void main() {
           ],
           onReorder: (int oldIndex, int newIndex) { },
         );
+        final Widget overlay = Overlay(
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(builder: (BuildContext context) => reorderableList)
+          ],
+        );
         final Widget boilerplate = Localizations(
           locale: const Locale('en'),
           delegates: const <LocalizationsDelegate<dynamic>>[
@@ -443,7 +407,7 @@ void main() {
             height: 100.0,
             child: Directionality(
               textDirection: TextDirection.ltr,
-              child: reorderableList,
+              child: overlay,
             ),
           ),
         );
@@ -793,47 +757,6 @@ void main() {
         await drag.up();
         await tester.pumpAndSettle();
         expect(getListWidth(), kDraggingListWidth);
-      });
-
-      testWidgets('Horizontal drop area golden', (WidgetTester tester) async {
-        final Widget reorderableListView = ReorderableListView(
-          children: <Widget>[
-            Container(
-              key: const Key('pink'),
-              height: double.infinity,
-              width: itemHeight,
-              color: Colors.pink,
-            ),
-            Container(
-              key: const Key('blue'),
-              height: double.infinity,
-              width: itemHeight,
-              color: Colors.blue,
-            ),
-            Container(
-              key: const Key('green'),
-              height: double.infinity,
-              width: itemHeight,
-              color: Colors.green,
-            ),
-          ],
-          scrollDirection: Axis.horizontal,
-          onReorder: (int oldIndex, int newIndex) { },
-        );
-        await tester.pumpWidget(MaterialApp(
-          home: SizedBox(
-            width: itemHeight * 3,
-            child: reorderableListView,
-          ),
-        ));
-
-        await tester.startGesture(tester.getCenter(find.byKey(const Key('blue'))));
-        await tester.pump(kLongPressTimeout + kPressTimeout);
-        await tester.pumpAndSettle();
-        await expectLater(
-          find.byKey(const Key('blue')),
-          matchesGoldenFile('reorderable_list_test.horizontal.drop_area.png'),
-        );
       });
 
       testWidgets('Preserves children states when the list parent changes the order', (WidgetTester tester) async {
@@ -1341,6 +1264,38 @@ void main() {
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
     expect(exception.toString(), contains('Every item of ReorderableListView must have a key.'));
+  });
+
+  testWidgets('Throws an error if no overlay present', (WidgetTester tester) async {
+    final Widget reorderableList = ReorderableListView(
+      children: const <Widget>[
+        SizedBox(width: 100.0, height: 100.0, child: Text('C'), key: Key('C')),
+        SizedBox(width: 100.0, height: 100.0, child: Text('B'), key: Key('B')),
+        SizedBox(width: 100.0, height: 100.0, child: Text('A'), key: Key('A')),
+      ],
+      onReorder: (int oldIndex, int newIndex) { },
+    );
+    final Widget boilerplate = Localizations(
+      locale: const Locale('en'),
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultMaterialLocalizations.delegate,
+        DefaultWidgetsLocalizations.delegate,
+      ],
+      child:SizedBox(
+        width: 100.0,
+        height: 100.0,
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: reorderableList,
+        ),
+      ),
+    );
+    await tester.pumpWidget(boilerplate);
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(exception.toString(), contains('No Overlay widget found'));
+    expect(exception.toString(), contains('ReorderableListView widgets require an Overlay widget ancestor'));
   });
 }
 
