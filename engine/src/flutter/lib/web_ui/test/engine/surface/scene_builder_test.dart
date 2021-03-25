@@ -27,7 +27,8 @@ void testMain() {
     await webOnlyInitializeEngine();
   });
 
-  group('SceneBuilder', () {
+  group('SceneBuilder', ()
+  {
     test('pushOffset implements surface lifecycle', () {
       testLayerLifeCycle((SceneBuilder sceneBuilder, EngineLayer oldLayer) {
         return sceneBuilder.pushOffset(10, 20, oldLayer: oldLayer);
@@ -328,6 +329,65 @@ void testMain() {
     }
   });
 
+  test('does not skip painting picture when picture is '
+      'inside transform with offset', () async {
+    final Picture picture = _drawPicture();
+    // Picture should not be clipped out since transform will offset it to 500,500
+    final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
+    builder.pushOffset(0, 0);
+    builder.pushClipRect(const Rect.fromLTRB(0, 0, 1000, 1000)) as PersistedContainerSurface;
+    builder.pushTransform((Matrix4.identity()..scale(0.5, 0.5)).toFloat64());
+    builder.addPicture(Offset(1000, 1000), picture);
+    builder.pop();
+    builder.pop();
+    builder.pop();
+    html.HtmlElement content = builder.build().webOnlyRootElement;
+    expect(content.querySelectorAll('flt-picture').single.children, isNotEmpty);
+  });
+
+  test('does not skip painting picture when picture is '
+      'inside transform', () async {
+    final Picture picture = _drawPicture();
+    // Picture should not be clipped out since transform will offset it to 500,500
+    final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
+    builder.pushOffset(0, 0);
+    builder.pushClipRect(const Rect.fromLTRB(0, 0, 1000, 1000)) as PersistedContainerSurface;
+    builder.pushTransform((Matrix4.identity()..scale(0.5, 0.5)).toFloat64());
+    builder.pushOffset(1000, 1000);
+    builder.addPicture(Offset.zero, picture);
+    builder.pop();
+    builder.pop();
+    builder.pop();
+    html.HtmlElement content = builder.build().webOnlyRootElement;
+    expect(content.querySelectorAll('flt-picture').single.children, isNotEmpty);
+  });
+
+  test(
+      'skips painting picture when picture fully clipped out with'
+          ' transform and offset', () async {
+    final Picture picture = _drawPicture();
+    // Picture should be clipped out since transform will offset it to 500,500
+    final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
+    builder.pushOffset(50, 50);
+    builder.pushClipRect(
+        const Rect.fromLTRB(0, 0, 1000, 1000)) as PersistedContainerSurface;
+    builder.pushTransform((Matrix4.identity()
+      ..scale(2, 2)).toFloat64());
+    builder.pushOffset(500, 500);
+    builder.addPicture(Offset.zero, picture);
+    builder.pop();
+    builder.pop();
+    builder.pop();
+    builder.pop();
+    html.HtmlElement content = builder
+        .build()
+        .webOnlyRootElement;
+    expect(content
+        .querySelectorAll('flt-picture')
+        .single
+        .children, isEmpty);
+  });
+
   test('releases old canvas when picture is fully clipped out after addRetained', () async {
     final Picture picture = _drawPicture();
 
@@ -416,8 +476,8 @@ void testMain() {
       paragraph.layout(ParagraphConstraints(width: 1000));
       canvas.drawParagraph(paragraph, Offset.zero);
       final EngineLayer newLayer = useOffset
-        ? builder.pushOffset(0, 0, oldLayer: oldLayer)
-        : builder.pushOpacity(100, oldLayer: oldLayer);
+          ? builder.pushOffset(0, 0, oldLayer: oldLayer)
+          : builder.pushOpacity(100, oldLayer: oldLayer);
       builder.addPicture(Offset.zero, recorder.endRecording());
       builder.pop();
       return newLayer;
@@ -758,6 +818,7 @@ class MockPersistedPicture extends PersistedPicture {
   int get bitmapPixelCount => 0;
 }
 
+/// Draw 4 circles within 50, 50, 120, 120 bounds
 Picture _drawPicture() {
   const double offsetX = 50;
   const double offsetY = 50;
