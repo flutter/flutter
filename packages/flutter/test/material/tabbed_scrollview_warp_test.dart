@@ -52,7 +52,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       appBar: AppBar(
         bottom: TabBar(
           controller: tabController,
-          tabs: List<Widget>.generate(tabCount, (int index) => Tab(text: 'Tab $index')).toList(),
+          tabs: List<Widget>.generate(tabCount, (int index) => Tab(label: 'Tab $index')).toList(),
         ),
       ),
       body: TabBarView(

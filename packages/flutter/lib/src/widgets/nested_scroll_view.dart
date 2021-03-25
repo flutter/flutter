@@ -98,7 +98,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///                 forceElevated: innerBoxIsScrolled,
 ///                 bottom: TabBar(
 ///                   // These are the widgets to put in each tab in the tab bar.
-///                   tabs: _tabs.map((String name) => Tab(text: name)).toList(),
+///                   tabs: _tabs.map((String name) => Tab(label: name)).toList(),
 ///                 ),
 ///               ),
 ///             ),

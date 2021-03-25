@@ -20,7 +20,7 @@ class PictureCachePage extends StatelessWidget {
           // expandedHeight: 50.0,
           // forceElevated: innerBoxIsScrolled,
           bottom: TabBar(
-            tabs: kTabNames.map((String name) => Tab(text: name)).toList(),
+            tabs: kTabNames.map((String name) => Tab(label: name)).toList(),
           ),
         ),
         body: TabBarView(

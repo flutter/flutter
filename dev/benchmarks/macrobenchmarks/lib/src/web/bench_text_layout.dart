@@ -483,7 +483,7 @@ class ColorsDemo extends StatelessWidget {
             isScrollable: true,
             tabs: allPalettes
                 .map<Widget>(
-                    (Palette swatch) => Tab(text: '$_counter:${swatch.name}'))
+                    (Palette swatch) => Tab(label: '$_counter:${swatch.name}'))
                 .toList(),
           ),
         ),

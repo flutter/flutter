@@ -30,7 +30,7 @@ void main() {
           isScrollable: true,
           controller: controller,
           tabs: const <Tab>[
-            Tab(text: 'Main'),
+            Tab(label: 'Main'),
           ],
         );
       },

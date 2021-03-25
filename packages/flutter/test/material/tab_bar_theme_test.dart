@@ -13,9 +13,9 @@ const String _tab3Text = 'tab 3';
 final Key _painterKey = UniqueKey();
 
 const List<Tab> _tabs = <Tab>[
-  Tab(text: _tab1Text, icon: Icon(Icons.looks_one)),
-  Tab(text: _tab2Text, icon: Icon(Icons.looks_two)),
-  Tab(text: _tab3Text, icon: Icon(Icons.looks_3)),
+  Tab(label: _tab1Text, icon: Icon(Icons.looks_one)),
+  Tab(label: _tab2Text, icon: Icon(Icons.looks_two)),
+  Tab(label: _tab3Text, icon: Icon(Icons.looks_3)),
 ];
 
 final List<SizedBox> _sizedTabs = <SizedBox>[

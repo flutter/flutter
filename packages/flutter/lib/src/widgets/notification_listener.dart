@@ -53,7 +53,7 @@ typedef NotificationListenerCallback<T extends Notification> = bool Function(T n
 ///                 pinned: true,
 ///                 floating: true,
 ///                 bottom: TabBar(
-///                   tabs: _tabs.map((String name) => Tab(text: name)).toList(),
+///                   tabs: _tabs.map((String name) => Tab(label: name)).toList(),
 ///                 ),
 ///               ),
 ///             ];

@@ -134,7 +134,7 @@ class ColorsDemo extends StatelessWidget {
           title: const Text('Colors'),
           bottom: TabBar(
             isScrollable: true,
-            tabs: allPalettes.map<Widget>((Palette swatch) => Tab(text: swatch.name)).toList(),
+            tabs: allPalettes.map<Widget>((Palette swatch) => Tab(label: swatch.name)).toList(),
           ),
         ),
         body: TabBarView(

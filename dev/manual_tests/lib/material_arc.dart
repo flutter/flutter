@@ -448,7 +448,7 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
         appBar: AppBar(
           title: const Text('Animation'),
           bottom: TabBar(
-            tabs: _allDemos.map<Tab>((_ArcDemo demo) => Tab(text: demo.title)).toList(),
+            tabs: _allDemos.map<Tab>((_ArcDemo demo) => Tab(label: demo.title)).toList(),
           ),
         ),
         floatingActionButton: Builder(

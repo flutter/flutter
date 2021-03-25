@@ -120,7 +120,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
           ],
           bottom: TabBar(
             isScrollable: isScrollable,
-            tabs: demos!.map<Widget>((ComponentDemoTabData data) => Tab(text: data.tabName)).toList(),
+            tabs: demos!.map<Widget>((ComponentDemoTabData data) => Tab(label: data.tabName)).toList(),
           ),
         ),
         body: TabBarView(

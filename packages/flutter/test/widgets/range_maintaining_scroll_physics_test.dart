@@ -277,9 +277,9 @@ class TabBarDemo extends StatelessWidget {
           appBar: AppBar(
             bottom: const TabBar(
               tabs: <Widget>[
-                Tab(text: 'car'),
-                Tab(text: 'transit'),
-                Tab(text: 'bike'),
+                Tab(label: 'car'),
+                Tab(label: 'transit'),
+                Tab(label: 'bike'),
               ],
             ),
             title: const Text('Tabs Demo'),

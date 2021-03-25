@@ -223,8 +223,8 @@ class StockHomeState extends State<StockHome> {
       ],
       bottom: TabBar(
         tabs: <Widget>[
-          Tab(text: StockStrings.of(context).market),
-          Tab(text: StockStrings.of(context).portfolio),
+          Tab(label: StockStrings.of(context).market),
+          Tab(label: StockStrings.of(context).portfolio),
         ],
       ),
     );

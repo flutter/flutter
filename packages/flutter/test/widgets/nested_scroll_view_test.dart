@@ -59,10 +59,10 @@ Widget buildTest({
                     forceElevated: innerBoxIsScrolled,
                     bottom: const TabBar(
                       tabs: <Tab>[
-                        Tab(text: 'AA'),
-                        Tab(text: 'BB'),
-                        Tab(text: 'CC'),
-                        Tab(text: 'DD'),
+                        Tab(label: 'AA'),
+                        Tab(label: 'BB'),
+                        Tab(label: 'CC'),
+                        Tab(label: 'DD'),
                       ],
                     ),
                   ),
@@ -511,7 +511,7 @@ void main() {
                     bottom: TabBar(
                       // These are the widgets to put in each tab in the tab
                       // bar.
-                      tabs: _tabs.map<Widget>((String name) => Tab(text: name)).toList(),
+                      tabs: _tabs.map<Widget>((String name) => Tab(label: name)).toList(),
                       dragStartBehavior: DragStartBehavior.down,
                     ),
                   ),

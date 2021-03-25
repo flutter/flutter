@@ -39,8 +39,8 @@ import 'constants.dart';
 ///
 /// class _MyTabbedPageState extends State<MyTabbedPage> with SingleTickerProviderStateMixin {
 ///   static const List<Tab> myTabs = <Tab>[
-///     Tab(text: 'LEFT'),
-///     Tab(text: 'RIGHT'),
+///     Tab(label: 'LEFT'),
+///     Tab(label: 'RIGHT'),
 ///   ];
 ///
 ///   late TabController _tabController;
@@ -91,9 +91,9 @@ import 'constants.dart';
 ///
 /// ```dart preamble
 /// const List<Tab> tabs = <Tab>[
-///   Tab(text: 'Zeroth'),
-///   Tab(text: 'First'),
-///   Tab(text: 'Second'),
+///   Tab(label: 'Zeroth'),
+///   Tab(label: 'First'),
+///   Tab(label: 'Second'),
 /// ];
 /// ```
 ///
@@ -333,8 +333,8 @@ class _TabControllerScope extends InheritedWidget {
 /// ```dart
 /// class MyDemo extends StatelessWidget {
 ///   final List<Tab> myTabs = <Tab>[
-///     Tab(text: 'LEFT'),
-///     Tab(text: 'RIGHT'),
+///     Tab(label: 'LEFT'),
+///     Tab(label: 'RIGHT'),
 ///   ];
 ///
 ///   @override

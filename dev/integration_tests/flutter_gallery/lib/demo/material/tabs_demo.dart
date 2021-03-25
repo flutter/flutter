@@ -160,7 +160,7 @@ class TabsDemo extends StatelessWidget {
                   forceElevated: innerBoxIsScrolled,
                   bottom: TabBar(
                     tabs: _allPages.keys.map<Widget>(
-                      (_Page page) => Tab(text: page.label),
+                      (_Page page) => Tab(label: page.label),
                     ).toList(),
                   ),
                 ),
