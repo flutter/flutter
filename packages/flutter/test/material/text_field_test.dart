@@ -255,6 +255,57 @@ void main() {
     expect(find.byType(CupertinoButton), findsNothing);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux }), skip: kIsWeb);
 
+  testWidgets('Activates the text field when receives semantics focus on Mac', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+    final FocusNode focusNode = FocusNode();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(focusNode: focusNode),
+        ),
+      ),
+    );
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            id: 1,
+            textDirection: TextDirection.ltr,
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 2,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 3,
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 4,
+                        flags: <SemanticsFlag>[SemanticsFlag.isTextField],
+                        actions: <SemanticsAction>[SemanticsAction.tap,
+                          SemanticsAction.didGainAccessibilityFocus],
+                        textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
+
+    expect(focusNode.hasFocus, isFalse);
+    semanticsOwner.performAction(4, SemanticsAction.didGainAccessibilityFocus);
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isTrue);
+    semantics.dispose();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }), skip: kIsWeb);
+
   testWidgets('TextField passes onEditingComplete to EditableText', (WidgetTester tester) async {
     void onEditingComplete() { }
 
@@ -392,6 +443,33 @@ void main() {
 
     expect(renderEditable.cursorColor!.alpha, 0);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+  // Regression test for https://github.com/flutter/flutter/issues/78918.
+  testWidgets('RenderEditable sets correct text editing value', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'how are you');
+    final UniqueKey icon = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              suffixIcon: IconButton(
+                key: icon,
+                icon: const Icon(Icons.cancel),
+                onPressed: () => controller.clear(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(icon));
+    await tester.pump();
+    expect(controller.text, '');
+    expect(controller.selection, const TextSelection.collapsed(offset: 0, affinity: TextAffinity.upstream));
+  });
 
   testWidgets('Cursor radius is 2.0', (WidgetTester tester) async {
     await tester.pumpWidget(
