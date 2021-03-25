@@ -160,11 +160,9 @@ const String pluralMethodTemplate = '''
 
 const String classFileTemplate = '''
 @(header)
-// ignore: unused_import
-import 'package:intl/intl.dart' as intl;
-import '@(fileName)';
 
-// ignore_for_file: unnecessary_brace_in_string_interps
+@(requiresIntlImport)
+import '@(fileName)';
 
 /// The translations for @(language) (`@(localeName)`).
 class @(class) extends @(baseClass) {
