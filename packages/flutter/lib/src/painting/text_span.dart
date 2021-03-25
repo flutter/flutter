@@ -35,7 +35,7 @@ import 'text_style.dart';
 /// The text "Hello world!", in black:
 ///
 /// ```dart
-/// TextSpan(
+/// const TextSpan(
 ///   text: 'Hello world!',
 ///   style: TextStyle(color: Colors.black),
 /// )
@@ -119,6 +119,8 @@ class TextSpan extends InlineSpan {
   ///
   /// ```dart
   /// class BuzzingText extends StatefulWidget {
+  ///   const BuzzingText({Key? key}) : super(key: key);
+  ///
   ///   @override
   ///   _BuzzingTextState createState() => _BuzzingTextState();
   /// }
@@ -148,18 +150,18 @@ class TextSpan extends InlineSpan {
   ///     return Text.rich(
   ///       TextSpan(
   ///         text: 'Can you ',
-  ///         style: TextStyle(color: Colors.black),
+  ///         style: const TextStyle(color: Colors.black),
   ///         children: <InlineSpan>[
   ///           TextSpan(
   ///             text: 'find the',
-  ///             style: TextStyle(
+  ///             style: const TextStyle(
   ///               color: Colors.green,
   ///               decoration: TextDecoration.underline,
   ///               decorationStyle: TextDecorationStyle.wavy,
   ///             ),
   ///             recognizer: _longPressRecognizer,
   ///           ),
-  ///           TextSpan(
+  ///           const TextSpan(
   ///             text: ' secret?',
   ///           ),
   ///         ],
@@ -341,10 +343,7 @@ class TextSpan extends InlineSpan {
     assert(() {
       if (children != null) {
         for (final InlineSpan child in children!) {
-          // `child` has a non-nullable return type, but might be null when
-          // running with weak checking, so we need to null check it anyway (and
-          // ignore the warning that the null-handling logic is dead code).
-          if (child == null) { // ignore: dead_code
+          if (child == null) {
             throw FlutterError.fromParts(<DiagnosticsNode>[
               ErrorSummary('TextSpan contains a null child.'),
               ErrorDescription(
@@ -457,7 +456,7 @@ class TextSpan extends InlineSpan {
       // warning that the null-handling logic is dead code).
       if (child != null) {
         return child.toDiagnosticsNode();
-      } else { // ignore: dead_code
+      } else {
         return DiagnosticsNode.message('<null child>');
       }
     }).toList();

@@ -130,8 +130,8 @@ String generateTestBootstrap({
   buffer.write('''
 $languageVersionHeader
 import 'dart:async';
-import 'dart:convert';  // ignore: dart_convert_import
-import 'dart:io';  // ignore: dart_io_import
+import 'dart:convert';  // flutter_ignore: dart_convert_import
+import 'dart:io';  // flutter_ignore: dart_io_import
 import 'dart:isolate';
 ''');
   if (flutterTestDep) {
@@ -328,8 +328,8 @@ class FlutterPlatform extends PlatformPlugin {
     final CompilerOutput compilerOutput =
       await compiler.compiler.compileExpression(expression, definitions,
         typeDefinitions, libraryUri, klass, isStatic);
-    if (compilerOutput != null && compilerOutput.outputFilename != null) {
-      return base64.encode(globals.fs.file(compilerOutput.outputFilename).readAsBytesSync());
+    if (compilerOutput != null && compilerOutput.expressionData != null) {
+      return base64.encode(compilerOutput.expressionData);
     }
     throw 'Failed to compile $expression';
   }

@@ -33,7 +33,7 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
   DeferredComponentsGenSnapshotValidator(this.env, {
     bool exitOnFail = true,
     String title,
-  }) : super(env.projectDir, env.logger, exitOnFail: exitOnFail, title: title);
+  }) : super(env.projectDir, env.logger, env.platform, exitOnFail: exitOnFail, title: title);
 
   /// The build environment that should be used to find the input files to run
   /// checks against.
@@ -107,6 +107,13 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
         }
       }
     }
+    for (final LoadingUnit unit in generatedLoadingUnits) {
+      if (!mapping.containsKey(unit.id)) {
+        // Store an empty string for unassigned loading units,
+        // indicating that it is in the base component.
+        mapping[unit.id] = '';
+      }
+    }
     // Encode the mapping as a string.
     final StringBuffer mappingBuffer = StringBuffer();
     for (final int key in mapping.keys) {
@@ -120,14 +127,16 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
     // Check for existing metadata entry and see if needs changes.
     bool exists = false;
     bool modified = false;
-    for (final XmlElement metaData in document.findAllElements('meta-data')) {
-      final String name = metaData.getAttribute('android:name');
-      if (name == _mappingKey) {
-        exists = true;
-        final String storedMappingString = metaData.getAttribute('android:value');
-        if (storedMappingString != encodedMapping) {
-          metaData.setAttribute('android:value', encodedMapping);
-          modified = true;
+    for (final XmlElement application in document.findAllElements('application')) {
+      for (final XmlElement metaData in application.findElements('meta-data')) {
+        final String name = metaData.getAttribute('android:name');
+        if (name == _mappingKey) {
+          exists = true;
+          final String storedMappingString = metaData.getAttribute('android:value');
+          if (storedMappingString != encodedMapping) {
+            metaData.setAttribute('android:value', encodedMapping);
+            modified = true;
+          }
         }
       }
     }

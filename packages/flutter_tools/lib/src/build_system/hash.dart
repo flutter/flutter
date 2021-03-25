@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:typed_data';
 
 /// Data from a non-linear mathematical function that functions as
@@ -51,7 +49,7 @@ class Md5Hash {
   int _remainingLength = 0;
   int _contentLength = 0;
 
-  void addChunk(Uint8List data, [int stop]) {
+  void addChunk(Uint8List data, [int? stop]) {
     assert(_remainingLength == 0);
     stop ??= data.length;
     int i = 0;

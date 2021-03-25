@@ -131,8 +131,6 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
   rootProject.buildDir = '../build'
   subprojects {
       project.buildDir = "${rootProject.buildDir}/${project.name}"
-  }
-  subprojects {
       project.evaluationDependsOn(':app')
   }
 

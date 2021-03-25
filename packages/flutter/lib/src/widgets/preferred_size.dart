@@ -54,22 +54,24 @@ abstract class PreferredSizeWidget implements Widget {
 ///
 /// ```dart preamble
 /// class AppBarContent extends StatelessWidget {
+///   const AppBarContent({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return Column(
 ///       mainAxisAlignment: MainAxisAlignment.end,
-///       children: [
+///       children: <Widget>[
 ///         Padding(
 ///           padding: const EdgeInsets.symmetric(horizontal: 10),
 ///           child: Row(
-///             children: [
-///               Text(
-///                 "PreferredSize Sample",
+///             children: <Widget>[
+///               const Text(
+///                 'PreferredSize Sample',
 ///                 style: TextStyle(color: Colors.white),
 ///               ),
-///               Spacer(),
+///               const Spacer(),
 ///               IconButton(
-///                 icon: Icon(
+///                 icon: const Icon(
 ///                   Icons.search,
 ///                   size: 20,
 ///                 ),
@@ -77,7 +79,7 @@ abstract class PreferredSizeWidget implements Widget {
 ///                 onPressed: () {},
 ///               ),
 ///               IconButton(
-///                 icon: Icon(
+///                 icon: const Icon(
 ///                   Icons.more_vert,
 ///                   size: 20,
 ///                 ),
@@ -98,16 +100,16 @@ abstract class PreferredSizeWidget implements Widget {
 ///     appBar: PreferredSize(
 ///       preferredSize: const Size.fromHeight(80.0),
 ///       child: Container(
-///         decoration: BoxDecoration(
+///         decoration: const BoxDecoration(
 ///           gradient: LinearGradient(
-///             colors: [Colors.blue, Colors.pink],
+///             colors: <Color>[Colors.blue, Colors.pink],
 ///           ),
 ///         ),
-///         child: AppBarContent(),
+///         child: const AppBarContent(),
 ///       ),
 ///     ),
-///     body: Center(
-///       child: Text("Content"),
+///     body: const Center(
+///       child: Text('Content'),
 ///     ),
 ///   );
 /// }
