@@ -648,6 +648,7 @@ class BitmapCanvas extends EngineCanvas {
         case ui.BlendMode.color:
         case ui.BlendMode.luminosity:
         case ui.BlendMode.xor:
+        case ui.BlendMode.dstATop:
           imgElement = _createImageElementWithSvgFilter(
               image, colorFilter.color, colorFilter.blendMode, paint);
           break;
