@@ -18,6 +18,7 @@ public final class FlutterApplicationInfo {
   public final String domainNetworkPolicy;
   public final String nativeLibraryDir;
   public final boolean clearTextPermitted;
+  final boolean automaticallyRegisterPlugins;
 
   public FlutterApplicationInfo(
       String aotSharedLibraryName,
@@ -26,7 +27,8 @@ public final class FlutterApplicationInfo {
       String flutterAssetsDir,
       String domainNetworkPolicy,
       String nativeLibraryDir,
-      boolean clearTextPermitted) {
+      boolean clearTextPermitted,
+      boolean automaticallyRegisterPlugins) {
     this.aotSharedLibraryName =
         aotSharedLibraryName == null ? DEFAULT_AOT_SHARED_LIBRARY_NAME : aotSharedLibraryName;
     this.vmSnapshotData = vmSnapshotData == null ? DEFAULT_VM_SNAPSHOT_DATA : vmSnapshotData;
@@ -37,5 +39,6 @@ public final class FlutterApplicationInfo {
     this.nativeLibraryDir = nativeLibraryDir;
     this.domainNetworkPolicy = domainNetworkPolicy == null ? "" : domainNetworkPolicy;
     this.clearTextPermitted = clearTextPermitted;
+    this.automaticallyRegisterPlugins = automaticallyRegisterPlugins;
   }
 }
