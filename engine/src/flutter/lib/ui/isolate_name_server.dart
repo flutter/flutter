@@ -33,7 +33,7 @@ class IsolateNameServer {
   ///
   /// The `name` argument must not be null.
   static SendPort? lookupPortByName(String name) {
-    assert(name != null, "'name' cannot be null."); // ignore: unnecessary_null_comparison
+    assert(name != null, "'name' cannot be null.");
     return _lookupPortByName(name);
   }
 
@@ -51,8 +51,8 @@ class IsolateNameServer {
   ///
   /// The `port` and `name` arguments must not be null.
   static bool registerPortWithName(SendPort port, String name) {
-    assert(port != null, "'port' cannot be null."); // ignore: unnecessary_null_comparison
-    assert(name != null, "'name' cannot be null."); // ignore: unnecessary_null_comparison
+    assert(port != null, "'port' cannot be null.");
+    assert(name != null, "'name' cannot be null.");
     return _registerPortWithName(port, name);
   }
 
@@ -68,7 +68,7 @@ class IsolateNameServer {
   ///
   /// The `name` argument must not be null.
   static bool removePortNameMapping(String name) {
-    assert(name != null, "'name' cannot be null."); // ignore: unnecessary_null_comparison
+    assert(name != null, "'name' cannot be null.");
     return _removePortNameMapping(name);
   }
 

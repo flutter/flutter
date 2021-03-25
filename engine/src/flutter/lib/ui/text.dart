@@ -81,7 +81,7 @@ class FontWeight {
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
   static FontWeight? lerp(FontWeight? a, FontWeight? b, double t) {
-    assert(t != null); // ignore: unnecessary_null_comparison
+    assert(t != null);
     if (a == null && b == null)
       return null;
     return values[_lerpInt((a ?? normal).index, (b ?? normal).index, t).round().clamp(0, 8)];
@@ -202,9 +202,9 @@ class FontFeature {
   const FontFeature(
     this.feature,
     [ this.value = 1 ]
-  ) : assert(feature != null), // ignore: unnecessary_null_comparison
+  ) : assert(feature != null),
       assert(feature.length == 4, 'Feature tag must be exactly four characters long.'),
-      assert(value != null), // ignore: unnecessary_null_comparison
+      assert(value != null),
       assert(value >= 0, 'Feature value must be zero or a positive integer.');
 
   /// Create a [FontFeature] object that enables the feature with the given tag.
@@ -2658,8 +2658,8 @@ class TextPosition {
   const TextPosition({
     required this.offset,
     this.affinity = TextAffinity.downstream,
-  }) : assert(offset != null), // ignore: unnecessary_null_comparison
-       assert(affinity != null); // ignore: unnecessary_null_comparison
+  }) : assert(offset != null),
+       assert(affinity != null);
 
   /// The index of the character that immediately follows the position in the
   /// string representation of the text.
@@ -2711,14 +2711,14 @@ class TextRange {
   const TextRange({
     required this.start,
     required this.end,
-  }) : assert(start != null && start >= -1), // ignore: unnecessary_null_comparison
-        assert(end != null && end >= -1); // ignore: unnecessary_null_comparison
+  }) : assert(start != null && start >= -1),
+        assert(end != null && end >= -1);
 
   /// A text range that starts and ends at offset.
   ///
   /// The [offset] argument must be non-null and greater than or equal to -1.
   const TextRange.collapsed(int offset)
-      : assert(offset != null && offset >= -1), // ignore: unnecessary_null_comparison
+      : assert(offset != null && offset >= -1),
         start = offset,
         end = offset;
 
@@ -2793,7 +2793,7 @@ class ParagraphConstraints {
   /// The [width] argument must not be null.
   const ParagraphConstraints({
     required this.width,
-  }) : assert(width != null); // ignore: unnecessary_null_comparison
+  }) : assert(width != null);
 
   /// The width the paragraph should use whey computing the positions of glyphs.
   ///
@@ -3173,8 +3173,8 @@ class Paragraph extends NativeFieldWrapperClass2 {
   ///
   /// See [BoxHeightStyle] and [BoxWidthStyle] for full descriptions of each option.
   List<TextBox> getBoxesForRange(int start, int end, {BoxHeightStyle boxHeightStyle = BoxHeightStyle.tight, BoxWidthStyle boxWidthStyle = BoxWidthStyle.tight}) {
-    assert(boxHeightStyle != null); // ignore: unnecessary_null_comparison
-    assert(boxWidthStyle != null); // ignore: unnecessary_null_comparison
+    assert(boxHeightStyle != null);
+    assert(boxWidthStyle != null);
     return _decodeTextBoxes(_getBoxesForRange(start, end, boxHeightStyle.index, boxWidthStyle.index));
   }
   // See paragraph.cc for the layout of this return value.
