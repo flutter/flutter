@@ -296,7 +296,7 @@ class Draggable<T extends Object> extends StatefulWidget {
   )
   final DragAnchor dragAnchor;
 
-  /// A strategy that is used by this draggable to get the the anchor offset when it is dragged.
+  /// A strategy that is used by this draggable to get the anchor offset when it is dragged.
   ///
   /// The anchor offset refers to the distance between the users' fingers and the [feedback] widget when this draggable is dragged.
   ///

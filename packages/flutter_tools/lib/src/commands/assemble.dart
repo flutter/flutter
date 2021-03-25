@@ -239,10 +239,10 @@ class AssembleCommand extends FlutterCommand {
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
+      platform: globals.platform,
       engineVersion: globals.artifacts.isLocalEngine
         ? null
-        : globals.flutterVersion.engineRevision,
-      generateDartPluginRegistry: true,
+        : globals.flutterVersion.engineRevision
     );
     return result;
   }

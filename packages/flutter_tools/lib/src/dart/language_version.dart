@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:package_config/package_config.dart';
 
@@ -62,10 +60,10 @@ LanguageVersion determineLanguageVersion(File file, Package package) {
       continue;
     }
     // Check for a match with the language version.
-    final Match match = _languageVersion.matchAsPrefix(trimmedLine);
+    final Match? match = _languageVersion.matchAsPrefix(trimmedLine);
     if (match != null) {
-      final String rawMajor = match.group(1);
-      final String rawMinor = match.group(2);
+      final String rawMajor = match.group(1) ?? '';
+      final String rawMinor = match.group(2) ?? '';
       try {
         final int major = int.parse(rawMajor);
         final int minor = int.parse(rawMinor);
