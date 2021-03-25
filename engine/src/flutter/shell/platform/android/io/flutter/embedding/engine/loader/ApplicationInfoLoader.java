@@ -27,6 +27,8 @@ public final class ApplicationInfoLoader {
   public static final String PUBLIC_FLUTTER_ASSETS_DIR_KEY =
       FlutterLoader.class.getName() + '.' + FlutterLoader.FLUTTER_ASSETS_DIR_KEY;
   public static final String NETWORK_POLICY_METADATA_KEY = "io.flutter.network-policy";
+  public static final String PUBLIC_AUTOMATICALLY_REGISTER_PLUGINS_METADATA_KEY =
+      "io.flutter." + FlutterLoader.AUTOMATICALLY_REGISTER_PLUGINS_KEY;
 
   @NonNull
   private static ApplicationInfo getApplicationInfo(@NonNull Context applicationContext) {
@@ -44,6 +46,13 @@ public final class ApplicationInfoLoader {
       return null;
     }
     return metadata.getString(key, null);
+  }
+
+  private static boolean getBoolean(Bundle metadata, String key, boolean defaultValue) {
+    if (metadata == null) {
+      return defaultValue;
+    }
+    return metadata.getBoolean(key, defaultValue);
   }
 
   private static String getNetworkPolicy(ApplicationInfo appInfo, Context context) {
@@ -150,6 +159,7 @@ public final class ApplicationInfoLoader {
         getString(appInfo.metaData, PUBLIC_FLUTTER_ASSETS_DIR_KEY),
         getNetworkPolicy(appInfo, applicationContext),
         appInfo.nativeLibraryDir,
-        clearTextPermitted);
+        clearTextPermitted,
+        getBoolean(appInfo.metaData, PUBLIC_AUTOMATICALLY_REGISTER_PLUGINS_METADATA_KEY, true));
   }
 }

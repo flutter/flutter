@@ -42,6 +42,7 @@ public class FlutterLoader {
   static final String VM_SNAPSHOT_DATA_KEY = "vm-snapshot-data";
   static final String ISOLATE_SNAPSHOT_DATA_KEY = "isolate-snapshot-data";
   static final String FLUTTER_ASSETS_DIR_KEY = "flutter-assets-dir";
+  static final String AUTOMATICALLY_REGISTER_PLUGINS_KEY = "automatically-register-plugins";
 
   // Resource names used for components of the precompiled snapshot.
   private static final String DEFAULT_LIBRARY = "libflutter.so";
@@ -390,6 +391,12 @@ public class FlutterLoader {
   @NonNull
   public String getLookupKeyForAsset(@NonNull String asset, @NonNull String packageName) {
     return getLookupKeyForAsset("packages" + File.separator + packageName + File.separator + asset);
+  }
+
+  /** Returns the configuration on whether flutter engine should automatically register plugins. */
+  @NonNull
+  public boolean automaticallyRegisterPlugins() {
+    return flutterApplicationInfo.automaticallyRegisterPlugins;
   }
 
   @NonNull
