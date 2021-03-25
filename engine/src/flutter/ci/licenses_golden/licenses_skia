@@ -1,4 +1,4 @@
-Signature: 675e2a4a65a732e1b04f79573b8b9b03
+Signature: e619235809ca3b04231f8c81bb4f9594
 
 UNUSED LICENSES:
 
@@ -1045,6 +1045,7 @@ FILE: ../../../third_party/skia/infra/bots/assets/ios-dev-image-13.3/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/ios-dev-image-13.4/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/ios-dev-image-13.5/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/ios-dev-image-13.6/VERSION
+FILE: ../../../third_party/skia/infra/bots/assets/ios-dev-image-14.4/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/linux_vulkan_sdk/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/lottie-samples/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/mesa_intel_driver_linux/VERSION
@@ -1179,6 +1180,7 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/git/examples/full.expe
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/gsutil/examples/full.expected/failed_all_uploads.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/gsutil/examples/full.expected/failed_one_upload.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/gsutil/examples/full.expected/gsutil_tests.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/gsutil/examples/full.expected/gsutil_win_tests.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/infra/examples/full.expected/infra_tests.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/run/examples/full.expected/test.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/Build-Debian10-Clang-x86_64-Release-SKNX_NO_SIMD.json
