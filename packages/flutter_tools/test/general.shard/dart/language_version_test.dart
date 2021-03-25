@@ -312,4 +312,3 @@ library funstuff;
     expect(currentLanguageVersion(fileSystem, flutterRoot), LanguageVersion(2, 13));
   });
 }
-
