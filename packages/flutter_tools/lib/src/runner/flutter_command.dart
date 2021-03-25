@@ -228,6 +228,15 @@ abstract class FlutterCommand extends Command<void> {
       'some proxy servers.',
       hide: !verboseHelp,
     );
+    argParser.addOption('web-server-debug-injected-client-protocol',
+      allowed: <String>['sse', 'ws'],
+      defaultsTo: 'sse',
+      help: 'The protocol (SSE or WebSockets) to use for the injected client '
+      'when using the Web Server device. '
+      'Using WebSockets can improve performance but may fail when connecting through '
+      'some proxy servers.',
+      hide: !verboseHelp,
+    );
     argParser.addFlag('web-allow-expose-url',
       defaultsTo: false,
       help: 'Enables daemon-to-editor requests (app.exposeUrl) for exposing URLs '
@@ -378,7 +387,6 @@ abstract class FlutterCommand extends Command<void> {
     } on FormatException catch (error) {
       throwToolExit('Invalid port for `--observatory-port/--host-vmservice-port`: $error');
     }
-    return null;
   }
 
   int get ddsPort {
@@ -440,7 +448,6 @@ abstract class FlutterCommand extends Command<void> {
     } on FormatException catch (error) {
       throwToolExit('Invalid port for `--device-vmservice-port`: $error');
     }
-    return null;
   }
 
   void addPublishPort({ bool enabledByDefault = true, bool verboseHelp = false }) {
@@ -1151,6 +1158,7 @@ abstract class FlutterCommand extends Command<void> {
         flutterRootDir: globals.fs.directory(Cache.flutterRoot),
         outputDir: globals.fs.directory(getBuildDirectory()),
         processManager: globals.processManager,
+        platform: globals.platform,
         projectDir: project.directory,
       );
 
