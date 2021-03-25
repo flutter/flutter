@@ -15,6 +15,7 @@ const int _kReturnKeyCode = 13;
 /// is autofilled.
 bool browserHasAutofillOverlay() =>
     browserEngine == BrowserEngine.blink ||
+    browserEngine == BrowserEngine.samsung ||
     browserEngine == BrowserEngine.webkit;
 
 /// `transparentTextEditing` class is configured to make the autofill overlay
@@ -1478,7 +1479,8 @@ class HybridTextEditing {
       this._defaultEditingElement = IOSTextEditingStrategy(this);
     } else if (browserEngine == BrowserEngine.webkit) {
       this._defaultEditingElement = SafariDesktopTextEditingStrategy(this);
-    } else if (browserEngine == BrowserEngine.blink &&
+    } else if ((browserEngine == BrowserEngine.blink ||
+        browserEngine == BrowserEngine.samsung) &&
         operatingSystem == OperatingSystem.android) {
       this._defaultEditingElement = AndroidTextEditingStrategy(this);
     } else if (browserEngine == BrowserEngine.firefox) {
