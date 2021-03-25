@@ -1523,18 +1523,8 @@ class FakeFuchsiaPM implements FuchsiaPM {
   }
 
   @override
-  Future<bool> genkey(String buildPath, String outKeyPath) async {
-    if (!globals.fs.file(globals.fs.path.join(buildPath, 'meta', 'package')).existsSync()) {
-      return false;
-    }
-    globals.fs.file(outKeyPath).createSync(recursive: true);
-    return true;
-  }
-
-  @override
-  Future<bool> build(String buildPath, String keyPath, String manifestPath) async {
+  Future<bool> build(String buildPath, String manifestPath) async {
     if (!globals.fs.file(globals.fs.path.join(buildPath, 'meta', 'package')).existsSync() ||
-        !globals.fs.file(keyPath).existsSync() ||
         !globals.fs.file(manifestPath).existsSync()) {
       return false;
     }
@@ -1543,9 +1533,8 @@ class FakeFuchsiaPM implements FuchsiaPM {
   }
 
   @override
-  Future<bool> archive(String buildPath, String keyPath, String manifestPath) async {
+  Future<bool> archive(String buildPath, String manifestPath) async {
     if (!globals.fs.file(globals.fs.path.join(buildPath, 'meta', 'package')).existsSync() ||
-        !globals.fs.file(keyPath).existsSync() ||
         !globals.fs.file(manifestPath).existsSync()) {
       return false;
     }
@@ -1589,18 +1578,14 @@ class FailingPM implements FuchsiaPM {
     return false;
   }
 
+
   @override
-  Future<bool> genkey(String buildPath, String outKeyPath) async {
+  Future<bool> build(String buildPath, String manifestPath) async {
     return false;
   }
 
   @override
-  Future<bool> build(String buildPath, String keyPath, String manifestPath) async {
-    return false;
-  }
-
-  @override
-  Future<bool> archive(String buildPath, String keyPath, String manifestPath) async {
+  Future<bool> archive(String buildPath, String manifestPath) async {
     return false;
   }
 
