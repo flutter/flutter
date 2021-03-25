@@ -444,6 +444,33 @@ void main() {
     expect(renderEditable.cursorColor!.alpha, 0);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
+  // Regression test for https://github.com/flutter/flutter/issues/78918.
+  testWidgets('RenderEditable sets correct text editing value', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'how are you');
+    final UniqueKey icon = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              suffixIcon: IconButton(
+                key: icon,
+                icon: const Icon(Icons.cancel),
+                onPressed: () => controller.clear(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(icon));
+    await tester.pump();
+    expect(controller.text, '');
+    expect(controller.selection, const TextSelection.collapsed(offset: 0, affinity: TextAffinity.upstream));
+  });
+
   testWidgets('Cursor radius is 2.0', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(

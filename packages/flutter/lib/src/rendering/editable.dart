@@ -564,6 +564,21 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   void _setSelection(TextSelection nextSelection, SelectionChangedCause cause) {
+    if (nextSelection.isValid) {
+      // The nextSelection is calculated based on _plainText, which can be out
+      // of sync with the textSelectionDelegate.textEditingValue by one frame.
+      // This is due to the render editable and editable text handle pointer
+      // event separately. If the editable text changes the text during the
+      // event handler, the render editable will use the outdated text stored in
+      // the _plainText when handling the pointer event.
+      //
+      // If this happens, we need to make sure the new selection is still valid.
+      final int textLength = textSelectionDelegate.textEditingValue.text.length;
+      nextSelection = nextSelection.copyWith(
+        baseOffset: math.min(nextSelection.baseOffset, textLength),
+        extentOffset: math.min(nextSelection.extentOffset, textLength),
+      );
+    }
     _handleSelectionChange(nextSelection, cause);
     _setTextEditingValue(
       textSelectionDelegate.textEditingValue.copyWith(selection: nextSelection),
