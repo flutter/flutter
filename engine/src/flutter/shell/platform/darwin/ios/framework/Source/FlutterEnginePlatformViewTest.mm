@@ -87,17 +87,24 @@ class MockDelegate : public PlatformView::Delegate {
   OCMVerify([mockEngine notifyLowMemory]);
   OCMReject([mockEngine notifyLowMemory]);
 
+  XCTNSNotificationExpectation* memoryExpectation = [[XCTNSNotificationExpectation alloc]
+      initWithName:UIApplicationDidReceiveMemoryWarningNotification];
   [[NSNotificationCenter defaultCenter]
       postNotificationName:UIApplicationDidReceiveMemoryWarningNotification
                     object:nil];
+  [self waitForExpectations:@[ memoryExpectation ] timeout:5.0];
   OCMVerify([mockEngine notifyLowMemory]);
   OCMReject([mockEngine notifyLowMemory]);
 
+  XCTNSNotificationExpectation* backgroundExpectation = [[XCTNSNotificationExpectation alloc]
+      initWithName:UIApplicationDidEnterBackgroundNotification];
   [[NSNotificationCenter defaultCenter]
       postNotificationName:UIApplicationDidEnterBackgroundNotification
                     object:nil];
+  [self waitForExpectations:@[ backgroundExpectation ] timeout:5.0];
 
   OCMVerify([mockEngine notifyLowMemory]);
+  [mockEngine stopMocking];
 }
 
 @end
