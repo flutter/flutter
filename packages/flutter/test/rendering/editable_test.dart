@@ -413,7 +413,9 @@ void main() {
   });
 
   test('selects correct place with offsets', () {
-    final TextSelectionDelegate delegate = FakeEditableTextState();
+    const String text = 'test\ntest';
+    final TextSelectionDelegate delegate = FakeEditableTextState()
+      ..textEditingValue = const TextEditingValue(text: text);
     final ViewportOffset viewportOffset = ViewportOffset.zero();
     late TextSelection currentSelection;
     final RenderEditable editable = RenderEditable(
@@ -431,7 +433,7 @@ void main() {
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
       text: const TextSpan(
-        text: 'test\ntest',
+        text: text,
         style: TextStyle(
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
@@ -498,7 +500,9 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61026
 
   test('selects correct place when offsets are flipped', () {
-    final TextSelectionDelegate delegate = FakeEditableTextState();
+    const String text = 'abc def ghi';
+    final TextSelectionDelegate delegate = FakeEditableTextState()
+      ..textEditingValue = const TextEditingValue(text: text);
     final ViewportOffset viewportOffset = ViewportOffset.zero();
     late TextSelection currentSelection;
     final RenderEditable editable = RenderEditable(
@@ -512,7 +516,7 @@ void main() {
         currentSelection = selection;
       },
       text: const TextSpan(
-        text: 'abc def ghi',
+        text: text,
         style: TextStyle(
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
@@ -534,9 +538,11 @@ void main() {
   test('selection does not flicker as user is dragging', () {
     int selectionChangedCount = 0;
     TextSelection? updatedSelection;
-    final TextSelectionDelegate delegate = FakeEditableTextState();
-    const TextSpan text = TextSpan(
-      text: 'abc def ghi',
+    const String text = 'abc def ghi';
+    final TextSelectionDelegate delegate = FakeEditableTextState()
+      ..textEditingValue = const TextEditingValue(text: text);
+    const TextSpan span = TextSpan(
+      text: text,
       style: TextStyle(
         height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
       ),
@@ -553,7 +559,7 @@ void main() {
       },
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
-      text: text,
+      text: span,
     );
 
     layout(editable1);
@@ -574,7 +580,7 @@ void main() {
         selectionChangedCount++;
         updatedSelection = selection;
       },
-      text: text,
+      text: span,
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
     );
@@ -933,8 +939,10 @@ void main() {
     expect(delegate.textEditingValue.text, '01232345');
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
-  test('arrow keys and delete handle surrogate pairs correctly', () async {
-    final TextSelectionDelegate delegate = FakeEditableTextState();
+  test('arrow keys and delete handle surrogate pairs correctly case 2', () async {
+    const String text = '\u{1F44D}';
+    final TextSelectionDelegate delegate = FakeEditableTextState()
+      ..textEditingValue = const TextEditingValue(text: text);
     final ViewportOffset viewportOffset = ViewportOffset.zero();
     late TextSelection currentSelection;
     final RenderEditable editable = RenderEditable(
@@ -951,7 +959,7 @@ void main() {
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
       text: const TextSpan(
-        text: '\u{1F44D}',  // Thumbs up
+        text: text,  // Thumbs up
         style: TextStyle(
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
@@ -1038,7 +1046,9 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
   test('arrow keys with selection text', () async {
-    final TextSelectionDelegate delegate = FakeEditableTextState();
+    const String text = '012345';
+    final TextSelectionDelegate delegate = FakeEditableTextState()
+      ..textEditingValue = const TextEditingValue(text: text);
     final ViewportOffset viewportOffset = ViewportOffset.zero();
     late TextSelection currentSelection;
     final RenderEditable editable = RenderEditable(
@@ -1055,7 +1065,7 @@ void main() {
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
       text: const TextSpan(
-        text: '012345',  // Thumbs up
+        text: text,  // Thumbs up
         style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
       ),
       selection: const TextSelection.collapsed(
@@ -1096,7 +1106,9 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/58068
 
   test('arrow keys with selection text and shift', () async {
-    final TextSelectionDelegate delegate = FakeEditableTextState();
+    const String text = '012345';
+    final TextSelectionDelegate delegate = FakeEditableTextState()
+      ..textEditingValue = const TextEditingValue(text: text);
     final ViewportOffset viewportOffset = ViewportOffset.zero();
     late TextSelection currentSelection;
     final RenderEditable editable = RenderEditable(
@@ -1113,7 +1125,7 @@ void main() {
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
       text: const TextSpan(
-        text: '012345',  // Thumbs up
+        text: text,  // Thumbs up
         style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
       ),
       selection: const TextSelection.collapsed(
@@ -1158,7 +1170,9 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/58068
 
   test('respects enableInteractiveSelection', () async {
-    final TextSelectionDelegate delegate = FakeEditableTextState();
+    const String text = '012345';
+    final TextSelectionDelegate delegate = FakeEditableTextState()
+      ..textEditingValue = const TextEditingValue(text: text);
     final ViewportOffset viewportOffset = ViewportOffset.zero();
     late TextSelection currentSelection;
     final RenderEditable editable = RenderEditable(
@@ -1175,7 +1189,7 @@ void main() {
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
       text: const TextSpan(
-        text: '012345',  // Thumbs up
+        text: text,  // Thumbs up
         style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
       ),
       selection: const TextSelection.collapsed(

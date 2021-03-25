@@ -502,6 +502,7 @@ class ResidentWebRunner extends ResidentRunner {
           urlTunneller: _urlTunneller,
           useSseForDebugProxy: debuggingOptions.webUseSseForDebugProxy,
           useSseForDebugBackend: debuggingOptions.webUseSseForDebugBackend,
+          useSseForInjectedClient: debuggingOptions.webUseSseForInjectedClient,
           buildInfo: debuggingOptions.buildInfo,
           enableDwds: _enableDwds,
           enableDds: !debuggingOptions.disableDds,
@@ -563,7 +564,6 @@ class ResidentWebRunner extends ResidentRunner {
       appFailedToStart();
       rethrow;
     }
-    return 0;
   }
 
   @override

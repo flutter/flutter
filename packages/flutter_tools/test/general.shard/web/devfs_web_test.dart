@@ -616,6 +616,7 @@ void main() {
       urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
+      useSseForInjectedClient: true,
       nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: const BuildInfo(
@@ -733,6 +734,7 @@ void main() {
       urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
+      useSseForInjectedClient: true,
       nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: const BuildInfo(
@@ -847,6 +849,7 @@ void main() {
       urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
+      useSseForInjectedClient: true,
       buildInfo: BuildInfo.debug,
       enableDwds: false,
       enableDds: false,
@@ -891,6 +894,7 @@ void main() {
       urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
+      useSseForInjectedClient: true,
       nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: const BuildInfo(
@@ -943,6 +947,7 @@ void main() {
       urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
+      useSseForInjectedClient: true,
       nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: const BuildInfo(
@@ -977,6 +982,7 @@ void main() {
       'localhost',
       0,
       null,
+      true,
       true,
       true,
       const BuildInfo(
@@ -1061,6 +1067,7 @@ void main() {
       urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
+      useSseForInjectedClient: true,
       nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: BuildInfo.debug,

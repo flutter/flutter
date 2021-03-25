@@ -128,12 +128,16 @@ class LocalSignals implements Signals {
   }
 
   Future<void> _handleSignal(ProcessSignal s) async {
-    for (final SignalHandler handler in _handlersList[s] ?? <SignalHandler>[]) {
-      try {
-        await asyncGuard<void>(() async => handler(s));
-      } on Exception catch (e) {
-        if (_errorStreamController.hasListener) {
-          _errorStreamController.add(e);
+    final List<SignalHandler>? handlers = _handlersList[s];
+    if (handlers != null) {
+      final List<SignalHandler> handlersCopy = handlers.toList();
+      for (final SignalHandler handler in handlersCopy) {
+        try {
+          await asyncGuard<void>(() async => handler(s));
+        } on Exception catch (e) {
+          if (_errorStreamController.hasListener) {
+            _errorStreamController.add(e);
+          }
         }
       }
     }
