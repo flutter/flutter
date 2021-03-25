@@ -769,7 +769,7 @@ class RawScrollbar extends StatefulWidget {
   ///
   ///   * [RawScrollbarState.showScrollbar], an overridable getter which uses
   ///     this value to override the default behavior.
-  ///   * [ScrollView.primary], indicates whether the ScrollView is the primary
+  ///   * [ScrollView.primary], which indicates whether the ScrollView is the primary
   ///     scroll view associated with the parent [PrimaryScrollController].
   ///   * [PrimaryScrollController], which associates a [ScrollController] with
   ///     a subtree.

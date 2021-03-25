@@ -1305,7 +1305,7 @@ void main() {
       );
     }
 
-    // Asserts when using the PrimaryScrollController
+    // Asserts when using the PrimaryScrollController.
     await tester.pumpWidget(_buildApp());
 
     // Swipe to the second tab, resulting in two attached ScrollPositions during
@@ -1327,7 +1327,7 @@ void main() {
     // the transition.
     try {
       await tester.drag(find.text('Test').first, const Offset(10.0, 0.0));
-    } on FlutterError catch (error) {
+    } on AssertionError catch (error) {
       expect(
         error.message,
         contains('The Scrollbar attempted to paint using the position attached to the provided ScrollController.'),
