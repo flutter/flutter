@@ -43,7 +43,7 @@ class TestTextState extends State<TestText> {
 
 void main() {
   const Color _dividerColor = Color(0x1f333333);
-  const Color _accentColor = Colors.blueAccent;
+  const Color _foregroundColor = Colors.blueAccent;
   const Color _unselectedWidgetColor = Colors.black54;
   const Color _headerColor = Colors.black45;
 
@@ -163,7 +163,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          accentColor: _accentColor,
+          colorScheme: ColorScheme.fromSwatch().copyWith(secondary: _foregroundColor),
           unselectedWidgetColor: _unselectedWidgetColor,
           textTheme: const TextTheme(subtitle1: TextStyle(color: _headerColor)),
         ),
@@ -195,9 +195,9 @@ void main() {
     Color iconColor(Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color!;
     Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color!;
 
-    expect(textColor(expandedTitleKey), _accentColor);
+    expect(textColor(expandedTitleKey), _foregroundColor);
     expect(textColor(collapsedTitleKey), _headerColor);
-    expect(iconColor(expandedIconKey), _accentColor);
+    expect(iconColor(expandedIconKey), _foregroundColor);
     expect(iconColor(collapsedIconKey), _unselectedWidgetColor);
 
     // Tap both tiles to change their state: collapse and extend respectively
@@ -208,9 +208,9 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     expect(textColor(expandedTitleKey), _headerColor);
-    expect(textColor(collapsedTitleKey), _accentColor);
+    expect(textColor(collapsedTitleKey), _foregroundColor);
     expect(iconColor(expandedIconKey), _unselectedWidgetColor);
-    expect(iconColor(collapsedIconKey), _accentColor);
+    expect(iconColor(collapsedIconKey), _foregroundColor);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('ExpansionTile subtitle', (WidgetTester tester) async {
