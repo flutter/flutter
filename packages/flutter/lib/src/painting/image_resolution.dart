@@ -116,10 +116,8 @@ const double _kLowDprLimit = 2.0;
 /// ```dart
 /// AssetImage('icons/heart.png')
 /// ```
-/// See also:
-///
-///  * [loading images](https://flutter.dev/docs/development/ui/assets-and-images#loading-images-1)
-///    for an example on how to use the [AssetImage] class to fetch an image.
+/// 
+/// To understand how an [Image] object is made out of an [AssetImage], refer [ImageProvider] and [AssetBundleImageProvider].
 ///  
 /// ## Assets in packages
 ///
