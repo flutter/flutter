@@ -2597,9 +2597,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       : null;
   }
 
-  static BoxConstraints _unmodified(BoxConstraints constraints) => constraints;
-  static BoxConstraints _removeMaxHeightConstraint(BoxConstraints constraints) => constraints.copyWith(maxHeight: double.infinity);
-
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
@@ -2610,7 +2607,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final bool ignoreOverflow = _isMultiline || widget.clipBehavior == Clip.none;
 
     return ConstraintsTransformBox(
-      constraintsTransform: ignoreOverflow ? _unmodified : _removeMaxHeightConstraint,
+      constraintsTransform: ignoreOverflow ? ConstraintsTransformBox.unmodified : ConstraintsTransformBox.maxHeightUnconstrained,
       clipBehavior: widget.clipBehavior,
       child: MouseRegion(
         cursor: widget.mouseCursor ?? SystemMouseCursors.text,
