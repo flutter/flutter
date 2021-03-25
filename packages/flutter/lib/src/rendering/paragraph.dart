@@ -449,6 +449,18 @@ class RenderParagraph extends RenderBox
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+    // Hit test text spans.
+    late final bool hitText;
+    final TextPosition textPosition = _textPainter.getPositionForOffset(position);
+    final InlineSpan? span = _textPainter.text!.getSpanForPosition(textPosition);
+    if (span != null && span is HitTestTarget) {
+      result.add(HitTestEntry(span as HitTestTarget));
+      hitText = true;
+    } else {
+      hitText = false;
+    }
+
+    // Hit test render object children
     RenderBox? child = firstChild;
     int childIndex = 0;
     while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes!.length) {
@@ -480,24 +492,7 @@ class RenderParagraph extends RenderBox
       child = childAfter(child);
       childIndex += 1;
     }
-    return false;
-  }
-
-  @override
-  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
-    assert(debugHandleEvent(event, entry));
-    if (event is! PointerDownEvent)
-      return;
-    _layoutTextWithConstraints(constraints);
-    final Offset offset = entry.localPosition;
-    final TextPosition position = _textPainter.getPositionForOffset(offset);
-    final InlineSpan? span = _textPainter.text!.getSpanForPosition(position);
-    if (span == null) {
-      return;
-    }
-    if (span is TextSpan) {
-      span.recognizer?.addPointer(event);
-    }
+    return hitText;
   }
 
   bool _needsClipping = false;
@@ -867,41 +862,6 @@ class RenderParagraph extends RenderBox
   /// [assembleSemanticsNode] and [_combineSemanticsInfo].
   List<InlineSpanSemanticsInformation>? _semanticsInfo;
 
-  /// Combines _semanticsInfo entries where permissible, determined by
-  /// [InlineSpanSemanticsInformation.requiresOwnNode].
-  List<InlineSpanSemanticsInformation> _combineSemanticsInfo() {
-    assert(_semanticsInfo != null);
-    final List<InlineSpanSemanticsInformation> combined = <InlineSpanSemanticsInformation>[];
-    String workingText = '';
-    // TODO(ianh): this algorithm is internally inconsistent. workingText
-    // never becomes null, but we check for it being so below.
-    String? workingLabel;
-    for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
-      if (info.requiresOwnNode) {
-        combined.add(InlineSpanSemanticsInformation(
-          workingText,
-          semanticsLabel: workingLabel ?? workingText,
-        ));
-        workingText = '';
-        workingLabel = null;
-        combined.add(info);
-      } else {
-        workingText += info.text;
-        workingLabel ??= '';
-        if (info.semanticsLabel != null) {
-          workingLabel += info.semanticsLabel!;
-        } else {
-          workingLabel += info.text;
-        }
-      }
-    }
-    combined.add(InlineSpanSemanticsInformation(
-      workingText,
-      semanticsLabel: workingLabel,
-    ));
-    return combined;
-  }
-
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
@@ -938,7 +898,7 @@ class RenderParagraph extends RenderBox
     int childIndex = 0;
     RenderBox? child = firstChild;
     final Queue<SemanticsNode> newChildCache = Queue<SemanticsNode>();
-    for (final InlineSpanSemanticsInformation info in _combineSemanticsInfo()) {
+    for (final InlineSpanSemanticsInformation info in combineSemanticsInfo(_semanticsInfo!)) {
       final TextSelection selection = TextSelection(
         baseOffset: start,
         extentOffset: start + info.text.length,
@@ -946,7 +906,7 @@ class RenderParagraph extends RenderBox
       start += info.text.length;
 
       if (info.isPlaceholder) {
-        // A placeholder span may have 0 to multple semantics nodes, we need
+        // A placeholder span may have 0 to multiple semantics nodes, we need
         // to annotate all of the semantics nodes belong to this span.
         while (children.length > childIndex &&
                children.elementAt(childIndex).isTagged(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {

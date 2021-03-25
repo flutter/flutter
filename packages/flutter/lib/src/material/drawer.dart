@@ -460,13 +460,11 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       switch (Directionality.of(context)) {
         case TextDirection.rtl:
           _controller.fling(velocity: -visualVelocity);
-          if (widget.drawerCallback != null)
-            widget.drawerCallback!(visualVelocity < 0.0);
+          widget.drawerCallback?.call(visualVelocity < 0.0);
           break;
         case TextDirection.ltr:
           _controller.fling(velocity: visualVelocity);
-          if (widget.drawerCallback != null)
-            widget.drawerCallback!(visualVelocity > 0.0);
+          widget.drawerCallback?.call(visualVelocity > 0.0);
           break;
       }
     } else if (_controller.value < 0.5) {
@@ -481,15 +479,13 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   /// Typically called by [ScaffoldState.openDrawer].
   void open() {
     _controller.fling(velocity: 1.0);
-    if (widget.drawerCallback != null)
-      widget.drawerCallback!(true);
+    widget.drawerCallback?.call(true);
   }
 
   /// Starts an animation to close the drawer.
   void close() {
     _controller.fling(velocity: -1.0);
-    if (widget.drawerCallback != null)
-      widget.drawerCallback!(false);
+    widget.drawerCallback?.call(false);
   }
 
   late ColorTween _scrimColorTween;

@@ -308,10 +308,7 @@ class Doctor {
 
     for (final ValidatorTask validatorTask in startValidatorTasks()) {
       final DoctorValidator validator = validatorTask.validator;
-      final Status status = Status.withSpinner(
-        stopwatch: Stopwatch(),
-        terminal: globals.terminal,
-      );
+      final Status status = _logger.startSpinner();
       ValidationResult result;
       try {
         result = await validatorTask.result;

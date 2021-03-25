@@ -330,8 +330,8 @@ class Environment {
     @required Logger logger,
     @required Artifacts artifacts,
     @required ProcessManager processManager,
+    @required Platform platform,
     @required String engineVersion,
-    @required bool generateDartPluginRegistry,
     Directory buildDir,
     Map<String, String> defines = const <String, String>{},
     Map<String, String> inputs = const <String, String>{},
@@ -369,9 +369,9 @@ class Environment {
       logger: logger,
       artifacts: artifacts,
       processManager: processManager,
+      platform: platform,
       engineVersion: engineVersion,
       inputs: inputs,
-      generateDartPluginRegistry: generateDartPluginRegistry,
     );
   }
 
@@ -388,7 +388,7 @@ class Environment {
     Map<String, String> defines = const <String, String>{},
     Map<String, String> inputs = const <String, String>{},
     String engineVersion,
-    bool generateDartPluginRegistry = false,
+    Platform platform,
     @required FileSystem fileSystem,
     @required Logger logger,
     @required Artifacts artifacts,
@@ -406,8 +406,8 @@ class Environment {
       logger: logger,
       artifacts: artifacts,
       processManager: processManager,
+      platform: platform ?? FakePlatform(),
       engineVersion: engineVersion,
-      generateDartPluginRegistry: generateDartPluginRegistry,
     );
   }
 
@@ -420,12 +420,12 @@ class Environment {
     @required this.defines,
     @required this.flutterRootDir,
     @required this.processManager,
+    @required this.platform,
     @required this.logger,
     @required this.fileSystem,
     @required this.artifacts,
     @required this.engineVersion,
     @required this.inputs,
-    @required this.generateDartPluginRegistry,
   });
 
   /// The [Source] value which is substituted with the path to [projectDir].
@@ -495,6 +495,8 @@ class Environment {
 
   final ProcessManager processManager;
 
+  final Platform platform;
+
   final Logger logger;
 
   final Artifacts artifacts;
@@ -503,11 +505,6 @@ class Environment {
 
   /// The version of the current engine, or `null` if built with a local engine.
   final String engineVersion;
-
-  /// Whether to generate the Dart plugin registry.
-  /// When [true], the main entrypoint is wrapped and the wrapper becomes
-  /// the new entrypoint.
-  final bool generateDartPluginRegistry;
 }
 
 /// The result information from the build system.
@@ -1027,11 +1024,15 @@ class Node {
   /// One or more reasons why a task was invalidated.
   ///
   /// May be empty if the task was skipped.
-  final Set<InvalidatedReason> invalidatedReasons = <InvalidatedReason>{};
+  final Map<InvalidatedReasonKind, InvalidatedReason> invalidatedReasons = <InvalidatedReasonKind, InvalidatedReason>{};
 
   /// Whether this node needs an action performed.
   bool get dirty => _dirty;
   bool _dirty = false;
+
+  InvalidatedReason _invalidate(InvalidatedReasonKind kind) {
+    return invalidatedReasons[kind] ??= InvalidatedReason(kind);
+  }
 
   /// Collect hashes for all inputs to determine if any have changed.
   ///
@@ -1060,7 +1061,8 @@ class Node {
       if (fileStore.currentAssetKeys.containsKey(absolutePath)) {
         final String currentHash = fileStore.currentAssetKeys[absolutePath];
         if (currentHash != previousAssetKey) {
-          invalidatedReasons.add(InvalidatedReason.inputChanged);
+          final InvalidatedReason reason = _invalidate(InvalidatedReasonKind.inputChanged);
+          reason.data.add(absolutePath);
           _dirty = true;
         }
       } else {
@@ -1074,13 +1076,15 @@ class Node {
       // output paths changed.
       if (!currentOutputPaths.contains(previousOutput)) {
         _dirty = true;
-        invalidatedReasons.add(InvalidatedReason.outputSetChanged);
+        final InvalidatedReason reason = _invalidate(InvalidatedReasonKind.outputSetChanged);
+        reason.data.add(previousOutput);
         // if this isn't a current output file there is no reason to compute the key.
         continue;
       }
       final File file = fileSystem.file(previousOutput);
       if (!file.existsSync()) {
-        invalidatedReasons.add(InvalidatedReason.outputMissing);
+        final InvalidatedReason reason = _invalidate(InvalidatedReasonKind.outputMissing);
+        reason.data.add(file.path);
         _dirty = true;
         continue;
       }
@@ -1089,7 +1093,8 @@ class Node {
       if (fileStore.currentAssetKeys.containsKey(absolutePath)) {
         final String currentHash = fileStore.currentAssetKeys[absolutePath];
         if (currentHash != previousHash) {
-          invalidatedReasons.add(InvalidatedReason.outputChanged);
+          final InvalidatedReason reason = _invalidate(InvalidatedReasonKind.outputChanged);
+          reason.data.add(absolutePath);
           _dirty = true;
         }
       } else {
@@ -1104,7 +1109,8 @@ class Node {
       _dirty = true;
       final String missingMessage = missingInputs.map((File file) => file.path).join(', ');
       logger.printTrace('invalidated build due to missing files: $missingMessage');
-      invalidatedReasons.add(InvalidatedReason.inputMissing);
+      final InvalidatedReason reason = _invalidate(InvalidatedReasonKind.inputMissing);
+      reason.data.addAll(missingInputs.map((File file) => file.path));
     }
 
     // If we have files to diff, compute them asynchronously and then
@@ -1112,7 +1118,8 @@ class Node {
     if (sourcesToDiff.isNotEmpty) {
       final List<File> dirty = fileStore.diffFileList(sourcesToDiff);
       if (dirty.isNotEmpty) {
-        invalidatedReasons.add(InvalidatedReason.inputChanged);
+        final InvalidatedReason reason = _invalidate(InvalidatedReasonKind.inputChanged);
+        reason.data.addAll(dirty.map((File file) => file.path));
         _dirty = true;
       }
     }
@@ -1120,8 +1127,35 @@ class Node {
   }
 }
 
+/// Data about why a target was re-run.
+class InvalidatedReason {
+  InvalidatedReason(this.kind);
+
+  final InvalidatedReasonKind kind;
+  /// Absolute file paths of inputs or outputs, depending on [kind].
+  final List<String> data = <String>[];
+
+  @override
+  String toString() {
+    switch (kind) {
+      case InvalidatedReasonKind.inputMissing:
+        return 'The following inputs were missing: ${data.join(',')}';
+      case InvalidatedReasonKind.inputChanged:
+        return 'The following inputs have updated contents: ${data.join(',')}';
+      case InvalidatedReasonKind.outputChanged:
+        return 'The following outputs have updated contents: ${data.join(',')}';
+      case InvalidatedReasonKind.outputMissing:
+        return 'The following outputs were missing: ${data.join(',')}';
+      case InvalidatedReasonKind.outputSetChanged:
+        return 'The following outputs were removed from the output set: ${data.join(',')}';
+    }
+    assert(false);
+    return null;
+  }
+}
+
 /// A description of why a target was rerun.
-enum InvalidatedReason {
+enum InvalidatedReasonKind {
   /// An input file that was expected is missing. This can occur when using
   /// depfile dependencies, or if a target is incorrectly specified.
   inputMissing,

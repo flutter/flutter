@@ -666,10 +666,10 @@ class RawScrollbar extends StatefulWidget {
   /// final ScrollController _controllerOne = ScrollController();
   /// final ScrollController _controllerTwo = ScrollController();
   ///
-  /// build(BuildContext context) {
+  /// Widget build(BuildContext context) {
   ///   return Column(
   ///     children: <Widget>[
-  ///       Container(
+  ///       SizedBox(
   ///        height: 200,
   ///        child: CupertinoScrollbar(
   ///          controller: _controllerOne,
@@ -680,7 +680,7 @@ class RawScrollbar extends StatefulWidget {
   ///          ),
   ///        ),
   ///      ),
-  ///      Container(
+  ///      SizedBox(
   ///        height: 200,
   ///        child: CupertinoScrollbar(
   ///          controller: _controllerTwo,
@@ -727,7 +727,7 @@ class RawScrollbar extends StatefulWidget {
   /// final ScrollController _controllerOne = ScrollController();
   /// final ScrollController _controllerTwo = ScrollController();
   ///
-  /// build(BuildContext context) {
+  /// Widget build(BuildContext context) {
   /// return Column(
   ///   children: <Widget>[
   ///     SizedBox(
@@ -751,7 +751,7 @@ class RawScrollbar extends StatefulWidget {
   ///          controller: _controllerTwo,
   ///          child: SingleChildScrollView(
   ///            controller: _controllerTwo,
-  ///            child: SizedBox(
+  ///            child: const SizedBox(
   ///              height: 2000,
   ///              width: 500,
   ///              child: Placeholder(),

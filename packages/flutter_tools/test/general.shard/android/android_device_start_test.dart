@@ -17,6 +17,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 
 const FakeCommand kAdbVersionCommand = FakeCommand(
   command: <String>['adb', 'version'],
@@ -121,7 +122,7 @@ void main() {
       );
 
       expect(launchResult.started, true);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
   }
 
@@ -160,7 +161,7 @@ void main() {
     );
 
     expect(launchResult.started, false);
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('AndroidDevice.startApp forwards all supported debugging options', () async {
@@ -285,7 +286,7 @@ void main() {
 
     // This fails to start due to observatory discovery issues.
     expect(launchResult.started, false);
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 }
 

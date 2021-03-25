@@ -39,7 +39,7 @@ const double _kDefaultFontSize = 14.0;
 /// ![Applying the style in this way creates bold text.](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_bold.png)
 ///
 /// ```dart
-/// Text(
+/// const Text(
 ///   'No, we need bold strokes. We need this plan.',
 ///   style: TextStyle(fontWeight: FontWeight.bold),
 /// )
@@ -55,7 +55,7 @@ const double _kDefaultFontSize = 14.0;
 /// ![This results in italicized text.](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_italics.png)
 ///
 /// ```dart
-/// Text(
+/// const Text(
 ///   "Welcome to the present, we're running a real nation.",
 ///   style: TextStyle(fontStyle: FontStyle.italic),
 /// )
@@ -137,7 +137,7 @@ const double _kDefaultFontSize = 14.0;
 /// 50 pixels.
 ///
 /// ```dart
-/// Text(
+/// const Text(
 ///   'Ladies and gentlemen, you coulda been anywhere in the world tonight, but you’re here with us in New York City.',
 ///   style: TextStyle(height: 5, fontSize: 10),
 /// )
@@ -163,7 +163,7 @@ const double _kDefaultFontSize = 14.0;
 ///
 /// ```dart
 /// RichText(
-///   text: TextSpan(
+///   text: const TextSpan(
 ///     text: "Don't tax the South ",
 ///     children: <TextSpan>[
 ///       TextSpan(
@@ -654,7 +654,7 @@ class TextStyle with Diagnosticable {
   /// decoration.
   ///
   /// ```dart
-  /// Text(
+  /// const Text(
   ///   'This has a very BOLD strike through!',
   ///   style: TextStyle(
   ///     decoration: TextDecoration.lineThrough,
@@ -669,7 +669,7 @@ class TextStyle with Diagnosticable {
   /// are misspelled) by using a [decorationThickness] < 1.0.
   ///
   /// ```dart
-  /// Text(
+  /// const Text(
   ///   'oopsIforgottousespaces!',
   ///   style: TextStyle(
   ///     decoration: TextDecoration.underline,

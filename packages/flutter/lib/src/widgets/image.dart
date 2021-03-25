@@ -768,8 +768,8 @@ class Image extends StatefulWidget {
   ///     ),
   ///     child: Image.network(
   ///       'https://flutter.github.io/assets-for-api-docs/assets/widgets/puffin.jpg',
-  ///       frameBuilder: (BuildContext context, Widget child, int? frame, bool? wasSynchronouslyLoaded) {
-  ///         if (wasSynchronouslyLoaded ?? false) {
+  ///       frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
+  ///         if (wasSynchronouslyLoaded) {
   ///           return child;
   ///         }
   ///         return AnimatedOpacity(
@@ -831,8 +831,9 @@ class Image extends StatefulWidget {
   ///     child: Image.network(
   ///       'https://example.com/image.jpg',
   ///       loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
-  ///         if (loadingProgress == null)
+  ///         if (loadingProgress == null) {
   ///           return child;
+  ///         }
   ///         return Center(
   ///           child: CircularProgressIndicator(
   ///             value: loadingProgress.expectedTotalBytes != null
@@ -882,7 +883,7 @@ class Image extends StatefulWidget {
   ///         //   exception,
   ///         //   stackTrace,
   ///         // );
-  ///         return Text('😢');
+  ///         return const Text('😢');
   ///       },
   ///     ),
   ///   );

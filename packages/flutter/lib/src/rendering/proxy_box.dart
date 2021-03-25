@@ -8,14 +8,14 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
 import 'layer.dart';
 import 'layout_helper.dart';
-import 'mouse_cursor.dart';
-import 'mouse_tracking.dart';
+import 'mouse_tracker.dart';
 import 'object.dart';
 
 export 'package:flutter/gestures.dart' show
@@ -1499,10 +1499,7 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
        assert(clipBehavior != Clip.none),
        _borderRadius = borderRadius,
        super(child: child, clipper: clipper, clipBehavior: clipBehavior) {
-    // `_borderRadius` has a non-nullable return type, but might be null when
-    // running with weak checking, so we need to null check it anyway (and
-    // ignore the warning that the null-handling logic is dead code).
-    assert(_borderRadius != null || clipper != null);// ignore: dead_code
+    assert(_borderRadius != null || clipper != null);
   }
 
   /// The border radius of the rounded corners.
@@ -3047,7 +3044,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///
   /// ```dart
   /// class PngHome extends StatefulWidget {
-  ///   PngHome({Key? key}) : super(key: key);
+  ///   const PngHome({Key? key}) : super(key: key);
   ///
   ///   @override
   ///   _PngHomeState createState() => _PngHomeState();
@@ -3057,10 +3054,10 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///   GlobalKey globalKey = GlobalKey();
   ///
   ///   Future<void> _capturePng() async {
-  ///     RenderRepaintBoundary boundary = globalKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
-  ///     ui.Image image = await boundary.toImage();
-  ///     ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-  ///     Uint8List pngBytes = byteData!.buffer.asUint8List();
+  ///     final RenderRepaintBoundary boundary = globalKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
+  ///     final ui.Image image = await boundary.toImage();
+  ///     final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+  ///     final Uint8List pngBytes = byteData!.buffer.asUint8List();
   ///     print(pngBytes);
   ///   }
   ///
@@ -3070,7 +3067,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///       key: globalKey,
   ///       child: Center(
   ///         child: TextButton(
-  ///           child: Text('Hello World', textDirection: TextDirection.ltr),
+  ///           child: const Text('Hello World', textDirection: TextDirection.ltr),
   ///           onPressed: _capturePng,
   ///         ),
   ///       ),

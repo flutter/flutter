@@ -1631,6 +1631,6 @@ void main() {
     await tester.pumpWidget(buildSwitch(false));
     expect(find.byType(Switch), findsNothing);
     // Release pointer after widget disappeared.
-    gesture.up();
+    await gesture.up();
   });
 }

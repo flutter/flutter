@@ -1588,7 +1588,7 @@ class _DecorationElement extends RenderObjectElement {
   }
 
   @override
-  void mount(Element? parent, dynamic newSlot) {
+  void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     _mountChild(widget.decoration.icon, _DecorationSlot.icon);
     _mountChild(widget.decoration.input, _DecorationSlot.input);
@@ -1685,7 +1685,7 @@ class _DecorationElement extends RenderObjectElement {
   }
 
   @override
-  void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
+  void moveRenderObjectChild(RenderObject child, Object? oldSlot, Object? newSlot) {
     assert(false, 'not reachable');
   }
 }
@@ -2019,24 +2019,14 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
   Color _getActiveColor(ThemeData themeData) {
     if (isFocused) {
-      switch (themeData.brightness) {
-        case Brightness.dark:
-          return themeData.accentColor;
-        case Brightness.light:
-          return themeData.primaryColor;
-      }
+      return themeData.colorScheme.primary;
     }
     return themeData.hintColor;
   }
 
   Color _getDefaultBorderColor(ThemeData themeData) {
     if (isFocused) {
-      switch (themeData.brightness) {
-        case Brightness.dark:
-          return themeData.accentColor;
-        case Brightness.light:
-          return themeData.primaryColor;
-      }
+        return themeData.colorScheme.primary;
     }
     if (decoration!.filled!) {
       return themeData.hintColor;
@@ -2415,7 +2405,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return TextField(
+///   return const TextField(
 ///     decoration: InputDecoration(
 ///       icon: Icon(Icons.send),
 ///       hintText: 'Hint Text',
@@ -2438,7 +2428,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return TextField(
+///   return const TextField(
 ///     decoration: InputDecoration.collapsed(
 ///       hintText: 'Hint Text',
 ///       border: OutlineInputBorder(),
@@ -2458,7 +2448,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return TextField(
+///   return const TextField(
 ///     decoration: InputDecoration(
 ///       hintText: 'Hint Text',
 ///       errorText: 'Error Text',
@@ -2875,7 +2865,7 @@ class InputDecoration {
   ///     padding: const EdgeInsets.symmetric(horizontal: 8.0),
   ///     child: Column(
   ///       mainAxisAlignment: MainAxisAlignment.center,
-  ///       children: <Widget>[
+  ///       children: const <Widget>[
   ///         TextField(
   ///           decoration: InputDecoration(
   ///             hintText: 'Normal Icon Constraints',
@@ -3043,7 +3033,7 @@ class InputDecoration {
   ///     padding: const EdgeInsets.symmetric(horizontal: 8.0),
   ///     child: Column(
   ///       mainAxisAlignment: MainAxisAlignment.center,
-  ///       children: <Widget>[
+  ///       children: const <Widget>[
   ///         TextField(
   ///           decoration: InputDecoration(
   ///             hintText: 'Normal Icon Constraints',

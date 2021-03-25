@@ -71,6 +71,9 @@ enum CocoaPodsStatus {
   brokenInstall,
 }
 
+String get cocoaPodsMinimumVersion => '1.9.0';
+String get cocoaPodsRecommendedVersion => '1.10.0';
+
 /// Cocoapods is a dependency management solution for iOS and macOS applications.
 ///
 /// Cocoapods is generally installed via ruby gems and interacted with via
@@ -110,9 +113,6 @@ class CocoaPods {
   final Usage _usage;
 
   Future<String> _versionText;
-
-  String get cocoaPodsMinimumVersion => '1.9.0';
-  String get cocoaPodsRecommendedVersion => '1.10.0';
 
   Future<bool> get isInstalled =>
     _processUtils.exitsHappy(<String>['which', 'pod']);
@@ -392,7 +392,6 @@ class CocoaPods {
               'To regenerate the Podfile, run:\n'
               '$podfileIosMigrationInstructions\n',
         );
-        return;
       }
     }
     // Most of the pod and plugin parsing logic was moved from the Podfile

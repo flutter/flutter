@@ -18,6 +18,16 @@ import 'theme.dart';
 
 export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization, SmartQuotesType, SmartDashesType;
 
+// This is a temporary fix for: https://github.com/flutter/flutter/issues/79012
+/// A map used to disable scrolling shortcuts in text fields.
+final Map<LogicalKeySet, Intent> _webScrollShortcutOverrides = <LogicalKeySet, Intent>{
+  LogicalKeySet(LogicalKeyboardKey.space): DoNothingAndStopPropagationIntent(),
+  LogicalKeySet(LogicalKeyboardKey.arrowUp): DoNothingAndStopPropagationIntent(),
+  LogicalKeySet(LogicalKeyboardKey.arrowDown): DoNothingAndStopPropagationIntent(),
+  LogicalKeySet(LogicalKeyboardKey.arrowLeft): DoNothingAndStopPropagationIntent(),
+  LogicalKeySet(LogicalKeyboardKey.arrowRight): DoNothingAndStopPropagationIntent(),
+};
+
 const TextStyle _kDefaultPlaceholderStyle = TextStyle(
   fontWeight: FontWeight.w400,
   color: CupertinoColors.placeholderText,
@@ -149,6 +159,8 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 ///
 /// ```dart
 /// class MyPrefilledText extends StatefulWidget {
+///   const MyPrefilledText({Key? key}) : super(key: key);
+///
 ///   @override
 ///   _MyPrefilledTextState createState() => _MyPrefilledTextState();
 /// }
@@ -1069,6 +1081,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     final TextEditingController controller = _effectiveController;
 
     TextSelectionControls? textSelectionControls = widget.selectionControls;
+    VoidCallback? handleDidGainAccessibilityFocus;
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.android:
@@ -1080,6 +1093,13 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
       case TargetPlatform.macOS:
         textSelectionControls ??= cupertinoDesktopTextSelectionControls;
+        handleDidGainAccessibilityFocus = () {
+          // macOS automatically activated the TextField when it receives
+          // accessibility focus.
+          if (!_effectiveFocusNode.hasFocus && _effectiveFocusNode.canRequestFocus) {
+            _effectiveFocusNode.requestFocus();
+          }
+        };
         break;
     }
 
@@ -1135,7 +1155,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
     final BoxDecoration? effectiveDecoration = widget.decoration?.copyWith(
       border: resolvedBorder,
-      color: enabled ? decorationColor : (decorationColor ?? disabledColor),
+      color: enabled ? decorationColor : disabledColor,
     );
 
     final Color selectionColor = CupertinoTheme.of(context).primaryColor.withOpacity(0.2);
@@ -1210,10 +1230,12 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         }
         _requestKeyboard();
       },
+      onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
       child: IgnorePointer(
         ignoring: !enabled,
         child: Container(
           decoration: effectiveDecoration,
+          color: !enabled && effectiveDecoration == null ? disabledColor : null,
           child: _selectionGestureDetectorBuilder.buildGestureDetector(
             behavior: HitTestBehavior.translucent,
             child: Align(
@@ -1229,7 +1251,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
     if (kIsWeb) {
       return Shortcuts(
-        shortcuts: scrollShortcutOverrides,
+        shortcuts: _webScrollShortcutOverrides,
         child: child,
       );
     }
