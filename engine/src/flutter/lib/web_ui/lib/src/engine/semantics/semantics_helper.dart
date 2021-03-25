@@ -311,9 +311,10 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
     // In Chrome the debouncing works well enough to detect accessibility
     // request.
     final bool blinkEnableConditionPassed =
-        browserEngine == BrowserEngine.blink &&
-            EngineSemanticsOwner.instance.gestureMode ==
-                GestureMode.browserGestures;
+        (browserEngine == BrowserEngine.blink ||
+            browserEngine == BrowserEngine.samsung) &&
+        EngineSemanticsOwner.instance.gestureMode ==
+            GestureMode.browserGestures;
 
     // In Safari debouncing doesn't work. Instead we look at where exactly
     // (within 1 pixel) the event landed. If it landed exactly in the middle of

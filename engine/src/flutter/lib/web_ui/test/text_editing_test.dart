@@ -1426,6 +1426,7 @@ void testMain() {
 
       // For `blink` and `webkit` browser engines the overlay would be hidden.
       if (browserEngine == BrowserEngine.blink ||
+          browserEngine == BrowserEngine.samsung ||
           browserEngine == BrowserEngine.webkit) {
         expect(textEditing.editingElement.domElement.classes,
             contains('transparentTextEditing'));
@@ -1924,6 +1925,7 @@ void testMain() {
 
       // For `blink` and `webkit` browser engines the overlay would be hidden.
       if (browserEngine == BrowserEngine.blink ||
+          browserEngine == BrowserEngine.samsung ||
           browserEngine == BrowserEngine.webkit) {
         expect(firstElement.classes, contains('transparentTextEditing'));
       } else {
