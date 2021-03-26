@@ -5968,9 +5968,7 @@ class RestorableRouteFuture<T> extends RestorableProperty<String?> {
       _route?.restorationScopeId.removeListener(notifyListeners);
       _route = null;
       notifyListeners();
-      if (onComplete != null) {
-        onComplete!(result as T);
-      }
+      onComplete?.call(result as T);
     });
   }
 

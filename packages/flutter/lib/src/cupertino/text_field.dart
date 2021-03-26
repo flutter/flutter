@@ -116,8 +116,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
     }
     super.onSingleTapUp(details);
     _state._requestKeyboard();
-    if (_state.widget.onTap != null)
-      _state.widget.onTap!();
+    _state.widget.onTap?.call();
   }
 
   @override

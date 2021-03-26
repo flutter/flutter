@@ -638,9 +638,7 @@ class _UiKitViewState extends State<UiKitView> {
       controller.dispose();
       return;
     }
-    if (widget.onPlatformViewCreated != null) {
-      widget.onPlatformViewCreated!(id);
-    }
+    widget.onPlatformViewCreated?.call(id);
     setState(() { _controller = controller; });
   }
 }

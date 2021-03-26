@@ -228,8 +228,7 @@ class _AnyTapGestureRecognizer extends BaseTapGestureRecognizer {
   @protected
   @override
   void handleTapUp({PointerDownEvent? down, PointerUpEvent? up}) {
-    if (onAnyTapUp != null)
-      onAnyTapUp!();
+    onAnyTapUp?.call();
   }
 
   @protected
