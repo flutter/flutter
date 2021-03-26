@@ -6176,6 +6176,35 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
     super.forgetChild(child);
   }
 
+  bool _debugCheckHasAssociatedRenderObject(Element newChild) {
+    assert(() {
+      if (newChild.renderObject == null) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary('The children of `MultiChildRenderObjectElement` must each has an associated render object.'),
+              ErrorHint(
+                'This typically means that the `${newChild.widget}` or its children\n'
+                'are not a subtype of `RenderObjectWidget`.'
+              ),
+              newChild.describeElement('The following element does not have an associated render object'),
+              DiagnosticsDebugCreator(DebugCreator(newChild)),
+            ]),
+          ),
+        );
+      }
+      return true;
+    }());
+    return true;
+  }
+
+  @override
+  Element inflateWidget(Widget newWidget, Object? newSlot) {
+    final Element newChild = super.inflateWidget(newWidget, newSlot);
+    assert(_debugCheckHasAssociatedRenderObject(newChild));
+    return newChild;
+  }
+
   @override
   void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);

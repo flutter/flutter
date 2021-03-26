@@ -69,7 +69,7 @@ import 'constants.dart';
 ///       body: TabBarView(
 ///         controller: _tabController,
 ///         children: myTabs.map((Tab tab) {
-///           final String label = tab.text!.toLowerCase();
+///           final String label = tab.label!.toLowerCase();
 ///           return Center(
 ///             child: Text(
 ///               'This is the $label tab',
@@ -122,7 +122,7 @@ import 'constants.dart';
 ///             children: tabs.map((Tab tab){
 ///               return Center(
 ///                 child: Text(
-///                   tab.text! + ' Tab',
+///                   tab.label! + ' Tab',
 ///                   style: Theme.of(context).textTheme.headline5,
 ///                 ),
 ///               );

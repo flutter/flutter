@@ -14,6 +14,7 @@ import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../cache.dart';
 import '../compile.dart';
 import '../convert.dart';
 import '../dart/language_version.dart';
@@ -512,6 +513,7 @@ class FlutterPlatform extends PlatformPlugin {
     final LanguageVersion languageVersion = determineLanguageVersion(
       file,
       packageConfig[flutterProject?.manifest?.appName],
+      Cache.flutterRoot,
     );
     return generateTestBootstrap(
       testUrl: testUrl,

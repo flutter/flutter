@@ -8,8 +8,6 @@ import 'logger.dart';
 import 'platform.dart';
 import 'terminal.dart';
 
-// ignore_for_file: non_constant_identifier_names
-
 const String fire = '🔥';
 const String image = '🖼️';
 const int maxLineWidth = 84;

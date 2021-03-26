@@ -690,11 +690,6 @@ void main() {
       platform: windowsPlatform,
     );
 
-    // Throws an argument error because package:process fails to locate the executable.
-    expect(() => processManager.runSync(<String>['foo']), throwsArgumentError);
-    expect(() => processManager.run(<String>['foo']), throwsArgumentError);
-    expect(() => processManager.start(<String>['foo']), throwsArgumentError);
-
     // Throws process exception because the executable does not exist.
     await ErrorHandlingProcessManager.skipCommandLookup<void>(() async {
       expect(() => processManager.runSync(<String>['foo']), throwsA(isA<ProcessException>()));
