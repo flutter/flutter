@@ -6,7 +6,6 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
-import 'key_labels.dart';
 import 'test_async_utils.dart';
 
 // TODO(gspencergoog): Replace this with more robust key simulation code once
@@ -15,7 +14,10 @@ import 'test_async_utils.dart';
 // This code can only simulate keys which appear in the key maps.
 
 String _keyLabel(LogicalKeyboardKey key) {
-  return logicalKeyLabels[key.keyId] ?? '';
+  final String keyLabel = key.keyLabel;
+  if (keyLabel.length == 1)
+    return keyLabel.toLowerCase();
+  return '';
 }
 
 /// A class that serves as a namespace for a bunch of keyboard-key generation
