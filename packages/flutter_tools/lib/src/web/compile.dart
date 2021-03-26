@@ -64,6 +64,7 @@ Future<void> buildWeb(
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
+      platform: globals.platform,
       cacheDir: globals.cache.getRoot(),
       engineVersion: globals.artifacts.isLocalEngine
         ? null

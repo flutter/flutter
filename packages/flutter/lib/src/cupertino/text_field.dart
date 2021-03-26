@@ -1071,6 +1071,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     final TextEditingController controller = _effectiveController;
 
     TextSelectionControls? textSelectionControls = widget.selectionControls;
+    VoidCallback? handleDidGainAccessibilityFocus;
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.android:
@@ -1082,6 +1083,13 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
       case TargetPlatform.macOS:
         textSelectionControls ??= cupertinoDesktopTextSelectionControls;
+        handleDidGainAccessibilityFocus = () {
+          // macOS automatically activated the TextField when it receives
+          // accessibility focus.
+          if (!_effectiveFocusNode.hasFocus && _effectiveFocusNode.canRequestFocus) {
+            _effectiveFocusNode.requestFocus();
+          }
+        };
         break;
     }
 
@@ -1212,6 +1220,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         }
         _requestKeyboard();
       },
+      onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
       child: IgnorePointer(
         ignoring: !enabled,
         child: Container(

@@ -170,7 +170,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
       }
 
       command.usageException(error.message);
-      return null;
     }
   }
 
