@@ -33,23 +33,10 @@ const EdgeInsetsDirectional _kDefaultInsetGroupedRowsMargin = EdgeInsetsDirectio
 const BorderRadius _kDefaultInsetGroupedBorderRadius = BorderRadius.all(Radius.circular(10.0));
 
 // Standard header margin, determined from SwiftUI's Forms in iOS 14.2 SDK.
-const EdgeInsetsDirectional _kDefaultHeaderMargin =
-    EdgeInsetsDirectional.fromSTEB(20.0, 16.0, 20.0, 10.0);
+const EdgeInsetsDirectional _kFormDefaultHeaderMargin = EdgeInsetsDirectional.fromSTEB(20.0, 16.0, 20.0, 10.0);
 
 // Standard footer margin, determined from SwiftUI's Forms in iOS 14.2 SDK.
-const EdgeInsetsDirectional _kDefaultFooterMargin =
-    EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
-
-// Used for iOS "Inset Grouped" margin, determined from SwiftUI's Forms in
-// iOS 14.2 SDK.
-const EdgeInsetsDirectional _kDefaultInsetGroupedRowsMargin =
-    EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
-
-// Used for iOS "Inset Grouped" border radius, estimated from SwiftUI's Forms in
-// iOS 14.2 SDK.
-// TODO(edrisian): This should be a rounded rectangle once that shape is added.
-const BorderRadius _kDefaultInsetGroupedBorderRadius =
-    BorderRadius.all(Radius.circular(10.0));
+const EdgeInsetsDirectional _kFormDefaultFooterMargin = EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
 
 // The margin of divider used in base list section. Estimated from iOS 14.4 SDK
 // Settings app.
@@ -824,7 +811,7 @@ class CupertinoFormSection extends StatelessWidget {
                   color: CupertinoColors.secondaryLabel.resolveFrom(context),
                 ),
                 child: Padding(
-                  padding: _kDefaultHeaderMargin,
+                  padding: _kFormDefaultHeaderMargin,
                   child: header!,
                 ),
               ),
@@ -847,7 +834,7 @@ class CupertinoFormSection extends StatelessWidget {
                   color: CupertinoColors.secondaryLabel.resolveFrom(context),
                 ),
                 child: Padding(
-                  padding: _kDefaultFooterMargin,
+                  padding: _kFormDefaultFooterMargin,
                   child: footer!,
                 ),
               ),
