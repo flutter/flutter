@@ -31,4 +31,11 @@ void main() {
     expect(binding.testTextInput.isRegistered, true);
     expect(HttpOverrides.current, isNotNull);
   });
+
+  test('Returns a no-op future for ReassembleApplication', () async {
+    final AutomatedTestWidgetsFlutterBinding binding = AutomatedTestWidgetsFlutterBinding();
+
+    // If the binding was waiting for frames this future would never complete.
+    await expectLater(binding.reassembleApplication(), completes);
+  });
 }

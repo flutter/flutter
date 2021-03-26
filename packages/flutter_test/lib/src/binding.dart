@@ -332,6 +332,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   @override
+  Future<void> reassembleApplication() async {
+    // The super.reassembleApplication method assumes that it can schedule frames which may
+    // or may not be the case in tests. No-op instead to avoid modifying any test state.
+  }
+
+  @override
   BinaryMessenger createBinaryMessenger() {
     return TestDefaultBinaryMessenger(super.createBinaryMessenger());
   }
@@ -918,8 +924,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 /// This binding controls time, allowing tests to verify long
 /// animation sequences without having to execute them in real time.
 ///
-/// This class assumes it is always run in checked mode (since tests are always
-/// run in checked mode).
+/// This class assumes it is always run in debug mode (since tests are always
+/// run in debug mode).
 class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void initInstances() {
