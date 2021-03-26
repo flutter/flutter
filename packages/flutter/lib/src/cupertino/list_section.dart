@@ -236,9 +236,9 @@ enum _CupertinoListSectionType { base, insetGrouped }
 ///
 /// See also:
 ///
-///  * [CupertinoFormSection], an iOS-style form section.
 ///  * [CupertinoListTile], an iOS-style list tile, a typical child of
 ///    [CupertinoListSection].
+///  * [CupertinoFormSection], an iOS-style form section.
 class CupertinoListSection extends StatelessWidget {
   /// Creates a section that mimicks standard iOS forms.
   ///
@@ -586,6 +586,12 @@ class CupertinoListSection extends StatelessWidget {
 /// If null, defaults to [CupertinoColors.systemGroupedBackground].
 ///
 /// {@macro flutter.material.Material.clipBehavior}
+/// 
+/// See also:
+///
+///  * [CupertinoFormRow], an iOS-style list tile, a typical child of
+///    [CupertinoFormSection].
+///  * [CupertinoListSection], an iOS-style list section.
 class CupertinoFormSection extends StatelessWidget {
   /// Creates a section that mimicks standard iOS forms.
   ///
