@@ -2129,6 +2129,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     markNeedsSemanticsUpdate();
   }
 
+  // Holds the text position at the last drag start.
+  TextPosition? _lastDragStartPosition;
+
   /// The offset at which the text should be painted.
   ///
   /// If the text content is larger than the editable line itself, the editable
@@ -2973,7 +2976,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       ? null
       : _textPainter.getPositionForOffset(globalToLocal(to - _paintOffset));
 
-    final int baseOffset = fromPosition.offset;
+    // If it's a drag update, keep the original baseOffset from drag start
+    // since the scroll offset may have changed.
+    if (cause == SelectionChangedCause.drag && to == null) {
+      _lastDragStartPosition = fromPosition;
+    }
+
+    final int baseOffset = (cause == SelectionChangedCause.drag && to != null)
+      ? _lastDragStartPosition?.offset ?? fromPosition.offset
+      : fromPosition.offset;
     final int extentOffset = toPosition?.offset ?? fromPosition.offset;
 
     final TextSelection newSelection = TextSelection(

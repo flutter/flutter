@@ -596,6 +596,85 @@ void main() {
     expect(selectionChangedCount, 1);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61028
 
+  test('selection baseOffset does not move when scrolling while dragging', () {
+    String text = '';
+    for (int i = 1; i < 100; i++)
+      text += 'Air plant authentic post-ironic kogi slow-carb flannel microdosing'
+        ' hexagon shoreditch chicharrones $i.\n';
+
+    final TextSelectionDelegate delegate = FakeEditableTextState()
+      ..textEditingValue = TextEditingValue(text: text);
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    TextSelection currentSelection = const TextSelection.collapsed(offset: -1);
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      offset: viewportOffset,
+      maxLines: null,
+      textSelectionDelegate: delegate,
+      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        renderObject.selection = selection;
+        currentSelection = selection;
+      },
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      text: TextSpan(
+        text: text,
+        style: const TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+      selection: const TextSelection.collapsed(
+        offset: 4,
+      ),
+    );
+
+    layout(
+      editable,
+      constraints: const BoxConstraints.tightFor(width: 400, height: 300.0),
+      alignment: Alignment.topLeft
+    );
+
+    pumpFrame(phase: EnginePhase.compositingBits);
+    expect(
+      editable,
+      paints..paragraph(offset: Offset.zero),
+    );
+
+    expect(editable.size, equals(const Size(400.0, 300.0)));
+    expect(editable.maxScrollExtent, equals(2680.0));
+
+    // Drag start
+    editable.selectPositionAt(from: const Offset(40.0, 30.0), cause: SelectionChangedCause.drag);
+    pumpFrame();
+
+    expect(currentSelection.isCollapsed, isTrue);
+    expect(currentSelection.baseOffset, 106);
+    expect(currentSelection.extentOffset, 106);
+
+    // Drag update
+    editable.selectPositionAt(from: const Offset(40.0, 30.0), to: const Offset(240.0, 330.0), cause: SelectionChangedCause.drag);
+    pumpFrame();
+
+    expect(currentSelection.isCollapsed, isFalse);
+    expect(currentSelection.baseOffset, 106);
+    expect(currentSelection.extentOffset, 1148);
+
+    // Update scroll offset
+    viewportOffset.correctBy(200.0);
+    pumpFrame(phase: EnginePhase.compositingBits);
+
+    // Drag update
+    editable.selectPositionAt(from: const Offset(40.0, 30.0), to: const Offset(280.0, 390.0), cause: SelectionChangedCause.drag);
+    pumpFrame();
+
+    expect(currentSelection.isCollapsed, isFalse);
+    expect(currentSelection.baseOffset, 106);
+    expect(currentSelection.extentOffset, 2050);
+  }, skip: isBrowser);
+
   test('promptRect disappears when promptRectColor is set to null', () {
     const Color promptRectColor = Color(0x12345678);
     final TextSelectionDelegate delegate = FakeEditableTextState();
