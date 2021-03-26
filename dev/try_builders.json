@@ -536,7 +536,7 @@
       "name": "Mac dart_plugin_registry_test",
       "repo": "flutter",
       "task_name": "dart_plugin_registry_test",
-      "enabled": true,
+      "enabled": false,
       "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
     },
     {
@@ -754,7 +754,8 @@
       "name": "Windows web_tool_tests",
       "repo": "flutter",
       "task_name": "win_web_tool_tests",
-      "enabled": false
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
     }
   ]
 }

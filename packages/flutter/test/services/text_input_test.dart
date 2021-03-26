@@ -133,7 +133,7 @@ void main() {
     test('basic structure', () async {
       const TextInputType text = TextInputType.text;
       const TextInputType number = TextInputType.number;
-      const TextInputType number2 = TextInputType.numberWithOptions(); // ignore: use_named_constants
+      const TextInputType number2 = TextInputType.numberWithOptions();
       const TextInputType signed = TextInputType.numberWithOptions(signed: true);
       const TextInputType signed2 = TextInputType.numberWithOptions(signed: true);
       const TextInputType decimal = TextInputType.numberWithOptions(decimal: true);
