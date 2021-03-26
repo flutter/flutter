@@ -213,9 +213,10 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// [keyLabel], such as 'Key A', 'Digit 1', 'Backslash'. This might
   /// also return accented letters (such as 'Key Ù') for keys labeled as so.
   ///
-  /// For other keys, this returns the same value as [keyLabel], such as 'F1',
-  /// 'Shift Left', or 'Media Down'. If there's no key label data for a key, this
-  /// returns a name that explains the ID (such as 'Key with ID 0x00100012345').
+  /// For other keys, this looks up the full key name from a predefined map (the
+  /// same value as [keyLabel]), such as 'F1', 'Shift Left', or 'Media Down'. If
+  /// there's no key label data for a key, this returns a name that explains the
+  /// ID (such as 'Key with ID 0x00100012345').
   String? get debugName {
     String? result;
     assert(() {
