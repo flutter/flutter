@@ -4,7 +4,7 @@
 
 // @dart = 2.8
 
-import 'dart:io';
+import 'dart:io' hide Directory;
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 
 import '../../src/android_common.dart';
 import '../../src/common.dart';
