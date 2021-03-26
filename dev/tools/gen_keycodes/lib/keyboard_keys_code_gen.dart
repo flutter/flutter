@@ -121,7 +121,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
       // plane.
       final Key entry = keyData.data.firstWhere((Key item) => item.name == Key.synonyms[name][0]);
       result.write('''
-      ${toHex(Key.synonymPlane | entry.flutterId, digits: 11)}: '${Key.getCommentName(name)}',
+    ${toHex(Key.synonymPlane | entry.flutterId, digits: 11)}: '${Key.getCommentName(name)}',
 ''');
     }
     return result.toString();
