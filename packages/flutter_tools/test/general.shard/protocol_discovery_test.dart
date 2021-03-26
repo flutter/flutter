@@ -4,7 +4,7 @@
 
 // @dart = 2.8
 
-import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/device_port_forwader.dart';
 import 'package:flutter_tools/src/protocol_discovery.dart';
 import 'package:fake_async/fake_async.dart';
 

@@ -176,8 +176,7 @@ class PaintingContext extends ClipContext {
     assert(() {
       if (debugProfilePaintsEnabled)
         Timeline.startSync('${child.runtimeType}', arguments: timelineArgumentsIndicatingLandmarkEvent);
-      if (debugOnProfilePaint != null)
-        debugOnProfilePaint!(child);
+      debugOnProfilePaint?.call(child);
       return true;
     }());
 
@@ -830,8 +829,7 @@ class PipelineOwner {
   /// Used to notify the pipeline owner that an associated render object wishes
   /// to update its visual appearance.
   void requestVisualUpdate() {
-    if (onNeedVisualUpdate != null)
-      onNeedVisualUpdate!();
+    onNeedVisualUpdate?.call();
   }
 
   /// The unique object managed by this pipeline that has no parent.
@@ -1029,8 +1027,7 @@ class PipelineOwner {
     if (_outstandingSemanticsHandles == 1) {
       assert(_semanticsOwner == null);
       _semanticsOwner = SemanticsOwner();
-      if (onSemanticsOwnerCreated != null)
-        onSemanticsOwnerCreated!();
+      onSemanticsOwnerCreated?.call();
     }
     return SemanticsHandle._(this, listener);
   }
@@ -1041,8 +1038,7 @@ class PipelineOwner {
     if (_outstandingSemanticsHandles == 0) {
       _semanticsOwner!.dispose();
       _semanticsOwner = null;
-      if (onSemanticsOwnerDisposed != null)
-        onSemanticsOwnerDisposed!();
+      onSemanticsOwnerDisposed?.call();
     }
   }
 

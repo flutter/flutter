@@ -16,6 +16,7 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
 import '../bundle.dart';
+import '../cache.dart';
 import '../compile.dart';
 import '../dart/language_version.dart';
 import '../web/bootstrap.dart';
@@ -63,7 +64,7 @@ class WebTestCompiler {
       }
     } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
       platformDillArtifact = Artifact.webPlatformSoundKernelDill;
-      languageVersion = nullSafeVersion;
+      languageVersion = currentLanguageVersion(_fileSystem, Cache.flutterRoot);
       if (!extraFrontEndOptions.contains('--sound-null-safety')) {
         extraFrontEndOptions.add('--sound-null-safety');
       }
