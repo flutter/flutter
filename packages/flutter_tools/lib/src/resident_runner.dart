@@ -1008,7 +1008,7 @@ abstract class ResidentRunner {
   }
 
   Future<bool> debugDumpLayerTree() async {
-    if (!supportsServiceProtocol) {
+    if (!supportsServiceProtocol || !isRunningDebug) {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
