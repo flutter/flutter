@@ -98,7 +98,8 @@ import 'theme.dart';
 ///       _items.insert(newIndex, item);
 ///     });
 ///   },
-/// );
+///  );
+/// }
 /// ```
 /// {@end-tool}
 class ReorderableListView extends StatefulWidget {
