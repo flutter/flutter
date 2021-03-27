@@ -1,4 +1,4 @@
-Signature: 7f2e09a118ce5ca355bc0defe06b35aa
+Signature: da2b85e2b969bf2ddde4effee657b00e
 
 UNUSED LICENSES:
 
@@ -519,6 +519,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.posix/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.process/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery.ui/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.scenic.allocation/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.scenic.scheduling/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings.policy/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/meta.json
@@ -1240,6 +1241,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.posix/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.process/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery.ui/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.scenic.allocation/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.scenic.scheduling/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings.policy/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/meta.json
@@ -1858,6 +1860,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.posix/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.process/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery.ui/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.scenic.allocation/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.scenic.scheduling/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings.policy/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/meta.json
@@ -3396,6 +3399,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/dai_connect.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish/goldfish_sync.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.virtualkeyboard/virtual_keyboard.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/inotify.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.scenic.allocation/allocator.fidl
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/inotify.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/cstddef.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/functional.h
