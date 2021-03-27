@@ -65,6 +65,42 @@ import 'theme.dart';
 /// ```
 ///
 ///{@end-tool}
+///
+/// {@tool snippet}
+/// This example mirrors the previous one, creating the same list using the
+/// [ReorderableListView.builder] constructor. Using the [IndexedWidgetBuilder], children
+/// are built lazily on demand.
+/// ```dart
+/// final List<int> _items = List<int>.generate(50, (int index) => index);
+///
+/// @override
+/// Widget build(BuildContext context){
+///   final ColorScheme colorScheme = Theme.of(context).colorScheme;
+///   final Color oddItemColor = colorScheme.primary.withOpacity(0.05);
+///   final Color evenItemColor = colorScheme.primary.withOpacity(0.15);
+///
+/// return ReorderableListView.builder(
+///   padding: const EdgeInsets.symmetric(horizontal: 40),
+///   itemCount:_items.length,
+///   itemBuilder: (BuildContext _, int index) {
+///     return ListTile(
+///       key: Key('$index'),
+///       tileColor: _items[index].isOdd ? oddItemColor : evenItemColor,
+///       title: Text('Item ${_items[index]}'),
+///     );
+///   },
+///   onReorder: (int oldIndex, int newIndex) {
+///     setState(() {
+///       if (oldIndex < newIndex) {
+///         newIndex -= 1;
+///       }
+///       final int item = _items.removeAt(oldIndex);
+///       _items.insert(newIndex, item);
+///     });
+///   },
+/// );
+/// ```
+/// {@end-tool}
 class ReorderableListView extends StatefulWidget {
   /// Creates a reorderable list from a pre-built list of widgets.
   ///
