@@ -306,7 +306,7 @@ class Router<T> extends StatefulWidget {
   ///
   ///  * [maybeOf], which is a similar function, but it will return null instead
   ///    of throwing an exception if no [Router] ancestor exists.
-  static Router<dynamic> of(BuildContext context) {
+  static Router<Object> of(BuildContext context) {
     final _RouterScope? scope = context.dependOnInheritedWidgetOfExactType<_RouterScope>();
     assert(() {
       if (scope == null) {
@@ -334,7 +334,7 @@ class Router<T> extends StatefulWidget {
   ///
   ///  * [of], a similar method that returns a non-nullable value, and will
   ///    throw if no [Router] ancestor exists.
-  static Router<dynamic>? maybeOf(BuildContext context) {
+  static Router<Object>? maybeOf(BuildContext context) {
     final _RouterScope? scope = context.dependOnInheritedWidgetOfExactType<_RouterScope>();
     return scope?.routerState.widget;
   }
@@ -619,7 +619,7 @@ class _RouterState<T> extends State<Router<T>> {
       });
   }
 
-  static final Future<dynamic> _never = Completer<dynamic>().future; // won't ever complete
+  static final Future<Object> _never = Completer<Object>().future; // won't ever complete
 
   _AsyncPassthrough<T> _verifyRouteInformationParserStillCurrent(Object? transaction, Router<T> originalWidget) {
     return (T data) {
@@ -704,9 +704,9 @@ class _RouterScope extends InheritedWidget {
 
   final ValueListenable<RouteInformation?>? routeInformationProvider;
   final BackButtonDispatcher? backButtonDispatcher;
-  final RouteInformationParser<dynamic>? routeInformationParser;
-  final RouterDelegate<dynamic> routerDelegate;
-  final _RouterState<dynamic> routerState;
+  final RouteInformationParser<Object>? routeInformationParser;
+  final RouterDelegate<Object> routerDelegate;
+  final _RouterState<Object> routerState;
 
   @override
   bool updateShouldNotify(_RouterScope oldWidget) {
