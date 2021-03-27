@@ -117,7 +117,9 @@ const double _kLowDprLimit = 2.0;
 /// AssetImage('icons/heart.png')
 /// ```
 /// 
-/// To understand how an [Image] object is made out of an [AssetImage], refer [ImageProvider] and [AssetBundleImageProvider].
+/// For an example on how an [AssetImage] would be resolved to obtain a
+/// [dart:ui.Image] object, refer to the sample code in the documentation for
+/// [ImageProvider].
 ///  
 /// ## Assets in packages
 ///
