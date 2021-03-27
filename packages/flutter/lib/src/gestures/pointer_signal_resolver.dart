@@ -61,12 +61,12 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 ///     Key? key,
 ///     required this.initialColor,
 ///     required this.useResolver,
-///     required this.child,
+///     this.child,
 ///   }) : super(key: key);
 ///
 ///   final HSVColor initialColor;
 ///   final bool useResolver;
-///   final Widget child;
+///   final Widget? child;
 ///
 ///   @override
 ///   _ColorChangerState createState() => _ColorChangerState();
@@ -77,7 +77,7 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 ///
 ///   void rotateColor() {
 ///     setState(() {
-///       color = color.withHue((color.hue + 6) % 360.0);
+///       color = color.withHue((color.hue + 3) % 360.0);
 ///     });
 ///   }
 ///
@@ -104,7 +104,13 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 ///             rotateColor();
 ///           }
 ///         },
-///         child: widget.child,
+///         child: Stack(
+///           fit: StackFit.expand,
+///           children: <Widget>[
+///             const AbsorbPointer(),
+///             if (widget.child != null) widget.child!,
+///           ],
+///         ),
 ///       ),
 ///     );
 ///   }
@@ -129,7 +135,6 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 ///             child: ColorChanger(
 ///               initialColor: const HSVColor.fromAHSV(1, 60.0, 1, 1),
 ///               useResolver: useResolver,
-///               child: const AbsorbPointer(),
 ///             ),
 ///           ),
 ///         ),
