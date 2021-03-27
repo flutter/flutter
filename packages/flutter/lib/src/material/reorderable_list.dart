@@ -68,8 +68,8 @@ import 'theme.dart';
 ///
 /// {@tool snippet}
 /// This example mirrors the previous one, creating the same list using the
-/// [ReorderableListView.builder] constructor. Using the [IndexedWidgetBuilder], children
-/// are built lazily on demand.
+/// [ReorderableListView.builder] constructor. Using the [IndexedWidgetBuilder], The
+/// list items are built lazily on demand.
 /// ```dart
 /// final List<int> _items = List<int>.generate(50, (int index) => index);
 ///
