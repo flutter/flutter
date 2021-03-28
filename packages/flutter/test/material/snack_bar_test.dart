@@ -421,12 +421,17 @@ void main() {
   });
 
   testWidgets('SnackBar dismiss test', (WidgetTester tester) async {
-    int snackBarCount = 0;
     const Key tapTarget = Key('tap-target');
+    late DismissDirection dismissDirection;
+    late double width;
+    int snackBarCount = 0;
+    
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Builder(
           builder: (BuildContext context) {
+            width = MediaQuery.of(context).size.width;
+
             return GestureDetector(
               key: tapTarget,
               onTap: () {
@@ -434,6 +439,7 @@ void main() {
                 Scaffold.of(context).showSnackBar(SnackBar(
                   content: Text('bar$snackBarCount'),
                   duration: const Duration(seconds: 2),
+                  dismissDirection: dismissDirection,
                 ));
               },
               behavior: HitTestBehavior.opaque,
@@ -446,32 +452,76 @@ void main() {
         ),
       ),
     ));
-    expect(find.text('bar1'), findsNothing);
-    expect(find.text('bar2'), findsNothing);
-    await tester.tap(find.byKey(tapTarget)); // queue bar1
-    await tester.tap(find.byKey(tapTarget)); // queue bar2
-    expect(find.text('bar1'), findsNothing);
-    expect(find.text('bar2'), findsNothing);
-    await tester.pump(); // schedule animation for bar1
-    expect(find.text('bar1'), findsOneWidget);
-    expect(find.text('bar2'), findsNothing);
-    await tester.pump(); // begin animation
-    expect(find.text('bar1'), findsOneWidget);
-    expect(find.text('bar2'), findsNothing);
-    await tester.pump(const Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
-    await tester.drag(find.text('bar1'), const Offset(0.0, 50.0));
-    await tester.pump(); // bar1 dismissed, bar2 begins animating
-    expect(find.text('bar1'), findsNothing);
-    expect(find.text('bar2'), findsOneWidget);
+
+    final Map<int, Offset> dragGestures = <int, Offset>{};
+
+    for (final DismissDirection val in DismissDirection.values) {
+      switch (val) {
+        case DismissDirection.down:
+          dragGestures[val.index * 10] = const Offset(0.0, 50.0);
+          break;
+        case DismissDirection.up:
+          dragGestures[val.index * 10] = const Offset(0.0, -50.0);
+          break;
+        case DismissDirection.vertical:
+          dragGestures[val.index * 10] = const Offset(0.0, 50.0);
+          dragGestures[val.index * 10 + 1] = const Offset(0.0, -50.0);
+          break;
+        case DismissDirection.startToEnd:
+          dragGestures[val.index * 10] = Offset(width, 0.0);
+          break;
+        case DismissDirection.endToStart:
+          dragGestures[val.index * 10] = Offset(-width, 0.0);
+          break;
+        case DismissDirection.horizontal:
+          dragGestures[val.index * 10] = Offset(width, 0.0);
+          dragGestures[val.index * 10 + 1] = Offset(-width, 0.0);
+          break;
+        default:
+      }
+    }
+
+    for (final int key in dragGestures.keys) {
+      dismissDirection = DismissDirection.values[key ~/ 10];
+      snackBarCount = 0;
+
+      expect(find.text('bar1'), findsNothing);
+      expect(find.text('bar2'), findsNothing);
+      await tester.tap(find.byKey(tapTarget)); // queue bar1
+      await tester.tap(find.byKey(tapTarget)); // queue bar2
+      expect(find.text('bar1'), findsNothing);
+      expect(find.text('bar2'), findsNothing);
+      await tester.pump(); // schedule animation for bar1
+      expect(find.text('bar1'), findsOneWidget);
+      expect(find.text('bar2'), findsNothing);
+      await tester.pump(); // begin animation
+      expect(find.text('bar1'), findsOneWidget);
+      expect(find.text('bar2'), findsNothing);
+      await tester.pump(const Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
+      await tester.drag(find.text('bar1'), dragGestures[key]!);
+      await tester.pump(); // bar1 dismissed, bar2 begins animating
+      expect(find.text('bar1'), findsNothing);
+      expect(find.text('bar2'), findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
+      await tester.drag(find.text('bar2'), dragGestures[key]!);
+      await tester.pump(); // bar2 dismissed
+      expect(find.text('bar1'), findsNothing);
+      expect(find.text('bar2'), findsNothing);
+    }
   });
 
   testWidgets('SnackBar dismiss test - ScaffoldMessenger', (WidgetTester tester) async {
-    int snackBarCount = 0;
     const Key tapTarget = Key('tap-target');
+    late DismissDirection dismissDirection;
+    late double width;
+    int snackBarCount = 0;
+
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Builder(
           builder: (BuildContext context) {
+            width = MediaQuery.of(context).size.width;
+
             return GestureDetector(
               key: tapTarget,
               onTap: () {
@@ -479,6 +529,7 @@ void main() {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: Text('bar$snackBarCount'),
                   duration: const Duration(seconds: 2),
+                  dismissDirection: dismissDirection,
                 ));
               },
               behavior: HitTestBehavior.opaque,
@@ -491,23 +542,62 @@ void main() {
         ),
       ),
     ));
-    expect(find.text('bar1'), findsNothing);
-    expect(find.text('bar2'), findsNothing);
-    await tester.tap(find.byKey(tapTarget)); // queue bar1
-    await tester.tap(find.byKey(tapTarget)); // queue bar2
-    expect(find.text('bar1'), findsNothing);
-    expect(find.text('bar2'), findsNothing);
-    await tester.pump(); // schedule animation for bar1
-    expect(find.text('bar1'), findsOneWidget);
-    expect(find.text('bar2'), findsNothing);
-    await tester.pump(); // begin animation
-    expect(find.text('bar1'), findsOneWidget);
-    expect(find.text('bar2'), findsNothing);
-    await tester.pump(const Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
-    await tester.drag(find.text('bar1'), const Offset(0.0, 50.0));
-    await tester.pump(); // bar1 dismissed, bar2 begins animating
-    expect(find.text('bar1'), findsNothing);
-    expect(find.text('bar2'), findsOneWidget);
+
+    final Map<int, Offset> dragGestures = <int, Offset>{};
+
+    for (final DismissDirection val in DismissDirection.values) {
+      switch (val) {
+        case DismissDirection.down:
+          dragGestures[val.index * 10] = const Offset(0.0, 50.0);
+          break;
+        case DismissDirection.up:
+          dragGestures[val.index * 10] = const Offset(0.0, -50.0);
+          break;
+        case DismissDirection.vertical:
+          dragGestures[val.index * 10] = const Offset(0.0, 50.0);
+          dragGestures[val.index * 10 + 1] = const Offset(0.0, -50.0);
+          break;
+        case DismissDirection.startToEnd:
+          dragGestures[val.index * 10] = Offset(width, 0.0);
+          break;
+        case DismissDirection.endToStart:
+          dragGestures[val.index * 10] = Offset(-width, 0.0);
+          break;
+        case DismissDirection.horizontal:
+          dragGestures[val.index * 10] = Offset(width, 0.0);
+          dragGestures[val.index * 10 + 1] = Offset(-width, 0.0);
+          break;
+        default:
+      }
+    }
+
+    for (final int key in dragGestures.keys) {
+      dismissDirection = DismissDirection.values[key ~/ 10];
+      snackBarCount = 0;
+
+      expect(find.text('bar1'), findsNothing);
+      expect(find.text('bar2'), findsNothing);
+      await tester.tap(find.byKey(tapTarget)); // queue bar1
+      await tester.tap(find.byKey(tapTarget)); // queue bar2
+      expect(find.text('bar1'), findsNothing);
+      expect(find.text('bar2'), findsNothing);
+      await tester.pump(); // schedule animation for bar1
+      expect(find.text('bar1'), findsOneWidget);
+      expect(find.text('bar2'), findsNothing);
+      await tester.pump(); // begin animation
+      expect(find.text('bar1'), findsOneWidget);
+      expect(find.text('bar2'), findsNothing);
+      await tester.pump(const Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
+      await tester.drag(find.text('bar1'), dragGestures[key]!);
+      await tester.pump(); // bar1 dismissed, bar2 begins animating
+      expect(find.text('bar1'), findsNothing);
+      expect(find.text('bar2'), findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
+      await tester.drag(find.text('bar2'), dragGestures[key]!);
+      await tester.pump(); // bar2 dismissed
+      expect(find.text('bar1'), findsNothing);
+      expect(find.text('bar2'), findsNothing);
+    }
   });
 
   testWidgets('SnackBar cannot be tapped twice', (WidgetTester tester) async {
