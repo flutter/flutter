@@ -68,7 +68,7 @@ void main() {
         LogicalKeyboardKey.keyC,
         LogicalKeyboardKey.keyD,
       );
-      final LogicalKeySet setFromSet = LogicalKeySet.fromSet(const <LogicalKeyboardKey>{
+      final LogicalKeySet setFromSet = LogicalKeySet.fromSet(<LogicalKeyboardKey>{
         LogicalKeyboardKey.keyA,
         LogicalKeyboardKey.keyB,
         LogicalKeyboardKey.keyC,
@@ -123,7 +123,7 @@ void main() {
         LogicalKeyboardKey.keyB,
         LogicalKeyboardKey.keyA,
       );
-      final LogicalKeySet set4 = LogicalKeySet.fromSet(const <LogicalKeyboardKey>{
+      final LogicalKeySet set4 = LogicalKeySet.fromSet(<LogicalKeyboardKey>{
         LogicalKeyboardKey.keyD,
         LogicalKeyboardKey.keyC,
         LogicalKeyboardKey.keyB,
@@ -138,7 +138,7 @@ void main() {
       expect(map.containsKey(LogicalKeySet(LogicalKeyboardKey.keyA)), isTrue);
       expect(
           set2,
-          equals(LogicalKeySet.fromSet(const <LogicalKeyboardKey>{
+          equals(LogicalKeySet.fromSet(<LogicalKeyboardKey>{
             LogicalKeyboardKey.keyA,
             LogicalKeyboardKey.keyB,
             LogicalKeyboardKey.keyC,
