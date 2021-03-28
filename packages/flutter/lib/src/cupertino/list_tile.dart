@@ -218,7 +218,7 @@ class CupertinoListTile extends StatefulWidget {
   /// The [onTap] function is called when a user taps on [CupertinoListTile]. If
   /// left `null`, the [CupertinoListTile] will not show any visual information
   /// when tapped.
-  final VoidCallback? onTap;
+  final Future<void> Function()? onTap;
 
   /// The [backgroundColor] of the tile in normal state. Once the tile is
   /// tapped, the background color switches to [backgroundColorActivated]. It is
@@ -381,7 +381,10 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
     return GestureDetector(
       onTapDown: (_) => setState(() => _tapped = true),
       onTapCancel: () => setState(() => _tapped = false),
-      onTap: widget.onTap,
+      onTap: () async {
+        await widget.onTap!();
+        setState(() => _tapped = false);
+      },
       behavior: HitTestBehavior.opaque,
       child: child,
     );
