@@ -479,10 +479,9 @@ abstract class Widget extends DiagnosticableTree {
 /// ```
 /// {@end-tool}
 ///
-/// By convention, widget constructors only use named arguments. Named arguments
-/// can be marked as required using [@required]. Also by convention, the first
-/// argument is [key], and the last argument is `child`, `children`, or the
-/// equivalent.
+/// By convention, widget constructors only use named arguments. Also by
+/// convention, the first argument is [key], and the last argument is `child`,
+/// `children`, or the equivalent.
 ///
 /// See also:
 ///
@@ -716,10 +715,9 @@ abstract class StatelessWidget extends Widget {
 /// ```
 /// {@end-tool}
 ///
-/// By convention, widget constructors only use named arguments. Named arguments
-/// can be marked as required using [@required]. Also by convention, the first
-/// argument is [key], and the last argument is `child`, `children`, or the
-/// equivalent.
+/// By convention, widget constructors only use named arguments. Also by
+/// convention, the first argument is [key], and the last argument is `child`,
+/// `children`, or the equivalent.
 ///
 /// See also:
 ///
