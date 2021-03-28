@@ -15,6 +15,8 @@ import 'text_button.dart';
 import 'text_button_theme.dart';
 import 'theme.dart';
 
+const double _singleLineVerticalPadding = 14.0;
+
 // TODO(ianh): We should check if the given text and actions are going to fit on
 // one line or not, and if they are, use the single-line layout, and if not, use
 // the multiline layout, https://github.com/flutter/flutter/issues/32782
@@ -249,7 +251,7 @@ class SnackBar extends StatefulWidget {
     this.duration = _snackBarDisplayDuration,
     this.animation,
     this.onVisible,
-    this.singleLineVerticalPadding = 14.0,
+    this.singleLineVerticalPadding = _singleLineVerticalPadding,
   }) : assert(elevation == null || elevation >= 0.0),
        assert(content != null),
        assert(
