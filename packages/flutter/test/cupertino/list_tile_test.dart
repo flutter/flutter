@@ -163,7 +163,7 @@ void main() {
                 title: const Text('CupertinoListTile'),
                 backgroundColor: backgroundColor,
                 backgroundColorActivated: backgroundColorActivated,
-                onTap: () {},
+                onTap: () async { await Future<void>.delayed(const Duration(milliseconds: 1), () {}); },
               ),
             ],
           ),
@@ -175,12 +175,16 @@ void main() {
     Container container = tester.widgetList<Container>(find.byType(Container)).elementAt(1);
     expect(container.color, backgroundColor);
 
+    // Pump only one frame so the color change persists.
     await tester.tap(find.byType(CupertinoListTile));
     await tester.pump();
 
     // Container inside CupertinoListTile is the second one in row.
     container = tester.widgetList<Container>(find.byType(Container)).elementAt(1);
     expect(container.color, backgroundColorActivated);
+
+    // Pump the rest of the frames to complete the test.
+    await tester.pumpAndSettle();
   });
 
   testWidgets('does not contain GestureDetector if onTap is not provided', (WidgetTester tester) async {
@@ -214,7 +218,7 @@ void main() {
             children: <Widget>[
               CupertinoListTile(
                 title: const Text('CupertinoListTile'),
-                onTap: () {},
+                onTap: () async {},
               ),
             ],
           ),
@@ -224,6 +228,54 @@ void main() {
 
     // Container inside CupertinoListTile is the second one in row.
     expect(find.byType(GestureDetector), findsOneWidget);
+  });
+
+  testWidgets('resets the background color when navigated back', (WidgetTester tester) async {
+    const Color backgroundColor = CupertinoColors.systemBlue;
+    const Color backgroundColorActivated = CupertinoColors.systemRed;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+             final Widget secondPage = Center(
+              child: CupertinoButton(
+                child: const Text('Go back'),
+                onPressed: () => Navigator.of(context).pop<void>(),
+              ),
+            );
+            return Center(
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: MediaQuery(
+                  data: const MediaQueryData(),
+                  child:CupertinoListTile(
+                    title: const Text('CupertinoListTile'),
+                    backgroundColor: backgroundColor,
+                    backgroundColorActivated: backgroundColorActivated,
+                    onTap: () => Navigator.of(context).push(CupertinoPageRoute<Widget>(
+                      builder: (BuildContext context) => secondPage,
+                    )),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Navigate to second page.
+    await tester.tap(find.byType(CupertinoListTile));
+    await tester.pumpAndSettle();
+
+    // Go back to first page.
+    await tester.tap(find.byType(CupertinoButton));
+    await tester.pumpAndSettle();
+
+    // Container inside CupertinoListTile is the second one in row.
+    final Container container = tester.widget<Container>(find.byType(Container));
+    expect(container.color, backgroundColor);
   });
 
   group('alignment of widgets for left-to-right', () {
