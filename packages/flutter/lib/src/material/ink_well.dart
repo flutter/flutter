@@ -733,6 +733,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     implements _ParentInkResponseState {
   Set<InteractiveInkFeature>? _splashes;
   InteractiveInkFeature? _currentSplash;
+  bool _active = true;
   bool _hovering = false;
   final Map<_HighlightType, InkHighlight?> _highlights = <_HighlightType, InkHighlight?>{};
   late final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
@@ -779,7 +780,16 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   @override
   void didUpdateWidget(_InkResponseStateWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (_isWidgetEnabled(widget) != _isWidgetEnabled(oldWidget)) {
+    final InkFeature? validInkFeature = _getSingleInkFeature();
+    if (validInkFeature != null && !identical(validInkFeature.controller, Material.of(context)!)) {
+      _removeAllFeatures();
+      if (_hovering && enabled)
+        updateHighlight(_HighlightType.hover, value: _hovering, callOnHover: false);
+      _updateFocusHighlights();
+      return;
+    }
+
+    if (enabled != _isWidgetEnabled(oldWidget)) {
       if (enabled) {
         // Don't call wigdet.onHover because many wigets, including the button
         // widgets, apply setState to an ancestor context from onHover.
@@ -789,10 +799,45 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     }
   }
 
+  InkFeature? _getSingleInkFeature() {
+    final List<InkFeature?> inkFeatures = <InkFeature?>[...?_splashes, ..._highlights.values];
+    assert(() {
+      MaterialInkController? lastController;
+      for (final InkFeature? inkFeature in inkFeatures) {
+        if (inkFeature == null)
+          continue;
+        final MaterialInkController controller = inkFeature.controller;
+        if (lastController != null && !identical(controller, lastController))
+          return false;
+        lastController = controller;
+      }
+      return true;
+    }());
+    final InkFeature? validInkFeature = inkFeatures.firstWhere((InkFeature? inkFeature) => inkFeature != null, orElse: () => null);
+    return validInkFeature;
+  }
+
   @override
   void dispose() {
+    _removeAllFeatures();
     FocusManager.instance.removeHighlightModeListener(_handleFocusHighlightModeChange);
     super.dispose();
+  }
+
+  void _removeAllFeatures() {
+    if (_splashes != null) {
+      final Set<InteractiveInkFeature> splashes = _splashes!;
+      _splashes = null;
+      for (final InteractiveInkFeature splash in splashes)
+        splash.dispose();
+      _currentSplash = null;
+    }
+    assert(_currentSplash == null);
+    for (final _HighlightType highlight in _highlights.keys) {
+      _highlights[highlight]?.dispose();
+      _highlights[highlight] = null;
+    }
+    widget.parentState?.markChildInkResponsePressed(this, false);
   }
 
   @override
@@ -830,7 +875,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     void handleInkRemoval() {
       assert(_highlights[type] != null);
       _highlights[type] = null;
-      updateKeepAlive();
+      if (_active)
+        updateKeepAlive();
     }
 
     if (type == _HighlightType.pressed) {
@@ -1013,22 +1059,24 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     }
   }
 
+  void _setAllFeaturesVisible(bool visible) {
+    for (final InkFeature? splash in <InkFeature?>[...?_splashes, ..._highlights.values])
+      splash?.visible = visible;
+  }
+
   @override
   void deactivate() {
-    if (_splashes != null) {
-      final Set<InteractiveInkFeature> splashes = _splashes!;
-      _splashes = null;
-      for (final InteractiveInkFeature splash in splashes)
-        splash.dispose();
-      _currentSplash = null;
-    }
-    assert(_currentSplash == null);
-    for (final _HighlightType highlight in _highlights.keys) {
-      _highlights[highlight]?.dispose();
-      _highlights[highlight] = null;
-    }
-    widget.parentState?.markChildInkResponsePressed(this, false);
+    _active = !_active;
+    _setAllFeaturesVisible(false);
     super.deactivate();
+  }
+
+  @override
+  void reactivate() {
+    _active = !_active;
+    _setAllFeaturesVisible(true);
+    updateKeepAlive();
+    super.reactivate();
   }
 
   bool _isWidgetEnabled(_InkResponseStateWidget widget) {
@@ -1200,6 +1248,10 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 /// size of its underlying [Material], where the splashes are rendered, changes
 /// during animation. You should avoid using InkWells within [Material] widgets
 /// that are changing size.
+///
+/// Animations triggered by an [InkWell] will survive their widget moving due
+/// to [GlobalKey] reparenting, as long as the nearest [Material] ancestor is
+/// the same before and after the move.
 ///
 /// See also:
 ///
