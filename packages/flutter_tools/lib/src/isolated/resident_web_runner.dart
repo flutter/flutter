@@ -25,6 +25,7 @@ import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/targets/web.dart';
+import '../cache.dart';
 import '../dart/language_version.dart';
 import '../devfs.dart';
 import '../device.dart';
@@ -678,6 +679,7 @@ class ResidentWebRunner extends ResidentRunner {
       final LanguageVersion languageVersion =  determineLanguageVersion(
         _fileSystem.file(mainUri),
         packageConfig[flutterProject.manifest.appName],
+        Cache.flutterRoot,
       );
 
       final String entrypoint = <String>[

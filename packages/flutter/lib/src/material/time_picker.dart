@@ -1074,9 +1074,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     _center = null;
     _animateTo(_getThetaForTime(widget.selectedTime));
     if (widget.mode == _TimePickerMode.hour) {
-      if (widget.onHourSelected != null) {
-        widget.onHourSelected!();
-      }
+      widget.onHourSelected?.call();
     }
   }
 
@@ -1092,9 +1090,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       } else {
         _announceToAccessibility(context, localizations.formatDecimal(newTime.hourOfPeriod));
       }
-      if (widget.onHourSelected != null) {
-        widget.onHourSelected!();
-      }
+      widget.onHourSelected?.call();
     } else {
       _announceToAccessibility(context, localizations.formatDecimal(newTime.minute));
     }
