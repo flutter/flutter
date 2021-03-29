@@ -1055,6 +1055,118 @@ void main() {
     await gesture3.up();
   });
 
+  testWidgets('When ink wells are reparented, the old parent can display splash while the new parent can not', (WidgetTester tester) async {
+    final GlobalKey innerKey = GlobalKey();
+    final GlobalKey leftKey = GlobalKey();
+    final GlobalKey rightKey = GlobalKey();
+
+    Widget doubleInkWellRow({
+      required double leftWidth,
+      required double rightWidth,
+      Widget? leftChild,
+      Widget? rightChild,
+    }) {
+      return Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: leftWidth+rightWidth,
+              height: 100,
+              child: Row(
+                children: <Widget>[
+                  SizedBox(
+                    width: leftWidth,
+                    height: 100,
+                    child: InkWell(
+                      key: leftKey,
+                      onTap: () {},
+                      child: Center(
+                        child: SizedBox(
+                          width: leftWidth,
+                          height: 50,
+                          child: leftChild,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: rightWidth,
+                    height: 100,
+                    child: InkWell(
+                      key: rightKey,
+                      onTap: () {},
+                      child: Center(
+                        child: SizedBox(
+                          width: leftWidth,
+                          height: 50,
+                          child: rightChild,
+                        ),
+                      ),
+                    )
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      doubleInkWellRow(
+        leftWidth: 110,
+        rightWidth: 90,
+        leftChild: InkWell(
+          key: innerKey,
+          onTap: () {},
+        ),
+      ),
+    );
+    final MaterialInkController material = Material.of(tester.element(find.byKey(innerKey)))!;
+
+    // Press inner
+    final TestGesture gesture = await tester.startGesture(const Offset(100, 50), pointer: 1);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+
+    // Switch side
+    await tester.pumpWidget(
+      doubleInkWellRow(
+        leftWidth: 90,
+        rightWidth: 110,
+        rightChild: InkWell(
+          key: innerKey,
+          onTap: () {},
+        ),
+      ),
+    );
+    expect(material, paintsExactlyCountTimes(#drawCircle, 0));
+
+    // A second pointer presses inner
+    final TestGesture gesture2 = await tester.startGesture(const Offset(100, 50), pointer: 2);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+
+    await gesture.up();
+    await gesture2.up();
+    await tester.pumpAndSettle();
+
+    // Press inner
+    await gesture.down(const Offset(100, 50));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+
+    // Press left
+    await gesture2.down(const Offset(50, 50));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 2));
+
+    await gesture.up();
+    await gesture2.up();
+  });
+
   testWidgets("Ink wells's splash starts before tap is confirmed and disappear after tap is canceled", (WidgetTester tester) async {
     final GlobalKey innerKey = GlobalKey();
     await tester.pumpWidget(
@@ -1251,231 +1363,4 @@ void main() {
       textDirection: TextDirection.ltr,
     ));
   });
-
-  // Regression test for https://github.com/flutter/flutter/issues/6751
-  testWidgets('When InkWell has a GlobalKey and changes position, splash should not stop', (WidgetTester tester) async {
-    final GlobalKey<_TestAppState> testAppKey = GlobalKey();
-    int frames;
-
-    await tester.pumpWidget(TestApp(key: testAppKey));
-
-    void expectPaintedCircle(bool painted) {
-      final PaintPattern paintPattern = paints..circle();
-      expect(
-        Material.of(tester.element(find.byType(InkWell)))! as RenderBox,
-        painted ? paintPattern : isNot(paintPattern),
-      );
-    }
-    Future<void> expectSplashContinueAfterMove(bool value) async {
-      await tester.pump();
-      expectPaintedCircle(true);
-      await tester.pump(const Duration(milliseconds: 10));
-      expectPaintedCircle(true);
-      await tester.pump(const Duration(milliseconds: 40));
-      expectPaintedCircle(value);
-    }
-
-    // InkWell does not have any key, so splash will stop.
-    testAppKey.currentState!.switchTapChangeWrap();
-    await tester.pump();
-    await tester.tap(find.byType(InkWell));
-    await expectSplashContinueAfterMove(false);
-    frames = await tester.pumpAndSettle();
-    expect(frames, 1);
-    expectPaintedCircle(false);
-
-    // InkWell has a ValueKey, so splash will also stop.
-    testAppKey.currentState!.setInkWellKey(const Key('foo'));
-    await tester.pump();
-    await tester.tap(find.byType(InkWell));
-    await expectSplashContinueAfterMove(false);
-    frames = await tester.pumpAndSettle();
-    expect(frames, 1);
-    expectPaintedCircle(false);
-
-    // InkWell has a GlobalKey, so splash will continue.
-    testAppKey.currentState!.setInkWellKey(GlobalKey());
-    await tester.pump();
-    await tester.tap(find.byType(InkWell));
-    await expectSplashContinueAfterMove(true);
-    frames = await tester.pumpAndSettle();
-    expect(frames > 1, isTrue);
-    expectPaintedCircle(false);
-
-    testAppKey.currentState!.switchTapDownChangeWrap();
-    await tester.pump();
-    final TestGesture testGesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
-    await expectSplashContinueAfterMove(true);
-    await testGesture.up();
-    frames = await tester.pumpAndSettle();
-    expect(frames > 1, isTrue);
-    expectPaintedCircle(false);
-  });
-
-  testWidgets('When InkWell/Ancestor has a GlobalKey and ancestor Material is replaced, splash should stop.', (WidgetTester tester) async {
-    final Key key = GlobalKey();
-    bool replaced = false;
-
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: StatefulBuilder(builder: (BuildContext context, void Function(void Function()) setState) {
-        Future<void> changeReplace() async {
-          await Future<void>.delayed(const Duration(milliseconds: 50));
-          setState(() {
-            replaced = !replaced;
-          });
-        }
-        return Material(
-          key: ValueKey<bool>(replaced),
-          child: InkWell(
-            key: key,
-            onTap: () {
-              changeReplace();
-            },
-          ),
-        );
-      }),
-    ));
-
-    await tester.tap(find.byType(InkWell));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 60));
-
-    final PaintPattern paintPattern = paints..circle();
-    expect(
-      Material.of(tester.element(find.byType(InkWell)))! as RenderBox,
-      isNot(paintPattern),
-    );
-  });
-
-  testWidgets('When InkWell/Ancestor has a GlobalKey and ancestor Material is replaced, highlight should always be maintained.', (WidgetTester tester) async {
-    const Color hoverColor = Color(0xff00ff00);
-    final Key key = GlobalKey();
-    int onHoverCount = 0;
-    int callChangeReplaceCount = 0;
-    bool replaced = false;
-    int frames;
-
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: StatefulBuilder(builder: (BuildContext context, void Function(void Function()) setState) {
-        Future<void> changeReplace() async {
-          callChangeReplaceCount += 1;
-          await Future<void>.delayed(const Duration(milliseconds: 50));
-          setState(() {
-            replaced = !replaced;
-          });
-        }
-        return Container(
-          margin: replaced ? const EdgeInsets.only(top: 1) : EdgeInsets.zero,
-          child: Material(
-            key: ValueKey<bool>(replaced),
-            child: InkWell(
-              key: key,
-              hoverColor: hoverColor,
-              onTap: () {},
-              onHover: (bool hovered) {
-                onHoverCount += 1;
-                if (hovered)
-                  changeReplace();
-              },
-            ),
-          ),
-        );
-      }),
-    ));
-
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer();
-    addTearDown(gesture.removePointer);
-    // When replaced is true, InkWell point at the top left is 1.
-    await gesture.moveTo(Offset.zero);
-    frames = await tester.pumpAndSettle();
-    expect(frames > 1, isTrue);
-    RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    expect(inkFeatures, isNot(paints..rect(color: hoverColor)));
-    expect(onHoverCount, 2);
-    expect(callChangeReplaceCount, 1);
-    expect(replaced, true);
-
-    await gesture.moveTo(tester.getCenter(find.byType(InkWell)));
-    frames = await tester.pumpAndSettle();
-    expect(frames > 1, isTrue);
-    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    expect(inkFeatures, paints..rect(color: hoverColor));
-    expect(onHoverCount, 3);
-    expect(callChangeReplaceCount, 2);
-    expect(replaced, false);
-  });
-}
-
-class TestApp extends StatefulWidget {
-  const TestApp({Key? key}) : super(key: key);
-
-  @override
-  _TestAppState createState() => _TestAppState();
-}
-
-class _TestAppState extends State<TestApp> {
-  bool wrap = false;
-  bool tapDownChangeWrap = false;
-  bool tapChangeWrap = false;
-  Key? inkWellKey;
-
-  @override
-  Widget build(BuildContext context) {
-    Widget child = InkWell(
-      key: inkWellKey,
-      onTap: () async {
-        if (tapChangeWrap) {
-          await changeWrap();
-        }
-      },
-      onTapDown: (_) async {
-        if (tapDownChangeWrap) {
-          await changeWrap();
-        }
-      },
-    );
-
-    if (wrap) {
-      child = Container(
-        child: child,
-      );
-    }
-
-    return Directionality(
-      textDirection: TextDirection.ltr,
-      child: Material(
-        child: child,
-      ),
-    );
-  }
-
-  Future<void> changeWrap() async {
-    await Future<void>.delayed(const Duration(milliseconds: 50));
-    setState(() {
-      wrap = !wrap;
-    });
-  }
-
-  void setInkWellKey(Key key) {
-    setState(() {
-      inkWellKey = key;
-    });
-  }
-
-  void switchTapDownChangeWrap() {
-    setState(() {
-      tapDownChangeWrap = true;
-      tapChangeWrap = false;
-    });
-  }
-
-  void switchTapChangeWrap() {
-    setState(() {
-      tapChangeWrap = true;
-      tapDownChangeWrap = false;
-    });
-  }
 }
