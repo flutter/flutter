@@ -153,6 +153,9 @@ header-file: header
 header: HEADER
 use-deferred-loading: true
 preferred-supported-locales: en_US
+synthetic-package: false
+required-resource-attributes: false
+nullable-getter: false
 ''');
 
     final LocalizationOptions options = parseLocalizationsOptions(
@@ -169,6 +172,9 @@ preferred-supported-locales: en_US
     expect(options.header, 'HEADER');
     expect(options.deferredLoading, true);
     expect(options.preferredSupportedLocales, <String>['en_US']);
+    expect(options.useSyntheticPackage, false);
+    expect(options.areResourceAttributesRequired, false);
+    expect(options.usesNullableGetter, false);
   });
 
   testWithoutContext('parseLocalizationsOptions handles preferredSupportedLocales as list', () async {

@@ -404,6 +404,7 @@ LocalizationOptions parseLocalizationsOptions({
     deferredLoading: _tryReadBool(yamlNode, 'use-deferred-loading', logger),
     useSyntheticPackage: _tryReadBool(yamlNode, 'synthetic-package', logger) ?? true,
     areResourceAttributesRequired: _tryReadBool(yamlNode, 'required-resource-attributes', logger) ?? false,
+    usesNullableGetter: _tryReadBool(yamlNode, 'nullable-getter', logger) ?? true,
   );
 }
 
