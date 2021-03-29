@@ -19,6 +19,7 @@ import '../build_info.dart';
 import '../bundle.dart';
 import '../convert.dart';
 import '../device.dart';
+import '../device_port_forwader.dart';
 import '../features.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
