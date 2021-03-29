@@ -1439,6 +1439,7 @@ void main() {
           color: const Color(0xffbcbcbc),
         ),
     );
+  });
 
   testWidgets('Scrollbar.isAlwaysShown triggers assertion when multiple ScrollPositions are attached.', (WidgetTester tester) async {
     Widget _getTabContent({ ScrollController? scrollController }) {
