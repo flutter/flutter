@@ -930,12 +930,6 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// It is an error to call [setState] unless [mounted] is true.
   bool get mounted => _element != null;
 
-  /// This field is used tracks [reactivate] and [deactivate], to assert that
-  /// they are called alternatively.
-  ///
-  /// This field is not set in release mode.
-  bool _debugActive = true;
-
   /// Called when this object is inserted into the tree.
   ///
   /// The framework will call this method exactly once for each [State] object
@@ -1116,17 +1110,17 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
     _element!.markNeedsBuild();
   }
 
-  /// Whenever the framework removes this [State] object from the tree, the
-  /// framework will call this method.
+  /// Called when this object is removed from the tree.
   ///
-  /// In some cases, the framework will reinsert the [State] object into
-  /// another part of the tree (e.g., if the subtree containing this [State]
-  /// object is grafted from one location in the tree to another). If that
-  /// happens, the framework will ensure that it calls [reactivate] to give the
-  /// [State] object a chance to adapt to its new location in the tree. If the
-  /// framework does reinsert this subtree, it will do so before the end of the
-  /// animation frame in which the subtree was removed from the tree. For this
-  /// reason, [State] objects can defer releasing most resources until the
+  /// The framework calls this method whenever it removes this [State] object
+  /// from the tree. In some cases, the framework will reinsert the [State]
+  /// object into another part of the tree (e.g., if the subtree containing this
+  /// [State] object is grafted from one location in the tree to another). If
+  /// that happens, the framework will ensure that it calls [build] to give the
+  /// [State] object a chance to adapt to its new location in the tree. If
+  /// the framework does reinsert this subtree, it will do so before the end of
+  /// the animation frame in which the subtree was removed from the tree. For
+  /// this reason, [State] objects can defer releasing most resources until the
   /// framework calls their [dispose] method.
   ///
   /// Subclasses should override this method to clean up any links between
@@ -1142,35 +1136,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///    from the tree permanently.
   @protected
   @mustCallSuper
-  void deactivate() {
-    assert(() {
-      _debugActive = !_debugActive;
-      return !_debugActive;
-    }());
-  }
-
-  /// Called when this object is reactivated.
-  ///
-  /// If the [widget] or one of its ancestors has a [GlobalKey], the framework
-  /// will mark this object as inactive when it is removed and call
-  /// [deactivate].
-  ///
-  /// If the object is reinserted to the tree in the next frame (e.g. by
-  /// changing position), it will be marked as active again and this method will be
-  /// called.
-  ///
-  /// See also:
-  ///
-  ///  * [Element.activate] and [Element.deactivate] for more information about
-  ///  lifecycle.
-  @protected
-  @mustCallSuper
-  void reactivate() {
-    assert(() {
-      _debugActive = !_debugActive;
-      return _debugActive;
-    }());
-  }
+  void deactivate() { }
 
   /// Called when this object is removed from the tree permanently.
   ///
@@ -4811,7 +4777,6 @@ class StatefulElement extends ComponentElement {
   @override
   void activate() {
     super.activate();
-    state.reactivate();
     // Since the State could have observed the deactivate() and thus disposed of
     // resources allocated in the build method, we have to rebuild the widget
     // so that its State can reallocate its resources.
