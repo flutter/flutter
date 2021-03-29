@@ -4,6 +4,7 @@
 
 #include "flutter/shell/common/rasterizer.h"
 
+#include <algorithm>
 #include <utility>
 
 #include "flutter/common/graphics/persistent_cache.h"
@@ -270,13 +271,30 @@ sk_sp<SkImage> Rasterizer::DoMakeRasterSnapshot(
                 return;
               }
 
+              GrRecordingContext* context = surface_->GetContext();
+              auto max_size = context->maxRenderTargetSize();
+              double scale_factor = std::min(
+                  1.0, static_cast<double>(max_size) /
+                           static_cast<double>(std::max(image_info.width(),
+                                                        image_info.height())));
+
+              // Scale down the render target size to the max supported by the
+              // GPU if necessary. Exceeding the max would otherwise cause a
+              // null result.
+              if (scale_factor < 1.0) {
+                image_info = image_info.makeWH(
+                    static_cast<double>(image_info.width()) * scale_factor,
+                    static_cast<double>(image_info.height()) * scale_factor);
+              }
+
               // When there is an on screen surface, we need a render target
               // SkSurface because we want to access texture backed images.
-              sk_sp<SkSurface> surface = SkSurface::MakeRenderTarget(
-                  surface_->GetContext(),  // context
-                  SkBudgeted::kNo,         // budgeted
-                  image_info               // image info
-              );
+              sk_sp<SkSurface> surface =
+                  SkSurface::MakeRenderTarget(context,          // context
+                                              SkBudgeted::kNo,  // budgeted
+                                              image_info        // image info
+                  );
+              surface->getCanvas()->scale(scale_factor, scale_factor);
               result = DrawSnapshot(surface, draw_callback);
             }));
   }
