@@ -214,7 +214,7 @@ mixin AnimationLocalStatusListenersMixin {
           stack: stack,
           library: 'animation library',
           context: ErrorDescription('while notifying status listeners for $runtimeType'),
-          informationCollector: collector
+          informationCollector: collector,
         ));
       }
     }

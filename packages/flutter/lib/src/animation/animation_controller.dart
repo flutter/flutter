@@ -446,7 +446,7 @@ class AnimationController extends Animation<double>
         throw FlutterError(
           'AnimationController.forward() called with no default duration.\n'
           'The "duration" property should be set, either in the constructor or later, before '
-          'calling the forward() function.'
+          'calling the forward() function.',
         );
       }
       return true;
@@ -479,7 +479,7 @@ class AnimationController extends Animation<double>
         throw FlutterError(
           'AnimationController.reverse() called with no default duration or reverseDuration.\n'
           'The "duration" or "reverseDuration" property should be set, either in the constructor or later, before '
-          'calling the reverse() function.'
+          'calling the reverse() function.',
         );
       }
       return true;
@@ -518,7 +518,7 @@ class AnimationController extends Animation<double>
           'AnimationController.animateTo() called with no explicit duration and no default duration.\n'
           'Either the "duration" argument to the animateTo() method should be provided, or the '
           '"duration" property should be set, either in the constructor or later, before '
-          'calling the animateTo() function.'
+          'calling the animateTo() function.',
         );
       }
       return true;
@@ -551,7 +551,7 @@ class AnimationController extends Animation<double>
           'AnimationController.animateBack() called with no explicit duration and no default duration or reverseDuration.\n'
           'Either the "duration" argument to the animateBack() method should be provided, or the '
           '"duration" or "reverseDuration" property should be set, either in the constructor or later, before '
-          'calling the animateBack() function.'
+          'calling the animateBack() function.',
         );
       }
       return true;
@@ -642,7 +642,7 @@ class AnimationController extends Animation<double>
           'AnimationController.repeat() called without an explicit period and with no default Duration.\n'
           'Either the "period" argument to the repeat() method should be provided, or the '
           '"duration" property should be set, either in the constructor or later, before '
-          'calling the repeat() function.'
+          'calling the repeat() function.',
         );
       }
       return true;

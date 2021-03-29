@@ -210,7 +210,7 @@ class PointerSignalResolver {
         stack: stack,
         library: 'gesture library',
         context: ErrorDescription('while resolving a PointerSignalEvent'),
-        informationCollector: collector
+        informationCollector: collector,
       ));
     }
     _firstRegisteredCallback = null;

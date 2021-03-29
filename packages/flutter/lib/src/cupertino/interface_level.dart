@@ -76,7 +76,7 @@ class CupertinoUserInterfaceLevel extends InheritedWidget {
       'MaterialApp widget (those widgets introduce a CupertinoUserInterfaceLevel), or it can happen '
       'if the context you use comes from a widget above those widgets.\n'
       'The context used was:\n'
-      '  $context'
+      '  $context',
     );
   }
 

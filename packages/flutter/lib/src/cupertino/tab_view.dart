@@ -209,7 +209,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
           ' 3. Otherwise, onGenerateRoute is called. It should return a '
           'non-null value for any valid route not handled by "builder" and "routes".\n'
           ' 4. Finally if all else fails onUnknownRoute is called.\n'
-          'Unfortunately, onUnknownRoute was not set.'
+          'Unfortunately, onUnknownRoute was not set.',
         );
       }
       return true;
@@ -221,7 +221,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
           'The onUnknownRoute callback returned null.\n'
           'When the $runtimeType requested the route $settings from its '
           'onUnknownRoute callback, the callback returned null. Such callbacks '
-          'must never return null.'
+          'must never return null.',
         );
       }
       return true;
