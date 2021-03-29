@@ -465,7 +465,7 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
     this.shift = false,
     this.alt = false,
     this.meta = false,
-  }) : // The enumerated check with `identical` is cumbersome but much needed
+  }) : // The enumerated check with `identical` is cumbersome but the only way
        // since const constructors can not call functions such as `==` or
        // `Set.contain`. Checking with `identical` is sufficient since
        // `LogicalKeyboardKey` only provides cached values.
