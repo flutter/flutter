@@ -113,7 +113,6 @@ class InteractiveViewer extends StatefulWidget {
        builder = _getBuilderForChild(child),
        super(key: key);
 
-  // TODO(justinmc): Example. Or put it in the builder param docs.
   /// Creates an InteractiveViewer for a child that is created on demand.
   ///
   /// Can be used to render a child that changes in response to the current
