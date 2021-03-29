@@ -33,9 +33,9 @@ List<String> interpolateCommand(
   Map<String, String> additionalReplacementValues = const <String, String>{}
 }) {
   return interpolateStringList(
-      command,
-      Map<String, String>.of(additionalReplacementValues)
-        ..addAll(replacementValues)
+    command,
+    Map<String, String>.of(additionalReplacementValues)
+      ..addAll(replacementValues)
   );
 }
 
