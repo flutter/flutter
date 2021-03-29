@@ -1028,8 +1028,7 @@ class LocalizationsGenerator {
       .replaceAll('@(class)', '$className${locale.camelCase()}')
       .replaceAll('@(localeName)', locale.toString())
       .replaceAll('@(methods)', methods.join('\n\n'))
-      .replaceAll('@(requiresIntlImport)', _containsPluralMessage() ? "import 'package:intl/intl.dart' as intl;" : '')
-      .replaceAll('@(isNullable)', _usesNullableGetter ? '?' : '');
+      .replaceAll('@(requiresIntlImport)', _containsPluralMessage() ? "import 'package:intl/intl.dart' as intl;" : '');
   }
 
   String _generateSubclass(
@@ -1169,7 +1168,9 @@ class LocalizationsGenerator {
       .replaceAll('@(supportedLanguageCodes)', supportedLanguageCodes.join(', '))
       .replaceAll('@(messageClassImports)', sortedClassImports.join('\n'))
       .replaceAll('@(delegateClass)', delegateClass)
-      .replaceAll('@(requiresIntlImport)', _containsPluralMessage() ? "import 'package:intl/intl.dart' as intl;" : '');
+      .replaceAll('@(requiresIntlImport)', _containsPluralMessage() ? "import 'package:intl/intl.dart' as intl;" : '')
+      .replaceAll('@(canBeNullable)', _usesNullableGetter ? '?' : '')
+      .replaceAll('@(needsNullCheck)', _usesNullableGetter ? '' : '!');
   }
 
   bool _containsPluralMessage() => _allMessages.any((Message message) => message.isPlural);

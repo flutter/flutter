@@ -800,6 +800,82 @@ void main() {
     },
   );
 
+  testUsingContext(
+    'generates nullable localizations class getter via static `of` method '
+    'by default',
+    () {
+      _standardFlutterDirectoryL10nSetup(fs);
+
+      LocalizationsGenerator generator;
+      try {
+        generator = LocalizationsGenerator(fs);
+        generator
+          ..initialize(
+            inputPathString: defaultL10nPathString,
+            outputPathString: fs.path.join('lib', 'l10n', 'output'),
+            templateArbFileName: defaultTemplateArbFileName,
+            outputFileString: defaultOutputFileString,
+            classNameString: defaultClassNameString,
+            useSyntheticPackage: false,
+          )
+          ..loadResources()
+          ..writeOutputFiles(BufferLogger.test());
+      } on L10nException catch (e) {
+        fail('Generating output should not fail: \n${e.message}');
+      }
+
+      final Directory outputDirectory = fs.directory('lib').childDirectory('l10n').childDirectory('output');
+      expect(outputDirectory.existsSync(), isTrue);
+      expect(outputDirectory.childFile('output-localization-file.dart').existsSync(), isTrue);
+      expect(
+        outputDirectory.childFile('output-localization-file.dart').readAsStringSync(),
+        contains('static AppLocalizations? of(BuildContext context)'),
+      );
+      expect(
+        outputDirectory.childFile('output-localization-file.dart').readAsStringSync(),
+        contains('return Localizations.of<AppLocalizations>(context, AppLocalizations);'),
+      );
+    },
+  );
+
+  testUsingContext(
+    'can generate non-nullable localizations class getter via static `of` method ',
+    () {
+      _standardFlutterDirectoryL10nSetup(fs);
+
+      LocalizationsGenerator generator;
+      try {
+        generator = LocalizationsGenerator(fs);
+        generator
+          ..initialize(
+            inputPathString: defaultL10nPathString,
+            outputPathString: fs.path.join('lib', 'l10n', 'output'),
+            templateArbFileName: defaultTemplateArbFileName,
+            outputFileString: defaultOutputFileString,
+            classNameString: defaultClassNameString,
+            useSyntheticPackage: false,
+            usesNullableGetter: false,
+          )
+          ..loadResources()
+          ..writeOutputFiles(BufferLogger.test());
+      } on L10nException catch (e) {
+        fail('Generating output should not fail: \n${e.message}');
+      }
+
+      final Directory outputDirectory = fs.directory('lib').childDirectory('l10n').childDirectory('output');
+      expect(outputDirectory.existsSync(), isTrue);
+      expect(outputDirectory.childFile('output-localization-file.dart').existsSync(), isTrue);
+      expect(
+        outputDirectory.childFile('output-localization-file.dart').readAsStringSync(),
+        contains('static AppLocalizations of(BuildContext context)'),
+      );
+      expect(
+        outputDirectory.childFile('output-localization-file.dart').readAsStringSync(),
+        contains('return Localizations.of<AppLocalizations>(context, AppLocalizations)!;'),
+      );
+    },
+  );
+
   testUsingContext('creates list of inputs and outputs when file path is specified', () {
     _standardFlutterDirectoryL10nSetup(fs);
 
