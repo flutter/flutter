@@ -251,21 +251,9 @@ class _InkState extends State<Ink> {
 
   @override
   void deactivate() {
-    _ink?.visible = false;
-    super.deactivate();
-  }
-
-  @override
-  void reactivate() {
-    _ink?.visible = true;
-    super.reactivate();
-  }
-
-  @override
-  void dispose() {
     _ink?.dispose();
     assert(_ink == null);
-    super.dispose();
+    super.deactivate();
   }
 
   Widget _build(BuildContext context) {
