@@ -6,6 +6,8 @@
 
 import 'dart:math' as math;
 
+import 'package:meta/meta.dart';
+
 import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -22,6 +24,13 @@ import '../test/event_printer.dart';
 import '../test/runner.dart';
 import '../test/test_wrapper.dart';
 import '../test/watcher.dart';
+
+/// The name of the directory where Integration Tests are placed.
+///
+/// When there are test files specified for the test command that are part of
+/// this directory, *relative to the package root*, the files will be executed
+/// as Integration Tests.
+const String _kIntegrationTestDirectory = 'integration_test';
 
 /// A command to run tests.
 ///
@@ -138,7 +147,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       ..addOption('concurrency',
         abbr: 'j',
         defaultsTo: math.max<int>(1, globals.platform.numberOfProcessors - 2).toString(),
-        help: 'The number of concurrent test processes to run.',
+        help: 'The number of concurrent test processes to run. This will be ignored '
+              'when running integration tests.',
         valueHelp: 'jobs',
       )
       ..addFlag('test-assets',
@@ -216,7 +226,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   /// Interface for running the tester process.
   final FlutterTestRunner testRunner;
 
+  @visibleForTesting
+  bool get isIntegrationTest => _isIntegrationTest;
   bool _isIntegrationTest = false;
+
   List<String> _testFiles = <String>[];
 
   @override
@@ -260,25 +273,18 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
           if (globals.fs.isDirectorySync(path))
             ..._findTests(globals.fs.directory(path))
           else
-            path,
+            globals.fs.path.canonicalize(path)
       ];
     }
 
-    final String currentDirectory = globals.fs.currentDirectory.absolute.path;
-    final String integrationTestPathPrefix = globals.fs.path.join(currentDirectory, 'integration_test');
-    if (_testFiles.any((String file) => file.startsWith(integrationTestPathPrefix))) {
-      // This needs to happen before [super.verifyThenRunCommand] so that the
-      // correct [requiredArtifacts] can be identified before [run] takes place.
-      _isIntegrationTest = true;
-    }
+    // This needs to be set before [super.verifyThenRunCommand] so that the
+    // correct [requiredArtifacts] can be identified before [run] takes place.
+    _isIntegrationTest = _shouldRunAsIntegrationTests(globals.fs.currentDirectory.absolute.path, _testFiles);
 
-    if (_isIntegrationTest && !_testFiles.every((String file) => file.startsWith(integrationTestPathPrefix))) {
-      throwToolExit(
-        'Integration tests and unit tests cannot be run in a single invocation.'
-        ' Use separate invocations of `flutter test` to run integration tests'
-        ' and unit tests.'
-      );
-    }
+    globals.logger.printTrace(
+      'Found ${_testFiles.length} files which will be executed as '
+      '${_isIntegrationTest ? 'Integration' : 'Widget'} Tests.',
+    );
     return super.verifyThenRunCommand(commandPath);
   }
 
@@ -322,11 +328,22 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
-    final int jobs = int.tryParse(stringArg('concurrency'));
+    int jobs = int.tryParse(stringArg('concurrency'));
     if (jobs == null || jobs <= 0 || !jobs.isFinite) {
       throwToolExit(
         'Could not parse -j/--concurrency argument. It must be an integer greater than zero.'
       );
+    }
+    if (_isIntegrationTest) {
+      if (argResults.wasParsed('concurrency')) {
+        globals.logger.printStatus(
+          '-j/--concurrency was parsed but will be ignored, this option is not '
+          'supported when running Integration Tests.',
+        );
+      }
+      // Running with concurrency will result in deploying multiple test apps
+      // on the connected device concurrently, which is not supported.
+      jobs = 1;
     }
 
     final int shardIndex = int.tryParse(stringArg('shard-index') ?? '');
@@ -482,9 +499,39 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   }
 }
 
+/// Searches [directory] and returns files that end with `_test.dart` as
+/// absolute paths.
 Iterable<String> _findTests(Directory directory) {
   return directory.listSync(recursive: true, followLinks: false)
       .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart') &&
       globals.fs.isFileSync(entity.path))
       .map((FileSystemEntity entity) => globals.fs.path.absolute(entity.path));
+}
+
+/// Returns true if there are files that are Integration Tests.
+///
+/// The [currentDirectory] and [testFiles] parameters here must be provided as
+/// absolute paths.
+///
+/// Throws an exception if there are both Integration Tests and Widget Tests
+/// found in [testFiles].
+@visibleForTesting
+bool _shouldRunAsIntegrationTests(String currentDirectory, List<String> testFiles) {
+  final String integrationTestDirectory = globals.fs.path.join(currentDirectory, _kIntegrationTestDirectory);
+
+  if (testFiles.every((String absolutePath) => !absolutePath.startsWith(integrationTestDirectory))) {
+    return false;
+  }
+
+  if (testFiles.every((String absolutePath) => absolutePath.startsWith(integrationTestDirectory))) {
+    return true;
+  }
+
+  throwToolExit(
+    'Integration tests and unit tests cannot be run in a single invocation.'
+    ' Use separate invocations of `flutter test` to run integration tests'
+    ' and unit tests.'
+  );
+  // Unreachable.
+  return null;
 }

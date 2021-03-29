@@ -184,9 +184,6 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     }
 
     if (integrationTestDevice != null) {
-      // Running with concurrency will result in deploying multiple test apps
-      // on the connected device concurrently, which is not supported.
-      testArgs.add('--concurrency=1');
       // Without this, some async exceptions which are caught will surface when
       // debugging tests.
       // TODO(jiahaog): Remove this once https://github.com/dart-lang/stack_trace/issues/106 is fixed.
