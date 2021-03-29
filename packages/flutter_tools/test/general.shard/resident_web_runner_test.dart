@@ -494,6 +494,7 @@ void main() {
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
+    await null;
 
     expect(testLogger.statusText, contains('\nerror text'));
     expect(testLogger.statusText, isNot(contains('other stuff')));
