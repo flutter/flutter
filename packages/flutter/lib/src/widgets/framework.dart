@@ -3310,6 +3310,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///
   /// See the [RenderObjectElement] documentation for more information on slots.
   @protected
+  @pragma('vm:prefer-inline')
   Element? updateChild(Element? child, Widget? newWidget, Object? newSlot) {
     if (newWidget == null) {
       if (child != null)
@@ -3583,6 +3584,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// The element returned by this function will already have been mounted and
   /// will be in the "active" lifecycle state.
   @protected
+  @pragma('vm:prefer-inline')
   Element inflateWidget(Widget newWidget, Object? newSlot) {
     assert(newWidget != null);
     final Key? key = newWidget.key;
@@ -4236,6 +4238,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// Called by the [BuildOwner] when [BuildOwner.scheduleBuildFor] has been
   /// called to mark this element dirty, by [mount] when the element is first
   /// built, and by [update] when the widget has changed.
+  @pragma('vm:prefer-inline')
   void rebuild() {
     assert(_lifecycleState != _ElementLifecycle.initial);
     if (_lifecycleState != _ElementLifecycle.active || !_dirty)
