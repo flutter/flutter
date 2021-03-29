@@ -1178,7 +1178,6 @@ void main() {
       final RawKeyEventDataMacOs data = leftArrowKey.data as RawKeyEventDataMacOs;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowLeft));
-      expect(data.logicalKey.keyLabel, isEmpty);
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
   }, skip: isBrowser); // This is a macOS-specific group.
 
@@ -1324,7 +1323,6 @@ void main() {
       final RawKeyEventDataIos data = leftArrowKey.data as RawKeyEventDataIos;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowLeft));
-      expect(data.logicalKey.keyLabel, isEmpty);
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
   }, skip: isBrowser); // This is an iOS-specific group.
 
@@ -1469,7 +1467,6 @@ void main() {
       final RawKeyEventDataWindows data = leftArrowKey.data as RawKeyEventDataWindows;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowLeft));
-      expect(data.logicalKey.keyLabel, isEmpty);
     });
     testWidgets('Win32 VK_PROCESSKEY events are skipped', (WidgetTester tester) async {
       const  String platform = 'windows';

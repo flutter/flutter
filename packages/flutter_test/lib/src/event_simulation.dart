@@ -13,6 +13,13 @@ import 'test_async_utils.dart';
 // https://github.com/flutter/flutter/issues/33521
 // This code can only simulate keys which appear in the key maps.
 
+String _keyLabel(LogicalKeyboardKey key) {
+  final String keyLabel = key.keyLabel;
+  if (keyLabel.length == 1)
+    return keyLabel.toLowerCase();
+  return '';
+}
+
 /// A class that serves as a namespace for a bunch of keyboard-key generation
 /// utilities.
 class KeyEventSimulator {
@@ -206,7 +213,7 @@ class KeyEventSimulator {
 
     if (kIsWeb) {
       result['code'] = _getWebKeyCode(key);
-      result['key'] = key.keyLabel;
+      result['key'] = _keyLabel(key);
       result['metaState'] = _getWebModifierFlags(key, isDown);
       return result;
     }
@@ -214,17 +221,17 @@ class KeyEventSimulator {
     switch (platform) {
       case 'android':
         result['keyCode'] = keyCode;
-        if (key.keyLabel.isNotEmpty) {
-          result['codePoint'] = key.keyLabel.codeUnitAt(0);
-          result['character'] = key.keyLabel;
+        if (_keyLabel(key).isNotEmpty) {
+          result['codePoint'] = _keyLabel(key).codeUnitAt(0);
+          result['character'] = _keyLabel(key);
         }
         result['scanCode'] = scanCode;
         result['metaState'] = _getAndroidModifierFlags(key, isDown);
         break;
       case 'fuchsia':
         result['hidUsage'] = physicalKey.usbHidUsage;
-        if (key.keyLabel.isNotEmpty) {
-          result['codePoint'] = key.keyLabel.codeUnitAt(0);
+        if (_keyLabel(key).isNotEmpty) {
+          result['codePoint'] = _keyLabel(key).codeUnitAt(0);
         }
         result['modifiers'] = _getFuchsiaModifierFlags(key, isDown);
         break;
@@ -233,32 +240,32 @@ class KeyEventSimulator {
         result['keyCode'] = keyCode;
         result['scanCode'] = scanCode;
         result['modifiers'] = _getGlfwModifierFlags(key, isDown);
-        result['unicodeScalarValues'] = key.keyLabel.isNotEmpty ? key.keyLabel.codeUnitAt(0) : 0;
+        result['unicodeScalarValues'] = _keyLabel(key).isNotEmpty ? _keyLabel(key).codeUnitAt(0) : 0;
         break;
       case 'macos':
         result['keyCode'] = scanCode;
-        if (key.keyLabel.isNotEmpty) {
-          result['characters'] = key.keyLabel;
-          result['charactersIgnoringModifiers'] = key.keyLabel;
+        if (_keyLabel(key).isNotEmpty) {
+          result['characters'] = _keyLabel(key);
+          result['charactersIgnoringModifiers'] = _keyLabel(key);
         }
         result['modifiers'] = _getMacOsModifierFlags(key, isDown);
         break;
       case 'ios':
         result['keyCode'] = scanCode;
-        result['characters'] = key.keyLabel;
-        result['charactersIgnoringModifiers'] = key.keyLabel;
+        result['characters'] = _keyLabel(key);
+        result['charactersIgnoringModifiers'] = _keyLabel(key);
         result['modifiers'] = _getIOSModifierFlags(key, isDown);
         break;
       case 'web':
         result['code'] = _getWebKeyCode(key);
-        result['key'] = key.keyLabel;
+        result['key'] = _keyLabel(key);
         result['metaState'] = _getWebModifierFlags(key, isDown);
         break;
       case 'windows':
         result['keyCode'] = keyCode;
         result['scanCode'] = scanCode;
-        if (key.keyLabel.isNotEmpty) {
-          result['characterCodePoint'] = key.keyLabel.codeUnitAt(0);
+        if (_keyLabel(key).isNotEmpty) {
+          result['characterCodePoint'] = _keyLabel(key).codeUnitAt(0);
         }
         result['modifiers'] = _getWindowsModifierFlags(key, isDown);
     }
