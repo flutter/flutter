@@ -206,14 +206,16 @@ void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
   [objects_ removeObjectsForKeys:doomed_uids];
 
   layoutChanged = layoutChanged || [doomed_uids count] > 0;
-  // We should send out only one notification per semantics update.
+
   if (routeChanged) {
     if (!ios_delegate_->IsFlutterViewControllerPresentingModalViewController(view_controller_)) {
       NSString* routeName = [lastAdded routeName];
       ios_delegate_->PostAccessibilityNotification(UIAccessibilityScreenChangedNotification,
                                                    routeName);
     }
-  } else if (layoutChanged) {
+  }
+
+  if (layoutChanged) {
     SemanticsObject* nextToFocus = nil;
     // This property will be -1 if the focus is outside of the flutter
     // application. In this case, we should not refocus anything.
