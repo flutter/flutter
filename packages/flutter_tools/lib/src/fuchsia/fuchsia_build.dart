@@ -185,7 +185,6 @@ Future<void> _buildPackage(
   final String appName = fuchsiaProject.project.manifest.appName;
   final String pkgassets = globals.fs.path.join(outDir, '${appName}_pkgassets');
   final String packageManifest = globals.fs.path.join(pkgDir, 'package_manifest');
-  final String devKeyPath = globals.fs.path.join(pkgDir, 'development.key');
 
   final Directory pkg = globals.fs.directory(pkgDir);
   if (!pkg.existsSync()) {
@@ -219,13 +218,10 @@ Future<void> _buildPackage(
   if (!await fuchsiaPM.init(pkgDir, appName)) {
     return;
   }
-  if (!await fuchsiaPM.genkey(pkgDir, devKeyPath)) {
+  if (!await fuchsiaPM.build(pkgDir, packageManifest)) {
     return;
   }
-  if (!await fuchsiaPM.build(pkgDir, devKeyPath, packageManifest)) {
-    return;
-  }
-  if (!await fuchsiaPM.archive(pkgDir, devKeyPath, packageManifest)) {
+  if (!await fuchsiaPM.archive(pkgDir, packageManifest)) {
     return;
   }
 }

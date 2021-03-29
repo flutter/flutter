@@ -1172,6 +1172,64 @@ void main() {
     );
   });
 
+  testWidgets('Can not attach a non-RenderObjectElement to the MultiChildRenderObjectElement - mount', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Column(
+        children: <Widget>[
+          Container(),
+          const _EmptyWidget(),
+        ],
+      ),
+    );
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(
+      exception.toString(),
+      equalsIgnoringHashCodes(
+        'The children of `MultiChildRenderObjectElement` must each has an associated render object.\n'
+        'This typically means that the `_EmptyWidget` or its children\n'
+        'are not a subtype of `RenderObjectWidget`.\n'
+        'The following element does not have an associated render object:\n'
+        '  _EmptyWidget\n'
+        'debugCreator: _EmptyWidget ← Column ← [root]'
+      ),
+    );
+  });
+
+  testWidgets('Can not attach a non-RenderObjectElement to the MultiChildRenderObjectElement - update', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Column(
+        children: <Widget>[
+          Container(),
+        ],
+      ),
+    );
+
+    await tester.pumpWidget(
+      Column(
+        children: <Widget>[
+          Container(),
+          const _EmptyWidget(),
+        ],
+      ),
+    );
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(
+      exception.toString(),
+      equalsIgnoringHashCodes(
+        'The children of `MultiChildRenderObjectElement` must each has an associated render object.\n'
+        'This typically means that the `_EmptyWidget` or its children\n'
+        'are not a subtype of `RenderObjectWidget`.\n'
+        'The following element does not have an associated render object:\n'
+        '  _EmptyWidget\n'
+        'debugCreator: _EmptyWidget ← Column ← [root]'
+      ),
+    );
+  });
+
   testWidgets('Element diagnostics', (WidgetTester tester) async {
     GlobalKey key0;
     await tester.pumpWidget(Column(
@@ -1848,4 +1906,21 @@ class FakeLeafRenderObject extends RenderBox {
 
 class TestRenderObjectElement extends RenderObjectElement {
   TestRenderObjectElement() : super(Table());
+}
+
+class _EmptyWidget extends Widget {
+  const _EmptyWidget({Key? key}) : super(key: key);
+
+  @override
+  Element createElement() => _EmptyElement(this);
+}
+
+class _EmptyElement extends Element {
+  _EmptyElement(_EmptyWidget widget) : super(widget);
+
+  @override
+  bool get debugDoingBuild => false;
+
+  @override
+  void performRebuild() {}
 }

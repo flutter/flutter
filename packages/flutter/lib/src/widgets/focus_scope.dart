@@ -670,9 +670,7 @@ class _FocusState extends State<Focus> {
     final bool hasPrimaryFocus = focusNode.hasPrimaryFocus;
     final bool canRequestFocus = focusNode.canRequestFocus;
     final bool descendantsAreFocusable = focusNode.descendantsAreFocusable;
-    if (widget.onFocusChange != null) {
-      widget.onFocusChange!(focusNode.hasFocus);
-    }
+    widget.onFocusChange?.call(focusNode.hasFocus);
     if (_hasPrimaryFocus != hasPrimaryFocus) {
       setState(() {
         _hasPrimaryFocus = hasPrimaryFocus;

@@ -626,8 +626,7 @@ abstract class InkFeature {
       return true;
     }());
     _controller._removeFeature(this);
-    if (onRemoved != null)
-      onRemoved!();
+    onRemoved?.call();
   }
 
   void _paint(Canvas canvas) {

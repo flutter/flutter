@@ -378,6 +378,71 @@ void main() {
     expect(unconstrained.getMaxIntrinsicWidth(100.0), equals(200.0));
   });
 
+  group('ConstraintsTransfromBox', () {
+    FlutterErrorDetails? firstErrorDetails;
+    void exhaustErrors() {
+      FlutterErrorDetails? next;
+      do {
+        next = renderer.takeFlutterErrorDetails();
+        firstErrorDetails ??= next;
+      } while (next != null);
+    }
+
+    tearDown(() {
+      firstErrorDetails = null;
+      RenderObject.debugCheckingIntrinsics = false;
+    });
+
+    test('throws if the resulting constraints are not normalized', () {
+      final RenderConstrainedBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(height: 0));
+      final RenderConstraintsTransformBox box = RenderConstraintsTransformBox(
+        alignment: Alignment.center,
+        textDirection: TextDirection.ltr,
+        constraintsTransform: (BoxConstraints constraints) => const BoxConstraints(maxHeight: -1, minHeight: 200),
+        child: child,
+      );
+
+      layout(box, constraints: const BoxConstraints(), onErrors: exhaustErrors);
+
+      expect(firstErrorDetails?.toString(), contains('is not normalized'));
+    });
+
+    test('overflow is reported when insufficient size is given', () {
+      final RenderConstrainedBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: double.maxFinite));
+      final RenderConstraintsTransformBox box = RenderConstraintsTransformBox(
+        alignment: Alignment.center,
+        textDirection: TextDirection.ltr,
+        constraintsTransform: (BoxConstraints constraints) => constraints.copyWith(maxWidth: double.infinity),
+        child: child,
+      );
+
+      layout(box, constraints: const BoxConstraints(), phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+    });
+
+    test('handles flow layout', () {
+      final RenderParagraph child = RenderParagraph(
+        TextSpan(text: 'a' * 100),
+        textDirection: TextDirection.ltr,
+      );
+      final RenderConstraintsTransformBox box = RenderConstraintsTransformBox(
+        alignment: Alignment.center,
+        textDirection: TextDirection.ltr,
+        constraintsTransform: (BoxConstraints constraints) => constraints.copyWith(maxWidth: double.infinity),
+        child: child,
+      );
+
+      // With a width of 30, the RenderParagraph would have wrapped, but the
+      // RenderConstraintsTransformBox allows the paragraph to expand regardless
+      // of the width constraint:
+      // unconstrainedHeight * numberOfLines = constrainedHeight.
+      final double constrainedHeight = child.getMinIntrinsicHeight(30);
+      final double unconstrainedHeight = box.getMinIntrinsicHeight(30);
+
+      // At least 2 lines.
+      expect(constrainedHeight, greaterThanOrEqualTo(2 * unconstrainedHeight));
+    });
+  });
+
   test ('getMinIntrinsicWidth error handling', () {
     final RenderUnconstrainedBox unconstrained = RenderUnconstrainedBox(
       textDirection: TextDirection.ltr,

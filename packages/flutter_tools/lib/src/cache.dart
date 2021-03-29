@@ -1293,11 +1293,13 @@ class GradleWrapper extends CachedArtifact {
     OperatingSystemUtils operatingSystemUtils,
   ) async {
     final Uri archiveUri = _toStorageUri(version);
-    await  artifactUpdater.downloadZippedTarball('Downloading Gradle Wrapper...', archiveUri, location);
+    await artifactUpdater.downloadZippedTarball('Downloading Gradle Wrapper...', archiveUri, location);
     // Delete property file, allowing templates to provide it.
-    fileSystem.file(fileSystem.path.join(location.path, 'gradle', 'wrapper', 'gradle-wrapper.properties')).deleteSync();
     // Remove NOTICE file. Should not be part of the template.
-    fileSystem.file(fileSystem.path.join(location.path, 'NOTICE')).deleteSync();
+    final File propertiesFile = fileSystem.file(fileSystem.path.join(location.path, 'gradle', 'wrapper', 'gradle-wrapper.properties'));
+    final File noticeFile = fileSystem.file(fileSystem.path.join(location.path, 'NOTICE'));
+    ErrorHandlingFileSystem.deleteIfExists(propertiesFile);
+    ErrorHandlingFileSystem.deleteIfExists(noticeFile);
   }
 
   @override

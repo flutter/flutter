@@ -543,13 +543,9 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
 
   void _handleResizeProgressChanged() {
     if (_resizeController!.isCompleted) {
-      if (widget.onDismissed != null) {
-        final DismissDirection direction = _dismissDirection;
-        widget.onDismissed!(direction);
-      }
+      widget.onDismissed?.call(_dismissDirection);
     } else {
-      if (widget.onResize != null)
-        widget.onResize!();
+      widget.onResize?.call();
     }
   }
 
