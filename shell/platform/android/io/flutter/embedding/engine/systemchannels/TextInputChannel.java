@@ -741,5 +741,9 @@ public class TextInputChannel {
       // be -1.
       return selectionStart >= 0;
     }
+
+    public boolean hasComposing() {
+      return composingStart >= 0 && composingEnd > composingStart;
+    }
   }
 }
