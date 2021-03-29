@@ -370,8 +370,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     _controller.addStatusListener((AnimationStatus status) {
       switch (status) {
         case AnimationStatus.completed:
-          if (widget.onEnd != null)
-            widget.onEnd!();
+          widget.onEnd?.call();
           break;
         case AnimationStatus.dismissed:
         case AnimationStatus.forward:

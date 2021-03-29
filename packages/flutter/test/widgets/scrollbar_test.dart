@@ -956,6 +956,35 @@ void main() {
     );
   });
 
+  testWidgets('RawScrollbar.isAlwaysShown asserts that a ScrollPosition is attached', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            isAlwaysShown: true,
+            controller: ScrollController(),
+            thumbColor: const Color(0x11111111),
+            child: const SingleChildScrollView(
+              child: SizedBox(
+                height: 1000.0,
+                width: 50.0,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final dynamic exception = tester.takeException();
+    expect(exception, isAssertionError);
+    expect(
+      (exception as AssertionError).message,
+      contains('The Scrollbar\'s ScrollController has no ScrollPosition attached.'),
+    );
+  });
+
   testWidgets('Simultaneous dragging and pointer scrolling does not cause a crash', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/70105
     final ScrollController scrollController = ScrollController();
@@ -970,7 +999,7 @@ void main() {
               isAlwaysShown: true,
               controller: scrollController,
               child: const SingleChildScrollView(
-                child: SizedBox(width: 4000.0, height: 4000.0)
+                  child: SizedBox(width: 4000.0, height: 4000.0)
               ),
             ),
           ),

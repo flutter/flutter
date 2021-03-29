@@ -118,6 +118,7 @@ class PackagesGetCommand extends FlutterCommand {
         flutterRootDir: globals.fs.directory(Cache.flutterRoot),
         outputDir: globals.fs.directory(getBuildDirectory()),
         processManager: globals.processManager,
+        platform: globals.platform,
         projectDir: flutterProject.directory,
       );
 
@@ -323,6 +324,7 @@ class PackagesInteractiveGetCommand extends FlutterCommand {
         flutterRootDir: globals.fs.directory(Cache.flutterRoot),
         outputDir: globals.fs.directory(getBuildDirectory()),
         processManager: globals.processManager,
+        platform: globals.platform,
         projectDir: flutterProject.directory,
       );
 

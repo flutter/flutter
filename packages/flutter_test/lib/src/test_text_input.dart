@@ -102,8 +102,7 @@ class TestTextInput {
       case 'TextInput.clearClient':
         _client = 0;
         _isVisible = false;
-        if (onCleared != null)
-          onCleared!();
+        onCleared?.call();
         break;
       case 'TextInput.setEditingState':
         editingState = methodCall.arguments as Map<String, dynamic>;
