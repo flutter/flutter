@@ -112,7 +112,6 @@ class Template {
     } on FileSystemException catch (err) {
       _logger.printError(err.toString());
       throwToolExit('Failed to flutter create at ${destination.path}.');
-      return 0;
     }
     int fileCount = 0;
 
@@ -160,6 +159,11 @@ class Template {
       // Only build a Windows project if explicitly asked.
       final bool windows = context['windows'] as bool;
       if (relativeDestinationPath.startsWith('windows.tmpl') && !windows) {
+        return null;
+      }
+      // Only build a Windows UWP project if explicitly asked.
+      final bool windowsUwp = context['winuwp'] as bool;
+      if (relativeDestinationPath.startsWith('winuwp.tmpl') && !windowsUwp) {
         return null;
       }
 

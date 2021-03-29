@@ -116,6 +116,7 @@ class ExampleDragSource extends StatelessWidget {
 
     Offset feedbackOffset;
     DragAnchor anchor;
+    DragAnchorStrategy dragAnchorStrategy;
     if (!under) {
       feedback = Transform(
         transform: Matrix4.identity()
@@ -124,9 +125,11 @@ class ExampleDragSource extends StatelessWidget {
       );
       feedbackOffset = const Offset(0.0, -kFingerSize);
       anchor = DragAnchor.pointer;
+      dragAnchorStrategy = pointerDragAnchorStrategy;
     } else {
       feedbackOffset = Offset.zero;
       anchor = DragAnchor.child;
+      dragAnchorStrategy = childDragAnchorStrategy;
     }
 
     if (heavy) {
@@ -143,7 +146,7 @@ class ExampleDragSource extends StatelessWidget {
         child: contents,
         feedback: feedback,
         feedbackOffset: feedbackOffset,
-        dragAnchor: anchor,
+        dragAnchorStrategy: dragAnchorStrategy,
       );
     }
   }

@@ -36,7 +36,7 @@ const Map<String, List<String>> _platformAdaptiveIdentifiers = <String, List<Str
 };
 
 // Rewrite certain Flutter IDs (reserved keywords, numbers) using prefix matching.
-const Map<String, String> _identifierRewrites = <String, String>{
+const Map<String, String> identifierRewrites = <String, String>{
   '1x': 'one_x',
   '360': 'threesixty',
   '2d': 'twod',
@@ -83,9 +83,6 @@ const Map<String, String> _identifierRewrites = <String, String>{
   '23mp': 'twenty_three_mp',
   '24mp': 'twenty_four_mp',
   'class': 'class_',
-  // TODO(guidezpl): will clean these up in g3 b/153556862
-  'door_back': 'door_back_door',
-  'door_front': 'door_front_door',
   'try': 'try_sms_star',
 };
 
@@ -202,7 +199,7 @@ void main(List<String> args) {
   final String newIconData = regenerateIconsFile(iconClassFileData, newTokenPairMap);
 
   if (argResults[_dryRunOption] as bool) {
-    stdout.writeln(newIconData);
+    stdout.write(newIconData);
   } else {
     stderr.writeln('\nWriting to ${iconClassFile.path}.');
     iconClassFile.writeAsStringSync(newIconData);
@@ -348,9 +345,9 @@ class _Icon {
     }
 
     flutterId = id;
-    for (final MapEntry<String, String> rewritePair in _identifierRewrites.entries) {
+    for (final MapEntry<String, String> rewritePair in identifierRewrites.entries) {
       if (id.startsWith(rewritePair.key)) {
-        flutterId = id.replaceFirst(rewritePair.key, _identifierRewrites[rewritePair.key]);
+        flutterId = id.replaceFirst(rewritePair.key, identifierRewrites[rewritePair.key]);
       }
     }
 

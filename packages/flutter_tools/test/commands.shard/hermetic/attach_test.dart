@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/device_port_forwader.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -760,11 +761,20 @@ class StreamLogger extends Logger {
     @required Duration timeout,
     String progressId,
     bool multilineOutput = false,
+    bool includeTiming = true,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     _log('[progress] $message');
     return SilentStatus(
       stopwatch: Stopwatch(),
+    )..start();
+  }
+
+  @override
+  Status startSpinner({ VoidCallback onFinish }) {
+    return SilentStatus(
+      stopwatch: Stopwatch(),
+      onFinish: onFinish,
     )..start();
   }
 
