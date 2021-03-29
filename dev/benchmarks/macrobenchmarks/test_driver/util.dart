@@ -67,7 +67,6 @@ void macroPerfTest(
     expect(timeline, isNotNull);
 
     final TimelineSummary summary = TimelineSummary.summarize(timeline);
-    await summary.writeSummaryToFile(testName, pretty: true);
     await summary.writeTimelineToFile(testName, pretty: true);
   }, timeout: Timeout(timeout));
 }

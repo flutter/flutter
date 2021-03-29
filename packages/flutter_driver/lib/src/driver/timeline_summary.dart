@@ -200,7 +200,8 @@ class TimelineSummary {
     return timelineSummary;
   }
 
-  /// Writes all of the recorded timeline data to a file.
+  /// Writes all of the recorded timeline data to a file, and a summary of those
+  /// those events to `$traceName.timeline_summary.json`.
   ///
   /// See also:
   ///
@@ -214,15 +215,16 @@ class TimelineSummary {
     await fs.directory(destinationDirectory).create(recursive: true);
     final File file = fs.file(path.join(destinationDirectory, '$traceName.timeline.json'));
     await file.writeAsString(_encodeJson(_timeline.json, pretty));
+
+    _writeSummaryToFile(traceName, destinationDirectory: destinationDirectory, pretty: pretty);
   }
 
   /// Writes [summaryJson] to a file.
-  Future<void> writeSummaryToFile(
+  Future<void> _writeSummaryToFile(
     String traceName, {
-    String? destinationDirectory,
+    required String destinationDirectory,
     bool pretty = false,
   }) async {
-    destinationDirectory ??= testOutputsDirectory;
     await fs.directory(destinationDirectory).create(recursive: true);
     final File file = fs.file(path.join(destinationDirectory, '$traceName.timeline_summary.json'));
     await file.writeAsString(_encodeJson(summaryJson, pretty));

@@ -40,7 +40,6 @@ void main() {
       });
 
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
-      await summary.writeSummaryToFile('stocks_scroll_perf', pretty: true);
       await summary.writeTimelineToFile('stocks_scroll_perf', pretty: true);
     });
   });

@@ -456,7 +456,7 @@ void main() {
           cpuUsage(5000, 20), cpuUsage(5010, 60),
           memoryUsage(6000, 20, 40), memoryUsage(6100, 30, 45),
           platformVsync(7000), vsyncCallback(7500),
-        ]).writeSummaryToFile('test', destinationDirectory: tempDir.path);
+        ]).writeTimelineToFile('test', destinationDirectory: tempDir.path);
         final String written =
             await fs.file(path.join(tempDir.path, 'test.timeline_summary.json')).readAsString();
         expect(json.decode(written), <String, dynamic>{
