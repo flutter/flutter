@@ -77,7 +77,7 @@ abstract class @(class) {
   // ignore: unused_field
   final String localeName;
 
-  static @(class)? of(BuildContext context) {
+  static @(class)@(isNullable) of(BuildContext context) {
     return Localizations.of<@(class)>(context, @(class));
   }
 

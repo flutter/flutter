@@ -545,6 +545,10 @@ class LocalizationsGenerator {
   AppResourceBundleCollection _allBundles;
   LocaleInfo _templateArbLocale;
   bool _useSyntheticPackage = true;
+  // Used to decide if the generated code is nullable or not
+  // (whether AppLocalizations? or AppLocalizations is returned from
+  // `static {name}Localizations{?} of (BuildContext context))`
+  bool _usesNullableGetter = true;
 
   /// The directory that contains the project's arb files, as well as the
   /// header file, if specified.
@@ -689,8 +693,10 @@ class LocalizationsGenerator {
     String projectPathString,
     bool areResourceAttributesRequired = false,
     String untranslatedMessagesFile,
+    bool usesNullableGetter = true,
   }) {
     _useSyntheticPackage = useSyntheticPackage;
+    _usesNullableGetter = usesNullableGetter;
     setProjectDir(projectPathString);
     setInputDirectory(inputPathString);
     setOutputDirectory(outputPathString ?? inputPathString);
@@ -1022,7 +1028,8 @@ class LocalizationsGenerator {
       .replaceAll('@(class)', '$className${locale.camelCase()}')
       .replaceAll('@(localeName)', locale.toString())
       .replaceAll('@(methods)', methods.join('\n\n'))
-      .replaceAll('@(requiresIntlImport)', _containsPluralMessage() ? "import 'package:intl/intl.dart' as intl;" : '');
+      .replaceAll('@(requiresIntlImport)', _containsPluralMessage() ? "import 'package:intl/intl.dart' as intl;" : '')
+      .replaceAll('@(isNullable)', _usesNullableGetter ? '?' : '');
   }
 
   String _generateSubclass(
