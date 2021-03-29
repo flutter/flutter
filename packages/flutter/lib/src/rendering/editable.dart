@@ -3044,7 +3044,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
     // On iOS, select the previous word if there is a previous word, or select
     // the the whitespace to the next word if there is a next word. Select
-    // nothing if there is neither previous word nor next word.
+    // nothing if there is neither a previous word nor a next word.
     //
     // If the platform is Android and the text is read only, try to select the
     // previous word if there is one; otherwise, select the whitespace at the
