@@ -722,6 +722,34 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
   }
 
   @override
+  double computeMinIntrinsicHeight(double width) {
+    return super.computeMinIntrinsicHeight(
+      constraintsTransform(BoxConstraints(maxWidth: width)).maxWidth,
+    );
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    return super.computeMaxIntrinsicHeight(
+      constraintsTransform(BoxConstraints(maxWidth: width)).maxWidth,
+    );
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    return super.computeMinIntrinsicWidth(
+      constraintsTransform(BoxConstraints(maxHeight: height)).maxHeight,
+    );
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    return super.computeMaxIntrinsicWidth(
+      constraintsTransform(BoxConstraints(maxHeight: height)).maxHeight,
+    );
+  }
+
+  @override
   Size computeDryLayout(BoxConstraints constraints) {
     final Size? childSize = child?.getDryLayout(constraintsTransform(constraints));
     return childSize == null ? constraints.smallest : constraints.constrain(childSize);

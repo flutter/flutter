@@ -24,14 +24,13 @@ environment:
 
 gcp_credentials: ENCRYPTED[1917385f09764ac58515f6fee14ed58688afc808849b244969d41d0b082061eecd0a4c8ba801f00833877a12b51f8bb5]
 
-
 # LINUX SHARDS
 task:
   gke_container:
     dockerfile: "dev/ci/docker_linux/Dockerfile"
     builder_image_name: docker-builder # gce vm image
     builder_image_project: flutter-cirrus
-    cluster_name: build-32-cluster
+    cluster_name: test-cluster
     zone: us-central1-a
     namespace: default
     cpu: $CPU

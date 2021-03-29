@@ -95,6 +95,7 @@ class AnalyzeOnce extends AnalyzeBase {
       logger: logger,
       processManager: processManager,
       terminal: terminal,
+      protocolTrafficLog: protocolTrafficLog,
     );
 
     Stopwatch timer;
