@@ -45,7 +45,7 @@ class KeyboardKeysCodeGenerator extends BaseCodeGenerator {
       definitions.write('''
 
 $firstComment  ///
-$otherComments  static const PhysicalKeyboardKey ${entry.constantName} = PhysicalKeyboardKey._(${toHex(entry.usbHidCode, digits: 8)});
+$otherComments  static const PhysicalKeyboardKey ${entry.constantName} = PhysicalKeyboardKey(${toHex(entry.usbHidCode, digits: 8)});
 ''');
     }
     return definitions.toString();
@@ -70,7 +70,7 @@ $otherComments  static const PhysicalKeyboardKey ${entry.constantName} = Physica
       definitions.write('''
 
 $firstComment  ///
-$otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardKey._(${toHex(flutterId, digits: 11)});
+$otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardKey(${toHex(flutterId, digits: 11)});
 ''');
     }
 
@@ -108,11 +108,11 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
     return synonyms.toString();
   }
 
-  String get _logicalDebugNames {
+  String get _logicalKeyLabels {
     final StringBuffer result = StringBuffer();
     for (final Key entry in keyData.data) {
       result.write('''
-      ${toHex(entry.flutterId, digits: 11)}: '${entry.commentName}',
+    ${toHex(entry.flutterId, digits: 11)}: '${entry.commentName}',
 ''');
     }
     for (final String name in Key.synonyms.keys) {
@@ -121,7 +121,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
       // plane.
       final Key entry = keyData.data.firstWhere((Key item) => item.name == Key.synonyms[name][0]);
       result.write('''
-      ${toHex(Key.synonymPlane | entry.flutterId, digits: 11)}: '${Key.getCommentName(name)}',
+    ${toHex(Key.synonymPlane | entry.flutterId, digits: 11)}: '${Key.getCommentName(name)}',
 ''');
     }
     return result.toString();
@@ -165,7 +165,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
       'LOGICAL_KEY_MAP': _predefinedKeyCodeMap,
       'LOGICAL_KEY_DEFINITIONS': _logicalDefinitions,
       'LOGICAL_KEY_SYNONYMS': _logicalSynonyms,
-      'LOGICAL_KEY_DEBUG_NAMES': _logicalDebugNames,
+      'LOGICAL_KEY_KEY_LABELS': _logicalKeyLabels,
       'PHYSICAL_KEY_DEFINITIONS': _physicalDefinitions,
       'PHYSICAL_KEY_DEBUG_NAMES': _physicalDebugNames,
     };

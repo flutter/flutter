@@ -15,6 +15,15 @@ void main() {
       // Check a modifier key
       expect(PhysicalKeyboardKey.findKeyByCode(0x000700e1), equals(PhysicalKeyboardKey.shiftLeft));
     });
+    test('Values are cached', () async {
+      expect(identical(PhysicalKeyboardKey.keyA, PhysicalKeyboardKey(PhysicalKeyboardKey.keyA.usbHidUsage)), true);
+      expect(identical(PhysicalKeyboardKey(0x12345), PhysicalKeyboardKey(0x12345)), true);
+    });
+    test('debugNames', () async {
+      expect(PhysicalKeyboardKey.keyA.debugName, 'Key A');
+      expect(PhysicalKeyboardKey.backslash.debugName, 'Backslash');
+      expect(PhysicalKeyboardKey(0x12345).debugName, 'Key with ID 0x00012345');
+    });
   });
   group(LogicalKeyboardKey, () {
     test('Various classes of keys can be looked up by code', () async {
@@ -93,6 +102,30 @@ void main() {
             LogicalKeyboardKey.alt,
             LogicalKeyboardKey.meta,
           }));
+    });
+    test('Values are cached', () async {
+      expect(identical(LogicalKeyboardKey.keyA, LogicalKeyboardKey(LogicalKeyboardKey.keyA.keyId)), true);
+      expect(identical(LogicalKeyboardKey(0x12345), LogicalKeyboardKey(0x12345)), true);
+    });
+    test('keyLabel', () async {
+      expect(LogicalKeyboardKey.keyA.keyLabel, 'A');
+      expect(LogicalKeyboardKey.backslash.keyLabel, r'\');
+      expect(LogicalKeyboardKey(0xD9).keyLabel, 'Ù');
+      expect(LogicalKeyboardKey(0xF9).keyLabel, 'Ù');
+      expect(LogicalKeyboardKey.shiftLeft.keyLabel, 'Shift Left');
+      expect(LogicalKeyboardKey.numpadDecimal.keyLabel, 'Numpad Decimal');
+      expect(LogicalKeyboardKey.numpad1.keyLabel, 'Numpad 1');
+      expect(LogicalKeyboardKey.delete.keyLabel, 'Delete');
+      expect(LogicalKeyboardKey.f12.keyLabel, 'F12');
+      expect(LogicalKeyboardKey.mediaPlay.keyLabel, 'Media Play');
+      expect(LogicalKeyboardKey(0x100012345).keyLabel, '');
+    });
+    test('debugName', () async {
+      expect(LogicalKeyboardKey.keyA.debugName, 'Key A');
+      expect(LogicalKeyboardKey.backslash.debugName, 'Backslash');
+      expect(LogicalKeyboardKey(0xD9).debugName, 'Key Ù');
+      expect(LogicalKeyboardKey.mediaPlay.debugName, 'Media Play');
+      expect(LogicalKeyboardKey(0x100012345).debugName, 'Key with ID 0x00100012345');
     });
   });
 }
