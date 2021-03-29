@@ -44,6 +44,7 @@ void main() {
       untranslatedMessagesFile: Uri.file('untranslated'),
       useSyntheticPackage: false,
       areResourceAttributesRequired: true,
+      usesNullableGetter: false,
     );
 
     final LocalizationsGenerator mockLocalizationsGenerator = MockLocalizationsGenerator();
@@ -70,6 +71,7 @@ void main() {
         projectPathString: '/',
         areResourceAttributesRequired: true,
         untranslatedMessagesFile: 'untranslated',
+        usesNullableGetter: false,
       ),
     ).called(1);
     verify(mockLocalizationsGenerator.loadResources()).called(1);

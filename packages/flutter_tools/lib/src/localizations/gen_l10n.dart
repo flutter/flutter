@@ -66,6 +66,7 @@ void generateLocalizations({
         useSyntheticPackage: options.useSyntheticPackage ?? true,
         areResourceAttributesRequired: options.areResourceAttributesRequired ?? false,
         untranslatedMessagesFile: options?.untranslatedMessagesFile?.toFilePath(),
+        usesNullableGetter: options?.usesNullableGetter ?? true,
       )
       ..loadResources()
       ..writeOutputFiles(logger, isFromYaml: true);

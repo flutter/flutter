@@ -220,6 +220,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
     final bool useSyntheticPackage = boolArg('synthetic-package');
     final String projectPathString = stringArg('project-dir');
     final bool areResourceAttributesRequired = boolArg('required-resource-attributes');
+    final bool usesNullableGetter = boolArg('nullable-getter');
 
     final LocalizationsGenerator localizationsGenerator = LocalizationsGenerator(_fileSystem);
 
@@ -242,6 +243,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
           projectPathString: projectPathString,
           areResourceAttributesRequired: areResourceAttributesRequired,
           untranslatedMessagesFile: untranslatedMessagesFile,
+          usesNullableGetter: usesNullableGetter,
         )
         ..loadResources()
         ..writeOutputFiles(_logger);
