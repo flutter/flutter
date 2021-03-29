@@ -29,15 +29,22 @@
             "type": "boolean"
           },
           "ping": {
-            "description": "The command to be invoked to ping the device. Used to find out whether its available or not. Every exit code unequal 0 will be treated as \"unavailable\". Make sure the command times out internally since it's not guaranteed the flutter SDK will enforce a timeout itself.",
+            "description": "The command to be invoked to ping the device. Used to find out whether its available or not. Every exit code unequal 0 will be treated as \"unavailable\". On Windows, consider providing a \"pingSuccessRegex\" since Windows' ping will also return 0 on failure. Make sure the command times out internally since it's not guaranteed the flutter SDK will enforce a timeout itself.",
             "type": "array",
             "items": {
               "type": "string"
             },
             "minItems": 1,
             "default": [
-              "ping", "-n", "1", "raspberrypi"
+              "ping", "-w", "500", "-n", "1", "raspberrypi"
             ]
+          },
+          "pingSuccessRegex": {
+            "description": "When the output of the ping command matches this regex (and the ping command finished with exit code 0), the ping will be considered successful and the pinged device reachable. If this regex is not provided the ping command will be considered successful when it returned with exit code 0. The regex syntax is the standard dart syntax.",
+            "type": ["string", "null"],
+            "format": "regex",
+            "default": "ms TTL=",
+            "required": false
           },
           "postBuild": {
             "description": "The command to be invoked after the build process is done, to do any additional packaging for example.",
@@ -98,10 +105,6 @@
             "description": "A regular expression to be used to classify a successful port forwarding. As soon as any line of stdout or stderr of the forward port command matches this regex, the port forwarding is considered successful. The regex syntax is the standard dart syntax. This value needs to be present & non-null when \"forwardPort\" specified.",
             "type": ["string", "null"],
             "format": "regex",
-            "items": {
-              "type": "string"
-            },
-            "minItems": 1,
             "default": "Linux",
             "required": false
           }

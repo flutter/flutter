@@ -173,11 +173,6 @@ Future<T> runInContext<T>(
         flutterProjectFactory: globals.projectFactory,
         client: globals.httpClientFactory?.call() ?? HttpClient(),
       ),
-      CustomDevicesConfig: () => CustomDevicesConfig(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        platform: globals.platform,
-      )..ensureFileExists(),
       DevFSConfig: () => DevFSConfig(),
       DeviceManager: () => FlutterDeviceManager(
         logger: globals.logger,
@@ -202,6 +197,11 @@ Future<T> runInContext<T>(
         ),
         operatingSystemUtils: globals.os,
         terminal: globals.terminal,
+        customDevicesConfig: CustomDevicesConfig(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          platform: globals.platform
+        ),
       ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,

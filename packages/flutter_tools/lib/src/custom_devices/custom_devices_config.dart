@@ -32,7 +32,10 @@ class CustomDevicesConfig {
          logger: logger,
          platform: platform,
          deleteFileOnFormatException: false
-       );
+       )
+  {
+    ensureFileExists();
+  }
 
   @visibleForTesting
   CustomDevicesConfig.test({
@@ -45,7 +48,10 @@ class CustomDevicesConfig {
          directory: directory,
          logger: logger,
          deleteFileOnFormatException: false
-       );
+       )
+  {
+    ensureFileExists();
+  }
 
   static const String _kCustomDevicesConfigName = 'custom_devices.json';
   static const String _kCustomDevicesConfigKey = 'custom-devices';

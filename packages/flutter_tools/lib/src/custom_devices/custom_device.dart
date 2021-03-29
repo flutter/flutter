@@ -11,7 +11,6 @@ import 'package:process/process.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
@@ -233,6 +232,7 @@ class CustomDeviceAppSession {
   final CustomDeviceLogReader logReader;
 
   Process _process;
+  int _forwardedHostPort;
 
   Future<LaunchResult> start({
     String mainPath,
@@ -272,7 +272,23 @@ class CustomDeviceAppSession {
 
     final Uri observatoryUri = await discovery.uri;
     await discovery.cancel();
+
+    if (_device._config.usesPortForwarding) {
+      _forwardedHostPort = observatoryUri.port;
+    }
+
     return LaunchResult.succeeded(observatoryUri: observatoryUri);
+  }
+
+  void _maybeUnforwardPort() {
+    if (_forwardedHostPort != null) {
+      final ForwardedPort forwardedPort = _device.portForwarder.forwardedPorts.singleWhere((ForwardedPort forwardedPort) {
+        return forwardedPort.hostPort == _forwardedHostPort;
+      });
+
+      _forwardedHostPort = null;
+      _device.portForwarder.unforward(forwardedPort);
+    }
   }
 
   Future<bool> stop() async {
@@ -280,6 +296,7 @@ class CustomDeviceAppSession {
       return false;
     }
 
+    _maybeUnforwardPort();
     final bool result = _processManager.killPid(_process.pid);
     _process = null;
     return result;
@@ -287,6 +304,7 @@ class CustomDeviceAppSession {
 
   void dispose() {
     if (_process != null) {
+      _maybeUnforwardPort();
       _processManager.killPid(_process.pid);
       _process = null;
     }
@@ -311,6 +329,14 @@ class CustomDevice extends Device {
          logger: logger
        ),
        _globalLogReader = CustomDeviceLogReader(config.label),
+       portForwarder = config.usesPortForwarding ?
+         CustomDevicePortForwarder(
+           deviceName: config.label,
+           forwardPortCommand: config.forwardPortCommand,
+           forwardPortSuccessRegex: config.forwardPortSuccessRegex,
+           processManager: processManager,
+           logger: logger,
+         ) : const NoOpDevicePortForwarder(),
        super(
          config.id,
          category: Category.mobile,
@@ -324,6 +350,9 @@ class CustomDevice extends Device {
   final ProcessUtils _processUtils;
   final Map<ApplicationPackage, CustomDeviceAppSession> _sessions = <ApplicationPackage, CustomDeviceAppSession>{};
   final CustomDeviceLogReader _globalLogReader;
+
+  @override
+  final DevicePortForwarder portForwarder;
 
   CustomDeviceAppSession _getOrCreateAppSession(covariant ApplicationPackage app) {
     return _sessions.putIfAbsent(
@@ -368,12 +397,18 @@ class CustomDevice extends Device {
     );
 
     try {
-      await _processUtils.run(
-          interpolated,
-          throwOnError: true,
-          timeout: timeout
+      final RunResult result = await _processUtils.run(
+        interpolated,
+        throwOnError: true,
+        timeout: timeout
       );
-      return true;
+
+      // If the user doesn't configure a ping success regex, any ping with exitCode zero
+      // is good enough. Otherwise we check if either stdout or stderr have a match of
+      // the pingSuccessRegex.
+      return _config.pingSuccessRegex == null
+        || _config.pingSuccessRegex.hasMatch(result.stdout)
+        || _config.pingSuccessRegex.hasMatch(result.stderr);
     } on ProcessException catch (e) {
       _logger.printError('Error executing ping command for custom device $id: $e');
       return false;
@@ -564,21 +599,6 @@ class CustomDevice extends Device {
   String get name => _config.label;
 
   @override
-  DevicePortForwarder get portForwarder {
-    if (_config.usesPortForwarding) {
-      return CustomDevicePortForwarder(
-        deviceName: name,
-        forwardPortCommand: _config.forwardPortCommand,
-        forwardPortSuccessRegex: _config.forwardPortSuccessRegex,
-        processManager: _processManager,
-        logger: _logger,
-      );
-    }
-
-    return const NoOpDevicePortForwarder();
-  }
-
-  @override
   Future<String> get sdkNameAndVersion => Future<String>.value(_config.sdkNameAndVersion);
 
   @override
@@ -590,26 +610,31 @@ class CustomDevice extends Device {
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
-    String userIdentifier
+    String userIdentifier,
+    BundleBuilder bundleBuilder
   }) async {
-    final String assetBundleDir = getAssetBuildDirectory();
+    if (!prebuiltApplication) {
+      final String assetBundleDir = getAssetBuildDirectory();
 
-    // build the asset bundle
-    await BundleBuilder().build(
-      platform: await targetPlatform,
-      buildInfo: debuggingOptions.buildInfo,
-      mainPath: mainPath,
-      depfilePath: defaultDepfilePath,
-      assetDirPath: assetBundleDir,
-      treeShakeIcons: false,
-    );
+      bundleBuilder ??= BundleBuilder();
 
-    // if we have a post build step (needed for some embedders), execute it
-    if (_config.postBuildCommand != null) {
-      await _tryPostBuild(
-        appName: package.name,
-        localPath: assetBundleDir,
+      // this just builds the asset bundle, it's the same as `flutter build bundle`
+      await bundleBuilder.build(
+        platform: await targetPlatform,
+        buildInfo: debuggingOptions.buildInfo,
+        mainPath: mainPath,
+        depfilePath: defaultDepfilePath,
+        assetDirPath: assetBundleDir,
+        treeShakeIcons: false,
       );
+
+      // if we have a post build step (needed for some embedders), execute it
+      if (_config.postBuildCommand != null) {
+        await _tryPostBuild(
+          appName: package.name,
+          localPath: assetBundleDir,
+        );
+      }
     }
 
     // install the app on the device
@@ -644,35 +669,20 @@ class CustomDevice extends Device {
 }
 
 class CustomDevices extends PollingDeviceDiscovery {
-  /// Create a custom device discovery that using the [CustomDeviceConfig]
-  /// in the context.
+  /// Create a custom device discovery that pings all enabled devices in the
+  /// given [CustomDevicesConfig].
   CustomDevices({
-    @required FeatureFlags featureFlags,
-    @required ProcessManager processManager,
-    @required Logger logger,
-  }) : _customDeviceWorkflow = CustomDeviceWorkflow(
-        featureFlags: featureFlags,
-      ),
-       _logger = logger,
-       _processManager = processManager,
-       _config = null,
-       super('custom devices');
-
-  /// Create a custom device discovery for the given [CustomDevicesConfig] instead
-  /// of sourcing it from the context.
-  @visibleForTesting
-  CustomDevices.test({
     @required FeatureFlags featureFlags,
     @required ProcessManager processManager,
     @required Logger logger,
     @required CustomDevicesConfig config
   }) : _customDeviceWorkflow = CustomDeviceWorkflow(
-        featureFlags: featureFlags,
-      ),
-      _logger = logger,
-      _processManager = processManager,
-      _config = config,
-      super('custom devices');
+         featureFlags: featureFlags,
+       ),
+       _logger = logger,
+       _processManager = processManager,
+       _config = config,
+       super('custom devices');
 
   final CustomDeviceWorkflow  _customDeviceWorkflow;
   final ProcessManager _processManager;
@@ -685,10 +695,10 @@ class CustomDevices extends PollingDeviceDiscovery {
   @override
   bool get canListAnything => _customDeviceWorkflow.canListDevices;
 
-  CustomDevicesConfig get customDevicesConfig => _config ?? context.get<CustomDevicesConfig>();
+  CustomDevicesConfig get _customDevicesConfig => _config;
 
   List<CustomDevice> get enabledCustomDevices {
-    return customDevicesConfig.devices
+    return _customDevicesConfig.devices
       .where((CustomDeviceConfig element) => !element.disabled)
       .map(
         (CustomDeviceConfig config) => CustomDevice(
