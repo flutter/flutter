@@ -1,4 +1,4 @@
-Signature: 7bf27068935134807fbb934275a84eb0
+Signature: 8aa1b4f7f74092f708e20a22bfec6ba0
 
 UNUSED LICENSES:
 
@@ -1177,6 +1177,7 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.e
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/retry_ios_install_retries_exhausted.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/git/examples/full.expected/test-win.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/git/examples/full.expected/test.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/gold_upload/examples/full.expected/upload_tests.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/gsutil/examples/full.expected/failed_all_uploads.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/gsutil/examples/full.expected/failed_one_upload.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/gsutil/examples/full.expected/gsutil_tests.json
@@ -5914,6 +5915,7 @@ LIBRARY: skia
 ORIGIN: ../../../third_party/skia/fuzz/oss_fuzz/FuzzDDLThreading.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzDDLThreading.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzRegionOp.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSkParagraph.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2021 Google, LLC
