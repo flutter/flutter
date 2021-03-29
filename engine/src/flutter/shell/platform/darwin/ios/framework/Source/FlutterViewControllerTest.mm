@@ -16,6 +16,22 @@ namespace flutter {
 class PointerDataPacket {};
 }
 
+/// Sometimes we have to use a custom mock to avoid retain cycles in ocmock.
+@interface FlutterEnginePartialMock : FlutterEngine
+@property(nonatomic, strong) FlutterBasicMessageChannel* lifecycleChannel;
+@property(nonatomic, weak) FlutterViewController* viewController;
+@property(nonatomic, assign) BOOL didCallNotifyLowMemory;
+@end
+
+@implementation FlutterEnginePartialMock
+@synthesize viewController;
+@synthesize lifecycleChannel;
+
+- (void)notifyLowMemory {
+  _didCallNotifyLowMemory = YES;
+}
+@end
+
 @interface FlutterEngine ()
 - (BOOL)createShell:(NSString*)entrypoint
          libraryURI:(NSString*)libraryURI
@@ -87,14 +103,15 @@ typedef enum UIAccessibilityContrast : NSInteger {
 
 - (void)testViewDidDisappearDoesntPauseEngineWhenNotTheViewController {
   id lifecycleChannel = OCMClassMock([FlutterBasicMessageChannel class]);
-  OCMStub([self.mockEngine lifecycleChannel]).andReturn(lifecycleChannel);
+  FlutterEnginePartialMock* mockEngine = [[FlutterEnginePartialMock alloc] init];
+  mockEngine.lifecycleChannel = lifecycleChannel;
   FlutterViewController* viewControllerA =
       [[FlutterViewController alloc] initWithEngine:self.mockEngine nibName:nil bundle:nil];
   FlutterViewController* viewControllerB =
       [[FlutterViewController alloc] initWithEngine:self.mockEngine nibName:nil bundle:nil];
   id viewControllerMock = OCMPartialMock(viewControllerA);
   OCMStub([viewControllerMock surfaceUpdated:NO]);
-  OCMStub([self.mockEngine viewController]).andReturn(viewControllerB);
+  mockEngine.viewController = viewControllerB;
   [viewControllerA viewDidDisappear:NO];
   OCMReject([lifecycleChannel sendMessage:@"AppLifecycleState.paused"]);
   OCMReject([viewControllerMock surfaceUpdated:[OCMArg any]]);
@@ -102,15 +119,21 @@ typedef enum UIAccessibilityContrast : NSInteger {
 
 - (void)testViewDidDisappearDoesPauseEngineWhenIsTheViewController {
   id lifecycleChannel = OCMClassMock([FlutterBasicMessageChannel class]);
-  OCMStub([self.mockEngine lifecycleChannel]).andReturn(lifecycleChannel);
-  FlutterViewController* viewController =
-      [[FlutterViewController alloc] initWithEngine:self.mockEngine nibName:nil bundle:nil];
-  id viewControllerMock = OCMPartialMock(viewController);
-  OCMStub([viewControllerMock surfaceUpdated:NO]);
-  OCMStub([self.mockEngine viewController]).andReturn(viewController);
-  [viewController viewDidDisappear:NO];
-  OCMVerify([lifecycleChannel sendMessage:@"AppLifecycleState.paused"]);
-  OCMVerify([viewControllerMock surfaceUpdated:NO]);
+  FlutterEnginePartialMock* mockEngine = [[FlutterEnginePartialMock alloc] init];
+  mockEngine.lifecycleChannel = lifecycleChannel;
+  __weak FlutterViewController* weakViewController;
+  @autoreleasepool {
+    FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                                  nibName:nil
+                                                                                   bundle:nil];
+    weakViewController = viewController;
+    id viewControllerMock = OCMPartialMock(viewController);
+    OCMStub([viewControllerMock surfaceUpdated:NO]);
+    [viewController viewDidDisappear:NO];
+    OCMVerify([lifecycleChannel sendMessage:@"AppLifecycleState.paused"]);
+    OCMVerify([viewControllerMock surfaceUpdated:NO]);
+  }
+  XCTAssertNil(weakViewController);
 }
 
 - (void)testBinaryMessenger {
@@ -528,15 +551,16 @@ typedef enum UIAccessibilityContrast : NSInteger {
 }
 
 - (void)testNotifyLowMemory {
-  FlutterViewController* viewController =
-      [[FlutterViewController alloc] initWithEngine:self.mockEngine nibName:nil bundle:nil];
-  OCMStub([self.mockEngine viewController]).andReturn(viewController);
+  FlutterEnginePartialMock* mockEngine = [[FlutterEnginePartialMock alloc] init];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
   id viewControllerMock = OCMPartialMock(viewController);
   OCMStub([viewControllerMock surfaceUpdated:NO]);
-
   [viewController beginAppearanceTransition:NO animated:NO];
   [viewController endAppearanceTransition];
-  OCMVerify([self.mockEngine notifyLowMemory]);
+  XCTAssertTrue(mockEngine.didCallNotifyLowMemory);
+  [viewControllerMock stopMocking];
 }
 
 - (void)testValidKeyUpEvent API_AVAILABLE(ios(13.4)) {

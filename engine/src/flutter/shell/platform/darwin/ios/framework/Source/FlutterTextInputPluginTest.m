@@ -885,9 +885,8 @@ FLUTTER_ASSERT_ARC
 
 - (void)testFlutterTextInputPluginRetainsFlutterTextInputView {
   FlutterTextInputPlugin* myInputPlugin;
-  id myEngine = OCMClassMock([FlutterEngine class]);
   myInputPlugin = [[FlutterTextInputPlugin alloc] init];
-  myInputPlugin.textInputDelegate = myEngine;
+  myInputPlugin.textInputDelegate = engine;
   __weak UIView* activeView;
   @autoreleasepool {
     FlutterMethodCall* setClientCall = [FlutterMethodCall
