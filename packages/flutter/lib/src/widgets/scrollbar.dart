@@ -327,7 +327,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
         x = textDirection == TextDirection.rtl
           ? crossAxisMargin + padding.left
-          : size.width - thickness - crossAxisMargin - padding.right;
+          : size.width - thickness - crossAxisMargin;
         y = _thumbOffset;
         trackOffset = Offset(x - crossAxisMargin, 0.0);
         break;
@@ -336,14 +336,14 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
         x = textDirection == TextDirection.rtl
           ? crossAxisMargin + padding.left
-          : size.width - thickness - crossAxisMargin - padding.right;
+          : size.width - thickness - crossAxisMargin;
         y = _thumbOffset;
         trackOffset = Offset(x - crossAxisMargin, 0.0);
         break;
       case AxisDirection.left:
         thumbSize = Size(thumbExtent, thickness);
         x = _thumbOffset;
-        y = size.height - thickness - crossAxisMargin - padding.bottom;
+        y = size.height - thickness - crossAxisMargin;
         trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
         trackOffset = Offset(0.0, y - crossAxisMargin);
         break;
@@ -351,7 +351,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         thumbSize = Size(thumbExtent, thickness);
         trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
         x = _thumbOffset;
-        y = size.height - thickness - crossAxisMargin - padding.bottom;
+        y = size.height - thickness - crossAxisMargin;
         trackOffset = Offset(0.0, y - crossAxisMargin);
         break;
     }
