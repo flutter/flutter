@@ -515,7 +515,6 @@ Iterable<String> _findTests(Directory directory) {
 ///
 /// Throws an exception if there are both Integration Tests and Widget Tests
 /// found in [testFiles].
-@visibleForTesting
 bool _shouldRunAsIntegrationTests(String currentDirectory, List<String> testFiles) {
   final String integrationTestDirectory = globals.fs.path.join(currentDirectory, _kIntegrationTestDirectory);
 
@@ -532,6 +531,4 @@ bool _shouldRunAsIntegrationTests(String currentDirectory, List<String> testFile
     ' Use separate invocations of `flutter test` to run integration tests'
     ' and unit tests.'
   );
-  // Unreachable.
-  return null;
 }
