@@ -446,7 +446,6 @@ dev_dependencies:
       ]),
     });
 
-    // TODO(jiahaog): Remove this when web is supported. https://github.com/flutter/flutter/pull/74236
     testUsingContext('when both test and integration test are passed', () async {
       final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
 
@@ -543,6 +542,7 @@ dev_dependencies:
     DeviceManager: () => _FakeDeviceManager(<Device>[]),
   });
 
+  // TODO(jiahaog): Remove this when web is supported. https://github.com/flutter/flutter/pull/74236
   testUsingContext('Integration tests when only web devices are connected', () async {
     final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
 
