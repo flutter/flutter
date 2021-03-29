@@ -251,7 +251,7 @@ class ResidentWebRunner extends ResidentRunner {
       return false;
     }
     try {
-       final String data = await _vmService
+      final String data = await _vmService
         .flutterDebugDumpRenderTree(
           isolateId: null,
         );
