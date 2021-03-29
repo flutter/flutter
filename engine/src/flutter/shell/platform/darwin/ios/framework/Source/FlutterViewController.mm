@@ -743,12 +743,12 @@ static void sendFakeTouchEvent(FlutterEngine* engine,
 
 - (void)applicationWillResignActive:(NSNotification*)notification {
   TRACE_EVENT0("flutter", "applicationWillResignActive");
-  [self surfaceUpdated:NO];
   [self goToApplicationLifecycle:@"AppLifecycleState.inactive"];
 }
 
 - (void)applicationDidEnterBackground:(NSNotification*)notification {
   TRACE_EVENT0("flutter", "applicationDidEnterBackground");
+  [self surfaceUpdated:NO];
   [self goToApplicationLifecycle:@"AppLifecycleState.paused"];
 }
 
