@@ -434,11 +434,20 @@ class CupertinoScrollBehavior extends ScrollBehavior {
   const CupertinoScrollBehavior() : super(useDecoration: true);
 
   @override
-  Widget buildScrollbar(Widget child, ScrollController controller) {
-    return CupertinoScrollbar(
-      child: child,
-      controller: controller,
-    );
+  Widget buildScrollbar(BuildContext context , Widget child, ScrollableDetails details) {
+    switch (getPlatform(context)) {
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return CupertinoScrollbar(
+          child: child,
+          controller: details.controller,
+        );
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+        return child;
+    }
   }
 
   @override

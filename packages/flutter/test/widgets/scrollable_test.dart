@@ -19,6 +19,7 @@ Future<void> pumpTest(
   ScrollController? controller,
 }) async {
   await tester.pumpWidget(MaterialApp(
+    scrollBehavior: const NoScrollbarBehavior(),
     theme: ThemeData(
       platform: platform,
     ),
@@ -32,6 +33,13 @@ Future<void> pumpTest(
     ),
   ));
   await tester.pump(const Duration(seconds: 5)); // to let the theme animate
+}
+
+class NoScrollbarBehavior extends MaterialScrollBehavior {
+  const NoScrollbarBehavior();
+
+  @override
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) => child;
 }
 
 // Pump a nested scrollable. The outer scrollable contains a sliver of a

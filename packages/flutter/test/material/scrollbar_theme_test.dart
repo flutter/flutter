@@ -631,7 +631,7 @@ class NoScrollbarBehavior extends ScrollBehavior {
   const NoScrollbarBehavior() : super(useDecoration: true);
 
   @override
-  Widget buildScrollbar(Widget child, ScrollController controller) => child;
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) => child;
 }
 
 ScrollbarThemeData _scrollbarTheme({

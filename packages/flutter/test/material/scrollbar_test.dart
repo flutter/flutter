@@ -57,11 +57,11 @@ Widget _buildBoilerplate({
   );
 }
 
-class NoScrollbarBehavior extends ScrollBehavior {
-  const NoScrollbarBehavior() : super(useDecoration: true);
+class NoScrollbarBehavior extends MaterialScrollBehavior {
+  const NoScrollbarBehavior();
 
   @override
-  Widget buildScrollbar(Widget child, ScrollController controller) => child;
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) => child;
 }
 
 void main() {
@@ -1076,33 +1076,36 @@ void main() {
         textDirection: TextDirection.ltr,
         child: MediaQuery(
           data: const MediaQueryData(),
-          child: Scrollbar(
-            key: key2,
-            notificationPredicate: null,
-            child: SingleChildScrollView(
-              key: outerKey,
-              child: SizedBox(
-                height: 1000.0,
-                width: double.infinity,
-                child: Column(
-                  children: <Widget>[
-                    Scrollbar(
-                      key: key1,
-                      notificationPredicate: null,
-                      child: SizedBox(
-                        height: 300.0,
-                        width: double.infinity,
-                        child: SingleChildScrollView(
-                          key: innerKey,
-                          child: const SizedBox(
-                            key: Key('Inner scrollable'),
-                            height: 1000.0,
-                            width: double.infinity,
+          child: ScrollConfiguration(
+            behavior: const NoScrollbarBehavior(),
+            child: Scrollbar(
+              key: key2,
+              notificationPredicate: null,
+              child: SingleChildScrollView(
+                key: outerKey,
+                child: SizedBox(
+                  height: 1000.0,
+                  width: double.infinity,
+                  child: Column(
+                    children: <Widget>[
+                      Scrollbar(
+                        key: key1,
+                        notificationPredicate: null,
+                        child: SizedBox(
+                          height: 300.0,
+                          width: double.infinity,
+                          child: SingleChildScrollView(
+                            key: innerKey,
+                            child: const SizedBox(
+                              key: Key('Inner scrollable'),
+                              height: 1000.0,
+                              width: double.infinity,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

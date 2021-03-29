@@ -598,7 +598,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// apply when  dragging on the thumb or tapping on the track.
 ///
 /// Scrollbars are added to most [Scrollable] widgets by default on Desktop
-/// platforms in [ScrollBehavior.buildViewportDecoration] as part of an app's
+/// platforms in [ScrollBehavior.buildScrollbar] as part of an app's
 /// [ScrollConfiguration]. Scrollable widgets that do not have automatically
 /// applied Scrollbars include
 ///
@@ -651,6 +651,9 @@ class RawScrollbar extends StatefulWidget {
   ///
   /// The scrollbar will be stacked on top of this child. This child (and its
   /// subtree) should include a source of [ScrollNotification] notifications.
+  /// Typically a [Scrollbar] is created on desktop platforms by a
+  /// [ScrollBehavior.buildScrollbar] method, in which case the child is usually
+  /// the one provided as an argument to that method.
   ///
   /// Typically a [ListView] or [CustomScrollView].
   /// {@endtemplate}

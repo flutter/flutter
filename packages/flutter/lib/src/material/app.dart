@@ -685,34 +685,60 @@ class MaterialApp extends StatefulWidget {
 /// [GlowingOverscrollIndicator] to [Scrollable] descendants when executing on
 /// [TargetPlatform.android] and [TargetPlatform.fuchsia].
 ///
+/// When using the desktop platform, if the [Scrollable] widget scrolls in the
+/// [Axis.vertical], a [Scrollbar] is applied.
+///
 /// See also:
 ///
 ///  * [ScrollBehavior], the default scrolling behavior extended by this class.
 class MaterialScrollBehavior extends ScrollBehavior {
   /// Creates a MaterialScrollBehavior that decorates [Scrollable]s with
   /// [GlowingOverscrollIndicator]s and [Scrollbar]s based on the current
-  /// platform.
+  /// platform and provided [ScrollableDetails].
   const MaterialScrollBehavior() : super(useDecoration: true);
 
   @override
   TargetPlatform getPlatform(BuildContext context) => Theme.of(context).platform;
 
   @override
-  Widget buildScrollbar(Widget child, ScrollController controller) {
-    return Scrollbar (
-      child: child,
-      controller: controller,
-    );
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
+    switch (axisDirectionToAxis(details.direction)) {
+      case Axis.horizontal:
+        return child;
+      case Axis.vertical:
+        switch (getPlatform(context)) {
+          case TargetPlatform.linux:
+          case TargetPlatform.macOS:
+          case TargetPlatform.windows:
+            return Scrollbar(
+              child: child,
+              controller: details.controller,
+            );
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.iOS:
+            return child;
+        }
+    }
   }
 
   @override
-  Widget buildOverscrollIndicator(BuildContext context, Widget child, AxisDirection direction) {
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     final ThemeData theme = Theme.of(context);
-    return GlowingOverscrollIndicator(
-      child: child,
-      axisDirection: direction,
-      color: theme.accentColor,
-    );
+    switch (getPlatform(context)) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return child;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        return GlowingOverscrollIndicator(
+          child: child,
+          axisDirection: details.direction,
+          color: theme.accentColor,
+        );
+    }
   }
 }
 

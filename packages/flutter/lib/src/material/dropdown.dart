@@ -98,7 +98,7 @@ class _DropdownScrollBehavior extends ScrollBehavior {
   TargetPlatform getPlatform(BuildContext context) => Theme.of(context).platform;
 
   @override
-  Widget buildOverscrollIndicator(BuildContext context, Widget child, AxisDirection direction) {
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     return child;
   }
 

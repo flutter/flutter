@@ -243,7 +243,12 @@ class Scrollable extends StatefulWidget {
   /// {@endtemplate}
   final String? restorationId;
 
+  /// {@macro flutter.widgets.shadow.scrollBehavior}
   ///
+  /// [ScrollBehavior]s also provide [ScrollPhysics]. If an explicit
+  /// [ScrollPhysics] is provided in [physics], it will take precedence,
+  /// followed by [scrollBehavior], and then the inherited ancestor
+  /// [ScrollBehavior].
   final ScrollBehavior? scrollBehavior;
 
   /// The axis along which the scroll view scrolls.
@@ -410,7 +415,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     }
 
     _position = controller.createScrollPosition(_physics!, this, oldPosition);
-      //?? ScrollPositionWithSingleContext(physics: _physics!, context: this, oldPosition: oldPosition);
     assert(_position != null);
     controller.attach(position);
   }
@@ -463,8 +467,13 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     super.didUpdateWidget(oldWidget);
 
     if (widget.controller != oldWidget.controller) {
-      oldWidget.controller?.detach(position);
-      widget.controller?.attach(position);
+      if (oldWidget.controller != null)
+        oldWidget.controller?.detach(position);
+      else
+        _scrollController.detach(position);
+
+      final ScrollController newScrollController = widget.controller ?? _scrollController;
+      newScrollController.attach(position);
     }
 
     if (_shouldUpdatePosition(oldWidget))
@@ -473,10 +482,14 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   @override
   void dispose() {
-    widget.controller?.detach(position);
+    if (widget.controller != null)
+      widget.controller?.detach(position);
+    else
+      _scrollController.detach(position);
+
+    _scrollController.dispose();
     position.dispose();
     _persistedScrollOffset.dispose();
-    _scrollController.dispose();
     super.dispose();
   }
 

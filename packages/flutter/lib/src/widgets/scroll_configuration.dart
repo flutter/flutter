@@ -24,8 +24,13 @@ const Color _kDefaultGlowColor = Color(0xFFFFFFFF);
 /// This class can be extended to further customize a [ScrollBehavior] for a
 /// subtree. For example, overriding [ScrollBehavior.getScrollPhysics] sets the
 /// default [ScrollPhysics] for [Scrollable]s that inherit this [ScrollConfiguration].
-/// Overriding [ScrollBehavior.buildViewportDecoration] can be used to add or change
-/// default decorations like [GlowingOverscrollIndicator]s.
+/// Overriding [ScrollBehavior.buildOverscrollIndicator] can be used to add or change
+/// the default [GlowingOverscrollIndicator] decoration, while
+/// [ScrollBehavior.buildScrollbar] can be changed to modify the default [Scrollbar].
+///
+/// When looking to easily toggle the default decorations, you can use
+/// [ScrollBehavior.copyWith] instead of creating your own [ScrollBehavior] class.
+/// The scrollbar and overscroll flags can turn these decorations off.
 /// {@endtemplate}
 ///
 /// See also:
@@ -49,7 +54,14 @@ class ScrollBehavior {
   // This is used to maintain subclass behavior to allow for graceful migration.
   final bool _useDecoration;
 
+  /// Creates a copy of the provided [delegate] ScrollBehavior, making it possible to
+  /// easily toggle [scrollbars] and [overscroll] effects.
   ///
+  /// This is used by widgets like [PageView] and [ListWheelScrollView] to
+  /// override the current [ScrollBehavior] and manage how they are decorated.
+  /// Widgets such as these have the option to provide a [ScrollBehavior] on
+  /// the widget level, like [PageView.scrollBehavior], in order to change the
+  /// default.
   ScrollBehavior copyWith({ bool scrollbars = true, bool overscroll = true}) {
     return _WrappedScrollBehavior(delegate: this, scrollbars: scrollbars, overscroll: overscroll);
   }
@@ -65,7 +77,9 @@ class ScrollBehavior {
   /// [GlowingOverscrollIndicator] to provide visual feedback when the user
   /// overscrolls.
   ///
-  /// This method is deprecated. Use [ScrollBehavior.buildViewportDecoration] instead.
+  /// This method is deprecated. Use [ScrollBehavior.buildViewportDecoration]
+  /// instead, or address the specific decoration by overriding
+  /// [ScrollBehavior.buildScrollbar] or [ScrollBehavior.buildOverscrollIndicator].
   @Deprecated(
     'Migrate to buildViewportDecoration. '
     'This feature was deprecated after v2.1.0-11.0.pre.'
@@ -79,19 +93,15 @@ class ScrollBehavior {
         return child;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        return buildOverscrollIndicator(context, child, axisDirection);
+      return GlowingOverscrollIndicator(
+        child: child,
+        axisDirection: axisDirection,
+        color: _kDefaultGlowColor,
+      );
     }
   }
 
-  /// Wraps the given widget with the information provided by [ScrollableDetails].
-  ///
-  /// Based on the platforms designated by [glowingPlatforms], or
-  /// the [defaultGlowingPlatforms], this method could wrap a given widget with
-  /// a [GlowingOverscrollIndicator] to provide visual feedback when the user overscrolls.
-  ///
-  /// Based on the platforms designated by [scrollbarPlatforms], or
-  /// the [defaultScrollbarPlatforms], this method could wrap a given widget with
-  /// a [Scrollbar].
+  /// Decorates the given widget with the information provided by [ScrollableDetails].
   Widget buildViewportDecoration(
     BuildContext context,
     Widget child,
@@ -107,34 +117,47 @@ class ScrollBehavior {
     // By default:
     //   * On Android and Fuchsia, we add a GlowingOverscrollIndicator.
     //   * On Desktop platforms, we add a RawScrollbar.
+    return buildScrollbar(
+        context,
+        buildOverscrollIndicator(context, child, details),
+        details,
+    );
+  }
+
+  /// Applies a [RawScrollbar] to the child widget on desktop platforms.
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
     switch (getPlatform(context)) {
-      case TargetPlatform.iOS:
-        return child;
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-        return buildScrollbar(child, details.controller);
+        return RawScrollbar(
+          child: child,
+          controller: details.controller,
+        );
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        return buildOverscrollIndicator(context, child, details.direction);
+      case TargetPlatform.iOS:
+        return child;
     }
   }
 
-  ///
-  Widget buildScrollbar(Widget child, ScrollController controller) {
-    return RawScrollbar(
-      child: child,
-      controller: controller,
-    );
-  }
-
-  ///
-  Widget buildOverscrollIndicator(BuildContext context, Widget child, AxisDirection direction) {
-    return GlowingOverscrollIndicator(
-      child: child,
-      axisDirection: direction,
-      color: _kDefaultGlowColor,
-    );
+  /// Applies a [GlowingOverscrollIndicator] to the child widget on
+  /// [TargetPlatform.android] and [TargetPlatform.fuchsia].
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
+    switch (getPlatform(context)) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return child;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        return GlowingOverscrollIndicator(
+          child: child,
+          axisDirection: details.direction,
+          color: _kDefaultGlowColor,
+        );
+    }
   }
 
   /// Specifies the type of velocity tracker to use in the descendant
@@ -218,16 +241,16 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   bool get _useDecoration => true;
 
   @override
-  Widget buildOverscrollIndicator(BuildContext context, Widget child, AxisDirection direction) {
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     if (overscroll)
-      return delegate.buildOverscrollIndicator(context, child, direction);
+      return delegate.buildOverscrollIndicator(context, child, details);
     return child;
   }
 
   @override
-  Widget buildScrollbar(Widget child, ScrollController controller) {
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
     if (scrollbars)
-      return delegate.buildScrollbar(child, controller);
+      return delegate.buildScrollbar(context, child, details);
     return child;
   }
 
@@ -238,7 +261,11 @@ class _WrappedScrollBehavior implements ScrollBehavior {
 
   @override
   Widget buildViewportDecoration(BuildContext context, Widget child, ScrollableDetails details) {
-    return delegate.buildViewportDecoration(context, child, details);
+    return buildScrollbar(
+      context,
+      buildOverscrollIndicator(context, child, details),
+      details,
+    );
   }
 
   @override

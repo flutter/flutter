@@ -27,7 +27,7 @@ import 'ticker_provider.dart';
 /// showing the indication, call [OverscrollIndicatorNotification.disallowGlow]
 /// on the notification.
 ///
-/// Created automatically by [ScrollBehavior.buildViewportDecoration] on platforms
+/// Created automatically by [ScrollBehavior.buildOverscrollIndicator] on platforms
 /// (e.g., Android) that commonly use this type of overscroll indication.
 ///
 /// In a [MaterialApp], the edge glow color is the [ThemeData.accentColor].
@@ -188,7 +188,7 @@ class GlowingOverscrollIndicator extends StatefulWidget {
   /// subtree) should include a source of [ScrollNotification] notifications.
   ///
   /// Typically a [GlowingOverscrollIndicator] is created by a
-  /// [ScrollBehavior.buildViewportDecoration] method, in which case
+  /// [ScrollBehavior.buildOverscrollIndicator] method, in which case
   /// the child is usually the one provided as an argument to that method.
   final Widget? child;
 
