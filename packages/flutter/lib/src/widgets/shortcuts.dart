@@ -203,16 +203,73 @@ abstract class ShortcutActivator {
 
 /// A set of [LogicalKeyboardKey]s that can be used as the keys in a map.
 ///
-/// [LogicalKeySet] can also be used as a [ShortcutActivator]. It will activate
-/// the intent when all [keys] are pressed, and no others, except that modifier
-/// keys are considered without considering sides (e.g. control left and control right
-/// are considered the same). If you're building a common shortcut such as
-/// `Delete` or `Ctrl+C`, prefer [SingleActivator] when possible, whose behavior
-/// more closely resembles that of typical platforms.
+/// [LogicalKeySet] can be used as a [ShortcutActivator]. It is not recommended
+/// to use [LogicalKeySet] for a common shortcut such as `Delete` or `Ctrl+C`,
+/// prefer [SingleActivator] when possible, whose behavior more closely resembles
+/// that of typical platforms.
 ///
-/// This is a thin wrapper around a [Set], but changes the equality comparison
-/// from an identity comparison to a contents comparison so that non-identical
-/// sets with the same keys in them will compare as equal.
+/// When used as a [ShortcutActivator], [LogicalKeySet] will activate the intent
+/// when all [keys] are pressed, and no others, except that modifier keys are
+/// considered without considering sides (e.g. control left and control right are
+/// considered the same).
+///
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// In the following example, the counter is increased when the following key
+/// sequences are pressed:
+///
+///  * Control left, then C.
+///  * Control right, then C.
+///  * C, then Control left.
+///
+/// But not when:
+///
+///  * Control left, then A, then C.
+///
+/// ```dart imports
+/// import 'package:flutter/services.dart';
+/// ```
+///
+/// ```dart preamble
+/// class IncrementIntent extends Intent {
+///   const IncrementIntent();
+/// }
+/// ```
+///
+/// ```dart
+/// int count = 0;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Shortcuts(
+///     shortcuts: <ShortcutActivator, Intent>{
+///       LogicalKeySet(LogicalKeyboardKey.keyC, LogicalKeyboardKey.controlLeft): const IncrementIntent(),
+///     },
+///     child: Actions(
+///       actions: <Type, Action<Intent>>{
+///         IncrementIntent: CallbackAction<IncrementIntent>(
+///           onInvoke: (IncrementIntent intent) => setState(() {
+///             count = count + 1;
+///           }),
+///         ),
+///       },
+///       child: Focus(
+///         autofocus: true,
+///         child: Column(
+///           children: <Widget>[
+///             const Text('Add to the counter by pressing Ctrl+C'),
+///             Text('count: $count'),
+///           ],
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// This is also a thin wrapper around a [Set], but changes the equality
+/// comparison from an identity comparison to a contents comparison so that
+/// non-identical sets with the same keys in them will compare as equal.
 
 class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
     implements ShortcutActivator {
@@ -351,9 +408,12 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutActivator, Int
 class SingleActivator with Diagnosticable implements ShortcutActivator {
   /// Create an activator of a trigger key and modifiers.
   ///
-  /// The `trigger` should be the non-modifier key, pressed after all the
-  /// modifiers, while `control`, `shift`, `alt`, and `meta` represents whether
-  /// the respect modifier keys should be held (true) or released (false).
+  /// The `trigger` should be the non-modifier key that is pressed after all the
+  /// modifiers, such as [LogicalKeyboardKey.keyC] as in `Ctrl+C`. It must not be
+  /// a modifier key (sided or unsided).
+  ///
+  /// The `control`, `shift`, `alt`, and `meta` flags represent whether
+  /// the respect modifier keys should be held (true) or released (false)
   ///
   /// {@tool dartpad --template=stateful_widget_scaffold_center}
   /// In the following example, the shortcut `Control + C` increases the counter:
@@ -405,7 +465,20 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
     this.shift = false,
     this.alt = false,
     this.meta = false,
-  });
+  }) : // The enumerated check is cumbersome but much needed since const
+       // constructors can not call functions such as `Set.contain`.
+       assert(trigger != LogicalKeyboardKey.control
+           && trigger != LogicalKeyboardKey.controlLeft
+           && trigger != LogicalKeyboardKey.controlRight
+           && trigger != LogicalKeyboardKey.shift
+           && trigger != LogicalKeyboardKey.shiftLeft
+           && trigger != LogicalKeyboardKey.shiftRight
+           && trigger != LogicalKeyboardKey.alt
+           && trigger != LogicalKeyboardKey.altLeft
+           && trigger != LogicalKeyboardKey.altRight
+           && trigger != LogicalKeyboardKey.meta
+           && trigger != LogicalKeyboardKey.metaLeft
+           && trigger != LogicalKeyboardKey.metaRight);
 
   /// The non-modifier key of the shortcut that is pressed after all modifiers
   /// to activate the shortcut.
@@ -491,8 +564,8 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   }
 }
 
-class _PromptIntent with Diagnosticable {
-  const _PromptIntent(this.activator, this.intent);
+class _ActivatorIntentPair with Diagnosticable {
+  const _ActivatorIntentPair(this.activator, this.intent);
   final ShortcutActivator activator;
   final Intent intent;
 
@@ -545,21 +618,21 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
     }
   }
 
-  static Map<LogicalKeyboardKey?, List<_PromptIntent>> _indexShortcuts(Map<ShortcutActivator, Intent> source) {
-    final Map<LogicalKeyboardKey?, List<_PromptIntent>> result = <LogicalKeyboardKey?, List<_PromptIntent>>{};
+  static Map<LogicalKeyboardKey?, List<_ActivatorIntentPair>> _indexShortcuts(Map<ShortcutActivator, Intent> source) {
+    final Map<LogicalKeyboardKey?, List<_ActivatorIntentPair>> result = <LogicalKeyboardKey?, List<_ActivatorIntentPair>>{};
     source.forEach((ShortcutActivator activator, Intent intent) {
       final Iterable<LogicalKeyboardKey?>? triggeringKeys = activator.triggers;
       for (final LogicalKeyboardKey? trigger in triggeringKeys ?? <LogicalKeyboardKey?>[null]) {
-        result.putIfAbsent(trigger, () => <_PromptIntent>[])
-          .add(_PromptIntent(activator, intent));
+        result.putIfAbsent(trigger, () => <_ActivatorIntentPair>[])
+          .add(_ActivatorIntentPair(activator, intent));
       }
     });
     return result;
   }
-  Map<LogicalKeyboardKey?, List<_PromptIntent>> get _indexedShortcuts {
+  Map<LogicalKeyboardKey?, List<_ActivatorIntentPair>> get _indexedShortcuts {
     return _indexedShortcutsCache ??= _indexShortcuts(_shortcuts);
   }
-  Map<LogicalKeyboardKey?, List<_PromptIntent>>? _indexedShortcutsCache;
+  Map<LogicalKeyboardKey?, List<_ActivatorIntentPair>>? _indexedShortcutsCache;
 
   /// Returns the [Intent], if any, that matches the current set of pressed
   /// keys.
@@ -569,10 +642,10 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   /// Defaults to a set derived from [RawKeyboard.keysPressed] if `keysPressed`
   /// is not supplied.
   Intent? _find(RawKeyEvent event, RawKeyboard state) {
-    final List<_PromptIntent>? candidates = _indexedShortcuts[event.logicalKey];
+    final List<_ActivatorIntentPair>? candidates = _indexedShortcuts[event.logicalKey];
     if (candidates == null)
       return null;
-    for (final _PromptIntent activatorIntent in candidates) {
+    for (final _ActivatorIntentPair activatorIntent in candidates) {
       if (activatorIntent.activator.accepts(event, state)) {
         return activatorIntent.intent;
       }
