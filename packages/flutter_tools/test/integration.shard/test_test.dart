@@ -18,7 +18,12 @@ import 'test_utils.dart';
 final String automatedTestsDirectory = fileSystem.path.join('..', '..', 'dev', 'automated_tests');
 final String missingDependencyDirectory = fileSystem.path.join('..', '..', 'dev', 'missing_dependency_tests');
 final String flutterTestDirectory = fileSystem.path.join(automatedTestsDirectory, 'flutter_test');
+final String integrationTestDirectory = fileSystem.path.join(automatedTestsDirectory, 'integration_test');
 final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
+
+// Running Integration Tests in the Flutter Tester will still exercise the same
+// flows specific to Integration Tests.
+final List<String> integrationTestExtraArgs = <String>['-d', 'flutter-tester'];
 
 void main() {
   setUpAll(() async {
@@ -44,12 +49,20 @@ void main() {
     return _testFile('trivial_widget', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero);
   });
 
+  testWithoutContext('integration test should not have extraneous error messages', () async {
+    return _testFile('trivial_widget', automatedTestsDirectory, integrationTestDirectory, exitCode: isZero, extraArguments: integrationTestExtraArgs);
+  });
+
   testWithoutContext('flutter test set the working directory correctly', () async {
     return _testFile('working_directory', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero);
   });
 
   testWithoutContext('flutter test should report nice errors for exceptions thrown within testWidgets()', () async {
     return _testFile('exception_handling', automatedTestsDirectory, flutterTestDirectory);
+  });
+
+  testWithoutContext('integration test should report nice errors for exceptions thrown within testWidgets()', () async {
+    return _testFile('exception_handling', automatedTestsDirectory, integrationTestDirectory, extraArguments: integrationTestExtraArgs);
   });
 
   testWithoutContext('flutter test should report a nice error when a guarded function was called without await', () async {

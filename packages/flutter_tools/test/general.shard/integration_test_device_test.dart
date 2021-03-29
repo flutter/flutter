@@ -152,4 +152,60 @@ void main() {
       Device device,
     }) async => fakeVmServiceHost.vmService,
   });
+
+  testUsingContext('when the device starts without providing an observatory URI', () async {
+    final TestDevice testDevice = IntegrationTestTestDevice(
+      id: 1,
+      device: FakeDevice(
+        'ephemeral',
+        'ephemeral',
+        type: PlatformType.android,
+        launchResult: LaunchResult.succeeded(observatoryUri: null),
+      ),
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+      ),
+      userIdentifier: '',
+    );
+
+    expect(() => testDevice.start('entrypointPath'), throwsA(isA<TestDeviceException>()));
+  }, overrides: <Type, Generator>{
+    VMServiceConnector: () => (Uri httpUri, {
+      ReloadSources reloadSources,
+      Restart restart,
+      CompileExpression compileExpression,
+      GetSkSLMethod getSkSLMethod,
+      PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
+      io.CompressionOptions compression,
+      Device device,
+    }) async => fakeVmServiceHost.vmService,
+  });
+
+  testUsingContext('when the device fails to start', () async {
+    final TestDevice testDevice = IntegrationTestTestDevice(
+      id: 1,
+      device: FakeDevice(
+        'ephemeral',
+        'ephemeral',
+        type: PlatformType.android,
+        launchResult: LaunchResult.failed(),
+      ),
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+      ),
+      userIdentifier: '',
+    );
+
+    expect(() => testDevice.start('entrypointPath'), throwsA(isA<TestDeviceException>()));
+  }, overrides: <Type, Generator>{
+    VMServiceConnector: () => (Uri httpUri, {
+      ReloadSources reloadSources,
+      Restart restart,
+      CompileExpression compileExpression,
+      GetSkSLMethod getSkSLMethod,
+      PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
+      io.CompressionOptions compression,
+      Device device,
+    }) async => fakeVmServiceHost.vmService,
+  });
 }
