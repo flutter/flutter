@@ -4,7 +4,6 @@
 
 import 'package:flutter/services.dart' show LogicalKeyboardKey;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 
@@ -852,7 +851,7 @@ void main() {
           child: ListView(
             controller: controller,
             children: kStates.map<Widget>((String state) {
-              return Container(
+              return SizedBox(
                 height: 200.0,
                 child: Text(state),
               );

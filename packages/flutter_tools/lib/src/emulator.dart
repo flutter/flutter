@@ -7,6 +7,7 @@
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import 'android/android_emulator.dart';
 import 'android/android_sdk.dart';

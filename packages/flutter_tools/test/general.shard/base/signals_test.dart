@@ -9,7 +9,7 @@ import 'dart:io' as io;
 
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/signals.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 
@@ -51,6 +51,21 @@ void main() {
         expect(first, isTrue);
         completer.complete();
       });
+
+      fakeSignal.controller.add(fakeSignal);
+      await completer.future;
+    });
+
+    testWithoutContext('signal handlers do not cause concurrent modification errors when removing handlers in a signal callback', () async {
+      final Completer<void> completer = Completer<void>();
+      Object token;
+      Future<void> handle(ProcessSignal s) async {
+        expect(s, signalUnderTest);
+        expect(await signals.removeHandler(signalUnderTest, token), true);
+        completer.complete();
+      }
+
+      token = signals.addHandler(signalUnderTest, handle);
 
       fakeSignal.controller.add(fakeSignal);
       await completer.future;

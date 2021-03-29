@@ -13,17 +13,17 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 
 void main() {
   setUpAll(() {
@@ -39,12 +39,9 @@ void main() {
   Logger logger;
 
   setUp(() {
-    fileSystem = LocalFileSystem.instance;
+    fileSystem = globals.localFileSystem;
     platform = const LocalPlatform();
-    processManager = LocalProcessManager(
-      fileSystem: fileSystem,
-      platform: platform,
-    );
+    processManager = const LocalProcessManager();
     terminal = AnsiTerminal(platform: platform, stdio: Stdio());
     logger = BufferLogger(outputPreferences: OutputPreferences.test(), terminal: terminal);
     tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_analysis_test.');
@@ -182,23 +179,20 @@ void main() {
       <FakeCommand>[
         FakeCommand(
           command: const <String>[
-            'custom-dart-sdk/bin/dart',
+            'Artifact.engineDartSdkPath/bin/dart',
             '--disable-dart-dev',
-            'custom-dart-sdk/bin/snapshots/analysis_server.dart.snapshot',
+            'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
             '--sdk',
-            'custom-dart-sdk',
+            'Artifact.engineDartSdkPath',
           ],
           completer: completer,
           stdin: IOSink(stdin.sink),
         ),
       ]);
 
-    final Artifacts artifacts = MockArtifacts();
-    when(artifacts.getArtifactPath(Artifact.engineDartSdkPath))
-      .thenReturn('custom-dart-sdk');
-
+    final Artifacts artifacts = Artifacts.test();
     final AnalyzeCommand command = AnalyzeCommand(
       terminal: Terminal.test(),
       artifacts: artifacts,
@@ -213,7 +207,7 @@ void main() {
     unawaited(commandRunner.run(<String>['analyze', '--watch']));
     await stdin.stream.first;
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testUsingContext('Can run AnalysisService with customized cache location --watch', () async {
@@ -223,23 +217,20 @@ void main() {
       <FakeCommand>[
         FakeCommand(
           command: const <String>[
-            'custom-dart-sdk/bin/dart',
+            'Artifact.engineDartSdkPath/bin/dart',
             '--disable-dart-dev',
-            'custom-dart-sdk/bin/snapshots/analysis_server.dart.snapshot',
+            'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
             '--sdk',
-            'custom-dart-sdk',
+            'Artifact.engineDartSdkPath',
           ],
           completer: completer,
           stdin: IOSink(stdin.sink),
         ),
       ]);
 
-    final Artifacts artifacts = MockArtifacts();
-    when(artifacts.getArtifactPath(Artifact.engineDartSdkPath))
-      .thenReturn('custom-dart-sdk');
-
+    final Artifacts artifacts = Artifacts.test();
     final AnalyzeCommand command = AnalyzeCommand(
       terminal: Terminal.test(),
       artifacts: artifacts,
@@ -254,8 +245,6 @@ void main() {
     unawaited(commandRunner.run(<String>['analyze', '--watch']));
     await stdin.stream.first;
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 }
-
-class MockArtifacts extends Mock implements Artifacts {}

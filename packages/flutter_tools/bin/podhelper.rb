@@ -33,6 +33,9 @@ end
 def flutter_additional_ios_build_settings(target)
   return unless target.platform_name == :ios
 
+  # Return if it's not a Flutter plugin (transitive dependency).
+  return unless target.dependencies.any? { |dependency| dependency.name == 'Flutter' }
+
   # [target.deployment_target] is a [String] formatted as "8.0".
   inherit_deployment_target = target.deployment_target[/\d+/].to_i < 9
 
@@ -68,12 +71,18 @@ def flutter_additional_ios_build_settings(target)
     # When deleted, the deployment version will inherit from the higher version derived from the 'Runner' target.
     # If the pod only supports a higher version, do not delete to correctly produce an error.
     build_configuration.build_settings.delete 'IPHONEOS_DEPLOYMENT_TARGET' if inherit_deployment_target
+
+    # Apple Silicon ARM simulators not yet supported.
+    build_configuration.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64 i386'
   end
 end
 
 # Same as flutter_ios_podfile_setup for macOS.
 def flutter_additional_macos_build_settings(target)
   return unless target.platform_name == :osx
+
+  # Return if it's not a Flutter plugin (transitive dependency).
+  return unless target.dependencies.any? { |dependency| dependency.name == 'FlutterMacOS' }
 
   # [target.deployment_target] is a [String] formatted as "10.8".
   deployment_target_major, deployment_target_minor = target.deployment_target.match(/(\d+).?(\d*)/).captures

@@ -72,8 +72,9 @@ enum DismissDirection {
 /// tiles to the left or right to dismiss them from the [ListView].
 ///
 /// ```dart
-/// List<int> items = List<int>.generate(100, (index) => index);
+/// List<int> items = List<int>.generate(100, (int index) => index);
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return ListView.builder(
 ///     itemCount: items.length,
@@ -88,7 +89,7 @@ enum DismissDirection {
 ///         background: Container(
 ///           color: Colors.green,
 ///         ),
-///         key: ValueKey(items[index]),
+///         key: ValueKey<int>(items[index]),
 ///         onDismissed: (DismissDirection direction) {
 ///           setState(() {
 ///             items.remove(index);
@@ -542,13 +543,9 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
 
   void _handleResizeProgressChanged() {
     if (_resizeController!.isCompleted) {
-      if (widget.onDismissed != null) {
-        final DismissDirection direction = _dismissDirection;
-        widget.onDismissed!(direction);
-      }
+      widget.onDismissed?.call(_dismissDirection);
     } else {
-      if (widget.onResize != null)
-        widget.onResize!();
+      widget.onResize?.call();
     }
   }
 

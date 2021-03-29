@@ -24,7 +24,7 @@ void main() {
                 ));
               },
               behavior: HitTestBehavior.opaque,
-              child: Container(
+              child: const SizedBox(
                 height: 100.0,
                 width: 100.0,
               ),
@@ -69,7 +69,7 @@ void main() {
                 ));
               },
               behavior: HitTestBehavior.opaque,
-              child: Container(
+              child: const SizedBox(
                 height: 100.0,
                 width: 100.0,
               ),
@@ -115,7 +115,7 @@ void main() {
                 ));
               },
               behavior: HitTestBehavior.opaque,
-              child: Container(
+              child: const SizedBox(
                 height: 100.0,
                 width: 100.0,
               ),
@@ -190,7 +190,7 @@ void main() {
                 ));
               },
               behavior: HitTestBehavior.opaque,
-              child: Container(
+              child: const SizedBox(
                 height: 100.0,
                 width: 100.0,
               ),
@@ -267,7 +267,7 @@ void main() {
                 ));
               },
               behavior: HitTestBehavior.opaque,
-              child: Container(
+              child: const SizedBox(
                 height: 100.0,
                 width: 100.0,
               ),
@@ -353,7 +353,7 @@ void main() {
                 ));
               },
               behavior: HitTestBehavior.opaque,
-              child: Container(
+              child: const SizedBox(
                 height: 100.0,
                 width: 100.0,
               ),
@@ -437,7 +437,7 @@ void main() {
                 ));
               },
               behavior: HitTestBehavior.opaque,
-              child: Container(
+              child: const SizedBox(
                 height: 100.0,
                 width: 100.0,
               ),
@@ -482,7 +482,7 @@ void main() {
                 ));
               },
               behavior: HitTestBehavior.opaque,
-              child: Container(
+              child: const SizedBox(
                 height: 100.0,
                 width: 100.0,
               ),
@@ -690,14 +690,12 @@ void main() {
       },
     );
 
-    final ThemeData theme = ThemeData.raw(
+    final ThemeData theme = ThemeData.light().copyWith(
       visualDensity: VisualDensity.standard,
       primaryColor: Colors.black,
       primaryColorBrightness: Brightness.dark,
       primaryColorLight: Colors.black,
       primaryColorDark: Colors.black,
-      accentColor: Colors.black,
-      accentColorBrightness: Brightness.dark,
       canvasColor: Colors.black,
       shadowColor: Colors.black,
       scaffoldBackgroundColor: Colors.black,
@@ -727,11 +725,9 @@ void main() {
       toggleableActiveColor: Colors.black,
       textTheme: ThemeData.dark().textTheme,
       primaryTextTheme: ThemeData.dark().textTheme,
-      accentTextTheme: ThemeData.dark().textTheme,
       inputDecorationTheme: ThemeData.dark().inputDecorationTheme.copyWith(border: const OutlineInputBorder()),
       iconTheme: ThemeData.dark().iconTheme,
       primaryIconTheme: ThemeData.dark().iconTheme,
-      accentIconTheme: ThemeData.dark().iconTheme,
       sliderTheme: sliderTheme,
       tabBarTheme: const TabBarTheme(labelColor: Colors.black),
       tooltipTheme: const TooltipThemeData(height: 100),
@@ -1603,7 +1599,7 @@ void main() {
                 ));
               },
               behavior: HitTestBehavior.opaque,
-              child: Container(
+              child: const SizedBox(
                 height: 100.0,
                 width: 100.0,
               ),
@@ -1751,7 +1747,7 @@ void main() {
                 ));
               },
               behavior: HitTestBehavior.opaque,
-              child: Container(
+              child: const SizedBox(
                 height: 100.0,
                 width: 100.0,
               ),
@@ -1795,7 +1791,7 @@ void main() {
                 ));
               },
               behavior: HitTestBehavior.opaque,
-              child: Container(
+              child: const SizedBox(
                 height: 100.0,
                 width: 100.0,
               ),
@@ -1981,8 +1977,7 @@ void main() {
     );
 
     testWidgets(
-      '${SnackBarBehavior.floating} should align SnackBar with the top of FloatingActionButton'
-      'when Scaffold has a FloatingActionButton',
+      '${SnackBarBehavior.floating} should align SnackBar with the top of FloatingActionButton when Scaffold has a FloatingActionButton',
       (WidgetTester tester) async {
         await tester.pumpWidget(MaterialApp(
           home: Scaffold(
@@ -2322,5 +2317,55 @@ void main() {
     );
     final Offset snackBarTopRight = tester.getTopRight(find.byType(SnackBar));
     expect(snackBarTopRight.dy, 465.0);
+  });
+
+  testWidgets('ScaffoldMessengerState clearSnackBars works as expected', (WidgetTester tester) async {
+    final List<String> snackBars = <String>['Hello Snackbar', 'Hi Snackbar', 'Bye Snackbar'];
+    int snackBarCounter = 0;
+    const Key tapTarget = Key('tap-target');
+    final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey();
+
+    await tester.pumpWidget(MaterialApp(
+      home: ScaffoldMessenger(
+        key: scaffoldMessengerKey,
+        child: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                key: tapTarget,
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(snackBars[snackBarCounter++]),
+                    duration: const Duration(seconds: 2),
+                  ));
+                },
+                behavior: HitTestBehavior.opaque,
+                child: const SizedBox(
+                  height: 100.0,
+                  width: 100.0,
+                ),
+              );
+            }
+          ),
+        ),
+      ),
+    ));
+    expect(find.text(snackBars[0]), findsNothing);
+    expect(find.text(snackBars[1]), findsNothing);
+    expect(find.text(snackBars[2]), findsNothing);
+    await tester.tap(find.byKey(tapTarget));
+    await tester.tap(find.byKey(tapTarget));
+    await tester.tap(find.byKey(tapTarget));
+    expect(find.text(snackBars[0]), findsNothing);
+    expect(find.text(snackBars[1]), findsNothing);
+    expect(find.text(snackBars[2]), findsNothing);
+    await tester.pump(); // schedule animation
+    expect(find.text(snackBars[0]), findsOneWidget);
+    scaffoldMessengerKey.currentState!.clearSnackBars();
+    expect(find.text(snackBars[0]), findsOneWidget);
+    await tester.pump(const Duration(seconds: 2));
+    expect(find.text(snackBars[0]), findsNothing);
+    expect(find.text(snackBars[1]), findsNothing);
+    expect(find.text(snackBars[2]), findsNothing);
   });
 }

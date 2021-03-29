@@ -6,6 +6,7 @@
 
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/error_handling_io.dart';
@@ -70,6 +71,9 @@ enum CocoaPodsStatus {
   brokenInstall,
 }
 
+String get cocoaPodsMinimumVersion => '1.9.0';
+String get cocoaPodsRecommendedVersion => '1.10.0';
+
 /// Cocoapods is a dependency management solution for iOS and macOS applications.
 ///
 /// Cocoapods is generally installed via ruby gems and interacted with via
@@ -109,9 +113,6 @@ class CocoaPods {
   final Usage _usage;
 
   Future<String> _versionText;
-
-  String get cocoaPodsMinimumVersion => '1.9.0';
-  String get cocoaPodsRecommendedVersion => '1.10.0';
 
   Future<bool> get isInstalled =>
     _processUtils.exitsHappy(<String>['which', 'pod']);
@@ -273,9 +274,10 @@ class CocoaPods {
     final File file = xcodeProject.xcodeConfigFor(mode);
     if (file.existsSync()) {
       final String content = file.readAsStringSync();
-      final String include = '#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.${mode
-          .toLowerCase()}.xcconfig"';
-      if (!content.contains(include)) {
+      final String includeFile = 'Pods/Target Support Files/Pods-Runner/Pods-Runner.${mode
+          .toLowerCase()}.xcconfig';
+      final String include = '#include? "$includeFile"';
+      if (!content.contains(includeFile)) {
         file.writeAsStringSync('$include\n$content', flush: true);
       }
     }
@@ -390,7 +392,6 @@ class CocoaPods {
               'To regenerate the Podfile, run:\n'
               '$podfileIosMigrationInstructions\n',
         );
-        return;
       }
     }
     // Most of the pod and plugin parsing logic was moved from the Podfile

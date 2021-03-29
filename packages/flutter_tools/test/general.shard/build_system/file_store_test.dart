@@ -11,7 +11,6 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/file_store.dart';
-import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 
@@ -143,14 +142,16 @@ void main() {
   });
 
   testWithoutContext('FileStore handles failure to persist file cache', () async {
-    final MockFile mockFile = MockFile();
+    final FileExceptionHandler handler = FileExceptionHandler();
+    final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
     final BufferLogger logger = BufferLogger.test();
-    when(mockFile.writeAsBytesSync(any)).thenThrow(const FileSystemException('Out of space!'));
-    when(mockFile.readAsBytesSync()).thenReturn(Uint8List(0));
-    when(mockFile.existsSync()).thenReturn(true);
+
+    final File cacheFile = fileSystem.file('foo')
+      ..createSync();
+    handler.addError(cacheFile, FileSystemOp.write, const FileSystemException('Out of space!'));
 
     final FileStore fileCache = FileStore(
-      cacheFile: mockFile,
+      cacheFile: cacheFile,
       logger: logger,
     );
 
@@ -161,13 +162,16 @@ void main() {
   });
 
   testWithoutContext('FileStore handles failure to restore file cache', () async {
-    final MockFile mockFile = MockFile();
+    final FileExceptionHandler handler = FileExceptionHandler();
+    final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
     final BufferLogger logger = BufferLogger.test();
-    when(mockFile.readAsBytesSync()).thenThrow(const FileSystemException('Out of space!'));
-    when(mockFile.existsSync()).thenReturn(true);
+
+    final File cacheFile = fileSystem.file('foo')
+      ..createSync();
+    handler.addError(cacheFile, FileSystemOp.read, const FileSystemException('Out of space!'));
 
     final FileStore fileCache = FileStore(
-      cacheFile: mockFile,
+      cacheFile: cacheFile,
       logger: logger,
     );
 
@@ -198,5 +202,3 @@ void main() {
     expect(fileCache.currentAssetKeys['foo.dart'], '5d41402abc4b2a76b9719d911017c592');
   });
 }
-
-class MockFile extends Mock implements File {}

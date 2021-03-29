@@ -8,6 +8,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
@@ -20,6 +21,7 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../devfs.dart';
 import '../device.dart';
+import '../device_port_forwader.dart';
 import '../globals.dart' as globals;
 import '../macos/xcode.dart';
 import '../project.dart';
@@ -691,7 +693,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
       onListen: _start,
       onCancel: _stop,
     );
-    _appName = app == null ? null : app.name.replaceAll('.app', '');
+    _appName = app?.name?.replaceAll('.app', '');
   }
 
   final IOSSimulator device;

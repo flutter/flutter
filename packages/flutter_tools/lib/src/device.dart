@@ -8,7 +8,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
+import 'package:process/process.dart';
 
 import 'android/android_device_discovery.dart';
 import 'android/android_sdk.dart';
@@ -20,16 +20,15 @@ import 'base/config.dart';
 import 'base/context.dart';
 import 'base/dds.dart';
 import 'base/file_system.dart';
-import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
-import 'base/process.dart';
 import 'base/terminal.dart';
 import 'base/user_messages.dart' hide userMessages;
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'devfs.dart';
+import 'device_port_forwader.dart';
 import 'features.dart';
 import 'fuchsia/fuchsia_device.dart';
 import 'fuchsia/fuchsia_sdk.dart';
@@ -45,6 +44,7 @@ import 'macos/xcode.dart';
 import 'project.dart';
 import 'tester/flutter_tester.dart';
 import 'version.dart';
+import 'vmservice.dart';
 import 'web/web_device.dart';
 import 'windows/windows_device.dart';
 import 'windows/windows_workflow.dart';
@@ -394,6 +394,7 @@ class FlutterDeviceManager extends DeviceManager {
       config: config,
       logger: logger,
       artifacts: artifacts,
+      operatingSystemUtils: operatingSystemUtils,
     ),
     MacOSDevices(
       processManager: processManager,
@@ -417,6 +418,7 @@ class FlutterDeviceManager extends DeviceManager {
       logger: logger,
       fileSystem: fileSystem,
       windowsWorkflow: windowsWorkflow,
+      featureFlags: featureFlags,
     ),
     WebDevices(
       featureFlags: featureFlags,
@@ -860,6 +862,7 @@ class DebuggingOptions {
     this.webEnableExposeUrl,
     this.webUseSseForDebugProxy = true,
     this.webUseSseForDebugBackend = true,
+    this.webUseSseForInjectedClient = true,
     this.webRunHeadless = false,
     this.webBrowserDebugPort,
     this.webEnableExpressionEvaluation = false,
@@ -876,6 +879,7 @@ class DebuggingOptions {
       this.webEnableExposeUrl,
       this.webUseSseForDebugProxy = true,
       this.webUseSseForDebugBackend = true,
+      this.webUseSseForInjectedClient = true,
       this.webRunHeadless = false,
       this.webBrowserDebugPort,
       this.cacheSkSL = false,
@@ -934,6 +938,7 @@ class DebuggingOptions {
   final bool webEnableExposeUrl;
   final bool webUseSseForDebugProxy;
   final bool webUseSseForDebugBackend;
+  final bool webUseSseForInjectedClient;
 
   /// Whether to run the browser in headless mode.
   ///
@@ -984,43 +989,6 @@ class LaunchResult {
   }
 }
 
-class ForwardedPort {
-  ForwardedPort(this.hostPort, this.devicePort) : context = null;
-  ForwardedPort.withContext(this.hostPort, this.devicePort, this.context);
-
-  final int hostPort;
-  final int devicePort;
-  final Process context;
-
-  @override
-  String toString() => 'ForwardedPort HOST:$hostPort to DEVICE:$devicePort';
-
-  /// Kill subprocess (if present) used in forwarding.
-  void dispose() {
-    if (context != null) {
-      context.kill();
-    }
-  }
-}
-
-/// Forward ports from the host machine to the device.
-abstract class DevicePortForwarder {
-  /// Returns a Future that completes with the current list of forwarded
-  /// ports for this device.
-  List<ForwardedPort> get forwardedPorts;
-
-  /// Forward [hostPort] on the host to [devicePort] on the device.
-  /// If [hostPort] is null or zero, will auto select a host port.
-  /// Returns a Future that completes with the host port.
-  Future<int> forward(int devicePort, { int hostPort });
-
-  /// Stops forwarding [forwardedPort].
-  Future<void> unforward(ForwardedPort forwardedPort);
-
-  /// Cleanup allocated resources, like [forwardedPorts].
-  Future<void> dispose();
-}
-
 /// Read the log for a particular device.
 abstract class DeviceLogReader {
   String get name;
@@ -1030,7 +998,7 @@ abstract class DeviceLogReader {
 
   /// Some logs can be obtained from a VM service stream.
   /// Set this after the VM services are connected.
-  vm_service.VmService connectedVMService;
+  FlutterVmService connectedVMService;
 
   @override
   String toString() => name;
@@ -1060,30 +1028,13 @@ class NoOpDeviceLogReader implements DeviceLogReader {
   int appPid;
 
   @override
-  vm_service.VmService connectedVMService;
+  FlutterVmService connectedVMService;
 
   @override
   Stream<String> get logLines => const Stream<String>.empty();
 
   @override
   void dispose() { }
-}
-
-// A port forwarder which does not support forwarding ports.
-class NoOpDevicePortForwarder implements DevicePortForwarder {
-  const NoOpDevicePortForwarder();
-
-  @override
-  Future<int> forward(int devicePort, { int hostPort }) async => devicePort;
-
-  @override
-  List<ForwardedPort> get forwardedPorts => <ForwardedPort>[];
-
-  @override
-  Future<void> unforward(ForwardedPort forwardedPort) async { }
-
-  @override
-  Future<void> dispose() async { }
 }
 
 /// Append --null_assertions to any existing Dart VM flags if

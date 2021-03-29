@@ -608,7 +608,7 @@ void main() {
     const Key childKey = Key('test child');
 
     Future<void> buildTest(VisualDensity visualDensity, {bool useText = false}) async {
-      return await tester.pumpWidget(
+      return tester.pumpWidget(
         MaterialApp(
           home: Directionality(
             textDirection: TextDirection.rtl,
@@ -793,11 +793,13 @@ void main() {
     for (final double textScaleFactor in textScaleFactorOptions) {
       for (final TextDirection textDirection in textDirectionOptions) {
         for (final Widget? icon in iconOptions) {
-          final String testName = 'ElevatedButton'
-            ', text scale $textScaleFactor'
-            '${icon != null ? ", with icon" : ""}'
-            '${textDirection == TextDirection.rtl ? ", RTL" : ""}';
-
+          final String testName = <String>[
+            'ElevatedButton, text scale $textScaleFactor',
+            if (icon != null)
+              'with icon',
+            if (textDirection == TextDirection.rtl)
+              'RTL',
+          ].join(', ');
           testWidgets(testName, (WidgetTester tester) async {
             await tester.pumpWidget(
               MaterialApp(

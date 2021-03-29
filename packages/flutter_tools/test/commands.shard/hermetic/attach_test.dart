@@ -17,15 +17,16 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/device_port_forwader.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
-import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
@@ -77,7 +78,6 @@ void main() {
       MockPortForwarder portForwarder;
       MockDartDevelopmentService mockDds;
       MockAndroidDevice device;
-      MockHttpClient httpClient;
 
       setUp(() {
         fakeLogReader = FakeDeviceLogReader();
@@ -97,13 +97,6 @@ void main() {
         when(mockDds.startDartDevelopmentService(any, any, false, any)).thenReturn(null);
         when(mockDds.uri).thenReturn(Uri.parse('http://localhost:8181'));
         when(mockDds.done).thenAnswer((_) => noopCompleter.future);
-        final HttpClientRequest httpClientRequest = MockHttpClientRequest();
-        httpClient = MockHttpClient();
-        when(httpClient.putUrl(any))
-          .thenAnswer((_) => Future<HttpClientRequest>.value(httpClientRequest));
-        when(httpClientRequest.headers).thenReturn(MockHttpHeaders());
-        when(httpClientRequest.close())
-          .thenAnswer((_) => Future<HttpClientResponse>.value(MockHttpClientResponse()));
 
         // We cannot add the device to a device manager because that is
         // only enabled by the context of each testUsingContext call.
@@ -725,7 +718,6 @@ void main() {
 class MockHotRunner extends Mock implements HotRunner {}
 class MockHotRunnerFactory extends Mock implements HotRunnerFactory {}
 class MockIOSDevice extends Mock implements IOSDevice {}
-class MockMDnsObservatoryDiscovery extends Mock implements MDnsObservatoryDiscovery {}
 class MockPortForwarder extends Mock implements DevicePortForwarder {}
 
 class StreamLogger extends Logger {
@@ -769,11 +761,20 @@ class StreamLogger extends Logger {
     @required Duration timeout,
     String progressId,
     bool multilineOutput = false,
+    bool includeTiming = true,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     _log('[progress] $message');
     return SilentStatus(
       stopwatch: Stopwatch(),
+    )..start();
+  }
+
+  @override
+  Status startSpinner({ VoidCallback onFinish }) {
+    return SilentStatus(
+      stopwatch: Stopwatch(),
+      onFinish: onFinish,
     )..start();
   }
 
@@ -806,6 +807,9 @@ class StreamLogger extends Logger {
 
   @override
   void clear() => _log('[stdout] ${globals.terminal.clearScreen()}\n');
+
+  @override
+  Terminal get terminal => Terminal.test();
 }
 
 class LoggerInterrupted implements Exception {
@@ -924,6 +928,3 @@ class TestHotRunnerFactory extends HotRunnerFactory {
 }
 
 class MockDartDevelopmentService extends Mock implements DartDevelopmentService {}
-class MockHttpClientRequest extends Mock implements HttpClientRequest {}
-class MockHttpClientResponse extends Mock implements HttpClientResponse {}
-class MockHttpHeaders extends Mock implements HttpHeaders {}

@@ -6,7 +6,7 @@
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
-import 'package:path/path.dart' as path; // ignore: package_path_import
+import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:yaml/yaml.dart';
 
 import 'android/gradle.dart';

@@ -162,7 +162,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
   /// The callback function to response the driver side input.
   @visibleForTesting
   Future<Map<String, dynamic>> callback(Map<String, String> params) async {
-    return await callbackManager.callback(
+    return callbackManager.callback(
         params, this /* as IntegrationTestResults */);
   }
 
@@ -180,7 +180,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
 
   @override
   Future<void> runTest(
-    Future<void> testBody(),
+    Future<void> Function() testBody,
     VoidCallback invariantTester, {
     String description = '',
     Duration? timeout,
@@ -202,7 +202,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
     List<String> streams = const <String>['all'],
     @visibleForTesting vm.VmService? vmService,
   }) async {
-    assert(streams != null); // ignore: unnecessary_null_comparison
+    assert(streams != null);
     assert(streams.isNotEmpty);
     if (vmService != null) {
       _vmService = vmService;
@@ -232,21 +232,21 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
   /// [action]. Otherwise, prior events are cleared before calling [action]. By
   /// default, prior events are cleared.
   Future<vm.Timeline> traceTimeline(
-    Future<dynamic> action(), {
+    Future<dynamic> Function() action, {
     List<String> streams = const <String>['all'],
     bool retainPriorEvents = false,
   }) async {
     await enableTimeline(streams: streams);
     if (retainPriorEvents) {
       await action();
-      return await _vmService!.getVMTimeline();
+      return _vmService!.getVMTimeline();
     }
 
     await _vmService!.clearVMTimeline();
     final vm.Timestamp startTime = await _vmService!.getVMTimelineMicros();
     await action();
     final vm.Timestamp endTime = await _vmService!.getVMTimelineMicros();
-    return await _vmService!.getVMTimeline(
+    return _vmService!.getVMTimeline(
       timeOriginMicros: startTime.timestamp,
       timeExtentMicros: endTime.timestamp,
     );
@@ -268,7 +268,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
   /// The `streams` and `retainPriorEvents` parameters are passed as-is to
   /// [traceTimeline].
   Future<void> traceAction(
-    Future<dynamic> action(), {
+    Future<dynamic> Function() action, {
     List<String> streams = const <String>['all'],
     bool retainPriorEvents = false,
     String reportKey = 'timeline',
@@ -288,7 +288,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
   /// This can be used to implement performance tests previously using
   /// [traceAction] and [TimelineSummary] from [flutter_driver]
   Future<void> watchPerformance(
-    Future<void> action(), {
+    Future<void> Function() action, {
     String reportKey = 'performance',
   }) async {
     assert(() {
@@ -305,10 +305,19 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
     // TODO(CareF): remove this when flush FrameTiming is readly in engine.
     //              See https://github.com/flutter/flutter/issues/64808
     //              and https://github.com/flutter/flutter/issues/67593
-    Future<void> delayForFrameTimings() => Future<void>.delayed(const Duration(seconds: 2));
-
-    await delayForFrameTimings(); // flush old FrameTimings
     final List<FrameTiming> frameTimings = <FrameTiming>[];
+    Future<void> delayForFrameTimings() async {
+      int count = 0;
+      while (frameTimings.isEmpty) {
+        count++;
+        await Future<void>.delayed(const Duration(seconds: 2));
+        if (count > 20) {
+          print('delayForFrameTimings is taking longer than expected...');
+        }
+      }
+    }
+
+    await Future<void>.delayed(const Duration(seconds: 2)); // flush old FrameTimings
     final TimingsCallback watcher = frameTimings.addAll;
     addTimingsCallback(watcher);
     await action();

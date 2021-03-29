@@ -11,6 +11,7 @@ import 'base/config.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'base/os.dart';
 import 'base/utils.dart';
 import 'build_system/targets/icon_tree_shaker.dart';
 import 'convert.dart';
@@ -452,35 +453,15 @@ bool isEmulatorBuildMode(BuildMode mode) {
   return mode == BuildMode.debug;
 }
 
-enum HostPlatform {
-  darwin_x64,
-  darwin_arm,
-  linux_x64,
-  windows_x64,
-}
-
-String getNameForHostPlatform(HostPlatform platform) {
-  switch (platform) {
-    case HostPlatform.darwin_x64:
-      return 'darwin-x64';
-    case HostPlatform.darwin_arm:
-      return 'darwin-arm';
-    case HostPlatform.linux_x64:
-      return 'linux-x64';
-    case HostPlatform.windows_x64:
-      return 'windows-x64';
-  }
-  assert(false);
-  return null;
-}
-
 enum TargetPlatform {
   android,
   ios,
   // darwin_arm64 not yet supported, macOS desktop targets run in Rosetta as x86.
   darwin_x64,
   linux_x64,
+  linux_arm64,
   windows_x64,
+  windows_uwp_x64,
   fuchsia_arm64,
   fuchsia_x64,
   tester,
@@ -574,8 +555,12 @@ String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch darwinArch}
       return 'darwin-x64';
     case TargetPlatform.linux_x64:
       return 'linux-x64';
+    case TargetPlatform.linux_arm64:
+      return 'linux-arm64';
     case TargetPlatform.windows_x64:
       return 'windows-x64';
+    case TargetPlatform.windows_uwp_x64:
+      return 'windows-uwp-x64';
     case TargetPlatform.fuchsia_arm64:
       return 'fuchsia-arm64';
     case TargetPlatform.fuchsia_x64:
@@ -613,6 +598,8 @@ TargetPlatform getTargetPlatformForName(String platform) {
       return TargetPlatform.darwin_x64;
     case 'linux-x64':
       return TargetPlatform.linux_x64;
+   case 'linux-arm64':
+      return TargetPlatform.linux_arm64;
     case 'windows-x64':
       return TargetPlatform.windows_x64;
     case 'web-javascript':
@@ -683,7 +670,8 @@ HostPlatform getCurrentHostPlatform() {
     return HostPlatform.darwin_x64;
   }
   if (globals.platform.isLinux) {
-    return HostPlatform.linux_x64;
+    // support x64 and arm64 architecture.
+    return globals.os.hostPlatform;
   }
   if (globals.platform.isWindows) {
     return HostPlatform.windows_x64;
@@ -747,8 +735,12 @@ String getWebBuildDirectory() {
 }
 
 /// Returns the Linux build output directory.
-String getLinuxBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'linux');
+String getLinuxBuildDirectory([TargetPlatform targetPlatform]) {
+  final String arch = (targetPlatform == null) ?
+      _getCurrentHostPlatformArchName() :
+      getNameForTargetPlatformArch(targetPlatform);
+  final String subDirs = 'linux/' + arch;
+  return globals.fs.path.join(getBuildDirectory(), subDirs);
 }
 
 /// Returns the Windows build output directory.
@@ -812,4 +804,41 @@ enum NullSafetyMode {
   unsound,
   /// The null safety mode was not detected. Only supported for 'flutter test'.
   autodetect,
+}
+
+String _getCurrentHostPlatformArchName() {
+  final HostPlatform hostPlatform = getCurrentHostPlatform();
+  return getNameForHostPlatformArch(hostPlatform);
+}
+
+String getNameForTargetPlatformArch(TargetPlatform platform) {
+  switch (platform) {
+    case TargetPlatform.linux_x64:
+    case TargetPlatform.darwin_x64:
+    case TargetPlatform.windows_x64:
+      return 'x64';
+    case TargetPlatform.linux_arm64:
+      return 'arm64';
+    default:
+      break;
+  }
+  assert(false);
+  return null;
+}
+
+String getNameForHostPlatformArch(HostPlatform platform) {
+  switch (platform) {
+    case HostPlatform.darwin_x64:
+      return 'x64';
+    case HostPlatform.darwin_arm:
+      return 'arm';
+    case HostPlatform.linux_x64:
+      return 'x64';
+    case HostPlatform.linux_arm64:
+      return 'arm64';
+    case HostPlatform.windows_x64:
+      return 'x64';
+  }
+  assert(false);
+  return null;
 }

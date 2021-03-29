@@ -4,6 +4,7 @@
 
 import '../framework/adb.dart';
 import '../framework/framework.dart';
+import '../framework/host_agent.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
@@ -75,20 +76,6 @@ TaskFunction createCodegenerationIntegrationTest() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/codegen',
     'lib/main.dart',
-  );
-}
-
-TaskFunction createImageLoadingIntegrationTest() {
-  return DriverTest(
-    '${flutterDirectory.path}/dev/integration_tests/image_loading',
-    'lib/main.dart',
-  );
-}
-
-TaskFunction createAndroidSplashScreenKitchenSinkTest() {
-  return DriverTest(
-    '${flutterDirectory.path}/dev/integration_tests/android_splash_screens/splash_screen_kitchen_sink',
-    'test_driver/main.dart',
   );
 }
 
@@ -165,6 +152,8 @@ class DriverTest {
         testTarget,
         '-d',
         deviceId,
+        '--screenshot',
+        hostAgent.dumpDirectory.path,
         ...extraOptions,
       ];
       await flutter('drive', options: options, environment: Map<String, String>.from(environment));

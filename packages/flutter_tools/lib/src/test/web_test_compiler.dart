@@ -6,6 +6,7 @@
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
+import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -13,9 +14,9 @@ import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
-import '../base/process.dart';
 import '../build_info.dart';
 import '../bundle.dart';
+import '../cache.dart';
 import '../compile.dart';
 import '../dart/language_version.dart';
 import '../web/bootstrap.dart';
@@ -63,7 +64,7 @@ class WebTestCompiler {
       }
     } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
       platformDillArtifact = Artifact.webPlatformSoundKernelDill;
-      languageVersion = nullSafeVersion;
+      languageVersion = currentLanguageVersion(_fileSystem, Cache.flutterRoot);
       if (!extraFrontEndOptions.contains('--sound-null-safety')) {
         extraFrontEndOptions.add('--sound-null-safety');
       }
@@ -130,6 +131,7 @@ class WebTestCompiler {
       processManager: _processManager,
       logger: _logger,
       platform: _platform,
+      fileSystem: _fileSystem,
     );
 
     final CompilerOutput output = await residentCompiler.recompile(

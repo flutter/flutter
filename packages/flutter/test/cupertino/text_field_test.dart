@@ -284,6 +284,56 @@ void main() {
     expect(find.byType(CupertinoButton), findsNothing);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }), skip: kIsWeb);
 
+  testWidgets('Activates the text field when receives semantics focus on Mac', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+    final FocusNode focusNode = FocusNode();
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTextField(focusNode: focusNode)
+      ),
+    );
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            id: 1,
+            textDirection: TextDirection.ltr,
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 2,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 3,
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 4,
+                        flags: <SemanticsFlag>[SemanticsFlag.isTextField,
+                          SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
+                        actions: <SemanticsAction>[SemanticsAction.tap,
+                          SemanticsAction.didGainAccessibilityFocus],
+                        textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
+
+    expect(focusNode.hasFocus, isFalse);
+    semanticsOwner.performAction(4, SemanticsAction.didGainAccessibilityFocus);
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isTrue);
+    semantics.dispose();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }), skip: kIsWeb);
+
   testWidgets(
     'takes available space horizontally and takes intrinsic space vertically no-strut',
     (WidgetTester tester) async {
@@ -3475,7 +3525,6 @@ void main() {
         from: tester.getTopRight(find.byType(CupertinoApp)),
         cause: SelectionChangedCause.tap,
       );
-      expect(state.showToolbar(), true);
       await tester.pumpAndSettle();
 
       // -1 because we want to reach the end of the line, not the start of a new line.
@@ -3536,7 +3585,6 @@ void main() {
         from: tester.getCenter(find.byType(EditableText)),
         cause: SelectionChangedCause.tap,
       );
-      expect(state.showToolbar(), true);
       await tester.pumpAndSettle();
 
       bottomLeftSelectionPosition = textOffsetToBottomLeftPosition(tester, state.renderEditable.selection!.baseOffset);
@@ -3734,12 +3782,11 @@ void main() {
                   ),
                   Expanded(
                     child: Navigator(
-                      onGenerateRoute: (_) =>
-                        CupertinoPageRoute<void>(builder: (_) => Container(
-                          child: CupertinoTextField(
-                            controller: controller,
-                          ),
-                        )),
+                      onGenerateRoute: (_) => CupertinoPageRoute<void>(
+                        builder: (_) => CupertinoTextField(
+                          controller: controller,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -4219,7 +4266,7 @@ void main() {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Container(
+              SizedBox(
                 width: 100.0,
                 child: CupertinoTextField(
                   controller: controller1,
@@ -4230,21 +4277,21 @@ void main() {
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  Container(
+                  SizedBox(
                     width: 100.0,
                     child: CupertinoTextField(
                       controller: controller2,
                       focusNode: focusNode2,
                     ),
                   ),
-                  Container(
+                  SizedBox(
                     width: 100.0,
                     child: CupertinoTextField(
                       controller: controller3,
                       focusNode: focusNode3,
                     ),
                   ),
-                  Container(
+                  SizedBox(
                     width: 100.0,
                     child: CupertinoTextField(
                       controller: controller4,
@@ -4253,7 +4300,7 @@ void main() {
                   ),
                 ],
               ),
-              Container(
+              SizedBox(
                 width: 100.0,
                 child: CupertinoTextField(
                   controller: controller5,
@@ -4619,5 +4666,107 @@ void main() {
       expect(state.currentTextEditingValue.text, '侬好啊旁友');
       expect(state.currentTextEditingValue.composing, TextRange.empty);
     });
+  });
+
+  testWidgets('disabled widget changes background color',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            enabled: false,
+          ),
+        ),
+      ),
+    );
+
+    BoxDecoration decoration = tester
+        .widget<DecoratedBox>(
+          find.descendant(
+            of: find.byType(CupertinoTextField),
+            matching: find.byType(DecoratedBox),
+          ),
+        )
+        .decoration as BoxDecoration;
+
+    expect(
+      decoration.color!.value,
+      0xFFFAFAFA,
+    );
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            enabled: true,
+          ),
+        ),
+      ),
+    );
+
+    decoration = tester
+        .widget<DecoratedBox>(
+          find.descendant(
+            of: find.byType(CupertinoTextField),
+            matching: find.byType(DecoratedBox),
+          ),
+        )
+        .decoration as BoxDecoration;
+
+    expect(
+      decoration.color!.value,
+      CupertinoColors.white.value,
+    );
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        theme: CupertinoThemeData(
+          brightness: Brightness.dark,
+        ),
+        home: Center(
+          child: CupertinoTextField(
+            enabled: false,
+          ),
+        ),
+      ),
+    );
+
+    decoration = tester
+        .widget<DecoratedBox>(
+          find.descendant(
+            of: find.byType(CupertinoTextField),
+            matching: find.byType(DecoratedBox),
+          ),
+        )
+        .decoration as BoxDecoration;
+
+    expect(
+      decoration.color!.value,
+      0xFF050505,
+    );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/78097.
+  testWidgets(
+    'still gets disabled background color when decoration is null',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              decoration: null,
+              enabled: false,
+            ),
+          ),
+        ),
+      );
+
+      final Color disabledColor = tester.widget<ColoredBox>(
+        find.descendant(
+          of: find.byType(CupertinoTextField),
+          matching: find.byType(ColoredBox),
+        ),
+      ).color;
+      expect(disabledColor, isSameColorAs(const Color(0xFFFAFAFA)));
   });
 }

@@ -19,7 +19,6 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_devices.dart';
 import '../src/fakes.dart';
-import '../src/mocks.dart';
 
 void main() {
   group('DeviceManager', () {
@@ -334,7 +333,7 @@ void main() {
         terminal: mockTerminal,
       );
       await expectLater(
-        () async => await deviceManager.findTargetDevices(FakeFlutterProject()),
+        () async => deviceManager.findTargetDevices(FakeFlutterProject()),
         throwsA(isA<ToolExit>())
       );
     });
@@ -478,24 +477,6 @@ void main() {
       expect(filtered.single, ephemeralOne);
       verify(mockDeviceDiscovery.devices).called(1);
       verify(mockDeviceDiscovery.discoverDevices(timeout: anyNamed('timeout'))).called(1);
-    });
-  });
-
-  group('ForwardedPort', () {
-    group('dispose()', () {
-      testUsingContext('does not throw exception if no process is present', () {
-        final ForwardedPort forwardedPort = ForwardedPort(123, 456);
-        expect(forwardedPort.context, isNull);
-        forwardedPort.dispose();
-      });
-
-      testUsingContext('kills process if process was available', () {
-        final MockProcess mockProcess = MockProcess();
-        final ForwardedPort forwardedPort = ForwardedPort.withContext(123, 456, mockProcess);
-        forwardedPort.dispose();
-        expect(forwardedPort.context, isNotNull);
-        verify(mockProcess.kill());
-      });
     });
   });
 

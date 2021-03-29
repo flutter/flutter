@@ -449,7 +449,7 @@ abstract class ScrollView extends StatelessWidget {
 ///       ),
 ///     ),
 ///     SliverGrid(
-///       gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+///       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
 ///         maxCrossAxisExtent: 200.0,
 ///         mainAxisSpacing: 10.0,
 ///         crossAxisSpacing: 10.0,
@@ -495,12 +495,12 @@ abstract class ScrollView extends StatelessWidget {
 /// bottom SliverList will grow downwards.
 ///
 /// ```dart
-/// List<int> top = [];
-/// List<int> bottom = [0];
+/// List<int> top = <int>[];
+/// List<int> bottom = <int>[0];
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   const Key centerKey = ValueKey('bottom-sliver-list');
+///   const Key centerKey = ValueKey<String>('bottom-sliver-list');
 ///   return Scaffold(
 ///     appBar: AppBar(
 ///       title: const Text('Press on the plus to add items above and below'),
@@ -967,11 +967,11 @@ abstract class BoxScrollView extends ScrollView {
 /// ListView(
 ///   shrinkWrap: true,
 ///   padding: const EdgeInsets.all(20.0),
-///   children: <Widget>[
-///     const Text("I'm dedicating every day to you"),
-///     const Text('Domestic life was never quite my style'),
-///     const Text('When you smile, you knock me out, I fall apart'),
-///     const Text('And I thought I was so smart'),
+///   children: const <Widget>[
+///     Text("I'm dedicating every day to you"),
+///     Text('Domestic life was never quite my style'),
+///     Text('When you smile, you knock me out, I fall apart'),
+///     Text('And I thought I was so smart'),
 ///   ],
 /// )
 /// ```
@@ -1024,7 +1024,7 @@ abstract class BoxScrollView extends ScrollView {
 ///             );
 ///           },
 ///         )
-///       : Center(child: const Text('No items')),
+///       : const Center(child: Text('No items')),
 ///   );
 /// }
 /// ```
@@ -1228,7 +1228,7 @@ class ListView extends BoxScrollView {
   /// ```dart
   /// ListView.separated(
   ///   itemCount: 25,
-  ///   separatorBuilder: (BuildContext context, int index) => Divider(),
+  ///   separatorBuilder: (BuildContext context, int index) => const Divider(),
   ///   itemBuilder: (BuildContext context, int index) {
   ///     return ListTile(
   ///       title: Text('item $index'),
@@ -1278,7 +1278,7 @@ class ListView extends BoxScrollView {
            } else {
              widget = separatorBuilder(context, itemIndex);
              assert(() {
-               if (widget == null) { // ignore: dead_code
+               if (widget == null) {
                  throw FlutterError('separatorBuilder cannot return null.');
                }
                return true;
@@ -1323,6 +1323,8 @@ class ListView extends BoxScrollView {
   ///
   /// ```dart
   /// class MyListView extends StatefulWidget {
+  ///   const MyListView({Key? key}) : super(key: key);
+  ///
   ///   @override
   ///   _MyListViewState createState() => _MyListViewState();
   /// }
@@ -1350,7 +1352,7 @@ class ListView extends BoxScrollView {
   ///             },
   ///             childCount: items.length,
   ///             findChildIndexCallback: (Key key) {
-  ///               final ValueKey valueKey = key as ValueKey;
+  ///               final ValueKey<String> valueKey = key as ValueKey<String>;
   ///               final String data = valueKey.value;
   ///               return items.indexOf(data);
   ///             }
@@ -1363,7 +1365,7 @@ class ListView extends BoxScrollView {
   ///           children: <Widget>[
   ///             TextButton(
   ///               onPressed: () => _reverse(),
-  ///               child: Text('Reverse items'),
+  ///               child: const Text('Reverse items'),
   ///             ),
   ///           ],
   ///         ),

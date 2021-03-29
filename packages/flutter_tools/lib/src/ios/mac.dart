@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import '../application_package.dart';
 import '../artifacts.dart';
@@ -105,7 +106,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   final List<ProjectMigrator> migrators = <ProjectMigrator>[
-    RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.xcode, globals.flutterUsage),
+    RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.flutterUsage),
     XcodeBuildSystemMigration(app.project, globals.logger),
     ProjectBaseConfigurationMigration(app.project, globals.logger),
     ProjectBuildLocationMigration(app.project, globals.logger),
@@ -254,7 +255,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     if (buildForDevice) {
       buildCommands.addAll(<String>['-sdk', 'iphoneos']);
     } else {
-      buildCommands.addAll(<String>['-sdk', 'iphonesimulator', '-arch', 'x86_64']);
+      buildCommands.addAll(<String>['-sdk', 'iphonesimulator']);
     }
   }
 
@@ -345,10 +346,10 @@ Future<XcodeBuildResult> buildXcodeProject({
   initialBuildStatus?.cancel();
   initialBuildStatus = null;
   globals.printStatus(
-    'Xcode ${buildAction.name} done.'.padRight(kDefaultStatusPadding + 1)
+    'Xcode ${xcodeBuildActionToString(buildAction)} done.'.padRight(kDefaultStatusPadding + 1)
         + getElapsedAsSeconds(sw.elapsed).padLeft(5),
   );
-  globals.flutterUsage.sendTiming(buildAction.name, 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
+  globals.flutterUsage.sendTiming(xcodeBuildActionToString(buildAction), 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
 
   // Run -showBuildSettings again but with the exact same parameters as the
   // build. showBuildSettings is reported to occasionally timeout. Here, we give
@@ -425,18 +426,24 @@ Future<XcodeBuildResult> buildXcodeProject({
         targetBuildDir,
         buildSettings['WRAPPER_NAME'],
       );
-      if (globals.fs.isDirectorySync(expectedOutputDirectory)) {
+      if (globals.fs.directory(expectedOutputDirectory).existsSync()) {
         // Copy app folder to a place where other tools can find it without knowing
         // the BuildInfo.
-        outputDir = expectedOutputDirectory.replaceFirst('/$configuration-', '/');
-        if (globals.fs.isDirectorySync(outputDir)) {
-          // Previous output directory might have incompatible artifacts
-          // (for example, kernel binary files produced from previous run).
-          globals.fs.directory(outputDir).deleteSync(recursive: true);
-        }
-        globals.fsUtils.copyDirectorySync(
-          globals.fs.directory(expectedOutputDirectory),
-          globals.fs.directory(outputDir),
+        outputDir = targetBuildDir.replaceFirst('/$configuration-', '/');
+        globals.fs.directory(outputDir).createSync(recursive: true);
+
+        // rsync instead of copy to maintain timestamps to support incremental
+        // app install deltas. Use --delete to remove incompatible artifacts
+        // (for example, kernel binary files produced from previous run).
+        await globals.processUtils.run(
+          <String>[
+            'rsync',
+            '-av',
+            '--delete',
+            expectedOutputDirectory,
+            outputDir,
+          ],
+          throwOnError: true,
         );
       } else {
         globals.printError('Build succeeded but the expected app at $expectedOutputDirectory not found');
@@ -591,9 +598,8 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsa
 /// `clean`, `test`, `analyze`, and `install` are not supported.
 enum XcodeBuildAction { build, archive }
 
-extension XcodeBuildActionExtension on XcodeBuildAction {
-  String get name {
-    switch (this) {
+String xcodeBuildActionToString(XcodeBuildAction action) {
+    switch (action) {
       case XcodeBuildAction.build:
         return 'build';
       case XcodeBuildAction.archive:
@@ -601,7 +607,6 @@ extension XcodeBuildActionExtension on XcodeBuildAction {
       default:
         throw UnsupportedError('Unknown Xcode build action');
     }
-  }
 }
 
 class XcodeBuildResult {

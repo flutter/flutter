@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 
 typedef ElementRebuildCallback = void Function(StatefulElement element);
 
@@ -905,7 +904,7 @@ void main() {
       children: <Widget>[
         const SwapKeyWidget(childKey: ValueKey<int>(0)),
         Container(key: const ValueKey<int>(1)),
-        Container(child: SizedBox(key: key)),
+        Container(color: Colors.green, child: SizedBox(key: key)),
       ],
     );
     await tester.pumpWidget(stack);
@@ -1031,7 +1030,7 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
-        child: Container(
+        child: SizedBox(
           height: 100,
           child: CustomScrollView(
             controller: ScrollController(),
@@ -1161,7 +1160,7 @@ void main() {
       children: <Widget>[
         Container(),
         Container(key: key1 = GlobalKey()),
-        Container(child: Container()),
+        Container(),
         Container(key: key2 = GlobalKey()),
         Container(),
       ],
@@ -1173,6 +1172,64 @@ void main() {
     );
   });
 
+  testWidgets('Can not attach a non-RenderObjectElement to the MultiChildRenderObjectElement - mount', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Column(
+        children: <Widget>[
+          Container(),
+          const _EmptyWidget(),
+        ],
+      ),
+    );
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(
+      exception.toString(),
+      equalsIgnoringHashCodes(
+        'The children of `MultiChildRenderObjectElement` must each has an associated render object.\n'
+        'This typically means that the `_EmptyWidget` or its children\n'
+        'are not a subtype of `RenderObjectWidget`.\n'
+        'The following element does not have an associated render object:\n'
+        '  _EmptyWidget\n'
+        'debugCreator: _EmptyWidget ← Column ← [root]'
+      ),
+    );
+  });
+
+  testWidgets('Can not attach a non-RenderObjectElement to the MultiChildRenderObjectElement - update', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Column(
+        children: <Widget>[
+          Container(),
+        ],
+      ),
+    );
+
+    await tester.pumpWidget(
+      Column(
+        children: <Widget>[
+          Container(),
+          const _EmptyWidget(),
+        ],
+      ),
+    );
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(
+      exception.toString(),
+      equalsIgnoringHashCodes(
+        'The children of `MultiChildRenderObjectElement` must each has an associated render object.\n'
+        'This typically means that the `_EmptyWidget` or its children\n'
+        'are not a subtype of `RenderObjectWidget`.\n'
+        'The following element does not have an associated render object:\n'
+        '  _EmptyWidget\n'
+        'debugCreator: _EmptyWidget ← Column ← [root]'
+      ),
+    );
+  });
+
   testWidgets('Element diagnostics', (WidgetTester tester) async {
     GlobalKey key0;
     await tester.pumpWidget(Column(
@@ -1180,7 +1237,7 @@ void main() {
       children: <Widget>[
         Container(),
         Container(key: GlobalKey()),
-        Container(child: Container()),
+        Container(color: Colors.green, child: Container()),
         Container(key: GlobalKey()),
         Container(),
       ],
@@ -1198,10 +1255,11 @@ void main() {
         '├Container-[GlobalKey#00000]\n'
         '│└LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
         '│ └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'
-        '├Container\n'
-        '│└Container\n'
-        '│ └LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
-        '│  └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'
+        '├Container(bg: MaterialColor(primary value: Color(0xff4caf50)))\n'
+        '│└ColoredBox(color: MaterialColor(primary value: Color(0xff4caf50)), renderObject: _RenderColoredBox#00000 relayoutBoundary=up1)\n'
+        '│ └Container\n'
+        '│  └LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up2)\n'
+        '│   └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up3)\n'
         '├Container-[GlobalKey#00000]\n'
         '│└LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
         '│ └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'
@@ -1463,7 +1521,7 @@ void main() {
 
   testWidgets('A widget whose element has an invalid visitChildren implementation triggers a useful error message', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
-    await tester.pumpWidget(Container(child: _WidgetWithNoVisitChildren(_StatefulLeaf(key: key))));
+    await tester.pumpWidget(_WidgetWithNoVisitChildren(_StatefulLeaf(key: key)));
     (key.currentState! as _StatefulLeafState).markNeedsBuild();
     await tester.pumpWidget(Container());
     final dynamic exception = tester.takeException();
@@ -1490,7 +1548,7 @@ void main() {
     final int pointerRouterCount = GestureBinding.instance!.pointerRouter.debugGlobalRouteCount;
     final RawKeyEventHandler? rawKeyEventHandler = RawKeyboard.instance.keyEventHandler;
     expect(rawKeyEventHandler, isNotNull);
-    BuildOwner(focusManager: _FakeFocusManager());
+    BuildOwner(focusManager: FocusManager());
     expect(GestureBinding.instance!.pointerRouter.debugGlobalRouteCount, pointerRouterCount);
     expect(RawKeyboard.instance.keyEventHandler, same(rawKeyEventHandler));
   });
@@ -1514,18 +1572,6 @@ void main() {
     await tester.pumpWidget(Container());
     expect(tester.binding.buildOwner!.globalKeyCount, initialCount + 0);
   });
-}
-
-class _FakeFocusManager implements FocusManager {
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    return super.noSuchMethod(invocation);
-  }
-
-  @override
-  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
-    return '_FakeFocusManager';
-  }
 }
 
 class _WidgetWithNoVisitChildren extends StatelessWidget {
@@ -1680,7 +1726,7 @@ class DependentState extends State<DependentStatefulWidget> {
 }
 
 class SwapKeyWidget extends StatefulWidget {
-  const SwapKeyWidget({this.childKey}): super();
+  const SwapKeyWidget({Key? key, this.childKey}): super(key: key);
 
   final Key? childKey;
   @override
@@ -1860,4 +1906,21 @@ class FakeLeafRenderObject extends RenderBox {
 
 class TestRenderObjectElement extends RenderObjectElement {
   TestRenderObjectElement() : super(Table());
+}
+
+class _EmptyWidget extends Widget {
+  const _EmptyWidget({Key? key}) : super(key: key);
+
+  @override
+  Element createElement() => _EmptyElement(this);
+}
+
+class _EmptyElement extends Element {
+  _EmptyElement(_EmptyWidget widget) : super(widget);
+
+  @override
+  bool get debugDoingBuild => false;
+
+  @override
+  void performRebuild() {}
 }

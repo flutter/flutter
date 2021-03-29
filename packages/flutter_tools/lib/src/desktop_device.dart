@@ -7,6 +7,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import 'application_package.dart';
 import 'base/common.dart';
@@ -14,11 +15,11 @@ import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
-import 'base/process.dart';
 import 'build_info.dart';
 import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
+import 'device_port_forwader.dart';
 import 'protocol_discovery.dart';
 
 /// A partial implementation of Device for desktop-class devices to inherit

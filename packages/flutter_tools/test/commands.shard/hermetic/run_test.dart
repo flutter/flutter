@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -34,7 +33,6 @@ import 'package:vm_service/vm_service.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
-import '../../src/mocks.dart';
 import '../../src/testbed.dart';
 
 void main() {
@@ -146,7 +144,6 @@ void main() {
       MemoryFileSystem fs;
       Artifacts artifacts;
       MockCache mockCache;
-      MockProcessManager mockProcessManager;
       TestUsage usage;
       Directory tempDir;
 
@@ -155,7 +152,6 @@ void main() {
         mockCache = MockCache();
         usage = TestUsage();
         fs = MemoryFileSystem.test();
-        mockProcessManager = MockProcessManager();
 
         tempDir = fs.systemTempDirectory.createTempSync('flutter_run_test.');
         fs.currentDirectory = tempDir;
@@ -202,7 +198,7 @@ void main() {
       }, overrides: <Type, Generator>{
         DeviceManager: () => mockDeviceManager,
         FileSystem: () => fs,
-        ProcessManager: () => mockProcessManager,
+        ProcessManager: () => FakeProcessManager.any(),
       });
 
       testUsingContext('fails when targeted device is not Android with --device-user', () async {
@@ -290,7 +286,7 @@ void main() {
       }, overrides: <Type, Generator>{
         DeviceManager: () => mockDeviceManager,
         FileSystem: () => fs,
-        ProcessManager: () => mockProcessManager,
+        ProcessManager: () => FakeProcessManager.any(),
       });
 
       testUsingContext('updates cache before checking for devices', () async {
@@ -334,7 +330,7 @@ void main() {
         Cache: () => mockCache,
         DeviceManager: () => mockDeviceManager,
         FileSystem: () => fs,
-        ProcessManager: () => mockProcessManager,
+        ProcessManager: () => FakeProcessManager.any(),
       });
 
       testUsingContext('passes device target platform to usage', () async {
@@ -388,10 +384,10 @@ void main() {
         )));
       }, overrides: <Type, Generator>{
         Artifacts: () => artifacts,
-        Cache: () => mockCache,
+        Cache: () => Cache.test(),
         DeviceManager: () => mockDeviceManager,
         FileSystem: () => fs,
-        ProcessManager: () => mockProcessManager,
+        ProcessManager: () => FakeProcessManager.any(),
         Usage: () => usage,
       });
     });

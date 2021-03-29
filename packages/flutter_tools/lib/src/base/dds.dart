@@ -76,7 +76,6 @@ class DartDevelopmentService {
         } on StateError {
           if (e.message.contains('Existing VM service clients prevent DDS from taking control.')) {
             throwToolExit('${e.message}. Please rebuild your application with a newer version of Flutter.');
-            return;
           }
           logger.printError(
             'DDS has failed to start and there is not an existing DDS instance '
@@ -95,5 +94,5 @@ class DartDevelopmentService {
     }
   }
 
-  Future<void> shutdown() async => await _ddsInstance?.shutdown();
+  Future<void> shutdown() async => _ddsInstance?.shutdown();
 }

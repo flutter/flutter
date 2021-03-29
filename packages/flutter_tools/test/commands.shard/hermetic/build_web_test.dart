@@ -8,7 +8,6 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -17,13 +16,12 @@ import 'package:flutter_tools/src/commands/build_web.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/web/compile.dart';
-import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/testbed.dart';
 
 void main() {
@@ -52,9 +50,10 @@ void main() {
 
   testUsingContext('Refuses to build for web when missing index.html', () async {
     fileSystem.file(fileSystem.path.join('web', 'index.html')).deleteSync();
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
     expect(buildWeb(
-      FlutterProject.current(),
+      project,
       fileSystem.path.join('lib', 'main.dart'),
       BuildInfo.debug,
       false,
@@ -66,7 +65,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 
@@ -79,7 +78,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 
@@ -94,7 +93,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 
@@ -109,9 +108,9 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     ProcessManager: () => FakeProcessManager.any(),
-    BuildSystem: () => MockBuildSystem(),
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
   });
 
   testUsingContext('hidden if feature flag is not enabled', () async {
@@ -120,7 +119,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 
@@ -130,7 +129,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 
@@ -146,9 +145,9 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     ProcessManager: () => FakeProcessManager.any(),
-    BuildSystem: () => MockBuildSystem(),
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
   });
 }
 
@@ -200,16 +199,7 @@ class UrlLauncherPlugin {}
 ''');
   fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       .writeAsStringSync('void main() { }');
-
-  // Process calls. We're not testing that these invocations are correct because
-  // that is covered in targets/web_test.dart.
-  when(globals.buildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
-    return BuildResult(success: true);
-  });
 }
-
-class MockBuildSystem extends Mock implements BuildSystem {}
-class MockPub extends Mock implements Pub {}
 
 class TestWebBuildCommand extends FlutterCommand {
   TestWebBuildCommand({ bool verboseHelp = false }) :

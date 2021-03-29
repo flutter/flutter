@@ -190,7 +190,7 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   /// Typically the pattern is a regular expression, as in:
   ///
   /// ```dart
-  /// var onlyDigits = FilteringTextInputFormatter.allow(RegExp(r'[0-9]'));
+  /// FilteringTextInputFormatter onlyDigits = FilteringTextInputFormatter.allow(RegExp(r'[0-9]'));
   /// ```
   /// {@end-tool}
   ///
@@ -199,7 +199,7 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   /// [String] can be used:
   ///
   /// ```dart
-  /// var noTabs = FilteringTextInputFormatter.deny('\t');
+  /// FilteringTextInputFormatter noTabs = FilteringTextInputFormatter.deny('\t');
   /// ```
   /// {@end-tool}
   final Pattern filterPattern;
@@ -530,7 +530,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
 
 TextEditingValue _selectionAwareTextManipulation(
   TextEditingValue value,
-  String substringManipulation(String substring),
+  String Function(String substring) substringManipulation,
 ) {
   final int selectionStartIndex = value.selection.start;
   final int selectionEndIndex = value.selection.end;

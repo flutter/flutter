@@ -18,7 +18,6 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
@@ -37,13 +36,13 @@ import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
 import 'common.dart';
+import 'fake_http_client.dart';
+import 'fake_process_manager.dart';
 import 'fakes.dart';
-import 'mocks.dart';
 import 'throwing_pub.dart';
 
 export 'package:flutter_tools/src/base/context.dart' show Generator;
-export 'package:flutter_tools/src/base/process.dart' show ProcessManager;
-export 'fake_process_manager.dart' show FakeProcessManager, FakeCommand;
+export 'fake_process_manager.dart' show ProcessManager, FakeProcessManager, FakeCommand;
 
 /// Return the test logger. This assumes that the current Logger is a BufferLogger.
 BufferLogger get testLogger => context.get<Logger>() as BufferLogger;
@@ -56,7 +55,7 @@ typedef ContextInitializer = void Function(AppContext testContext);
 @isTest
 void testUsingContext(
   String description,
-  dynamic testMethod(), {
+  dynamic Function() testMethod, {
   Map<Type, Generator> overrides = const <Type, Generator>{},
   bool initializeFlutterRoot = true,
   String testOn,
@@ -112,8 +111,8 @@ void testUsingContext(
           Config: () => buildConfig(globals.fs),
           DeviceManager: () => FakeDeviceManager(),
           Doctor: () => FakeDoctor(globals.logger),
-          FlutterVersion: () => MockFlutterVersion(),
-          HttpClient: () => MockHttpClient(),
+          FlutterVersion: () => FakeFlutterVersion(),
+          HttpClient: () => FakeHttpClient.any(),
           IOSSimulatorUtils: () {
             final MockIOSSimulatorUtils mock = MockIOSSimulatorUtils();
             when(mock.getAttachedDevices()).thenAnswer((Invocation _) async => <IOSSimulator>[]);
@@ -175,7 +174,7 @@ void testUsingContext(
       // If a test needs a BotDetector that does not always return true, it
       // can provide the AlwaysFalseBotDetector in the overrides, or its own
       // BotDetector implementation in the overrides.
-      BotDetector: overrides[BotDetector] ?? () => const AlwaysTrueBotDetector(),
+      BotDetector: overrides[BotDetector] ?? () => const FakeBotDetector(true),
     });
   }, testOn: testOn, skip: skip, timeout: timeout);
 }
@@ -338,16 +337,16 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   bool get isInstalled => true;
 
   @override
-  String get versionText => 'Xcode 11.0';
+  String get versionText => 'Xcode 12.0.1';
 
   @override
-  int get majorVersion => 11;
+  int get majorVersion => 12;
 
   @override
   int get minorVersion => 0;
 
   @override
-  int get patchVersion => 0;
+  int get patchVersion => 1;
 
   @override
   Future<Map<String, String>> getBuildSettings(
@@ -376,10 +375,6 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   @override
   List<String> xcrunCommand() => <String>['xcrun'];
 }
-
-class MockFlutterVersion extends Mock implements FlutterVersion {}
-
-class MockHttpClient extends Mock implements HttpClient {}
 
 class MockCrashReporter extends Mock implements CrashReporter {}
 

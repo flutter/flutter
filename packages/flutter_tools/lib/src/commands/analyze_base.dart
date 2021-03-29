@@ -6,6 +6,7 @@
 
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 import 'package:yaml/yaml.dart' as yaml;
 
 import '../artifacts.dart';
@@ -13,7 +14,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
-import '../base/process.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
@@ -86,6 +86,7 @@ abstract class AnalyzeBase {
   String get sdkPath => argResults['dart-sdk'] as String ?? artifacts.getArtifactPath(Artifact.engineDartSdkPath);
   bool get isBenchmarking => argResults['benchmark'] as bool;
   bool get isDartDocs => argResults['dartdocs'] as bool;
+  String get protocolTrafficLog => argResults['protocol-traffic-log'] as String;
 
   static int countMissingDartDocs(List<AnalysisError> errors) {
     return errors.where((AnalysisError error) {

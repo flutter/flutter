@@ -200,7 +200,7 @@ String generatePluralMethod(Message message, AppResourceBundle bundle) {
     '=2': 'two',
     'few': 'few',
     'many': 'many',
-    'other': 'other'
+    'other': 'other',
   };
 
   final List<String> pluralLogicArgs = <String>[];
@@ -211,9 +211,19 @@ String generatePluralMethod(Message message, AppResourceBundle bundle) {
       String argValue = generateString(match.group(2));
       for (final Placeholder placeholder in message.placeholders) {
         if (placeholder != countPlaceholder && placeholder.requiresFormatting) {
-          argValue = argValue.replaceAll('#${placeholder.name}#', '\${${placeholder.name}String}');
+          argValue = argValue.replaceAll(
+            '#${placeholder.name}#',
+            _needsCurlyBracketStringInterpolation(argValue, placeholder.name)
+              ? '\${${placeholder.name}String}'
+              : '\$${placeholder.name}String'
+          );
         } else {
-          argValue = argValue.replaceAll('#${placeholder.name}#', '\${${placeholder.name}}');
+          argValue = argValue.replaceAll(
+            '#${placeholder.name}#',
+            _needsCurlyBracketStringInterpolation(argValue, placeholder.name)
+              ? '\${${placeholder.name}}'
+              : '\$${placeholder.name}'
+          );
         }
       }
       pluralLogicArgs.add('      ${pluralIds[pluralKey]}: $argValue');
@@ -238,14 +248,61 @@ String generatePluralMethod(Message message, AppResourceBundle bundle) {
     .replaceAll('@(none)\n', '');
 }
 
+bool _needsCurlyBracketStringInterpolation(String messageString, String placeholder) {
+  final int placeholderIndex = messageString.indexOf(placeholder);
+  // This means that this message does not contain placeholders/parameters,
+  // since one was not found in the message.
+  if (placeholderIndex == -1) {
+    return false;
+  }
+
+  final bool isPlaceholderEndOfSubstring = placeholderIndex + placeholder.length + 2 == messageString.length;
+
+  if (placeholderIndex > 2 && !isPlaceholderEndOfSubstring) {
+    // Normal case
+    // Examples:
+    // "'The number of {hours} elapsed is: 44'" // no curly brackets.
+    // "'哈{hours}哈'" // no curly brackets.
+    // "'m#hours#m'" // curly brackets.
+    // "'I have to work _#hours#_' sometimes." // curly brackets.
+    final RegExp commonCaseRE = RegExp('[^a-zA-Z_][#{]$placeholder[#}][^a-zA-Z_]');
+    return !commonCaseRE.hasMatch(messageString);
+  } else if (placeholderIndex == 2) {
+    // Example:
+    // "'{hours} elapsed.'" // no curly brackets
+    // '#placeholder# ' // no curly brackets
+    // '#placeholder#m' // curly brackets
+    final RegExp startOfString = RegExp('[#{]$placeholder[#}][^a-zA-Z_]');
+    return !startOfString.hasMatch(messageString);
+  } else {
+    // Example:
+    // "'hours elapsed: {hours}'"
+    // "'Time elapsed: {hours}'" // no curly brackets
+    // ' #placeholder#' // no curly brackets
+    // 'm#placeholder#' // curly brackets
+    final RegExp endOfString = RegExp('[^a-zA-Z_][#{]$placeholder[#}]');
+    return !endOfString.hasMatch(messageString);
+  }
+}
+
 String generateMethod(Message message, AppResourceBundle bundle) {
   String generateMessage() {
     String messageValue = generateString(bundle.translationFor(message));
     for (final Placeholder placeholder in message.placeholders) {
       if (placeholder.requiresFormatting) {
-        messageValue = messageValue.replaceAll('{${placeholder.name}}', '\${${placeholder.name}String}');
+        messageValue = messageValue.replaceAll(
+          '{${placeholder.name}}',
+          _needsCurlyBracketStringInterpolation(messageValue, placeholder.name)
+            ? '\${${placeholder.name}String}'
+            : '\$${placeholder.name}String'
+        );
       } else {
-        messageValue = messageValue.replaceAll('{${placeholder.name}}', '\${${placeholder.name}}');
+        messageValue = messageValue.replaceAll(
+          '{${placeholder.name}}',
+          _needsCurlyBracketStringInterpolation(messageValue, placeholder.name)
+            ? '\${${placeholder.name}}'
+            : '\$${placeholder.name}'
+        );
       }
     }
 
@@ -420,13 +477,13 @@ String _generateLookupBody(
   bool useDeferredLoading,
   String fileName,
 ) {
-  final String Function(LocaleInfo) generateSwitchClauseTemplate = (LocaleInfo locale) {
+  String generateSwitchClauseTemplate(LocaleInfo locale) {
     return (useDeferredLoading ?
       switchClauseDeferredLoadingTemplate : switchClauseTemplate)
       .replaceAll('@(localeClass)', '$className${locale.camelCase()}')
       .replaceAll('@(appClass)', className)
       .replaceAll('@(library)', '${fileName}_${locale.languageCode}');
-  };
+  }
   return lookupBodyTemplate
     .replaceAll('@(lookupAllCodesSpecified)', _generateLookupByAllCodes(
       allBundles,
@@ -964,7 +1021,8 @@ class LocalizationsGenerator {
       .replaceAll('@(fileName)', fileName)
       .replaceAll('@(class)', '$className${locale.camelCase()}')
       .replaceAll('@(localeName)', locale.toString())
-      .replaceAll('@(methods)', methods.join('\n\n'));
+      .replaceAll('@(methods)', methods.join('\n\n'))
+      .replaceAll('@(requiresIntlImport)', _containsPluralMessage() ? "import 'package:intl/intl.dart' as intl;" : '');
   }
 
   String _generateSubclass(
@@ -1103,8 +1161,11 @@ class LocalizationsGenerator {
       .replaceAll('@(supportedLocales)', supportedLocalesCode.join(',\n    '))
       .replaceAll('@(supportedLanguageCodes)', supportedLanguageCodes.join(', '))
       .replaceAll('@(messageClassImports)', sortedClassImports.join('\n'))
-      .replaceAll('@(delegateClass)', delegateClass);
+      .replaceAll('@(delegateClass)', delegateClass)
+      .replaceAll('@(requiresIntlImport)', _containsPluralMessage() ? "import 'package:intl/intl.dart' as intl;" : '');
   }
+
+  bool _containsPluralMessage() => _allMessages.any((Message message) => message.isPlural);
 
   void writeOutputFiles(Logger logger, { bool isFromYaml = false }) {
     // First, generate the string contents of all necessary files.

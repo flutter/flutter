@@ -7,6 +7,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import '../android/android_builder.dart';
 import '../android/android_sdk.dart';
@@ -20,6 +21,7 @@ import '../base/process.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
+import '../device_port_forwader.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 

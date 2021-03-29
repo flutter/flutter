@@ -155,7 +155,7 @@ void main() {
                     color: const Color(0xFF00FF00),
                   ),
                 ),
-                Container(
+                SizedBox(
                   width: 100.0,
                   height: 100.0,
                   child: GestureDetector(
@@ -252,7 +252,7 @@ void main() {
     }, variant: buttonVariant);
 
     testWidgets('cache render object', (WidgetTester tester) async {
-      final GestureTapCallback inputCallback = () { };
+      void inputCallback() { }
 
       await tester.pumpWidget(
         Center(
@@ -858,9 +858,7 @@ void main() {
             textDirection: TextDirection.ltr,
             child: RawGestureDetector(
               key: key,
-              child: Container(
-                child: const Text('Text'),
-              ),
+              child: const Text('Text'),
             ),
           ),
         );
@@ -910,7 +908,7 @@ class ButtonVariant extends TestVariant<int> {
   const ButtonVariant({
     required this.values,
     required this.descriptions,
-  }) : assert(values.length != 0); // ignore: prefer_is_empty
+  }) : assert(values.length != 0);
 
   @override
   final List<int> values;
