@@ -338,7 +338,7 @@ class _MacOSUtils extends _PosixUtils {
         throwToolExit('sysctl not found. Try adding it to your PATH environment variable.');
       }
       final RunResult arm64Check =
-          _processUtils.runSync(<String>[sysctlPath!, 'hw.optional.arm64']);
+          _processUtils.runSync(<String>[sysctlPath, 'hw.optional.arm64']);
       // On arm64 stdout is "sysctl hw.optional.arm64: 1"
       // On x86 hw.optional.arm64 is unavailable and exits with 1.
       if (arm64Check.exitCode == 0 && arm64Check.stdout.trim().endsWith('1')) {
@@ -376,7 +376,7 @@ class _WindowsUtils extends OperatingSystemUtils {
   @override
   List<File> _which(String execName, { bool all = false }) {
     // `where` always returns all matches, not just the first one.
-    ProcessResult? result;
+    ProcessResult result;
     try {
       result = _processManager.runSync(<String>['where', execName]);
     } on ArgumentError {
@@ -388,10 +388,10 @@ class _WindowsUtils extends OperatingSystemUtils {
         'the terminal and/or IDE.'
       );
     }
-    if (result?.exitCode != 0) {
+    if (result.exitCode != 0) {
       return const <File>[];
     }
-    final List<String> lines = (result!.stdout as String).trim().split('\n');
+    final List<String> lines = (result.stdout as String).trim().split('\n');
     if (all) {
       return lines.map<File>((String path) => _fileSystem.file(path.trim())).toList();
     }

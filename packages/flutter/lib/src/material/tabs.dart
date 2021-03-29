@@ -1123,9 +1123,7 @@ class _TabBarState extends State<TabBar> {
   void _handleTap(int index) {
     assert(index >= 0 && index < widget.tabs.length);
     _controller!.animateTo(index);
-    if (widget.onTap != null) {
-      widget.onTap!(index);
-    }
+    widget.onTap?.call(index);
   }
 
   Widget _buildStyledTab(Widget child, bool selected, Animation<double> animation) {

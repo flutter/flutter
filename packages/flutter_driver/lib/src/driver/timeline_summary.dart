@@ -13,6 +13,7 @@ import 'percentile_utils.dart';
 import 'profiling_summarizer.dart';
 import 'scene_display_lag_summarizer.dart';
 import 'timeline.dart';
+import 'vsync_frame_lag_summarizer.dart';
 
 const JsonEncoder _prettyEncoder = JsonEncoder.withIndent('  ');
 
@@ -150,8 +151,16 @@ class TimelineSummary {
   ///   "99th_percentile_vsync_transitions_missed": The 90/99-th percentile
   ///   `vsync_transitions_missed` over the lag events.
   ///   See [SceneDisplayLagSummarizer.computePercentileVsyncTransitionsMissed].
+  /// * "average_vsync_frame_lag": Computes the average of the time between
+  ///   platform vsync signal and the engine frame process start time.
+  ///   See [VsyncFrameLagSummarizer.computeAverageVsyncFrameLag].
+  /// * "90th_percentile_vsync_frame_lag" and "99th_percentile_vsync_frame_lag":
+  ///   The 90/99-th percentile delay between platform vsync signal and engine
+  ///   frame process start time.
+  ///   See [VsyncFrameLagSummarizer.computePercentileVsyncFrameLag].
   Map<String, dynamic> get summaryJson {
     final SceneDisplayLagSummarizer sceneDisplayLagSummarizer = _sceneDisplayLagSummarizer();
+    final VsyncFrameLagSummarizer vsyncFrameLagSummarizer = _vsyncFrameLagSummarizer();
     final Map<String, dynamic> profilingSummary = _profilingSummarizer().summarize();
 
     final Map<String, dynamic> timelineSummary = <String, dynamic>{
@@ -182,6 +191,9 @@ class TimelineSummary {
       'average_vsync_transitions_missed': sceneDisplayLagSummarizer.computeAverageVsyncTransitionsMissed(),
       '90th_percentile_vsync_transitions_missed': sceneDisplayLagSummarizer.computePercentileVsyncTransitionsMissed(90.0),
       '99th_percentile_vsync_transitions_missed': sceneDisplayLagSummarizer.computePercentileVsyncTransitionsMissed(99.0),
+      'average_vsync_frame_lag': vsyncFrameLagSummarizer.computeAverageVsyncFrameLag(),
+      '90th_percentile_vsync_frame_lag': vsyncFrameLagSummarizer.computePercentileVsyncFrameLag(90.0),
+      '99th_percentile_vsync_frame_lag': vsyncFrameLagSummarizer.computePercentileVsyncFrameLag(99.0),
     };
 
     timelineSummary.addAll(profilingSummary);
@@ -321,4 +333,6 @@ class TimelineSummary {
   ProfilingSummarizer _profilingSummarizer() => ProfilingSummarizer.fromEvents(_extractEventsWithNames(kProfilingEvents));
 
   List<Duration> _extractFrameDurations() => _extractBeginEndEvents(kBuildFrameEventName);
+
+  VsyncFrameLagSummarizer _vsyncFrameLagSummarizer() => VsyncFrameLagSummarizer(_extractEventsWithNames(kVsyncTimelineEventNames));
 }
