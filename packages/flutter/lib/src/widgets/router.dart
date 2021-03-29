@@ -704,9 +704,9 @@ class _RouterScope extends InheritedWidget {
 
   final ValueListenable<RouteInformation?>? routeInformationProvider;
   final BackButtonDispatcher? backButtonDispatcher;
-  final RouteInformationParser<Object>? routeInformationParser;
-  final RouterDelegate<Object> routerDelegate;
-  final _RouterState<Object> routerState;
+  final RouteInformationParser<dynamic>? routeInformationParser;
+  final RouterDelegate<dynamic> routerDelegate;
+  final _RouterState<dynamic> routerState;
 
   @override
   bool updateShouldNotify(_RouterScope oldWidget) {
