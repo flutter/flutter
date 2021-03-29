@@ -151,19 +151,26 @@ enum MaterialTapTargetSize {
 ///
 /// {@tool snippet}
 ///
-/// This sample creates a [MaterialApp] widget that stores `ThemeData` and
-/// passes the `ThemeData` to descendant widgets. The [AppBar] widget uses the
-/// [primaryColor] to create a blue background. The [Text] widget uses the
-/// [TextTheme.bodyText2] to create purple text. The [FloatingActionButton] widget
-/// uses the [accentColor] to create a green background.
+/// This sample creates a [MaterialApp] with a [Theme] whose
+/// [ColorScheme] is based on [Colors.blue], but with the color
+/// scheme's [ColorScheme.secondary] color overridden to be green. The
+/// [AppBar] widget uses the color scheme's [ColorScheme.primary] as
+/// its default background color and the [FloatingActionButton] widget
+/// uses the color scheme's [ColorScheme.secondary] for its default
+/// background. By default, the [Text] widget uses
+/// [TextTheme.bodyText2], and the color of that [TextStyle] has been
+/// changed to purple.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/material_app_theme_data.png)
 ///
 /// ```dart
 /// MaterialApp(
 ///   theme: ThemeData(
-///     primaryColor: Colors.blue,
-///     accentColor: Colors.green,
+///     colorScheme: ColorScheme.fromSwatch(
+///       primarySwatch: Colors.blue,
+///     ).copyWith(
+///       secondary: Colors.green,
+///     ),
 ///     textTheme: const TextTheme(bodyText2: TextStyle(color: Colors.purple)),
 ///   ),
 ///   home: Scaffold(

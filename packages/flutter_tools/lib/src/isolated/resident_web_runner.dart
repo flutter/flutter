@@ -25,6 +25,7 @@ import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/targets/web.dart';
+import '../cache.dart';
 import '../dart/language_version.dart';
 import '../devfs.dart';
 import '../device.dart';
@@ -502,8 +503,10 @@ class ResidentWebRunner extends ResidentRunner {
           urlTunneller: _urlTunneller,
           useSseForDebugProxy: debuggingOptions.webUseSseForDebugProxy,
           useSseForDebugBackend: debuggingOptions.webUseSseForDebugBackend,
+          useSseForInjectedClient: debuggingOptions.webUseSseForInjectedClient,
           buildInfo: debuggingOptions.buildInfo,
           enableDwds: _enableDwds,
+          enableDds: !debuggingOptions.disableDds,
           entrypoint: _fileSystem.file(target).uri,
           expressionCompiler: expressionCompiler,
           chromiumLauncher: _chromiumLauncher,
@@ -562,7 +565,6 @@ class ResidentWebRunner extends ResidentRunner {
       appFailedToStart();
       rethrow;
     }
-    return 0;
   }
 
   @override
@@ -677,6 +679,7 @@ class ResidentWebRunner extends ResidentRunner {
       final LanguageVersion languageVersion =  determineLanguageVersion(
         _fileSystem.file(mainUri),
         packageConfig[flutterProject.manifest.appName],
+        Cache.flutterRoot,
       );
 
       final String entrypoint = <String>[
