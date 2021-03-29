@@ -465,20 +465,22 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
     this.shift = false,
     this.alt = false,
     this.meta = false,
-  }) : // The enumerated check is cumbersome but much needed since const
-       // constructors can not call functions such as `Set.contain`.
-       assert(trigger != LogicalKeyboardKey.control
-           && trigger != LogicalKeyboardKey.controlLeft
-           && trigger != LogicalKeyboardKey.controlRight
-           && trigger != LogicalKeyboardKey.shift
-           && trigger != LogicalKeyboardKey.shiftLeft
-           && trigger != LogicalKeyboardKey.shiftRight
-           && trigger != LogicalKeyboardKey.alt
-           && trigger != LogicalKeyboardKey.altLeft
-           && trigger != LogicalKeyboardKey.altRight
-           && trigger != LogicalKeyboardKey.meta
-           && trigger != LogicalKeyboardKey.metaLeft
-           && trigger != LogicalKeyboardKey.metaRight);
+  }) : // The enumerated check with `identical` is cumbersome but much needed
+       // since const constructors can not call functions such as `==` or
+       // `Set.contain`. Checking with `identical` is sufficient since
+       // `LogicalKeyboardKey` only provides cached values.
+       assert(!identical(trigger, LogicalKeyboardKey.control)
+           && !identical(trigger, LogicalKeyboardKey.controlLeft)
+           && !identical(trigger, LogicalKeyboardKey.controlRight)
+           && !identical(trigger, LogicalKeyboardKey.shift)
+           && !identical(trigger, LogicalKeyboardKey.shiftLeft)
+           && !identical(trigger, LogicalKeyboardKey.shiftRight)
+           && !identical(trigger, LogicalKeyboardKey.alt)
+           && !identical(trigger, LogicalKeyboardKey.altLeft)
+           && !identical(trigger, LogicalKeyboardKey.altRight)
+           && !identical(trigger, LogicalKeyboardKey.meta)
+           && !identical(trigger, LogicalKeyboardKey.metaLeft)
+           && !identical(trigger, LogicalKeyboardKey.metaRight));
 
   /// The non-modifier key of the shortcut that is pressed after all modifiers
   /// to activate the shortcut.
