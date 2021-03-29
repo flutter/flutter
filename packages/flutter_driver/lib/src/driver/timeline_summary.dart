@@ -200,8 +200,11 @@ class TimelineSummary {
     return timelineSummary;
   }
 
-  /// Writes all of the recorded timeline data to a file, and a summary of those
-  /// those events to `$traceName.timeline_summary.json`.
+  /// Writes all of the recorded timeline data to a file.
+  ///
+  /// By default, this will dump [summaryJson] to a companion file named
+  /// `$traceName.timeline_summary.json`. If you want to skip the summary, set
+  /// the `includeSummary` parameter to false.
   ///
   /// See also:
   ///
@@ -210,13 +213,16 @@ class TimelineSummary {
     String traceName, {
     String? destinationDirectory,
     bool pretty = false,
+    bool includeSummary = true,
   }) async {
     destinationDirectory ??= testOutputsDirectory;
     await fs.directory(destinationDirectory).create(recursive: true);
     final File file = fs.file(path.join(destinationDirectory, '$traceName.timeline.json'));
     await file.writeAsString(_encodeJson(_timeline.json, pretty));
 
-    writeSummaryToFile(traceName, destinationDirectory: destinationDirectory, pretty: pretty);
+    if (includeSummary) {
+      _writeSummaryToFile(traceName, destinationDirectory: destinationDirectory, pretty: pretty);
+    }
   }
 
   /// Writes [summaryJson] to a file.
