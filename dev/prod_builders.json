@@ -121,10 +121,16 @@
       "flaky": false
     },
     {
-      "name": "Linux docs",
+      "name": "Linux docs_test",
       "repo": "flutter",
-      "task_name": "linux_docs",
-      "flaky": false
+      "task_name": "linux_docs_test",
+      "flaky": true
+    },
+    {
+      "name": "Linux docs_publish",
+      "repo": "flutter",
+      "task_name": "linux_docs_publish",
+      "flaky": true
     },
     {
       "name": "Linux build_tests_1_2",
