@@ -1310,7 +1310,7 @@ class EditableText extends StatefulWidget {
   /// A [ScrollBehavior] that will be applied to this widget individually.
   ///
   /// Defaults to null, wherein the inherited [ScrollBehavior] is copied and
-  /// modified to alter the viewport decoration, like [Scrollbars].
+  /// modified to alter the viewport decoration, like [Scrollbar]s.
   /// {@endtemplate}
   ///
   /// [ScrollBehavior]s also provide [ScrollPhysics]. If an explicit

@@ -32,7 +32,7 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 /// To add a scrollbar to a [ScrollView], simply wrap the scroll view widget in
 /// a [CupertinoScrollbar] widget.
 ///
-/// {@macro flutter.widgets.Scrollbar}
+/// {@macro flutter.widgets.scrollbar}
 ///
 /// When dragging a [CupertinoScrollbar] thumb, the thickness and radius will
 /// animate from [thickness] and [radius] to [thicknessWhileDragging] and

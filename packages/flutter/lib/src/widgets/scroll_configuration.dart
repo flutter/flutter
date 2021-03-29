@@ -53,8 +53,8 @@ class ScrollBehavior {
   // This is used to maintain subclass behavior to allow for graceful migration.
   final bool _useDecoration;
 
-  /// Creates a copy of the provided [delegate] ScrollBehavior, making it possible to
-  /// easily toggle [scrollbars] and [overscroll] effects.
+  /// Creates a copy of the provided `delegate` ScrollBehavior, making it possible to
+  /// easily toggle `scrollbars` and `overscroll` effects.
   ///
   /// This is used by widgets like [PageView] and [ListWheelScrollView] to
   /// override the current [ScrollBehavior] and manage how they are decorated.
@@ -292,6 +292,8 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     return delegate.velocityTrackerBuilder(context);
   }
 
+  @override
+  String toString() => objectRuntimeType(this, '_WrappedScrollBehavior');
 }
 
 /// Controls how [Scrollable] widgets behave in a subtree.

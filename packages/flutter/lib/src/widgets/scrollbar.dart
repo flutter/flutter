@@ -572,7 +572,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// To add a scrollbar to a [ScrollView], like a [ListView] or a
 /// [CustomScrollView], wrap the scroll view widget in a [RawScrollbar] widget.
 ///
-/// {@template flutter.widgets.Scrollbar}
+/// {@template flutter.widgets.scrollbar}
 /// A scrollbar thumb indicates which portion of a [ScrollView] is actually
 /// visible.
 ///
