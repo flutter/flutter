@@ -55,4 +55,26 @@ public class FlutterEngineCacheTest {
     // --- Verify Results ---
     assertNull(cache.get("my_flutter_engine"));
   }
+
+  @Test
+  public void itRemovesAllFlutterEngines() {
+    // --- Test Setup ---
+    FlutterEngine flutterEngine = mock(FlutterEngine.class);
+    FlutterEngine flutterEngine2 = mock(FlutterEngine.class);
+    FlutterEngineCache cache = new FlutterEngineCache();
+
+    // --- Execute Test ---
+    cache.put("my_flutter_engine", flutterEngine);
+    cache.put("my_flutter_engine_2", flutterEngine2);
+
+    // --- Verify Results ---
+    assertEquals(flutterEngine, cache.get("my_flutter_engine"));
+    assertEquals(flutterEngine2, cache.get("my_flutter_engine_2"));
+
+    cache.clear();
+
+    // --- Verify Results ---
+    assertNull(cache.get("my_flutter_engine"));
+    assertNull(cache.get("my_flutter_engine_2"));
+  }
 }
