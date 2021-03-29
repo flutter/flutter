@@ -3148,8 +3148,8 @@ void main() {
               ],
               onChanged: (String? newValue) {
                 setState(() {
-                value = newValue;
-              });
+                  value = newValue;
+                });
               },
             ),
           ),
