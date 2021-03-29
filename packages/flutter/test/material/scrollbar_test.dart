@@ -1276,27 +1276,24 @@ void main() {
     expect(scrollController.offset, scrollAmount);
   });
 
-  testWidgets('Tapping the track area pages the Scroll View', (WidgetTester tester) async {
+  testWidgets('Simultaneous dragging and pointer scrolling does not cause a crash', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/70105
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(),
+      MaterialApp(
+        home: PrimaryScrollController(
+          controller: scrollController,
           child: Scrollbar(
             interactive: true,
             isAlwaysShown: true,
             controller: scrollController,
-            child: SingleChildScrollView(
-              controller: scrollController,
-              child: const SizedBox(width: 1000.0, height: 1000.0),
+            child: const SingleChildScrollView(
+                child: SizedBox(width: 4000.0, height: 4000.0)
             ),
           ),
         ),
       ),
     );
-
     await tester.pumpAndSettle();
     expect(scrollController.offset, 0.0);
     expect(
@@ -1313,95 +1310,132 @@ void main() {
           color: Colors.transparent,
         )
         ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 360.0),
+          rect: getStartingThumbRect(isAndroid: true),
           color: _kAndroidThumbIdleColor,
         ),
     );
-    // Pointer scrolls that happen while dragging the scrollbar at the same time
-    // should not trigger a crash.
-    // Start dragging on the scrollbar with the mouse
+
+    // Drag the thumb down to scroll down.
+    const double scrollAmount = 10.0;
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: _kAndroidTrackDimensions,
+          color: Colors.transparent,
+        )
+        ..line(
+          p1: _kTrackBorderPoint1,
+          p2: _kTrackBorderPoint2,
+          strokeWidth: 1.0,
+          color: Colors.transparent,
+        )
+        ..rect(
+          rect: getStartingThumbRect(isAndroid: true),
+          // Drag color
+          color: const Color(0x99000000),
+        ),
+    );
+
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, greaterThan(10.0));
+    final double previousOffset = scrollController.offset;
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
+          color: Colors.transparent,
+        )
+        ..line(
+          p1: const Offset(796.0, 0.0),
+          p2: const Offset(796.0, 600.0),
+          strokeWidth: 1.0,
+          color: Colors.transparent,
+        )
+        ..rect(
+          rect: const Rect.fromLTRB(796.0, 10.0, 800.0, 100.0),
+          color: const Color(0x99000000),
+        ),
+    );
+
+    // Execute a pointer scroll while dragging (drag gesture has not come up yet)
     final TestPointer pointer = TestPointer(1, ui.PointerDeviceKind.mouse);
-    pointer.hover(const Offset(794.0, 5.0));
-    print('going down');
-    pointer.down(const Offset(794.0, 5.0));
-    print('going to move');
-    pointer.move(const Offset(794.0, 15.0));
-
+    pointer.hover(const Offset(798.0, 15.0));
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 20.0)));
     await tester.pumpAndSettle();
-    // Dragging the scrollbar changed the offset
-    expect(pointer.location, const Offset(794.0, 15.0));
-    expect(scrollController.offset, greaterThan(10.0));
-    expect(
-      find.byType(Scrollbar),
-      paints
-        ..rect(
-          rect: _kAndroidTrackDimensions,
-          color: Colors.transparent,
-        )
-        ..line(
-          p1: _kTrackBorderPoint1,
-          p2: _kTrackBorderPoint2,
-          strokeWidth: 1.0,
-          color: Colors.transparent,
-        )
-        ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 360.0),
-          color: _kAndroidThumbIdleColor,
-        ),
-    );
-
-    // Execute a pointer scroll while dragging (pointer drag has not come up yet)
-    pointer.scroll(const Offset(0.0, 20.0));
-
-    await tester.pumpAndSettle();
-    // Scrolling while holding the drag on the scrollbar adn still hovered over
+    // Scrolling while holding the drag on the scrollbar and still hovered over
     // the scrollbar should not have changed the scroll offset.
-    expect(pointer.location, const Offset(794.0, 5.0));
-    expect(scrollController.offset, greaterThan(10.0));
+    expect(pointer.location, const Offset(798.0, 15.0));
+    expect(scrollController.offset, previousOffset);
     expect(
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: _kAndroidTrackDimensions,
+          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
           color: Colors.transparent,
         )
         ..line(
-          p1: _kTrackBorderPoint1,
-          p2: _kTrackBorderPoint2,
+          p1: const Offset(796.0, 0.0),
+          p2: const Offset(796.0, 600.0),
           strokeWidth: 1.0,
           color: Colors.transparent,
         )
         ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 360.0),
-          color: _kAndroidThumbIdleColor,
+          rect: const Rect.fromLTRB(796.0, 10.0, 800.0, 100.0),
+          color: const Color(0x99000000),
         ),
     );
 
     // Drag is still being held, move pointer to be hovering over another area
     // of the scrollable (not over the scrollbar) and execute another pointer scroll
-    pointer.move(const Offset(10.0, 10.0));
-    pointer.scroll(const Offset(0.0, 20.0));
-
+    pointer.hover(tester.getCenter(find.byType(SingleChildScrollView)));
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, -70.0)));
     await tester.pumpAndSettle();
     // Scrolling while holding the drag on the scrollbar changed the offset
-    expect(pointer.location, const Offset(794.0, 5.0));
-    expect(scrollController.offset, greaterThan(10.0));
+    expect(pointer.location, const Offset(400.0, 300.0));
+    expect(scrollController.offset, 0.0);
     expect(
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: _kAndroidTrackDimensions,
+          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
           color: Colors.transparent,
         )
         ..line(
-          p1: _kTrackBorderPoint1,
-          p2: _kTrackBorderPoint2,
+          p1: const Offset(796.0, 0.0),
+          p2: const Offset(796.0, 600.0),
           strokeWidth: 1.0,
           color: Colors.transparent,
         )
         ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 360.0),
-          color: _kAndroidThumbIdleColor,
+          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 90.0),
+          color: const Color(0x99000000),
+        ),
+    );
+
+    await dragScrollbarGesture.up();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
+          color: Colors.transparent,
+        )
+        ..line(
+          p1: const Offset(796.0, 0.0),
+          p2: const Offset(796.0, 600.0),
+          strokeWidth: 1.0,
+          color: Colors.transparent,
+        )
+        ..rect(
+          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 90.0),
+          color: const Color(0x99000000),
         ),
     );
   });
