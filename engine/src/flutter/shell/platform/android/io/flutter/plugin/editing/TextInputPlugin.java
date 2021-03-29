@@ -9,7 +9,6 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.text.Editable;
 import android.text.InputType;
 import android.util.SparseArray;
@@ -22,7 +21,6 @@ import android.view.autofill.AutofillValue;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
-import android.view.inputmethod.InputMethodSubtype;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -49,7 +47,6 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
   @Nullable private InputConnection lastInputConnection;
   @NonNull private PlatformViewsController platformViewsController;
   @Nullable private Rect lastClientRect;
-  private final boolean restartAlwaysRequired;
   private ImeSyncDeferringInsetsCallback imeSyncCallback;
   private AndroidKeyProcessor keyProcessor;
 
@@ -161,7 +158,6 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
 
     this.platformViewsController = platformViewsController;
     this.platformViewsController.attachTextInputPlugin(this);
-    restartAlwaysRequired = isRestartAlwaysRequired();
   }
 
   @NonNull
@@ -417,16 +413,45 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     mRestartInputPending = false;
   }
 
+  private static boolean composingChanged(
+      TextInputChannel.TextEditState before, TextInputChannel.TextEditState after) {
+    final int composingRegionLength = before.composingEnd - before.composingStart;
+    if (composingRegionLength != after.composingEnd - after.composingStart) {
+      return true;
+    }
+    for (int index = 0; index < composingRegionLength; index++) {
+      if (before.text.charAt(index + before.composingStart)
+          != after.text.charAt(index + after.composingStart)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   // Called by the text input channel to update the text input plugin with the
   // latest TextEditState from the framework.
   @VisibleForTesting
   void setTextInputEditingState(View view, TextInputChannel.TextEditState state) {
+    if (!mRestartInputPending
+        && mLastKnownFrameworkTextEditingState != null
+        && mLastKnownFrameworkTextEditingState.hasComposing()) {
+      // Also restart input if the framework (or the developer) decides to
+      // change the composing region by itself (which is discouraged). Many IMEs
+      // don't expect editors to commit composing text, so a restart is needed
+      // to reset their internal states.
+      mRestartInputPending = composingChanged(mLastKnownFrameworkTextEditingState, state);
+      if (mRestartInputPending) {
+        Log.w(
+            TAG,
+            "Changing the content within the the composing region may cause the input method to behave strangely, and is therefore discouraged. See https://github.com/flutter/flutter/issues/78827 for more details");
+      }
+    }
+
     mLastKnownFrameworkTextEditingState = state;
     mEditable.setEditingState(state);
 
-    // Restart if there is a pending restart or the device requires a force restart
-    // (see isRestartAlwaysRequired). Restarting will also update the selection.
-    if (restartAlwaysRequired || mRestartInputPending) {
+    // Restart if needed. Restarting will also update the selection.
+    if (mRestartInputPending) {
       mImm.restartInput(view);
       mRestartInputPending = false;
     }
@@ -474,32 +499,6 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
             (int) (minMax[2] * density),
             (int) Math.ceil(minMax[1] * density),
             (int) Math.ceil(minMax[3] * density));
-  }
-
-  // Samsung's Korean keyboard has a bug where it always attempts to combine characters based on
-  // its internal state, ignoring if and when the cursor is moved programmatically. The same bug
-  // also causes non-korean keyboards to occasionally duplicate text when tapping in the middle
-  // of existing text to edit it.
-  //
-  // Fully restarting the IMM works around this because it flushes the keyboard's internal state
-  // and stops it from trying to incorrectly combine characters. However this also has some
-  // negative performance implications, so we don't want to apply this workaround in every case.
-  @SuppressLint("NewApi") // New API guard is inline, the linter can't see it.
-  @SuppressWarnings("deprecation")
-  private boolean isRestartAlwaysRequired() {
-    InputMethodSubtype subtype = mImm.getCurrentInputMethodSubtype();
-    // Impacted devices all shipped with Android Lollipop or newer.
-    if (subtype == null
-        || Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP
-        || !Build.MANUFACTURER.equals("samsung")) {
-      return false;
-    }
-    String keyboardName =
-        Settings.Secure.getString(
-            mView.getContext().getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
-    // The Samsung keyboard is called "com.sec.android.inputmethod/.SamsungKeypad" but look
-    // for "Samsung" just in case Samsung changes the name of the keyboard.
-    return keyboardName.contains("Samsung");
   }
 
   @VisibleForTesting
@@ -572,15 +571,14 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     final int selectionEnd = mEditable.getSelectionEnd();
     final int composingStart = mEditable.getComposingStart();
     final int composingEnd = mEditable.getComposingEnd();
-    // The framework needs to send value first.
     final boolean skipFrameworkUpdate =
+        // The framework needs to send its editing state first.
         mLastKnownFrameworkTextEditingState == null
             || (mEditable.toString().equals(mLastKnownFrameworkTextEditingState.text)
                 && selectionStart == mLastKnownFrameworkTextEditingState.selectionStart
                 && selectionEnd == mLastKnownFrameworkTextEditingState.selectionEnd
                 && composingStart == mLastKnownFrameworkTextEditingState.composingStart
                 && composingEnd == mLastKnownFrameworkTextEditingState.composingEnd);
-    // Skip if we're currently setting
     if (!skipFrameworkUpdate) {
       Log.v(TAG, "send EditingState to flutter: " + mEditable.toString());
       textInputChannel.updateEditingState(
