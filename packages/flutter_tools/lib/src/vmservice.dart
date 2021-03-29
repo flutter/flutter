@@ -265,13 +265,13 @@ Future<vm_service.VmService> setUpVmService(
     registrationRequests.add(vmService.registerService('flutterGetSkSL', 'Flutter Tools'));
   }
   if (printStructuredErrorLogMethod != null) {
-    try {
-      await vmService.streamListen(vm_service.EventStreams.kExtension);
-    } on vm_service.RPCError {
-      // It is safe to ignore this error because we expect an error to be
-      // thrown if we're already subscribed.
-    }
     vmService.onExtensionEvent.listen(printStructuredErrorLogMethod);
+    // It is safe to ignore this error because we expect an error to be
+    // thrown if we're already subscribed.
+    registrationRequests.add(vmService
+      .streamListen(vm_service.EventStreams.kExtension)
+      .catchError((dynamic error) {}, test: (dynamic error) => error is vm_service.RPCError)
+    );
   }
 
   try {

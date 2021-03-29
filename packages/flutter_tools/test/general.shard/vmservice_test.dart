@@ -153,6 +153,21 @@ void main() {
     ), throwsToolExit());
   });
 
+  testWithoutContext('VmService throws tool exit on service registration failure with awaited future.', () async {
+    final MockVMService mockVMService = MockVMService()
+      ..errorOnRegisterService = true;
+
+    await expectLater(() async => setUpVmService(
+      null,
+      null,
+      null,
+      null,
+      () async => 'hello',
+      (vm_service.Event event) { },
+      mockVMService,
+    ), throwsToolExit());
+  });
+
   testWithoutContext('VmService registers flutterPrintStructuredErrorLogMethod', () async {
     final MockVMService mockVMService = MockVMService();
     await setUpVmService(
