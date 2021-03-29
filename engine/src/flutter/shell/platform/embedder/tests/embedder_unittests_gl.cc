@@ -18,6 +18,7 @@
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/thread.h"
+#include "flutter/lib/ui/painting/image.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/platform/embedder/tests/embedder_assertions.h"
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
@@ -3397,6 +3398,49 @@ TEST_F(EmbedderTest, CompositorRenderTargetsNotRecycledWhenAvoidsCacheSet) {
   // Killing the engine should collect all the frames.
   engine.reset();
   ASSERT_EQ(context.GetCompositor().GetPendingBackingStoresCount(), 0u);
+}
+
+TEST_F(EmbedderTest, SnapshotRenderTargetScalesDownToDriverMax) {
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
+  builder.SetCompositor();
+
+  auto max_size = context.GetCompositor().GetGrContext()->maxRenderTargetSize();
+
+  context.AddIsolateCreateCallback([&]() {
+    Dart_Handle snapshot_large_scene = Dart_GetField(
+        Dart_RootLibrary(), tonic::ToDart("snapshot_large_scene"));
+    tonic::DartInvoke(snapshot_large_scene, {tonic::ToDart<int64_t>(max_size)});
+  });
+
+  fml::AutoResetWaitableEvent latch;
+  context.AddNativeCallback(
+      "SnapshotsCallback", CREATE_NATIVE_ENTRY(([&](Dart_NativeArguments args) {
+        auto get_arg = [&args](int index) {
+          Dart_Handle dart_image = Dart_GetNativeArgument(args, index);
+          Dart_Handle internal_image =
+              Dart_GetField(dart_image, tonic::ToDart("_image"));
+          return tonic::DartConverter<flutter::CanvasImage*>::FromDart(
+              internal_image);
+        };
+
+        CanvasImage* big_image = get_arg(0);
+        ASSERT_EQ(big_image->width(), max_size);
+        ASSERT_EQ(big_image->height(), max_size / 2);
+
+        CanvasImage* small_image = get_arg(1);
+        ASSERT_TRUE(ImageMatchesFixture("snapshot_large_scene.png",
+                                        small_image->image()));
+
+        latch.Signal();
+      })));
+
+  UniqueEngine engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  latch.Wait();
 }
 
 }  // namespace testing

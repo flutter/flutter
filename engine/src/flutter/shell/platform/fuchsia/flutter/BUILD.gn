@@ -835,6 +835,10 @@ fuchsia_test_archive("embedder_tests") {
       dest = "assets/scene_without_custom_compositor_with_xform.png"
     },
     {
+      path = "$root_gen_dir/flutter/shell/platform/embedder/assets/snapshot_large_scene.png"
+      dest = "assets/snapshot_large_scene.png"
+    },
+    {
       path = "$root_gen_dir/flutter/shell/platform/embedder/assets/verifyb143464703.png"
       dest = "assets/verifyb143464703.png"
     },
