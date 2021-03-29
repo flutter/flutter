@@ -736,7 +736,7 @@ class MaterialScrollBehavior extends ScrollBehavior {
         return GlowingOverscrollIndicator(
           child: child,
           axisDirection: details.direction,
-          color: theme.accentColor,
+          color: theme.colorScheme.secondary,
         );
     }
   }

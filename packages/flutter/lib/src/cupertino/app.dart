@@ -451,6 +451,12 @@ class CupertinoScrollBehavior extends ScrollBehavior {
   }
 
   @override
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
+    // No overscroll indicator.
+    return child;
+  }
+
+  @override
   ScrollPhysics getScrollPhysics(BuildContext context) {
     return const BouncingScrollPhysics();
   }
