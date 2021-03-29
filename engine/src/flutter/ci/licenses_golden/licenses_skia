@@ -1,4 +1,4 @@
-Signature: c8fc3c530b85b59e0eb2a3a3a8de5895
+Signature: 7bf27068935134807fbb934275a84eb0
 
 UNUSED LICENSES:
 
@@ -1429,6 +1429,10 @@ FILE: ../../../third_party/skia/site/user/api/METADATA
 FILE: ../../../third_party/skia/site/user/api/catalog.htm
 FILE: ../../../third_party/skia/site/user/modules/METADATA
 FILE: ../../../third_party/skia/site/user/modules/PathKit_effects.png
+FILE: ../../../third_party/skia/site2/_index.html
+FILE: ../../../third_party/skia/site2/about/_index.html
+FILE: ../../../third_party/skia/site2/config.toml
+FILE: ../../../third_party/skia/site2/featured-background.png
 FILE: ../../../third_party/skia/specs/web-img-decode/current/index.html
 FILE: ../../../third_party/skia/specs/web-img-decode/proposed/impl/impl.js
 FILE: ../../../third_party/skia/specs/web-img-decode/proposed/index.html
