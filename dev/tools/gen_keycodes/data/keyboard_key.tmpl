@@ -124,18 +124,31 @@ abstract class KeyboardKey with Diagnosticable {
 ///    keyboard events.
 @immutable
 class LogicalKeyboardKey extends KeyboardKey {
+  /// Creates a new LogicalKeyboardKey object for a key ID.
+  ///
+  /// Avoid using this constructor. Instead, use [LogicalKeyboardKey.forId], which
+  /// guarantees to return the same object for the same ID.
+  ///
+  /// The `debugName` will overwrite the computed value from [debugName] if not
+  /// null. This property will be deprecated soon. To save executable size, it is
+  /// recommended that the [debugName] be null in release mode. You can do this
+  /// by using the [kReleaseMode] constant.
+  ///
+  /// ```dart
+  /// const LogicalKeyboardKey(0x0010000000a, debugName: kReleaseMode ? null : 'Special Key')
+  /// ```
+  const LogicalKeyboardKey(this.keyId, {String? debugName})
+    : _debugName = debugName;
+
   /// A LogicalKeyboardKey object for a key ID.
   ///
   /// This factory constructor ensures that the same `keyId` always results
   /// in the identical instance. It looks up an object from the predefined values
   /// if possible, or construct a new one and cache it.
-  factory LogicalKeyboardKey(int keyId) {
+  factory LogicalKeyboardKey.forId(int keyId) {
     return findKeyByKeyId(keyId) ??
-      _additionalKeyPool.putIfAbsent(keyId, () => LogicalKeyboardKey._(keyId));
+      _additionalKeyPool.putIfAbsent(keyId, () => LogicalKeyboardKey(keyId));
   }
-
-  /// Creates a LogicalKeyboardKey object for a key ID.
-  const LogicalKeyboardKey._(this.keyId);
 
   /// A unique code representing this key.
   ///
@@ -206,6 +219,7 @@ class LogicalKeyboardKey extends KeyboardKey {
         ?? '';
   }
 
+  final String? _debugName;
   /// The debug string to print for this keyboard key, which will be null in
   /// release mode.
   ///
@@ -220,6 +234,10 @@ class LogicalKeyboardKey extends KeyboardKey {
   String? get debugName {
     String? result;
     assert(() {
+      if (_debugName != null) {
+        result = _debugName;
+        return true;
+      }
       result = _keyLabels[keyId];
       if (result == null) {
         final String? unicodeKeyLabel = _unicodeKeyLabel(keyId);
@@ -467,18 +485,21 @@ class LogicalKeyboardKey extends KeyboardKey {
 ///    keyboard events.
 @immutable
 class PhysicalKeyboardKey extends KeyboardKey {
+  /// Creates a new PhysicalKeyboardKey object for a USB HID usage.
+  ///
+  /// Avoid using this constructor. Instead, use [PhysicalKeyboardKey.forId], which
+  /// guarantees to return the same object for the same ID.
+  const PhysicalKeyboardKey(this.usbHidUsage);
+
   /// A PhysicalKeyboardKey object for a USB HID usage.
   ///
   /// This factory constructor ensures that the same `usbHidUsage` always results
   /// in the identical instance. It looks up an object from the predefined values
   /// if possible, or construct a new one and cache it.
-  factory PhysicalKeyboardKey(int usbHidUsage) {
+  factory PhysicalKeyboardKey.forId(int usbHidUsage) {
     return findKeyByCode(usbHidUsage) ??
-      _additionalKeyPool.putIfAbsent(usbHidUsage, () => PhysicalKeyboardKey._(usbHidUsage));
+      _additionalKeyPool.putIfAbsent(usbHidUsage, () => PhysicalKeyboardKey(usbHidUsage));
   }
-
-  /// Creates a PhysicalKeyboardKey object for a USB HID usage.
-  const PhysicalKeyboardKey._(this.usbHidUsage);
 
   /// The unique USB HID usage ID of this physical key on the keyboard.
   ///
