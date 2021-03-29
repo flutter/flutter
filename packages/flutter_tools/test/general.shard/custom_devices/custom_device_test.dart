@@ -10,6 +10,7 @@ import 'package:file/src/interface/directory.dart';
 import 'package:file/src/interface/file.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_config.dart';
@@ -23,12 +24,12 @@ import 'package:file/file.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 
-import '../../commands.shard/permeable/build_bundle_test.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
+class MockBundleBuilder extends Mock implements BundleBuilder {}
 
 void _writeCustomDevicesConfigFile(Directory dir, List<CustomDeviceConfig> configs) {
   dir.createSync();
