@@ -125,6 +125,7 @@ bool ExternalTextureGL::CopyPixelBuffer(size_t& width, size_t& height) {
   gl.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, pixel_buffer->width,
                   pixel_buffer->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
                   pixel_buffer->buffer);
+  gl.glBindTexture(GL_TEXTURE_2D, 0);
   return true;
 }
 
