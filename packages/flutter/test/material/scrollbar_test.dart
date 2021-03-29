@@ -1419,6 +1419,7 @@ void main() {
     );
 
     await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
     expect(scrollController.offset, 0.0);
     expect(
       find.byType(Scrollbar),
@@ -1435,7 +1436,7 @@ void main() {
         )
         ..rect(
           rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 90.0),
-          color: const Color(0x99000000),
+          color: const Color(0xffbcbcbc),
         ),
     );
   });
