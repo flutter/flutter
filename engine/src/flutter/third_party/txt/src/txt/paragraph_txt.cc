@@ -1927,8 +1927,7 @@ Paragraph::PositionWithAffinity ParagraphTxt::GetGlyphPositionAtCoordinate(
   }
 
   if (gp == nullptr) {
-    const GlyphPosition& last_glyph = line_glyph_position.back();
-    return PositionWithAffinity(last_glyph.code_units.end, UPSTREAM);
+    gp = &line_glyph_position.back();
   }
 
   // Find the direction of the run that contains this glyph.
