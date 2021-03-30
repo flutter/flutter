@@ -2610,7 +2610,7 @@ void main() {
     const Color disabledColor = Color(0x00000006);
 
     const Color fallbackThemeColor = Color(0x00000007);
-    const defaultBorderSide = BorderSide(color: fallbackThemeColor, width: 10.0);
+    const BorderSide defaultBorderSide = BorderSide(color: fallbackThemeColor, width: 10.0);
 
     BorderSide? getBorderSide(Set<MaterialState> states) {
       Color sideColor = defaultColor;
