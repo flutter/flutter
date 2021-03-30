@@ -174,17 +174,6 @@ Process createMockProcess({ int exitCode = 0, String stdout = '', String stderr 
 
 class _MockBasicProcess extends Mock implements Process {}
 
-class MockIosProject extends Mock implements IosProject {
-  static const String bundleId = 'com.example.test';
-  static const String appBundleName = 'My Super Awesome App.app';
-
-  @override
-  Future<String> productBundleIdentifier(BuildInfo buildInfo) async => bundleId;
-
-  @override
-  Future<String> hostAppBundleName(BuildInfo buildInfo) async => appBundleName;
-}
-
 class MockAndroidDevice extends Mock implements AndroidDevice {
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
