@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
+
 import 'actions.dart';
+import 'editable_text.dart';
 
 /// An [Intent] to send the event straight to the engine, but only if a
 /// TextEditingTarget is focused.
@@ -217,4 +220,19 @@ class MoveSelectionToEndTextIntent extends Intent {
 class MoveSelectionUpTextIntent extends Intent {
   /// Creates an instance of MoveSelectionUpTextIntent.
   const MoveSelectionUpTextIntent();
+}
+
+/// An [Intent] that indicates that a single tap ended in the currently active
+/// [TextEditingTarget].
+///
+/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
+class SingleTapUpTextIntent extends Intent {
+  /// Creates an instance of SingleTapUpTextIntent.
+  const SingleTapUpTextIntent({
+    required this.details,
+    required this.editableTextState,
+  });
+
+  final TapUpDetails details;
+  final EditableTextState editableTextState;
 }

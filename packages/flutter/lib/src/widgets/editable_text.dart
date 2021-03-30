@@ -2076,6 +2076,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  /// {@template flutter.widgets.editableText.requestKeyboard}
   /// Express interest in interacting with the keyboard.
   ///
   /// If this control is already attached to the keyboard, this function will
@@ -2083,6 +2084,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// ask the focus system that it become focused. If successful in acquiring
   /// focus, the control will then attach to the keyboard and request that the
   /// keyboard become visible.
+  /// {@endtemplate}
   void requestKeyboard() {
     if (_hasFocus) {
       _openInputConnection();

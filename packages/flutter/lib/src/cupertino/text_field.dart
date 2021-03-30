@@ -1226,6 +1226,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
           decoration: effectiveDecoration,
           color: !enabled && effectiveDecoration == null ? disabledColor : null,
           child: _selectionGestureDetectorBuilder.buildGestureDetector(
+            context: context,
             behavior: HitTestBehavior.translucent,
             child: Align(
               alignment: Alignment(-1.0, _textAlignVertical.y),

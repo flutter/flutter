@@ -677,6 +677,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
         _effectiveFocusNode.requestFocus();
       },
       child: _selectionGestureDetectorBuilder.buildGestureDetector(
+        context: context,
         behavior: HitTestBehavior.translucent,
         child: child,
       ),

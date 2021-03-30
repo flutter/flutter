@@ -83,37 +83,10 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
     }
   }
 
+  // TODO(justinmc): Check this in other text editing widgets.
   @override
   void onSingleTapUp(TapUpDetails details) {
-    editableText.hideToolbar();
-    if (delegate.selectionEnabled) {
-      switch (Theme.of(_state.context).platform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          switch (details.kind) {
-            case PointerDeviceKind.mouse:
-            case PointerDeviceKind.stylus:
-            case PointerDeviceKind.invertedStylus:
-              // Precise devices should place the cursor at a precise position.
-              renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-              break;
-            case PointerDeviceKind.touch:
-            case PointerDeviceKind.unknown:
-              // On macOS/iOS/iPadOS a touch tap places the cursor at the edge
-              // of the word.
-              renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
-              break;
-          }
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-          break;
-      }
-    }
-    _state._requestKeyboard();
+    super.onSingleTapUp(details);
     _state.widget.onTap?.call();
   }
 
@@ -1322,6 +1295,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
             );
           },
           child: _selectionGestureDetectorBuilder.buildGestureDetector(
+            context: context,
             behavior: HitTestBehavior.translucent,
             child: child,
           ),

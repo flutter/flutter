@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show PointerDeviceKind;
+
 import 'package:flutter/foundation.dart';
 
 import 'actions.dart';
@@ -29,9 +31,53 @@ class DefaultTextEditingActions extends Actions{
     required Widget child,
   }) : super(
     key: key,
-    actions: _shortcutsActions,
+    actions: <Type, Action<Intent>>{
+      ..._shortcutsActions,
+      ..._platformActions,
+    },
     child: child,
   );
+
+  static final Map<Type, Action<Intent>> _androidActions = <Type, Action<Intent>>{
+    SingleTapUpTextIntent: _SelectLastTapDownPositionTextAction(),
+  };
+
+  static final Map<Type, Action<Intent>> _fuchsiaActions = <Type, Action<Intent>>{
+    SingleTapUpTextIntent: _SelectLastTapDownPositionTextAction(),
+  };
+
+  static final Map<Type, Action<Intent>> _iOSActions = <Type, Action<Intent>>{
+    SingleTapUpTextIntent: _SelectLastTapDownPositionOrEdgeTextAction(),
+  };
+
+  static final Map<Type, Action<Intent>> _linuxActions = <Type, Action<Intent>>{
+    SingleTapUpTextIntent: _SelectLastTapDownPositionTextAction(),
+  };
+
+  static final Map<Type, Action<Intent>> _macActions = <Type, Action<Intent>>{
+    SingleTapUpTextIntent: _SelectLastTapDownPositionOrEdgeTextAction(),
+  };
+
+  static final Map<Type, Action<Intent>> _windowsActions = <Type, Action<Intent>>{
+    SingleTapUpTextIntent: _SelectLastTapDownPositionTextAction(),
+  };
+
+  static Map<Type, Action<Intent>> get _platformActions {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return _androidActions;
+      case TargetPlatform.fuchsia:
+        return _fuchsiaActions;
+      case TargetPlatform.iOS:
+        return _iOSActions;
+      case TargetPlatform.linux:
+        return _linuxActions;
+      case TargetPlatform.macOS:
+        return _macActions;
+      case TargetPlatform.windows:
+        return _windowsActions;
+    }
+  }
 
   // These Intents are triggered by DefaultTextEditingShortcuts. They are included
   // regardless of the platform; it's up to DefaultTextEditingShortcuts to decide which
@@ -244,4 +290,38 @@ class _MoveSelectionToStartTextAction extends TextEditingAction<MoveSelectionToS
   Object? invoke(MoveSelectionToStartTextIntent intent, [BuildContext? context]) {
     textEditingActionTarget!.renderEditable.moveSelectionToStart(SelectionChangedCause.keyboard);
   }
+}
+
+class _SelectLastTapDownPositionOrEdgeTextAction extends CallbackAction<SingleTapUpTextIntent> {
+  _SelectLastTapDownPositionOrEdgeTextAction() : super(
+    onInvoke: (SingleTapUpTextIntent intent, [BuildContext? context]) {
+      if (!intent.editableTextState.renderEditable.selectionEnabled) {
+        return null;
+      }
+      switch (intent.details.kind) {
+        case PointerDeviceKind.mouse:
+        case PointerDeviceKind.stylus:
+        case PointerDeviceKind.invertedStylus:
+          intent.editableTextState.renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+          break;
+        case PointerDeviceKind.touch:
+        case PointerDeviceKind.unknown:
+          intent.editableTextState.renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+          break;
+      }
+    },
+  );
+}
+
+class _SelectLastTapDownPositionTextAction extends CallbackAction<SingleTapUpTextIntent> {
+  _SelectLastTapDownPositionTextAction() : super(
+    onInvoke: (SingleTapUpTextIntent intent, [BuildContext? context]) {
+      intent.editableTextState.hideToolbar();
+      if (!intent.editableTextState.renderEditable.selectionEnabled) {
+        return null;
+      }
+      intent.editableTextState.renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+      intent.editableTextState.requestKeyboard();
+    },
+  );
 }

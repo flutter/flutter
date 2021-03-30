@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import 'actions.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'constants.dart';
@@ -19,6 +20,7 @@ import 'editable_text.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'overlay.dart';
+import 'text_editing_intents.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 import 'visibility.dart';
@@ -950,6 +952,9 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   final TextSelectionGestureDetectorBuilderDelegate delegate;
 
+  // The BuildContext from the latest buildGestureDetector call.
+  late BuildContext _context;
+
   /// Returns true iff lastSecondaryTapDownPosition was on selection.
   bool get _lastSecondaryTapWasOnSelection {
     assert(renderEditable.lastSecondaryTapDownPosition != null);
@@ -1059,9 +1064,10 @@ class TextSelectionGestureDetectorBuilder {
   ///    this callback.
   @protected
   void onSingleTapUp(TapUpDetails details) {
-    if (delegate.selectionEnabled) {
-      renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
-    }
+    Actions.invoke<SingleTapUpTextIntent>(_context, SingleTapUpTextIntent(
+      details: details,
+      editableTextState: editableText,
+    ));
   }
 
   /// Handler for [TextSelectionGestureDetector.onSingleTapCancel].
@@ -1236,7 +1242,9 @@ class TextSelectionGestureDetectorBuilder {
     Key? key,
     HitTestBehavior? behavior,
     required Widget child,
+    required BuildContext context,
   }) {
+    _context = context;
     return TextSelectionGestureDetector(
       key: key,
       onTapDown: onTapDown,

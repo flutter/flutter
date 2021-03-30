@@ -26,6 +26,12 @@ abstract class TextEditingActionTarget {
   ///
   /// * [EditableTextState.renderEditable], which overrides this.
   RenderEditable get renderEditable;
+
+  /// {@macro flutter.services.TextSelectionDelegate.hideToolbar}
+  void hideToolbar();
+
+  /// {@macro flutter.widgets.editableText.requestKeyboard}
+  void requestKeyboard();
 }
 
 /// An [Action] related to editing text.
