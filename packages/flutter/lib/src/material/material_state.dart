@@ -348,13 +348,10 @@ abstract class MaterialStateBorderSide extends BorderSide implements MaterialSta
   BorderSide? resolve(Set<MaterialState> states);
 
   /// Creates a [MaterialStateBorderSide] from a
-  /// [MaterialPropertyResolver<BorderSide>] callback function.
+  /// [MaterialPropertyResolver<BorderSide?>] callback function.
   ///
   /// If used as a regular [BorderSide], the border resolved in the default state
   /// (the empty set of states) will be used.
-  ///
-  /// The given callback parameter must return a non-null [BorderSide] in the
-  /// default state.
   ///
   /// Usage:
   /// ```dart
@@ -382,7 +379,7 @@ abstract class MaterialStateBorderSide extends BorderSide implements MaterialSta
   ///   }),
   /// )
   /// ```
-  static MaterialStateBorderSide resolveWith(MaterialPropertyResolver<BorderSide> callback) =>
+  static MaterialStateBorderSide resolveWith(MaterialPropertyResolver<BorderSide?> callback) =>
       _MaterialStateBorderSide(callback);
 }
 
