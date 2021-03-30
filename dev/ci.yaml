@@ -27,6 +27,6 @@ targets:
     bringup: true
     recipe: flutter/flutter
     properties:
-      - validation: analyze
-      - validation_name: Analyze
+      validation: analyze
+      validation_name: Analyze
 
