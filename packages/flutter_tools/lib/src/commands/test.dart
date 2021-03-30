@@ -310,7 +310,7 @@ class TestCommand extends FlutterCommand {
 
     TestWatcher watcher;
     if (machine) {
-      watcher = EventPrinter(parent: collector);
+      watcher = EventPrinter(parent: collector, out: globals.stdio.stdout);
     } else if (collector != null) {
       watcher = collector;
     }
