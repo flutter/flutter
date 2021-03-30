@@ -323,7 +323,7 @@ class _EnabledAndDisabledMouseCursor extends MaterialStateMouseCursor {
 ///         isSelected = value;
 ///       });
 ///     },
-///     side: MaterialStateBorderSide.resolveWith((Set<MaterialState>States) {
+///     side: MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
 ///       if (states.contains(MaterialState.selected)) {
 ///         return const BorderSide(width: 1, color: Colors.red);
 ///       }
