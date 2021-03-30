@@ -45,9 +45,7 @@ Future<String> run(String? name) async {
   // widgets.
   // Since we don't really care about Flutter-side navigation in this app, we're
   // not using a regular routes map.
-  if (name == null) {
-    name = '';
-  }
+  name ??= '';
   switch (name) {
     case greenMarqueeRouteName:
       runApp(Marquee(color: Colors.green[400]));
