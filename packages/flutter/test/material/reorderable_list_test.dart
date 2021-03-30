@@ -265,6 +265,7 @@ void main() {
           find.byType(ReorderableListView),
           matchesGoldenFile('reorderable_list_test.vertical.drop_area.png'),
         );
+        debugDisableShadows = true;
       });
 
       testWidgets('Preserves children states when the list parent changes the order', (WidgetTester tester) async {
@@ -868,6 +869,7 @@ void main() {
           find.byType(ReorderableListView),
           matchesGoldenFile('reorderable_list_test.horizontal.drop_area.png'),
         );
+        debugDisableShadows = true;
       });
 
       testWidgets('Preserves children states when the list parent changes the order', (WidgetTester tester) async {
