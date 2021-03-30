@@ -19,7 +19,9 @@ import 'package:flutter_devicelab/framework/utils.dart';
 /// Must match flutter_driver/lib/src/common.dart.
 ///
 /// Redefined here to avoid taking a dependency on flutter_driver.
-final String _testOutputDirectory = Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? 'build';
+String _testOutputDirectory(String testDirectory) {
+  return Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? '$testDirectory/build';
+}
 
 TaskFunction createComplexLayoutScrollPerfTest({bool measureCpuGpu = true}) {
   return PerfTest(
@@ -302,7 +304,7 @@ TaskFunction createStackSizeTest() {
         hostAgent.dumpDirectory.path,
       ]);
       final Map<String, dynamic> data = json.decode(
-        file('$testDirectory/$_testOutputDirectory/stack_size.json').readAsStringSync(),
+        file('${_testOutputDirectory(testDirectory)}/stack_size.json').readAsStringSync(),
       ) as Map<String, dynamic>;
 
       final Map<String, dynamic> result = <String, dynamic>{
@@ -399,7 +401,7 @@ TaskFunction createsScrollSmoothnessPerfTest() {
         hostAgent.dumpDirectory.path,
       ]);
       final Map<String, dynamic> data = json.decode(
-        file('$testDirectory/$_testOutputDirectory/scroll_smoothness_test.json').readAsStringSync(),
+        file('${_testOutputDirectory(testDirectory)}/scroll_smoothness_test.json').readAsStringSync(),
       ) as Map<String, dynamic>;
 
       final Map<String, dynamic> result = <String, dynamic>{};
@@ -450,7 +452,7 @@ TaskFunction createFramePolicyIntegrationTest() {
         hostAgent.dumpDirectory.path,
       ]);
       final Map<String, dynamic> data = json.decode(
-        file('$testDirectory/$_testOutputDirectory/frame_policy_event_delay.json').readAsStringSync(),
+        file('${_testOutputDirectory(testDirectory)}/frame_policy_event_delay.json').readAsStringSync(),
       ) as Map<String, dynamic>;
       final Map<String, dynamic> fullLiveData = data['fullyLive'] as Map<String, dynamic>;
       final Map<String, dynamic> benchmarkLiveData = data['benchmarkLive'] as Map<String, dynamic>;
@@ -562,7 +564,7 @@ class StartupTest {
          ], canFail: true);
         if (result == 0) {
           final Map<String, dynamic> data = json.decode(
-            file('$testDirectory/$_testOutputDirectory/start_up_info.json').readAsStringSync(),
+            file('${_testOutputDirectory(testDirectory)}/start_up_info.json').readAsStringSync(),
           ) as Map<String, dynamic>;
           results.add(data);
         } else {
@@ -705,7 +707,7 @@ class PerfTest {
         hostAgent.dumpDirectory.path,
       ]);
       final Map<String, dynamic> data = json.decode(
-        file('$testDirectory/$_testOutputDirectory/$resultFilename.json').readAsStringSync(),
+        file('${_testOutputDirectory(testDirectory)}/$resultFilename.json').readAsStringSync(),
       ) as Map<String, dynamic>;
 
       if (data['frame_count'] as int < 5) {
@@ -722,7 +724,7 @@ class PerfTest {
         data,
         detailFiles: <String>[
           if (saveTraceFile)
-            '$testDirectory/$_testOutputDirectory/$traceFilename.json',
+            '${_testOutputDirectory(testDirectory)}/$traceFilename.json',
         ],
         benchmarkScoreKeys: benchmarkScoreKeys ?? <String>[
           ..._kCommonScoreKeys,
