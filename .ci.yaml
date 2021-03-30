@@ -11,7 +11,7 @@
 #       See https://cs.opensource.google/flutter/recipes/+/master:recipes
 #
 # Optional properties:
-# * bringup: boolean hether the target can block the tree. 
+# * bringup: boolean hether the target can block the tree.
 #       Targets should be marked as bringup when newly added, until they have
 #       soaked for a 25 runs. Tragets that are flaky but not being actively worked
 #       on should be hidden because they just cause confusion otherwise.
@@ -29,4 +29,3 @@ targets:
     properties:
       validation: analyze
       validation_name: Analyze
-
