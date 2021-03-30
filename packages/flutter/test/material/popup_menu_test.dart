@@ -1490,7 +1490,6 @@ void main() {
     expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 3')).padding, const EdgeInsets.all(20));
   });
 
-
   testWidgets('Update PopupMenuItem layout while the menu is visible', (WidgetTester tester) async {
     final Key popupMenuButtonKey = UniqueKey();
     final Type menuItemType = const PopupMenuItem<String>(child: Text('item')).runtimeType;

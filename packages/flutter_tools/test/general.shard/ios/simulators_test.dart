@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/device_port_forwader.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
@@ -23,7 +24,6 @@ import 'package:mockito/mockito.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
-import '../../src/mocks.dart';
 
 final Platform macosPlatform = FakePlatform(
   operatingSystem: 'macos',
@@ -481,13 +481,13 @@ void main() {
 
   group('log reader', () {
     FakeProcessManager fakeProcessManager;
-    MockIosProject mockIosProject;
+    FakeIosProject mockIosProject;
     MockSimControl mockSimControl;
     Xcode xcode;
 
     setUp(() {
       fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
-      mockIosProject = MockIosProject();
+      mockIosProject = FakeIosProject();
       mockSimControl = MockSimControl();
       xcode = Xcode.test(processManager: FakeProcessManager.any());
     });
@@ -984,4 +984,12 @@ flutter:
       expect(simulator.createDevFSWriter(null, ''), isA<LocalDevFSWriter>());
     });
   });
+}
+
+class FakeIosProject extends Fake implements IosProject {
+  @override
+  Future<String> productBundleIdentifier(BuildInfo buildInfo) async => 'com.example.test';
+
+  @override
+  Future<String> hostAppBundleName(BuildInfo buildInfo) async => 'My Super Awesome App.app';
 }

@@ -72,7 +72,7 @@ class _DoNothingAndStopPropagationTextAction extends TextEditingAction<DoNothing
   _DoNothingAndStopPropagationTextAction();
 
   @override
-  bool consumesKey(Intent intent) => true;
+  bool consumesKey(Intent intent) => false;
 
   @override
   void invoke(DoNothingAndStopPropagationTextIntent intent, [BuildContext? context]) {}

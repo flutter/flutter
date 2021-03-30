@@ -11,16 +11,7 @@ import 'package:vector_math/vector_math_64.dart' show Quad, Vector3, Matrix4;
 import 'basic.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
-import 'layout_builder.dart';
 import 'ticker_provider.dart';
-
-/// A type for widget builders that take a [Quad] of the current viewport.
-///
-/// See also:
-///
-///   * [InteractiveViewer.builder], whose builder is of this type.
-///   * [WidgetBuilder], which is similar, but takes no viewport.
-typedef InteractiveViewerWidgetBuilder = Widget Function(BuildContext context, Quad viewport);
 
 /// A widget that enables pan and zoom interactions with its child.
 ///
@@ -40,6 +31,8 @@ typedef InteractiveViewerWidgetBuilder = Widget Function(BuildContext context, Q
 /// See [flutter-go](https://github.com/justinmc/flutter-go) for an example of
 /// robust positioning of an InteractiveViewer child that works for all screen
 /// sizes and child sizes.
+///
+/// The [child] must not be null.
 ///
 /// See also:
 ///   * The [Flutter Gallery's transformations demo](https://github.com/flutter/gallery/blob/master/lib/demos/reference/transformations_demo.dart),
@@ -74,7 +67,7 @@ typedef InteractiveViewerWidgetBuilder = Widget Function(BuildContext context, Q
 class InteractiveViewer extends StatefulWidget {
   /// Create an InteractiveViewer.
   ///
-  /// The `child` parameter must not be null.
+  /// The [child] parameter must not be null.
   InteractiveViewer({
     Key? key,
     this.clipBehavior = Clip.hardEdge,
@@ -91,7 +84,7 @@ class InteractiveViewer extends StatefulWidget {
     this.panEnabled = true,
     this.scaleEnabled = true,
     this.transformationController,
-    required Widget child,
+    required this.child,
   }) : assert(alignPanAxis != null),
        assert(child != null),
        assert(constrained != null),
@@ -110,51 +103,6 @@ class InteractiveViewer extends StatefulWidget {
            && boundaryMargin.vertical.isInfinite) || (boundaryMargin.top.isFinite
            && boundaryMargin.right.isFinite && boundaryMargin.bottom.isFinite
            && boundaryMargin.left.isFinite)),
-       builder = _getBuilderForChild(child),
-       super(key: key);
-
-  // TODO(justinmc): Example. Or put it in the builder param docs.
-  /// Creates an InteractiveViewer for a child that is created on demand.
-  ///
-  /// Can be used to render a child that changes in response to the current
-  /// transformation.
-  ///
-  /// The [builder] parameter must not be null. See its docs for an example of
-  /// using it to optimize a large child.
-  InteractiveViewer.builder({
-    Key? key,
-    this.clipBehavior = Clip.hardEdge,
-    this.alignPanAxis = false,
-    this.boundaryMargin = EdgeInsets.zero,
-    // These default scale values were eyeballed as reasonable limits for common
-    // use cases.
-    this.maxScale = 2.5,
-    this.minScale = 0.8,
-    this.onInteractionEnd,
-    this.onInteractionStart,
-    this.onInteractionUpdate,
-    this.panEnabled = true,
-    this.scaleEnabled = true,
-    this.transformationController,
-    required this.builder,
-  }) : assert(alignPanAxis != null),
-       assert(builder != null),
-       assert(minScale != null),
-       assert(minScale > 0),
-       assert(minScale.isFinite),
-       assert(maxScale != null),
-       assert(maxScale > 0),
-       assert(!maxScale.isNaN),
-       assert(maxScale >= minScale),
-       assert(panEnabled != null),
-       assert(scaleEnabled != null),
-       // boundaryMargin must be either fully infinite or fully finite, but not
-       // a mix of both.
-       assert((boundaryMargin.horizontal.isInfinite
-           && boundaryMargin.vertical.isInfinite) || (boundaryMargin.top.isFinite
-           && boundaryMargin.right.isFinite && boundaryMargin.bottom.isFinite
-           && boundaryMargin.left.isFinite)),
-       constrained = false,
        super(key: key);
 
   /// If set to [Clip.none], the child may extend beyond the size of the InteractiveViewer,
@@ -190,206 +138,13 @@ class InteractiveViewer extends StatefulWidget {
   /// No edge can be NaN.
   ///
   /// Defaults to [EdgeInsets.zero], which results in boundaries that are the
-  /// exact same size and position as the child.
+  /// exact same size and position as the [child].
   final EdgeInsets boundaryMargin;
 
-  /// Builds the child of this widget.
+  /// The Widget to perform the transformations on.
   ///
-  /// If a child is passed directly, then this is simply a function that returns
-  /// that child.
-  ///
-  /// If using the [InteractiveViewer.builder] constructor, this can be passed
-  /// directly. This allows the child to be built in response to the current
-  /// transformation.
-  ///
-  /// {@tool dartpad --template=freeform}
-  ///
-  /// This example shows how to use builder to create a [Table] whose cell
-  /// contents are only built when they are visible. Built and remove cells are
-  /// logged in the console for illustration.
-  ///
-  /// ```dart main
-  /// import 'package:vector_math/vector_math_64.dart' show Quad, Vector3;
-  ///
-  /// import 'package:flutter/material.dart';
-  /// import 'package:flutter/widgets.dart';
-  ///
-  /// void main() => runApp(const IVBuilderExampleApp());
-  ///
-  /// class IVBuilderExampleApp extends StatelessWidget {
-  ///   const IVBuilderExampleApp({Key? key}) : super(key: key);
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return MaterialApp(
-  ///       home: Scaffold(
-  ///         appBar: AppBar(
-  ///           title: const Text('IV Builder Example'),
-  ///         ),
-  ///         body: _IVBuilderExample(),
-  ///       ),
-  ///     );
-  ///   }
-  /// }
-  ///
-  /// class _IVBuilderExample extends StatefulWidget {
-  ///   @override
-  ///   _IVBuilderExampleState createState() => _IVBuilderExampleState();
-  /// }
-  ///
-  /// class _IVBuilderExampleState extends State<_IVBuilderExample> {
-  ///   final TransformationController _transformationController = TransformationController();
-  ///
-  ///   static const double _cellWidth = 200.0;
-  ///   static const double _cellHeight = 26.0;
-  ///
-  ///   // Returns true iff the given cell is currently visible. Caches viewport
-  ///   // calculations.
-  ///   late Quad _cachedViewport;
-  ///   late int _firstVisibleRow;
-  ///   late int _firstVisibleColumn;
-  ///   late int _lastVisibleRow;
-  ///   late int _lastVisibleColumn;
-  ///   bool _isCellVisible(int row, int column, Quad viewport) {
-  ///     if (viewport != _cachedViewport) {
-  ///       final Rect aabb = _axisAlignedBoundingBox(viewport);
-  ///       _cachedViewport = viewport;
-  ///       _firstVisibleRow = (aabb.top / _cellHeight).floor();
-  ///       _firstVisibleColumn = (aabb.left / _cellWidth).floor();
-  ///       _lastVisibleRow = (aabb.bottom / _cellHeight).floor();
-  ///       _lastVisibleColumn = (aabb.right / _cellWidth).floor();
-  ///     }
-  ///     return row >= _firstVisibleRow && row <= _lastVisibleRow
-  ///         && column >= _firstVisibleColumn && column <= _lastVisibleColumn;
-  ///   }
-  ///
-  ///   // Returns the axis aligned bounding box for the given Quad, which might not
-  ///   // be axis aligned.
-  ///   Rect _axisAlignedBoundingBox(Quad quad) {
-  ///     double? xMin;
-  ///     double? xMax;
-  ///     double? yMin;
-  ///     double? yMax;
-  ///     for (final Vector3 point in <Vector3>[quad.point0, quad.point1, quad.point2, quad.point3]) {
-  ///       if (xMin == null || point.x < xMin) {
-  ///         xMin = point.x;
-  ///       }
-  ///       if (xMax == null || point.x > xMax) {
-  ///         xMax = point.x;
-  ///       }
-  ///       if (yMin == null || point.y < yMin) {
-  ///         yMin = point.y;
-  ///       }
-  ///       if (yMax == null || point.y > yMax) {
-  ///         yMax = point.y;
-  ///       }
-  ///     }
-  ///     return Rect.fromLTRB(xMin!, yMin!, xMax!, yMax!);
-  ///   }
-  ///
-  ///   void _onChangeTransformation() {
-  ///     setState(() {});
-  ///   }
-  ///
-  ///   @override
-  ///   void initState() {
-  ///     super.initState();
-  ///     _transformationController.addListener(_onChangeTransformation);
-  ///   }
-  ///
-  ///   @override
-  ///   void dispose() {
-  ///     _transformationController.removeListener(_onChangeTransformation);
-  ///     super.dispose();
-  ///   }
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return Center(
-  ///       child: LayoutBuilder(
-  ///         builder: (BuildContext context, BoxConstraints constraints) {
-  ///           return InteractiveViewer.builder(
-  ///             alignPanAxis: true,
-  ///             scaleEnabled: false,
-  ///             transformationController: _transformationController,
-  ///             builder: (BuildContext context, Quad viewport) {
-  ///               // A simple extension of Table that builds cells.
-  ///               return _TableBuilder(
-  ///                 rowCount: 60,
-  ///                 columnCount: 6,
-  ///                 cellWidth: _cellWidth,
-  ///                 builder: (BuildContext context, int row, int column) {
-  ///                   if (!_isCellVisible(row, column, viewport)) {
-  ///                     print('removing cell ($row, $column)');
-  ///                     return Container(height: _cellHeight);
-  ///                   }
-  ///                   print('building cell ($row, $column)');
-  ///                   return Container(
-  ///                     height: _cellHeight,
-  ///                     color: row % 2 + column % 2 == 1 ? Colors.white : Colors.grey.withOpacity(0.1),
-  ///                     child: Align(
-  ///                       alignment: Alignment.centerLeft,
-  ///                       child: Text('$row x $column'),
-  ///                     ),
-  ///                   );
-  ///                 }
-  ///               );
-  ///             },
-  ///           );
-  ///         },
-  ///       ),
-  ///     );
-  ///   }
-  /// }
-  ///
-  /// typedef _CellBuilder = Widget Function(BuildContext context, int row, int column);
-  ///
-  /// class _TableBuilder extends StatelessWidget {
-  ///   const _TableBuilder({
-  ///     required this.rowCount,
-  ///     required this.columnCount,
-  ///     required this.cellWidth,
-  ///     required this.builder,
-  ///   }) : assert(rowCount > 0),
-  ///        assert(columnCount > 0);
-  ///
-  ///   final int rowCount;
-  ///   final int columnCount;
-  ///   final double cellWidth;
-  ///   final _CellBuilder builder;
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return Table(
-  ///       // ignore: prefer_const_literals_to_create_immutables
-  ///       columnWidths: <int, TableColumnWidth>{
-  ///         for (int column = 0; column < columnCount; column++)
-  ///           column: FixedColumnWidth(cellWidth),
-  ///       },
-  ///       // ignore: prefer_const_literals_to_create_immutables
-  ///       children: <TableRow>[
-  ///         for (int row = 0; row < rowCount; row++)
-  ///           // ignore: prefer_const_constructors
-  ///           TableRow(
-  ///             // ignore: prefer_const_literals_to_create_immutables
-  ///             children: <Widget>[
-  ///               for (int column = 0; column < columnCount; column++)
-  ///                 builder(context, row, column),
-  ///             ],
-  ///           ),
-  ///       ],
-  ///     );
-  ///   }
-  /// }
-  /// ```
-  /// {@end-tool}
-  ///
-  /// See also:
-  ///
-  ///   * [ListView.builder], which follows a similar pattern.
-  ///   * [InteractiveViewer.builder], which has an example of building the
-  ///     child on demand.
-  final InteractiveViewerWidgetBuilder builder;
+  /// Cannot be null.
+  final Widget child;
 
   /// Whether the normal size constraints at this point in the widget tree are
   /// applied to the child.
@@ -666,13 +421,6 @@ class InteractiveViewer extends StatefulWidget {
   ///  * [ValueNotifier], the parent class of TransformationController.
   ///  * [TextEditingController] for an example of another similar pattern.
   final TransformationController? transformationController;
-
-  // Get a InteractiveViewerWidgetBuilder that simply returns the given child.
-  static InteractiveViewerWidgetBuilder _getBuilderForChild(Widget child) {
-    return (BuildContext context, Quad viewport) {
-      return child;
-    };
-  }
 
   /// Returns the closest point to the given point on the given line segment.
   @visibleForTesting
@@ -1314,52 +1062,44 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   @override
   Widget build(BuildContext context) {
+    Widget child = Transform(
+      transform: _transformationController!.value,
+      child: KeyedSubtree(
+        key: _childKey,
+        child: widget.child,
+      ),
+    );
+
+    if (!widget.constrained) {
+      child = OverflowBox(
+        alignment: Alignment.topLeft,
+        minWidth: 0.0,
+        minHeight: 0.0,
+        maxWidth: double.infinity,
+        maxHeight: double.infinity,
+        child: child,
+      );
+    }
+
+    if (widget.clipBehavior != Clip.none) {
+      child = ClipRect(
+        clipBehavior: widget.clipBehavior,
+        child: child,
+      );
+    }
+
     // A GestureDetector allows the detection of panning and zooming gestures on
     // the child.
     return Listener(
       key: _parentKey,
       onPointerSignal: _receivedPointerSignal,
-      child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          final Matrix4 matrix = _transformationController!.value;
-          // When constrained is false, such as when using
-          // InteractiveViewer.builder, then the viewport is the size of the
-          // constraints.
-          Widget child = Transform(
-            transform: matrix,
-            child: KeyedSubtree(
-              key: _childKey,
-              child: widget.builder(context, _transformViewport(matrix, Offset.zero & constraints.biggest)),
-            ),
-          );
-
-          if (!widget.constrained) {
-            child = OverflowBox(
-              alignment: Alignment.topLeft,
-              minWidth: 0.0,
-              minHeight: 0.0,
-              maxWidth: double.infinity,
-              maxHeight: double.infinity,
-              child: child,
-            );
-          }
-
-          if (widget.clipBehavior != Clip.none) {
-            child = ClipRect(
-              clipBehavior: widget.clipBehavior,
-              child: child,
-            );
-          }
-
-          return GestureDetector(
-            behavior: HitTestBehavior.opaque, // Necessary when panning off screen.
-            dragStartBehavior: DragStartBehavior.start,
-            onScaleEnd: _onScaleEnd,
-            onScaleStart: _onScaleStart,
-            onScaleUpdate: _onScaleUpdate,
-            child: child,
-          );
-        },
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque, // Necessary when panning off screen.
+        dragStartBehavior: DragStartBehavior.start,
+        onScaleEnd: _onScaleEnd,
+        onScaleStart: _onScaleStart,
+        onScaleUpdate: _onScaleUpdate,
+        child: child,
       ),
     );
   }
