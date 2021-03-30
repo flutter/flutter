@@ -162,6 +162,7 @@ class SemanticsFlag {
   static const int _kIsFocusableIndex = 1 << 21;
   static const int _kIsLinkIndex = 1 << 22;
   static const int _kIsSliderIndex = 1 << 23;
+  static const int _kIsKeyboardKeyIndex = 1 << 24;
 
   const SemanticsFlag._(this.index) : assert(index != null); // ignore: unnecessary_null_comparison
   final int index;
@@ -189,6 +190,7 @@ class SemanticsFlag {
   static const SemanticsFlag hasImplicitScrolling = SemanticsFlag._(_kHasImplicitScrollingIndex);
   static const SemanticsFlag isMultiline = SemanticsFlag._(_kIsMultilineIndex);
   static const SemanticsFlag isSlider = SemanticsFlag._(_kIsSliderIndex);
+  static const SemanticsFlag isKeyboardKey = SemanticsFlag._(_kIsKeyboardKeyIndex);
   static const Map<int, SemanticsFlag> values = <int, SemanticsFlag>{
     _kHasCheckedStateIndex: hasCheckedState,
     _kIsCheckedIndex: isChecked,
@@ -214,6 +216,7 @@ class SemanticsFlag {
     _kHasImplicitScrollingIndex: hasImplicitScrolling,
     _kIsMultilineIndex: isMultiline,
     _kIsReadOnlyIndex: isReadOnly,
+    _kIsKeyboardKeyIndex: isKeyboardKey,
   };
 
   @override
@@ -265,6 +268,8 @@ class SemanticsFlag {
         return 'SemanticsFlag.isMultiline';
       case _kIsReadOnlyIndex:
         return 'SemanticsFlag.isReadOnly';
+      case _kIsKeyboardKeyIndex:
+        return 'SemanticsFlag.isKeyboardKey';
     }
     assert(false, 'Unhandled index: $index');
     return '';
