@@ -1110,12 +1110,10 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         if (!mounted)
           return null;
         if (newValue == null) {
-          if (widget.onCanceled != null)
-            widget.onCanceled!();
+          widget.onCanceled?.call();
           return null;
         }
-        if (widget.onSelected != null)
-          widget.onSelected!(newValue);
+        widget.onSelected?.call(newValue);
       });
     }
   }

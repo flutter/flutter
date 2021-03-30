@@ -534,9 +534,7 @@ void paintImage({
       if (existingSizeInfo == null || existingSizeInfo.displaySizeInBytes < sizeInfo.displaySizeInBytes) {
         _pendingImageSizeInfo[sizeInfo.source!] = sizeInfo;
       }
-      if (debugOnPaintImage != null) {
-        debugOnPaintImage!(sizeInfo);
-      }
+      debugOnPaintImage?.call(sizeInfo);
       SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
         _lastFrameImageSizeInfo = _pendingImageSizeInfo.values.toSet();
         if (_pendingImageSizeInfo.isEmpty) {

@@ -4760,103 +4760,83 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   }
 
   void _performTap() {
-    if (onTap != null)
-      onTap!();
+    onTap?.call();
   }
 
   void _performLongPress() {
-    if (onLongPress != null)
-      onLongPress!();
+    onLongPress?.call();
   }
 
   void _performDismiss() {
-    if (onDismiss != null)
-      onDismiss!();
+    onDismiss?.call();
   }
 
   void _performScrollLeft() {
-    if (onScrollLeft != null)
-      onScrollLeft!();
+    onScrollLeft?.call();
   }
 
   void _performScrollRight() {
-    if (onScrollRight != null)
-      onScrollRight!();
+    onScrollRight?.call();
   }
 
   void _performScrollUp() {
-    if (onScrollUp != null)
-      onScrollUp!();
+    onScrollUp?.call();
   }
 
   void _performScrollDown() {
-    if (onScrollDown != null)
-      onScrollDown!();
+    onScrollDown?.call();
   }
 
   void _performIncrease() {
-    if (onIncrease != null)
-      onIncrease!();
+    onIncrease?.call();
   }
 
   void _performDecrease() {
-    if (onDecrease != null)
-      onDecrease!();
+    onDecrease?.call();
   }
 
   void _performCopy() {
-    if (onCopy != null)
-      onCopy!();
+    onCopy?.call();
   }
 
   void _performCut() {
-    if (onCut != null)
-      onCut!();
+    onCut?.call();
   }
 
   void _performPaste() {
-    if (onPaste != null)
-      onPaste!();
+    onPaste?.call();
   }
 
   void _performMoveCursorForwardByCharacter(bool extendSelection) {
-    if (onMoveCursorForwardByCharacter != null)
-      onMoveCursorForwardByCharacter!(extendSelection);
+    onMoveCursorForwardByCharacter?.call(extendSelection);
   }
 
   void _performMoveCursorBackwardByCharacter(bool extendSelection) {
-    if (onMoveCursorBackwardByCharacter != null)
-      onMoveCursorBackwardByCharacter!(extendSelection);
+    onMoveCursorBackwardByCharacter?.call(extendSelection);
   }
 
   void _performMoveCursorForwardByWord(bool extendSelection) {
-    if (onMoveCursorForwardByWord != null)
-      onMoveCursorForwardByWord!(extendSelection);
+    onMoveCursorForwardByWord?.call(extendSelection);
   }
 
   void _performMoveCursorBackwardByWord(bool extendSelection) {
-    if (onMoveCursorBackwardByWord != null)
-      onMoveCursorBackwardByWord!(extendSelection);
+    onMoveCursorBackwardByWord?.call(extendSelection);
   }
 
   void _performSetSelection(TextSelection selection) {
-    if (onSetSelection != null)
-      onSetSelection!(selection);
+    onSetSelection?.call(selection);
   }
 
   void _performSetText(String text) {
-    if (onSetText != null)
-      onSetText!(text);
+    onSetText?.call(text);
   }
 
   void _performDidGainAccessibilityFocus() {
-    if (onDidGainAccessibilityFocus != null)
-      onDidGainAccessibilityFocus!();
+    onDidGainAccessibilityFocus?.call();
   }
 
   void _performDidLoseAccessibilityFocus() {
-    if (onDidLoseAccessibilityFocus != null)
-      onDidLoseAccessibilityFocus!();
+    onDidLoseAccessibilityFocus?.call();
   }
 }
 

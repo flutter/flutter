@@ -6178,8 +6178,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderBox renderObject) {
-    if (onBuild != null)
-      onBuild!();
+    onBuild?.call();
   }
 }
 

@@ -442,8 +442,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   }
 
   void _handlePressed(bool isExpanded, int index) {
-    if (widget.expansionCallback != null)
-      widget.expansionCallback!(index, isExpanded);
+    widget.expansionCallback?.call(index, isExpanded);
 
     if (widget._allowOnlyOnePanelOpen) {
       final ExpansionPanelRadio pressedChild = widget.children[index] as ExpansionPanelRadio;

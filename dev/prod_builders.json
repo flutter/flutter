@@ -121,9 +121,15 @@
       "flaky": false
     },
     {
-      "name": "Linux docs",
+      "name": "Linux docs_test",
       "repo": "flutter",
-      "task_name": "linux_docs",
+      "task_name": "linux_docs_test",
+      "flaky": false
+    },
+    {
+      "name": "Linux docs_publish",
+      "repo": "flutter",
+      "task_name": "linux_docs_publish",
       "flaky": false
     },
     {
@@ -934,6 +940,12 @@
       "name": "Mac tool_integration_tests_3_3",
       "repo": "flutter",
       "task_name": "mac_tool_integration_tests_3_3",
+      "flaky": false
+    },
+    {
+      "name": "Mac_ios animation_with_microtasks_perf_ios__timeline_summary",
+      "repo": "flutter",
+      "task_name": "mac_ios_animation_with_microtasks_perf_ios__timeline_summary",
       "flaky": false
     },
     {

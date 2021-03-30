@@ -25,6 +25,7 @@ import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/targets/web.dart';
+import '../cache.dart';
 import '../dart/language_version.dart';
 import '../devfs.dart';
 import '../device.dart';
@@ -230,14 +231,15 @@ class ResidentWebRunner extends ResidentRunner {
 
   @override
   Future<bool> debugDumpApp() async {
-    if (!supportsServiceProtocol) {
+    if (!supportsServiceProtocol || _vmService == null) {
       return false;
     }
     try {
-      await _vmService
-        ?.flutterDebugDumpApp(
+      final String data = await _vmService
+        .flutterDebugDumpApp(
           isolateId: null,
         );
+       _logger.printStatus(data);
     } on vmservice.RPCError {
       // do nothing.
     }
@@ -246,14 +248,15 @@ class ResidentWebRunner extends ResidentRunner {
 
   @override
   Future<bool> debugDumpRenderTree() async {
-    if (!supportsServiceProtocol) {
+    if (!supportsServiceProtocol || _vmService == null) {
       return false;
     }
     try {
-      await _vmService
-        ?.flutterDebugDumpRenderTree(
+      final String data = await _vmService
+        .flutterDebugDumpRenderTree(
           isolateId: null,
         );
+      _logger.printStatus(data);
     } on vmservice.RPCError {
       // do nothing.
     }
@@ -262,14 +265,15 @@ class ResidentWebRunner extends ResidentRunner {
 
   @override
   Future<bool> debugDumpLayerTree() async {
-    if (!supportsServiceProtocol) {
+    if (!supportsServiceProtocol || _vmService == null) {
       return false;
     }
     try {
-      await _vmService
-        ?.flutterDebugDumpLayerTree(
+      final String data = await _vmService
+        .flutterDebugDumpLayerTree(
           isolateId: null,
         );
+       _logger.printStatus(data);
     } on vmservice.RPCError {
       // do nothing.
     }
@@ -678,6 +682,7 @@ class ResidentWebRunner extends ResidentRunner {
       final LanguageVersion languageVersion =  determineLanguageVersion(
         _fileSystem.file(mainUri),
         packageConfig[flutterProject.manifest.appName],
+        Cache.flutterRoot,
       );
 
       final String entrypoint = <String>[
@@ -786,8 +791,6 @@ class ResidentWebRunner extends ResidentRunner {
 
       _stdOutSub = _vmService.service.onStdoutEvent.listen(onLogEvent);
       _stdErrSub = _vmService.service.onStderrEvent.listen(onLogEvent);
-      _extensionEventSub =
-          _vmService.service.onExtensionEvent.listen(printStructuredErrorLog);
       try {
         await _vmService.service.streamListen(vmservice.EventStreams.kStdout);
       } on vmservice.RPCError {
@@ -806,18 +809,21 @@ class ResidentWebRunner extends ResidentRunner {
         // It is safe to ignore this error because we expect an error to be
         // thrown if we're not already subscribed.
       }
-      try {
-        await _vmService.service.streamListen(vmservice.EventStreams.kExtension);
-      } on vmservice.RPCError {
-        // It is safe to ignore this error because we expect an error to be
-        // thrown if we're not already subscribed.
-      }
-      unawaited(_vmService.service.registerService('reloadSources', 'FlutterTools'));
-      _vmService.service.registerServiceCallback('reloadSources', (Map<String, Object> params) async {
-        final bool pause = params['pause'] as bool ?? false;
-        await restart(benchmarkMode: false, pause: pause, fullRestart: false);
-        return <String, Object>{'type': 'Success'};
-      });
+      await setUpVmService(
+        (String isolateId, {
+          bool force,
+          bool pause,
+        }) async {
+          await restart(benchmarkMode: false, pause: pause, fullRestart: false);
+        },
+        null,
+        null,
+        device.device,
+        null,
+        printStructuredErrorLog,
+        _vmService.service,
+      );
+
 
       websocketUri = Uri.parse(_connectionResult.debugConnection.uri);
       device.vmService = _vmService;

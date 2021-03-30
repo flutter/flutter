@@ -150,9 +150,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
   void _handleOnTap() {
     final DropdownMenuItem<T> dropdownMenuItem = widget.route.items[widget.itemIndex].item!;
 
-    if (dropdownMenuItem.onTap != null) {
-      dropdownMenuItem.onTap!();
-    }
+    dropdownMenuItem.onTap?.call();
 
     Navigator.pop(
       context,
@@ -1270,13 +1268,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       _removeDropdownRoute();
       if (!mounted || newValue == null)
         return;
-      if (widget.onChanged != null)
-        widget.onChanged!(newValue.result);
+      widget.onChanged?.call(newValue.result);
     });
 
-    if (widget.onTap != null) {
-      widget.onTap!();
-    }
+    widget.onTap?.call();
   }
 
   // When isDense is true, reduce the height of this button from _kMenuItemHeight to

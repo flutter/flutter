@@ -598,9 +598,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (nextSelection == selection && cause != SelectionChangedCause.keyboard && !focusingEmpty) {
       return;
     }
-    if (onSelectionChanged != null) {
-      onSelectionChanged!(nextSelection, this, cause);
-    }
+    onSelectionChanged?.call(nextSelection, this, cause);
   }
 
   static final Set<LogicalKeyboardKey> _movementKeys = <LogicalKeyboardKey>{
