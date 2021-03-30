@@ -35,6 +35,7 @@ export 'src/widgets/container.dart';
 export 'src/widgets/debug.dart';
 export 'src/widgets/default_text_editing_actions.dart';
 export 'src/widgets/default_text_editing_shortcuts.dart';
+export 'src/widgets/deferred_widget.dart';
 export 'src/widgets/desktop_text_selection_toolbar_layout_delegate.dart';
 export 'src/widgets/dismissible.dart';
 export 'src/widgets/disposable_build_context.dart';
