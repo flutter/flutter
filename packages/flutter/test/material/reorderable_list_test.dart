@@ -244,7 +244,15 @@ void main() {
             // Wrap in an overlay so that the golden image includes the dragged item.
             child: Overlay(
               initialEntries: <OverlayEntry>[
-                OverlayEntry(builder: (BuildContext context) => reorderableListView),
+                OverlayEntry(builder: (BuildContext context) {
+                  // Wrap the list in padding to test that the positioning
+                  // is correct when the origin of the overlay is different
+                  // from the list.
+                  return Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: reorderableListView,
+                  );
+                }),
               ],
             ),
           ),
@@ -848,7 +856,15 @@ void main() {
             // Wrap in an overlay so that the golden image includes the dragged item.
             child: Overlay(
               initialEntries: <OverlayEntry>[
-                OverlayEntry(builder: (BuildContext context) => reorderableListView),
+                OverlayEntry(builder: (BuildContext context) {
+                  // Wrap the list in padding to test that the positioning
+                  // is correct when the origin of the overlay is different
+                  // from the list.
+                  return Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: reorderableListView,
+                  );
+                })
               ],
             ),
           ),
