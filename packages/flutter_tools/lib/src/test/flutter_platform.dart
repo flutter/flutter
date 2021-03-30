@@ -517,7 +517,7 @@ class FlutterPlatform extends PlatformPlugin {
     );
     return generateTestBootstrap(
       testUrl: testUrl,
-      testConfigFile: findTestConfigFile(globals.fs.file(testUrl)),
+      testConfigFile: findTestConfigFile(globals.fs.file(testUrl), globals.logger),
       host: host,
       updateGoldens: updateGoldens,
       flutterTestDep: packageConfig['flutter_test'] != null,
