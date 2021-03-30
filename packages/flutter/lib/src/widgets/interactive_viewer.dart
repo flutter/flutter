@@ -295,7 +295,8 @@ class InteractiveViewer extends StatefulWidget {
   /// Called when the user updates a pan or scale gesture on the widget.
   ///
   /// At the time this is called, the [TransformationController] will have
-  /// already been updated to reflect the change caused by the interaction.
+  /// already been updated to reflect the change caused by the interaction, if
+  /// the interation caused the matrix to change.
   ///
   /// {@macro flutter.widgets.InteractiveViewer.onInteractionEnd}
   ///
@@ -841,6 +842,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
       case _GestureType.rotate:
         if (details.rotation == 0.0) {
+          widget.onInteractionUpdate?.call(details);
           return;
         }
         final double desiredRotation = _rotationStart! + details.rotation;
@@ -858,6 +860,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         // In an effort to keep the behavior similar whether or not scaleEnabled
         // is true, these gestures are thrown away.
         if (details.scale != 1.0) {
+          widget.onInteractionUpdate?.call(details);
           return;
         }
         _panAxis ??= _getPanAxis(_referenceFocalPoint!, focalPointScene);
