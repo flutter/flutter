@@ -1976,6 +1976,22 @@ void main() {
     verifyNever(mockFlutterDevice.debugDumpLayerTree());
   }));
 
+  testUsingContext('ResidentRunner debugDumpLayerTree does not call flutter device if not running in debug mode', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
+
+    expect(await residentRunner.debugDumpLayerTree(), false);
+    verifyNever(mockFlutterDevice.debugDumpLayerTree());
+  }));
+
   testUsingContext('ResidentRunner debugDumpSemanticsTreeInTraversalOrder calls flutter device', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
 
