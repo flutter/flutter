@@ -369,7 +369,7 @@ class LocalizationOptions {
 
   /// The `nullable-getter` argument.
   ///
-  /// Whether or not the localizations class getter is non-nullable.
+  /// Whether or not the localizations class getter is nullable.
   final bool usesNullableGetter;
 }
 
