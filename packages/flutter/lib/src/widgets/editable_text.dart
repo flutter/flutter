@@ -208,7 +208,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
           text: value.composing.textInside(value.text),
         ),
         TextSpan(text: value.composing.textAfter(value.text)),
-    ]);
+      ],
+    );
   }
 
   /// The currently selected [text].

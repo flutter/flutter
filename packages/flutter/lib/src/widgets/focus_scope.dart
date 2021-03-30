@@ -462,7 +462,7 @@ class Focus extends StatefulWidget {
           'Focus.of(). This can happen because you are using a widget that looks for a Focus '
           'ancestor, and do not have a Focus widget descendant in the nearest FocusScope.\n'
           'The context used was:\n'
-          '  $context'
+          '  $context',
         );
       }
       return true;
@@ -477,7 +477,7 @@ class Focus extends StatefulWidget {
           'because you are using a widget that looks for a Focus ancestor, and do not have a '
           'Focus widget ancestor in the current FocusScope.\n'
           'The context used was:\n'
-          '  $context'
+          '  $context',
         );
       }
       return true;

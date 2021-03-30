@@ -785,7 +785,7 @@ class _MaterialAppState extends State<MaterialApp> {
               },
             )
           : child!,
-      )
+      ),
     );
   }
 

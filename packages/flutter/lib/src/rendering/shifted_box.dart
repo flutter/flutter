@@ -418,8 +418,8 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
       final Size childSize = child!.getDryLayout(constraints.loosen());
       return constraints.constrain(Size(
         shrinkWrapWidth ? childSize.width * (_widthFactor ?? 1.0) : double.infinity,
-        shrinkWrapHeight ? childSize.height * (_heightFactor ?? 1.0) : double.infinity),
-      );
+        shrinkWrapHeight ? childSize.height * (_heightFactor ?? 1.0) : double.infinity,
+      ));
     }
     return constraints.constrain(Size(
       shrinkWrapWidth ? 0.0 : double.infinity,
@@ -857,7 +857,7 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
 ///
 @Deprecated(
   'Use RenderConstraintsTransformBox instead. '
-  'This feature was deprecated after v2.1.0-11.0.pre.'
+  'This feature was deprecated after v2.1.0-11.0.pre.',
 )
 class RenderUnconstrainedBox extends RenderConstraintsTransformBox {
   /// Create a render object that sizes itself to the child but does not
@@ -866,7 +866,7 @@ class RenderUnconstrainedBox extends RenderConstraintsTransformBox {
   /// The [alignment] and [clipBehavior] must not be null.
   @Deprecated(
     'Use RenderConstraintsTransformBox instead. '
-    'This feature was deprecated after v2.1.0-11.0.pre.'
+    'This feature was deprecated after v2.1.0-11.0.pre.',
   )
   RenderUnconstrainedBox({
     required AlignmentGeometry alignment,

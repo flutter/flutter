@@ -451,7 +451,7 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
       MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
     );
     return super.defaultStyleOf(context).copyWith(
-      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(scaledPadding)
+      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(scaledPadding),
     );
   }
 }

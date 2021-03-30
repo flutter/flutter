@@ -804,7 +804,7 @@ mixin TextSelectionDelegate {
   /// formatting.
   @Deprecated(
     'Use the userUpdateTextEditingValue instead. '
-    'This feature was deprecated after v1.26.0-17.2.pre.'
+    'This feature was deprecated after v1.26.0-17.2.pre.',
   )
   set textEditingValue(TextEditingValue value) {}
 
@@ -1355,7 +1355,8 @@ class TextInput {
         break;
       case 'TextInputClient.performPrivateCommand':
         _currentConnection!._client.performPrivateCommand(
-          args[1]['action'] as String, args[1]['data'] as Map<String, dynamic>);
+          args[1]['action'] as String, args[1]['data'] as Map<String, dynamic>,
+        );
         break;
       case 'TextInputClient.updateFloatingCursor':
         _currentConnection!._client.updateFloatingCursor(_toTextPoint(
