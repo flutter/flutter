@@ -391,6 +391,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       buildInfo,
       startPaused: startPaused,
       disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
+      // On iOS >=14, keeping this enabled will leave a prompt on the screen.
+      disablePortPublication: true,
       disableDds: disableDds,
       nullAssertions: boolArg(FlutterOptions.kNullAssertions),
     );
