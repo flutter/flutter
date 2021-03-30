@@ -151,6 +151,17 @@ TaskFunction createBackdropFilterPerfTest({bool measureCpuGpu = true}) {
   ).run;
 }
 
+TaskFunction createAnimationWithMicrotasksPerfTest({bool measureCpuGpu = true}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'animation_with_microtasks_perf',
+    measureCpuGpu: measureCpuGpu,
+    testDriver: 'test_driver/animation_with_microtasks_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
 TaskFunction createBackdropFilterPerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
