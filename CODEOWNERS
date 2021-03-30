@@ -6,9 +6,9 @@
 #
 # Use git ls-files '<pattern>' without a / prefix to see the list of matching files.
 
+/.ci.yaml @caseyhillers
 /CODEOWNERS @jmagman
 /dev/ci/ @christopherfujino
-/dev/ci.yaml @caseyhillers
 /packages/flutter_goldens @Piinks
 /packages/flutter_goldens_client @Piinks
 /packages/flutter_test/lib/src/_goldens_io.dart @Piinks
