@@ -142,10 +142,15 @@ source_set("flutter_windows_source") {
 
   public_configs = [ ":relative_angle_headers" ]
 
-  defines = [
-    "FLUTTER_ENGINE_NO_PROTOTYPES",
-    "USECOREWINDOW",
-  ]
+  if (target_os == "winuwp") {
+    defines = [
+      "_SILENCE_CLANG_COROUTINE_MESSAGE",
+      "FLUTTER_ENGINE_NO_PROTOTYPES",
+      "USECOREWINDOW",
+    ]
+  } else {
+    defines = [ "FLUTTER_ENGINE_NO_PROTOTYPES" ]
+  }
 
   deps = [
     ":flutter_windows_headers",

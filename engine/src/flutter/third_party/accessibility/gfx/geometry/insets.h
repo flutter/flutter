@@ -5,6 +5,7 @@
 #ifndef UI_GFX_GEOMETRY_INSETS_H_
 #define UI_GFX_GEOMETRY_INSETS_H_
 
+#include <memory>
 #include <string>
 
 #include "gfx/gfx_export.h"

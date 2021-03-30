@@ -11,6 +11,7 @@
 #define UI_GFX_GEOMETRY_VECTOR2D_F_H_
 
 #include <iosfwd>
+#include <memory>
 #include <string>
 
 #include "gfx/gfx_export.h"
