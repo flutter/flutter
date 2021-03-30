@@ -83,7 +83,7 @@ class WebTestCompiler {
         ..writeAsStringSync(generateTestEntrypoint(
             relativeTestPath: relativeTestSegments.join('/'),
             absolutePath: testFilePath,
-            testConfigPath: findTestConfigFile(_fileSystem.file(testFilePath))?.path,
+            testConfigPath: findTestConfigFile(_fileSystem.file(testFilePath), _logger)?.path,
             languageVersion: languageVersion,
         ));
       generatedFiles.add(generatedFile);
