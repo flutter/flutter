@@ -221,7 +221,7 @@ class TimelineSummary {
     await file.writeAsString(_encodeJson(_timeline.json, pretty));
 
     if (includeSummary) {
-      _writeSummaryToFile(traceName, destinationDirectory: destinationDirectory, pretty: pretty);
+      await _writeSummaryToFile(traceName, destinationDirectory: destinationDirectory, pretty: pretty);
     }
   }
 
