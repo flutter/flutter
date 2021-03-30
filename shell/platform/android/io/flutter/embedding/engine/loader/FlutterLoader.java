@@ -237,9 +237,6 @@ public class FlutterLoader {
       }
 
       shellArgs.add("--cache-dir-path=" + result.engineCachesPath);
-      if (!flutterApplicationInfo.clearTextPermitted) {
-        shellArgs.add("--disallow-insecure-connections");
-      }
       if (flutterApplicationInfo.domainNetworkPolicy != null) {
         shellArgs.add("--domain-network-policy=" + flutterApplicationInfo.domainNetworkPolicy);
       }
