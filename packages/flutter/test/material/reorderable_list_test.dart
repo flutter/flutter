@@ -212,6 +212,61 @@ void main() {
         expect(getListHeight(), kDraggingListHeight);
       });
 
+      testWidgets('Vertical drag in progress golden image', (WidgetTester tester) async {
+        debugDisableShadows = false;
+        final Widget reorderableListView = ReorderableListView(
+          children: <Widget>[
+            Container(
+              key: const Key('pink'),
+              width: double.infinity,
+              height: itemHeight,
+              color: Colors.pink,
+            ),
+            Container(
+              key: const Key('blue'),
+              width: double.infinity,
+              height: itemHeight,
+              color: Colors.blue,
+            ),
+            Container(
+              key: const Key('green'),
+              width: double.infinity,
+              height: itemHeight,
+              color: Colors.green,
+            ),
+          ],
+          onReorder: (int oldIndex, int newIndex) { },
+        );
+        await tester.pumpWidget(MaterialApp(
+          home: Container(
+            color: Colors.white,
+            height: itemHeight * 3,
+            // Wrap in an overlay so that the golden image includes the dragged item.
+            child: Overlay(
+              initialEntries: <OverlayEntry>[
+                OverlayEntry(builder: (BuildContext context) => reorderableListView),
+              ],
+            ),
+          ),
+        ));
+
+        // Start dragging the second item.
+        final TestGesture drag = await tester.startGesture(tester.getCenter(find.byKey(const Key('blue'))));
+        await tester.pump(kLongPressTimeout + kPressTimeout);
+
+        // Drag it up to be partially over the top item.
+        await drag.moveBy(const Offset(0, -itemHeight / 3));
+        await tester.pumpAndSettle();
+
+        // Should be an image of the second item overlapping the bottom of the
+        // first with a gap between the first and third and a drop shadow on
+        // the dragged item.
+        await expectLater(
+          find.byType(ReorderableListView),
+          matchesGoldenFile('reorderable_list_test.vertical.drop_area.png'),
+        );
+      });
+
       testWidgets('Preserves children states when the list parent changes the order', (WidgetTester tester) async {
         _StatefulState findState(Key key) {
           return find.byElementPredicate((Element element) => element.findAncestorWidgetOfExactType<_Stateful>()?.key == key)
@@ -757,6 +812,62 @@ void main() {
         await drag.up();
         await tester.pumpAndSettle();
         expect(getListWidth(), kDraggingListWidth);
+      });
+
+      testWidgets('Horizontal drag in progress golden image', (WidgetTester tester) async {
+        debugDisableShadows = false;
+        final Widget reorderableListView = ReorderableListView(
+          children: <Widget>[
+            Container(
+              key: const Key('pink'),
+              height: double.infinity,
+              width: itemHeight,
+              color: Colors.pink,
+            ),
+            Container(
+              key: const Key('blue'),
+              height: double.infinity,
+              width: itemHeight,
+              color: Colors.blue,
+            ),
+            Container(
+              key: const Key('green'),
+              height: double.infinity,
+              width: itemHeight,
+              color: Colors.green,
+            ),
+          ],
+          scrollDirection: Axis.horizontal,
+          onReorder: (int oldIndex, int newIndex) { },
+        );
+        await tester.pumpWidget(MaterialApp(
+          home: Container(
+            color: Colors.white,
+            width: itemHeight * 3,
+            // Wrap in an overlay so that the golden image includes the dragged item.
+            child: Overlay(
+              initialEntries: <OverlayEntry>[
+                OverlayEntry(builder: (BuildContext context) => reorderableListView),
+              ],
+            ),
+          ),
+        ));
+
+        // Start dragging the second item.
+        final TestGesture drag = await tester.startGesture(tester.getCenter(find.byKey(const Key('blue'))));
+        await tester.pump(kLongPressTimeout + kPressTimeout);
+
+        // Drag it left to be partially over the first item.
+        await drag.moveBy(const Offset(-itemHeight / 3, 0));
+        await tester.pumpAndSettle();
+
+        // Should be an image of the second item overlapping the right of the
+        // first with a gap between the first and third and a drop shadow on
+        // the dragged item.
+        await expectLater(
+          find.byType(ReorderableListView),
+          matchesGoldenFile('reorderable_list_test.horizontal.drop_area.png'),
+        );
       });
 
       testWidgets('Preserves children states when the list parent changes the order', (WidgetTester tester) async {
