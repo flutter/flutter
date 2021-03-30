@@ -46,11 +46,12 @@ void batch1() {
   }
 
   testWithoutContext('flutter run expression evaluation - can evaluate trivial expressions in top level function', () async {
-    await initProject();
-    await _flutter.run(withDebugger: true);
-    await breakInTopLevelFunction(_flutter);
-    await evaluateTrivialExpressions(_flutter);
-    await cleanProject();
+    throw 'This should fail';
+//    await initProject();
+//    await _flutter.run(withDebugger: true);
+//    await breakInTopLevelFunction(_flutter);
+//    await evaluateTrivialExpressions(_flutter);
+//    await cleanProject();
   });
 
   testWithoutContext('flutter run expression evaluation - can evaluate trivial expressions in build method', () async {
