@@ -274,6 +274,11 @@ class ScrollDragController implements Drag {
   static const Duration momentumRetainStationaryDurationThreshold =
       Duration(milliseconds: 20);
 
+  /// The factor multiplied with the carriedVelocity to check if it should be
+  /// added to added to the velocity of an ended scroll gesture.
+  /// Decided by fair eyeballing with the scroll_overlay platform test
+  static const double momentumRetainVelocityThresholdFactor = 0.5;
+
   /// Maximum amount of time interval the drag can have consecutive stationary
   /// pointer update events before needing to break the
   /// [motionStartDistanceThreshold] to start motion again.
@@ -391,8 +396,17 @@ class ScrollDragController implements Drag {
     _lastDetails = details;
 
     // Build momentum only if dragging in the same direction.
-    if (_retainMomentum && velocity.sign == carriedVelocity!.sign)
+    // Check that the incomming velocity is more than 
+    // a [momentumRetainVelocityThresholdFactor]'th of the carriedVelocity to
+    // avoid adding the carriedVelocity to the current velocity if the finger 
+    // left the screen with a substantially smaller speed giving the effect of
+    // the scrollview carrying on in a much larger speed than the finger left with
+    if (_retainMomentum && 
+        velocity.sign == carriedVelocity!.sign &&
+        (carriedVelocity! == 0 || velocity.abs() > carriedVelocity!.abs() * momentumRetainVelocityThresholdFactor)
+    ) {
       velocity += carriedVelocity!;
+    }
     delegate.goBallistic(velocity);
   }
 
