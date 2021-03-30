@@ -237,7 +237,7 @@ class ReorderableList extends StatefulWidget {
           ErrorHint(
             'This can happen when the context provided is from the same StatefulWidget that '
             'built the ReorderableList. Please see the ReorderableList documentation for examples '
-            'of how to refer to an ReorderableListState object:'
+            'of how to refer to an ReorderableListState object:\n'
             '  https://api.flutter.dev/flutter/widgets/ReorderableListState-class.html',
           ),
           context.describeElement('The context used was'),
@@ -427,7 +427,7 @@ class SliverReorderableList extends StatefulWidget {
           ErrorHint(
             'This can happen when the context provided is from the same StatefulWidget that '
             'built the SliverReorderableList. Please see the SliverReorderableList documentation for examples '
-            'of how to refer to an SliverReorderableList object:'
+            'of how to refer to an SliverReorderableList object:\n'
             '  https://api.flutter.dev/flutter/widgets/SliverReorderableListState-class.html',
           ),
           context.describeElement('The context used was'),

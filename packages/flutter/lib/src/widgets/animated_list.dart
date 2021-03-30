@@ -409,7 +409,7 @@ class AnimatedList extends StatefulWidget {
           ErrorHint(
             'This can happen when the context provided is from the same StatefulWidget that '
             'built the AnimatedList. Please see the AnimatedList documentation for examples '
-            'of how to refer to an AnimatedListState object:'
+            'of how to refer to an AnimatedListState object:\n'
             '  https://api.flutter.dev/flutter/widgets/AnimatedListState-class.html',
           ),
           context.describeElement('The context used was'),
