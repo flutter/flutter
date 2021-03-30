@@ -20,6 +20,7 @@ import io.flutter.embedding.engine.plugins.activity.ActivityControlSurface;
 import io.flutter.embedding.engine.plugins.broadcastreceiver.BroadcastReceiverControlSurface;
 import io.flutter.embedding.engine.plugins.contentprovider.ContentProviderControlSurface;
 import io.flutter.embedding.engine.plugins.service.ServiceControlSurface;
+import io.flutter.embedding.engine.plugins.util.GeneratedPluginRegister;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.renderer.RenderSurface;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
@@ -36,7 +37,6 @@ import io.flutter.embedding.engine.systemchannels.SystemChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
-import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -342,7 +342,7 @@ public class FlutterEngine {
     // Only automatically register plugins if both constructor parameter and
     // loaded AndroidManifest config turn this feature on.
     if (automaticallyRegisterPlugins && flutterLoader.automaticallyRegisterPlugins()) {
-      registerPlugins();
+      GeneratedPluginRegister.registerGeneratedPlugins(this);
     }
   }
 
@@ -389,36 +389,6 @@ public class FlutterEngine {
         null, // FlutterLoader. A null value passed here causes the constructor to get it from the
         // FlutterInjector.
         newFlutterJNI); // FlutterJNI.
-  }
-
-  /**
-   * Registers all plugins that an app lists in its pubspec.yaml.
-   *
-   * <p>The Flutter tool generates a class called GeneratedPluginRegistrant, which includes the code
-   * necessary to register every plugin in the pubspec.yaml with a given {@code FlutterEngine}. The
-   * GeneratedPluginRegistrant must be generated per app, because each app uses different sets of
-   * plugins. Therefore, the Android embedding cannot place a compile-time dependency on this
-   * generated class. This method uses reflection to attempt to locate the generated file and then
-   * use it at runtime.
-   *
-   * <p>This method fizzles if the GeneratedPluginRegistrant cannot be found or invoked. This
-   * situation should never occur, but if any eventuality comes up that prevents an app from using
-   * this behavior, that app can still write code that explicitly registers plugins.
-   */
-  private void registerPlugins() {
-    try {
-      Class<?> generatedPluginRegistrant =
-          Class.forName("io.flutter.plugins.GeneratedPluginRegistrant");
-      Method registrationMethod =
-          generatedPluginRegistrant.getDeclaredMethod("registerWith", FlutterEngine.class);
-      registrationMethod.invoke(null, this);
-    } catch (Exception e) {
-      Log.w(
-          TAG,
-          "Tried to automatically register plugins with FlutterEngine ("
-              + this
-              + ") but could not find and invoke the GeneratedPluginRegistrant.");
-    }
   }
 
   /**
