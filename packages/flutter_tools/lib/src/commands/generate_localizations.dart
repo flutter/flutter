@@ -172,6 +172,17 @@ class GenerateLocalizationsCommand extends FlutterCommand {
             '\n'
             'Resource attributes are still required for plural messages.'
     );
+    argParser.addFlag(
+      'nullable-getter',
+      help: 'Whether or not the localizations class getter is non-nullable.\n'
+            '\n'
+            'By default, this value is set to true so that '
+            'Localizations.of(context) returns a nullable value '
+            'for backwards compatibility. If this value is set to true, then '
+            'a null check is performed on the returned value of '
+            'Localizations.of(context), removing the need for null checking in '
+            'user code.'
+    );
   }
 
   final FileSystem _fileSystem;
