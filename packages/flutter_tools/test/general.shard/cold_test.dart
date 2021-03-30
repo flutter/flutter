@@ -53,7 +53,6 @@ void main() {
   group('cleanupAtFinish()', () {
     MockFlutterDevice mockFlutterDeviceFactory(Device device) {
       final MockFlutterDevice mockFlutterDevice = MockFlutterDevice();
-      when(mockFlutterDevice.stopEchoingDeviceLog()).thenAnswer((Invocation invocation) => Future<void>.value(null));
       when(mockFlutterDevice.device).thenReturn(device);
       return mockFlutterDevice;
     }
@@ -72,9 +71,9 @@ void main() {
       ).cleanupAtFinish();
 
       verify(mockDevice1.dispose());
-      verify(mockFlutterDevice1.stopEchoingDeviceLog());
+      expect(mockFlutterDevice1.stopEchoingDeviceLogCount, 1);
       verify(mockDevice2.dispose());
-      verify(mockFlutterDevice2.stopEchoingDeviceLog());
+      expect(mockFlutterDevice2.stopEchoingDeviceLogCount, 1);
     });
   });
 
@@ -173,8 +172,12 @@ void main() {
 }
 
 class MockFlutterDevice extends Mock implements FlutterDevice {
+  int stopEchoingDeviceLogCount = 0;
+
   @override
-  Future<void> stopEchoingDeviceLog() async {}
+  Future<void> stopEchoingDeviceLog() async {
+    stopEchoingDeviceLogCount += 1;
+  }
 
   @override
   FlutterVmService get vmService => FakeFlutterVmService();
