@@ -581,15 +581,60 @@ class CkParagraph extends ManagedSkiaObject<SkParagraph>
 
   @override
   ui.TextRange getLineBoundary(ui.TextPosition position) {
-    // TODO(hterkelsen): Implement this when it's added to CanvasKit
-    throw UnimplementedError('getLineBoundary');
+    final List<SkLineMetrics> metrics = skiaObject.getLineMetrics();
+    final int offset = position.offset;
+    for (final SkLineMetrics metric in metrics) {
+      if (offset >= metric.startIndex && offset <= metric.endIndex) {
+        return ui.TextRange(start: metric.startIndex, end: metric.endIndex);
+      }
+    }
+    return ui.TextRange(start: -1, end: -1);
   }
 
   @override
   List<ui.LineMetrics> computeLineMetrics() {
-    // TODO(hterkelsen): Implement this when it's added to CanvasKit
-    throw UnimplementedError('computeLineMetrics');
+    final List<SkLineMetrics> skLineMetrics = skiaObject.getLineMetrics();
+    final List<ui.LineMetrics> result = <ui.LineMetrics>[];
+    for (final SkLineMetrics metric in skLineMetrics) {
+      result.add(CkLineMetrics._(metric));
+    }
+    return result;
   }
+}
+
+class CkLineMetrics implements ui.LineMetrics {
+  CkLineMetrics._(this.skLineMetrics);
+
+  final SkLineMetrics skLineMetrics;
+
+  @override
+  double get ascent => skLineMetrics.ascent;
+
+  @override
+  double get descent => skLineMetrics.descent;
+
+  // TODO(hterkelsen): Implement this correctly once SkParagraph does.
+  @override
+  double get unscaledAscent => skLineMetrics.ascent;
+
+  @override
+  bool get hardBreak => skLineMetrics.isHardBreak;
+
+  @override
+  double get baseline => skLineMetrics.baseline;
+
+  @override
+  double get height =>
+      (skLineMetrics.ascent + skLineMetrics.descent).round().toDouble();
+
+  @override
+  double get left => skLineMetrics.left;
+
+  @override
+  double get width => skLineMetrics.width;
+
+  @override
+  int get lineNumber => skLineMetrics.lineNumber;
 }
 
 class CkParagraphBuilder implements ui.ParagraphBuilder {
