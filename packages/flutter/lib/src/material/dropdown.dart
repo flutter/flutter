@@ -802,7 +802,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 ///    from displaying their underlines.
 ///  * [ElevatedButton], [TextButton], ordinary buttons that trigger a single action.
 ///  * <https://material.io/design/components/menus.html#dropdown-menu>
-class DropdownButton<T> extends StatefulWidget {
+class DropdownButton<T extends Object> extends StatefulWidget {
   /// Creates a dropdown button.
   ///
   /// The [items] must have distinct values. If [value] isn't null then it
@@ -1114,7 +1114,7 @@ class DropdownButton<T> extends StatefulWidget {
   _DropdownButtonState<T> createState() => _DropdownButtonState<T>();
 }
 
-class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindingObserver {
+class _DropdownButtonState<T extends Object> extends State<DropdownButton<T>> with WidgetsBindingObserver {
   int? _selectedIndex;
   _DropdownRoute<T>? _dropdownRoute;
   Orientation? _lastOrientation;
@@ -1465,7 +1465,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 }
 
 /// A convenience widget that makes a [DropdownButton] into a [FormField].
-class DropdownButtonFormField<T> extends FormField<T> {
+class DropdownButtonFormField<T extends Object> extends FormField<T> {
   /// Creates a [DropdownButton] widget that is a [FormField], wrapped in an
   /// [InputDecorator].
   ///
@@ -1601,7 +1601,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
   FormFieldState<T> createState() => _DropdownButtonFormFieldState<T>();
 }
 
-class _DropdownButtonFormFieldState<T> extends FormFieldState<T> {
+class _DropdownButtonFormFieldState<T extends Object> extends FormFieldState<T> {
   @override
   DropdownButtonFormField<T> get widget => super.widget as DropdownButtonFormField<T>;
 
