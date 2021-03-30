@@ -20,6 +20,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
+import '../device_port_forwader.dart';
 import '../emulator.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
@@ -427,9 +428,7 @@ class AppDomain extends Domain {
     registerHandler('detach', detach);
   }
 
-  // TODO(jonahwilliams): update after google3 uuid is updated.
-  // ignore: prefer_const_constructors
-  static final Uuid _uuidGenerator = Uuid();
+  static const Uuid _uuidGenerator = Uuid();
 
   static String _getNewAppId() => _uuidGenerator.v4();
 
@@ -484,6 +483,10 @@ class AppDomain extends Domain {
         stayResident: true,
         urlTunneller: options.webEnableExposeUrl ? daemon.daemonDomain.exposeUrl : null,
         machine: machine,
+        usage: globals.flutterUsage,
+        systemClock: globals.systemClock,
+        logger: globals.logger,
+        fileSystem: globals.fs,
       );
     } else if (enableHotReload) {
       runner = HotRunner(
@@ -1020,6 +1023,7 @@ class NotifyingLogger extends DelegatingLogger {
     @required Duration timeout,
     String progressId,
     bool multilineOutput = false,
+    bool includeTiming = true,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     assert(timeout != null);
@@ -1148,6 +1152,7 @@ class AppRunLogger extends DelegatingLogger {
     @required Duration timeout,
     String progressId,
     bool multilineOutput = false,
+    bool includeTiming = true,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     final int id = _nextProgressId++;

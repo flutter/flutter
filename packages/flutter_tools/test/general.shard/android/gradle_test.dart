@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -196,7 +195,7 @@ void main() {
       expect(() {
         updateLocalProperties(project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory));
       }, throwsToolExit(
-        message: '$warningMark No Android SDK found. Try setting the ANDROID_SDK_ROOT environment variable.',
+        message: '${globals.logger.terminal.warningMark} No Android SDK found. Try setting the ANDROID_SDK_ROOT environment variable.',
       ));
     }, overrides: <Type, Generator>{
       AndroidSdk: () => null,

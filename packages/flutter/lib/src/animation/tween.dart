@@ -259,7 +259,7 @@ class Tween<T extends dynamic> extends Animatable<T> {
     assert(() {
       // Assertions that attempt to catch common cases of tweening types
       // that do not conform to the Tween requirements.
-      dynamic? result;
+      dynamic result;
       try {
         result = begin + (end - begin) * t;
         result as T;

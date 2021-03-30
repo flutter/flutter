@@ -78,14 +78,18 @@ Widget overlayWithEntry(OverlayEntry entry) {
       WidgetsLocalizationsDelegate(),
       MaterialLocalizationsDelegate(),
     ],
-    child: Directionality(
-      textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(size: Size(800.0, 600.0)),
-        child: Overlay(
-          initialEntries: <OverlayEntry>[
-            entry,
-          ],
+    child: DefaultTextEditingShortcuts(
+      child: DefaultTextEditingActions(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(size: Size(800.0, 600.0)),
+            child: Overlay(
+              initialEntries: <OverlayEntry>[
+                entry,
+              ],
+            ),
+          ),
         ),
       ),
     ),
@@ -251,6 +255,57 @@ void main() {
     expect(find.byType(CupertinoButton), findsNothing);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux }), skip: kIsWeb);
 
+  testWidgets('Activates the text field when receives semantics focus on Mac', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+    final FocusNode focusNode = FocusNode();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(focusNode: focusNode),
+        ),
+      ),
+    );
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            id: 1,
+            textDirection: TextDirection.ltr,
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 2,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 3,
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 4,
+                        flags: <SemanticsFlag>[SemanticsFlag.isTextField],
+                        actions: <SemanticsAction>[SemanticsAction.tap,
+                          SemanticsAction.didGainAccessibilityFocus],
+                        textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
+
+    expect(focusNode.hasFocus, isFalse);
+    semanticsOwner.performAction(4, SemanticsAction.didGainAccessibilityFocus);
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isTrue);
+    semantics.dispose();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }), skip: kIsWeb);
+
   testWidgets('TextField passes onEditingComplete to EditableText', (WidgetTester tester) async {
     void onEditingComplete() { }
 
@@ -388,6 +443,33 @@ void main() {
 
     expect(renderEditable.cursorColor!.alpha, 0);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+  // Regression test for https://github.com/flutter/flutter/issues/78918.
+  testWidgets('RenderEditable sets correct text editing value', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'how are you');
+    final UniqueKey icon = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              suffixIcon: IconButton(
+                key: icon,
+                icon: const Icon(Icons.cancel),
+                onPressed: () => controller.clear(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(icon));
+    await tester.pump();
+    expect(controller.text, '');
+    expect(controller.selection, const TextSelection.collapsed(offset: 0, affinity: TextAffinity.upstream));
+  });
 
   testWidgets('Cursor radius is 2.0', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1198,7 +1280,7 @@ void main() {
             flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isFocused],
             actions: <SemanticsAction>[SemanticsAction.tap,
               SemanticsAction.moveCursorBackwardByCharacter, SemanticsAction.setSelection, SemanticsAction.paste,
-              SemanticsAction.moveCursorBackwardByWord],
+              SemanticsAction.setText, SemanticsAction.moveCursorBackwardByWord],
             value: 'abcdefghi',
             textDirection: TextDirection.ltr,
             textSelection: const TextSelection.collapsed(offset: 9),
@@ -5325,6 +5407,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
@@ -5352,6 +5435,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.moveCursorForwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
@@ -5378,6 +5462,7 @@ void main() {
             SemanticsAction.moveCursorForwardByCharacter,
             SemanticsAction.moveCursorForwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
@@ -5416,6 +5501,7 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.setText,
             // Absent the following because enableInteractiveSelection: false
             // SemanticsAction.moveCursorBackwardByCharacter,
             // SemanticsAction.moveCursorBackwardByWord,
@@ -5480,6 +5566,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
@@ -5507,6 +5594,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.moveCursorForwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.paste,
             SemanticsAction.cut,
             SemanticsAction.copy,
@@ -5557,6 +5645,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
@@ -5602,6 +5691,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.paste,
             SemanticsAction.cut,
             SemanticsAction.copy,
@@ -5671,6 +5761,7 @@ void main() {
               SemanticsAction.moveCursorBackwardByCharacter,
               SemanticsAction.moveCursorBackwardByWord,
               SemanticsAction.setSelection,
+              SemanticsAction.setText,
               SemanticsAction.paste,
             ],
             value: textInTextField,
@@ -5743,6 +5834,7 @@ void main() {
               SemanticsAction.moveCursorBackwardByCharacter,
               SemanticsAction.moveCursorBackwardByWord,
               SemanticsAction.setSelection,
+              SemanticsAction.setText,
               // No paste option.
             ],
             value: textInTextField,
@@ -5939,6 +6031,7 @@ void main() {
           actions: <SemanticsAction>[
             SemanticsAction.tap,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
@@ -8802,14 +8895,14 @@ void main() {
         // Regression test for https://github.com/flutter/flutter/issues/54729
         // If the intrinsic height does not match that of the height after
         // performLayout, this will fail.
-        tester.pumpWidget(_buildTest(isDense: false));
+        await tester.pumpWidget(_buildTest(isDense: false));
       });
 
       testWidgets('When isDense, intrinsic height can go below kMinInteractiveDimension height', (WidgetTester tester) async {
         // Regression test for https://github.com/flutter/flutter/issues/54729
         // If the intrinsic height does not match that of the height after
         // performLayout, this will fail.
-        tester.pumpWidget(_buildTest(isDense: true));
+        await tester.pumpWidget(_buildTest(isDense: true));
       });
     });
   });

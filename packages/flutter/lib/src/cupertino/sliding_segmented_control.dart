@@ -352,12 +352,14 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   ///
   /// ```dart
   /// class SegmentedControlExample extends StatefulWidget {
+  ///   const SegmentedControlExample({Key? key}) : super(key: key);
+  ///
   ///   @override
   ///   State createState() => SegmentedControlExampleState();
   /// }
   ///
   /// class SegmentedControlExampleState extends State<SegmentedControlExample> {
-  ///   final Map<int, Widget> children = const {
+  ///   final Map<int, Widget> children = const <int, Widget>{
   ///     0: Text('Child 1'),
   ///     1: Text('Child 2'),
   ///   };
@@ -366,16 +368,14 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return Container(
-  ///       child: CupertinoSlidingSegmentedControl<int>(
-  ///         children: children,
-  ///         onValueChanged: (int? newValue) {
-  ///           setState(() {
-  ///             currentValue = newValue;
-  ///           });
-  ///         },
-  ///         groupValue: currentValue,
-  ///       ),
+  ///     return CupertinoSlidingSegmentedControl<int>(
+  ///       children: children,
+  ///       onValueChanged: (int? newValue) {
+  ///         setState(() {
+  ///           currentValue = newValue;
+  ///         });
+  ///       },
+  ///       groupValue: currentValue,
   ///     );
   ///   }
   /// }
@@ -976,7 +976,7 @@ class _RenderSegmentedControl<T> extends RenderBox
 
   // This method is used to convert the original unscaled thumb rect painted in
   // the previous frame, to a Rect that is within the valid boundary defined by
-  // the the child segments.
+  // the child segments.
   //
   // The overall size does not include that of the thumb. That is, if the thumb
   // is located at the first or the last segment, the thumb can get cut off if

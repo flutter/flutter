@@ -84,6 +84,8 @@ class SliderTheme extends InheritedTheme {
   ///
   /// ```dart
   /// class Launch extends StatefulWidget {
+  ///   const Launch({Key? key}) : super(key: key);
+  ///
   ///   @override
   ///   State createState() => LaunchState();
   /// }
@@ -244,6 +246,8 @@ class SliderThemeData with Diagnosticable {
   ///
   /// ```dart
   /// class Blissful extends StatefulWidget {
+  ///   const Blissful({Key? key}) : super(key: key);
+  ///
   ///   @override
   ///   State createState() => BlissfulState();
   /// }
@@ -1423,7 +1427,7 @@ abstract class RangeSliderTrackShape {
 ///    rectangular edges
 ///  * [RoundedRectSliderTrackShape], which is a track shape with round
 ///    stadium-like edges.
-abstract class BaseSliderTrackShape {
+mixin BaseSliderTrackShape {
   /// Returns a rect that represents the track bounds that fits within the
   /// [Slider].
   ///

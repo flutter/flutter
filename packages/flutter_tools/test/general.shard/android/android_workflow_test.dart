@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/version.dart';
-import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:mockito/mockito.dart';
 

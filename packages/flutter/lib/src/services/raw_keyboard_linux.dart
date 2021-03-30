@@ -167,7 +167,7 @@ abstract class KeyHelper {
 }
 
 /// Helper class that uses GLFW-specific key mappings.
-class GLFWKeyHelper with KeyHelper {
+class GLFWKeyHelper implements KeyHelper {
   /// This mask is used to check the [RawKeyEventDataLinux.modifiers] field to
   /// test whether the CAPS LOCK modifier key is on.
   ///
@@ -304,7 +304,7 @@ class GLFWKeyHelper with KeyHelper {
 }
 
 /// Helper class that uses GTK-specific key mappings.
-class GtkKeyHelper with KeyHelper {
+class GtkKeyHelper implements KeyHelper {
   /// This mask is used to check the [RawKeyEventDataLinux.modifiers] field to
   /// test whether one of the SHIFT modifier keys is pressed.
   ///

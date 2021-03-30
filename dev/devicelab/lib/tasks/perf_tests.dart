@@ -12,8 +12,16 @@ import 'package:path/path.dart' as path;
 
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/host_agent.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
+
+/// Must match flutter_driver/lib/src/common.dart.
+///
+/// Redefined here to avoid taking a dependency on flutter_driver.
+String _testOutputDirectory(String testDirectory) {
+  return Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? '$testDirectory/build';
+}
 
 TaskFunction createComplexLayoutScrollPerfTest({bool measureCpuGpu = true}) {
   return PerfTest(
@@ -292,9 +300,11 @@ TaskFunction createStackSizeTest() {
         '--driver', testDriver,
         '-d',
         deviceId,
+        '--screenshot',
+        hostAgent.dumpDirectory.path,
       ]);
       final Map<String, dynamic> data = json.decode(
-        file('$testDirectory/build/stack_size.json').readAsStringSync(),
+        file('${_testOutputDirectory(testDirectory)}/stack_size.json').readAsStringSync(),
       ) as Map<String, dynamic>;
 
       final Map<String, dynamic> result = <String, dynamic>{
@@ -387,9 +397,11 @@ TaskFunction createsScrollSmoothnessPerfTest() {
         '-t', testTarget,
         '-d',
         deviceId,
+        '--screenshot',
+        hostAgent.dumpDirectory.path,
       ]);
       final Map<String, dynamic> data = json.decode(
-        file('$testDirectory/build/scroll_smoothness_test.json').readAsStringSync(),
+        file('${_testOutputDirectory(testDirectory)}/scroll_smoothness_test.json').readAsStringSync(),
       ) as Map<String, dynamic>;
 
       final Map<String, dynamic> result = <String, dynamic>{};
@@ -436,9 +448,11 @@ TaskFunction createFramePolicyIntegrationTest() {
         '-t', testTarget,
         '-d',
         deviceId,
+        '--screenshot',
+        hostAgent.dumpDirectory.path,
       ]);
       final Map<String, dynamic> data = json.decode(
-        file('$testDirectory/build/frame_policy_event_delay.json').readAsStringSync(),
+        file('${_testOutputDirectory(testDirectory)}/frame_policy_event_delay.json').readAsStringSync(),
       ) as Map<String, dynamic>;
       final Map<String, dynamic> fullLiveData = data['fullyLive'] as Map<String, dynamic>;
       final Map<String, dynamic> benchmarkLiveData = data['benchmarkLive'] as Map<String, dynamic>;
@@ -550,7 +564,7 @@ class StartupTest {
          ], canFail: true);
         if (result == 0) {
           final Map<String, dynamic> data = json.decode(
-            file('$testDirectory/build/start_up_info.json').readAsStringSync(),
+            file('${_testOutputDirectory(testDirectory)}/start_up_info.json').readAsStringSync(),
           ) as Map<String, dynamic>;
           results.add(data);
         } else {
@@ -689,9 +703,11 @@ class PerfTest {
           ...<String>['--dart-define', dartDefine],
         '-d',
         deviceId,
+        '--screenshot',
+        hostAgent.dumpDirectory.path,
       ]);
       final Map<String, dynamic> data = json.decode(
-        file('$testDirectory/build/$resultFilename.json').readAsStringSync(),
+        file('${_testOutputDirectory(testDirectory)}/$resultFilename.json').readAsStringSync(),
       ) as Map<String, dynamic>;
 
       if (data['frame_count'] as int < 5) {
@@ -708,7 +724,7 @@ class PerfTest {
         data,
         detailFiles: <String>[
           if (saveTraceFile)
-            '$testDirectory/build/$traceFilename.json',
+            '${_testOutputDirectory(testDirectory)}/$traceFilename.json',
         ],
         benchmarkScoreKeys: benchmarkScoreKeys ?? <String>[
           ..._kCommonScoreKeys,
@@ -1334,6 +1350,8 @@ class DevToolsMemoryTest {
         options: <String>[
           '--use-existing-app', _observatoryUri,
           '-d', _device.deviceId,
+          '--screenshot',
+          hostAgent.dumpDirectory.path,
           '--profile',
           driverTest,
         ],
@@ -1409,11 +1427,16 @@ class DevToolsMemoryTest {
   }
 
   Future<void> _launchDevTools() async {
+    // The version of devtools is pinned. If we pub global activate devtools and an
+    // upstream devtools release breaks our CI, it will manifest on an unrelated
+    // commit, making it more difficult to determine the cause.
+    //
+    // Also, for release branches, all external test dependencies need to be pinned.
     await exec(pubBin, <String>[
       'global',
       'activate',
       'devtools',
-      '0.2.5',
+      '2.0.0',
     ]);
     _devToolsProcess = await startProcess(
       pubBin,

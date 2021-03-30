@@ -791,9 +791,9 @@ enum SelectionChangedCause {
   drag,
 }
 
-/// An interface for manipulating the selection, to be used by the implementor
+/// A mixin for manipulating the selection, to be used by the implementer
 /// of the toolbar widget.
-abstract class TextSelectionDelegate {
+mixin TextSelectionDelegate {
   /// Gets the current text input.
   TextEditingValue get textEditingValue;
 
@@ -926,6 +926,7 @@ class TextInputConnection {
   Size? _cachedSize;
   Matrix4? _cachedTransform;
   Rect? _cachedRect;
+  Rect? _cachedCaretRect;
 
   static int _nextId = 1;
   final int _id;
@@ -1010,7 +1011,8 @@ class TextInputConnection {
   /// The given `rect` can not be null. If any of the 4 coordinates of the given
   /// [Rect] is not finite, a [Rect] of size (-1, -1) will be sent instead.
   ///
-  /// The information is currently only used on iOS, for positioning the IME bar.
+  /// This information is used for positioning the IME candidates menu on each
+  /// platform.
   void setComposingRect(Rect rect) {
     assert(rect != null);
     if (rect == _cachedRect)
@@ -1018,6 +1020,24 @@ class TextInputConnection {
     _cachedRect = rect;
     final Rect validRect = rect.isFinite ? rect : Offset.zero & const Size(-1, -1);
     TextInput._instance._setComposingTextRect(
+      <String, dynamic>{
+        'width': validRect.width,
+        'height': validRect.height,
+        'x': validRect.left,
+        'y': validRect.top,
+      },
+    );
+  }
+
+  /// Sends the coordinates of caret rect. This is used on macOS for positioning
+  /// the accent selection menu.
+  void setCaretRect(Rect rect) {
+    assert(rect != null);
+    if (rect == _cachedCaretRect)
+      return;
+    _cachedCaretRect = rect;
+    final Rect validRect = rect.isFinite ? rect : Offset.zero & const Size(-1, -1);
+    TextInput._instance._setCaretRect(
       <String, dynamic>{
         'width': validRect.width,
         'height': validRect.height,
@@ -1411,6 +1431,13 @@ class TextInput {
   void _setComposingTextRect(Map<String, dynamic> args) {
     _channel.invokeMethod<void>(
       'TextInput.setMarkedTextRect',
+      args,
+    );
+  }
+
+  void _setCaretRect(Map<String, dynamic> args) {
+    _channel.invokeMethod<void>(
+      'TextInput.setCaretRect',
       args,
     );
   }

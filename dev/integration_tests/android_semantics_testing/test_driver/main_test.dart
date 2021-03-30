@@ -4,12 +4,11 @@
 
 import 'dart:io' as io;
 
-import 'package:android_semantics_testing/test_constants.dart';
 import 'package:android_semantics_testing/android_semantics_testing.dart';
-
-import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
+import 'package:android_semantics_testing/test_constants.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:path/path.dart' as path;
+import 'package:test/test.dart' hide isInstanceOf;
 
 String adbPath() {
   final String androidHome = io.Platform.environment['ANDROID_HOME'] ?? io.Platform.environment['ANDROID_SDK_ROOT'];

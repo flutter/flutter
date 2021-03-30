@@ -99,11 +99,12 @@ import 'theme_data.dart';
 /// ```dart preamble
 /// class LinkedLabelCheckbox extends StatelessWidget {
 ///   const LinkedLabelCheckbox({
+///     Key? key,
 ///     required this.label,
 ///     required this.padding,
 ///     required this.value,
 ///     required this.onChanged,
-///   });
+///   }) : super(key: key);
 ///
 ///   final String label;
 ///   final EdgeInsets padding;
@@ -120,7 +121,7 @@ import 'theme_data.dart';
 ///             child: RichText(
 ///               text: TextSpan(
 ///                 text: label,
-///                 style: TextStyle(
+///                 style: const TextStyle(
 ///                   color: Colors.blueAccent,
 ///                   decoration: TextDecoration.underline,
 ///                 ),
@@ -179,11 +180,12 @@ import 'theme_data.dart';
 /// ```dart preamble
 /// class LabeledCheckbox extends StatelessWidget {
 ///   const LabeledCheckbox({
+///     Key? key,
 ///     required this.label,
 ///     required this.padding,
 ///     required this.value,
 ///     required this.onChanged,
-///   });
+///   }) : super(key: key);
 ///
 ///   final String label;
 ///   final EdgeInsets padding;

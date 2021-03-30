@@ -21,6 +21,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
+import '../device_port_forwader.dart';
 import '../globals.dart' as globals;
 import '../macos/xcode.dart';
 import '../project.dart';
@@ -258,6 +259,7 @@ class IOSDevice extends Device {
       installationResult = await _iosDeploy.installApp(
         deviceId: id,
         bundlePath: bundle.path,
+        appDeltaDirectory: app.appDeltaDirectory,
         launchArguments: <String>[],
         interfaceType: interfaceType,
       );
@@ -384,6 +386,7 @@ class IOSDevice extends Device {
           iosDeployDebugger = _iosDeploy.prepareDebuggerForLaunch(
             deviceId: id,
             bundlePath: bundle.path,
+            appDeltaDirectory: package.appDeltaDirectory,
             launchArguments: launchArguments,
             interfaceType: interfaceType,
           );
@@ -404,6 +407,7 @@ class IOSDevice extends Device {
         installationResult = await _iosDeploy.launchApp(
           deviceId: id,
           bundlePath: bundle.path,
+          appDeltaDirectory: package.appDeltaDirectory,
           launchArguments: launchArguments,
           interfaceType: interfaceType,
         );

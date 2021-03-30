@@ -69,6 +69,7 @@ class FlutterDevice {
          processManager: globals.processManager,
          logger: globals.logger,
          platform: globals.platform,
+         fileSystem: globals.fs,
        );
 
   /// Create a [FlutterDevice] with optional code generation enabled.
@@ -138,6 +139,7 @@ class FlutterDevice {
         artifacts: globals.artifacts,
         processManager: globals.processManager,
         logger: globals.logger,
+        fileSystem: globals.fs,
         platform: platform,
       );
     } else {
@@ -173,6 +175,7 @@ class FlutterDevice {
         processManager: globals.processManager,
         logger: globals.logger,
         platform: platform,
+        fileSystem: globals.fs,
       );
     }
 
@@ -565,7 +568,7 @@ class FlutterDevice {
     final bool prebuiltMode = hotRunner.applicationBinary != null;
     final String modeName = hotRunner.debuggingOptions.buildInfo.friendlyModeName;
     globals.printStatus(
-      'Launching ${globals.fsUtils.getDisplayPath(hotRunner.mainPath)} '
+      'Launching ${getDisplayPath(hotRunner.mainPath, globals.fs)} '
       'on ${device.name} in $modeName mode...',
     );
 
@@ -645,7 +648,7 @@ class FlutterDevice {
       );
     } else {
       globals.printStatus(
-        'Launching ${globals.fsUtils.getDisplayPath(coldRunner.mainPath)} '
+        'Launching ${getDisplayPath(coldRunner.mainPath, globals.fs)} '
         'on ${device.name} in $modeName mode...',
       );
     }
@@ -916,8 +919,8 @@ abstract class ResidentRunner {
       flutterRootDir: globals.fs.directory(Cache.flutterRoot),
       outputDir: globals.fs.directory(getBuildDirectory()),
       processManager: globals.processManager,
+      platform: globals.platform,
       projectDir: globals.fs.currentDirectory,
-      generateDartPluginRegistry: true,
     );
     _lastBuild = await globals.buildSystem.buildIncremental(
       const GenerateLocalizationsTarget(),
@@ -1498,11 +1501,11 @@ class TerminalHandler {
 
   void registerSignalHandlers() {
     assert(residentRunner.stayResident);
-    _addSignalHandler(io.ProcessSignal.SIGINT, _cleanUp);
-    _addSignalHandler(io.ProcessSignal.SIGTERM, _cleanUp);
+    _addSignalHandler(io.ProcessSignal.sigint, _cleanUp);
+    _addSignalHandler(io.ProcessSignal.sigterm, _cleanUp);
     if (residentRunner.supportsServiceProtocol && residentRunner.supportsRestart) {
-      _addSignalHandler(io.ProcessSignal.SIGUSR1, _handleSignal);
-      _addSignalHandler(io.ProcessSignal.SIGUSR2, _handleSignal);
+      _addSignalHandler(io.ProcessSignal.sigusr1, _handleSignal);
+      _addSignalHandler(io.ProcessSignal.sigusr2, _handleSignal);
       if (_pidFile != null) {
         _logger.printTrace('Writing pid to: $_pidFile');
         _actualPidFile = _processInfo.writePidFile(_pidFile);
@@ -1660,7 +1663,7 @@ class TerminalHandler {
     }
     _processingUserRequest = true;
 
-    final bool fullRestart = signal == io.ProcessSignal.SIGUSR2;
+    final bool fullRestart = signal == io.ProcessSignal.sigusr2;
 
     try {
       await residentRunner.restart(fullRestart: fullRestart);

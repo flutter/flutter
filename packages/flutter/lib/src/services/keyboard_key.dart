@@ -2040,7 +2040,7 @@ class LogicalKeyboardKey extends KeyboardKey {
 ///                 onTap: () {
 ///                   FocusScope.of(context).requestFocus(_focusNode);
 ///                 },
-///                 child: Text('Tap to focus'),
+///                 child: const Text('Tap to focus'),
 ///               );
 ///             }
 ///             return Text(_message ?? 'Press a key');

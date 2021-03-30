@@ -29,11 +29,13 @@ class AnalysisServer {
     @required Logger logger,
     @required Platform platform,
     @required Terminal terminal,
+    String protocolTrafficLog,
   }) : _fileSystem = fileSystem,
        _processManager = processManager,
        _logger = logger,
        _platform = platform,
-       _terminal = terminal;
+       _terminal = terminal,
+       _protocolTrafficLog = protocolTrafficLog;
 
   final String sdkPath;
   final List<String> directories;
@@ -42,6 +44,7 @@ class AnalysisServer {
   final Logger _logger;
   final Platform _platform;
   final Terminal _terminal;
+  final String _protocolTrafficLog;
 
   Process _process;
   final StreamController<bool> _analyzingController =
@@ -67,6 +70,8 @@ class AnalysisServer {
       '--disable-server-feature-search',
       '--sdk',
       sdkPath,
+      if (_protocolTrafficLog != null)
+        '--protocol-traffic-log=$_protocolTrafficLog',
     ];
 
     _logger.printTrace('dart ${command.skip(1).join(' ')}');

@@ -273,12 +273,12 @@ typedef RefreshCallback = Future<void> Function();
 /// adds a new item to the top of the list view.
 ///
 /// ```dart
-/// List<Color> colors = [
+/// List<Color> colors = <Color>[
 ///   CupertinoColors.systemYellow,
 ///   CupertinoColors.systemOrange,
 ///   CupertinoColors.systemPink
 /// ];
-/// List<Widget> items = [
+/// List<Widget> items = <Widget>[
 ///   Container(color: CupertinoColors.systemPink, height: 100.0),
 ///   Container(color: CupertinoColors.systemOrange, height: 100.0),
 ///   Container(color: CupertinoColors.systemYellow, height: 100.0),
@@ -296,7 +296,7 @@ typedef RefreshCallback = Future<void> Function();
 ///             refreshTriggerPullDistance: 100.0,
 ///             refreshIndicatorExtent: 60.0,
 ///             onRefresh: () async {
-///               await Future.delayed(Duration(milliseconds: 1000));
+///               await Future<void>.delayed(const Duration(milliseconds: 1000));
 ///               setState(() {
 ///                 items.insert(0, Container(color: colors[items.length % 3], height: 100.0));
 ///               });

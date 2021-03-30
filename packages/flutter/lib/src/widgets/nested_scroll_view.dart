@@ -66,7 +66,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   final List<String> _tabs = ['Tab 1', 'Tab 2'];
+///   final List<String> _tabs = <String>['Tab 1', 'Tab 2'];
 ///   return DefaultTabController(
 ///     length: _tabs.length, // This is the number of tabs.
 ///     child: Scaffold(
@@ -244,7 +244,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///         padding: const EdgeInsets.all(8),
 ///         itemCount: 30,
 ///         itemBuilder: (BuildContext context, int index) {
-///           return Container(
+///           return SizedBox(
 ///             height: 50,
 ///             child: Center(child: Text('Item $index')),
 ///           );
@@ -510,13 +510,13 @@ class NestedScrollView extends StatefulWidget {
 ///   return NestedScrollView(
 ///     key: globalKey,
 ///     headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-///       return <Widget>[
+///       return const <Widget>[
 ///         SliverAppBar(
 ///           title: Text('NestedScrollViewState Demo!'),
 ///         ),
 ///       ];
 ///     },
-///     body: CustomScrollView(
+///     body: const CustomScrollView(
 ///       // Body slivers go here!
 ///     ),
 ///   );

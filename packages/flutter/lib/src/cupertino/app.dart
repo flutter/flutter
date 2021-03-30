@@ -57,10 +57,10 @@ import 'theme.dart';
 /// ![The CupertinoApp displays a CupertinoPageScaffold](https://flutter.github.io/assets-for-api-docs/assets/cupertino/basic_cupertino_app.png)
 ///
 /// ```dart
-/// CupertinoApp(
+/// const CupertinoApp(
 ///   home: CupertinoPageScaffold(
 ///     navigationBar: CupertinoNavigationBar(
-///       middle: const Text('Home'),
+///       middle: Text('Home'),
 ///     ),
 ///     child: Center(child: Icon(CupertinoIcons.share)),
 ///   ),
@@ -77,17 +77,17 @@ import 'theme.dart';
 /// CupertinoApp(
 ///   routes: <String, WidgetBuilder>{
 ///     '/': (BuildContext context) {
-///       return CupertinoPageScaffold(
+///       return const CupertinoPageScaffold(
 ///         navigationBar: CupertinoNavigationBar(
-///           middle: const Text('Home Route'),
+///           middle: Text('Home Route'),
 ///         ),
 ///         child: Center(child: Icon(CupertinoIcons.share)),
 ///       );
 ///     },
 ///     '/about': (BuildContext context) {
-///       return CupertinoPageScaffold(
+///       return const CupertinoPageScaffold(
 ///         navigationBar: CupertinoNavigationBar(
-///           middle: const Text('About Route'),
+///           middle: Text('About Route'),
 ///         ),
 ///         child: Center(child: Icon(CupertinoIcons.share)),
 ///       );
@@ -104,14 +104,14 @@ import 'theme.dart';
 /// ![The CupertinoApp displays a CupertinoPageScaffold with orange-colored icons](https://flutter.github.io/assets-for-api-docs/assets/cupertino/theme_cupertino_app.png)
 ///
 /// ```dart
-/// CupertinoApp(
+/// const CupertinoApp(
 ///   theme: CupertinoThemeData(
 ///     brightness: Brightness.dark,
 ///     primaryColor: CupertinoColors.systemOrange,
 ///   ),
 ///   home: CupertinoPageScaffold(
 ///     navigationBar: CupertinoNavigationBar(
-///       middle: const Text('CupertinoApp Theme'),
+///       middle: Text('CupertinoApp Theme'),
 ///     ),
 ///     child: Center(child: Icon(CupertinoIcons.share)),
 ///   ),
@@ -168,6 +168,7 @@ class CupertinoApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
+    this.scrollBehavior,
   }) : assert(routes != null),
        assert(navigatorObservers != null),
        assert(title != null),
@@ -207,6 +208,7 @@ class CupertinoApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
+    this.scrollBehavior,
   }) : assert(title != null),
        assert(showPerformanceOverlay != null),
        assert(checkerboardRasterCacheImages != null),
@@ -372,7 +374,7 @@ class CupertinoApp extends StatefulWidget {
   ///   return WidgetsApp(
   ///     actions: <Type, Action<Intent>>{
   ///       ... WidgetsApp.defaultActions,
-  ///       ActivateAction: CallbackAction(
+  ///       ActivateAction: CallbackAction<Intent>(
   ///         onInvoke: (Intent intent) {
   ///           // Do something here...
   ///           return null;
@@ -393,6 +395,16 @@ class CupertinoApp extends StatefulWidget {
   /// {@macro flutter.widgets.widgetsApp.restorationScopeId}
   final String? restorationScopeId;
 
+  /// {@macro flutter.material.materialApp.scrollBehavior}
+  ///
+  /// When null, defaults to [CupertinoScrollBehavior].
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollConfiguration], which controls how [Scrollable] widgets behave
+  ///    in a subtree.
+  final ScrollBehavior? scrollBehavior;
+
   @override
   _CupertinoAppState createState() => _CupertinoAppState();
 
@@ -403,7 +415,18 @@ class CupertinoApp extends StatefulWidget {
       HeroController(); // Linear tweening.
 }
 
-class _AlwaysCupertinoScrollBehavior extends ScrollBehavior {
+/// Describes how [Scrollable] widgets behave for [CupertinoApp]s.
+///
+/// {@macro flutter.widgets.scrollBehavior}
+///
+/// Setting a [CupertinoScrollBehavior] will result in descendant [Scrollable] widgets
+/// using [BouncingScrollPhysics] by default. No [GlowingOverscrollIndicator] is
+/// applied when using a [CupertinoScrollBehavior] either, regardless of platform.
+///
+/// See also:
+///
+///  * [ScrollBehavior], the default scrolling behavior extended by this class.
+class CupertinoScrollBehavior extends ScrollBehavior {
   @override
   Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
     // Never build any overscroll glow indicators.
@@ -521,7 +544,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
     final CupertinoThemeData effectiveThemeData = widget.theme ?? const CupertinoThemeData();
 
     return ScrollConfiguration(
-      behavior: _AlwaysCupertinoScrollBehavior(),
+      behavior: widget.scrollBehavior ?? CupertinoScrollBehavior(),
       child: CupertinoUserInterfaceLevel(
         data: CupertinoUserInterfaceLevelData.base,
         child: CupertinoTheme(

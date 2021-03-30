@@ -64,7 +64,7 @@ class StocksAppState extends State<StocksApp> {
       case StockMode.pessimistic:
         return ThemeData(
           brightness: Brightness.dark,
-          accentColor: Colors.redAccent,
+          primarySwatch: Colors.purple,
         );
     }
     assert(_configuration.stockMode != null);

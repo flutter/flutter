@@ -189,6 +189,7 @@ bool _isTransitionable(BuildContext context) {
 ///
 ///
 /// ```dart
+/// @override
 /// Widget build(BuildContext context) {
 ///   return CupertinoPageScaffold(
 ///     navigationBar: CupertinoNavigationBar(
@@ -197,7 +198,7 @@ bool _isTransitionable(BuildContext context) {
 ///       middle: const Text('Sample Code'),
 ///     ),
 ///     child: Column(
-///       children: [
+///       children: <Widget>[
 ///         Container(height: 50, color: CupertinoColors.systemRed),
 ///         Container(height: 50, color: CupertinoColors.systemGreen),
 ///         Container(height: 50, color: CupertinoColors.systemBlue),

@@ -2,7 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# TODO(Piinks): Add link to public user guide when available.
+# For details regarding *Flutter Fix* feature, see
+# https://flutter.dev/docs/development/tools/flutter-fix
 
 # Please add new fixes to the top of the file, separated by one blank line
 # from other fixes. In a comment, include a link to the PR where the change
@@ -10,6 +11,222 @@
 
 version: 1
 transforms:
+
+  # Changes made in https://github.com/flutter/flutter/pull/65246
+  - title: "Remove 'disabledThumbGapWidth'"
+    date: 2020-11-17
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'RectangularSliderTrackShape'
+    changes:
+      - kind: 'removeParameter'
+        name: 'disabledThumbGapWidth'
+
+  # Changes made in https://github.com/flutter/flutter/pull/46115
+  - title: "Migrate to 'floatingLabelBehavior'"
+    date: 2020-01-15
+    element:
+      uris: [ 'material.dart' ]
+      field: 'hasFloatingPlaceholder'
+      inClass: 'InputDecorationTheme'
+    changes:
+      - kind: 'rename'
+        newName: 'floatingLabelBehavior'
+
+  # Changes made in https://github.com/flutter/flutter/pull/46115
+  - title: "Migrate to 'floatingLabelBehavior'"
+    date: 2020-01-15
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'InputDecorationTheme'
+    oneOf:
+      - if: "hasFloatingPlaceholder == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% FloatingLabelBehavior %}.auto'
+              requiredIf: "hasFloatingPlaceholder == 'true'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+      - if: "hasFloatingPlaceholder == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% FloatingLabelBehavior %}.never'
+              requiredIf: "hasFloatingPlaceholder == 'false'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+      - if: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% hasFloatingPlaceholder %} ? {% FloatingLabelBehavior %}.auto : {% FloatingLabelBehavior %}.never'
+              requiredIf: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+    variables:
+      hasFloatingPlaceholder:
+        kind: 'fragment'
+        value: 'arguments[hasFloatingPlaceholder]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/46115
+  - title: "Migrate to 'floatingLabelBehavior'"
+    date: 2020-01-15
+    element:
+      uris: [ 'material.dart' ]
+      field: 'hasFloatingPlaceholder'
+      inClass: 'InputDecoration'
+    changes:
+      - kind: 'rename'
+        newName: 'floatingLabelBehavior'
+
+  # Changes made in https://github.com/flutter/flutter/pull/46115
+  - title: "Rename to 'floatingLabelBehavior'"
+    date: 2020-01-15
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'collapsed'
+      inClass: 'InputDecoration'
+    oneOf:
+      - if: "hasFloatingPlaceholder == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% FloatingLabelBehavior %}.auto'
+              requiredIf: "hasFloatingPlaceholder == 'true'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+      - if: "hasFloatingPlaceholder == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% FloatingLabelBehavior %}.never'
+              requiredIf: "hasFloatingPlaceholder == 'false'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+      - if: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% hasFloatingPlaceholder %} ? {% FloatingLabelBehavior %}.auto : {% FloatingLabelBehavior %}.never'
+              requiredIf: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+    variables:
+      hasFloatingPlaceholder:
+        kind: 'fragment'
+        value: 'arguments[hasFloatingPlaceholder]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/46115
+  - title: "Rename to 'floatingLabelBehavior'"
+    date: 2020-01-15
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'InputDecoration'
+    oneOf:
+      - if: "hasFloatingPlaceholder == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% FloatingLabelBehavior %}.auto'
+              requiredIf: "hasFloatingPlaceholder == 'true'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+      - if: "hasFloatingPlaceholder == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% FloatingLabelBehavior %}.never'
+              requiredIf: "hasFloatingPlaceholder == 'false'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+      - if: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% hasFloatingPlaceholder %} ? {% FloatingLabelBehavior %}.auto : {% FloatingLabelBehavior %}.never'
+              requiredIf: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+    variables:
+      hasFloatingPlaceholder:
+        kind: 'fragment'
+        value: 'arguments[hasFloatingPlaceholder]'
 
   # Changes made in https://github.com/flutter/flutter/pull/59127
   - title: "Migrate to 'label'"

@@ -45,52 +45,47 @@ final Map<String, Object> vm = <String, dynamic>{
   ],
 };
 
-final vm_service.Isolate isolate = vm_service.Isolate.parse(
-  <String, dynamic>{
-    'type': 'Isolate',
-    'fixedId': true,
-    'id': 'isolates/242098474',
-    'name': 'main.dart:main()',
-    'number': 242098474,
-    '_originNumber': 242098474,
-    'startTime': 1540488745340,
-    '_heaps': <String, dynamic>{
-      'new': <String, dynamic>{
-        'used': 0,
-        'capacity': 0,
-        'external': 0,
-        'collections': 0,
-        'time': 0.0,
-        'avgCollectionPeriodMillis': 0.0,
-      },
-      'old': <String, dynamic>{
-        'used': 0,
-        'capacity': 0,
-        'external': 0,
-        'collections': 0,
-        'time': 0.0,
-        'avgCollectionPeriodMillis': 0.0,
-      },
-    },
-  }
+const String kExtensionName = 'ext.flutter.test.interestingExtension';
+
+final vm_service.Isolate isolate = vm_service.Isolate(
+  id: '1',
+  pauseEvent: vm_service.Event(
+    kind: vm_service.EventKind.kResume,
+    timestamp: 0
+  ),
+  breakpoints: <vm_service.Breakpoint>[],
+  exceptionPauseMode: null,
+  libraries: <vm_service.LibraryRef>[
+    vm_service.LibraryRef(
+      id: '1',
+      uri: 'file:///hello_world/main.dart',
+      name: '',
+    ),
+  ],
+  livePorts: 0,
+  name: 'test',
+  number: '1',
+  pauseOnExit: false,
+  runnable: true,
+  startTime: 0,
+  isSystemIsolate: false,
+  isolateFlags: <vm_service.IsolateFlag>[],
+  extensionRPCs: <String>[kExtensionName],
 );
 
-final Map<String, Object> listViews = <String, dynamic>{
-  'type': 'FlutterViewList',
-  'views': <dynamic>[
-    <String, dynamic>{
-      'type': 'FlutterView',
-      'id': '_flutterView/0x4a4c1f8',
-      'isolate': <String, dynamic>{
-        'type': '@Isolate',
-        'fixedId': true,
-        'id': 'isolates/242098474',
-        'name': 'main.dart:main()',
-        'number': 242098474,
-      },
-    },
-  ]
-};
+final FlutterView fakeFlutterView = FlutterView(
+  id: 'a',
+  uiIsolate: isolate,
+);
+
+final FakeVmServiceRequest listViewsRequest = FakeVmServiceRequest(
+  method: kListViewsMethod,
+  jsonResponse: <String, Object>{
+    'views': <Object>[
+      fakeFlutterView.toJson(),
+    ],
+  },
+);
 
 typedef ServiceCallback = Future<Map<String, dynamic>> Function(Map<String, Object>);
 
@@ -408,17 +403,7 @@ void main() {
             'views': <Object>[],
           },
         ),
-        const FakeVmServiceRequest(
-          method: kListViewsMethod,
-          jsonResponse: <String, Object>{
-            'views': <Object>[
-              <String, Object>{
-                'id': 'a',
-                'isolate': <String, Object>{},
-              },
-            ],
-          },
-        ),
+        listViewsRequest,
       ]
     );
 
@@ -450,6 +435,187 @@ void main() {
       isEmpty,
     );
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  });
+
+  group('findExtensionIsolate', () {
+
+    testWithoutContext('returns an isolate with the registered extensionRPC', () async {
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(
+          method: 'streamListen',
+          args: <String, Object>{
+            'streamId': 'Isolate',
+          },
+        ),
+        listViewsRequest,
+        FakeVmServiceRequest(
+          method: 'getIsolate',
+          jsonResponse: isolate.toJson(),
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+        ),
+        const FakeVmServiceRequest(
+          method: 'streamCancel',
+          args: <String, Object>{
+            'streamId': 'Isolate',
+          },
+        ),
+      ]);
+
+      final vm_service.IsolateRef isolateRef = await fakeVmServiceHost.vmService.findExtensionIsolate(kExtensionName);
+      expect(isolateRef.id, '1');
+    });
+
+    testWithoutContext('returns the isolate with the registered extensionRPC when there are multiple FlutterViews', () async {
+      const String otherExtensionName = 'ext.flutter.test.otherExtension';
+
+      // Copy the other isolate and change a few fields.
+      final vm_service.Isolate isolate2 = vm_service.Isolate.parse(
+        isolate.toJson()
+          ..['id'] = '2'
+          ..['extensionRPCs'] = <String>[otherExtensionName],
+      );
+
+      final FlutterView fakeFlutterView2 = FlutterView(
+        id: '2',
+        uiIsolate: isolate2,
+      );
+
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(
+          method: 'streamListen',
+          args: <String, Object>{
+            'streamId': 'Isolate',
+          },
+        ),
+        FakeVmServiceRequest(
+          method: kListViewsMethod,
+          jsonResponse: <String, Object>{
+            'views': <Object>[
+              fakeFlutterView.toJson(),
+              fakeFlutterView2.toJson(),
+            ],
+          },
+        ),
+        FakeVmServiceRequest(
+          method: 'getIsolate',
+          jsonResponse: isolate.toJson(),
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+        ),
+        FakeVmServiceRequest(
+          method: 'getIsolate',
+          jsonResponse: isolate2.toJson(),
+          args: <String, Object>{
+            'isolateId': '2',
+          },
+        ),
+        const FakeVmServiceRequest(
+          method: 'streamCancel',
+          args: <String, Object>{
+            'streamId': 'Isolate',
+          },
+        ),
+      ]);
+
+      final vm_service.IsolateRef isolateRef = await fakeVmServiceHost.vmService.findExtensionIsolate(otherExtensionName);
+      expect(isolateRef.id, '2');
+    });
+
+    testWithoutContext('when the isolate stream is already subscribed, returns an isolate with the registered extensionRPC', () async {
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(
+          method: 'streamListen',
+          args: <String, Object>{
+            'streamId': 'Isolate',
+          },
+          // Stream already subscribed - https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#streamlisten
+          errorCode: 103,
+        ),
+        listViewsRequest,
+        FakeVmServiceRequest(
+          method: 'getIsolate',
+          jsonResponse: isolate.toJson()..['extensionRPCs'] = <String>[kExtensionName],
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+        ),
+        const FakeVmServiceRequest(
+          method: 'streamCancel',
+          args: <String, Object>{
+            'streamId': 'Isolate',
+          },
+        ),
+      ]);
+
+      final vm_service.IsolateRef isolateRef = await fakeVmServiceHost.vmService.findExtensionIsolate(kExtensionName);
+      expect(isolateRef.id, '1');
+    });
+
+    testWithoutContext('returns an isolate with a extensionRPC that is registered later', () async {
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(
+          method: 'streamListen',
+          args: <String, Object>{
+            'streamId': 'Isolate',
+          },
+        ),
+        listViewsRequest,
+        FakeVmServiceRequest(
+          method: 'getIsolate',
+          jsonResponse: isolate.toJson(),
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+        ),
+        FakeVmServiceStreamResponse(
+          streamId: 'Isolate',
+          event: vm_service.Event(
+            kind: vm_service.EventKind.kServiceExtensionAdded,
+            extensionRPC: kExtensionName,
+            timestamp: 1,
+          ),
+        ),
+        const FakeVmServiceRequest(
+          method: 'streamCancel',
+          args: <String, Object>{
+            'streamId': 'Isolate',
+          },
+        ),
+      ]);
+
+      final vm_service.IsolateRef isolateRef = await fakeVmServiceHost.vmService.findExtensionIsolate(kExtensionName);
+      expect(isolateRef.id, '1');
+    });
+
+    testWithoutContext('throws when the service disappears', () async {
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(
+          method: 'streamListen',
+          args: <String, Object>{
+            'streamId': 'Isolate',
+          },
+        ),
+        const FakeVmServiceRequest(
+          method: kListViewsMethod,
+          errorCode: RPCErrorCodes.kServiceDisappeared,
+        ),
+        const FakeVmServiceRequest(
+          method: 'streamCancel',
+          args: <String, Object>{
+            'streamId': 'Isolate',
+          },
+          errorCode: RPCErrorCodes.kServiceDisappeared,
+        ),
+      ]);
+
+      expect(
+        () => fakeVmServiceHost.vmService.findExtensionIsolate(kExtensionName),
+        throwsA(isA<VmServiceDisappearedException>()),
+      );
+    });
   });
 
   testWithoutContext('Can process log events from the vm service', () {

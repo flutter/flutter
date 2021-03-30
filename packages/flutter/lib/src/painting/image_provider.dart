@@ -529,7 +529,12 @@ abstract class ImageProvider<T extends Object> {
   ///
   /// ```dart
   /// class MyWidget extends StatelessWidget {
-  ///   final String url = '...';
+  ///   const MyWidget({
+  ///     Key? key,
+  ///     this.url = ' ... ',
+  ///   }) : super(key: key);
+  ///
+  ///   final String url;
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
@@ -669,10 +674,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
       PaintingBinding.instance!.imageCache!.evict(key);
       rethrow;
     }
-    // `key.bundle.load` has a non-nullable return type, but might be null when
-    // running with weak checking, so we need to null check it anyway (and
-    // ignore the warning that the null-handling logic is dead code).
-    if (data == null) { // ignore: dead_code
+    if (data == null) {
       PaintingBinding.instance!.imageCache!.evict(key);
       throw StateError('Unable to read data');
     }

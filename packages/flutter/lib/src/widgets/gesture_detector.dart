@@ -1044,9 +1044,10 @@ class RawGestureDetector extends StatefulWidget {
   /// ```dart
   /// class ForcePressGestureDetectorWithSemantics extends StatelessWidget {
   ///   const ForcePressGestureDetectorWithSemantics({
+  ///     Key? key,
   ///     required this.child,
   ///     required this.onForcePress,
-  ///   });
+  ///   }) : super(key: key);
   ///
   ///   final Widget child;
   ///   final VoidCallback onForcePress;
@@ -1328,16 +1329,12 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
     final TapGestureRecognizer? tap = recognizers[TapGestureRecognizer] as TapGestureRecognizer?;
     if (tap == null)
       return null;
-    assert(tap is TapGestureRecognizer);
 
     return () {
       assert(tap != null);
-      if (tap.onTapDown != null)
-        tap.onTapDown!(TapDownDetails());
-      if (tap.onTapUp != null)
-        tap.onTapUp!(TapUpDetails(kind: PointerDeviceKind.unknown));
-      if (tap.onTap != null)
-        tap.onTap!();
+      tap.onTapDown?.call(TapDownDetails());
+      tap.onTapUp?.call(TapUpDetails(kind: PointerDeviceKind.unknown));
+      tap.onTap?.call();
     };
   }
 
@@ -1347,15 +1344,10 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
       return null;
 
     return () {
-      assert(longPress is LongPressGestureRecognizer);
-      if (longPress.onLongPressStart != null)
-        longPress.onLongPressStart!(const LongPressStartDetails());
-      if (longPress.onLongPress != null)
-        longPress.onLongPress!();
-      if (longPress.onLongPressEnd != null)
-        longPress.onLongPressEnd!(const LongPressEndDetails());
-      if (longPress.onLongPressUp != null)
-        longPress.onLongPressUp!();
+      longPress.onLongPressStart?.call(const LongPressStartDetails());
+      longPress.onLongPress?.call();
+      longPress.onLongPressEnd?.call(const LongPressEndDetails());
+      longPress.onLongPressUp?.call();
     };
   }
 
@@ -1366,29 +1358,19 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
     final GestureDragUpdateCallback? horizontalHandler = horizontal == null ?
       null :
       (DragUpdateDetails details) {
-        assert(horizontal is HorizontalDragGestureRecognizer);
-        if (horizontal.onDown != null)
-          horizontal.onDown!(DragDownDetails());
-        if (horizontal.onStart != null)
-          horizontal.onStart!(DragStartDetails());
-        if (horizontal.onUpdate != null)
-          horizontal.onUpdate!(details);
-        if (horizontal.onEnd != null)
-          horizontal.onEnd!(DragEndDetails(primaryVelocity: 0.0));
+        horizontal.onDown?.call(DragDownDetails());
+        horizontal.onStart?.call(DragStartDetails());
+        horizontal.onUpdate?.call(details);
+        horizontal.onEnd?.call(DragEndDetails(primaryVelocity: 0.0));
       };
 
     final GestureDragUpdateCallback? panHandler = pan == null ?
       null :
       (DragUpdateDetails details) {
-        assert(pan is PanGestureRecognizer);
-        if (pan.onDown != null)
-          pan.onDown!(DragDownDetails());
-        if (pan.onStart != null)
-          pan.onStart!(DragStartDetails());
-        if (pan.onUpdate != null)
-          pan.onUpdate!(details);
-        if (pan.onEnd != null)
-          pan.onEnd!(DragEndDetails());
+        pan.onDown?.call(DragDownDetails());
+        pan.onStart?.call(DragStartDetails());
+        pan.onUpdate?.call(details);
+        pan.onEnd?.call(DragEndDetails());
       };
 
     if (horizontalHandler == null && panHandler == null)
@@ -1408,29 +1390,19 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
     final GestureDragUpdateCallback? verticalHandler = vertical == null ?
       null :
       (DragUpdateDetails details) {
-        assert(vertical is VerticalDragGestureRecognizer);
-        if (vertical.onDown != null)
-          vertical.onDown!(DragDownDetails());
-        if (vertical.onStart != null)
-          vertical.onStart!(DragStartDetails());
-        if (vertical.onUpdate != null)
-          vertical.onUpdate!(details);
-        if (vertical.onEnd != null)
-          vertical.onEnd!(DragEndDetails(primaryVelocity: 0.0));
+        vertical.onDown?.call(DragDownDetails());
+        vertical.onStart?.call(DragStartDetails());
+        vertical.onUpdate?.call(details);
+        vertical.onEnd?.call(DragEndDetails(primaryVelocity: 0.0));
       };
 
     final GestureDragUpdateCallback? panHandler = pan == null ?
       null :
       (DragUpdateDetails details) {
-        assert(pan is PanGestureRecognizer);
-        if (pan.onDown != null)
-          pan.onDown!(DragDownDetails());
-        if (pan.onStart != null)
-          pan.onStart!(DragStartDetails());
-        if (pan.onUpdate != null)
-          pan.onUpdate!(details);
-        if (pan.onEnd != null)
-          pan.onEnd!(DragEndDetails());
+        pan.onDown?.call(DragDownDetails());
+        pan.onStart?.call(DragStartDetails());
+        pan.onUpdate?.call(details);
+        pan.onEnd?.call(DragEndDetails());
       };
 
     if (verticalHandler == null && panHandler == null)

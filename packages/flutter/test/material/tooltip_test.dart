@@ -857,7 +857,7 @@ void main() {
     // keep holding the long press, should still show tooltip
     await tester.pump(kLongPressTimeout);
     expect(find.text(tooltipText), findsOneWidget);
-    gesture.up();
+    await gesture.up();
   });
 
   testWidgets('Tooltip shows/hides when hovered', (WidgetTester tester) async {

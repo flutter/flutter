@@ -34,7 +34,7 @@ export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpR
 // late BuildContext context;
 // void setState(VoidCallback fn) { }
 // abstract class RenderFrogJar extends RenderObject { }
-// abstract class FrogJar extends RenderObjectWidget { }
+// abstract class FrogJar extends RenderObjectWidget { const FrogJar({Key? key}) : super(key: key); }
 // abstract class FrogJarParentData extends ParentData { late Size size; }
 
 // KEYS
@@ -693,6 +693,7 @@ abstract class StatelessWidget extends Widget {
 ///   final Color color;
 ///   final Widget? child;
 ///
+///   @override
 ///   _BirdState createState() => _BirdState();
 /// }
 ///
@@ -1351,7 +1352,7 @@ abstract class ProxyWidget extends Widget {
 ///
 /// ```dart
 /// class FrogSize extends ParentDataWidget<FrogJarParentData> {
-///   FrogSize({
+///   const FrogSize({
 ///     Key? key,
 ///     required this.size,
 ///     required Widget child,
@@ -1554,6 +1555,8 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 ///
 /// ```dart
 /// class MyPage extends StatelessWidget {
+///   const MyPage({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
@@ -1581,6 +1584,8 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 ///
 /// ```dart
 /// class MyOtherPage extends StatelessWidget {
+///   const MyOtherPage({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
@@ -1740,7 +1745,7 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
     assert(() {
       for (int index = 0; index < children.length; index++) {
         // TODO(a14n): remove this check to have a lot more const widget
-        if (children[index] == null) { // ignore: dead_code
+        if (children[index] == null) {
           throw FlutterError(
               "$runtimeType's children must not contain any null values, "
                   'but a null value was found at index $index'
@@ -3305,6 +3310,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///
   /// See the [RenderObjectElement] documentation for more information on slots.
   @protected
+  @pragma('vm:prefer-inline')
   Element? updateChild(Element? child, Widget? newWidget, Object? newSlot) {
     if (newWidget == null) {
       if (child != null)
@@ -3578,6 +3584,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// The element returned by this function will already have been mounted and
   /// will be in the "active" lifecycle state.
   @protected
+  @pragma('vm:prefer-inline')
   Element inflateWidget(Widget newWidget, Object? newSlot) {
     assert(newWidget != null);
     final Key? key = newWidget.key;
@@ -3965,7 +3972,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     final InheritedElement? ancestor = _inheritedWidgets == null ? null : _inheritedWidgets![T];
     if (ancestor != null) {
-      assert(ancestor is InheritedElement);
       return dependOnInheritedElement(ancestor, aspect: aspect) as T;
     }
     _hadUnsatisfiedDependencies = true;
@@ -4232,14 +4238,13 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// Called by the [BuildOwner] when [BuildOwner.scheduleBuildFor] has been
   /// called to mark this element dirty, by [mount] when the element is first
   /// built, and by [update] when the widget has changed.
+  @pragma('vm:prefer-inline')
   void rebuild() {
     assert(_lifecycleState != _ElementLifecycle.initial);
     if (_lifecycleState != _ElementLifecycle.active || !_dirty)
       return;
     assert(() {
-      if (debugOnRebuildDirtyWidget != null) {
-        debugOnRebuildDirtyWidget!(this, _debugBuiltOnce);
-      }
+      debugOnRebuildDirtyWidget?.call(this, _debugBuiltOnce);
       if (debugPrintRebuildDirtyWidgets) {
         if (!_debugBuiltOnce) {
           debugPrint('Building $this');
@@ -4329,14 +4334,15 @@ typedef ErrorWidgetBuilder = Widget Function(FlutterErrorDetails details);
 ///     assert(() { inDebug = true; return true; }());
 ///     // In debug mode, use the normal error widget which shows
 ///     // the error message:
-///     if (inDebug)
+///     if (inDebug) {
 ///       return ErrorWidget(details.exception);
+///     }
 ///     // In release builds, show a yellow-on-blue message instead:
 ///     return Container(
 ///       alignment: Alignment.center,
-///       child: Text(
+///       child: const Text(
 ///         'Error!',
-///         style: TextStyle(color: Colors.yellow),
+///         style: const TextStyle(color: Colors.yellow),
 ///         textDirection: TextDirection.ltr,
 ///       ),
 ///     );
@@ -5490,12 +5496,15 @@ abstract class RenderObjectElement extends Element {
   /// acts as if the child was not in `oldChildren`.
   ///
   /// This function is a convenience wrapper around [updateChild], which updates
-  /// each individual child. When calling [updateChild], this function uses an
-  /// [IndexedSlot<Element>] as the value for the `newSlot` argument.
-  /// [IndexedSlot.index] is set to the index that the currently processed
-  /// `child` corresponds to in the `newWidgets` list and [IndexedSlot.value] is
-  /// set to the [Element] of the previous widget in that list (or null if it is
-  /// the first child).
+  /// each individual child. If `slots` is non-null, the value for the `newSlot`
+  /// argument of [updateChild] is retrieved from that list using the index that
+  /// the currently processed `child` corresponds to in the `newWidgets` list
+  /// (`newWidgets` and `slots` must have the same length). If `slots` is null,
+  /// an [IndexedSlot<Element>] is used as the value for the `newSlot` argument.
+  /// In that case, [IndexedSlot.index] is set to the index that the currently
+  /// processed `child` corresponds to in the `newWidgets` list and
+  /// [IndexedSlot.value] is set to the [Element] of the previous widget in that
+  /// list (or null if it is the first child).
   ///
   /// When the [slot] value of an [Element] changes, its
   /// associated [renderObject] needs to move to a new position in the child
@@ -5520,12 +5529,19 @@ abstract class RenderObjectElement extends Element {
   /// knows where a child needs to move to in a linked list by providing its new
   /// previous sibling.
   @protected
-  List<Element> updateChildren(List<Element> oldChildren, List<Widget> newWidgets, { Set<Element>? forgottenChildren }) {
+  List<Element> updateChildren(List<Element> oldChildren, List<Widget> newWidgets, { Set<Element>? forgottenChildren, List<Object?>? slots }) {
     assert(oldChildren != null);
     assert(newWidgets != null);
+    assert(slots == null || newWidgets.length == slots.length);
 
     Element? replaceWithNullIfForgotten(Element child) {
       return forgottenChildren != null && forgottenChildren.contains(child) ? null : child;
+    }
+
+    Object? slotFor(int newChildIndex, Element? previousChild) {
+      return slots != null
+        ? slots[newChildIndex]
+        : IndexedSlot<Element?>(newChildIndex, previousChild);
     }
 
     // This attempts to diff the new child list (newWidgets) with
@@ -5576,7 +5592,7 @@ abstract class RenderObjectElement extends Element {
       assert(oldChild == null || oldChild._lifecycleState == _ElementLifecycle.active);
       if (oldChild == null || !Widget.canUpdate(oldChild.widget, newWidget))
         break;
-      final Element newChild = updateChild(oldChild, newWidget, IndexedSlot<Element?>(newChildrenTop, previousChild))!;
+      final Element newChild = updateChild(oldChild, newWidget, slotFor(newChildrenTop, previousChild))!;
       assert(newChild._lifecycleState == _ElementLifecycle.active);
       newChildren[newChildrenTop] = newChild;
       previousChild = newChild;
@@ -5634,7 +5650,7 @@ abstract class RenderObjectElement extends Element {
         }
       }
       assert(oldChild == null || Widget.canUpdate(oldChild.widget, newWidget));
-      final Element newChild = updateChild(oldChild, newWidget, IndexedSlot<Element?>(newChildrenTop, previousChild))!;
+      final Element newChild = updateChild(oldChild, newWidget, slotFor(newChildrenTop, previousChild))!;
       assert(newChild._lifecycleState == _ElementLifecycle.active);
       assert(oldChild == newChild || oldChild == null || oldChild._lifecycleState != _ElementLifecycle.active);
       newChildren[newChildrenTop] = newChild;
@@ -5656,7 +5672,7 @@ abstract class RenderObjectElement extends Element {
       assert(oldChild._lifecycleState == _ElementLifecycle.active);
       final Widget newWidget = newWidgets[newChildrenTop];
       assert(Widget.canUpdate(oldChild.widget, newWidget));
-      final Element newChild = updateChild(oldChild, newWidget, IndexedSlot<Element?>(newChildrenTop, previousChild))!;
+      final Element newChild = updateChild(oldChild, newWidget, slotFor(newChildrenTop, previousChild))!;
       assert(newChild._lifecycleState == _ElementLifecycle.active);
       assert(oldChild == newChild || oldChild == null || oldChild._lifecycleState != _ElementLifecycle.active);
       newChildren[newChildrenTop] = newChild;
@@ -6159,6 +6175,35 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
     assert(!_forgottenChildren.contains(child));
     _forgottenChildren.add(child);
     super.forgetChild(child);
+  }
+
+  bool _debugCheckHasAssociatedRenderObject(Element newChild) {
+    assert(() {
+      if (newChild.renderObject == null) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary('The children of `MultiChildRenderObjectElement` must each has an associated render object.'),
+              ErrorHint(
+                'This typically means that the `${newChild.widget}` or its children\n'
+                'are not a subtype of `RenderObjectWidget`.'
+              ),
+              newChild.describeElement('The following element does not have an associated render object'),
+              DiagnosticsDebugCreator(DebugCreator(newChild)),
+            ]),
+          ),
+        );
+      }
+      return true;
+    }());
+    return true;
+  }
+
+  @override
+  Element inflateWidget(Widget newWidget, Object? newSlot) {
+    final Element newChild = super.inflateWidget(newWidget, newSlot);
+    assert(_debugCheckHasAssociatedRenderObject(newChild));
+    return newChild;
   }
 
   @override

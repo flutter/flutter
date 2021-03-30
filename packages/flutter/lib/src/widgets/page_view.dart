@@ -45,13 +45,14 @@ import 'viewport.dart';
 ///
 /// ```dart
 /// class MyPageView extends StatefulWidget {
-///   MyPageView({Key? key}) : super(key: key);
+///   const MyPageView({Key? key}) : super(key: key);
 ///
+///   @override
 ///   _MyPageViewState createState() => _MyPageViewState();
 /// }
 ///
 /// class _MyPageViewState extends State<MyPageView> {
-///   PageController _pageController = PageController();
+///   final PageController _pageController = PageController();
 ///
 ///   @override
 ///   void dispose() {
@@ -65,7 +66,7 @@ import 'viewport.dart';
 ///       home: Scaffold(
 ///         body: PageView(
 ///           controller: _pageController,
-///           children: [
+///           children: <Widget>[
 ///             Container(
 ///               color: Colors.red,
 ///               child: Center(
@@ -79,7 +80,7 @@ import 'viewport.dart';
 ///                       );
 ///                     }
 ///                   },
-///                   child: Text('Next'),
+///                   child: const Text('Next'),
 ///                 ),
 ///               ),
 ///             ),
@@ -96,7 +97,7 @@ import 'viewport.dart';
 ///                       );
 ///                     }
 ///                   },
-///                   child: Text('Previous'),
+///                   child: const Text('Previous'),
 ///                 ),
 ///               ),
 ///             ),
@@ -572,21 +573,21 @@ const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
 ///
 /// ```dart
 ///  Widget build(BuildContext context) {
-///    final controller = PageController(initialPage: 0);
+///    final PageController controller = PageController(initialPage: 0);
 ///    return PageView(
 ///      /// [PageView.scrollDirection] defaults to [Axis.horizontal].
 ///      /// Use [Axis.vertical] to scroll vertically.
 ///      scrollDirection: Axis.horizontal,
 ///      controller: controller,
-///      children: [
+///      children: const <Widget>[
 ///        Center(
-///          child: Text("First Page"),
+///          child: Text('First Page'),
 ///        ),
 ///        Center(
-///          child: Text("Second Page"),
+///          child: Text('Second Page'),
 ///        ),
 ///        Center(
-///          child: Text("Third Page"),
+///          child: Text('Third Page'),
 ///        )
 ///      ],
 ///    );
@@ -688,6 +689,8 @@ class PageView extends StatefulWidget {
   ///
   /// ```dart
   /// class MyPageView extends StatefulWidget {
+  ///   const MyPageView({Key? key}) : super(key: key);
+  ///
   ///   @override
   ///   _MyPageViewState createState() => _MyPageViewState();
   /// }
@@ -728,7 +731,7 @@ class PageView extends StatefulWidget {
   ///           children: <Widget>[
   ///             TextButton(
   ///               onPressed: () => _reverse(),
-  ///               child: Text('Reverse items'),
+  ///               child: const Text('Reverse items'),
   ///             ),
   ///           ],
   ///         ),

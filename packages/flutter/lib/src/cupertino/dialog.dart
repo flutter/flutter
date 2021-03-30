@@ -389,7 +389,7 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
   }
 
   @override
-  void mount(Element? parent, dynamic newSlot) {
+  void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     _contentElement = updateChild(_contentElement, widget.contentSection, _AlertDialogSections.contentSection);
     _actionsElement = updateChild(_actionsElement, widget.actionsSection, _AlertDialogSections.actionsSection);

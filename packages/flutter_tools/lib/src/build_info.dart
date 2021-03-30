@@ -11,6 +11,7 @@ import 'base/config.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'base/os.dart';
 import 'base/utils.dart';
 import 'build_system/targets/icon_tree_shaker.dart';
 import 'convert.dart';
@@ -452,31 +453,6 @@ bool isEmulatorBuildMode(BuildMode mode) {
   return mode == BuildMode.debug;
 }
 
-enum HostPlatform {
-  darwin_x64,
-  darwin_arm,
-  linux_x64,
-  linux_arm64,
-  windows_x64,
-}
-
-String getNameForHostPlatform(HostPlatform platform) {
-  switch (platform) {
-    case HostPlatform.darwin_x64:
-      return 'darwin-x64';
-    case HostPlatform.darwin_arm:
-      return 'darwin-arm';
-    case HostPlatform.linux_x64:
-      return 'linux-x64';
-    case HostPlatform.linux_arm64:
-      return 'linux-arm64';
-    case HostPlatform.windows_x64:
-      return 'windows-x64';
-  }
-  assert(false);
-  return null;
-}
-
 enum TargetPlatform {
   android,
   ios,
@@ -485,6 +461,7 @@ enum TargetPlatform {
   linux_x64,
   linux_arm64,
   windows_x64,
+  windows_uwp_x64,
   fuchsia_arm64,
   fuchsia_x64,
   tester,
@@ -578,10 +555,12 @@ String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch darwinArch}
       return 'darwin-x64';
     case TargetPlatform.linux_x64:
       return 'linux-x64';
-   case TargetPlatform.linux_arm64:
+    case TargetPlatform.linux_arm64:
       return 'linux-arm64';
     case TargetPlatform.windows_x64:
       return 'windows-x64';
+    case TargetPlatform.windows_uwp_x64:
+      return 'windows-uwp-x64';
     case TargetPlatform.fuchsia_arm64:
       return 'fuchsia-arm64';
     case TargetPlatform.fuchsia_x64:

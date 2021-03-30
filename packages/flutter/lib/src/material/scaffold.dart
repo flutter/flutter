@@ -152,9 +152,11 @@ class ScaffoldMessenger extends StatefulWidget {
   /// import 'package:flutter/material.dart';
   /// ```
   /// ```dart
-  /// void main() => runApp(MyApp());
+  /// void main() => runApp(const MyApp());
   ///
   /// class MyApp extends StatefulWidget {
+  ///   const MyApp({Key? key}) : super(key: key);
+  ///
   ///   @override
   ///  _MyAppState createState() => _MyAppState();
   /// }
@@ -179,12 +181,12 @@ class ScaffoldMessenger extends StatefulWidget {
   ///     return MaterialApp(
   ///       scaffoldMessengerKey: _scaffoldMessengerKey,
   ///       home: Scaffold(
-  ///         appBar: AppBar(title: Text('ScaffoldMessenger Demo')),
+  ///         appBar: AppBar(title: const Text('ScaffoldMessenger Demo')),
   ///         body: Center(
   ///           child: Column(
   ///             mainAxisAlignment: MainAxisAlignment.center,
   ///             children: <Widget>[
-  ///               Text(
+  ///               const Text(
   ///                 'You have pushed the button this many times:',
   ///               ),
   ///               Text(
@@ -197,7 +199,7 @@ class ScaffoldMessenger extends StatefulWidget {
   ///         floatingActionButton: FloatingActionButton(
   ///           onPressed: _incrementCounter,
   ///           tooltip: 'Increment',
-  ///           child: Icon(Icons.add),
+  ///           child: const Icon(Icons.add),
   ///         ),
   ///       ),
   ///     );
@@ -1291,6 +1293,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// ```dart
 /// int _count = 0;
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     appBar: AppBar(
@@ -1320,6 +1323,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// ```dart
 /// int _count = 0;
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     appBar: AppBar(
@@ -1352,6 +1356,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// ```dart
 /// int _count = 0;
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     appBar: AppBar(
@@ -1369,7 +1374,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///         _count++;
 ///       }),
 ///       tooltip: 'Increment Counter',
-///       child: Icon(Icons.add),
+///       child: const Icon(Icons.add),
 ///     ),
 ///     floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 ///   );
@@ -1665,11 +1670,11 @@ class Scaffold extends StatefulWidget {
   /// Widget build(BuildContext context) {
   ///   return Scaffold(
   ///     key: _scaffoldKey,
-  ///     appBar: AppBar(title: Text('Drawer Demo')),
+  ///     appBar: AppBar(title: const Text('Drawer Demo')),
   ///     body: Center(
   ///       child: ElevatedButton(
   ///         onPressed: _openEndDrawer,
-  ///         child: Text('Open End Drawer'),
+  ///         child: const Text('Open End Drawer'),
   ///       ),
   ///     ),
   ///     endDrawer: Drawer(
@@ -1822,11 +1827,13 @@ class Scaffold extends StatefulWidget {
   /// ```
   ///
   /// ```dart main
-  /// void main() => runApp(MyApp());
+  /// void main() => runApp(const MyApp());
   /// ```
   ///
   /// ```dart preamble
   /// class MyApp extends StatelessWidget {
+  ///   const MyApp({Key? key}) : super(key: key);
+  ///
   ///   // This widget is the root of your application.
   ///   @override
   ///   Widget build(BuildContext context) {
@@ -1836,7 +1843,7 @@ class Scaffold extends StatefulWidget {
   ///         primarySwatch: Colors.blue,
   ///       ),
   ///       home: Scaffold(
-  ///         body: MyScaffoldBody(),
+  ///         body: const MyScaffoldBody(),
   ///         appBar: AppBar(title: const Text('Scaffold.of Example')),
   ///       ),
   ///       color: Colors.white,
@@ -1847,6 +1854,8 @@ class Scaffold extends StatefulWidget {
   ///
   /// ```dart
   /// class MyScaffoldBody extends StatelessWidget {
+  ///   const MyScaffoldBody({Key? key}) : super(key: key);
+  ///
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     return Center(
@@ -2213,8 +2222,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   ///     return OutlinedButton(
   ///       onPressed: () {
   ///         ScaffoldMessenger.of(context).showSnackBar(
-  ///           SnackBar(
-  ///             content: const Text('A SnackBar has been shown.'),
+  ///           const SnackBar(
+  ///             content: Text('A SnackBar has been shown.'),
   ///           ),
   ///         );
   ///       },

@@ -1275,4 +1275,63 @@ void main() {
     // The offset should not have changed.
     expect(scrollController.offset, scrollAmount);
   });
+
+  testWidgets('Scrollbar.isAlwaysShown triggers assertion when multiple ScrollPositions are attached.', (WidgetTester tester) async {
+    Widget _getTabContent({ ScrollController? scrollController }) {
+      return Scrollbar(
+        isAlwaysShown: true,
+        controller: scrollController,
+        child: ListView.builder(
+          controller: scrollController,
+          itemCount: 200,
+          itemBuilder: (BuildContext context, int index) => const Text('Test'),
+        ),
+      );
+    }
+
+    Widget _buildApp({ ScrollController? scrollController }) {
+      return MaterialApp(
+        home: DefaultTabController(
+          length: 2,
+          child: Scaffold(
+            body: TabBarView(
+              children: <Widget>[
+                _getTabContent(scrollController: scrollController),
+                _getTabContent(scrollController: scrollController),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Asserts when using the PrimaryScrollController.
+    await tester.pumpWidget(_buildApp());
+
+    // Swipe to the second tab, resulting in two attached ScrollPositions during
+    // the transition.
+    try {
+      await tester.drag(find.text('Test').first, const Offset(10.0, 0.0));
+    } on FlutterError catch (error) {
+      expect(
+        error.message,
+        contains('The Scrollbar attempted to paint using the position attached to the PrimaryScrollController.'),
+      );
+    }
+
+    // Asserts when using the ScrollController provided by the user.
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(_buildApp(scrollController: scrollController));
+
+    // Swipe to the second tab, resulting in two attached ScrollPositions during
+    // the transition.
+    try {
+      await tester.drag(find.text('Test').first, const Offset(10.0, 0.0));
+    } on AssertionError catch (error) {
+      expect(
+        error.message,
+        contains('The Scrollbar attempted to paint using the position attached to the provided ScrollController.'),
+      );
+    }
+  });
 }

@@ -358,8 +358,7 @@ class _CupertinoTextSelectionToolbarContent extends StatefulWidget {
     required this.toolbarBuilder,
     required this.children,
   }) : assert(children != null),
-       // This ignore is used because .isNotEmpty isn't compatible with const.
-       assert(children.length > 0), // ignore: prefer_is_empty
+       assert(children.length > 0),
        super(key: key);
 
   final Offset anchor;
@@ -536,7 +535,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   }
 
   @override
-  void insertRenderObjectChild(RenderObject child, dynamic slot) {
+  void insertRenderObjectChild(RenderObject child, Object? slot) {
     if (slot is _CupertinoTextSelectionToolbarItemsSlot) {
       assert(child is RenderBox);
       _updateRenderObject(child as RenderBox, slot);
@@ -563,7 +562,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   }
 
   @override
-  void removeRenderObjectChild(RenderObject child, dynamic slot) {
+  void removeRenderObjectChild(RenderObject child, Object? slot) {
     // Check if the child is in a slot.
     if (slot is _CupertinoTextSelectionToolbarItemsSlot) {
       assert(child is RenderBox);
@@ -615,7 +614,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   }
 
   @override
-  void mount(Element? parent, dynamic newSlot) {
+  void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     // Mount slotted children.
     _mountChild(widget.backButton, _CupertinoTextSelectionToolbarItemsSlot.backButton);

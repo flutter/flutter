@@ -11,8 +11,7 @@ import 'package:flutter/services.dart';
 
 import 'box.dart';
 import 'layer.dart';
-import 'mouse_cursor.dart';
-import 'mouse_tracking.dart';
+import 'mouse_tracker.dart';
 import 'object.dart';
 
 

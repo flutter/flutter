@@ -4,19 +4,18 @@
 
 // @dart = 2.8
 
-import 'dart:io' as io; // ignore: dart_io_import;
+import 'dart:io' as io; // flutter_ignore: dart_io_import;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/globals.dart' as globals show flutterUsage;
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
-import 'package:path/path.dart' as path; // ignore: package_path_import
+import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -370,6 +369,7 @@ void main() {
     const int eperm = 1;
     const int enospc = 28;
     const int eacces = 13;
+
     MockFileSystem mockFileSystem;
     ErrorHandlingFileSystem fs;
 
@@ -474,6 +474,19 @@ void main() {
       const String expectedMessage = 'Flutter failed to check for directory existence at';
       expect(() => directory.existsSync(),
              throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('When the current working directory disappears', () async {
+      setupReadMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: kSystemCannotFindFile,
+      );
+
+      expect(() => fs.currentDirectory, throwsToolExit(message: 'Unable to read current working directory'));
+
+      // Error is not caught by other operations.
+      expect(() => fs.file('foo').readAsStringSync(), throwsFileSystemException(kSystemCannotFindFile));
     });
   });
 
@@ -676,11 +689,6 @@ void main() {
       delegate: const LocalProcessManager(),
       platform: windowsPlatform,
     );
-
-    // Throws an argument error because package:process fails to locate the executable.
-    expect(() => processManager.runSync(<String>['foo']), throwsArgumentError);
-    expect(() => processManager.run(<String>['foo']), throwsArgumentError);
-    expect(() => processManager.start(<String>['foo']), throwsArgumentError);
 
     // Throws process exception because the executable does not exist.
     await ErrorHandlingProcessManager.skipCommandLookup<void>(() async {
@@ -940,8 +948,7 @@ void main() {
       verify(source.copySync('dest')).called(1);
     });
 
-    // Uses context for analytics.
-    testUsingContext('copySync can directly copy bytes if both files can be opened but copySync fails', () {
+    testWithoutContext('copySync can directly copy bytes if both files can be opened but copySync fails', () {
       final MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
       final MockFile source = MockFile();
       final MockFile dest = MockFile();
@@ -963,15 +970,9 @@ void main() {
       fileSystem.file('source').copySync('dest');
 
       expect(memoryDest.readAsBytesSync(), expectedBytes);
-      expect((globals.flutterUsage as TestUsage).events, contains(
-        const TestUsageEvent('error-handling', 'copy-fallback'),
-      ));
-    }, overrides: <Type, Generator>{
-      Usage: () => TestUsage(),
     });
 
-    // Uses context for analytics.
-    testUsingContext('copySync deletes the result file if the fallback fails', () {
+    testWithoutContext('copySync deletes the result file if the fallback fails', () {
       final MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
       final MockFile source = MockFile();
       final MockFile dest = MockFile();
@@ -1000,8 +1001,6 @@ void main() {
       expect(() => fileSystem.file('source').copySync('dest'), throwsToolExit());
 
       verify(dest.deleteSync(recursive: true)).called(1);
-    }, overrides: <Type, Generator>{
-      Usage: () => TestUsage(),
     });
   });
 }

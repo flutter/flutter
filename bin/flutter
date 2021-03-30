@@ -47,8 +47,8 @@ PROG_NAME="$(follow_links "${BASH_SOURCE[0]}")"
 BIN_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
 OS="$(uname -s)"
 
-if [[ $OS =~ MINGW.* ]]; then
-  # If we're on Windows, invoke the batch script instead, to get proper locking.
+# If we're on Windows, invoke the batch script instead to get proper locking.
+if [[ $OS =~ MINGW.* || $OS =~ CYGWIN.* ]]; then
   exec "${BIN_DIR}/flutter.bat" "$@"
 fi
 

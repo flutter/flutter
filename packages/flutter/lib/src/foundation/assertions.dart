@@ -1104,9 +1104,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   static void reportError(FlutterErrorDetails details) {
     assert(details != null);
     assert(details.exception != null);
-    if (onError != null) {
-      onError!(details);
-    }
+    onError?.call(details);
   }
 }
 
