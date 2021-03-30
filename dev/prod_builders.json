@@ -943,12 +943,6 @@
       "flaky": false
     },
     {
-      "name": "Mac_ios animation_with_microtasks_perf_ios__timeline_summary",
-      "repo": "flutter",
-      "task_name": "mac_ios_animation_with_microtasks_perf_ios__timeline_summary",
-      "flaky": false
-    },
-    {
       "name": "Mac_ios backdrop_filter_perf_ios__timeline_summary",
       "repo": "flutter",
       "task_name": "mac_ios_backdrop_filter_perf_ios__timeline_summary",
