@@ -134,12 +134,10 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
   }
 
   // Domain network configuration
-  NSDictionary* appTransportSecurity =
-      [mainBundle objectForInfoDictionaryKey:@"NSAppTransportSecurity"];
-  settings.may_insecurely_connect_to_all_domains =
-      [FlutterDartProject allowsArbitraryLoads:appTransportSecurity];
-  settings.domain_network_policy =
-      [FlutterDartProject domainNetworkPolicy:appTransportSecurity].UTF8String;
+  // Disabled in https://github.com/flutter/flutter/issues/72723.
+  // Re-enable in https://github.com/flutter/flutter/issues/54448.
+  settings.may_insecurely_connect_to_all_domains = true;
+  settings.domain_network_policy = "";
 
   // SkParagraph text layout library
   NSNumber* enableSkParagraph = [mainBundle objectForInfoDictionaryKey:@"FLTEnableSkParagraph"];
