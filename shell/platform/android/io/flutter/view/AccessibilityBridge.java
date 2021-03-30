@@ -1910,7 +1910,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     // IS_MULTILINE(1 << 19);
     IS_READ_ONLY(1 << 20),
     IS_FOCUSABLE(1 << 21),
-    IS_LINK(1 << 22);
+    IS_LINK(1 << 22),
+    IS_SLIDER(1 << 23),
+    IS_KEYBOARD_KEY(1 << 24);
 
     final int value;
 

@@ -80,6 +80,7 @@ enum class SemanticsFlags : int32_t {
   kIsFocusable = 1 << 21,
   kIsLink = 1 << 22,
   kIsSlider = 1 << 23,
+  kIsKeyboardKey = 1 << 24,
 };
 
 const int kScrollableSemanticsFlags =
