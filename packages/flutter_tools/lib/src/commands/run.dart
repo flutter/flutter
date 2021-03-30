@@ -39,7 +39,10 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     argParser
       ..addFlag('trace-startup',
         negatable: false,
-        help: 'Trace application startup, then exit, saving the trace to a file.',
+        help: 'Trace application startup, then exit, saving the trace to a file. '
+              'By default, this will be saved in the "build" directory. If the '
+              'FLUTTER_TEST_OUTPUTS_DIR environment variable is set, the file '
+              'will be written there instead.',
       )
       ..addFlag('verbose-system-logs',
         negatable: false,
