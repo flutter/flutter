@@ -5,11 +5,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class _CustomKeys {
-  static const LogicalKeyboardKey myLogicalKey = LogicalKeyboardKey(0x12345);
-  static const PhysicalKeyboardKey myPhysicalKey = PhysicalKeyboardKey(0x12345);
-}
-
 void main() {
   group(PhysicalKeyboardKey, () {
     test('Various classes of keys can be looked up by code.', () async {
@@ -21,9 +16,9 @@ void main() {
       expect(PhysicalKeyboardKey.findKeyByCode(0x000700e1), equals(PhysicalKeyboardKey.shiftLeft));
     });
     test('Values are equal', () async {
-      expect(identical(PhysicalKeyboardKey.keyA, PhysicalKeyboardKey(PhysicalKeyboardKey.keyA.usbHidUsage)), true);
+      expect(PhysicalKeyboardKey.keyA == PhysicalKeyboardKey(PhysicalKeyboardKey.keyA.usbHidUsage), true);
       // ignore: prefer_const_constructors, intentionally test if a const key is equal to a non-const key
-      expect(identical(_CustomKeys.myLogicalKey, PhysicalKeyboardKey(0x12345)), true);
+      expect(const PhysicalKeyboardKey(0x12345) == PhysicalKeyboardKey(0x12345), true);
     });
     test('debugNames', () async {
       expect(PhysicalKeyboardKey.keyA.debugName, 'Key A');
@@ -110,9 +105,9 @@ void main() {
           }));
     });
     test('Values are equal', () async {
-      expect(identical(LogicalKeyboardKey.keyA, LogicalKeyboardKey(LogicalKeyboardKey.keyA.keyId)), true);
+      expect(LogicalKeyboardKey.keyA == LogicalKeyboardKey(LogicalKeyboardKey.keyA.keyId), true);
       // ignore: prefer_const_constructors, intentionally test if a const key is equal to a non-const key
-      expect(identical(_CustomKeys.myPhysicalKey, LogicalKeyboardKey(0x12345)), true);
+      expect(const PhysicalKeyboardKey(0x12345) == PhysicalKeyboardKey(0x12345), true);
     });
     test('keyLabel', () async {
       expect(LogicalKeyboardKey.keyA.keyLabel, 'A');

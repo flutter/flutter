@@ -201,9 +201,10 @@ class LogicalKeyboardKey extends KeyboardKey {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
       return false;
-    }
     return other is LogicalKeyboardKey
         && other.keyId == keyId;
   }
@@ -2411,9 +2412,10 @@ class PhysicalKeyboardKey extends KeyboardKey {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
       return false;
-    }
     return other is PhysicalKeyboardKey
         && other.usbHidUsage == usbHidUsage;
   }
