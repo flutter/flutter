@@ -539,8 +539,8 @@ void main() {
     await tester.tapAt(ePos);
     await tester.pump();
 
-    expect(editableText.controller.selection!.baseOffset, tapIndex);
-    expect(editableText.controller.selection!.extentOffset, tapIndex);
+    expect(editableText.controller.selection?.baseOffset, tapIndex);
+    expect(editableText.controller.selection?.extentOffset, tapIndex);
   });
 
   testWidgets('enableInteractiveSelection = false, tap', (WidgetTester tester) async {
@@ -595,7 +595,7 @@ void main() {
 
     final EditableText editableText = tester.widget(find.byType(EditableText));
 
-    expect(editableText.controller.selection!.isCollapsed, true);
+    expect(editableText.controller.selection, isNull);
 
     // Long press the 'e' to select 'def'.
     const int tapIndex = 5;
@@ -604,15 +604,15 @@ void main() {
     await tester.pump();
 
     // 'def' is selected.
-    expect(editableText.controller.selection!.baseOffset, 4);
-    expect(editableText.controller.selection!.extentOffset, 7);
+    expect(editableText.controller.selection?.baseOffset, 4);
+    expect(editableText.controller.selection?.extentOffset, 7);
 
     // Tapping elsewhere immediately collapses and moves the cursor.
     await tester.tapAt(textOffsetToPosition(tester, 9));
     await tester.pump();
 
-    expect(editableText.controller.selection!.isCollapsed, true);
-    expect(editableText.controller.selection!.baseOffset, 9);
+    expect(editableText.controller.selection?.isCollapsed, true);
+    expect(editableText.controller.selection?.baseOffset, 9);
   });
 
   testWidgets("Slight movements in longpress don't hide/show handles", (WidgetTester tester) async {
@@ -661,8 +661,8 @@ void main() {
     await tester.pump();
 
     // The cursor is placed just like a regular tap.
-    expect(editableText.controller.selection!.baseOffset, eIndex);
-    expect(editableText.controller.selection!.extentOffset, eIndex);
+    expect(editableText.controller.selection?.baseOffset, eIndex);
+    expect(editableText.controller.selection?.extentOffset, eIndex);
   });
 
   testWidgets('selectable text basic', (WidgetTester tester) async {
@@ -677,7 +677,7 @@ void main() {
     expect(tester.testTextInput.hasAnyClients, false);
     await skipPastScrollingAnimation(tester);
 
-    expect(editableTextWidget.controller.selection!.isCollapsed, true);
+    expect(editableTextWidget.controller.selection?.isCollapsed, true);
 
     await tester.tap(find.byType(SelectableText));
     await tester.pump();
@@ -743,8 +743,8 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    expect(controller.selection!.baseOffset, 5);
-    expect(controller.selection!.extentOffset, 8);
+    expect(controller.selection?.baseOffset, 5);
+    expect(controller.selection?.extentOffset, 8);
   });
 
   testWidgets('Continuous dragging does not cause flickering', (WidgetTester tester) async {
@@ -781,8 +781,8 @@ void main() {
 
     expect(selectionChangedCount, isNonZero);
     selectionChangedCount = 0;
-    expect(controller.selection!.baseOffset, 2);
-    expect(controller.selection!.extentOffset, 8);
+    expect(controller.selection?.baseOffset, 2);
+    expect(controller.selection?.extentOffset, 8);
 
     // Tiny movement shouldn't cause text selection to change.
     await gesture.moveTo(gPos + const Offset(4.0, 0.0));
@@ -796,8 +796,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(selectionChangedCount, 1);
-    expect(controller.selection!.baseOffset, 2);
-    expect(controller.selection!.extentOffset, 9);
+    expect(controller.selection?.baseOffset, 2);
+    expect(controller.selection?.extentOffset, 9);
   });
 
   testWidgets('Dragging in opposite direction also works', (WidgetTester tester) async {
@@ -825,8 +825,8 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    expect(controller.selection!.baseOffset, 8);
-    expect(controller.selection!.extentOffset, 5);
+    expect(controller.selection?.baseOffset, 8);
+    expect(controller.selection?.extentOffset, 5);
   });
 
   testWidgets('Slow mouse dragging also selects text', (WidgetTester tester) async {
@@ -853,8 +853,8 @@ void main() {
     await tester.pump();
     await gesture.up();
 
-    expect(controller.selection!.baseOffset, 5);
-    expect(controller.selection!.extentOffset,8);
+    expect(controller.selection?.baseOffset, 5);
+    expect(controller.selection?.extentOffset,8);
   });
 
   testWidgets('Can drag handles to change selection', (WidgetTester tester) async {
@@ -902,8 +902,8 @@ void main() {
     await gesture.up();
     await tester.pump();
 
-    expect(controller.selection!.baseOffset, 4);
-    expect(controller.selection!.extentOffset, 11);
+    expect(controller.selection?.baseOffset, 4);
+    expect(controller.selection?.extentOffset, 11);
 
     // Drag the left handle 2 letters to the left.
     handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
@@ -915,8 +915,8 @@ void main() {
     await gesture.up();
     await tester.pump();
 
-    expect(controller.selection!.baseOffset, 0);
-    expect(controller.selection!.extentOffset, 11);
+    expect(controller.selection?.baseOffset, 0);
+    expect(controller.selection?.extentOffset, 11);
   });
 
   testWidgets('Dragging handles calls onSelectionChanged', (WidgetTester tester) async {
@@ -1014,8 +1014,8 @@ void main() {
     await gesture.moveTo(newHandlePos);
     await tester.pump();
 
-    expect(controller.selection!.baseOffset, 4);
-    expect(controller.selection!.extentOffset, 5);
+    expect(controller.selection?.baseOffset, 4);
+    expect(controller.selection?.extentOffset, 5);
 
     newHandlePos = textOffsetToPosition(tester, 2); // Position before 'c'.
     await gesture.moveTo(newHandlePos);
@@ -1023,10 +1023,10 @@ void main() {
     await gesture.up();
     await tester.pump();
 
-    expect(controller.selection!.baseOffset, 4);
+    expect(controller.selection?.baseOffset, 4);
     // The selection doesn't move beyond the left handle. There's always at
     // least 1 char selected.
-    expect(controller.selection!.extentOffset, 5);
+    expect(controller.selection?.extentOffset, 5);
   });
 
   testWidgets('Can use selection toolbar', (WidgetTester tester) async {
@@ -1062,13 +1062,13 @@ void main() {
     // Select all should select all the text.
     await tester.tap(find.text('Select all'));
     await tester.pump();
-    expect(controller.selection!.baseOffset, 0);
-    expect(controller.selection!.extentOffset, testValue.length);
+    expect(controller.selection?.baseOffset, 0);
+    expect(controller.selection?.extentOffset, testValue.length);
 
     // Copy should reset the selection.
     await tester.tap(find.text('Copy'));
     await skipPastScrollingAnimation(tester);
-    expect(controller.selection!.isCollapsed, true);
+    expect(controller.selection?.isCollapsed, true);
   });
 
   testWidgets('Selectable height with maxLine', (WidgetTester tester) async {
@@ -1162,8 +1162,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
-    expect(controller.selection!.baseOffset, 39);
-    expect(controller.selection!.extentOffset, 44);
+    expect(controller.selection?.baseOffset, 39);
+    expect(controller.selection?.extentOffset, 44);
 
     final RenderEditable renderEditable = findRenderEditable(tester);
     final List<TextSelectionPoint> endpoints = globalize(
@@ -1182,8 +1182,8 @@ void main() {
     await gesture.up();
     await tester.pump();
 
-    expect(controller.selection!.baseOffset, 39);
-    expect(controller.selection!.extentOffset, 50);
+    expect(controller.selection?.baseOffset, 39);
+    expect(controller.selection?.extentOffset, 50);
 
     // Drag the left handle to the first line, just after 'First'.
     handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
@@ -1195,11 +1195,11 @@ void main() {
     await gesture.up();
     await tester.pump();
 
-    expect(controller.selection!.baseOffset, 5);
-    expect(controller.selection!.extentOffset, 50);
+    expect(controller.selection?.baseOffset, 5);
+    expect(controller.selection?.extentOffset, 50);
     await tester.tap(find.text('Copy'));
     await tester.pump();
-    expect(controller.selection!.isCollapsed, true);
+    expect(controller.selection?.isCollapsed, true);
   });
 
   testWidgets('Can scroll multiline input', (WidgetTester tester) async {
@@ -1262,8 +1262,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(controller.selection!.base.offset, 77);
-    expect(controller.selection!.extent.offset, 82);
+    expect(controller.selection?.base.offset, 77);
+    expect(controller.selection?.extent.offset, 82);
     // Sanity check for the word selected is the intended one.
     expect(
       controller.text.substring(controller.selection!.baseOffset, controller.selection!.extentOffset),
@@ -1404,11 +1404,11 @@ void main() {
     final TextEditingController controller = editableTextWidget.controller;
     controller.selection = const TextSelection(baseOffset: 0, extentOffset: 3);
     await tester.pump();
-    expect(controller.selection, isNot(equals(TextRange.empty)));
+    expect(controller.selection, isNotNull);
 
     await tester.tap(find.byKey(key2));
     await tester.pump();
-    expect(controller.selection, equals(TextRange.empty));
+    expect(controller.selection, isNull);
   });
 
   testWidgets('Selectable text identifies as text field in semantics', (WidgetTester tester) async {
@@ -1705,8 +1705,8 @@ void main() {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.control);
     await tester.pumpAndSettle();
 
-    expect(controller.selection!.baseOffset, 0);
-    expect(controller.selection!.extentOffset, 31);
+    expect(controller.selection?.baseOffset, 0);
+    expect(controller.selection?.extentOffset, 31);
   });
 
   testWidgets('keyboard selection should call onSelectionChanged', (WidgetTester tester) async {
@@ -1899,7 +1899,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(c1.selection!.extentOffset - c1.selection!.baseOffset, -5);
-    expect(c2.selection!.extentOffset - c2.selection!.baseOffset, 0);
+    expect(c2.selection, isNull);
 
     await tester.tap(find.byType(SelectableText).last);
     await tester.pumpAndSettle();
@@ -1912,7 +1912,7 @@ void main() {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
     await tester.pumpAndSettle();
 
-    expect(c1.selection!.extentOffset - c1.selection!.baseOffset, 0);
+    expect(c1.selection, isNull);
     expect(c2.selection!.extentOffset - c2.selection!.baseOffset, -5);
   });
 
@@ -1937,7 +1937,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is
 
     // Confirm that the selection was updated.
-    expect(controller.selection!.baseOffset, 0);
+    expect(controller.selection?.baseOffset, 0);
   });
 
   testWidgets('SelectableText baseline alignment no-strut', (WidgetTester tester) async {
@@ -4577,29 +4577,29 @@ void main() {
     // Put the cursor at the end of the field.
     await tester.tapAt(textOffsetToPosition(tester, 10));
     expect(selection, isNotNull);
-    expect(selection!.baseOffset, 10);
-    expect(selection!.extentOffset, 10);
+    expect(selection?.baseOffset, 10);
+    expect(selection?.extentOffset, 10);
 
     // Long press on the second space and the previous word is selected.
     await tester.longPressAt(textOffsetToPosition(tester, 5));
     await tester.pumpAndSettle();
     expect(selection, isNotNull);
-    expect(selection!.baseOffset, 1);
-    expect(selection!.extentOffset, 5);
+    expect(selection?.baseOffset, 1);
+    expect(selection?.extentOffset, 5);
 
     // Put the cursor at the end of the field.
     await tester.tapAt(textOffsetToPosition(tester, 10));
     expect(selection, isNotNull);
-    expect(selection!.baseOffset, 10);
-    expect(selection!.extentOffset, 10);
+    expect(selection?.baseOffset, 10);
+    expect(selection?.extentOffset, 10);
 
     // Long press on the first space and the space is selected because there is
     // no previous word.
     await tester.longPressAt(textOffsetToPosition(tester, 0));
     await tester.pumpAndSettle();
     expect(selection, isNotNull);
-    expect(selection!.baseOffset, 0);
-    expect(selection!.extentOffset, 1);
+    expect(selection?.baseOffset, 0);
+    expect(selection?.extentOffset, 1);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
 
   testWidgets('selecting a space selects the space on non-mobile platforms', (WidgetTester tester) async {
@@ -4625,8 +4625,8 @@ void main() {
     // Put the cursor at the end of the field.
     await tester.tapAt(textOffsetToPosition(tester, 10));
     expect(selection, isNotNull);
-    expect(selection!.baseOffset, 10);
-    expect(selection!.extentOffset, 10);
+    expect(selection?.baseOffset, 10);
+    expect(selection?.extentOffset, 10);
 
     // Double tapping the second space selects it.
     await tester.pump(const Duration(milliseconds: 500));
@@ -4635,14 +4635,14 @@ void main() {
     await tester.tapAt(textOffsetToPosition(tester, 5));
     await tester.pumpAndSettle();
     expect(selection, isNotNull);
-    expect(selection!.baseOffset, 5);
-    expect(selection!.extentOffset, 6);
+    expect(selection?.baseOffset, 5);
+    expect(selection?.extentOffset, 6);
 
     // Put the cursor at the end of the field.
     await tester.tapAt(textOffsetToPosition(tester, 10));
     expect(selection, isNotNull);
-    expect(selection!.baseOffset, 10);
-    expect(selection!.extentOffset, 10);
+    expect(selection?.baseOffset, 10);
+    expect(selection?.extentOffset, 10);
 
     // Double tapping the first space selects it.
     await tester.pump(const Duration(milliseconds: 500));
@@ -4651,8 +4651,8 @@ void main() {
     await tester.tapAt(textOffsetToPosition(tester, 0));
     await tester.pumpAndSettle();
     expect(selection, isNotNull);
-    expect(selection!.baseOffset, 0);
-    expect(selection!.extentOffset, 1);
+    expect(selection?.baseOffset, 0);
+    expect(selection?.extentOffset, 1);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS,  TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
 
   testWidgets('double tapping a space selects the previous word on mobile', (WidgetTester tester) async {
@@ -4678,8 +4678,8 @@ void main() {
     // Put the cursor at the end of the field.
     await tester.tapAt(textOffsetToPosition(tester, 19));
     expect(selection, isNotNull);
-    expect(selection!.baseOffset, 19);
-    expect(selection!.extentOffset, 19);
+    expect(selection?.baseOffset, 19);
+    expect(selection?.extentOffset, 19);
 
     // Double tapping the second space selects the previous word.
     await tester.pump(const Duration(milliseconds: 500));
@@ -4688,8 +4688,8 @@ void main() {
     await tester.tapAt(textOffsetToPosition(tester, 5));
     await tester.pumpAndSettle();
     expect(selection, isNotNull);
-    expect(selection!.baseOffset, 1);
-    expect(selection!.extentOffset, 5);
+    expect(selection?.baseOffset, 1);
+    expect(selection?.extentOffset, 5);
 
     // Double tapping does the same thing for the first space.
     await tester.pump(const Duration(milliseconds: 500));
@@ -4698,14 +4698,14 @@ void main() {
     await tester.tapAt(textOffsetToPosition(tester, 0));
     await tester.pumpAndSettle();
     expect(selection, isNotNull);
-    expect(selection!.baseOffset, 0);
-    expect(selection!.extentOffset, 1);
+    expect(selection?.baseOffset, 0);
+    expect(selection?.extentOffset, 1);
 
     // Put the cursor at the end of the field.
     await tester.tapAt(textOffsetToPosition(tester, 19));
     expect(selection, isNotNull);
-    expect(selection!.baseOffset, 19);
-    expect(selection!.extentOffset, 19);
+    expect(selection?.baseOffset, 19);
+    expect(selection?.extentOffset, 19);
 
     // Double tapping the last space selects all previous contiguous spaces on
     // both lines and the previous word.
@@ -4715,7 +4715,7 @@ void main() {
     await tester.tapAt(textOffsetToPosition(tester, 14));
     await tester.pumpAndSettle();
     expect(selection, isNotNull);
-    expect(selection!.baseOffset, 6);
-    expect(selection!.extentOffset, 14);
+    expect(selection?.baseOffset, 6);
+    expect(selection?.extentOffset, 14);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
 }

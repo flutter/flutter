@@ -1856,7 +1856,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         selection: TextSelection(
           baseOffset: 0,
           extentOffset: textSelectionDelegate.textEditingValue.text.length,
-          isDirectional: true,
+          isDirectional: selection?.isDirectional ?? true,
+          affinity: TextAffinity.downstream,
         ),
       );
     }

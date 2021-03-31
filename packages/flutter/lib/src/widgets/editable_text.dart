@@ -235,9 +235,9 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
     final TextRange newComposing =
       newSelection != null && newSelection.isCollapsed && _isSelectionWithinComposingRange(newSelection)
         ? value.composing
-        : const TextRange.collapsed(0);
+        : TextRange.empty;
     value = TextEditingValue(
-      text: text,
+      text: value.text,
       selection: newSelection,
       composing: newComposing,
     );
@@ -2375,13 +2375,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   void _startOrStopCursorTimerIfNeeded() {
     final TextSelection? selection = _value.selection;
-    final bool hasCursor = _hasFocus && selection != null && selection.isCollapsed;
-    if (!hasCursor) {
-      return;
-    }
-    if (_cursorTimer == null) {
+    final bool needsCursor = _hasFocus && selection != null && selection.isCollapsed;
+    if (_cursorTimer == null && needsCursor) {
       _startCursorTimer();
-    } else {
+    } else if (_cursorTimer != null && !needsCursor) {
       _stopCursorTimer();
     }
   }

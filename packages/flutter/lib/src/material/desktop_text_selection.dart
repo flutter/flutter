@@ -69,9 +69,9 @@ class _DesktopTextSelectionControls extends TextSelectionControls {
     // already been selected. Same behavior as Android.
     final TextEditingValue value = delegate.textEditingValue;
     final TextSelection? selection = value.selection;
-    return delegate.selectAllEnabled &&
-           value.text.isNotEmpty &&
-           (selection == null || selection.start != 0 || selection.end == value.text.length);
+    return delegate.selectAllEnabled
+        && value.text.isNotEmpty
+        && (selection == null || !(selection.start == 0 && selection.end == value.text.length));
   }
 }
 

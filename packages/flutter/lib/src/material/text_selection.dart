@@ -107,10 +107,9 @@ class MaterialTextSelectionControls extends TextSelectionControls {
     // everything has already been selected.
     final TextEditingValue value = delegate.textEditingValue;
     final TextSelection? selection = value.selection;
-    return delegate.selectAllEnabled &&
-           value.text.isNotEmpty &&
-           selection != null &&
-           !(selection.start == 0 && selection.end == value.text.length);
+    return delegate.selectAllEnabled
+        && value.text.isNotEmpty
+        && (selection == null || !(selection.start == 0 && selection.end == value.text.length));
   }
 }
 

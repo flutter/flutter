@@ -1881,9 +1881,7 @@ void main() {
       ),
     );
 
-    expect(controller.value.selection, isNotNull);
-    expect(controller.value.selection?.baseOffset, -1);
-    expect(controller.value.selection?.extentOffset, -1);
+    expect(controller.value.selection, isNull);
 
     // Put the cursor at the end of the field.
     await tester.tapAt(textOffsetToPosition(tester, 19));
@@ -1949,9 +1947,7 @@ void main() {
       ),
     );
 
-    expect(controller.value.selection, isNotNull);
-    expect(controller.value.selection?.baseOffset, -1);
-    expect(controller.value.selection?.extentOffset, -1);
+    expect(controller.value.selection, isNull);
 
     // Put the cursor at the end of the field.
     await tester.tapAt(textOffsetToPosition(tester, 10));
@@ -2000,9 +1996,7 @@ void main() {
       ),
     );
 
-    expect(controller.value.selection, isNotNull);
-    expect(controller.value.selection?.baseOffset, -1);
-    expect(controller.value.selection?.extentOffset, -1);
+    expect(controller.value.selection, isNull);
 
     // Put the cursor at the end of the field.
     final TestGesture gesture = await tester.startGesture(

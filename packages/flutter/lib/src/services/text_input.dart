@@ -668,14 +668,23 @@ class TextEditingValue {
 
   /// Creates an instance of this class from a JSON object.
   factory TextEditingValue.fromJSON(Map<String, dynamic> encoded) {
+    final int? selectionBase = encoded['selectionBase'] as int?;
+    final int? selectionExtent = encoded['selectionExtent'] as int?;
+
+    final TextSelection? selection = selectionBase == null
+                                  || selectionExtent == null
+                                  || selectionBase < 0
+                                  || selectionExtent < 0
+        ? null
+        : TextSelection(
+            baseOffset: selectionBase,
+            extentOffset: selectionExtent,
+            affinity: _toTextAffinity(encoded['selectionAffinity'] as String?) ?? TextAffinity.downstream,
+            isDirectional: encoded['selectionIsDirectional'] as bool? ?? false,
+          );
     return TextEditingValue(
       text: encoded['text'] as String,
-      selection: TextSelection(
-        baseOffset: encoded['selectionBase'] as int? ?? -1,
-        extentOffset: encoded['selectionExtent'] as int? ?? -1,
-        affinity: _toTextAffinity(encoded['selectionAffinity'] as String?) ?? TextAffinity.downstream,
-        isDirectional: encoded['selectionIsDirectional'] as bool? ?? false,
-      ),
+      selection: selection,
       composing: TextRange(
         start: encoded['composingBase'] as int? ?? -1,
         end: encoded['composingExtent'] as int? ?? -1,
