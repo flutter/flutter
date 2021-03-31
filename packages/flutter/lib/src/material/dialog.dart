@@ -883,7 +883,7 @@ class SimpleDialog extends StatelessWidget {
           child: Semantics(
             namesRoute: label == null,
             container: true,
-            child: title
+            child: title,
           ),
         ),
       );

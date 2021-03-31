@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert';
 import 'dart:io' as io show Directory, File, Link, ProcessException, ProcessResult, ProcessSignal, systemEncoding, Process, ProcessStartMode;
 import 'dart:typed_data';
@@ -13,7 +11,6 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p; // flutter_ignore: package_path_import
 import 'package:process/process.dart';
 
-import '../reporting/reporting.dart';
 import 'common.dart' show throwToolExit;
 import 'platform.dart';
 
@@ -40,8 +37,8 @@ const int kSystemCannotFindFile = 2;
 /// fails to delete a file.
 class ErrorHandlingFileSystem extends ForwardingFileSystem {
   ErrorHandlingFileSystem({
-    @required FileSystem delegate,
-    @required Platform platform,
+    required FileSystem delegate,
+    required Platform platform,
   }) :
       assert(delegate != null),
       assert(platform != null),
@@ -87,7 +84,7 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
       // Certain error codes indicate the file could not be found. It could have
       // been deleted by a different program while the tool was running.
       // if it still exists, the file likely exists on a read-only volume.
-      if (err?.osError?.errorCode != kSystemCannotFindFile || _noExitOnFailure) {
+      if (err.osError?.errorCode != kSystemCannotFindFile || _noExitOnFailure) {
         rethrow;
       }
       if (file.existsSync()) {
@@ -109,7 +106,7 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
       return _runSync(() =>  directory(delegate.currentDirectory), platform: _platform);
     } on FileSystemException catch (err) {
       // Special handling for OS error 2 for current directory only.
-      if (err.osError.errorCode == kSystemCannotFindFile) {
+      if (err.osError?.errorCode == kSystemCannotFindFile) {
         throwToolExit(
           'Unable to read current working directory. This can happen if the directory the '
           'Flutter tool was run from was moved or deleted.'
@@ -147,7 +144,7 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
   // methods like `path.relative`.
   @override
   p.Context get path => _cachedPath ??= delegate.path;
-  p.Context _cachedPath;
+  p.Context? _cachedPath;
 
   @override
   set currentDirectory(dynamic path) {
@@ -163,9 +160,9 @@ class ErrorHandlingFile
     extends ForwardingFileSystemEntity<File, io.File>
     with ForwardingFile {
   ErrorHandlingFile({
-    @required Platform platform,
-    @required this.fileSystem,
-    @required this.delegate,
+    required Platform platform,
+    required this.fileSystem,
+    required this.delegate,
   }) :
     assert(platform != null),
     assert(fileSystem != null),
@@ -329,8 +326,8 @@ class ErrorHandlingFile
     // If the copy failed but both of the above checks passed, copy the bytes
     // directly.
     _runSync(() {
-      RandomAccessFile source;
-      RandomAccessFile sink;
+      RandomAccessFile? source;
+      RandomAccessFile? sink;
       try {
         source = delegate.openSync(mode: FileMode.read);
         sink = resultFile.openSync(mode: FileMode.writeOnly);
@@ -351,9 +348,7 @@ class ErrorHandlingFile
         sink?.closeSync();
       }
     }, platform: _platform, failureMessage: 'Flutter failed to copy $path to $newPath due to unknown error');
-    // The original copy failed, but the manual copy worked. Report an analytics event to
-    // track this to determine if this code path is actually hit.
-    ErrorHandlingEvent('copy-fallback').send();
+    // The original copy failed, but the manual copy worked.
     return wrapFile(resultFile);
   }
 
@@ -365,9 +360,9 @@ class ErrorHandlingDirectory
     extends ForwardingFileSystemEntity<Directory, io.Directory>
     with ForwardingDirectory<Directory> {
   ErrorHandlingDirectory({
-    @required Platform platform,
-    @required this.fileSystem,
-    @required this.delegate,
+    required Platform platform,
+    required this.fileSystem,
+    required this.delegate,
   }) :
     assert(platform != null),
     assert(fileSystem != null),
@@ -429,7 +424,7 @@ class ErrorHandlingDirectory
   }
 
   @override
-  Future<Directory> createTemp([String prefix]) {
+  Future<Directory> createTemp([String? prefix]) {
     return _run<Directory>(
       () async => wrap(await delegate.createTemp(prefix)),
       platform: _platform,
@@ -439,7 +434,7 @@ class ErrorHandlingDirectory
   }
 
   @override
-  Directory createTempSync([String prefix]) {
+  Directory createTempSync([String? prefix]) {
     return _runSync<Directory>(
       () => wrap(delegate.createTempSync(prefix)),
       platform: _platform,
@@ -496,9 +491,9 @@ class ErrorHandlingLink
     extends ForwardingFileSystemEntity<Link, io.Link>
     with ForwardingLink {
   ErrorHandlingLink({
-    @required Platform platform,
-    @required this.fileSystem,
-    @required this.delegate,
+    required Platform platform,
+    required this.fileSystem,
+    required this.delegate,
   }) :
     assert(platform != null),
     assert(fileSystem != null),
@@ -539,8 +534,8 @@ class ErrorHandlingLink
 }
 
 Future<T> _run<T>(Future<T> Function() op, {
-  @required Platform platform,
-  String failureMessage,
+  required Platform platform,
+  String? failureMessage,
 }) async {
   assert(platform != null);
   try {
@@ -554,17 +549,17 @@ Future<T> _run<T>(Future<T> Function() op, {
     rethrow;
   } on io.ProcessException catch (e) {
     if (platform.isWindows) {
-      _handleWindowsException(e, failureMessage, e.errorCode ?? 0);
+      _handleWindowsException(e, failureMessage, e.errorCode);
     } else if (platform.isLinux || platform.isMacOS) {
-      _handlePosixException(e, failureMessage, e.errorCode ?? 0);
+      _handlePosixException(e, failureMessage, e.errorCode);
     }
     rethrow;
   }
 }
 
 T _runSync<T>(T Function() op, {
-  @required Platform platform,
-  String failureMessage,
+  required Platform platform,
+  String? failureMessage,
 }) {
   assert(platform != null);
   try {
@@ -578,9 +573,9 @@ T _runSync<T>(T Function() op, {
     rethrow;
   } on io.ProcessException catch (e) {
     if (platform.isWindows) {
-      _handleWindowsException(e, failureMessage, e.errorCode ?? 0);
+      _handleWindowsException(e, failureMessage, e.errorCode);
     } else if (platform.isLinux || platform.isMacOS) {
-      _handlePosixException(e, failureMessage, e.errorCode ?? 0);
+      _handlePosixException(e, failureMessage, e.errorCode);
     }
     rethrow;
   }
@@ -591,8 +586,8 @@ class _ProcessDelegate {
 
   Future<io.Process> start(
     List<String> command, {
-    String workingDirectory,
-    Map<String, String> environment,
+    String? workingDirectory,
+    Map<String, String>? environment,
     bool includeParentEnvironment = true,
     bool runInShell = false,
     io.ProcessStartMode mode = io.ProcessStartMode.normal,
@@ -609,8 +604,8 @@ class _ProcessDelegate {
 
   Future<io.ProcessResult> run(
     List<String> command, {
-    String workingDirectory,
-    Map<String, String> environment,
+    String? workingDirectory,
+    Map<String, String>? environment,
     bool includeParentEnvironment = true,
     bool runInShell = false,
     Encoding stdoutEncoding = io.systemEncoding,
@@ -630,8 +625,8 @@ class _ProcessDelegate {
 
   io.ProcessResult runSync(
     List<String> command, {
-    String workingDirectory,
-    Map<String, String> environment,
+    String? workingDirectory,
+    Map<String, String>? environment,
     bool includeParentEnvironment = true,
     bool runInShell = false,
     Encoding stdoutEncoding = io.systemEncoding,
@@ -660,8 +655,8 @@ class _ProcessDelegate {
 ///   * [ErrorHandlingFileSystem], for a similar file system strategy.
 class ErrorHandlingProcessManager extends ProcessManager {
   ErrorHandlingProcessManager({
-    @required ProcessManager delegate,
-    @required Platform platform,
+    required ProcessManager delegate,
+    required Platform platform,
   }) : _delegate = delegate,
        _platform = platform;
 
@@ -684,7 +679,7 @@ class ErrorHandlingProcessManager extends ProcessManager {
   }
 
   @override
-  bool canRun(dynamic executable, {String workingDirectory}) {
+  bool canRun(dynamic executable, {String? workingDirectory}) {
     return _runSync(
       () => _delegate.canRun(executable, workingDirectory: workingDirectory),
       platform: _platform,
@@ -701,9 +696,9 @@ class ErrorHandlingProcessManager extends ProcessManager {
 
   @override
   Future<io.ProcessResult> run(
-    List<dynamic> command, {
-    String workingDirectory,
-    Map<String, String> environment,
+    List<Object> command, {
+    String? workingDirectory,
+    Map<String, String>? environment,
     bool includeParentEnvironment = true,
     bool runInShell = false,
     Encoding stdoutEncoding = io.systemEncoding,
@@ -735,9 +730,9 @@ class ErrorHandlingProcessManager extends ProcessManager {
 
   @override
   Future<io.Process> start(
-    List<dynamic> command, {
-    String workingDirectory,
-    Map<String, String> environment,
+    List<Object> command, {
+    String? workingDirectory,
+    Map<String, String>? environment,
     bool includeParentEnvironment = true,
     bool runInShell = false,
     io.ProcessStartMode mode = io.ProcessStartMode.normal,
@@ -764,9 +759,9 @@ class ErrorHandlingProcessManager extends ProcessManager {
 
   @override
   io.ProcessResult runSync(
-    List<dynamic> command, {
-    String workingDirectory,
-    Map<String, String> environment,
+    List<Object> command, {
+    String? workingDirectory,
+    Map<String, String>? environment,
     bool includeParentEnvironment = true,
     bool runInShell = false,
     Encoding stdoutEncoding = io.systemEncoding,
@@ -797,7 +792,7 @@ class ErrorHandlingProcessManager extends ProcessManager {
   }
 }
 
-void _handlePosixException(Exception e, String message, int errorCode) {
+void _handlePosixException(Exception e, String? message, int errorCode) {
   // From:
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno.h
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno-base.h
@@ -806,7 +801,7 @@ void _handlePosixException(Exception e, String message, int errorCode) {
   const int enospc = 28;
   const int eacces = 13;
   // Catch errors and bail when:
-  String errorMessage;
+  String? errorMessage;
   switch (errorCode) {
     case enospc:
       errorMessage =
@@ -828,7 +823,7 @@ void _handlePosixException(Exception e, String message, int errorCode) {
   _throwFileSystemException(errorMessage);
 }
 
-void _handleWindowsException(Exception e, String message, int errorCode) {
+void _handleWindowsException(Exception e, String? message, int errorCode) {
   // From:
   // https://docs.microsoft.com/en-us/windows/win32/debug/system-error-codes
   const int kDeviceFull = 112;
@@ -837,7 +832,7 @@ void _handleWindowsException(Exception e, String message, int errorCode) {
   const int kFatalDeviceHardwareError = 483;
 
   // Catch errors and bail when:
-  String errorMessage;
+  String? errorMessage;
   switch (errorCode) {
     case kAccessDenied:
       errorMessage =
@@ -870,7 +865,7 @@ void _handleWindowsException(Exception e, String message, int errorCode) {
   _throwFileSystemException(errorMessage);
 }
 
-void _throwFileSystemException(String errorMessage) {
+void _throwFileSystemException(String? errorMessage) {
   if (errorMessage == null) {
     return;
   }

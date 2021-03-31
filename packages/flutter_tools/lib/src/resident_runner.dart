@@ -919,6 +919,7 @@ abstract class ResidentRunner {
       flutterRootDir: globals.fs.directory(Cache.flutterRoot),
       outputDir: globals.fs.directory(getBuildDirectory()),
       processManager: globals.processManager,
+      platform: globals.platform,
       projectDir: globals.fs.currentDirectory,
     );
     _lastBuild = await globals.buildSystem.buildIncremental(
@@ -1008,7 +1009,7 @@ abstract class ResidentRunner {
   }
 
   Future<bool> debugDumpLayerTree() async {
-    if (!supportsServiceProtocol) {
+    if (!supportsServiceProtocol || !isRunningDebug) {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
@@ -1402,7 +1403,6 @@ abstract class ResidentRunner {
       if (supportsWriteSkSL) {
         commandHelp.M.print();
       }
-      commandHelp.v.print();
       // `P` should precede `a`
       commandHelp.P.print();
       commandHelp.a.print();

@@ -89,7 +89,7 @@ class Typography with Diagnosticable {
     'The default Typography constructor defaults to the 2014 material design defaults. '
     'Applications are urged to migrate to Typography.material2018(), or, if the 2014 defaults '
     'are desired, to explicitly request them using Typography.material2014(). '
-    'This feature was deprecated after v1.13.8.'
+    'This feature was deprecated after v1.13.8.',
   )
   factory Typography({
     TargetPlatform? platform,

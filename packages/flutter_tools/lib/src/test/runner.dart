@@ -53,6 +53,8 @@ abstract class FlutterTestRunner {
     bool runSkipped = false,
     int shardIndex,
     int totalShards,
+    Device integrationTestDevice,
+    String integrationTestUserIdentifier,
   });
 }
 
@@ -87,6 +89,8 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     bool runSkipped = false,
     int shardIndex,
     int totalShards,
+    Device integrationTestDevice,
+    String integrationTestUserIdentifier,
   }) async {
     // Configure package:test to use the Flutter engine for child processes.
     final String shellPath = globals.artifacts.getArtifactPath(Artifact.flutterTester);
@@ -179,6 +183,13 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       return exitCode;
     }
 
+    if (integrationTestDevice != null) {
+      // Without this, some async exceptions which are caught will surface when
+      // debugging tests.
+      // TODO(jiahaog): Remove this once https://github.com/dart-lang/stack_trace/issues/106 is fixed.
+      testArgs.add('--no-chain-stack-traces');
+    }
+
     testArgs
       ..add('--')
       ..addAll(testFiles);
@@ -201,6 +212,8 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       projectRootDirectory: globals.fs.currentDirectory.uri,
       flutterProject: flutterProject,
       icudtlPath: icudtlPath,
+      integrationTestDevice: integrationTestDevice,
+      integrationTestUserIdentifier: integrationTestUserIdentifier,
     );
 
     try {

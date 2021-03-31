@@ -9,6 +9,7 @@ import 'dart:async';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/device_port_forwader.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -1500,7 +1501,6 @@ void main() {
           commandHelp.z,
           commandHelp.g,
           commandHelp.M,
-          commandHelp.v,
           commandHelp.P,
           commandHelp.a,
           '',
@@ -1967,6 +1967,22 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
+
+    expect(await residentRunner.debugDumpLayerTree(), false);
+    verifyNever(mockFlutterDevice.debugDumpLayerTree());
+  }));
+
+  testUsingContext('ResidentRunner debugDumpLayerTree does not call flutter device if not running in debug mode', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );

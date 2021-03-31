@@ -400,7 +400,7 @@ class _IndicatorPainter extends CustomPainter {
     if (!(rect.size >= insets.collapsedSize)) {
       throw FlutterError(
           'indicatorPadding insets should be less than Tab Size\n'
-          'Rect Size : ${rect.size}, Insets: ${insets.toString()}'
+          'Rect Size : ${rect.size}, Insets: ${insets.toString()}',
       );
     }
     return insets.deflateRect(rect);
@@ -968,7 +968,7 @@ class _TabBarState extends State<TabBar> {
           'When creating a ${widget.runtimeType}, you must either provide an explicit '
           'TabController using the "controller" property, or you must ensure that there '
           'is a DefaultTabController above the ${widget.runtimeType}.\n'
-          'In this case, there was neither an explicit controller nor a default controller.'
+          'In this case, there was neither an explicit controller nor a default controller.',
         );
       }
       return true;
@@ -1123,9 +1123,7 @@ class _TabBarState extends State<TabBar> {
   void _handleTap(int index) {
     assert(index >= 0 && index < widget.tabs.length);
     _controller!.animateTo(index);
-    if (widget.onTap != null) {
-      widget.onTap!(index);
-    }
+    widget.onTap?.call(index);
   }
 
   Widget _buildStyledTab(Widget child, bool selected, Animation<double> animation) {
@@ -1147,7 +1145,7 @@ class _TabBarState extends State<TabBar> {
       if (_controller!.length != widget.tabs.length) {
         throw FlutterError(
           "Controller's length property (${_controller!.length}) does not match the "
-          "number of tabs (${widget.tabs.length}) present in TabBar's tabs property."
+          "number of tabs (${widget.tabs.length}) present in TabBar's tabs property.",
         );
       }
       return true;
@@ -1172,7 +1170,7 @@ class _TabBarState extends State<TabBar> {
               child: widget.tabs[i],
             ),
           ),
-        )
+        ),
     ];
 
     // If the controller was provided by DefaultTabController and we're part
@@ -1343,7 +1341,7 @@ class _TabBarViewState extends State<TabBarView> {
           'When creating a ${widget.runtimeType}, you must either provide an explicit '
           'TabController using the "controller" property, or you must ensure that there '
           'is a DefaultTabController above the ${widget.runtimeType}.\n'
-          'In this case, there was neither an explicit controller nor a default controller.'
+          'In this case, there was neither an explicit controller nor a default controller.',
         );
       }
       return true;
@@ -1481,7 +1479,7 @@ class _TabBarViewState extends State<TabBarView> {
       if (_controller!.length != widget.children.length) {
         throw FlutterError(
           "Controller's length property (${_controller!.length}) does not match the "
-          "number of tabs (${widget.children.length}) present in TabBar's tabs property."
+          "number of tabs (${widget.children.length}) present in TabBar's tabs property.",
         );
       }
       return true;
@@ -1631,7 +1629,7 @@ class TabPageSelector extends StatelessWidget {
           'When creating a $runtimeType, you must either provide an explicit TabController '
           'using the "controller" property, or you must ensure that there is a '
           'DefaultTabController above the $runtimeType.\n'
-          'In this case, there was neither an explicit controller nor a default controller.'
+          'In this case, there was neither an explicit controller nor a default controller.',
         );
       }
       return true;

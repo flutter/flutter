@@ -162,6 +162,7 @@ class CocoaPods {
     if (!xcodeProject.podfile.existsSync()) {
       throwToolExit('Podfile missing');
     }
+    _warnIfPodfileOutOfDate(xcodeProject);
     bool podsProcessed = false;
     if (_shouldRunPodInstall(xcodeProject, dependenciesChanged)) {
       if (!await _checkPodCondition()) {
@@ -170,7 +171,6 @@ class CocoaPods {
       await _runPodInstall(xcodeProject, buildMode);
       podsProcessed = true;
     }
-    _warnIfPodfileOutOfDate(xcodeProject);
     return podsProcessed;
   }
 
@@ -392,7 +392,6 @@ class CocoaPods {
               'To regenerate the Podfile, run:\n'
               '$podfileIosMigrationInstructions\n',
         );
-        return;
       }
     }
     // Most of the pod and plugin parsing logic was moved from the Podfile
