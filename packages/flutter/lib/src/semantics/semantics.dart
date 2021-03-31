@@ -592,6 +592,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.header,
     this.textField,
     this.slider,
+    this.keyboardKey,
     this.readOnly,
     this.focusable,
     this.focused,
@@ -697,6 +698,9 @@ class SemanticsProperties extends DiagnosticableTree {
   /// Talkback/\VoiceOver provides users with the hint "slider" when a
   /// slider is focused.
   final bool? slider;
+
+  /// If non-null, indicates that this subtree represents a keyboard key.
+  final bool? keyboardKey;
 
   /// If non-null, indicates that this subtree is read only.
   ///
@@ -3692,6 +3696,13 @@ class SemanticsConfiguration {
   bool get isSlider => _hasFlag(SemanticsFlag.isSlider);
   set isSlider(bool value) {
     _setFlag(SemanticsFlag.isSlider, value);
+  }
+
+  /// Whether the owning [RenderObject] is a keyboard key (true) or not
+  //(false).
+  bool get isKeyboardKey => _hasFlag(SemanticsFlag.isKeyboardKey);
+  set isKeyboardKey(bool value) {
+    _setFlag(SemanticsFlag.isKeyboardKey, value);
   }
 
   /// Whether the owning [RenderObject] is considered hidden.

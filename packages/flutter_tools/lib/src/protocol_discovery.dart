@@ -12,7 +12,6 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'device.dart';
 import 'device_port_forwader.dart';
-import 'globals.dart' as globals;
 
 /// Discovers a specific service protocol on a device, and forwards the service
 /// protocol device port to the host.
@@ -42,7 +41,7 @@ class ProtocolDiscovery {
     @required int hostPort,
     @required int devicePort,
     @required bool ipv6,
-    Logger logger, // TODO(jonahwilliams): make required.
+    @required Logger logger,
   }) {
     const String kObservatoryService = 'Observatory';
     return ProtocolDiscovery._(
@@ -53,7 +52,7 @@ class ProtocolDiscovery {
       hostPort: hostPort,
       devicePort: devicePort,
       ipv6: ipv6,
-      logger: logger ?? globals.logger,
+      logger: logger,
     );
   }
 
