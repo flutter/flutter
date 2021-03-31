@@ -72,6 +72,11 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   bool MakeResourceCurrent();
   bool SwapBuffers();
 
+  // Callback for presenting a software bitmap.
+  bool PresentSoftwareBitmap(const void* allocation,
+                             size_t row_bytes,
+                             size_t height);
+
   // Send initial bounds to embedder.  Must occur after engine has initialized.
   void SendInitialBounds();
 
@@ -263,10 +268,6 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   // surface_manager for creation of render surfaces and bound to the physical
   // os window.
   std::unique_ptr<WindowsRenderTarget> render_target_;
-
-  // An object used for intializing Angle and creating / destroying render
-  // surfaces. Surface creation functionality requires a valid render_target.
-  std::unique_ptr<AngleSurfaceManager> surface_manager_;
 
   // The engine associated with this view.
   std::unique_ptr<FlutterWindowsEngine> engine_;
