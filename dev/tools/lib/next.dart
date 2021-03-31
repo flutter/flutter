@@ -115,7 +115,7 @@ class NextCommand extends Command<void> {
       case ReleasePhase.PUBLISH_VERSION:
       case ReleasePhase.PUBLISH_CHANNEL:
       case ReleasePhase.VERIFY_RELEASE:
-        assert(false);
+        assert(false, 'Unimplemented phase ${currentPhase.name}');
         break;
     }
 
