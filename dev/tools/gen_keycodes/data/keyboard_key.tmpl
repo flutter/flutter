@@ -224,10 +224,6 @@ class LogicalKeyboardKey extends KeyboardKey {
     return result;
   }
 
-  /// Returns the [LogicalKeyboardKey] constant that matches the given ID, or
-  /// null, if not found.
-  static LogicalKeyboardKey? findKeyByKeyId(int keyId) => _knownLogicalKeys[keyId];
-
   @override
   int get hashCode => keyId.hashCode;
 
@@ -240,6 +236,10 @@ class LogicalKeyboardKey extends KeyboardKey {
     return other is LogicalKeyboardKey
         && other.keyId == keyId;
   }
+
+  /// Returns the [LogicalKeyboardKey] constant that matches the given ID, or
+  /// null, if not found.
+  static LogicalKeyboardKey? findKeyByKeyId(int keyId) => _knownLogicalKeys[keyId];
 
   /// Returns true if the given label represents a Unicode control character.
   ///
@@ -493,10 +493,6 @@ class PhysicalKeyboardKey extends KeyboardKey {
     return result;
   }
 
-  /// Finds a known [PhysicalKeyboardKey] that matches the given USB HID usage
-  /// code.
-  static PhysicalKeyboardKey? findKeyByCode(int usageCode) => _knownPhysicalKeys[usageCode];
-
   @override
   int get hashCode => usbHidUsage.hashCode;
 
@@ -509,6 +505,10 @@ class PhysicalKeyboardKey extends KeyboardKey {
     return other is PhysicalKeyboardKey
         && other.usbHidUsage == usbHidUsage;
   }
+
+  /// Finds a known [PhysicalKeyboardKey] that matches the given USB HID usage
+  /// code.
+  static PhysicalKeyboardKey? findKeyByCode(int usageCode) => _knownPhysicalKeys[usageCode];
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
