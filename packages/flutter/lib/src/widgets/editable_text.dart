@@ -2236,7 +2236,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   // This method is often called by platform message handlers that catch and
   // send unrecognized exceptions to the engine/platform. Make sure the
-  // exceptions user callbacks throw are handled within this method.
+  // exceptions that user callbacks throw are handled within this method.
   void _formatAndSetValue(TextEditingValue newTextEditingValue, SelectionChangedCause? cause, {bool userInteraction = false}) {
     // Only apply input formatters if the text has changed (including uncommited
     // text in the composing region), or when the user committed the composing
@@ -2251,19 +2251,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     final List<TextInputFormatter>? formatters = widget.inputFormatters;
     if (preformatTextChanged && formatters != null && formatters.isNotEmpty) {
-      for (final TextInputFormatter formatter in formatters) {
-        try {
+      try {
+        for (final TextInputFormatter formatter in formatters) {
           newTextEditingValue = formatter.formatEditUpdate(_value, newTextEditingValue);
-        } catch (exception, stack) {
-          FlutterError.reportError(FlutterErrorDetails(
-            exception: exception,
-            stack: stack,
-            library: 'widgets',
-            context: ErrorDescription(
-              'while applying ${formatter.runtimeType} on $newTextEditingValue',
-            ),
-          ));
         }
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets',
+          context: ErrorDescription('while applying TextInputFormatters'),
+        ));
       }
     }
 
