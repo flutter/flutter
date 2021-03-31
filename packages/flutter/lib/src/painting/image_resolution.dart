@@ -116,11 +116,11 @@ const double _kLowDprLimit = 2.0;
 /// ```dart
 /// AssetImage('icons/heart.png')
 /// ```
-/// 
+///
 /// For an example on how an [AssetImage] would be resolved to obtain a
 /// [dart:ui.Image] object, refer to the sample code in the documentation for
 /// [ImageProvider].
-///  
+///
 /// ## Assets in packages
 ///
 /// To fetch an asset from a package, the [package] argument must be provided.
