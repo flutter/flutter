@@ -18,6 +18,7 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
+import '../build_directories.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../flutter_manifest.dart';

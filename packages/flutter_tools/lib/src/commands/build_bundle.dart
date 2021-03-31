@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import '../base/common.dart';
+import '../build_directories.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../features.dart';

@@ -8,7 +8,7 @@ import 'package:args/args.dart';
 
 import '../base/common.dart';
 import '../base/os.dart';
-import '../build_info.dart';
+import '../build_directories.dart';
 import '../build_system/build_system.dart';
 import '../cache.dart';
 import '../dart/generate_synthetic_packages.dart';

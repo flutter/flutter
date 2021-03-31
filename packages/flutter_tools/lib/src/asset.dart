@@ -12,7 +12,7 @@ import 'base/deferred_component.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
-import 'build_info.dart';
+import 'build_directories.dart';
 import 'cache.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';

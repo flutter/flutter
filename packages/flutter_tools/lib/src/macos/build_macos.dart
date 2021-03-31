@@ -11,6 +11,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/project_migrator.dart';
+import '../build_directories.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;

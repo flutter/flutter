@@ -8,7 +8,7 @@ import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../build_info.dart';
+import '../build_directories.dart';
 import '../globals.dart' as globals;
 import '../ios/xcodeproj.dart';
 import '../project.dart';

@@ -24,6 +24,7 @@ import 'base/platform.dart';
 import 'base/signals.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
+import 'build_directories.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/targets/localizations.dart';

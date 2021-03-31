@@ -7,15 +7,13 @@
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 
-import 'base/config.dart';
-import 'base/context.dart';
-import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/utils.dart';
-import 'build_system/targets/icon_tree_shaker.dart';
 import 'convert.dart';
-import 'globals.dart' as globals;
+
+/// Whether icon font subsetting is enabled by default.
+const bool kIconTreeShakerEnabledDefault = true;
 
 /// Information about a build to be performed or used.
 class BuildInfo {
@@ -665,94 +663,6 @@ String fuchsiaArchForTargetPlatform(TargetPlatform targetPlatform) {
   }
 }
 
-HostPlatform getCurrentHostPlatform() {
-  if (globals.platform.isMacOS) {
-    return HostPlatform.darwin_x64;
-  }
-  if (globals.platform.isLinux) {
-    // support x64 and arm64 architecture.
-    return globals.os.hostPlatform;
-  }
-  if (globals.platform.isWindows) {
-    return HostPlatform.windows_x64;
-  }
-
-  globals.printError('Unsupported host platform, defaulting to Linux');
-
-  return HostPlatform.linux_x64;
-}
-
-/// Returns the top-level build output directory.
-String getBuildDirectory([Config config, FileSystem fileSystem]) {
-  // TODO(johnmccutchan): Stop calling this function as part of setting
-  // up command line argument processing.
-  if (context == null) {
-    return 'build';
-  }
-  final Config localConfig = config ?? globals.config;
-  final FileSystem localFilesystem = fileSystem ?? globals.fs;
-  if (localConfig == null) {
-    return 'build';
-  }
-
-  final String buildDir = localConfig.getValue('build-dir') as String ?? 'build';
-  if (localFilesystem.path.isAbsolute(buildDir)) {
-    throw Exception(
-        'build-dir config setting in ${globals.config.configPath} must be relative');
-  }
-  return buildDir;
-}
-
-/// Returns the Android build output directory.
-String getAndroidBuildDirectory() {
-  // TODO(cbracken): move to android subdir.
-  return getBuildDirectory();
-}
-
-/// Returns the AOT build output directory.
-String getAotBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'aot');
-}
-
-/// Returns the asset build output directory.
-String getAssetBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'flutter_assets');
-}
-
-/// Returns the iOS build output directory.
-String getIosBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'ios');
-}
-
-/// Returns the macOS build output directory.
-String getMacOSBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'macos');
-}
-
-/// Returns the web build output directory.
-String getWebBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'web');
-}
-
-/// Returns the Linux build output directory.
-String getLinuxBuildDirectory([TargetPlatform targetPlatform]) {
-  final String arch = (targetPlatform == null) ?
-      _getCurrentHostPlatformArchName() :
-      getNameForTargetPlatformArch(targetPlatform);
-  final String subDirs = 'linux/' + arch;
-  return globals.fs.path.join(getBuildDirectory(), subDirs);
-}
-
-/// Returns the Windows build output directory.
-String getWindowsBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'windows');
-}
-
-/// Returns the Fuchsia build output directory.
-String getFuchsiaBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'fuchsia');
-}
-
 /// Defines specified via the `--dart-define` command-line option.
 ///
 /// These values are URI-encoded and then combined into a comma-separated string.
@@ -804,11 +714,6 @@ enum NullSafetyMode {
   unsound,
   /// The null safety mode was not detected. Only supported for 'flutter test'.
   autodetect,
-}
-
-String _getCurrentHostPlatformArchName() {
-  final HostPlatform hostPlatform = getCurrentHostPlatform();
-  return getNameForHostPlatformArch(hostPlatform);
 }
 
 String getNameForTargetPlatformArch(TargetPlatform platform) {

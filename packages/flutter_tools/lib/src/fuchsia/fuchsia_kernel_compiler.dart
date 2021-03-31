@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/logger.dart';
+import '../build_directories.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../project.dart';

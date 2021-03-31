@@ -10,6 +10,7 @@ import '../application_package.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/utils.dart';
+import '../build_directories.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../ios/plist_parser.dart';

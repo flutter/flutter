@@ -12,6 +12,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/utils.dart';
+import '../build_directories.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../convert.dart';

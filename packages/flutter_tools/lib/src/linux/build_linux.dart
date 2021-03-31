@@ -11,6 +11,7 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/project_migrator.dart';
 import '../base/utils.dart';
+import '../build_directories.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../cmake.dart';

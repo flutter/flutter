@@ -19,6 +19,7 @@ import '../base/net.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/time.dart';
+import '../build_directories.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../device_port_forwader.dart';

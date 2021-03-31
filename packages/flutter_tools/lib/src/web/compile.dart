@@ -8,6 +8,7 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../build_directories.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/common.dart';

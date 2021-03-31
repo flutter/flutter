@@ -318,7 +318,7 @@ class CachedArtifacts implements Artifacts {
         return _fileSystem.path.join(engineDir, _artifactToFileName(artifact));
       case Artifact.genSnapshot:
         assert(mode != BuildMode.debug, 'Artifact $artifact only available in non-debug mode.');
-        final String hostPlatform = getNameForHostPlatform(getCurrentHostPlatform());
+        final String hostPlatform = getNameForHostPlatform(_getCurrentHostPlatform());
         return _fileSystem.path.join(engineDir, hostPlatform, _artifactToFileName(artifact));
       default:
         return _getHostArtifactPath(artifact, platform, mode);
@@ -695,7 +695,7 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
       case Artifact.webPlatformSoundKernelDill:
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', _artifactToFileName(artifact));
       case Artifact.fuchsiaKernelCompiler:
-        final String hostPlatform = getNameForHostPlatform(getCurrentHostPlatform());
+        final String hostPlatform = getNameForHostPlatform(_getCurrentHostPlatform());
         final String modeName = mode.isRelease ? 'release' : mode.toString();
         final String dartBinaries = 'dart_binaries-$modeName-$hostPlatform';
         return _fileSystem.path.join(engineOutPath, 'host_bundle', dartBinaries, 'kernel_compiler.dart.snapshot');
@@ -880,4 +880,21 @@ class _TestLocalEngine extends _TestArtifacts implements LocalEngineArtifacts {
 
   @override
   final String engineOutPath;
+}
+
+HostPlatform _getCurrentHostPlatform() {
+  if (globals.platform.isMacOS) {
+    return HostPlatform.darwin_x64;
+  }
+  if (globals.platform.isLinux) {
+    // support x64 and arm64 architecture.
+    return globals.os.hostPlatform;
+  }
+  if (globals.platform.isWindows) {
+    return HostPlatform.windows_x64;
+  }
+
+  globals.printError('Unsupported host platform, defaulting to Linux');
+
+  return HostPlatform.linux_x64;
 }
