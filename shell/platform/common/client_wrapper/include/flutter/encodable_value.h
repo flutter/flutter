@@ -45,7 +45,7 @@ static_assert(sizeof(double) == 8, "EncodableValue requires a 64-bit double");
 // rather than:
 //   EncodableValue(CustomEncodableValue(MyType(...)))
 //
-// For extracting recieved custom types, it is implicitly convertible to
+// For extracting received custom types, it is implicitly convertible to
 // std::any. For example:
 //   const MyType& my_type_value =
 //        std::any_cast<MyType>(std::get<CustomEncodableValue>(value));
@@ -62,7 +62,7 @@ class CustomEncodableValue {
   explicit CustomEncodableValue(const std::any& value) : value_(value) {}
   ~CustomEncodableValue() = default;
 
-  // Allow implict conversion to std::any to allow direct use of any_cast.
+  // Allow implicit conversion to std::any to allow direct use of any_cast.
   operator std::any&() { return value_; }
   operator const std::any&() const { return value_; }
 
@@ -197,9 +197,10 @@ class EncodableValue : public internal::EncodableValueVariant {
   // other types, std::monostate uses aren't self-documenting.
   bool IsNull() const { return std::holds_alternative<std::monostate>(*this); }
 
-  // Convience method to simplify handling objects received from Flutter where
-  // the values may be larger than 32-bit, since they have the same type on the
-  // Dart side, but will be either 32-bit or 64-bit here depending on the value.
+  // Convenience method to simplify handling objects received from Flutter
+  // where the values may be larger than 32-bit, since they have the same type
+  // on the Dart side, but will be either 32-bit or 64-bit here depending on
+  // the value.
   //
   // Calling this method if the value doesn't contain either an int32_t or an
   // int64_t will throw an exception.
