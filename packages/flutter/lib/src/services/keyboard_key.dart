@@ -319,6 +319,7 @@ class LogicalKeyboardKey extends KeyboardKey {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('keyId', '0x${keyId.toRadixString(16).padLeft(8, '0')}', showName: true));
+    properties.add(StringProperty('keyLabel', keyLabel, showName: true));
     properties.add(StringProperty('debugName', debugName, showName: true, defaultValue: null));
   }
 
