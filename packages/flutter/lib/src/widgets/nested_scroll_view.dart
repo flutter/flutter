@@ -409,6 +409,10 @@ class NestedScrollView extends StatefulWidget {
   /// [ScrollPhysics.createBallisticSimulation] allows this particular aspect of
   /// the physics to be overridden).
   ///
+  /// If an explicit [ScrollBehavior] is provided to [scrollBehavior], the
+  /// [ScrollPhysics] provided by that behavior will take precedence after
+  /// [physics].
+  ///
   /// Defaults to matching platform conventions.
   ///
   /// The [ScrollPhysics.applyBoundaryConditions] implementation of the provided
@@ -635,28 +639,26 @@ class NestedScrollViewState extends State<NestedScrollView> {
 
     return _InheritedNestedScrollView(
       state: this,
-      child: ScrollConfiguration(
-        behavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false),
-        child: Builder(
-          builder: (BuildContext context) {
-            _lastHasScrolledBody = _coordinator!.hasScrolledBody;
-            return _NestedScrollViewCustomScrollView(
-              dragStartBehavior: widget.dragStartBehavior,
-              scrollDirection: widget.scrollDirection,
-              reverse: widget.reverse,
-              physics: _scrollPhysics,
-              controller: _coordinator!._outerController,
-              slivers: widget._buildSlivers(
-                context,
-                _coordinator!._innerController,
-                _lastHasScrolledBody!,
-              ),
-              handle: _absorberHandle,
-              clipBehavior: widget.clipBehavior,
-              restorationId: widget.restorationId,
-            );
-          },
-        ),
+      child: Builder(
+        builder: (BuildContext context) {
+          _lastHasScrolledBody = _coordinator!.hasScrolledBody;
+          return _NestedScrollViewCustomScrollView(
+            dragStartBehavior: widget.dragStartBehavior,
+            scrollDirection: widget.scrollDirection,
+            reverse: widget.reverse,
+            physics: _scrollPhysics,
+            scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false),
+            controller: _coordinator!._outerController,
+            slivers: widget._buildSlivers(
+              context,
+              _coordinator!._innerController,
+              _lastHasScrolledBody!,
+            ),
+            handle: _absorberHandle,
+            clipBehavior: widget.clipBehavior,
+            restorationId: widget.restorationId,
+          );
+        },
       ),
     );
   }
@@ -667,6 +669,7 @@ class _NestedScrollViewCustomScrollView extends CustomScrollView {
     required Axis scrollDirection,
     required bool reverse,
     required ScrollPhysics physics,
+    required ScrollBehavior scrollBehavior,
     required ScrollController controller,
     required List<Widget> slivers,
     required this.handle,
@@ -677,6 +680,7 @@ class _NestedScrollViewCustomScrollView extends CustomScrollView {
          scrollDirection: scrollDirection,
          reverse: reverse,
          physics: physics,
+         scrollBehavior: scrollBehavior,
          controller: controller,
          slivers: slivers,
          dragStartBehavior: dragStartBehavior,

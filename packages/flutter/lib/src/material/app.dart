@@ -724,7 +724,6 @@ class MaterialScrollBehavior extends ScrollBehavior {
 
   @override
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
-    final ThemeData theme = Theme.of(context);
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
       case TargetPlatform.linux:
@@ -736,7 +735,7 @@ class MaterialScrollBehavior extends ScrollBehavior {
         return GlowingOverscrollIndicator(
           child: child,
           axisDirection: details.direction,
-          color: theme.colorScheme.secondary,
+          color: Theme.of(context).colorScheme.secondary,
         );
     }
   }

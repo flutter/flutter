@@ -1202,6 +1202,10 @@ class EditableText extends StatefulWidget {
   ///
   /// See [Scrollable.physics].
   /// {@endtemplate}
+  ///
+  /// If an explicit [ScrollBehavior] is provided to [scrollBehavior], the
+  /// [ScrollPhysics] provided by that behavior will take precedence after
+  /// [scrollPhysics].
   final ScrollPhysics? scrollPhysics;
 
   /// {@template flutter.widgets.editableText.selectionEnabled}
@@ -2610,7 +2614,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         excludeFromSemantics: true,
         axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
         controller: _scrollController,
-        physics: widget.scrollPhysics ?? widget.scrollBehavior?.getScrollPhysics(context),
+        physics: widget.scrollPhysics,
         dragStartBehavior: widget.dragStartBehavior,
         restorationId: widget.restorationId,
         scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: _isMultiline),

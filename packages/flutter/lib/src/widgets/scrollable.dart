@@ -135,6 +135,10 @@ class Scrollable extends StatefulWidget {
   /// Defaults to matching platform conventions via the physics provided from
   /// the ambient [ScrollConfiguration].
   ///
+  /// If an explicit [ScrollBehavior] is provided to [scrollBehavior], the
+  /// [ScrollPhysics] provided by that behavior will take precedence after
+  /// [physics].
+  ///
   /// The physics can be changed dynamically, but new physics will only take
   /// effect if the _class_ of the provided object changes. Merely constructing
   /// a new instance with a different configuration is insufficient to cause the
@@ -395,6 +399,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   ScrollPhysics? _physics;
   late ScrollController _scrollController;
 
+  ScrollController get _effectiveScrollController => widget.controller ?? _scrollController;
+
   // Only call this from places that will definitely trigger a rebuild.
   void _updatePosition() {
     _configuration = widget.scrollBehavior ?? ScrollConfiguration.of(context);
@@ -404,19 +410,18 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     } else if (widget.scrollBehavior != null) {
       _physics = widget.scrollBehavior!.getScrollPhysics(context).applyTo(_physics);
     }
-    final ScrollController controller = widget.controller ?? _scrollController;
     final ScrollPosition? oldPosition = _position;
     if (oldPosition != null) {
-      controller.detach(oldPosition);
+      _effectiveScrollController.detach(oldPosition);
       // It's important that we not dispose the old position until after the
       // viewport has had a chance to unregister its listeners from the old
       // position. So, schedule a microtask to do it.
       scheduleMicrotask(oldPosition.dispose);
     }
 
-    _position = controller.createScrollPosition(_physics!, this, oldPosition);
+    _position = _effectiveScrollController.createScrollPosition(_physics!, this, oldPosition);
     assert(_position != null);
-    controller.attach(position);
+    _effectiveScrollController.attach(position);
   }
 
   @override
@@ -439,7 +444,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   @override
   void initState() {
-    _scrollController = ScrollController();
+    if (widget.controller == null)
+      _scrollController = ScrollController();
     super.initState();
   }
 
@@ -467,13 +473,16 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     super.didUpdateWidget(oldWidget);
 
     if (widget.controller != oldWidget.controller) {
-      if (oldWidget.controller != null)
+      if (oldWidget.controller != null) {
         oldWidget.controller?.detach(position);
-      else
+      } else {
         _scrollController.detach(position);
+        _scrollController.dispose();
+        if (widget.controller == null)
+          _scrollController = ScrollController();
+      }
 
-      final ScrollController newScrollController = widget.controller ?? _scrollController;
-      newScrollController.attach(position);
+      _effectiveScrollController.attach(position);
     }
 
     if (_shouldUpdatePosition(oldWidget))
@@ -484,10 +493,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   void dispose() {
     if (widget.controller != null)
       widget.controller?.detach(position);
-    else
+    else {
       _scrollController.detach(position);
-
-    _scrollController.dispose();
+      _scrollController.dispose();
+    }
     position.dispose();
     _persistedScrollOffset.dispose();
     super.dispose();
@@ -749,7 +758,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       result,
       ScrollableDetails(
         direction: widget.axisDirection,
-        controller: widget.controller ?? _scrollController,
+        controller: _effectiveScrollController,
       ),
     );
   }

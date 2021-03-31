@@ -61,8 +61,19 @@ class ScrollBehavior {
   /// Widgets such as these have the option to provide a [ScrollBehavior] on
   /// the widget level, like [PageView.scrollBehavior], in order to change the
   /// default.
-  ScrollBehavior copyWith({ bool scrollbars = true, bool overscroll = true}) {
-    return _WrappedScrollBehavior(delegate: this, scrollbars: scrollbars, overscroll: overscroll);
+  ScrollBehavior copyWith({
+    bool scrollbars = true,
+    bool overscroll = true,
+    ScrollPhysics? physics,
+    TargetPlatform? platform,
+  }) {
+    return _WrappedScrollBehavior(
+      delegate: this,
+      scrollbars: scrollbars,
+      overscroll: overscroll,
+      physics: physics,
+      platform: platform,
+    );
   }
 
   /// The platform whose scroll physics should be implemented.
@@ -230,11 +241,15 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     required this.delegate,
     this.scrollbars = true,
     this.overscroll = true,
+    this.physics,
+    this.platform,
   });
 
   final ScrollBehavior delegate;
   final bool scrollbars;
   final bool overscroll;
+  final ScrollPhysics? physics;
+  final TargetPlatform? platform;
 
   @override
   bool get _useDecoration => true;
@@ -268,18 +283,28 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   }
 
   @override
-  ScrollBehavior copyWith({bool scrollbars = true, bool overscroll = true}) {
-    return delegate.copyWith(scrollbars: scrollbars, overscroll: overscroll);
+  ScrollBehavior copyWith({
+    bool scrollbars = true,
+    bool overscroll = true,
+    ScrollPhysics? physics,
+    TargetPlatform? platform,
+  }) {
+    return delegate.copyWith(
+      scrollbars: scrollbars,
+      overscroll: overscroll,
+      physics: physics,
+      platform: platform,
+    );
   }
 
   @override
   TargetPlatform getPlatform(BuildContext context) {
-    return delegate.getPlatform(context);
+    return platform ?? delegate.getPlatform(context);
   }
 
   @override
   ScrollPhysics getScrollPhysics(BuildContext context) {
-    return delegate.getScrollPhysics(context);
+    return physics ?? delegate.getScrollPhysics(context);
   }
 
   @override

@@ -674,6 +674,10 @@ class ListWheelScrollView extends StatefulWidget {
   /// For example, determines how the scroll view continues to animate after the
   /// user stops dragging the scroll view.
   ///
+  /// If an explicit [ScrollBehavior] is provided to [scrollBehavior], the
+  /// [ScrollPhysics] provided by that behavior will take precedence after
+  /// [physics].
+  ///
   /// Defaults to matching platform conventions.
   final ScrollPhysics? physics;
 
@@ -782,7 +786,7 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
       },
       child: _FixedExtentScrollable(
         controller: scrollController,
-        physics: widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context),
+        physics: widget.physics,
         itemExtent: widget.itemExtent,
         restorationId: widget.restorationId,
         scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false),

@@ -424,6 +424,7 @@ class CupertinoApp extends StatefulWidget {
 /// Setting a [CupertinoScrollBehavior] will result in descendant [Scrollable] widgets
 /// using [BouncingScrollPhysics] by default. No [GlowingOverscrollIndicator] is
 /// applied when using a [CupertinoScrollBehavior] either, regardless of platform.
+/// When executing on desktop platforms, a [CupertinoScrollbar] is applied to the child.
 ///
 /// See also:
 ///

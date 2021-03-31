@@ -15,6 +15,7 @@ import 'framework.dart';
 import 'media_query.dart';
 import 'notification_listener.dart';
 import 'primary_scroll_controller.dart';
+import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
 import 'scroll_notification.dart';
 import 'scroll_physics.dart';
@@ -83,6 +84,7 @@ abstract class ScrollView extends StatelessWidget {
     this.controller,
     bool? primary,
     ScrollPhysics? physics,
+    this.scrollBehavior,
     this.shrinkWrap = false,
     this.center,
     this.anchor = 0.0,
@@ -196,6 +198,10 @@ abstract class ScrollView extends StatelessWidget {
   ///   physics: const ScrollPhysics(),
   /// ```
   ///
+  /// If an explicit [ScrollBehavior] is provided to [scrollBehavior], the
+  /// [ScrollPhysics] provided by that behavior will take precedence after
+  /// [physics].
+  ///
   /// The physics can be changed dynamically (by providing a new object in a
   /// subsequent build), but new physics will only take effect if the _class_ of
   /// the provided object changes. Merely constructing a new instance with a
@@ -206,6 +212,14 @@ abstract class ScrollView extends StatelessWidget {
   /// physics should be updated.)
   /// {@endtemplate}
   final ScrollPhysics? physics;
+
+  /// {@macro flutter.widgets.shadow.scrollBehavior}
+  ///
+  /// [ScrollBehavior]s also provide [ScrollPhysics]. If an explicit
+  /// [ScrollPhysics] is provided in [physics], it will take precedence,
+  /// followed by [scrollBehavior], and then the inherited ancestor
+  /// [ScrollBehavior].
+  final ScrollBehavior? scrollBehavior;
 
   /// {@template flutter.widgets.scroll_view.shrinkWrap}
   /// Whether the extent of the scroll view in the [scrollDirection] should be
@@ -380,6 +394,7 @@ abstract class ScrollView extends StatelessWidget {
       axisDirection: axisDirection,
       controller: scrollController,
       physics: physics,
+      scrollBehavior: scrollBehavior,
       semanticChildCount: semanticChildCount,
       restorationId: restorationId,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
@@ -610,6 +625,7 @@ class CustomScrollView extends ScrollView {
     ScrollController? controller,
     bool? primary,
     ScrollPhysics? physics,
+    ScrollBehavior? scrollBehavior,
     bool shrinkWrap = false,
     Key? center,
     double anchor = 0.0,
@@ -627,6 +643,7 @@ class CustomScrollView extends ScrollView {
     controller: controller,
     primary: primary,
     physics: physics,
+    scrollBehavior: scrollBehavior,
     shrinkWrap: shrinkWrap,
     center: center,
     anchor: anchor,
