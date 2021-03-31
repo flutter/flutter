@@ -5,24 +5,18 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_UWP_FLUTTER_WINDOW_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_UWP_FLUTTER_WINDOW_H_
 
-#include <third_party/cppwinrt/generated/winrt/Windows.Foundation.Collections.h>
-#include <third_party/cppwinrt/generated/winrt/Windows.Graphics.Display.h>
-#include <third_party/cppwinrt/generated/winrt/Windows.System.Profile.h>
-#include <third_party/cppwinrt/generated/winrt/Windows.UI.Composition.h>
-#include <third_party/cppwinrt/generated/winrt/Windows.UI.Core.h>
-#include <third_party/cppwinrt/generated/winrt/Windows.UI.Input.h>
-#include <third_party/cppwinrt/generated/winrt/Windows.UI.ViewManagement.Core.h>
-#include <windows.ui.core.h>
+#include <winrt/Windows.UI.Composition.h>
+#include <winrt/Windows.UI.Input.h>
+#include <winrt/Windows.UI.Text.Core.h>
+#include <winrt/Windows.UI.ViewManagement.Core.h>
+#include <winrt/Windows.UI.ViewManagement.h>
 
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/windows/display_helper_winuwp.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
+#include "flutter/shell/platform/windows/game_pad_cursor_winuwp.h"
 
 namespace flutter {
-
-struct WindowBoundsWinUWP {
-  float width;
-  float height;
-};
 
 // Implements a UWP CoreWindow.  Underlying window has been created and provided
 // by the runner.
@@ -61,18 +55,6 @@ class FlutterWindowWinUWP : public WindowBindingHandler {
                               size_t height) override;
 
  private:
-  // Returns a bounds structure containing width and height information
-  // for the backing CoreWindow in either view or physical pixels depending on
-  // |physical|.
-  WindowBoundsWinUWP GetBounds(
-      winrt::Windows::Graphics::Display::DisplayInformation const& disp,
-      bool physical);
-
-  // Returns a scaling factor representing the current DPI scale applied to the
-  // backing CoreWindow.
-  float GetDpiScale(
-      winrt::Windows::Graphics::Display::DisplayInformation const&);
-
   // Undoes the scale transform applied by the Windows compositor in order to
   // render at native scale and produce smooth results on high DPI screens.
   void ApplyInverseDpiScalingTransform();
@@ -123,22 +105,11 @@ class FlutterWindowWinUWP : public WindowBindingHandler {
       winrt::Windows::Foundation::IInspectable const&,
       winrt::Windows::UI::Core::CharacterReceivedEventArgs const& args);
 
-  // Creates a visual representing the emulated cursor and add to the  visual
-  // tree
-  winrt::Windows::UI::Composition::Visual CreateCursorVisual();
-
-  // Test is current context is running on an xbox device and perform device
-  // specific initialization.
-  void ConfigureXboxSpecific();
-
   // Converts from logical point to physical X value.
   double GetPosX(winrt::Windows::UI::Core::PointerEventArgs const& args);
 
   // Converts from logical point to physical Y value.
   double GetPosY(winrt::Windows::UI::Core::PointerEventArgs const& args);
-
-  // Token representing current worker thread.
-  winrt::Windows::Foundation::IAsyncAction worker_loop_{nullptr};
 
   // Backing CoreWindow. nullptr if not set.
   winrt::Windows::UI::Core::CoreWindow window_{nullptr};
@@ -157,27 +128,16 @@ class FlutterWindowWinUWP : public WindowBindingHandler {
   // Composition tree root object.
   winrt::Windows::UI::Composition::ContainerVisual visual_tree_root_{nullptr};
 
-  // Composition visual representing the emulated
-  // cursor visual.
-  winrt::Windows::UI::Composition::Visual cursor_visual_{nullptr};
-
   // Compositor object that represents the render target binding the backing
   // SwapChain to the CoreWindow.
   winrt::Windows::UI::Composition::SpriteVisual render_target_{nullptr};
 
-  // Is current context is executing on an XBOX
-  // device.
-  bool running_on_xbox_ = false;
+  // GamepadCursorWinUWP object used to manage an emulated cursor visual driven
+  // by gamepad.
+  std::unique_ptr<GamepadCursorWinUWP> game_pad_cursor_{nullptr};
 
-  // Current X overscan compensation factor.
-  float xbox_overscan_x_offset_ = 0.0f;
-
-  // Current Y overscan compensation factor.
-  float xbox_overscan_y_offset_ = 0.0f;
-
-  // Most recent display information.
-  winrt::Windows::Graphics::Display::DisplayInformation current_display_info_{
-      nullptr};
+  // DisplayHelper object used to determine window bounds, DPI etc.
+  std::unique_ptr<DisplayHelperWinUWP> display_helper_ = {nullptr};
 };
 
 }  // namespace flutter
