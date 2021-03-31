@@ -853,6 +853,13 @@ class TextPainter {
   /// A given selection might have more than one rect if this text painter
   /// contains bidirectional text because logically contiguous text might not be
   /// visually contiguous.
+  ///
+  /// Leading or trailing newline characters will be represented by zero-width
+  /// `Textbox`es.
+  ///
+  /// The method only returns `TextBox`es of glyphs that are entirely enclosed by
+  /// the given `selection`: a multi-code-unit glyph will be excluded if only
+  /// part of its code units are in `selection`.
   List<TextBox> getBoxesForSelection(
     TextSelection selection, {
     ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
