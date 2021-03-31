@@ -2,6 +2,14 @@
   "program": {
     "binary": "bin/app"
   },
+  "facets": {
+    "fuchsia.test": {
+      "system-services": [
+        "fuchsia.sysmem.Allocator",
+        "fuchsia.vulkan.loader.Loader"
+      ]
+    }
+  },
   "sandbox": {
     "features": [
       "vulkan",
