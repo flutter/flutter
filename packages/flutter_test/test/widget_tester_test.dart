@@ -73,7 +73,7 @@ void main() {
       }
 
       expect(failure, isNotNull);
-      final String message = failure.message;
+      final String? message = failure.message;
       expect(message, contains('Expected: exactly one matching node in the widget tree\n'));
       expect(message, contains('Actual: _TextFinder:<zero widgets with text "foo">\n'));
       expect(message, contains('Which: means none were found but one was expected\n'));
@@ -96,7 +96,7 @@ void main() {
       }
 
       expect(failure, isNotNull);
-      final String message = failure.message;
+      final String? message = failure.message;
 
       expect(message, contains('Expected: no matching nodes in the widget tree\n'));
       expect(message, contains('Actual: _TextFinder:<exactly one widget with text "foo": Text("foo", textDirection: ltr)>\n'));
@@ -114,7 +114,7 @@ void main() {
       }
 
       expect(failure, isNotNull);
-      final String message = failure.message;
+      final String? message = failure.message;
 
       expect(message, contains('Expected: no matching nodes in the widget tree\n'));
       expect(message, contains('Actual: _TextFinder:<exactly one widget with text "foo" (ignoring offstage widgets): Text("foo", textDirection: ltr)>\n'));
