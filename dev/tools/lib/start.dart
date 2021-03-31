@@ -122,7 +122,7 @@ class StartCommand extends Command<void> {
     if (stateFile.existsSync()) {
       throw ConductorException(
           'Error! A persistent state file already found at ${argResults[kStateOption]}.\n\n'
-          'Run `conductor cleanup` to cancel a previous release.');
+          'Run `conductor clean` to cancel a previous release.');
     }
     final String frameworkUpstream = getValueFromEnvOrArgs(
       kFrameworkUpstreamOption,
