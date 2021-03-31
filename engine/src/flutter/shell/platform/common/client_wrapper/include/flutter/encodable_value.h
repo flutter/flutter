@@ -203,7 +203,7 @@ class EncodableValue : public internal::EncodableValueVariant {
   //
   // Calling this method if the value doesn't contain either an int32_t or an
   // int64_t will throw an exception.
-  int64_t LongValue() {
+  int64_t LongValue() const {
     if (std::holds_alternative<int32_t>(*this)) {
       return std::get<int32_t>(*this);
     }
