@@ -65,6 +65,14 @@ class WindowBindingHandler {
 
   // Invoked when the cursor/composing rect has been updated in the framework.
   virtual void OnCursorRectUpdated(const Rect& rect) = 0;
+
+  // Invoked when the Embedder provides us with new bitmap data for the contents
+  // of this Flutter view.
+  //
+  // Returns whether the surface was successfully updated or not.
+  virtual bool OnBitmapSurfaceUpdated(const void* allocation,
+                                      size_t row_bytes,
+                                      size_t height) = 0;
 };
 
 }  // namespace flutter

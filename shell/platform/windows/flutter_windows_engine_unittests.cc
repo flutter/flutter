@@ -46,6 +46,8 @@ TEST(FlutterWindowsEngine, RunDoesExpectedInitialization) {
 
         EXPECT_EQ(version, FLUTTER_ENGINE_VERSION);
         EXPECT_NE(config, nullptr);
+        // We have an AngleSurfaceManager, so this should be using OpenGL.
+        EXPECT_EQ(config->type, kOpenGL);
         EXPECT_EQ(user_data, engine_instance);
         // Spot-check arguments.
         EXPECT_STREQ(args->assets_path, "C:\\foo\\flutter_assets");
@@ -84,11 +86,54 @@ TEST(FlutterWindowsEngine, RunDoesExpectedInitialization) {
         return kSuccess;
       }));
 
+  // Set the AngleSurfaceManager to !nullptr to test ANGLE rendering.
+  modifier.SetSurfaceManager(reinterpret_cast<AngleSurfaceManager*>(1));
+
   engine->RunWithEntrypoint(nullptr);
 
   EXPECT_TRUE(run_called);
   EXPECT_TRUE(update_locales_called);
   EXPECT_TRUE(settings_message_sent);
+
+  // Ensure that deallocation doesn't call the actual Shutdown with the bogus
+  // engine pointer that the overridden Run returned.
+  modifier.embedder_api().Shutdown = [](auto engine) { return kSuccess; };
+  modifier.ReleaseSurfaceManager();
+}
+
+TEST(FlutterWindowsEngine, RunWithoutANGLEUsesSoftware) {
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+  EngineEmbedderApiModifier modifier(engine.get());
+
+  // The engine should be run with expected configuration values.
+  bool run_called = false;
+  modifier.embedder_api().Run = MOCK_ENGINE_PROC(
+      Run, ([&run_called, engine_instance = engine.get()](
+                size_t version, const FlutterRendererConfig* config,
+                const FlutterProjectArgs* args, void* user_data,
+                FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+        run_called = true;
+        *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
+        // We don't have an AngleSurfaceManager, so we should be using software.
+        EXPECT_EQ(config->type, kSoftware);
+        return kSuccess;
+      }));
+
+  // Stub out UpdateLocales and SendPlatformMessage as we don't have a fully
+  // initialized engine instance.
+  modifier.embedder_api().UpdateLocales = MOCK_ENGINE_PROC(
+      UpdateLocales, ([](auto engine, const FlutterLocale** locales,
+                         size_t locales_count) { return kSuccess; }));
+  modifier.embedder_api().SendPlatformMessage =
+      MOCK_ENGINE_PROC(SendPlatformMessage,
+                       ([](auto engine, auto message) { return kSuccess; }));
+
+  // Set the AngleSurfaceManager to nullptr to test software fallback path.
+  modifier.SetSurfaceManager(nullptr);
+
+  engine->RunWithEntrypoint(nullptr);
+
+  EXPECT_TRUE(run_called);
 
   // Ensure that deallocation doesn't call the actual Shutdown with the bogus
   // engine pointer that the overridden Run returned.

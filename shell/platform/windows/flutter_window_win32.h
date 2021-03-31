@@ -98,6 +98,11 @@ class FlutterWindowWin32 : public WindowWin32, public WindowBindingHandler {
   // |FlutterWindowBindingHandler|
   void OnWindowResized() override;
 
+  // |FlutterWindowBindingHandler|
+  bool OnBitmapSurfaceUpdated(const void* allocation,
+                              size_t row_bytes,
+                              size_t height) override;
+
  private:
   // A pointer to a FlutterWindowsView that can be used to update engine
   // windowing and input state.

@@ -338,4 +338,11 @@ FlutterWindowWinUWP::CreateCursorVisual() {
   return container;
 }
 
+bool FlutterWindowWinUWP::OnBitmapSurfaceUpdated(const void* allocation,
+                                                 size_t row_bytes,
+                                                 size_t height) {
+  // TODO(gw280): Support software rendering fallback on UWP
+  return false;
+}
+
 }  // namespace flutter
