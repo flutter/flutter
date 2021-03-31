@@ -203,21 +203,29 @@ void main() {
   ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red));
   ThemeData(textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue));
   ThemeData(textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colors.yellow));
-  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, cursorColor: Colors.blue,)
+  ThemeData(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionColor: Colors.red,),
   );
-  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colors.yellow, cursorColor: Colors.blue,)
+  ThemeData(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionHandleColor: Colors.yellow,),
   );
-  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, selectionHandleColor: Colors.yellow,)
+  ThemeData(
+    textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, selectionHandleColor: Colors.yellow,),
   );
-  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, cursorColor: Colors.blue,)
+  ThemeData(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionColor: Colors.red,),
   );
-  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colors.yellow, cursorColor: Colors.blue,)
+  ThemeData(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionHandleColor: Colors.yellow,),
   );
-  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, selectionHandleColor: Colors.yellow,)
+  ThemeData(
+    textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, selectionHandleColor: Colors.yellow,),
   );
-  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, cursorColor: Colors.blue, selectionHandleColor: Colors.yellow,)
+  ThemeData(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionColor: Colors.red, selectionHandleColor: Colors.yellow,),
   );
-  ThemeData(textSelectionTheme: TextSelectionThemeData(textSelectionColor: Colors.red, cursorColor: Colors.blue, textSelectionHandleColor: Colors.yellow,)
+  ThemeData(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionColor: Colors.red, selectionHandleColor: Colors.yellow,),
   );
   ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red));
   ThemeData.raw(textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue));
@@ -226,20 +234,28 @@ void main() {
   ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red));
   ThemeData.raw(textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue));
   ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colors.yellow));
-  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, cursorColor: Colors.blue,)
+  ThemeData.raw(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionColor: Colors.red,),
   );
-  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colors.yellow, cursorColor: Colors.blue,)
+  ThemeData.raw(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionHandleColor: Colors.yellow,),
   );
-  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, selectionHandleColor: Colors.yellow,)
+  ThemeData.raw(
+    textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, selectionHandleColor: Colors.yellow,),
   );
-  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, cursorColor: Colors.blue,)
+  ThemeData.raw(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionColor: Colors.red,),
   );
-  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colors.yellow, cursorColor: Colors.blue,)
+  ThemeData.raw(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionHandleColor: Colors.yellow,),
   );
-  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, selectionHandleColor: Colors.yellow,)
+  ThemeData.raw(
+    textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, selectionHandleColor: Colors.yellow,),
   );
-  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, cursorColor: Colors.blue, selectionHandleColor: Colors.yellow,)
+  ThemeData.raw(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionColor: Colors.red, selectionHandleColor: Colors.yellow,),
   );
-  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(textSelectionColor: Colors.red, cursorColor: Colors.blue, textSelectionHandleColor: Colors.yellow,)
+  ThemeData.raw(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionColor: Colors.red, selectionHandleColor: Colors.yellow,),
   );
 }
