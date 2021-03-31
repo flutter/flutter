@@ -1760,7 +1760,7 @@ class _AffixText extends StatelessWidget {
         duration: _kTransitionDuration,
         curve: _kTransitionCurve,
         opacity: labelIsFloating ? 1.0 : 0.0,
-        child: child ?? (text == null ? null : Text(text!, style: style,)),
+        child: child ?? (text == null ? null : Text(text!, style: style)),
       ),
     );
   }
@@ -1945,7 +1945,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     _floatingLabelController = AnimationController(
       duration: _kTransitionDuration,
       vsync: this,
-      value: labelIsInitiallyFloating ? 1.0 : 0.0
+      value: labelIsInitiallyFloating ? 1.0 : 0.0,
     );
     _floatingLabelController.addListener(_handleChange);
 
@@ -2520,7 +2520,7 @@ class InputDecoration {
     this.errorMaxLines,
     @Deprecated(
       'Use floatingLabelBehavior instead. '
-      'This feature was deprecated after v1.13.2.'
+      'This feature was deprecated after v1.13.2.',
     )
     this.hasFloatingPlaceholder = true,
     this.floatingLabelBehavior,
@@ -2566,7 +2566,7 @@ class InputDecoration {
     required this.hintText,
     @Deprecated(
       'Use floatingLabelBehavior instead. '
-      'This feature was deprecated after v1.13.2.'
+      'This feature was deprecated after v1.13.2.',
     )
     this.hasFloatingPlaceholder = true,
     this.floatingLabelBehavior,
@@ -2748,7 +2748,7 @@ class InputDecoration {
   ///
   @Deprecated(
     'Use floatingLabelBehavior instead. '
-    'This feature was deprecated after v1.13.2.'
+    'This feature was deprecated after v1.13.2.',
   )
   final bool hasFloatingPlaceholder;
 
@@ -3618,7 +3618,7 @@ class InputDecorationTheme with Diagnosticable {
     this.errorMaxLines,
     @Deprecated(
       'Use floatingLabelBehavior instead. '
-      'This feature was deprecated after v1.13.2.'
+      'This feature was deprecated after v1.13.2.',
     )
     this.hasFloatingPlaceholder = true,
     this.floatingLabelBehavior = FloatingLabelBehavior.auto,
@@ -3712,7 +3712,7 @@ class InputDecorationTheme with Diagnosticable {
   /// Defaults to true.
   @Deprecated(
     'Use floatingLabelBehavior instead. '
-    'This feature was deprecated after v1.13.2.'
+    'This feature was deprecated after v1.13.2.',
   )
   final bool hasFloatingPlaceholder;
 
@@ -3969,7 +3969,7 @@ class InputDecorationTheme with Diagnosticable {
     int? errorMaxLines,
     @Deprecated(
       'Use floatingLabelBehavior instead. '
-      'This feature was deprecated after v1.13.2.'
+      'This feature was deprecated after v1.13.2.',
     )
     bool? hasFloatingPlaceholder,
     FloatingLabelBehavior? floatingLabelBehavior,

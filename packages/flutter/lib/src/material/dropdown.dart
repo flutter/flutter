@@ -138,7 +138,10 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
 
     if (focused && inTraditionalMode) {
       final _MenuLimits menuLimits = widget.route.getMenuLimits(
-          widget.buttonRect, widget.constraints.maxHeight, widget.itemIndex);
+        widget.buttonRect,
+        widget.constraints.maxHeight,
+        widget.itemIndex,
+      );
       widget.route.scrollController!.animateTo(
         menuLimits.scrollOffset,
         curve: Curves.easeInOut,
@@ -459,7 +462,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
           style: style,
           dropdownColor: dropdownColor,
         );
-      }
+      },
     );
   }
 
@@ -1243,7 +1246,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
           _dropdownRoute!.itemHeights[index] = size.height;
         },
-      )
+      ),
     ];
 
     final NavigatorState navigator = Navigator.of(context);
@@ -1503,7 +1506,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     @Deprecated(
       'Use autovalidateMode parameter which provide more specific '
       'behaviour related to auto validation. '
-      'This feature was deprecated after v1.19.0.'
+      'This feature was deprecated after v1.19.0.',
     )
     bool autovalidate = false,
     AutovalidateMode? autovalidateMode,

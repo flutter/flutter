@@ -1402,7 +1402,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         if (newChildren.length != _debugPreviousSnapshot.length) {
           mutationErrors.add(ErrorDescription(
             "The list's length has changed from ${_debugPreviousSnapshot.length} "
-            'to ${newChildren.length}.'
+            'to ${newChildren.length}.',
           ));
         } else {
           for (int i = 0; i < newChildren.length; i++) {

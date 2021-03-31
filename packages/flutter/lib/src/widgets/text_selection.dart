@@ -294,7 +294,7 @@ abstract class TextSelectionControls {
               + data.text!
               + selection.textAfter(value.text),
           selection: TextSelection.collapsed(
-              offset: selection.start + data.text!.length
+              offset: selection.start + data.text!.length,
           ),
         ),
         SelectionChangedCause.toolBar,
@@ -607,7 +607,7 @@ class TextSelectionOverlay {
           selectionControls: selectionControls,
           position: position,
           dragStartBehavior: dragStartBehavior,
-        )
+        ),
       );
     }
     return ExcludeSemantics(

@@ -206,14 +206,14 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
         'The edge of the $runtimeType that is '
         'overflowing has been marked in the rendering with a yellow and black '
         'striped pattern. This is usually caused by the contents being too big '
-        'for the $runtimeType.'
+        'for the $runtimeType.',
       ));
       overflowHints.add(ErrorHint(
         'This is considered an error condition because it indicates that there '
         'is content that cannot be seen. If the content is legitimately bigger '
         'than the available space, consider clipping it with a ClipRect widget '
         'before putting it in the $runtimeType, or using a scrollable '
-        'container, like a ListView.'
+        'container, like a ListView.',
       ));
     }
 
