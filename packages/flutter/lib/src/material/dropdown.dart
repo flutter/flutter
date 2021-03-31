@@ -1530,7 +1530,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
        assert(
          autovalidate == false ||
          autovalidate == true && autovalidateMode == null,
-         'autovalidate and autovalidateMode should not be used together.'
+         'autovalidate and autovalidateMode should not be used together.',
        ),
        decoration = decoration ?? InputDecoration(focusColor: focusColor),
        super(

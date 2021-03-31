@@ -240,7 +240,7 @@ class ScrollDragController implements Drag {
        assert(details != null),
        assert(
          motionStartDistanceThreshold == null || motionStartDistanceThreshold > 0.0,
-         'motionStartDistanceThreshold must be a positive number or null'
+         'motionStartDistanceThreshold must be a positive number or null',
        ),
        _delegate = delegate,
        _lastDetails = details,

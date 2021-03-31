@@ -207,7 +207,7 @@ class TextFormField extends FormField<String> {
        assert(
          autovalidate == false ||
          autovalidate == true && autovalidateMode == null,
-         'autovalidate and autovalidateMode should not be used together.'
+         'autovalidate and autovalidateMode should not be used together.',
        ),
        assert(maxLengthEnforced != null),
        assert(

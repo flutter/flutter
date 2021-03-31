@@ -232,7 +232,7 @@ class SingleChildScrollView extends StatelessWidget {
        assert(clipBehavior != null),
        assert(!(controller != null && primary == true),
           'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
-          'You cannot both set primary to true and pass an explicit controller.'
+          'You cannot both set primary to true and pass an explicit controller.',
        ),
        primary = primary ?? controller == null && identical(scrollDirection, Axis.vertical),
        super(key: key);

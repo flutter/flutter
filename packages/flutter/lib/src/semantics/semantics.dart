@@ -1885,7 +1885,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
     assert(
       config.platformViewId == null || childrenInInversePaintOrder == null || childrenInInversePaintOrder.isEmpty,
-      'SemanticsNodes with children must not specify a platformViewId.'
+      'SemanticsNodes with children must not specify a platformViewId.',
     );
 
     _label = config.label;
