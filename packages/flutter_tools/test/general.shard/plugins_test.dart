@@ -824,6 +824,30 @@ dependencies:
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
 
+      testUsingContext('Module using multiple old and new plugins are sorted in the desired order from new -> old', () async {
+        when(flutterProject.isModule).thenReturn(true);
+        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v2);
+
+        createOldJavaPlugin('abcplugin1');
+        createNewJavaPlugin1();
+
+        await injectPlugins(flutterProject, androidPlatform: true);
+
+        final File registrant = flutterProject.directory
+          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+          .childFile('GeneratedPluginRegistrant.java');
+        const String newPluginName = 'flutterEngine.getPlugins().add(new plugin1.UseNewEmbedding());';
+        const String oldPluginName = 'abcplugin1.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("abcplugin1.UseOldEmbedding"));';
+        final String content = registrant.readAsStringSync();
+        expect(content, contains(newPluginName));
+        expect(content, contains(oldPluginName));
+        expect(content.indexOf(newPluginName) < content.indexOf(oldPluginName), isTrue);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+      });
+
       testUsingContext('Does not throw when AndroidManifest.xml is not found', () async {
         when(flutterProject.isModule).thenReturn(false);
 
