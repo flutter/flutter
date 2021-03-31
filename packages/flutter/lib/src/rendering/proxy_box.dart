@@ -3922,7 +3922,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsConfiguration.isKyeboardKey] semantic to the
+  /// If non-null, sets the [SemanticsConfiguration.isKeyboardKey] semantic to the
   /// given value.
   bool? get keyboardKey => _keyboardKey;
   bool? _keyboardKey;
