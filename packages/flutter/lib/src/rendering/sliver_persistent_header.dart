@@ -499,7 +499,7 @@ class FloatingHeaderSnapConfiguration {
   FloatingHeaderSnapConfiguration({
     @Deprecated(
       'Specify SliverPersistentHeaderDelegate.vsync instead. '
-      'This feature was deprecated after v1.19.0.'
+      'This feature was deprecated after v1.19.0.',
     )
     this.vsync,
     this.curve = Curves.ease,
@@ -511,7 +511,7 @@ class FloatingHeaderSnapConfiguration {
   /// header to snap in or out of view.
   @Deprecated(
     'Specify SliverPersistentHeaderDelegate.vsync instead. '
-    'This feature was deprecated after v1.19.0.'
+    'This feature was deprecated after v1.19.0.',
   )
   final TickerProvider? vsync;
 

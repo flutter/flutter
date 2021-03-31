@@ -534,7 +534,7 @@ class _MonthPickerState extends State<_MonthPicker> {
     if (widget.initialMonth != oldWidget.initialMonth && widget.initialMonth != _currentMonth) {
       // We can't interrupt this widget build with a scroll, so do it next frame
       WidgetsBinding.instance!.addPostFrameCallback(
-        (Duration timeStamp) => _showMonth(widget.initialMonth, jump: true)
+        (Duration timeStamp) => _showMonth(widget.initialMonth, jump: true),
       );
     }
   }
@@ -627,9 +627,10 @@ class _MonthPickerState extends State<_MonthPicker> {
     if (jump) {
       _pageController.jumpToPage(monthPage);
     } else {
-      _pageController.animateToPage(monthPage,
+      _pageController.animateToPage(
+        monthPage,
         duration: _monthScrollDuration,
-        curve: Curves.ease
+        curve: Curves.ease,
       );
     }
   }
@@ -808,7 +809,7 @@ class _FocusedDate extends InheritedWidget {
   const _FocusedDate({
     Key? key,
     required Widget child,
-    this.date
+    this.date,
   }) : super(key: key, child: child);
 
   final DateTime? date;
@@ -892,7 +893,7 @@ class _DayPickerState extends State<_DayPicker> {
     final int daysInMonth = DateUtils.getDaysInMonth(widget.displayedMonth.year, widget.displayedMonth.month);
     _dayFocusNodes = List<FocusNode>.generate(
       daysInMonth,
-      (int index) => FocusNode(skipTraversal: true, debugLabel: 'Day ${index + 1}')
+      (int index) => FocusNode(skipTraversal: true, debugLabel: 'Day ${index + 1}'),
     );
   }
 
