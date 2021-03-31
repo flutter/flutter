@@ -25,6 +25,7 @@ import '../test/test_wrapper.dart';
 
 import 'flutter_tester_device.dart';
 import 'font_config_manager.dart';
+import 'integration_test_device.dart';
 import 'test_compiler.dart';
 import 'test_config.dart';
 import 'test_device.dart';
@@ -60,6 +61,8 @@ FlutterPlatform installHook({
   FlutterProject flutterProject,
   String icudtlPath,
   PlatformPluginRegistration platformPluginRegistration,
+  Device integrationTestDevice,
+  String integrationTestUserIdentifier,
 }) {
   assert(testWrapper != null);
   assert(enableObservatory || (!debuggingOptions.startPaused && debuggingOptions.hostVmServicePort == null));
@@ -87,6 +90,8 @@ FlutterPlatform installHook({
     projectRootDirectory: projectRootDirectory,
     flutterProject: flutterProject,
     icudtlPath: icudtlPath,
+    integrationTestDevice: integrationTestDevice,
+    integrationTestUserIdentifier: integrationTestUserIdentifier,
   );
   platformPluginRegistration(platform);
   return platform;
@@ -107,6 +112,10 @@ FlutterPlatform installHook({
 ///
 /// The [updateGoldens] argument will set the [autoUpdateGoldens] global
 /// variable in the [flutter_test] package before invoking the test.
+///
+/// The [integrationTest] argument can be specified to generate the bootstrap
+/// for integration tests.
+///
 // NOTE: this API is used by the fuchsia source tree, do not add new
 // required or position parameters.
 String generateTestBootstrap({
@@ -117,6 +126,7 @@ String generateTestBootstrap({
   String languageVersionHeader = '',
   bool nullSafety = false,
   bool flutterTestDep = true,
+  bool integrationTest = false,
 }) {
   assert(testUrl != null);
   assert(host != null);
@@ -140,6 +150,12 @@ import 'dart:isolate';
 import 'package:flutter_test/flutter_test.dart';
 ''');
   }
+  if (integrationTest) {
+    buffer.write('''
+import 'package:integration_test/integration_test.dart';
+import 'dart:developer' as developer;
+''');
+  }
   buffer.write('''
 import 'package:test_api/src/remote_listener.dart';
 import 'package:stream_channel/stream_channel.dart';
@@ -157,6 +173,17 @@ import '${Uri.file(testConfigFile.path)}' as test_config;
 /// Returns a serialized test suite.
 StreamChannel<dynamic> serializeSuite(Function getMain()) {
   return RemoteListener.start(getMain);
+}
+
+Future<void> _testMain() async {
+''');
+  if (integrationTest) {
+    buffer.write('''
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+''');
+  }
+  buffer.write('''
+  return test.main();
 }
 
 /// Capture any top-level errors (mostly lazy syntax errors, since other are
@@ -191,15 +218,36 @@ void main() {
   }
   if (testConfigFile != null) {
     buffer.write('''
-    return () => test_config.testExecutable(test.main);
+    return () => test_config.testExecutable(_testMain);
 ''');
   } else {
     buffer.write('''
-    return test.main;
+    return _testMain;
 ''');
   }
   buffer.write('''
   });
+''');
+  if (integrationTest) {
+    buffer.write('''
+  final callback = (method, params) async {
+    testChannel.sink.add(json.decode(params['$kIntegrationTestData'] as String));
+
+    // Result is ignored but null is not accepted here.
+    return developer.ServiceExtensionResponse.result('{}');
+  };
+
+  developer.registerExtension('$kIntegrationTestMethod', callback);
+
+  testChannel.stream.listen((x) {
+    developer.postEvent(
+      '$kIntegrationTestExtension',
+      {'$kIntegrationTestData': json.encode(x)},
+    );
+  });
+  ''');
+  } else {
+    buffer.write('''
   WebSocket.connect(server).then((WebSocket socket) {
     socket.map((dynamic message) {
       // We're only communicating with string encoded JSON.
@@ -207,8 +255,11 @@ void main() {
     }).pipe(testChannel.sink);
     socket.addStream(testChannel.stream.map(json.encode));
   });
-}
 ''');
+  }
+  buffer.write('''
+}
+  ''');
   return buffer.toString();
 }
 
@@ -230,6 +281,8 @@ class FlutterPlatform extends PlatformPlugin {
     this.projectRootDirectory,
     this.flutterProject,
     this.icudtlPath,
+    this.integrationTestDevice,
+    this.integrationTestUserIdentifier,
   }) : assert(shellPath != null);
 
   final String shellPath;
@@ -245,6 +298,15 @@ class FlutterPlatform extends PlatformPlugin {
   final Uri projectRootDirectory;
   final FlutterProject flutterProject;
   final String icudtlPath;
+
+  /// The device to run the test on for Integration Tests.
+  ///
+  /// If this is null, the test will run as a regular test with the Flutter
+  /// Tester; otherwise it will run as a Integration Test on this device.
+  final Device integrationTestDevice;
+  bool get _isIntegrationTest => integrationTestDevice != null;
+
+  final String integrationTestUserIdentifier;
 
   final FontConfigManager _fontConfigManager = FontConfigManager();
 
@@ -336,6 +398,14 @@ class FlutterPlatform extends PlatformPlugin {
   }
 
   TestDevice _createTestDevice(int ourTestCount) {
+    if (_isIntegrationTest) {
+      return IntegrationTestTestDevice(
+        id: ourTestCount,
+        debuggingOptions: debuggingOptions,
+        device: integrationTestDevice,
+        userIdentifier: integrationTestUserIdentifier,
+      );
+    }
     return FlutterTesterTestDevice(
       id: ourTestCount,
       platform: globals.platform,
@@ -380,26 +450,25 @@ class FlutterPlatform extends PlatformPlugin {
         mainDart = precompiledDillPath;
       } else if (precompiledDillFiles != null) {
         mainDart = precompiledDillFiles[testPath];
-      }
-      mainDart ??= _createListenerDart(finalizers, ourTestCount, testPath);
+      } else {
+        mainDart = _createListenerDart(finalizers, ourTestCount, testPath);
 
-      if (precompiledDillPath == null && precompiledDillFiles == null) {
-        // Lazily instantiate compiler so it is built only if it is actually used.
-        compiler ??= TestCompiler(debuggingOptions.buildInfo, flutterProject);
-        mainDart = await compiler.compile(globals.fs.file(mainDart).uri);
+        // Integration test device takes care of the compilation.
+        if (integrationTestDevice == null) {
+          // Lazily instantiate compiler so it is built only if it is actually used.
+          compiler ??= TestCompiler(debuggingOptions.buildInfo, flutterProject);
+          mainDart = await compiler.compile(globals.fs.file(mainDart).uri);
 
-        if (mainDart == null) {
-          testHarnessChannel.sink.addError('Compilation failed for testPath=$testPath');
-          return null;
+          if (mainDart == null) {
+            testHarnessChannel.sink.addError('Compilation failed for testPath=$testPath');
+            return null;
+          }
         }
       }
 
       globals.printTrace('test $ourTestCount: starting test device');
-
       final TestDevice testDevice = _createTestDevice(ourTestCount);
-      final Future<StreamChannel<String>> remoteChannelFuture = testDevice.start(
-        compiledEntrypointPath: mainDart,
-      );
+      final Future<StreamChannel<String>> remoteChannelFuture = testDevice.start(mainDart);
       finalizers.add(() async {
         globals.printTrace('test $ourTestCount: ensuring test device is terminated.');
         await testDevice.kill();
@@ -521,7 +590,8 @@ class FlutterPlatform extends PlatformPlugin {
       host: host,
       updateGoldens: updateGoldens,
       flutterTestDep: packageConfig['flutter_test'] != null,
-      languageVersionHeader: '// @dart=${languageVersion.major}.${languageVersion.minor}'
+      languageVersionHeader: '// @dart=${languageVersion.major}.${languageVersion.minor}',
+      integrationTest: _isIntegrationTest,
     );
   }
 
