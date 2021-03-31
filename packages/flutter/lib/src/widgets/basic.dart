@@ -7160,6 +7160,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool? toggled,
     bool? button,
     bool? slider,
+    bool? keyboardKey,
     bool? link,
     bool? header,
     bool? textField,
@@ -7218,6 +7219,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       selected: selected,
       button: button,
       slider: slider,
+      keyboardKey: keyboardKey,
       link: link,
       header: header,
       textField: textField,
@@ -7335,6 +7337,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       selected: properties.selected,
       button: properties.button,
       slider: properties.slider,
+      keyboardKey: properties.keyboardKey,
       link: properties.link,
       header: properties.header,
       textField: properties.textField,
@@ -7409,6 +7412,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..selected = properties.selected
       ..button = properties.button
       ..slider = properties.slider
+      ..keyboardKey = properties.keyboardKey
       ..link = properties.link
       ..header = properties.header
       ..textField = properties.textField
