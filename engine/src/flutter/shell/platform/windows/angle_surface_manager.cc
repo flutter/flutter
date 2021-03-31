@@ -26,6 +26,15 @@ static void LogEglError(std::string message) {
 
 namespace flutter {
 
+std::unique_ptr<AngleSurfaceManager> AngleSurfaceManager::Create() {
+  std::unique_ptr<AngleSurfaceManager> manager;
+  manager.reset(new AngleSurfaceManager());
+  if (!manager->initialize_succeeded_) {
+    return nullptr;
+  }
+  return std::move(manager);
+}
+
 AngleSurfaceManager::AngleSurfaceManager()
     : egl_config_(nullptr),
       egl_display_(EGL_NO_DISPLAY),

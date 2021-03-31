@@ -206,4 +206,22 @@ void FlutterWindowWin32::OnCursorRectUpdated(const Rect& rect) {
   UpdateCursorRect(Rect(origin, size));
 }
 
+bool FlutterWindowWin32::OnBitmapSurfaceUpdated(const void* allocation,
+                                                size_t row_bytes,
+                                                size_t height) {
+  HDC dc = ::GetDC(std::get<HWND>(GetRenderTarget()));
+  BITMAPINFO bmi;
+  memset(&bmi, 0, sizeof(bmi));
+  bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+  bmi.bmiHeader.biWidth = row_bytes / 4;
+  bmi.bmiHeader.biHeight = -height;
+  bmi.bmiHeader.biPlanes = 1;
+  bmi.bmiHeader.biBitCount = 32;
+  bmi.bmiHeader.biCompression = BI_RGB;
+  bmi.bmiHeader.biSizeImage = 0;
+  int ret = SetDIBitsToDevice(dc, 0, 0, row_bytes / 4, height, 0, 0, 0, height,
+                              allocation, &bmi, DIB_RGB_COLORS);
+  return ret != 0;
+}
+
 }  // namespace flutter

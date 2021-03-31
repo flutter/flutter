@@ -23,9 +23,7 @@ namespace flutter {
 // destroy surfaces
 class AngleSurfaceManager {
  public:
-  // Creates a new surface manager retaining reference to the passed-in target
-  // for the lifetime of the manager.
-  AngleSurfaceManager();
+  static std::unique_ptr<AngleSurfaceManager> Create();
   ~AngleSurfaceManager();
 
   // Disallow copy/move.
@@ -75,6 +73,10 @@ class AngleSurfaceManager {
   void CleanUp();
 
  private:
+  // Creates a new surface manager retaining reference to the passed-in target
+  // for the lifetime of the manager.
+  AngleSurfaceManager();
+
   // Attempts to initialize EGL using ANGLE.
   bool InitializeEGL(
       PFNEGLGETPLATFORMDISPLAYEXTPROC egl_get_platform_display_EXT,

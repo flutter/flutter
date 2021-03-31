@@ -55,6 +55,11 @@ class FlutterWindowWinUWP : public WindowBindingHandler {
   // |WindowBindingHandler|
   void OnWindowResized() override;
 
+  // |WindowBindingHandler|
+  bool OnBitmapSurfaceUpdated(const void* allocation,
+                              size_t row_bytes,
+                              size_t height) override;
+
  private:
   // Returns a bounds structure containing width and height information
   // for the backing CoreWindow in either view or physical pixels depending on
