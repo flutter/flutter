@@ -910,7 +910,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       return false;
 
     // On iOS, we don't show handles when the selection is collapsed.
-    if (_effectiveController.selection.isCollapsed)
+    if (_effectiveController.selection?.isCollapsed ?? true)
       return false;
 
     if (cause == SelectionChangedCause.keyboard)
@@ -922,8 +922,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     return false;
   }
 
-  void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
-    if (cause == SelectionChangedCause.longPress) {
+  void _handleSelectionChanged(TextSelection? selection, SelectionChangedCause? cause) {
+    if (cause == SelectionChangedCause.longPress && selection != null) {
       _editableText.bringIntoView(selection.base);
     }
     final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
@@ -1214,9 +1214,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     return Semantics(
       enabled: enabled,
       onTap: !enabled || widget.readOnly ? null : () {
-        if (!controller.selection.isValid) {
-          controller.selection = TextSelection.collapsed(offset: controller.text.length);
-        }
+        controller.selection ??= TextSelection.collapsed(offset: controller.text.length);
         _requestKeyboard();
       },
       onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,

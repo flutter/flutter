@@ -40,7 +40,7 @@ void main() {
       TextSelection? selection,
     }) {
       final TextEditingController controller = TextEditingController(text: text)
-        ..selection = selection ?? const TextSelection.collapsed(offset: -1);
+        ..selection = selection;
       return MaterialApp(
         home: EditableText(
           key: key,
@@ -122,7 +122,7 @@ void main() {
       await tester.pumpAndSettle();
       final RenderEditable renderEditable = findRenderEditable(tester);
       final List<TextSelectionPoint> endpoints = globalize(
-        renderEditable.getEndpointsForSelection(controller.selection),
+        renderEditable.getEndpointsForSelection(controller.selection!),
         renderEditable,
       );
       expect(endpoints.length, 1);
@@ -402,7 +402,7 @@ void main() {
       await tester.pumpAndSettle();
       final RenderEditable renderEditable = findRenderEditable(tester);
       final List<TextSelectionPoint> endpoints = globalize(
-        renderEditable.getEndpointsForSelection(controller.selection),
+        renderEditable.getEndpointsForSelection(controller.selection!),
         renderEditable,
       );
       expect(endpoints.length, 1);
@@ -506,7 +506,7 @@ void main() {
       await tester.pumpAndSettle();
       RenderEditable renderEditable = findRenderEditable(tester);
       List<TextSelectionPoint> endpoints = globalize(
-        renderEditable.getEndpointsForSelection(controller.selection),
+        renderEditable.getEndpointsForSelection(controller.selection!),
         renderEditable,
       );
       expect(endpoints.length, 1);
@@ -533,7 +533,7 @@ void main() {
       // The menu appears below the bottom handle.
       renderEditable = findRenderEditable(tester);
       endpoints = globalize(
-        renderEditable.getEndpointsForSelection(controller.selection),
+        renderEditable.getEndpointsForSelection(controller.selection!),
         renderEditable,
       );
       expect(endpoints.length, 2);

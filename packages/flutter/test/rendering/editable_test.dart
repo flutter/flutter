@@ -427,8 +427,8 @@ void main() {
       // This makes the scroll axis vertical.
       maxLines: 2,
       textSelectionDelegate: delegate,
-      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
-        currentSelection = selection;
+      onSelectionChanged: (TextSelection? selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        currentSelection = selection!;
       },
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
@@ -512,8 +512,8 @@ void main() {
       cursorColor: Colors.red,
       offset: viewportOffset,
       textSelectionDelegate: delegate,
-      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
-        currentSelection = selection;
+      onSelectionChanged: (TextSelection? selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        currentSelection = selection!;
       },
       text: const TextSpan(
         text: text,
@@ -553,7 +553,7 @@ void main() {
       textDirection: TextDirection.ltr,
       offset: ViewportOffset.zero(),
       selection: const TextSelection(baseOffset: 3, extentOffset: 4),
-      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+      onSelectionChanged: (TextSelection? selection, RenderEditable renderObject, SelectionChangedCause cause) {
         selectionChangedCount++;
         updatedSelection = selection;
       },
@@ -576,7 +576,7 @@ void main() {
       textDirection: TextDirection.ltr,
       offset: ViewportOffset.zero(),
       selection: const TextSelection(baseOffset: 3, extentOffset: 4),
-      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+      onSelectionChanged: (TextSelection? selection, RenderEditable renderObject, SelectionChangedCause cause) {
         selectionChangedCount++;
         updatedSelection = selection;
       },
@@ -719,9 +719,9 @@ void main() {
       cursorColor: Colors.red,
       offset: viewportOffset,
       textSelectionDelegate: delegate,
-      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+      onSelectionChanged: (TextSelection? selection, RenderEditable renderObject, SelectionChangedCause cause) {
         renderObject.selection = selection;
-        currentSelection = selection;
+        currentSelection = selection!;
       },
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
@@ -800,9 +800,9 @@ void main() {
       cursorColor: Colors.red,
       offset: viewportOffset,
       textSelectionDelegate: delegate,
-      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+      onSelectionChanged: (TextSelection? selection, RenderEditable renderObject, SelectionChangedCause cause) {
         renderObject.selection = selection;
-        currentSelection = selection;
+        currentSelection = selection!;
       },
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
@@ -852,9 +852,9 @@ void main() {
       cursorColor: Colors.red,
       offset: viewportOffset,
       textSelectionDelegate: delegate,
-      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+      onSelectionChanged: (TextSelection? selection, RenderEditable renderObject, SelectionChangedCause cause) {
         renderObject.selection = selection;
-        currentSelection = selection;
+        currentSelection = selection!;
       },
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
@@ -903,9 +903,9 @@ void main() {
       cursorColor: Colors.red,
       offset: viewportOffset,
       textSelectionDelegate: delegate,
-      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+      onSelectionChanged: (TextSelection? selection, RenderEditable renderObject, SelectionChangedCause cause) {
         renderObject.selection = selection;
-        currentSelection = selection;
+        currentSelection = selection!;
       },
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
@@ -952,9 +952,9 @@ void main() {
       cursorColor: Colors.red,
       offset: viewportOffset,
       textSelectionDelegate: delegate,
-      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+      onSelectionChanged: (TextSelection? selection, RenderEditable renderObject, SelectionChangedCause cause) {
         renderObject.selection = selection;
-        currentSelection = selection;
+        currentSelection = selection!;
       },
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
@@ -1003,8 +1003,8 @@ void main() {
       cursorColor: Colors.red,
       offset: viewportOffset,
       textSelectionDelegate: delegate,
-      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
-        renderObject.selection = selection;
+      onSelectionChanged: (TextSelection? selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        renderObject.selection = selection!;
       },
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
@@ -1058,9 +1058,9 @@ void main() {
       cursorColor: Colors.red,
       offset: viewportOffset,
       textSelectionDelegate: delegate,
-      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+      onSelectionChanged: (TextSelection? selection, RenderEditable renderObject, SelectionChangedCause cause) {
         renderObject.selection = selection;
-        currentSelection = selection;
+        currentSelection = selection!;
       },
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
@@ -1118,9 +1118,9 @@ void main() {
       cursorColor: Colors.red,
       offset: viewportOffset,
       textSelectionDelegate: delegate,
-      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+      onSelectionChanged: (TextSelection? selection, RenderEditable renderObject, SelectionChangedCause cause) {
         renderObject.selection = selection;
-        currentSelection = selection;
+        currentSelection = selection!;
       },
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
@@ -1182,9 +1182,9 @@ void main() {
       cursorColor: Colors.red,
       offset: viewportOffset,
       textSelectionDelegate: delegate,
-      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+      onSelectionChanged: (TextSelection? selection, RenderEditable renderObject, SelectionChangedCause cause) {
         renderObject.selection = selection;
-        currentSelection = selection;
+        currentSelection = selection!;
       },
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
@@ -1246,7 +1246,7 @@ void main() {
         cursorColor: Colors.red,
         offset: viewportOffset,
         textSelectionDelegate: delegate,
-        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        onSelectionChanged: (TextSelection? selection, RenderEditable renderObject, SelectionChangedCause cause) {},
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
         text: const TextSpan(
@@ -1265,8 +1265,8 @@ void main() {
       await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
       await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
       expect(delegate.textEditingValue.text, 'tt');
-      expect(delegate.textEditingValue.selection.isCollapsed, true);
-      expect(delegate.textEditingValue.selection.baseOffset, 1);
+      expect(delegate.textEditingValue.selection!.isCollapsed, true);
+      expect(delegate.textEditingValue.selection!.baseOffset, 1);
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
     test('is a no-op at the end of the text', () async {
@@ -1283,7 +1283,7 @@ void main() {
         cursorColor: Colors.red,
         offset: viewportOffset,
         textSelectionDelegate: delegate,
-        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        onSelectionChanged: (TextSelection? selection, RenderEditable renderObject, SelectionChangedCause cause) {},
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
         text: const TextSpan(
@@ -1302,8 +1302,8 @@ void main() {
       await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
       await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
       expect(delegate.textEditingValue.text, 'test');
-      expect(delegate.textEditingValue.selection.isCollapsed, true);
-      expect(delegate.textEditingValue.selection.baseOffset, 4);
+      expect(delegate.textEditingValue.selection!.isCollapsed, true);
+      expect(delegate.textEditingValue.selection!.baseOffset, 4);
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
     test('handles obscured text', () async {
@@ -1322,7 +1322,7 @@ void main() {
         offset: viewportOffset,
         textSelectionDelegate: delegate,
         obscureText: true,
-        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        onSelectionChanged: (TextSelection? selection, RenderEditable renderObject, SelectionChangedCause cause) {},
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
         text: const TextSpan(
@@ -1342,8 +1342,8 @@ void main() {
       await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
 
       expect(delegate.textEditingValue.text, 'est');
-      expect(delegate.textEditingValue.selection.isCollapsed, true);
-      expect(delegate.textEditingValue.selection.baseOffset, 0);
+      expect(delegate.textEditingValue.selection!.isCollapsed, true);
+      expect(delegate.textEditingValue.selection!.baseOffset, 0);
     }, skip: isBrowser);
   });
 
@@ -1362,7 +1362,7 @@ void main() {
         cursorColor: Colors.red,
         offset: viewportOffset,
         textSelectionDelegate: delegate,
-        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        onSelectionChanged: (TextSelection? selection, RenderEditable renderObject, SelectionChangedCause cause) {},
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
         text: const TextSpan(
@@ -1381,8 +1381,8 @@ void main() {
       await simulateKeyDownEvent(LogicalKeyboardKey.backspace, platform: 'android');
       await simulateKeyUpEvent(LogicalKeyboardKey.backspace, platform: 'android');
       expect(delegate.textEditingValue.text, 'tt');
-      expect(delegate.textEditingValue.selection.isCollapsed, true);
-      expect(delegate.textEditingValue.selection.baseOffset, 1);
+      expect(delegate.textEditingValue.selection!.isCollapsed, true);
+      expect(delegate.textEditingValue.selection!.baseOffset, 1);
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
     test('handles simple text', () async {
@@ -1399,7 +1399,7 @@ void main() {
         cursorColor: Colors.red,
         offset: viewportOffset,
         textSelectionDelegate: delegate,
-        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        onSelectionChanged: (TextSelection? selection, RenderEditable renderObject, SelectionChangedCause cause) {},
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
         text: const TextSpan(
@@ -1418,8 +1418,8 @@ void main() {
       await simulateKeyDownEvent(LogicalKeyboardKey.backspace, platform: 'android');
       await simulateKeyUpEvent(LogicalKeyboardKey.backspace, platform: 'android');
       expect(delegate.textEditingValue.text, 'tet');
-      expect(delegate.textEditingValue.selection.isCollapsed, true);
-      expect(delegate.textEditingValue.selection.baseOffset, 2);
+      expect(delegate.textEditingValue.selection!.isCollapsed, true);
+      expect(delegate.textEditingValue.selection!.baseOffset, 2);
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
     test('handles surrogate pairs', () async {
@@ -1436,7 +1436,7 @@ void main() {
         cursorColor: Colors.red,
         offset: viewportOffset,
         textSelectionDelegate: delegate,
-        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        onSelectionChanged: (TextSelection? selection, RenderEditable renderObject, SelectionChangedCause cause) {},
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
         text: const TextSpan(
@@ -1455,8 +1455,8 @@ void main() {
       await simulateKeyDownEvent(LogicalKeyboardKey.backspace, platform: 'android');
       await simulateKeyUpEvent(LogicalKeyboardKey.backspace, platform: 'android');
       expect(delegate.textEditingValue.text, '');
-      expect(delegate.textEditingValue.selection.isCollapsed, true);
-      expect(delegate.textEditingValue.selection.baseOffset, 0);
+      expect(delegate.textEditingValue.selection!.isCollapsed, true);
+      expect(delegate.textEditingValue.selection!.baseOffset, 0);
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
     test('handles grapheme clusters', () async {
@@ -1473,7 +1473,7 @@ void main() {
         cursorColor: Colors.red,
         offset: viewportOffset,
         textSelectionDelegate: delegate,
-        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        onSelectionChanged: (TextSelection? selection, RenderEditable renderObject, SelectionChangedCause cause) {},
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
         text: const TextSpan(
@@ -1492,8 +1492,8 @@ void main() {
       await simulateKeyDownEvent(LogicalKeyboardKey.backspace, platform: 'android');
       await simulateKeyUpEvent(LogicalKeyboardKey.backspace, platform: 'android');
       expect(delegate.textEditingValue.text, '01232345');
-      expect(delegate.textEditingValue.selection.isCollapsed, true);
-      expect(delegate.textEditingValue.selection.baseOffset, 4);
+      expect(delegate.textEditingValue.selection!.isCollapsed, true);
+      expect(delegate.textEditingValue.selection!.baseOffset, 4);
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
     test('is a no-op at the start of the text', () async {
@@ -1510,7 +1510,7 @@ void main() {
         cursorColor: Colors.red,
         offset: viewportOffset,
         textSelectionDelegate: delegate,
-        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        onSelectionChanged: (TextSelection? selection, RenderEditable renderObject, SelectionChangedCause cause) {},
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
         text: const TextSpan(
@@ -1529,8 +1529,8 @@ void main() {
       await simulateKeyDownEvent(LogicalKeyboardKey.backspace, platform: 'android');
       await simulateKeyUpEvent(LogicalKeyboardKey.backspace, platform: 'android');
       expect(delegate.textEditingValue.text, 'test');
-      expect(delegate.textEditingValue.selection.isCollapsed, true);
-      expect(delegate.textEditingValue.selection.baseOffset, 0);
+      expect(delegate.textEditingValue.selection!.isCollapsed, true);
+      expect(delegate.textEditingValue.selection!.baseOffset, 0);
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
     test('handles obscured text', () async {
@@ -1549,7 +1549,7 @@ void main() {
         offset: viewportOffset,
         textSelectionDelegate: delegate,
         obscureText: true,
-        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        onSelectionChanged: (TextSelection? selection, RenderEditable renderObject, SelectionChangedCause cause) {},
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
         text: const TextSpan(
@@ -1569,8 +1569,8 @@ void main() {
       await simulateKeyUpEvent(LogicalKeyboardKey.backspace, platform: 'android');
 
       expect(delegate.textEditingValue.text, 'tes');
-      expect(delegate.textEditingValue.selection.isCollapsed, true);
-      expect(delegate.textEditingValue.selection.baseOffset, 3);
+      expect(delegate.textEditingValue.selection!.isCollapsed, true);
+      expect(delegate.textEditingValue.selection!.baseOffset, 3);
     }, skip: isBrowser);
   });
 

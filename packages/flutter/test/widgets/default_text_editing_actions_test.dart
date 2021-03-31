@@ -76,8 +76,8 @@ void main() {
     await tester.pump();
     expect(focusNodeTarget.hasFocus, isTrue);
     expect(focusNodeNonTarget.hasFocus, isFalse);
-    expect(controller.selection.isCollapsed, isTrue);
-    expect(controller.selection.baseOffset, 11);
+    expect(controller.selection?.isCollapsed, isTrue);
+    expect(controller.selection?.baseOffset, 11);
 
     // The left arrow key's Action is called.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);

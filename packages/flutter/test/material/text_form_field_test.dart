@@ -58,7 +58,7 @@ void main() {
 
     // Initially, the menu is not shown and there is no selection.
     expect(find.byType(CupertinoButton), findsNothing);
-    expect(controller.selection, const TextSelection(baseOffset: -1, extentOffset: -1));
+    expect(controller.selection, isNull);
 
     final Offset midBlah1 = textOffsetToPosition(tester, 2);
 

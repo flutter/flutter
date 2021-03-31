@@ -157,7 +157,7 @@ abstract class TextSelectionControls {
   /// Subclasses can use this to decide if they should expose the cut
   /// functionality to the user.
   bool canCut(TextSelectionDelegate delegate) {
-    return delegate.cutEnabled && !delegate.textEditingValue.selection.isCollapsed;
+    return delegate.cutEnabled && !(delegate.textEditingValue.selection?.isCollapsed ?? true);
   }
 
   /// Whether the current selection of the text field managed by the given
@@ -168,7 +168,7 @@ abstract class TextSelectionControls {
   /// Subclasses can use this to decide if they should expose the copy
   /// functionality to the user.
   bool canCopy(TextSelectionDelegate delegate) {
-    return delegate.copyEnabled && !delegate.textEditingValue.selection.isCollapsed;
+    return delegate.copyEnabled && !(delegate.textEditingValue.selection?.isCollapsed ?? true);
   }
 
   /// Whether the text field managed by the given `delegate` supports pasting
@@ -191,7 +191,7 @@ abstract class TextSelectionControls {
   /// Subclasses can use this to decide if they should expose the select all
   /// functionality to the user.
   bool canSelectAll(TextSelectionDelegate delegate) {
-    return delegate.selectAllEnabled && delegate.textEditingValue.text.isNotEmpty && delegate.textEditingValue.selection.isCollapsed;
+    return delegate.selectAllEnabled && delegate.textEditingValue.text.isNotEmpty && (delegate.textEditingValue.selection?.isCollapsed ?? true);
   }
 
   // TODO(justinmc): This and other methods should be ported to Actions and
@@ -205,20 +205,24 @@ abstract class TextSelectionControls {
   /// the user.
   void handleCut(TextSelectionDelegate delegate) {
     final TextEditingValue value = delegate.textEditingValue;
+    final TextSelection? selection = value.selection;
+    if (selection == null) {
+      assert(false, "handleCut is called when there's no selection");
+      return;
+    }
     Clipboard.setData(ClipboardData(
-      text: value.selection.textInside(value.text),
+      text: selection.textInside(value.text),
     ));
+    final TextSelection newSelection = TextSelection.collapsed(offset: selection.start);
     delegate.userUpdateTextEditingValue(
       TextEditingValue(
-        text: value.selection.textBefore(value.text)
-            + value.selection.textAfter(value.text),
-        selection: TextSelection.collapsed(
-          offset: value.selection.start
-        )
+        text: selection.textBefore(value.text)
+            + selection.textAfter(value.text),
+        selection: newSelection,
       ),
       SelectionChangedCause.toolBar,
     );
-    delegate.bringIntoView(delegate.textEditingValue.selection.extent);
+    delegate.bringIntoView(newSelection.base);
     delegate.hideToolbar();
   }
 
@@ -230,11 +234,16 @@ abstract class TextSelectionControls {
   /// the user.
   void handleCopy(TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus) {
     final TextEditingValue value = delegate.textEditingValue;
+    final TextSelection? selection = value.selection;
+    if (selection == null) {
+      assert(false, "handleCopy is called when there's no selection");
+      return;
+    }
     Clipboard.setData(ClipboardData(
-      text: value.selection.textInside(value.text),
+      text: selection.textInside(value.text),
     ));
     clipboardStatus?.update();
-    delegate.bringIntoView(delegate.textEditingValue.selection.extent);
+    delegate.bringIntoView(selection.extent);
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
@@ -250,7 +259,7 @@ abstract class TextSelectionControls {
         delegate.userUpdateTextEditingValue(
           TextEditingValue(
             text: value.text,
-            selection: TextSelection.collapsed(offset: value.selection.end),
+            selection: TextSelection.collapsed(offset: selection.end),
           ),
           SelectionChangedCause.toolBar,
         );
@@ -273,20 +282,28 @@ abstract class TextSelectionControls {
   Future<void> handlePaste(TextSelectionDelegate delegate) async {
     final TextEditingValue value = delegate.textEditingValue; // Snapshot the input before using `await`.
     final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
+    final TextSelection? selection = value.selection;
+    if (selection == null) {
+      assert(false, "handlePaste is called when there's no selection");
+      return;
+    }
     if (data != null) {
       delegate.userUpdateTextEditingValue(
         TextEditingValue(
-          text: value.selection.textBefore(value.text)
+          text: selection.textBefore(value.text)
               + data.text!
-              + value.selection.textAfter(value.text),
+              + selection.textAfter(value.text),
           selection: TextSelection.collapsed(
-              offset: value.selection.start + data.text!.length
+              offset: selection.start + data.text!.length
           ),
         ),
         SelectionChangedCause.toolBar,
       );
     }
-    delegate.bringIntoView(delegate.textEditingValue.selection.extent);
+    final TextPosition? newPosition = delegate.textEditingValue.selection?.extent;
+    if (newPosition != null) {
+      delegate.bringIntoView(newPosition);
+    }
     delegate.hideToolbar();
   }
 
@@ -308,7 +325,10 @@ abstract class TextSelectionControls {
       ),
       SelectionChangedCause.toolBar,
     );
-    delegate.bringIntoView(delegate.textEditingValue.selection.extent);
+    final TextPosition? newPosition = delegate.textEditingValue.selection?.extent;
+    if (newPosition != null) {
+      delegate.bringIntoView(newPosition);
+    }
   }
 }
 
@@ -431,7 +451,7 @@ class TextSelectionOverlay {
   /// A copy/paste toolbar.
   OverlayEntry? _toolbar;
 
-  TextSelection get _selection => _value.selection;
+  TextSelection? get _selection => _value.selection;
 
   /// Whether selection handles are visible.
   ///
@@ -565,9 +585,12 @@ class TextSelectionOverlay {
   }
 
   Widget _buildHandle(BuildContext context, _TextSelectionHandlePosition position) {
-    Widget handle;
-    if ((_selection.isCollapsed && position == _TextSelectionHandlePosition.end) ||
-         selectionControls == null)
+    final Widget handle;
+    final TextSelection? selection = _selection;
+    final bool shouldBuildHandle = selection != null
+                                && !(selection.isCollapsed && position == _TextSelectionHandlePosition.end)
+                                && selectionControls != null;
+    if (!shouldBuildHandle)
       handle = Container(); // hide the second handle when collapsed
     else {
       handle = Visibility(
@@ -580,7 +603,7 @@ class TextSelectionOverlay {
           startHandleLayerLink: startHandleLayerLink,
           endHandleLayerLink: endHandleLayerLink,
           renderObject: renderObject,
-          selection: _selection,
+          selection: selection,
           selectionControls: selectionControls,
           position: position,
           dragStartBehavior: dragStartBehavior,
@@ -593,12 +616,13 @@ class TextSelectionOverlay {
   }
 
   Widget _buildToolbar(BuildContext context) {
-    if (selectionControls == null)
+    final TextSelection? selection = _selection;
+    if (selectionControls == null || selection == null)
       return Container();
 
     // Find the horizontal midpoint, just above the selected text.
     final List<TextSelectionPoint> endpoints =
-        renderObject.getEndpointsForSelection(_selection);
+        renderObject.getEndpointsForSelection(selection);
 
     final Rect editingRegion = Rect.fromPoints(
       renderObject.localToGlobal(Offset.zero),

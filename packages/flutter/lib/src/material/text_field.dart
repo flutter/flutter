@@ -1003,7 +1003,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     }
     _effectiveFocusNode.canRequestFocus = _canRequestFocus;
     if (_effectiveFocusNode.hasFocus && widget.readOnly != oldWidget.readOnly && _isEnabled) {
-      if(_effectiveController.selection.isCollapsed) {
+      if(_effectiveController.selection?.isCollapsed ?? true) {
         _showSelectionHandles = !widget.readOnly;
       }
     }
@@ -1056,7 +1056,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     if (cause == SelectionChangedCause.keyboard)
       return false;
 
-    if (widget.readOnly && _effectiveController.selection.isCollapsed)
+    if (widget.readOnly && (_effectiveController.selection?.isCollapsed ?? true))
       return false;
 
     if (!_isEnabled)
@@ -1071,7 +1071,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     return false;
   }
 
-  void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
+  void _handleSelectionChanged(TextSelection? selection, SelectionChangedCause? cause) {
     final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
     if (willShowSelectionHandles != _showSelectionHandles) {
       setState(() {
@@ -1082,7 +1082,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        if (cause == SelectionChangedCause.longPress) {
+        if (cause == SelectionChangedCause.longPress && selection != null) {
           _editableText?.bringIntoView(selection.base);
         }
         return;
@@ -1096,7 +1096,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
   /// Toggle the toolbar when a selection handle is tapped.
   void _handleSelectionHandleTapped() {
-    if (_effectiveController.selection.isCollapsed) {
+    if (_effectiveController.selection?.isCollapsed ?? true) {
       _editableText!.toggleToolbar();
     }
   }
@@ -1313,8 +1313,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
               maxValueLength: semanticsMaxValueLength,
               currentValueLength: _currentLength,
               onTap: widget.readOnly ? null : () {
-                if (!_effectiveController.selection.isValid)
-                  _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
+                _effectiveController.selection ??= TextSelection.collapsed(offset: _effectiveController.text.length);
                 _requestKeyboard();
               },
               onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,

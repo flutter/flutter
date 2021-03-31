@@ -468,7 +468,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
       );
       _controller.addListener(_onControllerChanged);
     }
-    if (_effectiveFocusNode.hasFocus && _controller.selection.isCollapsed) {
+    if (_effectiveFocusNode.hasFocus && (_controller.selection?.isCollapsed ?? true)) {
       _showSelectionHandles = false;
     } else {
       _showSelectionHandles = true;
@@ -484,7 +484,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
 
   void _onControllerChanged() {
     final bool showSelectionHandles = !_effectiveFocusNode.hasFocus
-      || !_controller.selection.isCollapsed;
+      || !(_controller.selection?.isCollapsed ?? true);
     if (showSelectionHandles == _showSelectionHandles) {
       return;
     }
@@ -495,7 +495,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
 
   TextSelection? _lastSeenTextSelection;
 
-  void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
+  void _handleSelectionChanged(TextSelection? selection, SelectionChangedCause? cause) {
     final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
     if (willShowSelectionHandles != _showSelectionHandles) {
       setState(() {
@@ -512,7 +512,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        if (cause == SelectionChangedCause.longPress) {
+        if (cause == SelectionChangedCause.longPress && selection != null) {
           _editableText?.bringIntoView(selection.base);
         }
         return;
@@ -526,7 +526,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
 
   /// Toggle the toolbar when a selection handle is tapped.
   void _handleSelectionHandleTapped() {
-    if (_controller.selection.isCollapsed) {
+    if (_controller.selection?.isCollapsed ?? true) {
       _editableText!.toggleToolbar();
     }
   }
@@ -537,7 +537,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
     if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar)
       return false;
 
-    if (_controller.selection.isCollapsed)
+    if (_controller.selection?.isCollapsed ?? true)
       return false;
 
     if (cause == SelectionChangedCause.keyboard)

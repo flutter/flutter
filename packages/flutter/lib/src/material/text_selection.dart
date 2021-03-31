@@ -106,9 +106,11 @@ class MaterialTextSelectionControls extends TextSelectionControls {
     // Android allows SelectAll when selection is not collapsed, unless
     // everything has already been selected.
     final TextEditingValue value = delegate.textEditingValue;
+    final TextSelection? selection = value.selection;
     return delegate.selectAllEnabled &&
            value.text.isNotEmpty &&
-           !(value.selection.start == 0 && value.selection.end == value.text.length);
+           selection != null &&
+           !(selection.start == 0 && selection.end == value.text.length);
   }
 }
 

@@ -471,14 +471,14 @@ void main() {
     final RenderEditable renderEditable = findRenderEditable(tester);
     renderEditable.selection = const TextSelection(baseOffset: 29, extentOffset: 29);
 
-    expect(controller.selection.baseOffset, 29);
+    expect(controller.selection!.baseOffset, 29);
 
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
 
     // Sets the origin.
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: const Offset(20, 20)));
 
-    expect(controller.selection.baseOffset, 29);
+    expect(controller.selection!.baseOffset, 29);
 
     // Moves the cursor super far right
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
@@ -496,7 +496,7 @@ void main() {
 
     await tester.pumpAndSettle();
     // The cursor has been set.
-    expect(controller.selection.baseOffset, 8);
+    expect(controller.selection!.baseOffset, 8);
 
     // Go in the other direction.
 
@@ -518,7 +518,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(controller.selection.baseOffset, 10);
+    expect(controller.selection!.baseOffset, 10);
   });
 
   testWidgets('Updating the floating cursor correctly moves the cursor', (WidgetTester tester) async {
@@ -550,27 +550,27 @@ void main() {
     final RenderEditable renderEditable = findRenderEditable(tester);
     renderEditable.selection = const TextSelection(baseOffset: 29, extentOffset: 29);
 
-    expect(controller.selection.baseOffset, 29);
+    expect(controller.selection!.baseOffset, 29);
 
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
 
     // Sets the origin.
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: const Offset(20, 20)));
 
-    expect(controller.selection.baseOffset, 29);
+    expect(controller.selection!.baseOffset, 29);
 
     // Moves the cursor right a few characters.
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
       offset: const Offset(-250, 20)));
 
     // But we have not yet set the offset because the user is not done placing the cursor.
-    expect(controller.selection.baseOffset, 29);
+    expect(controller.selection!.baseOffset, 29);
 
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
 
     await tester.pumpAndSettle();
     // The cursor has been set.
-    expect(controller.selection.baseOffset, 10);
+    expect(controller.selection!.baseOffset, 10);
   });
 
   testWidgets('Updating the floating cursor can end without update', (WidgetTester tester) async {
@@ -602,18 +602,18 @@ void main() {
     final RenderEditable renderEditable = findRenderEditable(tester);
     renderEditable.selection = const TextSelection(baseOffset: 29, extentOffset: 29);
 
-    expect(controller.selection.baseOffset, 29);
+    expect(controller.selection!.baseOffset, 29);
 
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
 
-    expect(controller.selection.baseOffset, 29);
+    expect(controller.selection!.baseOffset, 29);
 
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
 
     await tester.pumpAndSettle();
     // The cursor did not change.
-    expect(controller.selection.baseOffset, 29);
+    expect(controller.selection!.baseOffset, 29);
     expect(tester.takeException(), null);
   });
 
@@ -647,21 +647,21 @@ void main() {
     final RenderEditable renderEditable = findRenderEditable(tester);
     renderEditable.selection = const TextSelection(baseOffset: 29, extentOffset: 29);
 
-    expect(controller.selection.baseOffset, 29);
+    expect(controller.selection!.baseOffset, 29);
 
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
 
     // Sets the origin.
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: const Offset(20, 20)));
 
-    expect(controller.selection.baseOffset, 29);
+    expect(controller.selection!.baseOffset, 29);
 
     // Moves the cursor right a few characters.
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
       offset: const Offset(-250, 20)));
 
     // But we have not yet set the offset because the user is not done placing the cursor.
-    expect(controller.selection.baseOffset, 29);
+    expect(controller.selection!.baseOffset, 29);
 
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
     // Immediately start a new floating cursor, in the same way as happens when
@@ -705,8 +705,8 @@ void main() {
     );
 
     expect(focusNode.hasFocus, true);
-    expect(controller.selection.isCollapsed, true);
-    expect(controller.selection.baseOffset, text.length);
+    expect(controller.selection!.isCollapsed, true);
+    expect(controller.selection!.baseOffset, text.length);
   });
 
   testWidgets('Floating cursor is painted', (WidgetTester tester) async {

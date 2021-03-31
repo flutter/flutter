@@ -661,10 +661,9 @@ class TextEditingValue {
   /// each have default values.
   const TextEditingValue({
     this.text = '',
-    this.selection = const TextSelection.collapsed(offset: -1),
+    this.selection,
     this.composing = TextRange.empty,
   }) : assert(text != null),
-       assert(selection != null),
        assert(composing != null);
 
   /// Creates an instance of this class from a JSON object.
@@ -688,10 +687,10 @@ class TextEditingValue {
   Map<String, dynamic> toJSON() {
     return <String, dynamic>{
       'text': text,
-      'selectionBase': selection.baseOffset,
-      'selectionExtent': selection.extentOffset,
-      'selectionAffinity': selection.affinity.toString(),
-      'selectionIsDirectional': selection.isDirectional,
+      'selectionBase': selection?.baseOffset ?? -1,
+      'selectionExtent': selection?.extentOffset ?? -1,
+      'selectionAffinity': (selection?.affinity ?? TextAffinity.downstream).toString(),
+      'selectionIsDirectional': selection?.isDirectional ?? false,
       'composingBase': composing.start,
       'composingExtent': composing.end,
     };
@@ -701,7 +700,7 @@ class TextEditingValue {
   final String text;
 
   /// The range of text that is currently selected.
-  final TextSelection selection;
+  final TextSelection? selection;
 
   /// The range of text that is still being composed.
   final TextRange composing;
@@ -710,6 +709,7 @@ class TextEditingValue {
   static const TextEditingValue empty = TextEditingValue();
 
   /// Creates a copy of this value but with the given fields replaced with the new values.
+  @Deprecated('')
   TextEditingValue copyWith({
     String? text,
     TextSelection? selection,

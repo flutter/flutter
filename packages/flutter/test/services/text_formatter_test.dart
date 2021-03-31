@@ -355,7 +355,6 @@ void main() {
       test('Removes characters from the end', () async {
         const TextEditingValue value = TextEditingValue(
           text: '01234567890',
-          selection: TextSelection.collapsed(offset: -1),
           composing: TextRange.empty,
         );
         final TextEditingValue truncated = LengthLimitingTextInputFormatter
@@ -376,8 +375,8 @@ void main() {
             .truncate(value, 10);
         const String stringTruncated = '😆012345678';
         expect(truncated.text, stringTruncated);
-        expect(truncated.selection.baseOffset, stringTruncated.length);
-        expect(truncated.selection.extentOffset, stringTruncated.length);
+        expect(truncated.selection!.baseOffset, stringTruncated.length);
+        expect(truncated.selection!.extentOffset, stringTruncated.length);
       });
 
       test('Counts grapheme clustsers as single characters', () async {
@@ -393,8 +392,8 @@ void main() {
             .truncate(value, 10);
         const String stringTruncated = '👨‍👩‍👦012345678';
         expect(truncated.text, stringTruncated);
-        expect(truncated.selection.baseOffset, stringTruncated.length);
-        expect(truncated.selection.extentOffset, stringTruncated.length);
+        expect(truncated.selection!.baseOffset, stringTruncated.length);
+        expect(truncated.selection!.extentOffset, stringTruncated.length);
       });
     });
 
@@ -404,12 +403,10 @@ void main() {
       test('Passes through when under limit', () async {
         const TextEditingValue oldValue = TextEditingValue(
           text: 'aaa',
-          selection: TextSelection.collapsed(offset: -1),
           composing: TextRange.empty,
         );
         const TextEditingValue newValue = TextEditingValue(
           text: 'aaab',
-          selection: TextSelection.collapsed(offset: -1),
           composing: TextRange.empty,
         );
         final LengthLimitingTextInputFormatter formatter =
@@ -424,12 +421,10 @@ void main() {
       test('Uses old value when at the limit', () async {
         const TextEditingValue oldValue = TextEditingValue(
           text: 'aaaaaaaaaa',
-          selection: TextSelection.collapsed(offset: -1),
           composing: TextRange.empty,
         );
         const TextEditingValue newValue = TextEditingValue(
           text: 'aaaaabbbbbaaaaa',
-          selection: TextSelection.collapsed(offset: -1),
           composing: TextRange.empty,
         );
         final LengthLimitingTextInputFormatter formatter =
@@ -444,12 +439,10 @@ void main() {
       test('Truncates newValue when oldValue already over limit', () async {
         const TextEditingValue oldValue = TextEditingValue(
           text: 'aaaaaaaaaaaaaaaaaaaa',
-          selection: TextSelection.collapsed(offset: -1),
           composing: TextRange.empty,
         );
         const TextEditingValue newValue = TextEditingValue(
           text: 'bbbbbbbbbbbbbbbbbbbb',
-          selection: TextSelection.collapsed(offset: -1),
           composing: TextRange.empty,
         );
         final LengthLimitingTextInputFormatter formatter =
@@ -519,7 +512,7 @@ void main() {
     // assert that we are passing digits only at the second time
     expect(newValue.text, equals('123456'));
     // assert that cursor is at the end of the text
-    expect(formatted.selection.baseOffset, equals(6));
+    expect(formatted.selection!.baseOffset, equals(6));
 
     // move cursor at the middle of the text and then add the number 9.
     oldValue = newValue.copyWith(selection: const TextSelection.collapsed(offset: 4));
@@ -528,7 +521,7 @@ void main() {
     formatted = formatter.formatEditUpdate(oldValue, newValue);
 
     // cursor must be now at fourth position (right after the number 9)
-    expect(formatted.selection.baseOffset, equals(4));
+    expect(formatted.selection!.baseOffset, equals(4));
   });
 
   test('FilteringTextInputFormatter should remove non-allowed characters', () {
@@ -583,7 +576,7 @@ void main() {
     // assert that we are passing digits only at the second time
     expect(newValue.text, equals('123456'));
     // assert that cursor is at the end of the text
-    expect(formatted.selection.baseOffset, equals(6));
+    expect(formatted.selection!.baseOffset, equals(6));
 
     // move cursor at the middle of the text and then add the number 9.
     oldValue = newValue.copyWith(
@@ -593,7 +586,7 @@ void main() {
     formatted = formatter.formatEditUpdate(oldValue, newValue);
 
     // cursor must be now at fourth position (right after the number 9)
-    expect(formatted.selection.baseOffset, equals(4));
+    expect(formatted.selection!.baseOffset, equals(4));
   });
 
   test('WhitelistingTextInputFormatter should move the cursor to the right position', () {
@@ -616,7 +609,7 @@ void main() {
     // assert that we are passing digits only at the second time
     expect(newValue.text, equals('123456'));
     // assert that cursor is at the end of the text
-    expect(formatted.selection.baseOffset, equals(6));
+    expect(formatted.selection!.baseOffset, equals(6));
 
     // move cursor at the middle of the text and then add the number 9.
     oldValue = newValue.copyWith(
@@ -626,6 +619,6 @@ void main() {
     formatted = formatter.formatEditUpdate(oldValue, newValue);
 
     // cursor must be now at fourth position (right after the number 9)
-    expect(formatted.selection.baseOffset, equals(4));
+    expect(formatted.selection!.baseOffset, equals(4));
   });
 }

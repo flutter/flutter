@@ -35,7 +35,7 @@ export 'package:flutter/services.dart' show SelectionChangedCause, TextEditingVa
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
-typedef SelectionChangedCallback = void Function(TextSelection selection, SelectionChangedCause? cause);
+typedef SelectionChangedCallback = void Function(TextSelection? selection, SelectionChangedCause? cause);
 
 /// Signature for the callback that reports the app private command results.
 typedef AppPrivateCommandCallback = void Function(String, Map<String, dynamic>);
@@ -166,9 +166,9 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// in a separate statement. To change both the [text] and the [selection]
   /// change the controller's [value].
   set text(String newText) {
-    value = value.copyWith(
+    value = TextEditingValue(
       text: newText,
-      selection: const TextSelection.collapsed(offset: -1),
+      selection: null,
       composing: TextRange.empty,
     );
   }
@@ -215,7 +215,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   ///
   /// If the selection is collapsed, then this property gives the offset of the
   /// cursor within the text.
-  TextSelection get selection => value.selection;
+  TextSelection? get selection => value.selection;
   /// Setting this will notify all the listeners of this [TextEditingController]
   /// that they need to update (it calls [notifyListeners]). For this reason,
   /// this value should only be set between frames, e.g. in response to user
@@ -228,14 +228,18 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   ///
   /// If the new selection if of non-zero length, or is outside the composing
   /// range, the composing composing range is cleared.
-  set selection(TextSelection newSelection) {
-    if (!isSelectionWithinTextBounds(newSelection))
+  set selection(TextSelection? newSelection) {
+    if (newSelection != null && !isSelectionWithinTextBounds(newSelection))
       throw FlutterError('invalid text selection: $newSelection');
     final TextRange newComposing =
-        newSelection.isCollapsed && _isSelectionWithinComposingRange(newSelection)
-            ? value.composing
-            : TextRange.empty;
-    value = value.copyWith(selection: newSelection, composing: newComposing);
+      newSelection != null && newSelection.isCollapsed && _isSelectionWithinComposingRange(newSelection)
+        ? value.composing
+        : const TextRange.collapsed(0);
+    value = TextEditingValue(
+      text: text,
+      selection: newSelection,
+      composing: newComposing,
+    );
   }
 
   /// Set the [value] to empty.
@@ -1697,7 +1701,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (widget.readOnly) {
       // In the read-only case, we only care about selection changes, and reject
       // everything else.
-      value = _value.copyWith(selection: value.selection);
+      value = TextEditingValue(
+        text: _value.text,
+        selection: value.selection,
+        composing: _value.composing,
+      );
     }
     _lastKnownRemoteTextEditingValue = value;
 
@@ -1718,7 +1726,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (_hasInputConnection) {
         if (widget.obscureText && value.text.length == _value.text.length + 1) {
           _obscureShowCharTicksPending = _kObscureShowLatestCharCursorTicks;
-          _obscureLatestCharIndex = _value.selection.baseOffset;
+          _obscureLatestCharIndex = _value.selection?.baseOffset;
         }
       }
 
@@ -2102,11 +2110,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
+  void _handleSelectionChanged(TextSelection? selection, SelectionChangedCause? cause) {
     // We return early if the selection is not valid. This can happen when the
     // text of [EditableText] is updated at the same time as the selection is
     // changed by a gesture event.
-    if (!widget.controller.isSelectionWithinTextBounds(selection))
+    if (selection != null && !widget.controller.isSelectionWithinTextBounds(selection))
       return;
 
     widget.controller.selection = selection;
@@ -2365,10 +2373,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _startOrStopCursorTimerIfNeeded() {
-    if (_cursorTimer == null && _hasFocus && _value.selection.isCollapsed)
+    final TextSelection? selection = _value.selection;
+    final bool hasCursor = _hasFocus && selection != null && selection.isCollapsed;
+    if (!hasCursor) {
+      return;
+    }
+    if (_cursorTimer == null) {
       _startCursorTimer();
-    else if (_cursorTimer != null && (!_hasFocus || !_value.selection.isCollapsed))
+    } else {
       _stopCursorTimer();
+    }
   }
 
   void _didChangeTextEditingValue() {
@@ -2391,7 +2405,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (!widget.readOnly) {
         _scheduleShowCaretOnScreen();
       }
-      if (!_value.selection.isValid) {
+      if (_value.selection == null) {
         // Place cursor at the end if the selection is invalid when we receive focus.
         _handleSelectionChanged(TextSelection.collapsed(offset: _value.text.length), null);
       }

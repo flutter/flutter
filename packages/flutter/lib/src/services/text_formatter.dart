@@ -466,12 +466,14 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
     }
     final String truncated = iterator.current;
 
+    final TextSelection? selection = value.selection;
+    final TextSelection? newSelection = selection?.copyWith(
+        baseOffset: math.min(selection.start, truncated.length),
+        extentOffset: math.min(selection.end, truncated.length),
+    );
     return TextEditingValue(
       text: truncated,
-      selection: value.selection.copyWith(
-        baseOffset: math.min(value.selection.start, truncated.length),
-        extentOffset: math.min(value.selection.end, truncated.length),
-      ),
+      selection: newSelection,
       composing: !value.composing.isCollapsed && truncated.length > value.composing.start
         ? TextRange(
             start: value.composing.start,
@@ -502,7 +504,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
       case MaxLengthEnforcement.enforced:
         // If already at the maximum and tried to enter even more, and has no
         // selection, keep the old value.
-        if (oldValue.text.characters.length == maxLength && !oldValue.selection.isValid) {
+        if (oldValue.text.characters.length == maxLength && oldValue.selection == null) {
           return oldValue;
         }
 
@@ -532,13 +534,15 @@ TextEditingValue _selectionAwareTextManipulation(
   TextEditingValue value,
   String Function(String substring) substringManipulation,
 ) {
-  final int selectionStartIndex = value.selection.start;
-  final int selectionEndIndex = value.selection.end;
-  String manipulatedText;
-  TextSelection? manipulatedSelection;
-  if (selectionStartIndex < 0 || selectionEndIndex < 0) {
+  final String manipulatedText;
+  final TextSelection? manipulatedSelection;
+  final TextSelection? selection = value.selection;
+  if (selection == null) {
     manipulatedText = substringManipulation(value.text);
+    manipulatedSelection = null;
   } else {
+    final int selectionStartIndex = selection.start;
+    final int selectionEndIndex = selection.end;
     final String beforeSelection = substringManipulation(
       value.text.substring(0, selectionStartIndex)
     );
@@ -549,13 +553,14 @@ TextEditingValue _selectionAwareTextManipulation(
       value.text.substring(selectionEndIndex)
     );
     manipulatedText = beforeSelection + inSelection + afterSelection;
-    if (value.selection.baseOffset > value.selection.extentOffset) {
-      manipulatedSelection = value.selection.copyWith(
+
+    if (selection.baseOffset > selection.extentOffset) {
+      manipulatedSelection = selection.copyWith(
         baseOffset: beforeSelection.length + inSelection.length,
         extentOffset: beforeSelection.length,
       );
     } else {
-      manipulatedSelection = value.selection.copyWith(
+      manipulatedSelection = selection.copyWith(
         baseOffset: beforeSelection.length,
         extentOffset: beforeSelection.length + inSelection.length,
       );
@@ -563,7 +568,7 @@ TextEditingValue _selectionAwareTextManipulation(
   }
   return TextEditingValue(
     text: manipulatedText,
-    selection: manipulatedSelection ?? const TextSelection.collapsed(offset: -1),
+    selection: manipulatedSelection,
     composing: manipulatedText == value.text
         ? value.composing
         : TextRange.empty,

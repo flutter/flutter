@@ -86,7 +86,7 @@ void main() {
       TextSelection? selection,
     }) {
       final TextEditingController controller = TextEditingController(text: text)
-        ..selection = selection ?? const TextSelection.collapsed(offset: -1);
+        ..selection = selection;
       return CupertinoApp(
         home: EditableText(
           key: key,
@@ -197,9 +197,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
     await tester.tapAt(textOffsetToPosition(tester, index));
     await tester.pumpAndSettle();
-    expect(controller.selection.isCollapsed, isFalse);
-    expect(controller.selection.baseOffset, 0);
-    expect(controller.selection.extentOffset, 7);
+    expect(controller.selection!.isCollapsed, isFalse);
+    expect(controller.selection!.baseOffset, 0);
+    expect(controller.selection!.extentOffset, 7);
 
     // Paste is showing even though clipboard is empty.
     expect(find.text('Paste'), findsOneWidget);
@@ -218,9 +218,9 @@ void main() {
     expect(find.text('Copy'), findsNothing);
     expect(find.text('Cut'), findsNothing);
     expect(find.text('Paste'), findsNothing);
-    expect(controller.selection.isCollapsed, isFalse);
-    expect(controller.selection.baseOffset, 0);
-    expect(controller.selection.extentOffset, 7);
+    expect(controller.selection!.isCollapsed, isFalse);
+    expect(controller.selection!.baseOffset, 0);
+    expect(controller.selection!.extentOffset, 7);
     expect(find.descendant(
       of: find.byType(Overlay),
       matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TextSelectionHandleOverlay'),
