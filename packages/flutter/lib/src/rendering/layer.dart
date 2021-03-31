@@ -505,8 +505,8 @@ class PictureLayer extends Layer {
     properties.add(DiagnosticsProperty<String>('picture', describeIdentity(_picture)));
     properties.add(DiagnosticsProperty<String>(
       'raster cache hints',
-      'isComplex = $isComplexHint, willChange = $willChangeHint'),
-    );
+      'isComplex = $isComplexHint, willChange = $willChangeHint',
+    ));
   }
 
   @override
@@ -1580,7 +1580,7 @@ class TransformLayer extends OffsetLayer {
   Offset? _transformOffset(Offset localPosition) {
     if (_inverseDirty) {
       _invertedTransform = Matrix4.tryInvert(
-        PointerEvent.removePerspectiveTransform(transform!)
+        PointerEvent.removePerspectiveTransform(transform!),
       );
       _inverseDirty = false;
     }

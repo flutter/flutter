@@ -429,8 +429,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
             globalPosition: _longPressOrigin!.global,
             localPosition: _longPressOrigin!.local,
           );
-          invokeCallback<void>(
-              'onSecondaryLongPressStart', () => onSecondaryLongPressStart!(details));
+          invokeCallback<void>('onSecondaryLongPressStart', () => onSecondaryLongPressStart!(details));
         }
         if (onSecondaryLongPress != null) {
           invokeCallback<void>('onSecondaryLongPress', onSecondaryLongPress!);
@@ -442,8 +441,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
             globalPosition: _longPressOrigin!.global,
             localPosition: _longPressOrigin!.local,
           );
-          invokeCallback<void>(
-              'onTertiaryLongPressStart', () => onTertiaryLongPressStart!(details));
+          invokeCallback<void>('onTertiaryLongPressStart', () => onTertiaryLongPressStart!(details));
         }
         if (onTertiaryLongPress != null) {
           invokeCallback<void>('onTertiaryLongPress', onTertiaryLongPress!);

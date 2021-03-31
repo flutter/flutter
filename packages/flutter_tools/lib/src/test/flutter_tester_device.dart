@@ -71,8 +71,12 @@ class FlutterTesterTestDevice extends TestDevice {
   Process _process;
   HttpServer _server;
 
+  /// Starts the device.
+  ///
+  /// [entrypointPath] is the path to the entrypoint file which must be compiled
+  /// as a dill.
   @override
-  Future<StreamChannel<String>> start({@required String compiledEntrypointPath}) async {
+  Future<StreamChannel<String>> start(String entrypointPath) async {
     assert(!_exitCode.isCompleted);
     assert(_process == null);
     assert(_server == null);
@@ -113,7 +117,7 @@ class FlutterTesterTestDevice extends TestDevice {
       if (debuggingOptions.nullAssertions)
         '--dart-flags=--null_assertions',
       ...debuggingOptions.dartEntrypointArgs,
-      compiledEntrypointPath,
+      entrypointPath,
     ];
 
     // If the FLUTTER_TEST environment variable has been set, then pass it on

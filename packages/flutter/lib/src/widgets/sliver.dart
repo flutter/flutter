@@ -1354,7 +1354,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
             'The childCount getter was called (implying that the delegate\'s builder returned null '
             'for a positive index), but even building the child with index $hi (the maximum '
             'possible integer) did not return null. Consider implementing childCount to avoid '
-            'the cost of searching for the final child.'
+            'the cost of searching for the final child.',
           );
         }
       }
@@ -1557,7 +1557,11 @@ class SliverOpacity extends SingleChildRenderObjectWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<double>('opacity', opacity));
-    properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics',));
+    properties.add(FlagProperty(
+      'alwaysIncludeSemantics',
+      value: alwaysIncludeSemantics,
+      ifTrue: 'alwaysIncludeSemantics',
+    ));
   }
 }
 

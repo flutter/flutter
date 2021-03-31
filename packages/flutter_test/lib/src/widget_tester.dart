@@ -1031,7 +1031,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       final EditableTextState editable = state<EditableTextState>(
         find.descendant(
           of: finder,
-          matching: find.byType(EditableText),
+          matching: find.byType(EditableText, skipOffstage: finder.skipOffstage),
           matchRoot: true,
         ),
       );

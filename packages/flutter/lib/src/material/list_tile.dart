@@ -1687,7 +1687,7 @@ class _RenderListTile extends RenderBox {
   @override
   Size computeDryLayout(BoxConstraints constraints) {
     assert(debugCannotComputeDryLayout(
-      reason: 'Layout requires baseline metrics, which are only available after a full layout.'
+      reason: 'Layout requires baseline metrics, which are only available after a full layout.',
     ));
     return Size.zero;
   }

@@ -24,7 +24,6 @@ import 'package:mockito/mockito.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
-import '../../src/mocks.dart';
 
 final Platform macosPlatform = FakePlatform(
   operatingSystem: 'macos',
@@ -482,13 +481,13 @@ void main() {
 
   group('log reader', () {
     FakeProcessManager fakeProcessManager;
-    MockIosProject mockIosProject;
+    FakeIosProject mockIosProject;
     MockSimControl mockSimControl;
     Xcode xcode;
 
     setUp(() {
       fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
-      mockIosProject = MockIosProject();
+      mockIosProject = FakeIosProject();
       mockSimControl = MockSimControl();
       xcode = Xcode.test(processManager: FakeProcessManager.any());
     });
@@ -985,4 +984,12 @@ flutter:
       expect(simulator.createDevFSWriter(null, ''), isA<LocalDevFSWriter>());
     });
   });
+}
+
+class FakeIosProject extends Fake implements IosProject {
+  @override
+  Future<String> productBundleIdentifier(BuildInfo buildInfo) async => 'com.example.test';
+
+  @override
+  Future<String> hostAppBundleName(BuildInfo buildInfo) async => 'My Super Awesome App.app';
 }
