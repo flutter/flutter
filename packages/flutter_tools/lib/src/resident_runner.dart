@@ -38,6 +38,7 @@ import 'project.dart';
 import 'resident_devtools_handler.dart';
 import 'run_cold.dart';
 import 'run_hot.dart';
+import 'sksl_writer.dart';
 import 'vmservice.dart';
 
 class FlutterDevice {
