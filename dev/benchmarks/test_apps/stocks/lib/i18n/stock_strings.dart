@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-// ignore: unused_import
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -67,7 +66,6 @@ import 'stock_strings_es.dart';
 abstract class StockStrings {
   StockStrings(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
-  // ignore: unused_field
   final String localeName;
 
   static StockStrings of(BuildContext context) {
@@ -135,7 +133,7 @@ class _StockStringsDelegate extends LocalizationsDelegate<StockStrings> {
 }
 
 StockStrings _lookupStockStrings(Locale locale) {
-  
+
 
 // Lookup logic when language+country codes are specified.
 switch (locale.languageCode) {
