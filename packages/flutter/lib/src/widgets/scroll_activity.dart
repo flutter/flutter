@@ -396,12 +396,12 @@ class ScrollDragController implements Drag {
     _lastDetails = details;
 
     // Build momentum only if dragging in the same direction.
-    // Check that the incomming velocity is more than 
+    // Check that the incomming velocity is more than
     // a [momentumRetainVelocityThresholdFactor]'th of the carriedVelocity to
-    // avoid adding the carriedVelocity to the current velocity if the finger 
+    // avoid adding the carriedVelocity to the current velocity if the finger
     // left the screen with a substantially smaller speed giving the effect of
     // the scrollview carrying on in a much larger speed than the finger left with
-    if (_retainMomentum && 
+    if (_retainMomentum &&
         velocity.sign == carriedVelocity!.sign &&
         (carriedVelocity! == 0 || velocity.abs() > carriedVelocity!.abs() * momentumRetainVelocityThresholdFactor)
     ) {
