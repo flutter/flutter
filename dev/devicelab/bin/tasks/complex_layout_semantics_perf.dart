@@ -35,7 +35,8 @@ void main() {
       ]);
     });
 
-    final String dataPath = p.join(complexLayoutPath, 'build', 'complex_layout_semantics_perf.json');
+    final String outputPath = Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? p.join(complexLayoutPath, 'build');
+    final String dataPath = p.join(outputPath, 'complex_layout_semantics_perf.json');
     return TaskResult.successFromFile(file(dataPath), benchmarkScoreKeys: <String>[
       'initialSemanticsTreeCreation',
     ]);
