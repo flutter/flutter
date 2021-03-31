@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/drive_service.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -487,8 +488,9 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
     Uri observatoryUri,
     int hostPort,
     bool ipv6,
-    bool disableServiceAuthCodes,
-  ) async {
+    bool disableServiceAuthCodes, {
+    @required Logger logger,
+  }) async {
     started = true;
   }
 
