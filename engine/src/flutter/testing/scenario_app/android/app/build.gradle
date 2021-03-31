@@ -1,6 +1,8 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.facebook.testing.screenshot'
 
+def leakcanary_version = '2.6'
+
 screenshots {
     failureDir = "${rootProject.buildDir}/reports/diff_failures"
     recordDir = "${rootProject.projectDir}/reports/screenshots"
@@ -13,12 +15,14 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     defaultConfig {
-        applicationId "dev.flutter.scenarios"
+        applicationId 'dev.flutter.scenarios'
         minSdkVersion 18
         targetSdkVersion 30
         versionCode 1
-        versionName "1.0"
-        testInstrumentationRunner "dev.flutter.TestRunner"
+        versionName '1.0'
+        testInstrumentationRunner 'dev.flutter.TestRunner'
+        testInstrumentationRunnerArgument 'listener', 'leakcanary.FailTestOnLeakRunListener'
+        testInstrumentationRunnerArguments clearPackageData: 'true'
     }
     buildTypes {
         release {
@@ -38,8 +42,10 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'com.google.android.material:material:1.0.0'
     implementation 'androidx.lifecycle:lifecycle-common-java8:2.2.0-alpha01'
+    implementation "com.squareup.leakcanary:leakcanary-android:$leakcanary_version"
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test:rules:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    androidTestImplementation "com.squareup.leakcanary:leakcanary-android-instrumentation:$leakcanary_version"
 }
