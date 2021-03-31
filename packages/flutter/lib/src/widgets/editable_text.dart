@@ -2236,7 +2236,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _lastBottomViewInset = WidgetsBinding.instance!.window.viewInsets.bottom;
   }
 
-  void _formatAndSetValue(TextEditingValue value, SelectionChangedCause? cause, {bool userInteraction = false}) {
+  // This method is often called by platform message handlers that catch and
+  // send unrecognized exceptions to the engine/platform. Make sure the
+  // exceptions that user callbacks throw are handled within this method.
+  void _formatAndSetValue(TextEditingValue newTextEditingValue, SelectionChangedCause? cause, {bool userInteraction = false}) {
     // Only apply input formatters if the text has changed (including uncommited
     // text in the composing region), or when the user committed the composing
     // text.
@@ -2245,21 +2248,31 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // current composing region) is very infinite-loop-prone: the formatters
     // will keep trying to modify the composing region while Gboard will keep
     // trying to restore the original composing region.
-    final bool textChanged = _value.text != value.text
-                          || (!_value.composing.isCollapsed && value.composing.isCollapsed);
-    final bool selectionChanged = _value.selection != value.selection;
+    final bool preformatTextChanged = _value.text != newTextEditingValue.text
+                                      || (!_value.composing.isCollapsed && newTextEditingValue.composing.isCollapsed);
 
-    if (textChanged) {
-      value = widget.inputFormatters?.fold<TextEditingValue>(
-        value,
-        (TextEditingValue newValue, TextInputFormatter formatter) => formatter.formatEditUpdate(_value, newValue),
-      ) ?? value;
+    final List<TextInputFormatter>? formatters = widget.inputFormatters;
+    if (preformatTextChanged && formatters != null && formatters.isNotEmpty) {
+      try {
+        for (final TextInputFormatter formatter in formatters) {
+          newTextEditingValue = formatter.formatEditUpdate(_value, newTextEditingValue);
+        }
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets',
+          context: ErrorDescription('while applying TextInputFormatters'),
+        ));
+      }
     }
 
     // Put all optional user callback invocations in a batch edit to prevent
     // sending multiple `TextInput.updateEditingValue` messages.
     beginBatchEdit();
-    _value = value;
+    final bool selectionChanged = _value.selection != newTextEditingValue.selection;
+    final bool textChanged = preformatTextChanged && _value != newTextEditingValue;
+    _value = newTextEditingValue;
     // Changes made by the keyboard can sometimes be "out of band" for listening
     // components, so always send those events, even if we didn't think it
     // changed. Also, the user long pressing should always send a selection change
@@ -2268,11 +2281,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         (userInteraction &&
         (cause == SelectionChangedCause.longPress ||
          cause == SelectionChangedCause.keyboard))) {
-      _handleSelectionChanged(value.selection, cause);
+      _handleSelectionChanged(newTextEditingValue.selection, cause);
     }
     if (textChanged) {
       try {
-        widget.onChanged?.call(value.text);
+        widget.onChanged?.call(newTextEditingValue.text);
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,

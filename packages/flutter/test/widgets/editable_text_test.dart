@@ -43,6 +43,7 @@ final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Node');
 final FocusScopeNode focusScopeNode = FocusScopeNode(debugLabel: 'EditableText Scope Node');
 const TextStyle textStyle = TextStyle();
 const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
+final TextInputFormatter rejectEverythingFormatter = TextInputFormatter.withFunction((TextEditingValue old, TextEditingValue value) => old);
 
 enum HandlePositionInViewport {
   leftEdge, rightEdge, within,
@@ -5705,20 +5706,21 @@ void main() {
       text: 'I will be modified by the formatter.',
       selection: controller.selection,
     ));
-    expect(log.length, 1);
-    MethodCall methodCall = log[0];
-    expect(
-      methodCall,
-      isMethodCall('TextInput.setEditingState', arguments: <String, dynamic>{
-        'text': 'Flutter is the best!',
-        'selectionBase': -1,
-        'selectionExtent': -1,
-        'selectionAffinity': 'TextAffinity.downstream',
-        'selectionIsDirectional': false,
-        'composingBase': -1,
-        'composingExtent': -1,
-      }),
-    );
+    expect(log, orderedEquals(<dynamic>[
+      matchesMethodCall('TextInput.show'),
+      matchesMethodCall(
+        'TextInput.setEditingState',
+        args: allOf(
+          containsPair('text', 'Flutter is the best!'),
+          containsPair('selectionBase', -1),
+          containsPair('selectionExtent', -1),
+          containsPair('selectionAffinity', 'TextAffinity.downstream'),
+          containsPair('selectionIsDirectional', false),
+          containsPair('composingBase', -1),
+          containsPair('composingExtent', -1),
+        ),
+      ),
+    ]));
 
     log.clear();
 
@@ -5726,21 +5728,21 @@ void main() {
     setState(() {
       controller.text = 'I love flutter!';
     });
-    expect(log.length, 1);
-    methodCall = log[0];
-    expect(
-      methodCall,
-      isMethodCall('TextInput.setEditingState', arguments: <String, dynamic>{
-        'text': 'I love flutter!',
-        'selectionBase': -1,
-        'selectionExtent': -1,
-        'selectionAffinity': 'TextAffinity.downstream',
-        'selectionIsDirectional': false,
-        'composingBase': -1,
-        'composingExtent': -1,
-      }),
-    );
 
+    expect(log, equals(<dynamic>[
+      matchesMethodCall(
+        'TextInput.setEditingState',
+        args: allOf(
+          containsPair('text', 'I love flutter!'),
+          containsPair('selectionBase', -1),
+          containsPair('selectionExtent', -1),
+          containsPair('selectionAffinity', 'TextAffinity.downstream'),
+          containsPair('selectionIsDirectional', false),
+          containsPair('composingBase', -1),
+          containsPair('composingExtent', -1),
+        ),
+      ),
+    ]));
     log.clear();
 
     // Currently `_receivedRemoteTextEditingValue` equals 'I will be modified by the formatter.',
@@ -5748,20 +5750,78 @@ void main() {
     setState(() {
       controller.text = 'I will be modified by the formatter.';
     });
-    expect(log.length, 1);
-    methodCall = log[0];
-    expect(
-      methodCall,
-      isMethodCall('TextInput.setEditingState', arguments: <String, dynamic>{
-        'text': 'I will be modified by the formatter.',
-        'selectionBase': -1,
-        'selectionExtent': -1,
-        'selectionAffinity': 'TextAffinity.downstream',
-        'selectionIsDirectional': false,
-        'composingBase': -1,
-        'composingExtent': -1,
-      }),
-    );
+    expect(log, equals(<dynamic>[
+      matchesMethodCall(
+        'TextInput.setEditingState',
+        args: allOf(
+          containsPair('text', 'I will be modified by the formatter.'),
+          containsPair('selectionBase', -1),
+          containsPair('selectionExtent', -1),
+          containsPair('selectionAffinity', 'TextAffinity.downstream'),
+          containsPair('selectionIsDirectional', false),
+          containsPair('composingBase', -1),
+          containsPair('composingExtent', -1),
+        ),
+      ),
+    ]));
+  });
+
+  testWidgets('Send text input state to engine when the input formatter rejects everything', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async { log.add(methodCall); });
+
+    final TextEditingController controller = TextEditingController(text: 'initial text');
+
+    final FocusNode focusNode = FocusNode();
+    Widget builder() {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setter) {
+          return MaterialApp(
+            home: MediaQuery(
+              data: const MediaQueryData(devicePixelRatio: 1.0),
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Center(
+                  child: Material(
+                    child: EditableText(
+                      controller: controller,
+                      focusNode: focusNode,
+                      style: textStyle,
+                      cursorColor: Colors.red,
+                      backgroundCursorColor: Colors.red,
+                      keyboardType: TextInputType.multiline,
+                      inputFormatters: <TextInputFormatter>[rejectEverythingFormatter],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    await tester.pump();
+
+    log.clear();
+
+    final EditableTextState state = tester.firstState(find.byType(EditableText));
+
+    // The formatter rejects all user inputs, the framework needs to tell the
+    // engine to restore to the previous editing state.
+    state.updateEditingValue(TextEditingValue(
+      text: 'some say kosm',
+      selection: controller.selection,
+    ));
+    expect(log, equals(<dynamic>[
+      matchesMethodCall(
+        'TextInput.setEditingState',
+        args: allOf(containsPair('text', 'initial text')),
+      ),
+    ]));
   });
 
   testWidgets('Send text input state to engine when the input formatter rejects user input', (WidgetTester tester) async {
@@ -5821,26 +5881,30 @@ void main() {
       text: 'I will be modified by the formatter.',
       selection: controller.selection,
     ));
-    expect(log.length, 1);
-    expect(log, contains(matchesMethodCall(
-      'TextInput.setEditingState',
-      args: allOf(
-        containsPair('text', 'Flutter is the best!'),
+    expect(log, equals(<dynamic>[
+      matchesMethodCall('TextInput.show'),
+      matchesMethodCall(
+        'TextInput.setEditingState',
+        args: allOf(
+          containsPair('text', 'Flutter is the best!'),
+        ),
       ),
-    )));
+    ]));
 
     log.clear();
 
     state.updateEditingValue(const TextEditingValue(
       text: 'I will be modified by the formatter.',
     ));
-    expect(log.length, 1);
-    expect(log, contains(matchesMethodCall(
-      'TextInput.setEditingState',
-      args: allOf(
-        containsPair('text', 'Flutter is the best!'),
+
+    expect(log, equals(<dynamic>[
+      matchesMethodCall(
+        'TextInput.setEditingState',
+        args: allOf(
+          containsPair('text', 'Flutter is the best!'),
+        ),
       ),
-    )));
+    ]));
   });
 
   testWidgets('Repeatedly receiving [TextEditingValue] will not trigger a keyboard request', (WidgetTester tester) async {
@@ -6908,7 +6972,7 @@ void main() {
     });
   });
 
-  group('callback errors', () {
+  group('state change user callbacks', () {
     const String errorText = 'Test EditableText callback error';
 
     testWidgets('onSelectionChanged can throw errors', (WidgetTester tester) async {
@@ -7024,6 +7088,89 @@ void main() {
       final dynamic error = tester.takeException();
       expect(error, isFlutterError);
       expect(error.toString(), contains(errorText));
+    });
+
+    testWidgets('TextInputFormatters can throw errors', (WidgetTester tester) async {
+      final TextInputFormatter alwaysThrowFormatter = TextInputFormatter.withFunction(
+        (TextEditingValue old, TextEditingValue value) {
+          throw FlutterError(errorText);
+        },
+      );
+      await tester.pumpWidget(MaterialApp(
+        home: EditableText(
+          showSelectionHandles: true,
+          maxLines: 2,
+          controller: TextEditingController(
+            text: 'flutter is the best!',
+          ),
+          focusNode: FocusNode(),
+          cursorColor: Colors.red,
+          backgroundCursorColor: Colors.blue,
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+          keyboardType: TextInputType.text,
+          inputFormatters: <TextInputFormatter>[alwaysThrowFormatter],
+        ),
+      ));
+
+      await tester.enterText(find.byType(EditableText), '...');
+      final dynamic error = tester.takeException();
+      expect(error, isFlutterError);
+      expect(error.toString(), contains(errorText));
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/44979.
+    testWidgets('onChanged callback takes formatter into account', (WidgetTester tester) async {
+      bool onChangedCalled = false;
+      await tester.pumpWidget(MaterialApp(
+        home: EditableText(
+          showSelectionHandles: true,
+          maxLines: 2,
+          controller: TextEditingController(
+            text: 'flutter is the best!',
+          ),
+          focusNode: FocusNode(),
+          cursorColor: Colors.red,
+          backgroundCursorColor: Colors.blue,
+          inputFormatters: <TextInputFormatter>[rejectEverythingFormatter],
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+          keyboardType: TextInputType.text,
+          onChanged: (String text) {
+            onChangedCalled = true;
+          },
+        ),
+      ));
+
+      // Modify the text and expect to get rejected.
+      await tester.enterText(find.byType(EditableText), '...');
+      expect(onChangedCalled, isFalse);
+    });
+
+    testWidgets('onSelectionChanged callback takes formatter into account', (WidgetTester tester) async {
+      bool onChangedCalled = false;
+      await tester.pumpWidget(MaterialApp(
+        home: EditableText(
+          showSelectionHandles: true,
+          maxLines: 2,
+          controller: TextEditingController(
+            text: 'flutter is the best!',
+          ),
+          focusNode: FocusNode(),
+          cursorColor: Colors.red,
+          backgroundCursorColor: Colors.blue,
+          inputFormatters: <TextInputFormatter>[rejectEverythingFormatter],
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+          keyboardType: TextInputType.text,
+          onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
+            onChangedCalled = true;
+          },
+        ),
+      ));
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+      // Modify the text and expect an error from onChanged.
+      state.updateEditingValue(const TextEditingValue(selection: TextSelection.collapsed(offset: 9)));
+      expect(onChangedCalled, isFalse);
     });
   });
 
