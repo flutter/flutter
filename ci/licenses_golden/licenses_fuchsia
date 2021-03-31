@@ -1,4 +1,4 @@
-Signature: e5118518f3db13336c7cea733454df2c
+Signature: f7d315bc074f95fbdd3e96ec9f490e4f
 
 UNUSED LICENSES:
 
@@ -538,6 +538,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.lifecycle/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointer.augment/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointer/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointerinjector/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/meta.json
@@ -1261,6 +1262,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.lifecycle/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointer.augment/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointer/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointerinjector/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/meta.json
@@ -1881,6 +1883,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.lifecycle/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointer.augment/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointer/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointerinjector/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/meta.json
@@ -2579,6 +2582,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/night_mode.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/events.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/keyboard.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/modifiers.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointer.augment/augment.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointer/mouse.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointer/state.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointer/touch.fidl
@@ -3354,7 +3358,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/dart/fidl/lib/fidl.dart + ../../../LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../fuchsia/sdk/linux/dart/fidl/lib/fidl.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia/lib/fuchsia.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_services/lib/src/startup_context.dart
 FILE: ../../../fuchsia/sdk/linux/dart/zircon/lib/src/fakes/zircon_fakes.dart
 FILE: ../../../fuchsia/sdk/linux/dart/zircon/lib/zircon.dart
 ----------------------------------------------------------------------------------------------------
@@ -3480,42 +3483,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
-ORIGIN: ../../../fuchsia/sdk/linux/dart/fuchsia_services/lib/src/internal/_startup_context_impl.dart + ../../../LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_services/lib/src/internal/_startup_context_impl.dart
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys.test/cache.fidl
-----------------------------------------------------------------------------------------------------
-Copyright 2019 The Chromium Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: fuchsia_sdk
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.oldhttp/http_error.fidl + ../../../fuchsia/sdk/linux/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.oldhttp/http_error.fidl
@@ -3537,6 +3504,41 @@ notice, this list of conditions and the following disclaimer.
 copyright notice, this list of conditions and the following disclaimer
 in the documentation and/or other materials provided with the
 distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: fuchsia_sdk
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys.test/cache.fidl + ../../../LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys.test/cache.fidl
+----------------------------------------------------------------------------------------------------
+Copyright 2019 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
