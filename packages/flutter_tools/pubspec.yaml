@@ -27,7 +27,7 @@ dependencies:
   process: 4.2.1
   fake_async: 1.2.0
   stack_trace: 1.10.0
-  usage: 4.0.1
+  usage: 4.0.2
   webdriver: 3.0.0
   webkit_inspection_protocol: 1.0.0
   xml: 5.0.2
@@ -35,7 +35,7 @@ dependencies:
   native_stack_traces: 0.4.0
   shelf: 1.1.0
   vm_snapshot_analysis: 0.6.0
-  uuid: 3.0.2
+  uuid: 3.0.3
   web_socket_channel: 2.0.0
   stream_channel: 2.1.0
   shelf_web_socket: 1.0.1
@@ -108,4 +108,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: b36f
+# PUBSPEC CHECKSUM: 3a71
