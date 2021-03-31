@@ -457,7 +457,7 @@ class Container extends StatelessWidget {
 class _DecorationClipper extends CustomClipper<Path> {
   _DecorationClipper({
     TextDirection? textDirection,
-    required this.decoration
+    required this.decoration,
   }) : assert(decoration != null),
        textDirection = textDirection ?? TextDirection.ltr;
 

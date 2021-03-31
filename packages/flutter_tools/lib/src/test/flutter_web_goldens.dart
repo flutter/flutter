@@ -147,7 +147,7 @@ class TestGoldenComparatorProcess {
   }
 
   static String generateBootstrap(Uri testUri) {
-    final File testConfigFile = findTestConfigFile(globals.fs.file(testUri));
+    final File testConfigFile = findTestConfigFile(globals.fs.file(testUri), globals.logger);
     // Generate comparator process for the file.
     return '''
 import 'dart:convert'; // flutter_ignore: dart_convert_import

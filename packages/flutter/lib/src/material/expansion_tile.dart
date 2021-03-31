@@ -317,7 +317,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
         ),
         enabled: !closed,
       ),
-      offstage: closed
+      offstage: closed,
     );
 
     return AnimatedBuilder(
