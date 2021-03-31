@@ -198,10 +198,6 @@ abstract class ScrollView extends StatelessWidget {
   ///   physics: const ScrollPhysics(),
   /// ```
   ///
-  /// If an explicit [ScrollBehavior] is provided to [scrollBehavior], the
-  /// [ScrollPhysics] provided by that behavior will take precedence after
-  /// [physics].
-  ///
   /// The physics can be changed dynamically (by providing a new object in a
   /// subsequent build), but new physics will only take effect if the _class_ of
   /// the provided object changes. Merely constructing a new instance with a
@@ -211,6 +207,10 @@ abstract class ScrollView extends StatelessWidget {
   /// inefficient to speculatively create this object each frame to see if the
   /// physics should be updated.)
   /// {@endtemplate}
+  ///
+  /// If an explicit [ScrollBehavior] is provided to [scrollBehavior], the
+  /// [ScrollPhysics] provided by that behavior will take precedence after
+  /// [physics].
   final ScrollPhysics? physics;
 
   /// {@macro flutter.widgets.shadow.scrollBehavior}
