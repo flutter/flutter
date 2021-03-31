@@ -37,6 +37,7 @@ import 'devtools_launcher.dart';
 import 'doctor.dart';
 import 'emulator.dart';
 import 'features.dart';
+import 'flutter_application_package.dart';
 import 'flutter_device_manager.dart';
 import 'fuchsia/fuchsia_device.dart' show FuchsiaDeviceTools;
 import 'fuchsia/fuchsia_sdk.dart' show FuchsiaSdk, FuchsiaArtifacts;
@@ -117,7 +118,7 @@ Future<T> runInContext<T>(
         featureFlags: featureFlags,
         operatingSystemUtils: globals.os,
       ),
-      ApplicationPackageFactory: () => ApplicationPackageFactory(
+      ApplicationPackageFactory: () => FlutterApplicationPackageFactory(
         userMessages: globals.userMessages,
         processManager: globals.processManager,
         logger: globals.logger,
