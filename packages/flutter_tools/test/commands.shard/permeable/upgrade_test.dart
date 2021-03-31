@@ -4,6 +4,7 @@
 
 // @dart = 2.8
 
+import 'package:flutter_tools/src/base/common.dart' show ToolExit;
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -173,7 +174,7 @@ void main() {
         stdout: version),
       ]);
 
-      final FlutterVersion updateVersion = await realCommandRunner.fetchLatestVersion();
+      final FlutterVersion updateVersion = await realCommandRunner.fetchLatestVersion(localVersion: FakeFlutterVersion());
 
       expect(updateVersion.frameworkVersion, version);
       expect(updateVersion.frameworkRevision, revision);
@@ -199,7 +200,7 @@ void main() {
       ]);
 
       await expectLater(
-            () async => realCommandRunner.fetchLatestVersion(),
+            () async => realCommandRunner.fetchLatestVersion(localVersion: FakeFlutterVersion()),
         throwsToolExit(message: 'You are not currently on a release branch.'),
       );
       expect(processManager, hasNoRemainingExpectations);
@@ -208,7 +209,7 @@ void main() {
       Platform: () => fakePlatform,
     });
 
-    testUsingContext('fetchRemoteRevision throws toolExit if no upstream configured', () async {
+    testUsingContext('fetchLatestVersion throws toolExit if no upstream configured', () async {
       processManager.addCommands(const <FakeCommand>[
         FakeCommand(command: <String>[
           'git', 'fetch', '--tags'
@@ -223,16 +224,55 @@ void main() {
         ),
       ]);
 
-      await expectLater(
-            () async => realCommandRunner.fetchLatestVersion(),
-        throwsToolExit(
-          message: 'Unable to upgrade Flutter: no origin repository configured.',
-        ),
-      );
+      ToolExit err;
+      try {
+        await realCommandRunner.fetchLatestVersion(localVersion: FakeFlutterVersion());
+      } on ToolExit catch (e) {
+        err = e;
+      }
+      expect(err, isNotNull);
+      expect(err.toString(), contains('Unable to upgrade Flutter: no origin repository configured.'));
+      // FakeFlutterVersion.getBranchName is hardcoded to 'master'
+      expect(err.toString(), contains('git branch --set-upstream-to=origin/master'));
+      expect(err.toString(), contains('if remote "origin" exists in src/flutter'));
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       Platform: () => fakePlatform,
+    });
+
+    testUsingContext('fetchLatestVersion throws on unsupported upstream remote with FLUTTER_GIT_URL unset', () async {
+      final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+        channel: 'dev',
+        repositoryUrl: 'https://githubmirror.com/flutter',
+      );
+
+      realCommandRunner.workingDirectory = './src/flutter';
+      ToolExit err;
+      try {
+       await realCommandRunner.fetchLatestVersion(localVersion: flutterVersion);
+      } on ToolExit catch (e) {
+        err = e;
+      }
+      expect(err, isNotNull);
+      expect(err.toString(), contains('Your local copy of Flutter is tracking an unsupported remote'));
+      expect(err.toString(), contains('"FLUTTER_GIT_URL" to "https://githubmirror.com/flutter"'));
+      expect(err.toString(), contains('git branch --set-upstream-to=origin/dev'));
+      expect(err.toString(), contains('if remote "origin" exists in flutter'));
+      expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator> {
+      Platform: () => fakePlatform,
+    });
+
+    testUsingContext('fetchLatestVersion does not throw on unsupported upstream remote with FLUTTER_GIT_URL set', () async {
+      final FakeFlutterVersion flutterVersion = FakeFlutterVersion(repositoryUrl: 'https://githubmirror.com/flutter');
+
+      await realCommandRunner.fetchLatestVersion(localVersion: flutterVersion);
+      expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator> {
+      Platform: () => fakePlatform..environment = Map<String, String>.unmodifiable(<String, String> {
+        'FLUTTER_GIT_URL': 'https://githubmirror.com/flutter',
+      }),
     });
 
     testUsingContext('git exception during attemptReset throwsToolExit', () async {
@@ -470,7 +510,7 @@ class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
   FlutterVersion remoteVersion;
 
   @override
-  Future<FlutterVersion> fetchLatestVersion() async => remoteVersion;
+  Future<FlutterVersion> fetchLatestVersion({FlutterVersion localVersion}) async => remoteVersion;
 
   @override
   Future<bool> hasUncommittedChanges() async => willHaveUncommittedChanges;

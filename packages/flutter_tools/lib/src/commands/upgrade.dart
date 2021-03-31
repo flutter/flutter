@@ -17,6 +17,9 @@ import '../globals_null_migrated.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../version.dart';
 
+/// The flutter GitHub repository.
+String get _flutterGit => globals.platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
+
 class UpgradeCommand extends FlutterCommand {
   UpgradeCommand({
     @required bool verboseHelp,
@@ -231,8 +234,6 @@ class UpgradeCommandRunner {
   /// upstream updates from the latter, which is used for version check and
   /// inform users about the update in the first place.
   void checkSupportedRemote(FlutterVersion localVersion) {
-    /// The flutter GitHub repository.
-    final String _flutterGit = globals.platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
     if (localVersion.repositoryUrl != _flutterGit) {
       throwToolExit(
         'Your local copy of Flutter is tracking an unsupported remote '
