@@ -30,7 +30,7 @@ const int kIsolateReloadBarred = 1005;
 
 /// Override `WebSocketConnector` in [context] to use a different constructor
 /// for [WebSocket]s (used by tests).
-typedef WebSocketConnector = Future<io.WebSocket> Function(String url, {io.CompressionOptions compression, @required Logger logger});
+typedef WebSocketConnector = Future<io.WebSocket> Function(String url, {io.CompressionOptions compression, Logger logger});
 
 typedef PrintStructuredErrorLogMethod = void Function(vm_service.Event);
 
@@ -159,6 +159,7 @@ typedef VMServiceConnector = Future<FlutterVmService> Function(Uri httpUri, {
   PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   io.CompressionOptions compression,
   Device device,
+  Logger logger,
 });
 
 /// Set up the VM Service client by attaching services for each of the provided
@@ -301,6 +302,7 @@ Future<FlutterVmService> connectToVmService(
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
     io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
     Device device,
+    @required Logger logger,
   }) async {
   final VMServiceConnector connector = context.get<VMServiceConnector>() ?? _connect;
   return connector(httpUri,
@@ -311,6 +313,7 @@ Future<FlutterVmService> connectToVmService(
     device: device,
     getSkSLMethod: getSkSLMethod,
     printStructuredErrorLogMethod: printStructuredErrorLogMethod,
+    logger: logger,
   );
 }
 
@@ -323,9 +326,10 @@ Future<FlutterVmService> _connect(
   PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
   Device device,
+  @required Logger logger,
 }) async {
   final Uri wsUri = httpUri.replace(scheme: 'ws', path: '${httpUri.path}/ws');
-  final io.WebSocket channel = await _openChannel(wsUri.toString(), compression: compression);
+  final io.WebSocket channel = await _openChannel(wsUri.toString(), compression: compression, logger: logger);
   final vm_service.VmService delegateService = vm_service.VmService(
     channel,
     channel.add,

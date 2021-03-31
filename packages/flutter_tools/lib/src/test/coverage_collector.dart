@@ -204,7 +204,7 @@ class CoverageCollector extends TestWatcher {
 
 Future<FlutterVmService> _defaultConnect(Uri serviceUri) {
   return connectToVmService(
-      serviceUri, compression: CompressionOptions.compressionOff);
+      serviceUri, compression: CompressionOptions.compressionOff, logger: globals.logger,);
 }
 
 Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libraryPredicate, {
