@@ -124,13 +124,13 @@
       "name": "Linux docs_test",
       "repo": "flutter",
       "task_name": "linux_docs_test",
-      "flaky": true
+      "flaky": false
     },
     {
       "name": "Linux docs_publish",
       "repo": "flutter",
       "task_name": "linux_docs_publish",
-      "flaky": true
+      "flaky": false
     },
     {
       "name": "Linux build_tests_1_2",
@@ -1000,7 +1000,7 @@
       "name": "Mac_ios flutter_gallery__transition_perf_e2e_ios32",
       "repo": "flutter",
       "task_name": "mac_ios_flutter_gallery__transition_perf_e2e_ios32",
-      "flaky": true
+      "flaky": false
     },
     {
       "name": "Mac_ios flutter_gallery_ios__compile",
