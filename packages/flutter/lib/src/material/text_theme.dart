@@ -180,7 +180,9 @@ class TextTheme with Diagnosticable {
           bodyText1 == null && bodyText2 == null) ||
          (display4 == null && display3 == null && display2 == null && display1 == null && headline == null && title == null &&
           subhead == null && subtitle == null &&
-          body2 == null && body1 == null), 'Cannot mix 2014 and 2018 terms in call to TextTheme() constructor.'),
+          body2 == null && body1 == null),
+         'Cannot mix 2014 and 2018 terms in call to TextTheme() constructor.',
+       ),
        headline1 = headline1 ?? display4,
        headline2 = headline2 ?? display3,
        headline3 = headline3 ?? display2,
@@ -451,7 +453,9 @@ class TextTheme with Diagnosticable {
        bodyText1 == null && bodyText2 == null) ||
       (display4 == null && display3 == null && display2 == null && display1 == null && headline == null && title == null &&
        subhead == null && subtitle == null &&
-       body2 == null && body1 == null), 'Cannot mix 2014 and 2018 terms in call to TextTheme.copyWith().');
+       body2 == null && body1 == null),
+      'Cannot mix 2014 and 2018 terms in call to TextTheme.copyWith().',
+    );
     return TextTheme(
       headline1: headline1 ?? display4 ?? this.headline1,
       headline2: headline2 ?? display3 ?? this.headline2,

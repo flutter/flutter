@@ -764,7 +764,7 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
       assert(
         cacheWidth == null && cacheHeight == null && allowUpscaling == null,
         'ResizeImage cannot be composed with another ImageProvider that applies '
-        'cacheWidth, cacheHeight, or allowUpscaling.'
+        'cacheWidth, cacheHeight, or allowUpscaling.',
       );
       return decode(bytes, cacheWidth: width, cacheHeight: height, allowUpscaling: this.allowUpscaling);
     }
