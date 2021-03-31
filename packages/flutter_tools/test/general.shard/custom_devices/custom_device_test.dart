@@ -10,7 +10,6 @@ import 'package:file/src/interface/directory.dart';
 import 'package:file/src/interface/file.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_config.dart';
@@ -22,14 +21,12 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:file/memory.dart';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
-class MockBundleBuilder extends Mock implements BundleBuilder {}
 
 void _writeCustomDevicesConfigFile(Directory dir, List<CustomDeviceConfig> configs) {
   dir.createSync();
@@ -479,27 +476,6 @@ void main() {
       final Directory configFileDir = fs.directory('custom_devices_config_dir');
       _writeCustomDevicesConfigFile(configFileDir, <CustomDeviceConfig>[testConfig]);
 
-      // Create a bundle builder that'll always work.
-      // Getting the real bundle builder to work is a bit tricky it seems.
-      final MockBundleBuilder mockBundleBuilder = MockBundleBuilder();
-      when(
-        mockBundleBuilder.build(
-          platform: anyNamed('platform'),
-          buildInfo: anyNamed('buildInfo'),
-          mainPath: anyNamed('mainPath'),
-          manifestPath: anyNamed('manifestPath'),
-          applicationKernelFilePath: anyNamed('applicationKernelFilePath'),
-          depfilePath: anyNamed('depfilePath'),
-          assetDirPath: anyNamed('assetDirPath'),
-          trackWidgetCreation: anyNamed('trackWidgetCreation'),
-          extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
-          extraGenSnapshotOptions: anyNamed('extraGenSnapshotOptions'),
-          fileSystemRoots: anyNamed('fileSystemRoots'),
-          fileSystemScheme: anyNamed('fileSystemScheme'),
-          treeShakeIcons: anyNamed('treeShakeIcons'),
-        ),
-      ).thenAnswer((_) => Future<void>.value());
-
       // finally start actually testing things
       final CustomDevices customDevices = CustomDevices(
         featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
@@ -524,7 +500,7 @@ void main() {
       final LaunchResult result = await device.startApp(
         app,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-        bundleBuilder: mockBundleBuilder
+        bundleBuilder: FakeBundleBuilder()
       );
       expect(result.started, true);
       expect(result.hasObservatory, true);

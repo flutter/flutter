@@ -27,6 +27,12 @@ import 'custom_device_config.dart';
 import 'custom_device_workflow.dart';
 import 'custom_devices_config.dart';
 
+/// Replace all ocurrences of `${someName}` with the value found for that
+/// name inside replacementValues or additionalReplacementValues.
+///
+/// The replacement value is first looked for in [replacementValues] and then
+/// [additionalReplacementValues]. If no value is found, an empty string will be
+/// substituted instead.
 List<String> interpolateCommand(
   List<String> command,
   Map<String, String> replacementValues, {
@@ -39,7 +45,8 @@ List<String> interpolateCommand(
   );
 }
 
-
+/// A log reader that can listen to a process' stdout / stderr or another log line
+/// Stream.
 class CustomDeviceLogReader extends DeviceLogReader {
   CustomDeviceLogReader(this.name);
 
@@ -91,6 +98,7 @@ class CustomDeviceLogReader extends DeviceLogReader {
   Stream<String> get logLines => _logLinesController.stream;
 }
 
+/// A [DevicePortForwarder] that uses commands to forward / unforward a port.
 class CustomDevicePortForwarder extends DevicePortForwarder {
   CustomDevicePortForwarder({
     @required String deviceName,
@@ -122,7 +130,7 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
   @override
   Future<void> dispose() async {
     // copy the list so we don't modify it concurrently
-    List<ForwardedPort>.of(_forwardedPorts).forEach(unforward);
+    return Future.wait(List<ForwardedPort>.of(_forwardedPorts).map(unforward));
   }
 
   Future<ForwardedPort> _tryForward(int devicePort, int hostPort) async {
@@ -179,7 +187,7 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
       // when the desired host port is already forwarded by this Forwarder,
       // choose another one
       while (_forwardedPorts.any((ForwardedPort port) => port.hostPort == actualHostPort)) {
-        actualHostPort++;
+        actualHostPort += 1;
       }
 
       final ForwardedPort port = await _tryForward(devicePort, actualHostPort);
@@ -190,8 +198,8 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
       } else {
         // null value means the forwarding failed (for whatever reason)
         // increase port by one and try again
-        actualHostPort++;
-        tries++;
+        actualHostPort += 1;
+        tries += 1;
       }
     }
 
@@ -212,6 +220,11 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
   }
 }
 
+/// A combination of [ApplicationPackage] and a [CustomDevice]. Can only start,
+/// stop this specific app package with this specific device. Useful because we
+/// often need to store additional context to an app that is running on a device,
+/// like any forwarded ports we need to unforward later, the process we need to
+/// kill to stop the app, maybe other things in the future.
 class CustomDeviceAppSession {
   CustomDeviceAppSession({
     @required this.name,
@@ -669,6 +682,8 @@ class CustomDevice extends Device {
   }
 }
 
+/// A [PollingDeviceDiscovery] that'll try to ping all enabled devices in the argument
+/// [CustomDevicesConfig] and report the ones that were actually reachable.
 class CustomDevices extends PollingDeviceDiscovery {
   /// Create a custom device discovery that pings all enabled devices in the
   /// given [CustomDevicesConfig].

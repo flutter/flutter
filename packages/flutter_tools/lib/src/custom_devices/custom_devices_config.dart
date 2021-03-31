@@ -4,6 +4,7 @@
 
 // @dart = 2.8
 
+import 'package:flutter_tools/src/cache.dart';
 import 'package:meta/meta.dart';
 
 import '../base/config.dart';
@@ -56,11 +57,26 @@ class CustomDevicesConfig {
   static const String _kCustomDevicesConfigName = 'custom_devices.json';
   static const String _kCustomDevicesConfigKey = 'custom-devices';
   static const String _kSchema = r'$schema';
-  static const String _defaultSchema = 'https://raw.githubusercontent.com/flutter/flutter/stable/packages/flutter_tools/static/custom-devices.schema.json';
   static const String _kCustomDevices = 'custom-devices';
 
   final FileSystem _fileSystem;
   final Config _config;
+
+  String get _defaultSchema {
+    final Uri uri = _fileSystem
+      .directory(Cache.flutterRoot)
+      .childDirectory('packages')
+      .childDirectory('flutter_tools')
+      .childDirectory('static')
+      .childFile('custom-devices.schema.json')
+      .uri;
+
+    // otherwise it won't contain the Uri schema, so the file:// at the start
+    // will be missing
+    assert(uri.isAbsolute);
+
+    return uri.toString();
+  }
 
   /// Ensure the config file exists on disk by creating one with default values
   /// if it doesn't exist yet.
