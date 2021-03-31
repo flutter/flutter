@@ -3059,7 +3059,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     assert(
       _snackBars.isEmpty || _messengerSnackBar == null,
       'Only one API should be used to manage SnackBars. The ScaffoldMessenger is '
-      'the preferred API instead of the Scaffold methods.'
+      'the preferred API instead of the Scaffold methods.',
     );
 
     if (_currentBottomSheet != null || _dismissedBottomSheets.isNotEmpty) {

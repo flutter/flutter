@@ -440,7 +440,7 @@ void paintImage({
     image.debugGetOpenHandleStackTraces()?.isNotEmpty ?? true,
     'Cannot paint an image that is disposed.\n'
     'The caller of paintImage is expected to wait to dispose the image until '
-    'after painting has completed.'
+    'after painting has completed.',
   );
   if (rect.isEmpty)
     return;

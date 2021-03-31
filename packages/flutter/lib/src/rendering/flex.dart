@@ -521,7 +521,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       // on [RenderBox.computeMinIntrinsicWidth].
       assert(
         RenderObject.debugCheckingIntrinsics,
-        'Intrinsics are not available for CrossAxisAlignment.baseline.'
+        'Intrinsics are not available for CrossAxisAlignment.baseline.',
       );
       return 0.0;
     }

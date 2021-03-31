@@ -5990,7 +5990,7 @@ class RawImage extends LeafRenderObjectWidget {
     assert(
       image?.debugGetOpenHandleStackTraces()?.isNotEmpty ?? true,
       'Creator of a RawImage disposed of the image when the RawImage still '
-      'needed it.'
+      'needed it.',
     );
     return RenderImage(
       image: image?.clone(),
@@ -6017,7 +6017,7 @@ class RawImage extends LeafRenderObjectWidget {
     assert(
       image?.debugGetOpenHandleStackTraces()?.isNotEmpty ?? true,
       'Creator of a RawImage disposed of the image when the RawImage still '
-      'needed it.'
+      'needed it.',
     );
     renderObject
       ..image = image?.clone()
