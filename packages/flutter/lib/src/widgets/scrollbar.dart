@@ -959,10 +959,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
           if (!scrollController!.hasClients) {
             throw FlutterError.fromParts(<DiagnosticsNode>[
               ErrorSummary(
-                'The Scrollbar\'s ScrollController has no ScrollPosition attached.'
+                'The Scrollbar\'s ScrollController has no ScrollPosition attached.',
               ),
               ErrorDescription(
-                'A Scrollbar cannot be painted without a ScrollPosition. '
+                'A Scrollbar cannot be painted without a ScrollPosition. ',
               ),
               ErrorHint(
                 'The Scrollbar attempted to use the $controllerForError. This '
@@ -977,7 +977,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
                     'to true for the Scrollable widget.'
                   : 'When providing your own ScrollController, ensure both the '
                     'Scrollbar and the Scrollable widget use the same one.'
-                }'
+                }',
               ),
             ]);
           }
@@ -990,10 +990,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
             throw FlutterError.fromParts(<DiagnosticsNode>[
               ErrorSummary(
                 'The $controllerForError is currently attached to more than one '
-                'ScrollPosition.'
+                'ScrollPosition.',
               ),
               ErrorDescription(
-                'The Scrollbar requires a single ScrollPosition in order to be painted.'
+                'The Scrollbar requires a single ScrollPosition in order to be painted.',
               ),
               ErrorHint(
                 'When Scrollbar.isAlwaysShown is true, the associated Scrollable '
@@ -1006,7 +1006,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
                     'to use the PrimaryScrollController of the current context.'
                   : 'The provided ScrollController must be unique to a '
                     'Scrollable widget.'
-                }'
+                }',
               ),
             ]);
           }
@@ -1157,14 +1157,14 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     double scrollIncrement;
     // Is an increment calculator available?
     final ScrollIncrementCalculator? calculator = Scrollable.of(
-      _currentController!.position.context.notificationContext!
+      _currentController!.position.context.notificationContext!,
     )?.widget.incrementCalculator;
     if (calculator != null) {
       scrollIncrement = calculator(
         ScrollIncrementDetails(
           type: ScrollIncrementType.page,
           metrics: _currentController!.position,
-        )
+        ),
       );
     } else {
       // Default page increment
@@ -1370,7 +1370,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
               key: _scrollbarPainterKey,
               foregroundPainter: scrollbarPainter,
               child: RepaintBoundary(child: widget.child),
-            )
+            ),
           ),
         ),
       ),

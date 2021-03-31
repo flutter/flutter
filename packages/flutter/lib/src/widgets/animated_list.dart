@@ -402,17 +402,17 @@ class AnimatedList extends StatefulWidget {
     assert((){
       if (result == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary(
-            'AnimatedList.of() called with a context that does not contain an AnimatedList.'),
+          ErrorSummary('AnimatedList.of() called with a context that does not contain an AnimatedList.'),
           ErrorDescription(
-            'No AnimatedList ancestor could be found starting from the context that was passed to AnimatedList.of().'),
+            'No AnimatedList ancestor could be found starting from the context that was passed to AnimatedList.of().',
+          ),
           ErrorHint(
             'This can happen when the context provided is from the same StatefulWidget that '
             'built the AnimatedList. Please see the AnimatedList documentation for examples '
-            'of how to refer to an AnimatedListState object:'
-            '  https://api.flutter.dev/flutter/widgets/AnimatedListState-class.html'
+            'of how to refer to an AnimatedListState object:\n'
+            '  https://api.flutter.dev/flutter/widgets/AnimatedListState-class.html',
           ),
-          context.describeElement('The context used was')
+          context.describeElement('The context used was'),
         ]);
       }
       return true;
@@ -826,7 +826,8 @@ class SliverAnimatedList extends StatefulWidget {
           'for examples of how to refer to an AnimatedListState object: '
           'https://api.flutter.dev/flutter/widgets/SliverAnimatedListState-class.html\n'
           'The context used was:\n'
-          '  $context');
+          '  $context',
+        );
       }
       return true;
     }());

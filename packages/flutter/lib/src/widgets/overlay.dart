@@ -300,7 +300,7 @@ class Overlay extends StatefulWidget {
           ErrorHint('The most common way to add an Overlay to an application is to include a MaterialApp or Navigator widget in the runApp() call.'),
           DiagnosticsProperty<Widget>('The specific widget that failed to find an overlay was', debugRequiredFor, style: DiagnosticsTreeStyle.errorProperty),
           if (context.widget != debugRequiredFor)
-            context.describeElement('The context from which that widget was searching for an overlay was')
+            context.describeElement('The context from which that widget was searching for an overlay was'),
         ];
 
         throw FlutterError.fromParts(information);

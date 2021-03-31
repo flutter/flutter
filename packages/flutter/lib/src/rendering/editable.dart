@@ -35,7 +35,7 @@ const Radius _kFloatingCaretRadius = Radius.circular(1.0);
 @Deprecated(
   'Signature of a deprecated class method, '
   'textSelectionDelegate.userUpdateTextEditingValue. '
-  'This feature was deprecated after v1.26.0-17.2.pre.'
+  'This feature was deprecated after v1.26.0-17.2.pre.',
 )
 typedef SelectionChangedHandler = void Function(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause);
 
@@ -171,7 +171,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     required ViewportOffset offset,
     @Deprecated(
       'Uses the textSelectionDelegate.userUpdateTextEditingValue instead. '
-      'This feature was deprecated after v1.26.0-17.2.pre.'
+      'This feature was deprecated after v1.26.0-17.2.pre.',
     )
     this.onSelectionChanged,
     this.onCaretChanged,
@@ -378,7 +378,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// If this is null, then selection changes will be ignored.
   @Deprecated(
     'Uses the textSelectionDelegate.userUpdateTextEditingValue instead. '
-    'This feature was deprecated after v1.26.0-17.2.pre.'
+    'This feature was deprecated after v1.26.0-17.2.pre.',
   )
   SelectionChangedHandler? onSelectionChanged;
 
@@ -1775,8 +1775,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     assert(_shortcutKeys.contains(key), 'shortcut key $key not recognized.');
     if (key == LogicalKeyboardKey.keyC) {
       if (!selection.isCollapsed) {
-        Clipboard.setData(
-            ClipboardData(text: selection.textInside(text)));
+        Clipboard.setData(ClipboardData(text: selection.textInside(text)));
       }
       return;
     }
@@ -2519,7 +2518,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final int baseOffset = !extentSelection ? extentOffset : selection!.baseOffset;
     _setSelection(
       TextSelection(baseOffset: baseOffset, extentOffset: extentOffset),
-      SelectionChangedCause.keyboard
+      SelectionChangedCause.keyboard,
     );
   }
 
@@ -2551,7 +2550,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         baseOffset: baseOffset,
         extentOffset: previousWord.start,
       ),
-      SelectionChangedCause.keyboard
+      SelectionChangedCause.keyboard,
     );
   }
 
@@ -3480,7 +3479,7 @@ abstract class RenderEditablePainter extends ChangeNotifier {
 class _TextHighlightPainter extends RenderEditablePainter {
   _TextHighlightPainter({
       TextRange? highlightedRange,
-      Color? highlightColor
+      Color? highlightColor,
   }) : _highlightedRange = highlightedRange,
        _highlightColor = highlightColor;
 
@@ -3542,7 +3541,7 @@ class _TextHighlightPainter extends RenderEditablePainter {
     final List<TextBox> boxes = renderEditable._textPainter.getBoxesForSelection(
       TextSelection(baseOffset: range.start, extentOffset: range.end),
       boxHeightStyle: selectionHeightStyle,
-      boxWidthStyle: selectionWidthStyle
+      boxWidthStyle: selectionWidthStyle,
     );
 
     for (final TextBox box in boxes)

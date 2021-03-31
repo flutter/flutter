@@ -130,7 +130,7 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
       highlightPressScaleAnimation = highlightPressScaleController.drive(
         Tween<double>(
           begin: highlightPressScaleAnimation.value,
-          end: widget.shouldScaleContent ? _kMinThumbScale : 1.0
+          end: widget.shouldScaleContent ? _kMinThumbScale : 1.0,
         ),
       );
       highlightPressScaleController.animateWith(_kThumbSpringAnimationSimulation);
@@ -166,7 +166,7 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
                 scale: highlightPressScaleAnimation,
                 child: widget.child,
               ),
-            )
+            ),
           ),
           // The entire widget will assume the size of this widget, so when a
           // segment's "highlight" animation plays the size of the parent stays
@@ -520,7 +520,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
       Tween<double>(
         begin: thumbScaleAnimation.value,
         end: isExpanding ? 1 : _kMinThumbScale,
-      )
+      ),
     );
     thumbScaleController.animateWith(_kThumbSpringAnimationSimulation);
   }

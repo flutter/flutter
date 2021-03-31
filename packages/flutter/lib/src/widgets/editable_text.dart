@@ -209,7 +209,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
           text: value.composing.textInside(value.text),
         ),
         TextSpan(text: value.composing.textAfter(value.text)),
-    ]);
+      ],
+    );
   }
 
   /// The currently selected [text].
@@ -2050,6 +2051,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _textInputConnection!.show();
       _updateSizeAndTransform();
       _updateComposingRectIfNeeded();
+      _updateCaretRectIfNeeded();
       if (_needsAutofill) {
         // Request autofill AFTER the size and the transform have been sent to
         // the platform text input plugin.
@@ -2456,6 +2458,19 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _textInputConnection!.setComposingRect(composingRect);
       SchedulerBinding.instance!
           .addPostFrameCallback((Duration _) => _updateComposingRectIfNeeded());
+    }
+  }
+
+  void _updateCaretRectIfNeeded() {
+    if (_hasInputConnection) {
+      if (renderEditable.selection != null && renderEditable.selection!.isValid &&
+          renderEditable.selection!.isCollapsed) {
+        final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection!.baseOffset);
+        final Rect caretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
+        _textInputConnection!.setCaretRect(caretRect);
+      }
+      SchedulerBinding.instance!
+          .addPostFrameCallback((Duration _) => _updateCaretRectIfNeeded());
     }
   }
 

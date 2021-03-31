@@ -9,9 +9,8 @@ import 'dart:async';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/convert.dart';
+import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
-import 'package:mockito/mockito.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -90,11 +89,11 @@ final FakeVmServiceRequest listViewsRequest = FakeVmServiceRequest(
 typedef ServiceCallback = Future<Map<String, dynamic>> Function(Map<String, Object>);
 
 void main() {
-  testUsingContext('VmService registers reloadSources', () async {
+  testWithoutContext('VmService registers reloadSources', () async {
     Future<void> reloadSources(String isolateId, { bool pause, bool force}) async {}
 
     final MockVMService mockVMService = MockVMService();
-    setUpVmService(
+    await setUpVmService(
       reloadSources,
       null,
       null,
@@ -104,16 +103,14 @@ void main() {
       mockVMService,
     );
 
-    verify(mockVMService.registerService('reloadSources', 'Flutter Tools')).called(1);
-  }, overrides: <Type, Generator>{
-    Logger: () => BufferLogger.test()
+    expect(mockVMService.services, containsPair('reloadSources', 'Flutter Tools'));
   });
 
-  testUsingContext('VmService registers flutterMemoryInfo service', () async {
+  testWithoutContext('VmService registers flutterMemoryInfo service', () async {
     final FakeDevice mockDevice = FakeDevice();
 
     final MockVMService mockVMService = MockVMService();
-    setUpVmService(
+    await setUpVmService(
       null,
       null,
       null,
@@ -123,14 +120,12 @@ void main() {
       mockVMService,
     );
 
-    verify(mockVMService.registerService('flutterMemoryInfo', 'Flutter Tools')).called(1);
-  }, overrides: <Type, Generator>{
-    Logger: () => BufferLogger.test()
+    expect(mockVMService.services, containsPair('flutterMemoryInfo', 'Flutter Tools'));
   });
 
-  testUsingContext('VmService registers flutterGetSkSL service', () async {
+  testWithoutContext('VmService registers flutterGetSkSL service', () async {
     final MockVMService mockVMService = MockVMService();
-    setUpVmService(
+    await setUpVmService(
       null,
       null,
       null,
@@ -140,17 +135,42 @@ void main() {
       mockVMService,
     );
 
-    verify(mockVMService.registerService('flutterGetSkSL', 'Flutter Tools')).called(1);
-  }, overrides: <Type, Generator>{
-    Logger: () => BufferLogger.test()
+    expect(mockVMService.services, containsPair('flutterGetSkSL', 'Flutter Tools'));
   });
 
-  testUsingContext('VmService registers flutterPrintStructuredErrorLogMethod', () async {
+  testWithoutContext('VmService throws tool exit on service registration failure.', () async {
+    final MockVMService mockVMService = MockVMService()
+      ..errorOnRegisterService = true;
+
+    await expectLater(() async => setUpVmService(
+      null,
+      null,
+      null,
+      null,
+      () async => 'hello',
+      null,
+      mockVMService,
+    ), throwsToolExit());
+  });
+
+  testWithoutContext('VmService throws tool exit on service registration failure with awaited future.', () async {
+    final MockVMService mockVMService = MockVMService()
+      ..errorOnRegisterService = true;
+
+    await expectLater(() async => setUpVmService(
+      null,
+      null,
+      null,
+      null,
+      () async => 'hello',
+      (vm_service.Event event) { },
+      mockVMService,
+    ), throwsToolExit());
+  });
+
+  testWithoutContext('VmService registers flutterPrintStructuredErrorLogMethod', () async {
     final MockVMService mockVMService = MockVMService();
-    when(mockVMService.onExtensionEvent).thenAnswer((Invocation invocation) {
-      return const Stream<vm_service.Event>.empty();
-    });
-    setUpVmService(
+    await setUpVmService(
       null,
       null,
       null,
@@ -159,14 +179,12 @@ void main() {
       (vm_service.Event event) async => 'hello',
       mockVMService,
     );
-    verify(mockVMService.streamListen(vm_service.EventStreams.kExtension)).called(1);
-  }, overrides: <Type, Generator>{
-    Logger: () => BufferLogger.test()
+    expect(mockVMService.listenedStreams, contains(vm_service.EventStreams.kExtension));
   });
 
-  testUsingContext('VMService returns correct FlutterVersion', () async {
+  testWithoutContext('VMService returns correct FlutterVersion', () async {
     final MockVMService mockVMService = MockVMService();
-    setUpVmService(
+    await setUpVmService(
       null,
       null,
       null,
@@ -176,9 +194,7 @@ void main() {
       mockVMService,
     );
 
-    verify(mockVMService.registerService('flutterVersion', 'Flutter Tools')).called(1);
-  }, overrides: <Type, Generator>{
-    FlutterVersion: () => FakeFlutterVersion(),
+    expect(mockVMService.services, containsPair('flutterVersion', 'Flutter Tools'));
   });
 
   testUsingContext('VMService prints messages for connection failures', () {
@@ -629,8 +645,35 @@ void main() {
   });
 }
 
-class MockVMService extends Mock implements vm_service.VmService {}
+class MockVMService extends Fake implements vm_service.VmService {
+  final Map<String, String> services = <String, String>{};
+  final Set<String> listenedStreams = <String>{};
+  bool errorOnRegisterService = false;
+
+  @override
+  void registerServiceCallback(String service, vm_service.ServiceCallback cb) {}
+
+  @override
+  Future<vm_service.Success> registerService(String service, String alias) async {
+    services[service] = alias;
+    if (errorOnRegisterService) {
+      throw vm_service.RPCError('registerService', 1234, 'error');
+    }
+    return vm_service.Success();
+  }
+
+  @override
+  Stream<vm_service.Event> get onExtensionEvent => const Stream<vm_service.Event>.empty();
+
+  @override
+  Future<vm_service.Success> streamListen(String streamId) async {
+    listenedStreams.add(streamId);
+    return vm_service.Success();
+  }
+}
+
 class FakeDevice extends Fake implements Device {}
+
 class FakeFlutterVersion extends Fake implements FlutterVersion {
   @override
   Map<String, Object> toJson() => const <String, Object>{'Fake': 'Version'};

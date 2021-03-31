@@ -336,8 +336,8 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
                 filter: ui.ImageFilter.blur(
                   sigmaX: blurAmount,
                   sigmaY: blurAmount,
-                )
-              )
+                ),
+              ),
             ));
           }
         }
@@ -378,7 +378,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
           if (opacity > 0.0) {
             TextStyle titleStyle = theme.primaryTextTheme.headline6!;
             titleStyle = titleStyle.copyWith(
-              color: titleStyle.color!.withOpacity(opacity)
+              color: titleStyle.color!.withOpacity(opacity),
             );
             final bool effectiveCenterTitle = _getEffectiveCenterTitle(theme);
             final EdgeInsetsGeometry padding = widget.titlePadding ??
@@ -406,7 +406,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
                           alignment: titleAlignment,
                           child: title,
                         );
-                      }
+                      },
                     ),
                   ),
                 ),
@@ -416,7 +416,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
         }
 
         return ClipRect(child: Stack(children: children));
-      }
+      },
     );
   }
 }
