@@ -115,5 +115,57 @@ TEST(TaskRunnerCheckerTests, MergedTaskRunnersRunsOnTheSameThread) {
   thread2.join();
 }
 
+TEST(TaskRunnerCheckerTests,
+     PassesRunsOnCreationTaskRunnerIfOnDifferentTaskRunner) {
+  fml::MessageLoop* loop1 = nullptr;
+  fml::AutoResetWaitableEvent latch1;
+  std::thread thread1([&]() {
+    fml::MessageLoop::EnsureInitializedForCurrentThread();
+    loop1 = &fml::MessageLoop::GetCurrent();
+    latch1.Signal();
+    loop1->Run();
+  });
+
+  fml::MessageLoop* loop2 = nullptr;
+  fml::AutoResetWaitableEvent latch2;
+  std::thread thread2([&]() {
+    fml::MessageLoop::EnsureInitializedForCurrentThread();
+    loop2 = &fml::MessageLoop::GetCurrent();
+    latch2.Signal();
+    loop2->Run();
+  });
+
+  latch1.Wait();
+  latch2.Wait();
+
+  fml::TaskQueueId qid1 = loop1->GetTaskRunner()->GetTaskQueueId();
+  fml::TaskQueueId qid2 = loop2->GetTaskRunner()->GetTaskQueueId();
+  fml::MessageLoopTaskQueues::GetInstance()->Merge(qid1, qid2);
+
+  std::unique_ptr<TaskRunnerChecker> checker;
+
+  fml::AutoResetWaitableEvent latch3;
+  loop2->GetTaskRunner()->PostTask([&]() {
+    checker = std::make_unique<TaskRunnerChecker>();
+    EXPECT_EQ(checker->RunsOnCreationTaskRunner(), true);
+    latch3.Signal();
+  });
+  latch3.Wait();
+
+  fml::MessageLoopTaskQueues::GetInstance()->Unmerge(qid1);
+
+  fml::AutoResetWaitableEvent latch4;
+  loop2->GetTaskRunner()->PostTask([&]() {
+    EXPECT_EQ(checker->RunsOnCreationTaskRunner(), true);
+    latch4.Signal();
+  });
+  latch4.Wait();
+
+  loop1->Terminate();
+  loop2->Terminate();
+  thread1.join();
+  thread2.join();
+}
+
 }  // namespace testing
 }  // namespace fml
