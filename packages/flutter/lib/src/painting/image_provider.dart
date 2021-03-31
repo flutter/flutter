@@ -445,8 +445,8 @@ abstract class ImageProvider<T extends Object> {
       specification: ZoneSpecification(
         handleUncaughtError: (Zone zone, ZoneDelegate delegate, Zone parent, Object error, StackTrace stackTrace) {
           handleError(error, stackTrace);
-        }
-      )
+        },
+      ),
     );
     dangerZone.runGuarded(() {
       Future<T> key;
@@ -655,7 +655,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
       codec: _loadAsync(key, decode),
       scale: key.scale,
       debugLabel: key.name,
-      informationCollector: collector
+      informationCollector: collector,
     );
   }
 

@@ -20,6 +20,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 
 typedef InvokeProcess = Future<ProcessResult> Function();
 
@@ -322,6 +323,7 @@ void main() {
         buildMode: BuildMode.debug,
       ), throwsToolExit(message: 'CocoaPods not installed or not in valid state'));
       expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('throwsToolExit if CocoaPods install is broken', () async {
@@ -332,17 +334,10 @@ void main() {
         buildMode: BuildMode.debug,
       ), throwsToolExit(message: 'CocoaPods not installed or not in valid state'));
       expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('exits if Podfile creates the Flutter engine symlink', () async {
-      pretendPodIsInstalled();
-      pretendPodVersionIs('1.10.0');
-      fakeProcessManager.addCommand(
-        const FakeCommand(
-          command: <String>['pod', 'install', '--verbose'],
-        ),
-      );
-
       fileSystem.file(fileSystem.path.join('project', 'ios', 'Podfile'))
         ..createSync()
         ..writeAsStringSync('Existing Podfile');
@@ -355,17 +350,10 @@ void main() {
         xcodeProject: projectUnderTest.ios,
         buildMode: BuildMode.debug,
       ), throwsToolExit(message: 'Podfile is out of date'));
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('exits if iOS Podfile parses .flutter-plugins', () async {
-      pretendPodIsInstalled();
-      pretendPodVersionIs('1.10.0');
-      fakeProcessManager.addCommand(
-        const FakeCommand(
-          command: <String>['pod', 'install', '--verbose'],
-        ),
-      );
-
       fileSystem.file(fileSystem.path.join('project', 'ios', 'Podfile'))
         ..createSync()
         ..writeAsStringSync('plugin_pods = parse_KV_file(\'../.flutter-plugins\')');
@@ -374,6 +362,7 @@ void main() {
         xcodeProject: projectUnderTest.ios,
         buildMode: BuildMode.debug,
       ), throwsToolExit(message: 'Podfile is out of date'));
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('prints warning if macOS Podfile parses .flutter-plugins', () async {
@@ -396,6 +385,7 @@ void main() {
 
       expect(logger.errorText, contains('Warning: Podfile is out of date'));
       expect(logger.errorText, contains('rm macos/Podfile'));
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('throws, if Podfile is missing.', () async {

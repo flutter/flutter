@@ -2732,7 +2732,7 @@ class Navigator extends StatefulWidget {
         throw FlutterError(
           'Navigator operation requested with a context that does not include a Navigator.\n'
           'The context used to push or pop routes from the Navigator must be that of a '
-          'widget that is a descendant of a Navigator widget.'
+          'widget that is a descendant of a Navigator widget.',
         );
       }
       return true;
@@ -2822,7 +2822,7 @@ class Navigator extends StatefulWidget {
                 'Could not navigate to initial route.\n'
                 'The requested route name was: "/$initialRouteName"\n'
                 'There was no corresponding route in the app, and therefore the initial route specified will be '
-                'ignored and "${Navigator.defaultRouteName}" will be used instead.'
+                'ignored and "${Navigator.defaultRouteName}" will be used instead.',
             ),
           );
           return true;
@@ -2992,7 +2992,7 @@ class _RouteEntry extends RouteTransitionRecord {
     assert(route.overlayEntries.isNotEmpty);
     currentState = _RouteLifecycle.adding;
     navigator._observedRouteAdditions.add(
-      _NavigatorPushObservation(route, previousPresent)
+      _NavigatorPushObservation(route, previousPresent),
     );
   }
 
@@ -3032,12 +3032,12 @@ class _RouteEntry extends RouteTransitionRecord {
 
     if (previousState == _RouteLifecycle.replace || previousState == _RouteLifecycle.pushReplace) {
       navigator._observedRouteAdditions.add(
-        _NavigatorReplaceObservation(route, previousPresent)
+        _NavigatorReplaceObservation(route, previousPresent),
       );
     } else {
       assert(previousState == _RouteLifecycle.push);
       navigator._observedRouteAdditions.add(
-        _NavigatorPushObservation(route, previousPresent)
+        _NavigatorPushObservation(route, previousPresent),
       );
     }
   }
@@ -3053,7 +3053,7 @@ class _RouteEntry extends RouteTransitionRecord {
     assert(route._navigator == navigator);
     currentState = _RouteLifecycle.popping;
     navigator._observedRouteDeletions.add(
-      _NavigatorPopObservation(route, previousPresent)
+      _NavigatorPopObservation(route, previousPresent),
     );
   }
 
@@ -3064,7 +3064,7 @@ class _RouteEntry extends RouteTransitionRecord {
     currentState = _RouteLifecycle.removing;
     if (_reportRemovalToObserver) {
       navigator._observedRouteDeletions.add(
-        _NavigatorRemoveObservation(route, previousPresent)
+        _NavigatorRemoveObservation(route, previousPresent),
       );
     }
   }
@@ -3285,7 +3285,7 @@ abstract class _NavigatorObservation {
 class _NavigatorPushObservation extends _NavigatorObservation {
   _NavigatorPushObservation(
     Route<dynamic> primaryRoute,
-    Route<dynamic>? secondaryRoute
+    Route<dynamic>? secondaryRoute,
   ) : super(primaryRoute, secondaryRoute);
 
   @override
@@ -3297,7 +3297,7 @@ class _NavigatorPushObservation extends _NavigatorObservation {
 class _NavigatorPopObservation extends _NavigatorObservation {
   _NavigatorPopObservation(
     Route<dynamic> primaryRoute,
-    Route<dynamic>? secondaryRoute
+    Route<dynamic>? secondaryRoute,
   ) : super(primaryRoute, secondaryRoute);
 
   @override
@@ -3309,7 +3309,7 @@ class _NavigatorPopObservation extends _NavigatorObservation {
 class _NavigatorRemoveObservation extends _NavigatorObservation {
   _NavigatorRemoveObservation(
     Route<dynamic> primaryRoute,
-    Route<dynamic>? secondaryRoute
+    Route<dynamic>? secondaryRoute,
   ) : super(primaryRoute, secondaryRoute);
 
   @override
@@ -3321,7 +3321,7 @@ class _NavigatorRemoveObservation extends _NavigatorObservation {
 class _NavigatorReplaceObservation extends _NavigatorObservation {
   _NavigatorReplaceObservation(
     Route<dynamic> primaryRoute,
-    Route<dynamic>? secondaryRoute
+    Route<dynamic>? secondaryRoute,
   ) : super(primaryRoute, secondaryRoute);
 
   @override
@@ -3360,7 +3360,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
             FlutterErrorDetails(
               exception: FlutterError(
                 'The Navigator.pages must not be empty to use the '
-                'Navigator.pages API'
+                'Navigator.pages API',
               ),
               library: 'widget library',
               stack: StackTrace.current,
@@ -3371,7 +3371,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
             FlutterErrorDetails(
               exception: FlutterError(
                 'The Navigator.onPopPage must be provided to use the '
-                'Navigator.pages API'
+                'Navigator.pages API',
               ),
               library: 'widget library',
               stack: StackTrace.current,
@@ -3516,7 +3516,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
                         '- $otherOwner\n'
                         'Please create a HeroControllerScope for each Navigator or '
                         'use a HeroControllerScope.none to prevent subtree from '
-                        'receiving a HeroController.'
+                        'receiving a HeroController.',
                       ),
                       library: 'widget library',
                       stack: StackTrace.current,
@@ -3557,7 +3557,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
             FlutterErrorDetails(
               exception: FlutterError(
                 'The Navigator.pages must not be empty to use the '
-                'Navigator.pages API'
+                'Navigator.pages API',
               ),
               library: 'widget library',
               stack: StackTrace.current,
@@ -3568,7 +3568,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
             FlutterErrorDetails(
               exception: FlutterError(
                 'The Navigator.onPopPage must be provided to use the '
-                'Navigator.pages API'
+                'Navigator.pages API',
               ),
               library: 'widget library',
               stack: StackTrace.current,
@@ -3594,7 +3594,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
             FlutterErrorDetails(
               exception: FlutterError(
                 'The Navigator.pages must not be empty to use the '
-                'Navigator.pages API'
+                'Navigator.pages API',
               ),
               library: 'widget library',
               stack: StackTrace.current,
@@ -3876,7 +3876,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         final List<_RouteEntry> pagelessRoutes = pageRouteToPagelessRoutes
           .putIfAbsent(
           previousOldPageRouteEntry,
-            () => <_RouteEntry>[]
+            () => <_RouteEntry>[],
         );
         pagelessRoutes.add(oldEntry);
         continue;
@@ -3945,7 +3945,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           if (canRemoveOrAdd || next == null) {
             entry.didAdd(
               navigator: this,
-              isNewFirst: next == null
+              isNewFirst: next == null,
             );
             assert(entry.currentState == _RouteLifecycle.idle);
             continue;
@@ -4042,12 +4042,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     // Announces route name changes.
     if (widget.reportsRouteUpdateToEngine) {
       final _RouteEntry? lastEntry = _history.cast<_RouteEntry?>().lastWhere(
-        (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e), orElse: () => null);
+        (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e), orElse: () => null,
+      );
       final String? routeName = lastEntry?.route.settings.name;
       if (routeName != _lastAnnouncedRouteName) {
         SystemNavigator.routeUpdated(
           routeName: routeName,
-          previousRouteName: _lastAnnouncedRouteName
+          previousRouteName: _lastAnnouncedRouteName,
         );
         _lastAnnouncedRouteName = routeName;
       }
@@ -4142,7 +4143,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           'pushNamedAndRemoveUntil), the Navigator must be provided with an '
           'onGenerateRoute handler.\n'
           'The Navigator was:\n'
-          '  $this'
+          '  $this',
         );
       }
       return true;
@@ -4159,7 +4160,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
             ErrorSummary('Navigator.onGenerateRoute returned null when requested to build route "$name".'),
             ErrorDescription(
               'The onGenerateRoute callback must never return null, unless an onUnknownRoute '
-              'callback is provided as well.'
+              'callback is provided as well.',
             ),
             DiagnosticsProperty<NavigatorState>('The Navigator was', this, style: DiagnosticsTreeStyle.errorProperty),
           ]);
@@ -4487,7 +4488,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           FlutterErrorDetails(
             exception: FlutterError(
               'A page-based route should not be added using the imperative api. '
-              'Provide a new list with the corresponding Page to Navigator.pages instead.'
+              'Provide a new list with the corresponding Page to Navigator.pages instead.',
             ),
             library: 'widget library',
             stack: StackTrace.current,
@@ -5142,8 +5143,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       _afterNavigation(
         _history.cast<_RouteEntry?>().lastWhere(
           (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
-          orElse: () => null
-        )?.route
+          orElse: () => null,
+        )?.route,
       );
   }
 

@@ -583,7 +583,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
             duration: const Duration(milliseconds: 300),
             child: body,
           ),
-        )
+        ),
       ),
     );
   }

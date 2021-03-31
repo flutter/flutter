@@ -616,7 +616,7 @@ class TextPainter {
       if (_needsLayout) {
         throw FlutterError(
           'TextPainter.paint called when text geometry was not yet calculated.\n'
-          'Please call layout() before paint() to position the text before painting it.'
+          'Please call layout() before paint() to position the text before painting it.',
         );
       }
       return true;
@@ -865,7 +865,7 @@ class TextPainter {
       selection.start,
       selection.end,
       boxHeightStyle: boxHeightStyle,
-      boxWidthStyle: boxWidthStyle
+      boxWidthStyle: boxWidthStyle,
     );
   }
 

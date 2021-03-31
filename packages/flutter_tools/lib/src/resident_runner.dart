@@ -1009,7 +1009,7 @@ abstract class ResidentRunner {
   }
 
   Future<bool> debugDumpLayerTree() async {
-    if (!supportsServiceProtocol) {
+    if (!supportsServiceProtocol || !isRunningDebug) {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
@@ -1403,7 +1403,6 @@ abstract class ResidentRunner {
       if (supportsWriteSkSL) {
         commandHelp.M.print();
       }
-      commandHelp.v.print();
       // `P` should precede `a`
       commandHelp.P.print();
       commandHelp.a.print();

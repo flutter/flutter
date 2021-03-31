@@ -365,12 +365,15 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
         );
 
     final IconThemeData iconThemeData = IconThemeData(
-        color: CupertinoDynamicColor.resolve(widget.itemColor, context),
-        size: scaledIconSize);
+      color: CupertinoDynamicColor.resolve(widget.itemColor, context),
+      size: scaledIconSize,
+    );
 
     final Widget prefix = Padding(
       child: IconTheme(
-          child: const Icon(CupertinoIcons.search), data: iconThemeData),
+        data: iconThemeData,
+        child: const Icon(CupertinoIcons.search),
+      ),
       padding: widget.prefixInsets,
     );
 
