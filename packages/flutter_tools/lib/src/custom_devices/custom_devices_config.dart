@@ -4,13 +4,13 @@
 
 // @dart = 2.8
 
-import 'package:flutter_tools/src/cache.dart';
 import 'package:meta/meta.dart';
 
 import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
+import '../cache.dart';
 import 'custom_device_config.dart';
 
 /// Represents the custom devices config file on disk which in turn
