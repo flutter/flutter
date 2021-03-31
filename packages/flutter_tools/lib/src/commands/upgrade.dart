@@ -113,8 +113,7 @@ class UpgradeCommandRunner {
     @required bool testFlow,
     @required bool verifyOnly,
   }) async {
-    final FlutterVersion upstreamVersion = await fetchLatestVersion();
-    checkSupportedRemote(flutterVersion);
+    final FlutterVersion upstreamVersion = await fetchLatestVersion(localVersion: flutterVersion);
     if (flutterVersion.frameworkRevision == upstreamVersion.frameworkRevision) {
       globals.printStatus('Flutter is already up to date on channel ${flutterVersion.channel}');
       globals.printStatus('$flutterVersion');
@@ -251,7 +250,7 @@ class UpgradeCommandRunner {
   /// Returns the remote HEAD flutter version.
   ///
   /// Exits tool if HEAD isn't pointing to a branch, or there is no upstream.
-  Future<FlutterVersion> fetchLatestVersion() async {
+  Future<FlutterVersion> fetchLatestVersion({@required FlutterVersion localVersion}) async {
     String revision;
     try {
       // Fetch upstream branch's commits and tags
@@ -280,12 +279,7 @@ class UpgradeCommandRunner {
         // Get the name of local branch to show in error message
         String localBranch;
         try {
-          final RunResult result = await globals.processUtils.run(
-            <String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
-            throwOnError: true,
-            workingDirectory: workingDirectory,
-          );
-          localBranch = result.stdout.trim();
+          localBranch = localVersion.getBranchName();
         } on Exception catch (e) {
           throwToolExit(e.toString());
         }
@@ -299,6 +293,7 @@ class UpgradeCommandRunner {
         throwToolExit(errorString);
       }
     }
+    checkSupportedRemote(localVersion);
     return FlutterVersion(workingDirectory: workingDirectory, frameworkRevision: revision);
   }
 
