@@ -1,4 +1,4 @@
-Signature: 389876b5ba5cd21d93b51b68cecb11ea
+Signature: 467010293392307262c6fc3eb2fb518b
 
 UNUSED LICENSES:
 
@@ -5438,6 +5438,7 @@ FILE: ../../../third_party/skia/include/sksl/DSLCase.h
 FILE: ../../../third_party/skia/include/sksl/DSLErrorHandling.h
 FILE: ../../../third_party/skia/include/sksl/DSLFunction.h
 FILE: ../../../third_party/skia/include/sksl/DSLStatement.h
+FILE: ../../../third_party/skia/src/gpu/GrVertexChunkArray.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellator.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeTessellator.h
