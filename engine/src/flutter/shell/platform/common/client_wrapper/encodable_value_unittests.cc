@@ -33,10 +33,10 @@ TEST(EncodableValueTest, Int) {
 
 // Test the int/long convenience wrapper.
 TEST(EncodableValueTest, LongValue) {
-  EncodableValue value(std::numeric_limits<int32_t>::max());
-  EXPECT_EQ(value.LongValue(), std::numeric_limits<int32_t>::max());
-  value = std::numeric_limits<int64_t>::max();
-  EXPECT_EQ(value.LongValue(), std::numeric_limits<int64_t>::max());
+  const EncodableValue int_value(std::numeric_limits<int32_t>::max());
+  EXPECT_EQ(int_value.LongValue(), std::numeric_limits<int32_t>::max());
+  const EncodableValue long_value(std::numeric_limits<int64_t>::max());
+  EXPECT_EQ(long_value.LongValue(), std::numeric_limits<int64_t>::max());
 }
 
 TEST(EncodableValueTest, Long) {
