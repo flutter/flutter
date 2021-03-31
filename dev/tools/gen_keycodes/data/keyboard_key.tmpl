@@ -124,18 +124,8 @@ abstract class KeyboardKey with Diagnosticable {
 ///    keyboard events.
 @immutable
 class LogicalKeyboardKey extends KeyboardKey {
-  /// A LogicalKeyboardKey object for a key ID.
-  ///
-  /// This factory constructor ensures that the same `keyId` always results
-  /// in the identical instance. It looks up an object from the predefined values
-  /// if possible, or construct a new one and cache it.
-  factory LogicalKeyboardKey(int keyId) {
-    return findKeyByKeyId(keyId) ??
-      _additionalKeyPool.putIfAbsent(keyId, () => LogicalKeyboardKey._(keyId));
-  }
-
-  /// Creates a LogicalKeyboardKey object for a key ID.
-  const LogicalKeyboardKey._(this.keyId);
+  /// Creates a new LogicalKeyboardKey object for a key ID.
+  const LogicalKeyboardKey(this.keyId);
 
   /// A unique code representing this key.
   ///
@@ -204,6 +194,19 @@ class LogicalKeyboardKey extends KeyboardKey {
     return _unicodeKeyLabel(keyId)
         ?? _keyLabels[keyId]
         ?? '';
+  }
+
+  @override
+  int get hashCode => keyId.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is LogicalKeyboardKey
+        && other.keyId == keyId;
   }
 
   /// The debug string to print for this keyboard key, which will be null in
@@ -318,8 +321,6 @@ class LogicalKeyboardKey extends KeyboardKey {
     properties.add(StringProperty('keyId', '0x${keyId.toRadixString(16).padLeft(8, '0')}', showName: true));
     properties.add(StringProperty('debugName', debugName, showName: true, defaultValue: null));
   }
-
-  static final Map<int, LogicalKeyboardKey> _additionalKeyPool = <int, LogicalKeyboardKey>{};
 
   /// Mask for the 32-bit value portion of the key code.
   ///
@@ -467,18 +468,8 @@ class LogicalKeyboardKey extends KeyboardKey {
 ///    keyboard events.
 @immutable
 class PhysicalKeyboardKey extends KeyboardKey {
-  /// A PhysicalKeyboardKey object for a USB HID usage.
-  ///
-  /// This factory constructor ensures that the same `usbHidUsage` always results
-  /// in the identical instance. It looks up an object from the predefined values
-  /// if possible, or construct a new one and cache it.
-  factory PhysicalKeyboardKey(int usbHidUsage) {
-    return findKeyByCode(usbHidUsage) ??
-      _additionalKeyPool.putIfAbsent(usbHidUsage, () => PhysicalKeyboardKey._(usbHidUsage));
-  }
-
-  /// Creates a PhysicalKeyboardKey object for a USB HID usage.
-  const PhysicalKeyboardKey._(this.usbHidUsage);
+  /// Creates a new PhysicalKeyboardKey object for a USB HID usage.
+  const PhysicalKeyboardKey(this.usbHidUsage);
 
   /// The unique USB HID usage ID of this physical key on the keyboard.
   ///
@@ -489,6 +480,19 @@ class PhysicalKeyboardKey extends KeyboardKey {
   /// See <https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf>
   /// for the HID usage values and their meanings.
   final int usbHidUsage;
+
+  @override
+  int get hashCode => usbHidUsage.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is PhysicalKeyboardKey
+        && other.usbHidUsage == usbHidUsage;
+  }
 
   /// The debug string to print for this keyboard key, which will be null in
   /// release mode.
@@ -512,8 +516,6 @@ class PhysicalKeyboardKey extends KeyboardKey {
     properties.add(StringProperty('usbHidUsage', '0x${usbHidUsage.toRadixString(16).padLeft(8, '0')}', showName: true));
     properties.add(StringProperty('debugName', debugName, showName: true, defaultValue: null));
   }
-
-  static final Map<int, PhysicalKeyboardKey> _additionalKeyPool = <int, PhysicalKeyboardKey>{};
 
   // Key constants for all keyboard keys in the USB HID specification at the
   // time Flutter was built.

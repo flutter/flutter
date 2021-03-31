@@ -45,7 +45,7 @@ class KeyboardKeysCodeGenerator extends BaseCodeGenerator {
       definitions.write('''
 
 $firstComment  ///
-$otherComments  static const PhysicalKeyboardKey ${entry.constantName} = PhysicalKeyboardKey._(${toHex(entry.usbHidCode, digits: 8)});
+$otherComments  static const PhysicalKeyboardKey ${entry.constantName} = PhysicalKeyboardKey(${toHex(entry.usbHidCode, digits: 8)});
 ''');
     }
     return definitions.toString();
@@ -70,7 +70,7 @@ $otherComments  static const PhysicalKeyboardKey ${entry.constantName} = Physica
       definitions.write('''
 
 $firstComment  ///
-$otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardKey._(${toHex(flutterId, digits: 11)});
+$otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardKey(${toHex(flutterId, digits: 11)});
 ''');
     }
 
