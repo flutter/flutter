@@ -874,6 +874,9 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.slider != null) {
       config.isSlider = properties.slider!;
     }
+    if (properties.keyboardKey != null) {
+      config.isKeyboardKey = properties.keyboardKey!;
+    }
     if (properties.readOnly != null) {
       config.isReadOnly = properties.readOnly!;
     }

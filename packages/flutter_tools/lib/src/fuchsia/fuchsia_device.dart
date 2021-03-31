@@ -64,6 +64,7 @@ Future<void> _kDefaultDartDevelopmentServiceStarter(
     0,
     true,
     disableServiceAuthCodes,
+    logger: globals.logger,
   );
 }
 
