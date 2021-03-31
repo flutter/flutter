@@ -848,7 +848,7 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
       <Color>[
         for (int i = 0; i < b._colors!.length; i += 1)
           Color.lerp(a._colors?[i], b._colors?[i], t)!,
-      ]
+      ],
     );
   }
 

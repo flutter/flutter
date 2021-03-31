@@ -591,4 +591,41 @@ flutter:
     ProcessManager: () => FakeProcessManager.any(),
     Platform: () => FakePlatform(operatingSystem: 'linux'),
   });
+
+  testUsingContext('deferred and regular assets are included in manifest alphabetically', () async {
+    globals.fs.file('.packages').writeAsStringSync(r'''
+example:lib/
+''');
+    globals.fs.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync(r'''
+name: example
+
+flutter:
+  assets:
+    - assets/zebra.jpg
+    - assets/foo.jpg
+
+  deferred-components:
+    - name: component1
+      assets:
+        - assets/bar.jpg
+        - assets/apple.jpg
+''');
+    globals.fs.file('assets/foo.jpg').createSync(recursive: true);
+    globals.fs.file('assets/bar.jpg').createSync();
+    globals.fs.file('assets/apple.jpg').createSync();
+    globals.fs.file('assets/zebra.jpg').createSync();
+    final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+
+    expect(await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages'), 0);
+    expect((bundle.entries['FontManifest.json'] as DevFSStringContent).string, '[]');
+    // The assets from deferred components and regular assets
+    // are both included in alphabetical order
+    expect((bundle.entries['AssetManifest.json'] as DevFSStringContent).string, '{"assets/apple.jpg":["assets/apple.jpg"],"assets/bar.jpg":["assets/bar.jpg"],"assets/foo.jpg":["assets/foo.jpg"],"assets/zebra.jpg":["assets/zebra.jpg"]}');
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+    Platform: () => FakePlatform(operatingSystem: 'linux'),
+  });
 }

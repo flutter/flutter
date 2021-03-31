@@ -489,7 +489,7 @@ class _CupertinoAlertRenderElement extends RenderObjectElement {
   }
 
   @override
-  void mount(Element? parent, dynamic newSlot) {
+  void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     _contentElement = updateChild(_contentElement,
         widget.contentSection, _AlertSections.contentSection);
@@ -1334,7 +1334,7 @@ class _RenderCupertinoAlertActions extends RenderBox
     }
 
     return constraints.constrain(
-      Size(constraints.maxWidth, verticalOffset)
+      Size(constraints.maxWidth, verticalOffset),
     );
   }
 

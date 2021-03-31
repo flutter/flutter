@@ -179,6 +179,9 @@ void main() {
   const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem(label: myTitle);
   bottomNavigationBarItem.label;
 
+  // Changes made in https://github.com/flutter/flutter/pull/65246
+  RectangularSliderTrackShape();
+
   // Changes made in https://github.com/flutter/flutter/pull/46115
   const InputDecoration inputDecoration = InputDecoration(floatingLabelBehavior: FloatingLabelBehavior.auto);
   InputDecoration(floatingLabelBehavior: FloatingLabelBehavior.never);

@@ -352,7 +352,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
     assert(
       sortedDescendants.length <= scope.traversalDescendants.length && sortedDescendants.toSet().difference(scope.traversalDescendants.toSet()).isEmpty,
       'Sorted descendants contains different nodes than FocusScopeNode.traversalDescendants would. '
-      'These are the different nodes: ${sortedDescendants.toSet().difference(scope.traversalDescendants.toSet())}'
+      'These are the different nodes: ${sortedDescendants.toSet().difference(scope.traversalDescendants.toSet())}',
     );
     return sortedDescendants;
   }
@@ -1161,9 +1161,10 @@ abstract class FocusOrder with Diagnosticable implements Comparable<FocusOrder> 
   @nonVirtual
   int compareTo(FocusOrder other) {
     assert(
-        runtimeType == other.runtimeType,
-        "The sorting algorithm must not compare incomparable keys, since they don't "
-        'know how to order themselves relative to each other. Comparing $this with $other');
+      runtimeType == other.runtimeType,
+      "The sorting algorithm must not compare incomparable keys, since they don't "
+      'know how to order themselves relative to each other. Comparing $this with $other',
+    );
     return doCompare(other);
   }
 

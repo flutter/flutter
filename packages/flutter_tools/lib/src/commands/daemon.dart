@@ -20,6 +20,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
+import '../device_port_forwader.dart';
 import '../emulator.dart';
 import '../features.dart';
 import '../globals.dart' as globals;

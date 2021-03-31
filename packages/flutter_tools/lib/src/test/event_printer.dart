@@ -2,25 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../convert.dart';
-import '../globals.dart' as globals;
 
 import 'test_device.dart';
 import 'watcher.dart';
 
 /// Prints JSON events when running a test in --machine mode.
 class EventPrinter extends TestWatcher {
-  EventPrinter({StringSink out, TestWatcher parent})
-    : _out = out ?? globals.stdio.stdout,
+  EventPrinter({required StringSink out, TestWatcher? parent})
+    : _out = out,
       _parent = parent;
 
   final StringSink _out;
-  final TestWatcher _parent;
+  final TestWatcher? _parent;
 
   @override
-  void handleStartedDevice(Uri observatoryUri) {
+  void handleStartedDevice(Uri? observatoryUri) {
     _sendEvent('test.startedProcess',
         <String, dynamic>{'observatoryUri': observatoryUri?.toString()});
     _parent?.handleStartedDevice(observatoryUri);

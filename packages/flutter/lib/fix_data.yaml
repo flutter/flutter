@@ -2,12 +2,15 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# For details regarding *Flutter Fix* feature, see
+# For details regarding the *Flutter Fix* feature, see
 # https://flutter.dev/docs/development/tools/flutter-fix
 
 # Please add new fixes to the top of the file, separated by one blank line
 # from other fixes. In a comment, include a link to the PR where the change
 # requiring the fix was made.
+
+# For documentation about this file format, see
+# https://dart.dev/go/data-driven-fixes.
 
 version: 1
 transforms:
@@ -265,6 +268,17 @@ transforms:
       useTextSelectionTheme:
         kind: 'fragment'
         value: 'arguments[useTextSelectionTheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/65246
+  - title: "Remove 'disabledThumbGapWidth'"
+    date: 2020-11-17
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'RectangularSliderTrackShape'
+    changes:
+      - kind: 'removeParameter'
+        name: 'disabledThumbGapWidth'
 
   # Changes made in https://github.com/flutter/flutter/pull/46115
   - title: "Migrate to 'floatingLabelBehavior'"
