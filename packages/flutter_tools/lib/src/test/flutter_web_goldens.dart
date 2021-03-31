@@ -12,7 +12,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../convert.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import 'test_compiler.dart';
 import 'test_config.dart';
 

@@ -11,7 +11,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../ios/plist_parser.dart';
 import '../project.dart';
 

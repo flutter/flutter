@@ -10,7 +10,7 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 
 import 'gen_l10n_templates.dart';
 import 'gen_l10n_types.dart';

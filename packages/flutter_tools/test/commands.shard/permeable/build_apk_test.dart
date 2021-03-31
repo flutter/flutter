@@ -16,7 +16,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_apk.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
