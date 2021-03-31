@@ -1509,7 +1509,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
 class _AdjustSliderIntent extends Intent {
   const _AdjustSliderIntent({
-    required this.type
+    required this.type,
   });
 
   const _AdjustSliderIntent.right() : type = _SliderAdjustmentType.right;

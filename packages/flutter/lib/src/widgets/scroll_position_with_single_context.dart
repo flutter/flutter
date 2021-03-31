@@ -212,7 +212,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     if (targetPixels != pixels) {
       goIdle();
       updateUserScrollDirection(
-          -delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse
+          -delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse,
       );
       final double oldPixels = pixels;
       forcePixels(targetPixels);

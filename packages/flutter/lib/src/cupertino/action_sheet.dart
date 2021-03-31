@@ -1334,7 +1334,7 @@ class _RenderCupertinoAlertActions extends RenderBox
     }
 
     return constraints.constrain(
-      Size(constraints.maxWidth, verticalOffset)
+      Size(constraints.maxWidth, verticalOffset),
     );
   }
 

@@ -1412,7 +1412,7 @@ abstract class RenderBox extends RenderObject {
           ErrorHint(
             'If you perform computations on another height before passing it to '
             'getMinIntrinsicWidth, consider using math.max() or double.clamp() '
-            'to force the value into the valid range.'
+            'to force the value into the valid range.',
           ),
         ]);
       }
@@ -1561,7 +1561,7 @@ abstract class RenderBox extends RenderObject {
           ErrorHint(
             'If you perform computations on another height before passing it to '
             'getMaxIntrinsicWidth, consider using math.max() or double.clamp() '
-            'to force the value into the valid range.'
+            'to force the value into the valid range.',
           ),
         ]);
       }
@@ -1644,7 +1644,7 @@ abstract class RenderBox extends RenderObject {
           ErrorHint(
             'If you perform computations on another width before passing it to '
             'getMinIntrinsicHeight, consider using math.max() or double.clamp() '
-            'to force the value into the valid range.'
+            'to force the value into the valid range.',
           ),
         ]);
       }
@@ -1726,7 +1726,7 @@ abstract class RenderBox extends RenderObject {
           ErrorHint(
             'If you perform computations on another width before passing it to '
             'getMaxIntrinsicHeight, consider using math.max() or double.clamp() '
-            'to force the value into the valid range.'
+            'to force the value into the valid range.',
           ),
         ]);
       }
@@ -1868,7 +1868,7 @@ abstract class RenderBox extends RenderObject {
         ErrorSummary('The ${objectRuntimeType(this, 'RenderBox')} class does not implement "computeDryLayout".'),
         ErrorHint(
           'If you are not writing your own RenderBox subclass, then this is not\n'
-          'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md'
+          'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md',
         ),
       ]),
     ));
@@ -1970,7 +1970,7 @@ abstract class RenderBox extends RenderObject {
         information.add(ErrorDescription('It appears that the size setter was called from performLayout().'));
       } else {
         information.add(ErrorDescription(
-          'The size setter was called from outside layout (neither performResize() nor performLayout() were being run for this object).'
+          'The size setter was called from outside layout (neither performResize() nor performLayout() were being run for this object).',
         ));
         if (owner != null && owner!.debugDoingLayout)
           information.add(ErrorDescription('Only the object itself can set its size. It is a contract violation for other objects to set it.'));
@@ -2019,20 +2019,20 @@ abstract class RenderBox extends RenderObject {
                 'However, this second render object is not, or is no longer, a '
                 'child of the first, and it is therefore a violation of the '
                 'RenderBox layout protocol to use that size in the layout of the '
-                'first render object.'
+                'first render object.',
               ),
               ErrorHint(
                 'If the size was obtained at a time where it was valid to read '
                 'the size (because the second render object above was a child '
                 'of the first at the time), then it should be adopted using '
-                'debugAdoptSize at that time.'
+                'debugAdoptSize at that time.',
               ),
               ErrorHint(
                 'If the size comes from a grandchild or a render object from an '
                 'entirely different part of the render tree, then there is no '
                 'way to be notified when the size changes and therefore attempts '
                 'to read that size are almost certainly a source of bugs. A different '
-                'approach should be used.'
+                'approach should be used.',
               ),
             ]);
           }
@@ -2047,7 +2047,7 @@ abstract class RenderBox extends RenderObject {
                 'inaccurate: the size was nonetheless used by the parent.\n'
                 'It is important to tell the framework if the size will be used or not '
                 'as several important performance optimizations can be made if the '
-                'size will not be used by the parent.'
+                'size will not be used by the parent.',
               ),
             ]);
           }
@@ -2184,7 +2184,7 @@ abstract class RenderBox extends RenderObject {
           ErrorDescription(
             'This probably means that it is a render object that tries to be '
             'as big as possible, but it was put inside another render object '
-            'that allows its children to pick their own size.'
+            'that allows its children to pick their own size.',
           ),
         ];
         if (!constraints.hasBoundedWidth) {
@@ -2216,7 +2216,7 @@ abstract class RenderBox extends RenderObject {
           DiagnosticsProperty<Size>('Size', _size, style: DiagnosticsTreeStyle.errorProperty),
           ErrorHint(
             'If you are not writing your own RenderBox subclass, then this is not '
-            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md'
+            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md',
           ),
         ]);
       }
@@ -2263,7 +2263,7 @@ abstract class RenderBox extends RenderObject {
             ...failures,
             ErrorHint(
               'If you are not writing your own RenderBox subclass, then this is not\n'
-              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md'
+              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md',
             ),
           ]);
         }
@@ -2282,14 +2282,14 @@ abstract class RenderBox extends RenderObject {
             ErrorSummary('The size given to the ${objectRuntimeType(this, 'RenderBox')} class differs from the size computed by computeDryLayout.'),
             ErrorDescription(
               'The size computed in ${sizedByParent ? 'performResize' : 'performLayout'} '
-              'is $size, which is different from $dryLayoutSize, which was computed by computeDryLayout.'
+              'is $size, which is different from $dryLayoutSize, which was computed by computeDryLayout.',
             ),
             ErrorDescription(
               'The constraints used were $constraints.',
             ),
             ErrorHint(
               'If you are not writing your own RenderBox subclass, then this is not\n'
-              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md'
+              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md',
             ),
           ]);
         }
@@ -2340,7 +2340,7 @@ abstract class RenderBox extends RenderObject {
           ErrorHint(
             'RenderBox subclasses need to either override performLayout() to '
             'set a size and lay out any children, or, set sizedByParent to true '
-            'so that performResize() sizes the render object.'
+            'so that performResize() sizes the render object.',
           ),
         ]);
       }
@@ -2382,13 +2382,13 @@ abstract class RenderBox extends RenderObject {
             ErrorDescription(
               "Unfortunately, this object's geometry is not known at this time, "
               'probably because it has never been laid out. '
-              'This means it cannot be accurately hit-tested.'
+              'This means it cannot be accurately hit-tested.',
             ),
             ErrorHint(
               'If you are trying '
               'to perform a hit test during the layout phase itself, make sure '
               "you only hit test nodes that have completed layout (e.g. the node's "
-              'children, after their layout() method has been called).'
+              'children, after their layout() method has been called).',
             ),
           ]);
         }
@@ -2397,12 +2397,12 @@ abstract class RenderBox extends RenderObject {
           describeForError('The hitTest() method was called on this RenderBox'),
           ErrorDescription(
             'Although this node is not marked as needing layout, '
-            'its size is not set.'
+            'its size is not set.',
           ),
           ErrorHint(
             'A RenderBox object must have an '
             'explicit size before it can be hit-tested. Make sure '
-            'that the RenderBox in question sets its size during layout.'
+            'that the RenderBox in question sets its size during layout.',
           ),
         ]);
       }
@@ -2485,7 +2485,7 @@ abstract class RenderBox extends RenderObject {
             'children all use BoxParentData objects for their parentData field. '
             'Since $runtimeType does not in fact use that ParentData class for its children, it must '
             'provide an implementation of applyPaintTransform that supports the specific ParentData '
-            'subclass used by its children (which apparently is ${child.parentData.runtimeType}).'
+            'subclass used by its children (which apparently is ${child.parentData.runtimeType}).',
           ),
         ]);
       }

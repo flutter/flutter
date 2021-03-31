@@ -1075,7 +1075,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
     goIdle();
     updateUserScrollDirection(
-        delta < 0.0 ? ScrollDirection.forward : ScrollDirection.reverse
+        delta < 0.0 ? ScrollDirection.forward : ScrollDirection.reverse,
     );
 
     if (_innerPositions.isEmpty) {
@@ -1097,7 +1097,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       }
       if (outerDelta != 0.0) {
         final double innerDelta = _outerPosition!.applyClampedPointerSignalUpdate(
-            outerDelta
+            outerDelta,
         );
         if (innerDelta != 0.0) {
           for (final _NestedScrollPosition position in _innerPositions)
@@ -1167,7 +1167,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   @override
   void applyUserOffset(double delta) {
     updateUserScrollDirection(
-      delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse
+      delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse,
     );
     assert(delta != 0.0);
     if (_innerPositions.isEmpty) {
@@ -1188,7 +1188,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       }
       if (outerDelta != 0.0) {
         final double innerDelta = _outerPosition!.applyClampedDragUpdate(
-          outerDelta
+          outerDelta,
         );
         if (innerDelta != 0.0) {
           for (final _NestedScrollPosition position in _innerPositions)
@@ -1238,7 +1238,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   void updateParent() {
     _outerPosition?.setParent(
-      _parent ?? PrimaryScrollController.of(_state.context)
+      _parent ?? PrimaryScrollController.of(_state.context),
     );
   }
 
@@ -1306,7 +1306,7 @@ class _NestedScrollController extends ScrollController {
     SchedulerBinding.instance!.addPostFrameCallback(
       (Duration timeStamp) {
         coordinator.updateShadow();
-      }
+      },
     );
   }
 
@@ -1661,14 +1661,14 @@ class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
   @override
   void resetActivity() {
     delegate.beginActivity(
-      coordinator.createOuterBallisticScrollActivity(velocity)
+      coordinator.createOuterBallisticScrollActivity(velocity),
     );
   }
 
   @override
   void applyNewDimensions() {
     delegate.beginActivity(
-      coordinator.createOuterBallisticScrollActivity(velocity)
+      coordinator.createOuterBallisticScrollActivity(velocity),
     );
   }
 

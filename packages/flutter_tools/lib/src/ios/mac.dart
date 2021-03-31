@@ -177,10 +177,11 @@ Future<XcodeBuildResult> buildXcodeProject({
   Map<String, String> autoSigningConfigs;
   if (codesign && buildForDevice) {
     autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeam(
-      iosApp: app,
+      buildSettings: await app.project.buildSettingsForBuildInfo(buildInfo),
       processManager: globals.processManager,
       logger: globals.logger,
-      buildInfo: buildInfo,
+      config: globals.config,
+      terminal: globals.terminal,
     );
   }
 

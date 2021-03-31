@@ -3726,7 +3726,7 @@ class Stack extends MultiChildRenderObjectWidget {
     this.fit = StackFit.loose,
     @Deprecated(
       'Use clipBehavior instead. See the migration guide in flutter.dev/go/clip-behavior. '
-      'This feature was deprecated after v1.22.0-12.0.pre.'
+      'This feature was deprecated after v1.22.0-12.0.pre.',
     )
     this.overflow = Overflow.clip,
     this.clipBehavior = Clip.hardEdge,
@@ -3783,7 +3783,7 @@ class Stack extends MultiChildRenderObjectWidget {
   /// Deprecated. Use [clipBehavior] instead.
   @Deprecated(
     'Use clipBehavior instead. See the migration guide in flutter.dev/go/clip-behavior. '
-    'This feature was deprecated after v1.22.0-12.0.pre.'
+    'This feature was deprecated after v1.22.0-12.0.pre.',
   )
   final Overflow overflow;
 
@@ -3798,8 +3798,8 @@ class Stack extends MultiChildRenderObjectWidget {
         context,
         why: 'to resolve the \'alignment\' argument',
         hint: alignment == AlignmentDirectional.topStart ? 'The default value for \'alignment\' is AlignmentDirectional.topStart, which requires a text direction.' : null,
-        alternative: 'Instead of providing a Directionality widget, another solution would be passing a non-directional \'alignment\', or an explicit \'textDirection\', to the $runtimeType.'),
-      );
+        alternative: 'Instead of providing a Directionality widget, another solution would be passing a non-directional \'alignment\', or an explicit \'textDirection\', to the $runtimeType.',
+      ));
     }
     return true;
   }
@@ -7160,6 +7160,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool? toggled,
     bool? button,
     bool? slider,
+    bool? keyboardKey,
     bool? link,
     bool? header,
     bool? textField,
@@ -7218,6 +7219,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       selected: selected,
       button: button,
       slider: slider,
+      keyboardKey: keyboardKey,
       link: link,
       header: header,
       textField: textField,
@@ -7335,6 +7337,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       selected: properties.selected,
       button: properties.button,
       slider: properties.slider,
+      keyboardKey: properties.keyboardKey,
       link: properties.link,
       header: properties.header,
       textField: properties.textField,
@@ -7409,6 +7412,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..selected = properties.selected
       ..button = properties.button
       ..slider = properties.slider
+      ..keyboardKey = properties.keyboardKey
       ..link = properties.link
       ..header = properties.header
       ..textField = properties.textField

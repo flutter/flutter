@@ -277,9 +277,9 @@ class GestureDetector extends StatelessWidget {
              throw FlutterError.fromParts(<DiagnosticsNode>[
                ErrorSummary('Incorrect GestureDetector arguments.'),
                ErrorDescription(
-                 'Having both a pan gesture recognizer and a scale gesture recognizer is redundant; scale is a superset of pan.'
+                 'Having both a pan gesture recognizer and a scale gesture recognizer is redundant; scale is a superset of pan.',
                ),
-               ErrorHint('Just use the scale gesture recognizer.')
+               ErrorHint('Just use the scale gesture recognizer.'),
              ]);
            }
            final String recognizer = havePan ? 'pan' : 'scale';
@@ -287,7 +287,7 @@ class GestureDetector extends StatelessWidget {
              throw FlutterError(
                'Incorrect GestureDetector arguments.\n'
                'Simultaneously having a vertical drag gesture recognizer, a horizontal drag gesture recognizer, and a $recognizer gesture recognizer '
-               'will result in the $recognizer gesture recognizer being ignored, since the other two will catch all drags.'
+               'will result in the $recognizer gesture recognizer being ignored, since the other two will catch all drags.',
              );
            }
          }
@@ -1131,7 +1131,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
           ErrorHint(
             'To set the gesture recognizers at other times, trigger a new build using setState() '
             'and provide the new gesture recognizers as constructor arguments to the corresponding '
-            'RawGestureDetector or GestureDetector object.'
+            'RawGestureDetector or GestureDetector object.',
           ),
         ]);
       }
@@ -1164,7 +1164,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       if (semanticsGestureHandler == null) {
         throw FlutterError(
           'Unexpected call to replaceSemanticsActions() method of RawGestureDetectorState.\n'
-          'The replaceSemanticsActions() method can only be called after the RenderSemanticsGestureHandler has been created.'
+          'The replaceSemanticsActions() method can only be called after the RenderSemanticsGestureHandler has been created.',
         );
       }
       return true;

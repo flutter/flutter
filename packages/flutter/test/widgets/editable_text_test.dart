@@ -3483,6 +3483,100 @@ void main() {
     );
   });
 
+  group('setCaretRect', () {
+    Widget builder() {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: EditableText(
+                  backgroundCursorColor: Colors.grey,
+                  controller: controller,
+                  focusNode: FocusNode(),
+                  style: textStyle,
+                  cursorColor: Colors.blue,
+                  selectionControls: materialTextSelectionControls,
+                  keyboardType: TextInputType.text,
+                  onChanged: (String value) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets(
+      'called with proper coordinates',
+      (WidgetTester tester) async {
+        controller.value = TextEditingValue(text: 'a' * 50);
+        await tester.pumpWidget(builder());
+        await tester.showKeyboard(find.byType(EditableText));
+
+        expect(tester.testTextInput.log, contains(
+          matchesMethodCall(
+            'TextInput.setCaretRect',
+            args: allOf(
+              // No composing text so the width should not be too wide because
+              // it's empty.
+              containsPair('x', equals(700)),
+              containsPair('y', equals(0)),
+              containsPair('width', equals(2)),
+              containsPair('height', equals(14)),
+            ),
+          ),
+        ));
+
+        tester.testTextInput.log.clear();
+
+        controller.value = TextEditingValue(
+          text: 'a' * 50, selection: const TextSelection(baseOffset: 0, extentOffset: 0));
+        await tester.pump();
+
+        expect(tester.testTextInput.log, contains(
+          matchesMethodCall(
+            'TextInput.setCaretRect',
+            // Now the composing range is not empty.
+            args: allOf(
+              containsPair('x', equals(0)),
+              containsPair('y', equals(0)),
+            )
+          ),
+        ));
+    }, skip: isBrowser); // Related to https://github.com/flutter/flutter/issues/66089
+
+    testWidgets(
+      'only send updates when necessary',
+      (WidgetTester tester) async {
+        controller.value = TextEditingValue(text: 'a' * 100);
+        await tester.pumpWidget(builder());
+        await tester.showKeyboard(find.byType(EditableText));
+
+        expect(tester.testTextInput.log, contains(matchesMethodCall('TextInput.setCaretRect')));
+
+        tester.testTextInput.log.clear();
+
+        // Should not send updates every frame.
+        await tester.pump();
+
+        expect(tester.testTextInput.log, isNot(contains(matchesMethodCall('TextInput.setCaretRect'))));
+    });
+
+    testWidgets(
+      'not sent with selection',
+      (WidgetTester tester) async {
+        controller.value = TextEditingValue(
+          text: 'a' * 100, selection: const TextSelection(baseOffset: 0, extentOffset: 10));
+        await tester.pumpWidget(builder());
+        await tester.showKeyboard(find.byType(EditableText));
+
+        expect(tester.testTextInput.log, isNot(contains(matchesMethodCall('TextInput.setCaretRect'))));
+    });
+  });
+
   group('setMarkedTextRect', () {
     Widget builder() {
       return MaterialApp(
@@ -5437,6 +5531,7 @@ void main() {
       'TextInput.setEditingState',
       'TextInput.setEditingState',
       'TextInput.show',
+      'TextInput.setCaretRect',
     ];
     expect(
       tester.testTextInput.log.map((MethodCall m) => m.method),
@@ -5480,6 +5575,7 @@ void main() {
       'TextInput.setEditingState',
       'TextInput.setEditingState',
       'TextInput.show',
+      'TextInput.setCaretRect',
       'TextInput.show',
     ];
     expect(tester.testTextInput.log.length, logOrder.length);
@@ -5529,6 +5625,7 @@ void main() {
       'TextInput.setEditingState',
       'TextInput.setEditingState',
       'TextInput.show',
+      'TextInput.setCaretRect',
       'TextInput.setEditingState',
     ];
 

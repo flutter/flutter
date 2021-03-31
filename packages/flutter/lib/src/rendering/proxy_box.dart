@@ -503,7 +503,7 @@ class RenderAspectRatio extends RenderProxyBox {
           'This $runtimeType was given an aspect ratio of $aspectRatio but was given '
           'both unbounded width and unbounded height constraints. Because both '
           'constraints were unbounded, this render object doesn\'t know how much '
-          'size to consume.'
+          'size to consume.',
         );
       }
       return true;
@@ -2147,7 +2147,7 @@ class RenderDecoratedBox extends RenderProxyBox {
             ErrorDescription(
               'Before painting the decoration, the canvas save count was $debugSaveCount. '
               'After painting it, the canvas save count was ${context.canvas.getSaveCount()}. '
-              'Every call to save() or saveLayer() must be matched by a call to restore().'
+              'Every call to save() or saveLayer() must be matched by a call to restore().',
             ),
             DiagnosticsProperty<Decoration>('The decoration was', decoration, style: DiagnosticsTreeStyle.errorProperty),
             DiagnosticsProperty<BoxPainter>('The painter was', _painter, style: DiagnosticsTreeStyle.errorProperty),
@@ -3705,6 +3705,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool? selected,
     bool? button,
     bool? slider,
+    bool? keyboardKey,
     bool? link,
     bool? header,
     bool? textField,
@@ -3761,6 +3762,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _selected = selected,
        _button = button,
        _slider = slider,
+       _keyboardKey = keyboardKey,
        _link = link,
        _header = header,
        _textField = textField,
@@ -3917,6 +3919,17 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (slider == value)
       return;
     _slider = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsConfiguration.isKeyboardKey] semantic to the
+  /// given value.
+  bool? get keyboardKey => _keyboardKey;
+  bool? _keyboardKey;
+  set keyboardKey(bool? value) {
+    if (keyboardKey == value)
+      return;
+    _keyboardKey = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -4662,6 +4675,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isLink = link!;
     if (slider != null)
       config.isSlider = slider!;
+    if (keyboardKey != null)
+      config.isKeyboardKey = keyboardKey!;
     if (header != null)
       config.isHeader = header!;
     if (textField != null)

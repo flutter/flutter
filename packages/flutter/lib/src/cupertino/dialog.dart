@@ -1537,7 +1537,7 @@ class _RenderCupertinoDialogActions extends RenderBox
         );
 
         return constraints.constrain(
-          Size(dialogWidth, childSize.height)
+          Size(dialogWidth, childSize.height),
         );
       } else {
         // Each button gets half the available width, minus a single divider.
@@ -1609,7 +1609,7 @@ class _RenderCupertinoDialogActions extends RenderBox
 
       // Our height is the accumulated height of all buttons and dividers.
       return constraints.constrain(
-        Size(dialogWidth, verticalOffset)
+        Size(dialogWidth, verticalOffset),
       );
     }
   }

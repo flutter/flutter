@@ -1578,13 +1578,13 @@ class _CalendarRangePickerDialog extends StatelessWidget {
     final String endDateText = _formatRangeEndDate(localizations, selectedStartDate, selectedEndDate, DateTime.now());
     final TextStyle? headlineStyle = textTheme.headline5;
     final TextStyle? startDateStyle = headlineStyle?.apply(
-        color: selectedStartDate != null ? headerForeground : headerDisabledForeground
+        color: selectedStartDate != null ? headerForeground : headerDisabledForeground,
     );
     final TextStyle? endDateStyle = headlineStyle?.apply(
-        color: selectedEndDate != null ? headerForeground : headerDisabledForeground
+        color: selectedEndDate != null ? headerForeground : headerDisabledForeground,
     );
     final TextStyle saveButtonStyle = textTheme.button!.apply(
-        color: onConfirm != null ? headerForeground : headerDisabledForeground
+        color: onConfirm != null ? headerForeground : headerDisabledForeground,
     );
 
     return SafeArea(
@@ -2303,7 +2303,7 @@ class _MonthItemState extends State<_MonthItem> {
     final int daysInMonth = DateUtils.getDaysInMonth(widget.displayedMonth.year, widget.displayedMonth.month);
     _dayFocusNodes = List<FocusNode>.generate(
         daysInMonth,
-        (int index) => FocusNode(skipTraversal: true, debugLabel: 'Day ${index + 1}')
+        (int index) => FocusNode(skipTraversal: true, debugLabel: 'Day ${index + 1}'),
     );
   }
 
