@@ -313,7 +313,7 @@ class Router<T> extends StatefulWidget {
         throw FlutterError(
           'Router operation requested with a context that does not include a Router.\n'
           'The context used to retrieve the Router must be that of a widget that '
-          'is a descendant of a Router widget.'
+          'is a descendant of a Router widget.',
         );
       }
       return true;
@@ -496,7 +496,7 @@ class _RouterState<T> extends State<Router<T>> {
               'Router.routeInformationParser returns a null RouteInformation. '
               'If you opt for route information reporting, the '
               'routeInformationParser must not report null for a given '
-              'configuration.'
+              'configuration.',
           ),
         );
       }
@@ -520,7 +520,7 @@ class _RouterState<T> extends State<Router<T>> {
               'Both Router.navigate and Router.neglect have been called in this '
               'build cycle, and the Router cannot decide whether to report the '
               'route information. Please make sure only one of them is called '
-              'within the same build cycle.'
+              'within the same build cycle.',
           ),
         );
       }
@@ -1184,7 +1184,7 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
   /// Use the [initialRouteInformation] to set the default route information for this
   /// provider.
   PlatformRouteInformationProvider({
-    RouteInformation? initialRouteInformation
+    RouteInformation? initialRouteInformation,
   }) : _value = initialRouteInformation;
 
   @override
