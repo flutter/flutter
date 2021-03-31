@@ -370,7 +370,7 @@
       "name": "Linux new_gallery__crane_perf",
       "repo": "flutter",
       "task_name": "linux_new_gallery__crane_perf",
-      "flaky": false
+      "flaky": true
     },
     {
       "name": "Linux picture_cache_perf__e2e_summary",
