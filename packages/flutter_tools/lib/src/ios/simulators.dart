@@ -471,6 +471,7 @@ class IOSSimulator extends Device {
         ipv6: ipv6,
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
+        logger: globals.logger,
       );
     }
 
