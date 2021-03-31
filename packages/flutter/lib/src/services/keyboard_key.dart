@@ -196,19 +196,6 @@ class LogicalKeyboardKey extends KeyboardKey {
         ?? '';
   }
 
-  @override
-  int get hashCode => keyId.hashCode;
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is LogicalKeyboardKey
-        && other.keyId == keyId;
-  }
-
   /// The debug string to print for this keyboard key, which will be null in
   /// release mode.
   ///
@@ -240,6 +227,19 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// Returns the [LogicalKeyboardKey] constant that matches the given ID, or
   /// null, if not found.
   static LogicalKeyboardKey? findKeyByKeyId(int keyId) => _knownLogicalKeys[keyId];
+
+  @override
+  int get hashCode => keyId.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is LogicalKeyboardKey
+        && other.keyId == keyId;
+  }
 
   /// Returns true if the given label represents a Unicode control character.
   ///
@@ -2407,19 +2407,6 @@ class PhysicalKeyboardKey extends KeyboardKey {
   /// for the HID usage values and their meanings.
   final int usbHidUsage;
 
-  @override
-  int get hashCode => usbHidUsage.hashCode;
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is PhysicalKeyboardKey
-        && other.usbHidUsage == usbHidUsage;
-  }
-
   /// The debug string to print for this keyboard key, which will be null in
   /// release mode.
   String? get debugName {
@@ -2435,6 +2422,19 @@ class PhysicalKeyboardKey extends KeyboardKey {
   /// Finds a known [PhysicalKeyboardKey] that matches the given USB HID usage
   /// code.
   static PhysicalKeyboardKey? findKeyByCode(int usageCode) => _knownPhysicalKeys[usageCode];
+
+  @override
+  int get hashCode => usbHidUsage.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is PhysicalKeyboardKey
+        && other.usbHidUsage == usbHidUsage;
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
