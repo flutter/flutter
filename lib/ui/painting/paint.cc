@@ -77,9 +77,6 @@ Paint::Paint(Dart_Handle paint_objects, Dart_Handle paint_data) {
   const uint32_t* uint_data = static_cast<const uint32_t*>(byte_data.data());
   const float* float_data = static_cast<const float*>(byte_data.data());
 
-  auto filter_quality =
-      static_cast<SkFilterQuality>(uint_data[kFilterQualityIndex]);
-
   Dart_Handle values[kObjectCount];
   if (!Dart_IsNull(paint_objects)) {
     FML_DCHECK(Dart_IsList(paint_objects));
@@ -95,7 +92,9 @@ Paint::Paint(Dart_Handle paint_objects, Dart_Handle paint_data) {
     Dart_Handle shader = values[kShaderIndex];
     if (!Dart_IsNull(shader)) {
       Shader* decoded = tonic::DartConverter<Shader*>::FromDart(shader);
-      paint_.setShader(decoded->shader(filter_quality));
+      auto sampling =
+          ImageFilter::SamplingFromIndex(uint_data[kFilterQualityIndex]);
+      paint_.setShader(decoded->shader(sampling));
     }
 
     Dart_Handle color_filter = values[kColorFilterIndex];
@@ -114,7 +113,6 @@ Paint::Paint(Dart_Handle paint_objects, Dart_Handle paint_data) {
   }
 
   paint_.setAntiAlias(uint_data[kIsAntiAliasIndex] == 0);
-  paint_.setFilterQuality(filter_quality);
 
   uint32_t encoded_color = uint_data[kColorIndex];
   if (encoded_color) {

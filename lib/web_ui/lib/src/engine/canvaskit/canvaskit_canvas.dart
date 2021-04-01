@@ -260,11 +260,6 @@ class CanvasKitCanvas implements ui.Canvas {
     assert(rectIsValid(center));
     assert(rectIsValid(dst));
     assert(paint != null); // ignore: unnecessary_null_comparison
-    _drawImageNine(image, center, dst, paint);
-  }
-
-  void _drawImageNine(
-      ui.Image image, ui.Rect center, ui.Rect dst, ui.Paint paint) {
     _canvas.drawImageNine(image as CkImage, center, dst, paint as CkPaint);
   }
 
