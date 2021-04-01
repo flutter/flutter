@@ -2959,9 +2959,6 @@ enum PlaceholderAlignment {
 /// method.
 class LineMetrics {
   /// Creates a [LineMetrics] object with only the specified values.
-  ///
-  /// Omitted values will remain null. [Paragraph.computeLineMetrics] produces
-  /// fully defined [LineMetrics] with no null values.
   LineMetrics({
     required this.hardBreak,
     required this.ascent,
