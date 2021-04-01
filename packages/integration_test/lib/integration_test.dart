@@ -38,7 +38,6 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
   /// Sets up a listener to report that the tests are finished when everything is
   /// torn down.
   IntegrationTestWidgetsFlutterBinding() {
-    // TODO(jackson): Report test results as they arrive
     tearDownAll(() async {
       if (!_allTestsPassed.isCompleted) {
         _allTestsPassed.complete(true);
