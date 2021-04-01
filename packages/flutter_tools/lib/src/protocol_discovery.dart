@@ -11,7 +11,7 @@ import 'package:meta/meta.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'device.dart';
-import 'device_port_forwader.dart';
+import 'device_port_forwarder.dart';
 
 /// Discovers a specific service protocol on a device, and forwards the service
 /// protocol device port to the host.
