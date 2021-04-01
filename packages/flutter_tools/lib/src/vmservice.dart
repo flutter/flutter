@@ -14,6 +14,7 @@ import 'base/common.dart';
 import 'base/context.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
+import 'base/utils.dart';
 import 'build_info.dart';
 import 'convert.dart';
 import 'device.dart';
@@ -322,7 +323,7 @@ Future<FlutterVmService> _connect(
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
   Device device,
 }) async {
-  final Uri wsUri = httpUri.replace(scheme: 'ws', path: globals.fs.path.join(httpUri.path, 'ws'));
+  final Uri wsUri = httpUri.replace(scheme: 'ws', path: urlContext.join(httpUri.path, 'ws'));
   final io.WebSocket channel = await _openChannel(wsUri.toString(), compression: compression);
   final vm_service.VmService delegateService = vm_service.VmService(
     channel,
