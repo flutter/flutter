@@ -295,7 +295,7 @@ class CupertinoListSection extends StatelessWidget {
   /// The [hasLeading] parameter specifies whether children [CupertinoListTile]
   /// widgets contain leading or not. Used for calculating correct starting
   /// margin for the divider between rows.
-  /// 
+  ///
   /// The [topMargin] is used to specify the margin above the list section. It
   /// matches the iOS look by default.
   ///
