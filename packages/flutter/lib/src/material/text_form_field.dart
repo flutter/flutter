@@ -315,9 +315,9 @@ class TextFormField extends FormField<String> {
 }
 
 class _TextFormFieldState extends FormFieldState<String> {
-  late final RestorableTextEditingController _controller = RestorableTextEditingController(text: widget.initialValue);
+  RestorableTextEditingController? _controller;
 
-  TextEditingController get _effectiveController => widget.controller ?? _controller.value;
+  TextEditingController get _effectiveController => widget.controller ?? _controller!.value;
 
   @override
   TextFormField get widget => super.widget as TextFormField;
@@ -325,17 +325,37 @@ class _TextFormFieldState extends FormFieldState<String> {
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     super.restoreState(oldBucket, initialRestore);
-    registerForRestoration(_controller, 'text_editing_controller');
+    if (_controller != null) {
+      _registerController();
+    }
     // Make sure to update the internal [FormFieldState] value to sync up with
     // text editing controller value.
     setValue(_effectiveController.text);
   }
 
+  void _registerController() {
+    assert(_controller != null);
+    registerForRestoration(_controller!, 'controller');
+  }
+
+  void _createLocalController([TextEditingValue? value]) {
+    assert(_controller == null);
+    _controller = value == null
+        ? RestorableTextEditingController()
+        : RestorableTextEditingController.fromValue(value);
+    if (!restorePending) {
+      _registerController();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    if (widget.controller != null)
+    if (widget.controller != null) {
       widget.controller!.addListener(_handleControllerChanged);
+    } else {
+      _createLocalController();
+    }
   }
 
   @override
@@ -345,16 +365,26 @@ class _TextFormFieldState extends FormFieldState<String> {
       oldWidget.controller?.removeListener(_handleControllerChanged);
       widget.controller?.addListener(_handleControllerChanged);
 
-      if (oldWidget.controller != null && widget.controller == null)
-        _controller.value.value = oldWidget.controller!.value;
-      if (widget.controller != null)
+      if (oldWidget.controller != null && widget.controller == null) {
+        _createLocalController();
+        _controller!.value.value = oldWidget.controller!.value;
+      }
+
+      if (widget.controller != null) {
         setValue(widget.controller!.text);
+        if (oldWidget.controller == null) {
+          unregisterFromRestoration(_controller!);
+          _controller!.dispose();
+          _controller = null;
+        }
+      }
     }
   }
 
   @override
   void dispose() {
     widget.controller?.removeListener(_handleControllerChanged);
+    _controller?.dispose();
     super.dispose();
   }
 
