@@ -83,7 +83,7 @@ float DisplayHelperWinUWP::GetDpiScale() {
   double raw_per_view = current_display_info_.RawPixelsPerViewPixel();
 
   // TODO(clarkezone): ensure DPI handling is correct:
-  // because XBOX has display scaling off, logicalDpi retuns 96 which is
+  // because XBOX has display scaling off, logicalDpi returns 96 which is
   // incorrect check if raw_per_view is more acurate.
   // Also confirm if it is necessary to use this workaround on 10X
   // https://github.com/flutter/flutter/issues/70198

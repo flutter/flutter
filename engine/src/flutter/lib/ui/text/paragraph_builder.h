@@ -57,7 +57,7 @@ class ParagraphBuilder : public RefCountedDartWrappable<ParagraphBuilder> {
 
   Dart_Handle addText(const std::u16string& text);
 
-  // Pushes the information requried to leave an open space, where Flutter may
+  // Pushes the information required to leave an open space, where Flutter may
   // draw a custom placeholder into.
   //
   // Internally, this method adds a single object replacement character (0xFFFC)

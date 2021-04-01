@@ -163,7 +163,7 @@ class AX_EXPORT AXEventGenerator : public AXTreeObserver {
   AXEventGenerator();
 
   // Automatically registers itself as the observer of |tree| and
-  // clears it on desctruction. |tree| must be valid for the lifetime
+  // clears it on destruction. |tree| must be valid for the lifetime
   // of this object.
   explicit AXEventGenerator(AXTree* tree);
 

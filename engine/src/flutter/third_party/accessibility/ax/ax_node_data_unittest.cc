@@ -211,7 +211,7 @@ TEST(AXNodeDataTest, IsClickable) {
 
 TEST(AXNodeDataTest, IsInvocable) {
   // Test for iterating through all roles and validate if a role is invocable.
-  // A role is invocable if it is clickable and supports neither expand collpase
+  // A role is invocable if it is clickable and supports neither expand collapse
   // nor toggle.
   AXNodeData data;
   for (int role_idx = static_cast<int>(ax::mojom::Role::kMinValue);

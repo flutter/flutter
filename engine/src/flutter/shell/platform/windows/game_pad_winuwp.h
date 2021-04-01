@@ -64,7 +64,7 @@ class GamepadWinUWP {
   void GamepadButtonPressedInternal(
       winrt::Windows::Gaming::Input::GamepadButtons b);
 
-  // Functions to propogate controller events to external consumers.
+  // Functions to propagate controller events to external consumers.
   void RaiseLeftStickMoved(double x, double y);
   void RaiseRightStickMoved(double x, double y);
   void RaiseLeftTriggerMoved(double value);

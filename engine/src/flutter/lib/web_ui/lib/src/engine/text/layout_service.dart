@@ -974,7 +974,7 @@ class LineBuilder {
       // 3. `allowEmpty` is false.
       if (breakingPoint == nextBreak.indexWithoutTrailingSpaces) {
         // In this case, we just extend to `nextBreak` instead of creating a new
-        // artifical break. It's safe (and better) to do so, because we don't
+        // artificial break. It's safe (and better) to do so, because we don't
         // want the trailing white space to go to the next line.
         extendTo(nextBreak);
       } else {

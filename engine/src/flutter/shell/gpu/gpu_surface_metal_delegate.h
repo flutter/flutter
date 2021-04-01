@@ -59,7 +59,7 @@ class GPUSurfaceMetalDelegate {
 
   //------------------------------------------------------------------------------
   /// @brief Returns the handle to the CAMetalLayer to render to. This is only
-  /// called when the specifed render target type is `kCAMetalLayer`.
+  /// called when the specified render target type is `kCAMetalLayer`.
   ///
   virtual GPUCAMetalLayerHandle GetCAMetalLayer(
       const SkISize& frame_info) const = 0;

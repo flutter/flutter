@@ -157,7 +157,7 @@ public class TextInputChannel {
   /**
    * Instructs Flutter to reattach the last active text input client, if any.
    *
-   * <p>This is necessary when the view heirarchy has been detached and reattached to a {@link
+   * <p>This is necessary when the view hierarchy has been detached and reattached to a {@link
    * FlutterEngine}, as the engine may have kept alive a text editing client on the Dart side.
    */
   public void requestExistingInputState() {

@@ -30,7 +30,7 @@ class FlutterGLCompositor {
   //
   // Any additional state allocated for the backing store and
   // saved as user_data in the backing store must be collected
-  // in the backing_store's desctruction_callback field which will
+  // in the backing_store's destruction_callback field which will
   // be called when the embedder collects the backing store.
   bool CreateBackingStore(const FlutterBackingStoreConfig* config,
                           FlutterBackingStore* backing_store_out);

@@ -67,7 +67,7 @@ class ParagraphBuilder {
   // on the style_stack_;
   virtual void AddText(const std::u16string& text) = 0;
 
-  // Pushes the information requried to leave an open space, where Flutter may
+  // Pushes the information required to leave an open space, where Flutter may
   // draw a custom placeholder into.
   //
   // Internally, this method adds a single object replacement character (0xFFFC)

@@ -63,7 +63,7 @@ class Safari extends Browser {
         // TODO(nurhan): https://github.com/flutter/flutter/issues/50809
         var process = await Process.start(installation.executable, [
           // These are flags for `open` command line tool.
-          '-F', // Open a fresh Safari with no persistant state.
+          '-F', // Open a fresh Safari with no persistent state.
           '-W', // Wait until the Safari opens.
           '-n', // Open a new instance of the Safari even another one is open.
           '-b', // Specifies the bundle identifier for the application to use.

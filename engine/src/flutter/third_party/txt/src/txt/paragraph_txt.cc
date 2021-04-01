@@ -284,7 +284,7 @@ bool ParagraphTxt::ComputeLineBreaks() {
     }
 
     // Setup breaker. We wait to set the line width in order to account for the
-    // widths of the inline placeholders, which are calcualted in the loop over
+    // widths of the inline placeholders, which are calculated in the loop over
     // the runs.
     breaker_.setLineWidths(0.0f, 0, width_);
     breaker_.setJustified(paragraph_style_.text_align == TextAlign::justify);

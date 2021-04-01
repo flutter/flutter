@@ -85,7 +85,7 @@ class IosSafariArgParser extends BrowserArgParser {
           ? _iosSimulator
           : throw StateError('iosSimulator not started. Please first call '
               'initIOSSimulator method'))
-      : throw StateError('iOS Simulator is only avaliable on macOS machines.');
+      : throw StateError('iOS Simulator is only available on macOS machines.');
 
   IosSimulator _iosSimulator;
 
@@ -139,7 +139,7 @@ class IosSafariArgParser extends BrowserArgParser {
       ..addOption('device',
           defaultsTo: '$_pinnedIosDevice',
           help: 'The device to be used for the iOS Simulator during the tests. '
-              'Use `.` instead of space for seperating the words. '
+              'Use `.` instead of space for separating the words. '
               'Common examples: iPhone.8, iPhone.8.Plus, iPhone.11, '
               'iPhone 11 Pro. Use command: '
               '`xcrun simctl list devices` for listing the available '
@@ -150,7 +150,7 @@ class IosSafariArgParser extends BrowserArgParser {
   @override
   void parseOptions(ArgResults argResults) {
     final String iosVersion = argResults['version'] as String;
-    // The version will contain major and minor version seperated by a comma,
+    // The version will contain major and minor version separated by a comma,
     // for example: 13.1, 12.2
     assert(iosVersion.split('.').length == 2,
         'The version should be in format 13.5');

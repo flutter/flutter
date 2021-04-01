@@ -12,13 +12,13 @@ part of engine;
 /// self-intersect.
 ///
 /// Stores the verbs and points as they are given to us, with exceptions:
-///   - we only record "Close" if it was immediately preceeded by Move | Line | Quad | Cubic
+///   - we only record "Close" if it was immediately preceded by Move | Line | Quad | Cubic
 ///   - we insert a Move(0,0) if Line | Quad | Cubic is our first command
 ///
 ///   The iterator does more cleanup, especially if forceClose == true
 ///   1. If we encounter degenerate segments, remove them
 ///   2. if we encounter Close, return a cons'd up Line() first (if the curr-pt != start-pt)
-///   3. if we encounter Move without a preceeding Close, and forceClose is true, goto #2
+///   3. if we encounter Move without a preceding Close, and forceClose is true, goto #2
 ///   4. if we encounter Line | Quad | Cubic after Close, cons up a Move
 class SurfacePath implements ui.Path {
   // Initial valid of last move to index so we can detect if a move to
