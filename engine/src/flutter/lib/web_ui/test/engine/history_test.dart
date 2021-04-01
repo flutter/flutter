@@ -279,7 +279,7 @@ void testMain() {
         // TODO(nurhan): https://github.com/flutter/flutter/issues/50836
         skip: browserEngine == BrowserEngine.edge);
 
-    test('browser back button push route infromation correctly', () async {
+    test('browser back button push route information correctly', () async {
       final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
         TestHistoryEntry('initial state', null, '/home'),
       );

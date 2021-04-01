@@ -57,7 +57,7 @@ public final class MotionEventTracker {
 
   /**
    * Returns the MotionEvent corresponding to the eventId while discarding all the motion events
-   * that occured prior to the event represented by the eventId. Returns null if this event was
+   * that occurred prior to the event represented by the eventId. Returns null if this event was
    * popped or discarded.
    */
   @Nullable

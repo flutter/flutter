@@ -1611,7 +1611,7 @@ enum PixelFormat {
 ///
 /// A class or method that receives an image object must call [dispose] on the
 /// handle when it is no longer needed. To create a shareable reference to the
-/// underlying image, call [clone]. The method or object that recieves
+/// underlying image, call [clone]. The method or object that receives
 /// the new instance will then be responsible for disposing it, and the
 /// underlying image itself will be disposed when all outstanding handles are
 /// disposed.
@@ -1727,7 +1727,7 @@ class Image {
   /// It is safe to pass an [Image] handle to another object or method if the
   /// current holder no longer needs it.
   ///
-  /// To check whether two [Image] references are refering to the same
+  /// To check whether two [Image] references are referring to the same
   /// underlying image memory, use [isCloneOf] rather than the equality operator
   /// or [identical].
   ///

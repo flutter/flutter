@@ -38,7 +38,7 @@ class AssetResolver {
   ///             run configuration, the tooling can avoid needing to sync all
   ///             application assets through the Dart devFS upon connecting to
   ///             the VM Service. Besides improving the startup performance of
-  ///             running a Flutter application, it also reduces the occurance
+  ///             running a Flutter application, it also reduces the occurrence
   ///             of tool failures due to repeated network flakes caused by
   ///             damaged cables or hereto unknown bugs in the Dart HTTP server
   ///             implementation.

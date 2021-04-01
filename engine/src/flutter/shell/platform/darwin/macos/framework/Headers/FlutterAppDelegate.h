@@ -33,7 +33,7 @@ FLUTTER_DARWIN_EXPORT
 @property(weak, nonatomic) IBOutlet NSMenu* applicationMenu;
 
 /**
- * The primary application window containg a FlutterViewController. This is primarily intended
+ * The primary application window containing a FlutterViewController. This is primarily intended
  * for use in single-window applications.
  */
 @property(weak, nonatomic) IBOutlet NSWindow* mainFlutterWindow;

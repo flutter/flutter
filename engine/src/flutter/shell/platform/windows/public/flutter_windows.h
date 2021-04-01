@@ -45,7 +45,7 @@ typedef struct {
   // containing the executable.
   const wchar_t* icu_data_path;
 
-  // The path to the AOT libary file for your application, if any.
+  // The path to the AOT library file for your application, if any.
   // This can either be an absolute path or a path relative to the directory
   // containing the executable. This can be nullptr for a non-AOT build, as
   // it will be ignored in that case.

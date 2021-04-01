@@ -213,7 +213,7 @@ const char* getEventString(NSString* characters) {
  * |FlutterEmbedderKeyResponder.handleResponse|.
  *
  * The embedder functions only accept C-functions as callbacks, as well as an
- * arbitray user_data. In order to send an instance method of
+ * arbitrary user_data. In order to send an instance method of
  * |FlutterEmbedderKeyResponder.handleResponse| to the engine's |SendKeyEvent|,
  * we wrap the invocation into a C-function |HandleResponse| and invocation
  * context |FlutterKeyPendingResponse|.

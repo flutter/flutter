@@ -1443,7 +1443,7 @@ void testMain() {
         // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
         skip: browserEngine == BrowserEngine.webkit);
 
-    test('input font set succesfully with null fontWeightIndex', () {
+    test('input font set successfully with null fontWeightIndex', () {
       final MethodCall setClient = MethodCall(
           'TextInput.setClient', <dynamic>[123, flutterSinglelineConfig]);
       sendFrameworkMessage(codec.encodeMethodCall(setClient));

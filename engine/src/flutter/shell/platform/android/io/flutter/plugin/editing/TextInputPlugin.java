@@ -73,7 +73,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     }
 
     // Sets up syncing ime insets with the framework, allowing
-    // the Flutter view to grow and shrink to accomodate Android
+    // the Flutter view to grow and shrink to accommodate Android
     // controlled keyboard animations.
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
       int mask = 0;

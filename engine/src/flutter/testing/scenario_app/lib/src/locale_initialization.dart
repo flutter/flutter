@@ -11,7 +11,7 @@ import 'package:vector_math/vector_math_64.dart';
 
 import 'scenario.dart';
 
-/// Sends the recieved locale data back as semantics information.
+/// Sends the received locale data back as semantics information.
 class LocaleInitialization extends Scenario {
   /// Constructor
   LocaleInitialization(PlatformDispatcher dispatcher)

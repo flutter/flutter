@@ -67,7 +67,7 @@
 @property(nullable, nonatomic, weak) id<FlutterIOSurfaceManagerDelegate> delegate;
 
 /**
- * Initializes and returns an IOSurface manager that renders to a child layer (refered to as the
+ * Initializes and returns an IOSurface manager that renders to a child layer (referred to as the
  * content layer) of the containing layer and applies the transform to the contents of the content
  * layer.
  */

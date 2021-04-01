@@ -697,7 +697,7 @@ class BitmapCanvas extends EngineCanvas {
     // code path that sets the size of the element and clips.
     //
     // If there is a color filter set however, we maybe using background-image
-    // to render therefore we have to explicitely set width/height of the
+    // to render therefore we have to explicitly set width/height of the
     // element for blending to work with background-color.
     if (dst.width == image.width &&
         dst.height == image.height &&
@@ -750,7 +750,7 @@ class BitmapCanvas extends EngineCanvas {
     final String heightPx = '${targetHeight.toStringAsFixed(2)}px';
     imageStyle
       // left,top are set to 0 (although position is absolute) because
-      // Chrome will glitch if you leave them out, reproducable with
+      // Chrome will glitch if you leave them out, reproducible with
       // canvas_image_blend_test on row 6,  MacOS / Chrome 81.04.
       ..left = "0px"
       ..top = "0px"

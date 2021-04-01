@@ -196,7 +196,7 @@ class EngineAutofillForm {
     ids.sort();
     final StringBuffer idBuffer = StringBuffer();
 
-    // Add a seperator between element identifiers.
+    // Add a separator between element identifiers.
     for (final String id in ids) {
       if (idBuffer.length > 0) {
         idBuffer.write('*');

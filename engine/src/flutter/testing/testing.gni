@@ -44,7 +44,7 @@ template("fixtures_location") {
 # Arguments
 #     dart_main (required): The Main Dart file.
 #
-#     dart_kernel (required): The path to the ouput kernel snapshot in the out
+#     dart_kernel (required): The path to the output kernel snapshot in the out
 #                             directory.
 template("dart_snapshot_kernel") {
   testonly = true

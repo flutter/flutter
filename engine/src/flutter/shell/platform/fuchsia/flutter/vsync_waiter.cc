@@ -80,7 +80,7 @@ VsyncWaiter::~VsyncWaiter() {
 /// Returns the system time at which the next frame is likely to be presented.
 ///
 /// Consider the following scenarios, where in both the
-/// scenarious the result will be the same.
+/// scenarios the result will be the same.
 ///
 /// Scenario 1:
 /// presentation_interval is 2

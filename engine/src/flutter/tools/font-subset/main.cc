@@ -39,8 +39,8 @@ void Usage() {
                "and the subsetting operation succeeds."
             << std::endl;
   std::cout << "Codepoints should be specified on stdin, separated by spaces, "
-               "and must be input as decimal numbers (123), hexidecimal "
-               "numbers (0x7B), or unicode hexidecimal characters (\\u7B)."
+               "and must be input as decimal numbers (123), hexadecimal "
+               "numbers (0x7B), or unicode hexadecimal characters (\\u7B)."
             << std::endl;
   std::cout << "Input terminates with a newline." << std::endl;
   std::cout

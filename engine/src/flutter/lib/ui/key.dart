@@ -60,7 +60,7 @@ class KeyData {
   ///
   /// For example, some key downs or ups might be lost when the window loses
   /// focus. Some platforms provides ways to query whether a key is being held.
-  /// If the embedder detects an inconsistancy between its internal record and
+  /// If the embedder detects an inconsistency between its internal record and
   /// the state returned by the system, the embedder will synthesize a
   /// corresponding event to synchronize the state without breaking the event
   /// model.

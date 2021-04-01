@@ -92,7 +92,7 @@ public final class FlutterInjector {
    * Builder used to supply a custom FlutterInjector instance to {@link
    * FlutterInjector#setInstance(FlutterInjector)}.
    *
-   * <p>Non-overriden values have reasonable defaults.
+   * <p>Non-overridden values have reasonable defaults.
    */
   public static final class Builder {
     private FlutterLoader flutterLoader;

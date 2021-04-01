@@ -522,7 +522,7 @@ void FuchsiaExternalViewEmbedder::Reset() {
   // Detach the root node to prepare for the next frame.
   layer_tree_node_.DetachChildren();
 
-  // Clear images on all layers so they aren't cached unnecesarily.
+  // Clear images on all layers so they aren't cached unnecessarily.
   for (auto& layer : scenic_layers_) {
     layer.material.SetTexture(0);
   }

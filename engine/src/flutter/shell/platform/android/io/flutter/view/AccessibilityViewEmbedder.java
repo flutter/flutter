@@ -194,7 +194,7 @@ class AccessibilityViewEmbedder {
     flutterIdToOrigin.put(flutterId, origin);
   }
 
-  // Supressing deprecation warning for AccessibilityNodeInfo#getBoundsinParent and
+  // Suppressing deprecation warning for AccessibilityNodeInfo#getBoundsinParent and
   // AccessibilityNodeInfo#getBoundsinParent as we are copying the platform view's
   // accessibility node and we should not lose any available bounds information.
   @SuppressWarnings("deprecation")

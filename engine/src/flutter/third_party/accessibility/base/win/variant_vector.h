@@ -123,7 +123,7 @@ class BASE_EXPORT VariantVector final {
         << Type();
   }
 
-  // Creates a SAFEARRAY and populates it with teh values held by each VARIANT
+  // Creates a SAFEARRAY and populates it with the values held by each VARIANT
   // in |vector_|, transferring ownership to the new SAFEARRAY.
   // The VariantVector is reset when successful.
   template <VARTYPE ElementVartype>

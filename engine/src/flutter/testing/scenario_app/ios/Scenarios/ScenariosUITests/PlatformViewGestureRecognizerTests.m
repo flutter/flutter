@@ -40,11 +40,11 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
 
   NSPredicate* predicate =
       [NSPredicate predicateWithFormat:@"label == %@", @"-gestureTouchesBegan-gestureTouchesEnded"];
-  XCTNSPredicateExpectation* expection =
+  XCTNSPredicateExpectation* exception =
       [[XCTNSPredicateExpectation alloc] initWithPredicate:predicate object:platformView];
 
   [platformView tap];
-  [self waitForExpectations:@[ expection ] timeout:kSecondsToWaitForPlatformView];
+  [self waitForExpectations:@[ exception ] timeout:kSecondsToWaitForPlatformView];
   XCTAssertEqualObjects(platformView.label, @"-gestureTouchesBegan-gestureTouchesEnded");
 }
 
@@ -75,11 +75,11 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
         XCUIElement* view = (XCUIElement*)evaluatedObject;
         return [view.label containsString:@"-gestureTouchesBegan"];
       }];
-  XCTNSPredicateExpectation* expection =
+  XCTNSPredicateExpectation* exception =
       [[XCTNSPredicateExpectation alloc] initWithPredicate:predicate object:platformView];
 
   [platformView tap];
-  [self waitForExpectations:@[ expection ] timeout:kSecondsToWaitForPlatformView];
+  [self waitForExpectations:@[ exception ] timeout:kSecondsToWaitForPlatformView];
   XCTAssertTrue([platformView.label containsString:@"-gestureTouchesBegan"]);
 }
 
@@ -107,12 +107,12 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
   NSPredicate* predicate = [NSPredicate
       predicateWithFormat:@"label == %@",
                           @"-gestureTouchesBegan-gestureTouchesEnded-platformViewTapped"];
-  XCTNSPredicateExpectation* expection =
+  XCTNSPredicateExpectation* exception =
       [[XCTNSPredicateExpectation alloc] initWithPredicate:predicate object:platformView];
 
   [platformView tap];
 
-  [self waitForExpectations:@[ expection ] timeout:kSecondsToWaitForPlatformView];
+  [self waitForExpectations:@[ exception ] timeout:kSecondsToWaitForPlatformView];
   XCTAssertEqualObjects(platformView.label,
                         @"-gestureTouchesBegan-gestureTouchesEnded-platformViewTapped");
 }
@@ -141,7 +141,7 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
   NSPredicate* predicate = [NSPredicate
       predicateWithFormat:@"label == %@",
                           @"-gestureTouchesBegan-gestureTouchesEnded-platformViewTapped"];
-  XCTNSPredicateExpectation* expection =
+  XCTNSPredicateExpectation* exception =
       [[XCTNSPredicateExpectation alloc] initWithPredicate:predicate object:platformView];
 
   XCUICoordinate* coordinate =
@@ -150,7 +150,7 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
                                                  platformView.frame.origin.y + 10)];
   [coordinate tap];
 
-  [self waitForExpectations:@[ expection ] timeout:kSecondsToWaitForPlatformView];
+  [self waitForExpectations:@[ exception ] timeout:kSecondsToWaitForPlatformView];
   XCTAssertEqualObjects(platformView.label,
                         @"-gestureTouchesBegan-gestureTouchesEnded-platformViewTapped");
 }

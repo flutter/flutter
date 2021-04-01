@@ -55,7 +55,7 @@ namespace flutter {
 // Certain fields are ignored in CATransform3D since SkMatrix is 3x3 and CATransform3D is 4x4.
 CATransform3D GetCATransform3DFromSkMatrix(const SkMatrix& matrix);
 
-// Reset the anchor of `layer` to match the tranform operation from flow.
+// Reset the anchor of `layer` to match the transform operation from flow.
 // The position of the `layer` should be unchanged after resetting the anchor.
 void ResetAnchor(CALayer* layer);
 
@@ -141,11 +141,11 @@ class FlutterPlatformViewsController {
       NSString* factoryId,
       FlutterPlatformViewGestureRecognizersBlockingPolicy gestureRecognizerBlockingPolicy);
 
-  // Called at the begining of each frame.
+  // Called at the beginning of each frame.
   void BeginFrame(SkISize frame_size);
 
   // Indicates that we don't compisite any platform views or overlays during this frame.
-  // Also reverts the composition_order_ to its original state at the begining of the frame.
+  // Also reverts the composition_order_ to its original state at the beginning of the frame.
   void CancelFrame();
 
   void PrerollCompositeEmbeddedView(int view_id,

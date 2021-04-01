@@ -20,7 +20,7 @@ namespace flutter {
 /// Holds an `EGLSurface` reference.
 ///
 ///
-/// This can be used in conjuction to unique_ptr to provide better guarantees
+/// This can be used in conjunction to unique_ptr to provide better guarantees
 /// about the lifespan of the `EGLSurface` object.
 ///
 class AndroidEGLSurface {

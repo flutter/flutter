@@ -700,7 +700,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(InlinePlaceholderBaselineParagraph)) {
     GetCanvas()->drawRect(boxes[i].rect, paint);
   }
   EXPECT_EQ(boxes.size(), 1ull);
-  // Verify the other text didn't just shift to accomodate it.
+  // Verify the other text didn't just shift to accommodate it.
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 75.34375);
   EXPECT_FLOAT_EQ(boxes[0].rect.top(), 14.226246);
   EXPECT_FLOAT_EQ(boxes[0].rect.right(), 90.945312);
@@ -776,7 +776,7 @@ TEST_F(ParagraphTest,
     GetCanvas()->drawRect(boxes[i].rect, paint);
   }
   EXPECT_EQ(boxes.size(), 1ull);
-  // Verify the other text didn't just shift to accomodate it.
+  // Verify the other text didn't just shift to accommodate it.
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 75.34375);
   EXPECT_FLOAT_EQ(boxes[0].rect.top(), 25.53125);
   EXPECT_FLOAT_EQ(boxes[0].rect.right(), 90.945312);
@@ -852,7 +852,7 @@ TEST_F(ParagraphTest,
     GetCanvas()->drawRect(boxes[i].rect, paint);
   }
   EXPECT_EQ(boxes.size(), 1ull);
-  // Verify the other text didn't just shift to accomodate it.
+  // Verify the other text didn't just shift to accommodate it.
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 75.34375);
   EXPECT_FLOAT_EQ(boxes[0].rect.top(), -0.12109375);
   EXPECT_FLOAT_EQ(boxes[0].rect.right(), 90.945312);
@@ -926,7 +926,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(InlinePlaceholderBottomParagraph)) {
     GetCanvas()->drawRect(boxes[i].rect, paint);
   }
   EXPECT_EQ(boxes.size(), 1ull);
-  // Verify the other text didn't just shift to accomodate it.
+  // Verify the other text didn't just shift to accommodate it.
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 0.5);
   EXPECT_FLOAT_EQ(boxes[0].rect.top(), 19.53125);
   EXPECT_FLOAT_EQ(boxes[0].rect.right(), 16.101562);
@@ -1000,7 +1000,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(InlinePlaceholderTopParagraph)) {
     GetCanvas()->drawRect(boxes[i].rect, paint);
   }
   EXPECT_EQ(boxes.size(), 1ull);
-  // Verify the other text didn't just shift to accomodate it.
+  // Verify the other text didn't just shift to accommodate it.
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 0.5);
   EXPECT_FLOAT_EQ(boxes[0].rect.top(), 0);
   EXPECT_FLOAT_EQ(boxes[0].rect.right(), 16.101562);
@@ -1074,7 +1074,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(InlinePlaceholderMiddleParagraph)) {
     GetCanvas()->drawRect(boxes[i].rect, paint);
   }
   EXPECT_EQ(boxes.size(), 1ull);
-  // Verify the other text didn't just shift to accomodate it.
+  // Verify the other text didn't just shift to accommodate it.
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 75.34375);
   EXPECT_FLOAT_EQ(boxes[0].rect.top(), 9.765625);
   EXPECT_FLOAT_EQ(boxes[0].rect.right(), 90.945312);
@@ -1150,7 +1150,7 @@ TEST_F(ParagraphTest,
     GetCanvas()->drawRect(boxes[i].rect, paint);
   }
   EXPECT_EQ(boxes.size(), 1ull);
-  // Verify the other text didn't just shift to accomodate it.
+  // Verify the other text didn't just shift to accommodate it.
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 135.5);
   EXPECT_FLOAT_EQ(boxes[0].rect.top(), 4.7033391);
   EXPECT_FLOAT_EQ(boxes[0].rect.right(), 162.5);

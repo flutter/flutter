@@ -537,7 +537,7 @@ bool FlutterPlatformViewsController::SubmitFrameGpuSafe(GrDirectContext* gr_cont
         // and the platform view rect.
         joined_rect.intersect(platform_view_rect);
         // Subpixels in the platform may not align with the canvas subpixels.
-        // To workaround it, round the floating point bounds and make the rect slighly larger.
+        // To workaround it, round the floating point bounds and make the rect slightly larger.
         // For example, {0.3, 0.5, 3.1, 4.7} becomes {0, 0, 4, 5}.
         joined_rect.setLTRB(std::floor(joined_rect.left()), std::floor(joined_rect.top()),
                             std::ceil(joined_rect.right()), std::ceil(joined_rect.bottom()));

@@ -104,7 +104,7 @@ class NumberInputType extends EngineInputType {
 /// Decimal input type.
 ///
 /// Input keyboard with containing the digits 0–9 and a decimal separator.
-/// Seperator can be `.`, `,` depending on the locale.
+/// Separator can be `.`, `,` depending on the locale.
 class DecimalInputType extends EngineInputType {
   const DecimalInputType();
 

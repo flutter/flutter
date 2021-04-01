@@ -16,7 +16,7 @@
 #include "flutter/shell/platform/linux/testing/fl_test.h"
 #include "flutter/shell/platform/linux/testing/mock_renderer.h"
 
-// Checks sending a message without a reponse works.
+// Checks sending a message without a response works.
 TEST(FlBasicMessageChannelTest, SendMessageWithoutResponse) {
   g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
 

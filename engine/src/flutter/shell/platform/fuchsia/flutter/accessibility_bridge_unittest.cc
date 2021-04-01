@@ -844,7 +844,7 @@ TEST_F(AccessibilityBridgeTest, HitTestUnfocusableChild) {
 
 TEST_F(AccessibilityBridgeTest, HitTestOverlapping) {
   // Tests that the first node in hit test order wins, even if a later node
-  // would be able to recieve the hit.
+  // would be able to receive the hit.
   flutter::SemanticsNode node0;
   node0.id = 0;
   node0.rect.setLTRB(0, 0, 100, 100);

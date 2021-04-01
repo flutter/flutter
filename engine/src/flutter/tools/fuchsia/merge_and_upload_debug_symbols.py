@@ -23,7 +23,7 @@ def IsLinux():
 
 
 # out_dir here is of the format "/b/s/w/ir/k/recipe_cleanup/tmpIbWDdp"
-# we need to palce the cipd definition in this directory.
+# we need to place the cipd definition in this directory.
 def GetPackagingDir(out_dir):
   return os.path.abspath(out_dir)
 

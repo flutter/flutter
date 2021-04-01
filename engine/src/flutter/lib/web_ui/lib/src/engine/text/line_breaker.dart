@@ -186,7 +186,7 @@ LineBreakResult nextLineBreak(String text, int index, {int? maxEnd}) {
   /// The index of the last character that wasn't a new line.
   int lastNonNewlineIndex = index;
 
-  // When the text/line starts with SP, we should treat the begining of text/line
+  // When the text/line starts with SP, we should treat the beginning of text/line
   // as if it were a WJ (word joiner).
   if (curr == LineCharProperty.SP) {
     baseOfSpaceSequence = LineCharProperty.WJ;

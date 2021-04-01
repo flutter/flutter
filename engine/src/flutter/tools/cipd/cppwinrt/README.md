@@ -23,7 +23,7 @@ Updating this package requires the following dependencies:
 To update the CIPD package, follow these steps:
 
 1. From the [CppWinRT package](https://www.nuget.org/packages/Microsoft.Windows.CppWinRT/)
-   page on nuget, click the _Download pacakge_ link.
+   page on nuget, click the _Download package_ link.
 2. Copy the downloaded `.nupkg` file into this directory.
 3. Unzip the archive to a new subdirectory named `tmp`:
    ```

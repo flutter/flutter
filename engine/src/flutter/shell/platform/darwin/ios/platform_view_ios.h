@@ -98,7 +98,7 @@ class PlatformViewIOS final : public PlatformView {
 
  private:
   /// Smart pointer for use with objective-c observers.
-  /// This guarentees we remove the observer.
+  /// This guarantees we remove the observer.
   class ScopedObserver {
    public:
     ScopedObserver();
@@ -111,7 +111,7 @@ class PlatformViewIOS final : public PlatformView {
     id<NSObject> observer_;
   };
 
-  /// Smart pointer that guarentees we communicate clearing Accessibility
+  /// Smart pointer that guarantees we communicate clearing Accessibility
   /// information to Dart.
   class AccessibilityBridgePtr {
    public:

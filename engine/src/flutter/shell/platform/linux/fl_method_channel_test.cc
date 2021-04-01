@@ -488,7 +488,7 @@ static GBytes* test_method_codec_encode_error_envelope(FlMethodCodec* codec,
   return nullptr;
 }
 
-// Implements FlMethodCodec::encode_decode_reponse.
+// Implements FlMethodCodec::encode_decode_response.
 static FlMethodResponse* test_method_codec_decode_response(FlMethodCodec* codec,
                                                            GBytes* message,
                                                            GError** error) {
@@ -531,7 +531,7 @@ static void method_call_success_error_cb(FlMethodChannel* channel,
       fl_method_call_respond_success(method_call, result, &response_error));
   EXPECT_NE(response_error, nullptr);
 
-  // Respond to stop a warning occuring about not responding.
+  // Respond to stop a warning occurring about not responding.
   fl_method_call_respond_not_implemented(method_call, nullptr);
 
   g_main_loop_quit(static_cast<GMainLoop*>(user_data));
@@ -573,7 +573,7 @@ static void method_call_error_error_cb(FlMethodChannel* channel,
                                             details, &response_error));
   EXPECT_NE(response_error, nullptr);
 
-  // Respond to stop a warning occuring about not responding.
+  // Respond to stop a warning occurring about not responding.
   fl_method_call_respond_not_implemented(method_call, nullptr);
 
   g_main_loop_quit(static_cast<GMainLoop*>(user_data));

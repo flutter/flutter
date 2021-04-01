@@ -37,7 +37,7 @@ GFX_EXPORT Rect ToEnclosedRectIgnoringError(const RectF& rect, float error);
 GFX_EXPORT Rect ToNearestRect(const RectF& rect);
 
 // Returns true if the Rect produced after snapping the corners of the RectF
-// to an integer grid is withing |distance|.
+// to an integer grid is within |distance|.
 GFX_EXPORT bool IsNearestRectWithinDistance(const gfx::RectF& rect,
                                             float distance);
 

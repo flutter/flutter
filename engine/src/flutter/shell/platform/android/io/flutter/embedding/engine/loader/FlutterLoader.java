@@ -77,7 +77,7 @@ public class FlutterLoader {
    * Creates a {@code FlutterLoader} with the specified {@link FlutterJNI}.
    *
    * @param flutterJNI The {@link FlutterJNI} instance to use for loading the libflutter.so C++
-   *     library, setting up the font manager, and calling into C++ initalization.
+   *     library, setting up the font manager, and calling into C++ initialization.
    */
   public FlutterLoader(@NonNull FlutterJNI flutterJNI) {
     this.flutterJNI = flutterJNI;

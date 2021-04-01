@@ -36,12 +36,12 @@ COMPARE_TESTS = (
 )
 
 FAIL_TESTS = [
-  ([FONT_SUBSET, 'output.ttf', 'does-not-exist.ttf'], ['1',]), # non-existant input font
+  ([FONT_SUBSET, 'output.ttf', 'does-not-exist.ttf'], ['1',]), # non-existent input font
   ([FONT_SUBSET, 'output.ttf', MATERIAL_TTF], ['0xFFFFFFFF',]), # Value too big.
   ([FONT_SUBSET, 'output.ttf', MATERIAL_TTF], ['-1',]), # invalid value
   ([FONT_SUBSET, 'output.ttf', MATERIAL_TTF], ['foo',]), # no valid values
   ([FONT_SUBSET, 'output.ttf', MATERIAL_TTF], ['0xE003', '0x12', '0xE004',]), # codepoint not in font
-  ([FONT_SUBSET, 'non-existant-dir/output.ttf', MATERIAL_TTF], ['0xE003',]), # dir doesn't exist
+  ([FONT_SUBSET, 'non-existent-dir/output.ttf', MATERIAL_TTF], ['0xE003',]), # dir doesn't exist
   ([FONT_SUBSET, 'output.ttf', MATERIAL_TTF], [' ',]), # empty input
   ([FONT_SUBSET, 'output.ttf', MATERIAL_TTF], []), # empty input
   ([FONT_SUBSET, 'output.ttf', MATERIAL_TTF], ['']), # empty input

@@ -388,7 +388,8 @@ class DartIsolate : public UIDartState {
   /// @brief      Transition the isolate to the `Phase::Shutdown` phase. The
   ///             only thing left to do is to collect the isolate.
   ///
-  /// @return     If the isolate succesfully transitioned to the shutdown phase.
+  /// @return     If the isolate successfully transitioned to the shutdown
+  ///             phase.
   ///
   [[nodiscard]] bool Shutdown();
 

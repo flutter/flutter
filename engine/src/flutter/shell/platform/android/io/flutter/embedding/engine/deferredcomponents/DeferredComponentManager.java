@@ -61,7 +61,7 @@ public interface DeferredComponentManager {
    *
    * <p>The {@link DeferredComponentChannel} passes manual invocations of {@link
    * installDeferredComponent} and {@link getDeferredComponentInstallState} from the method channel
-   * to this DeferredComponentManager. Upon completion of the install process, sucessful
+   * to this DeferredComponentManager. Upon completion of the install process, successful
    * installations should notify the DeferredComponentChannel by calling {@link
    * DeferredComponentChannel.completeInstallSuccess} while errors and failures should call {@link
    * DeferredComponentChannel.completeInstallError}.
@@ -142,7 +142,7 @@ public interface DeferredComponentManager {
    * implementation begins in the "requested" state before transitioning to the "downloading" and
    * "installed" states.
    *
-   * <p>Only sucessfully requested components have state. Modules that are invalid or have not been
+   * <p>Only successfully requested components have state. Modules that are invalid or have not been
    * requested with {@link installDeferredComponent} will not have a state. Due to the asynchronous
    * nature of the download process, components may not immediately have a valid state upon return
    * of {@link installDeferredComponent}, though valid components will eventually obtain a state.
