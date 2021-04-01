@@ -31,7 +31,7 @@ const int kIsolateReloadBarred = 1005;
 
 /// Override `WebSocketConnector` in [context] to use a different constructor
 /// for [WebSocket]s (used by tests).
-typedef WebSocketConnector = Future<io.WebSocket> Function(String url, {io.CompressionOptions compression, Logger logger});
+typedef WebSocketConnector = Future<io.WebSocket> Function(String url, {io.CompressionOptions compression, @required Logger logger});
 
 typedef PrintStructuredErrorLogMethod = void Function(vm_service.Event);
 
@@ -338,7 +338,7 @@ Future<FlutterVmService> _connect(
   @required Logger logger,
 }) async {
   final Uri wsUri = httpUri.replace(scheme: 'ws', path: urlContext.join(httpUri.path, 'ws'));
-  final io.WebSocket channel = await _openChannel(wsUri.toString(), compression: compression);
+  final io.WebSocket channel = await _openChannel(wsUri.toString(), compression: compression, logger: logger);
   final vm_service.VmService delegateService = vm_service.VmService(
     channel,
     channel.add,
