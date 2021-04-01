@@ -1683,7 +1683,7 @@ void main() {
     );
 
     expect(find.byType(Tooltip), findsNWidgets(3));
-    expect(find.byTooltip('Test tooltip',), findsNWidgets(3));
+    expect(find.byTooltip('Test tooltip'), findsNWidgets(3));
   });
 
   testWidgets('Allow Widget for PopupMenuButton.icon', (WidgetTester tester) async {
