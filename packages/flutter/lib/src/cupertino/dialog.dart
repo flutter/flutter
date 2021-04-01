@@ -1135,9 +1135,9 @@ class _RenderCupertinoDialog extends RenderBox {
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() => <DiagnosticsNode>[
-        if (contentSection != null) contentSection!.toDiagnosticsNode(name: 'content'),
-        if (actionsSection != null) actionsSection!.toDiagnosticsNode(name: 'actions'),
-      ];
+    if (contentSection != null) contentSection!.toDiagnosticsNode(name: 'content'),
+    if (actionsSection != null) actionsSection!.toDiagnosticsNode(name: 'actions'),
+  ];
 
   @override
   double computeMinIntrinsicWidth(double height) {
@@ -1340,7 +1340,7 @@ class _RenderCupertinoDialog extends RenderBox {
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     if (isActionSheet) {
       final MultiChildLayoutParentData contentSectionParentData = contentSection!.parentData! as MultiChildLayoutParentData;
       final MultiChildLayoutParentData actionsSectionParentData = actionsSection!.parentData! as MultiChildLayoutParentData;
@@ -1371,8 +1371,8 @@ class _RenderCupertinoDialog extends RenderBox {
               assert(transformed == position - contentSectionParentData.offset);
               return contentSection!.hitTest(result, position: transformed);
             },
-          )
-        || result.addWithPaintOffset(
+          ) ||
+          result.addWithPaintOffset(
             offset: actionsSectionParentData.offset,
             position: position,
             hitTest: (BoxHitTestResult result, Offset transformed) {
