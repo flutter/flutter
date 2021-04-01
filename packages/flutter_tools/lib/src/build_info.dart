@@ -768,7 +768,7 @@ final Converter<String, String> _defineDecoder = base64.decoder.fuse(utf8.decode
 /// control character on windows command lines.
 ///
 /// When decoding this string, it can be safely split on commas, since any
-/// user provided commans will still be encoded.
+/// user provided commands will still be encoded.
 ///
 /// If the presence of the `/` character ends up being an issue, this can
 /// be changed to use base32 instead.

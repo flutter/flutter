@@ -565,7 +565,7 @@ void main() {
                             ),
                           ),
                         ),
-                        TextSpan(text: 'hello world! sieze the day!'),
+                        TextSpan(text: 'hello world! seize the day!'),
                         WidgetSpan(
                           child: Checkbox(value: false, onChanged: null),
                         ),
@@ -837,7 +837,7 @@ void main() {
                             ),
                           ),
                         ),
-                        TextSpan(text: 'hello world! sieze the day!'),
+                        TextSpan(text: 'hello world! seize the day!'),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.baseline,
                           baseline: TextBaseline.alphabetic,
@@ -944,7 +944,7 @@ void main() {
                             ),
                           ),
                         ),
-                        TextSpan(text: 'hello world! sieze the day!'),
+                        TextSpan(text: 'hello world! seize the day!'),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.aboveBaseline,
                           baseline: TextBaseline.alphabetic,
@@ -1051,7 +1051,7 @@ void main() {
                             ),
                           ),
                         ),
-                        TextSpan(text: 'hello world! sieze the day!'),
+                        TextSpan(text: 'hello world! seize the day!'),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.belowBaseline,
                           baseline: TextBaseline.alphabetic,
@@ -1158,7 +1158,7 @@ void main() {
                             ),
                           ),
                         ),
-                        TextSpan(text: 'hello world! sieze the day!'),
+                        TextSpan(text: 'hello world! seize the day!'),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.top,
                           baseline: TextBaseline.alphabetic,
@@ -1265,7 +1265,7 @@ void main() {
                             ),
                           ),
                         ),
-                        TextSpan(text: 'hello world! sieze the day!'),
+                        TextSpan(text: 'hello world! seize the day!'),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.middle,
                           baseline: TextBaseline.alphabetic,

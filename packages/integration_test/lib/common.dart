@@ -293,6 +293,6 @@ abstract class IntegrationTestResults {
   /// The extra data for the reported result.
   Map<String, dynamic>? get reportData;
 
-  /// Whether all the test methods completed succesfully.
+  /// Whether all the test methods completed successfully.
   Completer<bool> get allTestsPassed;
 }
