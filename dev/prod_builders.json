@@ -730,7 +730,7 @@
       "name": "Mac_android integration_test_test",
       "repo": "flutter",
       "task_name": "mac_android_integration_test_test",
-      "flaky": false
+      "flaky": true
     },
     {
       "name": "Mac_android microbenchmarks",
@@ -1072,7 +1072,7 @@
       "name": "Mac_ios integration_test_test_ios",
       "repo": "flutter",
       "task_name": "mac_ios_integration_test_test_ios",
-      "flaky": false
+      "flaky": true
     },
     {
       "name": "Mac_ios ios_app_with_extensions_test",
