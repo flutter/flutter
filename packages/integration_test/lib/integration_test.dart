@@ -63,7 +63,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
           },
         );
       } on MissingPluginException {
-        print(r"""
+        print(r'''
 Warning: integration_test plugin was not detected.
 
 If you're running the tests with `flutter drive`, please make sure your tests
@@ -75,7 +75,7 @@ that you are not capturing test results properly! See the following link for
 how to set up the integration_test plugin:
 
 https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
-""");
+''');
       }
     });
 
