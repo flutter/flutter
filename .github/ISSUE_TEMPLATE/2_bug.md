@@ -16,35 +16,74 @@ assignees: ''
       * https://api.flutter.dev/
       * https://stackoverflow.com/questions/tagged/flutter?sort=frequent
 
+     Issues directly asking for support will be closed.
+
      If you have found a bug or if our documentation doesn't have an answer
      to what you're looking for, then fill out the template below. Please read
      our guide to filing a bug first: https://flutter.dev/docs/resources/bug-reports
 -->
 
-## Steps to Reproduce
+### Description
 
-<!-- You must include full steps to reproduce so that we can reproduce the problem. -->
+<!-- 
+     Please describe in detail the problem you are running into.
 
-1. Run `flutter create bug`.
-2. Update the files as follows: ... <!-- include every file that is different from the template app! -->
-3. ... <!-- describe how to reproduce the problem -->
+     List concrete steps to reproduce the problem, if this will better illustrate it:
 
-**Expected results:** <!-- what did you want to see? -->
+        1. ...
+        2. ...
+        3. ...
+-->
 
-**Actual results:** <!-- what did you see? -->
+### Expected results
+
+<!-- What did you want to see? -->
+
+### Actual results
+
+<!-- What did you see? -->
+
+
+
 
 <details>
-  <summary>Logs</summary>
+<summary>Code sample</summary>
 
 <!--
-      Run your application with `flutter run --verbose` and attach all the
-      log output below between the lines with the backticks. If there is an
-      exception, please see if the error message includes enough information
-      to explain how to solve the issue.
+     Please create a minimal reproducible sample that shows the problem
+     and attach it below between the lines with the backticks.
+
+     Without this we will unlikely progress on the issue, and thus will have
+     to close it.
+
+     If your problem goes out of what can be placed in file, for example
+     you have a problem with native channels, you can upload the full code of
+     your reproduction into a separate repository and link it.
+-->
+
+```dart
+```
+
+</details>
+
+
+<details>
+<summary>Logs</summary>
+
+<!--
+     Run your application with `flutter run -v` and attach all the
+     log output below. If there is an exception, please see if the error message
+     includes enough information to explain how to solve the issue.
 -->
 
 ```
 ```
+
+</details>
+
+
+<details>
+<summary>flutter analyze</summary>
 
 <!--
      Run `flutter analyze` and attach any output of that command below.
@@ -54,9 +93,25 @@ assignees: ''
 ```
 ```
 
-<!-- Finally, paste the output of running `flutter doctor -v` here. -->
+</details>
+
+
+<details>
+<summary>flutter doctor -v`</summary>
+
+<!-- Paste the output of running `flutter doctor -v` here. -->
 
 ```
 ```
 
 </details>
+
+
+
+<!--
+     Finally, to better illustrate the issue, consider attaching
+     screenshots and/or videos.
+
+     You can upload these directly on GitHub.
+     Beware that video file size is limited to 10MB.
+-->

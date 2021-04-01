@@ -15,6 +15,8 @@ assignees: ''
       * https://api.flutter.dev/
       * https://stackoverflow.com/questions/tagged/flutter?sort=frequent
 
+     Issues directly asking for support will be closed.
+
      If you have found a bug or if our documentation doesn't have an answer
      to what you're looking for, then fill out the template below. Please read
      our guide to filing a bug first: https://flutter.dev/docs/resources/bug-reports
@@ -23,8 +25,7 @@ assignees: ''
 ## Use case
 
 <!--
-     Please tell us the problem you are running into that led to you wanting
-     a new feature.
+     Please tell us why do you want a new feature.
 
      Is your feature request related to a problem? Please give a clear and
      concise description of what the problem is.
@@ -38,7 +39,10 @@ assignees: ''
 <!--
      Briefly but precisely describe what you would like Flutter to be able to do.
 
-     Consider attaching images showing what you are imagining.
+     Consider attaching something showing what you are imagining:
+      * images
+      * videos
+      * code samples
 
      Does this have to be provided by Flutter directly, or can it be provided
      by a package on pub.dev/flutter? If so, maybe consider implementing and

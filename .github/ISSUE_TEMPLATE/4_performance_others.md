@@ -15,6 +15,8 @@ assignees: ''
       * https://api.flutter.dev/
       * https://stackoverflow.com/questions/tagged/flutter?sort=frequent
 
+     Issues directly asking for support will be closed.
+
      If you have found a performance problem, then fill out the template below.
      Please read our guide to filing a bug first: https://flutter.dev/docs/resources/bug-reports
 -->
@@ -22,12 +24,11 @@ assignees: ''
 ## Details
 
 <!--
-1.  Please tell us exactly how to reproduce the problem you are running into, and how you measured the performance.
+     Please describe in detail the problem you are running into.
+-->
 
-2.  Please attach a small application (ideally just one main.dart file) that
-     reproduces the problem. You could use https://gist.github.com/ for this.
-
-3.  Switch flutter to master channel and run this app on a physical device
+<!--
+     Switch flutter to master channel and run this app on a physical device
      using profile or release mode. Verify that the performance issue can be
      reproduced there.
 
@@ -46,10 +47,31 @@ assignees: ''
 **Target OS version/browser:**
 **Devices:**
 
-## Logs
+
 
 <details>
-<summary>Logs</summary>
+<summary>Code sample</summary>
+
+<!--
+     Please create a minimal reproducible sample that shows the problem
+     and attach it below between the lines with the backticks.
+
+     Without this we will unlikely progress on the issue, and thus will have
+     to close it.
+
+     If your problem goes out of what can be placed in file, for example
+     you have a problem with native channels, you can upload the full code of
+     your reproduction into a separate repository and link it.
+-->
+
+```dart
+```
+
+</details>
+
+
+<details>
+<summary>flutter analyze</summary>
 
 <!--
      Run `flutter analyze` and attach any output of that command below.
@@ -59,9 +81,24 @@ assignees: ''
 ```
 ```
 
-<!-- Finally, paste the output of running `flutter doctor -v` here, with your device plugged in. -->
+</details>
+
+
+<details>
+<summary>flutter doctor -v</summary>
+
+<!-- Paste the output of running `flutter doctor -v` here, with your device plugged in. -->
 
 ```
 ```
 
 </details>
+
+
+<!--
+     Finally, to better illustrate the issue, consider attaching
+     screenshots and/or videos.
+
+     You can upload these directly on GitHub.
+     Beware that video file size is limited to 10MB.
+-->
