@@ -30,6 +30,7 @@ import 'base/user_messages.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
+import 'custom_devices/custom_devices_config.dart';
 import 'dart/pub.dart';
 import 'devfs.dart';
 import 'device.dart';
@@ -197,6 +198,11 @@ Future<T> runInContext<T>(
         ),
         operatingSystemUtils: globals.os,
         terminal: globals.terminal,
+        customDevicesConfig: CustomDevicesConfig(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          platform: globals.platform
+        ),
       ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,

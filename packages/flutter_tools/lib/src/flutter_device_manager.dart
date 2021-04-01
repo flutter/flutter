@@ -18,6 +18,8 @@ import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/terminal.dart';
 import 'base/user_messages.dart' hide userMessages;
+import 'custom_devices/custom_device.dart';
+import 'custom_devices/custom_devices_config.dart';
 import 'device.dart';
 import 'features.dart';
 import 'fuchsia/fuchsia_device.dart';
@@ -58,6 +60,7 @@ class FlutterDeviceManager extends DeviceManager {
     @required OperatingSystemUtils operatingSystemUtils,
     @required WindowsWorkflow windowsWorkflow,
     @required Terminal terminal,
+    @required CustomDevicesConfig customDevicesConfig,
   }) : deviceDiscoverers =  <DeviceDiscovery>[
     AndroidDevices(
       logger: logger,
@@ -122,6 +125,12 @@ class FlutterDeviceManager extends DeviceManager {
       platform: platform,
       processManager: processManager,
       logger: logger,
+    ),
+    CustomDevices(
+      featureFlags: featureFlags,
+      processManager: processManager,
+      logger: logger,
+      config: customDevicesConfig
     ),
   ], super(
       logger: logger,
