@@ -20,6 +20,7 @@ import 'src/large_images.dart';
 import 'src/multi_widget_construction.dart';
 import 'src/picture_cache.dart';
 import 'src/post_backdrop_filter.dart';
+import 'src/scroll_jump.dart';
 import 'src/simple_animation.dart';
 import 'src/simple_scroll.dart';
 import 'src/stack_size.dart';
@@ -58,6 +59,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kSimpleScrollRouteName: (BuildContext context) => const SimpleScroll(),
         kStackSizeRouteName: (BuildContext context) => const StackSizePage(),
         kAnimationWithMicrotasksRouteName: (BuildContext context) => const AnimationWithMicrotasks(),
+        kScrollJumpRouteName: (BuildContext context) => const ScrollJumpPage(),
       },
     );
   }
@@ -199,6 +201,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Animation With Microtasks'),
             onPressed: () {
               Navigator.pushNamed(context, kAnimationWithMicrotasksRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kScrollJumpRouteName),
+            child: const Text('Scroll Jump'),
+            onPressed: () {
+              Navigator.pushNamed(context, kScrollJumpRouteName);
             },
           ),
         ],
