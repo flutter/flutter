@@ -44,7 +44,9 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
       }
       callbackManager.cleanup();
 
-      if (!_shouldReportResultsToNative) {
+      // TODO(jiahaog): Print the message directing users to run with
+      // `flutter test` when Web is supported.
+      if (!_shouldReportResultsToNative || kIsWeb) {
         return;
       }
 
@@ -61,8 +63,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
           },
         );
       } on MissingPluginException {
-        print(
-          r"""
+        print(r"""
 Warning: integration_test plugin was not detected.
 
 If you're running the tests with `flutter drive`, please make sure your tests
