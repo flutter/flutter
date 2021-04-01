@@ -3864,6 +3864,90 @@ void main() {
     expect(textController.text, testValue);
   });
 
+  testWidgets(
+    'maxLength limits input in the center of a maxed-out field, with collapsed selection',
+    (WidgetTester tester) async {
+      final TextEditingController textController = TextEditingController();
+      const String testValue = '0123456789';
+
+      await tester.pumpWidget(boilerplate(
+        child: TextField(
+          controller: textController,
+          maxLength: 10,
+        ),
+      ));
+
+      // Max out the character limit in the field.
+      await tester.showKeyboard(find.byType(TextField));
+      tester.testTextInput.updateEditingValue(const TextEditingValue(
+        text: testValue,
+        selection: TextSelection.collapsed(offset: 10),
+        composing: TextRange.empty,
+      ));
+      await tester.pump();
+      expect(textController.text, testValue);
+
+      // Entering more characters at the end does nothing.
+      await tester.showKeyboard(find.byType(TextField));
+      tester.testTextInput.updateEditingValue(const TextEditingValue(
+        text: testValue + '9999999',
+        selection: TextSelection.collapsed(offset: 10 + 7),
+        composing: TextRange.empty,
+      ));
+      await tester.pump();
+
+      expect(textController.text, testValue);
+
+      // Entering text in the middle of the field also does nothing.
+      // Entering more characters at the end does nothing.
+      await tester.showKeyboard(find.byType(TextField));
+      tester.testTextInput.updateEditingValue(const TextEditingValue(
+        text: '0123455555555556789',
+        selection: TextSelection.collapsed(offset: 19),
+        composing: TextRange.empty,
+      ));
+      await tester.pump();
+
+      expect(textController.text, testValue);
+    },
+  );
+
+  testWidgets(
+    'maxLength limits input in the center of a maxed-out field, with non-collapsed selection',
+    (WidgetTester tester) async {
+      final TextEditingController textController = TextEditingController();
+      const String testValue = '0123456789';
+
+      await tester.pumpWidget(boilerplate(
+        child: TextField(
+          controller: textController,
+          maxLength: 10,
+        ),
+      ));
+
+      // Max out the character limit in the field.
+      await tester.showKeyboard(find.byType(TextField));
+      tester.testTextInput.updateEditingValue(const TextEditingValue(
+        text: testValue,
+        selection: TextSelection(baseOffset: 8, extentOffset: 10),
+        composing: TextRange.empty,
+      ));
+      await tester.pump();
+      expect(textController.text, testValue);
+
+      // Entering more characters at the end does nothing.
+      await tester.showKeyboard(find.byType(TextField));
+      tester.testTextInput.updateEditingValue(const TextEditingValue(
+        text: '01234569999999',
+        selection: TextSelection.collapsed(offset: 14),
+        composing: TextRange.empty,
+      ));
+      await tester.pump();
+
+      expect(textController.text,  '0123456999');
+    },
+  );
+
   testWidgets('maxLength limits input length even if decoration is null.', (WidgetTester tester) async {
     final TextEditingController textController = TextEditingController();
 
@@ -7865,7 +7949,13 @@ void main() {
           pressureMin: 0.0,
       ),
     );
-    await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: offset + const Offset(150.0, 9.0), pressure: 0.5, pressureMin: 0, pressureMax: 1,),);
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: offset + const Offset(150.0, 9.0),
+      pressure: 0.5,
+      pressureMin: 0,
+      pressureMax: 1,
+    ));
 
     // We don't want this gesture to select any word on Android.
     expect(controller.selection, const TextSelection.collapsed(offset: -1));
@@ -8972,7 +9062,7 @@ void main() {
           ),
         ),
       ),
-    ),);
+    ));
 
     focusNode3.requestFocus();
     await tester.pump();

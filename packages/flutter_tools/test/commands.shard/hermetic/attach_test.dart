@@ -17,7 +17,7 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/device_port_forwader.dart';
+import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -840,6 +840,7 @@ VMServiceConnector getFakeVmServiceFactory({
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
     CompressionOptions compression,
     Device device,
+    Logger logger,
   }) async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[

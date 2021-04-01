@@ -281,7 +281,7 @@ class AssetImage extends AssetBundleImageProvider {
     return _findBestVariant(mapping, config.devicePixelRatio!);
   }
 
-  // Returns the "best" asset variant amongst the availabe `candidates`.
+  // Returns the "best" asset variant amongst the available `candidates`.
   //
   // The best variant is chosen as follows:
   // - Choose a variant whose key matches `value` exactly, if available.

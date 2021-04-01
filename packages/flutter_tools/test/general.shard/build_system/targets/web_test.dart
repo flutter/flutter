@@ -129,7 +129,7 @@ void main() {
     expect(environment.outputDir.childDirectory('assets')
       .childFile('AssetManifest.json').existsSync(), true);
 
-    // Update to arbitary resource file triggers rebuild.
+    // Update to arbitrary resource file triggers rebuild.
     webResources.childFile('foo.txt').writeAsStringSync('B');
 
     await const WebReleaseBundle().build(environment);

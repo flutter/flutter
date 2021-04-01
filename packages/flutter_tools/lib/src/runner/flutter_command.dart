@@ -19,7 +19,6 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/common.dart' show kExtraFrontEndOptions, kExtraGenSnapshotOptions; // for "useLegacyNames" only
-import '../build_system/targets/icon_tree_shaker.dart' show kIconTreeShakerEnabledDefault;
 import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../dart/generate_synthetic_packages.dart';

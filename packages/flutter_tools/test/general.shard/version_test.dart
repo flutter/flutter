@@ -534,7 +534,7 @@ void main() {
     expect(gitTagVersion.frameworkVersionFor('abcd1234'), stableTag);
   });
 
-  testUsingContext('determine favors stable tag over dev tag if both idenitfy HEAD', () {
+  testUsingContext('determine favors stable tag over dev tag if both identify HEAD', () {
     const String stableTag = '1.2.3';
     final FakeProcessManager fakeProcessManager = FakeProcessManager.list(
       <FakeCommand>[

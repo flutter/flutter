@@ -21,7 +21,7 @@ import 'base/user_messages.dart' hide userMessages;
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'devfs.dart';
-import 'device_port_forwader.dart';
+import 'device_port_forwarder.dart';
 import 'project.dart';
 import 'vmservice.dart';
 
@@ -52,6 +52,7 @@ class PlatformType {
   static const PlatformType macos = PlatformType._('macos');
   static const PlatformType windows = PlatformType._('windows');
   static const PlatformType fuchsia = PlatformType._('fuchsia');
+  static const PlatformType custom = PlatformType._('custom');
 
   final String value;
 
