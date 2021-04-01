@@ -210,6 +210,7 @@ void main() {
     });
 
     testUsingContext('fetchLatestVersion throws toolExit if no upstream configured', () async {
+      realCommandRunner.workingDirectory = '/src/flutter';
       processManager.addCommands(const <FakeCommand>[
         FakeCommand(command: <String>[
           'git', 'fetch', '--tags'
@@ -234,20 +235,30 @@ void main() {
       expect(err.toString(), contains('Unable to upgrade Flutter: no origin repository configured.'));
       // FakeFlutterVersion.getBranchName is hardcoded to 'master'
       expect(err.toString(), contains('git branch --set-upstream-to=origin/master'));
-      expect(err.toString(), contains('if remote "origin" exists in src/flutter'));
+      expect(err.toString(), contains('if remote "origin" exists in /src/flutter'));
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       Platform: () => fakePlatform,
     });
 
-    testUsingContext('fetchLatestVersion throws on unsupported upstream remote with FLUTTER_GIT_URL unset', () async {
+    testUsingContext('fetchLatestVersion throws toolExit on nonstandard upstream remote with FLUTTER_GIT_URL unset', () async {
+      realCommandRunner.workingDirectory = '/src/flutter';
       final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
         channel: 'dev',
         repositoryUrl: 'https://githubmirror.com/flutter',
       );
 
-      realCommandRunner.workingDirectory = './src/flutter';
+      processManager.addCommands(const <FakeCommand>[
+        FakeCommand(command: <String>[
+          'git', 'fetch', '--tags'
+        ]),
+        FakeCommand(command: <String>[
+          'git', 'rev-parse', '--verify', '@{u}',
+        ],
+        stdout: ''),
+      ]);
+
       ToolExit err;
       try {
        await realCommandRunner.fetchLatestVersion(localVersion: flutterVersion);
@@ -258,18 +269,39 @@ void main() {
       expect(err.toString(), contains('Your local copy of Flutter is tracking an unsupported remote'));
       expect(err.toString(), contains('"FLUTTER_GIT_URL" to "https://githubmirror.com/flutter"'));
       expect(err.toString(), contains('git branch --set-upstream-to=origin/dev'));
-      expect(err.toString(), contains('if remote "origin" exists in flutter'));
+      expect(err.toString(), contains('if remote "origin" exists in /src/flutter'));
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator> {
+      ProcessManager: () => processManager,
       Platform: () => fakePlatform,
     });
 
     testUsingContext('fetchLatestVersion does not throw on unsupported upstream remote with FLUTTER_GIT_URL set', () async {
       final FakeFlutterVersion flutterVersion = FakeFlutterVersion(repositoryUrl: 'https://githubmirror.com/flutter');
+      const String upstreamRevision = '22222222222222222222';
+
+      processManager.addCommands(const <FakeCommand>[
+        FakeCommand(command: <String>[
+          'git', 'fetch', '--tags'
+        ]),
+        FakeCommand(command: <String>[
+          'git', 'rev-parse', '--verify', '@{u}',
+        ],
+        stdout: upstreamRevision),
+        FakeCommand(command: <String>[
+          'git', 'tag', '--points-at', upstreamRevision,
+        ],
+        stdout: ''),
+        FakeCommand(command: <String>[
+          'git', 'describe', '--match', '*.*.*', '--long', '--tags', upstreamRevision,
+        ],
+        stdout: ''),
+      ]);
 
       await realCommandRunner.fetchLatestVersion(localVersion: flutterVersion);
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator> {
+      ProcessManager: () => processManager,
       Platform: () => fakePlatform..environment = Map<String, String>.unmodifiable(<String, String> {
         'FLUTTER_GIT_URL': 'https://githubmirror.com/flutter',
       }),
