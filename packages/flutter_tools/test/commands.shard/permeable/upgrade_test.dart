@@ -201,7 +201,7 @@ void main() {
 
       await expectLater(
             () async => realCommandRunner.fetchLatestVersion(localVersion: FakeFlutterVersion()),
-        throwsToolExit(message: 'You are not currently on a release branch.'),
+        throwsToolExit(message: 'Unable to upgrade Flutter: HEAD does not point to a branch'),
       );
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
@@ -211,6 +211,7 @@ void main() {
 
     testUsingContext('fetchLatestVersion throws toolExit if no upstream configured', () async {
       realCommandRunner.workingDirectory = '/src/flutter';
+
       processManager.addCommands(const <FakeCommand>[
         FakeCommand(command: <String>[
           'git', 'fetch', '--tags'
@@ -232,7 +233,7 @@ void main() {
         err = e;
       }
       expect(err, isNotNull);
-      expect(err.toString(), contains('Unable to upgrade Flutter: no origin repository configured.'));
+      expect(err.toString(), contains('Unable to upgrade Flutter: no upstream repository configured for branch.'));
       // FakeFlutterVersion.getBranchName is hardcoded to 'master'
       expect(err.toString(), contains('git branch --set-upstream-to=origin/master'));
       expect(err.toString(), contains('if remote "origin" exists in /src/flutter'));

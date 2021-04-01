@@ -236,8 +236,8 @@ class UpgradeCommandRunner {
   void checkSupportedRemote(FlutterVersion localVersion) {
     if (localVersion.repositoryUrl != _flutterGit) {
       throwToolExit(
-        'Your local copy of Flutter is tracking an unsupported remote '
-        '"${localVersion.repositoryUrl}".\n'
+        'Unable to upgrade Flutter: Your local copy of Flutter is tracking a '
+        'nonstandard remote "${localVersion.repositoryUrl}".\n'
         'To use the unofficial remote, set the environment variable '
         '"FLUTTER_GIT_URL" to "${localVersion.repositoryUrl}",\n'
         'or to use the official remote, run '
@@ -271,9 +271,10 @@ class UpgradeCommandRunner {
       final String errorString = e.toString();
       if (errorString.contains('fatal: HEAD does not point to a branch')) {
         throwToolExit(
-          'You are not currently on a release branch. Use git to '
-          "check out an official branch ('stable', 'beta', 'dev', or 'master') "
-          'and retry, for example:\n'
+          'Unable to upgrade Flutter: HEAD does not point to a branch(Are you '
+          'in a detached HEAD state?).\n'
+          'Use "git" to checkout an official branch '
+          '("stable", "beta", "dev", or "master") and retry, for example:\n'
           '  git checkout stable'
         );
       } else if (errorString.contains('fatal: no upstream configured for branch')) {
@@ -285,9 +286,8 @@ class UpgradeCommandRunner {
           throwToolExit(e.toString());
         }
         throwToolExit(
-          'Unable to upgrade Flutter: no origin repository configured. '
-          'Run "git remote add origin '
-          'https://github.com/flutter/flutter" and '
+          'Unable to upgrade Flutter: no upstream repository configured for branch.\n'
+          'Run "git remote add origin https://github.com/flutter/flutter" and '
           '"git branch --set-upstream-to=origin/$localBranch" if remote '
           '"origin" exists in $workingDirectory');
       } else {
