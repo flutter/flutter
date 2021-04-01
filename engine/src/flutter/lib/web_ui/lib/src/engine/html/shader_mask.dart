@@ -23,12 +23,14 @@ class PersistedShaderMask extends PersistedContainerSurface
     this.shader,
     this.maskRect,
     this.blendMode,
+    this.filterQuality,
   ) : super(oldLayer);
 
   html.Element? _childContainer;
   final ui.Shader shader;
   final ui.Rect maskRect;
   final ui.BlendMode blendMode;
+  final ui.FilterQuality filterQuality;
   html.Element? _shaderElement;
   static int activeShaderMaskCount = 0;
   final bool isWebKit = browserEngine == BrowserEngine.webkit;

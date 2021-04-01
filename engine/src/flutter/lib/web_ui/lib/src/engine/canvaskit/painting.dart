@@ -124,7 +124,7 @@ class CkPaint extends ManagedSkiaObject<SkPaint> implements ui.Paint {
       return;
     }
     _shader = value as CkShader?;
-    skiaObject.setShader(_shader?.skiaObject);
+    skiaObject.setShader(_shader?.withQuality(_filterQuality));
   }
 
   CkShader? _shader;
@@ -159,6 +159,7 @@ class CkPaint extends ManagedSkiaObject<SkPaint> implements ui.Paint {
       return;
     }
     _filterQuality = value;
+    skiaObject.setShader(_shader?.withQuality(value));
     skiaObject.setFilterQuality(toSkFilterQuality(value));
   }
 
@@ -227,7 +228,7 @@ class CkPaint extends ManagedSkiaObject<SkPaint> implements ui.Paint {
     paint.setStrokeWidth(_strokeWidth);
     paint.setAntiAlias(_isAntiAlias);
     paint.setColorInt(_color.value);
-    paint.setShader(_shader?.skiaObject);
+    paint.setShader(_shader?.withQuality(_filterQuality));
     paint.setMaskFilter(_ckMaskFilter?.skiaObject);
     paint.setColorFilter(_managedColorFilter?.skiaObject);
     paint.setImageFilter(_managedImageFilter?.skiaObject);

@@ -7,6 +7,8 @@ part of engine;
 
 abstract class CkShader extends ManagedSkiaObject<SkShader>
     implements ui.Shader {
+  SkShader withQuality(ui.FilterQuality contextualQuality) => skiaObject;
+
   @override
   void delete() {
     rawSkiaObject?.delete();
@@ -162,25 +164,49 @@ class CkGradientConical extends CkShader implements ui.Gradient {
 }
 
 class CkImageShader extends CkShader implements ui.ImageShader {
-  CkImageShader(ui.Image image, this.tileModeX, this.tileModeY, this.matrix4)
+  CkImageShader(ui.Image image, this.tileModeX, this.tileModeY, this.matrix4, this.filterQuality)
       : _image = image as CkImage;
 
   final ui.TileMode tileModeX;
   final ui.TileMode tileModeY;
   final Float64List matrix4;
+  final ui.FilterQuality? filterQuality;
   final CkImage _image;
 
+  ui.FilterQuality? _cachedQuality;
   @override
-  SkShader createDefault() => _image.skImage.makeShaderOptions(
-        toSkTileMode(tileModeX),
-        toSkTileMode(tileModeY),
-        canvasKit.FilterMode.Nearest,
-        canvasKit.MipmapMode.None,
-        toSkMatrixFromFloat64(matrix4),
-      );
+  SkShader withQuality(ui.FilterQuality contextualQuality) {
+    ui.FilterQuality quality = filterQuality ?? contextualQuality;
+    SkShader? shader = rawSkiaObject;
+    if (_cachedQuality != quality || shader == null) {
+      if (quality == ui.FilterQuality.high) {
+        shader = _image.skImage.makeShaderCubic(
+          toSkTileMode(tileModeX),
+          toSkTileMode(tileModeY),
+          1.0 / 3.0,
+          1.0 / 3.0,
+          toSkMatrixFromFloat64(matrix4),
+        );
+      } else {
+        shader = _image.skImage.makeShaderOptions(
+          toSkTileMode(tileModeX),
+          toSkTileMode(tileModeY),
+          toSkFilterMode(quality),
+          toSkMipmapMode(quality),
+          toSkMatrixFromFloat64(matrix4),
+        );
+      }
+      _cachedQuality = quality;
+      rawSkiaObject = shader;
+    }
+    return shader;
+  }
 
   @override
-  SkShader resurrect() => createDefault();
+  SkShader createDefault() => withQuality(ui.FilterQuality.none);
+
+  @override
+  SkShader resurrect() => withQuality(_cachedQuality ?? ui.FilterQuality.none);
 
   @override
   void delete() {

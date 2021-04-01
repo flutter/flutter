@@ -980,26 +980,55 @@ void _canvasTests() {
     );
   });
 
-  test('drawImage', () {
+  test('drawImageOptions', () {
     final SkAnimatedImage image =
         canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
-    canvas.drawImage(
+    canvas.drawImageOptions(
       image.getCurrentFrame(),
       10,
       20,
+      canvasKit.FilterMode.Linear,
+      canvasKit.MipmapMode.None,
       SkPaint(),
     );
   });
 
-  test('drawImageRect', () {
+  test('drawImageCubic', () {
     final SkAnimatedImage image =
-        canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
-    canvas.drawImageRect(
+    canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
+    canvas.drawImageCubic(
+      image.getCurrentFrame(),
+      10,
+      20,
+      0.3,
+      0.3,
+      SkPaint(),
+    );
+  });
+
+  test('drawImageRectOptions', () {
+    final SkAnimatedImage image =
+    canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
+    canvas.drawImageRectOptions(
       image.getCurrentFrame(),
       Float32List.fromList([0, 0, 1, 1]),
       Float32List.fromList([0, 0, 1, 1]),
+      canvasKit.FilterMode.Linear,
+      canvasKit.MipmapMode.None,
       SkPaint(),
-      false,
+    );
+  });
+
+  test('drawImageRectCubic', () {
+    final SkAnimatedImage image =
+    canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
+    canvas.drawImageRectCubic(
+      image.getCurrentFrame(),
+      Float32List.fromList([0, 0, 1, 1]),
+      Float32List.fromList([0, 0, 1, 1]),
+      0.3,
+      0.3,
+      SkPaint(),
     );
   });
 
@@ -1010,6 +1039,7 @@ void _canvasTests() {
       image.getCurrentFrame(),
       Float32List.fromList([0, 0, 1, 1]),
       Float32List.fromList([0, 0, 1, 1]),
+      canvasKit.FilterMode.Linear,
       SkPaint(),
     );
   });

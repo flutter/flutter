@@ -110,7 +110,8 @@ class Canvas : public RefCountedDartWrappable<Canvas> {
                  double x,
                  double y,
                  const Paint& paint,
-                 const PaintData& paint_data);
+                 const PaintData& paint_data,
+                 int filterQualityIndex);
   void drawImageRect(const CanvasImage* image,
                      double src_left,
                      double src_top,
@@ -121,7 +122,8 @@ class Canvas : public RefCountedDartWrappable<Canvas> {
                      double dst_right,
                      double dst_bottom,
                      const Paint& paint,
-                     const PaintData& paint_data);
+                     const PaintData& paint_data,
+                     int filterQualityIndex);
   void drawImageNine(const CanvasImage* image,
                      double center_left,
                      double center_top,
@@ -132,7 +134,8 @@ class Canvas : public RefCountedDartWrappable<Canvas> {
                      double dst_right,
                      double dst_bottom,
                      const Paint& paint,
-                     const PaintData& paint_data);
+                     const PaintData& paint_data,
+                     int bitmapSamplingIndex);
   void drawPicture(Picture* picture);
 
   // The paint argument is first for the following functions because Paint
@@ -152,6 +155,7 @@ class Canvas : public RefCountedDartWrappable<Canvas> {
 
   void drawAtlas(const Paint& paint,
                  const PaintData& paint_data,
+                 int filterQualityIndex,
                  CanvasImage* atlas,
                  const tonic::Float32List& transforms,
                  const tonic::Float32List& rects,

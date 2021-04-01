@@ -40,6 +40,30 @@ fml::RefPtr<ImageFilter> ImageFilter::Create() {
   return fml::MakeRefCounted<ImageFilter>();
 }
 
+static const std::array<SkSamplingOptions, 4> filter_qualities = {
+    SkSamplingOptions(SkFilterMode::kNearest, SkMipmapMode::kNone),
+    SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone),
+    SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kLinear),
+    SkSamplingOptions(SkCubicResampler{1 / 3.0f, 1 / 3.0f}),
+};
+
+SkSamplingOptions ImageFilter::SamplingFromIndex(int filterQualityIndex) {
+  if (filterQualityIndex < 0) {
+    return filter_qualities.front();
+  } else if (((size_t)filterQualityIndex) >= filter_qualities.size()) {
+    return filter_qualities.back();
+  } else {
+    return filter_qualities[filterQualityIndex];
+  }
+}
+
+SkFilterMode ImageFilter::FilterModeFromIndex(int filterQualityIndex) {
+  if (filterQualityIndex <= 0) {
+    return SkFilterMode::kNearest;
+  }
+  return SkFilterMode::kLinear;
+}
+
 ImageFilter::ImageFilter() {}
 
 ImageFilter::~ImageFilter() {}
@@ -59,9 +83,8 @@ void ImageFilter::initBlur(double sigma_x,
 }
 
 void ImageFilter::initMatrix(const tonic::Float64List& matrix4,
-                             int filterQuality) {
-  auto sampling = SkSamplingOptions(static_cast<SkFilterQuality>(filterQuality),
-                                    SkSamplingOptions::kMedium_asMipmapLinear);
+                             int filterQualityIndex) {
+  auto sampling = ImageFilter::SamplingFromIndex(filterQualityIndex);
   filter_ =
       SkImageFilters::MatrixTransform(ToSkMatrix(matrix4), sampling, nullptr);
 }

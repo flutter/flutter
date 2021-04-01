@@ -379,11 +379,12 @@ class ImageFilterEngineLayer extends ContainerLayer implements ui.ImageFilterEng
 }
 
 class ShaderMaskEngineLayer extends ContainerLayer implements ui.ShaderMaskEngineLayer {
-  ShaderMaskEngineLayer(this.shader, this.maskRect, this.blendMode);
+  ShaderMaskEngineLayer(this.shader, this.maskRect, this.blendMode, this.filterQuality);
 
   final ui.Shader shader;
   final ui.Rect maskRect;
   final ui.BlendMode blendMode;
+  final ui.FilterQuality filterQuality;
 
   @override
   void paint(PaintContext paintContext) {
@@ -395,6 +396,7 @@ class ShaderMaskEngineLayer extends ContainerLayer implements ui.ShaderMaskEngin
     CkPaint paint = CkPaint();
     paint.shader = shader;
     paint.blendMode = blendMode;
+    paint.filterQuality = filterQuality;
 
     paintContext.leafNodesCanvas!.save();
     paintContext.leafNodesCanvas!.translate(maskRect.left, maskRect.top);

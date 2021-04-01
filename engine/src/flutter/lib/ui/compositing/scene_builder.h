@@ -80,6 +80,7 @@ class SceneBuilder : public RefCountedDartWrappable<SceneBuilder> {
                       double maskRectTop,
                       double maskRectBottom,
                       int blendMode,
+                      int filterQualityIndex,
                       fml::RefPtr<EngineLayer> oldLayer);
   void pushPhysicalShape(Dart_Handle layer_handle,
                          const CanvasPath* path,

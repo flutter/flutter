@@ -8,7 +8,6 @@
 #include "flutter/flow/skia_gpu_object.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/ui_dart_state.h"
-#include "third_party/skia/include/core/SkFilterQuality.h"
 #include "third_party/skia/include/core/SkShader.h"
 
 namespace flutter {
@@ -20,7 +19,7 @@ class Shader : public RefCountedDartWrappable<Shader> {
  public:
   ~Shader() override;
 
-  virtual sk_sp<SkShader> shader(SkFilterQuality) = 0;
+  virtual sk_sp<SkShader> shader(SkSamplingOptions) = 0;
 
  protected:
   Shader() {}

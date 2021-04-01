@@ -533,6 +533,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
     Rect maskRect,
     BlendMode blendMode, {
     ShaderMaskEngineLayer? oldLayer,
+    FilterQuality filterQuality = FilterQuality.low,
   }) {
     assert(_debugCheckCanBeUsedAsOldLayer(oldLayer, 'pushShaderMask'));
     final EngineLayer engineLayer = EngineLayer._();
@@ -544,6 +545,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
       maskRect.top,
       maskRect.bottom,
       blendMode.index,
+      filterQuality.index,
       oldLayer?._nativeLayer,
     );
     final ShaderMaskEngineLayer layer = ShaderMaskEngineLayer._(engineLayer);
@@ -559,6 +561,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
       double maskRectTop,
       double maskRectBottom,
       int blendMode,
+      int filterQualityIndex,
       EngineLayer? oldLayer) native 'SceneBuilder_pushShaderMask';
 
   /// Pushes a physical layer operation for an arbitrary shape onto the

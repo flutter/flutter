@@ -385,8 +385,6 @@ class MaskFilter {
 }
 
 enum FilterQuality {
-  // This list comes from Skia's SkFilterQuality.h and the values (order) should
-  // be kept in sync.
   none,
   low,
   medium,
@@ -690,9 +688,11 @@ class Shadow {
 }
 
 class ImageShader extends Shader {
-  factory ImageShader(Image image, TileMode tmx, TileMode tmy, Float64List matrix4) {
+  factory ImageShader(Image image, TileMode tmx, TileMode tmy, Float64List matrix4, {
+    FilterQuality? filterQuality,
+  }) {
     if (engine.useCanvasKit) {
-      return engine.CkImageShader(image, tmx, tmy, matrix4);
+      return engine.CkImageShader(image, tmx, tmy, matrix4, filterQuality);
     }
     throw UnsupportedError('ImageShader not implemented for web platform.');
   }
