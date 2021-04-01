@@ -22,7 +22,7 @@ class HapticFeedback {
   /// On Android, this uses the platform haptic feedback API to simulate a
   /// response to a long press (`HapticFeedbackConstants.LONG_PRESS`).
   static Future<void> vibrate() async {
-    await SystemChannels.platform.invokeMethod<void>('HapticFeedback.vibrate', '');
+    await SystemChannels.platform.invokeMethod<void>('HapticFeedback.vibrate');
   }
 
   /// Provides a haptic feedback corresponding a collision impact with a light mass.
