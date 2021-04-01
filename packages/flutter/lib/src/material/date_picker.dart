@@ -223,19 +223,19 @@ Future<DateTime?> showDatePicker({
   lastDate = DateUtils.dateOnly(lastDate);
   assert(
     !lastDate.isBefore(firstDate),
-    'lastDate $lastDate must be on or after firstDate $firstDate.'
+    'lastDate $lastDate must be on or after firstDate $firstDate.',
   );
   assert(
     !initialDate.isBefore(firstDate),
-    'initialDate $initialDate must be on or after firstDate $firstDate.'
+    'initialDate $initialDate must be on or after firstDate $firstDate.',
   );
   assert(
     !initialDate.isAfter(lastDate),
-    'initialDate $initialDate must be on or before lastDate $lastDate.'
+    'initialDate $initialDate must be on or before lastDate $lastDate.',
   );
   assert(
     selectableDayPredicate == null || selectableDayPredicate(initialDate),
-    'Provided initialDate $initialDate must satisfy provided selectableDayPredicate.'
+    'Provided initialDate $initialDate must satisfy provided selectableDayPredicate.',
   );
   assert(initialEntryMode != null);
   assert(useRootNavigator != null);
@@ -324,19 +324,19 @@ class DatePickerDialog extends StatefulWidget {
        super(key: key) {
     assert(
       !this.lastDate.isBefore(this.firstDate),
-      'lastDate ${this.lastDate} must be on or after firstDate ${this.firstDate}.'
+      'lastDate ${this.lastDate} must be on or after firstDate ${this.firstDate}.',
     );
     assert(
       !this.initialDate.isBefore(this.firstDate),
-      'initialDate ${this.initialDate} must be on or after firstDate ${this.firstDate}.'
+      'initialDate ${this.initialDate} must be on or after firstDate ${this.firstDate}.',
     );
     assert(
       !this.initialDate.isAfter(this.lastDate),
-      'initialDate ${this.initialDate} must be on or before lastDate ${this.lastDate}.'
+      'initialDate ${this.initialDate} must be on or before lastDate ${this.lastDate}.',
     );
     assert(
       selectableDayPredicate == null || selectableDayPredicate!(this.initialDate),
-      'Provided initialDate ${this.initialDate} must satisfy provided selectableDayPredicate'
+      'Provided initialDate ${this.initialDate} must satisfy provided selectableDayPredicate',
     );
   }
 
@@ -1052,11 +1052,11 @@ Future<DateTimeRange?> showDateRangePicker({
   assert(context != null);
   assert(
     initialDateRange == null || (initialDateRange.start != null && initialDateRange.end != null),
-    'initialDateRange must be null or have non-null start and end dates.'
+    'initialDateRange must be null or have non-null start and end dates.',
   );
   assert(
     initialDateRange == null || !initialDateRange.start.isAfter(initialDateRange.end),
-    'initialDateRange\'s start date must not be after it\'s end date.'
+    'initialDateRange\'s start date must not be after it\'s end date.',
   );
   initialDateRange = initialDateRange == null ? null : DateUtils.datesOnly(initialDateRange);
   assert(firstDate != null);
@@ -1065,23 +1065,23 @@ Future<DateTimeRange?> showDateRangePicker({
   lastDate = DateUtils.dateOnly(lastDate);
   assert(
     !lastDate.isBefore(firstDate),
-    'lastDate $lastDate must be on or after firstDate $firstDate.'
+    'lastDate $lastDate must be on or after firstDate $firstDate.',
   );
   assert(
     initialDateRange == null || !initialDateRange.start.isBefore(firstDate),
-    'initialDateRange\'s start date must be on or after firstDate $firstDate.'
+    'initialDateRange\'s start date must be on or after firstDate $firstDate.',
   );
   assert(
     initialDateRange == null || !initialDateRange.end.isBefore(firstDate),
-    'initialDateRange\'s end date must be on or after firstDate $firstDate.'
+    'initialDateRange\'s end date must be on or after firstDate $firstDate.',
   );
   assert(
     initialDateRange == null || !initialDateRange.start.isAfter(lastDate),
-    'initialDateRange\'s start date must be on or before lastDate $lastDate.'
+    'initialDateRange\'s start date must be on or before lastDate $lastDate.',
   );
   assert(
     initialDateRange == null || !initialDateRange.end.isAfter(lastDate),
-    'initialDateRange\'s end date must be on or before lastDate $lastDate.'
+    'initialDateRange\'s end date must be on or before lastDate $lastDate.',
   );
   currentDate = DateUtils.dateOnly(currentDate ?? DateTime.now());
   assert(initialEntryMode != null);
@@ -1703,11 +1703,11 @@ class _CalendarDateRangePicker extends StatefulWidget {
        super(key: key) {
     assert(
       this.initialStartDate == null || this.initialEndDate == null || !this.initialStartDate!.isAfter(initialEndDate!),
-      'initialStartDate must be on or before initialEndDate.'
+      'initialStartDate must be on or before initialEndDate.',
     );
     assert(
       !this.lastDate.isBefore(this.firstDate),
-      'firstDate must be on or before lastDate.'
+      'firstDate must be on or before lastDate.',
     );
   }
 

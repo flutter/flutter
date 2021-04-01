@@ -272,6 +272,7 @@ class FlutterDevice {
             ddsPort,
             ipv6,
             disableServiceAuthCodes,
+            logger: globals.logger,
           );
         } on dds.DartDevelopmentServiceException catch (e, st) {
           if (!allowExistingDdsInstance ||

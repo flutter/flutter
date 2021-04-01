@@ -811,8 +811,8 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
           'framework by filing a bug on GitHub:\n'
           '  https://github.com/flutter/flutter/issues/new?template=2_bug.md',
         ),
-      ],
-    ));
+      ]),
+    );
     assert(() {
       final Iterable<DiagnosticsNode> summaries = diagnostics.where((DiagnosticsNode node) => node.level == DiagnosticLevel.summary);
       if (summaries.length > 1) {

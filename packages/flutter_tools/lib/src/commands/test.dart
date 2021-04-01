@@ -16,7 +16,7 @@ import '../bundle.dart';
 import '../cache.dart';
 import '../devfs.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../test/coverage_collector.dart';

@@ -8,7 +8,7 @@ import '../base/common.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
