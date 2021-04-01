@@ -20,6 +20,18 @@ import 'common.dart';
 
 const String _success = 'success';
 
+/// Whether results should be reported to the native side over the method
+/// channel.
+///
+/// This is enabled by default for use by native test frameworks like Android
+/// instrumentation or XCTest. When running with the Flutter Tool through
+/// `flutter test integration_test` though, it will be disabled as the Flutter
+/// tool will be responsible for collection of test results.
+const bool _shouldReportResultsToNative = bool.fromEnvironment(
+  'INTEGRATION_TEST_SHOULD_REPORT_RESULTS_TO_NATIVE',
+  defaultValue: true,
+);
+
 /// A subclass of [LiveTestWidgetsFlutterBinding] that reports tests results
 /// on a channel to adapt them to native instrumentation test format.
 class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding implements IntegrationTestResults {
@@ -28,16 +40,16 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
   IntegrationTestWidgetsFlutterBinding() {
     // TODO(jackson): Report test results as they arrive
     tearDownAll(() async {
+      if (!_allTestsPassed.isCompleted) {
+        _allTestsPassed.complete(true);
+      }
+      callbackManager.cleanup();
+
+      if (!_shouldReportResultsToNative) {
+        return;
+      }
+
       try {
-        // For web integration tests we are not using the
-        // `plugins.flutter.io/integration_test`. Mark the tests as complete
-        // before invoking the channel.
-        if (kIsWeb) {
-          if (!_allTestsPassed.isCompleted) {
-            _allTestsPassed.complete(true);
-          }
-        }
-        callbackManager.cleanup();
         await _channel.invokeMethod<void>(
           'allTestsFinished',
           <String, dynamic>{
@@ -51,9 +63,6 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
         );
       } on MissingPluginException {
         print('Warning: integration_test test plugin was not detected.');
-      }
-      if (!_allTestsPassed.isCompleted) {
-        _allTestsPassed.complete(true);
       }
     });
 

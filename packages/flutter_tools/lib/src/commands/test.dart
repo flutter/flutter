@@ -401,6 +401,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     if (_isIntegrationTest) {
       integrationTestDevice = await findTargetDevice();
 
+      // Disable reporting of test results to native test frameworks. This isn't
+      // needed as the Flutter Tool will be responsible for reporting results.
+      buildInfo.dartDefines.add('INTEGRATION_TEST_SHOULD_REPORT_RESULTS_TO_NATIVE=false');
+
       if (integrationTestDevice == null) {
         throwToolExit(
           'No devices are connected. '
