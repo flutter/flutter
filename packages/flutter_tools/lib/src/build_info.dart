@@ -22,17 +22,17 @@ class BuildInfo {
     this.mode,
     this.flavor, {
     this.trackWidgetCreation = false,
-    this.extraFrontEndOptions,
-    this.extraGenSnapshotOptions,
+    List<String>? extraFrontEndOptions,
+    List<String>? extraGenSnapshotOptions,
     this.fileSystemRoots,
     this.fileSystemScheme,
     this.buildNumber,
     this.buildName,
     this.splitDebugInfoPath,
     this.dartObfuscation = false,
-    this.dartDefines = const <String>[],
+    List<String>? dartDefines,
     this.bundleSkSLPath,
-    this.dartExperiments = const <String>[],
+    List<String>? dartExperiments,
     required this.treeShakeIcons,
     this.performanceMeasurementFile,
     this.packagesPath = '.packages', // TODO(jonahwilliams): make this required and remove the default.
@@ -40,7 +40,10 @@ class BuildInfo {
     this.codeSizeDirectory,
     this.androidGradleDaemon = true,
     this.packageConfig = PackageConfig.empty,
-  });
+  }) : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
+       extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
+       dartDefines = dartDefines ?? const <String>[],
+       dartExperiments = dartExperiments ?? const <String>[];
 
   final BuildMode mode;
 
@@ -73,10 +76,10 @@ class BuildInfo {
   final bool trackWidgetCreation;
 
   /// Extra command-line options for front-end.
-  final List<String>? extraFrontEndOptions;
+  final List<String> extraFrontEndOptions;
 
   /// Extra command-line options for gen_snapshot.
-  final List<String>? extraGenSnapshotOptions;
+  final List<String> extraGenSnapshotOptions;
 
   /// Internal version number (not displayed to users).
   /// Each build must have a unique number to differentiate it from previous builds.
@@ -192,10 +195,10 @@ class BuildInfo {
         'DART_DEFINES': encodeDartDefines(dartDefines),
       if (dartObfuscation != null)
         'DART_OBFUSCATION': dartObfuscation.toString(),
-      if (extraFrontEndOptions?.isNotEmpty ?? false)
-        'EXTRA_FRONT_END_OPTIONS': extraFrontEndOptions!.join(','),
-      if (extraGenSnapshotOptions?.isNotEmpty ?? false)
-        'EXTRA_GEN_SNAPSHOT_OPTIONS': extraGenSnapshotOptions!.join(','),
+      if (extraFrontEndOptions.isNotEmpty)
+        'EXTRA_FRONT_END_OPTIONS': extraFrontEndOptions.join(','),
+      if (extraGenSnapshotOptions.isNotEmpty)
+        'EXTRA_GEN_SNAPSHOT_OPTIONS': extraGenSnapshotOptions.join(','),
       if (splitDebugInfoPath != null)
         'SPLIT_DEBUG_INFO': splitDebugInfoPath!,
       if (trackWidgetCreation != null)
@@ -222,10 +225,10 @@ class BuildInfo {
         '-Pdart-defines=${encodeDartDefines(dartDefines)}',
       if (dartObfuscation != null)
         '-Pdart-obfuscation=$dartObfuscation',
-      if (extraFrontEndOptions?.isNotEmpty ?? false)
-        '-Pextra-front-end-options=${extraFrontEndOptions?.join(',')}',
-      if (extraGenSnapshotOptions?.isNotEmpty ?? false)
-        '-Pextra-gen-snapshot-options=${extraGenSnapshotOptions?.join(',')}',
+      if (extraFrontEndOptions.isNotEmpty)
+        '-Pextra-front-end-options=${extraFrontEndOptions.join(',')}',
+      if (extraGenSnapshotOptions.isNotEmpty)
+        '-Pextra-gen-snapshot-options=${extraGenSnapshotOptions.join(',')}',
       if (splitDebugInfoPath != null)
         '-Psplit-debug-info=$splitDebugInfoPath',
       if (trackWidgetCreation != null)
