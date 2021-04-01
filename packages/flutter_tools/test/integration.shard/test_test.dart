@@ -53,8 +53,8 @@ void main() {
     return _testFile('trivial_widget', automatedTestsDirectory, integrationTestDirectory, exitCode: isZero, extraArguments: integrationTestExtraArgs);
   });
 
-  testWithoutContext('flutter test set the working directory correctly', () async {
-    return _testFile('working_directory', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero);
+  testWithoutContext('flutter test when main is tagged with @doNotStore', () async {
+    return _testFile('do_not_store', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero);
   });
 
   testWithoutContext('flutter test should report nice errors for exceptions thrown within testWidgets()', () async {
