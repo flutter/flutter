@@ -402,7 +402,7 @@ class ScrollDragController implements Drag {
       // Build momentum only if the velocity of the last drag was not substantially lower than the carried momentum.
       final bool isVelocityNotSubstantiallyLessThanCarriedMomentum = velocity.abs() > carriedVelocity!.abs() * momentumRetainVelocityThresholdFactor;
       if(isFlingingInSameDirection && isVelocityNotSubstantiallyLessThanCarriedMomentum) {
-        velocity += carriedVelocity!;      
+        velocity += carriedVelocity!;
       }
     }
     delegate.goBallistic(velocity);
