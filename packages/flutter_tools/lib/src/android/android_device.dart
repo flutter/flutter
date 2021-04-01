@@ -28,6 +28,7 @@ import '../protocol_discovery.dart';
 import 'android.dart';
 import 'android_console.dart';
 import 'android_sdk.dart';
+import 'application_package.dart';
 
 /// Whether the [AndroidDevice] is believed to be a physical device or an emulator.
 enum HardwareType { emulator, physical }

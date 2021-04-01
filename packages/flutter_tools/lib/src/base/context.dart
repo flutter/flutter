@@ -113,7 +113,7 @@ class AppContext {
 
   /// Gets the value associated with the specified [type], or `null` if no
   /// such value has been associated.
-  T get<T>() {
+  T? get<T>() {
     dynamic value = _generateIfNecessary(T, _overrides);
     if (value == null && _parent != null) {
       value = _parent!.get<T>();

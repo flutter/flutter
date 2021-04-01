@@ -372,7 +372,7 @@ class _FixedExtentScrollPosition extends ScrollPositionWithSingleContext impleme
     String? debugLabel,
   }) : assert(
          context is _FixedExtentScrollableState,
-         'FixedExtentScrollController can only be used with ListWheelScrollViews'
+         'FixedExtentScrollController can only be used with ListWheelScrollViews',
        ),
        super(
          physics: physics,
@@ -480,7 +480,7 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
     assert(
       position is _FixedExtentScrollPosition,
       'FixedExtentScrollPhysics can only be used with Scrollables that uses '
-      'the FixedExtentScrollController'
+      'the FixedExtentScrollController',
     );
 
     final _FixedExtentScrollPosition metrics = position as _FixedExtentScrollPosition;

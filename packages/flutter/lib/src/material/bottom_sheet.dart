@@ -193,9 +193,7 @@ class _BottomSheetState extends State<BottomSheet> {
   bool get _dismissUnderway => widget.animationController!.status == AnimationStatus.reverse;
 
   void _handleDragStart(DragStartDetails details) {
-    if (widget.onDragStart != null) {
-      widget.onDragStart!(details);
-    }
+    widget.onDragStart?.call(details);
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
@@ -226,12 +224,10 @@ class _BottomSheetState extends State<BottomSheet> {
       widget.animationController!.forward();
     }
 
-    if (widget.onDragEnd != null) {
-      widget.onDragEnd!(
-        details,
-        isClosing: isClosing,
-      );
-    }
+    widget.onDragEnd?.call(
+      details,
+      isClosing: isClosing,
+    );
 
     if (isClosing) {
       widget.onClosing();
@@ -394,7 +390,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
         // Disable the initial animation when accessible navigation is on so
         // that the semantics are added to the tree at the correct time.
         final double animationValue = animationCurve.transform(
-            mediaQuery.accessibleNavigation ? 1.0 : widget.route!.animation!.value
+            mediaQuery.accessibleNavigation ? 1.0 : widget.route!.animation!.value,
         );
         return Semantics(
           scopesRoute: true,

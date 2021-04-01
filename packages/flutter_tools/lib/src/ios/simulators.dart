@@ -26,6 +26,7 @@ import '../globals.dart' as globals;
 import '../macos/xcode.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
+import 'application_package.dart';
 import 'mac.dart';
 import 'plist_parser.dart';
 
@@ -471,6 +472,7 @@ class IOSSimulator extends Device {
         ipv6: ipv6,
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
+        logger: globals.logger,
       );
     }
 

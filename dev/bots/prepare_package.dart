@@ -11,6 +11,7 @@ import 'package:args/args.dart';
 import 'package:crypto/crypto.dart';
 import 'package:crypto/src/digest_sink.dart';
 import 'package:http/http.dart' as http;
+import 'package:meta/meta.dart' show required;
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart' show Platform, LocalPlatform;
 import 'package:process/process.dart';
@@ -26,6 +27,7 @@ const String oldBaseUrl = 'https://storage.googleapis.com/flutter_infra';
 const String newGsBase = 'gs://flutter_infra_release';
 const String newGsReleaseFolder = '$newGsBase$releaseFolder';
 const String newBaseUrl = 'https://storage.googleapis.com/flutter_infra_release';
+const int shortCacheSeconds = 60;
 
 /// Exception class for when a process fails to run, so we can catch
 /// it and provide something more readable than a stack trace.
@@ -547,7 +549,10 @@ class ArchivePublisher {
           );
         }
       }
-      await _cloudCopy(outputFile.absolute.path, destGsPath);
+      await _cloudCopy(
+        src: outputFile.absolute.path,
+        dest: destGsPath,
+      );
       assert(tempDir.existsSync());
       await _updateMetadata('$releaseFolder/${getMetadataFilename(platform)}', newBucket: false);
     }
@@ -614,7 +619,14 @@ class ArchivePublisher {
       const JsonEncoder encoder = JsonEncoder.withIndent('  ');
       metadataFile.writeAsStringSync(encoder.convert(jsonData));
     }
-    await _cloudCopy(metadataFile.absolute.path, gsPath);
+    await _cloudCopy(
+      src: metadataFile.absolute.path,
+      dest: gsPath,
+      // This metadata file is used by the website, so we don't want a long
+      // latency between publishing a release and it being available on the
+      // site.
+      cacheSeconds: shortCacheSeconds,
+    );
   }
 
   Future<String> _runGsUtil(
@@ -655,7 +667,11 @@ class ArchivePublisher {
     return true;
   }
 
-  Future<String> _cloudCopy(String src, String dest) async {
+  Future<String> _cloudCopy({
+    @required String src,
+    @required String dest,
+    int cacheSeconds,
+  }) async {
     // We often don't have permission to overwrite, but
     // we have permission to remove, so that's what we do.
     await _runGsUtil(<String>['rm', dest], failOk: true);
@@ -673,6 +689,7 @@ class ArchivePublisher {
       // Use our preferred MIME type for the files we care about
       // and let gsutil figure it out for anything else.
       if (mimeType != null) ...<String>['-h', 'Content-Type:$mimeType'],
+      if (cacheSeconds != null) ...<String>['-h', 'Cache-Control:max-age=$cacheSeconds'],
       'cp',
       src,
       dest,
@@ -804,7 +821,7 @@ Future<void> main(List<String> rawArguments) async {
         branch,
         version,
         outputFile,
-	parsedArguments['dry_run'] as bool,
+        parsedArguments['dry_run'] as bool,
       );
       await publisher.publishArchive(parsedArguments['force'] as bool);
     }

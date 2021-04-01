@@ -32,7 +32,7 @@ const Map<String, LogicalKeyboardKey> _kIosToLogicalMap = <String, LogicalKeyboa
   'UIKeyInputHome': LogicalKeyboardKey.home,
   'UIKeyInputEnd': LogicalKeyboardKey.enter,
   'UIKeyInputPageUp': LogicalKeyboardKey.pageUp,
-  'UIKeyInputPageDown': LogicalKeyboardKey.pageDown
+  'UIKeyInputPageDown': LogicalKeyboardKey.pageDown,
 };
 /// Platform-specific key event data for iOS.
 ///

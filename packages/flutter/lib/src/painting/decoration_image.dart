@@ -51,7 +51,7 @@ class DecorationImage {
     this.centerSlice,
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
-    this.scale = 1.0
+    this.scale = 1.0,
   }) : assert(image != null),
        assert(alignment != null),
        assert(repeat != null),
@@ -188,7 +188,7 @@ class DecorationImage {
         '$repeat',
       if (matchTextDirection)
         'match text direction',
-      'scale: $scale'
+      'scale: $scale',
     ];
     return '${objectRuntimeType(this, 'DecorationImage')}(${properties.join(", ")})';
   }
@@ -243,7 +243,7 @@ class DecorationImagePainter {
             ErrorSummary('DecorationImage.matchTextDirection can only be used when a TextDirection is available.'),
             ErrorDescription(
               'When DecorationImagePainter.paint() was called, there was no text direction provided '
-              'in the ImageConfiguration object to match.'
+              'in the ImageConfiguration object to match.',
             ),
             DiagnosticsProperty<DecorationImage>('The DecorationImage was', _details, style: DiagnosticsTreeStyle.errorProperty),
             DiagnosticsProperty<ImageConfiguration>('The ImageConfiguration was', configuration, style: DiagnosticsTreeStyle.errorProperty),
@@ -440,7 +440,7 @@ void paintImage({
     image.debugGetOpenHandleStackTraces()?.isNotEmpty ?? true,
     'Cannot paint an image that is disposed.\n'
     'The caller of paintImage is expected to wait to dispose the image until '
-    'after painting has completed.'
+    'after painting has completed.',
   );
   if (rect.isEmpty)
     return;
@@ -534,9 +534,7 @@ void paintImage({
       if (existingSizeInfo == null || existingSizeInfo.displaySizeInBytes < sizeInfo.displaySizeInBytes) {
         _pendingImageSizeInfo[sizeInfo.source!] = sizeInfo;
       }
-      if (debugOnPaintImage != null) {
-        debugOnPaintImage!(sizeInfo);
-      }
+      debugOnPaintImage?.call(sizeInfo);
       SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
         _lastFrameImageSizeInfo = _pendingImageSizeInfo.values.toSet();
         if (_pendingImageSizeInfo.isEmpty) {
@@ -546,7 +544,7 @@ void paintImage({
           'Flutter.ImageSizesForFrame',
           <String, Object>{
             for (ImageSizeInfo imageSizeInfo in _pendingImageSizeInfo.values)
-              imageSizeInfo.source!: imageSizeInfo.toJson()
+              imageSizeInfo.source!: imageSizeInfo.toJson(),
           },
         );
         _pendingImageSizeInfo = <String, ImageSizeInfo>{};

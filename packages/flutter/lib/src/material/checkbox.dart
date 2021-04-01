@@ -479,7 +479,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
           ..value = value
           ..previousValue = _previousValue
           ..shape = widget.shape ?? themeData.checkboxTheme.shape ?? const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(1.0))
+              borderRadius: BorderRadius.all(Radius.circular(1.0)),
           )
           ..side = widget.side ?? themeData.checkboxTheme.side,
       ),
