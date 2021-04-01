@@ -654,7 +654,7 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
 /// When [child] is null, this [RenderBox] takes the smallest possible size and
 /// never overflows.
 ///
-/// This [RenderBox] can be used to ensure some of [child]'s natrual dimensions
+/// This [RenderBox] can be used to ensure some of [child]'s natural dimensions
 /// are honored, and get an early warning during development otherwise. For
 /// instance, if [child] requires a minimum height to fully display its content,
 /// [constraintsTransform] can be set to a function that removes the `maxHeight`

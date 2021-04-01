@@ -127,7 +127,7 @@ class DefaultShaderWarmUp extends ShaderWarmUp {
   /// Defaults to 0.0.
   ///
   /// When changing this value, the [canvasSize] must also be changed to
-  /// accomodate the bigger canvas.
+  /// accommodate the bigger canvas.
   final double drawCallSpacing;
 
   /// The [size] of the canvas required to paint the shapes in [warmUpOnCanvas].
