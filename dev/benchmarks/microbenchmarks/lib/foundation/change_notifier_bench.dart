@@ -8,7 +8,7 @@ import '../common.dart';
 
 const int _kNumIterations = 65536;
 const int _kNumWarmUp = 100;
-const int _kScale = 1000;
+const int _kScale = 1024;
 
 void main() {
   assert(false,
