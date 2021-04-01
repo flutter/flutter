@@ -6,7 +6,6 @@
 
 import 'dart:async';
 
-import 'package:file/file.dart';
 import 'package:meta/meta.dart' show required, visibleForTesting;
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -15,10 +14,8 @@ import 'base/context.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/utils.dart';
-import 'build_info.dart';
 import 'convert.dart';
 import 'device.dart';
-import 'globals.dart' as globals;
 import 'version.dart';
 
 const String kGetSkSLsMethod = '_flutter.getSkSLs';
@@ -34,7 +31,7 @@ const int kIsolateReloadBarred = 1005;
 
 /// Override `WebSocketConnector` in [context] to use a different constructor
 /// for [WebSocket]s (used by tests).
-typedef WebSocketConnector = Future<io.WebSocket> Function(String url, {io.CompressionOptions compression});
+typedef WebSocketConnector = Future<io.WebSocket> Function(String url, {io.CompressionOptions compression, @required Logger logger});
 
 typedef PrintStructuredErrorLogMethod = void Function(vm_service.Event);
 
@@ -106,28 +103,29 @@ typedef CompileExpression = Future<String> Function(
 typedef GetSkSLMethod = Future<String> Function();
 
 Future<io.WebSocket> _defaultOpenChannel(String url, {
-  io.CompressionOptions compression = io.CompressionOptions.compressionDefault
+  io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
+  @required Logger logger,
 }) async {
   Duration delay = const Duration(milliseconds: 100);
   int attempts = 0;
   io.WebSocket socket;
 
   Future<void> handleError(dynamic e) async {
-    void Function(String) printVisibleTrace = globals.printTrace;
+    void Function(String) printVisibleTrace = logger.printTrace;
     if (attempts == 10) {
-      globals.printStatus('Connecting to the VM Service is taking longer than expected...');
+      logger.printStatus('Connecting to the VM Service is taking longer than expected...');
     } else if (attempts == 20) {
-      globals.printStatus('Still attempting to connect to the VM Service...');
-      globals.printStatus(
+      logger.printStatus('Still attempting to connect to the VM Service...');
+      logger.printStatus(
         'If you do NOT see the Flutter application running, it might have '
         'crashed. The device logs (e.g. from adb or XCode) might have more '
         'details.');
-      globals.printStatus(
+      logger.printStatus(
         'If you do see the Flutter application running on the device, try '
         're-running with --host-vmservice-port to use a specific port known to '
         'be available.');
     } else if (attempts % 50 == 0) {
-      printVisibleTrace = globals.printStatus;
+      printVisibleTrace = logger.printStatus;
     }
 
     printVisibleTrace('Exception attempting to connect to the VM Service: $e');
@@ -142,7 +140,11 @@ Future<io.WebSocket> _defaultOpenChannel(String url, {
     }
   }
 
-  final WebSocketConnector constructor = context.get<WebSocketConnector>() ?? io.WebSocket.connect;
+  final WebSocketConnector constructor = context.get<WebSocketConnector>() ?? (String url, {
+    io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
+    @required Logger logger,
+  }) => io.WebSocket.connect(url, compression: compression);
+
   while (socket == null) {
     attempts += 1;
     try {
@@ -166,6 +168,7 @@ typedef VMServiceConnector = Future<FlutterVmService> Function(Uri httpUri, {
   PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   io.CompressionOptions compression,
   Device device,
+  Logger logger,
 });
 
 /// Set up the VM Service client by attaching services for each of the provided
@@ -308,6 +311,7 @@ Future<FlutterVmService> connectToVmService(
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
     io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
     Device device,
+    @required Logger logger,
   }) async {
   final VMServiceConnector connector = context.get<VMServiceConnector>() ?? _connect;
   return connector(httpUri,
@@ -318,6 +322,7 @@ Future<FlutterVmService> connectToVmService(
     device: device,
     getSkSLMethod: getSkSLMethod,
     printStructuredErrorLogMethod: printStructuredErrorLogMethod,
+    logger: logger,
   );
 }
 
@@ -330,9 +335,10 @@ Future<FlutterVmService> _connect(
   PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
   Device device,
+  @required Logger logger,
 }) async {
   final Uri wsUri = httpUri.replace(scheme: 'ws', path: urlContext.join(httpUri.path, 'ws'));
-  final io.WebSocket channel = await _openChannel(wsUri.toString(), compression: compression);
+  final io.WebSocket channel = await _openChannel(wsUri.toString(), compression: compression, logger: logger);
   final vm_service.VmService delegateService = vm_service.VmService(
     channel,
     channel.add,
@@ -692,7 +698,6 @@ class FlutterVmService {
       'ext.flutter.exit',
       isolateId: isolateId,
     ).catchError((dynamic error, StackTrace stackTrace) {
-      globals.logger.printTrace('Failure in ext.flutter.exit: $error\n$stackTrace');
       // Do nothing on sentinel or exception, the isolate already exited.
     }, test: (dynamic error) => error is vm_service.SentinelException || error is vm_service.RPCError);
   }
@@ -932,54 +937,6 @@ bool isPauseEvent(String kind) {
          kind == vm_service.EventKind.kPauseException ||
          kind == vm_service.EventKind.kPausePostRequest ||
          kind == vm_service.EventKind.kNone;
-}
-
-// TODO(jonahwilliams): either refactor drive to use the resident runner
-// or delete it.
-Future<String> sharedSkSlWriter(Device device, Map<String, Object> data, {
-  File outputFile,
-  Logger logger,
-}) async {
-  logger ??= globals.logger;
-  if (data.isEmpty) {
-    logger.printStatus(
-      'No data was received. To ensure SkSL data can be generated use a '
-      'physical device then:\n'
-      '  1. Pass "--cache-sksl" as an argument to flutter run.\n'
-      '  2. Interact with the application to force shaders to be compiled.\n'
-    );
-    return null;
-  }
-  if (outputFile == null) {
-    outputFile = globals.fsUtils.getUniqueFile(
-      globals.fs.currentDirectory,
-      'flutter',
-      'sksl.json',
-    );
-  } else if (!outputFile.parent.existsSync()) {
-    outputFile.parent.createSync(recursive: true);
-  }
-  // Convert android sub-platforms to single target platform.
-  TargetPlatform targetPlatform = await device.targetPlatform;
-  switch (targetPlatform) {
-    case TargetPlatform.android_arm:
-    case TargetPlatform.android_arm64:
-    case TargetPlatform.android_x64:
-    case TargetPlatform.android_x86:
-      targetPlatform = TargetPlatform.android;
-      break;
-    default:
-      break;
-  }
-  final Map<String, Object> manifest = <String, Object>{
-    'platform': getNameForTargetPlatform(targetPlatform),
-    'name': device.name,
-    'engineRevision': globals.flutterVersion.engineRevision,
-    'data': data,
-  };
-  outputFile.writeAsStringSync(json.encode(manifest));
-  logger.printStatus('Wrote SkSL data to ${outputFile.path}.');
-  return outputFile.path;
 }
 
 /// A brightness enum that matches the values https://github.com/flutter/engine/blob/3a96741247528133c0201ab88500c0c3c036e64e/lib/ui/window.dart#L1328
