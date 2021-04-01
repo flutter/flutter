@@ -81,6 +81,10 @@ AccessibilityBridge::GetNodeAttributes(const flutter::SemanticsNode& node,
     *added_size += node.label.size();
   }
 
+  if (node.HasFlag(flutter::SemanticsFlags::kIsKeyboardKey)) {
+    attributes.set_is_keyboard_key(true);
+  }
+
   return attributes;
 }
 
