@@ -1233,7 +1233,7 @@ void main() {
       when<String>(emptyStdoutProcessResult.stderr as String).thenReturn('');
     });
 
-    testUsingContext('does not throw on non-existant ssh config', () async {
+    testUsingContext('does not throw on non-existent ssh config', () async {
       final FuchsiaDevice device = FuchsiaDevice('123');
       expect(await device.sdkNameAndVersion, equals('Fuchsia'));
     }, overrides: <Type, Generator>{
