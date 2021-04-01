@@ -547,6 +547,7 @@ void main() {
         flags: flags,
         actions: actions,
         label: 'a',
+        attributedLabel: null,
         increasedValue: 'b',
         value: 'c',
         decreasedValue: 'd',
