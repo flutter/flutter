@@ -1169,6 +1169,7 @@ class LocalizationsGenerator {
       .replaceAll('@(supportedLanguageCodes)', supportedLanguageCodes.join(', '))
       .replaceAll('@(messageClassImports)', sortedClassImports.join('\n'))
       .replaceAll('@(delegateClass)', delegateClass)
+      .replaceAll('@(requiresFoundationImport)', _useDeferredLoading ? '' : "import 'package:flutter/foundation.dart';")
       .replaceAll('@(requiresIntlImport)', _containsPluralMessage() ? "import 'package:intl/intl.dart' as intl;" : '')
       .replaceAll('@(canBeNullable)', _usesNullableGetter ? '?' : '')
       .replaceAll('@(needsNullCheck)', _usesNullableGetter ? '' : '!');
