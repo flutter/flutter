@@ -849,7 +849,7 @@ void main() {
 
   testWidgets('cursor layout has correct width', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController.fromValue(
-      const TextEditingValue(selection: TextSelection.collapsed(offset: 1)),
+      const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
     );
     final FocusNode focusNode = FocusNode();
     EditableText.debugDeterministicCursor = true;
@@ -876,7 +876,7 @@ void main() {
 
   testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController.fromValue(
-      const TextEditingValue(selection: TextSelection.collapsed(offset: 1)),
+      const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
     );
     final FocusNode focusNode = FocusNode();
     EditableText.debugDeterministicCursor = true;
@@ -904,7 +904,7 @@ void main() {
 
   testWidgets('cursor layout has correct height', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController.fromValue(
-      const TextEditingValue(selection: TextSelection.collapsed(offset: 1)),
+      const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
     );
     final FocusNode focusNode = FocusNode();
     EditableText.debugDeterministicCursor = true;
