@@ -234,10 +234,12 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
     ui.Rect maskRect,
     ui.BlendMode blendMode, {
     ui.ShaderMaskEngineLayer? oldLayer,
+    ui.FilterQuality filterQuality = ui.FilterQuality.low,
   }) {
     assert(blendMode != null); // ignore: unnecessary_null_comparison
     return _pushSurface<PersistedShaderMask>(PersistedShaderMask(
-        oldLayer as PersistedShaderMask?, shader, maskRect, blendMode));
+        oldLayer as PersistedShaderMask?,
+        shader, maskRect, blendMode, filterQuality));
   }
 
   /// Pushes a physical layer operation for an arbitrary shape onto the
@@ -384,12 +386,11 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
     bool freeze = false,
     ui.FilterQuality filterQuality = ui.FilterQuality.low,
   }) {
-    _addTexture(
-        offset.dx, offset.dy, width, height, textureId, filterQuality.index);
+    _addTexture(offset.dx, offset.dy, width, height, textureId, filterQuality);
   }
 
   void _addTexture(double dx, double dy, double width, double height,
-      int textureId, int filterQuality) {
+      int textureId, ui.FilterQuality filterQuality) {
     // In test mode, allow this to be a no-op.
     if (!ui.debugEmulateFlutterTesterEnvironment) {
       throw UnimplementedError('Textures are not supported in Flutter Web');

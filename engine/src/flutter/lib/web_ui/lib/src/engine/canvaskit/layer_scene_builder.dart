@@ -192,9 +192,10 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     ui.Rect maskRect,
     ui.BlendMode blendMode, {
     ui.EngineLayer? oldLayer,
+    ui.FilterQuality filterQuality = ui.FilterQuality.low,
   }) {
     return pushLayer<ShaderMaskEngineLayer>(ShaderMaskEngineLayer(
-        shader, maskRect, blendMode));
+        shader, maskRect, blendMode, filterQuality));
   }
 
   @override

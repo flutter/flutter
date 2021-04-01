@@ -86,6 +86,7 @@ abstract class SceneBuilder {
     Rect maskRect,
     BlendMode blendMode, {
     ShaderMaskEngineLayer? oldLayer,
+    FilterQuality filterQuality = FilterQuality.low,
   });
   PhysicalShapeEngineLayer? pushPhysicalShape({
     required Path path,

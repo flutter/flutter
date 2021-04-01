@@ -22,10 +22,13 @@ class ImageFilter : public RefCountedDartWrappable<ImageFilter> {
   ~ImageFilter() override;
   static fml::RefPtr<ImageFilter> Create();
 
+  static SkSamplingOptions SamplingFromIndex(int filterQualityIndex);
+  static SkFilterMode FilterModeFromIndex(int index);
+
   void initImage(CanvasImage* image);
   void initPicture(Picture*);
   void initBlur(double sigma_x, double sigma_y, SkTileMode tile_mode);
-  void initMatrix(const tonic::Float64List& matrix4, int filter_quality);
+  void initMatrix(const tonic::Float64List& matrix4, int filter_quality_index);
   void initColorFilter(ColorFilter* colorFilter);
   void initComposeFilter(ImageFilter* outer, ImageFilter* inner);
 
