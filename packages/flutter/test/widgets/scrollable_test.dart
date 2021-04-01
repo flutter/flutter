@@ -170,6 +170,24 @@ void main() {
     expect(getScrollVelocity(tester), moreOrLessEquals(1000.0));
   });
 
+  testWidgets('A slower final fling does not apply carried momentum', (WidgetTester tester) async {
+    const double finalFlingSpeed = 200.0;
+    await pumpTest(tester, debugDefaultTargetPlatformOverride);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
+    await tester.pump(); // trigger fling
+    await tester.pump(const Duration(milliseconds: 10));
+    // Repeat the exact same motion to build momentum.
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
+    await tester.pump(); // trigger the second fling
+    await tester.pump(const Duration(milliseconds: 10));
+    // Make a final fling that is much slower.
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), finalFlingSpeed);
+    await tester.pump(); // trigger the third fling
+    await tester.pump(const Duration(milliseconds: 10));
+    // expect that there is no carried velocity
+    expect(getScrollVelocity(tester), lessThan(finalFlingSpeed));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
   testWidgets('No iOS/macOS momentum build with flings in opposite directions', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
     await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
