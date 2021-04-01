@@ -37,5 +37,24 @@ void testMain() {
         [true],
       );
     });
+
+    test('responds to flutter/platform HapticFeedback.vibrate', () async {
+      const MethodCodec codec = JSONMethodCodec();
+      final Completer<ByteData?> completer = Completer<ByteData?>();
+      ui.PlatformDispatcher.instance.sendPlatformMessage(
+        'flutter/platform',
+        codec.encodeMethodCall(MethodCall(
+          'HapticFeedback.vibrate',
+        )),
+        completer.complete,
+      );
+
+      final ByteData? response = await completer.future;
+      expect(response, isNotNull);
+      expect(
+        codec.decodeEnvelope(response!),
+        true,
+      );
+    });
   });
 }
