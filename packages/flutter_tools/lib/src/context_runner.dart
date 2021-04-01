@@ -30,6 +30,7 @@ import 'base/user_messages.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
+import 'custom_devices/custom_devices_config.dart';
 import 'dart/pub.dart';
 import 'devfs.dart';
 import 'device.dart';
@@ -37,6 +38,8 @@ import 'devtools_launcher.dart';
 import 'doctor.dart';
 import 'emulator.dart';
 import 'features.dart';
+import 'flutter_application_package.dart';
+import 'flutter_device_manager.dart';
 import 'fuchsia/fuchsia_device.dart' show FuchsiaDeviceTools;
 import 'fuchsia/fuchsia_sdk.dart' show FuchsiaSdk, FuchsiaArtifacts;
 import 'fuchsia/fuchsia_workflow.dart' show FuchsiaWorkflow, fuchsiaWorkflow;
@@ -116,7 +119,7 @@ Future<T> runInContext<T>(
         featureFlags: featureFlags,
         operatingSystemUtils: globals.os,
       ),
-      ApplicationPackageFactory: () => ApplicationPackageFactory(
+      ApplicationPackageFactory: () => FlutterApplicationPackageFactory(
         userMessages: globals.userMessages,
         processManager: globals.processManager,
         logger: globals.logger,
@@ -195,6 +198,11 @@ Future<T> runInContext<T>(
         ),
         operatingSystemUtils: globals.os,
         terminal: globals.terminal,
+        customDevicesConfig: CustomDevicesConfig(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          platform: globals.platform
+        ),
       ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,

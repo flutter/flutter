@@ -6,7 +6,7 @@
 
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:meta/meta.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:yaml/yaml.dart';
 import 'common.dart';
 

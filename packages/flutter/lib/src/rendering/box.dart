@@ -1940,7 +1940,7 @@ abstract class RenderBox extends RenderObject {
             'otherwise, the only object that is allowed to read RenderBox.size '
             'is its parent, if they have said they will. It you hit this assert '
             'trying to access a child\'s size, pass "parentUsesSize: true" to '
-            'that child\'s layout().'
+            'that child\'s layout().',
           );
         }
         assert(_size == this._size);

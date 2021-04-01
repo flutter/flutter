@@ -10,7 +10,7 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 
 import 'gen_l10n_templates.dart';
 import 'gen_l10n_types.dart';
@@ -1169,6 +1169,7 @@ class LocalizationsGenerator {
       .replaceAll('@(supportedLanguageCodes)', supportedLanguageCodes.join(', '))
       .replaceAll('@(messageClassImports)', sortedClassImports.join('\n'))
       .replaceAll('@(delegateClass)', delegateClass)
+      .replaceAll('@(requiresFoundationImport)', _useDeferredLoading ? '' : "import 'package:flutter/foundation.dart';")
       .replaceAll('@(requiresIntlImport)', _containsPluralMessage() ? "import 'package:intl/intl.dart' as intl;" : '')
       .replaceAll('@(canBeNullable)', _usesNullableGetter ? '?' : '')
       .replaceAll('@(needsNullCheck)', _usesNullableGetter ? '' : '!');

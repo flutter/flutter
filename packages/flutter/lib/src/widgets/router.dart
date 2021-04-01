@@ -247,7 +247,7 @@ class Router<T> extends StatefulWidget {
           (routeInformationProvider == null) == (routeInformationParser == null),
           'Both routeInformationProvider and routeInformationParser must be provided '
           'if this router parses route information. Otherwise, they should both '
-          'be null.'
+          'be null.',
         ),
         assert(routerDelegate != null),
         super(key: key);

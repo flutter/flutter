@@ -1436,7 +1436,7 @@ abstract class DiagnosticsNode {
          name == null || !name.endsWith(':'),
          'Names of diagnostic nodes must not end with colons.\n'
          'name:\n'
-         '  "$name"'
+         '  "$name"',
        );
 
   /// Diagnostics containing just a string `message` and not a concrete name or

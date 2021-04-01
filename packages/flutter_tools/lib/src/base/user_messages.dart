@@ -5,7 +5,7 @@
 import 'context.dart';
 import 'platform.dart';
 
-UserMessages get userMessages => context.get<UserMessages>();
+UserMessages get userMessages => context.get<UserMessages>()!;
 
 /// Class containing message strings that can be produced by Flutter tools.
 class UserMessages {
