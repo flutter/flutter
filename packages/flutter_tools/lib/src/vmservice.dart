@@ -7,13 +7,14 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
-import 'package:meta/meta.dart' show required;
+import 'package:meta/meta.dart' show required, visibleForTesting;
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
+import 'base/utils.dart';
 import 'build_info.dart';
 import 'convert.dart';
 import 'device.dart';
@@ -38,6 +39,14 @@ typedef WebSocketConnector = Future<io.WebSocket> Function(String url, {io.Compr
 typedef PrintStructuredErrorLogMethod = void Function(vm_service.Event);
 
 WebSocketConnector _openChannel = _defaultOpenChannel;
+
+/// A testing only override of the WebSocket connector.
+///
+/// Provide a `null` value to restore the original connector.
+@visibleForTesting
+set openChannelForTesting(WebSocketConnector connector) {
+  _openChannel = connector ?? _defaultOpenChannel;
+}
 
 /// The error codes for the JSON-RPC standard, including VM service specific
 /// error codes.
@@ -322,7 +331,7 @@ Future<FlutterVmService> _connect(
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
   Device device,
 }) async {
-  final Uri wsUri = httpUri.replace(scheme: 'ws', path: globals.fs.path.join(httpUri.path, 'ws'));
+  final Uri wsUri = httpUri.replace(scheme: 'ws', path: urlContext.join(httpUri.path, 'ws'));
   final io.WebSocket channel = await _openChannel(wsUri.toString(), compression: compression);
   final vm_service.VmService delegateService = vm_service.VmService(
     channel,
