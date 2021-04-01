@@ -351,10 +351,10 @@ class _TextFormFieldState extends FormFieldState<String> {
   @override
   void initState() {
     super.initState();
-    if (widget.controller != null) {
-      widget.controller!.addListener(_handleControllerChanged);
+    if (widget.controller == null) {
+      _createLocalController(widget.initialValue != null ? TextEditingValue(text: widget.initialValue!) : null);
     } else {
-      _createLocalController();
+      widget.controller!.addListener(_handleControllerChanged);
     }
   }
 
