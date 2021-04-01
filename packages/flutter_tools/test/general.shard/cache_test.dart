@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/flutter_cache.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
