@@ -137,6 +137,16 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
    * The currently active text input model.
    */
   std::unique_ptr<flutter::TextInputModel> _activeModel;
+
+  /**
+   * Transform for current the editable. Used to determine position of accent selection menu.
+   */
+  CATransform3D _editableTransform;
+
+  /**
+   * Current position of caret in local (editable) coordinates.
+   */
+  CGRect _caretRect;
 }
 
 - (instancetype)initWithViewController:(FlutterViewController*)viewController {
@@ -152,6 +162,11 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
     }];
     _textInputContext = [[NSTextInputContext alloc] initWithClient:self];
     _previouslyPressedFlags = 0;
+
+    // Initialize with the zero matrix which is not
+    // an affine transform.
+    _editableTransform = CATransform3D();
+    _caretRect = CGRectNull;
   }
   return self;
 }
@@ -200,10 +215,48 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
     // engine since it sent this update, and needs to now be made to match the
     // engine's version of the state.
     [self updateEditState];
+  } else if ([method isEqualToString:@"TextInput.setEditableSizeAndTransform"]) {
+    NSDictionary* state = call.arguments;
+    [self setEditableTransform:state[@"transform"]];
+  } else if ([method isEqualToString:@"TextInput.setCaretRect"]) {
+    NSDictionary* rect = call.arguments;
+    [self updateCaretRect:rect];
   } else {
     handled = NO;
   }
   result(handled ? nil : FlutterMethodNotImplemented);
+}
+
+- (void)setEditableTransform:(NSArray*)matrix {
+  CATransform3D* transform = &_editableTransform;
+
+  transform->m11 = [matrix[0] doubleValue];
+  transform->m12 = [matrix[1] doubleValue];
+  transform->m13 = [matrix[2] doubleValue];
+  transform->m14 = [matrix[3] doubleValue];
+
+  transform->m21 = [matrix[4] doubleValue];
+  transform->m22 = [matrix[5] doubleValue];
+  transform->m23 = [matrix[6] doubleValue];
+  transform->m24 = [matrix[7] doubleValue];
+
+  transform->m31 = [matrix[8] doubleValue];
+  transform->m32 = [matrix[9] doubleValue];
+  transform->m33 = [matrix[10] doubleValue];
+  transform->m34 = [matrix[11] doubleValue];
+
+  transform->m41 = [matrix[12] doubleValue];
+  transform->m42 = [matrix[13] doubleValue];
+  transform->m43 = [matrix[14] doubleValue];
+  transform->m44 = [matrix[15] doubleValue];
+}
+
+- (void)updateCaretRect:(NSDictionary*)dictionary {
+  NSAssert(dictionary[@"x"] != nil && dictionary[@"y"] != nil && dictionary[@"width"] != nil &&
+               dictionary[@"height"] != nil,
+           @"Expected a dictionary representing a CGRect, got %@", dictionary);
+  _caretRect = CGRectMake([dictionary[@"x"] doubleValue], [dictionary[@"y"] doubleValue],
+                          [dictionary[@"width"] doubleValue], [dictionary[@"height"] doubleValue]);
 }
 
 - (void)setEditingState:(NSDictionary*)state {
@@ -403,9 +456,19 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
 }
 
 - (NSRect)firstRectForCharacterRange:(NSRange)range actualRange:(NSRangePointer)actualRange {
-  // TODO: Implement.
-  // Note: This function can't easily be implemented under the system-message architecture.
-  return CGRectZero;
+  // This only determines position of caret instead of any arbitrary range, but it's enough
+  // to properly position accent selection popup
+  if (CATransform3DIsAffine(_editableTransform) && !CGRectEqualToRect(_caretRect, CGRectNull)) {
+    CGRect rect =
+        CGRectApplyAffineTransform(_caretRect, CATransform3DGetAffineTransform(_editableTransform));
+
+    // flip and convert to screen coordinates
+    double viewHeight = self.flutterViewController.view.bounds.size.height;
+    rect.origin.y = viewHeight - rect.origin.y;
+    return [self.flutterViewController.view.window convertRectToScreen:rect];
+  } else {
+    return CGRectZero;
+  }
 }
 
 - (NSUInteger)characterIndexForPoint:(NSPoint)point {
