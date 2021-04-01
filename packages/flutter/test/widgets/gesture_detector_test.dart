@@ -806,7 +806,7 @@ void main() {
       test('constructor redundant pan and scale', () {
         late FlutterError error;
         try {
-          GestureDetector(onScaleStart: (_) {}, onPanStart: (_) {},);
+          GestureDetector(onScaleStart: (_) {}, onPanStart: (_) {});
         } on FlutterError catch (e) {
           error = e;
         } finally {

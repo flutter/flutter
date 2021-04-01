@@ -19,7 +19,7 @@ import  '../build_info.dart';
 import '../commands/daemon.dart';
 import '../compile.dart';
 import '../device.dart';
-import '../device_port_forwader.dart';
+import '../device_port_forwarder.dart';
 import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart' as globals;
 import '../ios/devices.dart';

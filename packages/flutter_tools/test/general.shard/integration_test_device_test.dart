@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'package:flutter_tools/src/base/io.dart' as io;
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/test/integration_test_device.dart';
@@ -133,6 +134,7 @@ void main() {
       PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
       io.CompressionOptions compression,
       Device device,
+      Logger logger,
     }) async => fakeVmServiceHost.vmService,
   });
 
@@ -150,6 +152,7 @@ void main() {
       PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
       io.CompressionOptions compression,
       Device device,
+      Logger logger,
     }) async => fakeVmServiceHost.vmService,
   });
 

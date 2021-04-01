@@ -218,7 +218,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
   // top and bottom. Since _kToolbarHeight includes the height of one arrow, the
   // total height that the child is given is that plus one more arrow height.
   // The extra height on the opposite side of the arrow will be clipped out. By
-  // using this appraoch, the buttons don't need any special padding that
+  // using this approach, the buttons don't need any special padding that
   // depends on isAbove.
   final BoxConstraints _heightConstraint = BoxConstraints.tightFor(
     height: _kToolbarHeight + _kToolbarArrowSize.height,

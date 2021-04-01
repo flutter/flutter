@@ -2240,9 +2240,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // send unrecognized exceptions to the engine/platform. Make sure the
   // exceptions that user callbacks throw are handled within this method.
   void _formatAndSetValue(TextEditingValue newTextEditingValue, SelectionChangedCause? cause, {bool userInteraction = false}) {
-    // Only apply input formatters if the text has changed (including uncommited
-    // text in the composing region), or when the user committed the composing
-    // text.
+    // Only apply input formatters if the text has changed (including
+    // uncommitted text in the composing region), or when the user committed
+    // the composing text.
     // Gboard is very persistent in restoring the composing region. Applying
     // input formatters on composing-region-only changes (except clearing the
     // current composing region) is very infinite-loop-prone: the formatters
