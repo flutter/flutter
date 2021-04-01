@@ -10,6 +10,18 @@ import './proto/conductor_state.pbenum.dart' show ReleasePhase;
 
 const String kStateFileName = '.flutter_conductor_state.json';
 
+String luciConsoleLink(String channel, String groupName) {
+  const Set<String> supportedBuilderGroupNames = <String>{
+    'master',
+    'dev',
+    'beta',
+    'stable',
+  };
+  assert(supportedBuilderGroupNames.contains(groupName));
+  final String consoleName = channel == 'master' ? groupName : '${channel}_$groupName';
+  return 'https://ci.chromium.org/p/flutter/g/$consoleName/console';
+}
+
 String defaultStateFilePath(Platform platform) {
   assert(platform.environment['HOME'] != null);
   return <String>[
@@ -33,6 +45,7 @@ String presentState(pb.ConductorState state) {
   buffer.writeln('\tStarting git HEAD: ${state.engine.startingGitHead}');
   buffer.writeln('\tCurrent git HEAD: ${state.engine.currentGitHead}');
   buffer.writeln('\tPath to checkout: ${state.engine.checkoutPath}');
+  buffer.writeln('\tPost-submit LUCI dashboard: ${luciConsoleLink(state.releaseChannel, 'engine')}');
   if (state.engine.cherrypicks.isNotEmpty) {
     buffer.writeln('${state.engine.cherrypicks.length} Engine Cherrypicks:');
     for (final String cherrypick in state.engine.cherrypicks) {
@@ -46,6 +59,8 @@ String presentState(pb.ConductorState state) {
   buffer.writeln('\tStarting git HEAD: ${state.framework.startingGitHead}');
   buffer.writeln('\tCurrent git HEAD: ${state.framework.currentGitHead}');
   buffer.writeln('\tPath to checkout: ${state.framework.checkoutPath}');
+  buffer.writeln('\tPost-submit LUCI dashboard: ${luciConsoleLink(state.releaseChannel, 'framework')}');
+  buffer.writeln('\tDevicelab LUCI dashboard: ${luciConsoleLink(state.releaseChannel, 'devicelab')}');
   if (state.framework.cherrypicks.isNotEmpty) {
     buffer.writeln('${state.framework.cherrypicks.length} Framework Cherrypicks:');
     for (final String cherrypick in state.framework.cherrypicks) {
