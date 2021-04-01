@@ -138,7 +138,7 @@ StockStrings _lookupStockStrings(Locale locale) {
 
   // Lookup logic when language+country codes are specified.
   switch (locale.languageCode) {
-        case 'en': {
+    case 'en': {
       switch (locale.countryCode) {
         case 'US': return StockStringsEnUs();
       }

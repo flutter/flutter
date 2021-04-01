@@ -355,11 +355,17 @@ String generateBaseClassMethod(Message message, LocaleInfo templateArbLocale) {
     .replaceAll('@(name)', message.resourceId);
 }
 
-// Add spaces to pad the start of each line.
+// Add spaces to pad the start of each line. Skips the first line
+// assuming that its already present.
 String _addSpaces(String message, {int spaces}) {
+  bool isFirstLine = true;
   return message
     .split('\n')
     .map((String value) {
+      if (isFirstLine) {
+        isFirstLine = false;
+        return value;
+      }
       final StringBuffer newValue = StringBuffer();
       for (int i = 0; i < spaces; i += 1) {
         newValue.write(' ');
@@ -407,13 +413,20 @@ String _generateLookupByScriptCode(
       return null;
     }
 
-    return nestedSwitchTemplate
+    return _addSpaces(nestedSwitchTemplate
       .replaceAll('@(languageCode)', language)
       .replaceAll('@(code)', 'scriptCode')
-      .replaceAll('@(switchClauses)', localesWithScriptCodes.map((LocaleInfo locale) {
-          return generateSwitchClauseTemplate(locale)
-            .replaceAll('@(case)', locale.scriptCode);
-        }).join('\n        '));
+      .replaceAll('@(switchClauses)',
+        _addSpaces(
+          localesWithScriptCodes.map((LocaleInfo locale) {
+            return generateSwitchClauseTemplate(locale)
+              .replaceAll('@(case)', locale.scriptCode);
+          }).join('\n'),
+          spaces: 8,
+        ),
+      ),
+      spaces: 4,
+    );
   }).where((String switchClause) => switchClause != null);
 
   if (switchClauses.isEmpty) {
@@ -444,10 +457,12 @@ String _generateLookupByCountryCode(
       nestedSwitchTemplate
         .replaceAll('@(languageCode)', language)
         .replaceAll('@(code)', 'countryCode')
-        .replaceAll('@(switchClauses)', localesWithCountryCodes.map((LocaleInfo locale) {
-            return generateSwitchClauseTemplate(locale)
-              .replaceAll('@(case)', locale.countryCode);
-          }).join('\n        ')),
+        .replaceAll('@(switchClauses)', _addSpaces(
+          localesWithCountryCodes.map((LocaleInfo locale) {
+            return generateSwitchClauseTemplate(locale).replaceAll('@(case)', locale.countryCode);
+          }).join('\n'),
+          spaces: 4,
+        )),
       spaces: 4,
     );
   }).where((String switchClause) => switchClause != null);
@@ -458,7 +473,7 @@ String _generateLookupByCountryCode(
 
   return languageCodeSwitchTemplate
     .replaceAll('@(comment)', '// Lookup logic when language+country codes are specified.')
-    .replaceAll('@(switchClauses)', switchClauses.join('\n      '));
+    .replaceAll('@(switchClauses)', switchClauses.join('\n    '));
 }
 
 String _generateLookupByLanguageCode(
