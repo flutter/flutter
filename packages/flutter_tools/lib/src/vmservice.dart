@@ -328,7 +328,7 @@ Future<FlutterVmService> _connect(
   Device device,
   @required Logger logger,
 }) async {
-  final Uri wsUri = httpUri.replace(scheme: 'ws', path: '${httpUri.path}/ws');
+  final Uri wsUri = httpUri.replace(scheme: 'ws', path: '${httpUri.path}ws');
   final io.WebSocket channel = await _openChannel(wsUri.toString(), compression: compression, logger: logger);
   final vm_service.VmService delegateService = vm_service.VmService(
     channel,
