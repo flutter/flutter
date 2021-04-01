@@ -11,7 +11,7 @@ Flutter tooling.
 ## Adding a New Scenario
 
 Create a new subclass of [Scenario](https://github.com/flutter/engine/blob/5d9509ae056b04c30295df27f201f31af9777842/testing/scenario_app/lib/src/scenario.dart#L9)
-and add it to the map in [main.dart](https://github.com/flutter/engine/blob/5d9509ae056b04c30295df27f201f31af9777842/testing/scenario_app/lib/main.dart#L17).
+and add it to the map in [scenarios.dart](https://github.com/flutter/engine/blob/db4d423ad9c6dad373618712690acd06b0a385fd/testing/scenario_app/lib/src/scenarios.dart#L22).
 For an example, see [animated_color_square.dart](https://github.com/flutter/engine/blob/5d9509ae056b04c30295df27f201f31af9777842/testing/scenario_app/lib/src/animated_color_square.dart#L15),
 which draws a continuously animating colored square that bounces off the sides
 of the viewport.
@@ -28,7 +28,7 @@ platform channel.
 ### iOS Platform View Tests
 
 For PlatformView tests on iOS, you'll also have to edit the dictionaries in
-[AppDelegate.m](https://github.com/flutter/engine/blob/5d9509ae056b04c30295df27f201f31af9777842/testing/scenario_app/ios/Scenarios/Scenarios/AppDelegate.m#L29) and [PlatformViewGoldenTestManager.m](https://github.com/flutter/engine/blob/5d9509ae056b04c30295df27f201f31af9777842/testing/scenario_app/ios/Scenarios/ScenariosUITests/PlatformViewGoldenTestManager.m#L24) so that the correct golden image can be found.  Also, you'll have to add a [GoldenPlatformViewTests](https://github.com/flutter/engine/blob/5d9509ae056b04c30295df27f201f31af9777842/testing/scenario_app/ios/Scenarios/ScenariosUITests/GoldenPlatformViewTests.h#L18) in [PlatformViewUITests.m](https://github.com/flutter/engine/blob/af2ffc02b72af2a89242ca3c89e18269b1584ce5/testing/scenario_app/ios/Scenarios/ScenariosUITests/PlatformViewUITests.m).
+[AppDelegate.m](https://github.com/flutter/engine/blob/5d9509ae056b04c30295df27f201f31af9777842/testing/scenario_app/ios/Scenarios/Scenarios/AppDelegate.m#L29) and [GoldenTestManager.m](https://github.com/flutter/engine/blob/db4d423ad9c6dad373618712690acd06b0a385fd/testing/scenario_app/ios/Scenarios/ScenariosUITests/GoldenTestManager.m#L25) so that the correct golden image can be found.  Also, you'll have to add a [GoldenPlatformViewTests](https://github.com/flutter/engine/blob/5d9509ae056b04c30295df27f201f31af9777842/testing/scenario_app/ios/Scenarios/ScenariosUITests/GoldenPlatformViewTests.h#L18) in [PlatformViewUITests.m](https://github.com/flutter/engine/blob/af2ffc02b72af2a89242ca3c89e18269b1584ce5/testing/scenario_app/ios/Scenarios/ScenariosUITests/PlatformViewUITests.m).
 
 If `PlatformViewRotation` is failing, make sure Simulator app Device > Rotate Device Automatically
 is selected, or run:
