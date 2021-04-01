@@ -2453,7 +2453,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _cachedFirstRect = firstRect;
       _cachedSize = size;
       final List<Rect> rects = List<Rect>.generate(
-              text.length, (int i) => renderEditable.getBoxesForSelection(TextSelection(baseOffset: i, extentOffset: i + 1)).first);
+        text.length,
+        (int i) => renderEditable.getBoxesForSelection(TextSelection(baseOffset: i, extentOffset: i + 1)).first,
+      );
       _textInputConnection!.setSelectionRects(rects);
     }
   }
@@ -2591,6 +2593,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  /// Tracks the location a [_ScribblePlaceholder] should be rendered in the
+  /// text.
+  ///
+  /// A value of -1 indicates there should be no placeholder, otherwise the
+  /// value should be between 0 and the length of the text, inclusive.
   int _placeholderLocation = -1;
 
   @override
@@ -2775,12 +2782,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final List<_ScribblePlaceholder> placeholders = <_ScribblePlaceholder>[];
       final int placeholderLocation = _value.text.length - _placeholderLocation;
       if (_isMultiline) {
-        final List<Rect> selectionBoxes = renderEditable.getBoxesForSelection(TextSelection(baseOffset: placeholderLocation, extentOffset: placeholderLocation + 1));
-        if (selectionBoxes.isNotEmpty) {
-          final Rect selectionBox = selectionBoxes.first;
-          placeholders.add(_ScribblePlaceholder(child: Container(), size: Size(renderEditable.size.width - selectionBox.topLeft.dx - selectionBox.width, 0.0)));
-          placeholders.add(_ScribblePlaceholder(child: Container(), size: Size(selectionBox.topLeft.dx, 0.0)));
-        }
+        placeholders.add(_ScribblePlaceholder(child: Container(), size: Size.zero));
+        placeholders.add(_ScribblePlaceholder(child: Container(), size: Size(renderEditable.size.width, 0.0)));
       } else {
         placeholders.add(_ScribblePlaceholder(child: Container(), size: const Size(100.0, 0.0)));
       }
@@ -3033,21 +3036,9 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> implements Scrib
     if (!_bounds.overlaps(rect))
       return false;
     final Rect intersection = _bounds.intersect(rect);
-    return <Offset>[
-      intersection.topLeft,
-      intersection.topCenter,
-      intersection.topRight,
-      intersection.centerLeft,
-      intersection.center,
-      intersection.centerRight,
-      intersection.bottomLeft,
-      intersection.bottomCenter,
-      intersection.bottomRight
-    ].any((Offset point) {
-      final HitTestResult result = HitTestResult();
-      WidgetsBinding.instance?.hitTest(result, point);
-      return result.path.any((HitTestEntry entry) => entry.target == renderEditable);
-    });
+    final HitTestResult result = HitTestResult();
+    WidgetsBinding.instance?.hitTest(result, intersection.center);
+    return result.path.any((HitTestEntry entry) => entry.target == renderEditable);
   }
 
   @override
