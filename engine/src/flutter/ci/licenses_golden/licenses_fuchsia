@@ -1,4 +1,4 @@
-Signature: f7d315bc074f95fbdd3e96ec9f490e4f
+Signature: acf40d4cf6d775d6103d65e214002cd3
 
 UNUSED LICENSES:
 
@@ -553,6 +553,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.url/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.weave/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.ieee80211/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.policy/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.product.deprecatedclient/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.product.deprecatedconfiguration/meta.json
@@ -1277,6 +1278,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.url/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.weave/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.ieee80211/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.policy/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.product.deprecatedclient/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.product.deprecatedconfiguration/meta.json
@@ -1898,6 +1900,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.url/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.weave/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.ieee80211/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.policy/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.product.deprecatedclient/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.product.deprecatedconfiguration/meta.json
@@ -2602,6 +2605,9 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.weave/auth.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.weave/bootstrap.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.weave/common.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.weave/weavestack.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.ieee80211/constants.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.ieee80211/reason_code.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.ieee80211/status_code.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.product.deprecatedclient/wlan_deprecated_client.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.product.deprecatedconfiguration/wlan_deprecated_configuration.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/zx/zx_common.fidl
