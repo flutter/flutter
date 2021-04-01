@@ -274,9 +274,10 @@ class ScrollDragController implements Drag {
   static const Duration momentumRetainStationaryDurationThreshold =
       Duration(milliseconds: 20);
 
-  /// The factor multiplied with the carriedVelocity to check if it should be
-  /// added to added to the velocity of an ended scroll gesture.
-  /// Decided by fair eyeballing with the scroll_overlay platform test
+  /// The minimum amount of velocity needed to apply the [carriedVelocity] at
+  /// the end of a drag. Expressed as a factor. For example with a [carriedVelocity]
+  /// of 2000, we will need a velocity of at least 1000 to apply the [carriedVelocity]
+  /// as well. Decided by fair eyeballing with the scroll_overlay platform test.
   static const double momentumRetainVelocityThresholdFactor = 0.5;
 
   /// Maximum amount of time interval the drag can have consecutive stationary
@@ -396,15 +397,10 @@ class ScrollDragController implements Drag {
     _lastDetails = details;
 
     // Build momentum only if dragging in the same direction.
-    // Check that the incomming velocity is more than
-    // a [momentumRetainVelocityThresholdFactor]'th of the carriedVelocity to
-    // avoid adding the carriedVelocity to the current velocity if the finger
-    // left the screen with a substantially smaller speed giving the effect of
-    // the scrollview carrying on in a much larger speed than the finger left with
-    if (_retainMomentum &&
-        velocity.sign == carriedVelocity!.sign &&
-        (carriedVelocity! == 0 || velocity.abs() > carriedVelocity!.abs() * momentumRetainVelocityThresholdFactor)
-    ) {
+    final bool isFlingingInSameDirection = velocity.sign == carriedVelocity!.sign;
+    // Build momentum only if the velocity of the last drag was not substantially lower than the carried momentum.
+    final bool isVelocityNotSubstantiallyLessThanCarriedMomentum = velocity.abs() > carriedVelocity!.abs() * momentumRetainVelocityThresholdFactor;
+    if (_retainMomentum && isFlingingInSameDirection && isVelocityNotSubstantiallyLessThanCarriedMomentum) {
       velocity += carriedVelocity!;
     }
     delegate.goBallistic(velocity);
