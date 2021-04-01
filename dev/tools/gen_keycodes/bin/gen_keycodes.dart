@@ -18,7 +18,6 @@ import 'package:gen_keycodes/glfw_code_gen.dart';
 import 'package:gen_keycodes/gtk_code_gen.dart';
 import 'package:gen_keycodes/windows_code_gen.dart';
 import 'package:gen_keycodes/web_code_gen.dart';
-import 'package:gen_keycodes/key_labels_code_gen.dart';
 import 'package:gen_keycodes/keyboard_keys_code_gen.dart';
 import 'package:gen_keycodes/keyboard_maps_code_gen.dart';
 import 'package:gen_keycodes/key_data.dart';
@@ -253,13 +252,6 @@ Future<void> main(List<String> rawArguments) async {
   }
   print('Writing ${'key maps'.padRight(15)}${mapsFile.absolute}');
   await mapsFile.writeAsString(KeyboardMapsCodeGenerator(data).generate());
-
-  final File keyLabelsFile = File(path.join(flutterRoot.path, 'packages', 'flutter_test', 'lib', 'src', 'key_labels.dart'));
-  if (!keyLabelsFile.existsSync()) {
-    mapsFile.createSync(recursive: true);
-  }
-  print('Writing ${'key labels'.padRight(15)}${mapsFile.absolute}');
-  await keyLabelsFile.writeAsString(KeyLabelsCodeGenerator(data).generate());
 
   for (final String platform in <String>['android', 'macos', 'ios', 'glfw', 'fuchsia', 'linux', 'windows', 'web']) {
     PlatformCodeGenerator codeGenerator;

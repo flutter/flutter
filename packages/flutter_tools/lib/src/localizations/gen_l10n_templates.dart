@@ -75,8 +75,8 @@ abstract class @(class) {
 
   final String localeName;
 
-  static @(class)? of(BuildContext context) {
-    return Localizations.of<@(class)>(context, @(class));
+  static @(class)@(canBeNullable) of(BuildContext context) {
+    return Localizations.of<@(class)>(context, @(class))@(needsNullCheck);
   }
 
   static const LocalizationsDelegate<@(class)> delegate = _@(class)Delegate();

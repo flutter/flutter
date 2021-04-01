@@ -505,7 +505,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
           ..isFocused = states.contains(MaterialState.focused)
           ..isHovered = states.contains(MaterialState.hovered)
           ..activeColor = effectiveActiveColor
-          ..inactiveColor = effectiveInactiveColor
+          ..inactiveColor = effectiveInactiveColor,
       ),
     );
   }

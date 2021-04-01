@@ -209,6 +209,7 @@ class FlutterDriverService extends DriverService {
         debuggingOptions.ddsPort,
         ipv6,
         debuggingOptions.disableServiceAuthCodes,
+        logger: _logger,
       );
       _vmServiceUri = device.dds.uri.toString();
     } on dds.DartDevelopmentServiceException {

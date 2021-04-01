@@ -211,7 +211,7 @@ class Draggable<T extends Object> extends StatefulWidget {
     this.feedbackOffset = Offset.zero,
     @Deprecated(
       'Use dragAnchorStrategy instead. '
-      'This feature was deprecated after v2.1.0-10.0.pre.'
+      'This feature was deprecated after v2.1.0-10.0.pre.',
     )
     this.dragAnchor = DragAnchor.child,
     this.dragAnchorStrategy,
@@ -292,7 +292,7 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// Defaults to [DragAnchor.child].
   @Deprecated(
     'Use dragAnchorStrategy instead. '
-    'This feature was deprecated after v2.1.0-10.0.pre.'
+    'This feature was deprecated after v2.1.0-10.0.pre.',
   )
   final DragAnchor dragAnchor;
 
@@ -576,8 +576,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
           widget.onDraggableCanceled!(velocity, offset);
       },
     );
-    if (widget.onDragStarted != null)
-      widget.onDragStarted!();
+    widget.onDragStarted?.call();
     return avatar;
   }
 
@@ -754,8 +753,7 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
       _candidateAvatars.remove(avatar);
       _rejectedAvatars.remove(avatar);
     });
-    if (widget.onLeave != null)
-      widget.onLeave!(avatar.data as T?);
+    widget.onLeave?.call(avatar.data as T?);
   }
 
   void didDrop(_DragAvatar<Object> avatar) {
@@ -765,17 +763,14 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
     setState(() {
       _candidateAvatars.remove(avatar);
     });
-    if (widget.onAccept != null)
-      widget.onAccept!(avatar.data! as T);
-    if (widget.onAcceptWithDetails != null)
-      widget.onAcceptWithDetails!(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
+    widget.onAccept?.call(avatar.data! as T);
+    widget.onAcceptWithDetails?.call(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
   }
 
   void didMove(_DragAvatar<Object> avatar) {
     if (!mounted)
       return;
-    if (widget.onMove != null)
-      widget.onMove!(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
+    widget.onMove?.call(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
   }
 
   @override
@@ -937,8 +932,7 @@ class _DragAvatar<T extends Object> extends Drag {
     _entry!.remove();
     _entry = null;
     // TODO(ianh): consider passing _entry as well so the client can perform an animation.
-    if (onDragEnd != null)
-      onDragEnd!(velocity ?? Velocity.zero, _lastOffset!, wasAccepted);
+    onDragEnd?.call(velocity ?? Velocity.zero, _lastOffset!, wasAccepted);
   }
 
   Widget _build(BuildContext context) {

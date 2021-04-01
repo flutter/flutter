@@ -8,8 +8,6 @@ import 'logger.dart';
 import 'platform.dart';
 import 'terminal.dart';
 
-// ignore_for_file: non_constant_identifier_names
-
 const String fire = '🔥';
 const String image = '🖼️';
 const int maxLineWidth = 84;
@@ -138,11 +136,6 @@ class CommandHelp {
     't',
     'Dump rendering tree to the console.',
     'debugDumpRenderTree',
-  );
-
-  late final CommandHelpOption v = _makeOption(
-    'v',
-    'Launch DevTools.',
   );
 
   late final CommandHelpOption w = _makeOption(

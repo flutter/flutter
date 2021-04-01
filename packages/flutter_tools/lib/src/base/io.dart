@@ -248,7 +248,6 @@ class Stdio {
 
   Stream<List<int>> get stdin => io.stdin;
 
-  @visibleForTesting
   io.Stdout get stdout {
     if (_stdout != null) {
       return _stdout!;

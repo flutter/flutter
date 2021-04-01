@@ -666,7 +666,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
           RouteInformation(
             location: routeArguments['location'] as String,
             state: routeArguments['state'] as Object?,
-          )
+          ),
         )
       )
       return;
@@ -746,7 +746,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
           ErrorSummary('Build scheduled during frame.'),
           ErrorDescription(
             'While the widget tree was being built, laid out, and painted, '
-            'a new frame was scheduled to rebuild the widget tree.'
+            'a new frame was scheduled to rebuild the widget tree.',
           ),
           ErrorHint(
             'This might be because setState() was called from a layout or '
@@ -761,7 +761,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
             'animation, consider scheduling the frame in a post-frame callback '
             'using SchedulerBinding.addPostFrameCallback or '
             'using an AnimationController to trigger the animation.',
-          )
+          ),
         ]);
       }
       return true;

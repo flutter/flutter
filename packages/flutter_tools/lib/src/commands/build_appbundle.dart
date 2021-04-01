@@ -116,6 +116,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
       final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
         FlutterProject.current().directory,
         globals.logger,
+        globals.platform,
         title: 'Deferred components prebuild validation',
         exitOnFail: true,
       );

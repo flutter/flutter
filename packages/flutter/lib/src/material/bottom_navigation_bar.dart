@@ -290,7 +290,7 @@ class BottomNavigationBar extends StatefulWidget {
        assert(iconSize != null && iconSize >= 0.0),
        assert(
          selectedItemColor == null || fixedColor == null,
-         'Either selectedItemColor or fixedColor can be specified, but not both'
+         'Either selectedItemColor or fixedColor can be specified, but not both',
        ),
        assert(selectedFontSize != null && selectedFontSize >= 0.0),
        assert(unselectedFontSize != null && unselectedFontSize >= 0.0),
@@ -985,8 +985,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         unselectedLabelStyle: effectiveUnselectedLabelStyle,
         enableFeedback: widget.enableFeedback ?? bottomTheme.enableFeedback ?? true,
         onTap: () {
-          if (widget.onTap != null)
-            widget.onTap!(i);
+          widget.onTap?.call(i);
         },
         colorTween: colorTween,
         flex: _evaluateFlex(_animations[i]),
