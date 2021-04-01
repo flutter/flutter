@@ -30,8 +30,14 @@ void main() {
       );
     }
 
-    Widget build({ Widget? header, Axis scrollDirection = Axis.vertical, TextDirection textDirection = TextDirection.ltr }) {
+    Widget build({
+      Widget? header,
+      Axis scrollDirection = Axis.vertical,
+      TextDirection textDirection = TextDirection.ltr,
+      TargetPlatform? platform,
+    }) {
       return MaterialApp(
+        theme: ThemeData(platform: platform),
         home: Directionality(
           textDirection: textDirection,
           child: SizedBox(
@@ -1309,6 +1315,28 @@ void main() {
       expect(getTestItemPosition(), startPosition);
     });
     // TODO(djshuckerow): figure out how to write a test for scrolling the list.
+
+    testWidgets('Vertical list renders drag handle in correct position', (WidgetTester tester) async {
+      await tester.pumpWidget(build(platform: TargetPlatform.macOS));
+      final Finder listView = find.byType(ReorderableListView);
+      final Finder item1 = find.byKey(const Key('Item 1'));
+      final Finder dragHandle = find.byIcon(Icons.drag_handle).first;
+
+      // Should be centered vertically within the item and 8 pixels from the right edge of the list.
+      expect(tester.getCenter(dragHandle).dy, tester.getCenter(item1).dy);
+      expect(tester.getTopRight(dragHandle).dx, tester.getSize(listView).width - 8);
+    });
+
+    testWidgets('Horizontal list renders drag handle in correct position', (WidgetTester tester) async {
+      await tester.pumpWidget(build(scrollDirection: Axis.horizontal, platform: TargetPlatform.macOS));
+      final Finder listView = find.byType(ReorderableListView);
+      final Finder item1 = find.byKey(const Key('Item 1'));
+      final Finder dragHandle = find.byIcon(Icons.drag_handle).first;
+
+      // Should be centered horizontally within the item and 8 pixels from the bottom of the list.
+      expect(tester.getCenter(dragHandle).dx, tester.getCenter(item1).dx);
+      expect(tester.getBottomRight(dragHandle).dy, tester.getSize(listView).height - 8);
+    });
   });
 
   testWidgets('ReorderableListView, can deal with the dragged item getting unmounted and rebuilt during drag', (WidgetTester tester) async {

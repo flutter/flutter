@@ -504,7 +504,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
       case MaxLengthEnforcement.enforced:
         // If already at the maximum and tried to enter even more, and has no
         // selection, keep the old value.
-        if (oldValue.text.characters.length == maxLength && oldValue.selection == null) {
+        if (oldValue.text.characters.length == maxLength && (oldValue.selection?.isCollapsed ?? true)) {
           return oldValue;
         }
 

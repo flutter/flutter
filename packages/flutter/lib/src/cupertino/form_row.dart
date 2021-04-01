@@ -30,7 +30,7 @@ const EdgeInsetsGeometry _kDefaultPadding =
 /// The [helper] and [error] parameters are both optional widgets targeted at
 /// displaying more information about the row. Both widgets are placed
 /// underneath the [prefix] and [child], and will expand the row's height to
-/// accomodate for their presence. When a [Text] is given to [error], it will
+/// accommodate for their presence. When a [Text] is given to [error], it will
 /// be shown in [CupertinoColors.destructiveRed] coloring and
 /// medium-weighted font.
 ///
@@ -96,7 +96,7 @@ class CupertinoFormRow extends StatelessWidget {
   /// The [helper] and [error] parameters are both optional widgets targeted at
   /// displaying more information about the row. Both widgets are placed
   /// underneath the [prefix] and [child], and will expand the row's height to
-  /// accomodate for their presence. When a [Text] is given to [error], it will
+  /// accommodate for their presence. When a [Text] is given to [error], it will
   /// be shown in [CupertinoColors.destructiveRed] coloring and
   /// medium-weighted font.
   const CupertinoFormRow({

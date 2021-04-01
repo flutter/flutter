@@ -68,7 +68,7 @@ typedef DragTargetMove<T> = void Function(DragTargetDetails<T> details);
 
 /// Signature for the strategy that determines the drag start point.
 ///
-/// Used for the built-in strategies switched via [DragAnchor] and the optinally
+/// Used for the built-in strategies switched via [DragAnchor] and the optimally
 /// injectable [Draggable.dragAnchorStrategy]
 typedef DragAnchorStrategy = Offset Function(Draggable<Object> draggable, BuildContext context, Offset position);
 

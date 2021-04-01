@@ -369,25 +369,48 @@ class _ReorderableListViewState extends State<ReorderableListView> {
         case TargetPlatform.linux:
         case TargetPlatform.windows:
         case TargetPlatform.macOS:
-          return Stack(
-            key: itemGlobalKey,
-            children: <Widget>[
-              itemWithSemantics,
-              Positioned.directional(
-                textDirection: Directionality.of(context),
-                top: 0,
-                bottom: 0,
-                end: 8,
-                child: Align(
-                  alignment: AlignmentDirectional.centerEnd,
-                  child: ReorderableDragStartListener(
-                    index: index,
-                    child: const Icon(Icons.drag_handle),
+          switch (widget.scrollDirection) {
+            case Axis.horizontal:
+              return Stack(
+                key: itemGlobalKey,
+                children: <Widget>[
+                  itemWithSemantics,
+                  Positioned.directional(
+                    textDirection: Directionality.of(context),
+                    start: 0,
+                    end: 0,
+                    bottom: 8,
+                    child: Align(
+                      alignment: AlignmentDirectional.bottomCenter,
+                      child: ReorderableDragStartListener(
+                        index: index,
+                        child: const Icon(Icons.drag_handle),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ],
-          );
+                ],
+              );
+            case Axis.vertical:
+              return Stack(
+                key: itemGlobalKey,
+                children: <Widget>[
+                  itemWithSemantics,
+                  Positioned.directional(
+                    textDirection: Directionality.of(context),
+                    top: 0,
+                    bottom: 0,
+                    end: 8,
+                    child: Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: ReorderableDragStartListener(
+                        index: index,
+                        child: const Icon(Icons.drag_handle),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+          }
 
         case TargetPlatform.iOS:
         case TargetPlatform.android:

@@ -1006,7 +1006,7 @@
       "name": "Mac_ios flutter_gallery__transition_perf_e2e_ios32",
       "repo": "flutter",
       "task_name": "mac_ios_flutter_gallery__transition_perf_e2e_ios32",
-      "flaky": false
+      "flaky": true
     },
     {
       "name": "Mac_ios flutter_gallery_ios__compile",
@@ -1120,7 +1120,7 @@
       "name": "Mac_ios native_ui_tests_ios32",
       "repo": "flutter",
       "task_name": "mac_ios_native_ui_tests_ios32",
-      "flaky": false
+      "flaky": true
     },
     {
       "name": "Mac_ios new_gallery_ios__transition_perf",

@@ -12,7 +12,9 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -560,6 +562,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isAndroidEnabled = true,
     this.isIOSEnabled = true,
     this.isFuchsiaEnabled = false,
+    this.areCustomDevicesEnabled = false,
     this.isExperimentalInvalidationStrategyEnabled = false,
     this.isWindowsUwpEnabled = false,
   });
@@ -589,6 +592,9 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isFuchsiaEnabled;
 
   @override
+  final bool areCustomDevicesEnabled;
+
+  @override
   final bool isExperimentalInvalidationStrategyEnabled;
 
   @override
@@ -613,6 +619,8 @@ class TestFeatureFlags implements FeatureFlags {
         return isIOSEnabled;
       case flutterFuchsiaFeature:
         return isFuchsiaEnabled;
+      case flutterCustomDevicesFeature:
+        return areCustomDevicesEnabled;
       case experimentalInvalidationStrategy:
         return isExperimentalInvalidationStrategyEnabled;
       case windowsUwpEmbedding:
@@ -691,4 +699,23 @@ class TestBuildSystem implements BuildSystem {
     }
     return _results[_nextResult++];
   }
+}
+
+class FakeBundleBuilder extends Fake implements BundleBuilder {
+  @override
+  Future<void> build({
+    TargetPlatform platform,
+    BuildInfo buildInfo,
+    String mainPath,
+    String manifestPath = defaultManifestPath,
+    String applicationKernelFilePath,
+    String depfilePath,
+    String assetDirPath,
+    bool trackWidgetCreation = false,
+    List<String> extraFrontEndOptions = const <String>[],
+    List<String> extraGenSnapshotOptions = const <String>[],
+    List<String> fileSystemRoots,
+    String fileSystemScheme,
+    bool treeShakeIcons
+  }) => Future<void>.value();
 }

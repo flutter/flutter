@@ -16,7 +16,7 @@ import '../base/platform.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../device.dart';
-import '../device_port_forwader.dart';
+import '../device_port_forwarder.dart';
 import '../features.dart';
 import '../project.dart';
 import 'chrome.dart';
