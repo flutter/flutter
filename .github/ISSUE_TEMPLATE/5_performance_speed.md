@@ -39,7 +39,7 @@ assignees: ''
      older Flutter version may have already been solved in the master channel.
 -->
 
-<!-- 
+<!--
      Open Observatory and save a timeline trace of the performance issue
      so we know which functions might be causing it. See "How to Collect
      and Read Timeline Traces" on this blog post:
