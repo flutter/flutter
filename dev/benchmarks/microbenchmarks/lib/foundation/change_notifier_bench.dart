@@ -22,7 +22,7 @@ void main() {
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
 
   void runAddListenerBenchmark(int iteration, {bool addResult = true}) {
-    const String name = 'addListener';
+    const String name = 'add';
     for (int listenerCount = 1; listenerCount <= 5; listenerCount += 1) {
       final List<_Notifier> notifiers = List<_Notifier>.generate(
         iteration,
@@ -43,15 +43,15 @@ void main() {
       if (addResult)
         printer.addResult(
           description: '$name ($listenerCount listeners)',
-          value: _makeToStringFriendly(averagePerIteration * _kScale),
+          value: averagePerIteration * _kScale,
           unit: 'ns per iteration',
-          name: '$name${listenerCount}_iteration',
+          name: '$name$listenerCount',
         );
     }
   }
 
   void runNotifyListenerBenchmark(int iteration, {bool addResult = true}) {
-    const String name = 'notifyListener';
+    const String name = 'notify';
 
     for (int listenerCount = 0; listenerCount <= 5; listenerCount += 1) {
       final _Notifier notifier = _Notifier();
@@ -69,15 +69,15 @@ void main() {
       if (addResult)
         printer.addResult(
           description: '$name ($listenerCount listeners)',
-          value: _makeToStringFriendly(averagePerIteration * _kScale),
+          value: averagePerIteration * _kScale,
           unit: 'ns per iteration',
-          name: '$name${listenerCount}_iteration',
+          name: '$name$listenerCount',
         );
     }
   }
 
   void runRemoveListenerBenchmark(int iteration, {bool addResult = true}) {
-    const String name = 'removeListener';
+    const String name = 'remove';
     final List<VoidCallback> listeners = <VoidCallback>[
       () {},
       () {},
@@ -111,16 +111,16 @@ void main() {
       if (addResult)
         printer.addResult(
           description: '$name ($listenerCount listeners)',
-          value: _makeToStringFriendly(averagePerIteration * _kScale),
+          value: averagePerIteration * _kScale,
           unit: 'ns per iteration',
-          name: '$name${listenerCount}_iteration',
+          name: '$name$listenerCount',
         );
     }
   }
 
   void runRemoveListenerWhileNotifyingBenchmark(int iteration,
       {bool addResult = true}) {
-    const String name = 'removeListenerWhileNotifying';
+    const String name = 'removeWhileNotify';
 
     final List<VoidCallback> listeners = <VoidCallback>[
       () {},
@@ -160,9 +160,9 @@ void main() {
       if (addResult)
         printer.addResult(
           description: '$name ($listenerCount listeners)',
-          value: _makeToStringFriendly(averagePerIteration * _kScale),
+          value: averagePerIteration * _kScale,
           unit: 'ns per iteration',
-          name: '$name${listenerCount}_iteration',
+          name: '$name$listenerCount',
         );
     }
   }
@@ -184,12 +184,4 @@ void main() {
 
 class _Notifier extends ChangeNotifier {
   void notify() => notifyListeners();
-}
-
-/// round the given double to but 2 decimal places.
-/// this is a workaround to ensure that the printed JSON does not get too long
-/// which can lead to the JSON being cut off in the middle
-/// see issue https://github.com/flutter/flutter/issues/74448
-double _makeToStringFriendly(double d) {
-  return double.parse(d.toStringAsFixed(2));
 }
