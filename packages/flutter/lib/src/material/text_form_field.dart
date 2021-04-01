@@ -366,8 +366,7 @@ class _TextFormFieldState extends FormFieldState<String> {
       widget.controller?.addListener(_handleControllerChanged);
 
       if (oldWidget.controller != null && widget.controller == null) {
-        _createLocalController();
-        _controller!.value.value = oldWidget.controller!.value;
+        _createLocalController(oldWidget.controller!.value);
       }
 
       if (widget.controller != null) {
