@@ -1145,8 +1145,8 @@ void main() {
         child: Column(children: const<Widget> [
           Text('Hello ', key: Key('widgetOne')),
           SizedBox(
-            height: 0, 
-            width: 0, 
+            height: 0,
+            width: 0,
             child: Text('World!', key: Key('widgetTwo')),
             )
           ],
@@ -1157,7 +1157,7 @@ void main() {
     testWidgets('returns true when widget is tappable', (
         WidgetTester tester) async {
       driverExtension = FlutterDriverExtension((String? arg) async => '', true, false);
-      
+
       await tester.pumpWidget(testWidget);
 
       final Map<String, dynamic> waitForTappableResult = await waitForTappable();
