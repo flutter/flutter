@@ -136,14 +136,6 @@ String generateTestEntrypoint({
 
   StreamChannel serializeSuite(Function getMain(), {bool hidePrints = true}) => RemoteListener.start(getMain, hidePrints: hidePrints);
 
-  StreamChannel suiteChannel(String name) {
-    var manager = SuiteChannelManager.current;
-    if (manager == null) {
-      throw StateError('suiteChannel() may only be called within a test worker.');
-    }
-    return manager.connectOut(name);
-  }
-
   StreamChannel postMessageChannel() {
     var controller = StreamChannelController(sync: true);
     window.onMessage.firstWhere((message) {

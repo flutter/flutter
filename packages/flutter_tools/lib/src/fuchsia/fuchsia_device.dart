@@ -21,6 +21,7 @@ import '../base/process.dart';
 import '../base/time.dart';
 import '../build_info.dart';
 import '../device.dart';
+import '../device_port_forwarder.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../vmservice.dart';
@@ -63,6 +64,7 @@ Future<void> _kDefaultDartDevelopmentServiceStarter(
     0,
     true,
     disableServiceAuthCodes,
+    logger: globals.logger,
   );
 }
 
@@ -622,13 +624,11 @@ class FuchsiaDevice extends Device {
     final RunResult findResult = await shell(findCommand);
     if (findResult.exitCode != 0) {
       throwToolExit("'$findCommand' on device $name failed. stderr: '${findResult.stderr}'");
-      return null;
     }
     final String findOutput = findResult.stdout;
     if (findOutput.trim() == '') {
       throwToolExit(
           'No Dart Observatories found. Are you running a debug build?');
-      return null;
     }
     final List<int> ports = <int>[];
     for (final String path in findOutput.split('\n')) {
@@ -639,7 +639,6 @@ class FuchsiaDevice extends Device {
       final RunResult lsResult = await shell(lsCommand);
       if (lsResult.exitCode != 0) {
         throwToolExit("'$lsCommand' on device $name failed");
-        return null;
       }
       final String lsOutput = lsResult.stdout;
       for (final String line in lsOutput.split('\n')) {
@@ -715,7 +714,6 @@ class FuchsiaDevice extends Device {
       }
     }
     throwToolExit('No ports found running $isolateName');
-    return null;
   }
 
   FuchsiaIsolateDiscoveryProtocol getIsolateDiscoveryProtocol(String isolateName) {

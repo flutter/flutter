@@ -4,7 +4,8 @@
 
 // @dart = 2.8
 
-import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/protocol_discovery.dart';
 import 'package:fake_async/fake_async.dart';
 
@@ -44,6 +45,7 @@ void main() {
         hostPort: null,
         devicePort: devicePort,
         throttleDuration: throttleDuration,
+        logger: BufferLogger.test(),
       );
     }
 
@@ -280,6 +282,7 @@ void main() {
           hostPort: null,
           devicePort: null,
           ipv6: false,
+          logger: BufferLogger.test(),
         );
 
         // Get next port future.
@@ -301,6 +304,7 @@ void main() {
           hostPort: 1243,
           devicePort: null,
           ipv6: false,
+          logger: BufferLogger.test(),
         );
 
         // Get next port future.
@@ -322,6 +326,7 @@ void main() {
           hostPort: 0,
           devicePort: null,
           ipv6: false,
+          logger: BufferLogger.test(),
         );
 
         // Get next port future.
@@ -343,6 +348,7 @@ void main() {
           hostPort: 54777,
           ipv6: true,
           devicePort: null,
+          logger: BufferLogger.test(),
         );
 
         // Get next port future.
@@ -364,6 +370,7 @@ void main() {
           hostPort: 54777,
           ipv6: true,
           devicePort: null,
+          logger: BufferLogger.test(),
         );
 
         // Get next port future.

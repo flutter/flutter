@@ -975,13 +975,13 @@ List<DiagnosticsNode> _debugCompareFloats(String labelA, double valueA, String l
     if (valueA.toStringAsFixed(1) != valueB.toStringAsFixed(1))
       ErrorDescription(
         'The $labelA is ${valueA.toStringAsFixed(1)}, but '
-        'the $labelB is ${valueB.toStringAsFixed(1)}.'
+        'the $labelB is ${valueB.toStringAsFixed(1)}.',
       )
     else ...<DiagnosticsNode>[
       ErrorDescription('The $labelA is $valueA, but the $labelB is $valueB.'),
       ErrorHint(
         'Maybe you have fallen prey to floating point rounding errors, and should explicitly '
-        'apply the min() or max() functions, or the clamp() method, to the $labelB?'
+        'apply the min() or max() functions, or the clamp() method, to the $labelB?',
       ),
     ],
   ];
@@ -1205,7 +1205,7 @@ abstract class RenderSliver extends RenderObject {
     assert(geometry!.debugAssertIsValid(
       informationCollector: () sync* {
         yield describeForError('The RenderSliver that returned the offending geometry was');
-      }
+      },
     ));
     assert(() {
       if (geometry!.paintOrigin + geometry!.paintExtent > constraints.remainingPaintExtent) {

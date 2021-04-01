@@ -7,26 +7,20 @@
 import 'dart:convert';
 
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
-import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/ios/code_signing.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
 
 void main() {
   group('Auto signing', () {
     ProcessManager mockProcessManager;
     Config testConfig;
-    IosProject mockIosProject;
-    BuildableIOSApp app;
     AnsiTerminal testTerminal;
     BufferLogger logger;
 
@@ -36,67 +30,53 @@ void main() {
       // Assume all binaries exist and are executable
       when(mockProcessManager.canRun(any)).thenReturn(true);
       testConfig = Config.test();
-      mockIosProject = MockIosProject();
-      when(mockIosProject.buildSettingsForBuildInfo(any)).thenAnswer((_) {
-        return Future<Map<String, String>>.value(<String, String>{
-          'For our purposes': 'a non-empty build settings map is valid',
-        });
-      });
       testTerminal = TestTerminal();
       testTerminal.usesTerminalUi = true;
-      app = await BuildableIOSApp.fromProject(mockIosProject, null);
     });
 
     testWithoutContext('No auto-sign if Xcode project settings are not available', () async {
-      const BuildInfo buildInfo = BuildInfo.debug;
-      when(mockIosProject.buildSettingsForBuildInfo(any)).thenReturn(null);
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
-        iosApp: app,
+        buildSettings: null,
         processManager: mockProcessManager,
         logger: logger,
-        buildInfo: buildInfo,
+        config: testConfig,
+        terminal: testTerminal,
       );
       expect(signingConfigs, isNull);
-      verify(mockIosProject.buildSettingsForBuildInfo(buildInfo));
     });
 
     testWithoutContext('No discovery if development team specified in Xcode project', () async {
-      const BuildInfo buildInfo = BuildInfo.debug;
-      when(mockIosProject.buildSettingsForBuildInfo(any)).thenAnswer((_) {
-        return Future<Map<String, String>>.value(<String, String>{
-          'DEVELOPMENT_TEAM': 'abc',
-        });
-      });
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
-        iosApp: app,
+        buildSettings: <String, String>{
+          'DEVELOPMENT_TEAM': 'abc',
+        },
         processManager: mockProcessManager,
         logger: logger,
-        buildInfo: buildInfo,
+        config: testConfig,
+        terminal: testTerminal,
       );
       expect(signingConfigs, isNull);
       expect(logger.statusText, equals(
         'Automatically signing iOS for device deployment using specified development team in Xcode project: abc\n'
       ));
-      verify(mockIosProject.buildSettingsForBuildInfo(buildInfo));
     });
 
     testWithoutContext('No auto-sign if security or openssl not available', () async {
       when(mockProcessManager.run(<String>['which', 'security']))
           .thenAnswer((_) => Future<ProcessResult>.value(exitsFail));
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
-        iosApp: app,
+        buildSettings: <String, String>{
+          'bogus': 'bogus',
+        },
         processManager: mockProcessManager,
         logger: logger,
-        buildInfo: null,
+        config: testConfig,
+        terminal: testTerminal,
       );
       expect(signingConfigs, isNull);
     });
 
-    testUsingContext('No valid code signing certificates shows instructions', () async {
-      const BuildInfo buildInfo = BuildInfo.debug;
-      when(mockIosProject.buildSettingsForBuildInfo(any)).thenAnswer((_) {
-        return Future<Map<String, String>>.value(<String, String>{});
-      });
+    testWithoutContext('No valid code signing certificates shows instructions', () async {
       when(mockProcessManager.run(
         <String>['which', 'security'],
         workingDirectory: anyNamed('workingDirectory'),
@@ -114,15 +94,12 @@ void main() {
       )).thenAnswer((_) => Future<ProcessResult>.value(exitsHappy));
 
       expect(() async => getCodeSigningIdentityDevelopmentTeam(
-        iosApp: app,
+        buildSettings: <String, String>{},
         processManager: mockProcessManager,
         logger: logger,
-        buildInfo: buildInfo,
+        config: testConfig,
+        terminal: testTerminal,
       ), throwsToolExit(message: 'No development certificates available to code sign app for device deployment'));
-      verify(mockIosProject.buildSettingsForBuildInfo(buildInfo));
-    },
-    overrides: <Type, Generator>{
-      OutputPreferences: () => OutputPreferences(wrapText: false),
     });
 
     testWithoutContext('Test single identity and certificate organization works', () async {
@@ -180,10 +157,13 @@ void main() {
       when(mockProcess.exitCode).thenAnswer((_) async => 0);
 
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
-        iosApp: app,
+        buildSettings: <String, String>{
+          'bogus': 'bogus',
+        },
         processManager: mockProcessManager,
         logger: logger,
-        buildInfo: null,
+        config: testConfig,
+        terminal: testTerminal,
       );
 
       expect(logger.statusText, contains('iPhone Developer: Profile 1 (1111AAAA11)'));
@@ -249,10 +229,13 @@ void main() {
       Map<String, String> signingConfigs;
       try {
         signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
-          iosApp: app,
+          buildSettings: <String, String>{
+            'bogus': 'bogus',
+          },
           processManager: mockProcessManager,
           logger: logger,
-          buildInfo: null,
+          config: testConfig,
+          terminal: testTerminal,
         );
       } on Exception catch (e) {
         // This should not throw
@@ -265,7 +248,7 @@ void main() {
       expect(signingConfigs, <String, String>{'DEVELOPMENT_TEAM': '3333CCCC33'});
     });
 
-    testUsingContext('Test multiple identity and certificate organization works', () async {
+    testWithoutContext('Test multiple identity and certificate organization works', () async {
       when(mockProcessManager.run(
         <String>['which', 'security'],
         workingDirectory: anyNamed('workingDirectory'),
@@ -324,10 +307,13 @@ void main() {
       when(mockOpenSslProcess.exitCode).thenAnswer((_) => Future<int>.value(0));
 
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
-        iosApp: app,
+        buildSettings: <String, String>{
+          'bogus': 'bogus',
+        },
         processManager: mockProcessManager,
         logger: logger,
-        buildInfo: null,
+        config: testConfig,
+        terminal: testTerminal,
       );
 
       expect(
@@ -343,14 +329,9 @@ void main() {
       expect(signingConfigs, <String, String>{'DEVELOPMENT_TEAM': '4444DDDD44'});
 
       expect(testConfig.getValue('ios-signing-cert'), 'iPhone Developer: Profile 3 (3333CCCC33)');
-    },
-    overrides: <Type, Generator>{
-      Config: () => testConfig,
-      AnsiTerminal: () => testTerminal,
-      OutputPreferences: () => OutputPreferences(wrapText: false),
     });
 
-    testUsingContext('Test multiple identity in machine mode works', () async {
+    testWithoutContext('Test multiple identity in machine mode works', () async {
       testTerminal.usesTerminalUi = false;
       when(mockProcessManager.run(
         <String>['which', 'security'],
@@ -410,10 +391,13 @@ void main() {
       when(mockOpenSslProcess.exitCode).thenAnswer((_) => Future<int>.value(0));
 
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
-        iosApp: app,
+        buildSettings: <String, String>{
+          'bogus': 'bogus',
+        },
         processManager: mockProcessManager,
         logger: logger,
-        buildInfo: null,
+        config: testConfig,
+        terminal: testTerminal,
       );
 
       expect(
@@ -423,14 +407,9 @@ void main() {
       expect(logger.errorText, isEmpty);
       verify(mockOpenSslStdIn.write('This is a mock certificate'));
       expect(signingConfigs, <String, String>{'DEVELOPMENT_TEAM': '5555EEEE55'});
-    },
-    overrides: <Type, Generator>{
-      Config: () => testConfig,
-      AnsiTerminal: () => testTerminal,
-      OutputPreferences: () => OutputPreferences(wrapText: false),
     });
 
-    testUsingContext('Test saved certificate used', () async {
+    testWithoutContext('Test saved certificate used', () async {
       when(mockProcessManager.run(
         <String>['which', 'security'],
         workingDirectory: anyNamed('workingDirectory'),
@@ -488,10 +467,13 @@ void main() {
       testConfig.setValue('ios-signing-cert', 'iPhone Developer: Profile 3 (3333CCCC33)');
 
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
-        iosApp: app,
+        buildSettings: <String, String>{
+          'bogus': 'bogus',
+        },
         processManager: mockProcessManager,
         logger: logger,
-        buildInfo: null,
+        config: testConfig,
+        terminal: testTerminal,
       );
 
       expect(
@@ -505,13 +487,9 @@ void main() {
       expect(logger.errorText, isEmpty);
       verify(mockOpenSslStdIn.write('This is a mock certificate'));
       expect(signingConfigs, <String, String>{'DEVELOPMENT_TEAM': '4444DDDD44'});
-    },
-    overrides: <Type, Generator>{
-      Config: () => testConfig,
-      OutputPreferences: () => OutputPreferences(wrapText: false),
     });
 
-    testUsingContext('Test invalid saved certificate shows error and prompts again', () async {
+    testWithoutContext('Test invalid saved certificate shows error and prompts again', () async {
       when(mockProcessManager.run(
         <String>['which', 'security'],
         workingDirectory: anyNamed('workingDirectory'),
@@ -572,10 +550,13 @@ void main() {
       testConfig.setValue('ios-signing-cert', 'iPhone Developer: Invalid Profile');
 
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
-        iosApp: app,
+        buildSettings: <String, String>{
+          'bogus': 'bogus',
+        },
         processManager: mockProcessManager,
         logger: logger,
-        buildInfo: null,
+        config: testConfig,
+        terminal: testTerminal,
       );
 
       expect(
@@ -588,10 +569,6 @@ void main() {
       );
       expect(signingConfigs, <String, String>{'DEVELOPMENT_TEAM': '4444DDDD44'});
       expect(testConfig.getValue('ios-signing-cert'), 'iPhone Developer: Profile 3 (3333CCCC33)');
-    },
-    overrides: <Type, Generator>{
-      Config: () => testConfig,
-      AnsiTerminal: () => testTerminal,
     });
 
     testWithoutContext('find-identity failure', () async {
@@ -614,15 +591,18 @@ void main() {
       ));
 
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
-        iosApp: app,
+        buildSettings: <String, String>{
+          'bogus': 'bogus',
+        },
         processManager: mockProcessManager,
         logger: logger,
-        buildInfo: null,
+        config: testConfig,
+        terminal: testTerminal,
       );
       expect(signingConfigs, isNull);
     });
 
-    testUsingContext('find-certificate failure', () async {
+    testWithoutContext('find-certificate failure', () async {
       when(mockProcessManager.run(
         <String>['which', 'security'],
         workingDirectory: anyNamed('workingDirectory'),
@@ -658,16 +638,15 @@ void main() {
       );
 
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
-        iosApp: app,
+        buildSettings: <String, String>{
+          'bogus': 'bogus',
+        },
         processManager: mockProcessManager,
         logger: logger,
-        buildInfo: null,
+        config: testConfig,
+        terminal: testTerminal,
       );
       expect(signingConfigs, isNull);
-    },
-    overrides: <Type, Generator>{
-      Config: () => testConfig,
-      AnsiTerminal: () => testTerminal,
     });
   });
 }

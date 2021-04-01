@@ -351,7 +351,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
        assert(
          refreshTriggerPullDistance >= refreshIndicatorExtent,
          'The refresh indicator cannot take more space in its final state '
-         'than the amount initially created by overscrolling.'
+         'than the amount initially created by overscrolling.',
        ),
        super(key: key);
 

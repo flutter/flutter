@@ -77,6 +77,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       platform: platform,
       processManager: processManager,
       terminal: terminal,
+      protocolTrafficLog: protocolTrafficLog,
     );
     server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
     server.onErrors.listen(_handleAnalysisErrors);
