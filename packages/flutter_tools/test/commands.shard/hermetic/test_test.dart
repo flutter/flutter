@@ -446,6 +446,27 @@ dev_dependencies:
       ]),
     });
 
+    testUsingContext('when absolute unnormalized path to integration test is passed', () async {
+      final FakePackageTest fakePackageTest = FakePackageTest();
+
+      final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        '/package/../package/integration_test/some_integration_test.dart',
+      ]);
+
+      expect(testCommand.isIntegrationTest, true);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+      DeviceManager: () => _FakeDeviceManager(<Device>[
+        FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
+      ]),
+    });
+
     testUsingContext('when both test and integration test are passed', () async {
       final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
 
