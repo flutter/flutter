@@ -355,6 +355,21 @@ String generateBaseClassMethod(Message message, LocaleInfo templateArbLocale) {
     .replaceAll('@(name)', message.resourceId);
 }
 
+// Add spaces to pad the start of each line.
+String _addSpaces(String message, {int spaces}) {
+  return message
+    .split('\n')
+    .map((String value) {
+      final StringBuffer newValue = StringBuffer();
+      for (int i = 0; i < spaces; i += 1) {
+        newValue.write(' ');
+      }
+      newValue.write(value);
+      return newValue.toString();
+    })
+    .join('\n');
+}
+
 String _generateLookupByAllCodes(
   AppResourceBundleCollection allBundles,
   String Function(LocaleInfo) generateSwitchClauseTemplate,
@@ -374,7 +389,7 @@ String _generateLookupByAllCodes(
 
   return allCodesLookupTemplate.replaceAll(
     '@(allCodesSwitchClauses)',
-    switchClauses.join('\n    '),
+    switchClauses.join('\n        '),
   );
 }
 
@@ -407,7 +422,7 @@ String _generateLookupByScriptCode(
 
   return languageCodeSwitchTemplate
     .replaceAll('@(comment)', '// Lookup logic when language+script codes are specified.')
-    .replaceAll('@(switchClauses)', switchClauses.join('\n    '),
+    .replaceAll('@(switchClauses)', switchClauses.join('\n      '),
   );
 }
 
@@ -425,13 +440,16 @@ String _generateLookupByCountryCode(
       return null;
     }
 
-    return nestedSwitchTemplate
-      .replaceAll('@(languageCode)', language)
-      .replaceAll('@(code)', 'countryCode')
-      .replaceAll('@(switchClauses)', localesWithCountryCodes.map((LocaleInfo locale) {
-          return generateSwitchClauseTemplate(locale)
-            .replaceAll('@(case)', locale.countryCode);
-        }).join('\n        '));
+    return _addSpaces(
+      nestedSwitchTemplate
+        .replaceAll('@(languageCode)', language)
+        .replaceAll('@(code)', 'countryCode')
+        .replaceAll('@(switchClauses)', localesWithCountryCodes.map((LocaleInfo locale) {
+            return generateSwitchClauseTemplate(locale)
+              .replaceAll('@(case)', locale.countryCode);
+          }).join('\n        ')),
+      spaces: 4,
+    );
   }).where((String switchClause) => switchClause != null);
 
   if (switchClauses.isEmpty) {
@@ -440,7 +458,7 @@ String _generateLookupByCountryCode(
 
   return languageCodeSwitchTemplate
     .replaceAll('@(comment)', '// Lookup logic when language+country codes are specified.')
-    .replaceAll('@(switchClauses)', switchClauses.join('\n    '));
+    .replaceAll('@(switchClauses)', switchClauses.join('\n      '));
 }
 
 String _generateLookupByLanguageCode(
@@ -460,7 +478,7 @@ String _generateLookupByLanguageCode(
     return localesWithLanguageCode.map((LocaleInfo locale) {
       return generateSwitchClauseTemplate(locale)
         .replaceAll('@(case)', locale.languageCode);
-    }).join('\n        ');
+    }).join('\n      ');
   }).where((String switchClause) => switchClause != null);
 
   if (switchClauses.isEmpty) {
@@ -1172,7 +1190,11 @@ class LocalizationsGenerator {
       .replaceAll('@(requiresFoundationImport)', _useDeferredLoading ? '' : "import 'package:flutter/foundation.dart';")
       .replaceAll('@(requiresIntlImport)', _containsPluralMessage() ? "import 'package:intl/intl.dart' as intl;" : '')
       .replaceAll('@(canBeNullable)', _usesNullableGetter ? '?' : '')
-      .replaceAll('@(needsNullCheck)', _usesNullableGetter ? '' : '!');
+      .replaceAll('@(needsNullCheck)', _usesNullableGetter ? '' : '!')
+      // Removes all trailing whitespace from the generated file.
+      .split('\n').map((String line) => line.trimRight()).join('\n')
+      // Cleans out unnecessary newlines.
+      .replaceAll('\n\n\n', '\n\n');
   }
 
   bool _containsPluralMessage() => _allMessages.any((Message message) => message.isPlural);
