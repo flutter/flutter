@@ -76,7 +76,7 @@ class StockData extends ChangeNotifier {
   static bool actuallyFetchData = true;
 
   void _fetchNextChunk() {
-    _httpClient?.get(_urlToFetch(_nextChunk++)).then<void>((http.Response response) {
+    _httpClient!.get(_urlToFetch(_nextChunk++)).then<void>((http.Response response) {
       final String json = response.body;
       if (json == null) {
         debugPrint('Failed to load stock data chunk ${_nextChunk - 1}');
@@ -94,7 +94,7 @@ class StockData extends ChangeNotifier {
   }
 
   void _end() {
-    _httpClient?.close();
+    _httpClient!.close();
     _httpClient = null;
   }
 }
