@@ -201,9 +201,9 @@ class IntegrationTestsManager {
       {String mode = 'profile', String webRenderer = 'html'}) async {
     String executable =
         _useSystemFlutter ? 'flutter' : environment.flutterCommand.path;
-    Map<String, String> enviroment = Map<String, String>();
+    Map<String, String> flutterEnvironment = Map<String, String>();
     if (_doUpdateScreenshotGoldens) {
-      enviroment['UPDATE_GOLDENS'] = 'true';
+      flutterEnvironment['UPDATE_GOLDENS'] = 'true';
     }
     final IntegrationArguments arguments =
         IntegrationArguments.fromBrowser(_browser);
@@ -211,7 +211,7 @@ class IntegrationTestsManager {
       executable,
       arguments.getTestArguments(testName, mode, webRenderer),
       workingDirectory: directory.path,
-      environment: enviroment,
+      environment: flutterEnvironment,
     );
 
     if (exitCode != 0) {

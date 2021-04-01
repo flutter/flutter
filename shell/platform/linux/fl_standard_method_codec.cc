@@ -146,7 +146,7 @@ static GBytes* fl_standard_method_codec_encode_error_envelope(
       static_cast<GByteArray*>(g_steal_pointer(&buffer)));
 }
 
-// Implements FlMethodCodec::encode_decode_reponse.
+// Implements FlMethodCodec::encode_decode_response.
 static FlMethodResponse* fl_standard_method_codec_decode_response(
     FlMethodCodec* codec,
     GBytes* message,

@@ -60,7 +60,7 @@ class KeyData {
   ///
   /// For example, some key downs or ups might be lost when the window loses
   /// focus. Some platforms provides ways to query whether a key is being held.
-  /// If Flutter detects an inconsistancy between the state Flutter records and
+  /// If Flutter detects an inconsistency between the state Flutter records and
   /// the state returned by the system, Flutter will synthesize a corresponding
   /// event to synchronize the state without breaking the event model.
   ///

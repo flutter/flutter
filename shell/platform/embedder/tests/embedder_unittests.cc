@@ -740,7 +740,7 @@ TEST_F(EmbedderTest, CaDeinitializeAnEngine) {
   // It is ok to deinitialize an engine multiple times.
   ASSERT_EQ(FlutterEngineDeinitialize(engine.get()), kSuccess);
 
-  // Sending events to a deinitalized engine fails.
+  // Sending events to a deinitialized engine fails.
   FlutterWindowMetricsEvent event = {};
   event.struct_size = sizeof(event);
   event.width = 800;

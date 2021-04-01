@@ -517,7 +517,7 @@ class SingletonFlutterWindow extends FlutterWindow {
   ///
   /// {@macro dart.ui.window.accessorForwardWarning}
   ///
-  /// It's prefered to use [SchedulerBinding.addTimingsCallback] than to use
+  /// It's preferred to use [SchedulerBinding.addTimingsCallback] than to use
   /// [SingletonFlutterWindow.onReportTimings] directly because
   /// [SchedulerBinding.addTimingsCallback] allows multiple callbacks.
   ///

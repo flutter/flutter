@@ -162,7 +162,7 @@ class WindowWin32 {
   LRESULT DefaultWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
  private:
-  // Release OS resources asociated with window.
+  // Release OS resources associated with window.
   void Destroy();
 
   // Activates tracking for a "mouse leave" event.

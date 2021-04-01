@@ -147,7 +147,7 @@ the new revision.
 
 If you are making changes in the `felt` tool itself, you need to be aware of Dart snapshots. We create a Dart snapshot of the `felt` tool to make the startup faster.
 
-To make sure you are running the `felt` tool with your changes included, you would need to stop using the snapshot. This can be achived through the environment variable `FELT_USE_SNAPSHOT`:
+To make sure you are running the `felt` tool with your changes included, you would need to stop using the snapshot. This can be achieved through the environment variable `FELT_USE_SNAPSHOT`:
 
 ```
 FELT_USE_SNAPSHOT=false felt <command>

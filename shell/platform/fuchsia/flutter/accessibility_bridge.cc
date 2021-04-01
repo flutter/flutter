@@ -248,7 +248,7 @@ std::unordered_set<int32_t> AccessibilityBridge::GetDescendants(
 // nodes should give us a negative ID.
 static uint32_t FlutterIdToFuchsiaId(int32_t flutter_node_id) {
   FML_DCHECK(flutter_node_id >= 0)
-      << "Unexpectedly recieved a negative semantics node ID.";
+      << "Unexpectedly received a negative semantics node ID.";
   return static_cast<uint32_t>(flutter_node_id);
 }
 
@@ -528,7 +528,7 @@ void AccessibilityBridge::OnAccessibilityActionRequested(
   if (nodes_.find(node_id) == nodes_.end()) {
     FML_LOG(ERROR) << "Attempted to send accessibility action "
                    << static_cast<int32_t>(action)
-                   << " to unkonwn node id: " << node_id;
+                   << " to unknown node id: " << node_id;
     callback(false);
     return;
   }
@@ -561,7 +561,7 @@ std::optional<int32_t> AccessibilityBridge::GetHitNode(int32_t node_id,
                                                        float y) {
   auto it = nodes_.find(node_id);
   if (it == nodes_.end()) {
-    FML_LOG(ERROR) << "Attempted to hit test unkonwn node id: " << node_id;
+    FML_LOG(ERROR) << "Attempted to hit test unknown node id: " << node_id;
     return {};
   }
   auto const& node = it->second;

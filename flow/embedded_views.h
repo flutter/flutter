@@ -148,7 +148,7 @@ class MutatorsStack {
   const std::vector<std::shared_ptr<Mutator>>::const_reverse_iterator Bottom()
       const;
 
-  // Returns an iterator pointing to the begining of the mutator vector, which
+  // Returns an iterator pointing to the beginning of the mutator vector, which
   // is the mutator that is furtherest from the leaf node.
   const std::vector<std::shared_ptr<Mutator>>::const_iterator Begin() const;
 
@@ -218,7 +218,7 @@ class EmbeddedViewParams {
     final_bounding_rect_ = other.final_bounding_rect_;
   };
 
-  // The trasnformation Matrix corresponding to the sum of all the
+  // The transformation Matrix corresponding to the sum of all the
   // transformations in the platform view's mutator stack.
   const SkMatrix& transformMatrix() const { return matrix_; };
   // The original size of the platform view before any mutation matrix is
@@ -280,7 +280,7 @@ class ExternalViewEmbedder {
   // sets the stage for the next pre-roll.
   virtual void CancelFrame() = 0;
 
-  // Indicates the begining of a frame.
+  // Indicates the beginning of a frame.
   //
   // The `raster_thread_merger` will be null if |SupportsDynamicThreadMerging|
   // returns false.

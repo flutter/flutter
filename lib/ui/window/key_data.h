@@ -29,7 +29,7 @@ enum class KeyEventType : int64_t {
 //
 // This structure is unpacked by hooks.dart.
 struct alignas(8) KeyData {
-  // Timestamp in microseconds from an arbitrary and consistant start point
+  // Timestamp in microseconds from an arbitrary and consistent start point
   uint64_t timestamp;
   KeyEventType type;
   uint64_t physical;

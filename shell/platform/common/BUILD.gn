@@ -121,7 +121,7 @@ source_set("common_cpp") {
 
 # The portion of common_cpp that has no dependencies on the public/
 # headers. This division should be revisited once the Linux GTK
-# embedding is futher along and it's clearer how much, if any, shared
+# embedding is further along and it's clearer how much, if any, shared
 # API surface there will be.
 source_set("common_cpp_core") {
   public = [

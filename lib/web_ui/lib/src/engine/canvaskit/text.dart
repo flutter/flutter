@@ -433,7 +433,7 @@ class CkParagraph extends ManagedSkiaObject<SkParagraph>
   /// is deleted.
   final List<_ParagraphCommand> _paragraphCommands;
 
-  /// The constraints from the last time we layed the paragraph out.
+  /// The constraints from the last time we laid the paragraph out.
   ///
   /// This is used to resurrect the paragraph if the initial paragraph
   /// is deleted.

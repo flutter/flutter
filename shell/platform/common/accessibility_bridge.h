@@ -25,7 +25,7 @@ namespace flutter {
 ///
 /// The bridge creates an AXTree to hold the semantics data that comes from
 /// Flutter semantics updates. The tree holds AXNode[s] which contain the
-/// semantics information for semantics node. The AXTree ressemble the Flutter
+/// semantics information for semantics node. The AXTree resemble the Flutter
 /// semantics tree in the Flutter framework. The bridge also uses
 /// FlutterPlatformNodeDelegate to wrap each AXNode in order to provide
 /// an accessibility tree in the native format.

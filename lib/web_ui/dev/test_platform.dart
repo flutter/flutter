@@ -541,7 +541,7 @@ class BrowserManager {
 
     // For the cases where we use a delegator such as `adb` (for Android) or
     // `xcrun` (for IOS), these delegator processes can shut down before the
-    // websocket is available. Therefore do not throw an error if proccess
+    // websocket is available. Therefore do not throw an error if process
     // exits with exitCode 0. Note that `browser` will throw and error if the
     // exit code was not 0, which will be processed by the next callback.
     browser.onExit.catchError((dynamic error, StackTrace stackTrace) {

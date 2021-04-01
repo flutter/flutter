@@ -33,7 +33,7 @@ String placeholderMessage = 'Enable accessibility';
 /// event which should be forwarded to the framework.
 ///
 /// It does this by using a [SemanticsEnabler]. The [SemanticsEnabler]
-/// implementation is choosen using form factor type.
+/// implementation is chosen using form factor type.
 ///
 /// See [DesktopSemanticsEnabler], [MobileSemanticsEnabler].
 class SemanticsHelper {
