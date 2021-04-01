@@ -121,9 +121,15 @@
       "flaky": false
     },
     {
-      "name": "Linux docs",
+      "name": "Linux docs_test",
       "repo": "flutter",
-      "task_name": "linux_docs",
+      "task_name": "linux_docs_test",
+      "flaky": false
+    },
+    {
+      "name": "Linux docs_publish",
+      "repo": "flutter",
+      "task_name": "linux_docs_publish",
       "flaky": false
     },
     {
@@ -721,6 +727,12 @@
       "flaky": false
     },
     {
+      "name": "Mac_android integration_test_test",
+      "repo": "flutter",
+      "task_name": "mac_android_integration_test_test",
+      "flaky": false
+    },
+    {
       "name": "Mac_android microbenchmarks",
       "repo": "flutter",
       "task_name": "mac_android_microbenchmarks",
@@ -994,7 +1006,7 @@
       "name": "Mac_ios flutter_gallery__transition_perf_e2e_ios32",
       "repo": "flutter",
       "task_name": "mac_ios_flutter_gallery__transition_perf_e2e_ios32",
-      "flaky": false
+      "flaky": true
     },
     {
       "name": "Mac_ios flutter_gallery_ios__compile",
@@ -1057,6 +1069,12 @@
       "flaky": false
     },
     {
+      "name": "Mac_ios integration_test_test_ios",
+      "repo": "flutter",
+      "task_name": "mac_ios_integration_test_test_ios",
+      "flaky": false
+    },
+    {
       "name": "Mac_ios ios_app_with_extensions_test",
       "repo": "flutter",
       "task_name": "mac_ios_ios_app_with_extensions_test",
@@ -1102,7 +1120,7 @@
       "name": "Mac_ios native_ui_tests_ios32",
       "repo": "flutter",
       "task_name": "mac_ios_native_ui_tests_ios32",
-      "flaky": false
+      "flaky": true
     },
     {
       "name": "Mac_ios new_gallery_ios__transition_perf",

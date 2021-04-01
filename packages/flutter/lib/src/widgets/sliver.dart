@@ -722,7 +722,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
     final Key? key = child.key != null? _SaltedValueKey(child.key!) : null;
     assert(
       child != null,
-      "The sliver's children must not contain null values, but a null value was found at index $index"
+      "The sliver's children must not contain null values, but a null value was found at index $index",
     );
     if (addRepaintBoundaries)
       child = RepaintBoundary(child: child);
@@ -1354,7 +1354,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
             'The childCount getter was called (implying that the delegate\'s builder returned null '
             'for a positive index), but even building the child with index $hi (the maximum '
             'possible integer) did not return null. Consider implementing childCount to avoid '
-            'the cost of searching for the final child.'
+            'the cost of searching for the final child.',
           );
         }
       }
@@ -1557,7 +1557,11 @@ class SliverOpacity extends SingleChildRenderObjectWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<double>('opacity', opacity));
-    properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics',));
+    properties.add(FlagProperty(
+      'alwaysIncludeSemantics',
+      value: alwaysIncludeSemantics,
+      ifTrue: 'alwaysIncludeSemantics',
+    ));
   }
 }
 

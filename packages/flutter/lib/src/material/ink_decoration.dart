@@ -136,7 +136,7 @@ class Ink extends StatefulWidget {
        assert(decoration == null || decoration.debugAssertIsValid()),
        assert(color == null || decoration == null,
          'Cannot provide both a color and a decoration\n'
-         'The color argument is just a shorthand for "decoration: BoxDecoration(color: color)".'
+         'The color argument is just a shorthand for "decoration: BoxDecoration(color: color)".',
        ),
        decoration = decoration ?? (color != null ? BoxDecoration(color: color) : null),
        super(key: key);
@@ -251,21 +251,9 @@ class _InkState extends State<Ink> {
 
   @override
   void deactivate() {
-    _ink?.visible = false;
-    super.deactivate();
-  }
-
-  @override
-  void reactivate() {
-    _ink?.visible = true;
-    super.reactivate();
-  }
-
-  @override
-  void dispose() {
     _ink?.dispose();
     assert(_ink == null);
-    super.dispose();
+    super.deactivate();
   }
 
   Widget _build(BuildContext context) {

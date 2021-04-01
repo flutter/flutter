@@ -106,7 +106,7 @@ class PointerRouter {
         stack: stack,
         library: 'gesture library',
         context: ErrorDescription('while routing a pointer event'),
-        informationCollector: collector
+        informationCollector: collector,
       ));
     }
   }

@@ -857,7 +857,7 @@ class Actions extends StatefulWidget {
       'The type passed to "find" resolved to "Intent": either a non-Intent '
       'generic type argument or an example intent derived from Intent must be '
       'specified. Intent may be used as the generic type as long as the optional '
-      '"intent" argument is passed.'
+      '"intent" argument is passed.',
     );
 
     _visitActionsAncestors(context, (InheritedElement element) {

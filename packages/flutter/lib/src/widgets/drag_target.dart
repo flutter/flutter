@@ -68,7 +68,7 @@ typedef DragTargetMove<T> = void Function(DragTargetDetails<T> details);
 
 /// Signature for the strategy that determines the drag start point.
 ///
-/// Used for the built-in strategies switched via [DragAnchor] and the optinally
+/// Used for the built-in strategies switched via [DragAnchor] and the optimally
 /// injectable [Draggable.dragAnchorStrategy]
 typedef DragAnchorStrategy = Offset Function(Draggable<Object> draggable, BuildContext context, Offset position);
 
@@ -211,7 +211,7 @@ class Draggable<T extends Object> extends StatefulWidget {
     this.feedbackOffset = Offset.zero,
     @Deprecated(
       'Use dragAnchorStrategy instead. '
-      'This feature was deprecated after v2.1.0-10.0.pre.'
+      'This feature was deprecated after v2.1.0-10.0.pre.',
     )
     this.dragAnchor = DragAnchor.child,
     this.dragAnchorStrategy,
@@ -292,7 +292,7 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// Defaults to [DragAnchor.child].
   @Deprecated(
     'Use dragAnchorStrategy instead. '
-    'This feature was deprecated after v2.1.0-10.0.pre.'
+    'This feature was deprecated after v2.1.0-10.0.pre.',
   )
   final DragAnchor dragAnchor;
 
