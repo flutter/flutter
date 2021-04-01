@@ -648,13 +648,13 @@ void main() {
 
   testUsingContext('WebSocket URL construction uses correct URI join primitives', () async {
     final Completer<String> completer = Completer<String>();
-    openChannelForTesting = (String url, {io.CompressionOptions compression}) async {
+    openChannelForTesting = (String url, {io.CompressionOptions compression, Logger logger}) async {
       completer.complete(url);
       throw Exception('');
     };
 
     // Construct a URL that does not end in a `/`.
-    await expectLater(() => connectToVmService(Uri.parse('http://localhost:8181/foo')), throwsException);
+    await expectLater(() => connectToVmService(Uri.parse('http://localhost:8181/foo'), logger: BufferLogger.test()), throwsException);
     expect(await completer.future, 'ws://localhost:8181/foo/ws');
     openChannelForTesting = null;
   });

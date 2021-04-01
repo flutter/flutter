@@ -14,7 +14,6 @@ import 'base/context.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/utils.dart';
-import 'build_info.dart';
 import 'convert.dart';
 import 'device.dart';
 import 'version.dart';
