@@ -182,6 +182,9 @@ Future<void> _testMain() async {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 ''');
   }
+  // Don't propagate the return value of `test.main` here. If the `main`
+  // function on users` test is annotated with `@doNotStore`, it will cause an
+  // analyzer error otherwise.
   buffer.write('''
   await Future(test.main);
 }
