@@ -12,39 +12,43 @@ import 'theme.dart';
 const double _kMarginTop = 22.0;
 
 // Standard header margin, determined from SwiftUI's Forms in iOS 14.2 SDK.
-const EdgeInsetsDirectional _kDefaultHeaderMargin =
-    EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 6.0);
+const EdgeInsetsDirectional _kDefaultHeaderMargin = EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 6.0);
 
 // Header margin for inset grouped variant, determined from iOS 14.4 Simulator.
-const EdgeInsetsDirectional _kInsetGroupedDefaultHeaderMargin =
-    EdgeInsetsDirectional.fromSTEB(20.0, 16.0, 20.0, 10.0);
+const EdgeInsetsDirectional _kInsetGroupedDefaultHeaderMargin = EdgeInsetsDirectional.fromSTEB(20.0, 16.0, 20.0, 6.0);
 
 // Standard footer margin, determined from SwiftUI's Forms in iOS 14.2 SDK.
-const EdgeInsetsDirectional _kDefaultFooterMargin =
-    EdgeInsetsDirectional.fromSTEB(20.0, 8.0, 20.0, 0.0);
+const EdgeInsetsDirectional _kDefaultFooterMargin = EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0);
 
 // Footer margin for inset grouped variant, determined from iOS 14.4 Simulator.
-const EdgeInsetsDirectional _kInsetGroupedDefaultFooterMargin =
-    EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
+const EdgeInsetsDirectional _kInsetGroupedDefaultFooterMargin = EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
+
+// Margin around children in edge-to-edge variant, determined from iOS 14.4
+// Simulator.
+const EdgeInsets _kDefaultRowsMargin = EdgeInsets.only(bottom: 8.0);
 
 // Used for iOS "Inset Grouped" margin, determined from SwiftUI's Forms in
 // iOS 14.2 SDK.
-const EdgeInsetsDirectional _kDefaultInsetGroupedRowsMargin =
-    EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
+const EdgeInsetsDirectional _kDefaultInsetGroupedRowsMargin = EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 10.0);
+
+// Used for iOS "Inset Grouped" margin, determined from SwiftUI's Forms in
+// iOS 14.2 SDK.
+const EdgeInsetsDirectional _kDefaultInsetGroupedRowsMarginWithHeader = EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
 
 // Used for iOS "Inset Grouped" border radius, estimated from SwiftUI's Forms in
 // iOS 14.2 SDK.
 // TODO(edrisian): This should be a rounded rectangle once that shape is added.
-const BorderRadius _kDefaultInsetGroupedBorderRadius =
-    BorderRadius.all(Radius.circular(10.0));
+const BorderRadius _kDefaultInsetGroupedBorderRadius = BorderRadius.all(Radius.circular(10.0));
+
+// Used for iOS "Inset Grouped" margin, determined from SwiftUI's Forms in
+// iOS 14.2 SDK.
+const EdgeInsetsDirectional _kFormDefaultInsetGroupedRowsMargin = EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
 
 // Standard header margin, determined from SwiftUI's Forms in iOS 14.2 SDK.
-const EdgeInsetsDirectional _kFormDefaultHeaderMargin =
-    EdgeInsetsDirectional.fromSTEB(20.0, 16.0, 20.0, 10.0);
+const EdgeInsetsDirectional _kFormDefaultHeaderMargin = EdgeInsetsDirectional.fromSTEB(20.0, 16.0, 20.0, 10.0);
 
 // Standard footer margin, determined from SwiftUI's Forms in iOS 14.2 SDK.
-const EdgeInsetsDirectional _kFormDefaultFooterMargin =
-    EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
+const EdgeInsetsDirectional _kFormDefaultFooterMargin = EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
 
 // The margin of divider used in base list section. Estimated from iOS 14.4 SDK
 // Settings app.
@@ -291,6 +295,9 @@ class CupertinoListSection extends StatelessWidget {
   /// The [hasLeading] parameter specifies whether children [CupertinoListTile]
   /// widgets contain leading or not. Used for calculating correct starting
   /// margin for the divider between rows.
+  /// 
+  /// The [topMargin] is used to specify the margin above the list section. It
+  /// matches the iOS look by default.
   ///
   /// {@macro flutter.material.Material.clipBehavior}
   const CupertinoListSection({
@@ -298,12 +305,13 @@ class CupertinoListSection extends StatelessWidget {
     required this.children,
     this.header,
     this.footer,
-    this.margin = EdgeInsets.zero,
+    this.margin = _kDefaultRowsMargin,
     this.backgroundColor = CupertinoColors.systemGroupedBackground,
     this.decoration,
     this.clipBehavior = Clip.none,
     this.dividerMargin = _kBaseDividerMargin,
     double? additionalDividerMargin,
+    this.topMargin = _kMarginTop,
     bool hasLeading = true,
   })  : assert(children.length > 0),
         _type = _CupertinoListSectionType.base,
@@ -361,20 +369,22 @@ class CupertinoListSection extends StatelessWidget {
     required this.children,
     this.header,
     this.footer,
-    this.margin = _kDefaultInsetGroupedRowsMargin,
+    EdgeInsetsGeometry? margin,
     this.backgroundColor = CupertinoColors.systemGroupedBackground,
     this.decoration,
     this.clipBehavior = Clip.hardEdge,
     this.dividerMargin = _kInsetDividerMargin,
     double? additionalDividerMargin,
+    this.topMargin,
     bool hasLeading = true,
-  })  : assert(children.length > 0),
-        _type = _CupertinoListSectionType.insetGrouped,
-        additionalDividerMargin = additionalDividerMargin ??
-            (hasLeading
-                ? _kInsetAdditionalDividerMargin
-                : _kInsetAdditionalDividerMarginWithoutLeading),
-        super(key: key);
+  }) : assert(children.length > 0),
+       _type = _CupertinoListSectionType.insetGrouped,
+       additionalDividerMargin = additionalDividerMargin ??
+           (hasLeading
+               ? _kInsetAdditionalDividerMargin
+               : _kInsetAdditionalDividerMarginWithoutLeading),
+       margin = margin ?? (header == null ? _kDefaultInsetGroupedRowsMargin : _kDefaultInsetGroupedRowsMarginWithHeader),
+       super(key: key);
 
   final _CupertinoListSectionType _type;
 
@@ -429,6 +439,10 @@ class CupertinoListSection extends StatelessWidget {
   /// text inset instead of the icon.
   final double additionalDividerMargin;
 
+  /// Margin above the list section. Only used in edge-to-edge variant and it
+  /// matches iOS style by default.
+  final double? topMargin;
+
   @override
   Widget build(BuildContext context) {
     final Color dividerColor = CupertinoColors.separator.resolveFrom(context);
@@ -456,7 +470,7 @@ class CupertinoListSection extends StatelessWidget {
         style: CupertinoTheme.of(context).textTheme.textStyle.merge(
               _type == _CupertinoListSectionType.base
                   ? TextStyle(
-                      fontSize: 14.0,
+                      fontSize: 13.0,
                       color: CupertinoDynamicColor.resolve(
                           _kHeaderFooterColor, context))
                   : const TextStyle(
@@ -471,7 +485,7 @@ class CupertinoListSection extends StatelessWidget {
         child: footer!,
         style: _type == _CupertinoListSectionType.base
             ? CupertinoTheme.of(context).textTheme.textStyle.merge(TextStyle(
-                  fontSize: 14.0,
+                  fontSize: 13.0,
                   color: CupertinoDynamicColor.resolve(
                       _kHeaderFooterColor, context),
                 ))
@@ -529,7 +543,7 @@ class CupertinoListSection extends StatelessWidget {
       child: Column(
         children: <Widget>[
           if (_type == _CupertinoListSectionType.base)
-            const SizedBox(height: _kMarginTop),
+            SizedBox(height: topMargin),
           if (_header != null)
             Align(
               alignment: AlignmentDirectional.centerStart,
@@ -693,7 +707,7 @@ class CupertinoFormSection extends StatelessWidget {
     required this.children,
     this.header,
     this.footer,
-    this.margin = _kDefaultInsetGroupedRowsMargin,
+    this.margin = _kFormDefaultInsetGroupedRowsMargin,
     this.backgroundColor = CupertinoColors.systemGroupedBackground,
     this.decoration,
     this.clipBehavior = Clip.none,
