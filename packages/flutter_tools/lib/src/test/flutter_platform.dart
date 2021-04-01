@@ -183,7 +183,7 @@ Future<void> _testMain() async {
 ''');
   }
   buffer.write('''
-  return test.main();
+  await test.main();
 }
 
 /// Capture any top-level errors (mostly lazy syntax errors, since other are
