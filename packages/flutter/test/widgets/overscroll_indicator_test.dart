@@ -333,14 +333,14 @@ void main() {
             slivers: <Widget>[
               SliverList(
                 delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) => Text('First sliver $index',),
+                  (BuildContext context, int index) => Text('First sliver $index'),
                   childCount: 2,
                 ),
               ),
               SliverList(
                 key: centerKey,
                 delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) => Text('Second sliver $index',),
+                  (BuildContext context, int index) => Text('Second sliver $index'),
                   childCount: 5,
                 ),
               ),
@@ -379,14 +379,14 @@ void main() {
               slivers: <Widget>[
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
-                        (BuildContext context, int index) => Text('First sliver $index',),
+                    (BuildContext context, int index) => Text('First sliver $index'),
                     childCount: 2,
                   ),
                 ),
                 SliverList(
                   key: centerKey,
                   delegate: SliverChildBuilderDelegate(
-                        (BuildContext context, int index) => Text('Second sliver $index',),
+                    (BuildContext context, int index) => Text('Second sliver $index'),
                     childCount: 5,
                   ),
                 ),
