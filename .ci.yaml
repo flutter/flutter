@@ -7,8 +7,8 @@
 #
 # Required properties:
 # * name: human readable, unique string identifier that describes the target
-# * recipe: name of the LUCI recipe to run the target on
-#       See https://cs.opensource.google/flutter/recipes/+/master:recipes
+# * builder: name of the LUCI builder to run the target on
+#       See https://cs.opensource.google/flutter/infra/+/master:config/
 #
 # Optional properties:
 # * bringup: boolean hether the target can block the tree.
@@ -25,7 +25,7 @@ enabled_branches:
 targets:
   - name: analyze_linux
     bringup: true
-    recipe: flutter/flutter
+    builder: Linux analyze
     properties:
       validation: analyze
       validation_name: Analyze
