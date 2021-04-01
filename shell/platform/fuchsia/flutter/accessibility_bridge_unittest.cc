@@ -113,6 +113,21 @@ TEST_F(AccessibilityBridgeTest, RequestAnnounce) {
   EXPECT_EQ(last_events[0].announce().message(), "message");
 }
 
+TEST_F(AccessibilityBridgeTest, PopulatesIsKeyboardKeyAttribute) {
+  flutter::SemanticsNode node0;
+  node0.id = 0;
+  node0.flags = static_cast<int>(flutter::SemanticsFlags::kIsKeyboardKey);
+
+  accessibility_bridge_->AddSemanticsNodeUpdate({{0, node0}}, 1.f);
+  RunLoopUntilIdle();
+
+  EXPECT_EQ(1U, semantics_manager_.LastUpdatedNodes().size());
+  const auto& fuchsia_node = semantics_manager_.LastUpdatedNodes().at(0u);
+  EXPECT_EQ(fuchsia_node.node_id(), static_cast<unsigned int>(node0.id));
+  EXPECT_TRUE(fuchsia_node.has_attributes());
+  EXPECT_TRUE(fuchsia_node.attributes().is_keyboard_key());
+}
+
 TEST_F(AccessibilityBridgeTest, UpdatesNodeRoles) {
   flutter::SemanticsNodeUpdates updates;
 
