@@ -2414,7 +2414,7 @@ void main() {
   });
 }
 
-/// Create drag gestures based for DismissDirections.
+/// Create drag gestures for DismissDirections.
 Map<DismissDirection, List<Offset>> _getDragGesturesOfDismissDirections(double scaffoldWidth) {
   final Map<DismissDirection, List<Offset>> dragGestures = <DismissDirection, List<Offset>>{};
   
