@@ -376,7 +376,7 @@ void main() {
             slivers: <Widget>[SliverToBoxAdapter(
               child: SizedBox(
                 height: 2000,
-                child: GestureDetector(onTap: () {},),
+                child: GestureDetector(onTap: () {}),
               ),
             )],
           ),

@@ -389,6 +389,7 @@ FlutterDriverService setUpDriverService({
       PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
       Object compression,
       Device device,
+      Logger logger,
     }) async {
       if (httpUri.scheme != 'http') {
         fail('Expected an HTTP scheme, found $httpUri');
