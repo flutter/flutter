@@ -454,8 +454,7 @@ void main() {
     // Still paints the paragraph.
     expect(editable, paints..paragraph());
     // No longer paints the caret.
-    expect(editable, isNot(paints..rect(color: Colors.red[500])),
-    );
+    expect(editable, isNot(paints..rect(color: Colors.red[500])));
   });
 
   test('selects correct place with offsets', () {
