@@ -264,7 +264,7 @@ class KernelCompiler {
       // `generated_main.dart` is under `.dart_tools/flutter_build/`,
       // so the resident compiler can find it.
       final File newMainDart = buildDir.parent.childFile('generated_main.dart');
-      if (await generateMainDartWithPluginRegistrant(
+      await generateMainDartWithPluginRegistrant(
         FlutterProject.current(),
         packageConfig,
         mainUri,
@@ -272,9 +272,8 @@ class KernelCompiler {
         mainFile,
         // TODO(egarciad): Turn this on when the plugins are fixed.
         throwOnPluginPubspecError: false,
-      )) {
-        mainUri = newMainDart.path;
-      }
+      );
+      mainUri = newMainDart.path;
     }
 
     final List<String> command = <String>[

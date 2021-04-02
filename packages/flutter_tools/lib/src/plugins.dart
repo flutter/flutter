@@ -25,10 +25,11 @@ import 'globals.dart' as globals;
 import 'platform_plugins.dart';
 import 'project.dart';
 
-void _renderTemplateToFile(String template, dynamic context, String filePath) {
+void _renderTemplateToFile(String template, dynamic context, String filePath, {FileSystem fileSystem}){
   final String renderedTemplate = globals.templateRenderer
     .renderString(template, context, htmlEscapeValues: false);
-  final File file = globals.fs.file(filePath);
+  final FileSystem fs = fileSystem ?? globals.fs;
+  final File file = fs.file(filePath);
   file.createSync(recursive: true);
   file.writeAsStringSync(renderedTemplate);
 }
@@ -424,15 +425,16 @@ class Plugin {
   final bool isDirectDependency;
 }
 
-Plugin _pluginFromPackage(String name, Uri packageRoot, Set<String> appDependencies) {
-  final String pubspecPath = globals.fs.path.fromUri(packageRoot.resolve('pubspec.yaml'));
-  if (!globals.fs.isFileSync(pubspecPath)) {
+Plugin _pluginFromPackage(String name, Uri packageRoot, Set<String> appDependencies, {FileSystem fileSystem}) {
+  final FileSystem fs = fileSystem ?? globals.fs;
+  final String pubspecPath = fs.path.fromUri(packageRoot.resolve('pubspec.yaml'));
+  if (!fs.isFileSync(pubspecPath)) {
     return null;
   }
   dynamic pubspec;
 
   try {
-    pubspec = loadYaml(globals.fs.file(pubspecPath).readAsStringSync());
+    pubspec = loadYaml(fs.file(pubspecPath).readAsStringSync());
   } on YamlException catch (err) {
     globals.printTrace('Failed to parse plugin manifest for $name: $err');
     // Do nothing, potentially not a plugin.
@@ -444,7 +446,7 @@ Plugin _pluginFromPackage(String name, Uri packageRoot, Set<String> appDependenc
   if (flutterConfig == null || !(flutterConfig.containsKey('plugin') as bool)) {
     return null;
   }
-  final String packageRootPath = globals.fs.path.fromUri(packageRoot);
+  final String packageRootPath = fs.path.fromUri(packageRoot);
   final YamlMap dependencies = pubspec['dependencies'] as YamlMap;
   globals.printTrace('Found plugin $name at $packageRootPath');
   return Plugin.fromYaml(
@@ -452,7 +454,7 @@ Plugin _pluginFromPackage(String name, Uri packageRoot, Set<String> appDependenc
     packageRootPath,
     flutterConfig['plugin'] as YamlMap,
     dependencies == null ? <String>[] : <String>[...dependencies.keys.cast<String>()],
-    fileSystem: globals.fs,
+    fileSystem: fs,
     appDependencies: appDependencies,
   );
 }
@@ -463,8 +465,9 @@ Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = t
     project.directory.path,
     '.packages',
   );
+  final FileSystem fs = project.directory.fileSystem;
   final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-    globals.fs.file(packagesFile),
+    fs.file(packagesFile),
     logger: globals.logger,
     throwOnError: throwOnError,
   );
@@ -474,6 +477,7 @@ Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = t
       package.name,
       packageRoot,
       project.manifest.dependencies,
+      fileSystem: fs
     );
     if (plugin != null) {
       plugins.add(plugin);
@@ -933,14 +937,14 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
 ///
 /// [mainFile] is the main entrypoint file. e.g. /<app>/lib/main.dart.
 ///
-/// Returns [true] if it's necessary to create a plugin registrant, and
-/// if the new entrypoint was written to disk.
+/// A successful run will create a new generate_main.dart file or update the existing file.
+/// Throws [ToolExit] if unable to generate the file.
 ///
 /// This method also validates each plugin's pubspec.yaml, but errors are only
 /// reported if [throwOnPluginPubspecError] is [true].
 ///
 /// For more details, see https://flutter.dev/go/federated-plugins.
-Future<bool> generateMainDartWithPluginRegistrant(
+Future<void> generateMainDartWithPluginRegistrant(
   FlutterProject rootProject,
   PackageConfig packageConfig,
   String currentMainUri,
@@ -965,25 +969,19 @@ Future<bool> generateMainDartWithPluginRegistrant(
     MacOSPlugin.kConfigKey: <dynamic>[],
     WindowsPlugin.kConfigKey: <dynamic>[],
   };
-  bool didFindPlugin = false;
   for (final PluginInterfaceResolution resolution in resolutions) {
     assert(templateContext.containsKey(resolution.platform));
     (templateContext[resolution.platform] as List<dynamic>).add(resolution.toMap());
-    didFindPlugin = true;
-  }
-  if (!didFindPlugin) {
-    return false;
   }
   try {
     _renderTemplateToFile(
       _dartPluginRegistryForDesktopTemplate,
       templateContext,
       newMainDart.path,
+      fileSystem: rootProject.directory.fileSystem,
     );
-    return true;
   } on FileSystemException catch (error) {
     throwToolExit('Unable to write ${newMainDart.path}, received error: $error');
-    return false;
   }
 }
 

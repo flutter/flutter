@@ -1439,10 +1439,32 @@ void main() {
     globals.fs.file('l10n.yaml').createSync();
     globals.fs.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
 
+    // Create necessary files for [DartPluginRegistrantTarget]
+    final File packageConfig = globals.fs.directory('.dart_tool')
+        .childFile('package_config.json');
+    packageConfig.createSync(recursive: true);
+    packageConfig.writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "path_provider_linux",
+      "rootUri": "../../../path_provider_linux",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    }
+  ]
+}
+''');
+    // Start from an empty generated_main.dart file.
+    globals.fs.directory('.dart_tool').childDirectory('flutter_build').childFile('generated_main.dart').createSync(recursive: true);
+
     await residentRunner.runSourceGenerators();
 
     expect(testLogger.errorText, isEmpty);
     expect(testLogger.statusText, isEmpty);
+    // generated_main.dart regenerated, some content should be written in the file.
+    expect(globals.fs.directory('.dart_tool').childDirectory('flutter_build').childFile('generated_main.dart').readAsStringSync(), isNotEmpty);
   }));
 
   testUsingContext('ResidentRunner can run source generation - generation fails', () => testbed.run(() async {
