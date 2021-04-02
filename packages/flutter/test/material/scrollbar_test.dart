@@ -49,9 +49,19 @@ Widget _buildBoilerplate({
     textDirection: textDirection,
     child: MediaQuery(
       data: MediaQueryData(padding: padding),
-      child: child,
+      child: ScrollConfiguration(
+        behavior: const NoScrollbarBehavior(),
+        child: child,
+      ),
     ),
   );
+}
+
+class NoScrollbarBehavior extends MaterialScrollBehavior {
+  const NoScrollbarBehavior();
+
+  @override
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) => child;
 }
 
 void main() {
@@ -809,18 +819,11 @@ void main() {
   });
 
   testWidgets('Scrollbar thumb color completes a hover animation', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
-        home: PrimaryScrollController(
-          controller: scrollController,
-          child: Scrollbar(
-            isAlwaysShown: true,
-            controller: scrollController,
-            child: const SingleChildScrollView(
-              child: SizedBox(width: 4000.0, height: 4000.0)
-            ),
-          ),
+        theme: ThemeData(scrollbarTheme: const ScrollbarThemeData(isAlwaysShown: true)),
+        home: const SingleChildScrollView(
+          child: SizedBox(width: 4000.0, height: 4000.0)
         ),
       ),
     );
@@ -858,24 +861,18 @@ void main() {
       TargetPlatform.linux,
       TargetPlatform.macOS,
       TargetPlatform.windows,
-      TargetPlatform.fuchsia,
     }),
   );
 
   testWidgets('Hover animation is not triggered by tap gestures', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
-        home: PrimaryScrollController(
-          controller: scrollController,
-          child: Scrollbar(
-            isAlwaysShown: true,
-            showTrackOnHover: true,
-            controller: scrollController,
-            child: const SingleChildScrollView(
-              child: SizedBox(width: 4000.0, height: 4000.0)
-            ),
-          ),
+        theme: ThemeData(scrollbarTheme: const ScrollbarThemeData(
+          isAlwaysShown: true,
+          showTrackOnHover: true,
+        )),
+        home: const SingleChildScrollView(
+          child: SizedBox(width: 4000.0, height: 4000.0)
         ),
       ),
     );
@@ -936,27 +933,19 @@ void main() {
           color: const Color(0x80000000),
         ),
     );
-
   },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.linux,
-    }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux }),
   );
 
   testWidgets('Scrollbar showTrackOnHover', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
-        home: PrimaryScrollController(
-          controller: scrollController,
-          child: Scrollbar(
-            isAlwaysShown: true,
-            showTrackOnHover: true,
-            controller: scrollController,
-            child: const SingleChildScrollView(
-              child: SizedBox(width: 4000.0, height: 4000.0)
-            ),
-          ),
+        theme: ThemeData(scrollbarTheme: const ScrollbarThemeData(
+          isAlwaysShown: true,
+          showTrackOnHover: true,
+        )),
+        home: const SingleChildScrollView(
+          child: SizedBox(width: 4000.0, height: 4000.0)
         ),
       ),
     );
@@ -1006,7 +995,6 @@ void main() {
       TargetPlatform.linux,
       TargetPlatform.macOS,
       TargetPlatform.windows,
-      TargetPlatform.fuchsia,
     }),
   );
 
@@ -1088,33 +1076,36 @@ void main() {
         textDirection: TextDirection.ltr,
         child: MediaQuery(
           data: const MediaQueryData(),
-          child: Scrollbar(
-            key: key2,
-            notificationPredicate: null,
-            child: SingleChildScrollView(
-              key: outerKey,
-              child: SizedBox(
-                height: 1000.0,
-                width: double.infinity,
-                child: Column(
-                  children: <Widget>[
-                    Scrollbar(
-                      key: key1,
-                      notificationPredicate: null,
-                      child: SizedBox(
-                        height: 300.0,
-                        width: double.infinity,
-                        child: SingleChildScrollView(
-                          key: innerKey,
-                          child: const SizedBox(
-                            key: Key('Inner scrollable'),
-                            height: 1000.0,
-                            width: double.infinity,
+          child: ScrollConfiguration(
+            behavior: const NoScrollbarBehavior(),
+            child: Scrollbar(
+              key: key2,
+              notificationPredicate: null,
+              child: SingleChildScrollView(
+                key: outerKey,
+                child: SizedBox(
+                  height: 1000.0,
+                  width: double.infinity,
+                  child: Column(
+                    children: <Widget>[
+                      Scrollbar(
+                        key: key1,
+                        notificationPredicate: null,
+                        child: SizedBox(
+                          height: 300.0,
+                          width: double.infinity,
+                          child: SingleChildScrollView(
+                            key: innerKey,
+                            child: const SizedBox(
+                              key: Key('Inner scrollable'),
+                              height: 1000.0,
+                              width: double.infinity,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -1206,11 +1197,7 @@ void main() {
     await tester.pumpAndSettle();
     // The offset should not have changed.
     expect(scrollController.offset, scrollAmount);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{
-    TargetPlatform.linux,
-    TargetPlatform.windows,
-    TargetPlatform.fuchsia,
-  }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.fuchsia }));
 
   testWidgets('Scrollbar dragging is disabled by default on Android', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
