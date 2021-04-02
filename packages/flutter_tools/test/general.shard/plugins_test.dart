@@ -824,6 +824,19 @@ dependencies:
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
 
+      testUsingContext('Does not throw when AndroidManifest.xml is not found', () async {
+        when(flutterProject.isModule).thenReturn(false);
+
+        final File manifest = fs.file('AndroidManifest.xml');
+        when(androidProject.appManifestFile).thenReturn(manifest);
+
+        await injectPlugins(flutterProject, androidPlatform: true);
+
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
       testUsingContext("Registrant for web doesn't escape slashes in imports", () async {
         when(flutterProject.isModule).thenReturn(true);
         final Directory webPluginWithNestedFile =
