@@ -1544,8 +1544,9 @@ mixin WidgetInspectorService {
 
   List<DiagnosticsNode> _truncateNodes(Iterable<DiagnosticsNode> nodes, int maxDescendentsTruncatableNode) {
     if (nodes.every((DiagnosticsNode node) => node.value is Element) && isWidgetCreationTracked()) {
-      final List<DiagnosticsNode> localNodes = nodes.where((DiagnosticsNode node) =>
-          _isValueCreatedByLocalProject(node.value)).toList();
+      final List<DiagnosticsNode> localNodes = nodes
+        .where((DiagnosticsNode node) => _isValueCreatedByLocalProject(node.value))
+        .toList();
       if (localNodes.isNotEmpty) {
         return localNodes;
       }

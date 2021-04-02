@@ -818,8 +818,10 @@ abstract class AndroidViewController extends PlatformViewController {
 
   /// Sets the layout direction for the Android view.
   Future<void> setLayoutDirection(TextDirection layoutDirection) async {
-    assert(_state != _AndroidViewState.disposed,
-        'trying to set a layout direction for a disposed UIView. View id: $viewId');
+    assert(
+      _state != _AndroidViewState.disposed,
+      'trying to set a layout direction for a disposed UIView. View id: $viewId',
+    );
 
     if (layoutDirection == _layoutDirection)
       return;
@@ -994,8 +996,7 @@ class TextureAndroidViewController extends AndroidViewController {
 
   @override
   Future<void> setSize(Size size) async {
-    assert(_state != _AndroidViewState.disposed,
-        'trying to size a disposed Android View. View id: $viewId');
+    assert(_state != _AndroidViewState.disposed, 'trying to size a disposed Android View. View id: $viewId');
 
     assert(size != null);
     assert(!size.isEmpty);

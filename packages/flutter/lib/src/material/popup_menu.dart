@@ -988,8 +988,10 @@ class PopupMenuButton<T> extends StatefulWidget {
   }) : assert(itemBuilder != null),
        assert(offset != null),
        assert(enabled != null),
-       assert(!(child != null && icon != null),
-           'You can only pass [child] or [icon], not both.'),
+       assert(
+         !(child != null && icon != null),
+         'You can only pass [child] or [icon], not both.',
+       ),
        super(key: key);
 
   /// Called when the button is pressed to create the items to show in the menu.
