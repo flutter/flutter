@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Simple router basic functionality - synchronized', (WidgetTester tester) async {
@@ -725,6 +725,164 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pump();
     expect(find.text('popped'), findsOneWidget);
+  });
+
+  testWidgets('BackButtonListener takes priority over root back dispatcher', (WidgetTester tester) async {
+    final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider();
+    provider.value = const RouteInformation(
+      location: 'initial',
+    );
+    final BackButtonDispatcher outerDispatcher = RootBackButtonDispatcher();
+    await tester.pumpWidget(buildBoilerPlate(
+      Router<RouteInformation>(
+        backButtonDispatcher: outerDispatcher,
+        routeInformationProvider: provider,
+        routeInformationParser: SimpleRouteInformationParser(),
+        routerDelegate: SimpleRouterDelegate(
+          builder: (BuildContext context, RouteInformation? information) {
+            // Creates the sub-router.
+            return Column(
+              children: <Widget>[
+                Text(information!.location!),
+                BackButtonListener(
+                  child: Container(),
+                  onBackPressed: () {
+                      provider.value = const RouteInformation(
+                        location: 'popped inner1',
+                      );
+                      return SynchronousFuture<bool>(true);
+                    },
+                ),
+              ],
+            );
+          },
+          onPopRoute: () {
+            provider.value = const RouteInformation(
+              location: 'popped outter',
+            );
+            return SynchronousFuture<bool>(true);
+          }
+        ),
+      )
+    ));
+    expect(find.text('initial'), findsOneWidget);
+
+    bool result = false;
+    result = await outerDispatcher.invokeCallback(SynchronousFuture<bool>(false));
+    expect(result, isTrue);
+    await tester.pump();
+    expect(find.text('popped inner1'), findsOneWidget);
+  });
+
+
+  testWidgets('Nested backButtonListener should take priority', (WidgetTester tester) async {
+    final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider();
+    provider.value = const RouteInformation(
+      location: 'initial',
+    );
+    final BackButtonDispatcher outerDispatcher = RootBackButtonDispatcher();
+    await tester.pumpWidget(buildBoilerPlate(
+      Router<RouteInformation>(
+        backButtonDispatcher: outerDispatcher,
+        routeInformationProvider: provider,
+        routeInformationParser: SimpleRouteInformationParser(),
+        routerDelegate: SimpleRouterDelegate(
+          builder: (BuildContext context, RouteInformation? information) {
+            // Creates the sub-router.
+            return Column(
+              children: <Widget>[
+                Text(information!.location!),
+                BackButtonListener(
+                  child: BackButtonListener(
+                    child: Container(),
+                    onBackPressed: () {
+                      provider.value = const RouteInformation(
+                        location: 'popped inner2',
+                      );
+                      return SynchronousFuture<bool>(true);
+                    },
+                  ),
+                  onBackPressed: () {
+                      provider.value = const RouteInformation(
+                        location: 'popped inner1',
+                      );
+                      return SynchronousFuture<bool>(true);
+                    },
+                ),
+              ],
+            );
+          },
+          onPopRoute: () {
+            provider.value = const RouteInformation(
+              location: 'popped outter',
+            );
+            return SynchronousFuture<bool>(true);
+          }
+        ),
+      )
+    ));
+    expect(find.text('initial'), findsOneWidget);
+
+    bool result = false;
+    result = await outerDispatcher.invokeCallback(SynchronousFuture<bool>(false));
+    expect(result, isTrue);
+    await tester.pump();
+    expect(find.text('popped inner2'), findsOneWidget);
+  });
+
+  testWidgets('Nested backButtonListener that returns false should call next on the line', (WidgetTester tester) async {
+    final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider();
+    provider.value = const RouteInformation(
+      location: 'initial',
+    );
+    final BackButtonDispatcher outerDispatcher = RootBackButtonDispatcher();
+    await tester.pumpWidget(buildBoilerPlate(
+      Router<RouteInformation>(
+        backButtonDispatcher: outerDispatcher,
+        routeInformationProvider: provider,
+        routeInformationParser: SimpleRouteInformationParser(),
+        routerDelegate: SimpleRouterDelegate(
+          builder: (BuildContext context, RouteInformation? information) {
+            // Creates the sub-router.
+            return Column(
+              children: <Widget>[
+                Text(information!.location!),
+                BackButtonListener(
+                  child: BackButtonListener(
+                    child: Container(),
+                    onBackPressed: () {
+                      provider.value = const RouteInformation(
+                        location: 'popped inner2',
+                      );
+                      return SynchronousFuture<bool>(false);
+                    },
+                  ),
+                  onBackPressed: () {
+                      provider.value = const RouteInformation(
+                        location: 'popped inner1',
+                      );
+                      return SynchronousFuture<bool>(true);
+                    },
+                ),
+              ],
+            );
+          },
+          onPopRoute: () {
+            provider.value = const RouteInformation(
+              location: 'popped outter',
+            );
+            return SynchronousFuture<bool>(true);
+          }
+        ),
+      )
+    ));
+    expect(find.text('initial'), findsOneWidget);
+
+    bool result = false;
+    result = await outerDispatcher.invokeCallback(SynchronousFuture<bool>(false));
+    expect(result, isTrue);
+    await tester.pump();
+    expect(find.text('popped inner1'), findsOneWidget);
   });
 }
 
