@@ -16,7 +16,6 @@ import '../integration.shard/test_driver.dart';
 import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
 
-
 void main() {
   Directory tempDir;
   final BasicProjectWithUnaryMain project = BasicProjectWithUnaryMain();
@@ -41,7 +40,7 @@ void main() {
 
       expect(flutter.vmServiceWsUri, isNotNull);
 
-      final VmService client = 
+      final VmService client =
         await vmServiceConnectUri('${flutter.vmServiceWsUri}');
       await validateFlutterVersion(client);
     });
@@ -53,17 +52,17 @@ void main() {
 
       expect(flutter.vmServiceWsUri, isNotNull);
 
-      final VmService client1 = 
+      final VmService client1 =
         await vmServiceConnectUri('${flutter.vmServiceWsUri}');
 
-      final VmService client2 = 
+      final VmService client2 =
         await vmServiceConnectUri('${flutter.vmServiceWsUri}');
-      
+
       await Future.wait(<Future<void>>[
         validateFlutterVersion(client1),
         validateFlutterVersion(client2)]
       );
-    }, skip: 'Fails with "Stream already subscribed" exception');
+    }, skip: 'DDS failure: https://github.com/dart-lang/sdk/issues/45569');
   });
 
   group('Clients of flutter run on web with DDS disabled', () {
@@ -85,7 +84,7 @@ void main() {
 
       expect(flutter.vmServiceWsUri, isNotNull);
 
-      final VmService client = 
+      final VmService client =
         await vmServiceConnectUri('${flutter.vmServiceWsUri}');
       await validateFlutterVersion(client);
     });
@@ -98,12 +97,12 @@ void main() {
 
       expect(flutter.vmServiceWsUri, isNotNull);
 
-      final VmService client1 = 
+      final VmService client1 =
         await vmServiceConnectUri('${flutter.vmServiceWsUri}');
 
-      final VmService client2 = 
+      final VmService client2 =
         await vmServiceConnectUri('${flutter.vmServiceWsUri}');
-      
+
       await Future.wait(<Future<void>>[
         validateFlutterVersion(client1),
         validateFlutterVersion(client2)]
@@ -116,9 +115,9 @@ Future<void> validateFlutterVersion(VmService client) async {
   String method;
 
   final Future<dynamic> registration = expectLater(
-    client.onEvent('Service'), 
+    client.onEvent('Service'),
       emitsThrough(predicate((Event e) {
-        if (e.kind == EventKind.kServiceRegistered && 
+        if (e.kind == EventKind.kServiceRegistered &&
             e.service == 'flutterVersion') {
           method = e.method;
           return true;
