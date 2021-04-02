@@ -274,6 +274,14 @@ class ScrollDragController implements Drag {
   static const Duration momentumRetainStationaryDurationThreshold =
       Duration(milliseconds: 20);
 
+  /// The minimum amount of velocity needed to apply the [carriedVelocity] at
+  /// the end of a drag. Expressed as a factor. For example with a
+  /// [carriedVelocity] of 2000, we will need a velocity of at least 1000 to
+  /// apply the [carriedVelocity] as well. If the velocity does not meet the
+  /// threshold the the [carriedVelocity] is lost. Decided by fair eyeballing
+  /// with the scroll_overlay platform test.
+  static const double momentumRetainVelocityThresholdFactor = 0.5;
+
   /// Maximum amount of time interval the drag can have consecutive stationary
   /// pointer update events before needing to break the
   /// [motionStartDistanceThreshold] to start motion again.
@@ -390,9 +398,17 @@ class ScrollDragController implements Drag {
       velocity = -velocity;
     _lastDetails = details;
 
-    // Build momentum only if dragging in the same direction.
-    if (_retainMomentum && velocity.sign == carriedVelocity!.sign)
-      velocity += carriedVelocity!;
+    if (_retainMomentum) {
+      // Build momentum only if dragging in the same direction.
+      final bool isFlingingInSameDirection = velocity.sign == carriedVelocity!.sign;
+      // Build momentum only if the velocity of the last drag was not
+      // substantially lower than the carried momentum.
+      final bool isVelocityNotSubstantiallyLessThanCarriedMomentum =
+        velocity.abs() > carriedVelocity!.abs() * momentumRetainVelocityThresholdFactor;
+      if(isFlingingInSameDirection && isVelocityNotSubstantiallyLessThanCarriedMomentum) {
+        velocity += carriedVelocity!;
+      }
+    }
     delegate.goBallistic(velocity);
   }
 
