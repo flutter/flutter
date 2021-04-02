@@ -1035,15 +1035,20 @@ class _BackButtonListenerState extends State<BackButtonListener> {
 
   @override
   void didChangeDependencies() {
+    _updateCallback(widget.onBackPressed);
     super.didChangeDependencies();
+  }
+
+  @override
+  void didUpdateWidget(covariant BackButtonListener oldWidget) {
+    _updateCallback(oldWidget.onBackPressed);
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() {
     dispatcher?.removeCallback(widget.onBackPressed);
-
-    final BackButtonDispatcher? rootBackDispatcher = Router.of(context).backButtonDispatcher;
-    assert(rootBackDispatcher != null, 'make sure to have a Router object with a backButtonDispatcher registered');
-
-    dispatcher = rootBackDispatcher!.createChildBackButtonDispatcher()
-      ..addCallback(widget.onBackPressed)
-      ..takePriority();
+    super.dispose();
   }
 
   @override
@@ -1051,10 +1056,15 @@ class _BackButtonListenerState extends State<BackButtonListener> {
     return widget.child;
   }
 
-  @override
-  void dispose() {
-    dispatcher?.removeCallback(widget.onBackPressed);
-    super.dispose();
+  void _updateCallback(ValueGetter<Future<bool>> previousCallback) {
+    dispatcher?.removeCallback(previousCallback);
+
+    final BackButtonDispatcher? rootBackDispatcher = Router.of(context).backButtonDispatcher;
+    assert(rootBackDispatcher != null, 'The parent router must have a backButtonDispatcher to use this widget');
+
+    dispatcher = rootBackDispatcher!.createChildBackButtonDispatcher()
+      ..addCallback(widget.onBackPressed)
+      ..takePriority();
   }
 }
 
