@@ -30,7 +30,7 @@ class DartDevelopmentService {
   Uri _existingDdsUri;
 
   Future<void> get done => _completer.future;
-  final Completer<void> _completer = Completer<void>();
+  Completer<void> _completer = Completer<void>();
 
   Future<void> startDartDevelopmentService(
     Uri observatoryUri,
@@ -39,6 +39,7 @@ class DartDevelopmentService {
     bool disableServiceAuthCodes, {
     @required Logger logger,
   }) async {
+    _completer = Completer<void>();
     final Uri ddsUri = Uri(
       scheme: 'http',
       host: (ipv6 ?
@@ -92,5 +93,8 @@ class DartDevelopmentService {
     }
   }
 
-  Future<void> shutdown() async => _ddsInstance?.shutdown();
+  Future<void> shutdown() async {
+    await _ddsInstance?.shutdown();
+    _existingDdsUri = null;
+  }
 }

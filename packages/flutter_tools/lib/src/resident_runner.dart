@@ -923,6 +923,7 @@ abstract class ResidentRunner {
     for (final FlutterDevice device in flutterDevices) {
       await device.exitApps();
       await device.device.dds.shutdown();
+      await device.device.dds.done;
     }
     final Completer<DebugConnectionInfo> connectionInfo = Completer<DebugConnectionInfo>();
     unawaited(run(connectionInfoCompleter: connectionInfo));
