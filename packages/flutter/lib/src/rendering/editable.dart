@@ -199,6 +199,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     required this.textSelectionDelegate,
     RenderEditablePainter? painter,
     RenderEditablePainter? foregroundPainter,
+    required int editableTextId,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
        assert(maxLines == null || maxLines > 0),
@@ -257,7 +258,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        _obscureText = obscureText,
        _readOnly = readOnly,
        _forceLine = forceLine,
-       _clipBehavior = clipBehavior {
+       _clipBehavior = clipBehavior,
+       _editableTextId = editableTextId {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
     this.hasFocus = hasFocus ?? false;
@@ -2327,6 +2329,17 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
   }
 
+  int get editableTextId => _editableTextId;
+  int _editableTextId;
+  set editableTextId(int value) {
+    assert(value != null);
+    if (value != _editableTextId) {
+      _editableTextId = value;
+      markNeedsPaint();
+      markNeedsSemanticsUpdate();
+    }
+  }
+
   /// Collected during [describeSemanticsConfiguration], used by
   /// [assembleSemanticsNode] and [_combineSemanticsInfo].
   List<InlineSpanSemanticsInformation>? _semanticsInfo;
@@ -2364,7 +2377,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       ..textDirection = textDirection
       ..isFocused = hasFocus
       ..isTextField = true
-      ..isReadOnly = readOnly;
+      ..isReadOnly = readOnly
+      ..editableTextId = _editableTextId;
 
     if (hasFocus && selectionEnabled)
       config.onSetSelection = _handleSetSelection;

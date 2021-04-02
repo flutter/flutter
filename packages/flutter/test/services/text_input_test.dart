@@ -81,7 +81,9 @@ void main() {
     });
 
     test('sets expected defaults', () {
-      const TextInputConfiguration configuration = TextInputConfiguration();
+      const TextInputConfiguration configuration = TextInputConfiguration(
+        editableTextId: 1,
+      );
       expect(configuration.inputType, TextInputType.text);
       expect(configuration.readOnly, false);
       expect(configuration.obscureText, false);
@@ -93,6 +95,7 @@ void main() {
 
     test('text serializes to JSON', () async {
       const TextInputConfiguration configuration = TextInputConfiguration(
+        editableTextId: 1,
         inputType: TextInputType.text,
         readOnly: true,
         obscureText: true,
@@ -113,6 +116,7 @@ void main() {
 
     test('number serializes to JSON', () async {
       const TextInputConfiguration configuration = TextInputConfiguration(
+        editableTextId: 1,
         inputType: TextInputType.numberWithOptions(decimal: true),
         obscureText: true,
         autocorrect: false,
@@ -166,7 +170,9 @@ void main() {
     test('TextInputClient onConnectionClosed method is called', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
       final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue(text: 'test3'));
-      const TextInputConfiguration configuration = TextInputConfiguration();
+      const TextInputConfiguration configuration = TextInputConfiguration(
+        editableTextId: 1,
+      );
       TextInput.attach(client, configuration);
 
       expect(client.latestMethodCall, isEmpty);
@@ -188,7 +194,9 @@ void main() {
     test('TextInputClient performPrivateCommand method is called', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
       final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
-      const TextInputConfiguration configuration = TextInputConfiguration();
+      const TextInputConfiguration configuration = TextInputConfiguration(
+        editableTextId: 1,
+      );
       TextInput.attach(client, configuration);
 
       expect(client.latestMethodCall, isEmpty);
@@ -215,7 +223,9 @@ void main() {
         () async {
       // Assemble a TextInputConnection so we can verify its change in state.
       final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
-      const TextInputConfiguration configuration = TextInputConfiguration();
+      const TextInputConfiguration configuration = TextInputConfiguration(
+        editableTextId: 1,
+      );
       TextInput.attach(client, configuration);
 
       expect(client.latestMethodCall, isEmpty);
@@ -243,7 +253,9 @@ void main() {
         () async {
       // Assemble a TextInputConnection so we can verify its change in state.
       final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
-      const TextInputConfiguration configuration = TextInputConfiguration();
+      const TextInputConfiguration configuration = TextInputConfiguration(
+        editableTextId: 1,
+      );
       TextInput.attach(client, configuration);
 
       expect(client.latestMethodCall, isEmpty);
@@ -271,7 +283,9 @@ void main() {
         () async {
       // Assemble a TextInputConnection so we can verify its change in state.
       final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
-      const TextInputConfiguration configuration = TextInputConfiguration();
+      const TextInputConfiguration configuration = TextInputConfiguration(
+        editableTextId: 1,
+      );
       TextInput.attach(client, configuration);
 
       expect(client.latestMethodCall, isEmpty);
@@ -300,7 +314,9 @@ void main() {
         () async {
       // Assemble a TextInputConnection so we can verify its change in state.
       final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
-      const TextInputConfiguration configuration = TextInputConfiguration();
+      const TextInputConfiguration configuration = TextInputConfiguration(
+        editableTextId: 1,
+      );
       TextInput.attach(client, configuration);
 
       expect(client.latestMethodCall, isEmpty);
@@ -328,7 +344,9 @@ void main() {
         () async {
       // Assemble a TextInputConnection so we can verify its change in state.
       final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
-      const TextInputConfiguration configuration = TextInputConfiguration();
+      const TextInputConfiguration configuration = TextInputConfiguration(
+        editableTextId: 1,
+      );
       TextInput.attach(client, configuration);
 
       expect(client.latestMethodCall, isEmpty);
@@ -418,7 +436,9 @@ class FakeTextInputClient implements TextInputClient {
     latestMethodCall = 'showAutocorrectionPromptRect';
   }
 
-  TextInputConfiguration get configuration => const TextInputConfiguration();
+  TextInputConfiguration get configuration => const TextInputConfiguration(
+    editableTextId: 1,
+  );
 }
 
 class FakeTextChannel implements MethodChannel {

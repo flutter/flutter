@@ -206,6 +206,7 @@ class SemanticsData with Diagnosticable {
     this.tags,
     this.transform,
     this.customSemanticsActionIds,
+    required this.editableTextId,
   }) : assert(flags != null),
        assert(actions != null),
        assert(label != null),
@@ -372,6 +373,8 @@ class SemanticsData with Diagnosticable {
   ///
   ///  * [CustomSemanticsAction], for an explanation of custom actions.
   final List<int>? customSemanticsActionIds;
+
+  final int? editableTextId;
 
   /// Whether [flags] contains the given flag.
   bool hasFlag(SemanticsFlag flag) => (flags & flag.index) != 0;
@@ -1619,7 +1622,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         platformViewId != config.platformViewId ||
         _maxValueLength != config._maxValueLength ||
         _currentValueLength != config._currentValueLength ||
-        _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants;
+        _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants ||
+        _editableTextId != config._editableTextId;
   }
 
   // TAGS, LABELS, ACTIONS
@@ -1858,6 +1862,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   int? get currentValueLength => _currentValueLength;
   int? _currentValueLength;
 
+  int? get editableTextId => _editableTextId;
+  int? _editableTextId;
+
   bool _canPerformAction(SemanticsAction action) => _actions.containsKey(action);
 
   static final SemanticsConfiguration _kEmptyConfig = SemanticsConfiguration();
@@ -1910,6 +1917,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _platformViewId = config._platformViewId;
     _maxValueLength = config._maxValueLength;
     _currentValueLength = config._currentValueLength;
+    _editableTextId = config._editableTextId;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
     assert(
@@ -1950,6 +1958,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     final double elevation = _elevation;
     double thickness = _thickness;
     final Set<int> customSemanticsActionIds = <int>{};
+    int? editableTextId = _editableTextId;
     for (final CustomSemanticsAction action in _customSemanticsActions.keys)
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
     if (hintOverrides != null) {
@@ -1994,6 +2003,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
           mergedTags ??= <SemanticsTag>{};
           mergedTags!.addAll(node.tags!);
         }
+        editableTextId ??= node._editableTextId;
         for (final CustomSemanticsAction action in _customSemanticsActions.keys)
           customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
         if (node.hintOverrides != null) {
@@ -2055,6 +2065,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       maxValueLength: maxValueLength,
       currentValueLength: currentValueLength,
       customSemanticsActionIds: customSemanticsActionIds.toList()..sort(),
+      editableTextId: editableTextId,
     );
   }
 
@@ -2123,6 +2134,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
       additionalActions: customSemanticsActionIds ?? _kEmptyCustomSemanticsActionsList,
+      editableTextId: data.editableTextId,
     );
     _dirty = false;
   }
@@ -3721,6 +3733,16 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isTextField, value);
   }
 
+  int? get editableTextId => _editableTextId;
+  int? _editableTextId;
+  set editableTextId(int? value) {
+    if (value == _editableTextId) {
+      return;
+    }
+    _editableTextId = value;
+    _hasBeenAnnotated = true;
+  }
+
   /// Whether the owning [RenderObject] is read only.
   ///
   /// Only applicable when [isTextField] is true.
@@ -3907,6 +3929,11 @@ class SemanticsConfiguration {
   /// configurations as determined by [isCompatibleWith].
   void absorb(SemanticsConfiguration child) {
     assert(!explicitChildNodes);
+    assert(
+      !isTextField || !child.isTextField,
+      'Both parent and child semantics configurations cannot be text fields.\n'
+      'Parent editableTextId was $_editableTextId. Child editableTextId was ${child._editableTextId}.',
+    );
 
     if (!child.hasBeenAnnotated)
       return;
@@ -3951,6 +3978,7 @@ class SemanticsConfiguration {
     _thickness = math.max(_thickness, child._thickness + child._elevation);
 
     _hasBeenAnnotated = _hasBeenAnnotated || child._hasBeenAnnotated;
+    _editableTextId ??= child._editableTextId;
   }
 
   /// Returns an exact copy of this configuration.
@@ -3985,7 +4013,8 @@ class SemanticsConfiguration {
       .._maxValueLength = _maxValueLength
       .._currentValueLength = _currentValueLength
       .._actions.addAll(_actions)
-      .._customSemanticsActions.addAll(_customSemanticsActions);
+      .._customSemanticsActions.addAll(_customSemanticsActions)
+      .._editableTextId = _editableTextId;
   }
 }
 

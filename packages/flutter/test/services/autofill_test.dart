@@ -49,6 +49,7 @@ void main() {
         final FakeAutofillClient client2 = FakeAutofillClient(const TextEditingValue(text: 'test2'));
 
         client1.textInputConfiguration = TextInputConfiguration(
+          editableTextId: 1,
           autofillConfiguration: AutofillConfiguration(
             uniqueIdentifier: client1.autofillId,
             autofillHints: const <String>['client1'],
@@ -57,6 +58,7 @@ void main() {
         );
 
         client2.textInputConfiguration = TextInputConfiguration(
+          editableTextId: 2,
           autofillConfiguration: AutofillConfiguration(
             uniqueIdentifier: client2.autofillId,
             autofillHints: const <String>['client2'],

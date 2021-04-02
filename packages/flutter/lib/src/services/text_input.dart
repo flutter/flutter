@@ -451,6 +451,7 @@ class TextInputConfiguration {
   /// All arguments have default values, except [actionLabel]. Only
   /// [actionLabel] may be null.
   const TextInputConfiguration({
+    required this.editableTextId,
     this.inputType = TextInputType.text,
     this.readOnly = false,
     this.obscureText = false,
@@ -472,6 +473,8 @@ class TextInputConfiguration {
        assert(keyboardAppearance != null),
        assert(inputAction != null),
        assert(textCapitalization != null);
+
+  final int editableTextId;
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
@@ -590,6 +593,7 @@ class TextInputConfiguration {
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
+      'editableTextId': editableTextId,
       'inputType': inputType.toJson(),
       'readOnly': readOnly,
       'obscureText': obscureText,

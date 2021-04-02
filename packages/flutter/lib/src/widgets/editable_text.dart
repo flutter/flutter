@@ -1491,6 +1491,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   final GlobalKey _editableKey = GlobalKey();
   final ClipboardStatusNotifier? _clipboardStatus = kIsWeb ? null : ClipboardStatusNotifier();
 
+  static int _editableTextIdCounter = 0;
+  final int _editableTextId = ++_editableTextIdCounter;
+
   TextInputConnection? _textInputConnection;
   TextSelectionOverlay? _selectionOverlay;
 
@@ -2543,6 +2546,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextInputConfiguration _createTextInputConfiguration(bool needsAutofillConfiguration) {
     assert(needsAutofillConfiguration != null);
     return TextInputConfiguration(
+      editableTextId: _editableTextId,
       inputType: widget.keyboardType,
       readOnly: widget.readOnly,
       obscureText: widget.obscureText,
@@ -2667,6 +2671,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 promptRectRange: _currentPromptRectRange,
                 promptRectColor: widget.autocorrectionTextRectColor,
                 clipBehavior: widget.clipBehavior,
+                editableTextId: _editableTextId,
               ),
             ),
           );
@@ -2750,6 +2755,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.promptRectRange,
     this.promptRectColor,
     required this.clipBehavior,
+    required this.editableTextId,
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
        super(key: key);
@@ -2797,6 +2803,7 @@ class _Editable extends LeafRenderObjectWidget {
   final TextRange? promptRectRange;
   final Color? promptRectColor;
   final Clip clipBehavior;
+  final int editableTextId;
 
   @override
   RenderEditable createRenderObject(BuildContext context) {
@@ -2840,6 +2847,7 @@ class _Editable extends LeafRenderObjectWidget {
       promptRectRange: promptRectRange,
       promptRectColor: promptRectColor,
       clipBehavior: clipBehavior,
+      editableTextId: editableTextId,
     );
   }
 
@@ -2882,7 +2890,8 @@ class _Editable extends LeafRenderObjectWidget {
       ..paintCursorAboveText = paintCursorAboveText
       ..promptRectColor = promptRectColor
       ..clipBehavior = clipBehavior
-      ..setPromptRectRange(promptRectRange);
+      ..setPromptRectRange(promptRectRange)
+      ..editableTextId = editableTextId;
   }
 }
 
