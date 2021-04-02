@@ -215,8 +215,20 @@ std::string GetAbsoluteFilePath(const std::string& path) {
   DWORD ret =
       GetFinalPathNameByHandleA(file, buffer, MAX_PATH, FILE_NAME_NORMALIZED);
   if (ret == 0 || ret > MAX_PATH) {
+    std::string result;
+    if (GetLastError() == ERROR_ACCESS_DENIED) {
+      // In UWP, GetFinalPathNameByHandle requires the app to declare
+      // appropriate capabilities in the app's package manifest. Some of these
+      // capabilities are not permitted in shipping apps on the app store, but
+      // may be fine for development/debugging scenarios. If we can't resolve
+      // the full path due to insufficient access, but have verified the handle
+      // is valid, return AbsolutePath of the original path.
+      //
+      // https://github.com/flutter/flutter/issues/79609
+      result = AbsolutePath(path);
+    }
     CloseHandle(file);
-    return std::string();
+    return result;
   }
   std::string result(buffer);
   result.erase(0, strlen("\\\\?\\"));
