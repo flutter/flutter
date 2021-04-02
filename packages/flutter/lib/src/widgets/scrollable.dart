@@ -397,9 +397,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   late ScrollBehavior _configuration;
   ScrollPhysics? _physics;
-  late ScrollController _scrollController;
+  ScrollController? _fallbackScrollController;
 
-  ScrollController get _effectiveScrollController => widget.controller ?? _scrollController;
+  ScrollController get _effectiveScrollController => widget.controller ?? _fallbackScrollController!;
 
   // Only call this from places that will definitely trigger a rebuild.
   void _updatePosition() {
@@ -445,7 +445,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   @override
   void initState() {
     if (widget.controller == null)
-      _scrollController = ScrollController();
+      _fallbackScrollController = ScrollController();
     super.initState();
   }
 
@@ -473,15 +473,24 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     super.didUpdateWidget(oldWidget);
 
     if (widget.controller != oldWidget.controller) {
-      if (oldWidget.controller != null) {
-        oldWidget.controller?.detach(position);
+      if (oldWidget.controller == null) {
+        // The old controller was null, meaning the fallback cannot be null.
+        // Dispose of the fallback.
+        assert(_fallbackScrollController !=  null);
+        assert(widget.controller != null);
+        _fallbackScrollController!.detach(position);
+        _fallbackScrollController!.dispose();
+        _fallbackScrollController = null;
       } else {
-        _scrollController.detach(position);
-        _scrollController.dispose();
-        if (widget.controller == null)
-          _scrollController = ScrollController();
+        // The old controller was not null, detach.
+        oldWidget.controller?.detach(position);
+        if (widget.controller == null) {
+          // If the new controller is null, we need to set up the fallback
+          // ScrollController.
+          _fallbackScrollController = ScrollController();
+        }
       }
-
+      // Attach the updated effective scroll controller.
       _effectiveScrollController.attach(position);
     }
 
@@ -491,12 +500,13 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   @override
   void dispose() {
-    if (widget.controller != null)
-      widget.controller?.detach(position);
-    else {
-      _scrollController.detach(position);
-      _scrollController.dispose();
+    if (widget.controller != null) {
+      widget.controller!.detach(position);
+    } else {
+      _fallbackScrollController?.detach(position);
+      _fallbackScrollController?.dispose();
     }
+
     position.dispose();
     _persistedScrollOffset.dispose();
     super.dispose();
@@ -753,13 +763,15 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       );
     }
 
-    return _configuration.buildViewportDecoration(
+    final ScrollableDetails details = ScrollableDetails(
+      direction: widget.axisDirection,
+      controller: _effectiveScrollController,
+    );
+
+    return _configuration.buildScrollbar(
       context,
-      result,
-      ScrollableDetails(
-        direction: widget.axisDirection,
-        controller: _effectiveScrollController,
-      ),
+      _configuration.buildOverscrollIndicator(context, result, details),
+      details,
     );
   }
 

@@ -35,7 +35,7 @@ class TestBehavior extends ScrollBehavior {
   const TestBehavior();
 
   @override
-  Widget buildViewportDecoration(BuildContext context, Widget child, ScrollableDetails details) {
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     return GlowingOverscrollIndicator(
       child: child,
       axisDirection: details.direction,

@@ -304,7 +304,12 @@ class RangeMaintainingTestScrollBehavior extends ScrollBehavior {
   TargetPlatform getPlatform(BuildContext context) => throw 'should not be called';
 
   @override
-  Widget buildViewportDecoration(BuildContext context, Widget child, ScrollableDetails details) {
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
+    return child;
+  }
+
+  @override
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
     return child;
   }
 

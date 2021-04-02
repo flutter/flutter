@@ -39,19 +39,7 @@ const Color _kDefaultGlowColor = Color(0xFFFFFFFF);
 @immutable
 class ScrollBehavior {
   /// Creates a description of how [Scrollable] widgets should behave.
-  const ScrollBehavior({
-    @Deprecated(
-      'Temporary migration flag, do not use. '
-      'This feature was deprecated after v2.1.0-11.0.pre.'
-    )
-    bool useDecoration = false,
-  }) : _useDecoration = useDecoration;
-
-  // Whether [buildViewportChrome] or [buildViewportDecoration] should be used
-  // in wrapping the Scrollable widget.
-  //
-  // This is used to maintain subclass behavior to allow for graceful migration.
-  final bool _useDecoration;
+  const ScrollBehavior();
 
   /// Creates a copy of the provided `delegate` ScrollBehavior, making it possible to
   /// easily toggle `scrollbars` and `overscroll` effects.
@@ -69,8 +57,8 @@ class ScrollBehavior {
   }) {
     return _WrappedScrollBehavior(
       delegate: this,
-      scrollbars: scrollbars,
-      overscroll: overscroll,
+      scrollbar: scrollbars,
+      overscrollIndicator: overscroll,
       physics: physics,
       platform: platform,
     );
@@ -91,7 +79,7 @@ class ScrollBehavior {
   /// instead, or address the specific decoration by overriding
   /// [ScrollBehavior.buildScrollbar] or [ScrollBehavior.buildOverscrollIndicator].
   @Deprecated(
-    'Migrate to buildViewportDecoration. '
+    'Migrate to buildOverscrollIndicator. '
     'This feature was deprecated after v2.1.0-11.0.pre.'
   )
   Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
@@ -109,29 +97,6 @@ class ScrollBehavior {
         color: _kDefaultGlowColor,
       );
     }
-  }
-
-  /// Decorates the given widget with the information provided by [ScrollableDetails].
-  Widget buildViewportDecoration(
-    BuildContext context,
-    Widget child,
-    ScrollableDetails details,
-  ) {
-    // If useDecoration is false, call buildViewportChrome instead, this is to
-    // avoid breaking subclasses that have not implemented buildViewportDecoration yet.
-    if (!_useDecoration)
-      return buildViewportChrome(context, child, details.direction);
-
-    // When modifying this function, consider modifying the implementation in
-    // MaterialScrollBehavior and CupertinoScrollBehavior as well.
-    // By default:
-    //   * On Android and Fuchsia, we add a GlowingOverscrollIndicator.
-    //   * On Desktop platforms, we add a RawScrollbar.
-    return buildScrollbar(
-        context,
-        buildOverscrollIndicator(context, child, details),
-        details,
-    );
   }
 
   /// Applies a [RawScrollbar] to the child widget on desktop platforms.
@@ -154,20 +119,9 @@ class ScrollBehavior {
   /// Applies a [GlowingOverscrollIndicator] to the child widget on
   /// [TargetPlatform.android] and [TargetPlatform.fuchsia].
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
-    switch (getPlatform(context)) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        return child;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        return GlowingOverscrollIndicator(
-          child: child,
-          axisDirection: details.direction,
-          color: _kDefaultGlowColor,
-        );
-    }
+    // TODO(Piinks): Move implementation from buildViewportChrome here after
+    //  deprecation period
+    return buildViewportChrome(context, child, details.direction);
   }
 
   /// Specifies the type of velocity tracker to use in the descendant
@@ -239,31 +193,28 @@ class ScrollBehavior {
 class _WrappedScrollBehavior implements ScrollBehavior {
   const _WrappedScrollBehavior({
     required this.delegate,
-    this.scrollbars = true,
-    this.overscroll = true,
+    this.scrollbar = true,
+    this.overscrollIndicator = true,
     this.physics,
     this.platform,
   });
 
   final ScrollBehavior delegate;
-  final bool scrollbars;
-  final bool overscroll;
+  final bool scrollbar;
+  final bool overscrollIndicator;
   final ScrollPhysics? physics;
   final TargetPlatform? platform;
 
   @override
-  bool get _useDecoration => true;
-
-  @override
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
-    if (overscroll)
+    if (overscrollIndicator)
       return delegate.buildOverscrollIndicator(context, child, details);
     return child;
   }
 
   @override
   Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
-    if (scrollbars)
+    if (scrollbar)
       return delegate.buildScrollbar(context, child, details);
     return child;
   }
@@ -271,15 +222,6 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   @override
   Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
     return delegate.buildViewportChrome(context, child, axisDirection);
-  }
-
-  @override
-  Widget buildViewportDecoration(BuildContext context, Widget child, ScrollableDetails details) {
-    return buildScrollbar(
-      context,
-      buildOverscrollIndicator(context, child, details),
-      details,
-    );
   }
 
   @override
@@ -308,8 +250,13 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   }
 
   @override
-  bool shouldNotify(covariant ScrollBehavior oldDelegate) {
-    return delegate.shouldNotify(oldDelegate);
+  bool shouldNotify(_WrappedScrollBehavior oldDelegate) {
+    return oldDelegate.delegate.runtimeType != delegate.runtimeType
+        || oldDelegate.scrollbar != scrollbar
+        || oldDelegate.overscrollIndicator != overscrollIndicator
+        || oldDelegate.physics != physics
+        || oldDelegate.platform != platform
+        || delegate.shouldNotify(oldDelegate.delegate);
   }
 
   @override
@@ -344,7 +291,7 @@ class ScrollConfiguration extends InheritedWidget {
   /// a default [ScrollBehavior] instance is returned.
   static ScrollBehavior of(BuildContext context) {
     final ScrollConfiguration? configuration = context.dependOnInheritedWidgetOfExactType<ScrollConfiguration>();
-    return configuration?.behavior ?? const ScrollBehavior(useDecoration: true);
+    return configuration?.behavior ?? const ScrollBehavior();
   }
 
   @override

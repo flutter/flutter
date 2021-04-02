@@ -432,7 +432,7 @@ class CupertinoApp extends StatefulWidget {
 class CupertinoScrollBehavior extends ScrollBehavior {
   /// Creates a CupertinoScrollBehavior that uses [BouncingScrollPhysics] and
   /// adds [CupertinoScrollbar]s on desktop platforms.
-  const CupertinoScrollBehavior() : super(useDecoration: true);
+  const CupertinoScrollBehavior();
 
   @override
   Widget buildScrollbar(BuildContext context , Widget child, ScrollableDetails details) {

@@ -695,7 +695,7 @@ class MaterialScrollBehavior extends ScrollBehavior {
   /// Creates a MaterialScrollBehavior that decorates [Scrollable]s with
   /// [GlowingOverscrollIndicator]s and [Scrollbar]s based on the current
   /// platform and provided [ScrollableDetails].
-  const MaterialScrollBehavior() : super(useDecoration: true);
+  const MaterialScrollBehavior();
 
   @override
   TargetPlatform getPlatform(BuildContext context) => Theme.of(context).platform;
