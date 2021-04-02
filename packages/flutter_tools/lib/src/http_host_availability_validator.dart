@@ -33,10 +33,12 @@ class HttpHostAvailabilityValidator extends DoctorValidator {
 
   /// Returns a list of URLs to check availability, different for different platforms
   List<String> get _allRequiredHosts {
-    /// Hosts used by flutter on all machines
-    final List<String> commonRequiredHostUrls = <String>[
+    /// Hosts used by flutter
+    final List<String> requiredHostUrls = <String>[
       if (_featureFlags.isAndroidEnabled)
         'https://maven.google.com/',
+      if (_featureFlags.isIOSEnabled)
+        'https://cocoapods.org/',
       if (_platform.environment.containsKey(kCloudUrl))
         _platform.environment[kCloudUrl]
       else
@@ -47,16 +49,7 @@ class HttpHostAvailabilityValidator extends DoctorValidator {
         'https://pub.dev/',
     ];
 
-    /// Hosts used only on MacOS
-    final List<String> macOsRequiredHostUrls = <String>[
-      if (_featureFlags.isIOSEnabled)
-        'https://cocoapods.org/',
-    ];
-
-    if (_platform.isMacOS) {
-      return commonRequiredHostUrls + macOsRequiredHostUrls;
-    }
-    return commonRequiredHostUrls;
+    return requiredHostUrls;
   }
 
   /// Make an HTTP HEAD request to the given URL. If there is no exception,
