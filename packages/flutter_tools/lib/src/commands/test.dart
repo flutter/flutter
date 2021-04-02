@@ -13,7 +13,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle.dart';
-import '../cache.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../globals_null_migrated.dart' as globals;
@@ -400,6 +399,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     Device integrationTestDevice;
     if (_isIntegrationTest) {
       integrationTestDevice = await findTargetDevice();
+
+      // Disable reporting of test results to native test frameworks. This isn't
+      // needed as the Flutter Tool will be responsible for reporting results.
+      buildInfo.dartDefines.add('INTEGRATION_TEST_SHOULD_REPORT_RESULTS_TO_NATIVE=false');
 
       if (integrationTestDevice == null) {
         throwToolExit(

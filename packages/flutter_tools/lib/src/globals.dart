@@ -5,7 +5,6 @@
 // @dart = 2.8
 
 import 'android/android_sdk.dart';
-import 'android/android_studio.dart';
 import 'android/gradle_utils.dart';
 import 'artifacts.dart';
 import 'base/bot_detector.dart';
@@ -52,7 +51,6 @@ CocoaPodsValidator get cocoapodsValidator => context.get<CocoaPodsValidator>();
 
 LocalEngineLocator get localEngineLocator => context.get<LocalEngineLocator>();
 
-AndroidStudio get androidStudio => context.get<AndroidStudio>();
 AndroidSdk get androidSdk => context.get<AndroidSdk>();
 CocoaPods get cocoaPods => context.get<CocoaPods>();
 FlutterVersion get flutterVersion => context.get<FlutterVersion>();

@@ -174,6 +174,39 @@ void main() {
       PlistParser: () => plistUtils,
     });
 
+    testUsingContext('finds latest valid install', () {
+      final String applicationPlistFolder = globals.fs.path.join(
+        '/',
+        'Applications',
+        'Android Studio.app',
+        'Contents',
+      );
+      globals.fs.directory(applicationPlistFolder).createSync(recursive: true);
+
+      final String applicationsPlistFilePath = globals.fs.path.join(applicationPlistFolder, 'Info.plist');
+      plistUtils.fileContents[applicationsPlistFilePath] = macStudioInfoPlist;
+
+      final String homeDirectoryPlistFolder = globals.fs.path.join(
+        globals.fsUtils.homeDirPath,
+        'Applications',
+        'Android Studio.app',
+        'Contents',
+      );
+      globals.fs.directory(homeDirectoryPlistFolder).createSync(recursive: true);
+
+      final String homeDirectoryPlistFilePath = globals.fs.path.join(homeDirectoryPlistFolder, 'Info.plist');
+      plistUtils.fileContents[homeDirectoryPlistFilePath] = macStudioInfoPlist4_1;
+
+      expect(AndroidStudio.allInstalled().length, 2);
+      expect(AndroidStudio.latestValid().version, Version(4, 1, 0));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => fsUtils,
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => platform,
+      PlistParser: () => plistUtils,
+    });
+
     testUsingContext('extracts custom paths for directly downloaded Android Studio on Mac', () {
       final String studioInApplicationPlistFolder = globals.fs.path.join(
         '/',
