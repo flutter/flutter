@@ -590,7 +590,7 @@ public final class GeneratedPluginRegistrant {
   {{#supportsEmbeddingV2}}
     try {
       flutterEngine.getPlugins().add(new {{package}}.{{class}}());
-    } catch(Exception e) { 
+    } catch(Exception e) {
       Log.e(TAG, "Error registering plugin {{name}}, {{package}}.{{class}} " +
       "The app might not function as expected unless you remove it from pubspec.yaml.", e);
     }
