@@ -534,7 +534,7 @@ void main() {
     final ScrollMetrics nullMetrics = FixedScrollMetrics(
       minScrollExtent: null,
       maxScrollExtent: null,
-        pixels: 0,
+      pixels: null,
       viewportDimension: null,
       axisDirection: AxisDirection.down
     );
