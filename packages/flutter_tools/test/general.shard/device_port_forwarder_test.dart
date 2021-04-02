@@ -5,7 +5,7 @@
 // @dart = 2.8
 
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/device_port_forwader.dart';
+import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';

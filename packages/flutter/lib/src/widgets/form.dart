@@ -79,7 +79,7 @@ class Form extends StatefulWidget {
     @Deprecated(
       'Use autovalidateMode parameter which provides more specific '
       'behavior related to auto validation. '
-      'This feature was deprecated after v1.19.0.'
+      'This feature was deprecated after v1.19.0.',
     )
     this.autovalidate = false,
     this.onWillPop,
@@ -90,7 +90,7 @@ class Form extends StatefulWidget {
        assert(
          autovalidate == false ||
          autovalidate == true && autovalidateMode == null,
-         'autovalidate and autovalidateMode should not be used together.'
+         'autovalidate and autovalidateMode should not be used together.',
        ),
        autovalidateMode = autovalidateMode ??
          (autovalidate ? AutovalidateMode.always : AutovalidateMode.disabled),
@@ -145,7 +145,7 @@ class Form extends StatefulWidget {
   @Deprecated(
     'Use autovalidateMode parameter which provides more specific '
     'behavior related to auto validation. '
-    'This feature was deprecated after v1.19.0.'
+    'This feature was deprecated after v1.19.0.',
   )
   final bool autovalidate;
 
@@ -167,9 +167,7 @@ class FormState extends State<Form> {
   // Called when a form field has changed. This will cause all form fields
   // to rebuild, useful if form fields have interdependencies.
   void _fieldDidChange() {
-    if (widget.onChanged != null)
-      widget.onChanged!();
-
+    widget.onChanged?.call();
 
     _hasInteractedByUser = _fields
         .any((FormFieldState<dynamic> field) => field._hasInteractedByUser);
@@ -328,7 +326,7 @@ class FormField<T> extends StatefulWidget {
     @Deprecated(
       'Use autovalidateMode parameter which provides more specific '
       'behavior related to auto validation. '
-      'This feature was deprecated after v1.19.0.'
+      'This feature was deprecated after v1.19.0.',
     )
     this.autovalidate = false,
     this.enabled = true,
@@ -337,7 +335,7 @@ class FormField<T> extends StatefulWidget {
        assert(
          autovalidate == false ||
          autovalidate == true && autovalidateMode == null,
-         'autovalidate and autovalidateMode should not be used together.'
+         'autovalidate and autovalidateMode should not be used together.',
        ),
         autovalidateMode = autovalidateMode ??
           (autovalidate ? AutovalidateMode.always : AutovalidateMode.disabled),
@@ -397,7 +395,7 @@ class FormField<T> extends StatefulWidget {
   @Deprecated(
     'Use autovalidateMode parameter which provides more specific '
     'behavior related to auto validation. '
-    'This feature was deprecated after v1.19.0.'
+    'This feature was deprecated after v1.19.0.',
   )
   final bool autovalidate;
 
@@ -435,8 +433,7 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   /// Calls the [FormField]'s onSaved method with the current value.
   void save() {
-    if (widget.onSaved != null)
-      widget.onSaved!(value);
+    widget.onSaved?.call(value);
   }
 
   /// Resets the field to its initial value.

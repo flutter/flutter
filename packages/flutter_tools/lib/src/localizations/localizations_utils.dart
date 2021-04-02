@@ -304,6 +304,7 @@ class LocalizationOptions {
     this.deferredLoading,
     this.useSyntheticPackage = true,
     this.areResourceAttributesRequired = false,
+    this.usesNullableGetter = true,
   }) : assert(useSyntheticPackage != null);
 
   /// The `--arb-dir` argument.
@@ -365,6 +366,11 @@ class LocalizationOptions {
   /// Whether to require all resource ids to contain a corresponding
   /// resource attribute.
   final bool areResourceAttributesRequired;
+
+  /// The `nullable-getter` argument.
+  ///
+  /// Whether or not the localizations class getter is nullable.
+  final bool usesNullableGetter;
 }
 
 /// Parse the localizations configuration options from [file].
@@ -398,6 +404,7 @@ LocalizationOptions parseLocalizationsOptions({
     deferredLoading: _tryReadBool(yamlNode, 'use-deferred-loading', logger),
     useSyntheticPackage: _tryReadBool(yamlNode, 'synthetic-package', logger) ?? true,
     areResourceAttributesRequired: _tryReadBool(yamlNode, 'required-resource-attributes', logger) ?? false,
+    usesNullableGetter: _tryReadBool(yamlNode, 'nullable-getter', logger) ?? true,
   );
 }
 

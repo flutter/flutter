@@ -370,8 +370,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     _controller.addStatusListener((AnimationStatus status) {
       switch (status) {
         case AnimationStatus.completed:
-          if (widget.onEnd != null)
-            widget.onEnd!();
+          widget.onEnd?.call();
           break;
         case AnimationStatus.dismissed:
         case AnimationStatus.forward:
@@ -647,7 +646,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
        assert(constraints == null || constraints.debugAssertIsValid()),
        assert(color == null || decoration == null,
          'Cannot provide both a color and a decoration\n'
-         'The color argument is just a shorthand for "decoration: BoxDecoration(color: color)".'
+         'The color argument is just a shorthand for "decoration: BoxDecoration(color: color)".',
        ),
        decoration = decoration ?? (color != null ? BoxDecoration(color: color) : null),
        constraints =

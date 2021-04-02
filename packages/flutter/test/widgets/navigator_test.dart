@@ -3587,22 +3587,19 @@ class RouteAnnouncementSpy extends Route<void> {
   @override
   void didChangeNext(Route<dynamic>? nextRoute) {
     super.didChangeNext(nextRoute);
-    if (onDidChangeNext != null)
-      onDidChangeNext!(nextRoute);
+    onDidChangeNext?.call(nextRoute);
   }
 
   @override
   void didChangePrevious(Route<dynamic>? previousRoute) {
     super.didChangePrevious(previousRoute);
-    if (onDidChangePrevious != null)
-      onDidChangePrevious!(previousRoute);
+    onDidChangePrevious?.call(previousRoute);
   }
 
   @override
   void didPopNext(Route<dynamic> nextRoute) {
     super.didPopNext(nextRoute);
-    if (onDidPopNext != null)
-      onDidPopNext!(nextRoute);
+    onDidPopNext?.call(nextRoute);
   }
 }
 
@@ -3728,9 +3725,7 @@ class HeroControllerSpy extends HeroController {
   OnObservation? onPushed;
   @override
   void didPush(Route<dynamic>? route, Route<dynamic>? previousRoute) {
-    if (onPushed != null) {
-      onPushed!(route, previousRoute);
-    }
+    onPushed?.call(route, previousRoute);
   }
 }
 

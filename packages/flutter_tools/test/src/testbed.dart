@@ -21,11 +21,9 @@ import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:meta/meta.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:process/process.dart';
 
-import 'common.dart' as tester;
 import 'context.dart';
 import 'fake_http_client.dart';
 import 'fakes.dart';
@@ -91,16 +89,6 @@ class Testbed {
 
   final FutureOr<void> Function() _setup;
   final Map<Type, Generator> _overrides;
-
-  /// Runs the `test` within a tool zone.
-  ///
-  /// Unlike [run], this sets up a test group on its own.
-  @isTest
-  void test<T>(String name, FutureOr<T> Function() test, {Map<Type, Generator> overrides}) {
-    tester.test(name, () {
-      return run(test, overrides: overrides);
-    });
-  }
 
   /// Runs `test` within a tool zone.
   ///

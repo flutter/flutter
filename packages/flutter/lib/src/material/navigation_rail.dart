@@ -652,7 +652,7 @@ class _RailDestination extends StatelessWidget {
                     child: label,
                   ),
                 ),
-              ]
+              ],
             ),
           );
         } else {
@@ -758,7 +758,7 @@ class _RailDestination extends StatelessWidget {
           Semantics(
             label: indexLabel,
           ),
-        ]
+        ],
       ),
     );
   }

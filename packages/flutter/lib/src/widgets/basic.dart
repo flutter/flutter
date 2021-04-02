@@ -2336,7 +2336,7 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 /// When [child] is null, this widget becomes as small as possible and never
 /// overflows
 ///
-/// This widget can be used to ensure some of [child]'s natrual dimensions are
+/// This widget can be used to ensure some of [child]'s natural dimensions are
 /// honored, and get an early warning otherwise during development. For
 /// instance, if [child] requires a minimum height to fully display its content,
 /// [constraintsTransform] can be set to [maxHeightUnconstrained], so that if
@@ -2346,8 +2346,8 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 ///
 /// {@tool snippet}
 /// In the following snippet, the [Card] is guaranteed to be at least as tall as
-/// its "natrual" height. Unlike [UnconstrainedBox], it will become taller if
-/// its "natrual" height is smaller than 40 px. If the [Container] isn't high
+/// its "natural" height. Unlike [UnconstrainedBox], it will become taller if
+/// its "natural" height is smaller than 40 px. If the [Container] isn't high
 /// enough to show the full content of the [Card], in debug mode a warning will
 /// be given.
 ///
@@ -3726,7 +3726,7 @@ class Stack extends MultiChildRenderObjectWidget {
     this.fit = StackFit.loose,
     @Deprecated(
       'Use clipBehavior instead. See the migration guide in flutter.dev/go/clip-behavior. '
-      'This feature was deprecated after v1.22.0-12.0.pre.'
+      'This feature was deprecated after v1.22.0-12.0.pre.',
     )
     this.overflow = Overflow.clip,
     this.clipBehavior = Clip.hardEdge,
@@ -3783,7 +3783,7 @@ class Stack extends MultiChildRenderObjectWidget {
   /// Deprecated. Use [clipBehavior] instead.
   @Deprecated(
     'Use clipBehavior instead. See the migration guide in flutter.dev/go/clip-behavior. '
-    'This feature was deprecated after v1.22.0-12.0.pre.'
+    'This feature was deprecated after v1.22.0-12.0.pre.',
   )
   final Overflow overflow;
 
@@ -3798,8 +3798,8 @@ class Stack extends MultiChildRenderObjectWidget {
         context,
         why: 'to resolve the \'alignment\' argument',
         hint: alignment == AlignmentDirectional.topStart ? 'The default value for \'alignment\' is AlignmentDirectional.topStart, which requires a text direction.' : null,
-        alternative: 'Instead of providing a Directionality widget, another solution would be passing a non-directional \'alignment\', or an explicit \'textDirection\', to the $runtimeType.'),
-      );
+        alternative: 'Instead of providing a Directionality widget, another solution would be passing a non-directional \'alignment\', or an explicit \'textDirection\', to the $runtimeType.',
+      ));
     }
     return true;
   }
@@ -5990,7 +5990,7 @@ class RawImage extends LeafRenderObjectWidget {
     assert(
       image?.debugGetOpenHandleStackTraces()?.isNotEmpty ?? true,
       'Creator of a RawImage disposed of the image when the RawImage still '
-      'needed it.'
+      'needed it.',
     );
     return RenderImage(
       image: image?.clone(),
@@ -6017,7 +6017,7 @@ class RawImage extends LeafRenderObjectWidget {
     assert(
       image?.debugGetOpenHandleStackTraces()?.isNotEmpty ?? true,
       'Creator of a RawImage disposed of the image when the RawImage still '
-      'needed it.'
+      'needed it.',
     );
     renderObject
       ..image = image?.clone()
@@ -6178,8 +6178,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderBox renderObject) {
-    if (onBuild != null)
-      onBuild!();
+    onBuild?.call();
   }
 }
 
@@ -7161,6 +7160,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool? toggled,
     bool? button,
     bool? slider,
+    bool? keyboardKey,
     bool? link,
     bool? header,
     bool? textField,
@@ -7219,6 +7219,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       selected: selected,
       button: button,
       slider: slider,
+      keyboardKey: keyboardKey,
       link: link,
       header: header,
       textField: textField,
@@ -7336,6 +7337,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       selected: properties.selected,
       button: properties.button,
       slider: properties.slider,
+      keyboardKey: properties.keyboardKey,
       link: properties.link,
       header: properties.header,
       textField: properties.textField,
@@ -7410,6 +7412,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..selected = properties.selected
       ..button = properties.button
       ..slider = properties.slider
+      ..keyboardKey = properties.keyboardKey
       ..link = properties.link
       ..header = properties.header
       ..textField = properties.textField
