@@ -39,7 +39,6 @@ assignees: ''
 **Devices:**
 
 
-
 <details>
 <summary>Code sample</summary>
 

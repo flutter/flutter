@@ -34,7 +34,6 @@ assignees: ''
 2. ...
 3. ...
 
-
 ## Expected results
 
 <!-- What did you want to see? -->
@@ -42,7 +41,6 @@ assignees: ''
 ## Actual results
 
 <!-- What did you see? -->
-
 
 
 <details>
