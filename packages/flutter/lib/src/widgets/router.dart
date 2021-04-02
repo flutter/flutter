@@ -1001,6 +1001,8 @@ class ChildBackButtonDispatcher extends BackButtonDispatcher {
 /// A convenience widget that registers a callback when the back button is pressed
 /// by using [BackButtonDispatcher].
 ///
+/// It's required to have a [Router] widget ancestor on the tree.
+///
 /// It only applies to platforms that accept back button clicks, such as Android.
 ///
 /// It can be useful for scenarios, in which you create a different state in your
@@ -1015,10 +1017,11 @@ class BackButtonListener extends StatefulWidget {
     required this.onBackPressed,
   }) : super(key: key);
 
-  /// The child Widget that will be drawn and usually a page that will
+  /// The [child] Widget contained by the BackButtonListener.
   final Widget child;
 
   /// The callback function that will be called when the back button is pressed.
+  ///
   /// It must return a boolean future with true if this child will handle the request;
   /// otherwise, return a boolean future with false.
   final ValueGetter<Future<bool>> onBackPressed;
