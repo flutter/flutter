@@ -471,8 +471,8 @@ class _ReorderableListViewState extends State<ReorderableListView> {
           outerPadding = EdgeInsets.fromLTRB(padding.left, 0, padding.right, padding.bottom);
           listPadding = EdgeInsets.fromLTRB(0, padding.top, 0, 0);
         } else {
-          outerPadding = EdgeInsets.fromLTRB(padding.left, padding.top, padding.right, 0);
-          listPadding = EdgeInsets.fromLTRB(0, 0, 0, padding.bottom);
+          outerPadding = EdgeInsets.fromLTRB(padding.left, 0, padding.right, 0);
+          listPadding = EdgeInsets.fromLTRB(0, padding.top, 0, padding.bottom);
         }
         break;
     }
