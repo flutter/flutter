@@ -1,4 +1,9 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 // @dart = 2.9
+
 import 'base/io.dart';
 import 'base/platform.dart';
 import 'doctor.dart';
@@ -25,7 +30,7 @@ class HttpHostAvailabilityValidator extends DoctorValidator {
   /// Returns a list of URLs to check availability, different for different platforms
   List<String> get _allRequiredHosts {
     /// Hosts used by flutter on all machines
-    List<String> commonRequiredHostUrls = <String>[
+    final List<String> commonRequiredHostUrls = <String>[
       'https://maven.google.com/',
       if (_platform.environment.containsKey(kCloudUrl))
         _platform.environment[kCloudUrl]
@@ -38,7 +43,7 @@ class HttpHostAvailabilityValidator extends DoctorValidator {
     ];
 
     /// Hosts used only on MacOS
-    List<String> macOsRequiredHostUrls = <String>[
+    final List<String> macOsRequiredHostUrls = <String>[
       'https://cocoapods.org/',
     ];
 
