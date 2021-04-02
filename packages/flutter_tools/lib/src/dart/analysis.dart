@@ -121,14 +121,18 @@ class AnalysisServer {
       if (response['event'] != null) {
         final String event = response['event'] as String;
         final dynamic params = response['params'];
+        Map<String, dynamic>? paramsMap;
+        if (params is Map<String, dynamic>) {
+          paramsMap = castStringKeyedMap(params);
+        }
 
-        if (params is Map<String, dynamic> && castStringKeyedMap(response['params']) != null) {
+        if (paramsMap != null) {
           if (event == 'server.status') {
-            _handleStatus(castStringKeyedMap(response['params'])!);
+            _handleStatus(paramsMap);
           } else if (event == 'analysis.errors') {
-            _handleAnalysisIssues(castStringKeyedMap(response['params'])!);
+            _handleAnalysisIssues(paramsMap);
           } else if (event == 'server.error') {
-            _handleServerError(castStringKeyedMap(response['params'])!);
+            _handleServerError(paramsMap);
           }
         }
       } else if (response['error'] != null) {
