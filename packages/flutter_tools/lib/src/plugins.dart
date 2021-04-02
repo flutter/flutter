@@ -582,10 +582,6 @@ import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistry;
 @Keep
 public final class GeneratedPluginRegistrant {
   private static final String TAG = "GeneratedPluginRegistrant";
-  public static void _logException(String name, String package, String class, Exception e) {
-     Log.e(TAG, "Error registering plugin " + name + ", package " + package + "." + class +
-     " The app might not function as expected unless you remove it from pubspec.yaml. ", e);
-  }
   public static void registerWith(@NonNull FlutterEngine flutterEngine) {
 {{#needsShim}}
     ShimPluginRegistry shimPluginRegistry = new ShimPluginRegistry(flutterEngine);
@@ -595,7 +591,8 @@ public final class GeneratedPluginRegistrant {
     try {
       flutterEngine.getPlugins().add(new {{package}}.{{class}}());
     } catch(Exception e) { 
-      _logException('{{name}}','{{package}}','{{class}}',e);
+      Log.e(TAG, "Error registering plugin {{name}}, {{package}}.{{class}} " +
+      "The app might not function as expected unless you remove it from pubspec.yaml.", e);
     }
   {{/supportsEmbeddingV2}}
   {{^supportsEmbeddingV2}}
@@ -603,7 +600,8 @@ public final class GeneratedPluginRegistrant {
     try {
       {{package}}.{{class}}.registerWith(shimPluginRegistry.registrarFor("{{package}}.{{class}}"));
     } catch(Exception e) {
-      _logException('{{name}}','{{package}}','{{class}}',e);
+      Log.e(TAG, "Error registering plugin {{name}}, {{package}}.{{class}} " +
+      "The app might not function as expected unless you remove it from pubspec.yaml.", e);
     }
     {{/supportsEmbeddingV1}}
   {{/supportsEmbeddingV2}}
