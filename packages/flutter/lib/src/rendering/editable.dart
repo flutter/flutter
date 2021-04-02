@@ -3331,7 +3331,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       _clipRectLayer = null;
       _paintContents(context, offset);
     }
-    _paintHandleLayers(context, getEndpointsForSelection(selection!));
+    final TextSelection? selection = this.selection;
+    if (selection != null) {
+      _paintHandleLayers(context, getEndpointsForSelection(selection));
+    }
   }
 
   ClipRectLayer? _clipRectLayer;
