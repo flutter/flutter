@@ -368,7 +368,9 @@ class SnackBar extends StatefulWidget {
   /// Called the first time that the snackbar is visible within a [Scaffold].
   final VoidCallback? onVisible;
 
-  /// Swipe gesture when dismissing this snackbar.
+  /// The direction in which the SnackBar can be dismissed.
+  ///
+  /// Cannot be null, defaults to [DismissDirection.down].
   final DismissDirection dismissDirection;
 
   // API for ScaffoldMessengerState.showSnackBar():
