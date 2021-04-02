@@ -214,7 +214,13 @@ bool AngleSurfaceManager::CreateSurface(WindowsRenderTarget* render_target,
 
   EGLSurface surface = EGL_NO_SURFACE;
 
+#ifdef WINUWP
   const EGLint surfaceAttributes[] = {EGL_NONE};
+#else
+  const EGLint surfaceAttributes[] = {
+      EGL_FIXED_SIZE_ANGLE, EGL_TRUE, EGL_WIDTH, width,
+      EGL_HEIGHT,           height,   EGL_NONE};
+#endif
 
 #ifdef WINUWP
 #ifdef USECOREWINDOW
@@ -249,11 +255,26 @@ void AngleSurfaceManager::ResizeSurface(WindowsRenderTarget* render_target,
   EGLint existing_width, existing_height;
   GetSurfaceDimensions(&existing_width, &existing_height);
   if (width != existing_width || height != existing_height) {
-    // Resize render_surface_.  Internaly this calls mSwapChain->ResizeBuffers
-    // avoiding the need to destroy and recreate the underlying SwapChain.
     surface_width_ = width;
     surface_height_ = height;
+
+    // TODO(clarkezone) convert ifdef to use use final implementation of angle
+    // resize API prototyped here
+    // https://github.com/clarkezone/angle/tree/resizeswapchaintest to eliminate
+    // unnecessary surface creation / desctruction by use ResizeSwapchain
+    // https://github.com/flutter/flutter/issues/79427
+#ifdef WINUWP
+    // Resize render_surface_.  Internaly this calls mSwapChain->ResizeBuffers
+    // avoiding the need to destory and recreate the underlying SwapChain.
     eglPostSubBufferNV(egl_display_, render_surface_, 1, 1, width, height);
+#else
+    ClearContext();
+    DestroySurface();
+    if (!CreateSurface(render_target, width, height)) {
+      std::cerr << "AngleSurfaceManager::ResizeSurface failed to create surface"
+                << std::endl;
+    }
+#endif
   }
 }
 
