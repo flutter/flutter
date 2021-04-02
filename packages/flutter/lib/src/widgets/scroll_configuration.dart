@@ -29,7 +29,7 @@ const Color _kDefaultGlowColor = Color(0xFFFFFFFF);
 ///
 /// When looking to easily toggle the default decorations, you can use
 /// [ScrollBehavior.copyWith] instead of creating your own [ScrollBehavior] class.
-/// The scrollbar and overscroll flags can turn these decorations off.
+/// The `scrollbar` and `overscrollIndicator` flags can turn these decorations off.
 /// {@endtemplate}
 ///
 /// See also:
@@ -41,8 +41,8 @@ class ScrollBehavior {
   /// Creates a description of how [Scrollable] widgets should behave.
   const ScrollBehavior();
 
-  /// Creates a copy of the provided `delegate` ScrollBehavior, making it possible to
-  /// easily toggle `scrollbars` and `overscroll` effects.
+  /// Creates a copy of this ScrollBehavior, making it possible to
+  /// easily toggle `scrollbar` and `overscrollIndicator` effects.
   ///
   /// This is used by widgets like [PageView] and [ListWheelScrollView] to
   /// override the current [ScrollBehavior] and manage how they are decorated.
@@ -75,9 +75,8 @@ class ScrollBehavior {
   /// [GlowingOverscrollIndicator] to provide visual feedback when the user
   /// overscrolls.
   ///
-  /// This method is deprecated. Use [ScrollBehavior.buildViewportDecoration]
-  /// instead, or address the specific decoration by overriding
-  /// [ScrollBehavior.buildScrollbar] or [ScrollBehavior.buildOverscrollIndicator].
+  /// This method is deprecated. Use [ScrollBehavior.buildOverscrollIndicator]
+  /// instead.
   @Deprecated(
     'Migrate to buildOverscrollIndicator. '
     'This feature was deprecated after v2.1.0-11.0.pre.'
@@ -101,6 +100,8 @@ class ScrollBehavior {
 
   /// Applies a [RawScrollbar] to the child widget on desktop platforms.
   Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
+    // When modifying this function, consider modifying the implementation in
+    // the Material and Cupertino subclasses as well.
     switch (getPlatform(context)) {
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
@@ -121,6 +122,8 @@ class ScrollBehavior {
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     // TODO(Piinks): Move implementation from buildViewportChrome here after
     //  deprecation period
+    // When modifying this function, consider modifying the implementation in
+    // the Material and Cupertino subclasses as well.
     return buildViewportChrome(context, child, details.direction);
   }
 

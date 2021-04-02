@@ -436,6 +436,8 @@ class CupertinoScrollBehavior extends ScrollBehavior {
 
   @override
   Widget buildScrollbar(BuildContext context , Widget child, ScrollableDetails details) {
+    // When modifying this function, consider modifying the implementation in
+    // the base class as well.
     switch (getPlatform(context)) {
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
@@ -454,6 +456,8 @@ class CupertinoScrollBehavior extends ScrollBehavior {
   @override
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     // No overscroll indicator.
+    // When modifying this function, consider modifying the implementation in
+    // the base class as well.
     return child;
   }
 

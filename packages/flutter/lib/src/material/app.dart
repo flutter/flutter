@@ -702,6 +702,8 @@ class MaterialScrollBehavior extends ScrollBehavior {
 
   @override
   Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
+    // When modifying this function, consider modifying the implementation in
+    // the base class as well.
     switch (axisDirectionToAxis(details.direction)) {
       case Axis.horizontal:
         return child;
@@ -724,6 +726,8 @@ class MaterialScrollBehavior extends ScrollBehavior {
 
   @override
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
+    // When modifying this function, consider modifying the implementation in
+    // the base class as well.
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
       case TargetPlatform.linux:
