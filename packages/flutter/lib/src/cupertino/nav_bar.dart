@@ -238,12 +238,12 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
        assert(
          heroTag != null,
          'heroTag cannot be null. Use transitionBetweenRoutes = false to '
-         'disable Hero transition on this navigation bar.'
+         'disable Hero transition on this navigation bar.',
        ),
        assert(
          !transitionBetweenRoutes || identical(heroTag, _defaultHeroTag),
          'Cannot specify a heroTag override if this navigation bar does not '
-         'transition due to transitionBetweenRoutes = false.'
+         'transition due to transitionBetweenRoutes = false.',
        ),
        super(key: key);
 
@@ -574,7 +574,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
          automaticallyImplyTitle == true || largeTitle != null,
          'No largeTitle has been provided but automaticallyImplyTitle is also '
          'false. Either provide a largeTitle or set automaticallyImplyTitle to '
-         'true.'
+         'true.',
        ),
        super(key: key);
 

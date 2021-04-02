@@ -580,6 +580,16 @@ class StartupTest {
           results.add(data);
         } else {
           currentFailures += 1;
+          await flutter(
+            'screenshot',
+            options: <String>[
+              '-d',
+              device.deviceId,
+              '--out',
+              hostAgent.dumpDirectory.childFile('screenshot_startup_failure_$currentFailures.png').path,
+            ],
+            canFail: true,
+          );
           i -= 1;
           if (currentFailures == maxFailures) {
             return TaskResult.failure('Application failed to start $maxFailures times');

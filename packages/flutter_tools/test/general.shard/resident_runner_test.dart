@@ -8,8 +8,9 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/dds.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/device_port_forwader.dart';
+import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -2671,7 +2672,7 @@ void main() {
     final Completer<void> noopCompleter = Completer<void>();
     when(mockDevice.getLogReader(app: anyNamed('app'))).thenReturn(mockLogReader);
     when(mockDevice.dds).thenReturn(mockDds);
-    when(mockDds.startDartDevelopmentService(any, any, any, any)).thenReturn(null);
+    when(mockDds.startDartDevelopmentService(any, any, any, any, logger: anyNamed('logger'))).thenReturn(null);
     when(mockDds.uri).thenReturn(Uri.parse('http://localhost:8181'));
     when(mockDds.done).thenAnswer((_) => noopCompleter.future);
 
@@ -2691,6 +2692,7 @@ void main() {
       PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
       io.CompressionOptions compression,
       Device device,
+      Logger logger,
     }) async => mockVMService,
   }));
 
@@ -2702,7 +2704,7 @@ void main() {
     final Completer<void> noopCompleter = Completer<void>();
     when(mockDevice.getLogReader(app: anyNamed('app'))).thenReturn(mockLogReader);
     when(mockDevice.dds).thenReturn(mockDds);
-    when(mockDds.startDartDevelopmentService(any, any, any, any)).thenThrow(FakeDartDevelopmentServiceException());
+    when(mockDds.startDartDevelopmentService(any, any, any, any, logger: anyNamed('logger'))).thenThrow(FakeDartDevelopmentServiceException());
     when(mockDds.uri).thenReturn(Uri.parse('http://localhost:1234'));
     when(mockDds.done).thenAnswer((_) => noopCompleter.future);
 
@@ -2721,13 +2723,14 @@ void main() {
       PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
       io.CompressionOptions compression,
       Device device,
+      Logger logger,
     }) async => mockVMService,
   }));
 
   testUsingContext('Handle existing VM service clients DDS error', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final FakeDevice mockDevice = FakeDevice()
-      ..dds = DartDevelopmentService(logger: testLogger);
+      ..dds = DartDevelopmentService();
     ddsLauncherCallback = (Uri uri, {bool enableAuthCodes, bool ipv6, Uri serviceUri}) {
       throw FakeDartDevelopmentServiceException(message:
         'Existing VM service clients prevent DDS from taking control.',
@@ -2762,6 +2765,7 @@ void main() {
       PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
       io.CompressionOptions compression,
       Device device,
+      Logger logger,
     }) async => mockVMService,
   }));
 
@@ -2769,7 +2773,7 @@ void main() {
     // See https://github.com/flutter/flutter/issues/72385 for context.
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final FakeDevice mockDevice = FakeDevice()
-      ..dds = DartDevelopmentService(logger: testLogger);
+      ..dds = DartDevelopmentService();
     ddsLauncherCallback = (Uri uri, {bool enableAuthCodes, bool ipv6, Uri serviceUri}) {
       throw FakeDartDevelopmentServiceException(message: 'No URI');
     };
@@ -2803,6 +2807,7 @@ void main() {
       PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
       io.CompressionOptions compression,
       Device device,
+      Logger logger,
     }) async => mockVMService,
   }));
 

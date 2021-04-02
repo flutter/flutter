@@ -69,7 +69,7 @@ Future<T?> showSearch<T>({
 /// The search page always shows an [AppBar] at the top where users can
 /// enter their search queries. The buttons shown before and after the search
 /// query text field can be customized via [SearchDelegate.buildLeading]
-/// and [SearchDelegate.buildActions]. Additonally, a widget can be placed
+/// and [SearchDelegate.buildActions]. Additionally, a widget can be placed
 /// across the bottom of the [AppBar] via [SearchDelegate.buildBottom].
 ///
 /// The body below the [AppBar] can either show suggested queries (returned by

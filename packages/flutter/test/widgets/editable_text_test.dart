@@ -5907,9 +5907,9 @@ void main() {
     expect(log.length, 2);
     MethodCall methodCall = log[0];
     // Close the InputConnection.
-    expect(methodCall, isMethodCall('TextInput.clearClient', arguments: null),);
+    expect(methodCall, isMethodCall('TextInput.clearClient', arguments: null));
     methodCall = log[1];
-    expect(methodCall, isMethodCall('TextInput.hide', arguments: null),);
+    expect(methodCall, isMethodCall('TextInput.hide', arguments: null));
     // The keyboard loses focus.
     expect(focusNode.hasFocus, false);
 
