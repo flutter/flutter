@@ -144,7 +144,7 @@ class AndroidSemanticsAction {
       case _kNextAtMovementGranularityIndex:
         return 'AndroidSemanticsAction.nextAtMovementGranularity';
       case _kPreviousAtMovementGranularityIndex:
-        return 'AndroidSemanticsAction.nextAtMovementGranularity';
+        return 'AndroidSemanticsAction.previousAtMovementGranularity';
       case _kNextHtmlElementIndex:
         return 'AndroidSemanticsAction.nextHtmlElement';
       case _kPreviousHtmlElementIndex:
@@ -182,7 +182,7 @@ class AndroidSemanticsAction {
     _kAccessibilityFocusIndex: accessibilityFocus,
     _kClearAccessibilityFocusIndex: clearAccessibilityFocus,
     _kNextAtMovementGranularityIndex: nextAtMovementGranularity,
-    _kPreviousAtMovementGranularityIndex: nextAtMovementGranularity,
+    _kPreviousAtMovementGranularityIndex: previousAtMovementGranularity,
     _kNextHtmlElementIndex: nextHtmlElement,
     _kPreviousHtmlElementIndex: previousHtmlElement,
     _kScrollForwardIndex: scrollForward,

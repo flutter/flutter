@@ -157,6 +157,7 @@ void main() {
               AndroidSemanticsAction.copy,
               AndroidSemanticsAction.setSelection,
               AndroidSemanticsAction.setText,
+              AndroidSemanticsAction.previousAtMovementGranularity,
             ],
           ),
         );
@@ -224,6 +225,7 @@ void main() {
               AndroidSemanticsAction.copy,
               AndroidSemanticsAction.setSelection,
               AndroidSemanticsAction.setText,
+              AndroidSemanticsAction.previousAtMovementGranularity,
             ],
           ),
         );
