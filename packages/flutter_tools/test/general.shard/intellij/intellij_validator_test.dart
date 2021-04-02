@@ -10,7 +10,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/intellij/intellij_validator.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:test/fake.dart';

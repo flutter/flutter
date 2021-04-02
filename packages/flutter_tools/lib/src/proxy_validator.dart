@@ -7,7 +7,7 @@
 import 'package:meta/meta.dart';
 
 import 'base/platform.dart';
-import 'doctor.dart';
+import 'doctor_validator.dart';
 
 /// A validator that displays configured HTTP_PROXY environment variables.
 ///
