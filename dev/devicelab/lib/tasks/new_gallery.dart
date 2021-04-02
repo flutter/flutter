@@ -29,7 +29,7 @@ class NewGalleryPerfTest extends PerfTest {
     // turns out to be updated frequently in the future, we can set up an auto
     // roller to update this version.
     await getNewGallery(galleryVersion, galleryDir);
-    return await super.run();
+    return super.run();
   }
 
   final Directory galleryDir;

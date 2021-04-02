@@ -48,11 +48,17 @@ abstract class FeatureFlags {
   /// Whether fuchsia is enabled.
   bool get isFuchsiaEnabled => true;
 
+  /// Whether custom devices are enabled.
+  bool get areCustomDevicesEnabled => false;
+
   /// Whether fast single widget reloads are enabled.
   bool get isSingleWidgetReloadEnabled => false;
 
   /// Whether the CFE experimental invalidation strategy is enabled.
   bool get isExperimentalInvalidationStrategyEnabled => true;
+
+  /// Whether the windows UWP embedding is enabled.
+  bool get isWindowsUwpEnabled => false;
 
   /// Whether a particular feature is enabled for the current channel.
   ///
@@ -95,10 +101,16 @@ class FlutterFeatureFlags implements FeatureFlags {
   bool get isFuchsiaEnabled => isEnabled(flutterFuchsiaFeature);
 
   @override
+  bool get areCustomDevicesEnabled => isEnabled(flutterCustomDevicesFeature);
+
+  @override
   bool get isSingleWidgetReloadEnabled => isEnabled(singleWidgetReload);
 
   @override
   bool get isExperimentalInvalidationStrategyEnabled => isEnabled(experimentalInvalidationStrategy);
+
+  @override
+  bool get isWindowsUwpEnabled => isEnabled(windowsUwpEmbedding);
 
   @override
   bool isEnabled(Feature feature) {
@@ -129,10 +141,12 @@ const List<Feature> allFeatures = <Feature>[
   flutterLinuxDesktopFeature,
   flutterMacOSDesktopFeature,
   flutterWindowsDesktopFeature,
+  windowsUwpEmbedding,
   singleWidgetReload,
   flutterAndroidFeature,
   flutterIOSFeature,
   flutterFuchsiaFeature,
+  flutterCustomDevicesFeature,
   experimentalInvalidationStrategy,
 ];
 
@@ -290,6 +304,28 @@ const Feature flutterFuchsiaFeature = Feature(
   ),
 );
 
+const Feature flutterCustomDevicesFeature = Feature(
+  name: 'Early support for custom device types',
+  configSetting: 'enable-custom-devices',
+  environmentOverride: 'FLUTTER_CUSTOM_DEVICES',
+  master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+  dev: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+  beta: FeatureChannelSetting(
+    available: false,
+    enabledByDefault: false,
+  ),
+  stable: FeatureChannelSetting(
+    available: false,
+    enabledByDefault: false,
+  )
+);
+
 /// The fast hot reload feature for https://github.com/flutter/flutter/issues/61407.
 const Feature singleWidgetReload = Feature(
   name: 'Hot reload optimization for changes to class body of a single widget',
@@ -336,6 +372,16 @@ const Feature experimentalInvalidationStrategy = Feature(
   ),
 );
 
+/// The feature for enabling the Windows UWP embeding.
+const Feature windowsUwpEmbedding = Feature(
+  name: 'Flutter for Windows UWP',
+  configSetting: 'enable-windows-uwp-desktop',
+  master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+);
+
 /// A [Feature] is a process for conditionally enabling tool features.
 ///
 /// All settings are optional, and if not provided will generally default to
@@ -354,7 +400,7 @@ class Feature {
     this.master = const FeatureChannelSetting(),
     this.dev = const FeatureChannelSetting(),
     this.beta = const FeatureChannelSetting(),
-    this.stable = const FeatureChannelSetting(),
+    this.stable = const FeatureChannelSetting()
   });
 
   /// The user visible name for this feature.

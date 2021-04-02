@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../rendering/rendering_tester.dart';
@@ -880,7 +880,7 @@ void main() {
   group('scroll notifications', () {
     testWidgets('no onSelectedItemChanged callback on first build', (WidgetTester tester) async {
       bool itemChangeCalled = false;
-      final ValueChanged<int> onItemChange = (_) { itemChangeCalled = true; };
+      void onItemChange(int _) { itemChangeCalled = true; }
 
       await tester.pumpWidget(
         Directionality(
@@ -1195,7 +1195,7 @@ void main() {
       await tester.fling(
         find.byType(ListWheelScrollView),
         const Offset(0.0, -50.0),
-        800.0,
+        100.0,
       );
 
       // At this moment, the ballistics is started but 50px is still inside the

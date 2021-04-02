@@ -51,6 +51,7 @@ typedef DwdsLauncher = Future<Dwds> Function(
     String hostname,
     bool useSseForDebugProxy,
     bool useSseForDebugBackend,
+    bool useSseForInjectedClient,
     bool serveDevTools,
     UrlEncoder urlEncoder,
     bool spawnDds});
@@ -103,7 +104,7 @@ class WebExpressionCompiler implements ExpressionCompiler {
   }
 
   @override
-  Future<void> initialize({bool soundNullSafety}) async {}
+  Future<void> initialize({String moduleFormat, bool soundNullSafety}) async {}
 
   @override
   Future<bool> updateDependencies(Map<String, ModuleInfo> modules) async => true;
@@ -172,8 +173,10 @@ class WebAssetServer implements AssetReader {
     UrlTunneller urlTunneller,
     bool useSseForDebugProxy,
     bool useSseForDebugBackend,
+    bool useSseForInjectedClient,
     BuildInfo buildInfo,
     bool enableDwds,
+    bool enableDds,
     Uri entrypoint,
     ExpressionCompiler expressionCompiler,
     NullSafetyMode nullSafetyMode, {
@@ -241,8 +244,7 @@ class WebAssetServer implements AssetReader {
     // load the through the isolate APIs.
     final Directory directory =
         await _loadDwdsDirectory(globals.fs, globals.logger);
-    final shelf.Middleware middleware =
-        (FutureOr<shelf.Response> Function(shelf.Request) innerHandler) {
+    shelf.Handler middleware(FutureOr<shelf.Response> Function(shelf.Request) innerHandler) {
       return (shelf.Request request) async {
         if (request.url.path.endsWith('dwds/src/injected/client.js')) {
           final Uri uri = directory.uri.resolve('src/injected/client.js');
@@ -254,7 +256,7 @@ class WebAssetServer implements AssetReader {
         }
         return innerHandler(request);
       };
-    };
+    }
 
     logging.Logger.root.onRecord.listen((logging.LogRecord event) {
       globals.printTrace('${event.loggerName}: ${event.message}');
@@ -274,6 +276,7 @@ class WebAssetServer implements AssetReader {
       enableDebugging: true,
       useSseForDebugProxy: useSseForDebugProxy,
       useSseForDebugBackend: useSseForDebugBackend,
+      useSseForInjectedClient: useSseForInjectedClient,
       serveDevTools: false,
       loadStrategy: FrontendServerRequireStrategyProvider(
         ReloadConfiguration.none,
@@ -281,7 +284,7 @@ class WebAssetServer implements AssetReader {
         _digestProvider,
       ).strategy,
       expressionCompiler: expressionCompiler,
-      spawnDds: true,
+      spawnDds: enableDds,
     );
     shelf.Pipeline pipeline = const shelf.Pipeline();
     if (enableDwds) {
@@ -453,7 +456,8 @@ class WebAssetServer implements AssetReader {
   }
 
   /// Tear down the http server running.
-  Future<void> dispose() {
+  Future<void> dispose() async {
+    await dwds?.stop();
     return _httpServer.close();
   }
 
@@ -607,8 +611,10 @@ class WebDevFS implements DevFS {
     @required this.urlTunneller,
     @required this.useSseForDebugProxy,
     @required this.useSseForDebugBackend,
+    @required this.useSseForInjectedClient,
     @required this.buildInfo,
     @required this.enableDwds,
+    @required this.enableDds,
     @required this.entrypoint,
     @required this.expressionCompiler,
     @required this.chromiumLauncher,
@@ -624,8 +630,10 @@ class WebDevFS implements DevFS {
   final UrlTunneller urlTunneller;
   final bool useSseForDebugProxy;
   final bool useSseForDebugBackend;
+  final bool useSseForInjectedClient;
   final BuildInfo buildInfo;
   final bool enableDwds;
+  final bool enableDds;
   final bool testMode;
   final ExpressionCompiler expressionCompiler;
   final ChromiumLauncher chromiumLauncher;
@@ -701,8 +709,10 @@ class WebDevFS implements DevFS {
       urlTunneller,
       useSseForDebugProxy,
       useSseForDebugBackend,
+      useSseForInjectedClient,
       buildInfo,
       enableDwds,
+      enableDds,
       entrypoint,
       expressionCompiler,
       nullSafetyMode,

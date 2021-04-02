@@ -31,7 +31,7 @@ void main() {
     );
   }
 
-  final VoidCallback uiTestGroup = () {
+  void uiTestGroup() {
     testWidgets("doesn't invoke anything without user interaction", (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
@@ -879,7 +879,7 @@ void main() {
 
         expect(mockHelper.invocations.last, matchesBuilder(
           refreshState: RefreshIndicatorMode.done,
-          pulledExtent: moreOrLessEquals(148.6463892921364,),
+          pulledExtent: moreOrLessEquals(148.6463892921364),
           refreshTriggerPullDistance: 100.0, // Default value.
           refreshIndicatorExtent: 60.0, // Default value.
         ));
@@ -956,9 +956,9 @@ void main() {
         initialFirstCellY + 50
       );
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
-  };
+  }
 
-  final VoidCallback stateMachineTestGroup = () {
+  void stateMachineTestGroup() {
     testWidgets('starts in inactive state', (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
@@ -1345,7 +1345,7 @@ void main() {
       );
       expect(tester.widget<CupertinoActivityIndicator>(find.byType(CupertinoActivityIndicator)).progress, 100.0 / 100.0);
     });
-  };
+  }
 
   group('UI tests long list', uiTestGroup);
 

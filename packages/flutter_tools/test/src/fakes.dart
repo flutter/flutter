@@ -12,7 +12,9 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -252,6 +254,16 @@ class MemoryIOSink implements IOSink {
 
   @override
   Future<void> flush() async { }
+
+  void clear() {
+    writes.clear();
+  }
+
+  String getAndClear() {
+    final String result = utf8.decode(writes.expand((List<int> l) => l).toList());
+    clear();
+    return result;
+  }
 }
 
 class MemoryStdout extends MemoryIOSink implements io.Stdout {
@@ -448,14 +460,71 @@ class FakePub extends Fake implements Pub {
 }
 
 class FakeFlutterVersion implements FlutterVersion {
-  @override
-  void fetchTagsAndUpdate() {  }
+  FakeFlutterVersion({
+    this.channel = 'unknown',
+    this.dartSdkVersion = '12',
+    this.engineRevision = 'abcdefghijklmnopqrstuvwxyz',
+    this.engineRevisionShort = 'abcde',
+    this.repositoryUrl = 'https://github.com/flutter/flutter.git',
+    this.frameworkVersion = '0.0.0',
+    this.frameworkRevision = '11111111111111111111',
+    this.frameworkRevisionShort = '11111',
+    this.frameworkAge = '0 hours ago',
+    this.frameworkCommitDate = '12/01/01',
+    this.gitTagVersion = const GitTagVersion.unknown(),
+  });
+
+  bool get didFetchTagsAndUpdate => _didFetchTagsAndUpdate;
+  bool _didFetchTagsAndUpdate = false;
+
+  bool get didCheckFlutterVersionFreshness => _didCheckFlutterVersionFreshness;
+  bool _didCheckFlutterVersionFreshness = false;
 
   @override
-  String get channel => 'master';
+  final String channel;
 
   @override
-  Future<void> checkFlutterVersionFreshness() async { }
+  final String dartSdkVersion;
+
+  @override
+  final String engineRevision;
+
+  @override
+  final String engineRevisionShort;
+
+  @override
+  final String repositoryUrl;
+
+  @override
+  final String frameworkVersion;
+
+  @override
+  final String frameworkRevision;
+
+  @override
+  final String frameworkRevisionShort;
+
+  @override
+  final String frameworkAge;
+
+  @override
+  final String frameworkCommitDate;
+
+  @override
+  String get frameworkDate => frameworkCommitDate;
+
+  @override
+  final GitTagVersion gitTagVersion;
+
+  @override
+  void fetchTagsAndUpdate() {
+    _didFetchTagsAndUpdate = true;
+  }
+
+  @override
+  Future<void> checkFlutterVersionFreshness() async {
+    _didCheckFlutterVersionFreshness = true;
+  }
 
   @override
   bool checkRevisionAncestry({String tentativeDescendantRevision, String tentativeAncestorRevision}) {
@@ -463,37 +532,7 @@ class FakeFlutterVersion implements FlutterVersion {
   }
 
   @override
-  String get dartSdkVersion => '12';
-
-  @override
-  String get engineRevision => '42.2';
-
-  @override
-  String get engineRevisionShort => '42';
-
-  @override
   Future<void> ensureVersionFile() async { }
-
-  @override
-  String get frameworkAge => null;
-
-  @override
-  String get frameworkCommitDate => null;
-
-  @override
-  String get frameworkDate => null;
-
-  @override
-  String get frameworkRevision => null;
-
-  @override
-  String get frameworkRevisionShort => null;
-
-  @override
-  String get frameworkVersion => null;
-
-  @override
-  GitTagVersion get gitTagVersion => null;
 
   @override
   String getBranchName({bool redactUnknownBranches = false}) {
@@ -506,11 +545,8 @@ class FakeFlutterVersion implements FlutterVersion {
   }
 
   @override
-  String get repositoryUrl => null;
-
-  @override
   Map<String, Object> toJson() {
-    return null;
+    return <String, Object>{};
   }
 }
 
@@ -526,7 +562,9 @@ class TestFeatureFlags implements FeatureFlags {
     this.isAndroidEnabled = true,
     this.isIOSEnabled = true,
     this.isFuchsiaEnabled = false,
+    this.areCustomDevicesEnabled = false,
     this.isExperimentalInvalidationStrategyEnabled = false,
+    this.isWindowsUwpEnabled = false,
   });
 
   @override
@@ -554,7 +592,13 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isFuchsiaEnabled;
 
   @override
+  final bool areCustomDevicesEnabled;
+
+  @override
   final bool isExperimentalInvalidationStrategyEnabled;
+
+  @override
+  final bool isWindowsUwpEnabled;
 
   @override
   bool isEnabled(Feature feature) {
@@ -575,8 +619,12 @@ class TestFeatureFlags implements FeatureFlags {
         return isIOSEnabled;
       case flutterFuchsiaFeature:
         return isFuchsiaEnabled;
+      case flutterCustomDevicesFeature:
+        return areCustomDevicesEnabled;
       case experimentalInvalidationStrategy:
         return isExperimentalInvalidationStrategyEnabled;
+      case windowsUwpEmbedding:
+        return isWindowsUwpEnabled;
     }
     return false;
   }
@@ -588,7 +636,7 @@ class FakeStatusLogger extends DelegatingLogger {
   Status status;
 
   @override
-  Status startProgress(String message, {Duration timeout, String progressId, bool multilineOutput = false, int progressIndicatorPadding = kDefaultStatusPadding}) {
+  Status startProgress(String message, {Duration timeout, String progressId, bool multilineOutput = false, bool includeTiming = true, int progressIndicatorPadding = kDefaultStatusPadding}) {
     return status;
   }
 }
@@ -630,7 +678,7 @@ class TestBuildSystem implements BuildSystem {
       return _singleResult;
     }
     if (_nextResult >= _results.length) {
-      throw StateError('Unexpected buildIncremental request of ${target.name}');
+      throw StateError('Unexpected build request of ${target.name}');
     }
     return _results[_nextResult++];
   }
@@ -651,4 +699,23 @@ class TestBuildSystem implements BuildSystem {
     }
     return _results[_nextResult++];
   }
+}
+
+class FakeBundleBuilder extends Fake implements BundleBuilder {
+  @override
+  Future<void> build({
+    TargetPlatform platform,
+    BuildInfo buildInfo,
+    String mainPath,
+    String manifestPath = defaultManifestPath,
+    String applicationKernelFilePath,
+    String depfilePath,
+    String assetDirPath,
+    bool trackWidgetCreation = false,
+    List<String> extraFrontEndOptions = const <String>[],
+    List<String> extraGenSnapshotOptions = const <String>[],
+    List<String> fileSystemRoots,
+    String fileSystemScheme,
+    bool treeShakeIcons
+  }) => Future<void>.value();
 }

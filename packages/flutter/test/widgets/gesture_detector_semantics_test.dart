@@ -117,7 +117,7 @@ void main() {
 
     final Set<String> logs = <String>{};
     final GlobalKey<RawGestureDetectorState> detectorKey = GlobalKey();
-    final VoidCallback performLayout = () {
+    void performLayout() {
       detectorKey.currentState!.replaceGestureRecognizers(<Type, GestureRecognizerFactory>{
         TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
           () => TapGestureRecognizer(),
@@ -126,7 +126,7 @@ void main() {
           },
         ),
       });
-    };
+    }
 
     bool hasLayoutPerformer = false;
     late VoidCallback introduceLayoutPerformer;

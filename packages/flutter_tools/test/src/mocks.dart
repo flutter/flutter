@@ -12,7 +12,7 @@ import 'package:flutter_tools/src/android/android_sdk.dart' show AndroidSdk;
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
@@ -86,10 +86,12 @@ typedef _ProcessFactory = Process Function(List<String> command);
 
 /// A ProcessManager that starts Processes by delegating to a ProcessFactory.
 class MockProcessManager extends Mock implements ProcessManager {
-  _ProcessFactory processFactory = (List<String> commands) => FakeProcess();
+  _ProcessFactory processFactory = _defaulProcessFactory;
   bool canRunSucceeds = true;
   bool runSucceeds = true;
   List<String> commands;
+
+  static Process _defaulProcessFactory(List<String> commands) => FakeProcess();
 
   @override
   bool canRun(dynamic command, { String workingDirectory }) => canRunSucceeds;
@@ -171,17 +173,6 @@ Process createMockProcess({ int exitCode = 0, String stdout = '', String stderr 
 }
 
 class _MockBasicProcess extends Mock implements Process {}
-
-class MockIosProject extends Mock implements IosProject {
-  static const String bundleId = 'com.example.test';
-  static const String appBundleName = 'My Super Awesome App.app';
-
-  @override
-  Future<String> productBundleIdentifier(BuildInfo buildInfo) async => bundleId;
-
-  @override
-  Future<String> hostAppBundleName(BuildInfo buildInfo) async => appBundleName;
-}
 
 class MockAndroidDevice extends Mock implements AndroidDevice {
   @override

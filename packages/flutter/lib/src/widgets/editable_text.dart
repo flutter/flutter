@@ -12,7 +12,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
-import 'actions.dart';
 import 'autofill.dart';
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
@@ -27,8 +26,8 @@ import 'media_query.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
-import 'shortcuts.dart';
 import 'text.dart';
+import 'text_editing_action.dart';
 import 'text_selection.dart';
 import 'ticker_provider.dart';
 
@@ -53,17 +52,6 @@ const Duration _kCursorBlinkWaitForStart = Duration(milliseconds: 150);
 // Number of cursor ticks during which the most recently entered character
 // is shown in an obscured text field.
 const int _kObscureShowLatestCharCursorTicks = 3;
-
-/// A map used to disable scrolling shortcuts in text fields.
-///
-/// This is a temporary fix for: https://github.com/flutter/flutter/issues/74191
-final Map<LogicalKeySet, Intent> scrollShortcutOverrides = <LogicalKeySet, Intent>{
-  LogicalKeySet(LogicalKeyboardKey.space): DoNothingAndStopPropagationIntent(),
-  LogicalKeySet(LogicalKeyboardKey.arrowUp): DoNothingAndStopPropagationIntent(),
-  LogicalKeySet(LogicalKeyboardKey.arrowDown): DoNothingAndStopPropagationIntent(),
-  LogicalKeySet(LogicalKeyboardKey.arrowLeft): DoNothingAndStopPropagationIntent(),
-  LogicalKeySet(LogicalKeyboardKey.arrowRight): DoNothingAndStopPropagationIntent(),
-};
 
 /// A controller for an editable text field.
 ///
@@ -101,12 +89,13 @@ final Map<LogicalKeySet, Intent> scrollShortcutOverrides = <LogicalKeySet, Inten
 /// cursor at the end of the input.
 ///
 /// ```dart
-/// final _controller = TextEditingController();
+/// final TextEditingController _controller = TextEditingController();
 ///
+/// @override
 /// void initState() {
 ///   super.initState();
 ///   _controller.addListener(() {
-///     final text = _controller.text.toLowerCase();
+///     final String text = _controller.text.toLowerCase();
 ///     _controller.value = _controller.value.copyWith(
 ///       text: text,
 ///       selection: TextSelection(baseOffset: text.length, extentOffset: text.length),
@@ -115,11 +104,13 @@ final Map<LogicalKeySet, Intent> scrollShortcutOverrides = <LogicalKeySet, Inten
 ///   });
 /// }
 ///
+/// @override
 /// void dispose() {
 ///   _controller.dispose();
 ///   super.dispose();
 /// }
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     body: Container(
@@ -127,7 +118,7 @@ final Map<LogicalKeySet, Intent> scrollShortcutOverrides = <LogicalKeySet, Inten
 ///       padding: const EdgeInsets.all(6),
 ///       child: TextFormField(
 ///         controller: _controller,
-///         decoration: InputDecoration(border: OutlineInputBorder()),
+///         decoration: const InputDecoration(border: OutlineInputBorder()),
 ///       ),
 ///     ),
 ///   );
@@ -217,7 +208,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
           text: value.composing.textInside(value.text),
         ),
         TextSpan(text: value.composing.textAfter(value.text)),
-    ]);
+      ],
+    );
   }
 
   /// The currently selected [text].
@@ -706,15 +698,6 @@ class EditableText extends StatefulWidget {
   /// context, the English phrase will be on the right and the Hebrew phrase on
   /// its left.
   ///
-  /// When LTR text is entered into an RTL field, or RTL text is entered into an
-  /// LTR field, [LRM](https://en.wikipedia.org/wiki/Left-to-right_mark) or
-  /// [RLM](https://en.wikipedia.org/wiki/Right-to-left_mark) characters will be
-  /// inserted alongside whitespace characters, respectively. This is to
-  /// eliminate ambiguous directionality in whitespace and ensure proper caret
-  /// placement. These characters will affect the length of the string and may
-  /// need to be parsed out when doing things like string comparison with other
-  /// text.
-  ///
   /// Defaults to the ambient [Directionality], if any.
   /// {@endtemplate}
   final TextDirection? textDirection;
@@ -957,11 +940,13 @@ class EditableText extends StatefulWidget {
   /// ```dart
   /// final TextEditingController _controller = TextEditingController();
   ///
+  /// @override
   /// void dispose() {
   ///   _controller.dispose();
   ///   super.dispose();
   /// }
   ///
+  /// @override
   /// Widget build(BuildContext context) {
   ///   return Scaffold(
   ///     body: Column(
@@ -980,7 +965,7 @@ class EditableText extends StatefulWidget {
   ///               builder: (BuildContext context) {
   ///                 return AlertDialog(
   ///                   title: const Text('That is correct!'),
-  ///                   content: Text ('13 is the right answer.'),
+  ///                   content: const Text ('13 is the right answer.'),
   ///                   actions: <Widget>[
   ///                     TextButton(
   ///                       onPressed: () { Navigator.pop(context); },
@@ -1491,7 +1476,7 @@ class EditableText extends StatefulWidget {
 }
 
 /// State for a [EditableText].
-class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText>, TextSelectionDelegate implements TextInputClient, AutofillClient {
+class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText>, TextSelectionDelegate implements TextInputClient, AutofillClient, TextEditingActionTarget {
   Timer? _cursorTimer;
   bool _targetCursorVisibility = false;
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(true);
@@ -2043,6 +2028,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _textInputConnection!.show();
       _updateSizeAndTransform();
       _updateComposingRectIfNeeded();
+      _updateCaretRectIfNeeded();
       if (_needsAutofill) {
         // Request autofill AFTER the size and the transform have been sent to
         // the platform text input plugin.
@@ -2250,8 +2236,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _lastBottomViewInset = WidgetsBinding.instance!.window.viewInsets.bottom;
   }
 
-  late final _WhitespaceDirectionalityFormatter _whitespaceFormatter = _WhitespaceDirectionalityFormatter(textDirection: _textDirection);
-
   void _formatAndSetValue(TextEditingValue value, SelectionChangedCause? cause, {bool userInteraction = false}) {
     // Only apply input formatters if the text has changed (including uncommited
     // text in the composing region), or when the user committed the composing
@@ -2270,14 +2254,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         value,
         (TextEditingValue newValue, TextInputFormatter formatter) => formatter.formatEditUpdate(_value, newValue),
       ) ?? value;
-
-      // Always pass the text through the whitespace directionality formatter to
-      // maintain expected behavior with carets on trailing whitespace.
-      // TODO(LongCatIsLooong): The if statement here is for retaining the
-      // previous behavior. The input formatter logic will be updated in an
-      // upcoming PR.
-      if (widget.inputFormatters?.isNotEmpty ?? false)
-        value = _whitespaceFormatter.formatEditUpdate(_value, value);
     }
 
     // Put all optional user callback invocations in a batch edit to prevent
@@ -2462,6 +2438,19 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  void _updateCaretRectIfNeeded() {
+    if (_hasInputConnection) {
+      if (renderEditable.selection != null && renderEditable.selection!.isValid &&
+          renderEditable.selection!.isCollapsed) {
+        final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection!.baseOffset);
+        final Rect caretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
+        _textInputConnection!.setCaretRect(caretRect);
+      }
+      SchedulerBinding.instance!
+          .addPostFrameCallback((Duration _) => _updateCaretRectIfNeeded());
+    }
+  }
+
   TextDirection get _textDirection {
     final TextDirection result = widget.textDirection ?? Directionality.of(context);
     assert(result != null, '$runtimeType created without a textDirection and with no ambient Directionality.');
@@ -2472,6 +2461,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///
   /// This property is typically used to notify the renderer of input gestures
   /// when [RenderEditable.ignorePointer] is true.
+  @override
   RenderEditable get renderEditable => _editableKey.currentContext!.findRenderObject()! as RenderEditable;
 
   @override
@@ -2889,186 +2879,5 @@ class _Editable extends LeafRenderObjectWidget {
       ..promptRectColor = promptRectColor
       ..clipBehavior = clipBehavior
       ..setPromptRectRange(promptRectRange);
-  }
-}
-
-// This formatter inserts [Unicode.RLM] and [Unicode.LRM] into the
-// string in order to preserve expected caret behavior when trailing
-// whitespace is inserted.
-//
-// When typing in a direction that opposes the base direction
-// of the paragraph, un-enclosed whitespace gets the directionality
-// of the paragraph. This is often at odds with what is immediately
-// being typed causing the caret to jump to the wrong side of the text.
-// This formatter makes use of the RLM and LRM to cause the text
-// shaper to inherently treat the whitespace as being surrounded
-// by the directionality of the previous non-whitespace codepoint.
-class _WhitespaceDirectionalityFormatter extends TextInputFormatter {
-  // The [textDirection] should be the base directionality of the
-  // paragraph/editable.
-  _WhitespaceDirectionalityFormatter({TextDirection? textDirection})
-    : _baseDirection = textDirection,
-      _previousNonWhitespaceDirection = textDirection;
-
-  // Using regex here instead of ICU is suboptimal, but is enough
-  // to produce the correct results for any reasonable input where this
-  // is even relevant. Using full ICU would be a much heavier change,
-  // requiring exposure of the C++ ICU API.
-  //
-  // LTR covers most scripts and symbols, including but not limited to Latin,
-  // ideographic scripts (Chinese, Japanese, etc), Cyrilic, Indic, and
-  // SE Asian scripts.
-  final RegExp _ltrRegExp = RegExp(r'[A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02B8\u0300-\u0590\u0800-\u1FFF\u2C00-\uFB1C\uFDFE-\uFE6F\uFEFD-\uFFFF]');
-  // RTL covers Arabic, Hebrew, and other RTL languages such as Urdu,
-  // Aramic, Farsi, Dhivehi.
-  final RegExp _rtlRegExp = RegExp(r'[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]');
-  // Although whitespaces are not the only codepoints that have weak directionality,
-  // these are the primary cause of the caret being misplaced.
-  final RegExp _whitespaceRegExp = RegExp(r'\s');
-
-  final TextDirection? _baseDirection;
-  // Tracks the directionality of the most recently encountered
-  // codepoint that was not whitespace. This becomes the direction of
-  // marker inserted to fully surround ambiguous whitespace.
-  TextDirection? _previousNonWhitespaceDirection;
-
-  // Prevents the formatter from attempting more expensive formatting
-  // operations mixed directionality is found.
-  bool _hasOpposingDirection = false;
-
-  // See [Unicode.RLM] and [Unicode.LRM].
-  //
-  // We do not directly use the [Unicode] constants since they are strings.
-  static const int _rlm = 0x200F;
-  static const int _lrm = 0x200E;
-
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    // Skip formatting (which can be more expensive) if there are no cases of
-    // mixing directionality. Once a case of mixed directionality is found,
-    // always perform the formatting.
-    if (!_hasOpposingDirection) {
-      _hasOpposingDirection = _baseDirection == TextDirection.ltr ?
-        _rtlRegExp.hasMatch(newValue.text) : _ltrRegExp.hasMatch(newValue.text);
-    }
-
-    if (_hasOpposingDirection) {
-      _previousNonWhitespaceDirection = _baseDirection;
-
-      final List<int> outputCodepoints = <int>[];
-
-      // We add/subtract from these as we insert/remove markers.
-      int selectionBase = newValue.selection.baseOffset;
-      int selectionExtent = newValue.selection.extentOffset;
-      int composingStart = newValue.composing.start;
-      int composingEnd = newValue.composing.end;
-
-      void addToLength() {
-        selectionBase += outputCodepoints.length <= selectionBase ? 1 : 0;
-        selectionExtent += outputCodepoints.length <= selectionExtent ? 1 : 0;
-
-        composingStart += outputCodepoints.length <= composingStart ? 1 : 0;
-        composingEnd += outputCodepoints.length <= composingEnd ? 1 : 0;
-      }
-      void subtractFromLength() {
-        selectionBase -= outputCodepoints.length < selectionBase ? 1 : 0;
-        selectionExtent -= outputCodepoints.length < selectionExtent ? 1 : 0;
-
-        composingStart -= outputCodepoints.length < composingStart ? 1 : 0;
-        composingEnd -= outputCodepoints.length < composingEnd ? 1 : 0;
-      }
-
-     final bool isBackspace = oldValue.text.runes.length - newValue.text.runes.length == 1 &&
-                              isDirectionalityMarker(oldValue.text.runes.last) &&
-                              oldValue.text.substring(0, oldValue.text.length - 1) == newValue.text;
-
-      bool previousWasWhitespace = false;
-      bool previousWasDirectionalityMarker = false;
-      int? previousNonWhitespaceCodepoint;
-      int index = 0;
-      for (final int codepoint in newValue.text.runes) {
-        if (isWhitespace(codepoint)) {
-          // Only compute the directionality of the non-whitespace
-          // when the value is needed.
-          if (!previousWasWhitespace && previousNonWhitespaceCodepoint != null) {
-            _previousNonWhitespaceDirection = getDirection(previousNonWhitespaceCodepoint);
-          }
-          // If we already added directionality for this run of whitespace,
-          // "shift" the marker added to the end of the whitespace run.
-          if (previousWasWhitespace) {
-            subtractFromLength();
-            outputCodepoints.removeLast();
-          }
-          // Handle trailing whitespace deleting the directionality char instead of the whitespace.
-          if (isBackspace && index == newValue.text.runes.length - 1) {
-            // Do not append the whitespace to the outputCodepoints.
-            subtractFromLength();
-          } else {
-            outputCodepoints.add(codepoint);
-            addToLength();
-            outputCodepoints.add(_previousNonWhitespaceDirection == TextDirection.rtl ? _rlm : _lrm);
-          }
-
-          previousWasWhitespace = true;
-          previousWasDirectionalityMarker = false;
-        } else if (isDirectionalityMarker(codepoint)) {
-          // Handle pre-existing directionality markers. Use pre-existing marker
-          // instead of the one we add.
-          if (previousWasWhitespace) {
-            subtractFromLength();
-            outputCodepoints.removeLast();
-          }
-          outputCodepoints.add(codepoint);
-
-          previousWasWhitespace = false;
-          previousWasDirectionalityMarker = true;
-        } else {
-          // If the whitespace was already enclosed by the same directionality,
-          // we can remove the artificially added marker.
-          if (!previousWasDirectionalityMarker &&
-              previousWasWhitespace &&
-              getDirection(codepoint) == _previousNonWhitespaceDirection) {
-            subtractFromLength();
-            outputCodepoints.removeLast();
-          }
-          // Normal character, track its codepoint add it to the string.
-          previousNonWhitespaceCodepoint = codepoint;
-          outputCodepoints.add(codepoint);
-
-          previousWasWhitespace = false;
-          previousWasDirectionalityMarker = false;
-        }
-        index++;
-      }
-      final String formatted = String.fromCharCodes(outputCodepoints);
-      return TextEditingValue(
-        text: formatted,
-        selection: TextSelection(
-          baseOffset: selectionBase,
-          extentOffset: selectionExtent,
-          affinity: newValue.selection.affinity,
-          isDirectional: newValue.selection.isDirectional
-        ),
-        composing: TextRange(start: composingStart, end: composingEnd),
-      );
-    }
-    return newValue;
-  }
-
-  bool isWhitespace(int value) {
-    return _whitespaceRegExp.hasMatch(String.fromCharCode(value));
-  }
-
-  bool isDirectionalityMarker(int value) {
-    return value == _rlm || value == _lrm;
-  }
-
-  TextDirection getDirection(int value) {
-    // Use the LTR version as short-circuiting will be more efficient since
-    // there are more LTR codepoints.
-    return _ltrRegExp.hasMatch(String.fromCharCode(value)) ? TextDirection.ltr : TextDirection.rtl;
   }
 }

@@ -106,7 +106,7 @@ void main() {
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(color: hoverColor));
 
-    gesture.removePointer();
+    await gesture.removePointer();
   });
 
   testWidgets('OutlineButton changes mouse cursor when hovered', (WidgetTester tester) async {
@@ -1168,7 +1168,7 @@ void main() {
     const Key childKey = Key('test child');
 
     Future<void> buildTest(VisualDensity visualDensity, {bool useText = false}) async {
-      return await tester.pumpWidget(
+      return tester.pumpWidget(
         MaterialApp(
           home: Directionality(
             textDirection: TextDirection.rtl,

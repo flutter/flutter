@@ -25,7 +25,7 @@ class _TextSpanEditingController extends TextEditingController {
   _TextSpanEditingController({required TextSpan textSpan}):
     assert(textSpan != null),
     _textSpan = textSpan,
-    super(text: textSpan.toPlainText());
+    super(text: textSpan.toPlainText(includeSemanticsLabels: false));
 
   final TextSpan _textSpan;
 
@@ -94,8 +94,7 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
           break;
       }
     }
-    if (_state.widget.onTap != null)
-      _state.widget.onTap!();
+    _state.widget.onTap?.call();
   }
 
   @override
@@ -125,7 +124,7 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
 /// {@tool snippet}
 ///
 /// ```dart
-/// SelectableText(
+/// const SelectableText(
 ///   'Hello! How are you?',
 ///   textAlign: TextAlign.center,
 ///   style: TextStyle(fontWeight: FontWeight.bold),
@@ -454,7 +453,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
     super.initState();
     _selectionGestureDetectorBuilder = _SelectableTextSelectionGestureDetectorBuilder(state: this);
     _controller = _TextSpanEditingController(
-        textSpan: widget.textSpan ?? TextSpan(text: widget.data)
+        textSpan: widget.textSpan ?? TextSpan(text: widget.data),
     );
     _controller.addListener(_onControllerChanged);
   }
@@ -465,7 +464,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
     if (widget.data != oldWidget.data || widget.textSpan != oldWidget.textSpan) {
       _controller.removeListener(_onControllerChanged);
       _controller = _TextSpanEditingController(
-          textSpan: widget.textSpan ?? TextSpan(text: widget.data)
+          textSpan: widget.textSpan ?? TextSpan(text: widget.data),
       );
       _controller.addListener(_onControllerChanged);
     }

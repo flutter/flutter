@@ -6,7 +6,7 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io; // ignore: dart_io_import
+import 'dart:io' as io; // flutter_ignore: dart_io_import
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -175,7 +175,7 @@ abstract class FlutterTestDriver {
     final int port = _vmServiceWsUri != null ? vmServicePort : _attachPort;
     final VmService vmService = await vmServiceConnectUri('ws://localhost:$port/ws');
     final Isolate isolate = await waitForExtension(vmService, extension);
-    return await vmService.callServiceExtension(
+    return vmService.callServiceExtension(
       extension,
       isolateId: isolate.id,
       args: args,
@@ -204,7 +204,7 @@ abstract class FlutterTestDriver {
 
   Future<int> _killForcefully() {
     _debugPrint('Sending SIGKILL to $_processPid..');
-    ProcessSignal.SIGKILL.send(_processPid);
+    ProcessSignal.sigkill.send(_processPid);
     return _process.exitCode;
   }
 
@@ -300,9 +300,9 @@ abstract class FlutterTestDriver {
 
   Future<Isolate> stepOverOrOverAsyncSuspension({ bool waitForNextPause = true }) async {
     if (await isAtAsyncSuspension()) {
-      return await stepOverAsync(waitForNextPause: waitForNextPause);
+      return stepOverAsync(waitForNextPause: waitForNextPause);
     }
-    return await stepOver(waitForNextPause: waitForNextPause);
+    return stepOver(waitForNextPause: waitForNextPause);
   }
 
   Future<Isolate> _resume(String step, bool waitForNextPause) async {
@@ -634,9 +634,6 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     }
     if (_vmService != null) {
       _debugPrint('Closing VM service...');
-      // TODO(dnfield): Remove ignore once internal repo is up to date
-      // https://github.com/flutter/flutter/issues/74518
-      // ignore: await_only_futures
       await _vmService.dispose();
     }
     if (_currentRunningAppId != null) {

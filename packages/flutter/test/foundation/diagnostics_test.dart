@@ -1197,7 +1197,7 @@ void main() {
   });
 
   test('callback property test', () {
-    final Function onClick = () { };
+    void onClick() { }
     final ObjectFlagProperty<Function> present = ObjectFlagProperty<Function>(
       'onClick',
       onClick,
@@ -1631,7 +1631,7 @@ void main() {
   });
 
   test('has property test', () {
-    final Function onClick = () { };
+    void onClick() { }
     final ObjectFlagProperty<Function> has = ObjectFlagProperty<Function>.has(
       'onClick',
       onClick,
@@ -1656,8 +1656,8 @@ void main() {
   test('iterable flags property test', () {
     // Normal property
     {
-      final Function onClick = () { };
-      final Function onMove = () { };
+      void onClick() { }
+      void onMove() { }
       final Map<String, Function> value = <String, Function>{
         'click': onClick,
         'move': onMove,
@@ -1675,8 +1675,8 @@ void main() {
 
     // Reversed-order property
     {
-      final Function onClick = () { };
-      final Function onMove = () { };
+      void onClick() { }
+      void onMove() { }
       final Map<String, Function> value = <String, Function>{
         'move': onMove,
         'click': onClick,
@@ -1692,7 +1692,7 @@ void main() {
 
     // Partially empty property
     {
-      final Function onClick = () { };
+      void onClick() { }
       final Map<String, Function?> value = <String, Function?>{
         'move': null,
         'click': onClick,

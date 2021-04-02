@@ -6,7 +6,6 @@ import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
@@ -46,6 +45,39 @@ import 'theme_data.dart';
 ///
 /// If [onPressed] and [onLongPress] callbacks are null, then the
 /// button will be disabled.
+///
+/// {@tool dartpad --template=stateful_widget_scaffold}
+///
+/// This sample produces an enabled and a disabled ElevatedButton.
+///
+/// ```dart
+/// @override
+/// Widget build(BuildContext context) {
+///   final ButtonStyle style =
+///     ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));
+///
+///   return Center(
+///     child: Column(
+///       mainAxisSize: MainAxisSize.min,
+///       children: <Widget>[
+///         ElevatedButton(
+///            style: style,
+///            onPressed: null,
+///            child: const Text('Disabled'),
+///         ),
+///         const SizedBox(height: 30),
+///         ElevatedButton(
+///           style: style,
+///           onPressed: () {},
+///           child: const Text('Enabled'),
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+///
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -418,7 +450,7 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
       MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
     );
     return super.defaultStyleOf(context).copyWith(
-      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(scaledPadding)
+      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(scaledPadding),
     );
   }
 }

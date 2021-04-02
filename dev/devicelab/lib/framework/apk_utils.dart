@@ -210,7 +210,7 @@ class ApkExtractor {
 
 /// Gets the content of the `AndroidManifest.xml`.
 Future<String> getAndroidManifest(String apk) async {
-  return await _evalApkAnalyzer(
+  return _evalApkAnalyzer(
     <String>[
       'manifest',
       'print',

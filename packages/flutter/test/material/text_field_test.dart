@@ -78,14 +78,18 @@ Widget overlayWithEntry(OverlayEntry entry) {
       WidgetsLocalizationsDelegate(),
       MaterialLocalizationsDelegate(),
     ],
-    child: Directionality(
-      textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(size: Size(800.0, 600.0)),
-        child: Overlay(
-          initialEntries: <OverlayEntry>[
-            entry,
-          ],
+    child: DefaultTextEditingShortcuts(
+      child: DefaultTextEditingActions(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(size: Size(800.0, 600.0)),
+            child: Overlay(
+              initialEntries: <OverlayEntry>[
+                entry,
+              ],
+            ),
+          ),
         ),
       ),
     ),
@@ -251,8 +255,59 @@ void main() {
     expect(find.byType(CupertinoButton), findsNothing);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux }), skip: kIsWeb);
 
+  testWidgets('Activates the text field when receives semantics focus on Mac', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+    final FocusNode focusNode = FocusNode();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(focusNode: focusNode),
+        ),
+      ),
+    );
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            id: 1,
+            textDirection: TextDirection.ltr,
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 2,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 3,
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 4,
+                        flags: <SemanticsFlag>[SemanticsFlag.isTextField],
+                        actions: <SemanticsAction>[SemanticsAction.tap,
+                          SemanticsAction.didGainAccessibilityFocus],
+                        textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
+
+    expect(focusNode.hasFocus, isFalse);
+    semanticsOwner.performAction(4, SemanticsAction.didGainAccessibilityFocus);
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isTrue);
+    semantics.dispose();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }), skip: kIsWeb);
+
   testWidgets('TextField passes onEditingComplete to EditableText', (WidgetTester tester) async {
-    final VoidCallback onEditingComplete = () { };
+    void onEditingComplete() { }
 
     await tester.pumpWidget(
       MaterialApp(
@@ -389,6 +444,33 @@ void main() {
     expect(renderEditable.cursorColor!.alpha, 0);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
+  // Regression test for https://github.com/flutter/flutter/issues/78918.
+  testWidgets('RenderEditable sets correct text editing value', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'how are you');
+    final UniqueKey icon = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              suffixIcon: IconButton(
+                key: icon,
+                icon: const Icon(Icons.cancel),
+                onPressed: () => controller.clear(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(icon));
+    await tester.pump();
+    expect(controller.text, '');
+    expect(controller.selection, const TextSelection.collapsed(offset: 0, affinity: TextAffinity.upstream));
+  });
+
   testWidgets('Cursor radius is 2.0', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
@@ -489,10 +571,10 @@ void main() {
   testWidgets('TextInputFormatter gets correct selection value', (WidgetTester tester) async {
     late TextEditingValue actualOldValue;
     late TextEditingValue actualNewValue;
-    final FormatEditUpdateCallback callBack = (TextEditingValue oldValue, TextEditingValue newValue) {
+    void callBack(TextEditingValue oldValue, TextEditingValue newValue) {
       actualOldValue = oldValue;
       actualNewValue = newValue;
-    };
+    }
     final FocusNode focusNode = FocusNode();
     final TextEditingController controller = TextEditingController(text: '123');
     await tester.pumpWidget(
@@ -766,18 +848,24 @@ void main() {
   );
 
   testWidgets('cursor layout has correct width', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController.fromValue(
+      const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
+    );
+    final FocusNode focusNode = FocusNode();
     EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
         overlay(
-          child: const RepaintBoundary(
+          child: RepaintBoundary(
             child: TextField(
               cursorWidth: 15.0,
+              controller: controller,
+              focusNode: focusNode,
             ),
           ),
         )
     );
-    await tester.enterText(find.byType(TextField), ' ');
-    await skipPastScrollingAnimation(tester);
+    focusNode.requestFocus();
+    await tester.pump();
 
     await expectLater(
       find.byType(TextField),
@@ -787,19 +875,25 @@ void main() {
   });
 
   testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController.fromValue(
+      const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
+    );
+    final FocusNode focusNode = FocusNode();
     EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
         overlay(
-          child: const RepaintBoundary(
+          child: RepaintBoundary(
             child: TextField(
               cursorWidth: 15.0,
-              cursorRadius: Radius.circular(3.0),
+              cursorRadius: const Radius.circular(3.0),
+              controller: controller,
+              focusNode: focusNode,
             ),
           ),
         )
     );
-    await tester.enterText(find.byType(TextField), ' ');
-    await skipPastScrollingAnimation(tester);
+    focusNode.requestFocus();
+    await tester.pump();
 
     await expectLater(
       find.byType(TextField),
@@ -809,19 +903,25 @@ void main() {
   });
 
   testWidgets('cursor layout has correct height', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController.fromValue(
+      const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
+    );
+    final FocusNode focusNode = FocusNode();
     EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
         overlay(
-          child: const RepaintBoundary(
+          child: RepaintBoundary(
             child: TextField(
               cursorWidth: 15.0,
               cursorHeight: 30.0,
+              controller: controller,
+              focusNode: focusNode,
             ),
           ),
         )
     );
-    await tester.enterText(find.byType(TextField), ' ');
-    await skipPastScrollingAnimation(tester);
+    focusNode.requestFocus();
+    await tester.pump();
 
     await expectLater(
       find.byType(TextField),
@@ -1033,8 +1133,8 @@ void main() {
     await tester.tapAt(ePos);
     await tester.pump();
 
-    expect(controller.selection.baseOffset, -1);
-    expect(controller.selection.extentOffset, -1);
+    expect(controller.selection.baseOffset, testValue.length);
+    expect(controller.selection.isCollapsed, isTrue);
   });
 
   testWidgets('Can long press to select', (WidgetTester tester) async {
@@ -1198,7 +1298,7 @@ void main() {
             flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isFocused],
             actions: <SemanticsAction>[SemanticsAction.tap,
               SemanticsAction.moveCursorBackwardByCharacter, SemanticsAction.setSelection, SemanticsAction.paste,
-              SemanticsAction.moveCursorBackwardByWord],
+              SemanticsAction.setText, SemanticsAction.moveCursorBackwardByWord],
             value: 'abcdefghi',
             textDirection: TextDirection.ltr,
             textSelection: const TextSelection.collapsed(offset: 9),
@@ -1502,8 +1602,7 @@ void main() {
     await tester.pump();
 
     expect(controller.selection.isCollapsed, true);
-    expect(controller.selection.baseOffset, -1);
-    expect(controller.selection.extentOffset, -1);
+    expect(controller.selection.baseOffset, testValue.length);
   });
 
   testWidgets('Can select text by dragging with a mouse', (WidgetTester tester) async {
@@ -3782,6 +3881,90 @@ void main() {
     expect(textController.text, testValue);
   });
 
+  testWidgets(
+    'maxLength limits input in the center of a maxed-out field, with collapsed selection',
+    (WidgetTester tester) async {
+      final TextEditingController textController = TextEditingController();
+      const String testValue = '0123456789';
+
+      await tester.pumpWidget(boilerplate(
+        child: TextField(
+          controller: textController,
+          maxLength: 10,
+        ),
+      ));
+
+      // Max out the character limit in the field.
+      await tester.showKeyboard(find.byType(TextField));
+      tester.testTextInput.updateEditingValue(const TextEditingValue(
+        text: testValue,
+        selection: TextSelection.collapsed(offset: 10),
+        composing: TextRange.empty,
+      ));
+      await tester.pump();
+      expect(textController.text, testValue);
+
+      // Entering more characters at the end does nothing.
+      await tester.showKeyboard(find.byType(TextField));
+      tester.testTextInput.updateEditingValue(const TextEditingValue(
+        text: testValue + '9999999',
+        selection: TextSelection.collapsed(offset: 10 + 7),
+        composing: TextRange.empty,
+      ));
+      await tester.pump();
+
+      expect(textController.text, testValue);
+
+      // Entering text in the middle of the field also does nothing.
+      // Entering more characters at the end does nothing.
+      await tester.showKeyboard(find.byType(TextField));
+      tester.testTextInput.updateEditingValue(const TextEditingValue(
+        text: '0123455555555556789',
+        selection: TextSelection.collapsed(offset: 19),
+        composing: TextRange.empty,
+      ));
+      await tester.pump();
+
+      expect(textController.text, testValue);
+    },
+  );
+
+  testWidgets(
+    'maxLength limits input in the center of a maxed-out field, with non-collapsed selection',
+    (WidgetTester tester) async {
+      final TextEditingController textController = TextEditingController();
+      const String testValue = '0123456789';
+
+      await tester.pumpWidget(boilerplate(
+        child: TextField(
+          controller: textController,
+          maxLength: 10,
+        ),
+      ));
+
+      // Max out the character limit in the field.
+      await tester.showKeyboard(find.byType(TextField));
+      tester.testTextInput.updateEditingValue(const TextEditingValue(
+        text: testValue,
+        selection: TextSelection(baseOffset: 8, extentOffset: 10),
+        composing: TextRange.empty,
+      ));
+      await tester.pump();
+      expect(textController.text, testValue);
+
+      // Entering more characters at the end does nothing.
+      await tester.showKeyboard(find.byType(TextField));
+      tester.testTextInput.updateEditingValue(const TextEditingValue(
+        text: '01234569999999',
+        selection: TextSelection.collapsed(offset: 14),
+        composing: TextRange.empty,
+      ));
+      await tester.pump();
+
+      expect(textController.text,  '0123456999');
+    },
+  );
+
   testWidgets('maxLength limits input length even if decoration is null.', (WidgetTester tester) async {
     final TextEditingController textController = TextEditingController();
 
@@ -5052,7 +5235,8 @@ void main() {
     const String testValue = 'x';
     await tester.enterText(find.byType(TextField), testValue);
     await skipPastScrollingAnimation(tester);
-    expect(controller.selection.baseOffset, -1);
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, testValue.length);
 
     // Tap the selection handle to bring up the "paste / select all" menu.
     await tester.tapAt(textOffsetToPosition(tester, 0));
@@ -5325,6 +5509,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
@@ -5352,6 +5537,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.moveCursorForwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
@@ -5378,6 +5564,7 @@ void main() {
             SemanticsAction.moveCursorForwardByCharacter,
             SemanticsAction.moveCursorForwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
@@ -5416,6 +5603,7 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.setText,
             // Absent the following because enableInteractiveSelection: false
             // SemanticsAction.moveCursorBackwardByCharacter,
             // SemanticsAction.moveCursorBackwardByWord,
@@ -5480,6 +5668,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
@@ -5507,6 +5696,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.moveCursorForwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.paste,
             SemanticsAction.cut,
             SemanticsAction.copy,
@@ -5557,6 +5747,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
@@ -5602,6 +5793,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.paste,
             SemanticsAction.cut,
             SemanticsAction.copy,
@@ -5671,6 +5863,7 @@ void main() {
               SemanticsAction.moveCursorBackwardByCharacter,
               SemanticsAction.moveCursorBackwardByWord,
               SemanticsAction.setSelection,
+              SemanticsAction.setText,
               SemanticsAction.paste,
             ],
             value: textInTextField,
@@ -5743,6 +5936,7 @@ void main() {
               SemanticsAction.moveCursorBackwardByCharacter,
               SemanticsAction.moveCursorBackwardByWord,
               SemanticsAction.setSelection,
+              SemanticsAction.setText,
               // No paste option.
             ],
             value: textInTextField,
@@ -5939,6 +6133,7 @@ void main() {
           actions: <SemanticsAction>[
             SemanticsAction.tap,
             SemanticsAction.setSelection,
+            SemanticsAction.setText,
             SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
@@ -7772,7 +7967,13 @@ void main() {
           pressureMin: 0.0,
       ),
     );
-    await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: offset + const Offset(150.0, 9.0), pressure: 0.5, pressureMin: 0, pressureMax: 1,),);
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: offset + const Offset(150.0, 9.0),
+      pressure: 0.5,
+      pressureMin: 0,
+      pressureMax: 1,
+    ));
 
     // We don't want this gesture to select any word on Android.
     expect(controller.selection, const TextSelection.collapsed(offset: -1));
@@ -8802,14 +9003,14 @@ void main() {
         // Regression test for https://github.com/flutter/flutter/issues/54729
         // If the intrinsic height does not match that of the height after
         // performLayout, this will fail.
-        tester.pumpWidget(_buildTest(isDense: false));
+        await tester.pumpWidget(_buildTest(isDense: false));
       });
 
       testWidgets('When isDense, intrinsic height can go below kMinInteractiveDimension height', (WidgetTester tester) async {
         // Regression test for https://github.com/flutter/flutter/issues/54729
         // If the intrinsic height does not match that of the height after
         // performLayout, this will fail.
-        tester.pumpWidget(_buildTest(isDense: true));
+        await tester.pumpWidget(_buildTest(isDense: true));
       });
     });
   });
@@ -8879,7 +9080,7 @@ void main() {
           ),
         ),
       ),
-    ),);
+    ));
 
     focusNode3.requestFocus();
     await tester.pump();

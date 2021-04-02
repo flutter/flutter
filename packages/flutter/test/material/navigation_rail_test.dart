@@ -1869,7 +1869,7 @@ void main() {
                     leading: Builder(
                       builder: (BuildContext context) {
                         animation = NavigationRail.extendedAnimation(context);
-                        return FloatingActionButton(onPressed: () { },);
+                        return FloatingActionButton(onPressed: () { });
                       },
                     ),
                     destinations: _destinations(),

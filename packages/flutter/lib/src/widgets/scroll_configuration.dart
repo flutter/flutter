@@ -14,8 +14,21 @@ const Color _kDefaultGlowColor = Color(0xFFFFFFFF);
 
 /// Describes how [Scrollable] widgets should behave.
 ///
+/// {@template flutter.widgets.scrollBehavior}
 /// Used by [ScrollConfiguration] to configure the [Scrollable] widgets in a
 /// subtree.
+///
+/// This class can be extended to further customize a [ScrollBehavior] for a
+/// subtree. For example, overriding [ScrollBehavior.getScrollPhysics] sets the
+/// default [ScrollPhysics] for [Scrollable]s that inherit this [ScrollConfiguration].
+/// Overriding [ScrollBehavior.buildViewportChrome] can be used to add or change
+/// default decorations like [GlowingOverscrollIndicator]s.
+/// {@endtemplate}
+///
+/// See also:
+///
+///   * [ScrollConfiguration], the inherited widget that controls how
+///     [Scrollable] widgets behave in a subtree.
 @immutable
 class ScrollBehavior {
   /// Creates a description of how [Scrollable] widgets should behave.
@@ -33,7 +46,7 @@ class ScrollBehavior {
   /// overscrolls.
   Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
     // When modifying this function, consider modifying the implementation in
-    // _MaterialScrollBehavior as well.
+    // MaterialScrollBehavior as well.
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
       case TargetPlatform.linux:

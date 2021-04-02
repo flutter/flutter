@@ -114,8 +114,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
       }
     }
     _state._requestKeyboard();
-    if (_state.widget.onTap != null)
-      _state.widget.onTap!();
+    _state.widget.onTap?.call();
   }
 
   @override
@@ -181,7 +180,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/text_field.png)
 ///
 /// ```dart
-/// TextField(
+/// const TextField(
 ///   obscureText: true,
 ///   decoration: InputDecoration(
 ///     border: OutlineInputBorder(),
@@ -205,16 +204,19 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// ```dart
 /// late TextEditingController _controller;
 ///
+/// @override
 /// void initState() {
 ///   super.initState();
 ///   _controller = TextEditingController();
 /// }
 ///
+/// @override
 /// void dispose() {
 ///   _controller.dispose();
 ///   super.dispose();
 /// }
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     body: Center(
@@ -360,7 +362,7 @@ class TextField extends StatefulWidget {
     @Deprecated(
       'Use maxLengthEnforcement parameter which provides more specific '
       'behavior related to the maxLength limit. '
-      'This feature was deprecated after v1.25.0-5.0.pre.'
+      'This feature was deprecated after v1.25.0-5.0.pre.',
     )
     this.maxLengthEnforced = true,
     this.maxLengthEnforcement,
@@ -612,7 +614,7 @@ class TextField extends StatefulWidget {
   @Deprecated(
     'Use maxLengthEnforcement parameter which provides more specific '
     'behavior related to the maxLength limit. '
-    'This feature was deprecated after v1.25.0-5.0.pre.'
+    'This feature was deprecated after v1.25.0-5.0.pre.',
   )
   final bool maxLengthEnforced;
 
@@ -1141,6 +1143,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     final Color selectionColor;
     Color? autocorrectionTextRectColor;
     Radius? cursorRadius = widget.cursorRadius;
+    VoidCallback? handleDidGainAccessibilityFocus;
 
     switch (theme.platform) {
       case TargetPlatform.iOS:
@@ -1166,6 +1169,13 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
+        handleDidGainAccessibilityFocus = () {
+          // macOS automatically activated the TextField when it receives
+          // accessibility focus.
+          if (!_effectiveFocusNode.hasFocus && _effectiveFocusNode.canRequestFocus) {
+            _effectiveFocusNode.requestFocus();
+          }
+        };
         break;
 
       case TargetPlatform.android:
@@ -1290,7 +1300,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       semanticsMaxValueLength = null;
     }
 
-    child = MouseRegion(
+    return MouseRegion(
       cursor: effectiveMouseCursor,
       onEnter: (PointerEnterEvent event) => _handleHover(true),
       onExit: (PointerExitEvent event) => _handleHover(false),
@@ -1307,6 +1317,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
                   _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
                 _requestKeyboard();
               },
+              onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
               child: child,
             );
           },
@@ -1317,13 +1328,5 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         ),
       ),
     );
-
-    if (kIsWeb) {
-      return Shortcuts(
-        shortcuts: scrollShortcutOverrides,
-        child: child,
-      );
-    }
-    return child;
   }
 }

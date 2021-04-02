@@ -66,7 +66,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   final List<String> _tabs = ['Tab 1', 'Tab 2'];
+///   final List<String> _tabs = <String>['Tab 1', 'Tab 2'];
 ///   return DefaultTabController(
 ///     length: _tabs.length, // This is the number of tabs.
 ///     child: Scaffold(
@@ -244,7 +244,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///         padding: const EdgeInsets.all(8),
 ///         itemCount: 30,
 ///         itemBuilder: (BuildContext context, int index) {
-///           return Container(
+///           return SizedBox(
 ///             height: 50,
 ///             child: Center(child: Text('Item $index')),
 ///           );
@@ -510,13 +510,13 @@ class NestedScrollView extends StatefulWidget {
 ///   return NestedScrollView(
 ///     key: globalKey,
 ///     headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-///       return <Widget>[
+///       return const <Widget>[
 ///         SliverAppBar(
 ///           title: Text('NestedScrollViewState Demo!'),
 ///         ),
 ///       ];
 ///     },
-///     body: CustomScrollView(
+///     body: const CustomScrollView(
 ///       // Body slivers go here!
 ///     ),
 ///   );
@@ -1075,7 +1075,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
     goIdle();
     updateUserScrollDirection(
-        delta < 0.0 ? ScrollDirection.forward : ScrollDirection.reverse
+        delta < 0.0 ? ScrollDirection.forward : ScrollDirection.reverse,
     );
 
     if (_innerPositions.isEmpty) {
@@ -1097,7 +1097,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       }
       if (outerDelta != 0.0) {
         final double innerDelta = _outerPosition!.applyClampedPointerSignalUpdate(
-            outerDelta
+            outerDelta,
         );
         if (innerDelta != 0.0) {
           for (final _NestedScrollPosition position in _innerPositions)
@@ -1167,7 +1167,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   @override
   void applyUserOffset(double delta) {
     updateUserScrollDirection(
-      delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse
+      delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse,
     );
     assert(delta != 0.0);
     if (_innerPositions.isEmpty) {
@@ -1188,7 +1188,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       }
       if (outerDelta != 0.0) {
         final double innerDelta = _outerPosition!.applyClampedDragUpdate(
-          outerDelta
+          outerDelta,
         );
         if (innerDelta != 0.0) {
           for (final _NestedScrollPosition position in _innerPositions)
@@ -1238,7 +1238,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   void updateParent() {
     _outerPosition?.setParent(
-      _parent ?? PrimaryScrollController.of(_state.context)
+      _parent ?? PrimaryScrollController.of(_state.context),
     );
   }
 
@@ -1306,7 +1306,7 @@ class _NestedScrollController extends ScrollController {
     SchedulerBinding.instance!.addPostFrameCallback(
       (Duration timeStamp) {
         coordinator.updateShadow();
-      }
+      },
     );
   }
 
@@ -1661,14 +1661,14 @@ class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
   @override
   void resetActivity() {
     delegate.beginActivity(
-      coordinator.createOuterBallisticScrollActivity(velocity)
+      coordinator.createOuterBallisticScrollActivity(velocity),
     );
   }
 
   @override
   void applyNewDimensions() {
     delegate.beginActivity(
-      coordinator.createOuterBallisticScrollActivity(velocity)
+      coordinator.createOuterBallisticScrollActivity(velocity),
     );
   }
 

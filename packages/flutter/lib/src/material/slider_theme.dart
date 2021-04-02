@@ -84,6 +84,8 @@ class SliderTheme extends InheritedTheme {
   ///
   /// ```dart
   /// class Launch extends StatefulWidget {
+  ///   const Launch({Key? key}) : super(key: key);
+  ///
   ///   @override
   ///   State createState() => LaunchState();
   /// }
@@ -244,6 +246,8 @@ class SliderThemeData with Diagnosticable {
   ///
   /// ```dart
   /// class Blissful extends StatefulWidget {
+  ///   const Blissful({Key? key}) : super(key: key);
+  ///
   ///   @override
   ///   State createState() => BlissfulState();
   /// }
@@ -1423,7 +1427,7 @@ abstract class RangeSliderTrackShape {
 ///    rectangular edges
 ///  * [RoundedRectSliderTrackShape], which is a track shape with round
 ///    stadium-like edges.
-abstract class BaseSliderTrackShape {
+mixin BaseSliderTrackShape {
   /// Returns a rect that represents the track bounds that fits within the
   /// [Slider].
   ///
@@ -1489,9 +1493,9 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
   const RectangularSliderTrackShape({
     @Deprecated(
       'It no longer has any effect because the thumb does not shrink when the slider is disabled now. '
-      'This feature was deprecated after v1.26.0-18.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.',
     )
-    this.disabledThumbGapWidth = 2.0
+    this.disabledThumbGapWidth = 2.0,
   });
 
   /// Horizontal spacing, or gap, between the disabled thumb and the track.
@@ -1502,7 +1506,7 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
   /// thumb radius.
   @Deprecated(
     'It no longer has any effect because the thumb does not shrink when the slider is disabled now. '
-    'This feature was deprecated after v1.26.0-18.0.pre.'
+    'This feature was deprecated after v1.26.0-18.0.pre.',
   )
   final double disabledThumbGapWidth;
 
@@ -1916,10 +1920,12 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
     // but reversed for right to left text.
     final ColorTween activeTrackColorTween = ColorTween(
       begin: sliderTheme.disabledActiveTrackColor,
-      end: sliderTheme.activeTrackColor);
+      end: sliderTheme.activeTrackColor,
+    );
     final ColorTween inactiveTrackColorTween = ColorTween(
       begin: sliderTheme.disabledInactiveTrackColor,
-      end: sliderTheme.inactiveTrackColor);
+      end: sliderTheme.inactiveTrackColor,
+    );
     final Paint activePaint = Paint()
       ..color = activeTrackColorTween.evaluate(enableAnimation)!;
     final Paint inactivePaint = Paint()
@@ -2578,7 +2584,8 @@ class RectangularSliderValueIndicatorShape extends SliderComponentShape {
       labelPainter: labelPainter,
       textScaleFactor: textScaleFactor,
       sizeWithOverflow: sizeWithOverflow,
-      backgroundPaintColor: sliderTheme.valueIndicatorColor!);
+      backgroundPaintColor: sliderTheme.valueIndicatorColor!,
+    );
   }
 }
 

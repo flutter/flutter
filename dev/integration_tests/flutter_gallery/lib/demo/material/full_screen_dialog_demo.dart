@@ -116,7 +116,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
     final ThemeData theme = Theme.of(context);
     final TextStyle dialogTextStyle = theme.textTheme.subtitle1!.copyWith(color: theme.textTheme.caption!.color);
 
-    return await (showDialog<bool>(
+    return showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -140,7 +140,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
           ],
         );
       },
-    ) as Future<bool>);
+    ) as Future<bool>;
   }
 
   @override

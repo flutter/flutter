@@ -13,7 +13,7 @@ import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:mockito/mockito.dart';
@@ -250,7 +250,7 @@ void main() {
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(MockAndroidDevice());
 
-      return await responses.stream.skipWhile(_isConnectedEvent).first.then<void>((Map<String, dynamic> response) async {
+      return responses.stream.skipWhile(_isConnectedEvent).first.then<void>((Map<String, dynamic> response) async {
         expect(response['event'], 'device.added');
         expect(response['params'], isMap);
 

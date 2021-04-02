@@ -204,13 +204,10 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
 }
 
 void main() {
-  runApp(MaterialApp(
-    theme: ThemeData(
-      brightness: Brightness.light,
-      primarySwatch: Colors.blue,
-      accentColor: Colors.redAccent,
+  runApp(
+    const MaterialApp(
+      title: 'Cards',
+      home: OverlayGeometryApp(),
     ),
-    title: 'Cards',
-    home: const OverlayGeometryApp(),
-  ));
+  );
 }

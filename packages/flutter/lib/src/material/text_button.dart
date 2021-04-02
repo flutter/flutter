@@ -6,7 +6,6 @@ import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
@@ -64,7 +63,7 @@ import 'theme_data.dart';
 ///       children: <Widget>[
 ///         TextButton(
 ///            style: TextButton.styleFrom(
-///              textStyle: TextStyle(fontSize: 20),
+///              textStyle: const TextStyle(fontSize: 20),
 ///            ),
 ///            onPressed: null,
 ///            child: const Text('Disabled'),
@@ -72,7 +71,7 @@ import 'theme_data.dart';
 ///         const SizedBox(height: 30),
 ///         TextButton(
 ///           style: TextButton.styleFrom(
-///             textStyle: TextStyle(fontSize: 20),
+///             textStyle: const TextStyle(fontSize: 20),
 ///           ),
 ///           onPressed: () {},
 ///           child: const Text('Enabled'),
@@ -99,7 +98,7 @@ import 'theme_data.dart';
 ///                 style: TextButton.styleFrom(
 ///                   padding: const EdgeInsets.all(16.0),
 ///                   primary: Colors.white,
-///                   textStyle: TextStyle(fontSize: 20),
+///                   textStyle: const TextStyle(fontSize: 20),
 ///                 ),
 ///                 onPressed: () {},
 ///                  child: const Text('Gradient'),
@@ -444,7 +443,7 @@ class _TextButtonWithIcon extends TextButton {
       MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
     );
     return super.defaultStyleOf(context).copyWith(
-      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(scaledPadding)
+      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(scaledPadding),
     );
   }
 }

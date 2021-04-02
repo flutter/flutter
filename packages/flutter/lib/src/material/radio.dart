@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -52,12 +51,13 @@ const double _kInnerRadius = 4.5;
 /// ```dart
 /// SingingCharacter? _character = SingingCharacter.lafayette;
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Column(
 ///     children: <Widget>[
 ///       ListTile(
 ///         title: const Text('Lafayette'),
-///         leading: Radio(
+///         leading: Radio<SingingCharacter>(
 ///           value: SingingCharacter.lafayette,
 ///           groupValue: _character,
 ///           onChanged: (SingingCharacter? value) {
@@ -67,7 +67,7 @@ const double _kInnerRadius = 4.5;
 ///       ),
 ///       ListTile(
 ///         title: const Text('Thomas Jefferson'),
-///         leading: Radio(
+///         leading: Radio<SingingCharacter>(
 ///           value: SingingCharacter.jefferson,
 ///           groupValue: _character,
 ///           onChanged: (SingingCharacter? value) {
@@ -218,7 +218,7 @@ class Radio<T> extends StatefulWidget {
   /// Widget build(BuildContext context) {
   ///   return Scaffold(
   ///     body: ListView.builder(
-  ///       itemBuilder: (context, index) {
+  ///       itemBuilder: (BuildContext context, int index) {
   ///         return Row(
   ///           mainAxisSize: MainAxisSize.min,
   ///           crossAxisAlignment: CrossAxisAlignment.center,
@@ -504,7 +504,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
           ..isFocused = states.contains(MaterialState.focused)
           ..isHovered = states.contains(MaterialState.hovered)
           ..activeColor = effectiveActiveColor
-          ..inactiveColor = effectiveInactiveColor
+          ..inactiveColor = effectiveInactiveColor,
       ),
     );
   }

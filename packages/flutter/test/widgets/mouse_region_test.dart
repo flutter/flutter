@@ -29,21 +29,13 @@ class HoverClient extends StatefulWidget {
 
 class HoverClientState extends State<HoverClient> {
   void _onExit(PointerExitEvent details) {
-    if (widget.onExit != null) {
-      widget.onExit!();
-    }
-    if (widget.onHover != null) {
-      widget.onHover!(false);
-    }
+    widget.onExit?.call();
+    widget.onHover?.call(false);
   }
 
   void _onEnter(PointerEnterEvent details) {
-    if (widget.onEnter != null) {
-      widget.onEnter!();
-    }
-    if (widget.onHover != null) {
-      widget.onHover!(true);
-    }
+    widget.onEnter?.call();
+    widget.onHover?.call(true);
   }
 
   @override
@@ -1424,8 +1416,8 @@ void main() {
     await gesture.addPointer(location: const Offset(5, 5));
     addTearDown(gesture.removePointer);
 
-    final PointerHoverEventListener onHover = (_) {};
-    final VoidCallback onPaintChild = () { logs.add('paint'); };
+    void onHover(PointerHoverEvent _) {}
+    void onPaintChild() { logs.add('paint'); }
 
     await tester.pumpWidget(_Scaffold(
       topLeft: SizedBox(
@@ -1471,7 +1463,7 @@ void main() {
     await gesture.addPointer(location: const Offset(100, 100));
     addTearDown(gesture.removePointer);
 
-    final VoidCallback onPaintChild = () { logPaints.add('paint'); };
+    void onPaintChild() { logPaints.add('paint'); }
 
     await tester.pumpWidget(_Scaffold(
       topLeft: SizedBox(
@@ -1521,7 +1513,7 @@ void main() {
     await gesture.addPointer(location: const Offset(100, 100));
     addTearDown(gesture.removePointer);
 
-    final VoidCallback onPaintChild = () { logPaints.add('paint'); };
+    void onPaintChild() { logPaints.add('paint'); }
 
     await tester.pumpWidget(_Scaffold(
       topLeft: SizedBox(

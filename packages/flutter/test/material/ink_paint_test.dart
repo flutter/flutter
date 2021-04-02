@@ -258,7 +258,7 @@ void main() {
 
     final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
     Future<void> buildTest(Intent intent) async {
-      return await tester.pumpWidget(
+      return tester.pumpWidget(
         Shortcuts(
           shortcuts: <LogicalKeySet, Intent>{
             LogicalKeySet(LogicalKeyboardKey.space): intent,

@@ -189,18 +189,8 @@ class FakeFuchsiaPM extends Fake implements FuchsiaPM {
   }
 
   @override
-  Future<bool> genkey(String buildPath, String outKeyPath) async {
-    if (!fileSystem.file(fileSystem.path.join(buildPath, 'meta', 'package')).existsSync()) {
-      return false;
-    }
-    fileSystem.file(outKeyPath).createSync(recursive: true);
-    return true;
-  }
-
-  @override
-  Future<bool> build(String buildPath, String keyPath, String manifestPath) async {
+  Future<bool> build(String buildPath, String manifestPath) async {
     if (!fileSystem.file(fileSystem.path.join(buildPath, 'meta', 'package')).existsSync() ||
-        !fileSystem.file(keyPath).existsSync() ||
         !fileSystem.file(manifestPath).existsSync()) {
       return false;
     }
@@ -209,9 +199,8 @@ class FakeFuchsiaPM extends Fake implements FuchsiaPM {
   }
 
   @override
-  Future<bool> archive(String buildPath, String keyPath, String manifestPath) async {
+  Future<bool> archive(String buildPath, String manifestPath) async {
     if (!fileSystem.file(fileSystem.path.join(buildPath, 'meta', 'package')).existsSync() ||
-        !fileSystem.file(keyPath).existsSync() ||
         !fileSystem.file(manifestPath).existsSync()) {
       return false;
     }

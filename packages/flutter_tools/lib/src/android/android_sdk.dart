@@ -13,7 +13,7 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/version.dart';
 import '../convert.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import 'android_studio.dart';
 
 // ANDROID_HOME is deprecated.
@@ -261,14 +261,56 @@ class AndroidSdk {
     return null;
   }
 
-  String getAvdManagerPath() {
-    final String binaryName = globals.platform.isWindows ? 'avdmanager.bat' : 'avdmanager';
-    final File file = directory.childDirectory('tools').childDirectory('bin').childFile(binaryName);
-    if (file.existsSync()) {
-      return file.path;
+  String getCmdlineToolsPath(String binaryName) {
+    // First look for the latest version of the command-line tools
+    final File cmdlineToolsLatestBinary = directory
+      .childDirectory('cmdline-tools')
+      .childDirectory('latest')
+      .childDirectory('bin')
+      .childFile(binaryName);
+    if (cmdlineToolsLatestBinary.existsSync()) {
+      return cmdlineToolsLatestBinary.path;
     }
+
+    // Next look for the highest version of the command-line tools
+    final Directory cmdlineToolsDir = directory.childDirectory('cmdline-tools');
+    if (cmdlineToolsDir.existsSync()) {
+      final List<Version> cmdlineTools = cmdlineToolsDir
+        .listSync()
+        .whereType<Directory>()
+        .map((Directory subDirectory) {
+          try {
+            return Version.parse(subDirectory.basename);
+          } on Exception {
+            return null;
+          }
+        })
+        .where((Version version) => version != null)
+        .toList();
+      cmdlineTools.sort();
+
+      for (final Version cmdlineToolsVersion in cmdlineTools.reversed) {
+        final File cmdlineToolsBinary = directory
+          .childDirectory('cmdline-tools')
+          .childDirectory(cmdlineToolsVersion.toString())
+          .childDirectory('bin')
+          .childFile(binaryName);
+        if (cmdlineToolsBinary.existsSync()) {
+          return cmdlineToolsBinary.path;
+        }
+      }
+    }
+
+    // Finally fallback to the old SDK tools
+    final File toolsBinary = directory.childDirectory('tools').childDirectory('bin').childFile(binaryName);
+    if (toolsBinary.existsSync()) {
+      return toolsBinary.path;
+    }
+
     return null;
   }
+
+  String getAvdManagerPath() => getCmdlineToolsPath(globals.platform.isWindows ? 'avdmanager.bat' : 'avdmanager');
 
   /// Sets up various paths used internally.
   ///
@@ -346,14 +388,11 @@ class AndroidSdk {
     final String executable = globals.platform.isWindows
       ? 'sdkmanager.bat'
       : 'sdkmanager';
-    final File cmdlineTool = directory
-      .childDirectory('cmdline-tools')
-      .childDirectory('latest')
-      .childDirectory('bin')
-      .childFile(executable);
-    if (cmdlineTool.existsSync()) {
-      return cmdlineTool.path;
+    final String path = getCmdlineToolsPath(executable);
+    if (path != null) {
+      return path;
     }
+    // If no binary was found, return the default location
     return directory
       .childDirectory('tools')
       .childDirectory('bin')

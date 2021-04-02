@@ -690,14 +690,12 @@ void main() {
       },
     );
 
-    final ThemeData theme = ThemeData.raw(
+    final ThemeData theme = ThemeData.light().copyWith(
       visualDensity: VisualDensity.standard,
       primaryColor: Colors.black,
       primaryColorBrightness: Brightness.dark,
       primaryColorLight: Colors.black,
       primaryColorDark: Colors.black,
-      accentColor: Colors.black,
-      accentColorBrightness: Brightness.dark,
       canvasColor: Colors.black,
       shadowColor: Colors.black,
       scaffoldBackgroundColor: Colors.black,
@@ -727,11 +725,9 @@ void main() {
       toggleableActiveColor: Colors.black,
       textTheme: ThemeData.dark().textTheme,
       primaryTextTheme: ThemeData.dark().textTheme,
-      accentTextTheme: ThemeData.dark().textTheme,
       inputDecorationTheme: ThemeData.dark().inputDecorationTheme.copyWith(border: const OutlineInputBorder()),
       iconTheme: ThemeData.dark().iconTheme,
       primaryIconTheme: ThemeData.dark().iconTheme,
-      accentIconTheme: ThemeData.dark().iconTheme,
       sliderTheme: sliderTheme,
       tabBarTheme: const TabBarTheme(labelColor: Colors.black),
       tooltipTheme: const TooltipThemeData(height: 100),
@@ -1237,7 +1233,7 @@ void main() {
   testWidgets('Floating SnackBar button text alignment', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
-        snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating,)
+        snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating)
       ),
       home: MediaQuery(
         data: const MediaQueryData(

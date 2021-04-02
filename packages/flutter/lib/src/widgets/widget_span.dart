@@ -27,7 +27,7 @@ import 'framework.dart';
 /// A card with `Hello World!` embedded inline within a TextSpan tree.
 ///
 /// ```dart
-/// Text.rich(
+/// const Text.rich(
 ///   TextSpan(
 ///     children: <InlineSpan>[
 ///       TextSpan(text: 'Flutter is'),

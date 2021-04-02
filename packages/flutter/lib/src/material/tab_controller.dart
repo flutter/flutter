@@ -38,7 +38,7 @@ import 'constants.dart';
 /// }
 ///
 /// class _MyTabbedPageState extends State<MyTabbedPage> with SingleTickerProviderStateMixin {
-///   final List<Tab> myTabs = <Tab>[
+///   static const List<Tab> myTabs = <Tab>[
 ///     Tab(text: 'LEFT'),
 ///     Tab(text: 'RIGHT'),
 ///   ];
@@ -90,7 +90,7 @@ import 'constants.dart';
 /// when using [DefaultTabController].
 ///
 /// ```dart preamble
-/// final List<Tab> tabs = <Tab>[
+/// const List<Tab> tabs = <Tab>[
 ///   Tab(text: 'Zeroth'),
 ///   Tab(text: 'First'),
 ///   Tab(text: 'Second'),
@@ -114,7 +114,7 @@ import 'constants.dart';
 ///         });
 ///         return Scaffold(
 ///           appBar: AppBar(
-///             bottom: TabBar(
+///             bottom: const TabBar(
 ///               tabs: tabs,
 ///             ),
 ///           ),

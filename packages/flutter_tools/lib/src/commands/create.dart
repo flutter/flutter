@@ -8,7 +8,6 @@ import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/net.dart';
 import '../base/terminal.dart';
 import '../convert.dart';
@@ -22,15 +21,18 @@ import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import 'create_base.dart';
 
+const String kPlatformHelp =
+  'The platforms supported by this project. '
+  'Platform folders (e.g. android/) will be generated in the target project. '
+  'This argument only works when "--template" is set to app or plugin. '
+  'When adding platforms to a plugin project, the pubspec.yaml will be updated with the requested platform. '
+  'Adding desktop platforms requires the corresponding desktop config setting to be enabled.';
+
 class CreateCommand extends CreateBase {
   CreateCommand({
     bool verboseHelp = false,
   }) : super(verboseHelp: verboseHelp) {
-    addPlatformsOptions(customHelp: 'The platforms supported by this project. '
-        'Platform folders (e.g. android/) will be generated in the target project. '
-        'This argument only works when "--template" is set to app or plugin. '
-        'When adding platforms to a plugin project, the pubspec.yaml will be updated with the requested platform. '
-        'Adding desktop platforms requires the corresponding desktop config setting to be enabled.');
+    addPlatformsOptions(customHelp: kPlatformHelp);
     argParser.addOption(
       'template',
       abbr: 't',
@@ -39,8 +41,7 @@ class CreateCommand extends CreateBase {
       valueHelp: 'type',
       allowedHelp: <String, String>{
         flutterProjectTypeToString(FlutterProjectType.app): '(default) Generate a Flutter application.',
-        flutterProjectTypeToString(FlutterProjectType.package): 'Generate a shareable Flutter project containing modular '
-            'Dart code.',
+        flutterProjectTypeToString(FlutterProjectType.package): 'Generate a shareable Flutter project containing only Dart code.',
         flutterProjectTypeToString(FlutterProjectType.plugin): 'Generate a shareable Flutter project containing an API '
             'in Dart code with a platform-specific implementation for Android, for iOS code, or '
             'for both.',
@@ -89,7 +90,7 @@ class CreateCommand extends CreateBase {
   // Lazy-initialize the net utilities with values from the context.
   Net _cachedNet;
   Net get _net => _cachedNet ??= Net(
-    httpClientFactory: context.get<HttpClientFactory>() ?? () => HttpClient(),
+    httpClientFactory: context.get<HttpClientFactory>(),
     logger: globals.logger,
     platform: globals.platform,
   );
@@ -234,14 +235,15 @@ class CreateCommand extends CreateBase {
       withPluginHook: generatePlugin,
       androidLanguage: stringArg('android-language'),
       iosLanguage: stringArg('ios-language'),
-      ios: platforms.contains('ios'),
-      android: platforms.contains('android'),
+      ios: featureFlags.isIOSEnabled && platforms.contains('ios'),
+      android: featureFlags.isAndroidEnabled && platforms.contains('android'),
       web: featureFlags.isWebEnabled && platforms.contains('web'),
       linux: featureFlags.isLinuxEnabled && platforms.contains('linux'),
       macos: featureFlags.isMacOSEnabled && platforms.contains('macos'),
       windows: featureFlags.isWindowsEnabled && platforms.contains('windows'),
-      // Enable null-safety for sample code, which is - unlike our regular templates - already migrated.
-      dartSdkVersionBounds: sampleCode != null ? '">=2.12.0-0 <3.0.0"' : '">=2.7.0 <3.0.0"'
+      windowsUwp: featureFlags.isWindowsUwpEnabled && platforms.contains('winuwp'),
+      // Enable null safety everywhere.
+      dartSdkVersionBounds: '">=2.12.0 <3.0.0"'
     );
 
     final String relativeDirPath = globals.fs.path.relative(projectDirPath);
@@ -323,11 +325,6 @@ In order to run your $application, type:
   \$ cd $relativeAppPath
   \$ flutter run
 
-To enable null safety, type:
-
-  \$ cd $relativeAppPath
-  \$ dart migrate --apply-changes
-
 Your $application code is in $relativeAppMain.
 ''');
       // Show warning if any selected platform is not enabled
@@ -382,15 +379,11 @@ Your $application code is in $relativeAppMain.
   }
 
   Future<int> _generatePlugin(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
-    // Plugin doesn't create any platform by default
+    // Plugins only add a platform if it was requested explicitly by the user.
     if (!argResults.wasParsed('platforms')) {
-      // If the user didn't explicitly declare the platforms, we don't generate any platforms.
-      templateContext['ios'] = false;
-      templateContext['android'] = false;
-      templateContext['web'] = false;
-      templateContext['linux'] = false;
-      templateContext['macos'] = false;
-      templateContext['windows'] = false;
+      for (final String platform in kAllCreatePlatforms) {
+        templateContext[platform] = false;
+      }
     }
     final List<String> platformsToAdd = _getSupportedPlatformsFromTemplateContext(templateContext);
 
@@ -457,18 +450,8 @@ Your $application code is in $relativeAppMain.
 
   List<String> _getSupportedPlatformsFromTemplateContext(Map<String, dynamic> templateContext) {
     return <String>[
-      if (templateContext['ios'] == true)
-        'ios',
-      if (templateContext['android'] == true)
-        'android',
-      if (templateContext['web'] == true)
-        'web',
-      if (templateContext['linux'] == true)
-        'linux',
-      if (templateContext['windows'] == true)
-        'windows',
-      if (templateContext['macos'] == true)
-        'macos',
+      for (String platform in kAllCreatePlatforms)
+        if (templateContext[platform] == true) platform
     ];
   }
 

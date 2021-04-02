@@ -475,7 +475,7 @@ class _LerpSides implements MaterialStateProperty<BorderSide?> {
     if (resolvedA == null)
       return BorderSide.lerp(BorderSide(width: 0, color: resolvedB!.color.withAlpha(0)), resolvedB, t);
     if (resolvedB == null)
-      return BorderSide.lerp(BorderSide(width: 0, color: resolvedA.color.withAlpha(0)), resolvedA, t);
+      return BorderSide.lerp(resolvedA, BorderSide(width: 0, color: resolvedA.color.withAlpha(0)), t);
     return BorderSide.lerp(resolvedA, resolvedB, t);
   }
 }

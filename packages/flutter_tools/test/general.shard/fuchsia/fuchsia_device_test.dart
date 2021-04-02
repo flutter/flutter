@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/fuchsia/amber_ctl.dart';
 import 'package:flutter_tools/src/fuchsia/application_package.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_dev_finder.dart';
@@ -31,7 +32,7 @@ import 'package:flutter_tools/src/fuchsia/fuchsia_pm.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
 import 'package:flutter_tools/src/fuchsia/tiles_ctl.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
@@ -333,7 +334,7 @@ void main() {
         return ProcessResult(1, 1, '', '');
       });
       final FuchsiaDevice device = FuchsiaDevice('id');
-      expect(() async => await device.hostAddress, throwsToolExit());
+      expect(() async => device.hostAddress, throwsToolExit());
     }, overrides: <Type, Generator>{
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
       FuchsiaSdk: () => MockFuchsiaSdk(),
@@ -345,7 +346,7 @@ void main() {
         return ProcessResult(1, 0, '', '');
       });
       final FuchsiaDevice device = FuchsiaDevice('id');
-      expect(() async => await device.hostAddress, throwsToolExit());
+      expect(() async => device.hostAddress, throwsToolExit());
     }, overrides: <Type, Generator>{
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
       FuchsiaSdk: () => MockFuchsiaSdk(),
@@ -745,7 +746,7 @@ void main() {
         environment: anyNamed('environment'),
       )).thenAnswer((_) async => ProcessResult(0, 0, '', ''));
 
-      expect(() async => await device.takeScreenshot(globals.fs.file('file.ppm')),
+      expect(() async => device.takeScreenshot(globals.fs.file('file.ppm')),
         returnsNormally);
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
@@ -833,7 +834,7 @@ void main() {
       );
       final MockDartDevelopmentService mockDds = MockDartDevelopmentService();
       when(fuchsiaDevice.dds).thenReturn(mockDds);
-      when(mockDds.startDartDevelopmentService(any, any, any, any)).thenReturn(null);
+      when(mockDds.startDartDevelopmentService(any, any, any, any, logger: anyNamed('logger'))).thenReturn(null);
       when(mockDds.uri).thenReturn(Uri.parse('example'));
       when(fuchsiaDevice.servicePorts())
           .thenAnswer((Invocation invocation) async => <int>[1]);
@@ -1013,7 +1014,7 @@ void main() {
       }
 
       final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(BuildInfo(mode, null, treeShakeIcons: false));
-      return await device.startApp(
+      return device.startApp(
         app,
         prebuiltApplication: prebuilt,
         debuggingOptions: debuggingOptions,
@@ -1123,7 +1124,7 @@ void main() {
 
     testUsingContext('fail when cant get ssh config', () async {
       expect(() async =>
-          await setupAndStartApp(prebuilt: true, mode: BuildMode.release),
+          setupAndStartApp(prebuilt: true, mode: BuildMode.release),
           throwsToolExit(message: 'Cannot interact with device. No ssh config.\n'
                                   'Try setting FUCHSIA_SSH_CONFIG or FUCHSIA_BUILD_DIR.'));
     }, overrides: <Type, Generator>{
@@ -1137,7 +1138,7 @@ void main() {
 
     testUsingContext('fail when cant get host address', () async {
       expect(() async =>
-        await setupAndStartApp(prebuilt: true, mode: BuildMode.release),
+        setupAndStartApp(prebuilt: true, mode: BuildMode.release),
           throwsToolExit(message: 'Failed to get local address, aborting.'));
     }, overrides: <Type, Generator>{
       Artifacts: () => artifacts,
@@ -1232,7 +1233,7 @@ void main() {
       when<String>(emptyStdoutProcessResult.stderr as String).thenReturn('');
     });
 
-    testUsingContext('does not throw on non-existant ssh config', () async {
+    testUsingContext('does not throw on non-existent ssh config', () async {
       final FuchsiaDevice device = FuchsiaDevice('123');
       expect(await device.sdkNameAndVersion, equals('Fuchsia'));
     }, overrides: <Type, Generator>{
@@ -1276,8 +1277,6 @@ class FuchsiaModulePackage extends ApplicationPackage {
   @override
   final String name;
 }
-
-class MockFuchsiaArtifacts extends Mock implements FuchsiaArtifacts {}
 
 class MockProcessManager extends Mock implements ProcessManager {}
 
@@ -1524,18 +1523,8 @@ class FakeFuchsiaPM implements FuchsiaPM {
   }
 
   @override
-  Future<bool> genkey(String buildPath, String outKeyPath) async {
-    if (!globals.fs.file(globals.fs.path.join(buildPath, 'meta', 'package')).existsSync()) {
-      return false;
-    }
-    globals.fs.file(outKeyPath).createSync(recursive: true);
-    return true;
-  }
-
-  @override
-  Future<bool> build(String buildPath, String keyPath, String manifestPath) async {
+  Future<bool> build(String buildPath, String manifestPath) async {
     if (!globals.fs.file(globals.fs.path.join(buildPath, 'meta', 'package')).existsSync() ||
-        !globals.fs.file(keyPath).existsSync() ||
         !globals.fs.file(manifestPath).existsSync()) {
       return false;
     }
@@ -1544,9 +1533,8 @@ class FakeFuchsiaPM implements FuchsiaPM {
   }
 
   @override
-  Future<bool> archive(String buildPath, String keyPath, String manifestPath) async {
+  Future<bool> archive(String buildPath, String manifestPath) async {
     if (!globals.fs.file(globals.fs.path.join(buildPath, 'meta', 'package')).existsSync() ||
-        !globals.fs.file(keyPath).existsSync() ||
         !globals.fs.file(manifestPath).existsSync()) {
       return false;
     }
@@ -1590,18 +1578,14 @@ class FailingPM implements FuchsiaPM {
     return false;
   }
 
+
   @override
-  Future<bool> genkey(String buildPath, String outKeyPath) async {
+  Future<bool> build(String buildPath, String manifestPath) async {
     return false;
   }
 
   @override
-  Future<bool> build(String buildPath, String keyPath, String manifestPath) async {
-    return false;
-  }
-
-  @override
-  Future<bool> archive(String buildPath, String keyPath, String manifestPath) async {
+  Future<bool> archive(String buildPath, String manifestPath) async {
     return false;
   }
 
