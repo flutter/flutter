@@ -14,7 +14,7 @@ import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
 
 void main() {
-  group('Flutter run', () {
+  group('Flutter run for web', () {
     final BasicProject project = BasicProject();
     Directory tempDir;
     FlutterRunTestDriver flutter;
@@ -53,7 +53,7 @@ void main() {
       );
     }
 
-    testWithoutContext('cannot evaluate if expression evaluation disabled', () async {
+    testWithoutContext('cannot evaluate expression if feature is disabled', () async {
       await start(expressionEvaluation: false);
       await breakInTopLevelFunction(flutter);
       await failToEvaluateExpression(flutter);
@@ -95,19 +95,19 @@ void main() {
       await evaluateComplexExpressions(flutter);
     });
 
-    testWithoutContext('can evaluate trivial expressions in library', () async {
+    testWithoutContext('can evaluate trivial expressions in library without pause', () async {
       await start(expressionEvaluation: true);
       await evaluateTrivialExpressionsInLibrary(flutter);
     });
 
-    testWithoutContext('can evaluate complex expressions in library', () async {
+    testWithoutContext('can evaluate complex expressions in library without pause', () async {
       await start(expressionEvaluation: true);
       await evaluateComplexExpressionsInLibrary(flutter);
     });
   });
 
 
-  group('Flutter test', () {
+  group('Flutter test for web', () {
     final TestsProject project = TestsProject();
     Directory tempDir;
     FlutterRunTestDriver flutter;
@@ -143,7 +143,7 @@ void main() {
         additionalCommandArgs: <String>['--verbose']);
     }
 
-    testWithoutContext('cannot evaluate if expression evaluation disabled', () async {
+    testWithoutContext('cannot evaluate expressions if feature is disabled', () async {
       await startPaused(expressionEvaluation: false);
       await breakInMethod(flutter);
       await failToEvaluateExpression(flutter);
@@ -161,12 +161,12 @@ void main() {
       await evaluateComplexExpressions(flutter);
     });
 
-    testWithoutContext('can evaluate trivial expressions in library', () async {
+    testWithoutContext('can evaluate trivial expressions in library without pause', () async {
       await startPaused(expressionEvaluation: true);
       await evaluateTrivialExpressionsInLibrary(flutter);
     });
 
-    testWithoutContext('can evaluate complex expressions in library', () async {
+    testWithoutContext('can evaluate complex expressions in library without pause', () async {
       await startPaused(expressionEvaluation: true);
       await evaluateComplexExpressionsInLibrary(flutter);
     });
