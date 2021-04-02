@@ -21,6 +21,7 @@ import '../bundle.dart';
 import '../desktop_device.dart';
 import '../devfs.dart';
 import '../device.dart';
+import '../device_port_forwader.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../version.dart';

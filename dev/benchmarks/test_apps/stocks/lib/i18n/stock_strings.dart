@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-// ignore: unused_import
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -67,7 +66,6 @@ import 'stock_strings_es.dart';
 abstract class StockStrings {
   StockStrings(String locale) : assert(locale != null), localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
-  // ignore: unused_field
   final String localeName;
 
   static StockStrings of(BuildContext context) {

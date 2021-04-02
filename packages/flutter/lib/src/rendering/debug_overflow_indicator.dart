@@ -85,7 +85,8 @@ class _OverflowRegionData {
 ///
 /// See also:
 ///
-///  * [RenderUnconstrainedBox] and [RenderFlex] for examples of classes that use this indicator mixin.
+///  * [RenderConstraintsTransformBox], [RenderUnconstrainedBox] and
+///    [RenderFlex], for examples of classes that use this indicator mixin.
 mixin DebugOverflowIndicatorMixin on RenderObject {
   static const Color _black = Color(0xBF000000);
   static const Color _yellow = Color(0xBFFFFF00);

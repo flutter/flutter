@@ -218,7 +218,7 @@ class _ViewportElement extends MultiChildRenderObjectElement {
   RenderViewport get renderObject => super.renderObject as RenderViewport;
 
   @override
-  void mount(Element? parent, dynamic newSlot) {
+  void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     _updateCenter();
   }

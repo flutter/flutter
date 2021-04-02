@@ -1588,7 +1588,7 @@ class _DecorationElement extends RenderObjectElement {
   }
 
   @override
-  void mount(Element? parent, dynamic newSlot) {
+  void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     _mountChild(widget.decoration.icon, _DecorationSlot.icon);
     _mountChild(widget.decoration.input, _DecorationSlot.input);
@@ -1685,7 +1685,7 @@ class _DecorationElement extends RenderObjectElement {
   }
 
   @override
-  void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
+  void moveRenderObjectChild(RenderObject child, Object? oldSlot, Object? newSlot) {
     assert(false, 'not reachable');
   }
 }

@@ -33,7 +33,7 @@ platform.TargetPlatform get defaultTargetPlatform {
     throw FlutterError(
       'Unknown platform.\n'
       '${Platform.operatingSystem} was not recognized as a target platform. '
-      'Consider updating the list of TargetPlatforms to include this platform.'
+      'Consider updating the list of TargetPlatforms to include this platform.',
     );
   }
   return result!;

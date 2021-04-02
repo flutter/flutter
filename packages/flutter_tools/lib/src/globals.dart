@@ -74,7 +74,7 @@ LocalEngineLocator get localEngineLocator => context.get<LocalEngineLocator>();
 /// By default it uses local disk-based implementation. Override this in tests
 /// with [MemoryFileSystem].
 FileSystem get fs => ErrorHandlingFileSystem(
-  delegate: context.get<FileSystem>() ?? LocalFileSystem.instance,
+  delegate: context.get<FileSystem>() ?? localFileSystem,
   platform: platform,
 );
 
@@ -213,3 +213,15 @@ TemplateRenderer get templateRenderer => context.get<TemplateRenderer>();
 
 /// Gradle utils in the current [AppContext].
 GradleUtils get gradleUtils => context.get<GradleUtils>();
+
+ShutdownHooks get shutdownHooks => context.get<ShutdownHooks>();
+
+// Unless we're in a test of this class's signal handling features, we must
+// have only one instance created with the singleton LocalSignals instance
+// and the catchable signals it considers to be fatal.
+LocalFileSystem _instance;
+LocalFileSystem get localFileSystem => _instance ??= LocalFileSystem(
+  LocalSignals.instance,
+  Signals.defaultExitSignals,
+  shutdownHooks,
+);

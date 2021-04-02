@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 /// This file serves as the single point of entry into the `dart:io` APIs
 /// within Flutter tools.
 ///
@@ -140,7 +138,7 @@ bool _inUnitTest() {
 /// Sets the [exit] function to a function that throws an exception rather
 /// than exiting the process; this is intended for testing purposes.
 @visibleForTesting
-void setExitFunctionForTests([ ExitFunction exitFunction ]) {
+void setExitFunctionForTests([ ExitFunction? exitFunction ]) {
   _exitFunction = exitFunction ?? (int exitCode) {
     throw ProcessExit(exitCode, immediate: true);
   };
@@ -235,12 +233,12 @@ class Stdio {
   /// dart:io.
   @visibleForTesting
   Stdio.test({
-    @required io.Stdout stdout,
-    @required io.IOSink stderr,
+    required io.Stdout stdout,
+    required io.IOSink stderr,
   }) : _stdoutOverride = stdout, _stderrOverride = stderr;
 
-  io.Stdout _stdoutOverride;
-  io.IOSink _stderrOverride;
+  io.Stdout? _stdoutOverride;
+  io.IOSink? _stderrOverride;
 
   // These flags exist to remember when the done Futures on stdout and stderr
   // complete to avoid trying to write to a closed stream sink, which would
@@ -253,34 +251,34 @@ class Stdio {
   @visibleForTesting
   io.Stdout get stdout {
     if (_stdout != null) {
-      return _stdout;
+      return _stdout!;
     }
     _stdout = _stdoutOverride ?? io.stdout;
-    _stdout.done.then(
+    _stdout!.done.then(
       (void _) { _stdoutDone = true; },
       onError: (Object err, StackTrace st) { _stdoutDone = true; },
     );
-    return _stdout;
+    return _stdout!;
   }
-  io.Stdout _stdout;
+  io.Stdout? _stdout;
 
   @visibleForTesting
   io.IOSink get stderr {
     if (_stderr != null) {
-      return _stderr;
+      return _stderr!;
     }
     _stderr = _stderrOverride ?? io.stderr;
-    _stderr.done.then(
+    _stderr!.done.then(
       (void _) { _stderrDone = true; },
       onError: (Object err, StackTrace st) { _stderrDone = true; },
     );
-    return _stderr;
+    return _stderr!;
   }
-  io.IOSink _stderr;
+  io.IOSink? _stderr;
 
   bool get hasTerminal => io.stdout.hasTerminal;
 
-  static bool _stdinHasTerminal;
+  static bool? _stdinHasTerminal;
 
   /// Determines whether there is a terminal attached.
   ///
@@ -290,7 +288,7 @@ class Stdio {
   /// runtime errors such as "inappropriate ioctl for device" if not handled.
   bool get stdinHasTerminal {
     if (_stdinHasTerminal != null) {
-      return _stdinHasTerminal;
+      return _stdinHasTerminal!;
     }
     if (stdin is! io.Stdin) {
       return _stdinHasTerminal = false;
@@ -309,15 +307,15 @@ class Stdio {
     return _stdinHasTerminal = true;
   }
 
-  int get terminalColumns => hasTerminal ? stdout.terminalColumns : null;
-  int get terminalLines => hasTerminal ? stdout.terminalLines : null;
+  int? get terminalColumns => hasTerminal ? stdout.terminalColumns : null;
+  int? get terminalLines => hasTerminal ? stdout.terminalLines : null;
   bool get supportsAnsiEscapes => hasTerminal && stdout.supportsAnsiEscapes;
 
   /// Writes [message] to [stderr], falling back on [fallback] if the write
   /// throws any exception. The default fallback calls [print] on [message].
   void stderrWrite(
     String message, {
-    void Function(String, dynamic, StackTrace) fallback,
+    void Function(String, dynamic, StackTrace)? fallback,
   }) {
     if (!_stderrDone) {
       _stdioWrite(stderr, message, fallback: fallback);
@@ -334,7 +332,7 @@ class Stdio {
   /// throws any exception. The default fallback calls [print] on [message].
   void stdoutWrite(
     String message, {
-    void Function(String, dynamic, StackTrace) fallback,
+    void Function(String, dynamic, StackTrace)? fallback,
   }) {
     if (!_stdoutDone) {
       _stdioWrite(stdout, message, fallback: fallback);
@@ -349,7 +347,7 @@ class Stdio {
 
   // Helper for [stderrWrite] and [stdoutWrite].
   void _stdioWrite(io.IOSink sink, String message, {
-    void Function(String, dynamic, StackTrace) fallback,
+    void Function(String, dynamic, StackTrace)? fallback,
   }) {
     asyncGuard<void>(() async {
       sink.write(message);
@@ -447,7 +445,7 @@ typedef NetworkInterfaceLister = Future<List<NetworkInterface>> Function({
   io.InternetAddressType type,
 });
 
-NetworkInterfaceLister _networkInterfaceListerOverride;
+NetworkInterfaceLister? _networkInterfaceListerOverride;
 
 // Tests can set up a non-default network interface lister.
 @visibleForTesting
@@ -469,7 +467,7 @@ Future<List<NetworkInterface>> listNetworkInterfaces({
   io.InternetAddressType type = io.InternetAddressType.any,
 }) async {
   if (_networkInterfaceListerOverride != null) {
-    return _networkInterfaceListerOverride(
+    return _networkInterfaceListerOverride!.call(
       includeLoopback: includeLoopback,
       includeLinkLocal: includeLinkLocal,
       type: type,

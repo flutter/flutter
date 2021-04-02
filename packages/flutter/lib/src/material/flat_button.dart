@@ -229,7 +229,7 @@ class _FlatButtonWithIcon extends FlatButton with MaterialButtonWithIconMixin {
            children: <Widget>[
              icon,
              const SizedBox(width: 8.0),
-             Flexible(child: label),
+             label,
            ],
          ),
          minWidth: minWidth,

@@ -287,7 +287,7 @@ class NavigationRail extends StatefulWidget {
   /// a copy of the [IconThemeData.fallback] with a custom [NavigationRail]
   /// specific color will be used.
   ///
-  /// The default value is Is the [Theme]'s [ThemeData.iconTheme] with a color
+  /// The default value is the [Theme]'s [ThemeData.iconTheme] with a color
   /// of the [Theme]'s [ColorScheme.onSurface] with an opacity of 0.64.
   /// Properties from this icon theme, or
   /// [NavigationRailThemeData.unselectedIconTheme] if this is null, are
@@ -299,7 +299,7 @@ class NavigationRail extends StatefulWidget {
   /// When a [NavigationRailDestination] is not selected,
   /// [unselectedIconTheme] will be used.
   ///
-  /// The default value is Is the [Theme]'s [ThemeData.iconTheme] with a color
+  /// The default value is the [Theme]'s [ThemeData.iconTheme] with a color
   /// of the [Theme]'s [ColorScheme.primary]. Properties from this icon theme,
   /// or [NavigationRailThemeData.selectedIconTheme] if this is null, are
   /// merged into the defaults.

@@ -4,6 +4,7 @@
 
 import '../framework/adb.dart';
 import '../framework/framework.dart';
+import '../framework/host_agent.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
@@ -151,6 +152,8 @@ class DriverTest {
         testTarget,
         '-d',
         deviceId,
+        '--screenshot',
+        hostAgent.dumpDirectory.path,
         ...extraOptions,
       ];
       await flutter('drive', options: options, environment: Map<String, String>.from(environment));

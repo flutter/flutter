@@ -12,6 +12,15 @@ import 'package:process/process.dart';
 import '../test.dart';
 import 'common.dart';
 
+/// Fails a test if the exit code of `result` is not the expected value. This
+/// is favored over `expect(result.exitCode, expectedExitCode)` because this
+/// will include the process result's stdio in the failure message.
+void expectExitCode(ProcessResult result, int expectedExitCode) {
+  if (result.exitCode != expectedExitCode) {
+    fail('Failure due to exit code ${result.exitCode}\nSTDOUT:\n${result.stdout}\nSTDERR:\n${result.stderr}');
+  }
+}
+
 void main() {
   group('verifyVersion()', () {
     MemoryFileSystem fileSystem;
@@ -103,14 +112,14 @@ void main() {
       ProcessResult result = await runScript(
         <String, String>{'SHARD': 'smoke_tests', 'SUBSHARD': '1_3'},
       );
-      expect(result.exitCode, 0);
+      expectExitCode(result, 0);
       // There are currently 6 smoke tests. This shard should contain test 1 and 2.
       expect(result.stdout, contains('Selecting subshard 1 of 3 (range 1-2 of 6)'));
 
       result = await runScript(
         <String, String>{'SHARD': 'smoke_tests', 'SUBSHARD': '5_6'},
       );
-      expect(result.exitCode, 0);
+      expectExitCode(result, 0);
       // This shard should contain only test 5.
       expect(result.stdout, contains('Selecting subshard 5 of 6 (range 5-5 of 6)'));
     });
@@ -119,7 +128,7 @@ void main() {
       final ProcessResult result = await runScript(
         <String, String>{'SHARD': 'smoke_tests', 'SUBSHARD': '100_99'},
       );
-      expect(result.exitCode, 1);
+      expectExitCode(result, 1);
       expect(result.stdout, contains('Invalid subshard name'));
     });
   });

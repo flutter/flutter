@@ -214,7 +214,7 @@ class FlutterPlugin implements Plugin<Project> {
         project.android.buildTypes.all this.&addFlutterDependencies
     }
 
-    private static Boolean shouldShrinkResources(Project project) { 
+    private static Boolean shouldShrinkResources(Project project) {
         if (project.hasProperty("shrink")) {
             return project.property("shrink").toBoolean()
         }
@@ -595,7 +595,7 @@ class FlutterPlugin implements Plugin<Project> {
 
     /**
      * Gets the directory that contains the Flutter source code.
-     * This is the the directory containing the `android/` directory.
+     * This is the directory containing the `android/` directory.
      */
     private File getFlutterSourceDirectory() {
         if (project.flutter.source == null) {
@@ -842,7 +842,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
             return copyFlutterAssetsTask
         } // end def addFlutterDeps
-        
+
         if (isFlutterAppProject()) {
             project.android.applicationVariants.all { variant ->
                 Task assembleTask = getAssembleTask(variant)

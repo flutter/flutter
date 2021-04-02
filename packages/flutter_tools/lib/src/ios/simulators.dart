@@ -21,6 +21,7 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../devfs.dart';
 import '../device.dart';
+import '../device_port_forwader.dart';
 import '../globals.dart' as globals;
 import '../macos/xcode.dart';
 import '../project.dart';
