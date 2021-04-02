@@ -567,6 +567,7 @@ package io.flutter.plugins;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
+import android.util.Log;
 
 import io.flutter.embedding.engine.FlutterEngine;
 {{#needsShim}}
@@ -580,17 +581,30 @@ import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistry;
  */
 @Keep
 public final class GeneratedPluginRegistrant {
+  private static final String TAG = "GeneratedPluginRegistrant";
+  public static void _logException(String name, String package, String class, Exception e) {
+     Log.e(TAG, "Error registering plugin " + name + ", package " + package + "." + class +
+     " The app might not function as expected unless you remove it from pubspec.yaml. ", e);
+  }
   public static void registerWith(@NonNull FlutterEngine flutterEngine) {
 {{#needsShim}}
     ShimPluginRegistry shimPluginRegistry = new ShimPluginRegistry(flutterEngine);
 {{/needsShim}}
 {{#plugins}}
   {{#supportsEmbeddingV2}}
-    flutterEngine.getPlugins().add(new {{package}}.{{class}}());
+    try {
+      flutterEngine.getPlugins().add(new {{package}}.{{class}}());
+    } catch(Exception e) { 
+      _logException('{{name}}','{{package}}','{{class}}',e);
+    }
   {{/supportsEmbeddingV2}}
   {{^supportsEmbeddingV2}}
     {{#supportsEmbeddingV1}}
+    try {
       {{package}}.{{class}}.registerWith(shimPluginRegistry.registrarFor("{{package}}.{{class}}"));
+    } catch(Exception e) {
+      _logException('{{name}}','{{package}}','{{class}}',e);
+    }
     {{/supportsEmbeddingV1}}
   {{/supportsEmbeddingV2}}
 {{/plugins}}
@@ -620,12 +634,7 @@ AndroidEmbeddingVersion _getAndroidEmbeddingVersion(FlutterProject project) {
 Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
   final List<Map<String, dynamic>> androidPlugins =
     _extractPlatformMaps(plugins, AndroidPlugin.kConfigKey);
-  androidPlugins.sort((Map<String, dynamic> left, Map<String, dynamic> right) {
-    if (left['supportsEmbeddingV2'] != right['supportsEmbeddingV2']) {
-      return left['supportsEmbeddingV2'] as bool ? -1 : 1;
-    }
-    return left['name'].compareTo(right['name']) as int;
-  });
+
   final Map<String, dynamic> templateContext = <String, dynamic>{
     'plugins': androidPlugins,
     'androidX': isAppUsingAndroidX(project.android.hostAppGradleRoot),
