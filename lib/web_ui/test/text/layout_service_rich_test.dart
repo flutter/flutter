@@ -42,6 +42,21 @@ void main() {
 void testMain() async {
   await ui.webOnlyInitializeTestDomRenderer();
 
+  test('does not crash on empty spans', () {
+    final CanvasParagraph paragraph = rich(ahemStyle, (builder) {
+      builder.pushStyle(EngineTextStyle.only(color: blue));
+      builder.addText('');
+
+      builder.pushStyle(EngineTextStyle.only(color: red));
+      builder.addText('Lorem ipsum');
+
+      builder.pushStyle(EngineTextStyle.only(color: green));
+      builder.addText('');
+    });
+
+    expect(() => paragraph.layout(constrain(double.infinity)), returnsNormally);
+  });
+
   test('measures spans in the same line correctly', () {
     final CanvasParagraph paragraph = rich(ahemStyle, (builder) {
       builder.pushStyle(EngineTextStyle.only(fontSize: 12.0));
