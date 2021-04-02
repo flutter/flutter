@@ -998,6 +998,63 @@ class ChildBackButtonDispatcher extends BackButtonDispatcher {
   }
 }
 
+/// A convenience widget that registers a callback when the back button is pressed
+/// by using [BackButtonDispatcher].
+///
+/// It only applies to platforms that accept back button clicks, such as Android.
+///
+/// It can be useful for scenarios, in which you create a different state in your
+/// screen but don't want to use a new page for that.
+class BackButtonListener extends StatefulWidget {
+  /// Creates a BackButtonListener widget .
+  ///
+  /// The [child] and [onBackPressed] arguments must not be null.
+  const BackButtonListener({
+    Key? key,
+    required this.child,
+    required this.onBackPressed,
+  }) : super(key: key);
+
+  /// The child Widget that will be drawn and usually a page that will
+  final Widget child;
+
+  /// The callback function that will be called when the back button is pressed.
+  /// It must return a boolean future with true if this child will handle the request;
+  /// otherwise, return a boolean future with false.
+  final ValueGetter<Future<bool>> onBackPressed;
+
+  @override
+  _BackButtonListenerState createState() => _BackButtonListenerState();
+}
+
+class _BackButtonListenerState extends State<BackButtonListener> {
+  BackButtonDispatcher? dispatcher;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    dispatcher?.removeCallback(widget.onBackPressed);
+
+    final BackButtonDispatcher? rootBackDispatcher = Router.of(context).backButtonDispatcher;
+    assert(rootBackDispatcher != null, 'make sure to have a Router object with a backButtonDispatcher registered');
+
+    dispatcher = rootBackDispatcher!.createChildBackButtonDispatcher()
+      ..addCallback(widget.onBackPressed)
+      ..takePriority();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
+
+  @override
+  void dispose() {
+    dispatcher?.removeCallback(widget.onBackPressed);
+    super.dispose();
+  }
+}
+
 /// A delegate that is used by the [Router] widget to parse a route information
 /// into a configuration of type T.
 ///
