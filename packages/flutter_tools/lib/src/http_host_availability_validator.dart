@@ -4,6 +4,8 @@
 
 // @dart = 2.9
 
+import 'package:flutter_tools/src/features.dart';
+
 import 'base/io.dart';
 import 'base/platform.dart';
 import 'doctor.dart';
@@ -16,12 +18,15 @@ const String kCloudUrl = 'FLUTTER_STORAGE_BASE_URL';
 class HttpHostAvailabilityValidator extends DoctorValidator {
   HttpHostAvailabilityValidator({
     Platform platform,
+    FeatureFlags featureFlags,
     HttpClient httpClient,
   })   : _platform = platform,
+        _featureFlags = featureFlags,
         _httpClient = httpClient,
         super('HTTP host availability');
 
   final Platform _platform;
+  final FeatureFlags _featureFlags;
   final HttpClient _httpClient;
 
   @override
@@ -31,7 +36,8 @@ class HttpHostAvailabilityValidator extends DoctorValidator {
   List<String> get _allRequiredHosts {
     /// Hosts used by flutter on all machines
     final List<String> commonRequiredHostUrls = <String>[
-      'https://maven.google.com/',
+      if (_featureFlags.isAndroidEnabled)
+        'https://maven.google.com/',
       if (_platform.environment.containsKey(kCloudUrl))
         _platform.environment[kCloudUrl]
       else
@@ -44,7 +50,8 @@ class HttpHostAvailabilityValidator extends DoctorValidator {
 
     /// Hosts used only on MacOS
     final List<String> macOsRequiredHostUrls = <String>[
-      'https://cocoapods.org/',
+      if (_featureFlags.isIOSEnabled)
+        'https://cocoapods.org/',
     ];
 
     if (_platform.isMacOS) {
