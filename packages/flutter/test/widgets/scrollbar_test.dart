@@ -530,6 +530,47 @@ void main() {
     }
   });
 
+  testWidgets('Scrollbar works with null Scroll Metrics', (WidgetTester tester) async {
+    final ScrollMetrics nullMetrics = FixedScrollMetrics(
+      minScrollExtent: null,
+      maxScrollExtent: null,
+        pixels: 0,
+      viewportDimension: null,
+      axisDirection: AxisDirection.down
+    );
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            isAlwaysShown: true,
+            controller: scrollController,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(width: 1000.0, height: 1000.0),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+
+    scrollController.position.sendMetrics(nullMetrics);
+    expect(
+        find.byType(RawScrollbar),
+        paints
+          ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+          ..rect(
+            rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 360.0),
+            color: const Color(0x66BCBCBC),
+          )
+    );
+  });
+
   testWidgets('Tapping the track area pages the Scroll View', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(

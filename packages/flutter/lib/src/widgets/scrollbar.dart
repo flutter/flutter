@@ -855,7 +855,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   Timer? _fadeoutTimer;
   late AnimationController _fadeoutAnimationController;
   late Animation<double> _fadeoutOpacityAnimation;
-  final GlobalKey  _scrollbarPainterKey = GlobalKey();
+  final GlobalKey _scrollbarPainterKey = GlobalKey();
   bool _hoverIsActive = false;
 
 
@@ -1008,7 +1008,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   ///
   /// Subclasses can override to configure the [scrollbarPainter].
   @protected
-  void  updateScrollbarPainter() {
+  void updateScrollbarPainter() {
     scrollbarPainter
       ..color =  widget.thumbColor ?? const Color(0x66BCBCBC)
       ..textDirection = Directionality.of(context)

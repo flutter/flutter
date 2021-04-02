@@ -243,7 +243,7 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
   final Map<bool, bool> _accepted = <bool, bool>{false: true, true: true};
 
   bool _handleScrollNotification(ScrollNotification notification) {
-    if (!widget.notificationPredicate(notification))
+    if (!widget.notificationPredicate(notification) || !notification.metrics.hasViewportDimension)
       return false;
 
     // Update the paint offset with the current scroll position. This makes

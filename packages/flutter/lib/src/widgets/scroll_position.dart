@@ -895,6 +895,12 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     UserScrollNotification(metrics: copyWith(), context: context.notificationContext!, direction: direction).dispatch(context.notificationContext);
   }
 
+  /// Dispatches a notification that the [ScrollMetrics] has changed.
+  @visibleForTesting
+  void sendMetrics(ScrollMetrics metrics) {
+    activity!.dispatchScrollStartNotification(metrics, context.notificationContext);
+  }
+
   /// Provides a heuristic to determine if expensive frame-bound tasks should be
   /// deferred.
   ///
