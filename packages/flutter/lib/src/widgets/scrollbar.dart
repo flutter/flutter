@@ -276,8 +276,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   Rect? _trackRect;
   late double _thumbOffset;
 
-  /// Update with new [ScrollMetrics]. The scrollbar will show and redraw itself
-  /// based on these new metrics.
+  /// Update with new [ScrollMetrics]. If the metrics change, the scrollbar will
+  /// show and redraw itself based on these new metrics.
   ///
   /// The scrollbar will remain on screen.
   void update(
@@ -922,14 +922,14 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _requestEmptyScrollEventIfNeeded();
+    _maybeRequestEmptyScrollEvent();
   }
 
   // Waits one frame and cause an empty scroll event (zero delta pixels).
   //
   // This allows the thumb to show immediately when isAlwaysShown is true.
   // A scroll event is required in order to paint the thumb.
-  void _requestEmptyScrollEventIfNeeded() {
+  void _maybeRequestEmptyScrollEvent() {
     if (!showScrollbar)
       return;
     WidgetsBinding.instance!.addPostFrameCallback((Duration duration) {
@@ -1031,7 +1031,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     // it may be necessary to trigger a scroll event to show or hide the bar when the
     // scrollable widget viewport size changed.
     if (widget.isAlwaysShown == true) {
-      _requestEmptyScrollEventIfNeeded();
+      _maybeRequestEmptyScrollEvent();
       _fadeoutAnimationController.animateTo(1.0);
     } else if (widget.isAlwaysShown != oldWidget.isAlwaysShown) {
       _fadeoutAnimationController.reverse();
