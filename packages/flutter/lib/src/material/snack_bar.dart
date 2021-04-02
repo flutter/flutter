@@ -251,7 +251,6 @@ class SnackBar extends StatefulWidget {
     this.duration = _snackBarDisplayDuration,
     this.animation,
     this.onVisible,
-    this.singleLineVerticalPadding = _singleLineVerticalPadding,
   }) : assert(elevation == null || elevation >= 0.0),
        assert(content != null),
        assert(
@@ -368,16 +367,6 @@ class SnackBar extends StatefulWidget {
   /// Called the first time that the snackbar is visible within a [Scaffold].
   final VoidCallback? onVisible;
 
-  /// Default vertical padding for this snack bar.
-  /// 
-  /// Defaults to 14.0.
-  /// 
-  /// This will not be overriden when setting [padding]'s top and/or bottom values.
-  /// Both paddings will just be added.
-  /// 
-  /// To ignore this padding, please set to 0.
-  final double singleLineVerticalPadding;
-
   // API for ScaffoldMessengerState.showSnackBar():
 
   /// Creates an animation controller useful for driving a snack bar's entrance and exit animation.
@@ -408,7 +397,6 @@ class SnackBar extends StatefulWidget {
       duration: duration,
       animation: newAnimation,
       onVisible: onVisible,
-      singleLineVerticalPadding: singleLineVerticalPadding,
     );
   }
 
@@ -515,7 +503,7 @@ class _SnackBarState extends State<SnackBar> {
         children: <Widget>[
           Expanded(
             child: Container(
-              padding: EdgeInsets.symmetric(vertical: widget.singleLineVerticalPadding),
+              padding: widget.padding == null ? const EdgeInsets.symmetric(vertical: _singleLineVerticalPadding) : null,
               child: DefaultTextStyle(
                 style: contentTextStyle!,
                 child: widget.content,
