@@ -669,7 +669,8 @@ class WebDevFS implements DevFS {
           appConnection.runMain();
         } else {
           final vm_service.VmService vmService = await createVmServiceDelegate(
-            Uri.parse(debugConnection.uri)
+            Uri.parse(debugConnection.uri),
+            logger: globals.logger,
           );
           firstConnection
               .complete(ConnectionResult(appConnection, debugConnection, vmService));
