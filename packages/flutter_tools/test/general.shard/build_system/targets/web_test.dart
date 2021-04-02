@@ -13,7 +13,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:process/process.dart';
 
 import '../../../src/common.dart';
@@ -129,7 +129,7 @@ void main() {
     expect(environment.outputDir.childDirectory('assets')
       .childFile('AssetManifest.json').existsSync(), true);
 
-    // Update to arbitary resource file triggers rebuild.
+    // Update to arbitrary resource file triggers rebuild.
     webResources.childFile('foo.txt').writeAsStringSync('B');
 
     await const WebReleaseBundle().build(environment);

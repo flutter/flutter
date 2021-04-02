@@ -9,7 +9,7 @@ import '../../base/build.dart';
 import '../../base/deferred_component.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
-import '../../globals.dart' as globals hide fs, artifacts, logger, processManager;
+import '../../globals.dart' as globals show platform, printError, xcode;
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';

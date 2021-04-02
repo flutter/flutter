@@ -882,26 +882,6 @@ void main() {
       await buildWidget(buttonMinWidth: buttonMinWidth);
       expect(tester.widget<RawMaterialButton>(rawMaterialButtonFinder).constraints.minWidth, buttonMinWidth);
     });
-
-    testWidgets('Fixed FlatButton.icon RenderFlex overflow', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SizedBox(
-              width: 200,
-              child: FlatButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.add),
-                label: const Text(
-                  'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut a euismod nibh. Morbi laoreet purus.',
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-      expect(tester.takeException(), null);
-  });
 }
 
 TextStyle? _iconStyle(WidgetTester tester, IconData icon) {

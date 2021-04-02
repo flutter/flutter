@@ -205,13 +205,13 @@ class WidgetsApp extends StatefulWidget {
          home == null ||
          onGenerateInitialRoutes == null,
          'If onGenerateInitialRoutes is specified, the home argument will be '
-         'redundant.'
+         'redundant.',
        ),
        assert(
          home == null ||
          !routes.containsKey(Navigator.defaultRouteName),
          'If the home property is specified, the routes table '
-         'cannot include an entry for "/", since it would be redundant.'
+         'cannot include an entry for "/", since it would be redundant.',
        ),
        assert(
          builder != null ||
@@ -225,7 +225,7 @@ class WidgetsApp extends StatefulWidget {
          'or there must be an onUnknownRoute callback specified, '
          'or the builder property must be specified, '
          'because otherwise there is nothing to fall back on if the '
-         'app is started with an intent that specifies an unknown route.'
+         'app is started with an intent that specifies an unknown route.',
        ),
        assert(
          (home != null ||
@@ -243,7 +243,7 @@ class WidgetsApp extends StatefulWidget {
          'and the other navigator-related properties, '
          'navigatorKey, initialRoute, and navigatorObservers, '
          'must have their initial values '
-         '(null, null, and the empty list, respectively).'
+         '(null, null, and the empty list, respectively).',
        ),
        assert(
          builder != null ||
@@ -251,7 +251,7 @@ class WidgetsApp extends StatefulWidget {
          pageRouteBuilder != null,
          'If neither builder nor onGenerateRoute are provided, the '
          'pageRouteBuilder must be specified so that the default handler '
-         'will know what kind of PageRoute transition to build.'
+         'will know what kind of PageRoute transition to build.',
        ),
        assert(title != null),
        assert(color != null),
@@ -298,7 +298,7 @@ class WidgetsApp extends StatefulWidget {
   }) : assert(
          routeInformationParser != null &&
          routerDelegate != null,
-         'The routeInformationParser and routerDelegate cannot be null.'
+         'The routeInformationParser and routerDelegate cannot be null.',
        ),
        assert(title != null),
        assert(color != null),
@@ -1036,7 +1036,7 @@ class WidgetsApp extends StatefulWidget {
       orderedIntents: <Intent>[
         ActivateIntent(),
         ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
-      ]
+      ],
     ),
     // On the web, enter activates buttons, but not other controls.
     LogicalKeySet(LogicalKeyboardKey.enter): const ButtonActivateIntent(),
@@ -1235,7 +1235,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           ' 3. Otherwise, onGenerateRoute is called. It should return a '
           'non-null value for any valid route not handled by "home" and "routes".\n'
           ' 4. Finally if all else fails onUnknownRoute is called.\n'
-          'Unfortunately, onUnknownRoute was not set.'
+          'Unfortunately, onUnknownRoute was not set.',
         );
       }
       return true;
@@ -1247,7 +1247,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           'The onUnknownRoute callback returned null.\n'
           'When the $runtimeType requested the route $settings from its '
           'onUnknownRoute callback, the callback returned null. Such callbacks '
-          'must never return null.'
+          'must never return null.',
         );
       }
       return true;
@@ -1484,7 +1484,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       message.writeln('\u2550' * 8);
       message.writeln(
         "Warning: This application's locale, $appLocale, is not supported by all of its\n"
-        'localization delegates.'
+        'localization delegates.',
       );
       for (final Type unsupportedType in unsupportedTypes) {
         // Currently the Cupertino library only provides english localizations.
@@ -1493,13 +1493,13 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         if (unsupportedType.toString() == 'CupertinoLocalizations')
           continue;
         message.writeln(
-          '> A $unsupportedType delegate that supports the $appLocale locale was not found.'
+          '> A $unsupportedType delegate that supports the $appLocale locale was not found.',
         );
       }
       message.writeln(
         'See https://flutter.dev/tutorials/internationalization/ for more\n'
         "information about configuring an app's locale, supportedLocales,\n"
-        'and localizationsDelegates parameters.'
+        'and localizationsDelegates parameters.',
       );
       message.writeln('\u2550' * 8);
       debugPrint(message.toString());

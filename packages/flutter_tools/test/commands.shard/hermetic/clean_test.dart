@@ -35,16 +35,10 @@ void main() {
     group('general', () {
       MemoryFileSystem fs;
       Directory buildDirectory;
-      FlutterProject projectUnderTest;
 
-      setUp(() {
-        fs = MemoryFileSystem.test();
-
-        final Directory currentDirectory = fs.currentDirectory;
-        buildDirectory = currentDirectory.childDirectory('build');
-        buildDirectory.createSync(recursive: true);
-
-        projectUnderTest = FlutterProject.fromDirectory(currentDirectory);
+      FlutterProject setupProjectUnderTest(Directory currentDirectory) {
+        // This needs to be run within testWithoutContext and not setUp since FlutterProject uses context.
+        final FlutterProject projectUnderTest = FlutterProject.fromDirectory(currentDirectory);
         projectUnderTest.ios.xcodeWorkspace.createSync(recursive: true);
         projectUnderTest.macos.xcodeWorkspace.createSync(recursive: true);
 
@@ -65,9 +59,20 @@ void main() {
         projectUnderTest.windows.ephemeralDirectory.createSync(recursive: true);
         projectUnderTest.flutterPluginsFile.createSync(recursive: true);
         projectUnderTest.flutterPluginsDependenciesFile.createSync(recursive: true);
+
+        return projectUnderTest;
+      }
+
+      setUp(() {
+        fs = MemoryFileSystem.test();
+
+        final Directory currentDirectory = fs.currentDirectory;
+        buildDirectory = currentDirectory.childDirectory('build');
+        buildDirectory.createSync(recursive: true);
       });
 
       testUsingContext('$CleanCommand removes build and .dart_tool and ephemeral directories, cleans Xcode', () async {
+        final FlutterProject projectUnderTest = setupProjectUnderTest(fs.currentDirectory);
         // Xcode is installed and version satisfactory.
         when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
         when(mockXcodeProjectInterpreter.majorVersion).thenReturn(1000);
@@ -102,6 +107,7 @@ void main() {
       });
 
       testUsingContext('$CleanCommand cleans Xcode verbosely', () async {
+        setupProjectUnderTest(fs.currentDirectory);
         // Xcode is installed and version satisfactory.
         when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
         when(mockXcodeProjectInterpreter.majorVersion).thenReturn(1000);

@@ -389,7 +389,7 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
   }
 
   @override
-  void mount(Element? parent, dynamic newSlot) {
+  void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     _contentElement = updateChild(_contentElement, widget.contentSection, _AlertDialogSections.contentSection);
     _actionsElement = updateChild(_actionsElement, widget.actionsSection, _AlertDialogSections.actionsSection);
@@ -1537,7 +1537,7 @@ class _RenderCupertinoDialogActions extends RenderBox
         );
 
         return constraints.constrain(
-          Size(dialogWidth, childSize.height)
+          Size(dialogWidth, childSize.height),
         );
       } else {
         // Each button gets half the available width, minus a single divider.
@@ -1609,7 +1609,7 @@ class _RenderCupertinoDialogActions extends RenderBox
 
       // Our height is the accumulated height of all buttons and dividers.
       return constraints.constrain(
-        Size(dialogWidth, verticalOffset)
+        Size(dialogWidth, verticalOffset),
       );
     }
   }

@@ -132,7 +132,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
           return <String, Object>{
             'data': data,
           };
-        }
+        },
       );
 
       registerServiceExtension(

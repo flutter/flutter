@@ -10,6 +10,7 @@ import 'package:path/path.dart' as path;
 
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/host_agent.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
@@ -24,7 +25,16 @@ void main() {
     await inDirectory(appDir, () async {
       return flutter(
         'drive',
-        options: <String>['--verbose', '-d', device.deviceId, '--route', '/smuggle-it', 'lib/route.dart'],
+        options: <String>[
+          '--verbose',
+          '-d',
+          device.deviceId,
+          '--screenshot',
+          hostAgent.dumpDirectory.path,
+          '--route',
+          '/smuggle-it',
+          'lib/route.dart',
+        ],
         canFail: false,
       );
     });

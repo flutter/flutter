@@ -385,6 +385,34 @@ class RestorableDateTime extends RestorableValue<DateTime> {
   Object? toPrimitives() => value.millisecondsSinceEpoch;
 }
 
+/// A [RestorableValue] that knows how to save and restore [DateTime] that is
+/// nullable.
+///
+/// {@macro flutter.widgets.RestorableNum}.
+class RestorableDateTimeN extends RestorableValue<DateTime?> {
+  /// Creates a [RestorableDateTime].
+  ///
+  /// {@macro flutter.widgets.RestorableNum.constructor}
+  RestorableDateTimeN(DateTime? defaultValue) : _defaultValue = defaultValue;
+
+  final DateTime? _defaultValue;
+
+  @override
+  DateTime? createDefaultValue() => _defaultValue;
+
+  @override
+  void didUpdateValue(DateTime? oldValue) {
+    assert(debugIsSerializableForRestoration(value?.millisecondsSinceEpoch));
+    notifyListeners();
+  }
+
+  @override
+  DateTime? fromPrimitives(Object? data) => data != null ? DateTime.fromMillisecondsSinceEpoch(data as int) : null;
+
+  @override
+  Object? toPrimitives() => value?.millisecondsSinceEpoch;
+}
+
 /// A base class for creating a [RestorableProperty] that stores and restores a
 /// [Listenable].
 ///

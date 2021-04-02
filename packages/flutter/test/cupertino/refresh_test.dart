@@ -879,7 +879,7 @@ void main() {
 
         expect(mockHelper.invocations.last, matchesBuilder(
           refreshState: RefreshIndicatorMode.done,
-          pulledExtent: moreOrLessEquals(148.6463892921364,),
+          pulledExtent: moreOrLessEquals(148.6463892921364),
           refreshTriggerPullDistance: 100.0, // Default value.
           refreshIndicatorExtent: 60.0, // Default value.
         ));

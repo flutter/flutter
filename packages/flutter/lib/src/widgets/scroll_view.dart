@@ -99,7 +99,7 @@ abstract class ScrollView extends StatelessWidget {
        assert(clipBehavior != null),
        assert(!(controller != null && primary == true),
            'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
-           'You cannot both set primary to true and pass an explicit controller.'
+           'You cannot both set primary to true and pass an explicit controller.',
        ),
        assert(!shrinkWrap || center == null),
        assert(anchor != null),

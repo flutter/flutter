@@ -8,6 +8,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -16,7 +17,7 @@ import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
@@ -107,17 +108,6 @@ void main() {
         expect(
           FlutterProject.fromDirectory(directory).manifest.appName,
           'hello',
-        );
-      });
-
-      _testInMemory('reads dependencies from pubspec.yaml', () async {
-        final Directory directory = globals.fs.directory('myproject');
-        directory.childFile('pubspec.yaml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(validPubspecWithDependencies);
-        expect(
-          FlutterProject.fromDirectory(directory).manifest.dependencies,
-          <String>{'plugin_a', 'plugin_b'},
         );
       });
 
@@ -820,10 +810,16 @@ void _testInMemory(String description, Future<void> Function() testMethod) {
     ..writeAsStringSync('{"configVersion":2,"packages":[]}');
   // Transfer needed parts of the Flutter installation folder
   // to the in-memory file system used during testing.
+  final Logger logger = BufferLogger.test();
   transfer(Cache(
     fileSystem: globals.fs,
-    logger: globals.logger,
-    osUtils: globals.os,
+    logger: logger,
+    osUtils: OperatingSystemUtils(
+      fileSystem: globals.fs,
+      logger: logger,
+      platform: globals.platform,
+      processManager: globals.processManager,
+    ),
     platform: globals.platform,
   ).getArtifactDirectory('gradle_wrapper'), testFileSystem);
   transfer(globals.fs.directory(Cache.flutterRoot)
@@ -851,11 +847,6 @@ void _testInMemory(String description, Future<void> Function() testMethod) {
     ],
   }));
 
-  final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory(
-    fileSystem: testFileSystem,
-    logger: globals.logger ?? BufferLogger.test(),
-  );
-
   testUsingContext(
     description,
     testMethod,
@@ -864,11 +855,14 @@ void _testInMemory(String description, Future<void> Function() testMethod) {
       ProcessManager: () => FakeProcessManager.any(),
       Cache: () => Cache(
         logger: globals.logger,
-        fileSystem: globals.fs,
+        fileSystem: testFileSystem,
         osUtils: globals.os,
         platform: globals.platform,
       ),
-      FlutterProjectFactory: () => flutterProjectFactory,
+      FlutterProjectFactory: () => FlutterProjectFactory(
+        fileSystem: testFileSystem,
+        logger: globals.logger ?? BufferLogger.test(),
+      ),
     },
   );
 }
@@ -924,16 +918,6 @@ String get validPubspec => '''
 name: hello
 flutter:
 ''';
-
-String get validPubspecWithDependencies => '''
-name: hello
-flutter:
-
-dependencies:
-  plugin_a:
-  plugin_b:
-''';
-
 
 String get invalidPubspec => '''
 name: hello

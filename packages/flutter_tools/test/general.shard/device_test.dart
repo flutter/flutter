@@ -5,7 +5,6 @@
 // @dart = 2.8
 
 import 'package:flutter_tools/src/base/common.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
@@ -151,11 +150,11 @@ void main() {
   });
 
   group('Filter devices', () {
-    final FakeDevice ephemeralOne = FakeDevice('ephemeralOne', 'ephemeralOne', true);
-    final FakeDevice ephemeralTwo = FakeDevice('ephemeralTwo', 'ephemeralTwo', true);
-    final FakeDevice nonEphemeralOne = FakeDevice('nonEphemeralOne', 'nonEphemeralOne', false);
-    final FakeDevice nonEphemeralTwo = FakeDevice('nonEphemeralTwo', 'nonEphemeralTwo', false);
-    final FakeDevice unsupported = FakeDevice('unsupported', 'unsupported', true, false);
+    final FakeDevice ephemeralOne = FakeDevice('ephemeralOne', 'ephemeralOne');
+    final FakeDevice ephemeralTwo = FakeDevice('ephemeralTwo', 'ephemeralTwo');
+    final FakeDevice nonEphemeralOne = FakeDevice('nonEphemeralOne', 'nonEphemeralOne', ephemeral: false);
+    final FakeDevice nonEphemeralTwo = FakeDevice('nonEphemeralTwo', 'nonEphemeralTwo', ephemeral: false);
+    final FakeDevice unsupported = FakeDevice('unsupported', 'unsupported', isSupported: false);
     final FakeDevice webDevice = FakeDevice('webby', 'webby')
       ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript);
     final FakeDevice fuchsiaDevice = FakeDevice('fuchsiay', 'fuchsiay')
@@ -481,24 +480,6 @@ void main() {
     });
   });
 
-  group('ForwardedPort', () {
-    group('dispose()', () {
-      testUsingContext('does not throw exception if no process is present', () {
-        final ForwardedPort forwardedPort = ForwardedPort(123, 456);
-        expect(forwardedPort.context, isNull);
-        forwardedPort.dispose();
-      });
-
-      testUsingContext('kills process if process was available', () {
-        final MockProcess mockProcess = MockProcess();
-        final ForwardedPort forwardedPort = ForwardedPort.withContext(123, 456, mockProcess);
-        forwardedPort.dispose();
-        expect(forwardedPort.context, isNotNull);
-        verify(mockProcess.kill());
-      });
-    });
-  });
-
   group('JSON encode devices', () {
     testUsingContext('Consistency of JSON representation', () async {
       expect(
@@ -555,4 +536,3 @@ class TestDeviceManager extends DeviceManager {
 class MockTerminal extends Mock implements AnsiTerminal {}
 class MockDeviceDiscovery extends Mock implements DeviceDiscovery {}
 class FakeFlutterProject extends Fake implements FlutterProject {}
-class MockProcess extends Mock implements Process {}
