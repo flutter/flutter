@@ -40,6 +40,7 @@ import 'emulator.dart';
 import 'features.dart';
 import 'flutter_application_package.dart';
 import 'flutter_device_manager.dart';
+import 'flutter_features.dart';
 import 'fuchsia/fuchsia_device.dart' show FuchsiaDeviceTools;
 import 'fuchsia/fuchsia_sdk.dart' show FuchsiaSdk, FuchsiaArtifacts;
 import 'fuchsia/fuchsia_workflow.dart' show FuchsiaWorkflow, fuchsiaWorkflow;
