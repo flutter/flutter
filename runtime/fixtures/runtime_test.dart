@@ -10,8 +10,7 @@ import 'dart:ui';
 
 import 'split_lib_test.dart' deferred as splitlib;
 
-void main() {
-}
+void main() {}
 
 @pragma('vm:entry-point')
 void sayHi() {
@@ -114,4 +113,25 @@ void testCanConvertListOfInts(List<int> args){
                 args[1] == 2 &&
                 args[2] == 3 &&
                 args[3] == 4);
+}
+
+bool didCallRegistrantBeforeEntrypoint = false;
+
+// Test the Dart plugin registrant.
+// _registerPlugins requires the entrypoint annotation, so the compiler doesn't tree shake it.
+@pragma('vm:entry-point')
+void _registerPlugins() { // ignore: unused_element
+  if (didCallRegistrantBeforeEntrypoint) {
+    throw '_registerPlugins is being called twice';
+  }
+  didCallRegistrantBeforeEntrypoint = true;
+}
+
+@pragma('vm:entry-point')
+void mainForPluginRegistrantTest() { // ignore: unused_element
+  if (didCallRegistrantBeforeEntrypoint) {
+    passMessage('_registerPlugins was called');
+  } else {
+    passMessage('_registerPlugins was not called');
+  }
 }
