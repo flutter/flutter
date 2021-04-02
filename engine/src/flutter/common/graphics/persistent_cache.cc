@@ -410,7 +410,7 @@ PersistentCache::GetSkpsFromAssetManager() const {
         << "PersistentCache::GetSkpsFromAssetManager: Asset manager not set!";
     return std::vector<std::unique_ptr<fml::Mapping>>();
   }
-  return asset_manager_->GetAsMappings(".*\\.skp$");
+  return asset_manager_->GetAsMappings(".*\\.skp$", "shaders");
 }
 
 }  // namespace flutter

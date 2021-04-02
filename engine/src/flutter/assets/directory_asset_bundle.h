@@ -5,6 +5,7 @@
 #ifndef FLUTTER_ASSETS_DIRECTORY_ASSET_BUNDLE_H_
 #define FLUTTER_ASSETS_DIRECTORY_ASSET_BUNDLE_H_
 
+#include <optional>
 #include "flutter/assets/asset_resolver.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/ref_counted.h"
@@ -39,7 +40,8 @@ class DirectoryAssetBundle : public AssetResolver {
 
   // |AssetResolver|
   std::vector<std::unique_ptr<fml::Mapping>> GetAsMappings(
-      const std::string& asset_pattern) const override;
+      const std::string& asset_pattern,
+      const std::optional<std::string>& subdir) const override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(DirectoryAssetBundle);
 };

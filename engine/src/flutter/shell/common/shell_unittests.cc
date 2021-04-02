@@ -139,7 +139,8 @@ class TestAssetResolver : public AssetResolver {
   }
 
   std::vector<std::unique_ptr<fml::Mapping>> GetAsMappings(
-      const std::string& asset_pattern) const override {
+      const std::string& asset_pattern,
+      const std::optional<std::string>& subdir) const override {
     return {};
   };
 
@@ -2436,16 +2437,78 @@ TEST_F(ShellTest, AssetManagerMulti) {
   asset_manager.PushBack(
       std::make_unique<DirectoryAssetBundle>(std::move(asset_dir_fd), false));
 
-  auto mappings = asset_manager.GetAsMappings("(.*)");
-  ASSERT_TRUE(mappings.size() == 4);
+  auto mappings = asset_manager.GetAsMappings("(.*)", std::nullopt);
+  EXPECT_EQ(mappings.size(), 4u);
 
   std::vector<std::string> expected_results = {
       "good0",
       "good1",
   };
 
-  mappings = asset_manager.GetAsMappings("(.*)good(.*)");
-  ASSERT_TRUE(mappings.size() == expected_results.size());
+  mappings = asset_manager.GetAsMappings("(.*)good(.*)", std::nullopt);
+  ASSERT_EQ(mappings.size(), expected_results.size());
+
+  for (auto& mapping : mappings) {
+    std::string result(reinterpret_cast<const char*>(mapping->GetMapping()),
+                       mapping->GetSize());
+    EXPECT_NE(
+        std::find(expected_results.begin(), expected_results.end(), result),
+        expected_results.end());
+  }
+}
+
+#if defined(OS_FUCHSIA)
+TEST_F(ShellTest, AssetManagerMultiSubdir) {
+  std::string subdir_path = "subdir";
+
+  fml::ScopedTemporaryDirectory asset_dir;
+  fml::UniqueFD asset_dir_fd = fml::OpenDirectory(
+      asset_dir.path().c_str(), false, fml::FilePermission::kRead);
+  fml::UniqueFD subdir_fd =
+      fml::OpenDirectory((asset_dir.path() + "/" + subdir_path).c_str(), true,
+                         fml::FilePermission::kReadWrite);
+
+  std::vector<std::string> filenames = {
+      "bad0",
+      "notgood",  // this is to make sure the pattern (.*)good(.*) only matches
+                  // things in the subdirectory
+  };
+
+  std::vector<std::string> subdir_filenames = {
+      "good0",
+      "good1",
+      "bad1",
+  };
+
+  for (auto filename : filenames) {
+    bool success = fml::WriteAtomically(asset_dir_fd, filename.c_str(),
+                                        fml::DataMapping(filename));
+    ASSERT_TRUE(success);
+  }
+
+  for (auto filename : subdir_filenames) {
+    bool success = fml::WriteAtomically(subdir_fd, filename.c_str(),
+                                        fml::DataMapping(filename));
+    ASSERT_TRUE(success);
+  }
+
+  AssetManager asset_manager;
+  asset_manager.PushBack(
+      std::make_unique<DirectoryAssetBundle>(std::move(asset_dir_fd), false));
+
+  auto mappings = asset_manager.GetAsMappings("(.*)", std::nullopt);
+  EXPECT_EQ(mappings.size(), 5u);
+
+  mappings = asset_manager.GetAsMappings("(.*)", subdir_path);
+  EXPECT_EQ(mappings.size(), 3u);
+
+  std::vector<std::string> expected_results = {
+      "good0",
+      "good1",
+  };
+
+  mappings = asset_manager.GetAsMappings("(.*)good(.*)", subdir_path);
+  ASSERT_EQ(mappings.size(), expected_results.size());
 
   for (auto& mapping : mappings) {
     std::string result(reinterpret_cast<const char*>(mapping->GetMapping()),
@@ -2455,6 +2518,7 @@ TEST_F(ShellTest, AssetManagerMulti) {
         expected_results.end());
   }
 }
+#endif  // OS_FUCHSIA
 
 TEST_F(ShellTest, Spawn) {
   auto settings = CreateSettingsForFixture();

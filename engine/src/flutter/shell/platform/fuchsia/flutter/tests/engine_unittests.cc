@@ -59,8 +59,9 @@ class EngineTest : public ::testing::Test {
     // otherwise we segfault creating the VulkanSurfaceProducer
     auto loop = fml::MessageLoopImpl::Create();
 
-    fuchsia::ui::scenic::SessionPtr session_ptr;
-    scenic::Session session(std::move(session_ptr));
+    context_ = sys::ComponentContext::CreateAndServeOutgoingDirectory();
+    scenic_ = context_->svc()->Connect<fuchsia::ui::scenic::Scenic>();
+    scenic::Session session(scenic_.get());
     surface_producer_ = std::make_unique<VulkanSurfaceProducer>(&session);
 
     Engine::WarmupSkps(&concurrent_task_runner_, &raster_task_runner_,
@@ -71,6 +72,9 @@ class EngineTest : public ::testing::Test {
   MockTaskRunner concurrent_task_runner_;
   MockTaskRunner raster_task_runner_;
   std::unique_ptr<VulkanSurfaceProducer> surface_producer_;
+
+  std::unique_ptr<sys::ComponentContext> context_;
+  fuchsia::ui::scenic::ScenicPtr scenic_;
 };
 
 TEST_F(EngineTest, SkpWarmup) {
@@ -98,8 +102,10 @@ TEST_F(EngineTest, SkpWarmup) {
   fml::ScopedTemporaryDirectory asset_dir;
   fml::UniqueFD asset_dir_fd = fml::OpenDirectory(
       asset_dir.path().c_str(), false, fml::FilePermission::kRead);
+  fml::UniqueFD subdir_fd = fml::OpenDirectory(asset_dir_fd, "shaders", true,
+                                               fml::FilePermission::kReadWrite);
 
-  bool success = fml::WriteAtomically(asset_dir_fd, "test.skp", mapping);
+  bool success = fml::WriteAtomically(subdir_fd, "test.skp", mapping);
   ASSERT_TRUE(success);
 
   auto asset_manager = std::make_shared<AssetManager>();
