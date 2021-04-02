@@ -133,7 +133,8 @@ void main() {
       return ConnectionResult(
         mockAppConnection,
         mockDebugConnection,
-        mockDebugConnection.vmService);
+        mockDebugConnection.vmService,
+      );
     });
     fileSystem.file('.packages').writeAsStringSync('\n');
   });
