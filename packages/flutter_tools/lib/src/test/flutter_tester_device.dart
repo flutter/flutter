@@ -171,6 +171,7 @@ class FlutterTesterTestDevice extends TestDevice {
         final Future<FlutterVmService> localVmService = connectToVmService(
           forwardingUri,
           compileExpression: compileExpression,
+          logger: logger,
         );
         unawaited(localVmService.then((FlutterVmService vmservice) {
           logger.printTrace('test $id: Successfully connected to service protocol: $forwardingUri');

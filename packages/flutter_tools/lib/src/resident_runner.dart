@@ -38,6 +38,7 @@ import 'project.dart';
 import 'resident_devtools_handler.dart';
 import 'run_cold.dart';
 import 'run_hot.dart';
+import 'sksl_writer.dart';
 import 'vmservice.dart';
 
 class FlutterDevice {
@@ -252,7 +253,7 @@ class FlutterDevice {
         // this may not be the case when scraping logcat for URIs. If this URI is
         // from an old application instance, we shouldn't try and start DDS.
         try {
-          service = await connectToVmService(observatoryUri);
+          service = await connectToVmService(observatoryUri, logger: globals.logger);
           await service.dispose();
         } on Exception catch (exception) {
           globals.printTrace('Fail to connect to service protocol: $observatoryUri: $exception');
@@ -303,6 +304,7 @@ class FlutterDevice {
               getSkSLMethod: getSkSLMethod,
               printStructuredErrorLogMethod: printStructuredErrorLogMethod,
               device: device,
+              logger: globals.logger,
             ),
             if (!existingDds)
               device.dds.done.whenComplete(() => throw Exception('DDS shut down too early')),

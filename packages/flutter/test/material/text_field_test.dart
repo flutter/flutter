@@ -849,7 +849,7 @@ void main() {
 
   testWidgets('cursor layout has correct width', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController.fromValue(
-      const TextEditingValue(selection: TextSelection.collapsed(offset: 1)),
+      const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
     );
     final FocusNode focusNode = FocusNode();
     EditableText.debugDeterministicCursor = true;
@@ -876,7 +876,7 @@ void main() {
 
   testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController.fromValue(
-      const TextEditingValue(selection: TextSelection.collapsed(offset: 1)),
+      const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
     );
     final FocusNode focusNode = FocusNode();
     EditableText.debugDeterministicCursor = true;
@@ -904,7 +904,7 @@ void main() {
 
   testWidgets('cursor layout has correct height', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController.fromValue(
-      const TextEditingValue(selection: TextSelection.collapsed(offset: 1)),
+      const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
     );
     final FocusNode focusNode = FocusNode();
     EditableText.debugDeterministicCursor = true;
@@ -1133,8 +1133,8 @@ void main() {
     await tester.tapAt(ePos);
     await tester.pump();
 
-    expect(controller.selection.baseOffset, -1);
-    expect(controller.selection.extentOffset, -1);
+    expect(controller.selection.baseOffset, testValue.length);
+    expect(controller.selection.isCollapsed, isTrue);
   });
 
   testWidgets('Can long press to select', (WidgetTester tester) async {
@@ -1602,8 +1602,7 @@ void main() {
     await tester.pump();
 
     expect(controller.selection.isCollapsed, true);
-    expect(controller.selection.baseOffset, -1);
-    expect(controller.selection.extentOffset, -1);
+    expect(controller.selection.baseOffset, testValue.length);
   });
 
   testWidgets('Can select text by dragging with a mouse', (WidgetTester tester) async {
@@ -5236,7 +5235,8 @@ void main() {
     const String testValue = 'x';
     await tester.enterText(find.byType(TextField), testValue);
     await skipPastScrollingAnimation(tester);
-    expect(controller.selection.baseOffset, -1);
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, testValue.length);
 
     // Tap the selection handle to bring up the "paste / select all" menu.
     await tester.tapAt(textOffsetToPosition(tester, 0));
@@ -7967,7 +7967,13 @@ void main() {
           pressureMin: 0.0,
       ),
     );
-    await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: offset + const Offset(150.0, 9.0), pressure: 0.5, pressureMin: 0, pressureMax: 1,),);
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: offset + const Offset(150.0, 9.0),
+      pressure: 0.5,
+      pressureMin: 0,
+      pressureMax: 1,
+    ));
 
     // We don't want this gesture to select any word on Android.
     expect(controller.selection, const TextSelection.collapsed(offset: -1));
@@ -9074,7 +9080,7 @@ void main() {
           ),
         ),
       ),
-    ),);
+    ));
 
     focusNode3.requestFocus();
     await tester.pump();
