@@ -298,19 +298,6 @@ class TextLayoutService {
     // it possible to do hit testing. Once we find the box, we look inside that
     // box to find where exactly the `offset` is located.
 
-    // [offset] is above all the lines.
-    if (offset.dy < 0) {
-      return ui.TextPosition(offset: 0, affinity: ui.TextAffinity.downstream);
-    }
-
-    // [offset] is below all the lines.
-    if (offset.dy >= paragraph.height) {
-      return ui.TextPosition(
-        offset: paragraph.toPlainText().length,
-        affinity: ui.TextAffinity.upstream,
-      );
-    }
-
     final EngineLineMetrics line = _findLineForY(offset.dy);
     // [offset] is to the left of the line.
     if (offset.dx <= line.left) {
@@ -773,13 +760,6 @@ class LineBuilder {
 
   /// Extends the line by setting a [newEnd].
   void extendTo(LineBreakResult newEnd) {
-    // If the current end of the line is a hard break, the line shouldn't be
-    // extended any further.
-    assert(
-      isEmpty || !end.isHard || _isLastBoxAPlaceholder,
-      'Cannot extend a line that ends with a hard break.',
-    );
-
     ascent = math.max(ascent, spanometer.ascent);
     descent = math.max(descent, spanometer.descent);
 
