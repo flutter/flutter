@@ -718,7 +718,6 @@ class TextEditingValue {
   static const TextEditingValue empty = TextEditingValue();
 
   /// Creates a copy of this value but with the given fields replaced with the new values.
-  @Deprecated('')
   TextEditingValue copyWith({
     String? text,
     TextSelection? selection,

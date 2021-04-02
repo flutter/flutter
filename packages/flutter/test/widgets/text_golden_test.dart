@@ -1331,11 +1331,11 @@ void main() {
               children: const <Widget>[
                 Text('Hello\nLine 2\nLine 3',
                   textDirection: TextDirection.ltr,
-                  style: TextStyle(height: 5,),
+                  style: TextStyle(height: 5),
                 ),
                 Text('Hello\nLine 2\nLine 3',
                   textDirection: TextDirection.ltr,
-                  style: TextStyle(height: 5,),
+                  style: TextStyle(height: 5),
                   textHeightBehavior: TextHeightBehavior(
                     applyHeightToFirstAscent: false,
                     applyHeightToLastDescent: false,
@@ -1343,7 +1343,7 @@ void main() {
                 ),
                 Text('Hello',
                   textDirection: TextDirection.ltr,
-                  style: TextStyle(height: 5,),
+                  style: TextStyle(height: 5),
                   textHeightBehavior: TextHeightBehavior(
                     applyHeightToFirstAscent: false,
                   ),

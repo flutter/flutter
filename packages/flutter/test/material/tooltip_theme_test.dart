@@ -1242,7 +1242,7 @@ void main() {
   testWidgets('default Tooltip debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
-    const Tooltip(message: 'message',).debugFillProperties(builder);
+    const Tooltip(message: 'message').debugFillProperties(builder);
 
     final List<String> description = builder.properties
       .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))

@@ -320,7 +320,7 @@ void main() {
 
   test('UnconstrainedBox toString', () {
     expect(
-      const UnconstrainedBox(constrainedAxis: Axis.vertical,).toString(),
+      const UnconstrainedBox(constrainedAxis: Axis.vertical).toString(),
       equals('UnconstrainedBox(alignment: Alignment.center, constrainedAxis: vertical)'),
     );
 

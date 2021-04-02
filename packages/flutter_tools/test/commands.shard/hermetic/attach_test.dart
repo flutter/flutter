@@ -840,6 +840,7 @@ VMServiceConnector getFakeVmServiceFactory({
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
     CompressionOptions compression,
     Device device,
+    Logger logger,
   }) async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[

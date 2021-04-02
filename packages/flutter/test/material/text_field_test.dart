@@ -848,18 +848,24 @@ void main() {
   );
 
   testWidgets('cursor layout has correct width', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController.fromValue(
+      const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
+    );
+    final FocusNode focusNode = FocusNode();
     EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
         overlay(
-          child: const RepaintBoundary(
+          child: RepaintBoundary(
             child: TextField(
               cursorWidth: 15.0,
+              controller: controller,
+              focusNode: focusNode,
             ),
           ),
         )
     );
-    await tester.enterText(find.byType(TextField), ' ');
-    await skipPastScrollingAnimation(tester);
+    focusNode.requestFocus();
+    await tester.pump();
 
     await expectLater(
       find.byType(TextField),
@@ -869,19 +875,25 @@ void main() {
   });
 
   testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController.fromValue(
+      const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
+    );
+    final FocusNode focusNode = FocusNode();
     EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
         overlay(
-          child: const RepaintBoundary(
+          child: RepaintBoundary(
             child: TextField(
               cursorWidth: 15.0,
-              cursorRadius: Radius.circular(3.0),
+              cursorRadius: const Radius.circular(3.0),
+              controller: controller,
+              focusNode: focusNode,
             ),
           ),
         )
     );
-    await tester.enterText(find.byType(TextField), ' ');
-    await skipPastScrollingAnimation(tester);
+    focusNode.requestFocus();
+    await tester.pump();
 
     await expectLater(
       find.byType(TextField),
@@ -891,19 +903,25 @@ void main() {
   });
 
   testWidgets('cursor layout has correct height', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController.fromValue(
+      const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
+    );
+    final FocusNode focusNode = FocusNode();
     EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
         overlay(
-          child: const RepaintBoundary(
+          child: RepaintBoundary(
             child: TextField(
               cursorWidth: 15.0,
               cursorHeight: 30.0,
+              controller: controller,
+              focusNode: focusNode,
             ),
           ),
         )
     );
-    await tester.enterText(find.byType(TextField), ' ');
-    await skipPastScrollingAnimation(tester);
+    focusNode.requestFocus();
+    await tester.pump();
 
     await expectLater(
       find.byType(TextField),
@@ -1112,7 +1130,8 @@ void main() {
     await tester.tapAt(ePos);
     await tester.pump();
 
-    expect(controller.selection, isNull);
+    expect(controller.selection?.baseOffset, testValue.length);
+    expect(controller.selection?.isCollapsed, isTrue);
   });
 
   testWidgets('Can long press to select', (WidgetTester tester) async {
@@ -1131,7 +1150,7 @@ void main() {
     expect(controller.value.text, testValue);
     await skipPastScrollingAnimation(tester);
 
-    expect(controller.selection, isNull);
+    expect(controller.selection?.isCollapsed, isTrue);
 
     // Long press the 'e' to select 'def'.
     final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
@@ -1166,7 +1185,7 @@ void main() {
     expect(controller.value.text, testValue);
     await skipPastScrollingAnimation(tester);
 
-    expect(controller.selection, isNull);
+    expect(controller.selection?.isCollapsed, isTrue);
 
     // Long press the 'e' to select 'def', but don't release the gesture.
     final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
@@ -1225,7 +1244,7 @@ void main() {
     await skipPastScrollingAnimation(tester);
 
     // Handle not shown.
-    expect(controller.selection, isNull);
+    expect(controller.selection?.isCollapsed, isTrue);
     final Finder fadeFinder = find.byType(FadeTransition);
     expect(fadeFinder, findsNothing);
 
@@ -1244,7 +1263,7 @@ void main() {
     await skipPastScrollingAnimation(tester);
 
     // Handle not shown.
-    expect(controller.selection, isNull);
+    expect(controller.selection?.isCollapsed, isTrue);
     expect(fadeFinder, findsNothing);
   });
 
@@ -1305,7 +1324,7 @@ void main() {
     expect(controller.value.text, testValue);
     await skipPastScrollingAnimation(tester);
 
-    expect(controller.selection, isNull);
+    expect(controller.selection?.isCollapsed, isTrue);
 
     // Long press the 'e' using a mouse device.
     final int eIndex = testValue.indexOf('e');
@@ -1572,14 +1591,15 @@ void main() {
     expect(controller.value.text, testValue);
     await skipPastScrollingAnimation(tester);
 
-    expect(controller.selection, isNull);
+    expect(controller.selection?.isCollapsed, isTrue);
 
     // Long press the 'e' to select 'def'.
     final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
     await tester.longPressAt(ePos, pointer: 7);
     await tester.pump();
 
-    expect(controller.selection, isNull);
+    expect(controller.selection?.isCollapsed, true);
+    expect(controller.selection?.baseOffset, testValue.length);
   });
 
   testWidgets('Can select text by dragging with a mouse', (WidgetTester tester) async {
@@ -2122,7 +2142,7 @@ void main() {
     await tester.pumpWidget(buildFrame(true));
     await tester.enterText(find.byType(TextField), 'abcdefghi');
     await skipPastScrollingAnimation(tester);
-    expect(controller.selection, isNull);
+    expect(controller.selection?.isCollapsed, isTrue);
 
     // Long press does select text.
     final Offset ePos = textOffsetToPosition(tester, 1);
@@ -2150,13 +2170,13 @@ void main() {
     await tester.pumpWidget(buildFrame(true, false));
     await tester.enterText(find.byType(TextField), 'abcdefghi');
     await skipPastScrollingAnimation(tester);
-    expect(controller.selection, isNull);
+    expect(controller.selection?.isCollapsed, isTrue);
 
     // Long press doesn't select text.
     final Offset ePos2 = textOffsetToPosition(tester, 1);
     await tester.longPressAt(ePos2, pointer: 7);
     await tester.pump();
-    expect(controller.selection, isNull);
+    expect(controller.selection?.isCollapsed, isTrue);
   });
 
   testWidgets('An obscured TextField is selected as one word', (WidgetTester tester) async {
@@ -5211,7 +5231,8 @@ void main() {
     const String testValue = 'x';
     await tester.enterText(find.byType(TextField), testValue);
     await skipPastScrollingAnimation(tester);
-    expect(controller.selection, isNull);
+    expect(controller.selection?.isCollapsed, true);
+    expect(controller.selection?.baseOffset, testValue.length);
 
     // Tap the selection handle to bring up the "paste / select all" menu.
     await tester.tapAt(textOffsetToPosition(tester, 0));
@@ -7936,7 +7957,13 @@ void main() {
           pressureMin: 0.0,
       ),
     );
-    await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: offset + const Offset(150.0, 9.0), pressure: 0.5, pressureMin: 0, pressureMax: 1,),);
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: offset + const Offset(150.0, 9.0),
+      pressure: 0.5,
+      pressureMin: 0,
+      pressureMax: 1,
+    ));
 
     // We don't want this gesture to select any word on Android.
     expect(controller.selection, isNull);
@@ -9043,7 +9070,7 @@ void main() {
           ),
         ),
       ),
-    ),);
+    ));
 
     focusNode3.requestFocus();
     await tester.pump();

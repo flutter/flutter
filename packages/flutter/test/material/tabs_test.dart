@@ -2617,7 +2617,7 @@ void main() {
             length: 1,
             child: TabBar(
               tabs: <Tab>[
-                Tab(text: 'A',)
+                Tab(text: 'A')
               ],
             )
           )
@@ -2641,7 +2641,7 @@ void main() {
             length: 1,
             child: TabBar(
               tabs: <Tab>[
-                Tab(text: 'A',)
+                Tab(text: 'A')
               ],
               enableFeedback: false,
             ),
@@ -2669,7 +2669,7 @@ void main() {
             length: 1,
             child: TabBar(
               tabs: const <Tab>[
-                Tab(text: 'A',)
+                Tab(text: 'A')
               ],
               overlayColor: MaterialStateProperty.resolveWith<Color>(
                 (Set<MaterialState> states) {
@@ -2702,7 +2702,7 @@ void main() {
           length: 1,
           child: TabBar(
             tabs: const <Tab>[
-              Tab(text: 'A',)
+              Tab(text: 'A')
             ],
             overlayColor: MaterialStateProperty.resolveWith<Color>(
               (Set<MaterialState> states) {
@@ -3165,8 +3165,8 @@ void main() {
       Tab(icon: Icon(Icons.notifications), child: Text('Test')),
     ];
 
-    const TabBar tabBarWithText = TabBar(tabs: tabListWithText, indicatorWeight: indicatorWeight,);
-    const TabBar tabBarWithTextChild = TabBar(tabs: tabListWithTextChild, indicatorWeight: indicatorWeight,);
+    const TabBar tabBarWithText = TabBar(tabs: tabListWithText, indicatorWeight: indicatorWeight);
+    const TabBar tabBarWithTextChild = TabBar(tabs: tabListWithTextChild, indicatorWeight: indicatorWeight);
 
     expect(tabBarWithText.preferredSize, tabBarWithTextChild.preferredSize);
    });
