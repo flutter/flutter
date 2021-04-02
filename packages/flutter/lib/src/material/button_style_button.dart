@@ -304,7 +304,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       if (size.height.isFinite) {
         effectiveConstraints = effectiveConstraints.copyWith(
           minHeight: size.height,
-          maxHeight: size.height
+          maxHeight: size.height,
         );
       }
     }

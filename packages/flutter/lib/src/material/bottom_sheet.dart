@@ -390,7 +390,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
         // Disable the initial animation when accessible navigation is on so
         // that the semantics are added to the tree at the correct time.
         final double animationValue = animationCurve.transform(
-            mediaQuery.accessibleNavigation ? 1.0 : widget.route!.animation!.value
+            mediaQuery.accessibleNavigation ? 1.0 : widget.route!.animation!.value,
         );
         return Semantics(
           scopesRoute: true,

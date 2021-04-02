@@ -162,6 +162,7 @@ class CocoaPods {
     if (!xcodeProject.podfile.existsSync()) {
       throwToolExit('Podfile missing');
     }
+    _warnIfPodfileOutOfDate(xcodeProject);
     bool podsProcessed = false;
     if (_shouldRunPodInstall(xcodeProject, dependenciesChanged)) {
       if (!await _checkPodCondition()) {
@@ -170,7 +171,6 @@ class CocoaPods {
       await _runPodInstall(xcodeProject, buildMode);
       podsProcessed = true;
     }
-    _warnIfPodfileOutOfDate(xcodeProject);
     return podsProcessed;
   }
 

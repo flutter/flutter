@@ -288,7 +288,8 @@ void main() {
               return false;
             },
           ),
-      ],),
+        ],
+      ),
     };
 
     await tester.pumpWidget(MaterialApp(routes: routes));
@@ -328,7 +329,8 @@ void main() {
               return true;
             },
           ),
-        ],),
+        ],
+      ),
     };
 
     await tester.pumpWidget(MaterialApp(routes: routes));

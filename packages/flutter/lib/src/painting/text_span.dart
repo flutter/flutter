@@ -302,7 +302,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   void computeToPlainText(
     StringBuffer buffer, {
     bool includeSemanticsLabels = true,
-    bool includePlaceholders = true
+    bool includePlaceholders = true,
   }) {
     assert(debugAssertIsValid());
     if (semanticsLabel != null && includeSemanticsLabels) {
@@ -388,9 +388,12 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
             throw FlutterError.fromParts(<DiagnosticsNode>[
               ErrorSummary('TextSpan contains a null child.'),
               ErrorDescription(
-                  'A TextSpan object with a non-null child list should not have any nulls in its child list.'),
-              toDiagnosticsNode(name: 'The full text in question was',
-                  style: DiagnosticsTreeStyle.errorProperty),
+                'A TextSpan object with a non-null child list should not have any nulls in its child list.',
+              ),
+              toDiagnosticsNode(
+                name: 'The full text in question was',
+                style: DiagnosticsTreeStyle.errorProperty,
+              ),
             ]);
           }
           assert(child.debugAssertIsValid());
@@ -477,7 +480,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
         text,
         showName: false,
         defaultValue: null,
-      )
+      ),
     );
     if (style == null && text == null && children == null)
       properties.add(DiagnosticsNode.message('(empty)'));

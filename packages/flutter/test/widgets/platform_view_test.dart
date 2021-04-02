@@ -257,7 +257,7 @@ void main() {
           child: SizedBox(
             width: 200.0,
             height: 100.0,
-            child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr,),
+            child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
           ),
         ),
       );
@@ -1196,7 +1196,8 @@ void main() {
       final AndroidViewSurface surface = AndroidViewSurface(
         controller: controller,
         hitTestBehavior: PlatformViewHitTestBehavior.opaque,
-        gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},);
+        gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+      );
       await tester.pumpWidget(surface);
       expect(controller.pointTransformer, isNotNull);
     });
@@ -1400,7 +1401,7 @@ void main() {
           child: SizedBox(
             width: 200.0,
             height: 100.0,
-            child: UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr,),
+            child: UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr),
           ),
         ),
       );
@@ -1890,14 +1891,17 @@ void main() {
                 child: const SizedBox(
                   width: 300,
                   height: 500,
-                  child: UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr)),),
+                  child: UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+                ),
+              ),
               Transform.translate(
                 offset: const Offset(0, 500),
                 child: Container(
                   color: const Color.fromARGB(255, 255, 255, 255),
                   width: 300,
                   height: 100,
-              ),),
+                ),
+              ),
             ],
           ),
         ),
@@ -1998,7 +2002,8 @@ void main() {
       final PlatformViewSurface surface = PlatformViewSurface(
         controller: controller,
         hitTestBehavior: PlatformViewHitTestBehavior.opaque,
-        gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},);
+        gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+      );
       await tester.pumpWidget(surface);
       expect(() => tester.layers.whereType<PlatformViewLayer>().first, returnsNormally);
     });
@@ -2467,7 +2472,7 @@ void main() {
         Center(
           child: Column(
             children: <Widget>[
-              SizedBox(child: platformViewLink, width: 300, height: 300,),
+              SizedBox(child: platformViewLink, width: 300, height: 300),
               Focus(
                 debugLabel: 'container',
                 child: Container(key: containerKey),

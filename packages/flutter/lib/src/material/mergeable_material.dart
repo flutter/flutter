@@ -295,10 +295,10 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
     super.didUpdateWidget(oldWidget);
 
     final Set<LocalKey> oldKeys = oldWidget.children.map<LocalKey>(
-      (MergeableMaterialItem child) => child.key
+      (MergeableMaterialItem child) => child.key,
     ).toSet();
     final Set<LocalKey> newKeys = widget.children.map<LocalKey>(
-      (MergeableMaterialItem child) => child.key
+      (MergeableMaterialItem child) => child.key,
     ).toSet();
     final Set<LocalKey> newOnly = newKeys.difference(oldKeys);
     final Set<LocalKey> oldOnly = oldKeys.difference(newKeys);
@@ -570,11 +570,11 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
           final Border border;
           if (i == 0) {
             border = Border(
-              bottom: hasBottomDivider ? divider : BorderSide.none
+              bottom: hasBottomDivider ? divider : BorderSide.none,
             );
           } else if (i == _children.length - 1) {
             border = Border(
-              top: hasTopDivider ? divider : BorderSide.none
+              top: hasTopDivider ? divider : BorderSide.none,
             );
           } else {
             border = Border(
@@ -584,6 +584,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
           }
 
           child = AnimatedContainer(
+            key: _MergeableMaterialSliceKey(_children[i].key),
             decoration: BoxDecoration(border: border),
             duration: kThemeAnimationDuration,
             curve: Curves.fastOutSlowIn,
@@ -599,7 +600,6 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
               shape: BoxShape.rectangle,
             ),
             child: Material(
-              key: _MergeableMaterialSliceKey(_children[i].key),
               type: MaterialType.transparency,
               child: child,
             ),

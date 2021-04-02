@@ -390,7 +390,7 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
         throw FlutterError(
           'LayoutBuilder does not support returning intrinsic dimensions.\n'
           'Calculating the intrinsic dimensions would require running the layout '
-          'callback speculatively, which might mutate the live render object tree.'
+          'callback speculatively, which might mutate the live render object tree.',
         );
       }
       return true;

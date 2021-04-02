@@ -103,6 +103,19 @@ void main() {
     expect(fileStorage.files.single.path, file.path);
   });
 
+  testWithoutContext('FileStore handles changed format', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File cacheFile = fileSystem.file(FileStore.kFileCache)..writeAsStringSync(
+      '{"version":1,"files":[{"path_old":"foo.dart","hash_old":"f95b70fdc3088560732a5ac135644506"}]}');
+    final FileStore fileCache = FileStore(
+      cacheFile: cacheFile,
+      logger: BufferLogger.test(),
+    );
+
+    fileCache.initialize();
+    expect(cacheFile, isNot(exists));
+  });
+
   testWithoutContext('FileStore handles persisting with a missing build directory', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File cacheFile = fileSystem

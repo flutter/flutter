@@ -328,28 +328,31 @@ abstract class RawKeyEvent with Diagnosticable {
           break;
         case 'macos':
           data = RawKeyEventDataMacOs(
-              characters: message['characters'] as String? ?? '',
-              charactersIgnoringModifiers: message['charactersIgnoringModifiers'] as String? ?? '',
-              keyCode: message['keyCode'] as int? ?? 0,
-              modifiers: message['modifiers'] as int? ?? 0);
+            characters: message['characters'] as String? ?? '',
+            charactersIgnoringModifiers: message['charactersIgnoringModifiers'] as String? ?? '',
+            keyCode: message['keyCode'] as int? ?? 0,
+            modifiers: message['modifiers'] as int? ?? 0,
+          );
           character = message['characters'] as String?;
           break;
         case 'ios':
           data = RawKeyEventDataIos(
-              characters: message['characters'] as String? ?? '',
-              charactersIgnoringModifiers: message['charactersIgnoringModifiers'] as String? ?? '',
-              keyCode: message['keyCode'] as int? ?? 0,
-              modifiers: message['modifiers'] as int? ?? 0);
+            characters: message['characters'] as String? ?? '',
+            charactersIgnoringModifiers: message['charactersIgnoringModifiers'] as String? ?? '',
+            keyCode: message['keyCode'] as int? ?? 0,
+            modifiers: message['modifiers'] as int? ?? 0,
+          );
           break;
         case 'linux':
           final int unicodeScalarValues = message['unicodeScalarValues'] as int? ?? 0;
           data = RawKeyEventDataLinux(
-              keyHelper: KeyHelper(message['toolkit'] as String? ?? ''),
-              unicodeScalarValues: unicodeScalarValues,
-              keyCode: message['keyCode'] as int? ?? 0,
-              scanCode: message['scanCode'] as int? ?? 0,
-              modifiers: message['modifiers'] as int? ?? 0,
-              isDown: message['type'] == 'keydown');
+            keyHelper: KeyHelper(message['toolkit'] as String? ?? ''),
+            unicodeScalarValues: unicodeScalarValues,
+            keyCode: message['keyCode'] as int? ?? 0,
+            scanCode: message['scanCode'] as int? ?? 0,
+            modifiers: message['modifiers'] as int? ?? 0,
+            isDown: message['type'] == 'keydown',
+          );
           if (unicodeScalarValues != 0) {
             character = String.fromCharCode(unicodeScalarValues);
           }
