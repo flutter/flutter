@@ -4,11 +4,10 @@
 
 // @dart = 2.9
 
-import 'package:flutter_tools/src/features.dart';
-
 import 'base/io.dart';
 import 'base/platform.dart';
 import 'doctor.dart';
+import 'features.dart';
 
 // The environment variables used to override some URLs
 const String kPubHostedUrl = 'PUB_HOSTED_URL';

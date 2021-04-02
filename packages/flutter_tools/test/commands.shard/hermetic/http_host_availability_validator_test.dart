@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_http_client.dart';
+import '../../src/fakes.dart';
 
 // The environment variables used to override some URLs
 const Map<String, String> kFlutterUrls = <String, String>{
@@ -31,6 +32,7 @@ void main() {
       for(final String operatingSystem in operatingSystemsToTest) {
         final HttpHostAvailabilityValidator httpHostValidator = HttpHostAvailabilityValidator(
           platform: FakePlatform(operatingSystem: operatingSystem),
+          featureFlags: TestFeatureFlags(isAndroidEnabled: true, isIOSEnabled: true),
           httpClient: mockClient,
         );
 
@@ -47,6 +49,7 @@ void main() {
       for(final String operatingSystem in operatingSystemsToTest) {
         final HttpHostAvailabilityValidator httpHostValidator = HttpHostAvailabilityValidator(
           platform: FakePlatform(operatingSystem: operatingSystem),
+          featureFlags: TestFeatureFlags(isAndroidEnabled: true, isIOSEnabled: true),
           httpClient: FakeHttpClient.list(<FakeRequest>[
             FakeRequest(Uri.parse('https://cloud.google.com/'), method: HttpMethod.head, responseError: const OSError('Name or service not known', -2)),
             FakeRequest(Uri.parse('https://maven.google.com/'), method: HttpMethod.head, responseError: const OSError('Name or service not known', -2)),
@@ -68,6 +71,7 @@ void main() {
       for(final String operatingSystem in operatingSystemsToTest) {
         final HttpHostAvailabilityValidator httpHostValidator = HttpHostAvailabilityValidator(
           platform: FakePlatform(operatingSystem: operatingSystem),
+          featureFlags: TestFeatureFlags(isAndroidEnabled: true, isIOSEnabled: true),
           httpClient: FakeHttpClient.list(<FakeRequest>[
             FakeRequest(Uri.parse('https://cloud.google.com/'), method: HttpMethod.head, responseError: const OSError('Name or service not known', -2)),
             FakeRequest(Uri.parse('https://maven.google.com/'), method: HttpMethod.head),
@@ -96,6 +100,7 @@ void main() {
             operatingSystem: operatingSystem,
             environment: kFlutterUrls,
           ),
+          featureFlags: TestFeatureFlags(isAndroidEnabled: true, isIOSEnabled: true),
           httpClient: mockClient,
         );
 
@@ -115,6 +120,7 @@ void main() {
             operatingSystem: operatingSystem,
             environment: kFlutterUrls,
           ),
+          featureFlags: TestFeatureFlags(isAndroidEnabled: true, isIOSEnabled: true),
           httpClient: FakeHttpClient.list(<FakeRequest>[
             FakeRequest(Uri.parse('https://storage.flutter-io.cn'), method: HttpMethod.head, responseError: const OSError('Name or service not known', -2)),
             FakeRequest(Uri.parse('https://maven.google.com/'), method: HttpMethod.head, responseError: const OSError('Name or service not known', -2)),
@@ -139,6 +145,7 @@ void main() {
             operatingSystem: operatingSystem,
             environment: kFlutterUrls,
           ),
+          featureFlags: TestFeatureFlags(isAndroidEnabled: true, isIOSEnabled: true),
           httpClient: FakeHttpClient.list(<FakeRequest>[
             FakeRequest(Uri.parse('https://storage.flutter-io.cn'), method: HttpMethod.head, responseError: const OSError('Name or service not known', -2)),
             FakeRequest(Uri.parse('https://maven.google.com/'), method: HttpMethod.head),
@@ -152,6 +159,50 @@ void main() {
 
         // Check for a ValidationType.partial result
         expect(result.type, equals(ValidationType.partial));
+      }
+    });
+
+    test('all http hosts are available (android disabled)', () async {
+      // Run the check for all operating systems one by one
+      for(final String operatingSystem in operatingSystemsToTest) {
+        final HttpHostAvailabilityValidator httpHostValidator = HttpHostAvailabilityValidator(
+          platform: FakePlatform(operatingSystem: operatingSystem),
+          featureFlags: TestFeatureFlags(isAndroidEnabled: false, isIOSEnabled: true),
+          httpClient: FakeHttpClient.list(<FakeRequest>[
+            // Don't include maven - it should not be called. If it is called, then the test should fail
+            FakeRequest(Uri.parse('https://cloud.google.com/'), method: HttpMethod.head),
+            FakeRequest(Uri.parse('https://pub.dev/'), method: HttpMethod.head),
+            FakeRequest(Uri.parse('https://cocoapods.org/'), method: HttpMethod.head),
+          ]),
+        );
+
+        // Run the validation check and get the results
+        final ValidationResult result = await httpHostValidator.validate();
+
+        // Check for a ValidationType.installed result
+        expect(result.type, equals(ValidationType.installed));
+      }
+    });
+
+    test('all http hosts are available (ios disabled)', () async {
+      // Run the check for all operating systems one by one
+      for(final String operatingSystem in operatingSystemsToTest) {
+        final HttpHostAvailabilityValidator httpHostValidator = HttpHostAvailabilityValidator(
+          platform: FakePlatform(operatingSystem: operatingSystem),
+          featureFlags: TestFeatureFlags(isAndroidEnabled: true, isIOSEnabled: false),
+          httpClient: FakeHttpClient.list(<FakeRequest>[
+            // Don't include cocoapods - it should not be called. If it is called, then the test should fail
+            FakeRequest(Uri.parse('https://cloud.google.com/'), method: HttpMethod.head),
+            FakeRequest(Uri.parse('https://maven.google.com/'), method: HttpMethod.head),
+            FakeRequest(Uri.parse('https://pub.dev/'), method: HttpMethod.head),
+          ]),
+        );
+
+        // Run the validation check and get the results
+        final ValidationResult result = await httpHostValidator.validate();
+
+        // Check for a ValidationType.installed result
+        expect(result.type, equals(ValidationType.installed));
       }
     });
   });
