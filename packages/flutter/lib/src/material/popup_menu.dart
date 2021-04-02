@@ -613,7 +613,14 @@ class _PopupMenu<T> extends StatelessWidget {
 
 // Positioning of the menu on the screen.
 class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
-  _PopupMenuRouteLayout(this.position, this.itemSizes, this.selectedItemIndex, this.textDirection);
+  _PopupMenuRouteLayout(
+    this.position,
+    this.itemSizes,
+    this.selectedItemIndex,
+    this.textDirection,
+    this.topPadding,
+    this.bottomPadding,
+  );
 
   // Rectangle of underlying button, relative to the overlay's dimensions.
   final RelativeRect position;
@@ -629,6 +636,12 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
   // Whether to prefer going to the left or to the right.
   final TextDirection textDirection;
 
+  // Top padding of unsafe area.
+  final double topPadding;
+
+  // Bottom padding of unsafe area.
+  final double bottomPadding;
+
   // We put the child wherever position specifies, so long as it will fit within
   // the specified parent size padded (inset) by 8. If necessary, we adjust the
   // child's position so that it fits.
@@ -637,7 +650,8 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
     // The menu can be at most the size of the overlay minus 8.0 pixels in each
     // direction.
-    return BoxConstraints.loose(constraints.biggest).deflate(const EdgeInsets.all(_kMenuScreenPadding));
+    return BoxConstraints.loose(constraints.biggest).deflate(
+        const EdgeInsets.all(_kMenuScreenPadding) + EdgeInsets.only(top: topPadding, bottom: bottomPadding));
   }
 
   @override
@@ -646,6 +660,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     // childSize: The size of the menu, when fully open, as determined by
     // getConstraintsForChild.
 
+    final double buttonHeight = size.height - position.top - position.bottom;
     // Find the ideal vertical position.
     double y = position.top;
     if (selectedItemIndex != null && itemSizes != null) {
@@ -653,7 +668,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
       for (int index = 0; index < selectedItemIndex!; index += 1)
         selectedItemOffset += itemSizes[index]!.height;
       selectedItemOffset += itemSizes[selectedItemIndex!]!.height / 2;
-      y = position.top + (size.height - position.top - position.bottom) / 2.0 - selectedItemOffset;
+      y = y + buttonHeight / 2.0 - selectedItemOffset;
     }
 
     // Find the ideal horizontal position.
@@ -683,10 +698,10 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
       x = _kMenuScreenPadding;
     else if (x + childSize.width > size.width - _kMenuScreenPadding)
       x = size.width - childSize.width - _kMenuScreenPadding;
-    if (y < _kMenuScreenPadding)
-      y = _kMenuScreenPadding;
-    else if (y + childSize.height > size.height - _kMenuScreenPadding)
-      y = size.height - childSize.height - _kMenuScreenPadding;
+    if (y < _kMenuScreenPadding + topPadding)
+      y = _kMenuScreenPadding + topPadding;
+    else if (y + childSize.height > size.height - _kMenuScreenPadding - bottomPadding)
+      y = size.height - bottomPadding - _kMenuScreenPadding - childSize.height ;
     return Offset(x, y);
   }
 
@@ -698,9 +713,11 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     assert(itemSizes.length == oldDelegate.itemSizes.length);
 
     return position != oldDelegate.position
-        || selectedItemIndex != oldDelegate.selectedItemIndex
-        || textDirection != oldDelegate.textDirection
-        || !listEquals(itemSizes, oldDelegate.itemSizes);
+      || selectedItemIndex != oldDelegate.selectedItemIndex
+      || textDirection != oldDelegate.textDirection
+      || !listEquals(itemSizes, oldDelegate.itemSizes)
+      || topPadding != oldDelegate.topPadding
+      || bottomPadding != oldDelegate.bottomPadding;
   }
 }
 
@@ -761,20 +778,21 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 
     final Widget menu = _PopupMenu<T>(route: this, semanticLabel: semanticLabel);
 
-    return SafeArea(
-      child: Builder(
-        builder: (BuildContext context) {
-          return CustomSingleChildLayout(
-            delegate: _PopupMenuRouteLayout(
-              position,
-              itemSizes,
-              selectedItemIndex,
-              Directionality.of(context),
-            ),
-            child: capturedThemes.wrap(menu),
-          );
-        },
-      ),
+    return Builder(
+      builder: (BuildContext context) {
+        final MediaQueryData mediaQuery = MediaQuery.of(context);
+        return CustomSingleChildLayout(
+          delegate: _PopupMenuRouteLayout(
+            position,
+            itemSizes,
+            selectedItemIndex,
+            Directionality.of(context),
+            mediaQuery.padding.top,
+            mediaQuery.padding.bottom,
+          ),
+          child: capturedThemes.wrap(menu),
+        );
+      },
     );
   }
 }
