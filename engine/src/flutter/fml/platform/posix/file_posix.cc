@@ -16,6 +16,7 @@
 #include "flutter/fml/eintr_wrapper.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/mapping.h"
+#include "flutter/fml/trace_event.h"
 #include "flutter/fml/unique_fd.h"
 
 namespace fml {
@@ -72,6 +73,7 @@ fml::UniqueFD OpenFile(const fml::UniqueFD& base_directory,
                        const char* path,
                        bool create_if_necessary,
                        FilePermission permission) {
+  TRACE_EVENT0("flutter", "fml::OpenFile");
   if (path == nullptr) {
     return {};
   }

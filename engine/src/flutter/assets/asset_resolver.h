@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include <optional>
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 
@@ -59,10 +60,24 @@ class AssetResolver {
   [[nodiscard]] virtual std::unique_ptr<fml::Mapping> GetAsMapping(
       const std::string& asset_name) const = 0;
 
-  // Same as GetAsMapping() but returns mappings for all files who's name
-  // matches |pattern|. Returns empty vector if no matching assets are found
+  //--------------------------------------------------------------------------
+  /// @brief      Same as GetAsMapping() but returns mappings for all files
+  ///             who's name matches a given pattern. Returns empty vector
+  ///             if no matching assets are found.
+  ///
+  /// @param[in]  asset_pattern  The pattern to match file names against.
+  ///
+  /// @param[in]  subdir  Optional subdirectory in which to search for files.
+  ///             If supplied this function does a flat search within the
+  ///             subdirectory instead of a recursive search through the entire
+  ///             assets directory.
+  ///
+  /// @return     Returns a vector of mappings of files which match the search
+  ///             parameters.
+  ///
   [[nodiscard]] virtual std::vector<std::unique_ptr<fml::Mapping>>
-  GetAsMappings(const std::string& asset_pattern) const {
+  GetAsMappings(const std::string& asset_pattern,
+                const std::optional<std::string>& subdir) const {
     return {};
   };
 

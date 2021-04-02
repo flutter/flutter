@@ -10,6 +10,7 @@
 #include "flutter/fml/eintr_wrapper.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/mapping.h"
+#include "flutter/fml/trace_event.h"
 
 namespace flutter {
 
@@ -60,7 +61,8 @@ std::unique_ptr<fml::Mapping> DirectoryAssetBundle::GetAsMapping(
 }
 
 std::vector<std::unique_ptr<fml::Mapping>> DirectoryAssetBundle::GetAsMappings(
-    const std::string& asset_pattern) const {
+    const std::string& asset_pattern,
+    const std::optional<std::string>& subdir) const {
   std::vector<std::unique_ptr<fml::Mapping>> mappings;
   if (!is_valid_) {
     FML_DLOG(WARNING) << "Asset bundle was not valid.";
@@ -70,9 +72,19 @@ std::vector<std::unique_ptr<fml::Mapping>> DirectoryAssetBundle::GetAsMappings(
   std::regex asset_regex(asset_pattern);
   fml::FileVisitor visitor = [&](const fml::UniqueFD& directory,
                                  const std::string& filename) {
+    TRACE_EVENT0("flutter", "DirectoryAssetBundle::GetAsMappings FileVisitor");
+
     if (std::regex_match(filename, asset_regex)) {
-      auto mapping = std::make_unique<fml::FileMapping>(fml::OpenFile(
-          directory, filename.c_str(), false, fml::FilePermission::kRead));
+      TRACE_EVENT0("flutter", "Matched File");
+
+      fml::UniqueFD fd = fml::OpenFile(directory, filename.c_str(), false,
+                                       fml::FilePermission::kRead);
+
+      if (fml::IsDirectory(fd)) {
+        return true;
+      }
+
+      auto mapping = std::make_unique<fml::FileMapping>(fd);
 
       if (mapping && mapping->IsValid()) {
         mappings.push_back(std::move(mapping));
@@ -82,7 +94,18 @@ std::vector<std::unique_ptr<fml::Mapping>> DirectoryAssetBundle::GetAsMappings(
     }
     return true;
   };
-  fml::VisitFilesRecursively(descriptor_, visitor);
+  if (!subdir) {
+    fml::VisitFilesRecursively(descriptor_, visitor);
+  } else {
+    fml::UniqueFD subdir_fd =
+        fml::OpenFileReadOnly(descriptor_, subdir.value().c_str());
+    if (!fml::IsDirectory(subdir_fd)) {
+      FML_LOG(ERROR) << "Subdirectory path " << subdir.value()
+                     << " is not a directory";
+      return mappings;
+    }
+    fml::VisitFiles(subdir_fd, visitor);
+  }
 
   return mappings;
 }
