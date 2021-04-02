@@ -32,6 +32,7 @@ import 'cache.dart';
 import 'compile.dart';
 import 'devfs.dart';
 import 'device.dart';
+import 'device_categories.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
 import 'project.dart';

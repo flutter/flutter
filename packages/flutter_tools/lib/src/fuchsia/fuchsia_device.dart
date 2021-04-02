@@ -21,6 +21,7 @@ import '../base/process.dart';
 import '../base/time.dart';
 import '../build_info.dart';
 import '../device.dart';
+import '../device_categories.dart';
 import '../device_port_forwarder.dart';
 import '../globals.dart' as globals;
 import '../project.dart';

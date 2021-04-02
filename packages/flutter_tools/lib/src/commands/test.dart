@@ -15,6 +15,7 @@ import '../build_info.dart';
 import '../bundle.dart';
 import '../devfs.dart';
 import '../device.dart';
+import '../device_categories.dart';
 import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';

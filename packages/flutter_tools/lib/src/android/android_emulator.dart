@@ -17,7 +17,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../convert.dart';
-import '../device.dart';
+import '../device_categories.dart';
 import '../emulator.dart';
 import 'android_sdk.dart';
 

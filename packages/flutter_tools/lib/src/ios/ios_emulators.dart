@@ -5,7 +5,7 @@
 // @dart = 2.8
 
 import '../base/process.dart';
-import '../device.dart';
+import '../device_categories.dart';
 import '../emulator.dart';
 import '../globals.dart' as globals;
 import 'simulators.dart';

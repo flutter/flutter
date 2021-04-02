@@ -16,7 +16,7 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/process.dart';
-import 'device.dart';
+import 'device_categories.dart';
 import 'ios/ios_emulators.dart';
 
 EmulatorManager get emulatorManager => context.get<EmulatorManager>();

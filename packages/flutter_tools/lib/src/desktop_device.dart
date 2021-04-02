@@ -19,6 +19,7 @@ import 'build_info.dart';
 import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
+import 'device_categories.dart';
 import 'device_port_forwarder.dart';
 import 'protocol_discovery.dart';
 

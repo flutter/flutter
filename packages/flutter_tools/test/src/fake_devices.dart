@@ -7,6 +7,7 @@
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/device_categories.dart';
 import 'package:flutter_tools/src/project.dart';
 
 /// A list of fake devices to test JSON serialization

@@ -14,6 +14,7 @@ import '../base/os.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
+import '../device_categories.dart';
 import '../features.dart';
 import '../project.dart';
 import 'application_package.dart';
