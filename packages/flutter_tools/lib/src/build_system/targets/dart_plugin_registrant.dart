@@ -14,8 +14,8 @@ import '../../project.dart';
 import '../build_system.dart';
 import 'common.dart';
 
-/// Based on the current dependency map in `pubspec.lock`. Generated a new `generated_main.dart`
-/// and replace the `./dart_tool/flutter_build/generated_main.dart`.
+/// Generates a new `./dart_tool/flutter_build/generated_main.dart`
+/// based on the current dependency map in `pubspec.lock`.
 class DartPluginRegistrantTarget extends Target {
   /// Construct a [DartPluginRegistrantTarget].
   const DartPluginRegistrantTarget() : _project = null;

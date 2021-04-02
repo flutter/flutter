@@ -232,7 +232,7 @@ class KernelCompiler {
     String initializeFromDill,
     String platformDill,
     Directory buildDir,
-    bool generateDartPluginRegistry = false,
+    bool checkDartPluginRegistry = false,
     @required String packagesPath,
     @required BuildMode buildMode,
     @required bool trackWidgetCreation,
@@ -260,20 +260,13 @@ class KernelCompiler {
     if (outputFilePath != null && !_fileSystem.isFileSync(outputFilePath)) {
       _fileSystem.file(outputFilePath).createSync(recursive: true);
     }
-    if (buildDir != null && generateDartPluginRegistry) {
-      // `generated_main.dart` is under `.dart_tools/flutter_build/`,
-      // so the resident compiler can find it.
+    if (buildDir != null && checkDartPluginRegistry) {
+      // Check if there's a Dart plugin registrant.
+      // This is contained in the file `generated_main.dart` under `.dart_tools/flutter_build/`.
       final File newMainDart = buildDir.parent.childFile('generated_main.dart');
-      await generateMainDartWithPluginRegistrant(
-        FlutterProject.current(),
-        packageConfig,
-        mainUri,
-        newMainDart,
-        mainFile,
-        // TODO(egarciad): Turn this on when the plugins are fixed.
-        throwOnPluginPubspecError: false,
-      );
-      mainUri = newMainDart.path;
+      if (newMainDart.existsSync()) {
+        mainUri = newMainDart.path;
+      }
     }
 
     final List<String> command = <String>[
