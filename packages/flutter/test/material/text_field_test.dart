@@ -19,6 +19,12 @@ import 'feedback_tester.dart';
 
 typedef FormatEditUpdateCallback = void Function(TextEditingValue, TextEditingValue);
 
+// On web, the context menu (aka toolbar) is provided by the browser.
+final bool isContextMenuProvidedByPlatform = isBrowser;
+
+// On web, key events in text fields are handled by the browser.
+final bool areKeyEventsHandledByPlatform = isBrowser;
+
 class MockClipboard {
   Object _clipboardData = <String, dynamic>{
     'text': null,
@@ -256,7 +262,7 @@ void main() {
     expect(controller.text, ' blah2blah1');
     expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 0));
     expect(find.byType(CupertinoButton), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux }), skip: kIsWeb);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux }), skip: isContextMenuProvidedByPlatform);
 
   testWidgets('Activates the text field when receives semantics focus on Mac', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -610,9 +616,7 @@ void main() {
         selection: TextSelection.collapsed(offset: 2),
       ),
     );
-    // In flutter web, we let the browser handle key events in text fields, so
-    // the framework does nothing in that case.
-  }, skip: isBrowser);
+  }, skip: areKeyEventsHandledByPlatform);
 
   testWidgets('text field selection toolbar renders correctly inside opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -663,9 +667,7 @@ void main() {
       find.byType(Overlay),
       matchesGoldenFile('text_field_opacity_test.0.png'),
     );
-
-    // On web, we don't let Flutter show the toolbar.
-  }, skip: isBrowser);
+  }, skip: isContextMenuProvidedByPlatform);
 
   testWidgets('text field toolbar options correctly changes options',
       (WidgetTester tester) async {
@@ -716,8 +718,7 @@ void main() {
     expect(find.text('Select All'), findsNothing);
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
-    // On web, we don't let Flutter show the toolbar.
-    skip: isBrowser,
+    skip: isContextMenuProvidedByPlatform,
   );
 
   testWidgets('text selection style 1', (WidgetTester tester) async {
@@ -854,8 +855,7 @@ void main() {
       TargetPlatform.linux,
       TargetPlatform.windows,
     }),
-    // On web, we don't let Flutter show the toolbar.
-    skip: isBrowser,
+    skip: isContextMenuProvidedByPlatform,
   );
 
   testWidgets('cursor layout has correct width', (WidgetTester tester) async {
@@ -1221,8 +1221,7 @@ void main() {
     await tester.longPressAt(emptyPos, pointer: 7);
     await tester.pumpAndSettle();
     expect(find.text('Paste'), findsOneWidget);
-    // On web, we don't let Flutter show the toolbar.
-  }, skip: isBrowser);
+  }, skip: isContextMenuProvidedByPlatform);
 
   testWidgets('Entering text hides selection handle caret', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
@@ -1370,8 +1369,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Context menu should not have paste and cut.
-    // On web, we don't let Flutter show the toolbar.
-    expect(find.text('Copy'), isBrowser ? findsNothing : findsOneWidget);
+    expect(find.text('Copy'), isContextMenuProvidedByPlatform ? findsNothing : findsOneWidget);
     expect(find.text('Paste'), findsNothing);
     expect(find.text('Cut'), findsNothing);
   });
@@ -1946,8 +1944,7 @@ void main() {
     await tester.tap(find.text('Paste'));
     await tester.pump();
     expect(controller.text, 'abc d${testValue}ef ghi');
-    // On web, we don't let Flutter show the toolbar.
-  }, skip: isBrowser);
+  }, skip: isContextMenuProvidedByPlatform);
 
   // Show the selection menu at the given index into the text by tapping to
   // place the cursor and then tapping on the handle.
@@ -2026,8 +2023,7 @@ void main() {
       textFieldTopLeft = tester.getTopLeft(find.byType(TextField));
       expect(toolbarTopLeft.dy, lessThan(textFieldTopLeft.dy));
     },
-    // On web, we don't let Flutter show the toolbar.
-    skip: isBrowser,
+    skip: isContextMenuProvidedByPlatform,
   );
 
   testWidgets(
@@ -2083,8 +2079,7 @@ void main() {
       expect(lastLineToolbarTopLeft.dy, lessThan(lastLineTopLeft.dy));
       expect(lastLineToolbarTopLeft.dy, greaterThan(penultimateLineToolbarTopLeft.dy));
     },
-    // On web, we don't let Flutter show the toolbar.
-    skip: isBrowser,
+    skip: isContextMenuProvidedByPlatform,
   );
 
   testWidgets('Selection toolbar fades in', (WidgetTester tester) async {
@@ -2130,9 +2125,7 @@ void main() {
     expect(opacity.opacity.value, lessThan(1.0));
 
     // End the test here to ensure the animation is properly disposed of.
-
-    // On web, we don't let Flutter show the toolbar.
-  }, skip: isBrowser);
+  }, skip: isContextMenuProvidedByPlatform);
 
   testWidgets('An obscured TextField is selectable by default', (WidgetTester tester) async {
     // This is a regression test for
@@ -2245,9 +2238,7 @@ void main() {
     expect(find.text('Select all'), findsOneWidget);
     expect(find.text('Copy'), findsNothing);
     expect(find.text('Cut'), findsNothing);
-
-    // On web, we don't let Flutter show the toolbar.
-  }, skip: isBrowser);
+  }, skip: isContextMenuProvidedByPlatform);
 
   testWidgets('TextField height with minLines unset', (WidgetTester tester) async {
     await tester.pumpWidget(textFieldBuilder());
@@ -2725,8 +2716,7 @@ void main() {
     expect(controller.selection.baseOffset, 5);
     expect(controller.selection.extentOffset, 50);
 
-    // On web, we don't let Flutter show the toolbar.
-    if (!isBrowser) {
+    if (!isContextMenuProvidedByPlatform) {
       await tester.tap(find.text('Cut'));
       await tester.pump();
       expect(controller.selection.isCollapsed, true);
@@ -3578,9 +3568,7 @@ void main() {
     await tester.pump();
     // Puts 456 before the 2 in 123.
     expect(textController.text, '145623');
-
-    // On web, we don't let Flutter show the toolbar.
-  }, skip: isBrowser);
+  }, skip: isContextMenuProvidedByPlatform);
 
   testWidgets('Pasted values are formatted (deprecated names)', (WidgetTester tester) async {
     final TextEditingController textController = TextEditingController();
@@ -3618,9 +3606,7 @@ void main() {
     await tester.pump();
     // Puts 456 before the 2 in 123.
     expect(textController.text, '145623');
-
-    // On web, we don't let Flutter show the toolbar.
-  }, skip: isBrowser);
+  }, skip: isContextMenuProvidedByPlatform);
 
   testWidgets('Do not add LengthLimiting formatter to the user supplied list', (WidgetTester tester) async {
     final List<TextInputFormatter> formatters = <TextInputFormatter>[];
@@ -4672,9 +4658,7 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -1);
     });
-
-    // On web, keyboard events in text fields are handled by the browser.
-  }, skip: isBrowser);
+  }, skip: areKeyEventsHandledByPlatform);
 
   testWidgets('Copy paste test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -4747,9 +4731,7 @@ void main() {
 
     const String expected = 'a biga big house\njumped over a mouse';
     expect(find.text(expected), findsOneWidget, reason: 'Because text contains ${controller.text}');
-
-    // On web, keyboard events in text fields are handled by the browser.
-  }, skip: isBrowser);
+  }, skip: areKeyEventsHandledByPlatform);
 
   testWidgets('Copy paste obscured text test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -4822,9 +4804,7 @@ void main() {
 
     const String expected = 'a biga big house jumped over a mouse';
     expect(find.text(expected), findsOneWidget, reason: 'Because text contains ${controller.text}');
-
-    // On web, keyboard events in text fields are handled by the browser.
-  }, skip: isBrowser);
+  }, skip: areKeyEventsHandledByPlatform);
 
   testWidgets('Cut test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -4899,9 +4879,7 @@ void main() {
 
     const String expected = ' housa bige\njumped over a mouse';
     expect(find.text(expected), findsOneWidget);
-
-    // On web, keyboard events in text fields are handled by the browser.
-  }, skip: isBrowser);
+  }, skip: areKeyEventsHandledByPlatform);
 
   testWidgets('Cut obscured text test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -4975,9 +4953,7 @@ void main() {
 
     const String expected = ' housa bige jumped over a mouse';
     expect(find.text(expected), findsOneWidget);
-
-    // On web, keyboard events in text fields are handled by the browser.
-  }, skip: isBrowser);
+  }, skip: areKeyEventsHandledByPlatform);
 
   testWidgets('Select all test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -5026,9 +5002,7 @@ void main() {
 
     const String expected = '';
     expect(find.text(expected), findsOneWidget);
-
-    // On web, keyboard events in text fields are handled by the browser.
-  }, skip: isBrowser);
+  }, skip: areKeyEventsHandledByPlatform);
 
   testWidgets('Delete test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -5080,9 +5054,7 @@ void main() {
 
     const String expected2 = '';
     expect(find.text(expected2), findsOneWidget);
-
-    // On web, keyboard events in text fields are handled by the browser.
-  }, skip: isBrowser);
+  }, skip: areKeyEventsHandledByPlatform);
 
   testWidgets('Changing positions of text fields', (WidgetTester tester) async {
 
@@ -5174,9 +5146,7 @@ void main() {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
 
     expect(c1.selection.extentOffset - c1.selection.baseOffset, -10);
-
-    // On web, keyboard events in text fields are handled by the browser.
-  }, skip: isBrowser);
+  }, skip: areKeyEventsHandledByPlatform);
 
 
   testWidgets('Changing focus test', (WidgetTester tester) async {
@@ -5251,9 +5221,7 @@ void main() {
 
     expect(c1.selection.extentOffset - c1.selection.baseOffset, 0);
     expect(c2.selection.extentOffset - c2.selection.baseOffset, -5);
-
-    // On web, keyboard events in text fields are handled by the browser.
-  }, skip: isBrowser);
+  }, skip: areKeyEventsHandledByPlatform);
 
   testWidgets('Caret works when maxLines is null', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
@@ -6109,7 +6077,7 @@ void main() {
 
     expect(topLeft.dx, equals(160.0));
 
-    // RTL support still has issues on the web.
+    // TODO: RTL support still has issues on the web.
     // https://github.com/flutter/flutter/projects/159
   }, skip: isBrowser);
 
@@ -6842,8 +6810,7 @@ void main() {
       );
 
       // Selected text shows 3 toolbar buttons.
-      // On web, we don't let Flutter show the toolbar.
-      expect(find.byType(CupertinoButton), isBrowser ? findsNothing : findsNWidgets(3));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
@@ -6888,8 +6855,7 @@ void main() {
       );
 
       // Selected text shows 4 toolbar buttons: cut, copy, paste, select all
-      // On web, we don't let Flutter show the toolbar.
-      expect(find.byType(TextButton), isBrowser ? findsNothing : findsNWidgets(4));
+      expect(find.byType(TextButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(4));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
   testWidgets('Custom toolbar test - Android text selection controls', (WidgetTester tester) async {
@@ -6919,9 +6885,7 @@ void main() {
 
       // Selected text shows 4 toolbar buttons: cut, copy, paste, select all
       expect(find.byType(TextButton), findsNWidgets(4));
-
-      // On web, we don't let Flutter show the toolbar.
-  }, variant: TargetPlatformVariant.all(), skip: isBrowser);
+  }, variant: TargetPlatformVariant.all(), skip: isContextMenuProvidedByPlatform);
 
   testWidgets(
     'Custom toolbar test - Cupertino text selection controls',
@@ -6952,9 +6916,7 @@ void main() {
 
       // Selected text shows 3 toolbar buttons: cut, copy, paste
       expect(find.byType(CupertinoButton), findsNWidgets(3));
-
-      // On web, we don't let Flutter show the toolbar.
-  }, variant: TargetPlatformVariant.all(), skip: isBrowser);
+  }, variant: TargetPlatformVariant.all(), skip: isContextMenuProvidedByPlatform);
 
   testWidgets('selectionControls is passed to EditableText',
       (WidgetTester tester) async {
@@ -7020,8 +6982,7 @@ void main() {
       );
 
       // Selected text shows 4 toolbar buttons: cut, copy, paste, select all
-      // On web, we don't let Flutter show the toolbar.
-      expect(find.byType(TextButton), isBrowser ? findsNothing : findsNWidgets(4));
+      expect(find.byType(TextButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(4));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
   testWidgets(
@@ -7056,9 +7017,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Paste'), findsOneWidget);
     },
-
-    // On web, we don't let Flutter show the toolbar.
-    skip: isBrowser,
+    skip: isContextMenuProvidedByPlatform,
   );
 
   testWidgets(
@@ -7089,9 +7048,7 @@ void main() {
       await tester.pump();
       expect(find.text('Paste'), findsOneWidget);
     },
-
-    // On web, we don't let Flutter show the toolbar.
-    skip: isBrowser,
+    skip: isContextMenuProvidedByPlatform,
   );
 
   testWidgets(
@@ -7122,9 +7079,7 @@ void main() {
       await tester.pump();
       expect(find.text('Paste'), findsNothing);
     },
-
-    // On web, we don't let Flutter show the toolbar.
-    skip: isBrowser,
+    skip: isContextMenuProvidedByPlatform,
   );
 
   testWidgets(
@@ -7155,9 +7110,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Paste'), findsOneWidget);
     },
-
-    // On web, we don't let Flutter show the toolbar.
-    skip: isBrowser,
+    skip: isContextMenuProvidedByPlatform,
   );
 
   testWidgets(
@@ -7193,8 +7146,7 @@ void main() {
       );
 
       // Selected text shows 3 toolbar buttons.
-      // On web, we don't let Flutter show the toolbar.
-      expect(find.byType(CupertinoButton), isBrowser ? findsNothing : findsNWidgets(3));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
 
       await gesture.up();
       await tester.pump();
@@ -7205,8 +7157,7 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
       // The toolbar is still showing.
-      // On web, we don't let Flutter show the toolbar.
-      expect(find.byType(CupertinoButton), isBrowser ? findsNothing : findsNWidgets(3));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
@@ -7285,8 +7236,7 @@ void main() {
       );
 
       // Collapsed toolbar shows 2 buttons.
-      // On web, we don't let Flutter show the toolbar.
-      expect(find.byType(CupertinoButton), isBrowser ? findsNothing : findsNWidgets(2));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(2));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
@@ -7318,8 +7268,7 @@ void main() {
       );
 
       // Collapsed toolbar shows 4 buttons: cut, copy, paste, select all
-      // On web, we don't let Flutter show the toolbar.
-      expect(find.byType(TextButton), isBrowser ? findsNothing : findsNWidgets(4));
+      expect(find.byType(TextButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(4));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
   testWidgets(
@@ -7422,8 +7371,7 @@ void main() {
         const TextSelection.collapsed(offset: 9, affinity: TextAffinity.downstream),
       );
       // The toolbar now shows up.
-      // On web, we don't let Flutter show the toolbar.
-      expect(find.byType(CupertinoButton), isBrowser ? findsNothing : findsNWidgets(2));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(2));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('long press drag can edge scroll', (WidgetTester tester) async {
@@ -7497,8 +7445,7 @@ void main() {
       const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
     );
     // The toolbar now shows up.
-    // On web, we don't let Flutter show the toolbar.
-    expect(find.byType(CupertinoButton), isBrowser ? findsNothing : findsNWidgets(2));
+    expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(2));
 
     lastCharEndpoint = renderEditable.getEndpointsForSelection(
       const TextSelection.collapsed(offset: 66), // Last character's position.
@@ -7556,8 +7503,7 @@ void main() {
       );
 
       // Long press toolbar.
-      // On web, we don't let Flutter show the toolbar.
-      expect(find.byType(CupertinoButton), isBrowser ? findsNothing : findsNWidgets(2));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(2));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
@@ -7602,8 +7548,7 @@ void main() {
         controller.selection,
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
-      // On web, we don't let Flutter show the toolbar.
-      expect(find.byType(CupertinoButton), isBrowser ? findsNothing : findsNWidgets(3));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets(
@@ -7694,8 +7639,7 @@ void main() {
         controller.selection,
         const TextSelection(baseOffset: 0, extentOffset: 7),
       );
-      // On web, we don't let Flutter show the toolbar.
-      expect(find.byType(CupertinoButton), isBrowser ? findsNothing : findsNWidgets(3));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
 
       // Double tap selecting the same word somewhere else is fine.
       await tester.tapAt(textfieldStart + const Offset(100.0, 9.0));
@@ -7711,8 +7655,7 @@ void main() {
         controller.selection,
         const TextSelection(baseOffset: 0, extentOffset: 7),
       );
-      // On web, we don't let Flutter show the toolbar.
-      expect(find.byType(CupertinoButton), isBrowser ? findsNothing : findsNWidgets(3));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
 
       await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
       await tester.pump(const Duration(milliseconds: 50));
@@ -7727,8 +7670,7 @@ void main() {
         controller.selection,
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
-      // On web, we don't let Flutter show the toolbar.
-      expect(find.byType(CupertinoButton), isBrowser ? findsNothing : findsNWidgets(3));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('double click chains work', (WidgetTester tester) async {
@@ -8101,8 +8043,7 @@ void main() {
 
     await gesture.up();
     await tester.pumpAndSettle();
-    // On web, we don't let Flutter show the toolbar.
-    expect(find.byType(CupertinoButton), isBrowser ? findsNothing : findsNWidgets(3));
+    expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('tap on non-force-press-supported devices work', (WidgetTester tester) async {
@@ -8386,7 +8327,7 @@ void main() {
       );
     },
 
-    // https://github.com/flutter/flutter/issues/32243
+    // TODO: https://github.com/flutter/flutter/issues/32243
     skip: isBrowser,
   );
 
@@ -8417,7 +8358,7 @@ void main() {
       );
     },
 
-    // https://github.com/flutter/flutter/issues/32243
+    // TODO: https://github.com/flutter/flutter/issues/32243
     skip: isBrowser,
   );
 
@@ -8450,7 +8391,7 @@ void main() {
       );
     },
 
-    // https://github.com/flutter/flutter/issues/32243
+    // TODO: https://github.com/flutter/flutter/issues/32243
     skip: isBrowser,
   );
 
@@ -8671,8 +8612,7 @@ void main() {
 
     final EditableTextState editableText = tester.state(find.byType(EditableText));
     expect(editableText.selectionOverlay!.handlesAreVisible, isTrue);
-    // On web, we don't let Flutter show the toolbar.
-    expect(editableText.selectionOverlay!.toolbarIsVisible, isBrowser ? isFalse : isTrue);
+    expect(editableText.selectionOverlay!.toolbarIsVisible, isContextMenuProvidedByPlatform ? isFalse : isTrue);
   });
 
   testWidgets(
@@ -8694,8 +8634,7 @@ void main() {
 
       final EditableTextState editableText = tester.state(find.byType(EditableText));
       expect(editableText.selectionOverlay!.handlesAreVisible, isTrue);
-      // On web, we don't let Flutter show the toolbar.
-      expect(editableText.selectionOverlay!.toolbarIsVisible, isBrowser ? isFalse : isTrue);
+      expect(editableText.selectionOverlay!.toolbarIsVisible, isContextMenuProvidedByPlatform ? isFalse : isTrue);
     },
   );
 
@@ -8720,8 +8659,7 @@ void main() {
 
     final EditableTextState editableText = tester.state(find.byType(EditableText));
     expect(editableText.selectionOverlay!.handlesAreVisible, isTrue);
-    // On web, we don't let Flutter show the toolbar.
-    expect(editableText.selectionOverlay!.toolbarIsVisible, isBrowser ? isFalse : isTrue);
+    expect(editableText.selectionOverlay!.toolbarIsVisible, isContextMenuProvidedByPlatform ? isFalse : isTrue);
   });
 
   testWidgets(
@@ -8745,8 +8683,7 @@ void main() {
 
       final EditableTextState editableText = tester.state(find.byType(EditableText));
       expect(editableText.selectionOverlay!.handlesAreVisible, isFalse);
-      // On web, we don't let Flutter show the toolbar.
-      expect(editableText.selectionOverlay!.toolbarIsVisible, isBrowser ? isFalse : isTrue);
+      expect(editableText.selectionOverlay!.toolbarIsVisible, isContextMenuProvidedByPlatform ? isFalse : isTrue);
     },
   );
 
@@ -8928,8 +8865,7 @@ void main() {
     // Tap the handle to show the toolbar.
     final Offset handlePos = endpoints[0].point + const Offset(0.0, 1.0);
     await tester.tapAt(handlePos, pointer: 7);
-    // On web, we don't let Flutter show the toolbar.
-    expect(editableText.selectionOverlay!.toolbarIsVisible, isBrowser ? isFalse : isTrue);
+    expect(editableText.selectionOverlay!.toolbarIsVisible, isContextMenuProvidedByPlatform ? isFalse : isTrue);
 
     // Tap the handle again to hide the toolbar.
     await tester.tapAt(handlePos, pointer: 7);
@@ -9473,7 +9409,7 @@ void main() {
     expect(inputWidth, wideWidth);
     expect(cursorRight, inputWidth - kCaretGap);
 
-    // RTL support still has issues on the web.
+    // TODO: RTL support still has issues on the web.
     // https://github.com/flutter/flutter/projects/159
   }, skip: isBrowser);
 

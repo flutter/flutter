@@ -20,6 +20,7 @@ platform.TargetPlatform get defaultTargetPlatform {
 final platform.TargetPlatform? _testPlatform = () {
   platform.TargetPlatform? result;
   assert(() {
+    // This member is only available in the web's dart:ui implementation.
     // ignore: undefined_prefixed_name
     if (ui.debugEmulateFlutterTesterEnvironment as bool) {
       result = platform.TargetPlatform.android;
