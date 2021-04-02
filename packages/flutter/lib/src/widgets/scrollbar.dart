@@ -944,7 +944,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
           if (!scrollController!.hasClients) {
             throw FlutterError.fromParts(<DiagnosticsNode>[
               ErrorSummary(
-                'The Scrollbar\'s ScrollController has no ScrollPosition attached.'
+                "The Scrollbar's ScrollController has no ScrollPosition attached."
               ),
               ErrorDescription(
                 'A Scrollbar cannot be painted without a ScrollPosition. '
