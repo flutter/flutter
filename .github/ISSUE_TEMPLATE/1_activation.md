@@ -24,16 +24,16 @@ assignees: ''
      our guide to filing a bug first: https://flutter.dev/docs/resources/bug-reports
 -->
 
+## Details
 
 <!--
      Please describe in detail the problem you are running into.
-
-     If you have concrete steps to reproduce the problem, list them:
-
-        1. ...
-        2. ...
-        3. ...
+     If you have concrete steps to reproduce the problem, please list them.
 -->
+
+1. ...
+2. ...
+3. ...
 
 
 

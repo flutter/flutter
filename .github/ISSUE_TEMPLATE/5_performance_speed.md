@@ -24,31 +24,9 @@ assignees: ''
 
 ## Details
 
-<!--
-     Please describe in detail the problem you are running into.
--->
+<!-- Please describe in detail the problem you are running into. -->
 
-<!--
-     Switch flutter to master channel and run this app on a physical device
-     using profile mode with Skia tracing enabled, as follows:
-       flutter channel master
-       flutter run --profile --trace-skia
-
-     The bleeding edge master channel is encouraged here because Flutter is
-     constantly fixing bugs and improving its performance. Your problem in an
-     older Flutter version may have already been solved in the master channel.
--->
-
-<!--
-     Open Observatory and save a timeline trace of the performance issue
-     so we know which functions might be causing it. See "How to Collect
-     and Read Timeline Traces" on this blog post:
-       https://medium.com/flutter/profiling-flutter-applications-using-the-timeline-a1a434964af3#a499
-
-     Make sure the performance overlay is turned OFF when recording the
-     trace as that may affect the performance of the profile run.
-     (Pressing ‘P’ on the command line toggles the overlay.)
--->
+## Platform(s)
 
 <!--
      Please tell us which target platform(s) the problem occurs (Android / iOS / Web / macOS / Linux / Windows)
@@ -66,15 +44,35 @@ assignees: ''
 <summary>Code sample</summary>
 
 <!--
-     Please create a minimal reproducible sample that shows the problem
+
+1.   Please create a minimal reproducible sample that shows the problem
      and attach it below between the lines with the backticks.
 
-     Without this we will unlikely progress on the issue, and thus will have
-     to close it.
+     Without this we will unlikely be able to progress on the issue, and because of that
+     we regretfully will have to close it.
 
      If your problem goes out of what can be placed in file, for example
      you have a problem with native channels, you can upload the full code of
      your reproduction into a separate repository and link it.
+
+2.   Switch flutter to master channel and run this app on a physical device
+     using profile mode with Skia tracing enabled, as follows:
+       flutter channel master
+       flutter run --profile --trace-skia
+
+     The bleeding edge master channel is encouraged here because Flutter is
+     constantly fixing bugs and improving its performance. Your problem in an
+     older Flutter version may have already been solved in the master channel.
+
+3.   Open Observatory, save a timeline trace of the performance issue and attach
+     it at the end of the issue, so we know which functions might be causing it.
+     See "How to Collect and Read Timeline Traces" on this blog post:
+       https://medium.com/flutter/profiling-flutter-applications-using-the-timeline-a1a434964af3#a499
+
+     Make sure the performance overlay is turned OFF when recording the
+     trace as that may affect the performance of the profile run.
+     (Pressing ‘P’ on the command line toggles the overlay.)
+
 -->
 
 ```dart

@@ -23,26 +23,25 @@ assignees: ''
      our guide to filing a bug first: https://flutter.dev/docs/resources/bug-reports
 -->
 
-### Description
+## Description
 
 <!--
      Please describe in detail the problem you are running into.
-
-     List concrete steps to reproduce the problem, if this will better illustrate it:
-
-        1. ...
-        2. ...
-        3. ...
+     List concrete steps to reproduce the problem, if this will better illustrate it.
 -->
 
-### Expected results
+1. ...
+2. ...
+3. ...
+
+
+## Expected results
 
 <!-- What did you want to see? -->
 
-### Actual results
+## Actual results
 
 <!-- What did you see? -->
-
 
 
 
@@ -53,8 +52,8 @@ assignees: ''
      Please create a minimal reproducible sample that shows the problem
      and attach it below between the lines with the backticks.
 
-     Without this we will unlikely progress on the issue, and thus will have
-     to close it.
+     Without this we will unlikely be able to progress on the issue, and because of that
+     we regretfully will have to close it.
 
      If your problem goes out of what can be placed in file, for example
      you have a problem with native channels, you can upload the full code of
