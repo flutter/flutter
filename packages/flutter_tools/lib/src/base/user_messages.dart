@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'context.dart';
 import 'platform.dart';
 
-UserMessages get userMessages => context.get<UserMessages>();
+UserMessages get userMessages => context.get<UserMessages>()!;
 
 /// Class containing message strings that can be produced by Flutter tools.
 class UserMessages {
@@ -16,7 +14,7 @@ class UserMessages {
       'Please report a bug at https://github.com/flutter/flutter/issues.';
 
   // Messages used in FlutterValidator
-  String flutterStatusInfo(String channel, String version, String os, String locale) =>
+  String flutterStatusInfo(String? channel, String? version, String os, String locale) =>
       'Channel ${channel ?? 'unknown'}, ${version ?? 'Unknown'}, on $os, locale $locale';
   String flutterVersion(String version, String flutterRoot) =>
       'Flutter version $version at $flutterRoot';

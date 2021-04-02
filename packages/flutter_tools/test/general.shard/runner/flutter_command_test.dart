@@ -241,7 +241,6 @@ void main() {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
           throwToolExit('fail');
-          return null; // unreachable
         }
       );
       try {
@@ -469,7 +468,6 @@ void main() {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
           throwToolExit('fail');
-          return null; // unreachable
         },
       );
 

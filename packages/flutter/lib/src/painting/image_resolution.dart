@@ -236,7 +236,7 @@ class AssetImage extends AssetBundleImageProvider {
           // ourselves.
           result = SynchronousFuture<AssetBundleImageKey>(key);
         }
-      }
+      },
     ).catchError((Object error, StackTrace stack) {
       // We had an error. (This guarantees we weren't called synchronously.)
       // Forward the error to the caller.
@@ -281,7 +281,7 @@ class AssetImage extends AssetBundleImageProvider {
     return _findBestVariant(mapping, config.devicePixelRatio!);
   }
 
-  // Returns the "best" asset variant amongst the availabe `candidates`.
+  // Returns the "best" asset variant amongst the available `candidates`.
   //
   // The best variant is chosen as follows:
   // - Choose a variant whose key matches `value` exactly, if available.

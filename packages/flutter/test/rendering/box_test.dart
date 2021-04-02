@@ -390,6 +390,7 @@ void main() {
 
     tearDown(() {
       firstErrorDetails = null;
+      RenderObject.debugCheckingIntrinsics = false;
     });
 
     test('throws if the resulting constraints are not normalized', () {
@@ -415,8 +416,30 @@ void main() {
         child: child,
       );
 
-      // No error reported.
       layout(box, constraints: const BoxConstraints(), phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+    });
+
+    test('handles flow layout', () {
+      final RenderParagraph child = RenderParagraph(
+        TextSpan(text: 'a' * 100),
+        textDirection: TextDirection.ltr,
+      );
+      final RenderConstraintsTransformBox box = RenderConstraintsTransformBox(
+        alignment: Alignment.center,
+        textDirection: TextDirection.ltr,
+        constraintsTransform: (BoxConstraints constraints) => constraints.copyWith(maxWidth: double.infinity),
+        child: child,
+      );
+
+      // With a width of 30, the RenderParagraph would have wrapped, but the
+      // RenderConstraintsTransformBox allows the paragraph to expand regardless
+      // of the width constraint:
+      // unconstrainedHeight * numberOfLines = constrainedHeight.
+      final double constrainedHeight = child.getMinIntrinsicHeight(30);
+      final double unconstrainedHeight = box.getMinIntrinsicHeight(30);
+
+      // At least 2 lines.
+      expect(constrainedHeight, greaterThanOrEqualTo(2 * unconstrainedHeight));
     });
   });
 

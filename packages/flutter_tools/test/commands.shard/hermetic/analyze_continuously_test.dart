@@ -39,7 +39,7 @@ void main() {
   Logger logger;
 
   setUp(() {
-    fileSystem = LocalFileSystem.instance;
+    fileSystem = globals.localFileSystem;
     platform = const LocalPlatform();
     processManager = const LocalProcessManager();
     terminal = AnsiTerminal(platform: platform, stdio: Stdio());

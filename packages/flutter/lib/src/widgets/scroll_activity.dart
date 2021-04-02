@@ -214,8 +214,7 @@ class HoldScrollActivity extends ScrollActivity implements ScrollHoldController 
 
   @override
   void dispose() {
-    if (onHoldCanceled != null)
-      onHoldCanceled!();
+    onHoldCanceled?.call();
     super.dispose();
   }
 }
@@ -241,7 +240,7 @@ class ScrollDragController implements Drag {
        assert(details != null),
        assert(
          motionStartDistanceThreshold == null || motionStartDistanceThreshold > 0.0,
-         'motionStartDistanceThreshold must be a positive number or null'
+         'motionStartDistanceThreshold must be a positive number or null',
        ),
        _delegate = delegate,
        _lastDetails = details,
@@ -406,8 +405,7 @@ class ScrollDragController implements Drag {
   @mustCallSuper
   void dispose() {
     _lastDetails = null;
-    if (onDragCanceled != null)
-      onDragCanceled!();
+    onDragCanceled?.call();
   }
 
   /// The most recently observed [DragStartDetails], [DragUpdateDetails], or

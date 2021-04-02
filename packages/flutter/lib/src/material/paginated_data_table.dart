@@ -392,7 +392,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
             padding: const EdgeInsetsDirectional.only(start: 24.0 - 8.0 * 2.0),
             child: action,
           );
-        }).toList()
+        }).toList(),
       );
     }
 
@@ -491,7 +491,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                                                  : themeData.textTheme.headline6!.copyWith(fontWeight: FontWeight.w400),
                     child: IconTheme.merge(
                       data: const IconThemeData(
-                        opacity: 0.54
+                        opacity: 0.54,
                       ),
                       child: Ink(
                         height: 64.0,
@@ -536,7 +536,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                 style: footerTextStyle!,
                 child: IconTheme.merge(
                   data: const IconThemeData(
-                    opacity: 0.54
+                    opacity: 0.54,
                   ),
                   child: SizedBox(
                     // TODO(bkonyi): this won't handle text zoom correctly,
