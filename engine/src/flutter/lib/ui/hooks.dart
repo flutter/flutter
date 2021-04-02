@@ -132,10 +132,14 @@ typedef _ListStringArgFunction(List<String> args);
 @pragma('vm:entry-point')
 // ignore: unused_element
 void _runMainZoned(Function startMainIsolateFunction,
+                   Function? dartPluginRegistrant,
                    Function userMainFunction,
                    List<String> args) {
   startMainIsolateFunction(() {
     runZonedGuarded<void>(() {
+      if (dartPluginRegistrant != null) {
+        dartPluginRegistrant();
+      }
       if (userMainFunction is _ListStringArgFunction) {
         (userMainFunction as dynamic)(args);
       } else {
