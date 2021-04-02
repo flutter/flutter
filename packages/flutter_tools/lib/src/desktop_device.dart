@@ -19,7 +19,7 @@ import 'build_info.dart';
 import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
-import 'device_port_forwader.dart';
+import 'device_port_forwarder.dart';
 import 'protocol_discovery.dart';
 
 /// A partial implementation of Device for desktop-class devices to inherit

@@ -124,18 +124,8 @@ abstract class KeyboardKey with Diagnosticable {
 ///    keyboard events.
 @immutable
 class LogicalKeyboardKey extends KeyboardKey {
-  /// A LogicalKeyboardKey object for a key ID.
-  ///
-  /// This factory constructor ensures that the same `keyId` always results
-  /// in the identical instance. It looks up an object from the predefined values
-  /// if possible, or construct a new one and cache it.
-  factory LogicalKeyboardKey(int keyId) {
-    return findKeyByKeyId(keyId) ??
-      _additionalKeyPool.putIfAbsent(keyId, () => LogicalKeyboardKey._(keyId));
-  }
-
-  /// Creates a LogicalKeyboardKey object for a key ID.
-  const LogicalKeyboardKey._(this.keyId);
+  /// Creates a new LogicalKeyboardKey object for a key ID.
+  const LogicalKeyboardKey(this.keyId);
 
   /// A unique code representing this key.
   ///
@@ -232,6 +222,19 @@ class LogicalKeyboardKey extends KeyboardKey {
       return true;
     }());
     return result;
+  }
+
+  @override
+  int get hashCode => keyId.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is LogicalKeyboardKey
+        && other.keyId == keyId;
   }
 
   /// Returns the [LogicalKeyboardKey] constant that matches the given ID, or
@@ -467,18 +470,8 @@ class LogicalKeyboardKey extends KeyboardKey {
 ///    keyboard events.
 @immutable
 class PhysicalKeyboardKey extends KeyboardKey {
-  /// A PhysicalKeyboardKey object for a USB HID usage.
-  ///
-  /// This factory constructor ensures that the same `usbHidUsage` always results
-  /// in the identical instance. It looks up an object from the predefined values
-  /// if possible, or construct a new one and cache it.
-  factory PhysicalKeyboardKey(int usbHidUsage) {
-    return findKeyByCode(usbHidUsage) ??
-      _additionalKeyPool.putIfAbsent(usbHidUsage, () => PhysicalKeyboardKey._(usbHidUsage));
-  }
-
-  /// Creates a PhysicalKeyboardKey object for a USB HID usage.
-  const PhysicalKeyboardKey._(this.usbHidUsage);
+  /// Creates a new PhysicalKeyboardKey object for a USB HID usage.
+  const PhysicalKeyboardKey(this.usbHidUsage);
 
   /// The unique USB HID usage ID of this physical key on the keyboard.
   ///
@@ -500,6 +493,19 @@ class PhysicalKeyboardKey extends KeyboardKey {
       return true;
     }());
     return result;
+  }
+
+  @override
+  int get hashCode => usbHidUsage.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is PhysicalKeyboardKey
+        && other.usbHidUsage == usbHidUsage;
   }
 
   /// Finds a known [PhysicalKeyboardKey] that matches the given USB HID usage

@@ -133,6 +133,7 @@ void main() {
               AndroidSemanticsAction.click,
               AndroidSemanticsAction.copy,
               AndroidSemanticsAction.setSelection,
+              AndroidSemanticsAction.setText,
             ],
           ),
         );
@@ -155,6 +156,7 @@ void main() {
               AndroidSemanticsAction.click,
               AndroidSemanticsAction.copy,
               AndroidSemanticsAction.setSelection,
+              AndroidSemanticsAction.setText,
             ],
           ),
         );
@@ -198,6 +200,7 @@ void main() {
               AndroidSemanticsAction.click,
               AndroidSemanticsAction.copy,
               AndroidSemanticsAction.setSelection,
+              AndroidSemanticsAction.setText,
             ],
           ),
         );
@@ -220,6 +223,7 @@ void main() {
               AndroidSemanticsAction.click,
               AndroidSemanticsAction.copy,
               AndroidSemanticsAction.setSelection,
+              AndroidSemanticsAction.setText,
             ],
           ),
         );

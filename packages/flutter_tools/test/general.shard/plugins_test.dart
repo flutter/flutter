@@ -14,7 +14,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -1307,7 +1307,7 @@ flutter:
         projectDir.childFile('pubspec.yaml')..createSync(recursive: true)..writeAsStringSync(yamlString);
       }
 
-      test('validatePubspecForPlugin works', () async {
+      testUsingContext('validatePubspecForPlugin works', () async {
         const String pluginYaml = '''
   flutter:
     plugin:
@@ -1333,7 +1333,7 @@ flutter:
         ], androidIdentifier: 'AndroidPackage', webFileName: 'lib/SomeFile.dart');
       });
 
-      test('createPlatformsYamlMap should create the correct map', () async {
+      testUsingContext('createPlatformsYamlMap should create the correct map', () async {
         final YamlMap map = Plugin.createPlatformsYamlMap(<String>['ios', 'android', 'linux'], 'PluginClass', 'some.android.package');
         expect(map['ios'], <String, String> {
           'pluginClass' : 'PluginClass'
@@ -1347,7 +1347,7 @@ flutter:
         });
       });
 
-      test('createPlatformsYamlMap should create empty map', () async {
+      testUsingContext('createPlatformsYamlMap should create empty map', () async {
         final YamlMap map = Plugin.createPlatformsYamlMap(<String>[], null, null);
         expect(map.isEmpty, true);
       });

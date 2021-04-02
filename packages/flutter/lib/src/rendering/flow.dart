@@ -345,7 +345,7 @@ class RenderFlow extends RenderBox
         throw FlutterError(
           'Cannot call paintChild twice for the same child.\n'
           'The flow delegate of type ${_delegate.runtimeType} attempted to '
-          'paint child $i multiple times, which is not permitted.'
+          'paint child $i multiple times, which is not permitted.',
         );
       }
       return true;

@@ -189,7 +189,7 @@ class _TimePickerHeader extends StatelessWidget {
                       orientation: orientation,
                       onChanged: onChanged,
                     ),
-                  ]
+                  ],
                 ],
               ),
             ),

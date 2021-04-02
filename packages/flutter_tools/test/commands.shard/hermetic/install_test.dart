@@ -5,11 +5,13 @@
 // @dart = 2.8
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/android/application_package.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/install.dart';
+import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';

@@ -10,7 +10,7 @@ import '../base/io.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../ios/plist_parser.dart';
 
 AndroidStudio get androidStudio => context.get<AndroidStudio>();

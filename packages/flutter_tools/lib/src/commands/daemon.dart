@@ -20,7 +20,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../device_port_forwader.dart';
+import '../device_port_forwarder.dart';
 import '../emulator.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
@@ -390,6 +390,9 @@ class DaemonDomain extends Domain {
       }
       if (featureFlags.isFuchsiaEnabled && flutterProject.fuchsia.existsSync()) {
         result.add('fuchsia');
+      }
+      if (featureFlags.areCustomDevicesEnabled) {
+        result.add('custom');
       }
       return <String, Object>{
         'platforms': result,
