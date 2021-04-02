@@ -468,8 +468,8 @@ class _ReorderableListViewState extends State<ReorderableListView> {
         break;
       case Axis.vertical:
         if (widget.reverse) {
-          outerPadding = EdgeInsets.fromLTRB(padding.left, 0, padding.right, padding.bottom);
-          listPadding = EdgeInsets.fromLTRB(0, padding.top, 0, 0);
+          outerPadding = EdgeInsets.fromLTRB(padding.left, 0, padding.right, 0);
+          listPadding = EdgeInsets.fromLTRB(0, padding.top, 0, padding.bottom);
         } else {
           outerPadding = EdgeInsets.fromLTRB(padding.left, 0, padding.right, 0);
           listPadding = EdgeInsets.fromLTRB(0, padding.top, 0, padding.bottom);
