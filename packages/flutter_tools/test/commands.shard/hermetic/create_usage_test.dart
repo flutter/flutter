@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 import '../../src/testbed.dart';
 
 void main() {
