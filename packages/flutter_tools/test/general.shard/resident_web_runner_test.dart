@@ -61,18 +61,32 @@ const List<VmServiceExpectation> kAttachIsolateExpectations = <VmServiceExpectat
     }
   ),
   FakeVmServiceRequest(
+    method: 'registerService',
+    args: <String, Object>{
+      'service': 'reloadSources',
+      'alias': 'Flutter Tools',
+    }
+  ),
+  FakeVmServiceRequest(
+    method: 'registerService',
+    args: <String, Object>{
+      'service': 'flutterVersion',
+      'alias': 'Flutter Tools',
+    }
+  ),
+  FakeVmServiceRequest(
+    method: 'registerService',
+    args: <String, Object>{
+      'service': 'flutterMemoryInfo',
+      'alias': 'Flutter Tools',
+    }
+  ),
+  FakeVmServiceRequest(
     method: 'streamListen',
     args: <String, Object>{
       'streamId': 'Extension',
     },
   ),
-  FakeVmServiceRequest(
-    method: 'registerService',
-    args: <String, Object>{
-      'service': 'reloadSources',
-      'alias': 'FlutterTools',
-    }
-  )
 ];
 
 const List<VmServiceExpectation> kAttachExpectations = <VmServiceExpectation>[
@@ -480,11 +494,6 @@ void main() {
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
-
-    // Need these to run events, otherwise expect statements below run before
-    // structured errors are processed.
-    await null;
-    await null;
     await null;
 
     expect(testLogger.statusText, contains('\nerror text'));

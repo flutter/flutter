@@ -220,7 +220,6 @@ class UpgradeCommandRunner {
         'Error: $error.'
       );
     }
-    return false;
   }
 
   /// Returns the remote HEAD flutter version.

@@ -38,6 +38,7 @@ import 'project.dart';
 import 'resident_devtools_handler.dart';
 import 'run_cold.dart';
 import 'run_hot.dart';
+import 'sksl_writer.dart';
 import 'vmservice.dart';
 
 class FlutterDevice {
@@ -252,7 +253,7 @@ class FlutterDevice {
         // this may not be the case when scraping logcat for URIs. If this URI is
         // from an old application instance, we shouldn't try and start DDS.
         try {
-          service = await connectToVmService(observatoryUri);
+          service = await connectToVmService(observatoryUri, logger: globals.logger);
           await service.dispose();
         } on Exception catch (exception) {
           globals.printTrace('Fail to connect to service protocol: $observatoryUri: $exception');
@@ -271,6 +272,7 @@ class FlutterDevice {
             ddsPort,
             ipv6,
             disableServiceAuthCodes,
+            logger: globals.logger,
           );
         } on dds.DartDevelopmentServiceException catch (e, st) {
           if (!allowExistingDdsInstance ||
@@ -302,6 +304,7 @@ class FlutterDevice {
               getSkSLMethod: getSkSLMethod,
               printStructuredErrorLogMethod: printStructuredErrorLogMethod,
               device: device,
+              logger: globals.logger,
             ),
             if (!existingDds)
               device.dds.done.whenComplete(() => throw Exception('DDS shut down too early')),
@@ -919,6 +922,7 @@ abstract class ResidentRunner {
       flutterRootDir: globals.fs.directory(Cache.flutterRoot),
       outputDir: globals.fs.directory(getBuildDirectory()),
       processManager: globals.processManager,
+      platform: globals.platform,
       projectDir: globals.fs.currentDirectory,
     );
     _lastBuild = await globals.buildSystem.buildIncremental(
@@ -1008,7 +1012,7 @@ abstract class ResidentRunner {
   }
 
   Future<bool> debugDumpLayerTree() async {
-    if (!supportsServiceProtocol) {
+    if (!supportsServiceProtocol || !isRunningDebug) {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
@@ -1402,7 +1406,6 @@ abstract class ResidentRunner {
       if (supportsWriteSkSL) {
         commandHelp.M.print();
       }
-      commandHelp.v.print();
       // `P` should precede `a`
       commandHelp.P.print();
       commandHelp.a.print();

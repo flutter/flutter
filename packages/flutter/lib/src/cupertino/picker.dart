@@ -255,9 +255,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
       HapticFeedback.selectionClick();
     }
 
-    if (widget.onSelectedItemChanged != null) {
-      widget.onSelectedItemChanged!(index);
-    }
+    widget.onSelectedItemChanged?.call(index);
   }
 
   /// Draws the selectionOverlay.

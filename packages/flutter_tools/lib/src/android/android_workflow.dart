@@ -452,7 +452,6 @@ class AndroidLicenseValidator extends DoctorValidator {
         e.toString(),
         _platform,
       ));
-      return false;
     }
   }
 
