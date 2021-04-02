@@ -8,7 +8,7 @@ import '../common.dart';
 
 const int _kNumIterations = 65536;
 const int _kNumWarmUp = 100;
-const int _kScale = 1024;
+const int _kScale = 1000;
 
 void main() {
   assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
