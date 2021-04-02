@@ -579,14 +579,12 @@ void main() {
                     ),
                   ),
                   SizedBox(
-                    height: 25.0,
                     child: TextField(
                       key: const ValueKey<String>('text4'),
                       controller: TextEditingController(text: 'Hello4'),
                     ),
                   ),
                   SizedBox(
-                    height: 25.0,
                     child: TextFormField(
                       key: const ValueKey<String>('text5'),
                       controller: TextEditingController(text: 'Hello5'),

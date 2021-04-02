@@ -4452,7 +4452,7 @@ void main() {
         child: Center(
           child: SizedBox(
             width: 200,
-            height: 28,
+            height: 40,
             child: TextField(
               controller: TextEditingController(text: 'A'),
             ),
