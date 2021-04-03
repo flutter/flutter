@@ -969,6 +969,19 @@ Future<void> generateMainDartWithPluginRegistrant(
     MacOSPlugin.kConfigKey: <dynamic>[],
     WindowsPlugin.kConfigKey: <dynamic>[],
   };
+  if (resolutions.isEmpty) {
+    try {
+      if (newMainDart.existsSync()) {
+        newMainDart.deleteSync();
+      }
+    } on FileSystemException catch (error) {
+      throwToolExit(
+        'Unable to remove ${newMainDart.path}, received error: $error.\n'
+        'You might need to run flutter clean.'
+      );
+    }
+    return;
+  }
   for (final PluginInterfaceResolution resolution in resolutions) {
     assert(templateContext.containsKey(resolution.platform));
     (templateContext[resolution.platform] as List<dynamic>).add(resolution.toMap());

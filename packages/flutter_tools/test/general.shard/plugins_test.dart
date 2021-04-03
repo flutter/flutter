@@ -1831,48 +1831,18 @@ flutter:
     });
 
     group('generateMainDartWithPluginRegistrant', () {
-      testUsingContext('Generates new entrypoint', () async {
-        when(flutterProject.isModule).thenReturn(false);
 
-        final List<Directory> directories = <Directory>[];
+      List<Directory> createFakeDartPlugins(
+        FlutterProject flutterProject,
+        FlutterManifest flutterManifest,
+        FileSystem fs,
+        Map<String, String> plugins,
+      ) {
         final Directory fakePubCache = fs.systemTempDirectory.childDirectory('cache');
         final File packagesFile = flutterProject.directory
-            .childFile('.packages')
-            ..createSync(recursive: true);
+          .childFile('.packages')
+          ..createSync(recursive: true);
 
-        final Map<String, String> plugins = <String, String>{};
-        plugins['url_launcher_macos'] = '''
-  flutter:
-    plugin:
-      implements: url_launcher
-      platforms:
-        macos:
-          dartPluginClass: MacOSPlugin
-''';
-        plugins['url_launcher_linux'] = '''
-  flutter:
-    plugin:
-      implements: url_launcher
-      platforms:
-        linux:
-          dartPluginClass: LinuxPlugin
-''';
-        plugins['url_launcher_windows'] = '''
-  flutter:
-    plugin:
-      implements: url_launcher
-      platforms:
-        windows:
-          dartPluginClass: WindowsPlugin
-''';
-        plugins['awesome_macos'] = '''
-  flutter:
-    plugin:
-      implements: awesome
-      platforms:
-        macos:
-          dartPluginClass: AwesomeMacOS
-''';
         for (final MapEntry<String, String> entry in plugins.entries) {
           final String name = fs.path.basename(entry.key);
           final Directory pluginDirectory = fakePubCache.childDirectory(name);
@@ -1882,10 +1852,51 @@ flutter:
           pluginDirectory.childFile('pubspec.yaml')
               ..createSync(recursive: true)
               ..writeAsStringSync(entry.value);
-          directories.add(pluginDirectory);
         }
-
         when(flutterManifest.dependencies).thenReturn(<String>{...plugins.keys});
+      }
+
+      testUsingContext('Generates new entrypoint', () async {
+        when(flutterProject.isModule).thenReturn(false);
+
+        createFakeDartPlugins(
+          flutterProject,
+          flutterManifest,
+          fs,
+          <String, String>{
+          'url_launcher_macos': '''
+  flutter:
+    plugin:
+      implements: url_launcher
+      platforms:
+        macos:
+          dartPluginClass: MacOSPlugin
+''',
+         'url_launcher_linux': '''
+  flutter:
+    plugin:
+      implements: url_launcher
+      platforms:
+        linux:
+          dartPluginClass: LinuxPlugin
+''',
+         'url_launcher_windows': '''
+  flutter:
+    plugin:
+      implements: url_launcher
+      platforms:
+        windows:
+          dartPluginClass: WindowsPlugin
+''',
+         'awesome_macos': '''
+  flutter:
+    plugin:
+      implements: awesome
+      platforms:
+        macos:
+          dartPluginClass: AwesomeMacOS
+'''
+        });
 
         final Directory libDir = flutterProject.directory.childDirectory('lib');
         libDir.createSync(recursive: true);
@@ -1896,7 +1907,7 @@ flutter:
 void main() {
 }
 ''');
-        final File flutterBuild = flutterProject.directory.childFile('generated_main.dart');
+        final File generatedMainFile = flutterProject.directory.childFile('generated_main.dart');
         final PackageConfig packageConfig = await loadPackageConfigWithLogging(
           flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json'),
           logger: globals.logger,
@@ -1906,11 +1917,11 @@ void main() {
           flutterProject,
           packageConfig,
           'package:app/main.dart',
-          flutterBuild,
+          generatedMainFile,
           mainFile,
           throwOnPluginPubspecError: true,
         );
-        expect(flutterBuild.readAsStringSync(),
+        expect(generatedMainFile.readAsStringSync(),
             '//\n'
             '// Generated file. Do not edit.\n'
             '//\n'
@@ -1948,39 +1959,26 @@ void main() {
       testUsingContext('Plugin without platform support throws tool exit', () async {
         when(flutterProject.isModule).thenReturn(false);
 
-        final List<Directory> directories = <Directory>[];
-        final Directory fakePubCache = fs.systemTempDirectory.childDirectory('cache');
-        final File packagesFile = flutterProject.directory
-            .childFile('.packages')
-            ..createSync(recursive: true);
-        final Map<String, String> plugins = <String, String>{};
-        plugins['url_launcher_macos'] = '''
+        createFakeDartPlugins(
+          flutterProject,
+          flutterManifest,
+          fs,
+          <String, String>{
+          'url_launcher_macos': '''
   flutter:
     plugin:
       implements: url_launcher
       platforms:
         macos:
           invalid:
-''';
-        for (final MapEntry<String, String> entry in plugins.entries) {
-          final String name = fs.path.basename(entry.key);
-          final Directory pluginDirectory = fakePubCache.childDirectory(name);
-          packagesFile.writeAsStringSync(
-              '$name:file://${pluginDirectory.childFile('lib').uri}\n',
-              mode: FileMode.writeOnlyAppend);
-          pluginDirectory.childFile('pubspec.yaml')
-              ..createSync(recursive: true)
-              ..writeAsStringSync(entry.value);
-          directories.add(pluginDirectory);
-        }
-
-        when(flutterManifest.dependencies).thenReturn(<String>{...plugins.keys});
+'''
+        });
 
         final Directory libDir = flutterProject.directory.childDirectory('lib');
         libDir.createSync(recursive: true);
 
         final File mainFile = libDir.childFile('main.dart')..writeAsStringSync('');
-        final File flutterBuild = flutterProject.directory.childFile('generated_main.dart');
+        final File generatedMainFile = flutterProject.directory.childFile('generated_main.dart');
         final PackageConfig packageConfig = await loadPackageConfigWithLogging(
           flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json'),
           logger: globals.logger,
@@ -1991,7 +1989,7 @@ void main() {
             flutterProject,
             packageConfig,
             'package:app/main.dart',
-            flutterBuild,
+            generatedMainFile,
             mainFile,
             throwOnPluginPubspecError: true,
           ), throwsToolExit(message:
@@ -2007,36 +2005,23 @@ void main() {
       testUsingContext('Plugin with platform support without dart plugin class throws tool exit', () async {
         when(flutterProject.isModule).thenReturn(false);
 
-        final List<Directory> directories = <Directory>[];
-        final Directory fakePubCache = fs.systemTempDirectory.childDirectory('cache');
-        final File packagesFile = flutterProject.directory
-            .childFile('.packages')
-            ..createSync(recursive: true);
-        final Map<String, String> plugins = <String, String>{};
-        plugins['url_launcher_macos'] = '''
+        createFakeDartPlugins(
+          flutterProject,
+          flutterManifest,
+          fs,
+          <String, String>{
+          'url_launcher_macos': '''
   flutter:
     plugin:
       implements: url_launcher
-''';
-        for (final MapEntry<String, String> entry in plugins.entries) {
-          final String name = fs.path.basename(entry.key);
-          final Directory pluginDirectory = fakePubCache.childDirectory(name);
-          packagesFile.writeAsStringSync(
-              '$name:file://${pluginDirectory.childFile('lib').uri}\n',
-              mode: FileMode.writeOnlyAppend);
-          pluginDirectory.childFile('pubspec.yaml')
-              ..createSync(recursive: true)
-              ..writeAsStringSync(entry.value);
-          directories.add(pluginDirectory);
-        }
-
-        when(flutterManifest.dependencies).thenReturn(<String>{...plugins.keys});
+'''
+        });
 
         final Directory libDir = flutterProject.directory.childDirectory('lib');
         libDir.createSync(recursive: true);
 
         final File mainFile = libDir.childFile('main.dart')..writeAsStringSync('');
-        final File flutterBuild = flutterProject.directory.childFile('generated_main.dart');
+        final File generatedMainFile = flutterProject.directory.childFile('generated_main.dart');
         final PackageConfig packageConfig = await loadPackageConfigWithLogging(
           flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json'),
           logger: globals.logger,
@@ -2047,7 +2032,7 @@ void main() {
             flutterProject,
             packageConfig,
             'package:app/main.dart',
-            flutterBuild,
+            generatedMainFile,
             mainFile,
             throwOnPluginPubspecError: true,
           ), throwsToolExit(message:
@@ -2090,6 +2075,96 @@ void main() {
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
       });
+
+      testUsingContext('Does not create new entrypoint if there are no platform resolutions', () async {
+        when(flutterProject.isModule).thenReturn(false);
+
+        final Directory fakePubCache = fs.systemTempDirectory.childDirectory('cache');
+        when(flutterManifest.dependencies).thenReturn(<String>{});
+
+        final Directory libDir = flutterProject.directory.childDirectory('lib');
+        libDir.createSync(recursive: true);
+
+        final File mainFile = libDir.childFile('main.dart')..writeAsStringSync('');
+        final File generatedMainFile = flutterProject.directory.childFile('generated_main.dart');
+        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+          flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json'),
+          logger: globals.logger,
+          throwOnError: false,
+        );
+        await generateMainDartWithPluginRegistrant(
+          flutterProject,
+          packageConfig,
+          'package:app/main.dart',
+          generatedMainFile,
+          mainFile,
+          throwOnPluginPubspecError: true,
+        );
+        expect(generatedMainFile.existsSync(), isFalse);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('Deletes new entrypoint if there are no platform resolutions', () async {
+        when(flutterProject.isModule).thenReturn(false);
+
+        createFakeDartPlugins(
+          flutterProject,
+          flutterManifest,
+          fs,
+          <String, String>{
+          'url_launcher_macos': '''
+  flutter:
+    plugin:
+      implements: url_launcher
+      platforms:
+        macos:
+          dartPluginClass: MacOSPlugin
+'''
+        });
+
+        final Directory libDir = flutterProject.directory.childDirectory('lib');
+        libDir.createSync(recursive: true);
+
+        final File mainFile = libDir.childFile('main.dart')..writeAsStringSync('');
+        final File generatedMainFile = flutterProject.directory.childFile('generated_main.dart');
+        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+          flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json'),
+          logger: globals.logger,
+          throwOnError: false,
+        );
+        await generateMainDartWithPluginRegistrant(
+          flutterProject,
+          packageConfig,
+          'package:app/main.dart',
+          generatedMainFile,
+          mainFile,
+          throwOnPluginPubspecError: true,
+        );
+        expect(generatedMainFile.existsSync(), isTrue);
+
+        // No plugins.
+        createFakeDartPlugins(
+          flutterProject,
+          flutterManifest,
+          fs,
+          <String, String>{});
+
+        await generateMainDartWithPluginRegistrant(
+          flutterProject,
+          packageConfig,
+          'package:app/main.dart',
+          generatedMainFile,
+          mainFile,
+          throwOnPluginPubspecError: true,
+        );
+        expect(generatedMainFile.existsSync(), isFalse);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
     });
 
     group('pubspec', () {
