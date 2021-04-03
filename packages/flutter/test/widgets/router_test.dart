@@ -774,7 +774,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     expect(find.text('popped inner1'), findsOneWidget);
   });
 
-  testWidgets('BackButtonListener updates callback if it has been changed', (WidgetTester tester) async {  
+  testWidgets('BackButtonListener updates callback if it has been changed', (WidgetTester tester) async {
     final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider();
     provider.value = const RouteInformation(
       location: 'initial',
@@ -853,7 +853,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     expect(find.text('second callback'), findsOneWidget);
   });
 
-  testWidgets('BackButtonListener clears callback if it is disposed', (WidgetTester tester) async {  
+  testWidgets('BackButtonListener clears callback if it is disposed', (WidgetTester tester) async {
     final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider();
     provider.value = const RouteInformation(
       location: 'initial',
