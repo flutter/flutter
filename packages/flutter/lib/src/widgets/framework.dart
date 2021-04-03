@@ -3995,7 +3995,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   T? findAncestorWidgetOfExactType<T extends Widget>() {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     Element? ancestor = _parent;
-    while (ancestor != null && ancestor.widget.runtimeType != T)
+    while (ancestor != null && ancestor.widget is! T)
       ancestor = ancestor._parent;
     return ancestor?.widget as T?;
   }
