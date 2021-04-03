@@ -814,14 +814,16 @@ class Actions extends StatefulWidget {
     assert(() {
       if (action == null) {
         final Type type = intent?.runtimeType ?? T;
-        throw FlutterError('Unable to find an action for a $type in an $Actions widget '
-            'in the given context.\n'
-            "$Actions.find() was called on a context that doesn't contain an "
-            '$Actions widget with a mapping for the given intent type.\n'
-            'The context used was:\n'
-            '  $context\n'
-            'The intent type requested was:\n'
-            '  $type');
+        throw FlutterError(
+          'Unable to find an action for a $type in an $Actions widget '
+          'in the given context.\n'
+          "$Actions.find() was called on a context that doesn't contain an "
+          '$Actions widget with a mapping for the given intent type.\n'
+          'The context used was:\n'
+          '  $context\n'
+          'The intent type requested was:\n'
+          '  $type',
+        );
       }
       return true;
     }());
@@ -925,16 +927,18 @@ class Actions extends StatefulWidget {
 
     assert(() {
       if (actionElement == null) {
-        throw FlutterError('Unable to find an action for an Intent with type '
-            '${intent.runtimeType} in an $Actions widget in the given context.\n'
-            '$Actions.invoke() was unable to find an $Actions widget that '
-            "contained a mapping for the given intent, or the intent type isn't the "
-            'same as the type argument to invoke (which is $T - try supplying a '
-            'type argument to invoke if one was not given)\n'
-            'The context used was:\n'
-            '  $context\n'
-            'The intent type requested was:\n'
-            '  ${intent.runtimeType}');
+        throw FlutterError(
+          'Unable to find an action for an Intent with type '
+          '${intent.runtimeType} in an $Actions widget in the given context.\n'
+          '$Actions.invoke() was unable to find an $Actions widget that '
+          "contained a mapping for the given intent, or the intent type isn't the "
+          'same as the type argument to invoke (which is $T - try supplying a '
+          'type argument to invoke if one was not given)\n'
+          'The context used was:\n'
+          '  $context\n'
+          'The intent type requested was:\n'
+          '  ${intent.runtimeType}',
+        );
       }
       return true;
     }());
