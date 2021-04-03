@@ -488,9 +488,11 @@ class TextInputConfiguration {
   /// Defaults to false.
   final bool obscureText;
 
-  /// Whether show the last char When hide the text.
+  /// Whether or not the last character entered is shown before
+  /// being obscured.
   ///
   /// Defaults to true.
+  /// Only has an effect when [obscureText] is set to true.
   final bool showLastCharWhenObscureText;
 
   /// Whether to enable autocorrection.

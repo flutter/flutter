@@ -582,12 +582,14 @@ class EditableText extends StatefulWidget {
   final bool obscureText;
   
   /// {@template flutter.widgets.editableText.showLastCharWhenObscureText}
-  /// Whether show the last char When hide the text.
-  ///
+  /// Whether or not the last character entered is shown before
+  /// being obscured.
   /// When this is set to true, the last characters in the text field is
   /// replaced by [obscuringCharacter].
   ///
   /// Defaults to true. Cannot be null.
+  ///
+  /// Only has an effect when [obscureText] is set to true.
   /// {@endtemplate}
   final bool showLastCharWhenObscureText;
 
@@ -2709,8 +2711,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if ((defaultTargetPlatform == TargetPlatform.android ||
               defaultTargetPlatform == TargetPlatform.iOS ||
               defaultTargetPlatform == TargetPlatform.fuchsia) &&
-          !kIsWeb &&
-         widget.showLastCharWhenObscureText) {
+          !kIsWeb && widget.showLastCharWhenObscureText) {
         final int? o =
             _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
         if (o != null && o >= 0 && o < text.length)

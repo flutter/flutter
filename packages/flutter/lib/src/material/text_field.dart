@@ -321,7 +321,8 @@ class TextField extends StatefulWidget {
   /// to [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively and
   /// must not be null.
   ///
-  /// The [textAlign], [autofocus], [obscureText], [showLastCharWhenObscureText], [readOnly], [autocorrect],
+  /// The [textAlign], [autofocus], [obscureText], 
+  /// [showLastCharWhenObscureText], [readOnly], [autocorrect],
   /// [maxLengthEnforced], [scrollPadding], [maxLines], [maxLength],
   /// [selectionHeightStyle], [selectionWidthStyle], and [enableSuggestions]
   /// arguments must not be null.

@@ -467,7 +467,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     markNeedsSemanticsUpdate();
   }
 
-  /// Whether show the last char When hide the text.
+ /// Whether or not the last character entered is shown before
+ /// being obscured.
+ ///
+ /// Only has an effect when [obscureText] is set to true.
   bool get showLastCharWhenObscureText => _showLastCharWhenObscureText;
   bool _showLastCharWhenObscureText;
   set showLastCharWhenObscureText(bool value) {
