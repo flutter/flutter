@@ -1017,6 +1017,15 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// return a future (the callback cannot be `async`), since then it would be
   /// unclear when the state was actually being set.
   ///
+  /// In fact, this callback is a simple convention that allows anyone reading
+  /// the code to easily catch the reason of why [setState] is called. Therefore,
+  /// it should be never left empty, if that's impossible, leave a comment explaining
+  /// the reason of why it's called here:
+  ///
+  /// ```dart
+  /// setState(() { /* rebuild because ... */ });
+  /// ```
+  ///
   /// Calling [setState] notifies the framework that the internal state of this
   /// object has changed in a way that might impact the user interface in this
   /// subtree, which causes the framework to schedule a [build] for this [State]
