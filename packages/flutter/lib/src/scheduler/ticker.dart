@@ -62,7 +62,7 @@ class Ticker {
   ///
   /// An optional label can be provided for debugging purposes. That label
   /// will appear in the [toString] output in debug builds.
-  Ticker(this._onTick, { this.debugLabel }) {
+  Ticker(this._onTick, { this.debugLabel, String? Function()? lazyDebugLabel }): _lazyDebugLabel = lazyDebugLabel {
     assert(() {
       _debugCreationStack = StackTrace.current;
       return true;
@@ -70,6 +70,7 @@ class Ticker {
   }
 
   TickerFuture? _future;
+  final String? Function()? _lazyDebugLabel;
 
   /// Whether this ticker has been silenced.
   ///
@@ -333,7 +334,7 @@ class Ticker {
     final StringBuffer buffer = StringBuffer();
     buffer.write('${objectRuntimeType(this, 'Ticker')}(');
     assert(() {
-      buffer.write(debugLabel ?? '');
+      buffer.write(debugLabel ?? _lazyDebugLabel?.call() ?? '');
       return true;
     }());
     buffer.write(')');

@@ -468,6 +468,15 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
     assert(() {
       registerBoolServiceExtension(
+        name: 'debugExpensiveAsserts',
+        getter: () async => debugEnableExpensiveAsserts,
+        setter: (bool value) async {
+          if (debugEnableExpensiveAsserts != null)
+            debugEnableExpensiveAsserts = value;
+        },
+      );
+
+      registerBoolServiceExtension(
         name: 'debugAllowBanner',
         getter: () => Future<bool>.value(WidgetsApp.debugAllowBannerOverride),
         setter: (bool value) {

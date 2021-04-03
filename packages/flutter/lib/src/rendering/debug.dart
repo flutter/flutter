@@ -110,6 +110,9 @@ bool debugPrintMarkNeedsLayoutStacks = false;
 /// Log the call stacks that mark render objects as needing paint.
 bool debugPrintMarkNeedsPaintStacks = false;
 
+/// Whether expensive asserts are enabled in debug mode.
+bool debugEnableExpensiveAsserts = true;
+
 /// Log the dirty render objects that are laid out each frame.
 ///
 /// Combined with [debugPrintBeginFrameBanner], this allows you to distinguish

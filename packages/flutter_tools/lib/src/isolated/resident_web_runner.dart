@@ -466,6 +466,27 @@ class ResidentWebRunner extends ResidentRunner {
   }
 
   @override
+  Future<bool> debugToggleExpensiveAsserts() async {
+    if (!supportsServiceProtocol || !isRunningDebug) {
+      return false;
+    }
+    try {
+      final Map<String, Object> result = await _vmService
+        ?.flutterToggleDebugExpensiveAssertsEnabled(
+          isolateId: null,
+        );
+      if (result['enabled'] == true) {
+        _logger.printStatus('Expensive asserts enabled.');
+      } else {
+        _logger.printStatus('Expensive asserts disabled.');
+      }
+    } on vmservice.RPCError {
+      // do nothing.
+    }
+    return true;
+  }
+
+  @override
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,

@@ -3130,6 +3130,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   bool _debugIsInScope(Element target) {
+    if (!debugEnableExpensiveAsserts)
+      return true;
     Element? current = this;
     while (current != null) {
       if (target == current)
@@ -3614,6 +3616,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   void _debugCheckForCycles(Element newChild) {
+    if (!debugEnableExpensiveAsserts)
+      return;
     assert(newChild._parent == null);
     assert(() {
       Element node = this;

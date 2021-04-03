@@ -199,7 +199,7 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
   @override
   Ticker createTicker(TickerCallback onTick) {
     _tickers ??= <_WidgetTicker>{};
-    final _WidgetTicker result = _WidgetTicker(onTick, this, debugLabel: 'created by $this');
+    final _WidgetTicker result = _WidgetTicker(onTick, this, debugLabel: () => 'created by $this');
     _tickers!.add(result);
     return result;
   }
@@ -268,7 +268,7 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
 // confusing. Instead we use the less precise but more anodyne "_WidgetTicker",
 // which attracts less attention.
 class _WidgetTicker extends Ticker {
-  _WidgetTicker(TickerCallback onTick, this._creator, { String? debugLabel }) : super(onTick, debugLabel: debugLabel);
+  _WidgetTicker(TickerCallback onTick, this._creator, { String? Function()? debugLabel }) : super(onTick, lazyDebugLabel: debugLabel);
 
   final TickerProviderStateMixin _creator;
 

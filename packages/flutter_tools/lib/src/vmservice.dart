@@ -609,6 +609,10 @@ class FlutterVmService {
     return state;
   }
 
+  Future<Map<String, dynamic>> flutterToggleDebugExpensiveAssertsEnabled({
+    @required String isolateId,
+  }) => _flutterToggle('debugExpensiveAsserts', isolateId: isolateId);
+
   Future<Map<String, dynamic>> flutterToggleDebugPaintSizeEnabled({
     @required String isolateId,
   }) => _flutterToggle('debugPaint', isolateId: isolateId);

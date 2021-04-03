@@ -1359,9 +1359,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
   /// Whether tree mutations are currently permitted.
   ///
-  /// Only valid when asserts are enabled. In release builds, always returns
-  /// null.
+  /// Only valid when asserts are enabled. In release builds, always throws a
+  /// [LateInitializationException].
   bool get _debugCanPerformMutations {
+    if (!debugEnableExpensiveAsserts)
+      return true;
     late bool result;
     assert(() {
       RenderObject node = this;

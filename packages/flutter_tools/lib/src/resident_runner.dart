@@ -400,6 +400,16 @@ class FlutterDevice {
     return devFS.create();
   }
 
+  Future<void> debugToggleExpensiveAsserts() async {
+    final List<FlutterView> views = await vmService.getFlutterViews();
+    for (final FlutterView view in views) {
+      final Map<String, Object> result = await vmService.flutterToggleDebugExpensiveAssertsEnabled(
+        isolateId: view.uiIsolate.id,
+      );
+      globals.logger.printStatus(result.toString());
+    }
+  }
+
   Future<void> debugDumpApp() async {
     final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
@@ -989,6 +999,16 @@ abstract class ResidentRunner {
     await preExit();
     await shutdownDartDevelopmentService();
     appFinished();
+  }
+
+  Future<bool> debugToggleExpensiveAsserts() async {
+    if (!supportsServiceProtocol || !isRunningDebug) {
+      return false;
+    }
+    for (final FlutterDevice device in flutterDevices) {
+      await device.debugToggleExpensiveAsserts();
+    }
+    return true;
   }
 
   Future<bool> debugDumpApp() async {
@@ -1627,6 +1647,8 @@ class TerminalHandler {
       case 'z':
       case 'Z':
         return residentRunner.debugToggleDebugCheckElevationsEnabled();
+      case 'x':
+        return residentRunner.debugToggleExpensiveAsserts();
     }
     return false;
   }

@@ -235,6 +235,10 @@ bool debugCheckHasMediaQuery(BuildContext context) {
   return true;
 }
 
+/// Caches the results of [debugCheckHasDirectionality] per-frame to improve the performance
+/// of debug builds.
+final Expando<bool> _directionalityCache = Expando<bool>();
+
 /// Asserts that the given context has a [Directionality] ancestor.
 ///
 /// Used by various widgets to make sure that they are only used in an
