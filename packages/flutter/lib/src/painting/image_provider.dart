@@ -1007,7 +1007,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 /// Then, to fetch the image and associate it with scale `1.5`, use:
 ///
 /// ```dart
-/// AssetImage('icons/heart.png', scale: 1.5)
+/// ExactAssetImage('icons/heart.png', scale: 1.5)
 /// ```
 ///
 /// ## Assets in packages
@@ -1017,7 +1017,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 /// `my_icons`. Then to fetch the image, use:
 ///
 /// ```dart
-/// AssetImage('icons/heart.png', scale: 1.5, package: 'my_icons')
+/// ExactAssetImage('icons/heart.png', scale: 1.5, package: 'my_icons')
 /// ```
 ///
 /// Assets used by the package itself should also be fetched using the [package]
