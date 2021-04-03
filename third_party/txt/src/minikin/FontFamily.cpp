@@ -181,7 +181,8 @@ void FontFamily::computeCoverage() {
   const uint32_t cmapTag = MinikinFont::MakeTag('c', 'm', 'a', 'p');
   HbBlob cmapTable(getFontTable(typeface, cmapTag));
   if (cmapTable.get() == nullptr) {
-    ALOGE("Could not get cmap table size!\n");
+    // Missing or corrupt font cmap table; bail out.
+    // The cmap table maps charcodes to glyph indices in a font.
     return;
   }
   mCoverage = CmapCoverage::getCoverage(cmapTable.get(), cmapTable.size(),
