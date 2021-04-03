@@ -1019,8 +1019,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///
   /// In fact, this callback is a simple convention that allows anyone reading
   /// the code to easily catch the reason of why [setState] is called. Therefore,
-  /// it should be never left empty, if that's impossible, leave a comment explaining
-  /// the reason of why it's called here:
+  /// it should be never left empty, if that's impossible, put a comment inside it:
   ///
   /// ```dart
   /// setState(() { /* rebuild because ... */ });
