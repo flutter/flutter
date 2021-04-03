@@ -14,6 +14,7 @@
 
 // Windows platform specific includes
 #include <windows.h>
+#include <memory>
 
 #include "window_binding_handler.h"
 
