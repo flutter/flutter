@@ -155,7 +155,7 @@ class ResidentWebRunner extends ResidentRunner {
     if (_instance != null) {
       return _instance;
     }
-    final vmservice.VmService service =_connectionResult?.debugConnection?.vmService;
+    final vmservice.VmService service =_connectionResult?.vmService;
     final Uri websocketUri = Uri.parse(_connectionResult.debugConnection.uri);
     final Uri httpUri = _httpUriFromWebsocketUri(websocketUri);
     return _instance ??= FlutterVmService(service, wsAddress: websocketUri, httpAddress: httpUri);
@@ -835,7 +835,7 @@ class ResidentWebRunner extends ResidentRunner {
         _connectionResult.appConnection.runMain();
       } else {
         StreamSubscription<void> resumeSub;
-        resumeSub = _connectionResult.debugConnection.vmService.onDebugEvent
+        resumeSub = _vmService.service.onDebugEvent
             .listen((vmservice.Event event) {
           if (event.type == vmservice.EventKind.kResume) {
             _connectionResult.appConnection.runMain();
