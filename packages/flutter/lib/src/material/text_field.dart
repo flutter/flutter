@@ -843,7 +843,7 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<String>('obscuringCharacter', obscuringCharacter, defaultValue: '•'));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('showLastCharWhenObscureText', showLastCharWhenObscureText, defaultValue: true));
-    properties.add(DiagnosticsProperty<bool>('obscure', obscure, defaultValue: true));
+    properties.add(DiagnosticsProperty<Obscure>('obscure', obscure, defaultValue: Obscure.none));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
     properties.add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType, defaultValue: obscureText ? SmartDashesType.disabled : SmartDashesType.enabled));
     properties.add(EnumProperty<SmartQuotesType>('smartQuotesType', smartQuotesType, defaultValue: obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled));
