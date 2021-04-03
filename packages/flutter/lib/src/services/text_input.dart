@@ -428,6 +428,15 @@ enum TextCapitalization {
   none,
 }
 
+enum Obscure {
+  /// show all text
+  none,
+  /// obscure all text
+  all,
+  /// obscure all text but the last char
+  last
+}
+
 /// Controls the visual appearance of the text input control.
 ///
 /// Many [TextInputAction]s are common between Android and iOS. However, if an
@@ -455,6 +464,7 @@ class TextInputConfiguration {
     this.readOnly = false,
     this.obscureText = false,
     this.showLastCharWhenObscureText = true,
+    this.obscure = Obscure.none,
     this.autocorrect = true,
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
@@ -467,6 +477,7 @@ class TextInputConfiguration {
   }) : assert(inputType != null),
        assert(obscureText != null),
        assert(showLastCharWhenObscureText != null),
+       assert(obscure != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(autocorrect != null),
@@ -483,17 +494,29 @@ class TextInputConfiguration {
   /// Defaults to false.
   final bool readOnly;
 
+  @Deprecated(
+    'use obscure instead.'
+  )
   /// Whether to hide the text being edited (e.g., for passwords).
   ///
   /// Defaults to false.
   final bool obscureText;
 
+  @Deprecated(
+    'use obscure instead.'
+  )
   /// Whether or not the last character entered is shown before
   /// being obscured.
   ///
   /// Defaults to true.
   /// Only has an effect when [obscureText] is set to true.
   final bool showLastCharWhenObscureText;
+
+  /// Whether or not the last character entered is shown before
+  /// being obscured.
+  ///
+  /// Defaults to [Obscure.none].
+  final Obscure obscure;
 
   /// Whether to enable autocorrection.
   ///
@@ -603,6 +626,7 @@ class TextInputConfiguration {
       'readOnly': readOnly,
       'obscureText': obscureText,
       'showLastCharWhenObscureText': showLastCharWhenObscureText,
+      'obscure': obscure,
       'autocorrect': autocorrect,
       'smartDashesType': smartDashesType.index.toString(),
       'smartQuotesType': smartQuotesType.index.toString(),

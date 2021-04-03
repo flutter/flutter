@@ -11,6 +11,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
+import '../../services.dart';
 import 'box.dart';
 import 'custom_paint.dart';
 import 'layer.dart';
@@ -182,6 +183,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     String obscuringCharacter = '•',
     bool obscureText = false,
     bool showLastCharWhenObscureText = true,
+    Obscure obscure = Obscure.none,
     Locale? locale,
     double cursorWidth = 1.0,
     double? cursorHeight,
@@ -222,6 +224,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        assert(obscuringCharacter != null && obscuringCharacter.characters.length == 1),
        assert(obscureText != null),
        assert(showLastCharWhenObscureText != null),
+       assert(obscure != null),
        assert(textSelectionDelegate != null),
        assert(cursorWidth != null && cursorWidth >= 0.0),
        assert(cursorHeight == null || cursorHeight >= 0.0),
@@ -257,6 +260,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        _obscuringCharacter = obscuringCharacter,
        _obscureText = obscureText,
        _showLastCharWhenObscureText = showLastCharWhenObscureText,
+       _obscure = obscure,
        _readOnly = readOnly,
        _forceLine = forceLine,
        _clipBehavior = clipBehavior {
@@ -477,6 +481,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (_showLastCharWhenObscureText == value)
       return;
     _showLastCharWhenObscureText = value;
+    markNeedsSemanticsUpdate();
+  }
+
+ /// Whether to hide the text being edited (e.g., for passwords).
+  Obscure get obscure => _obscure;
+  Obscure _obscure;
+  set obscure(Obscure value) {
+    if (_obscure == value)
+      return;
+    _obscure = value;
     markNeedsSemanticsUpdate();
   }
 
