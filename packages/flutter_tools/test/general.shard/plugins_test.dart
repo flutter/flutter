@@ -1832,7 +1832,7 @@ flutter:
 
     group('generateMainDartWithPluginRegistrant', () {
 
-      List<Directory> createFakeDartPlugins(
+      void createFakeDartPlugins(
         FlutterProject flutterProject,
         FlutterManifest flutterManifest,
         FileSystem fs,
@@ -2078,8 +2078,6 @@ void main() {
 
       testUsingContext('Does not create new entrypoint if there are no platform resolutions', () async {
         when(flutterProject.isModule).thenReturn(false);
-
-        final Directory fakePubCache = fs.systemTempDirectory.childDirectory('cache');
         when(flutterManifest.dependencies).thenReturn(<String>{});
 
         final Directory libDir = flutterProject.directory.childDirectory('lib');

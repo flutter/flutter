@@ -20,8 +20,6 @@ import 'base/logger.dart';
 import 'base/platform.dart';
 import 'build_info.dart';
 import 'convert.dart';
-import 'plugins.dart';
-import 'project.dart';
 
 /// The target model describes the set of core libraries that are available within
 /// the SDK.
