@@ -10,7 +10,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
-import '../../services.dart';
 import 'debug.dart';
 import 'desktop_text_selection.dart';
 import 'feedback.dart';
