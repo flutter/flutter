@@ -1111,8 +1111,7 @@ void main() {
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 0);
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
+    editable.deleteForward(SelectionChangedCause.keyboard);
     expect(delegate.textEditingValue.text, '');
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
