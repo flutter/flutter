@@ -13,6 +13,7 @@ class DummyFlutterCommand extends FlutterCommand {
   DummyFlutterCommand({
     this.shouldUpdateCache = false,
     this.noUsagePath  = false,
+    this.name = 'dummy',
     this.commandFunction,
   });
 
@@ -29,7 +30,7 @@ class DummyFlutterCommand extends FlutterCommand {
   Future<String> get usagePath => noUsagePath ? null : super.usagePath;
 
   @override
-  String get name => 'dummy';
+  final String name;
 
   @override
   Future<FlutterCommandResult> runCommand() async {

@@ -4,8 +4,9 @@
 
 import 'dart:ui' as ui show TextStyle, ParagraphStyle, FontFeature, Shadow;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 // This matcher verifies ui.TextStyle.toString (from dart:ui) reports a superset
 // of the given TextStyle's (from painting.dart) properties.
@@ -29,6 +30,9 @@ class _DartUiTextStyleToStringMatcher extends Matcher {
     _propertyToString('letterSpacing', textStyle.letterSpacing),
     _propertyToString('wordSpacing', textStyle.wordSpacing),
     _propertyToString('height', textStyle.height),
+    // TODO(LongCatIsLooong): web support for
+    // https://github.com/flutter/flutter/issues/72521
+    if (!kIsWeb) _propertyToString('leadingDistribution', textStyle.leadingDistribution),
     _propertyToString('locale', textStyle.locale),
     _propertyToString('background', textStyle.background),
     _propertyToString('foreground', textStyle.foreground),
@@ -115,7 +119,11 @@ void main() {
       equals('TextStyle(inherit: false, size: 10.0, weight: 800, height: 123.0x)'),
     );
 
-    final TextStyle s2 = s1.copyWith(color: const Color(0xFF00FF00), height: 100.0);
+    final TextStyle s2 = s1.copyWith(
+      color: const Color(0xFF00FF00),
+      height: 100.0,
+      leadingDistribution: TextLeadingDistribution.even,
+    );
     expect(s1.fontFamily, isNull);
     expect(s1.fontSize, 10.0);
     expect(s1.fontWeight, FontWeight.w800);
@@ -126,11 +134,12 @@ void main() {
     expect(s2.fontWeight, FontWeight.w800);
     expect(s2.height, 100.0);
     expect(s2.color, const Color(0xFF00FF00));
+    expect(s2.leadingDistribution, TextLeadingDistribution.even);
     expect(s2, isNot(equals(s1)));
     expect(
       s2.toString(),
       equals(
-        'TextStyle(inherit: true, color: Color(0xff00ff00), size: 10.0, weight: 800, height: 100.0x)',
+        'TextStyle(inherit: true, color: Color(0xff00ff00), size: 10.0, weight: 800, height: 100.0x, leadingDistribution: even)',
       ),
     );
 
@@ -162,6 +171,7 @@ void main() {
     expect(s2.fontWeight, FontWeight.w800);
     expect(s2.height, 100.0);
     expect(s2.color, const Color(0xFF00FF00));
+    expect(s2.leadingDistribution, TextLeadingDistribution.even);
     expect(s2, isNot(equals(s1)));
     expect(s2, isNot(equals(s4)));
     expect(s4.fontFamily, isNull);
@@ -169,6 +179,7 @@ void main() {
     expect(s4.fontWeight, FontWeight.w800);
     expect(s4.height, 123.0);
     expect(s4.color, const Color(0xFF00FF00));
+    expect(s4.leadingDistribution, TextLeadingDistribution.even);
 
     final TextStyle s5 = TextStyle.lerp(s1, s3, 0.25)!;
     expect(s1.fontFamily, isNull);
@@ -247,15 +258,20 @@ void main() {
     expect(ts5, equals(ui.TextStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: 123.0)));
     expect(ts5, matchesToStringOf(s5));
     final ui.TextStyle ts2 = s2.getTextStyle();
-    expect(ts2, equals(ui.TextStyle(color: const Color(0xFF00FF00), fontWeight: FontWeight.w800, fontSize: 10.0, height: 100.0)));
+    expect(ts2, equals(ui.TextStyle(color: const Color(0xFF00FF00), fontWeight: FontWeight.w800, fontSize: 10.0, height: 100.0, leadingDistribution: TextLeadingDistribution.even)));
     expect(ts2, matchesToStringOf(s2));
 
     final ui.ParagraphStyle ps2 = s2.getParagraphStyle(textAlign: TextAlign.center);
-    expect(ps2, equals(ui.ParagraphStyle(textAlign: TextAlign.center, fontWeight: FontWeight.w800, fontSize: 10.0, height: 100.0)));
+    expect(
+      ps2,
+      equals(ui.ParagraphStyle(textAlign: TextAlign.center, fontWeight: FontWeight.w800, fontSize: 10.0, height: 100.0, textHeightBehavior: const TextHeightBehavior(leadingDistribution: TextLeadingDistribution.even))),
+    );
     final ui.ParagraphStyle ps5 = s5.getParagraphStyle();
-    expect(ps5, equals(ui.ParagraphStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: 123.0)));
+    expect(
+      ps5,
+      equals(ui.ParagraphStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: 123.0)),
+    );
   });
-
 
   test('TextStyle with text direction', () {
     final ui.ParagraphStyle ps6 = const TextStyle().getParagraphStyle(textDirection: TextDirection.ltr);
@@ -342,6 +358,11 @@ void main() {
     const TextStyle b = TextStyle(fontFamilyFallback: <String>['Noto'], shadows: <ui.Shadow>[ui.Shadow()], fontFeatures: <ui.FontFeature>[ui.FontFeature('abcd')]);
     expect(a.hashCode, a.hashCode);
     expect(a.hashCode, isNot(equals(b.hashCode)));
+
+    const TextStyle c = TextStyle(leadingDistribution: TextLeadingDistribution.even);
+    const TextStyle d = TextStyle(leadingDistribution: TextLeadingDistribution.proportional);
+    expect(c.hashCode, c.hashCode);
+    expect(c.hashCode, isNot(d.hashCode));
   });
 
   test('TextStyle foreground and color combos', () {
@@ -450,7 +471,14 @@ void main() {
   });
 
   test('TextStyle apply', () {
-    const TextStyle style = TextStyle(fontSize: 10, shadows: <ui.Shadow>[], fontStyle: FontStyle.normal, fontFeatures: <ui.FontFeature>[], textBaseline: TextBaseline.alphabetic);
+    const TextStyle style = TextStyle(
+      fontSize: 10,
+      shadows: <ui.Shadow>[],
+      fontStyle: FontStyle.normal,
+      fontFeatures: <ui.FontFeature>[],
+      textBaseline: TextBaseline.alphabetic,
+      leadingDistribution: TextLeadingDistribution.even,
+    );
     expect(style.apply().shadows, const <ui.Shadow>[]);
     expect(style.apply(shadows: const <ui.Shadow>[ui.Shadow(blurRadius: 2.0)]).shadows, const <ui.Shadow>[ui.Shadow(blurRadius: 2.0)]);
     expect(style.apply().fontStyle, FontStyle.normal);
@@ -461,5 +489,10 @@ void main() {
     expect(style.apply(fontFeatures: const <ui.FontFeature>[ui.FontFeature.enable('test')]).fontFeatures, const <ui.FontFeature>[ui.FontFeature.enable('test')]);
     expect(style.apply().textBaseline, TextBaseline.alphabetic);
     expect(style.apply(textBaseline: TextBaseline.ideographic).textBaseline, TextBaseline.ideographic);
+    expect(style.apply().leadingDistribution, TextLeadingDistribution.even);
+    expect(
+      style.apply(leadingDistribution: TextLeadingDistribution.proportional).leadingDistribution,
+      TextLeadingDistribution.proportional,
+    );
   });
 }

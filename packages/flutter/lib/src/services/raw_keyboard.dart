@@ -228,11 +228,11 @@ abstract class RawKeyEventData {
   String get keyLabel;
 
   /// Whether a key down event, and likewise its accompanying key up event,
-  /// should be disapatched.
+  /// should be dispatched.
   ///
   /// Certain events on some platforms should not be dispatched to listeners
   /// according to Flutter's event model. For example, on macOS, Fn keys are
-  /// skipped to be consistant with other platform. On Win32, events dispatched
+  /// skipped to be consistent with other platform. On Win32, events dispatched
   /// for IME (`VK_PROCESSKEY`) are also skipped.
   ///
   /// This method will be called upon every down events. By default, this method
@@ -284,7 +284,6 @@ abstract class RawKeyEvent with Diagnosticable {
     final RawKeyEventData data;
     String? character;
 
-    final String keymap = message['keymap'] as String;
     if (kIsWeb) {
       final String? key = message['key'] as String?;
       data = RawKeyEventDataWeb(
@@ -296,6 +295,7 @@ abstract class RawKeyEvent with Diagnosticable {
         character = key;
       }
     } else {
+      final String keymap = message['keymap'] as String;
       switch (keymap) {
         case 'android':
           data = RawKeyEventDataAndroid(
@@ -328,28 +328,31 @@ abstract class RawKeyEvent with Diagnosticable {
           break;
         case 'macos':
           data = RawKeyEventDataMacOs(
-              characters: message['characters'] as String? ?? '',
-              charactersIgnoringModifiers: message['charactersIgnoringModifiers'] as String? ?? '',
-              keyCode: message['keyCode'] as int? ?? 0,
-              modifiers: message['modifiers'] as int? ?? 0);
+            characters: message['characters'] as String? ?? '',
+            charactersIgnoringModifiers: message['charactersIgnoringModifiers'] as String? ?? '',
+            keyCode: message['keyCode'] as int? ?? 0,
+            modifiers: message['modifiers'] as int? ?? 0,
+          );
           character = message['characters'] as String?;
           break;
         case 'ios':
           data = RawKeyEventDataIos(
-              characters: message['characters'] as String? ?? '',
-              charactersIgnoringModifiers: message['charactersIgnoringModifiers'] as String? ?? '',
-              keyCode: message['keyCode'] as int? ?? 0,
-              modifiers: message['modifiers'] as int? ?? 0);
+            characters: message['characters'] as String? ?? '',
+            charactersIgnoringModifiers: message['charactersIgnoringModifiers'] as String? ?? '',
+            keyCode: message['keyCode'] as int? ?? 0,
+            modifiers: message['modifiers'] as int? ?? 0,
+          );
           break;
         case 'linux':
           final int unicodeScalarValues = message['unicodeScalarValues'] as int? ?? 0;
           data = RawKeyEventDataLinux(
-              keyHelper: KeyHelper(message['toolkit'] as String? ?? ''),
-              unicodeScalarValues: unicodeScalarValues,
-              keyCode: message['keyCode'] as int? ?? 0,
-              scanCode: message['scanCode'] as int? ?? 0,
-              modifiers: message['modifiers'] as int? ?? 0,
-              isDown: message['type'] == 'keydown');
+            keyHelper: KeyHelper(message['toolkit'] as String? ?? ''),
+            unicodeScalarValues: unicodeScalarValues,
+            keyCode: message['keyCode'] as int? ?? 0,
+            scanCode: message['scanCode'] as int? ?? 0,
+            modifiers: message['modifiers'] as int? ?? 0,
+            isDown: message['type'] == 'keydown',
+          );
           if (unicodeScalarValues != 0) {
             character = String.fromCharCode(unicodeScalarValues);
           }

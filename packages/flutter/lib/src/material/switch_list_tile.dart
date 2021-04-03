@@ -102,11 +102,12 @@ enum _SwitchListTileType { material, adaptive }
 /// ```dart preamble
 /// class LinkedLabelSwitch extends StatelessWidget {
 ///   const LinkedLabelSwitch({
+///     Key? key,
 ///     required this.label,
 ///     required this.padding,
 ///     required this.value,
 ///     required this.onChanged,
-///   });
+///   }) : super(key: key);
 ///
 ///   final String label;
 ///   final EdgeInsets padding;
@@ -123,7 +124,7 @@ enum _SwitchListTileType { material, adaptive }
 ///             child: RichText(
 ///               text: TextSpan(
 ///                 text: label,
-///                 style: TextStyle(
+///                 style: const TextStyle(
 ///                   color: Colors.blueAccent,
 ///                   decoration: TextDecoration.underline,
 ///                 ),
@@ -182,11 +183,12 @@ enum _SwitchListTileType { material, adaptive }
 /// ```dart preamble
 /// class LabeledSwitch extends StatelessWidget {
 ///   const LabeledSwitch({
+///     Key? key,
 ///     required this.label,
 ///     required this.padding,
 ///     required this.value,
 ///     required this.onChanged,
-///   });
+///   }) : super(key: key);
 ///
 ///   final String label;
 ///   final EdgeInsets padding;

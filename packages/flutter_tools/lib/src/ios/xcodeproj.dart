@@ -246,7 +246,6 @@ class XcodeProjectInterpreter {
     @required ProcessManager processManager,
     @required Logger logger,
     @required FileSystem fileSystem,
-    @required Terminal terminal,
     @required Usage usage,
   }) {
     return XcodeProjectInterpreter._(
@@ -254,7 +253,6 @@ class XcodeProjectInterpreter {
       processManager: processManager,
       logger: logger,
       fileSystem: fileSystem,
-      terminal: terminal,
       usage: usage,
     );
   }
@@ -264,14 +262,12 @@ class XcodeProjectInterpreter {
     @required ProcessManager processManager,
     @required Logger logger,
     @required FileSystem fileSystem,
-    @required Terminal terminal,
     @required Usage usage,
     int majorVersion,
     int minorVersion,
     int patchVersion,
   }) : _platform = platform,
         _fileSystem = fileSystem,
-        _terminal = terminal,
         _logger = logger,
         _processUtils = ProcessUtils(logger: logger, processManager: processManager),
         _operatingSystemUtils = OperatingSystemUtils(
@@ -307,7 +303,6 @@ class XcodeProjectInterpreter {
       processManager: processManager,
       usage: TestUsage(),
       logger: BufferLogger.test(),
-      terminal: Terminal.test(),
       majorVersion: majorVersion,
       minorVersion: minorVersion,
       patchVersion: patchVersion,
@@ -318,7 +313,6 @@ class XcodeProjectInterpreter {
   final FileSystem _fileSystem;
   final ProcessUtils _processUtils;
   final OperatingSystemUtils _operatingSystemUtils;
-  final Terminal _terminal;
   final Logger _logger;
   final Usage _usage;
 
@@ -415,10 +409,7 @@ class XcodeProjectInterpreter {
     String scheme,
     Duration timeout = const Duration(minutes: 1),
   }) async {
-    final Status status = Status.withSpinner(
-      stopwatch: Stopwatch(),
-      terminal: _terminal,
-    );
+    final Status status = _logger.startSpinner();
     final List<String> showBuildSettingsCommand = <String>[
       ...xcrunCommand(),
       'xcodebuild',

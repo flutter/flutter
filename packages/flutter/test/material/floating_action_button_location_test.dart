@@ -148,11 +148,13 @@ void main() {
             }
 
             if (deltas.where((double delta) => delta < maxDeltaRotation).isEmpty) {
-              fail("The Floating Action Button's rotation should not change "
-                  'faster than $maxDeltaRotation per animation step.\n'
-                  'Detected deltas were: $deltas\n'
-                  'Previous values: $previousRotations, current values: $currentRotations\n'
-                  'Previous rect: $previousRect, current rect: $currentRect',);
+              fail(
+                "The Floating Action Button's rotation should not change "
+                'faster than $maxDeltaRotation per animation step.\n'
+                'Detected deltas were: $deltas\n'
+                'Previous values: $previousRotations, current values: $currentRotations\n'
+                'Previous rect: $previousRect, current rect: $currentRect',
+              );
             }
           }
           previousRotations = currentRotations;
@@ -1037,7 +1039,9 @@ void main() {
       );
     });
 
-    // Test docked locations, for each (6), keyboard presented or not:
+    // Test docked locations, for each (6), keyboard presented or not.
+    // If keyboard is presented and resizeToAvoidBottomInset: true, test whether
+    // the FAB is away from the keyboard(and thus not clipped):
     //  - Default
     //  - Default with resizeToAvoidBottomInset: false
     //  - docked with BottomNavigationBar
@@ -1057,6 +1061,7 @@ void main() {
       const double keyboardHeight = 200.0;
       const double viewPadding = 50.0;
       const double bottomNavHeight = 106.0;
+      const double scaffoldHeight = 600.0;
       final Key floatingActionButton = UniqueKey();
       final double fabHeight = mini ? 48.0 : 56.0;
       // Default
@@ -1084,8 +1089,13 @@ void main() {
         tester.getRect(find.byKey(floatingActionButton)),
         rectMoreOrLessEquals(defaultRect.translate(
           0.0,
-          viewPadding - keyboardHeight + fabHeight / 2.0,
+          viewPadding - keyboardHeight - kFloatingActionButtonMargin,
         )),
+      );
+      // The FAB should be away from the keyboard
+      expect(
+        tester.getRect(find.byKey(floatingActionButton)).bottom,
+        lessThan(scaffoldHeight - keyboardHeight),
       );
 
       // With resizeToAvoidBottomInset: false
@@ -1136,8 +1146,13 @@ void main() {
         tester.getRect(find.byKey(floatingActionButton)),
         rectMoreOrLessEquals(bottomNavigationBarRect.translate(
           0.0,
-          -keyboardHeight + bottomNavHeight,
+          bottomNavHeight + fabHeight / 2.0 - keyboardHeight - kFloatingActionButtonMargin - fabHeight,
         )),
+      );
+      // The FAB should be away from the keyboard
+      expect(
+        tester.getRect(find.byKey(floatingActionButton)).bottom,
+        lessThan(scaffoldHeight - keyboardHeight),
       );
 
       // BottomNavigationBar with resizeToAvoidBottomInset: false
@@ -1194,6 +1209,11 @@ void main() {
           0.0,
           -keyboardHeight + bottomNavHeight,
         )),
+      );
+      // The FAB should be away from the keyboard
+      expect(
+        tester.getRect(find.byKey(floatingActionButton)).bottom,
+        lessThan(scaffoldHeight - keyboardHeight),
       );
 
       // BottomNavigationBar + BottomSheet with resizeToAvoidBottomInset: false
@@ -1263,6 +1283,11 @@ void main() {
       expect(
         tester.getRect(find.byKey(floatingActionButton)),
         rectMoreOrLessEquals(snackBarRect.translate(0.0, -keyboardHeight)),
+      );
+      // The FAB should be away from the keyboard
+      expect(
+        tester.getRect(find.byKey(floatingActionButton)).bottom,
+        lessThan(scaffoldHeight - keyboardHeight),
       );
     }
 

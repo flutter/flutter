@@ -19,6 +19,7 @@ import  '../build_info.dart';
 import '../commands/daemon.dart';
 import '../compile.dart';
 import '../device.dart';
+import '../device_port_forwarder.dart';
 import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
@@ -149,7 +150,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     } on Exception catch (error) {
       throwToolExit('Invalid port for `--debug-port`: $error');
     }
-    return null;
   }
 
   Uri get debugUri {
@@ -296,6 +296,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             ipv6: ipv6,
             devicePort: deviceVmservicePort,
             hostPort: hostVmservicePort,
+            logger: globals.logger,
           );
         globals.printStatus('Waiting for a connection from Flutter on ${device.name}...');
         observatoryUri = observatoryDiscovery.uris;
@@ -368,7 +369,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             logger: globals.logger,
             terminal: globals.terminal,
             signals: globals.signals,
-            processInfo: processInfo,
+            processInfo: globals.processInfo,
             reportReady: boolArg('report-ready'),
             pidFile: stringArg('pid-file'),
           )

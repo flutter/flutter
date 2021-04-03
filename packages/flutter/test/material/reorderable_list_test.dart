@@ -30,8 +30,14 @@ void main() {
       );
     }
 
-    Widget build({ Widget? header, Axis scrollDirection = Axis.vertical, TextDirection textDirection = TextDirection.ltr }) {
+    Widget build({
+      Widget? header,
+      Axis scrollDirection = Axis.vertical,
+      TextDirection textDirection = TextDirection.ltr,
+      TargetPlatform? platform,
+    }) {
       return MaterialApp(
+        theme: ThemeData(platform: platform),
         home: Directionality(
           textDirection: textDirection,
           child: SizedBox(
@@ -212,7 +218,8 @@ void main() {
         expect(getListHeight(), kDraggingListHeight);
       });
 
-      testWidgets('Vertical drop area golden', (WidgetTester tester) async {
+      testWidgets('Vertical drag in progress golden image', (WidgetTester tester) async {
+        debugDisableShadows = false;
         final Widget reorderableListView = ReorderableListView(
           children: <Widget>[
             Container(
@@ -234,23 +241,45 @@ void main() {
               color: Colors.green,
             ),
           ],
-          scrollDirection: Axis.vertical,
           onReorder: (int oldIndex, int newIndex) { },
         );
         await tester.pumpWidget(MaterialApp(
-          home: SizedBox(
+          home: Container(
+            color: Colors.white,
             height: itemHeight * 3,
-            child: reorderableListView,
+            // Wrap in an overlay so that the golden image includes the dragged item.
+            child: Overlay(
+              initialEntries: <OverlayEntry>[
+                OverlayEntry(builder: (BuildContext context) {
+                  // Wrap the list in padding to test that the positioning
+                  // is correct when the origin of the overlay is different
+                  // from the list.
+                  return Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: reorderableListView,
+                  );
+                }),
+              ],
+            ),
           ),
         ));
 
-        await tester.startGesture(tester.getCenter(find.byKey(const Key('blue'))));
+        // Start dragging the second item.
+        final TestGesture drag = await tester.startGesture(tester.getCenter(find.byKey(const Key('blue'))));
         await tester.pump(kLongPressTimeout + kPressTimeout);
+
+        // Drag it up to be partially over the top item.
+        await drag.moveBy(const Offset(0, -itemHeight / 3));
         await tester.pumpAndSettle();
+
+        // Should be an image of the second item overlapping the bottom of the
+        // first with a gap between the first and third and a drop shadow on
+        // the dragged item.
         await expectLater(
-          find.byKey(const Key('blue')),
+          find.byType(ReorderableListView),
           matchesGoldenFile('reorderable_list_test.vertical.drop_area.png'),
         );
+        debugDisableShadows = true;
       });
 
       testWidgets('Preserves children states when the list parent changes the order', (WidgetTester tester) async {
@@ -432,6 +461,11 @@ void main() {
           ],
           onReorder: (int oldIndex, int newIndex) { },
         );
+        final Widget overlay = Overlay(
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(builder: (BuildContext context) => reorderableList)
+          ],
+        );
         final Widget boilerplate = Localizations(
           locale: const Locale('en'),
           delegates: const <LocalizationsDelegate<dynamic>>[
@@ -443,7 +477,7 @@ void main() {
             height: 100.0,
             child: Directionality(
               textDirection: TextDirection.ltr,
-              child: reorderableList,
+              child: overlay,
             ),
           ),
         );
@@ -795,7 +829,8 @@ void main() {
         expect(getListWidth(), kDraggingListWidth);
       });
 
-      testWidgets('Horizontal drop area golden', (WidgetTester tester) async {
+      testWidgets('Horizontal drag in progress golden image', (WidgetTester tester) async {
+        debugDisableShadows = false;
         final Widget reorderableListView = ReorderableListView(
           children: <Widget>[
             Container(
@@ -821,19 +856,42 @@ void main() {
           onReorder: (int oldIndex, int newIndex) { },
         );
         await tester.pumpWidget(MaterialApp(
-          home: SizedBox(
+          home: Container(
+            color: Colors.white,
             width: itemHeight * 3,
-            child: reorderableListView,
+            // Wrap in an overlay so that the golden image includes the dragged item.
+            child: Overlay(
+              initialEntries: <OverlayEntry>[
+                OverlayEntry(builder: (BuildContext context) {
+                  // Wrap the list in padding to test that the positioning
+                  // is correct when the origin of the overlay is different
+                  // from the list.
+                  return Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: reorderableListView,
+                  );
+                })
+              ],
+            ),
           ),
         ));
 
-        await tester.startGesture(tester.getCenter(find.byKey(const Key('blue'))));
+        // Start dragging the second item.
+        final TestGesture drag = await tester.startGesture(tester.getCenter(find.byKey(const Key('blue'))));
         await tester.pump(kLongPressTimeout + kPressTimeout);
+
+        // Drag it left to be partially over the first item.
+        await drag.moveBy(const Offset(-itemHeight / 3, 0));
         await tester.pumpAndSettle();
+
+        // Should be an image of the second item overlapping the right of the
+        // first with a gap between the first and third and a drop shadow on
+        // the dragged item.
         await expectLater(
-          find.byKey(const Key('blue')),
+          find.byType(ReorderableListView),
           matchesGoldenFile('reorderable_list_test.horizontal.drop_area.png'),
         );
+        debugDisableShadows = true;
       });
 
       testWidgets('Preserves children states when the list parent changes the order', (WidgetTester tester) async {
@@ -1257,6 +1315,28 @@ void main() {
       expect(getTestItemPosition(), startPosition);
     });
     // TODO(djshuckerow): figure out how to write a test for scrolling the list.
+
+    testWidgets('Vertical list renders drag handle in correct position', (WidgetTester tester) async {
+      await tester.pumpWidget(build(platform: TargetPlatform.macOS));
+      final Finder listView = find.byType(ReorderableListView);
+      final Finder item1 = find.byKey(const Key('Item 1'));
+      final Finder dragHandle = find.byIcon(Icons.drag_handle).first;
+
+      // Should be centered vertically within the item and 8 pixels from the right edge of the list.
+      expect(tester.getCenter(dragHandle).dy, tester.getCenter(item1).dy);
+      expect(tester.getTopRight(dragHandle).dx, tester.getSize(listView).width - 8);
+    });
+
+    testWidgets('Horizontal list renders drag handle in correct position', (WidgetTester tester) async {
+      await tester.pumpWidget(build(scrollDirection: Axis.horizontal, platform: TargetPlatform.macOS));
+      final Finder listView = find.byType(ReorderableListView);
+      final Finder item1 = find.byKey(const Key('Item 1'));
+      final Finder dragHandle = find.byIcon(Icons.drag_handle).first;
+
+      // Should be centered horizontally within the item and 8 pixels from the bottom of the list.
+      expect(tester.getCenter(dragHandle).dx, tester.getCenter(item1).dx);
+      expect(tester.getBottomRight(dragHandle).dy, tester.getSize(listView).height - 8);
+    });
   });
 
   testWidgets('ReorderableListView, can deal with the dragged item getting unmounted and rebuilt during drag', (WidgetTester tester) async {
@@ -1325,6 +1405,54 @@ void main() {
       expect(find.text('item $i'), findsOneWidget);
     }
     expect(items.take(8), orderedEquals(<int>[0, 1, 2, 3, 4, 5, 6, 7]));
+  });
+
+  testWidgets('ReorderableListView throws an error when key is not passed to its children', (WidgetTester tester) async {
+    final Widget reorderableListView = ReorderableListView.builder(
+      itemBuilder: (BuildContext context, int index) {
+        return SizedBox(child: Text('Item $index'));
+      },
+      itemCount: 3,
+      onReorder: (int oldIndex, int newIndex) { },
+    );
+    await tester.pumpWidget(MaterialApp(
+      home: reorderableListView,
+    ));
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(exception.toString(), contains('Every item of ReorderableListView must have a key.'));
+  });
+
+  testWidgets('Throws an error if no overlay present', (WidgetTester tester) async {
+    final Widget reorderableList = ReorderableListView(
+      children: const <Widget>[
+        SizedBox(width: 100.0, height: 100.0, child: Text('C'), key: Key('C')),
+        SizedBox(width: 100.0, height: 100.0, child: Text('B'), key: Key('B')),
+        SizedBox(width: 100.0, height: 100.0, child: Text('A'), key: Key('A')),
+      ],
+      onReorder: (int oldIndex, int newIndex) { },
+    );
+    final Widget boilerplate = Localizations(
+      locale: const Locale('en'),
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultMaterialLocalizations.delegate,
+        DefaultWidgetsLocalizations.delegate,
+      ],
+      child:SizedBox(
+        width: 100.0,
+        height: 100.0,
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: reorderableList,
+        ),
+      ),
+    );
+    await tester.pumpWidget(boilerplate);
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(exception.toString(), contains('No Overlay widget found'));
+    expect(exception.toString(), contains('ReorderableListView widgets require an Overlay widget ancestor'));
   });
 }
 

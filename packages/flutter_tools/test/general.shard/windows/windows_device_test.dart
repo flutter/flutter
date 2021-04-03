@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/windows/application_package.dart';
 import 'package:flutter_tools/src/windows/windows_device.dart';
@@ -39,12 +40,31 @@ void main() {
     expect(windowsDevice.supportsRuntimeMode(BuildMode.jitRelease), false);
   });
 
+  testWithoutContext('WindowsUwpDevice defaults', () async {
+    final WindowsUWPDevice windowsDevice = setUpWindowsUwpDevice();
+    final PrebuiltWindowsApp windowsApp = PrebuiltWindowsApp(executable: 'foo');
+
+    expect(await windowsDevice.targetPlatform, TargetPlatform.windows_uwp_x64);
+    expect(windowsDevice.name, 'Windows (UWP)');
+    expect(await windowsDevice.installApp(windowsApp), true);
+    expect(await windowsDevice.uninstallApp(windowsApp), true);
+    expect(await windowsDevice.isLatestBuildInstalled(windowsApp), true);
+    expect(await windowsDevice.isAppInstalled(windowsApp), true);
+    expect(windowsDevice.category, Category.desktop);
+
+    expect(windowsDevice.supportsRuntimeMode(BuildMode.debug), true);
+    expect(windowsDevice.supportsRuntimeMode(BuildMode.profile), true);
+    expect(windowsDevice.supportsRuntimeMode(BuildMode.release), true);
+    expect(windowsDevice.supportsRuntimeMode(BuildMode.jitRelease), false);
+  });
+
   testWithoutContext('WindowsDevices does not list devices if the workflow is unsupported', () async {
     expect(await WindowsDevices(
       windowsWorkflow: WindowsWorkflow(
         featureFlags: TestFeatureFlags(isWindowsEnabled: false),
-        platform: FakePlatform(operatingSystem: 'windows')
+        platform: FakePlatform(operatingSystem: 'windows'),
       ),
+      featureFlags: TestFeatureFlags(isWindowsEnabled: false),
       operatingSystemUtils: FakeOperatingSystemUtils(),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
@@ -62,7 +82,23 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),
+      featureFlags: TestFeatureFlags(isWindowsEnabled: true),
     ).devices, hasLength(1));
+  });
+
+  testWithoutContext('WindowsDevices lists a UWP Windows device if feature is enabled', () async {
+    final FeatureFlags featureFlags = TestFeatureFlags(isWindowsEnabled: true, isWindowsUwpEnabled: true);
+    expect(await WindowsDevices(
+      windowsWorkflow: WindowsWorkflow(
+        featureFlags: featureFlags,
+        platform: FakePlatform(operatingSystem: 'windows')
+      ),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: MemoryFileSystem.test(),
+      featureFlags: featureFlags,
+    ).devices, hasLength(2));
   });
 
   testWithoutContext('WindowsDevices ignores the timeout provided to discoverDevices', () async {
@@ -75,6 +111,7 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),
+      featureFlags: TestFeatureFlags(isWindowsEnabled: true),
     );
     // Timeout ignored.
     final List<Device> devices = await windowsDevices.discoverDevices(timeout: const Duration(seconds: 10));
@@ -138,6 +175,19 @@ WindowsDevice setUpWindowsDevice({
   ProcessManager processManager,
 }) {
   return WindowsDevice(
+    fileSystem: fileSystem ?? MemoryFileSystem.test(),
+    logger: logger ?? BufferLogger.test(),
+    processManager: processManager ?? FakeProcessManager.any(),
+    operatingSystemUtils: FakeOperatingSystemUtils(),
+  );
+}
+
+WindowsUWPDevice setUpWindowsUwpDevice({
+  FileSystem fileSystem,
+  Logger logger,
+  ProcessManager processManager,
+}) {
+  return WindowsUWPDevice(
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
     logger: logger ?? BufferLogger.test(),
     processManager: processManager ?? FakeProcessManager.any(),

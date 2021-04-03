@@ -1268,13 +1268,12 @@ class _RenderDecoration extends RenderBox {
     final double containerHeight = contentPadding.top
       + (label == null ? 0.0 : decoration.floatingLabelHeight)
       + _lineHeight(width, <RenderBox?>[prefix, input, suffix])
-      + subtextHeight
       + contentPadding.bottom
       + densityOffset.dy;
     final double minContainerHeight = decoration.isDense! || expands
       ? 0.0
       : kMinInteractiveDimension;
-    return math.max(containerHeight, minContainerHeight);
+    return math.max(containerHeight, minContainerHeight) + subtextHeight;
   }
 
   @override
@@ -1588,7 +1587,7 @@ class _DecorationElement extends RenderObjectElement {
   }
 
   @override
-  void mount(Element? parent, dynamic newSlot) {
+  void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     _mountChild(widget.decoration.icon, _DecorationSlot.icon);
     _mountChild(widget.decoration.input, _DecorationSlot.input);
@@ -1685,7 +1684,7 @@ class _DecorationElement extends RenderObjectElement {
   }
 
   @override
-  void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
+  void moveRenderObjectChild(RenderObject child, Object? oldSlot, Object? newSlot) {
     assert(false, 'not reachable');
   }
 }
@@ -1760,7 +1759,7 @@ class _AffixText extends StatelessWidget {
         duration: _kTransitionDuration,
         curve: _kTransitionCurve,
         opacity: labelIsFloating ? 1.0 : 0.0,
-        child: child ?? (text == null ? null : Text(text!, style: style,)),
+        child: child ?? (text == null ? null : Text(text!, style: style)),
       ),
     );
   }
@@ -1945,7 +1944,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     _floatingLabelController = AnimationController(
       duration: _kTransitionDuration,
       vsync: this,
-      value: labelIsInitiallyFloating ? 1.0 : 0.0
+      value: labelIsInitiallyFloating ? 1.0 : 0.0,
     );
     _floatingLabelController.addListener(_handleChange);
 
@@ -2019,24 +2018,14 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
   Color _getActiveColor(ThemeData themeData) {
     if (isFocused) {
-      switch (themeData.brightness) {
-        case Brightness.dark:
-          return themeData.accentColor;
-        case Brightness.light:
-          return themeData.primaryColor;
-      }
+      return themeData.colorScheme.primary;
     }
     return themeData.hintColor;
   }
 
   Color _getDefaultBorderColor(ThemeData themeData) {
     if (isFocused) {
-      switch (themeData.brightness) {
-        case Brightness.dark:
-          return themeData.accentColor;
-        case Brightness.light:
-          return themeData.primaryColor;
-      }
+        return themeData.colorScheme.primary;
     }
     if (decoration!.filled!) {
       return themeData.hintColor;
@@ -2415,7 +2404,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return TextField(
+///   return const TextField(
 ///     decoration: InputDecoration(
 ///       icon: Icon(Icons.send),
 ///       hintText: 'Hint Text',
@@ -2438,7 +2427,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return TextField(
+///   return const TextField(
 ///     decoration: InputDecoration.collapsed(
 ///       hintText: 'Hint Text',
 ///       border: OutlineInputBorder(),
@@ -2458,7 +2447,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return TextField(
+///   return const TextField(
 ///     decoration: InputDecoration(
 ///       hintText: 'Hint Text',
 ///       errorText: 'Error Text',
@@ -2530,7 +2519,7 @@ class InputDecoration {
     this.errorMaxLines,
     @Deprecated(
       'Use floatingLabelBehavior instead. '
-      'This feature was deprecated after v1.13.2.'
+      'This feature was deprecated after v1.13.2.',
     )
     this.hasFloatingPlaceholder = true,
     this.floatingLabelBehavior,
@@ -2576,7 +2565,7 @@ class InputDecoration {
     required this.hintText,
     @Deprecated(
       'Use floatingLabelBehavior instead. '
-      'This feature was deprecated after v1.13.2.'
+      'This feature was deprecated after v1.13.2.',
     )
     this.hasFloatingPlaceholder = true,
     this.floatingLabelBehavior,
@@ -2758,7 +2747,7 @@ class InputDecoration {
   ///
   @Deprecated(
     'Use floatingLabelBehavior instead. '
-    'This feature was deprecated after v1.13.2.'
+    'This feature was deprecated after v1.13.2.',
   )
   final bool hasFloatingPlaceholder;
 
@@ -2875,7 +2864,7 @@ class InputDecoration {
   ///     padding: const EdgeInsets.symmetric(horizontal: 8.0),
   ///     child: Column(
   ///       mainAxisAlignment: MainAxisAlignment.center,
-  ///       children: <Widget>[
+  ///       children: const <Widget>[
   ///         TextField(
   ///           decoration: InputDecoration(
   ///             hintText: 'Normal Icon Constraints',
@@ -3043,7 +3032,7 @@ class InputDecoration {
   ///     padding: const EdgeInsets.symmetric(horizontal: 8.0),
   ///     child: Column(
   ///       mainAxisAlignment: MainAxisAlignment.center,
-  ///       children: <Widget>[
+  ///       children: const <Widget>[
   ///         TextField(
   ///           decoration: InputDecoration(
   ///             hintText: 'Normal Icon Constraints',
@@ -3628,7 +3617,7 @@ class InputDecorationTheme with Diagnosticable {
     this.errorMaxLines,
     @Deprecated(
       'Use floatingLabelBehavior instead. '
-      'This feature was deprecated after v1.13.2.'
+      'This feature was deprecated after v1.13.2.',
     )
     this.hasFloatingPlaceholder = true,
     this.floatingLabelBehavior = FloatingLabelBehavior.auto,
@@ -3722,7 +3711,7 @@ class InputDecorationTheme with Diagnosticable {
   /// Defaults to true.
   @Deprecated(
     'Use floatingLabelBehavior instead. '
-    'This feature was deprecated after v1.13.2.'
+    'This feature was deprecated after v1.13.2.',
   )
   final bool hasFloatingPlaceholder;
 
@@ -3979,7 +3968,7 @@ class InputDecorationTheme with Diagnosticable {
     int? errorMaxLines,
     @Deprecated(
       'Use floatingLabelBehavior instead. '
-      'This feature was deprecated after v1.13.2.'
+      'This feature was deprecated after v1.13.2.',
     )
     bool? hasFloatingPlaceholder,
     FloatingLabelBehavior? floatingLabelBehavior,

@@ -11,8 +11,6 @@ import 'package:flutter/services.dart';
 
 import 'box.dart';
 import 'layer.dart';
-import 'mouse_cursor.dart';
-import 'mouse_tracking.dart';
 import 'object.dart';
 
 
@@ -313,9 +311,10 @@ class RenderUiKitView extends RenderBox {
   void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {
     assert(gestureRecognizers != null);
     assert(
-    _factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length,
-    'There were multiple gesture recognizer factories for the same type, there must only be a single '
-        'gesture recognizer factory for each gesture recognizer type.',);
+      _factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length,
+      'There were multiple gesture recognizer factories for the same type, there must only be a single '
+      'gesture recognizer factory for each gesture recognizer type.',
+    );
     if (_factoryTypesSetEquals(gestureRecognizers, _gestureRecognizer?.gestureRecognizerFactories)) {
       return;
     }
@@ -703,9 +702,10 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
   void _updateGestureRecognizersWithCallBack(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers, _HandlePointerEvent handlePointerEvent) {
     assert(gestureRecognizers != null);
     assert(
-    _factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length,
-    'There were multiple gesture recognizer factories for the same type, there must only be a single '
-        'gesture recognizer factory for each gesture recognizer type.',);
+      _factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length,
+      'There were multiple gesture recognizer factories for the same type, there must only be a single '
+      'gesture recognizer factory for each gesture recognizer type.',
+    );
     if (_factoryTypesSetEquals(gestureRecognizers, _gestureRecognizer?.gestureRecognizerFactories)) {
       return;
     }

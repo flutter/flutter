@@ -1444,6 +1444,57 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Selectable rich text with gesture recognizer has correct semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      overlay(
+        child: SelectableText.rich(
+          TextSpan(
+            children: <TextSpan>[
+              const TextSpan(text: 'text'),
+              TextSpan(
+                text: 'link',
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () { },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          id: 1,
+          actions: <SemanticsAction>[SemanticsAction.longPress],
+          textDirection: TextDirection.ltr,
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 2,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 3,
+                  label: 'text',
+                  textDirection: TextDirection.ltr,
+                ),
+                TestSemantics(
+                  id: 4,
+                  flags: <SemanticsFlag>[SemanticsFlag.isLink],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  label: 'link',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true));
+
+    semantics.dispose();
+  });
+
   group('Keyboard Tests', () {
     late TextEditingController controller;
 
@@ -2813,6 +2864,37 @@ void main() {
       );
       // The toolbar is still showing.
       expect(find.byType(CupertinoButton), findsNWidgets(1));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+  testWidgets(
+    'double tap selects word with semantics label',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Material(
+            child: Center(
+              child: SelectableText.rich(
+                TextSpan(text: 'Atwater Peel Sherbrooke Bonaventure', semanticsLabel: ''),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
+
+      await tester.tapAt(selectableTextStart + const Offset(220.0, 5.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(selectableTextStart + const Offset(220.0, 5.0));
+      await tester.pump();
+
+      final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
+      final TextEditingController controller = editableTextWidget.controller;
+
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 13, extentOffset: 23),
+      );
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(

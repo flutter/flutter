@@ -6,7 +6,6 @@
 
 import 'dart:io' hide Directory, File;
 
-import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -617,6 +616,7 @@ void main() {
       urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
+      useSseForInjectedClient: true,
       nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: const BuildInfo(
@@ -626,6 +626,7 @@ void main() {
         nullSafetyMode: NullSafetyMode.unsound,
       ),
       enableDwds: false,
+      enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null,
@@ -733,6 +734,7 @@ void main() {
       urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
+      useSseForInjectedClient: true,
       nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: const BuildInfo(
@@ -742,6 +744,7 @@ void main() {
         nullSafetyMode: NullSafetyMode.sound,
       ),
       enableDwds: false,
+      enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null,
@@ -846,8 +849,10 @@ void main() {
       urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
+      useSseForInjectedClient: true,
       buildInfo: BuildInfo.debug,
       enableDwds: false,
+      enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null,
@@ -889,6 +894,7 @@ void main() {
       urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
+      useSseForInjectedClient: true,
       nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: const BuildInfo(
@@ -900,6 +906,7 @@ void main() {
         ]
       ),
       enableDwds: false,
+      enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null,
@@ -940,6 +947,7 @@ void main() {
       urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
+      useSseForInjectedClient: true,
       nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: const BuildInfo(
@@ -951,6 +959,7 @@ void main() {
         ]
       ),
       enableDwds: false,
+      enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null,
@@ -975,11 +984,13 @@ void main() {
       null,
       true,
       true,
+      true,
       const BuildInfo(
         BuildMode.debug,
         '',
         treeShakeIcons: false,
       ),
+      false,
       false,
       Uri.base,
       null,
@@ -1056,10 +1067,12 @@ void main() {
       urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
+      useSseForInjectedClient: true,
       nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: BuildInfo.debug,
       enableDwds: false,
+      enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null,
@@ -1084,4 +1097,3 @@ void main() {
 
 class MockHttpServer extends Mock implements HttpServer {}
 class MockResidentCompiler extends Mock implements ResidentCompiler {}
-class MockDwds extends Mock implements Dwds {}

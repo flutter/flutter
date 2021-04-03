@@ -20,6 +20,7 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 FakePlatform _kNoColorTerminalPlatform() => FakePlatform(stdoutSupportsAnsi: false);
@@ -471,7 +472,7 @@ Exited (sigterm)''',
       ]);
 
       await removeFinderExtendedAttributes(iosProjectDirectory, ProcessUtils(processManager: processManager, logger: logger), logger);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('ignores errors', () async {
@@ -488,7 +489,7 @@ Exited (sigterm)''',
 
       await removeFinderExtendedAttributes(iosProjectDirectory, ProcessUtils(processManager: processManager, logger: logger), logger);
       expect(logger.traceText, contains('Failed to remove xattr com.apple.FinderInfo'));
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
   });
 }

@@ -41,17 +41,16 @@ enum ScriptCategory {
 
 /// The color and geometry [TextTheme]s for Material apps.
 ///
-/// The text themes provided by the overall [Theme], like
-/// [ThemeData.textTheme], are based on the current locale's
-/// [MaterialLocalizations.scriptCategory] and are created
-/// by merging a color text theme, [black] or [white]
-/// and a geometry text theme, one of [englishLike], [dense],
+/// The text theme provided by the overall [Theme],
+/// [ThemeData.textTheme], is based on the current locale's
+/// [MaterialLocalizations.scriptCategory] and is created
+/// by merging a color text theme - [black] for
+/// [Brightness.light] themes and [white] for [Brightness.dark]
+/// themes -  and a geometry text theme, one of [englishLike], [dense],
 /// or [tall], depending on the locale.
 ///
-/// To lookup a localized text theme use
-/// `Theme.of(context).textTheme` or
-/// `Theme.of(context).primaryTextTheme` or
-/// `Theme.of(context).accentTextTheme`.
+/// To lookup the localized text theme use
+/// `Theme.of(context).textTheme`.
 ///
 /// The color text themes are [blackMountainView], [whiteMountainView],
 /// [blackCupertino], and [whiteCupertino]. The Mountain View theme [TextStyle]s
@@ -77,9 +76,6 @@ enum ScriptCategory {
 ///
 /// See also:
 ///
-///  * [ThemeData.typography], which can be used to configure the
-///    text themes used to create [ThemeData.textTheme],
-///    [ThemeData.primaryTextTheme], [ThemeData.accentTextTheme].
 ///  * <https://material.io/design/typography/>
 @immutable
 class Typography with Diagnosticable {
@@ -93,7 +89,7 @@ class Typography with Diagnosticable {
     'The default Typography constructor defaults to the 2014 material design defaults. '
     'Applications are urged to migrate to Typography.material2018(), or, if the 2014 defaults '
     'are desired, to explicitly request them using Typography.material2014(). '
-    'This feature was deprecated after v1.13.8.'
+    'This feature was deprecated after v1.13.8.',
   )
   factory Typography({
     TargetPlatform? platform,

@@ -20,6 +20,7 @@ import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fake_process_manager.dart';
 
 final SystemClock _testClock = SystemClock.fixed(DateTime(2015, 1, 1));
 final DateTime _stampUpToDate = _testClock.ago(FlutterVersion.checkAgeConsideredUpToDate ~/ 2);
@@ -533,7 +534,7 @@ void main() {
     expect(gitTagVersion.frameworkVersionFor('abcd1234'), stableTag);
   });
 
-  testUsingContext('determine favors stable tag over dev tag if both idenitfy HEAD', () {
+  testUsingContext('determine favors stable tag over dev tag if both identify HEAD', () {
     const String stableTag = '1.2.3';
     final FakeProcessManager fakeProcessManager = FakeProcessManager.list(
       <FakeCommand>[
@@ -578,168 +579,97 @@ void main() {
   });
 
   testUsingContext('determine does not call fetch --tags', () {
-    final MockProcessUtils processUtils = MockProcessUtils();
-    when(processUtils.runSync(
-      <String>['git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags'],
-      workingDirectory: anyNamed('workingDirectory'),
-      environment: anyNamed('environment'),
-    )).thenReturn(RunResult(ProcessResult(105, 0, '', ''), <String>['git', 'fetch']));
-    when(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
-      workingDirectory: anyNamed('workingDirectory'),
-      environment: anyNamed('environment'),
-    )).thenReturn(RunResult(ProcessResult(106, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
-    when(processUtils.runSync(
-      <String>['git', 'tag', '--points-at', 'HEAD'],
-      workingDirectory: anyNamed('workingDirectory'),
-      environment: anyNamed('environment'),
-    )).thenReturn(
-      RunResult(ProcessResult(110, 0, '', ''),
-      <String>['git', 'tag', '--points-at', 'HEAD'],
-    ));
+    final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['git', 'tag', '--points-at', 'HEAD'],
+      ),
+      const FakeCommand(
+        command: <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
+        stdout: 'v0.1.2-3-1234abcd',
+      ),
+    ]);
+    final ProcessUtils processUtils = ProcessUtils(
+      processManager: fakeProcessManager,
+      logger: BufferLogger.test(),
+    );
 
     GitTagVersion.determine(processUtils, workingDirectory: '.');
-
-    verifyNever(processUtils.runSync(
-      <String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
-      workingDirectory: anyNamed('workingDirectory'),
-      environment: anyNamed('environment'),
-    ));
-    verifyNever(processUtils.runSync(
-      <String>['git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags'],
-      workingDirectory: anyNamed('workingDirectory'),
-      environment: anyNamed('environment'),
-    ));
-    verify(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
-      workingDirectory: anyNamed('workingDirectory'),
-      environment: anyNamed('environment'),
-    )).called(1);
+    expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
   testUsingContext('determine does not fetch tags on dev/stable/beta', () {
-    final MockProcessUtils processUtils = MockProcessUtils();
-    when(processUtils.runSync(
-      <String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
-      workingDirectory: anyNamed('workingDirectory'),
-      environment: anyNamed('environment'),
-    )).thenReturn(RunResult(ProcessResult(105, 0, 'dev', ''), <String>['git', 'fetch']));
-    when(processUtils.runSync(
-      <String>['git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags'],
-      workingDirectory: anyNamed('workingDirectory'),
-      environment: anyNamed('environment'),
-    )).thenReturn(RunResult(ProcessResult(106, 0, '', ''), <String>['git', 'fetch']));
-    when(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
-      workingDirectory: anyNamed('workingDirectory'),
-      environment: anyNamed('environment'),
-    )).thenReturn(RunResult(ProcessResult(107, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
-    when(processUtils.runSync(
-      <String>['git', 'tag', '--points-at', 'HEAD'],
-      workingDirectory: anyNamed('workingDirectory'),
-      environment: anyNamed('environment'),
-    )).thenReturn(
-      RunResult(ProcessResult(108, 0, '', ''),
-      <String>['git', 'tag', '--points-at', 'HEAD'],
-    ));
+    final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+        stdout: 'dev',
+      ),
+      const FakeCommand(
+        command: <String>['git', 'tag', '--points-at', 'HEAD'],
+      ),
+      const FakeCommand(
+        command: <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
+        stdout: 'v0.1.2-3-1234abcd',
+      ),
+    ]);
+    final ProcessUtils processUtils = ProcessUtils(
+      processManager: fakeProcessManager,
+      logger: BufferLogger.test(),
+    );
 
     GitTagVersion.determine(processUtils, workingDirectory: '.', fetchTags: true);
-
-    verify(processUtils.runSync(
-      <String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
-      workingDirectory: anyNamed('workingDirectory'),
-      environment: anyNamed('environment'),
-    )).called(1);
-    verifyNever(processUtils.runSync(
-      <String>['git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags'],
-      workingDirectory: anyNamed('workingDirectory'),
-      environment: anyNamed('environment'),
-    ));
-    verify(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
-      workingDirectory: anyNamed('workingDirectory'),
-      environment: anyNamed('environment'),
-    )).called(1);
+    expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
   testUsingContext('determine calls fetch --tags on master', () {
-    final MockProcessUtils processUtils = MockProcessUtils();
-    when(processUtils.runSync(
-      <String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
-      workingDirectory: anyNamed('workingDirectory'),
-      environment: anyNamed('environment'),
-    )).thenReturn(RunResult(ProcessResult(108, 0, 'master', ''), <String>['git', 'fetch']));
-    when(processUtils.runSync(
-      <String>['git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags', '-f'],
-      workingDirectory: anyNamed('workingDirectory'),
-      environment: anyNamed('environment'),
-    )).thenReturn(RunResult(ProcessResult(109, 0, '', ''), <String>['git', 'fetch']));
-    when(processUtils.runSync(
-      <String>['git', 'tag', '--points-at', 'HEAD'],
-      workingDirectory: anyNamed('workingDirectory'),
-      environment: anyNamed('environment'),
-    )).thenReturn(
-      RunResult(ProcessResult(110, 0, '', ''),
-      <String>['git', 'tag', '--points-at', 'HEAD'],
-    ));
-    when(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
-      workingDirectory: anyNamed('workingDirectory'),
-      environment: anyNamed('environment'),
-    )).thenReturn(RunResult(ProcessResult(111, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
+    final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+        stdout: 'master',
+      ),
+      const FakeCommand(
+        command: <String>['git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags', '-f'],
+      ),
+      const FakeCommand(
+        command: <String>['git', 'tag', '--points-at', 'HEAD'],
+      ),
+      const FakeCommand(
+        command: <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
+        stdout: 'v0.1.2-3-1234abcd',
+      ),
+    ]);
+    final ProcessUtils processUtils = ProcessUtils(
+      processManager: fakeProcessManager,
+      logger: BufferLogger.test(),
+    );
 
     GitTagVersion.determine(processUtils, workingDirectory: '.', fetchTags: true);
-
-    verify(processUtils.runSync(
-      <String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
-      workingDirectory: anyNamed('workingDirectory'),
-      environment: anyNamed('environment'),
-    )).called(1);
-    verify(processUtils.runSync(
-      <String>['git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags', '-f'],
-      workingDirectory: anyNamed('workingDirectory'),
-      environment: anyNamed('environment'),
-    )).called(1);
-    verify(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
-      workingDirectory: anyNamed('workingDirectory'),
-      environment: anyNamed('environment'),
-    )).called(1);
+    expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
   testUsingContext('determine uses overridden git url', () {
-    final MockProcessUtils processUtils = MockProcessUtils();
-    when(processUtils.runSync(
-      <String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
-      workingDirectory: anyNamed('workingDirectory'),
-      environment: anyNamed('environment'),
-    )).thenReturn(RunResult(ProcessResult(108, 0, 'master', ''), <String>['git', 'fetch']));
-    when(processUtils.runSync(
-      <String>['git', 'fetch', 'https://githubmirror.com/flutter.git', '--tags', '-f'],
-      workingDirectory: anyNamed('workingDirectory'),
-      environment: anyNamed('environment'),
-    )).thenReturn(RunResult(ProcessResult(109, 0, '', ''), <String>['git', 'fetch']));
-    when(processUtils.runSync(
-      <String>['git', 'tag', '--points-at', 'HEAD'],
-      workingDirectory: anyNamed('workingDirectory'),
-      environment: anyNamed('environment'),
-    )).thenReturn(
-      RunResult(ProcessResult(110, 0, '', ''),
-      <String>['git', 'tag', '--points-at', 'HEAD'],
-    ));
-    when(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
-      workingDirectory: anyNamed('workingDirectory'),
-      environment: anyNamed('environment'),
-    )).thenReturn(RunResult(ProcessResult(111, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
+    final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+        stdout: 'master',
+      ),
+      const FakeCommand(
+        command: <String>['git', 'fetch', 'https://githubmirror.com/flutter.git', '--tags', '-f'],
+      ),
+      const FakeCommand(
+        command: <String>['git', 'tag', '--points-at', 'HEAD'],
+      ),
+      const FakeCommand(
+        command: <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
+        stdout: 'v0.1.2-3-1234abcd',
+      ),
+    ]);
+    final ProcessUtils processUtils = ProcessUtils(
+      processManager: fakeProcessManager,
+      logger: BufferLogger.test(),
+    );
 
     GitTagVersion.determine(processUtils, workingDirectory: '.', fetchTags: true);
-
-    verify(processUtils.runSync(
-      <String>['git', 'fetch', 'https://githubmirror.com/flutter.git', '--tags', '-f'],
-      workingDirectory: anyNamed('workingDirectory'),
-      environment: anyNamed('environment'),
-    )).called(1);
+    expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     Platform: () => FakePlatform(environment: <String, String>{
       'FLUTTER_GIT_URL': 'https://githubmirror.com/flutter.git',
@@ -873,5 +803,4 @@ void fakeData(
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
-class MockProcessUtils extends Mock implements ProcessUtils {}
 class MockCache extends Mock implements Cache {}

@@ -7,7 +7,6 @@
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
-import '../application_package.dart';
 import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/logger.dart';
@@ -16,6 +15,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
+import '../ios/application_package.dart';
 import '../ios/mac.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
@@ -57,6 +57,9 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
 
   @override
   bool get shouldCodesign => boolArg('codesign');
+
+  @override
+  Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs.directory(xcodeResultOutput);
 }
 
 /// Builds an .xcarchive and optionally .ipa for an iOS app to be generated for
@@ -97,6 +100,12 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   final bool shouldCodesign = true;
 
   String get exportOptionsPlist => stringArg('export-options-plist');
+
+  @override
+  Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs
+      .directory(xcodeResultOutput)
+      .childDirectory('Products')
+      .childDirectory('Applications');
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -209,6 +218,8 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
   BuildableIOSApp _buildableIOSApp;
 
+  Directory _outputAppDirectory(String xcodeResultOutput);
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     defaultBuildMode = forSimulator ? BuildMode.debug : BuildMode.release;
@@ -273,16 +284,19 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)
         .childFile('trace.$arch.json');
 
-      // This analysis is only supported for release builds, which also excludes the simulator.
-      // Attempt to guess the correct .app by picking the first one.
-      final Directory candidateDirectory = globals.fs.directory(
-        globals.fs.path.join(getIosBuildDirectory(), 'Release-iphoneos'),
-      );
-      final Directory appDirectory = candidateDirectory.listSync()
-        .whereType<Directory>()
-        .firstWhere((Directory directory) {
-        return globals.fs.path.extension(directory.path) == '.app';
-      });
+      final Directory outputAppDirectoryCandidate = _outputAppDirectory(result.output);
+
+      Directory appDirectory;
+      if (outputAppDirectoryCandidate.existsSync()) {
+        appDirectory = outputAppDirectoryCandidate.listSync()
+            .whereType<Directory>()
+            .firstWhere((Directory directory) {
+          return globals.fs.path.extension(directory.path) == '.app';
+        }, orElse: () => null);
+      }
+      if (appDirectory == null) {
+        throwToolExit('Could not find app to analyze code size in ${outputAppDirectoryCandidate.path}');
+      }
       final Map<String, Object> output = await sizeAnalyzer.analyzeAotSnapshot(
         aotSnapshot: aotSnapshot,
         precompilerTrace: precompilerTrace,

@@ -41,7 +41,7 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
           child: Text('This is a Material persistent bottom sheet. Drag downwards to dismiss it.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: themeData.accentColor,
+              color: themeData.colorScheme.secondary,
               fontSize: 24.0,
             ),
           ),

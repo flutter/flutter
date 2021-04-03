@@ -91,16 +91,9 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
-    final File goldenFile = _getGoldenFile(golden);
-    if (!goldenFile.existsSync()) {
-      throw test_package.TestFailure(
-        'Could not be compared against non-existent file: "$golden"'
-      );
-    }
-    final List<int> goldenBytes = await goldenFile.readAsBytes();
     final ComparisonResult result = await GoldenFileComparator.compareLists(
       imageBytes,
-      goldenBytes,
+      await getGoldenBytes(golden),
     );
 
     if (!result.passed) {
@@ -117,14 +110,27 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
     await goldenFile.writeAsBytes(imageBytes, flush: true);
   }
 
-  File _getGoldenFile(Uri golden) {
-    return File(_path.join(_path.fromUri(basedir), _path.fromUri(golden.path)));
+  /// Returns the bytes of the given [golden] file.
+  ///
+  /// If the file cannot be found, an error will be thrown.
+  @protected
+  Future<List<int>> getGoldenBytes(Uri golden) async {
+    final File goldenFile = _getGoldenFile(golden);
+    if (!goldenFile.existsSync()) {
+      throw test_package.TestFailure(
+        'Could not be compared against non-existent file: "$golden"'
+      );
+    }
+    final List<int> goldenBytes = await goldenFile.readAsBytes();
+    return goldenBytes;
   }
+
+  File _getGoldenFile(Uri golden) => File(_path.join(_path.fromUri(basedir), _path.fromUri(golden.path)));
 }
 
-/// A class for use in golden file comparators that run locally and provide
+/// A mixin for use in golden file comparators that run locally and provide
 /// output.
-class LocalComparisonOutput {
+mixin LocalComparisonOutput {
   /// Writes out diffs from the [ComparisonResult] of a golden file test.
   ///
   /// Will throw an error if a null result is provided.

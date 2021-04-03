@@ -12,10 +12,9 @@ import 'package:flutter_tools/src/android/android_sdk.dart' show AndroidSdk;
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -175,17 +174,6 @@ Process createMockProcess({ int exitCode = 0, String stdout = '', String stderr 
 
 class _MockBasicProcess extends Mock implements Process {}
 
-class MockIosProject extends Mock implements IosProject {
-  static const String bundleId = 'com.example.test';
-  static const String appBundleName = 'My Super Awesome App.app';
-
-  @override
-  Future<String> productBundleIdentifier(BuildInfo buildInfo) async => bundleId;
-
-  @override
-  Future<String> hostAppBundleName(BuildInfo buildInfo) async => appBundleName;
-}
-
 class MockAndroidDevice extends Mock implements AndroidDevice {
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
@@ -235,4 +223,3 @@ class MockStdIn extends Mock implements IOSink {
 }
 
 class MockStream extends Mock implements Stream<List<int>> {}
-class MockFlutterVersion extends Mock implements FlutterVersion {}

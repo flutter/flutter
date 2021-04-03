@@ -48,14 +48,19 @@ void main() {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     globals.fs.file(globals.fs.path.join('web', 'index.html')).createSync(recursive: true);
     final FlutterProject project = FlutterProject.fromDirectoryTest(globals.fs.currentDirectory);
-    residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
+    residentWebRunner = ResidentWebRunner(
       mockFlutterDevice,
       flutterProject: project,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
       ipv6: true,
       stayResident: true,
       urlTunneller: null,
-    ) as ResidentWebRunner;
+      featureFlags: TestFeatureFlags(),
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      systemClock: globals.systemClock,
+      usage: globals.flutterUsage,
+    );
   }
 
   testUsingContext('Can successfully run and connect without vmservice', () async {

@@ -7,7 +7,6 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'base/logger.dart';
 import 'resident_runner.dart';
@@ -66,12 +65,12 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
       // report their URLs yet. Do so now.
       _residentRunner.printDebuggerList(includeObservatory: false);
     }
-    await _waitForExtensions(flutterDevices);
+    final List<FlutterDevice> devicesWithExtension = await _devicesWithExtensions(flutterDevices);
     await _maybeCallDevToolsUriServiceExtension(
-      flutterDevices,
+      devicesWithExtension,
     );
     await _callConnectedVmServiceUriExtension(
-      flutterDevices,
+      devicesWithExtension,
     );
   }
 
@@ -107,12 +106,28 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     }
   }
 
-  Future<void> _waitForExtensions(List<FlutterDevice> flutterDevices) async {
-    await Future.wait(<Future<void>>[
+  Future<List<FlutterDevice>> _devicesWithExtensions(List<FlutterDevice> flutterDevices) async {
+    final List<FlutterDevice> devices = await Future.wait(<Future<FlutterDevice>>[
       for (final FlutterDevice device in flutterDevices)
-        if (device.vmService != null)
-          waitForExtension(device.vmService.service, 'ext.flutter.connectedVmServiceUri'),
+        _waitForExtensionsForDevice(device)
     ]);
+    return devices.where((FlutterDevice device) => device != null).toList();
+  }
+
+  /// Returns null if the service extension cannot be found on the device.
+  Future<FlutterDevice> _waitForExtensionsForDevice(FlutterDevice flutterDevice) async {
+    const String extension = 'ext.flutter.connectedVmServiceUri';
+    try {
+      await flutterDevice.vmService?.findExtensionIsolate(extension);
+      return flutterDevice;
+    } on VmServiceDisappearedException {
+      _logger.printTrace(
+        'The VM Service for ${flutterDevice.device} disappeared while trying to'
+        ' find the $extension service extension. Skipping subsequent DevTools '
+        'setup for this device.',
+      );
+      return null;
+    }
   }
 
   Future<void> _callConnectedVmServiceUriExtension(List<FlutterDevice> flutterDevices) async {
@@ -164,10 +179,10 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
 
   @override
   Future<void> hotRestart(List<FlutterDevice> flutterDevices) async {
-    await _waitForExtensions(flutterDevices);
+    final List<FlutterDevice> devicesWithExtension = await _devicesWithExtensions(flutterDevices);
     await Future.wait(<Future<void>>[
-      _maybeCallDevToolsUriServiceExtension(flutterDevices),
-      _callConnectedVmServiceUriExtension(flutterDevices),
+      _maybeCallDevToolsUriServiceExtension(devicesWithExtension),
+      _callConnectedVmServiceUriExtension(devicesWithExtension),
     ]);
   }
 
@@ -179,37 +194,6 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     _shutdown = true;
     await _devToolsLauncher.close();
   }
-}
-
-
-@visibleForTesting
-Future<void> waitForExtension(vm_service.VmService vmService, String extension) async {
-  final Completer<void> completer = Completer<void>();
-  try {
-    await vmService.streamListen(vm_service.EventStreams.kExtension);
-  } on Exception {
-    // do nothing
-  }
-  StreamSubscription<vm_service.Event> extensionStream;
-  extensionStream = vmService.onExtensionEvent.listen((vm_service.Event event) {
-    if (event.json['extensionKind'] == 'Flutter.FrameworkInitialization') {
-      // The 'Flutter.FrameworkInitialization' event is sent on hot restart
-      // as well, so make sure we don't try to complete this twice.
-      if (!completer.isCompleted) {
-        completer.complete();
-        extensionStream.cancel();
-      }
-    }
-  });
-  final vm_service.VM vm = await vmService.getVM();
-  if (vm.isolates.isNotEmpty) {
-    final vm_service.IsolateRef isolateRef = vm.isolates.first;
-    final vm_service.Isolate isolate = await vmService.getIsolate(isolateRef.id);
-    if (isolate.extensionRPCs.contains(extension)) {
-      return;
-    }
-  }
-  await completer.future;
 }
 
 @visibleForTesting

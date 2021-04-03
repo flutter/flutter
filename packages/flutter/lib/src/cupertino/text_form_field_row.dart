@@ -58,7 +58,7 @@ import 'text_field.dart';
 ///
 /// ```dart
 /// CupertinoTextFormFieldRow(
-///   prefix: Text('Username'),
+///   prefix: const Text('Username'),
 ///   onSaved: (String? value) {
 ///     // This optional block of code can be used to run
 ///     // code when the user saves the form.
@@ -79,6 +79,7 @@ import 'text_field.dart';
 /// ```
 ///
 /// ```dart
+/// @override
 /// Widget build(BuildContext context) {
 ///   return CupertinoPageScaffold(
 ///     child: Center(
@@ -88,12 +89,12 @@ import 'text_field.dart';
 ///           Form.of(primaryFocus!.context!)?.save();
 ///         },
 ///         child: CupertinoFormSection.insetGrouped(
-///           header: Text('SECTION 1'),
+///           header: const Text('SECTION 1'),
 ///           children: List<Widget>.generate(5, (int index) {
 ///             return CupertinoTextFormFieldRow(
-///               prefix: Text('Enter text'),
+///               prefix: const Text('Enter text'),
 ///               placeholder: 'Enter text',
-///               validator: (value) {
+///               validator: (String? value) {
 ///                 if (value == null || value.isEmpty) {
 ///                   return 'Please enter a value';
 ///                 }
