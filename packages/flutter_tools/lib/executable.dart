@@ -51,10 +51,12 @@ import 'src/features.dart';
 import 'src/globals.dart' as globals;
 // Files in `isolated` are intentionally excluded from google3 tooling.
 import 'src/isolated/mustache_template.dart';
+import 'src/isolated/native_api_win32.dart';
 import 'src/isolated/resident_web_runner.dart';
 import 'src/resident_runner.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/web/web_runner.dart';
+import 'src/windows/native_api.dart';
 
 /// Main entry point for commands.
 ///
@@ -112,6 +114,7 @@ Future<void> main(List<String> args) async {
         platform: globals.platform,
         persistentToolState: globals.persistentToolState,
       ),
+      NativeApi: () => const Win32NativeApi(),
       Logger: () {
        final LoggerFactory loggerFactory = LoggerFactory(
          outputPreferences: globals.outputPreferences,

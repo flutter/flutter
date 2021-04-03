@@ -21,6 +21,7 @@ import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'ios/plist_parser.dart';
+import 'windows/native_api.dart';
 
 Config get config => context.get<Config>()!;
 HttpClientFactory get httpClientFactory => context.get<HttpClientFactory>()!;
@@ -66,6 +67,8 @@ SystemClock get systemClock => context.get<SystemClock>() ?? _systemClock;
 SystemClock _systemClock = const SystemClock();
 
 ProcessInfo get processInfo => context.get<ProcessInfo>()!;
+
+NativeApi get nativeApi => context.get<NativeApi>()!;
 
 /// Display an error level message to the user. Commands should use this if they
 /// fail in some way.
