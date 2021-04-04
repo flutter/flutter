@@ -92,7 +92,7 @@ enum DismissDirection {
 ///         key: ValueKey<int>(items[index]),
 ///         onDismissed: (DismissDirection direction) {
 ///           setState(() {
-///             items.remove(index);
+///             items.removeAt(index);
 ///           });
 ///         },
 ///       );
