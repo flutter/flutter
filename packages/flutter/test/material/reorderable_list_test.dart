@@ -36,6 +36,7 @@ void main() {
       TextDirection textDirection = TextDirection.ltr,
       TargetPlatform? platform,
       EdgeInsets padding = const EdgeInsets.all(0.0),
+      bool reverse = false,
     }) {
       return MaterialApp(
         theme: ThemeData(platform: platform),
@@ -50,6 +51,7 @@ void main() {
               scrollDirection: scrollDirection,
               onReorder: onReorder,
               padding: padding,
+              reverse: reverse,
             ),
           ),
         ),
@@ -64,8 +66,21 @@ void main() {
     group('in vertical mode', () {
       testWidgets('when additional padding applied', (WidgetTester tester) async {
         await tester.pumpWidget(build(padding: const EdgeInsets.all(10.0)));
-        final actualPadding = tester.widget<SliverPadding>(find.byType(SliverPadding));
-        expect((actualPadding).padding,EdgeInsets.only(top: 10.0, bottom: 10.0));
+        final SliverPadding actualPadding = tester.widget<SliverPadding>(find.byType(SliverPadding));
+        expect(actualPadding.padding,const EdgeInsets.only(top: 10.0, bottom: 10.0));
+      });
+
+      testWidgets('when additional padding applied with header', (WidgetTester tester) async {
+        await tester.pumpWidget(build(padding: const EdgeInsets.all(10.0), header: Container(height: 10.0,)));
+        final SliverPadding headerPadding = tester.widget<SliverPadding>(find.byType(SliverPadding).first);
+        expect(headerPadding.padding, const EdgeInsets.only(top: 10.0));
+        final SliverPadding listPadding = tester.widget<SliverPadding>(find.byType(SliverPadding).last);
+        expect(listPadding.padding, const EdgeInsets.only(bottom: 10.0));
+        await tester.pumpWidget(build(padding: const EdgeInsets.all(10.0), header: Container(height: 10.0,),reverse: true));
+        final SliverPadding headerPaddingReverse = tester.widget<SliverPadding>(find.byType(SliverPadding).first);
+        expect(headerPaddingReverse.padding, const EdgeInsets.only(bottom: 10.0));
+        final SliverPadding listPaddingReverse = tester.widget<SliverPadding>(find.byType(SliverPadding).last);
+        expect(listPaddingReverse.padding, const EdgeInsets.only(top: 10.0));
       });
       
       testWidgets('reorder is not triggered when children length is less or equals to 1', (WidgetTester tester) async {

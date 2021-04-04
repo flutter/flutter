@@ -449,9 +449,9 @@ class _ReorderableListViewState extends State<ReorderableListView> {
     assert(debugCheckHasOverlay(context));
 
     // If there is a header we can't just apply the padding to the list,
-    // so we wrap the CustomScrollView in the padding for the top, left and right
-    // and only add the padding from the bottom to the sliver list (or the equivalent
-    // for other axis directions).
+    // so if header is not present, we wrap the CustomScrollView in the padding form the left and right
+    // and add the padding from the bottom and top to the sliver list. If header if present
+    // we only padd top of the header and bottom of the sliver list (or the equivalent for other axis directions).
     final EdgeInsets padding = widget.padding ?? EdgeInsets.zero;
     late EdgeInsets outerPadding;
     late EdgeInsets listPadding;
@@ -469,10 +469,10 @@ class _ReorderableListViewState extends State<ReorderableListView> {
       case Axis.vertical:
         if (widget.reverse) {
           outerPadding = EdgeInsets.fromLTRB(padding.left, 0, padding.right, 0);
-          listPadding = EdgeInsets.fromLTRB(0, padding.top, 0, padding.bottom);
+          listPadding = EdgeInsets.fromLTRB(0, padding.top, 0, widget.header != null ? 0 : padding.bottom);
         } else {
           outerPadding = EdgeInsets.fromLTRB(padding.left, 0, padding.right, 0);
-          listPadding = EdgeInsets.fromLTRB(0, padding.top, 0, padding.bottom);
+          listPadding = EdgeInsets.fromLTRB(0, widget.header != null ? 0 : padding.top, 0, padding.bottom);
         }
         break;
     }
@@ -494,7 +494,10 @@ class _ReorderableListViewState extends State<ReorderableListView> {
         clipBehavior: widget.clipBehavior,
         slivers: <Widget>[
           if (widget.header != null)
-            SliverToBoxAdapter(child: widget.header!),
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(0, widget.reverse ? 0 : padding.top, 0, widget.reverse ? padding.bottom : 0),
+              sliver: SliverToBoxAdapter(child: widget.header!),
+            ),
           SliverPadding(
             padding: listPadding,
             sliver: SliverReorderableList(
