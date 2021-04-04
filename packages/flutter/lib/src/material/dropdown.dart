@@ -691,9 +691,9 @@ class DropdownMenuItem<T> extends _DropdownMenuItemContainer {
     this.enabled = true,
     required Widget child,
   }) : assert(child != null),
-        assert(enabled || (!enabled && value == null), 'if enabled is false, value should be null'),
-        assert(enabled || (!enabled && onTap == null), 'if enabled is false, onTap should be null'),
-        super(key: key, child: child);
+       assert(enabled || (!enabled && value == null), 'if enabled is false, value should be null'),
+       assert(enabled || (!enabled && onTap == null), 'if enabled is false, onTap should be null'),
+       super(key: key, child: child);
 
   /// Called when the dropdown menu item is tapped.
   ///

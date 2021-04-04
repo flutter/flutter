@@ -3191,8 +3191,8 @@ void main() {
               ],
               onChanged: (String? newValue) {
                 setState(() {
-                value = newValue;
-              });
+                  value = newValue;
+                });
               },
             ),
           ),
@@ -3218,6 +3218,7 @@ void main() {
         home: Scaffold(
           body: DropdownButton<String>(
             value: 'enabled',
+            onChanged: onChanged,
             items: const <DropdownMenuItem<String>>[
               DropdownMenuItem<String>(
                 enabled: false,
@@ -3228,7 +3229,6 @@ void main() {
                 child: Text('enabled'),
               )
             ],
-            onChanged: onChanged,
           ),
         ),
       ),
@@ -3261,6 +3261,7 @@ void main() {
           home: Scaffold(
             body: DropdownButton<String>(
               value: 'enabled',
+              onChanged: onChanged,
               items: <DropdownMenuItem<String>>[
                 DropdownMenuItem<String>(
                   value: 'disabled',
@@ -3272,7 +3273,6 @@ void main() {
                   child: Text('enabled'),
                 )
               ],
-              onChanged: onChanged,
             ),
           ),
         ),
@@ -3297,6 +3297,7 @@ void main() {
           home: Scaffold(
             body: DropdownButton<String>(
               value: 'enabled',
+              onChanged: onChanged,
               items: <DropdownMenuItem<String>>[
                 DropdownMenuItem<String>(
                   enabled: false,
@@ -3308,7 +3309,6 @@ void main() {
                   child: Text('enabled'),
                 )
               ],
-              onChanged: onChanged,
             ),
           ),
         ),
