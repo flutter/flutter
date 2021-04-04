@@ -1752,7 +1752,7 @@ void main() {
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 3);
     }, skip: isBrowser);
-    
+
     test('handles *-lock modifier keys', () async {
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
