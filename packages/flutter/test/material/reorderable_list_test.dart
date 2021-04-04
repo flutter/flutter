@@ -35,6 +35,7 @@ void main() {
       Axis scrollDirection = Axis.vertical,
       TextDirection textDirection = TextDirection.ltr,
       TargetPlatform? platform,
+      EdgeInsets padding = const EdgeInsets.all(0.0),
     }) {
       return MaterialApp(
         theme: ThemeData(platform: platform),
@@ -48,6 +49,7 @@ void main() {
               children: listItems.map<Widget>(listItemToWidget).toList(),
               scrollDirection: scrollDirection,
               onReorder: onReorder,
+              padding: padding,
             ),
           ),
         ),
@@ -60,6 +62,12 @@ void main() {
     });
 
     group('in vertical mode', () {
+      testWidgets('when additional padding applied', (WidgetTester tester) async {
+        await tester.pumpWidget(build(padding: const EdgeInsets.all(10.0)));
+        final actualPadding = tester.widget<SliverPadding>(find.byType(SliverPadding));
+        expect((actualPadding).padding,EdgeInsets.only(top: 10.0, bottom: 10.0));
+      });
+      
       testWidgets('reorder is not triggered when children length is less or equals to 1', (WidgetTester tester) async {
         bool onReorderWasCalled = false;
         final List<String> currentListItems = listItems.take(1).toList();
