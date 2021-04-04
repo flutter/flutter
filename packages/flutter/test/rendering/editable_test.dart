@@ -1475,6 +1475,56 @@ void main() {
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 0);
     }, skip: isBrowser);
+
+        test('handles *-lock modifier keys', () async {
+      final TextSelectionDelegate delegate = FakeEditableTextState()
+        ..textEditingValue = const TextEditingValue(
+          text: 'test',
+          selection: TextSelection(baseOffset: 2, extentOffset: 2),
+        );
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        onSelectionChanged: (TextSelection selection,
+            RenderEditable renderObject, SelectionChangedCause cause) {},
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          text: 'test',
+          style: TextStyle(
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
+          ),
+        ),
+        selection: const TextSelection(baseOffset: 2, extentOffset: 2),
+      );
+
+      layout(editable);
+      editable.hasFocus = true;
+      pumpFrame();
+
+      // Test with NumLock set
+      await simulateKeyDownEvent(LogicalKeyboardKey.numLock, platform: 'android');
+      await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
+      await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
+      await simulateKeyUpEvent(LogicalKeyboardKey.numLock, platform: 'android');
+      expect(delegate.textEditingValue.text, 'tet');
+      expect(delegate.textEditingValue.selection.baseOffset, 2);
+
+      // Test with CapsLock set
+      await simulateKeyDownEvent(LogicalKeyboardKey.capsLock, platform: 'android');
+      await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
+      await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
+      await simulateKeyUpEvent(LogicalKeyboardKey.capsLock, platform: 'android');
+      expect(delegate.textEditingValue.text, 'te');
+      expect(delegate.textEditingValue.selection.baseOffset, 2);
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
   });
 
   group('backspace', () {
@@ -1702,6 +1752,56 @@ void main() {
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 3);
     }, skip: isBrowser);
+    
+    test('handles *-lock modifier keys', () async {
+      final TextSelectionDelegate delegate = FakeEditableTextState()
+        ..textEditingValue = const TextEditingValue(
+          text: 'test',
+          selection: TextSelection(baseOffset: 2, extentOffset: 2),
+        );
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        onSelectionChanged: (TextSelection selection,
+            RenderEditable renderObject, SelectionChangedCause cause) {},
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          text: 'test',
+          style: TextStyle(
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
+          ),
+        ),
+        selection: const TextSelection(baseOffset: 2, extentOffset: 2),
+      );
+
+      layout(editable);
+      editable.hasFocus = true;
+      pumpFrame();
+
+      // Test with NumLock set
+      await simulateKeyDownEvent(LogicalKeyboardKey.numLock, platform: 'android');
+      await simulateKeyDownEvent(LogicalKeyboardKey.backspace, platform: 'android');
+      await simulateKeyUpEvent(LogicalKeyboardKey.backspace, platform: 'android');
+      await simulateKeyUpEvent(LogicalKeyboardKey.numLock, platform: 'android');
+      expect(delegate.textEditingValue.text, 'tst');
+      expect(delegate.textEditingValue.selection.baseOffset, 1);
+
+      // Test with CapsLock set
+      await simulateKeyDownEvent(LogicalKeyboardKey.capsLock, platform: 'android');
+      await simulateKeyDownEvent(LogicalKeyboardKey.backspace, platform: 'android');
+      await simulateKeyUpEvent(LogicalKeyboardKey.backspace, platform: 'android');
+      await simulateKeyUpEvent(LogicalKeyboardKey.capsLock, platform: 'android');
+      expect(delegate.textEditingValue.text, 'st');
+      expect(delegate.textEditingValue.selection.baseOffset, 0);
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
   });
 
   test('getEndpointsForSelection handles empty characters', () {
