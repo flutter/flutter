@@ -940,7 +940,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         _splashes!.remove(splash);
         if (_currentSplash == splash)
           _currentSplash = null;
-        updateKeepAlive();
+        if (_active)
+          updateKeepAlive();
       } // else we're probably in deactivate()
     }
 

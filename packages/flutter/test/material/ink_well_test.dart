@@ -1407,6 +1407,28 @@ void main() {
     expect(callChangeReplaceCount, 2);
     expect(replaced, false);
   });
+
+  // Regression test for https://github.com/flutter/flutter/pull/79300
+  testWidgets('When widget dispose, trigger tap cancel', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      // Colors.
+      splashFactory: InkRipple.splashFactory,
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: Scaffold(
+        body: InputChip(
+          label: const Text('Chip'),
+          onPressed: () {},
+        ),
+      ),
+    ));
+
+    await tester.press(find.byType(RawChip));
+    // widget dispose and tap cancel.
+    await tester.pump();
+  });
 }
 
 class TestApp extends StatefulWidget {
