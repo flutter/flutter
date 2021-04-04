@@ -1101,6 +1101,6 @@ void main() {
     await tester.pumpWidget(buildRadio(false));
     expect(find.byKey(key), findsNothing);
     // Release pointer after widget disappeared.
-    gesture.up();
+    await gesture.up();
   });
 }

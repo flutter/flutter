@@ -39,7 +39,7 @@ const double _kDefaultFontSize = 14.0;
 /// ![Applying the style in this way creates bold text.](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_bold.png)
 ///
 /// ```dart
-/// Text(
+/// const Text(
 ///   'No, we need bold strokes. We need this plan.',
 ///   style: TextStyle(fontWeight: FontWeight.bold),
 /// )
@@ -55,7 +55,7 @@ const double _kDefaultFontSize = 14.0;
 /// ![This results in italicized text.](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_italics.png)
 ///
 /// ```dart
-/// Text(
+/// const Text(
 ///   "Welcome to the present, we're running a real nation.",
 ///   style: TextStyle(fontStyle: FontStyle.italic),
 /// )
@@ -137,7 +137,7 @@ const double _kDefaultFontSize = 14.0;
 /// 50 pixels.
 ///
 /// ```dart
-/// Text(
+/// const Text(
 ///   'Ladies and gentlemen, you coulda been anywhere in the world tonight, but you’re here with us in New York City.',
 ///   style: TextStyle(height: 5, fontSize: 10),
 /// )
@@ -149,6 +149,47 @@ const double _kDefaultFontSize = 14.0;
 /// ![Since the explicit line height is applied as a scale factor on the font-metrics-defined line height, the gap above the text grows faster, as the height grows, than the gap below the text.](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_comparison_diagram.png)
 ///
 /// See [StrutStyle] for further control of line height at the paragraph level.
+///
+/// ### Leading Distribution and Trimming
+///
+/// [Leading](https://en.wikipedia.org/wiki/Leading) is the vertical space
+/// between glyphs from adjacent lines. Quantitatively, it is the line height
+/// (see the previous section) subtracted by the font's ascent and descent.
+/// It's possible to have a negative `Leading` if [height] is sufficiently
+/// small.
+///
+/// When the [height] multiplier is null, `leading` and how it is distributed
+/// is up to the font's
+/// [metrics](https://en.wikipedia.org/wiki/Typeface#Font_metrics).
+/// When the [height] multiplier is specified, the exact behavior can be
+/// configured via [leadingDistribution] and [TextPainter.textHeightBehavior].
+///
+/// ![In configuration 1 the line height is divided by the alphabetic baseline proportionally to the font's ascent and descent, in configuration 3 the glyphs are roughly centered within the line height, configuration 2 is similar to configuration 1 except the Text Top guide on the same line as the font's ascent](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_breakdown.png)
+///
+/// Above is a side-by-side comparison of different [leadingDistribution] and
+/// [TextPainter.textHeightBehavior] combinations.
+///
+///  * Configuration 1: The default. [leadingDistribution] is set to [TextLeadingDistribution.proportional].
+///  * Configuration 2: same as Configuration 1, except [TextHeightBehavior.applyHeightToFirstAscent] is set to false.
+///  * Configuration 3: [leadingDistribution] is set to [TextLeadingDistribution.even].
+///  * Configuration 4: same as Configuration 3, except [TextHeightBehavior.applyHeightToLastDescent] is set to false.
+///
+/// The [leadingDistribution] property controls how leading is distributed over
+/// and under the text. With [TextLeadingDistribution.proportional]
+/// (Configuration 1), `Top Leading : Bottom Leading = Font Ascent : Font
+/// Descent`, which also means the alphabetic baseline divides the line height
+/// into 2 parts proportional to the font's ascent and descent. With
+/// [TextLeadingDistribution.even] (Configuration 3), `Top Leading` equals
+/// `Bottom Leading`, and the glyphs are roughly centered within the allotted
+/// line height.
+///
+/// The [TextPainter.textHeightBehavior] is a property that controls leading at
+/// the paragraph level. The `applyHeightToFirstAscent` property is applied
+/// **after** [height] and [leadingDistribution]. Setting it to false trims the
+/// "Top Leading" of the text box to match the font's ascent if it's on the
+/// first line (see Configuration 2). Similarly setting
+/// `applyHeightToLastDescent` to false reduces "Bottom Leading" to 0 for the
+/// last line of text (Configuration 4).
 ///
 /// ### Wavy red underline with black text
 ///
@@ -163,7 +204,7 @@ const double _kDefaultFontSize = 14.0;
 ///
 /// ```dart
 /// RichText(
-///   text: TextSpan(
+///   text: const TextSpan(
 ///     text: "Don't tax the South ",
 ///     children: <TextSpan>[
 ///       TextSpan(
@@ -578,7 +619,8 @@ class TextStyle with Diagnosticable {
   /// When a non-null [height] is specified, after accommodating the glyphs of
   /// the text, the remaining vertical space from the allotted line height will
   /// be distributed over and under the text, according to the
-  /// [leadingDistribution] property.
+  /// [leadingDistribution] property. See the [TextStyle] class's documentation
+  /// for an example.
   ///
   /// When [height] is null, [leadingDistribution] does not affect the text
   /// layout.
@@ -654,7 +696,7 @@ class TextStyle with Diagnosticable {
   /// decoration.
   ///
   /// ```dart
-  /// Text(
+  /// const Text(
   ///   'This has a very BOLD strike through!',
   ///   style: TextStyle(
   ///     decoration: TextDecoration.lineThrough,
@@ -669,7 +711,7 @@ class TextStyle with Diagnosticable {
   /// are misspelled) by using a [decorationThickness] < 1.0.
   ///
   /// ```dart
-  /// Text(
+  /// const Text(
   ///   'oopsIforgottousespaces!',
   ///   style: TextStyle(
   ///     decoration: TextDecoration.underline,

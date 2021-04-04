@@ -314,7 +314,7 @@ enum UnfocusDisposition {
 ///
 /// ```dart preamble
 /// class ColorfulButton extends StatefulWidget {
-///   ColorfulButton({Key? key}) : super(key: key);
+///   const ColorfulButton({Key? key}) : super(key: key);
 ///
 ///   @override
 ///   _ColorfulButtonState createState() => _ColorfulButtonState();
@@ -407,7 +407,7 @@ enum UnfocusDisposition {
 ///   final TextTheme textTheme = Theme.of(context).textTheme;
 ///   return DefaultTextStyle(
 ///     style: textTheme.headline4!,
-///     child: ColorfulButton(),
+///     child: const ColorfulButton(),
 ///   );
 /// }
 /// ```
@@ -729,10 +729,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Offset is the offset of the transformed widget in global coordinates.
   Offset get offset {
     assert(
-        context != null,
-        "Tried to get the offset of a focus node that didn't have its context set yet.\n"
-        'The context needs to be set before trying to evaluate traversal policies. '
-        'Setting the context is typically done with the attach method.');
+      context != null,
+      "Tried to get the offset of a focus node that didn't have its context set yet.\n"
+      'The context needs to be set before trying to evaluate traversal policies. '
+      'Setting the context is typically done with the attach method.',
+    );
     final RenderObject object = context!.findRenderObject()!;
     return MatrixUtils.transformPoint(object.getTransformTo(null), object.semanticBounds.topLeft);
   }
@@ -743,10 +744,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Rect is the rectangle of the transformed widget in global coordinates.
   Rect get rect {
     assert(
-        context != null,
-        "Tried to get the bounds of a focus node that didn't have its context set yet.\n"
-        'The context needs to be set before trying to evaluate traversal policies. '
-        'Setting the context is typically done with the attach method.');
+      context != null,
+      "Tried to get the bounds of a focus node that didn't have its context set yet.\n"
+      'The context needs to be set before trying to evaluate traversal policies. '
+      'Setting the context is typically done with the attach method.',
+    );
     final RenderObject object = context!.findRenderObject()!;
     final Offset topLeft = MatrixUtils.transformPoint(object.getTransformTo(null), object.semanticBounds.topLeft);
     final Offset bottomRight = MatrixUtils.transformPoint(object.getTransformTo(null), object.semanticBounds.bottomRight);
@@ -812,7 +814,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///         children: <Widget>[
   ///           Wrap(
   ///             children: List<Widget>.generate(4, (int index) {
-  ///               return SizedBox(
+  ///               return const SizedBox(
   ///                 width: 200,
   ///                 child: Padding(
   ///                   padding: const EdgeInsets.all(8.0),
@@ -1494,7 +1496,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// interaction type.
   ///
   /// The initial value of [highlightMode] depends upon the value of
-  /// [defaultTargetPlatform] and [BaseMouseTracker.mouseIsConnected] of
+  /// [defaultTargetPlatform] and [MouseTracker.mouseIsConnected] of
   /// [RendererBinding.mouseTracker], making a guess about which interaction is
   /// most appropriate for the initial interaction mode.
   ///
@@ -1674,8 +1676,10 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       if (node.onKey != null) {
         // TODO(gspencergoog): Convert this from dynamic to KeyEventResult once migration is complete.
         final dynamic result = node.onKey!(node, event);
-        assert(result is bool || result is KeyEventResult,
-            'Value returned from onKey handler must be a non-null bool or KeyEventResult, not ${result.runtimeType}');
+        assert(
+          result is bool || result is KeyEventResult,
+          'Value returned from onKey handler must be a non-null bool or KeyEventResult, not ${result.runtimeType}',
+        );
         if (result is KeyEventResult) {
           switch (result) {
             case KeyEventResult.handled:

@@ -66,9 +66,11 @@ enum StretchMode {
 /// import 'package:flutter/material.dart';
 /// ```
 /// ```dart
-/// void main() => runApp(MaterialApp(home: MyApp()));
+/// void main() => runApp(const MaterialApp(home: MyApp()));
 ///
 /// class MyApp extends StatelessWidget {
+///   const MyApp({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
@@ -79,11 +81,11 @@ enum StretchMode {
 ///             stretch: true,
 ///             onStretchTrigger: () {
 ///               // Function callback for stretch
-///               return Future.value();
+///               return Future<void>.value();
 ///             },
 ///             expandedHeight: 300.0,
 ///             flexibleSpace: FlexibleSpaceBar(
-///               stretchModes: <StretchMode>[
+///               stretchModes: const <StretchMode>[
 ///                 StretchMode.zoomBackground,
 ///                 StretchMode.blurBackground,
 ///                 StretchMode.fadeTitle,
@@ -92,7 +94,7 @@ enum StretchMode {
 ///               title: const Text('Flight Report'),
 ///               background: Stack(
 ///                 fit: StackFit.expand,
-///                 children: [
+///                 children: <Widget>[
 ///                   Image.network(
 ///                     'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
 ///                     fit: BoxFit.cover,
@@ -114,19 +116,21 @@ enum StretchMode {
 ///             ),
 ///           ),
 ///           SliverList(
-///             delegate: SliverChildListDelegate([
-///               ListTile(
-///                 leading: Icon(Icons.wb_sunny),
-///                 title: Text('Sunday'),
-///                 subtitle: Text('sunny, h: 80, l: 65'),
-///               ),
-///               ListTile(
-///                 leading: Icon(Icons.wb_sunny),
-///                 title: Text('Monday'),
-///                 subtitle: Text('sunny, h: 80, l: 65'),
-///               ),
-///               // ListTiles++
-///             ]),
+///             delegate: SliverChildListDelegate(
+///               const <Widget>[
+///                 ListTile(
+///                   leading: Icon(Icons.wb_sunny),
+///                   title: Text('Sunday'),
+///                   subtitle: Text('sunny, h: 80, l: 65'),
+///                 ),
+///                 ListTile(
+///                   leading: Icon(Icons.wb_sunny),
+///                   title: Text('Monday'),
+///                   subtitle: Text('sunny, h: 80, l: 65'),
+///                 ),
+///                 // ListTiles++
+///               ],
+///             ),
 ///           ),
 ///         ],
 ///       ),
@@ -332,8 +336,8 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
                 filter: ui.ImageFilter.blur(
                   sigmaX: blurAmount,
                   sigmaY: blurAmount,
-                )
-              )
+                ),
+              ),
             ));
           }
         }
@@ -374,7 +378,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
           if (opacity > 0.0) {
             TextStyle titleStyle = theme.primaryTextTheme.headline6!;
             titleStyle = titleStyle.copyWith(
-              color: titleStyle.color!.withOpacity(opacity)
+              color: titleStyle.color!.withOpacity(opacity),
             );
             final bool effectiveCenterTitle = _getEffectiveCenterTitle(theme);
             final EdgeInsetsGeometry padding = widget.titlePadding ??
@@ -402,7 +406,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
                           alignment: titleAlignment,
                           child: title,
                         );
-                      }
+                      },
                     ),
                   ),
                 ),
@@ -412,7 +416,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
         }
 
         return ClipRect(child: Stack(children: children));
-      }
+      },
     );
   }
 }

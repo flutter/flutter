@@ -806,7 +806,7 @@ void main() {
       test('constructor redundant pan and scale', () {
         late FlutterError error;
         try {
-          GestureDetector(onScaleStart: (_) {}, onPanStart: (_) {},);
+          GestureDetector(onScaleStart: (_) {}, onPanStart: (_) {});
         } on FlutterError catch (e) {
           error = e;
         } finally {
@@ -908,7 +908,7 @@ class ButtonVariant extends TestVariant<int> {
   const ButtonVariant({
     required this.values,
     required this.descriptions,
-  }) : assert(values.length != 0); // ignore: prefer_is_empty
+  }) : assert(values.length != 0);
 
   @override
   final List<int> values;

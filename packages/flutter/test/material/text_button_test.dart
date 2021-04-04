@@ -831,10 +831,13 @@ void main() {
     for (final double textScaleFactor in textScaleFactorOptions) {
       for (final TextDirection textDirection in textDirectionOptions) {
         for (final Widget? icon in iconOptions) {
-          final String testName = 'TextButton'
-            ', text scale $textScaleFactor' // ignore: missing_whitespace_between_adjacent_strings, https://github.com/dart-lang/linter/issues/2489
-            '${icon != null ? ", with icon" : ""}'
-            '${textDirection == TextDirection.rtl ? ", RTL" : ""}';
+          final String testName = <String>[
+            'TextButton, text scale $textScaleFactor',
+            if (icon != null)
+              'with icon',
+            if (textDirection == TextDirection.rtl)
+              'RTL',
+          ].join(', ');
 
           testWidgets(testName, (WidgetTester tester) async {
             await tester.pumpWidget(

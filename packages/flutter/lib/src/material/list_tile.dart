@@ -399,12 +399,12 @@ enum ListTileControlAffinity {
 ///     child: Container(
 ///       width: 48,
 ///       height: 48,
-///       padding: EdgeInsets.symmetric(vertical: 4.0),
+///       padding: const EdgeInsets.symmetric(vertical: 4.0),
 ///       alignment: Alignment.center,
-///       child: CircleAvatar(),
+///       child: const CircleAvatar(),
 ///     ),
 ///   ),
-///   title: Text('title'),
+///   title: const Text('title'),
 ///   dense: false,
 /// ),
 /// ```
@@ -426,11 +426,12 @@ enum ListTileControlAffinity {
 /// ```dart preamble
 /// class CustomListItem extends StatelessWidget {
 ///   const CustomListItem({
+///     Key? key,
 ///     required this.thumbnail,
 ///     required this.title,
 ///     required this.user,
 ///     required this.viewCount,
-///   });
+///   }) : super(key: key);
 ///
 ///   final Widget thumbnail;
 ///   final String title;
@@ -547,7 +548,7 @@ enum ListTileControlAffinity {
 ///
 /// ```dart preamble
 /// class _ArticleDescription extends StatelessWidget {
-///   _ArticleDescription({
+///   const _ArticleDescription({
 ///     Key? key,
 ///     required this.title,
 ///     required this.subtitle,
@@ -573,7 +574,7 @@ enum ListTileControlAffinity {
 ///             crossAxisAlignment: CrossAxisAlignment.start,
 ///             children: <Widget>[
 ///               Text(
-///                 '$title',
+///                 title,
 ///                 maxLines: 2,
 ///                 overflow: TextOverflow.ellipsis,
 ///                 style: const TextStyle(
@@ -582,7 +583,7 @@ enum ListTileControlAffinity {
 ///               ),
 ///               const Padding(padding: EdgeInsets.only(bottom: 2.0)),
 ///               Text(
-///                 '$subtitle',
+///                 subtitle,
 ///                 maxLines: 2,
 ///                 overflow: TextOverflow.ellipsis,
 ///                 style: const TextStyle(
@@ -600,7 +601,7 @@ enum ListTileControlAffinity {
 ///             mainAxisAlignment: MainAxisAlignment.end,
 ///             children: <Widget>[
 ///               Text(
-///                 '$author',
+///                 author,
 ///                 style: const TextStyle(
 ///                   fontSize: 12.0,
 ///                   color: Colors.black87,
@@ -622,7 +623,7 @@ enum ListTileControlAffinity {
 /// }
 ///
 /// class CustomListItemTwo extends StatelessWidget {
-///   CustomListItemTwo({
+///   const CustomListItemTwo({
 ///     Key? key,
 ///     required this.thumbnail,
 ///     required this.title,
@@ -683,7 +684,7 @@ enum ListTileControlAffinity {
 ///         ),
 ///         title: 'Flutter 1.0 Launch',
 ///         subtitle:
-///           'Flutter continues to improve and expand its horizons.'
+///           'Flutter continues to improve and expand its horizons. '
 ///           'This text should max out at two lines and clip',
 ///         author: 'Dash',
 ///         publishDate: 'Dec 28',
@@ -1326,7 +1327,7 @@ class _ListTileElement extends RenderObjectElement {
   }
 
   @override
-  void mount(Element? parent, dynamic newSlot) {
+  void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     _mountChild(widget.leading, _ListTileSlot.leading);
     _mountChild(widget.title, _ListTileSlot.title);
@@ -1388,7 +1389,7 @@ class _ListTileElement extends RenderObjectElement {
   }
 
   @override
-  void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
+  void moveRenderObjectChild(RenderObject child, Object? oldSlot, Object? newSlot) {
     assert(false, 'not reachable');
   }
 }
@@ -1686,7 +1687,7 @@ class _RenderListTile extends RenderBox {
   @override
   Size computeDryLayout(BoxConstraints constraints) {
     assert(debugCannotComputeDryLayout(
-      reason: 'Layout requires baseline metrics, which are only available after a full layout.'
+      reason: 'Layout requires baseline metrics, which are only available after a full layout.',
     ));
     return Size.zero;
   }
@@ -1721,13 +1722,13 @@ class _RenderListTile extends RenderBox {
       tileWidth != leadingSize.width || tileWidth == 0.0,
       'Leading widget consumes entire tile width. Please use a sized widget, '
       'or consider replacing ListTile with a custom widget '
-      '(see https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4)'
+      '(see https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4)',
     );
     assert(
       tileWidth != trailingSize.width || tileWidth == 0.0,
       'Trailing widget consumes entire tile width. Please use a sized widget, '
       'or consider replacing ListTile with a custom widget '
-      '(see https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4)'
+      '(see https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4)',
     );
 
     final double titleStart = hasLeading

@@ -26,6 +26,7 @@ import 'inherited_notifier.dart';
 ///
 ///  * [ShortcutManager], which uses [LogicalKeySet] (a [KeySet] subclass) to
 ///    define its key map.
+@immutable
 class KeySet<T extends KeyboardKey> {
   /// A constructor for making a [KeySet] of up to four keys.
   ///
@@ -81,7 +82,6 @@ class KeySet<T extends KeyboardKey> {
   final HashSet<T> _keys;
 
   @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes, to remove in NNBD with a late final hashcode
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
@@ -90,25 +90,19 @@ class KeySet<T extends KeyboardKey> {
         && setEquals<T>(other._keys, _keys);
   }
 
-  // Arrays used to temporarily store hash codes for sorting.
-  static final List<int> _tempHashStore3 = <int>[0, 0, 0]; // used to sort exactly 3 keys
-  static final List<int> _tempHashStore4 = <int>[0, 0, 0, 0]; // used to sort exactly 4 keys
 
   // Cached hash code value. Improves [hashCode] performance by 27%-900%,
   // depending on key set size and read/write ratio.
-  int? _hashCode;
-
   @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes, to remove in NNBD with a late final hashcode
-  int get hashCode {
-    // Return cached hash code if available.
-    if (_hashCode != null) {
-      return _hashCode!;
-    }
+  late final int hashCode = _computeHashCode(_keys);
 
+  // Arrays used to temporarily store hash codes for sorting.
+  static final List<int> _tempHashStore3 = <int>[0, 0, 0]; // used to sort exactly 3 keys
+  static final List<int> _tempHashStore4 = <int>[0, 0, 0, 0]; // used to sort exactly 4 keys
+  static int _computeHashCode<T>(Set<T> keys) {
     // Compute order-independent hash and cache it.
-    final int length = _keys.length;
-    final Iterator<T> iterator = _keys.iterator;
+    final int length = keys.length;
+    final Iterator<T> iterator = keys.iterator;
 
     // There's always at least one key. Just extract it.
     iterator.moveNext();
@@ -116,14 +110,14 @@ class KeySet<T extends KeyboardKey> {
 
     if (length == 1) {
       // Don't do anything fancy if there's exactly one key.
-      return _hashCode = h1;
+      return h1;
     }
 
     iterator.moveNext();
     final int h2 = iterator.current.hashCode;
     if (length == 2) {
       // No need to sort if there's two keys, just compare them.
-      return _hashCode = h1 < h2
+      return h1 < h2
         ? hashValues(h1, h2)
         : hashValues(h2, h1);
     }
@@ -142,7 +136,7 @@ class KeySet<T extends KeyboardKey> {
       sortedHashes[3] = iterator.current.hashCode;
     }
     sortedHashes.sort();
-    return _hashCode = hashList(sortedHashes);
+    return hashList(sortedHashes);
   }
 }
 
@@ -201,7 +195,7 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable {
             return 1;
           }
           return a.debugName!.compareTo(b.debugName!);
-        }
+        },
     );
     return sortedKeys.map<String>((LogicalKeyboardKey key) => key.debugName.toString()).join(' + ');
   }
@@ -353,11 +347,13 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
       return KeyEventResult.ignored;
     }
     assert(context != null);
-    assert(keysPressed != null || RawKeyboard.instance.keysPressed.isNotEmpty,
+    assert(
+      keysPressed != null || RawKeyboard.instance.keysPressed.isNotEmpty,
       'Received a key down event when no keys are in keysPressed. '
       "This state can occur if the key event being sent doesn't properly "
       'set its modifier flags. This was the event: $event and its data: '
-      '${event.data}');
+      '${event.data}',
+    );
     final Intent? matchedIntent = _find(keysPressed: keysPressed);
     if (matchedIntent != null) {
       final BuildContext primaryContext = primaryFocus!.context!;
@@ -628,13 +624,15 @@ class Shortcuts extends StatefulWidget {
     final _ShortcutsMarker? inherited = context.dependOnInheritedWidgetOfExactType<_ShortcutsMarker>();
     assert(() {
       if (inherited == null) {
-        throw FlutterError('Unable to find a $Shortcuts widget in the context.\n'
-            '$Shortcuts.of() was called with a context that does not contain a '
-            '$Shortcuts widget.\n'
-            'No $Shortcuts ancestor could be found starting from the context that was '
-            'passed to $Shortcuts.of().\n'
-            'The context used was:\n'
-            '  $context');
+        throw FlutterError(
+          'Unable to find a $Shortcuts widget in the context.\n'
+          '$Shortcuts.of() was called with a context that does not contain a '
+          '$Shortcuts widget.\n'
+          'No $Shortcuts ancestor could be found starting from the context that was '
+          'passed to $Shortcuts.of().\n'
+          'The context used was:\n'
+          '  $context',
+        );
       }
       return true;
     }());

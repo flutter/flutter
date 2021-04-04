@@ -6,7 +6,6 @@ import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
@@ -52,9 +51,10 @@ import 'theme_data.dart';
 /// This sample produces an enabled and a disabled ElevatedButton.
 ///
 /// ```dart
+/// @override
 /// Widget build(BuildContext context) {
 ///   final ButtonStyle style =
-///     ElevatedButton.styleFrom(textStyle: TextStyle(fontSize: 20));
+///     ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));
 ///
 ///   return Center(
 ///     child: Column(
@@ -450,7 +450,7 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
       MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
     );
     return super.defaultStyleOf(context).copyWith(
-      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(scaledPadding)
+      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(scaledPadding),
     );
   }
 }

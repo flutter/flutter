@@ -108,12 +108,13 @@ import 'theme_data.dart';
 /// ```dart preamble
 /// class LinkedLabelRadio extends StatelessWidget {
 ///   const LinkedLabelRadio({
+///     Key? key,
 ///     required this.label,
 ///     required this.padding,
 ///     required this.groupValue,
 ///     required this.value,
 ///     required this.onChanged,
-///   });
+///   }) :super(key: key);
 ///
 ///   final String label;
 ///   final EdgeInsets padding;
@@ -137,7 +138,7 @@ import 'theme_data.dart';
 ///           RichText(
 ///             text: TextSpan(
 ///               text: label,
-///               style: TextStyle(
+///               style: const TextStyle(
 ///                 color: Colors.blueAccent,
 ///                 decoration: TextDecoration.underline,
 ///               ),
@@ -164,7 +165,7 @@ import 'theme_data.dart';
 ///       children: <Widget>[
 ///         LinkedLabelRadio(
 ///           label: 'First tappable label text',
-///           padding: EdgeInsets.symmetric(horizontal: 5.0),
+///           padding: const EdgeInsets.symmetric(horizontal: 5.0),
 ///           value: true,
 ///           groupValue: _isRadioSelected,
 ///           onChanged: (bool newValue) {
@@ -175,7 +176,7 @@ import 'theme_data.dart';
 ///         ),
 ///         LinkedLabelRadio(
 ///           label: 'Second tappable label text',
-///           padding: EdgeInsets.symmetric(horizontal: 5.0),
+///           padding: const EdgeInsets.symmetric(horizontal: 5.0),
 ///           value: false,
 ///           groupValue: _isRadioSelected,
 ///           onChanged: (bool newValue) {
@@ -208,12 +209,13 @@ import 'theme_data.dart';
 /// ```dart preamble
 /// class LabeledRadio extends StatelessWidget {
 ///   const LabeledRadio({
+///     Key? key,
 ///     required this.label,
 ///     required this.padding,
 ///     required this.groupValue,
 ///     required this.value,
 ///     required this.onChanged,
-///   });
+///   }) : super(key: key);
 ///
 ///   final String label;
 ///   final EdgeInsets padding;
@@ -225,8 +227,9 @@ import 'theme_data.dart';
 ///   Widget build(BuildContext context) {
 ///     return InkWell(
 ///       onTap: () {
-///         if (value != groupValue)
+///         if (value != groupValue) {
 ///           onChanged(value);
+///         }
 ///       },
 ///       child: Padding(
 ///         padding: padding,
@@ -406,7 +409,7 @@ class RadioListTile<T> extends StatelessWidget {
   /// Widget build(BuildContext context) {
   ///   return Scaffold(
   ///     body: ListView.builder(
-  ///       itemBuilder: (context, index) {
+  ///       itemBuilder: (BuildContext context, int index) {
   ///         return RadioListTile<int>(
   ///           value: index,
   ///           groupValue: groupValue,

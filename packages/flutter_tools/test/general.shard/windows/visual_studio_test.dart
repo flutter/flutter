@@ -259,7 +259,7 @@ void setMockEncodedAnyVisualStudioInstallation(
 // Sets up the mock environment for a Windows 10 SDK query.
 //
 // registryPresent controls whether or not the registry key is found.
-// filesPresent controles where or not there are any SDK folders at the location
+// filesPresent controls where or not there are any SDK folders at the location
 // returned by the registry query.
 void setMockSdkRegResponse(
   FileSystem fileSystem,
@@ -342,6 +342,18 @@ void setNoViableToolchainInstallation(
 
 void main() {
   group('Visual Studio', () {
+    testWithoutContext('isInstalled throws when PROGRAMFILES(X86) env not set', () {
+      final VisualStudio visualStudio = VisualStudio(
+        logger: BufferLogger.test(),
+        fileSystem: MemoryFileSystem.test(style: FileSystemStyle.windows),
+        platform: FakePlatform(operatingSystem: 'windows'),
+        processManager: FakeProcessManager.any(),
+      );
+
+      expect(() => visualStudio.isInstalled,
+          throwsToolExit(message: '%PROGRAMFILES(X86)% environment variable not found'));
+    });
+
     testWithoutContext('isInstalled and cmakePath correct when vswhere is missing', () {
       final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
       const Exception exception = ProcessException('vswhere', <String>[]);

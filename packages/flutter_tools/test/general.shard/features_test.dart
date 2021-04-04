@@ -7,34 +7,39 @@
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/version.dart';
-import 'package:mockito/mockito.dart';
+import 'package:flutter_tools/src/flutter_features.dart';
 
 import '../src/common.dart';
+import '../src/fakes.dart';
 
 void main() {
   group('Features', () {
-    MockFlutterVerion mockFlutterVerion;
     Config testConfig;
-    MockPlatform mockPlatform;
+    FakePlatform platform;
     FlutterFeatureFlags featureFlags;
 
     setUp(() {
-      mockFlutterVerion = MockFlutterVerion();
       testConfig = Config.test();
-      mockPlatform = MockPlatform();
-      when(mockPlatform.environment).thenReturn(<String, String>{});
+      platform = FakePlatform(environment: <String, String>{});
 
       for (final Feature feature in allFeatures) {
         testConfig.setValue(feature.configSetting, false);
       }
 
       featureFlags = FlutterFeatureFlags(
-        flutterVersion: mockFlutterVerion,
+        flutterVersion: FakeFlutterVersion(),
         config: testConfig,
-        platform: mockPlatform,
+        platform: platform,
       );
     });
+
+    FeatureFlags createFlags(String channel) {
+      return FlutterFeatureFlags(
+        flutterVersion: FakeFlutterVersion(channel: channel),
+        config: testConfig,
+        platform: platform,
+      );
+    }
 
     testWithoutContext('setting has safe defaults', () {
       const FeatureChannelSetting featureSetting = FeatureChannelSetting();
@@ -52,11 +57,11 @@ void main() {
     });
 
     testWithoutContext('retrieves the correct setting for each branch', () {
-      final FeatureChannelSetting masterSetting = FeatureChannelSetting(available: nonconst(true));
-      final FeatureChannelSetting devSetting = FeatureChannelSetting(available: nonconst(true));
-      final FeatureChannelSetting betaSetting = FeatureChannelSetting(available: nonconst(true));
-      final FeatureChannelSetting stableSetting = FeatureChannelSetting(available: nonconst(true));
-      final Feature feature = Feature(
+      const FeatureChannelSetting masterSetting = FeatureChannelSetting(available: true);
+      const FeatureChannelSetting devSetting = FeatureChannelSetting(available: true);
+      const FeatureChannelSetting betaSetting = FeatureChannelSetting(available: true);
+      const FeatureChannelSetting stableSetting = FeatureChannelSetting(available: true);
+      const Feature feature = Feature(
         name: 'example',
         master: masterSetting,
         dev: devSetting,
@@ -72,11 +77,11 @@ void main() {
     });
 
     testWithoutContext('env variables are only enabled with "true" string', () {
-      when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_WEB': 'hello'});
+      platform.environment = <String, String>{'FLUTTER_WEB': 'hello'};
 
       expect(featureFlags.isWebEnabled, false);
 
-      when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_WEB': 'true'});
+      platform.environment = <String, String>{'FLUTTER_WEB': 'true'};
 
       expect(featureFlags.isWebEnabled, true);
     });
@@ -125,82 +130,82 @@ void main() {
     /// Flutter Web
 
     testWithoutContext('Flutter web off by default on master', () {
-      when(mockFlutterVerion.channel).thenReturn('master');
+      final FeatureFlags featureFlags = createFlags('master');
 
       expect(featureFlags.isWebEnabled, false);
     });
 
     testWithoutContext('Flutter web enabled with config on master', () {
-      when(mockFlutterVerion.channel).thenReturn('master');
+      final FeatureFlags featureFlags = createFlags('master');
       testConfig.setValue('enable-web', true);
 
       expect(featureFlags.isWebEnabled, true);
     });
 
     testWithoutContext('Flutter web enabled with environment variable on master', () {
-      when(mockFlutterVerion.channel).thenReturn('master');
-      when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_WEB': 'true'});
+      final FeatureFlags featureFlags = createFlags('master');
+      platform.environment = <String, String>{'FLUTTER_WEB': 'true'};
 
       expect(featureFlags.isWebEnabled, true);
     });
 
     testWithoutContext('Flutter web off by default on dev', () {
-      when(mockFlutterVerion.channel).thenReturn('dev');
+      final FeatureFlags featureFlags = createFlags('dev');
 
       expect(featureFlags.isWebEnabled, false);
     });
 
     testWithoutContext('Flutter web enabled with config on dev', () {
-      when(mockFlutterVerion.channel).thenReturn('dev');
+      final FeatureFlags featureFlags = createFlags('dev');
       testConfig.setValue('enable-web', true);
 
       expect(featureFlags.isWebEnabled, true);
     });
 
     testWithoutContext('Flutter web enabled with environment variable on dev', () {
-      when(mockFlutterVerion.channel).thenReturn('dev');
-      when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_WEB': 'true'});
+      final FeatureFlags featureFlags = createFlags('dev');
+      platform.environment = <String, String>{'FLUTTER_WEB': 'true'};
 
       expect(featureFlags.isWebEnabled, true);
     });
 
     testWithoutContext('Flutter web off by default on beta', () {
-      when(mockFlutterVerion.channel).thenReturn('beta');
+      final FeatureFlags featureFlags = createFlags('beta');
 
       expect(featureFlags.isWebEnabled, false);
     });
 
     testWithoutContext('Flutter web enabled with config on beta', () {
-      when(mockFlutterVerion.channel).thenReturn('beta');
+      final FeatureFlags featureFlags = createFlags('beta');
       testConfig.setValue('enable-web', true);
 
       expect(featureFlags.isWebEnabled, true);
     });
 
     testWithoutContext('Flutter web not enabled with environment variable on beta', () {
-      when(mockFlutterVerion.channel).thenReturn('beta');
-      when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_WEB': 'true'});
+     final FeatureFlags featureFlags = createFlags('beta');
+      platform.environment = <String, String>{'FLUTTER_WEB': 'true'};
 
       expect(featureFlags.isWebEnabled, true);
     });
 
     testWithoutContext('Flutter web on by default on stable', () {
-      when(mockFlutterVerion.channel).thenReturn('stable');
+      final FeatureFlags featureFlags = createFlags('stable');
       testConfig.removeValue('enable-web');
 
       expect(featureFlags.isWebEnabled, true);
     });
 
     testWithoutContext('Flutter web enabled with config on stable', () {
-      when(mockFlutterVerion.channel).thenReturn('stable');
+      final FeatureFlags featureFlags = createFlags('stable');
       testConfig.setValue('enable-web', true);
 
       expect(featureFlags.isWebEnabled, true);
     });
 
     testWithoutContext('Flutter web not enabled with environment variable on stable', () {
-      when(mockFlutterVerion.channel).thenReturn('stable');
-      when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_WEB': 'enabled'});
+      final FeatureFlags featureFlags = createFlags('stable');
+      platform.environment = <String, String>{'FLUTTER_WEB': 'enabled'};
 
       expect(featureFlags.isWebEnabled, false);
     });
@@ -208,243 +213,243 @@ void main() {
     /// Flutter macOS desktop.
 
     testWithoutContext('Flutter macos desktop off by default on master', () {
-      when(mockFlutterVerion.channel).thenReturn('master');
+      final FeatureFlags featureFlags = createFlags('master');
 
       expect(featureFlags.isMacOSEnabled, false);
     });
 
     testWithoutContext('Flutter macos desktop enabled with config on master', () {
-      when(mockFlutterVerion.channel).thenReturn('master');
+      final FeatureFlags featureFlags = createFlags('master');
       testConfig.setValue('enable-macos-desktop', true);
 
       expect(featureFlags.isMacOSEnabled, true);
     });
 
     testWithoutContext('Flutter macos desktop enabled with environment variable on master', () {
-      when(mockFlutterVerion.channel).thenReturn('master');
-      when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_MACOS': 'true'});
+      final FeatureFlags featureFlags = createFlags('master');
+      platform.environment = <String, String>{'FLUTTER_MACOS': 'true'};
 
       expect(featureFlags.isMacOSEnabled, true);
     });
 
     testWithoutContext('Flutter macos desktop off by default on dev', () {
-      when(mockFlutterVerion.channel).thenReturn('dev');
+      final FeatureFlags featureFlags = createFlags('dev');
 
       expect(featureFlags.isMacOSEnabled, false);
     });
 
     testWithoutContext('Flutter macos desktop enabled with config on dev', () {
-      when(mockFlutterVerion.channel).thenReturn('dev');
+      final FeatureFlags featureFlags = createFlags('dev');
       testConfig.setValue('enable-macos-desktop', true);
 
       expect(featureFlags.isMacOSEnabled, true);
     });
 
     testWithoutContext('Flutter macos desktop enabled with environment variable on dev', () {
-      when(mockFlutterVerion.channel).thenReturn('dev');
-      when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_MACOS': 'true'});
+      final FeatureFlags featureFlags = createFlags('dev');
+      platform.environment = <String, String>{'FLUTTER_MACOS': 'true'};
 
       expect(featureFlags.isMacOSEnabled, true);
     });
 
     testWithoutContext('Flutter macos desktop off by default on beta', () {
-      when(mockFlutterVerion.channel).thenReturn('beta');
+      final FeatureFlags featureFlags = createFlags('beta');
 
       expect(featureFlags.isMacOSEnabled, false);
     });
 
     testWithoutContext('Flutter macos desktop enabled with config on beta', () {
-      when(mockFlutterVerion.channel).thenReturn('beta');
+      final FeatureFlags featureFlags = createFlags('beta');
       testConfig.setValue('enable-macos-desktop', true);
 
       expect(featureFlags.isMacOSEnabled, true);
     });
 
     testWithoutContext('Flutter macos desktop enabled with environment variable on beta', () {
-      when(mockFlutterVerion.channel).thenReturn('beta');
-      when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_MACOS': 'true'});
+      final FeatureFlags featureFlags = createFlags('beta');
+      platform.environment = <String, String>{'FLUTTER_MACOS': 'true'};
 
       expect(featureFlags.isMacOSEnabled, true);
     });
 
     testWithoutContext('Flutter macos desktop off by default on stable', () {
-      when(mockFlutterVerion.channel).thenReturn('stable');
+      final FeatureFlags featureFlags = createFlags('stable');
 
       expect(featureFlags.isMacOSEnabled, false);
     });
 
     testWithoutContext('Flutter macos desktop enabled with config on stable', () {
-      when(mockFlutterVerion.channel).thenReturn('stable');
+      final FeatureFlags featureFlags = createFlags('stable');
       testConfig.setValue('enable-macos-desktop', true);
 
       expect(featureFlags.isMacOSEnabled, true);
     });
 
     testWithoutContext('Flutter macos desktop enabled with environment variable on stable', () {
-      when(mockFlutterVerion.channel).thenReturn('stable');
-      when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_MACOS': 'true'});
+      final FeatureFlags featureFlags = createFlags('stable');
+      platform.environment = <String, String>{'FLUTTER_MACOS': 'true'};
 
       expect(featureFlags.isMacOSEnabled, true);
     });
 
     /// Flutter Linux Desktop
     testWithoutContext('Flutter linux desktop off by default on master', () {
-      when(mockFlutterVerion.channel).thenReturn('master');
+      final FeatureFlags featureFlags = createFlags('stable');
 
       expect(featureFlags.isLinuxEnabled, false);
     });
 
     testWithoutContext('Flutter linux desktop enabled with config on master', () {
-      when(mockFlutterVerion.channel).thenReturn('master');
+      final FeatureFlags featureFlags = createFlags('master');
       testConfig.setValue('enable-linux-desktop', true);
 
       expect(featureFlags.isLinuxEnabled, true);
     });
 
     testWithoutContext('Flutter linux desktop enabled with environment variable on master', () {
-      when(mockFlutterVerion.channel).thenReturn('master');
-      when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_LINUX': 'true'});
+      final FeatureFlags featureFlags = createFlags('master');
+      platform.environment = <String, String>{'FLUTTER_LINUX': 'true'};
 
       expect(featureFlags.isLinuxEnabled, true);
     });
 
     testWithoutContext('Flutter linux desktop off by default on dev', () {
-      when(mockFlutterVerion.channel).thenReturn('dev');
+      final FeatureFlags featureFlags = createFlags('dev');
 
       expect(featureFlags.isLinuxEnabled, false);
     });
 
     testWithoutContext('Flutter linux desktop enabled with config on dev', () {
-      when(mockFlutterVerion.channel).thenReturn('dev');
+      final FeatureFlags featureFlags = createFlags('dev');
       testConfig.setValue('enable-linux-desktop', true);
 
       expect(featureFlags.isLinuxEnabled, true);
     });
 
     testWithoutContext('Flutter linux desktop enabled with environment variable on dev', () {
-      when(mockFlutterVerion.channel).thenReturn('dev');
-      when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_LINUX': 'true'});
+      final FeatureFlags featureFlags = createFlags('dev');
+      platform.environment = <String, String>{'FLUTTER_LINUX': 'true'};
 
       expect(featureFlags.isLinuxEnabled, true);
     });
 
     testWithoutContext('Flutter linux desktop off by default on beta', () {
-      when(mockFlutterVerion.channel).thenReturn('beta');
+      final FeatureFlags featureFlags = createFlags('beta');
 
       expect(featureFlags.isLinuxEnabled, false);
     });
 
     testWithoutContext('Flutter linux desktop enabled with config on beta', () {
-      when(mockFlutterVerion.channel).thenReturn('beta');
+      final FeatureFlags featureFlags = createFlags('beta');
       testConfig.setValue('enable-linux-desktop', true);
 
       expect(featureFlags.isLinuxEnabled, true);
     });
 
     testWithoutContext('Flutter linux desktop enabled with environment variable on beta', () {
-      when(mockFlutterVerion.channel).thenReturn('beta');
-      when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_LINUX': 'true'});
+      final FeatureFlags featureFlags = createFlags('beta');
+      platform.environment = <String, String>{'FLUTTER_LINUX': 'true'};
 
       expect(featureFlags.isLinuxEnabled, true);
     });
 
     testWithoutContext('Flutter linux desktop off by default on stable', () {
-      when(mockFlutterVerion.channel).thenReturn('stable');
+      final FeatureFlags featureFlags = createFlags('stable');
 
       expect(featureFlags.isLinuxEnabled, false);
     });
 
     testWithoutContext('Flutter linux desktop enabled with config on stable', () {
-      when(mockFlutterVerion.channel).thenReturn('stable');
+      final FeatureFlags featureFlags = createFlags('stable');
       testConfig.setValue('enable-linux-desktop', true);
 
       expect(featureFlags.isLinuxEnabled, true);
     });
 
     testWithoutContext('Flutter linux desktop enabled with environment variable on stable', () {
-      when(mockFlutterVerion.channel).thenReturn('stable');
-      when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_LINUX': 'true'});
+      final FeatureFlags featureFlags = createFlags('stable');
+      platform.environment = <String, String>{'FLUTTER_LINUX': 'true'};
 
       expect(featureFlags.isLinuxEnabled, true);
     });
 
     /// Flutter Windows desktop.
     testWithoutContext('Flutter Windows desktop off by default on master', () {
-      when(mockFlutterVerion.channel).thenReturn('master');
+      final FeatureFlags featureFlags = createFlags('master');
 
       expect(featureFlags.isWindowsEnabled, false);
     });
 
     testWithoutContext('Flutter Windows desktop enabled with config on master', () {
-      when(mockFlutterVerion.channel).thenReturn('master');
+      final FeatureFlags featureFlags = createFlags('master');
       testConfig.setValue('enable-windows-desktop', true);
 
       expect(featureFlags.isWindowsEnabled, true);
     });
 
     testWithoutContext('Flutter Windows desktop enabled with environment variable on master', () {
-      when(mockFlutterVerion.channel).thenReturn('master');
-      when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_WINDOWS': 'true'});
+      final FeatureFlags featureFlags = createFlags('master');
+      platform.environment = <String, String>{'FLUTTER_WINDOWS': 'true'};
 
       expect(featureFlags.isWindowsEnabled, true);
     });
 
     testWithoutContext('Flutter Windows desktop off by default on dev', () {
-      when(mockFlutterVerion.channel).thenReturn('dev');
+      final FeatureFlags featureFlags = createFlags('dev');
 
       expect(featureFlags.isWindowsEnabled, false);
     });
 
     testWithoutContext('Flutter Windows desktop enabled with config on dev', () {
-      when(mockFlutterVerion.channel).thenReturn('dev');
+      final FeatureFlags featureFlags = createFlags('dev');
       testConfig.setValue('enable-windows-desktop', true);
 
       expect(featureFlags.isWindowsEnabled, true);
     });
 
     testWithoutContext('Flutter Windows desktop not enabled with environment variable on dev', () {
-      when(mockFlutterVerion.channel).thenReturn('dev');
-      when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_WINDOWS': 'true'});
+      final FeatureFlags featureFlags = createFlags('dev');
+      platform.environment = <String, String>{'FLUTTER_WINDOWS': 'true'};
 
       expect(featureFlags.isWindowsEnabled, true);
     });
 
     testWithoutContext('Flutter Windows desktop off by default on beta', () {
-      when(mockFlutterVerion.channel).thenReturn('beta');
+      final FeatureFlags featureFlags = createFlags('beta');
 
       expect(featureFlags.isWindowsEnabled, false);
     });
 
     testWithoutContext('Flutter Windows desktop enabled with config on beta', () {
-      when(mockFlutterVerion.channel).thenReturn('beta');
+      final FeatureFlags featureFlags = createFlags('beta');
       testConfig.setValue('enable-windows-desktop', true);
 
       expect(featureFlags.isWindowsEnabled, true);
     });
 
     testWithoutContext('Flutter Windows desktop enabled with environment variable on beta', () {
-      when(mockFlutterVerion.channel).thenReturn('beta');
-      when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_WINDOWS': 'true'});
+      final FeatureFlags featureFlags = createFlags('beta');
+      platform.environment = <String, String>{'FLUTTER_WINDOWS': 'true'};
 
       expect(featureFlags.isWindowsEnabled, true);
     });
 
     testWithoutContext('Flutter Windows desktop off by default on stable', () {
-      when(mockFlutterVerion.channel).thenReturn('stable');
+      final FeatureFlags featureFlags = createFlags('stable');
 
       expect(featureFlags.isWindowsEnabled, false);
     });
 
     testWithoutContext('Flutter Windows desktop enabled with config on stable', () {
-      when(mockFlutterVerion.channel).thenReturn('stable');
+      final FeatureFlags featureFlags = createFlags('stable');
       testConfig.setValue('enable-windows-desktop', true);
 
       expect(featureFlags.isWindowsEnabled, true);
     });
 
     testWithoutContext('Flutter Windows desktop enabled with environment variable on stable', () {
-      when(mockFlutterVerion.channel).thenReturn('stable');
-      when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_WINDOWS': 'true'});
+      final FeatureFlags featureFlags = createFlags('stable');
+      platform.environment = <String, String>{'FLUTTER_WINDOWS': 'true'};
 
       expect(featureFlags.isWindowsEnabled, true);
     });
@@ -452,34 +457,29 @@ void main() {
     // Windows UWP desktop
 
     testWithoutContext('Flutter Windows UWP desktop off by default on master', () {
-      when(mockFlutterVerion.channel).thenReturn('master');
+      final FeatureFlags featureFlags = createFlags('master');
 
       expect(featureFlags.isWindowsUwpEnabled, false);
     });
 
     testWithoutContext('Flutter Windows UWP desktop enabled with config on master', () {
-      when(mockFlutterVerion.channel).thenReturn('master');
+      final FeatureFlags featureFlags = createFlags('master');
       testConfig.setValue('enable-windows-uwp-desktop', true);
 
       expect(featureFlags.isWindowsUwpEnabled, true);
     });
 
     testWithoutContext('Flutter Windows UWP desktop off by default on stable', () {
-      when(mockFlutterVerion.channel).thenReturn('stable');
+      final FeatureFlags featureFlags = createFlags('stable');
 
       expect(featureFlags.isWindowsUwpEnabled, false);
     });
 
     testWithoutContext('Flutter Windows UWP desktop not enabled with config on stable', () {
-      when(mockFlutterVerion.channel).thenReturn('stable');
+      final FeatureFlags featureFlags = createFlags('stable');
       testConfig.setValue('enable-windows-uwp-desktop', true);
 
       expect(featureFlags.isWindowsUwpEnabled, false);
     });
   });
 }
-
-class MockFlutterVerion extends Mock implements FlutterVersion {}
-class MockPlatform extends Mock implements Platform {}
-
-T nonconst<T>(T item) => item;

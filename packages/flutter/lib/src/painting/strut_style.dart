@@ -239,7 +239,7 @@ import 'text_style.dart';
 /// ![The result of the example below.](https://flutter.github.io/assets-for-api-docs/assets/painting/strut_force_example_2.png)
 ///
 /// ```dart
-/// Text.rich(
+/// const Text.rich(
 ///   TextSpan(
 ///     text: '       he candle flickered\n',
 ///     style: TextStyle(

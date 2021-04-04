@@ -11,9 +11,8 @@ import '../../base/build.dart';
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
-import '../../base/process.dart';
 import '../../build_info.dart';
-import '../../globals.dart' as globals hide fs, logger, processManager, artifacts;
+import '../../globals.dart' as globals show xcode;
 import '../../macos/xcode.dart';
 import '../../project.dart';
 import '../build_system.dart';
@@ -231,14 +230,11 @@ class DebugUniversalFramework extends Target {
       .childDirectory('App.framework')
       .childFile('App');
     environment.buildDir.createSync(recursive: true);
-    final RunResult createFrameworkResult = await createStubAppFramework(
+    await _createStubAppFramework(
       output,
-      environment.defines[kSdkRoot],
+      environment,
       iosArchNames,
     );
-    if (createFrameworkResult.exitCode != 0) {
-      throw Exception('Failed to create App.framework.');
-    }
   }
 }
 
@@ -283,18 +279,19 @@ abstract class UnpackIOS extends Target {
     if (environment.defines[kBitcodeFlag] == null) {
       throw MissingDefineException(kBitcodeFlag, name);
     }
-    await _copyFramework(environment);
+    _copyFramework(environment);
 
     final File frameworkBinary = environment.outputDir.childDirectory('Flutter.framework').childFile('Flutter');
     final String frameworkBinaryPath = frameworkBinary.path;
     if (!frameworkBinary.existsSync()) {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
     }
-    await _thinFramework(environment, frameworkBinaryPath);
-    await _bitcodeStripFramework(environment, frameworkBinaryPath);
+    _thinFramework(environment, frameworkBinaryPath);
+    _bitcodeStripFramework(environment, frameworkBinaryPath);
+    _signFramework(environment, frameworkBinaryPath, buildMode);
   }
 
-  Future<void> _copyFramework(Environment environment) async {
+  void _copyFramework(Environment environment) {
     final Directory sdkRoot = environment.fileSystem.directory(environment.defines[kSdkRoot]);
     final EnvironmentType environmentType = environmentTypeFromSdkroot(sdkRoot);
     final String basePath = environment.artifacts.getArtifactPath(
@@ -322,7 +319,7 @@ abstract class UnpackIOS extends Target {
   }
 
   /// Destructively thin Flutter.framework to include only the specified architectures.
-  Future<void> _thinFramework(Environment environment, String frameworkBinaryPath) async {
+  void _thinFramework(Environment environment, String frameworkBinaryPath) {
     final String archs = environment.defines[kIosArchs];
     final List<String> archList = archs.split(' ').toList();
     final ProcessResult infoResult = environment.processManager.runSync(<String>[
@@ -368,7 +365,7 @@ abstract class UnpackIOS extends Target {
   }
 
   /// Destructively strip bitcode from the framework, if needed.
-  Future<void> _bitcodeStripFramework(Environment environment, String frameworkBinaryPath) async {
+  void _bitcodeStripFramework(Environment environment, String frameworkBinaryPath) {
     if (environment.defines[kBitcodeFlag] == 'true') {
       return;
     }
@@ -460,6 +457,7 @@ abstract class IosAssetBundle extends Target {
     }
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
+    final String frameworkBinaryPath = frameworkDirectory.childFile('App').path;
     final Directory assetDirectory = frameworkDirectory.childDirectory('flutter_assets');
     frameworkDirectory.createSync(recursive: true);
     assetDirectory.createSync();
@@ -470,7 +468,7 @@ abstract class IosAssetBundle extends Target {
       environment.buildDir
         .childDirectory('App.framework')
         .childFile('App')
-        .copySync(frameworkDirectory.childFile('App').path);
+        .copySync(frameworkBinaryPath);
 
       final String vmSnapshotData = environment.artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug);
       final String isolateSnapshotData = environment.artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug);
@@ -482,7 +480,7 @@ abstract class IosAssetBundle extends Target {
           .copySync(assetDirectory.childFile('isolate_snapshot_data').path);
     } else {
       environment.buildDir.childDirectory('App.framework').childFile('App')
-        .copySync(frameworkDirectory.childFile('App').path);
+        .copySync(frameworkBinaryPath);
     }
 
     // Copy the assets.
@@ -512,6 +510,8 @@ abstract class IosAssetBundle extends Target {
       .copySync(environment.outputDir
       .childDirectory('App.framework')
       .childFile('Info.plist').path);
+
+    _signFramework(environment, frameworkBinaryPath, buildMode);
   }
 }
 
@@ -576,7 +576,7 @@ class ReleaseIosApplicationBundle extends IosAssetBundle {
 /// This framework needs to exist for the Xcode project to link/bundle,
 /// but it isn't actually executed. To generate something valid, we compile a trivial
 /// constant.
-Future<RunResult> createStubAppFramework(File outputFile, String sdkRoot,
+Future<void> _createStubAppFramework(File outputFile, Environment environment,
     Set<String> iosArchNames) async {
   try {
     outputFile.createSync(recursive: true);
@@ -592,7 +592,8 @@ Future<RunResult> createStubAppFramework(File outputFile, String sdkRoot,
   static const int Moo = 88;
   ''');
 
-    return await globals.xcode.clang(<String>[
+    final String sdkRoot = environment.defines[kSdkRoot];
+    await globals.xcode.clang(<String>[
       '-x',
       'c',
       for (String arch in iosArchNames) ...<String>['-arch', arch],
@@ -615,5 +616,28 @@ Future<RunResult> createStubAppFramework(File outputFile, String sdkRoot,
     } on Exception catch (e) {
       throwToolExit('Failed to create App.framework stub at ${outputFile.path}: $e');
     }
+  }
+
+  _signFramework(environment, outputFile.path, BuildMode.debug);
+}
+
+void _signFramework(Environment environment, String binaryPath, BuildMode buildMode) {
+  final String codesignIdentity = environment.defines[kCodesignIdentity];
+  if (codesignIdentity == null || codesignIdentity.isEmpty) {
+    return;
+  }
+  final ProcessResult result = environment.processManager.runSync(<String>[
+    'codesign',
+    '--force',
+    '--sign',
+    codesignIdentity,
+    if (buildMode != BuildMode.release) ...<String>[
+      // Mimic Xcode's timestamp codesigning behavior on non-release binaries.
+      '--timestamp=none',
+    ],
+    binaryPath,
+  ]);
+  if (result.exitCode != 0) {
+    throw Exception('Failed to codesign $binaryPath with identity $codesignIdentity.\n${result.stderr}');
   }
 }

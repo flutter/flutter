@@ -203,8 +203,8 @@ class MethodChannel {
   ///     // code thus cannot assume e.g. List<Map<String, String>> even though
   ///     // the actual values involved would support such a typed container.
   ///     // The correct type cannot be inferred with any value of `T`.
-  ///     final List<dynamic> songs = await _channel.invokeMethod('getSongs');
-  ///     return songs.map(Song.fromJson).toList();
+  ///     final List<dynamic>? songs = await _channel.invokeMethod<List<dynamic>>('getSongs');
+  ///     return songs?.map(Song.fromJson).toList() ?? <Song>[];
   ///   }
   ///
   ///   static Future<void> play(Song song, double volume) async {
@@ -229,7 +229,7 @@ class MethodChannel {
   ///   final String artist;
   ///
   ///   static Song fromJson(dynamic json) {
-  ///     return Song(json['id'], json['title'], json['artist']);
+  ///     return Song(json['id'] as String, json['title'] as String, json['artist'] as String);
   ///   }
   /// }
   /// ```

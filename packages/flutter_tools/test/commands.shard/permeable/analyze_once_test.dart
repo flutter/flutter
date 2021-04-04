@@ -111,7 +111,7 @@ void main() {
     processManager = const LocalProcessManager();
     platform = const LocalPlatform();
     terminal = AnsiTerminal(platform: platform, stdio: Stdio());
-    fileSystem = LocalFileSystem.instance;
+    fileSystem = globals.localFileSystem;
     logger = BufferLogger.test();
     analyzerSeparator = platform.isWindows ? '-' : '•';
     artifacts = CachedArtifacts(

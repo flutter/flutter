@@ -395,7 +395,6 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
     final Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
     for (final String deviceId in await discoverDevices()) {
       try {
-        StringBuffer stderr;
         final int resolveResult = await exec(
           _ffx,
           <String>[
@@ -404,11 +403,9 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
             '--format',
             'a',
             deviceId,
-          ],
-          stderr: stderr
+          ]
         );
-        final String stderrOutput = stderr.toString().trim();
-        if (resolveResult == 0 && ! stderrOutput.contains('No devices found')) {
+        if (resolveResult == 0) {
           results['fuchsia-device-$deviceId'] = HealthCheckResult.success();
         } else {
           results['fuchsia-device-$deviceId'] = HealthCheckResult.failure('Cannot resolve device $deviceId');

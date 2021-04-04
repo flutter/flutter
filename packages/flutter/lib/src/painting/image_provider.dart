@@ -445,8 +445,8 @@ abstract class ImageProvider<T extends Object> {
       specification: ZoneSpecification(
         handleUncaughtError: (Zone zone, ZoneDelegate delegate, Zone parent, Object error, StackTrace stackTrace) {
           handleError(error, stackTrace);
-        }
-      )
+        },
+      ),
     );
     dangerZone.runGuarded(() {
       Future<T> key;
@@ -529,7 +529,12 @@ abstract class ImageProvider<T extends Object> {
   ///
   /// ```dart
   /// class MyWidget extends StatelessWidget {
-  ///   final String url = '...';
+  ///   const MyWidget({
+  ///     Key? key,
+  ///     this.url = ' ... ',
+  ///   }) : super(key: key);
+  ///
+  ///   final String url;
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
@@ -650,7 +655,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
       codec: _loadAsync(key, decode),
       scale: key.scale,
       debugLabel: key.name,
-      informationCollector: collector
+      informationCollector: collector,
     );
   }
 
@@ -669,10 +674,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
       PaintingBinding.instance!.imageCache!.evict(key);
       rethrow;
     }
-    // `key.bundle.load` has a non-nullable return type, but might be null when
-    // running with weak checking, so we need to null check it anyway (and
-    // ignore the warning that the null-handling logic is dead code).
-    if (data == null) { // ignore: dead_code
+    if (data == null) {
       PaintingBinding.instance!.imageCache!.evict(key);
       throw StateError('Unable to read data');
     }
@@ -762,7 +764,7 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
       assert(
         cacheWidth == null && cacheHeight == null && allowUpscaling == null,
         'ResizeImage cannot be composed with another ImageProvider that applies '
-        'cacheWidth, cacheHeight, or allowUpscaling.'
+        'cacheWidth, cacheHeight, or allowUpscaling.',
       );
       return decode(bytes, cacheWidth: width, cacheHeight: height, allowUpscaling: this.allowUpscaling);
     }

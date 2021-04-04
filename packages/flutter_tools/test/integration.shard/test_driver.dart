@@ -6,7 +6,7 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io; // ignore: dart_io_import
+import 'dart:io' as io; // flutter_ignore: dart_io_import
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -63,6 +63,7 @@ abstract class FlutterTestDriver {
   Stream<String> get stdout => _stdout.stream;
   int get vmServicePort => _vmServiceWsUri.port;
   bool get hasExited => _hasExited;
+  Uri get vmServiceWsUri => _vmServiceWsUri;
 
   String lastTime = '';
   void _debugPrint(String message, { String topic = '' }) {
@@ -204,7 +205,7 @@ abstract class FlutterTestDriver {
 
   Future<int> _killForcefully() {
     _debugPrint('Sending SIGKILL to $_processPid..');
-    ProcessSignal.SIGKILL.send(_processPid);
+    ProcessSignal.sigkill.send(_processPid);
     return _process.exitCode;
   }
 
@@ -219,7 +220,7 @@ abstract class FlutterTestDriver {
     return _flutterIsolateId;
   }
 
-  Future<Isolate> _getFlutterIsolate() async {
+  Future<Isolate> getFlutterIsolate() async {
     final Isolate isolate = await _vmService.getIsolate(await _getFlutterIsolateId());
     return isolate;
   }
@@ -281,7 +282,7 @@ abstract class FlutterTestDriver {
         // Cancel the subscription on either of the above.
         await pauseSubscription.cancel();
 
-        return _getFlutterIsolate();
+        return getFlutterIsolate();
       },
       task: 'Waiting for isolate to pause',
     );
@@ -294,7 +295,7 @@ abstract class FlutterTestDriver {
   Future<Isolate> stepOut({ bool waitForNextPause = true }) => _resume(StepOption.kOut, waitForNextPause);
 
   Future<bool> isAtAsyncSuspension() async {
-    final Isolate isolate = await _getFlutterIsolate();
+    final Isolate isolate = await getFlutterIsolate();
     return isolate.pauseEvent.atAsyncSuspension == true;
   }
 
@@ -634,9 +635,6 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     }
     if (_vmService != null) {
       _debugPrint('Closing VM service...');
-      // TODO(dnfield): Remove ignore once internal repo is up to date
-      // https://github.com/flutter/flutter/issues/74518
-      // ignore: await_only_futures
       await _vmService.dispose();
     }
     if (_currentRunningAppId != null) {

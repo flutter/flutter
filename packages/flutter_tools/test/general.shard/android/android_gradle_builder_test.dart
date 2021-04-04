@@ -23,6 +23,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 
 void main() {
   group('gradle build', () {
@@ -372,7 +373,7 @@ void main() {
         );
       },
       throwsA(isA<ProcessException>()));
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('logs success event after a successful retry', () async {
@@ -470,7 +471,7 @@ void main() {
           parameters: <String, String>{},
         ),
       ));
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('performs code size analysis and sends analytics', () async {
@@ -678,7 +679,7 @@ void main() {
           parameters: <String, String>{},
         ),
       ));
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('indicates that an APK has been built successfully', () async {
@@ -742,7 +743,7 @@ void main() {
         logger.statusText,
         contains('Built build/app/outputs/flutter-apk/app-release.apk (0.0MB)'),
       );
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testUsingContext("doesn't indicate how to consume an AAR when printHowToConsumeAar is false", () async {
@@ -805,7 +806,7 @@ void main() {
         logger.statusText.contains('Consuming the Module'),
         isFalse,
       );
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('gradle exit code and stderr is forwarded to tool exit', () async {
@@ -861,7 +862,7 @@ void main() {
           target: '',
           buildNumber: '1.0',
         ), throwsToolExit(exitCode: 108, message: 'Gradle task assembleAarRelease failed with exit code 108.'));
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('build apk uses selected local engine with arm32 ABI', () async {
@@ -935,7 +936,7 @@ void main() {
           localGradleErrors: const <GradleHandledError>[],
         );
       }, throwsToolExit());
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('build apk uses selected local engine with arm64 ABI', () async {
@@ -1009,7 +1010,7 @@ void main() {
           localGradleErrors: const <GradleHandledError>[],
         );
       }, throwsToolExit());
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('build apk uses selected local engine with x86 ABI', () async {
@@ -1083,7 +1084,7 @@ void main() {
           localGradleErrors: const <GradleHandledError>[],
         );
       }, throwsToolExit());
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('build apk uses selected local engine with x64 ABI', () async {
@@ -1157,7 +1158,7 @@ void main() {
           localGradleErrors: const <GradleHandledError>[],
         );
       }, throwsToolExit());
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('honors --no-android-gradle-daemon setting', () async {
@@ -1212,7 +1213,7 @@ void main() {
           localGradleErrors: const <GradleHandledError>[],
         );
       }, throwsToolExit());
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('build aar uses selected local engine with arm32 ABI', () async {
@@ -1297,7 +1298,7 @@ void main() {
         '1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b/'
         'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'
       ), exists);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('build aar uses selected local engine with x64 ABI', () async {
@@ -1382,7 +1383,7 @@ void main() {
         '1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b/'
         'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'
       ), exists);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('build aar uses selected local engine with x86 ABI', () async {
@@ -1467,7 +1468,7 @@ void main() {
         '1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b/'
         'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'
       ), exists);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('build aar uses selected local engine on x64 ABI', () async {
@@ -1552,7 +1553,7 @@ void main() {
         '1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b/'
         'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'
       ), exists);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
   });
 }
