@@ -48,6 +48,8 @@ sk_sp<SkImage> EmbedderExternalTextureGL::ResolveTexture(
     int64_t texture_id,
     GrDirectContext* context,
     const SkISize& size) {
+  context->flushAndSubmit();
+  context->resetContext(kAll_GrBackendState);
   std::unique_ptr<FlutterOpenGLTexture> texture =
       external_texture_callback_(texture_id, size.width(), size.height());
 
