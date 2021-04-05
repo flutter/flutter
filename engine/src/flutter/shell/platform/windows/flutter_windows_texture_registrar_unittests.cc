@@ -7,7 +7,7 @@
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/flutter_windows_texture_registrar.h"
-#include "flutter/shell/platform/windows/testing/engine_embedder_api_modifier.h"
+#include "flutter/shell/platform/windows/testing/engine_modifier.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
@@ -35,7 +35,7 @@ TEST(FlutterWindowsTextureRegistrarTest, CreateDestroy) {
 
 TEST(FlutterWindowsTextureRegistrarTest, RegisterUnregisterTexture) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
-  EngineEmbedderApiModifier modifier(engine.get());
+  EngineModifier modifier(engine.get());
 
   FlutterWindowsTextureRegistrar registrar(engine.get());
 
@@ -90,7 +90,7 @@ TEST(FlutterWindowsTextureRegistrarTest, RegisterUnregisterTexture) {
 
 TEST(FlutterWindowsTextureRegistrarTest, RegisterUnknownTextureType) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
-  EngineEmbedderApiModifier modifier(engine.get());
+  EngineModifier modifier(engine.get());
 
   FlutterWindowsTextureRegistrar registrar(engine.get());
 
