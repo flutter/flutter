@@ -5,7 +5,7 @@
 // @dart = 2.8
 
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/proxy_validator.dart';
 
 import '../../src/common.dart';

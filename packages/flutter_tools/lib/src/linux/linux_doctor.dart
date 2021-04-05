@@ -10,7 +10,7 @@ import 'package:process/process.dart';
 import '../base/io.dart';
 import '../base/user_messages.dart';
 import '../base/version.dart';
-import '../doctor.dart';
+import '../doctor_validator.dart';
 
 /// A combination of version description and parsed version number.
 class _VersionInfo {
