@@ -39,6 +39,7 @@ import 'doctor.dart';
 import 'emulator.dart';
 import 'features.dart';
 import 'flutter_application_package.dart';
+import 'flutter_cache.dart';
 import 'flutter_device_manager.dart';
 import 'flutter_features.dart';
 import 'fuchsia/fuchsia_device.dart' show FuchsiaDeviceTools;
@@ -145,7 +146,7 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
       ),
-      Cache: () => Cache(
+      Cache: () => FlutterCache(
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,

@@ -13,8 +13,8 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/user_messages.dart' hide userMessages;
+import '../cache.dart';
 import '../dart/package_map.dart';
-import 'flutter_command_runner.dart';
 
 /// A strategy for locating the out/ directory of a local engine build.
 ///
