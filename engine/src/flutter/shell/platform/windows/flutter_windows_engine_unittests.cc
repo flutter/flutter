@@ -6,7 +6,7 @@
 
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
-#include "flutter/shell/platform/windows/testing/engine_embedder_api_modifier.h"
+#include "flutter/shell/platform/windows/testing/engine_modifier.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
@@ -22,7 +22,7 @@ std::unique_ptr<FlutterWindowsEngine> GetTestEngine() {
   FlutterProjectBundle project(properties);
   auto engine = std::make_unique<FlutterWindowsEngine>(project);
 
-  EngineEmbedderApiModifier modifier(engine.get());
+  EngineModifier modifier(engine.get());
   // Force the non-AOT path unless overridden by the test.
   modifier.embedder_api().RunsAOTCompiledDartCode = []() { return false; };
 
@@ -32,7 +32,7 @@ std::unique_ptr<FlutterWindowsEngine> GetTestEngine() {
 
 TEST(FlutterWindowsEngine, RunDoesExpectedInitialization) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
-  EngineEmbedderApiModifier modifier(engine.get());
+  EngineModifier modifier(engine.get());
 
   // The engine should be run with expected configuration values.
   bool run_called = false;
@@ -103,7 +103,7 @@ TEST(FlutterWindowsEngine, RunDoesExpectedInitialization) {
 
 TEST(FlutterWindowsEngine, RunWithoutANGLEUsesSoftware) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
-  EngineEmbedderApiModifier modifier(engine.get());
+  EngineModifier modifier(engine.get());
 
   // The engine should be run with expected configuration values.
   bool run_called = false;
@@ -142,7 +142,7 @@ TEST(FlutterWindowsEngine, RunWithoutANGLEUsesSoftware) {
 
 TEST(FlutterWindowsEngine, SendPlatformMessageWithoutResponse) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
-  EngineEmbedderApiModifier modifier(engine.get());
+  EngineModifier modifier(engine.get());
 
   const char* channel = "test";
   const std::vector<uint8_t> test_message = {1, 2, 3, 4};
@@ -168,7 +168,7 @@ TEST(FlutterWindowsEngine, SendPlatformMessageWithoutResponse) {
 
 TEST(FlutterWindowsEngine, SendPlatformMessageWithResponse) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
-  EngineEmbedderApiModifier modifier(engine.get());
+  EngineModifier modifier(engine.get());
 
   const char* channel = "test";
   const std::vector<uint8_t> test_message = {1, 2, 3, 4};

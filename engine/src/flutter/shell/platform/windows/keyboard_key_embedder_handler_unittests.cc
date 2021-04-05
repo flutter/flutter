@@ -9,7 +9,7 @@
 
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
-#include "flutter/shell/platform/windows/testing/engine_embedder_api_modifier.h"
+#include "flutter/shell/platform/windows/testing/engine_modifier.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
