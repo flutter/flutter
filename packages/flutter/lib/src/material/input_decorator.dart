@@ -977,26 +977,32 @@ class _RenderDecoration extends RenderBox {
     boxToBaseline[prefixIcon] = _layoutLineBox(prefixIcon, boxConstraints);
     boxToBaseline[suffixIcon] = _layoutLineBox(suffixIcon, boxConstraints);
 
-    final double inputWidth = math.max(0.0, constraints.maxWidth - (
-      _boxSize(icon).width
-      + contentPadding.left
-      + _boxSize(prefixIcon).width
-      + _boxSize(prefix).width
-      + _boxSize(suffix).width
-      + _boxSize(suffixIcon).width
-      + contentPadding.right));
+    final double inputWidth = math.max(
+      0.0,
+      constraints.maxWidth - (
+        _boxSize(icon).width
+        + contentPadding.left
+        + _boxSize(prefixIcon).width
+        + _boxSize(prefix).width
+        + _boxSize(suffix).width
+        + _boxSize(suffixIcon).width
+        + contentPadding.right),
+    );
     // Increase the available width for the label when it is scaled down.
     final double invertedLabelScale = lerpDouble(1.00, 1 / _kFinalLabelScale, decoration.floatingLabelProgress)!;
     double suffixIconWidth = _boxSize(suffixIcon).width;
     if (decoration.border!.isOutline) {
       suffixIconWidth = lerpDouble(suffixIconWidth, 0.0, decoration.floatingLabelProgress)!;
     }
-    final double labelWidth = math.max(0.0, constraints.maxWidth - (
-      _boxSize(icon).width
-      + contentPadding.left
-      + _boxSize(prefixIcon).width
-      + suffixIconWidth
-      + contentPadding.right));
+    final double labelWidth = math.max(
+      0.0,
+      constraints.maxWidth - (
+        _boxSize(icon).width
+        + contentPadding.left
+        + _boxSize(prefixIcon).width
+        + suffixIconWidth
+        + contentPadding.right),
+    );
     boxToBaseline[label] = _layoutLineBox(
       label,
       boxConstraints.copyWith(maxWidth: labelWidth * invertedLabelScale),
@@ -1268,13 +1274,12 @@ class _RenderDecoration extends RenderBox {
     final double containerHeight = contentPadding.top
       + (label == null ? 0.0 : decoration.floatingLabelHeight)
       + _lineHeight(width, <RenderBox?>[prefix, input, suffix])
-      + subtextHeight
       + contentPadding.bottom
       + densityOffset.dy;
     final double minContainerHeight = decoration.isDense! || expands
       ? 0.0
       : kMinInteractiveDimension;
-    return math.max(containerHeight, minContainerHeight);
+    return math.max(containerHeight, minContainerHeight) + subtextHeight;
   }
 
   @override
@@ -1497,8 +1502,13 @@ class _RenderDecoration extends RenderBox {
       _labelTransform = Matrix4.identity()
         ..translate(dx, labelOffset.dy + dy)
         ..scale(scale);
-      _transformLayer = context.pushTransform(needsCompositing, offset, _labelTransform!, _paintLabel,
-          oldLayer: _transformLayer);
+      _transformLayer = context.pushTransform(
+        needsCompositing,
+        offset,
+        _labelTransform!,
+        _paintLabel,
+        oldLayer: _transformLayer,
+      );
     } else {
       _transformLayer = null;
     }
@@ -2579,8 +2589,10 @@ class InputDecoration {
     this.border = InputBorder.none,
     this.enabled = true,
   }) : assert(enabled != null),
-       assert(!(!hasFloatingPlaceholder && identical(floatingLabelBehavior, FloatingLabelBehavior.always)),
-              'hasFloatingPlaceholder=false conflicts with FloatingLabelBehavior.always'),
+       assert(
+         !(!hasFloatingPlaceholder && identical(floatingLabelBehavior, FloatingLabelBehavior.always)),
+         'hasFloatingPlaceholder=false conflicts with FloatingLabelBehavior.always',
+       ),
        icon = null,
        labelText = null,
        labelStyle = null,
@@ -3643,8 +3655,10 @@ class InputDecorationTheme with Diagnosticable {
        assert(isCollapsed != null),
        assert(filled != null),
        assert(alignLabelWithHint != null),
-       assert(!(!hasFloatingPlaceholder && identical(floatingLabelBehavior, FloatingLabelBehavior.always)),
-        'hasFloatingPlaceholder=false conflicts with FloatingLabelBehavior.always');
+       assert(
+         !(!hasFloatingPlaceholder && identical(floatingLabelBehavior, FloatingLabelBehavior.always)),
+         'hasFloatingPlaceholder=false conflicts with FloatingLabelBehavior.always',
+       );
 
   /// The style to use for [InputDecoration.labelText] when the label is
   /// above (i.e., vertically adjacent to) the input field.

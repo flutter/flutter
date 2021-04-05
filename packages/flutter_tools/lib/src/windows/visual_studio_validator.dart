@@ -8,7 +8,7 @@ import 'package:meta/meta.dart';
 
 import '../base/context.dart';
 import '../base/user_messages.dart' hide userMessages;
-import '../doctor.dart';
+import '../doctor_validator.dart';
 import 'visual_studio.dart';
 
 VisualStudioValidator get visualStudioValidator => context.get<VisualStudioValidator>();

@@ -6,7 +6,7 @@
 
 import 'package:meta/meta.dart';
 
-import '../doctor.dart';
+import '../doctor_validator.dart';
 import '../features.dart';
 
 /// The custom-devices-specific implementation of a [Workflow].

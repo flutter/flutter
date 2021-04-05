@@ -8,6 +8,7 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -17,7 +18,7 @@ import 'package:flutter_tools/src/vmservice.dart';
 import 'package:fake_async/fake_async.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
+import '../src/context.dart' hide testLogger;
 
 final Map<String, Object> vm = <String, dynamic>{
   'type': 'VM',
@@ -198,16 +199,17 @@ void main() {
   });
 
   testUsingContext('VMService prints messages for connection failures', () {
+    final BufferLogger logger = BufferLogger.test();
     FakeAsync().run((FakeAsync time) {
       final Uri uri = Uri.parse('ws://127.0.0.1:12345/QqL7EFEDNG0=/ws');
-      unawaited(connectToVmService(uri));
+      unawaited(connectToVmService(uri, logger: logger));
 
       time.elapse(const Duration(seconds: 5));
-      expect(testLogger.statusText, isEmpty);
+      expect(logger.statusText, isEmpty);
 
       time.elapse(const Duration(minutes: 2));
 
-      final String statusText = testLogger.statusText;
+      final String statusText = logger.statusText;
       expect(
         statusText,
         containsIgnoringWhitespace('Connecting to the VM Service is taking longer than expected...'),
@@ -646,13 +648,13 @@ void main() {
 
   testUsingContext('WebSocket URL construction uses correct URI join primitives', () async {
     final Completer<String> completer = Completer<String>();
-    openChannelForTesting = (String url, {io.CompressionOptions compression}) async {
+    openChannelForTesting = (String url, {io.CompressionOptions compression, Logger logger}) async {
       completer.complete(url);
       throw Exception('');
     };
 
     // Construct a URL that does not end in a `/`.
-    await expectLater(() => connectToVmService(Uri.parse('http://localhost:8181/foo')), throwsException);
+    await expectLater(() => connectToVmService(Uri.parse('http://localhost:8181/foo'), logger: BufferLogger.test()), throwsException);
     expect(await completer.future, 'ws://localhost:8181/foo/ws');
     openChannelForTesting = null;
   });
@@ -696,6 +698,7 @@ class FakeFlutterVersion extends Fake implements FlutterVersion {
 Future<io.WebSocket> failingWebSocketConnector(
   String url, {
   io.CompressionOptions compression,
+  Logger logger,
 }) {
   throw const io.SocketException('Failed WebSocket connection');
 }

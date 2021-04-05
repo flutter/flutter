@@ -133,6 +133,31 @@ Future<void> buildWindowsUwp(WindowsUwpProject windowsProject, BuildInfo buildIn
       'you must delete the winuwp directory and re-create the project.',
     );
   }
+   // Ensure that necessary ephemeral files are generated and up to date.
+  _writeGeneratedFlutterConfig(windowsProject, buildInfo, target);
+  createPluginSymlinks(windowsProject.parent);
+
+  final VisualStudio visualStudio = visualStudioOverride ?? VisualStudio(
+    fileSystem: globals.fs,
+    platform: globals.platform,
+    logger: globals.logger,
+    processManager: globals.processManager,
+  );
+  final String cmakePath = visualStudio.cmakePath;
+  if (cmakePath == null) {
+    throwToolExit('Unable to find suitable Visual Studio toolchain. '
+        'Please run `flutter doctor` for more details.');
+  }
+
+  final Directory buildDirectory = globals.fs.directory(getWindowsBuildUwpDirectory());
+  final Status status = globals.logger.startProgress(
+    'Building Windows application...',
+  );
+  try {
+    await _runCmakeGeneration(cmakePath, buildDirectory, windowsProject.cmakeFile.parent);
+  } finally {
+    status.cancel();
+  }
   throwToolExit('Windows UWP builds are not implemented.');
 }
 

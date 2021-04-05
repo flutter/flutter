@@ -331,7 +331,6 @@ dev_dependencies:
     ]);
 
     expect(fakePackageTest.lastArgs, contains('--concurrency=1'));
-    expect(fakePackageTest.lastArgs, contains('--no-chain-stack-traces'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
@@ -435,6 +434,27 @@ dev_dependencies:
         'test',
         '--no-pub',
         '/package/integration_test/some_integration_test.dart',
+      ]);
+
+      expect(testCommand.isIntegrationTest, true);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+      DeviceManager: () => _FakeDeviceManager(<Device>[
+        FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
+      ]),
+    });
+
+    testUsingContext('when absolute unnormalized path to integration test is passed', () async {
+      final FakePackageTest fakePackageTest = FakePackageTest();
+
+      final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        '/package/../package/integration_test/some_integration_test.dart',
       ]);
 
       expect(testCommand.isIntegrationTest, true);
@@ -561,6 +581,30 @@ dev_dependencies:
       FakeDevice('ephemeral', 'ephemeral', ephemeral: true, isSupported: true, type: PlatformType.web),
     ]),
   });
+
+  testUsingContext('Integration tests set the correct dart-defines', () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      'integration_test',
+    ]);
+
+    expect(
+      testRunner.lastDebuggingOptionsValue.buildInfo.dartDefines,
+      contains('INTEGRATION_TEST_SHOULD_REPORT_RESULTS_TO_NATIVE=false'),
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    DeviceManager: () => _FakeDeviceManager(<Device>[
+      FakeDevice('ephemeral', 'ephemeral', ephemeral: true, isSupported: true, type: PlatformType.android),
+    ]),
+  });
 }
 
 class FakeFlutterTestRunner implements FlutterTestRunner {
@@ -568,6 +612,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
 
   int exitCode;
   bool lastEnableObservatoryValue;
+  DebuggingOptions lastDebuggingOptionsValue;
 
   @override
   Future<int> runTests(
@@ -605,6 +650,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     String integrationTestUserIdentifier,
   }) async {
     lastEnableObservatoryValue = enableObservatory;
+    lastDebuggingOptionsValue = debuggingOptions;
     return exitCode;
   }
 }

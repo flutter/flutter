@@ -1676,8 +1676,10 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       if (node.onKey != null) {
         // TODO(gspencergoog): Convert this from dynamic to KeyEventResult once migration is complete.
         final dynamic result = node.onKey!(node, event);
-        assert(result is bool || result is KeyEventResult,
-            'Value returned from onKey handler must be a non-null bool or KeyEventResult, not ${result.runtimeType}');
+        assert(
+          result is bool || result is KeyEventResult,
+          'Value returned from onKey handler must be a non-null bool or KeyEventResult, not ${result.runtimeType}',
+        );
         if (result is KeyEventResult) {
           switch (result) {
             case KeyEventResult.handled:

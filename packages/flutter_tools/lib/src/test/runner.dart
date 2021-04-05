@@ -183,13 +183,6 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       return exitCode;
     }
 
-    if (integrationTestDevice != null) {
-      // Without this, some async exceptions which are caught will surface when
-      // debugging tests.
-      // TODO(jiahaog): Remove this once https://github.com/dart-lang/stack_trace/issues/106 is fixed.
-      testArgs.add('--no-chain-stack-traces');
-    }
-
     testArgs
       ..add('--')
       ..addAll(testFiles);

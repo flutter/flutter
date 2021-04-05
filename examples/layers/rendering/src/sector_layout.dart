@@ -287,9 +287,11 @@ class RenderSectorRing extends RenderSectorWithChildren {
         remainingDeltaTheta -= paddingTheta;
       }
     }
-    return SectorDimensions.withConstraints(constraints,
-                                                deltaRadius: outerDeltaRadius,
-                                                deltaTheta: innerTheta);
+    return SectorDimensions.withConstraints(
+      constraints,
+      deltaRadius: outerDeltaRadius,
+      deltaTheta: innerTheta,
+    );
   }
 
   @override
@@ -399,9 +401,11 @@ class RenderSectorSlice extends RenderSectorWithChildren {
       childRadius += padding;
       remainingDeltaRadius -= padding;
     }
-    return SectorDimensions.withConstraints(constraints,
-                                                deltaRadius: childRadius - parentData!.radius,
-                                                deltaTheta: outerDeltaTheta);
+    return SectorDimensions.withConstraints(
+      constraints,
+      deltaRadius: childRadius - parentData!.radius,
+      deltaTheta: outerDeltaTheta,
+    );
   }
 
   @override
