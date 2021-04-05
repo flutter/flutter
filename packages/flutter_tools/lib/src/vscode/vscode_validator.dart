@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../base/user_messages.dart';
 import '../base/version.dart';
-import '../doctor.dart';
+import '../doctor_validator.dart';
 import 'vscode.dart';
 
 class VsCodeValidator extends DoctorValidator {
@@ -24,7 +22,7 @@ class VsCodeValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    final String vsCodeVersionText = _vsCode.version == Version.unknown
+    final String? vsCodeVersionText = _vsCode.version == Version.unknown
         ? null
         : userMessages.vsCodeVersion(_vsCode.version.toString());
 

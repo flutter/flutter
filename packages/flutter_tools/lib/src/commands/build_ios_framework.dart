@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';

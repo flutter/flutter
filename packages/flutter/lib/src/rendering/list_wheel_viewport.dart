@@ -989,11 +989,15 @@ class RenderListWheelViewport
   Matrix4 _centerOriginTransform(Matrix4 originalMatrix) {
     final Matrix4 result = Matrix4.identity();
     final Offset centerOriginTranslation = Alignment.center.alongSize(size);
-    result.translate(centerOriginTranslation.dx * (-_offAxisFraction * 2 + 1),
-                     centerOriginTranslation.dy);
+    result.translate(
+      centerOriginTranslation.dx * (-_offAxisFraction * 2 + 1),
+      centerOriginTranslation.dy,
+    );
     result.multiply(originalMatrix);
-    result.translate(-centerOriginTranslation.dx * (-_offAxisFraction * 2 + 1),
-                     -centerOriginTranslation.dy);
+    result.translate(
+      -centerOriginTranslation.dx * (-_offAxisFraction * 2 + 1),
+      -centerOriginTranslation.dy,
+    );
     return result;
   }
 
