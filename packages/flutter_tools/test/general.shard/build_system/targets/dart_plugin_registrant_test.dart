@@ -127,7 +127,7 @@ void main() {
     expect(const DartPluginRegistrantTarget().canSkip(environment2), false);
   });
 
-  testUsingContext('regenerates generated_main.dart with no desktop plugins', () async {
+  testUsingContext("doesn't generate generated_main.dart if there aren't Dart plugins", () async {
     final FileSystem fileSystem = _getFileSystem();
 
     final Environment environment = Environment.test(
@@ -154,13 +154,11 @@ void main() {
         .childDirectory('.dart_tool')
         .childDirectory('flutter_build')
         .childFile('generated_main.dart');
-    generatedMain.createSync(recursive: true);
 
     final FlutterProject testProject = FlutterProject.fromDirectoryTest(environment.projectDir);
     await DartPluginRegistrantTarget.test(testProject).build(environment);
 
-    final String mainContent = generatedMain.readAsStringSync();
-    expect(mainContent, contains(_kNoPluginsRegistrant));
+    expect(generatedMain.existsSync(), isFalse);
   });
 
   testUsingContext('regenerates generated_main.dart', () async {

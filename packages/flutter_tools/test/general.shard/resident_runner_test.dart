@@ -1463,8 +1463,6 @@ void main() {
 
     expect(testLogger.errorText, isEmpty);
     expect(testLogger.statusText, isEmpty);
-    // generated_main.dart regenerated, some content should be written in the file.
-    expect(globals.fs.directory('.dart_tool').childDirectory('flutter_build').childFile('generated_main.dart').readAsStringSync(), isNotEmpty);
   }));
 
   testUsingContext('ResidentRunner can run source generation - generation fails', () => testbed.run(() async {
