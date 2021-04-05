@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-
 import 'actions.dart';
 import 'editable_text.dart';
 import 'framework.dart';
@@ -41,7 +39,9 @@ class DefaultTextEditingActions extends Actions{
     ExtendSelectionDownTextIntent: _ExtendSelectionDownTextAction(),
     ExtendSelectionLeftByLineTextIntent: _ExtendSelectionLeftByLineTextAction(),
     ExtendSelectionLeftByWordTextIntent: _ExtendSelectionLeftByWordTextAction(),
+    ExtendSelectionLeftByWordAndStopAtReversalTextIntent: _ExtendSelectionLeftByWordAndStopAtReversalTextAction(),
     ExtendSelectionLeftTextIntent: _ExtendSelectionLeftTextAction(),
+    ExtendSelectionRightByWordAndStopAtReversalTextIntent: _ExtendSelectionRightByWordAndStopAtReversalTextAction(),
     ExtendSelectionRightByWordTextIntent: _ExtendSelectionRightByWordTextAction(),
     ExtendSelectionRightByLineTextIntent: _ExtendSelectionRightByLineTextAction(),
     ExtendSelectionRightTextIntent: _ExtendSelectionRightTextAction(),
@@ -70,7 +70,7 @@ class _DoNothingAndStopPropagationTextAction extends TextEditingAction<DoNothing
   _DoNothingAndStopPropagationTextAction();
 
   @override
-  bool consumesKey(Intent intent) => true;
+  bool consumesKey(Intent intent) => false;
 
   @override
   void invoke(DoNothingAndStopPropagationTextIntent intent, [BuildContext? context]) {}
@@ -118,6 +118,13 @@ class _ExtendSelectionLeftByLineTextAction extends TextEditingAction<ExtendSelec
   }
 }
 
+class _ExtendSelectionLeftByWordAndStopAtReversalTextAction extends TextEditingAction<ExtendSelectionLeftByWordAndStopAtReversalTextIntent> {
+  @override
+  Object? invoke(ExtendSelectionLeftByWordAndStopAtReversalTextIntent intent, [BuildContext? context]) {
+    textEditingActionTarget!.renderEditable.extendSelectionLeftByWord(SelectionChangedCause.keyboard, false, true);
+  }
+}
+
 class _ExtendSelectionLeftByWordTextAction extends TextEditingAction<ExtendSelectionLeftByWordTextIntent> {
   @override
   Object? invoke(ExtendSelectionLeftByWordTextIntent intent, [BuildContext? context]) {
@@ -136,6 +143,13 @@ class _ExtendSelectionRightByLineTextAction extends TextEditingAction<ExtendSele
   @override
   Object? invoke(ExtendSelectionRightByLineTextIntent intent, [BuildContext? context]) {
     textEditingActionTarget!.renderEditable.extendSelectionRightByLine(SelectionChangedCause.keyboard);
+  }
+}
+
+class _ExtendSelectionRightByWordAndStopAtReversalTextAction extends TextEditingAction<ExtendSelectionRightByWordAndStopAtReversalTextIntent> {
+  @override
+  Object? invoke(ExtendSelectionRightByWordAndStopAtReversalTextIntent intent, [BuildContext? context]) {
+    textEditingActionTarget!.renderEditable.extendSelectionRightByWord(SelectionChangedCause.keyboard, false, true);
   }
 }
 

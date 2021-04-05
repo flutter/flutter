@@ -1067,7 +1067,7 @@ void main() {
     const Key key2 = GlobalObjectKey('key2');
     late StateSetter setState;
     int tabBarViewCnt = 2;
-    TabController tabController = TabController(length: tabBarViewCnt, vsync: const TestVSync(),);
+    TabController tabController = TabController(length: tabBarViewCnt, vsync: const TestVSync());
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -1077,8 +1077,8 @@ void main() {
           return TabBarView(
             controller: tabController,
             children: <Widget>[
-              if (tabBarViewCnt > 0) const Text('key1', key: key1,),
-              if (tabBarViewCnt > 1) const Text('key2', key: key2,),
+              if (tabBarViewCnt > 0) const Text('key1', key: key1),
+              if (tabBarViewCnt > 1) const Text('key2', key: key2),
             ],
           );
         },
@@ -1099,7 +1099,7 @@ void main() {
     // rebuild TabBarView that only have the 1st page with GlobalKey 'key1'
     setState((){
       tabBarViewCnt = 1;
-      tabController = TabController(length: tabBarViewCnt, vsync: const TestVSync(),);
+      tabController = TabController(length: tabBarViewCnt, vsync: const TestVSync());
     });
 
     await tester.pump(const Duration(seconds: 1)); // finish the animation
@@ -1169,6 +1169,64 @@ void main() {
     expect(
       element.children.map((Element element) => element.widget.key),
       <Key?>[null, key1, null, key2, null],
+    );
+  });
+
+  testWidgets('Can not attach a non-RenderObjectElement to the MultiChildRenderObjectElement - mount', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Column(
+        children: <Widget>[
+          Container(),
+          const _EmptyWidget(),
+        ],
+      ),
+    );
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(
+      exception.toString(),
+      equalsIgnoringHashCodes(
+        'The children of `MultiChildRenderObjectElement` must each has an associated render object.\n'
+        'This typically means that the `_EmptyWidget` or its children\n'
+        'are not a subtype of `RenderObjectWidget`.\n'
+        'The following element does not have an associated render object:\n'
+        '  _EmptyWidget\n'
+        'debugCreator: _EmptyWidget ← Column ← [root]'
+      ),
+    );
+  });
+
+  testWidgets('Can not attach a non-RenderObjectElement to the MultiChildRenderObjectElement - update', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Column(
+        children: <Widget>[
+          Container(),
+        ],
+      ),
+    );
+
+    await tester.pumpWidget(
+      Column(
+        children: <Widget>[
+          Container(),
+          const _EmptyWidget(),
+        ],
+      ),
+    );
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(
+      exception.toString(),
+      equalsIgnoringHashCodes(
+        'The children of `MultiChildRenderObjectElement` must each has an associated render object.\n'
+        'This typically means that the `_EmptyWidget` or its children\n'
+        'are not a subtype of `RenderObjectWidget`.\n'
+        'The following element does not have an associated render object:\n'
+        '  _EmptyWidget\n'
+        'debugCreator: _EmptyWidget ← Column ← [root]'
+      ),
     );
   });
 
@@ -1848,4 +1906,21 @@ class FakeLeafRenderObject extends RenderBox {
 
 class TestRenderObjectElement extends RenderObjectElement {
   TestRenderObjectElement() : super(Table());
+}
+
+class _EmptyWidget extends Widget {
+  const _EmptyWidget({Key? key}) : super(key: key);
+
+  @override
+  Element createElement() => _EmptyElement(this);
+}
+
+class _EmptyElement extends Element {
+  _EmptyElement(_EmptyWidget widget) : super(widget);
+
+  @override
+  bool get debugDoingBuild => false;
+
+  @override
+  void performRebuild() {}
 }

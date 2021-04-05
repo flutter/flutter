@@ -14,15 +14,33 @@ import 'text_form_field.dart';
 /// This example shows how to create a very basic Autocomplete widget using the
 /// default UI.
 ///
-/// ```dart imports
+/// ```dart main
 /// import 'package:flutter/material.dart';
-/// ```
 ///
-/// ```dart
+/// void main() => runApp(const AutocompleteExampleApp());
+///
+/// class AutocompleteExampleApp extends StatelessWidget {
+///   const AutocompleteExampleApp({Key? key}) : super(key: key);
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       home: Scaffold(
+///         appBar: AppBar(
+///           title: const Text('Autocomplete Basic'),
+///         ),
+///         body: const Center(
+///           child: AutocompleteBasicExample(),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+///
 /// class AutocompleteBasicExample extends StatelessWidget {
-///   AutocompleteBasicExample({Key? key}) : super(key: key);
+///   const AutocompleteBasicExample({Key? key}) : super(key: key);
 ///
-///   final List<String> _kOptions = <String>[
+///   static const List<String> _kOptions = <String>[
 ///     'aardvark',
 ///     'bobcat',
 ///     'chameleon',
@@ -52,11 +70,29 @@ import 'text_form_field.dart';
 /// This example shows how to create an Autocomplete widget with a custom type.
 /// Try searching with text from the name or email field.
 ///
-/// ```dart imports
+/// ```dart main
 /// import 'package:flutter/material.dart';
-/// ```
 ///
-/// ```dart
+/// void main() => runApp(const AutocompleteExampleApp());
+///
+/// class AutocompleteExampleApp extends StatelessWidget {
+///   const AutocompleteExampleApp({Key? key}) : super(key: key);
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       home: Scaffold(
+///         appBar: AppBar(
+///           title: const Text('Autocomplete Basic User'),
+///         ),
+///         body: const Center(
+///           child: AutocompleteBasicUserExample(),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+///
 /// @immutable
 /// class User {
 ///   const User({

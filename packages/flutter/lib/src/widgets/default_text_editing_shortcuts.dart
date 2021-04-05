@@ -181,7 +181,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): const ExtendSelectionLeftTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const ExtendSelectionRightTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): const ExtendSelectionUpTextIntent(),
-    // The following key combinations have no effect on text edition on this
+    // The following key combinations have no effect on text editing on this
     // platform:
     //   * End
     //   * Home
@@ -218,7 +218,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): const ExtendSelectionLeftTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const ExtendSelectionRightTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): const ExtendSelectionUpTextIntent(),
-    // The following key combinations have no effect on text edition on this
+    // The following key combinations have no effect on text editing on this
     // platform:
     //   * Meta + arrow down
     //   * End
@@ -255,7 +255,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): const ExtendSelectionLeftTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const ExtendSelectionRightTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): const ExtendSelectionUpTextIntent(),
-    // The following key combinations have no effect on text edition on this
+    // The following key combinations have no effect on text editing on this
     // platform:
     //   * Meta + arrow down
     //   * End
@@ -292,7 +292,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): const ExtendSelectionLeftTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const ExtendSelectionRightTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): const ExtendSelectionUpTextIntent(),
-    // The following key combinations have no effect on text edition on this
+    // The following key combinations have no effect on text editing on this
     // platform:
     //   * Meta + arrow down
     //   * End
@@ -314,8 +314,8 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowRight): const MoveSelectionRightByWordTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowUp): const MoveSelectionLeftByLineTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowDown): const ExtendSelectionRightByLineTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): const ExtendSelectionLeftByWordTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const ExtendSelectionRightByWordTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): const ExtendSelectionLeftByWordAndStopAtReversalTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const ExtendSelectionRightByWordAndStopAtReversalTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): const ExtendSelectionLeftByLineTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.arrowDown): const MoveSelectionDownTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.arrowLeft): const MoveSelectionLeftTextIntent(),
@@ -333,7 +333,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): const ExtendSelectionLeftTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const ExtendSelectionRightTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): const ExtendSelectionUpTextIntent(),
-    // The following key combinations have no effect on text edition on this
+    // The following key combinations have no effect on text editing on this
     // platform:
     //   * Control + arrow left
     //   * Control + arrow right
@@ -370,7 +370,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): const ExtendSelectionUpTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.end): const ExpandSelectionRightByLineTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.home): const ExpandSelectionLeftByLineTextIntent(),
-    // The following key combinations have no effect on text edition on this
+    // The following key combinations have no effect on text editing on this
     // platform:
     //   * Meta + arrow down
     //   * Meta + arrow left

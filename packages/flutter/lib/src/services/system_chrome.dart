@@ -219,7 +219,6 @@ List<String> _stringify(List<dynamic> list) => <String>[
 class SystemChrome {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
-  // ignore: unused_element
   SystemChrome._();
 
   /// Specifies the set of orientations the application interface can

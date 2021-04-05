@@ -4,9 +4,9 @@
 
 import 'dart:ui' as ui show TextStyle, ParagraphStyle, FontFeature, Shadow;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter/src/foundation/constants.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 // This matcher verifies ui.TextStyle.toString (from dart:ui) reports a superset
 // of the given TextStyle's (from painting.dart) properties.

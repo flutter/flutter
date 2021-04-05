@@ -2492,7 +2492,50 @@ void main() {
     expect(value, equals('two'));
   });
 
-  testWidgets('DropdownButton is activated with the space key', (WidgetTester tester) async {
+  // Regression test for https://github.com/flutter/flutter/issues/77655.
+  testWidgets('DropdownButton selecting a null valued item should be selected',
+      (WidgetTester tester) async {
+    final List<MapEntry<String?, String>> items = <MapEntry<String?, String>>[
+      const MapEntry<String?, String>(null, 'None'),
+      const MapEntry<String?, String>('one', 'One'),
+      const MapEntry<String?, String>('two', 'Two'),
+    ];
+    String? selectedItem = 'one';
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return MaterialApp(
+            home: Scaffold(
+              body: DropdownButton<String>(
+                value: selectedItem,
+                onChanged: (String? string) {
+                  setState(() {
+                    selectedItem = string;
+                  });
+                },
+                items: items.map((MapEntry<String?, String> item) {
+                  return DropdownMenuItem<String>(
+                    child: Text(item.value),
+                    value: item.key,
+                  );
+                }).toList(),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('One'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('None').last);
+    await tester.pumpAndSettle();
+    expect(find.text('None'), findsOneWidget);
+  });
+
+  testWidgets('DropdownButton is activated with the space key',
+      (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
     String? value = 'one';
 

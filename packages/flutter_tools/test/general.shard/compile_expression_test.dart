@@ -21,14 +21,13 @@ import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/mocks.dart';
+import '../src/fakes.dart';
 
 void main() {
   ProcessManager mockProcessManager;
   ResidentCompiler generator;
   MockProcess mockFrontendServer;
-  MockStdIn mockFrontendServerStdIn;
-  MockStream mockFrontendServerStdErr;
+  MemoryIOSink frontendServerStdIn;
   StreamController<String> stdErrStreamController;
   BufferLogger testLogger;
   MemoryFileSystem fileSystem;
@@ -37,8 +36,7 @@ void main() {
     testLogger = BufferLogger.test();
     mockProcessManager = MockProcessManager();
     mockFrontendServer = MockProcess();
-    mockFrontendServerStdIn = MockStdIn();
-    mockFrontendServerStdErr = MockStream();
+    frontendServerStdIn = MemoryIOSink();
     fileSystem = MemoryFileSystem.test();
     generator = ResidentCompiler(
       'sdkroot',
@@ -50,15 +48,13 @@ void main() {
       fileSystem: fileSystem,
     );
 
-    when(mockFrontendServer.stdin).thenReturn(mockFrontendServerStdIn);
+    stdErrStreamController = StreamController<String>();
+    when(mockFrontendServer.stdin).thenReturn(frontendServerStdIn);
     when(mockFrontendServer.stderr)
-        .thenAnswer((Invocation invocation) => mockFrontendServerStdErr);
+        .thenAnswer((Invocation invocation) => stdErrStreamController.stream.transform(utf8.encoder));
     when(mockFrontendServer.exitCode).thenAnswer((Invocation invocation) {
       return Completer<int>().future;
     });
-    stdErrStreamController = StreamController<String>();
-    when(mockFrontendServerStdErr.transform<String>(any))
-        .thenAnswer((Invocation invocation) => stdErrStreamController.stream);
 
     when(mockProcessManager.canRun(any)).thenReturn(true);
     when(mockProcessManager.start(any)).thenAnswer(
@@ -100,9 +96,8 @@ void main() {
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
     ).then((CompilerOutput output) {
-      expect(mockFrontendServerStdIn.getAndClear(),
+      expect(frontendServerStdIn.getAndClear(),
           'compile file:///path/to/main.dart\n');
-      verifyNoMoreInteractions(mockFrontendServerStdIn);
       expect(testLogger.errorText,
           equals('line1\nline2\n'));
       expect(output.outputFilename, equals('/path/to/main.dart.dill'));

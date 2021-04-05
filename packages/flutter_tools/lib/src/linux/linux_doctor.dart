@@ -151,18 +151,6 @@ class LinuxDoctorValidator extends DoctorValidator {
         messages.add(ValidationMessage.error(_userMessages.gtkLibrariesMissing));
       }
     }
-    if (!await _libraryIsPresent('blkid')) {
-      validationType = ValidationType.missing;
-      messages.add(ValidationMessage.error(_userMessages.blkidLibraryMissing));
-    }
-    if (!await _libraryIsPresent('liblzma')) {
-      validationType = ValidationType.missing;
-      messages.add(ValidationMessage.error(_userMessages.lzmaLibraryMissing));
-    }
-    if (!await _libraryIsPresent('libgcrypt')) {
-      validationType = ValidationType.missing;
-      messages.add(ValidationMessage.error(_userMessages.gcryptLibraryMissing));
-    }
 
     return ValidationResult(validationType, messages);
   }

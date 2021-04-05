@@ -151,4 +151,38 @@ void main() {
       style.merge(const ButtonStyle())
     );
   });
+
+  test('ButtonStyle.lerp BorderSide', () {
+    // This is regression test for https://github.com/flutter/flutter/pull/78051
+    expect(ButtonStyle.lerp(null, null, 0), null);
+    expect(ButtonStyle.lerp(null, null, 0.5), null);
+    expect(ButtonStyle.lerp(null, null, 1), null);
+
+    const BorderSide blackSide = BorderSide(width: 1, color: Color(0xFF000000));
+    const BorderSide whiteSide = BorderSide(width: 1, color: Color(0xFFFFFFFF));
+    const BorderSide emptyBlackSide = BorderSide(width: 0, color: Color(0x00000000));
+
+    final ButtonStyle blackStyle = ButtonStyle(side: MaterialStateProperty.all<BorderSide>(blackSide));
+    final ButtonStyle whiteStyle = ButtonStyle(side: MaterialStateProperty.all<BorderSide>(whiteSide));
+
+    // MaterialState.all<Foo>(value) properties resolve to value
+    // for any set of MaterialStates.
+    const Set<MaterialState> states = <MaterialState>{ };
+
+    expect(ButtonStyle.lerp(blackStyle, blackStyle, 0)?.side?.resolve(states), blackSide);
+    expect(ButtonStyle.lerp(blackStyle, blackStyle, 0.5)?.side?.resolve(states), blackSide);
+    expect(ButtonStyle.lerp(blackStyle, blackStyle, 1)?.side?.resolve(states), blackSide);
+
+    expect(ButtonStyle.lerp(blackStyle, null, 0)?.side?.resolve(states), blackSide);
+    expect(ButtonStyle.lerp(blackStyle, null, 0.5)?.side?.resolve(states), BorderSide.lerp(blackSide, emptyBlackSide, 0.5));
+    expect(ButtonStyle.lerp(blackStyle, null, 1)?.side?.resolve(states), emptyBlackSide);
+
+    expect(ButtonStyle.lerp(null, blackStyle, 0)?.side?.resolve(states), emptyBlackSide);
+    expect(ButtonStyle.lerp(null, blackStyle, 0.5)?.side?.resolve(states), BorderSide.lerp(emptyBlackSide, blackSide, 0.5));
+    expect(ButtonStyle.lerp(null, blackStyle, 1)?.side?.resolve(states), blackSide);
+
+    expect(ButtonStyle.lerp(blackStyle, whiteStyle, 0)?.side?.resolve(states), blackSide);
+    expect(ButtonStyle.lerp(blackStyle, whiteStyle, 0.5)?.side?.resolve(states), BorderSide.lerp(blackSide, whiteSide, 0.5));
+    expect(ButtonStyle.lerp(blackStyle, whiteStyle, 1)?.side?.resolve(states), whiteSide);
+  });
 }

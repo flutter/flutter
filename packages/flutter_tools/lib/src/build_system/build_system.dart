@@ -330,8 +330,8 @@ class Environment {
     @required Logger logger,
     @required Artifacts artifacts,
     @required ProcessManager processManager,
+    @required Platform platform,
     @required String engineVersion,
-    @required bool generateDartPluginRegistry,
     Directory buildDir,
     Map<String, String> defines = const <String, String>{},
     Map<String, String> inputs = const <String, String>{},
@@ -369,9 +369,9 @@ class Environment {
       logger: logger,
       artifacts: artifacts,
       processManager: processManager,
+      platform: platform,
       engineVersion: engineVersion,
       inputs: inputs,
-      generateDartPluginRegistry: generateDartPluginRegistry,
     );
   }
 
@@ -388,7 +388,7 @@ class Environment {
     Map<String, String> defines = const <String, String>{},
     Map<String, String> inputs = const <String, String>{},
     String engineVersion,
-    bool generateDartPluginRegistry = false,
+    Platform platform,
     @required FileSystem fileSystem,
     @required Logger logger,
     @required Artifacts artifacts,
@@ -406,8 +406,8 @@ class Environment {
       logger: logger,
       artifacts: artifacts,
       processManager: processManager,
+      platform: platform ?? FakePlatform(),
       engineVersion: engineVersion,
-      generateDartPluginRegistry: generateDartPluginRegistry,
     );
   }
 
@@ -420,12 +420,12 @@ class Environment {
     @required this.defines,
     @required this.flutterRootDir,
     @required this.processManager,
+    @required this.platform,
     @required this.logger,
     @required this.fileSystem,
     @required this.artifacts,
     @required this.engineVersion,
     @required this.inputs,
-    @required this.generateDartPluginRegistry,
   });
 
   /// The [Source] value which is substituted with the path to [projectDir].
@@ -495,6 +495,8 @@ class Environment {
 
   final ProcessManager processManager;
 
+  final Platform platform;
+
   final Logger logger;
 
   final Artifacts artifacts;
@@ -503,11 +505,6 @@ class Environment {
 
   /// The version of the current engine, or `null` if built with a local engine.
   final String engineVersion;
-
-  /// Whether to generate the Dart plugin registry.
-  /// When [true], the main entrypoint is wrapped and the wrapper becomes
-  /// the new entrypoint.
-  final bool generateDartPluginRegistry;
 }
 
 /// The result information from the build system.

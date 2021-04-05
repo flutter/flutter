@@ -44,6 +44,4 @@ typedef _ComputeImpl = Future<R> Function<Q, R>(ComputeCallback<Q, R> callback, 
 ///
 /// The `debugLabel` argument can be specified to provide a name to add to the
 /// [Timeline]. This is useful when profiling an application.
-// Remove when https://github.com/dart-lang/sdk/issues/37149 is fixed.
-// ignore: prefer_const_declarations
-final _ComputeImpl compute = _isolates.compute;
+const _ComputeImpl compute = _isolates.compute;

@@ -5,6 +5,8 @@
 // @dart = 2.8
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/bot_detector.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -59,6 +61,7 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
         Platform: () => platform,
         FlutterVersion: () => FakeFlutterVersion(),
+        BotDetector: () => const FakeBotDetector(false),
         OutputPreferences: () => OutputPreferences.test(),
       });
 
@@ -75,6 +78,68 @@ void main() {
         Platform: () => platform,
         FlutterVersion: () => FakeFlutterVersion(),
         OutputPreferences: () => OutputPreferences.test(),
+      });
+
+      testUsingContext('does not check that Flutter installation is up-to-date with CI=true in environment', () async {
+        final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
+        final FakeFlutterVersion version = globals.flutterVersion as FakeFlutterVersion;
+
+        await runner.run(<String>['dummy', '--version']);
+
+        expect(version.didCheckFlutterVersionFreshness, false);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Platform: () => platform,
+        BotDetector: () => const FakeBotDetector(true),
+      }, initializeFlutterRoot: false);
+
+      testUsingContext('checks that Flutter installation is up-to-date with CI=true and --machine when explicit --version-check', () async {
+        final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
+        final FakeFlutterVersion version = globals.flutterVersion as FakeFlutterVersion;
+
+        await runner.run(<String>['dummy', '--version', '--machine', '--version-check']);
+
+         expect(version.didCheckFlutterVersionFreshness, true);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Platform: () => platform,
+        BotDetector: () => const FakeBotDetector(true),
+      }, initializeFlutterRoot: false);
+
+      testUsingContext('checks that Flutter installation is up-to-date if shell completion to terminal', () async {
+        final FlutterCommand command = DummyFlutterCommand(name: 'bash-completion');
+        final FlutterCommandRunner runner = createTestCommandRunner(command) as FlutterCommandRunner;
+        final FakeFlutterVersion version = globals.flutterVersion as FakeFlutterVersion;
+
+        await runner.run(<String>['bash-completion']);
+
+        expect(version.didCheckFlutterVersionFreshness, true);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Platform: () => platform,
+        FlutterVersion: () => FakeFlutterVersion(),
+        BotDetector: () => const FakeBotDetector(false),
+        Stdio: () => FakeStdio(hasFakeTerminal: true),
+      });
+
+      testUsingContext('does not check that Flutter installation is up-to-date if redirecting shell completion', () async {
+        final FlutterCommand command = DummyFlutterCommand(name: 'bash-completion');
+        final FlutterCommandRunner runner = createTestCommandRunner(command) as FlutterCommandRunner;
+        final FakeFlutterVersion version = globals.flutterVersion as FakeFlutterVersion;
+
+        await runner.run(<String>['bash-completion']);
+
+        expect(version.didCheckFlutterVersionFreshness, false);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Platform: () => platform,
+        FlutterVersion: () => FakeFlutterVersion(),
+        BotDetector: () => const FakeBotDetector(false),
+        Stdio: () => FakeStdio(hasFakeTerminal: false),
       });
 
       testUsingContext('Fetches tags when --version is used', () async {

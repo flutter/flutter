@@ -62,7 +62,6 @@ const Icon _kDefaultDeleteIcon = Icon(Icons.cancel, size: _kDeleteIconSize);
 abstract class ChipAttributes {
   // This class is intended to be used as an interface, and should not be
   // extended directly; this constructor prevents instantiation and extension.
-  // ignore: unused_element
   ChipAttributes._();
 
   /// The primary content of the chip.
@@ -203,7 +202,6 @@ abstract class ChipAttributes {
 abstract class DeletableChipAttributes {
   // This class is intended to be used as an interface, and should not be
   // extended directly; this constructor prevents instantiation and extension.
-  // ignore: unused_element
   DeletableChipAttributes._();
 
   /// The icon displayed when [onDeleted] is set.
@@ -315,7 +313,6 @@ abstract class DeletableChipAttributes {
 abstract class CheckmarkableChipAttributes {
   // This class is intended to be used as an interface, and should not be
   // extended directly; this constructor prevents instantiation and extension.
-  // ignore: unused_element
   CheckmarkableChipAttributes._();
 
   /// Whether or not to show a check mark when
@@ -351,7 +348,6 @@ abstract class CheckmarkableChipAttributes {
 abstract class SelectableChipAttributes {
   // This class is intended to be used as an interface, and should not be
   // extended directly; this constructor prevents instantiation and extension.
-  // ignore: unused_element
   SelectableChipAttributes._();
 
   /// Whether or not this chip is selected.
@@ -462,7 +458,6 @@ abstract class SelectableChipAttributes {
 abstract class DisabledChipAttributes {
   // This class is intended to be used as an interface, and should not be
   // extended directly; this constructor prevents instantiation and extension.
-  // ignore: unused_element
   DisabledChipAttributes._();
 
   /// Whether or not this chip is enabled for input.
@@ -510,7 +505,6 @@ abstract class DisabledChipAttributes {
 abstract class TappableChipAttributes {
   // This class is intended to be used as an interface, and should not be
   // extended directly; this constructor prevents instantiation and extension.
-  // ignore: unused_element
   TappableChipAttributes._();
 
   /// Called when the user taps the chip.
@@ -2195,7 +2189,7 @@ class _RenderChipElement extends RenderObjectElement {
   }
 
   @override
-  void mount(Element? parent, dynamic newSlot) {
+  void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     _mountChild(widget.theme.avatar, _ChipSlot.avatar);
     _mountChild(widget.theme.deleteIcon, _ChipSlot.deleteIcon);
@@ -2252,7 +2246,7 @@ class _RenderChipElement extends RenderObjectElement {
   }
 
   @override
-  void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
+  void moveRenderObjectChild(RenderObject child, Object? oldSlot, Object? newSlot) {
     assert(false, 'not reachable');
   }
 }
@@ -2785,13 +2779,15 @@ class _RenderChip extends RenderBox {
     );
     size = constraints.constrain(paddedSize);
     assert(
-        size.height == constraints.constrainHeight(paddedSize.height),
-        "Constrained height ${size.height} doesn't match expected height "
-        '${constraints.constrainWidth(paddedSize.height)}');
+      size.height == constraints.constrainHeight(paddedSize.height),
+      "Constrained height ${size.height} doesn't match expected height "
+      '${constraints.constrainWidth(paddedSize.height)}',
+    );
     assert(
-        size.width == constraints.constrainWidth(paddedSize.width),
-        "Constrained width ${size.width} doesn't match expected width "
-        '${constraints.constrainWidth(paddedSize.width)}');
+      size.width == constraints.constrainWidth(paddedSize.width),
+      "Constrained width ${size.width} doesn't match expected width "
+      '${constraints.constrainWidth(paddedSize.width)}',
+    );
   }
 
   static final ColorTween selectionScrimTween = ColorTween(

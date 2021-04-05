@@ -17,6 +17,7 @@ import 'package:mime/mime.dart' as mime;
 import 'package:package_config/package_config.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf;
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../artifacts.dart';
 import '../asset.dart';
@@ -35,6 +36,7 @@ import '../dart/package_map.dart';
 import '../devfs.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
+import '../vmservice.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
@@ -51,6 +53,7 @@ typedef DwdsLauncher = Future<Dwds> Function(
     String hostname,
     bool useSseForDebugProxy,
     bool useSseForDebugBackend,
+    bool useSseForInjectedClient,
     bool serveDevTools,
     UrlEncoder urlEncoder,
     bool spawnDds});
@@ -103,7 +106,7 @@ class WebExpressionCompiler implements ExpressionCompiler {
   }
 
   @override
-  Future<void> initialize({bool soundNullSafety}) async {}
+  Future<void> initialize({String moduleFormat, bool soundNullSafety}) async {}
 
   @override
   Future<bool> updateDependencies(Map<String, ModuleInfo> modules) async => true;
@@ -172,8 +175,10 @@ class WebAssetServer implements AssetReader {
     UrlTunneller urlTunneller,
     bool useSseForDebugProxy,
     bool useSseForDebugBackend,
+    bool useSseForInjectedClient,
     BuildInfo buildInfo,
     bool enableDwds,
+    bool enableDds,
     Uri entrypoint,
     ExpressionCompiler expressionCompiler,
     NullSafetyMode nullSafetyMode, {
@@ -273,6 +278,7 @@ class WebAssetServer implements AssetReader {
       enableDebugging: true,
       useSseForDebugProxy: useSseForDebugProxy,
       useSseForDebugBackend: useSseForDebugBackend,
+      useSseForInjectedClient: useSseForInjectedClient,
       serveDevTools: false,
       loadStrategy: FrontendServerRequireStrategyProvider(
         ReloadConfiguration.none,
@@ -280,7 +286,7 @@ class WebAssetServer implements AssetReader {
         _digestProvider,
       ).strategy,
       expressionCompiler: expressionCompiler,
-      spawnDds: true,
+      spawnDds: enableDds,
     );
     shelf.Pipeline pipeline = const shelf.Pipeline();
     if (enableDwds) {
@@ -452,7 +458,8 @@ class WebAssetServer implements AssetReader {
   }
 
   /// Tear down the http server running.
-  Future<void> dispose() {
+  Future<void> dispose() async {
+    await dwds?.stop();
     return _httpServer.close();
   }
 
@@ -587,10 +594,11 @@ class WebAssetServer implements AssetReader {
 }
 
 class ConnectionResult {
-  ConnectionResult(this.appConnection, this.debugConnection);
+  ConnectionResult(this.appConnection, this.debugConnection, this.vmService);
 
   final AppConnection appConnection;
   final DebugConnection debugConnection;
+  final vm_service.VmService vmService;
 }
 
 /// The web specific DevFS implementation.
@@ -606,8 +614,10 @@ class WebDevFS implements DevFS {
     @required this.urlTunneller,
     @required this.useSseForDebugProxy,
     @required this.useSseForDebugBackend,
+    @required this.useSseForInjectedClient,
     @required this.buildInfo,
     @required this.enableDwds,
+    @required this.enableDds,
     @required this.entrypoint,
     @required this.expressionCompiler,
     @required this.chromiumLauncher,
@@ -623,8 +633,10 @@ class WebDevFS implements DevFS {
   final UrlTunneller urlTunneller;
   final bool useSseForDebugProxy;
   final bool useSseForDebugBackend;
+  final bool useSseForInjectedClient;
   final BuildInfo buildInfo;
   final bool enableDwds;
+  final bool enableDds;
   final bool testMode;
   final ExpressionCompiler expressionCompiler;
   final ChromiumLauncher chromiumLauncher;
@@ -656,8 +668,12 @@ class WebDevFS implements DevFS {
         if (firstConnection.isCompleted) {
           appConnection.runMain();
         } else {
+          final vm_service.VmService vmService = await createVmServiceDelegate(
+            Uri.parse(debugConnection.uri),
+            logger: globals.logger,
+          );
           firstConnection
-              .complete(ConnectionResult(appConnection, debugConnection));
+              .complete(ConnectionResult(appConnection, debugConnection, vmService));
         }
       } on Exception catch (error, stackTrace) {
         if (!firstConnection.isCompleted) {
@@ -700,8 +716,10 @@ class WebDevFS implements DevFS {
       urlTunneller,
       useSseForDebugProxy,
       useSseForDebugBackend,
+      useSseForInjectedClient,
       buildInfo,
       enableDwds,
+      enableDds,
       entrypoint,
       expressionCompiler,
       nullSafetyMode,

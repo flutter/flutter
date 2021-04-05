@@ -38,11 +38,14 @@ const String _kNoPlatformsMessage = 'You\'ve created a plugin project that doesn
 const String frameworkRevision = '12345678';
 const String frameworkChannel = 'omega';
 const String _kDisabledPlatformRequestedMessage = 'currently not supported on your local environment.';
-// TODO(fujino): replace FakePlatform.fromPlatform() with FakePlatform()
+
+// This needs to be created from the local platform due to re-entrant flutter calls made in this test.
 FakePlatform _kNoColorTerminalPlatform() => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
+
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
 };
+
 const String samplesIndexJson = '''
 [
   { "id": "sample1" },
@@ -690,6 +693,44 @@ void main() {
     Logger: () => logger,
   });
 
+  testUsingContext('app supports android and ios by default', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+
+    expect(projectDir.childDirectory('android'), exists);
+    expect(projectDir.childDirectory('ios'), exists);
+  }, overrides: <Type, Generator>{});
+
+  testUsingContext('app does not include android if disabled in config', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+
+    expect(projectDir.childDirectory('android'), isNot(exists));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false),
+  });
+
+  testUsingContext('app does not include ios if disabled in config', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+
+    expect(projectDir.childDirectory('ios'), isNot(exists));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isIOSEnabled: false),
+  });
+
   testUsingContext('app does not include desktop or web by default', () async {
     Cache.flutterRoot = '../..';
 
@@ -702,6 +743,7 @@ void main() {
     expect(projectDir.childDirectory('macos'), isNot(exists));
     expect(projectDir.childDirectory('windows'), isNot(exists));
     expect(projectDir.childDirectory('web'), isNot(exists));
+    expect(projectDir.childDirectory('winuwp'), isNot(exists));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
   });
@@ -720,16 +762,40 @@ void main() {
     expect(projectDir.childDirectory('macos'), isNot(exists));
     expect(projectDir.childDirectory('windows'), isNot(exists));
     expect(projectDir.childDirectory('web'), isNot(exists));
-    expect(projectDir.childDirectory('example').childDirectory('linux'),
-        isNot(exists));
-    expect(projectDir.childDirectory('example').childDirectory('macos'),
-        isNot(exists));
-    expect(projectDir.childDirectory('example').childDirectory('windows'),
-        isNot(exists));
-    expect(projectDir.childDirectory('example').childDirectory('web'),
-        isNot(exists));
+    expect(projectDir.childDirectory('winuwp'), isNot(exists));
+    expect(projectDir.childDirectory('example').childDirectory('linux'), isNot(exists));
+    expect(projectDir.childDirectory('example').childDirectory('macos'), isNot(exists));
+    expect(projectDir.childDirectory('example').childDirectory('windows'), isNot(exists));
+    expect(projectDir.childDirectory('example').childDirectory('web'), isNot(exists));
+    expect(projectDir.childDirectory('example').childDirectory('winuwp'), isNot(exists));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
+  });
+
+  testUsingContext('app supports Windows UWP if requested', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--platforms=winuwp',
+      projectDir.path,
+    ]);
+
+    expect(projectDir.childDirectory('linux'), isNot(exists));
+    expect(projectDir.childDirectory('android'), isNot(exists));
+    expect(projectDir.childDirectory('ios'), isNot(exists));
+    expect(projectDir.childDirectory('windows'), isNot(exists));
+    expect(projectDir.childDirectory('macos'), isNot(exists));
+    expect(projectDir.childDirectory('web'), isNot(exists));
+    expect(projectDir.childDirectory('winuwp'), exists);
+    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWindowsUwpEnabled: true),
+    Logger: () => logger,
   });
 
   testUsingContext('app supports Linux if requested', () async {
@@ -745,13 +811,13 @@ void main() {
       projectDir.path,
     ]);
 
-    expect(
-        projectDir.childDirectory('linux').childFile('CMakeLists.txt'), exists);
+    expect(projectDir.childDirectory('linux').childFile('CMakeLists.txt'), exists);
     expect(projectDir.childDirectory('android'), isNot(exists));
     expect(projectDir.childDirectory('ios'), isNot(exists));
     expect(projectDir.childDirectory('windows'), isNot(exists));
     expect(projectDir.childDirectory('macos'), isNot(exists));
     expect(projectDir.childDirectory('web'), isNot(exists));
+    expect(projectDir.childDirectory('winuwp'), isNot(exists));
     expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
@@ -2382,25 +2448,6 @@ void main() {
 
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true, isAndroidEnabled: false, isIOSEnabled: false),
-    Logger: () => logger,
-  });
-
-  testUsingContext('flutter create prints note about null safety', () async {
-    await _createProject(
-      projectDir,
-      <String>[],
-      <String>[],
-    );
-    expect(logger.statusText, contains('dart migrate --apply-changes'));
-  }, overrides: <Type, Generator>{
-    Pub: () => Pub(
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      processManager: globals.processManager,
-      usage: globals.flutterUsage,
-      botDetector: globals.botDetector,
-      platform: globals.platform,
-    ),
     Logger: () => logger,
   });
 }

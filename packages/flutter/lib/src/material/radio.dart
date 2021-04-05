@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -505,7 +504,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
           ..isFocused = states.contains(MaterialState.focused)
           ..isHovered = states.contains(MaterialState.hovered)
           ..activeColor = effectiveActiveColor
-          ..inactiveColor = effectiveInactiveColor
+          ..inactiveColor = effectiveInactiveColor,
       ),
     );
   }

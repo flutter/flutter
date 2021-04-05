@@ -322,7 +322,6 @@ Future<int> exec(
   List<String> arguments, {
   Map<String, String> environment,
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
-  StringBuffer stderr, // if not null, the stderr will be written here
   String workingDirectory,
 }) async {
   return _execute(
@@ -330,7 +329,6 @@ Future<int> exec(
     arguments,
     environment: environment,
     canFail : canFail,
-    stderr: stderr,
     workingDirectory: workingDirectory,
   );
 }

@@ -240,7 +240,7 @@ class AssetImage extends AssetBundleImageProvider {
           // ourselves.
           result = SynchronousFuture<AssetBundleImageKey>(key);
         }
-      }
+      },
     ).catchError((Object error, StackTrace stack) {
       // We had an error. (This guarantees we weren't called synchronously.)
       // Forward the error to the caller.
@@ -265,9 +265,9 @@ class AssetImage extends AssetBundleImageProvider {
     // TODO(ianh): JSON decoding really shouldn't be on the main thread.
     final Map<String, dynamic> parsedJson = json.decode(jsonData) as Map<String, dynamic>;
     final Iterable<String> keys = parsedJson.keys;
-    final Map<String, List<String>> parsedManifest =
-        Map<String, List<String>>.fromIterables(keys,
-          keys.map<List<String>>((String key) => List<String>.from(parsedJson[key] as List<dynamic>)));
+    final Map<String, List<String>> parsedManifest = <String, List<String>> {
+      for (final String key in keys) key: List<String>.from(parsedJson[key] as List<dynamic>),
+    };
     // TODO(ianh): convert that data structure to the right types.
     return SynchronousFuture<Map<String, List<String>>?>(parsedManifest);
   }
@@ -285,7 +285,7 @@ class AssetImage extends AssetBundleImageProvider {
     return _findBestVariant(mapping, config.devicePixelRatio!);
   }
 
-  // Returns the "best" asset variant amongst the availabe `candidates`.
+  // Returns the "best" asset variant amongst the available `candidates`.
   //
   // The best variant is chosen as follows:
   // - Choose a variant whose key matches `value` exactly, if available.

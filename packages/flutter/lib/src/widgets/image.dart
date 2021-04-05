@@ -624,9 +624,12 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.low,
     int? cacheWidth,
     int? cacheHeight,
-  }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, scale != null
-         ? ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
-         : AssetImage(name, bundle: bundle, package: package)
+  }) : image = ResizeImage.resizeIfNeeded(
+         cacheWidth,
+         cacheHeight,
+         scale != null
+           ? ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
+           : AssetImage(name, bundle: bundle, package: package),
        ),
        loadingBuilder = null,
        assert(alignment != null),
@@ -768,8 +771,8 @@ class Image extends StatefulWidget {
   ///     ),
   ///     child: Image.network(
   ///       'https://flutter.github.io/assets-for-api-docs/assets/widgets/puffin.jpg',
-  ///       frameBuilder: (BuildContext context, Widget child, int? frame, bool? wasSynchronouslyLoaded) {
-  ///         if (wasSynchronouslyLoaded ?? false) {
+  ///       frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
+  ///         if (wasSynchronouslyLoaded) {
   ///           return child;
   ///         }
   ///         return AnimatedOpacity(
