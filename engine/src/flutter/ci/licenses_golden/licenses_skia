@@ -1,4 +1,4 @@
-Signature: ee742a567d296d361dc739b1296a151e
+Signature: ceb185bf9f0ff73617d9ffa0a225609f
 
 UNUSED LICENSES:
 
@@ -5128,6 +5128,8 @@ FILE: ../../../third_party/skia/src/sksl/ir/SkSLConstructorScalarCast.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLConstructorScalarCast.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLConstructorSplat.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLConstructorSplat.h
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLConstructorVectorCast.cpp
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLConstructorVectorCast.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLDoStatement.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLExpressionStatement.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLFieldAccess.cpp
