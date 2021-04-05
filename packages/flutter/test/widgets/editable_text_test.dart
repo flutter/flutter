@@ -2729,7 +2729,7 @@ void main() {
       expect(
         e.message,
         'current context or render editable should not be null when '
-        'update text editing value'
+        'updating the text editing value'
       );
     }
     expect(hasAssertion, isTrue);

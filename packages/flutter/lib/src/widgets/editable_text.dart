@@ -2490,7 +2490,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       assert(
         false,
         'current context or render editable should not be null when '
-        'update text editing value'
+        'updating the text editing value'
       );
       return;
     }
