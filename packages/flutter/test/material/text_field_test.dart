@@ -199,7 +199,7 @@ void main() {
 
     // Initially, the menu is not shown and there is no selection.
     expect(find.byType(CupertinoButton), findsNothing);
-    expect(controller.selection, const TextSelection(baseOffset: -1, extentOffset: -1));
+    expect(controller.selection, isNull);
 
     final Offset midBlah1 = textOffsetToPosition(tester, 2);
 
@@ -942,8 +942,7 @@ void main() {
         ),
       ),
     );
-    expect(controller.selection.baseOffset, -1);
-    expect(controller.selection.extentOffset, -1);
+    expect(controller.selection, isNull);
 
     const String testValueOneLine = 'enough text to be exactly at the end of the line.';
     await tester.enterText(find.byType(TextField), testValueOneLine);
@@ -1092,8 +1091,7 @@ void main() {
         ),
       ),
     );
-    expect(controller.selection.baseOffset, -1);
-    expect(controller.selection.extentOffset, -1);
+    expect(controller.selection, isNull);
 
     const String testValue = 'abc def ghi';
     await tester.enterText(find.byType(TextField), testValue);
@@ -1105,8 +1103,8 @@ void main() {
     await tester.tapAt(ePos);
     await tester.pump();
 
-    expect(controller.selection.baseOffset, tapIndex);
-    expect(controller.selection.extentOffset, tapIndex);
+    expect(controller.selection?.baseOffset, tapIndex);
+    expect(controller.selection?.extentOffset, tapIndex);
   });
 
   testWidgets('enableInteractiveSelection = false, tap', (WidgetTester tester) async {
@@ -1120,8 +1118,7 @@ void main() {
         ),
       ),
     );
-    expect(controller.selection.baseOffset, -1);
-    expect(controller.selection.extentOffset, -1);
+    expect(controller.selection, isNull);
 
     const String testValue = 'abc def ghi';
     await tester.enterText(find.byType(TextField), testValue);
@@ -1133,8 +1130,8 @@ void main() {
     await tester.tapAt(ePos);
     await tester.pump();
 
-    expect(controller.selection.baseOffset, testValue.length);
-    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection?.baseOffset, testValue.length);
+    expect(controller.selection?.isCollapsed, isTrue);
   });
 
   testWidgets('Can long press to select', (WidgetTester tester) async {
@@ -1153,7 +1150,7 @@ void main() {
     expect(controller.value.text, testValue);
     await skipPastScrollingAnimation(tester);
 
-    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection?.isCollapsed, isTrue);
 
     // Long press the 'e' to select 'def'.
     final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
@@ -1161,15 +1158,15 @@ void main() {
     await tester.pump();
 
     // 'def' is selected.
-    expect(controller.selection.baseOffset, testValue.indexOf('d'));
-    expect(controller.selection.extentOffset, testValue.indexOf('f')+1);
+    expect(controller.selection?.baseOffset, testValue.indexOf('d'));
+    expect(controller.selection?.extentOffset, testValue.indexOf('f')+1);
 
     // Tapping elsewhere immediately collapses and moves the cursor.
     await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('h')));
     await tester.pump();
 
-    expect(controller.selection.isCollapsed, true);
-    expect(controller.selection.baseOffset, testValue.indexOf('h'));
+    expect(controller.selection?.isCollapsed, true);
+    expect(controller.selection?.baseOffset, testValue.indexOf('h'));
   });
 
   testWidgets("Slight movements in longpress don't hide/show handles", (WidgetTester tester) async {
@@ -1188,7 +1185,7 @@ void main() {
     expect(controller.value.text, testValue);
     await skipPastScrollingAnimation(tester);
 
-    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection?.isCollapsed, isTrue);
 
     // Long press the 'e' to select 'def', but don't release the gesture.
     final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
@@ -1247,14 +1244,14 @@ void main() {
     await skipPastScrollingAnimation(tester);
 
     // Handle not shown.
-    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection?.isCollapsed, isTrue);
     final Finder fadeFinder = find.byType(FadeTransition);
     expect(fadeFinder, findsNothing);
 
     // Tap on the text field to show the handle.
     await tester.tap(find.byType(TextField));
     await tester.pumpAndSettle();
-    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection?.isCollapsed, true);
     expect(fadeFinder, findsNWidgets(1));
     final FadeTransition handle = tester.widget(fadeFinder.at(0));
     expect(handle.opacity.value, equals(1.0));
@@ -1266,7 +1263,7 @@ void main() {
     await skipPastScrollingAnimation(tester);
 
     // Handle not shown.
-    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection?.isCollapsed, isTrue);
     expect(fadeFinder, findsNothing);
   });
 
@@ -1327,7 +1324,7 @@ void main() {
     expect(controller.value.text, testValue);
     await skipPastScrollingAnimation(tester);
 
-    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection?.isCollapsed, isTrue);
 
     // Long press the 'e' using a mouse device.
     final int eIndex = testValue.indexOf('e');
@@ -1339,8 +1336,8 @@ void main() {
     await tester.pump();
 
     // The cursor is placed just like a regular tap.
-    expect(controller.selection.baseOffset, eIndex);
-    expect(controller.selection.extentOffset, eIndex);
+    expect(controller.selection?.baseOffset, eIndex);
+    expect(controller.selection?.extentOffset, eIndex);
   });
 
   testWidgets('Read only text field basic', (WidgetTester tester) async {
@@ -1359,7 +1356,7 @@ void main() {
     expect(tester.testTextInput.hasAnyClients, false);
     await skipPastScrollingAnimation(tester);
 
-    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection?.isCollapsed, true);
 
     await tester.tap(find.byType(TextField));
     await tester.pump();
@@ -1445,7 +1442,7 @@ void main() {
     await tester.pumpAndSettle();
     final EditableTextState state = tester.state(find.byType(EditableText));
     TextSelection currentOverlaySelection =
-        state.selectionOverlay!.value.selection;
+        state.selectionOverlay!.value.selection!;
     expect(currentOverlaySelection.baseOffset, 0);
     expect(currentOverlaySelection.extentOffset, 8);
 
@@ -1461,7 +1458,7 @@ void main() {
     entry.markNeedsBuild();
 
     await tester.pump();
-    currentOverlaySelection = state.selectionOverlay!.value.selection;
+    currentOverlaySelection = state.selectionOverlay!.value.selection!;
     expect(currentOverlaySelection.baseOffset, 1);
     expect(currentOverlaySelection.extentOffset, 7);
   });
@@ -1594,15 +1591,15 @@ void main() {
     expect(controller.value.text, testValue);
     await skipPastScrollingAnimation(tester);
 
-    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection?.isCollapsed, isTrue);
 
     // Long press the 'e' to select 'def'.
     final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
     await tester.longPressAt(ePos, pointer: 7);
     await tester.pump();
 
-    expect(controller.selection.isCollapsed, true);
-    expect(controller.selection.baseOffset, testValue.length);
+    expect(controller.selection?.isCollapsed, true);
+    expect(controller.selection?.baseOffset, testValue.length);
   });
 
   testWidgets('Can select text by dragging with a mouse', (WidgetTester tester) async {
@@ -1634,8 +1631,8 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    expect(controller.selection.baseOffset, testValue.indexOf('e'));
-    expect(controller.selection.extentOffset, testValue.indexOf('g'));
+    expect(controller.selection?.baseOffset, testValue.indexOf('e'));
+    expect(controller.selection?.extentOffset, testValue.indexOf('g'));
   });
 
   testWidgets('Continuous dragging does not cause flickering', (WidgetTester tester) async {
@@ -1672,8 +1669,8 @@ void main() {
 
     expect(selectionChangedCount, isNonZero);
     selectionChangedCount = 0;
-    expect(controller.selection.baseOffset, 2);
-    expect(controller.selection.extentOffset, 8);
+    expect(controller.selection?.baseOffset, 2);
+    expect(controller.selection?.extentOffset, 8);
 
     // Tiny movement shouldn't cause text selection to change.
     await gesture.moveTo(gPos + const Offset(4.0, 0.0));
@@ -1687,8 +1684,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(selectionChangedCount, 1);
-    expect(controller.selection.baseOffset, 2);
-    expect(controller.selection.extentOffset, 9);
+    expect(controller.selection?.baseOffset, 2);
+    expect(controller.selection?.extentOffset, 9);
   });
 
   testWidgets('Dragging in opposite direction also works', (WidgetTester tester) async {
@@ -1720,8 +1717,8 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    expect(controller.selection.baseOffset, testValue.indexOf('g'));
-    expect(controller.selection.extentOffset, testValue.indexOf('e'));
+    expect(controller.selection?.baseOffset, testValue.indexOf('g'));
+    expect(controller.selection?.extentOffset, testValue.indexOf('e'));
   });
 
   testWidgets('Slow mouse dragging also selects text', (WidgetTester tester) async {
@@ -1752,8 +1749,8 @@ void main() {
     await tester.pump();
     await gesture.up();
 
-    expect(controller.selection.baseOffset, testValue.indexOf('e'));
-    expect(controller.selection.extentOffset, testValue.indexOf('g'));
+    expect(controller.selection?.baseOffset, testValue.indexOf('e'));
+    expect(controller.selection?.extentOffset, testValue.indexOf('g'));
   });
 
   testWidgets('Can drag handles to change selection', (WidgetTester tester) async {
@@ -1780,7 +1777,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
-    final TextSelection selection = controller.selection;
+    final TextSelection selection = controller.selection!;
     expect(selection.baseOffset, 4);
     expect(selection.extentOffset, 7);
 
@@ -1803,8 +1800,8 @@ void main() {
     await gesture.up();
     await tester.pump();
 
-    expect(controller.selection.baseOffset, 4);
-    expect(controller.selection.extentOffset, 11);
+    expect(controller.selection?.baseOffset, 4);
+    expect(controller.selection?.extentOffset, 11);
 
     // Drag the left handle 2 letters to the left.
     handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
@@ -1816,8 +1813,8 @@ void main() {
     await gesture.up();
     await tester.pump();
 
-    expect(controller.selection.baseOffset, 0);
-    expect(controller.selection.extentOffset, 11);
+    expect(controller.selection?.baseOffset, 0);
+    expect(controller.selection?.extentOffset, 11);
   });
 
   testWidgets('Cannot drag one handle past the other', (WidgetTester tester) async {
@@ -1844,7 +1841,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
-    final TextSelection selection = controller.selection;
+    final TextSelection selection = controller.selection!;
     expect(selection.baseOffset, 4);
     expect(selection.extentOffset, 7);
 
@@ -1865,8 +1862,8 @@ void main() {
     await gesture.moveTo(newHandlePos);
     await tester.pump();
 
-    expect(controller.selection.baseOffset, 4);
-    expect(controller.selection.extentOffset, 5);
+    expect(controller.selection?.baseOffset, 4);
+    expect(controller.selection?.extentOffset, 5);
 
     newHandlePos = textOffsetToPosition(tester, 2); // Position before 'c'.
     await gesture.moveTo(newHandlePos);
@@ -1874,10 +1871,10 @@ void main() {
     await gesture.up();
     await tester.pump();
 
-    expect(controller.selection.baseOffset, 4);
+    expect(controller.selection?.baseOffset, 4);
     // The selection doesn't move beyond the left handle. There's always at
     // least 1 char selected.
-    expect(controller.selection.extentOffset, 5);
+    expect(controller.selection?.extentOffset, 5);
   });
 
   testWidgets('Can use selection toolbar', (WidgetTester tester) async {
@@ -1901,7 +1898,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
     RenderEditable renderEditable = findRenderEditable(tester);
     List<TextSelectionPoint> endpoints = globalize(
-      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable.getEndpointsForSelection(controller.selection!),
       renderEditable,
     );
     // Tapping on the part of the handle's GestureDetector where it overlaps
@@ -1914,33 +1911,33 @@ void main() {
     // Select all should select all the text.
     await tester.tap(find.text('Select all'));
     await tester.pump();
-    expect(controller.selection.baseOffset, 0);
-    expect(controller.selection.extentOffset, testValue.length);
+    expect(controller.selection?.baseOffset, 0);
+    expect(controller.selection?.extentOffset, testValue.length);
 
     // Copy should reset the selection.
     await tester.tap(find.text('Copy'));
     await skipPastScrollingAnimation(tester);
-    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection?.isCollapsed, true);
 
     // Tap again to bring back the menu.
     await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
     await tester.pump();
     // Allow time for handle to appear and double tap to time out.
     await tester.pump(const Duration(milliseconds: 300));
-    expect(controller.selection.isCollapsed, true);
-    expect(controller.selection.baseOffset, testValue.indexOf('e'));
-    expect(controller.selection.extentOffset, testValue.indexOf('e'));
+    expect(controller.selection?.isCollapsed, true);
+    expect(controller.selection?.baseOffset, testValue.indexOf('e'));
+    expect(controller.selection?.extentOffset, testValue.indexOf('e'));
     renderEditable = findRenderEditable(tester);
     endpoints = globalize(
-      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable.getEndpointsForSelection(controller.selection!),
       renderEditable,
     );
     await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
-    expect(controller.selection.isCollapsed, true);
-    expect(controller.selection.baseOffset, testValue.indexOf('e'));
-    expect(controller.selection.extentOffset, testValue.indexOf('e'));
+    expect(controller.selection?.isCollapsed, true);
+    expect(controller.selection?.baseOffset, testValue.indexOf('e'));
+    expect(controller.selection?.extentOffset, testValue.indexOf('e'));
 
     // Paste right before the 'e'.
     await tester.tap(find.text('Paste'));
@@ -1963,7 +1960,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
     final RenderEditable renderEditable = findRenderEditable(tester);
     final List<TextSelectionPoint> endpoints = globalize(
-      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable.getEndpointsForSelection(controller.selection!),
       renderEditable,
     );
     // Tapping on the part of the handle's GestureDetector where it overlaps
@@ -2104,7 +2101,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 600));
     final RenderEditable renderEditable = findRenderEditable(tester);
     final List<TextSelectionPoint> endpoints = globalize(
-      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable.getEndpointsForSelection(controller.selection!),
       renderEditable,
     );
     await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
@@ -2145,13 +2142,13 @@ void main() {
     await tester.pumpWidget(buildFrame(true));
     await tester.enterText(find.byType(TextField), 'abcdefghi');
     await skipPastScrollingAnimation(tester);
-    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection?.isCollapsed, isTrue);
 
     // Long press does select text.
     final Offset ePos = textOffsetToPosition(tester, 1);
     await tester.longPressAt(ePos, pointer: 7);
     await tester.pump();
-    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection?.isCollapsed, false);
   });
 
   testWidgets('An obscured TextField is not selectable when disabled', (WidgetTester tester) async {
@@ -2173,13 +2170,13 @@ void main() {
     await tester.pumpWidget(buildFrame(true, false));
     await tester.enterText(find.byType(TextField), 'abcdefghi');
     await skipPastScrollingAnimation(tester);
-    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection?.isCollapsed, isTrue);
 
     // Long press doesn't select text.
     final Offset ePos2 = textOffsetToPosition(tester, 1);
     await tester.longPressAt(ePos2, pointer: 7);
     await tester.pump();
-    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection?.isCollapsed, isTrue);
   });
 
   testWidgets('An obscured TextField is selected as one word', (WidgetTester tester) async {
@@ -2198,7 +2195,7 @@ void main() {
     final Offset bPos = textOffsetToPosition(tester, 1);
     await tester.longPressAt(bPos, pointer: 7);
     await tester.pump();
-    final TextSelection selection = controller.selection;
+    final TextSelection selection = controller.selection!;
     expect(selection.isCollapsed, false);
     expect(selection.baseOffset, 0);
     expect(selection.extentOffset, 10);
@@ -2680,12 +2677,12 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
-    expect(controller.selection.baseOffset, 39);
-    expect(controller.selection.extentOffset, 44);
+    expect(controller.selection?.baseOffset, 39);
+    expect(controller.selection?.extentOffset, 44);
 
     final RenderEditable renderEditable = findRenderEditable(tester);
     final List<TextSelectionPoint> endpoints = globalize(
-      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable.getEndpointsForSelection(controller.selection!),
       renderEditable,
     );
     expect(endpoints.length, 2);
@@ -2700,8 +2697,8 @@ void main() {
     await gesture.up();
     await tester.pump();
 
-    expect(controller.selection.baseOffset, 39);
-    expect(controller.selection.extentOffset, 50);
+    expect(controller.selection?.baseOffset, 39);
+    expect(controller.selection?.extentOffset, 50);
 
     // Drag the left handle to the first line, just after 'First'.
     handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
@@ -2713,12 +2710,12 @@ void main() {
     await gesture.up();
     await tester.pump();
 
-    expect(controller.selection.baseOffset, 5);
-    expect(controller.selection.extentOffset, 50);
+    expect(controller.selection?.baseOffset, 5);
+    expect(controller.selection?.extentOffset, 50);
 
     await tester.tap(find.text('Cut'));
     await tester.pump();
-    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection?.isCollapsed, true);
     expect(controller.text, cutValue);
   });
 
@@ -2786,17 +2783,17 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(controller.selection.base.offset, 77);
-    expect(controller.selection.extent.offset, 82);
+    expect(controller.selection?.base.offset, 77);
+    expect(controller.selection?.extent.offset, 82);
     // Sanity check for the word selected is the intended one.
     expect(
-      controller.text.substring(controller.selection.baseOffset, controller.selection.extentOffset),
+      controller.text.substring(controller.selection!.baseOffset, controller.selection!.extentOffset),
       "won't",
     );
 
     final RenderEditable renderEditable = findRenderEditable(tester);
     final List<TextSelectionPoint> endpoints = globalize(
-      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable.getEndpointsForSelection(controller.selection!),
       renderEditable,
     );
     expect(endpoints.length, 2);
@@ -3554,7 +3551,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
     final RenderEditable renderEditable = findRenderEditable(tester);
     final List<TextSelectionPoint> endpoints = globalize(
-      renderEditable.getEndpointsForSelection(textController.selection),
+      renderEditable.getEndpointsForSelection(textController.selection!),
       renderEditable,
     );
     await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
@@ -3592,7 +3589,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
     final RenderEditable renderEditable = findRenderEditable(tester);
     final List<TextSelectionPoint> endpoints = globalize(
-      renderEditable.getEndpointsForSelection(textController.selection),
+      renderEditable.getEndpointsForSelection(textController.selection!),
       renderEditable,
     );
     await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
@@ -3752,11 +3749,11 @@ void main() {
     await tester.pump();
     controller1.selection = const TextSelection(baseOffset: 0, extentOffset: 3);
     await tester.pump();
-    expect(controller1.selection, isNot(equals(TextRange.empty)));
+    expect(controller1.selection, isNotNull);
 
     await tester.tap(find.byKey(key2));
     await tester.pump();
-    expect(controller1.selection, equals(TextRange.empty));
+    expect(controller1.selection, isNull);
   });
 
   testWidgets('Selection is consistent with text length', (WidgetTester tester) async {
@@ -3766,8 +3763,7 @@ void main() {
     controller.selection = const TextSelection.collapsed(offset: 5);
 
     controller.text = '';
-    expect(controller.selection.start, lessThanOrEqualTo(0));
-    expect(controller.selection.end, lessThanOrEqualTo(0));
+    expect(controller.selection, isNull);
 
     late FlutterError error;
     try {
@@ -4515,7 +4511,7 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, -1);
+      expect(controller.selection!.extentOffset - controller.selection!.baseOffset, -1);
     });
 
     testWidgets('Shift test 2', (WidgetTester tester) async {
@@ -4533,7 +4529,7 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowRight);
       await tester.pumpAndSettle();
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
+      expect(controller.selection!.extentOffset - controller.selection!.baseOffset, 1);
     });
 
     testWidgets('Control Shift test', (WidgetTester tester) async {
@@ -4550,7 +4546,7 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowRight);
       await tester.pumpAndSettle();
 
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, 5);
+      expect(controller.selection!.extentOffset - controller.selection!.baseOffset, 5);
     });
 
     testWidgets('Down and up test', (WidgetTester tester) async {
@@ -4568,7 +4564,7 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowUp);
       await tester.pumpAndSettle();
 
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, -11);
+      expect(controller.selection!.extentOffset - controller.selection!.baseOffset, -11);
 
       await tester.sendKeyUpEvent(LogicalKeyboardKey.arrowUp);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
@@ -4577,7 +4573,7 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowDown);
       await tester.pumpAndSettle();
 
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
+      expect(controller.selection!.extentOffset - controller.selection!.baseOffset, 0);
     });
 
     testWidgets('Down and up test 2', (WidgetTester tester) async {
@@ -4601,7 +4597,7 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
       await tester.pumpAndSettle();
 
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, 12);
+      expect(controller.selection!.extentOffset - controller.selection!.baseOffset, 12);
 
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
@@ -4609,7 +4605,7 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
       await tester.pumpAndSettle();
 
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, 32);
+      expect(controller.selection!.extentOffset - controller.selection!.baseOffset, 32);
 
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
@@ -4617,7 +4613,7 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
       await tester.pumpAndSettle();
 
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, 12);
+      expect(controller.selection!.extentOffset - controller.selection!.baseOffset, 12);
 
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
@@ -4625,7 +4621,7 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
       await tester.pumpAndSettle();
 
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
+      expect(controller.selection!.extentOffset - controller.selection!.baseOffset, 0);
 
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
@@ -4633,7 +4629,7 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
       await tester.pumpAndSettle();
 
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, -5);
+      expect(controller.selection!.extentOffset - controller.selection!.baseOffset, -5);
     });
 
     testWidgets('Read only keyboard selection test', (WidgetTester tester) async {
@@ -4653,7 +4649,7 @@ void main() {
 
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, -1);
+      expect(controller.selection!.extentOffset - controller.selection!.baseOffset, -1);
     });
   });
 
@@ -5106,7 +5102,7 @@ void main() {
     }
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
 
-    expect(c1.selection.extentOffset - c1.selection.baseOffset, -5);
+    expect(c1.selection!.extentOffset - c1.selection!.baseOffset, -5);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -5142,7 +5138,7 @@ void main() {
     }
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
 
-    expect(c1.selection.extentOffset - c1.selection.baseOffset, -10);
+    expect(c1.selection!.extentOffset - c1.selection!.baseOffset, -10);
   });
 
 
@@ -5198,8 +5194,8 @@ void main() {
     }
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
 
-    expect(c1.selection.extentOffset - c1.selection.baseOffset, -5);
-    expect(c2.selection.extentOffset - c2.selection.baseOffset, 0);
+    expect(c1.selection!.extentOffset - c1.selection!.baseOffset, -5);
+    expect(c2.selection, isNull);
 
     await tester.enterText(find.byType(TextField).last, testValue);
     await tester.idle();
@@ -5216,8 +5212,8 @@ void main() {
     }
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
 
-    expect(c1.selection.extentOffset - c1.selection.baseOffset, 0);
-    expect(c2.selection.extentOffset - c2.selection.baseOffset, -5);
+    expect(c1.selection, isNull);
+    expect(c2.selection!.extentOffset - c2.selection!.baseOffset, -5);
   });
 
   testWidgets('Caret works when maxLines is null', (WidgetTester tester) async {
@@ -5235,8 +5231,8 @@ void main() {
     const String testValue = 'x';
     await tester.enterText(find.byType(TextField), testValue);
     await skipPastScrollingAnimation(tester);
-    expect(controller.selection.isCollapsed, true);
-    expect(controller.selection.baseOffset, testValue.length);
+    expect(controller.selection?.isCollapsed, true);
+    expect(controller.selection?.baseOffset, testValue.length);
 
     // Tap the selection handle to bring up the "paste / select all" menu.
     await tester.tapAt(textOffsetToPosition(tester, 0));
@@ -5244,7 +5240,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is
 
     // Confirm that the selection was updated.
-    expect(controller.selection.baseOffset, 0);
+    expect(controller.selection?.baseOffset, 0);
   });
 
   testWidgets('TextField baseline alignment no-strut', (WidgetTester tester) async {
@@ -7761,15 +7757,13 @@ void main() {
       ),
     );
 
-    expect(controller.value.selection, isNotNull);
-    expect(controller.value.selection.baseOffset, -1);
-    expect(controller.value.selection.extentOffset, -1);
+    expect(controller.value.selection, isNull);
 
     // Put the cursor at the end of the field.
     await tester.tapAt(textOffsetToPosition(tester, 19));
     expect(controller.value.selection, isNotNull);
-    expect(controller.value.selection.baseOffset, 19);
-    expect(controller.value.selection.extentOffset, 19);
+    expect(controller.value.selection!.baseOffset, 19);
+    expect(controller.value.selection!.extentOffset, 19);
 
     // Double tapping does the same thing.
     await tester.pump(const Duration(milliseconds: 500));
@@ -7778,14 +7772,14 @@ void main() {
     await tester.tapAt(textOffsetToPosition(tester, 5));
     await tester.pumpAndSettle();
     expect(controller.value.selection, isNotNull);
-    expect(controller.value.selection.extentOffset, 5);
-    expect(controller.value.selection.baseOffset, 1);
+    expect(controller.value.selection!.extentOffset, 5);
+    expect(controller.value.selection!.baseOffset, 1);
 
     // Put the cursor at the end of the field.
     await tester.tapAt(textOffsetToPosition(tester, 19));
     expect(controller.value.selection, isNotNull);
-    expect(controller.value.selection.baseOffset, 19);
-    expect(controller.value.selection.extentOffset, 19);
+    expect(controller.value.selection!.baseOffset, 19);
+    expect(controller.value.selection!.extentOffset, 19);
 
     // Double tapping does the same thing for the first space.
     await tester.pump(const Duration(milliseconds: 500));
@@ -7794,14 +7788,14 @@ void main() {
     await tester.tapAt(textOffsetToPosition(tester, 0));
     await tester.pumpAndSettle();
     expect(controller.value.selection, isNotNull);
-    expect(controller.value.selection.baseOffset, 0);
-    expect(controller.value.selection.extentOffset, 1);
+    expect(controller.value.selection!.baseOffset, 0);
+    expect(controller.value.selection!.extentOffset, 1);
 
     // Put the cursor at the end of the field.
     await tester.tapAt(textOffsetToPosition(tester, 19));
     expect(controller.value.selection, isNotNull);
-    expect(controller.value.selection.baseOffset, 19);
-    expect(controller.value.selection.extentOffset, 19);
+    expect(controller.value.selection!.baseOffset, 19);
+    expect(controller.value.selection!.extentOffset, 19);
 
     // Double tapping the last space selects all previous contiguous spaces on
     // both lines and the previous word.
@@ -7811,8 +7805,8 @@ void main() {
     await tester.tapAt(textOffsetToPosition(tester, 14));
     await tester.pumpAndSettle();
     expect(controller.value.selection, isNotNull);
-    expect(controller.value.selection.baseOffset, 6);
-    expect(controller.value.selection.extentOffset, 14);
+    expect(controller.value.selection!.baseOffset, 6);
+    expect(controller.value.selection!.extentOffset, 14);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('selecting a space selects the space on non-iOS platforms', (WidgetTester tester) async {
@@ -7831,15 +7825,13 @@ void main() {
       ),
     );
 
-    expect(controller.value.selection, isNotNull);
-    expect(controller.value.selection.baseOffset, -1);
-    expect(controller.value.selection.extentOffset, -1);
+    expect(controller.value.selection, isNull);
 
     // Put the cursor at the end of the field.
     await tester.tapAt(textOffsetToPosition(tester, 10));
     expect(controller.value.selection, isNotNull);
-    expect(controller.value.selection.baseOffset, 10);
-    expect(controller.value.selection.extentOffset, 10);
+    expect(controller.value.selection!.baseOffset, 10);
+    expect(controller.value.selection!.extentOffset, 10);
 
     // Double tapping the second space selects it.
     await tester.pump(const Duration(milliseconds: 500));
@@ -7848,14 +7840,14 @@ void main() {
     await tester.tapAt(textOffsetToPosition(tester, 5));
     await tester.pumpAndSettle();
     expect(controller.value.selection, isNotNull);
-    expect(controller.value.selection.baseOffset, 5);
-    expect(controller.value.selection.extentOffset, 6);
+    expect(controller.value.selection!.baseOffset, 5);
+    expect(controller.value.selection!.extentOffset, 6);
 
     // Put the cursor at the end of the field.
     await tester.tapAt(textOffsetToPosition(tester, 10));
     expect(controller.value.selection, isNotNull);
-    expect(controller.value.selection.baseOffset, 10);
-    expect(controller.value.selection.extentOffset, 10);
+    expect(controller.value.selection!.baseOffset, 10);
+    expect(controller.value.selection!.extentOffset, 10);
 
     // Double tapping the second space selects it.
     await tester.pump(const Duration(milliseconds: 500));
@@ -7864,8 +7856,8 @@ void main() {
     await tester.tapAt(textOffsetToPosition(tester, 0));
     await tester.pumpAndSettle();
     expect(controller.value.selection, isNotNull);
-    expect(controller.value.selection.baseOffset, 0);
-    expect(controller.value.selection.extentOffset, 1);
+    expect(controller.value.selection!.baseOffset, 0);
+    expect(controller.value.selection!.extentOffset, 1);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia, TargetPlatform.android }));
 
   testWidgets('selecting a space selects the space on Mac', (WidgetTester tester) async {
@@ -7884,9 +7876,7 @@ void main() {
       ),
     );
 
-    expect(controller.value.selection, isNotNull);
-    expect(controller.value.selection.baseOffset, -1);
-    expect(controller.value.selection.extentOffset, -1);
+    expect(controller.value.selection, isNull);
 
     // Put the cursor at the end of the field.
     final TestGesture gesture = await tester.startGesture(
@@ -7898,8 +7888,8 @@ void main() {
     await tester.pump();
     await gesture.up();
     expect(controller.value.selection, isNotNull);
-    expect(controller.value.selection.baseOffset, 10);
-    expect(controller.value.selection.extentOffset, 10);
+    expect(controller.value.selection!.baseOffset, 10);
+    expect(controller.value.selection!.extentOffset, 10);
 
     // Double clicking the second space selects it.
     await tester.pump(const Duration(milliseconds: 500));
@@ -7912,8 +7902,8 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
     expect(controller.value.selection, isNotNull);
-    expect(controller.value.selection.baseOffset, 5);
-    expect(controller.value.selection.extentOffset, 6);
+    expect(controller.value.selection!.baseOffset, 5);
+    expect(controller.value.selection!.extentOffset, 6);
 
     // Put the cursor at the end of the field.
     await gesture.down(textOffsetToPosition(tester, 10));
@@ -7921,8 +7911,8 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(controller.value.selection, isNotNull);
-    expect(controller.value.selection.baseOffset, 10);
-    expect(controller.value.selection.extentOffset, 10);
+    expect(controller.value.selection!.baseOffset, 10);
+    expect(controller.value.selection!.extentOffset, 10);
 
     // Double tapping the second space selects it.
     await tester.pump(const Duration(milliseconds: 500));
@@ -7935,8 +7925,8 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
     expect(controller.value.selection, isNotNull);
-    expect(controller.value.selection.baseOffset, 0);
-    expect(controller.value.selection.extentOffset, 1);
+    expect(controller.value.selection!.baseOffset, 0);
+    expect(controller.value.selection!.extentOffset, 1);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux }), skip: kIsWeb);
 
   testWidgets('force press does not select a word', (WidgetTester tester) async {
@@ -7976,7 +7966,7 @@ void main() {
     ));
 
     // We don't want this gesture to select any word on Android.
-    expect(controller.selection, const TextSelection.collapsed(offset: -1));
+    expect(controller.selection, isNull);
 
     await gesture.up();
     await tester.pump();
@@ -8834,7 +8824,7 @@ void main() {
 
     final RenderEditable renderEditable = findRenderEditable(tester);
     final List<TextSelectionPoint> endpoints = globalize(
-      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable.getEndpointsForSelection(controller.selection!),
       renderEditable,
     );
     expect(endpoints.length, 1);

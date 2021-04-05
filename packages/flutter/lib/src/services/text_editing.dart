@@ -19,7 +19,9 @@ class TextSelection extends TextRange {
     required this.extentOffset,
     this.affinity = TextAffinity.downstream,
     this.isDirectional = false,
-  }) : super(
+  }) : assert(baseOffset >= 0),
+       assert(extentOffset >= 0),
+       super(
          start: baseOffset < extentOffset ? baseOffset : extentOffset,
          end: baseOffset < extentOffset ? extentOffset : baseOffset,
        );
@@ -37,6 +39,7 @@ class TextSelection extends TextRange {
   }) : baseOffset = offset,
        extentOffset = offset,
        isDirectional = false,
+       assert(offset >= 0),
        super.collapsed(offset);
 
   /// Creates a collapsed selection at the given text position.
@@ -49,11 +52,13 @@ class TextSelection extends TextRange {
       extentOffset = position.offset,
       affinity = position.affinity,
       isDirectional = false,
+      assert(position.offset >= 0),
       super.collapsed(position.offset);
 
   /// The offset at which the selection originates.
   ///
-  /// Might be larger than, smaller than, or equal to extent.
+  /// Might be larger than, smaller than, or equal to extent. Can not be
+  /// negative.
   final int baseOffset;
 
   /// The offset at which the selection terminates.
@@ -62,7 +67,7 @@ class TextSelection extends TextRange {
   /// value that changes. Similarly, if the current theme paints a caret on one
   /// side of the selection, this is the location at which to paint the caret.
   ///
-  /// Might be larger than, smaller than, or equal to base.
+  /// Might be larger than, smaller than, or equal to base. Can not be negative.
   final int extentOffset;
 
   /// If the text range is collapsed and has more than one visual location
@@ -124,6 +129,8 @@ class TextSelection extends TextRange {
     TextAffinity? affinity,
     bool? isDirectional,
   }) {
+    assert(baseOffset == null || baseOffset >= 0);
+    assert(extentOffset == null || extentOffset >= 0);
     return TextSelection(
       baseOffset: baseOffset ?? this.baseOffset,
       extentOffset: extentOffset ?? this.extentOffset,

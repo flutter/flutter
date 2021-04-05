@@ -502,7 +502,7 @@ void main() {
           find.byType(EditableText, skipOffstage: false),
         );
         final RenderEditable renderEditable = state.renderEditable;
-        final Rect localRect = renderEditable.getLocalRectForCaret(state.textEditingValue.selection.base);
+        final Rect localRect = renderEditable.getLocalRectForCaret(state.textEditingValue.selection!.base);
         final Offset caretOrigin = renderEditable.localToGlobal(localRect.topLeft);
         final Rect caretRect = caretOrigin & localRect.size;
         return const Rect.fromLTWH(0, 0,  800, 600).intersect(caretRect) == caretRect;

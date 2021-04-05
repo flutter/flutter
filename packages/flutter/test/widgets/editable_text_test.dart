@@ -154,24 +154,24 @@ void main() {
     // Simulates Gboard Persian input.
     state.updateEditingValue(const TextEditingValue(text: 'گ', selection: TextSelection.collapsed(offset: 1)));
     await tester.pump();
-    double previousCaretXPosition = state.renderEditable.getLocalRectForCaret(state.textEditingValue.selection.base).left;
+    double previousCaretXPosition = state.renderEditable.getLocalRectForCaret(state.textEditingValue.selection!.base).left;
 
     state.updateEditingValue(const TextEditingValue(text: 'گی', selection: TextSelection.collapsed(offset: 2)));
     await tester.pump();
-    double caretXPosition = state.renderEditable.getLocalRectForCaret(state.textEditingValue.selection.base).left;
+    double caretXPosition = state.renderEditable.getLocalRectForCaret(state.textEditingValue.selection!.base).left;
     expect(caretXPosition, lessThan(previousCaretXPosition));
     previousCaretXPosition = caretXPosition;
 
     state.updateEditingValue(const TextEditingValue(text: 'گیگ', selection: TextSelection.collapsed(offset: 3)));
     await tester.pump();
-    caretXPosition = state.renderEditable.getLocalRectForCaret(state.textEditingValue.selection.base).left;
+    caretXPosition = state.renderEditable.getLocalRectForCaret(state.textEditingValue.selection!.base).left;
     expect(caretXPosition, lessThan(previousCaretXPosition));
     previousCaretXPosition = caretXPosition;
 
     // Enter a whitespace in a RTL input field moves the caret to the left.
     state.updateEditingValue(const TextEditingValue(text: 'گیگ ', selection: TextSelection.collapsed(offset: 4)));
     await tester.pump();
-    caretXPosition = state.renderEditable.getLocalRectForCaret(state.textEditingValue.selection.base).left;
+    caretXPosition = state.renderEditable.getLocalRectForCaret(state.textEditingValue.selection!.base).left;
     expect(caretXPosition, lessThan(previousCaretXPosition));
 
     expect(state.currentTextEditingValue.text, equals('گیگ '));
@@ -1196,6 +1196,7 @@ void main() {
 
     // Can show the menu with text and a selection.
     controller.text = 'blah';
+    controller.selection = const TextSelection.collapsed(offset: 0);
     await tester.pump();
     // On web, we don't let Flutter show the toolbar.
     expect(state.showToolbar(), kIsWeb ? isFalse : isTrue);
@@ -1240,7 +1241,7 @@ void main() {
     expect(state.showToolbar(), kIsWeb ? isFalse : isTrue);
     await tester.pumpAndSettle();
     expect(find.text('Paste'), kIsWeb ? findsNothing : findsOneWidget);
-  });
+  }, skip: true);
 
   testWidgets('can dynamically disable options in toolbar', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1485,7 +1486,7 @@ void main() {
           style: textStyle,
           cursorColor: cursorColor,
           selectionControls: materialTextSelectionControls,
-          onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
+          onSelectionChanged: (TextSelection? selection, SelectionChangedCause? cause) {
             selectionCause = cause!;
           },
         ),
@@ -2292,15 +2293,15 @@ void main() {
     final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
     final int semanticsId = render.debugSemantics!.id;
 
-    expect(controller.selection.baseOffset, 4);
-    expect(controller.selection.extentOffset, 4);
+    expect(controller.selection?.baseOffset, 4);
+    expect(controller.selection?.extentOffset, 4);
 
     tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
         SemanticsAction.moveCursorBackwardByCharacter, doNotExtendSelection);
     await tester.pumpAndSettle();
 
-    expect(controller.selection.baseOffset, 3);
-    expect(controller.selection.extentOffset, 3);
+    expect(controller.selection?.baseOffset, 3);
+    expect(controller.selection?.extentOffset, 3);
 
     expect(
       semantics,
@@ -2327,8 +2328,8 @@ void main() {
         SemanticsAction.moveCursorBackwardByCharacter, doNotExtendSelection);
     await tester.pumpAndSettle();
 
-    expect(controller.selection.baseOffset, 0);
-    expect(controller.selection.extentOffset, 0);
+    expect(controller.selection?.baseOffset, 0);
+    expect(controller.selection?.extentOffset, 0);
 
     await tester.pumpAndSettle();
     expect(
@@ -2348,8 +2349,8 @@ void main() {
         SemanticsAction.moveCursorForwardByCharacter, doNotExtendSelection);
     await tester.pumpAndSettle();
 
-    expect(controller.selection.baseOffset, 1);
-    expect(controller.selection.extentOffset, 1);
+    expect(controller.selection?.baseOffset, 1);
+    expect(controller.selection?.extentOffset, 1);
 
     semantics.dispose();
   });
@@ -2386,15 +2387,15 @@ void main() {
     final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
     final int semanticsId = render.debugSemantics!.id;
 
-    expect(controller.selection.baseOffset, 14);
-    expect(controller.selection.extentOffset, 14);
+    expect(controller.selection?.baseOffset, 14);
+    expect(controller.selection?.extentOffset, 14);
 
     tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
         SemanticsAction.moveCursorBackwardByWord, doNotExtendSelection);
     await tester.pumpAndSettle();
 
-    expect(controller.selection.baseOffset, 9);
-    expect(controller.selection.extentOffset, 9);
+    expect(controller.selection?.baseOffset, 9);
+    expect(controller.selection?.extentOffset, 9);
 
     expect(
       semantics,
@@ -2415,15 +2416,15 @@ void main() {
         SemanticsAction.moveCursorBackwardByWord, doNotExtendSelection);
     await tester.pumpAndSettle();
 
-    expect(controller.selection.baseOffset, 5);
-    expect(controller.selection.extentOffset, 5);
+    expect(controller.selection?.baseOffset, 5);
+    expect(controller.selection?.extentOffset, 5);
 
     tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
         SemanticsAction.moveCursorBackwardByWord, doNotExtendSelection);
     await tester.pumpAndSettle();
 
-    expect(controller.selection.baseOffset, 0);
-    expect(controller.selection.extentOffset, 0);
+    expect(controller.selection?.baseOffset, 0);
+    expect(controller.selection?.extentOffset, 0);
 
     await tester.pumpAndSettle();
     expect(
@@ -2443,15 +2444,15 @@ void main() {
         SemanticsAction.moveCursorForwardByWord, doNotExtendSelection);
     await tester.pumpAndSettle();
 
-    expect(controller.selection.baseOffset, 5);
-    expect(controller.selection.extentOffset, 5);
+    expect(controller.selection?.baseOffset, 5);
+    expect(controller.selection?.extentOffset, 5);
 
     tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
         SemanticsAction.moveCursorForwardByWord, doNotExtendSelection);
     await tester.pumpAndSettle();
 
-    expect(controller.selection.baseOffset, 9);
-    expect(controller.selection.extentOffset, 9);
+    expect(controller.selection?.baseOffset, 9);
+    expect(controller.selection?.extentOffset, 9);
 
     semantics.dispose();
   });
@@ -2489,15 +2490,15 @@ void main() {
     final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
     final int semanticsId = render.debugSemantics!.id;
 
-    expect(controller.selection.baseOffset, 4);
-    expect(controller.selection.extentOffset, 4);
+    expect(controller.selection?.baseOffset, 4);
+    expect(controller.selection?.extentOffset, 4);
 
     tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
         SemanticsAction.moveCursorBackwardByCharacter, extendSelection);
     await tester.pumpAndSettle();
 
-    expect(controller.selection.baseOffset, 4);
-    expect(controller.selection.extentOffset, 3);
+    expect(controller.selection?.baseOffset, 4);
+    expect(controller.selection?.extentOffset, 3);
 
     expect(
       semantics,
@@ -2524,8 +2525,8 @@ void main() {
         SemanticsAction.moveCursorBackwardByCharacter, extendSelection);
     await tester.pumpAndSettle();
 
-    expect(controller.selection.baseOffset, 4);
-    expect(controller.selection.extentOffset, 0);
+    expect(controller.selection?.baseOffset, 4);
+    expect(controller.selection?.extentOffset, 0);
 
     await tester.pumpAndSettle();
     expect(
@@ -2545,15 +2546,15 @@ void main() {
         SemanticsAction.moveCursorForwardByCharacter, doNotExtendSelection);
     await tester.pumpAndSettle();
 
-    expect(controller.selection.baseOffset, 1);
-    expect(controller.selection.extentOffset, 1);
+    expect(controller.selection?.baseOffset, 1);
+    expect(controller.selection?.extentOffset, 1);
 
     tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
         SemanticsAction.moveCursorForwardByCharacter, extendSelection);
     await tester.pumpAndSettle();
 
-    expect(controller.selection.baseOffset, 1);
-    expect(controller.selection.extentOffset, 2);
+    expect(controller.selection?.baseOffset, 1);
+    expect(controller.selection?.extentOffset, 2);
 
     semantics.dispose();
   });
@@ -2591,15 +2592,15 @@ void main() {
     final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
     final int semanticsId = render.debugSemantics!.id;
 
-    expect(controller.selection.baseOffset, 14);
-    expect(controller.selection.extentOffset, 14);
+    expect(controller.selection?.baseOffset, 14);
+    expect(controller.selection?.extentOffset, 14);
 
     tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
         SemanticsAction.moveCursorBackwardByWord, extendSelection);
     await tester.pumpAndSettle();
 
-    expect(controller.selection.baseOffset, 14);
-    expect(controller.selection.extentOffset, 9);
+    expect(controller.selection?.baseOffset, 14);
+    expect(controller.selection?.extentOffset, 9);
 
     expect(
       semantics,
@@ -2620,15 +2621,15 @@ void main() {
         SemanticsAction.moveCursorBackwardByWord, extendSelection);
     await tester.pumpAndSettle();
 
-    expect(controller.selection.baseOffset, 14);
-    expect(controller.selection.extentOffset, 5);
+    expect(controller.selection?.baseOffset, 14);
+    expect(controller.selection?.extentOffset, 5);
 
     tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
         SemanticsAction.moveCursorBackwardByWord, extendSelection);
     await tester.pumpAndSettle();
 
-    expect(controller.selection.baseOffset, 14);
-    expect(controller.selection.extentOffset, 0);
+    expect(controller.selection?.baseOffset, 14);
+    expect(controller.selection?.extentOffset, 0);
 
     await tester.pumpAndSettle();
     expect(
@@ -2648,15 +2649,15 @@ void main() {
         SemanticsAction.moveCursorForwardByWord, doNotExtendSelection);
     await tester.pumpAndSettle();
 
-    expect(controller.selection.baseOffset, 5);
-    expect(controller.selection.extentOffset, 5);
+    expect(controller.selection?.baseOffset, 5);
+    expect(controller.selection?.extentOffset, 5);
 
     tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
         SemanticsAction.moveCursorForwardByWord, extendSelection);
     await tester.pumpAndSettle();
 
-    expect(controller.selection.baseOffset, 5);
-    expect(controller.selection.extentOffset, 9);
+    expect(controller.selection?.baseOffset, 5);
+    expect(controller.selection?.extentOffset, 9);
 
     semantics.dispose();
   });
@@ -3976,8 +3977,8 @@ void main() {
       ),
     );
     expect(state.selectionOverlay!.handlesAreVisible, isTrue);
-    expect(controller.selection.base.offset, 0);
-    expect(controller.selection.extent.offset, 5);
+    expect(controller.selection?.base.offset, 0);
+    expect(controller.selection?.extent.offset, 5);
 
     // On web, we don't show the Flutter toolbar and instead rely on the browser
     // toolbar. Until we change that, this test should remain skipped.
@@ -4068,8 +4069,8 @@ void main() {
             selectionControls: materialTextSelectionControls,
             keyboardType: TextInputType.text,
             textAlign: TextAlign.right,
-            onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? newCause) {
-              selection = newSelection;
+            onSelectionChanged: (TextSelection? newSelection, SelectionChangedCause? newCause) {
+              selection = newSelection!;
               cause = newCause!;
             },
           ),
@@ -4744,7 +4745,7 @@ void main() {
             selectionControls: materialTextSelectionControls,
             keyboardType: TextInputType.text,
             textAlign: TextAlign.right,
-            onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? newCause) {
+            onSelectionChanged: (TextSelection? newSelection, SelectionChangedCause? newCause) {
               selection = newSelection;
             },
           ),
@@ -4786,7 +4787,7 @@ void main() {
         const TextSelection(
           baseOffset: 0,
           extentOffset: testText.length,
-          affinity: TextAffinity.upstream,
+          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -4809,7 +4810,7 @@ void main() {
         const TextSelection(
           baseOffset: 0,
           extentOffset: testText.length,
-          affinity: TextAffinity.upstream,
+          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -4837,7 +4838,7 @@ void main() {
         const TextSelection(
           baseOffset: 0,
           extentOffset: testText.length,
-          affinity: TextAffinity.upstream,
+          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -4863,7 +4864,7 @@ void main() {
         const TextSelection(
           baseOffset: 0,
           extentOffset: testText.length,
-          affinity: TextAffinity.upstream,
+          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -4884,7 +4885,7 @@ void main() {
         const TextSelection(
           baseOffset: 0,
           extentOffset: testText.length,
-          affinity: TextAffinity.upstream,
+          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -6925,7 +6926,7 @@ void main() {
           style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!.copyWith(fontFamily: 'Roboto'),
           keyboardType: TextInputType.text,
           selectionControls: materialTextSelectionControls,
-          onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
+          onSelectionChanged: (TextSelection? selection, SelectionChangedCause? cause) {
             throw FlutterError(errorText);
           },
         ),
@@ -7100,14 +7101,14 @@ void main() {
     // The right arrow key moves to the right as usual.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pump();
-    expect(controller.selection.isCollapsed, isTrue);
-    expect(controller.selection.baseOffset, 1);
+    expect(controller.selection?.isCollapsed, isTrue);
+    expect(controller.selection?.baseOffset, 1);
 
     // And the left arrow also moves to the right due to the Shortcuts override.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pump();
-    expect(controller.selection.isCollapsed, isTrue);
-    expect(controller.selection.baseOffset, 2);
+    expect(controller.selection?.isCollapsed, isTrue);
+    expect(controller.selection?.baseOffset, 2);
 
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb);
@@ -7140,9 +7141,9 @@ void main() {
     ));
 
     await tester.pump(); // Wait for autofocus to take effect.
-    expect(controller.selection.isCollapsed, false);
-    expect(controller.selection.baseOffset, 7);
-    expect(controller.selection.extentOffset, 9);
+    expect(controller.selection?.isCollapsed, false);
+    expect(controller.selection?.baseOffset, 7);
+    expect(controller.selection?.extentOffset, 9);
 
     final String targetPlatform = defaultTargetPlatform.toString();
     final String platform = targetPlatform.substring(targetPlatform.indexOf('.') + 1).toLowerCase();
@@ -7156,9 +7157,9 @@ void main() {
     );
     await tester.pump();
     // word wo|rd word|
-    expect(controller.selection.isCollapsed, false);
-    expect(controller.selection.baseOffset, 7);
-    expect(controller.selection.extentOffset, 14);
+    expect(controller.selection?.isCollapsed, false);
+    expect(controller.selection?.baseOffset, 7);
+    expect(controller.selection?.extentOffset, 14);
 
     await sendKeys(
       tester,
@@ -7168,9 +7169,9 @@ void main() {
       platform: platform,
     );
     // word wo|rd |word
-    expect(controller.selection.isCollapsed, false);
-    expect(controller.selection.baseOffset, 7);
-    expect(controller.selection.extentOffset, 10);
+    expect(controller.selection?.isCollapsed, false);
+    expect(controller.selection?.baseOffset, 7);
+    expect(controller.selection?.extentOffset, 10);
 
     await sendKeys(
       tester,
@@ -7181,9 +7182,9 @@ void main() {
     );
     if (platform == 'macos') {
       // word wo|rd word
-      expect(controller.selection.isCollapsed, true);
-      expect(controller.selection.baseOffset, 7);
-      expect(controller.selection.extentOffset, 7);
+      expect(controller.selection?.isCollapsed, true);
+      expect(controller.selection?.baseOffset, 7);
+      expect(controller.selection?.extentOffset, 7);
 
       await sendKeys(
         tester,
@@ -7195,9 +7196,9 @@ void main() {
     }
 
     // word |wo|rd word
-    expect(controller.selection.isCollapsed, false);
-    expect(controller.selection.baseOffset, 7);
-    expect(controller.selection.extentOffset, 5);
+    expect(controller.selection?.isCollapsed, false);
+    expect(controller.selection?.baseOffset, 7);
+    expect(controller.selection?.extentOffset, 5);
 
     await sendKeys(
       tester,
@@ -7207,9 +7208,9 @@ void main() {
       platform: platform,
     );
     // |word wo|rd word
-    expect(controller.selection.isCollapsed, false);
-    expect(controller.selection.baseOffset, 7);
-    expect(controller.selection.extentOffset, 0);
+    expect(controller.selection?.isCollapsed, false);
+    expect(controller.selection?.baseOffset, 7);
+    expect(controller.selection?.extentOffset, 0);
 
     await sendKeys(
       tester,
@@ -7219,9 +7220,9 @@ void main() {
       platform: platform,
     );
     // word| wo|rd word
-    expect(controller.selection.isCollapsed, false);
-    expect(controller.selection.baseOffset, 7);
-    expect(controller.selection.extentOffset, 4);
+    expect(controller.selection?.isCollapsed, false);
+    expect(controller.selection?.baseOffset, 7);
+    expect(controller.selection?.extentOffset, 4);
 
     await sendKeys(
       tester,
@@ -7232,9 +7233,9 @@ void main() {
     );
     if (platform == 'macos') {
       // word wo|rd word
-      expect(controller.selection.isCollapsed, true);
-      expect(controller.selection.baseOffset, 7);
-      expect(controller.selection.extentOffset, 7);
+      expect(controller.selection?.isCollapsed, true);
+      expect(controller.selection?.baseOffset, 7);
+      expect(controller.selection?.extentOffset, 7);
 
       await sendKeys(
         tester,
@@ -7246,9 +7247,9 @@ void main() {
     }
 
     // word wo|rd| word
-    expect(controller.selection.isCollapsed, false);
-    expect(controller.selection.baseOffset, 7);
-    expect(controller.selection.extentOffset, 9);
+    expect(controller.selection?.isCollapsed, false);
+    expect(controller.selection?.baseOffset, 7);
+    expect(controller.selection?.extentOffset, 9);
 
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb, variant: TargetPlatformVariant.all());
@@ -7297,14 +7298,14 @@ void main() {
     // The right arrow key moves to the right as usual.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pump();
-    expect(controller.selection.isCollapsed, isTrue);
-    expect(controller.selection.baseOffset, 1);
+    expect(controller.selection?.isCollapsed, isTrue);
+    expect(controller.selection?.baseOffset, 1);
 
     // And the left arrow also moves to the right due to the Actions override.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pump();
-    expect(controller.selection.isCollapsed, isTrue);
-    expect(controller.selection.baseOffset, 2);
+    expect(controller.selection?.isCollapsed, isTrue);
+    expect(controller.selection?.baseOffset, 2);
     expect(myIntentWasCalled, isTrue);
 
     // On web, using keyboard for selection is handled by the browser.
@@ -7357,14 +7358,14 @@ void main() {
       await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'web');
       await tester.pump();
       expect(myIntentWasCalled, isFalse);
-      expect(controller.selection.isCollapsed, true);
-      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection?.isCollapsed, true);
+      expect(controller.selection?.baseOffset, 0);
     } else {
       await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
       await tester.pump();
       expect(myIntentWasCalled, isTrue);
-      expect(controller.selection.isCollapsed, true);
-      expect(controller.selection.baseOffset, 1);
+      expect(controller.selection?.isCollapsed, true);
+      expect(controller.selection?.baseOffset, 1);
     }
   });
 }

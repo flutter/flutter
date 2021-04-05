@@ -661,22 +661,30 @@ class TextEditingValue {
   /// each have default values.
   const TextEditingValue({
     this.text = '',
-    this.selection = const TextSelection.collapsed(offset: -1),
+    this.selection,
     this.composing = TextRange.empty,
   }) : assert(text != null),
-       assert(selection != null),
        assert(composing != null);
 
   /// Creates an instance of this class from a JSON object.
   factory TextEditingValue.fromJSON(Map<String, dynamic> encoded) {
+    final int? selectionBase = encoded['selectionBase'] as int?;
+    final int? selectionExtent = encoded['selectionExtent'] as int?;
+
+    final TextSelection? selection = selectionBase == null
+                                  || selectionExtent == null
+                                  || selectionBase < 0
+                                  || selectionExtent < 0
+        ? null
+        : TextSelection(
+            baseOffset: selectionBase,
+            extentOffset: selectionExtent,
+            affinity: _toTextAffinity(encoded['selectionAffinity'] as String?) ?? TextAffinity.downstream,
+            isDirectional: encoded['selectionIsDirectional'] as bool? ?? false,
+          );
     return TextEditingValue(
       text: encoded['text'] as String,
-      selection: TextSelection(
-        baseOffset: encoded['selectionBase'] as int? ?? -1,
-        extentOffset: encoded['selectionExtent'] as int? ?? -1,
-        affinity: _toTextAffinity(encoded['selectionAffinity'] as String?) ?? TextAffinity.downstream,
-        isDirectional: encoded['selectionIsDirectional'] as bool? ?? false,
-      ),
+      selection: selection,
       composing: TextRange(
         start: encoded['composingBase'] as int? ?? -1,
         end: encoded['composingExtent'] as int? ?? -1,
@@ -688,10 +696,10 @@ class TextEditingValue {
   Map<String, dynamic> toJSON() {
     return <String, dynamic>{
       'text': text,
-      'selectionBase': selection.baseOffset,
-      'selectionExtent': selection.extentOffset,
-      'selectionAffinity': selection.affinity.toString(),
-      'selectionIsDirectional': selection.isDirectional,
+      'selectionBase': selection?.baseOffset ?? -1,
+      'selectionExtent': selection?.extentOffset ?? -1,
+      'selectionAffinity': (selection?.affinity ?? TextAffinity.downstream).toString(),
+      'selectionIsDirectional': selection?.isDirectional ?? false,
       'composingBase': composing.start,
       'composingExtent': composing.end,
     };
@@ -701,7 +709,7 @@ class TextEditingValue {
   final String text;
 
   /// The range of text that is currently selected.
-  final TextSelection selection;
+  final TextSelection? selection;
 
   /// The range of text that is still being composed.
   final TextRange composing;

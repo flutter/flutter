@@ -37,7 +37,7 @@ const Radius _kFloatingCaretRadius = Radius.circular(1.0);
   'textSelectionDelegate.userUpdateTextEditingValue. '
   'This feature was deprecated after v1.26.0-17.2.pre.',
 )
-typedef SelectionChangedHandler = void Function(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause);
+typedef SelectionChangedHandler = void Function(TextSelection? selection, RenderEditable renderObject, SelectionChangedCause cause);
 
 /// Signature for the callback that reports when the caret location changes.
 ///
@@ -516,11 +516,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   final ValueNotifier<bool> _selectionEndInViewport = ValueNotifier<bool>(true);
 
   void _updateSelectionExtentsVisibility(Offset effectiveOffset) {
-    assert(selection != null);
+    final TextSelection? selection = this.selection;
+    if (selection == null) {
+      return;
+    }
     final Rect visibleRegion = Offset.zero & size;
 
     final Offset startOffset = _textPainter.getOffsetForCaret(
-      TextPosition(offset: selection!.start, affinity: selection!.affinity),
+      TextPosition(offset: selection.start, affinity: selection.affinity),
       _caretPrototype,
     );
     // TODO(justinmc): https://github.com/flutter/flutter/issues/31495
@@ -536,7 +539,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       .contains(startOffset + effectiveOffset);
 
     final Offset endOffset =  _textPainter.getOffsetForCaret(
-      TextPosition(offset: selection!.end, affinity: selection!.affinity),
+      TextPosition(offset: selection.end, affinity: selection.affinity),
       _caretPrototype,
     );
     _selectionEndInViewport.value = visibleRegion
@@ -563,8 +566,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     textSelectionDelegate.userUpdateTextEditingValue(newValue, cause);
   }
 
-  void _setSelection(TextSelection nextSelection, SelectionChangedCause cause) {
-    if (nextSelection.isValid) {
+  void _setSelection(TextSelection? nextSelection, SelectionChangedCause cause) {
+    final TextEditingValue currentTextEditingValue = textSelectionDelegate.textEditingValue;
+    if (nextSelection != null) {
       // The nextSelection is calculated based on _plainText, which can be out
       // of sync with the textSelectionDelegate.textEditingValue by one frame.
       // This is due to the render editable and editable text handle pointer
@@ -573,7 +577,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       // the _plainText when handling the pointer event.
       //
       // If this happens, we need to make sure the new selection is still valid.
-      final int textLength = textSelectionDelegate.textEditingValue.text.length;
+      final int textLength = currentTextEditingValue.text.length;
       nextSelection = nextSelection.copyWith(
         baseOffset: math.min(nextSelection.baseOffset, textLength),
         extentOffset: math.min(nextSelection.extentOffset, textLength),
@@ -581,20 +585,27 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
     _handleSelectionChange(nextSelection, cause);
     _setTextEditingValue(
-      textSelectionDelegate.textEditingValue.copyWith(selection: nextSelection),
+      TextEditingValue(
+        text: currentTextEditingValue.text,
+        selection: nextSelection,
+        composing: currentTextEditingValue.composing,
+      ),
       cause,
     );
   }
 
   void _handleSelectionChange(
-    TextSelection nextSelection,
+    TextSelection? nextSelection,
     SelectionChangedCause cause,
   ) {
     // Changes made by the keyboard can sometimes be "out of band" for listening
     // components, so always send those events, even if we didn't think it
     // changed. Also, focusing an empty field is sent as a selection change even
     // if the selection offset didn't change.
-    final bool focusingEmpty = nextSelection.baseOffset == 0 && nextSelection.extentOffset == 0 && !hasFocus;
+    final bool focusingEmpty = nextSelection != null
+                            && nextSelection.isCollapsed
+                            && nextSelection.baseOffset == 0
+                            && !hasFocus;
     if (nextSelection == selection && cause != SelectionChangedCause.keyboard && !focusingEmpty) {
       return;
     }
@@ -661,9 +672,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
 
-    // TODO(ianh): It seems to be entirely possible for the selection to be null here, but
-    // all the keyboard handling functions assume it is not.
-    assert(selection != null);
+    final TextSelection? selection = this.selection;
+    if (selection == null) {
+      return;
+    }
 
     final bool isShortcutModifierPressed = isMacOS ? keyEvent.isMetaPressed : keyEvent.isControlPressed;
     if (isShortcutModifierPressed && _shortcutKeys.contains(key)) {
@@ -1030,31 +1042,34 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [extendSelectionUp], which is same but in the opposite direction.
   void extendSelectionDown(SelectionChangedCause cause) {
-    assert(selection != null);
+    final TextSelection? selection = this.selection;
+    if (selection == null) {
+      return;
+    }
 
     // If the selection is collapsed at the end of the field already, then
     // nothing happens.
-    if (selection!.isCollapsed && selection!.extentOffset >= _plainText.length) {
+    if (selection.isCollapsed && selection.extentOffset >= _plainText.length) {
       return;
     }
     if (!selectionEnabled) {
       return moveSelectionDown(cause);
     }
 
-    final TextPosition positionBelow = _getTextPositionBelow(selection!.extentOffset);
+    final TextPosition positionBelow = _getTextPositionBelow(selection.extentOffset);
     late final TextSelection nextSelection;
-    if (positionBelow.offset == selection!.extentOffset) {
-      nextSelection = selection!.copyWith(
+    if (positionBelow.offset == selection.extentOffset) {
+      nextSelection = selection.copyWith(
         extentOffset: _plainText.length,
       );
       _wasSelectingVerticallyWithKeyboard = true;
     } else if (_wasSelectingVerticallyWithKeyboard) {
-      nextSelection = selection!.copyWith(
+      nextSelection = selection.copyWith(
         extentOffset: _cursorResetLocation,
       );
       _wasSelectingVerticallyWithKeyboard = false;
     } else {
-      nextSelection = selection!.copyWith(
+      nextSelection = selection.copyWith(
         extentOffset: positionBelow.offset,
       );
       _cursorResetLocation = nextSelection.extentOffset;
@@ -1078,9 +1093,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [expandSelectionToStart], which is same but in the opposite direction.
   void expandSelectionToEnd(SelectionChangedCause cause) {
-    assert(selection != null);
-
-    if (selection!.extentOffset == _plainText.length) {
+    final TextSelection? selection = this.selection;
+    if (selection == null || selection.extentOffset == _plainText.length) {
       return;
     }
     if (!selectionEnabled) {
@@ -1088,8 +1102,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     final int firstOffset = math.max(0, math.min(
-      selection!.baseOffset,
-      selection!.extentOffset,
+      selection.baseOffset,
+      selection.extentOffset,
     ));
     final TextSelection nextSelection = TextSelection(
       baseOffset: firstOffset,
@@ -1110,20 +1124,22 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [extendSelectionRight], which is same but in the opposite direction.
   void extendSelectionLeft(SelectionChangedCause cause) {
-    assert(selection != null);
-
+    final TextSelection? selection = this.selection;
+    if (selection == null) {
+      return;
+    }
     if (!selectionEnabled) {
       return moveSelectionLeft(cause);
     }
 
     final TextSelection nextSelection = _extendGivenSelectionLeft(
-      selection!,
+      selection,
       _plainText,
     );
     if (nextSelection == selection) {
       return;
     }
-    final int distance = selection!.extentOffset - nextSelection.extentOffset;
+    final int distance = selection.extentOffset - nextSelection.extentOffset;
     _cursorResetLocation -= distance;
     _setSelection(nextSelection, cause);
   }
@@ -1147,8 +1163,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///   * [expandSelectionRightByLine], which strictly grows the selection
   ///     regardless of the order.
   void extendSelectionLeftByLine(SelectionChangedCause cause) {
-    assert(selection != null);
-
+    final TextSelection? selection = this.selection;
+    if (selection == null) {
+      return;
+    }
     if (!selectionEnabled) {
       return moveSelectionLeftByLine(cause);
     }
@@ -1157,16 +1175,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     // so we go back to the first non-whitespace before asking for the line
     // bounds, since _getLineAtOffset finds the line boundaries without
     // including whitespace (like the newline).
-    final int startPoint = previousCharacter(selection!.extentOffset, _plainText, false);
+    final int startPoint = previousCharacter(selection.extentOffset, _plainText, false);
     final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
 
     late final TextSelection nextSelection;
-    if (selection!.extentOffset > selection!.baseOffset) {
-      nextSelection = selection!.copyWith(
-        extentOffset: selection!.baseOffset,
+    if (selection.extentOffset > selection.baseOffset) {
+      nextSelection = selection.copyWith(
+        extentOffset: selection.baseOffset,
       );
     } else {
-      nextSelection = selection!.copyWith(
+      nextSelection = selection.copyWith(
         extentOffset: selectedLine.baseOffset,
       );
     }
@@ -1186,20 +1204,22 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [extendSelectionLeft], which is same but in the opposite direction.
   void extendSelectionRight(SelectionChangedCause cause) {
-    assert(selection != null);
-
+    final TextSelection? selection = this.selection;
+    if (selection == null) {
+      return;
+    }
     if (!selectionEnabled) {
       return moveSelectionRight(cause);
     }
 
     final TextSelection nextSelection = _extendGivenSelectionRight(
-      selection!,
+      selection,
       _plainText,
     );
     if (nextSelection == selection) {
       return;
     }
-    final int distance = nextSelection.extentOffset - selection!.extentOffset;
+    final int distance = nextSelection.extentOffset - selection.extentOffset;
     _cursorResetLocation += distance;
     _setSelection(nextSelection, cause);
   }
@@ -1223,22 +1243,24 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///   * [expandSelectionRightByLine], which strictly grows the selection
   ///     regardless of the order.
   void extendSelectionRightByLine(SelectionChangedCause cause) {
-    assert(selection != null);
-
+    final TextSelection? selection = this.selection;
+    if (selection == null) {
+      return;
+    }
     if (!selectionEnabled) {
       return moveSelectionRightByLine(cause);
     }
 
-    final int startPoint = nextCharacter(selection!.extentOffset, _plainText, false);
+    final int startPoint = nextCharacter(selection.extentOffset, _plainText, false);
     final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
 
     late final TextSelection nextSelection;
-    if (selection!.extentOffset < selection!.baseOffset) {
-      nextSelection = selection!.copyWith(
-        extentOffset: selection!.baseOffset,
+    if (selection.extentOffset < selection.baseOffset) {
+      nextSelection = selection.copyWith(
+        extentOffset: selection.baseOffset,
       );
     } else {
-      nextSelection = selection!.copyWith(
+      nextSelection = selection.copyWith(
         extentOffset: selectedLine.extentOffset,
       );
     }
@@ -1260,33 +1282,35 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///   * [extendSelectionDown], which is the same but in the opposite
   ///     direction.
   void extendSelectionUp(SelectionChangedCause cause) {
-    assert(selection != null);
-
+    final TextSelection? selection = this.selection;
+    if (selection == null) {
+      return;
+    }
     // If the selection is collapsed at the beginning of the field already, then
     // nothing happens.
-    if (selection!.isCollapsed && selection!.extentOffset <= 0.0) {
+    if (selection.isCollapsed && selection.extentOffset <= 0.0) {
       return;
     }
     if (!selectionEnabled) {
       return moveSelectionUp(cause);
     }
 
-    final TextPosition positionAbove = _getTextPositionAbove(selection!.extentOffset);
+    final TextPosition positionAbove = _getTextPositionAbove(selection.extentOffset);
     late final TextSelection nextSelection;
-    if (positionAbove.offset == selection!.extentOffset) {
-      nextSelection = selection!.copyWith(
+    if (positionAbove.offset == selection.extentOffset) {
+      nextSelection = selection.copyWith(
         extentOffset: 0,
       );
       _wasSelectingVerticallyWithKeyboard = true;
     } else if (_wasSelectingVerticallyWithKeyboard) {
-      nextSelection = selection!.copyWith(
-        baseOffset: selection!.baseOffset,
+      nextSelection = selection.copyWith(
+        baseOffset: selection.baseOffset,
         extentOffset: _cursorResetLocation,
       );
       _wasSelectingVerticallyWithKeyboard = false;
     } else {
-      nextSelection = selection!.copyWith(
-        baseOffset: selection!.baseOffset,
+      nextSelection = selection.copyWith(
+        baseOffset: selection.baseOffset,
         extentOffset: positionAbove.offset,
       );
       _cursorResetLocation = nextSelection.extentOffset;
@@ -1311,9 +1335,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///   * [expandSelectionToEnd], which is the same but in the opposite
   ///     direction.
   void expandSelectionToStart(SelectionChangedCause cause) {
-    assert(selection != null);
-
-    if (selection!.extentOffset == 0) {
+    final TextSelection? selection = this.selection;
+    if (selection == null || selection.extentOffset == 0) {
       return;
     }
     if (!selectionEnabled) {
@@ -1321,8 +1344,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     final int lastOffset = math.max(0, math.max(
-      selection!.baseOffset,
-      selection!.extentOffset,
+      selection.baseOffset,
+      selection.extentOffset,
     ));
     final TextSelection nextSelection = TextSelection(
       baseOffset: lastOffset,
@@ -1347,23 +1370,25 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///   * [expandSelectionRightByLine], which is the same but in the opposite
   ///     direction.
   void expandSelectionLeftByLine(SelectionChangedCause cause) {
-    assert(selection != null);
-
+    final TextSelection? selection = this.selection;
+    if (selection == null) {
+      return;
+    }
     if (!selectionEnabled) {
       return moveSelectionLeftByLine(cause);
     }
 
-    final int firstOffset = math.min(selection!.baseOffset, selection!.extentOffset);
+    final int firstOffset = math.min(selection.baseOffset, selection.extentOffset);
     final int startPoint = previousCharacter(firstOffset, _plainText, false);
     final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
 
     late final TextSelection nextSelection;
-    if (selection!.extentOffset <= selection!.baseOffset) {
-      nextSelection = selection!.copyWith(
+    if (selection.extentOffset <= selection.baseOffset) {
+      nextSelection = selection.copyWith(
         extentOffset: selectedLine.baseOffset,
       );
     } else {
-      nextSelection = selection!.copyWith(
+      nextSelection = selection.copyWith(
         baseOffset: selectedLine.baseOffset,
       );
     }
@@ -1392,8 +1417,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///   * [extendSelectionRightByWord], which is the same but in the opposite
   ///     direction.
   void extendSelectionLeftByWord(SelectionChangedCause cause, [bool includeWhitespace = true, bool stopAtReversal = false]) {
-    assert(selection != null);
-
+    final TextSelection? selection = this.selection;
+    if (selection == null) {
+      return;
+    }
     // When the text is obscured, the whole thing is treated as one big word.
     if (obscureText) {
       return _extendSelectionToStart(cause);
@@ -1406,7 +1433,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     );
     final TextSelection nextSelection = _extendGivenSelectionLeftByWord(
       _textPainter,
-      selection!,
+      selection,
       includeWhitespace,
       stopAtReversal,
     );
@@ -1432,8 +1459,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///   * [extendSelectionLeftByWord], which is the same but in the opposite
   ///     direction.
   void extendSelectionRightByWord(SelectionChangedCause cause, [bool includeWhitespace = true, bool stopAtReversal = false]) {
-    assert(selection != null);
-
+    if (selection == null) {
+      return;
+    }
     // When the text is obscured, the whole thing is treated as one big word.
     if (obscureText) {
       return _extendSelectionToEnd(cause);
@@ -1472,23 +1500,25 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///   * [expandSelectionLeftByLine], which is the same but in the opposite
   ///     direction.
   void expandSelectionRightByLine(SelectionChangedCause cause) {
-    assert(selection != null);
-
+    final TextSelection? selection = this.selection;
+    if (selection == null) {
+      return;
+    }
     if (!selectionEnabled) {
       return moveSelectionRightByLine(cause);
     }
 
-    final int lastOffset = math.max(selection!.baseOffset, selection!.extentOffset);
+    final int lastOffset = math.max(selection.baseOffset, selection.extentOffset);
     final int startPoint = nextCharacter(lastOffset, _plainText, false);
     final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
 
     late final TextSelection nextSelection;
-    if (selection!.extentOffset >= selection!.baseOffset) {
-      nextSelection = selection!.copyWith(
+    if (selection.extentOffset >= selection.baseOffset) {
+      nextSelection = selection.copyWith(
         extentOffset: selectedLine.extentOffset,
       );
     } else {
-      nextSelection = selection!.copyWith(
+      nextSelection = selection.copyWith(
         baseOffset: selectedLine.extentOffset,
       );
     }
@@ -1504,19 +1534,18 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [moveSelectionUp], which is the same but in the opposite direction.
   void moveSelectionDown(SelectionChangedCause cause) {
-    assert(selection != null);
-
+    final TextSelection? selection = this.selection;
     // If the selection is collapsed at the end of the field already, then
     // nothing happens.
-    if (selection!.isCollapsed && selection!.extentOffset >= _plainText.length) {
+    if (selection == null || (selection.isCollapsed && selection.extentOffset >= _plainText.length)) {
       return;
     }
 
-    final TextPosition positionBelow = _getTextPositionBelow(selection!.extentOffset);
+    final TextPosition positionBelow = _getTextPositionBelow(selection.extentOffset);
 
     late final TextSelection nextSelection;
-    if (positionBelow.offset == selection!.extentOffset) {
-      nextSelection = selection!.copyWith(
+    if (positionBelow.offset == selection.extentOffset) {
+      nextSelection = selection.copyWith(
         baseOffset: _plainText.length,
         extentOffset: _plainText.length,
       );
@@ -1537,16 +1566,18 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [moveSelectionRight], which is the same but in the opposite direction.
   void moveSelectionLeft(SelectionChangedCause cause) {
-    assert(selection != null);
-
+    final TextSelection? selection = this.selection;
+    if (selection == null) {
+      return;
+    }
     final TextSelection nextSelection = _moveGivenSelectionLeft(
-      selection!,
+      selection,
       _plainText,
     );
     if (nextSelection == selection) {
       return;
     }
-    _cursorResetLocation -= selection!.extentOffset - nextSelection.extentOffset;
+    _cursorResetLocation -= selection.extentOffset - nextSelection.extentOffset;
     _setSelection(nextSelection, cause);
   }
 
@@ -1559,10 +1590,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///   * [moveSelectionRightByLine], which is the same but in the opposite
   ///     direction.
   void moveSelectionLeftByLine(SelectionChangedCause cause) {
-    assert(selection != null);
-
+    final TextSelection? selection = this.selection;
+    if (selection == null) {
+      return;
+    }
     // If the previous character is the edge of a line, don't do anything.
-    final int previousPoint = previousCharacter(selection!.extentOffset, _plainText, true);
+    final int previousPoint = previousCharacter(selection.extentOffset, _plainText, true);
     final TextSelection line = _getLineAtOffset(TextPosition(offset: previousPoint));
     if (line.extentOffset == previousPoint) {
       return;
@@ -1572,7 +1605,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     // so we go back to the first non-whitespace before asking for the line
     // bounds, since _getLineAtOffset finds the line boundaries without
     // including whitespace (like the newline).
-    final int startPoint = previousCharacter(selection!.extentOffset, _plainText, false);
+    final int startPoint = previousCharacter(selection.extentOffset, _plainText, false);
     final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
     final TextSelection nextSelection = TextSelection.collapsed(
       offset: selectedLine.baseOffset,
@@ -1594,8 +1627,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///   * [moveSelectionRightByWord], which is the same but in the opposite
   ///     direction.
   void moveSelectionLeftByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
-    assert(selection != null);
-
+    final TextSelection? selection = this.selection;
+    if (selection == null) {
+      return;
+    }
     // When the text is obscured, the whole thing is treated as one big word.
     if (obscureText) {
       return moveSelectionToStart(cause);
@@ -1608,7 +1643,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     );
     final TextSelection nextSelection = _moveGivenSelectionLeftByWord(
       _textPainter,
-      selection!,
+      selection,
       includeWhitespace,
     );
     if (nextSelection == selection) {
@@ -1625,10 +1660,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [moveSelectionLeft], which is the same but in the opposite direction.
   void moveSelectionRight(SelectionChangedCause cause) {
-    assert(selection != null);
-
+    final TextSelection? selection = this.selection;
+    if (selection == null) {
+      return;
+    }
     final TextSelection nextSelection = _moveGivenSelectionRight(
-      selection!,
+      selection,
       _plainText,
     );
     if (nextSelection == selection) {
@@ -1646,13 +1683,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///   * [moveSelectionLeftByLine], which is the same but in the opposite
   ///     direction.
   void moveSelectionRightByLine(SelectionChangedCause cause) {
-    assert(selection != null);
-
+    final TextSelection? selection = this.selection;
+    if (selection == null) {
+      return;
+    }
     // If already at the right edge of the line, do nothing.
     final TextSelection currentLine = _getLineAtOffset(TextPosition(
-      offset: selection!.extentOffset,
+      offset: selection.extentOffset,
     ));
-    if (currentLine.extentOffset == selection!.extentOffset) {
+    if (currentLine.extentOffset == selection.extentOffset) {
       return;
     }
 
@@ -1660,7 +1699,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     // so we go forward to the first non-whitespace character before asking
     // for the line bounds, since _getLineAtOffset finds the line
     // boundaries without including whitespace (like the newline).
-    final int startPoint = nextCharacter(selection!.extentOffset, _plainText, false);
+    final int startPoint = nextCharacter(selection.extentOffset, _plainText, false);
     final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
     final TextSelection nextSelection = TextSelection.collapsed(
       offset: selectedLine.extentOffset,
@@ -1682,8 +1721,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///   * [moveSelectionLeftByWord], which is the same but in the opposite
   ///     direction.
   void moveSelectionRightByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
-    assert(selection != null);
-
+    final TextSelection? selection = this.selection;
+    if (selection == null) {
+      return;
+    }
     // When the text is obscured, the whole thing is treated as one big word.
     if (obscureText) {
       return moveSelectionToEnd(cause);
@@ -1696,7 +1737,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     );
     final TextSelection nextSelection = _moveGivenSelectionRightByWord(
       _textPainter,
-      selection!,
+      selection,
       includeWhitespace,
     );
     if (nextSelection == selection) {
@@ -1714,9 +1755,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///   * [moveSelectionToStart], which is the same but in the opposite
   ///     direction.
   void moveSelectionToEnd(SelectionChangedCause cause) {
-    assert(selection != null);
-
-    if (selection!.isCollapsed && selection!.extentOffset == _plainText.length) {
+    final TextSelection? selection = this.selection;
+    if (selection == null) {
+      return;
+    }
+    if (selection.isCollapsed && selection.extentOffset == _plainText.length) {
       return;
     }
     final TextSelection nextSelection = TextSelection.collapsed(
@@ -1733,9 +1776,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [moveSelectionToEnd], which is the same but in the opposite direction.
   void moveSelectionToStart(SelectionChangedCause cause) {
-    assert(selection != null);
-
-    if (selection!.isCollapsed && selection!.extentOffset == 0) {
+    final TextSelection? selection = this.selection;
+    if (selection == null) {
+      return;
+    }
+    if (selection.isCollapsed && selection.extentOffset == 0) {
       return;
     }
     const TextSelection nextSelection = TextSelection.collapsed(offset: 0);
@@ -1750,21 +1795,23 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [moveSelectionDown], which is the same but in the opposite direction.
   void moveSelectionUp(SelectionChangedCause cause) {
-    assert(selection != null);
-
+    final TextSelection? selection = this.selection;
+    if (selection == null) {
+      return;
+    }
     // If the selection is collapsed at the beginning of the field already, then
     // nothing happens.
-    if (selection!.isCollapsed && selection!.extentOffset <= 0.0) {
+    if (selection.isCollapsed && selection.extentOffset <= 0.0) {
       return;
     }
 
-    final TextPosition positionAbove = _getTextPositionAbove(selection!.extentOffset);
+    final TextPosition positionAbove = _getTextPositionAbove(selection.extentOffset);
     late final TextSelection nextSelection;
-    if (positionAbove.offset == selection!.extentOffset) {
-      nextSelection = selection!.copyWith(baseOffset: 0, extentOffset: 0);
+    if (positionAbove.offset == selection.extentOffset) {
+      nextSelection = selection.copyWith(baseOffset: 0, extentOffset: 0);
       _wasSelectingVerticallyWithKeyboard = false;
     } else {
-      nextSelection = selection!.copyWith(
+      nextSelection = selection.copyWith(
         baseOffset: positionAbove.offset,
         extentOffset: positionAbove.offset,
       );
@@ -1777,26 +1824,29 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // Handles shortcut functionality including cut, copy, paste and select all
   // using control/command + (X, C, V, A).
   Future<void> _handleShortcuts(LogicalKeyboardKey key) async {
-    final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
+    final TextSelection? selection = this.selection;
     final String text = textSelectionDelegate.textEditingValue.text;
-    assert(selection != null);
     assert(_shortcutKeys.contains(key), 'shortcut key $key not recognized.');
     if (key == LogicalKeyboardKey.keyC) {
-      if (!selection.isCollapsed) {
-        Clipboard.setData(ClipboardData(text: selection.textInside(text)));
+      if (selection == null || selection.isCollapsed) {
+        return;
       }
-      return;
+      Clipboard.setData(ClipboardData(text: selection.textInside(text)));
     }
     TextEditingValue? value;
     if (key == LogicalKeyboardKey.keyX && !_readOnly) {
-      if (!selection.isCollapsed) {
-        Clipboard.setData(ClipboardData(text: selection.textInside(text)));
-        value = TextEditingValue(
-          text: selection.textBefore(text) + selection.textAfter(text),
-          selection: TextSelection.collapsed(offset: math.min(selection.start, selection.end)),
-        );
+      if (selection == null || selection.isCollapsed) {
+        return;
       }
+      Clipboard.setData(ClipboardData(text: selection.textInside(text)));
+      value = TextEditingValue(
+        text: selection.textBefore(text) + selection.textAfter(text),
+        selection: TextSelection.collapsed(offset: math.min(selection.start, selection.end)),
+      );
     } else if (key == LogicalKeyboardKey.keyV && !_readOnly) {
+      if (selection == null) {
+        return;
+      }
       // Snapshot the input before using `await`.
       // See https://github.com/flutter/flutter/issues/11427
       final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
@@ -1811,9 +1861,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     } else if (key == LogicalKeyboardKey.keyA) {
       value = TextEditingValue(
         text: text,
-        selection: selection.copyWith(
+        selection: TextSelection(
           baseOffset: 0,
           extentOffset: textSelectionDelegate.textEditingValue.text.length,
+          isDirectional: selection?.isDirectional ?? true,
+          affinity: TextAffinity.downstream,
         ),
       );
     }
@@ -1826,10 +1878,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   void _handleDelete({ required bool forward }) {
-    final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
+    final TextSelection? selection = textSelectionDelegate.textEditingValue.selection;
     final String text = textSelectionDelegate.textEditingValue.text;
-    assert(_selection != null);
-    if (_readOnly || !selection.isValid) {
+    if (_readOnly || selection == null) {
       return;
     }
     String textBefore = selection.textBefore(text);
@@ -2392,7 +2443,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (hasFocus && !readOnly)
       config.onSetText = _handleSetText;
 
-    if (selectionEnabled && selection?.isValid == true) {
+    if (selectionEnabled && selection != null) {
       config.textSelection = selection;
       if (_textPainter.getOffsetBefore(selection!.extentOffset) != null) {
         config
@@ -2507,11 +2558,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   void _handleMoveCursorForwardByCharacter(bool extentSelection) {
-    assert(selection != null);
-    final int? extentOffset = _textPainter.getOffsetAfter(selection!.extentOffset);
+    final TextSelection? selection = this.selection;
+    if (selection == null) {
+      return;
+    }
+    final int? extentOffset = _textPainter.getOffsetAfter(selection.extentOffset);
     if (extentOffset == null)
       return;
-    final int baseOffset = !extentSelection ? extentOffset : selection!.baseOffset;
+    final int baseOffset = !extentSelection ? extentOffset : selection.baseOffset;
     _setSelection(
       TextSelection(baseOffset: baseOffset, extentOffset: extentOffset),
       SelectionChangedCause.keyboard,
@@ -2519,11 +2573,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   void _handleMoveCursorBackwardByCharacter(bool extentSelection) {
-    assert(selection != null);
-    final int? extentOffset = _textPainter.getOffsetBefore(selection!.extentOffset);
+    final TextSelection? selection = this.selection;
+    if (selection == null) {
+      return;
+    }
+    final int? extentOffset = _textPainter.getOffsetBefore(selection.extentOffset);
     if (extentOffset == null)
       return;
-    final int baseOffset = !extentSelection ? extentOffset : selection!.baseOffset;
+    final int baseOffset = !extentSelection ? extentOffset : selection.baseOffset;
     _setSelection(
       TextSelection(baseOffset: baseOffset, extentOffset: extentOffset),
       SelectionChangedCause.keyboard,
@@ -2531,12 +2588,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   void _handleMoveCursorForwardByWord(bool extentSelection) {
-    assert(selection != null);
-    final TextRange currentWord = _textPainter.getWordBoundary(selection!.extent);
+    final TextSelection? selection = this.selection;
+    if (selection == null) {
+      return;
+    }
+    final TextRange currentWord = _textPainter.getWordBoundary(selection.extent);
     final TextRange? nextWord = _getNextWord(currentWord.end);
     if (nextWord == null)
       return;
-    final int baseOffset = extentSelection ? selection!.baseOffset : nextWord.start;
+    final int baseOffset = extentSelection ? selection.baseOffset : nextWord.start;
     _setSelection(
       TextSelection(
         baseOffset: baseOffset,
@@ -2547,12 +2607,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   void _handleMoveCursorBackwardByWord(bool extentSelection) {
-    assert(selection != null);
-    final TextRange currentWord = _textPainter.getWordBoundary(selection!.extent);
+    final TextSelection? selection = this.selection;
+    if (selection == null) {
+      return;
+    }
+    final TextRange currentWord = _textPainter.getWordBoundary(selection.extent);
     final TextRange? previousWord = _getPreviousWord(currentWord.start - 1);
     if (previousWord == null)
       return;
-    final int baseOffset = extentSelection ?  selection!.baseOffset : previousWord.start;
+    final int baseOffset = extentSelection ?  selection.baseOffset : previousWord.start;
     _setSelection(
       TextSelection(
         baseOffset: baseOffset,
@@ -3372,7 +3435,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       _clipRectLayer = null;
       _paintContents(context, offset);
     }
-    _paintHandleLayers(context, getEndpointsForSelection(selection!));
+    final TextSelection? selection = this.selection;
+    if (selection != null) {
+      _paintHandleLayers(context, getEndpointsForSelection(selection));
+    }
   }
 
   ClipRectLayer? _clipRectLayer;
