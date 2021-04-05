@@ -1,4 +1,4 @@
-Signature: 768aab4e6e70fac4b6315a53674ca0f0
+Signature: ee742a567d296d361dc739b1296a151e
 
 UNUSED LICENSES:
 
@@ -1378,6 +1378,7 @@ FILE: ../../../third_party/skia/site/docs/dev/design/conical/lemma3.1.svg
 FILE: ../../../third_party/skia/site/docs/dev/design/conical/lemma3.2.svg
 FILE: ../../../third_party/skia/site/docs/dev/design/conical/lemma4.svg
 FILE: ../../../third_party/skia/site/docs/dev/tools/buttons.png
+FILE: ../../../third_party/skia/site/docs/dev/tools/calendar.mskp
 FILE: ../../../third_party/skia/site/docs/dev/tools/crosshair.png
 FILE: ../../../third_party/skia/site/docs/dev/tools/debugger.png
 FILE: ../../../third_party/skia/site/docs/dev/tools/end.png
