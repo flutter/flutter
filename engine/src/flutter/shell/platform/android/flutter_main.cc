@@ -6,6 +6,8 @@
 
 #include "flutter/shell/platform/android/flutter_main.h"
 
+#include <android/log.h>
+
 #include <vector>
 
 #include "flutter/fml/command_line.h"
@@ -105,6 +107,12 @@ void FlutterMain::Init(JNIEnv* env,
 
   settings.task_observer_remove = [](intptr_t key) {
     fml::MessageLoop::GetCurrent().RemoveTaskObserver(key);
+  };
+
+  settings.log_message_callback = [](const std::string& tag,
+                                     const std::string& message) {
+    __android_log_print(ANDROID_LOG_INFO, tag.c_str(), "%.*s",
+                        (int)message.size(), message.c_str());
   };
 
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG

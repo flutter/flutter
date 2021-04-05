@@ -140,6 +140,11 @@ void EmbedderTestContext::PlatformMessageCallback(
   }
 }
 
+void EmbedderTestContext::SetLogMessageCallback(
+    const LogMessageCallback& callback) {
+  log_message_callback_ = callback;
+}
+
 FlutterUpdateSemanticsNodeCallback
 EmbedderTestContext::GetUpdateSemanticsNodeCallbackHook() {
   return [](const FlutterSemanticsNode* semantics_node, void* user_data) {
@@ -156,6 +161,15 @@ EmbedderTestContext::GetUpdateSemanticsCustomActionCallbackHook() {
     auto context = reinterpret_cast<EmbedderTestContext*>(user_data);
     if (auto callback = context->update_semantics_custom_action_callback_) {
       callback(action);
+    }
+  };
+}
+
+FlutterLogMessageCallback EmbedderTestContext::GetLogMessageCallbackHook() {
+  return [](const char* tag, const char* message, void* user_data) {
+    auto context = reinterpret_cast<EmbedderTestContext*>(user_data);
+    if (auto callback = context->log_message_callback_) {
+      callback(tag, message);
     }
   };
 }

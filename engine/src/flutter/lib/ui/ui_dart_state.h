@@ -77,6 +77,14 @@ class UIDartState : public tonic::DartState {
   void ReportUnhandledException(const std::string& error,
                                 const std::string& stack_trace);
 
+  // Logs `print` messages from the application via an embedder-specified
+  // logging mechanism.
+  //
+  // @param[in]  tag      A component name or tag that identifies the logging
+  //                      application.
+  // @param[in]  message  The message to be logged.
+  void LogMessage(const std::string& tag, const std::string& message) const;
+
   bool enable_skparagraph() const;
 
   template <class T>
@@ -103,6 +111,7 @@ class UIDartState : public tonic::DartState {
               std::string advisory_script_entrypoint,
               std::string logger_prefix,
               UnhandledExceptionCallback unhandled_exception_callback,
+              LogMessageCallback log_message_callback,
               std::shared_ptr<IsolateNameServer> isolate_name_server,
               bool is_root_isolate_,
               std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
@@ -138,6 +147,7 @@ class UIDartState : public tonic::DartState {
   std::unique_ptr<PlatformConfiguration> platform_configuration_;
   tonic::DartMicrotaskQueue microtask_queue_;
   UnhandledExceptionCallback unhandled_exception_callback_;
+  LogMessageCallback log_message_callback_;
   const std::shared_ptr<IsolateNameServer> isolate_name_server_;
   const bool enable_skparagraph_;
 
