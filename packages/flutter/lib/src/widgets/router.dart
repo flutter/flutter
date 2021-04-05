@@ -272,7 +272,7 @@ class Router<T> extends StatefulWidget {
   ///
   /// Since this delegate is the primary consumer of the [routeInformationProvider],
   /// it must not be null if [routeInformationProvider] is not null.
-  final RouteInformationParser<T>? routeInformationParser;
+  final RouteInformationParser<Object>? routeInformationParser;
 
   /// The router delegate for the router.
   ///
@@ -285,7 +285,7 @@ class Router<T> extends StatefulWidget {
   ///
   /// If the [RouterDelegate.currentConfiguration] returns a non-null object,
   /// this [Router] will opt for URL updates.
-  final RouterDelegate<T> routerDelegate;
+  final RouterDelegate<Object> routerDelegate;
 
   /// The back button dispatcher for the router.
   ///
@@ -306,7 +306,7 @@ class Router<T> extends StatefulWidget {
   ///
   ///  * [maybeOf], which is a similar function, but it will return null instead
   ///    of throwing an exception if no [Router] ancestor exists.
-  static Router<Object> of(BuildContext context) {
+  static Router<dynamic> of(BuildContext context) {
     final _RouterScope? scope = context.dependOnInheritedWidgetOfExactType<_RouterScope>();
     assert(() {
       if (scope == null) {
@@ -484,7 +484,7 @@ class _RouterState<T> extends State<Router<T>> {
   }
 
   RouteInformation? _retrieveNewRouteInformation() {
-    final T? configuration = widget.routerDelegate.currentConfiguration;
+    final Object? configuration = widget.routerDelegate.currentConfiguration;
     if (configuration == null)
       return null;
     final RouteInformation? routeInformation = widget.routeInformationParser!.restoreRouteInformation(configuration);
@@ -588,7 +588,7 @@ class _RouterState<T> extends State<Router<T>> {
     _lastSeenLocation = widget.routeInformationProvider!.value!.location;
     widget.routeInformationParser!
       .parseRouteInformation(widget.routeInformationProvider!.value!)
-      .then<T>(_verifyRouteInformationParserStillCurrent(_currentRouteInformationParserTransaction, widget))
+      .then<Object>(_verifyRouteInformationParserStillCurrent(_currentRouteInformationParserTransaction, widget))
       .then<void>(widget.routerDelegate.setInitialRoutePath)
       .then<void>(_verifyRouterDelegatePushStillCurrent(_currentRouterDelegateTransaction, widget))
       .then<void>(_rebuild);
@@ -600,7 +600,7 @@ class _RouterState<T> extends State<Router<T>> {
     _lastSeenLocation = widget.routeInformationProvider!.value!.location;
     widget.routeInformationParser!
       .parseRouteInformation(widget.routeInformationProvider!.value!)
-      .then<T>(_verifyRouteInformationParserStillCurrent(_currentRouteInformationParserTransaction, widget))
+      .then<Object>(_verifyRouteInformationParserStillCurrent(_currentRouteInformationParserTransaction, widget))
       .then<void>(widget.routerDelegate.setNewRoutePath)
       .then<void>(_verifyRouterDelegatePushStillCurrent(_currentRouterDelegateTransaction, widget))
       .then<void>(_rebuild);
@@ -621,21 +621,22 @@ class _RouterState<T> extends State<Router<T>> {
 
   static final Future<Object> _never = Completer<Object>().future; // won't ever complete
 
-  _AsyncPassthrough<T> _verifyRouteInformationParserStillCurrent(Object? transaction, Router<T> originalWidget) {
-    return (T data) {
+  _AsyncPassthrough<Object> _verifyRouteInformationParserStillCurrent(Object? transaction, Router<T> originalWidget) {
+    return (Object data) {
       if (transaction == _currentRouteInformationParserTransaction &&
           widget.routeInformationProvider == originalWidget.routeInformationProvider &&
           widget.backButtonDispatcher == originalWidget.backButtonDispatcher &&
           widget.routeInformationParser == originalWidget.routeInformationParser &&
           widget.routerDelegate == originalWidget.routerDelegate) {
-        return SynchronousFuture<T>(data);
+        return SynchronousFuture<Object>(data);
       }
-      return _never as Future<T>;
+      return _never as Future<Object>;
     };
   }
 
   _AsyncPassthrough<void> _verifyRouterDelegatePushStillCurrent(Object? transaction, Router<T> originalWidget) {
     return (void data) {
+
       if (transaction == _currentRouterDelegateTransaction &&
           widget.routeInformationProvider == originalWidget.routeInformationProvider &&
           widget.backButtonDispatcher == originalWidget.backButtonDispatcher &&
@@ -678,7 +679,7 @@ class _RouterState<T> extends State<Router<T>> {
       backButtonDispatcher: widget.backButtonDispatcher,
       routeInformationParser: widget.routeInformationParser,
       routerDelegate: widget.routerDelegate,
-      routerState: this,
+      routerState: this as _RouterState<Object>,
       child: Builder(
         // We use a Builder so that the build method below
         // will have a BuildContext that contains the _RouterScope.
@@ -704,9 +705,9 @@ class _RouterScope extends InheritedWidget {
 
   final ValueListenable<RouteInformation?>? routeInformationProvider;
   final BackButtonDispatcher? backButtonDispatcher;
-  final RouteInformationParser<dynamic>? routeInformationParser;
-  final RouterDelegate<dynamic> routerDelegate;
-  final _RouterState<dynamic> routerState;
+  final RouteInformationParser<Object>? routeInformationParser;
+  final RouterDelegate<Object> routerDelegate;
+  final _RouterState<Object> routerState;
 
   @override
   bool updateShouldNotify(_RouterScope oldWidget) {
