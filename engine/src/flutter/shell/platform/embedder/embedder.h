@@ -1272,6 +1272,17 @@ typedef struct {
   };
 } FlutterEngineAOTDataSource;
 
+// Logging callback for Dart application messages.
+//
+// The `tag` parameter contains a null-terminated string containing a logging
+// tag or component name that can be used to identify system log messages from
+// the app. The `message` parameter contains a null-terminated string
+// containing the message to be logged. `user_data` is a user data baton passed
+// in `FlutterEngineRun`.
+typedef void (*FlutterLogMessageCallback)(const char* /* tag */,
+                                          const char* /* message */,
+                                          void* /* user_data */);
+
 /// An opaque object that describes the AOT data that can be used to launch a
 /// FlutterEngine instance in AOT mode.
 typedef struct _FlutterEngineAOTData* FlutterEngineAOTData;
@@ -1495,6 +1506,13 @@ typedef struct {
   /// `FlutterProjectArgs`.
   const char* const* dart_entrypoint_argv;
 
+  // Logging callback for Dart application messages.
+  //
+  // This callback is used by embedder to log print messages from the running
+  // Flutter application. This callback is made on an internal engine managed
+  // thread and embedders must re-thread if necessary. Performing blocking calls
+  // in this callback may introduce application jank.
+  FlutterLogMessageCallback log_message_callback;
 } FlutterProjectArgs;
 
 #ifndef FLUTTER_ENGINE_NO_PROTOTYPES

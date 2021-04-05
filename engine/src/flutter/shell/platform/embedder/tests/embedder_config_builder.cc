@@ -99,6 +99,7 @@ EmbedderConfigBuilder::EmbedderConfigBuilder(
     SetAssetsPath();
     SetIsolateCreateCallbackHook();
     SetSemanticsCallbackHooks();
+    SetLogMessageCallbackHook();
     SetLocalizationCallbackHooks();
     AddCommandLineArgument("--disable-observatory");
 
@@ -209,6 +210,11 @@ void EmbedderConfigBuilder::SetSemanticsCallbackHooks() {
       EmbedderTestContext::GetUpdateSemanticsNodeCallbackHook();
   project_args_.update_semantics_custom_action_callback =
       EmbedderTestContext::GetUpdateSemanticsCustomActionCallbackHook();
+}
+
+void EmbedderConfigBuilder::SetLogMessageCallbackHook() {
+  project_args_.log_message_callback =
+      EmbedderTestContext::GetLogMessageCallbackHook();
 }
 
 void EmbedderConfigBuilder::SetLocalizationCallbackHooks() {

@@ -497,6 +497,14 @@ Application::Application(
   settings_.task_observer_remove = std::bind(
       &CurrentMessageLoopRemoveAfterTaskObserver, std::placeholders::_1);
 
+  settings_.log_message_callback = [](const std::string& tag,
+                                      const std::string& message) {
+    if (tag.size() > 0) {
+      std::cout << tag << ": ";
+    }
+    std::cout << message << std::endl;
+  };
+
   settings_.dart_flags = {"--no_causal_async_stacks", "--lazy_async_stacks"};
 
   // Don't collect CPU samples from Dart VM C++ code.

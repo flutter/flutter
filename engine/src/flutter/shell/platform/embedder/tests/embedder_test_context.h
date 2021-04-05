@@ -27,6 +27,8 @@ namespace testing {
 using SemanticsNodeCallback = std::function<void(const FlutterSemanticsNode*)>;
 using SemanticsActionCallback =
     std::function<void(const FlutterSemanticsCustomAction*)>;
+using LogMessageCallback =
+    std::function<void(const char* tag, const char* message)>;
 
 struct AOTDataDeleter {
   void operator()(FlutterEngineAOTData aot_data) {
@@ -77,6 +79,8 @@ class EmbedderTestContext {
   void SetPlatformMessageCallback(
       const std::function<void(const FlutterPlatformMessage*)>& callback);
 
+  void SetLogMessageCallback(const LogMessageCallback& log_message_callback);
+
   std::future<sk_sp<SkImage>> GetNextSceneImage();
 
   EmbedderTestCompositor& GetCompositor();
@@ -104,6 +108,7 @@ class EmbedderTestContext {
   SemanticsNodeCallback update_semantics_node_callback_;
   SemanticsActionCallback update_semantics_custom_action_callback_;
   std::function<void(const FlutterPlatformMessage*)> platform_message_callback_;
+  LogMessageCallback log_message_callback_;
   std::unique_ptr<EmbedderTestCompositor> compositor_;
   NextSceneCallback next_scene_callback_;
   SkMatrix root_surface_transformation_;
@@ -115,6 +120,8 @@ class EmbedderTestContext {
 
   static FlutterUpdateSemanticsCustomActionCallback
   GetUpdateSemanticsCustomActionCallbackHook();
+
+  static FlutterLogMessageCallback GetLogMessageCallbackHook();
 
   static FlutterComputePlatformResolvedLocaleCallback
   GetComputePlatformResolvedLocaleCallbackHook();

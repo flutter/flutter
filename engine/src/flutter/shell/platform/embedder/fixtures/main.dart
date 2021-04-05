@@ -876,6 +876,11 @@ void render_targets_are_recycled() {
 void nativeArgumentsCallback(List<String> args) native 'NativeArgumentsCallback';
 
 @pragma('vm:entry-point')
+void custom_logger(List<String> args) {
+  print("hello world");
+}
+
+@pragma('vm:entry-point')
 void dart_entrypoint_args(List<String> args) {
   nativeArgumentsCallback(args);
 }
