@@ -8,7 +8,7 @@
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/keyboard_key_channel_handler.h"
 #include "flutter/shell/platform/windows/keyboard_key_handler.h"
-#include "flutter/shell/platform/windows/testing/engine_embedder_api_modifier.h"
+#include "flutter/shell/platform/windows/testing/engine_modifier.h"
 #include "flutter/shell/platform/windows/testing/flutter_window_win32_test.h"
 #include "flutter/shell/platform/windows/testing/mock_window_binding_handler.h"
 #include "flutter/shell/platform/windows/text_input_plugin.h"
@@ -247,7 +247,7 @@ std::unique_ptr<FlutterWindowsEngine> GetTestEngine() {
   FlutterProjectBundle project(properties);
   auto engine = std::make_unique<FlutterWindowsEngine>(project);
 
-  EngineEmbedderApiModifier modifier(engine.get());
+  EngineModifier modifier(engine.get());
   // Force the non-AOT path unless overridden by the test.
   modifier.embedder_api().RunsAOTCompiledDartCode = []() { return false; };
 

@@ -12,10 +12,9 @@ namespace flutter {
 // This simply provides a way to access the normally-private embedder proc
 // table, so the lifetime of any changes made to the proc table is that of the
 // engine object, not this helper.
-class EngineEmbedderApiModifier {
+class EngineModifier {
  public:
-  explicit EngineEmbedderApiModifier(FlutterWindowsEngine* engine)
-      : engine_(engine) {}
+  explicit EngineModifier(FlutterWindowsEngine* engine) : engine_(engine) {}
 
   // Returns the engine's embedder API proc table, allowing for modification.
   //

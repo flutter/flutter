@@ -216,7 +216,7 @@ executable("flutter_windows_unittests") {
     # "flutter_windows_engine_unittests.cc", //TODO failing to send / receive platform message get plugins working first.  Blocked on https://github.com/flutter/flutter/issues/74155
     "string_conversion_unittests.cc",
     "system_utils_unittests.cc",
-    "testing/engine_embedder_api_modifier.h",
+    "testing/engine_modifier.h",
   ]
 
   # Target-specific sources.

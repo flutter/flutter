@@ -140,7 +140,7 @@ class FlutterWindowsEngine {
 
  private:
   // Allows swapping out embedder_api_ calls in tests.
-  friend class EngineEmbedderApiModifier;
+  friend class EngineModifier;
 
   // Sends system settings (e.g., locale) to the engine.
   //
