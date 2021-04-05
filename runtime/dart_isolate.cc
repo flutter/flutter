@@ -331,6 +331,7 @@ DartIsolate::DartIsolate(
                   advisory_script_entrypoint,
                   settings.log_tag,
                   settings.unhandled_exception_callback,
+                  settings.log_message_callback,
                   DartVMRef::GetIsolateNameServer(),
                   is_root_isolate,
                   std::move(volatile_path_tracker),

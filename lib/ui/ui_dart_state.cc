@@ -4,10 +4,21 @@
 
 #include "flutter/lib/ui/ui_dart_state.h"
 
+#include <iostream>
+
 #include "flutter/fml/message_loop.h"
 #include "flutter/lib/ui/window/platform_configuration.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_message_handler.h"
+
+#if defined(OS_ANDROID)
+#include <android/log.h>
+#elif defined(OS_IOS)
+extern "C" {
+// Cannot import the syslog.h header directly because of macro collision.
+extern void syslog(int, const char*, ...);
+}
+#endif
 
 using tonic::ToDart;
 
@@ -26,6 +37,7 @@ UIDartState::UIDartState(
     std::string advisory_script_entrypoint,
     std::string logger_prefix,
     UnhandledExceptionCallback unhandled_exception_callback,
+    LogMessageCallback log_message_callback,
     std::shared_ptr<IsolateNameServer> isolate_name_server,
     bool is_root_isolate,
     std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
@@ -44,6 +56,7 @@ UIDartState::UIDartState(
       logger_prefix_(std::move(logger_prefix)),
       is_root_isolate_(is_root_isolate),
       unhandled_exception_callback_(unhandled_exception_callback),
+      log_message_callback_(log_message_callback),
       isolate_name_server_(std::move(isolate_name_server)),
       enable_skparagraph_(enable_skparagraph) {
   AddOrRemoveTaskObserver(true /* add */);
@@ -185,6 +198,32 @@ void UIDartState::ReportUnhandledException(const std::string& error,
   // just log the exception.
   FML_LOG(ERROR) << "Unhandled Exception: " << error << std::endl
                  << stack_trace;
+}
+
+void UIDartState::LogMessage(const std::string& tag,
+                             const std::string& message) const {
+  if (log_message_callback_) {
+    log_message_callback_(tag, message);
+  } else {
+    // Fall back to previous behavior if unspecified.
+#if defined(OS_ANDROID)
+    __android_log_print(ANDROID_LOG_INFO, tag.c_str(), "%.*s",
+                        (int)message.size(), message.c_str());
+#elif defined(OS_IOS)
+    std::stringstream stream;
+    if (tag.size() > 0) {
+      stream << tag << ": ";
+    }
+    stream << message;
+    std::string log = stream.str();
+    syslog(1 /* LOG_ALERT */, "%.*s", (int)log.size(), log.c_str());
+#else
+    if (tag.size() > 0) {
+      std::cout << tag << ": ";
+    }
+    std::cout << message << std::endl;
+#endif
+  }
 }
 
 bool UIDartState::enable_skparagraph() const {
