@@ -1,4 +1,4 @@
-Signature: cd8aff7e63f3345d63632d5e4e89f4fb
+Signature: 768aab4e6e70fac4b6315a53674ca0f0
 
 UNUSED LICENSES:
 
@@ -1366,6 +1366,33 @@ FILE: ../../../third_party/skia/public.bzl
 FILE: ../../../third_party/skia/site/_index.html
 FILE: ../../../third_party/skia/site/about/_index.html
 FILE: ../../../third_party/skia/site/config.toml
+FILE: ../../../third_party/skia/site/docs/dev/contrib/SuggestedReviewers.png
+FILE: ../../../third_party/skia/site/docs/dev/design/PdfLogicalDocumentStructure.png
+FILE: ../../../third_party/skia/site/docs/dev/design/conical/corollary2.2.1.svg
+FILE: ../../../third_party/skia/site/docs/dev/design/conical/corollary2.2.2.svg
+FILE: ../../../third_party/skia/site/docs/dev/design/conical/corollary2.3.1.svg
+FILE: ../../../third_party/skia/site/docs/dev/design/conical/corollary2.3.2.svg
+FILE: ../../../third_party/skia/site/docs/dev/design/conical/corollary2.3.3.svg
+FILE: ../../../third_party/skia/site/docs/dev/design/conical/lemma1.svg
+FILE: ../../../third_party/skia/site/docs/dev/design/conical/lemma3.1.svg
+FILE: ../../../third_party/skia/site/docs/dev/design/conical/lemma3.2.svg
+FILE: ../../../third_party/skia/site/docs/dev/design/conical/lemma4.svg
+FILE: ../../../third_party/skia/site/docs/dev/tools/buttons.png
+FILE: ../../../third_party/skia/site/docs/dev/tools/crosshair.png
+FILE: ../../../third_party/skia/site/docs/dev/tools/debugger.png
+FILE: ../../../third_party/skia/site/docs/dev/tools/end.png
+FILE: ../../../third_party/skia/site/docs/dev/tools/expand.png
+FILE: ../../../third_party/skia/site/docs/dev/tools/frameplayback.png
+FILE: ../../../third_party/skia/site/docs/dev/tools/gpuop.png
+FILE: ../../../third_party/skia/site/docs/dev/tools/image.png
+FILE: ../../../third_party/skia/site/docs/dev/tools/layers.png
+FILE: ../../../third_party/skia/site/docs/dev/tools/onlinedebugger.png
+FILE: ../../../third_party/skia/site/docs/dev/tools/playcommands.png
+FILE: ../../../third_party/skia/site/docs/dev/tools/resources.png
+FILE: ../../../third_party/skia/site/docs/dev/tools/settings.png
+FILE: ../../../third_party/skia/site/docs/dev/tools/tracing.png
+FILE: ../../../third_party/skia/site/docs/dev/tools/tracing_load.png
+FILE: ../../../third_party/skia/site/docs/user/modules/PathKit_effects.png
 FILE: ../../../third_party/skia/site/featured-background.png
 FILE: ../../../third_party/skia/specs/web-img-decode/current/index.html
 FILE: ../../../third_party/skia/specs/web-img-decode/proposed/impl/impl.js
@@ -5096,6 +5123,8 @@ FILE: ../../../third_party/skia/src/sksl/ir/SkSLConstructorArray.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLConstructorArray.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLConstructorDiagonalMatrix.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLConstructorDiagonalMatrix.h
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLConstructorScalarCast.cpp
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLConstructorScalarCast.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLConstructorSplat.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLConstructorSplat.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLDoStatement.cpp
