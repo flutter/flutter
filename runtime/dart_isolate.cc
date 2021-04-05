@@ -447,7 +447,6 @@ void DartIsolate::SetMessageHandlingTaskRunner(
   message_handling_task_runner_ = runner;
 
   message_handler().Initialize([runner](std::function<void()> task) {
-    TRACE_EVENT0("flutter", "DartIsolate::PostMessage");
     runner->PostTask([task = std::move(task)]() {
       TRACE_EVENT0("flutter", "DartIsolate::HandleMessage");
       task();
