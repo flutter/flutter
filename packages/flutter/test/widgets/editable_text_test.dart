@@ -2717,6 +2717,24 @@ void main() {
     semantics.dispose();
   });
 
+  // TODO(chunhtai): remove this test once we resolve
+  //  https://github.com/flutter/flutter/issues/79818
+  testWidgets('editable text state throws if userUpdateTextEditingValue is called without context', (WidgetTester tester) async {
+    final EditableTextState state = EditableTextState();
+    bool hasAssertion = false;
+    try {
+      state.userUpdateTextEditingValue(TextEditingValue.empty, null);
+    } on AssertionError catch(e) {
+      hasAssertion = true;
+      expect(
+        e.message,
+        'current context or render editable should not be null when '
+        'update text editing value'
+      );
+    }
+    expect(hasAssertion, isTrue);
+  });
+
   testWidgets('password fields become obscured with the right semantics when set', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 

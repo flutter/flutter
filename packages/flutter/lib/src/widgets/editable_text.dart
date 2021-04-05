@@ -2484,6 +2484,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause? cause) {
+    // TODO(chunhtai): Figure out why context or renderEditable can be null
+    // https://github.com/flutter/flutter/issues/79818.
+    if (_editableKey.currentContext == null || _editableKey.currentContext!.findRenderObject() == null) {
+      assert(
+        false,
+        'current context or render editable should not be null when '
+        'update text editing value'
+      );
+      return;
+    }
     // Compare the current TextEditingValue with the pre-format new
     // TextEditingValue value, in case the formatter would reject the change.
     final bool shouldShowCaret = widget.readOnly
