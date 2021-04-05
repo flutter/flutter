@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
-
 import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/platform.dart';
@@ -16,7 +12,7 @@ import '../intellij/intellij.dart';
 import 'android_studio.dart';
 
 class AndroidStudioValidator extends DoctorValidator {
-  AndroidStudioValidator(this._studio, { @required FileSystem fileSystem })
+  AndroidStudioValidator(this._studio, { required FileSystem fileSystem })
     : _fileSystem = fileSystem,
       super('Android Studio');
 
@@ -40,27 +36,29 @@ class AndroidStudioValidator extends DoctorValidator {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType type = ValidationType.missing;
 
-    final String studioVersionText = _studio.version == Version.unknown
+    final String? studioVersionText = _studio.version == Version.unknown
       ? null
       : userMessages.androidStudioVersion(_studio.version.toString());
     messages.add(ValidationMessage(
       userMessages.androidStudioLocation(_studio.directory),
     ));
 
-    final IntelliJPlugins plugins = IntelliJPlugins(_studio.pluginsPath, fileSystem: _fileSystem);
-    plugins.validatePackage(
-      messages,
-      <String>['flutter-intellij', 'flutter-intellij.jar'],
-      'Flutter',
-      IntelliJPlugins.kIntellijFlutterPluginUrl,
-      minVersion: IntelliJPlugins.kMinFlutterPluginVersion,
-    );
-    plugins.validatePackage(
-      messages,
-      <String>['Dart'],
-      'Dart',
-      IntelliJPlugins.kIntellijDartPluginUrl,
-    );
+    if (_studio.pluginsPath != null) {
+      final IntelliJPlugins plugins = IntelliJPlugins(_studio.pluginsPath!, fileSystem: _fileSystem);
+      plugins.validatePackage(
+        messages,
+        <String>['flutter-intellij', 'flutter-intellij.jar'],
+        'Flutter',
+        IntelliJPlugins.kIntellijFlutterPluginUrl,
+        minVersion: IntelliJPlugins.kMinFlutterPluginVersion,
+      );
+      plugins.validatePackage(
+        messages,
+        <String>['Dart'],
+        'Dart',
+        IntelliJPlugins.kIntellijDartPluginUrl,
+      );
+    }
 
     if (_studio.isValid) {
       type = _hasIssues(messages)
@@ -90,9 +88,9 @@ class AndroidStudioValidator extends DoctorValidator {
 
 class NoAndroidStudioValidator extends DoctorValidator {
   NoAndroidStudioValidator({
-    @required Config config,
-    @required Platform platform,
-    @required UserMessages userMessages,
+    required Config config,
+    required Platform platform,
+    required UserMessages userMessages,
   }) : _config = config,
        _platform = platform,
        _userMessages = userMessages,

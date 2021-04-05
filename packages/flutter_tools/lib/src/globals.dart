@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'android/android_sdk.dart';
 import 'android/gradle_utils.dart';
 import 'artifacts.dart';
 import 'base/bot_detector.dart';
@@ -51,7 +50,6 @@ CocoaPodsValidator get cocoapodsValidator => context.get<CocoaPodsValidator>();
 
 LocalEngineLocator get localEngineLocator => context.get<LocalEngineLocator>();
 
-AndroidSdk get androidSdk => context.get<AndroidSdk>();
 CocoaPods get cocoaPods => context.get<CocoaPods>();
 FlutterVersion get flutterVersion => context.get<FlutterVersion>();
 FuchsiaArtifacts get fuchsiaArtifacts => context.get<FuchsiaArtifacts>();

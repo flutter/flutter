@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
-
 import '../base/platform.dart';
 import '../doctor_validator.dart';
 import '../features.dart';
@@ -16,8 +12,8 @@ import '../features.dart';
 /// repository to the flutter repo.
 class LinuxWorkflow implements Workflow {
   const LinuxWorkflow({
-    @required Platform platform,
-    @required FeatureFlags featureFlags,
+    required Platform platform,
+    required FeatureFlags featureFlags,
   }) : _platform = platform,
        _featureFlags = featureFlags;
 
