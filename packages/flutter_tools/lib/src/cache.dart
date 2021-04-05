@@ -105,7 +105,7 @@ class Cache {
   /// [artifacts] is configurable for testing.
   Cache({
     @protected Directory rootOverride,
-    @required List<ArtifactSet> artifacts,
+    @protected List<ArtifactSet> artifacts,
     @required Logger logger,
     @required FileSystem fileSystem,
     @required Platform platform,
