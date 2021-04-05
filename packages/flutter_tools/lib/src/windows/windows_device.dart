@@ -78,7 +78,7 @@ class WindowsUWPDevice extends DesktopDevice {
     @required FileSystem fileSystem,
     @required OperatingSystemUtils operatingSystemUtils,
   }) : super(
-      'windows-uwp',
+      'winuwp',
       platformType: PlatformType.windows,
       ephemeral: false,
       processManager: processManager,
@@ -88,7 +88,7 @@ class WindowsUWPDevice extends DesktopDevice {
   );
 
   @override
-  bool isSupported() => false;
+  bool isSupported() => true;
 
   @override
   String get name => 'Windows (UWP)';
@@ -100,7 +100,7 @@ class WindowsUWPDevice extends DesktopDevice {
   bool isSupportedForProject(FlutterProject flutterProject) {
     // TODO(flutter): update with detection once FlutterProject knows
     // about the UWP structure.
-    return false;
+    return true;
   }
 
   @override
@@ -109,8 +109,8 @@ class WindowsUWPDevice extends DesktopDevice {
     String mainPath,
     BuildInfo buildInfo,
   }) async {
-    await buildWindows(
-      FlutterProject.current().windows,
+    await buildWindowsUwp(
+      FlutterProject.current().windowsUwp,
       buildInfo,
       target: mainPath,
     );

@@ -435,12 +435,16 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
 
     if (child != null) {
       child!.layout(constraints.loosen(), parentUsesSize: true);
-      size = constraints.constrain(Size(shrinkWrapWidth ? child!.size.width * (_widthFactor ?? 1.0) : double.infinity,
-                                        shrinkWrapHeight ? child!.size.height * (_heightFactor ?? 1.0) : double.infinity));
+      size = constraints.constrain(Size(
+        shrinkWrapWidth ? child!.size.width * (_widthFactor ?? 1.0) : double.infinity,
+        shrinkWrapHeight ? child!.size.height * (_heightFactor ?? 1.0) : double.infinity,
+      ));
       alignChild();
     } else {
-      size = constraints.constrain(Size(shrinkWrapWidth ? 0.0 : double.infinity,
-                                        shrinkWrapHeight ? 0.0 : double.infinity));
+      size = constraints.constrain(Size(
+        shrinkWrapWidth ? 0.0 : double.infinity,
+        shrinkWrapHeight ? 0.0 : double.infinity,
+      ));
     }
   }
 
@@ -801,8 +805,14 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
       super.paint(context, offset);
     } else {
       // We have overflow and the clipBehavior isn't none. Clip it.
-      _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, super.paint,
-          clipBehavior: clipBehavior, oldLayer:_clipRectLayer);
+      _clipRectLayer = context.pushClipRect(
+        needsCompositing,
+        offset,
+        Offset.zero & size,
+        super.paint,
+        clipBehavior: clipBehavior,
+        oldLayer:_clipRectLayer,
+      );
     }
 
     // Display the overflow indicator.

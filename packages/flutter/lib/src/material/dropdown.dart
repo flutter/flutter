@@ -88,21 +88,6 @@ class _DropdownMenuPainter extends CustomPainter {
   }
 }
 
-// Do not use the platform-specific default scroll configuration.
-// Dropdown menus should never overscroll or display an overscroll indicator.
-class _DropdownScrollBehavior extends ScrollBehavior {
-  const _DropdownScrollBehavior();
-
-  @override
-  TargetPlatform getPlatform(BuildContext context) => Theme.of(context).platform;
-
-  @override
-  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) => child;
-
-  @override
-  ScrollPhysics getScrollPhysics(BuildContext context) => const ClampingScrollPhysics();
-}
-
 // The widget that is the button wrapping the menu items.
 class _DropdownMenuItemButton<T> extends StatefulWidget {
   const _DropdownMenuItemButton({
@@ -289,7 +274,14 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
             type: MaterialType.transparency,
             textStyle: route.style,
             child: ScrollConfiguration(
-              behavior: const _DropdownScrollBehavior(),
+              // Dropdown menus should never overscroll or display an overscroll indicator.
+              // The default scrollbar platforms will apply.
+              // Platform must use Theme and ScrollPhysics must be Clamping.
+              behavior: ScrollConfiguration.of(context).copyWith(
+                overscroll: false,
+                physics: const ClampingScrollPhysics(),
+                platform: Theme.of(context).platform,
+              ),
               child: PrimaryScrollController(
                 controller: widget.route.scrollController!,
                 child: Scrollbar(

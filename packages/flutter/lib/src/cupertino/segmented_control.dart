@@ -612,11 +612,17 @@ class _RenderSegmentedControl<T> extends RenderBox
       final Rect childRect = Rect.fromLTWH(start, 0.0, child.size.width, child.size.height);
       final RRect rChildRect;
       if (child == leftChild) {
-        rChildRect = RRect.fromRectAndCorners(childRect, topLeft: const Radius.circular(3.0),
-            bottomLeft: const Radius.circular(3.0));
+        rChildRect = RRect.fromRectAndCorners(
+          childRect,
+          topLeft: const Radius.circular(3.0),
+          bottomLeft: const Radius.circular(3.0),
+        );
       } else if (child == rightChild) {
-        rChildRect = RRect.fromRectAndCorners(childRect, topRight: const Radius.circular(3.0),
-            bottomRight: const Radius.circular(3.0));
+        rChildRect = RRect.fromRectAndCorners(
+          childRect,
+          topRight: const Radius.circular(3.0),
+          bottomRight: const Radius.circular(3.0),
+        );
       } else {
         rChildRect = RRect.fromRectAndCorners(childRect);
       }

@@ -859,18 +859,24 @@ void main() {
   );
 
   testWidgets('cursor layout has correct width', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController.fromValue(
+      const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
+    );
+    final FocusNode focusNode = FocusNode();
     EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
         overlay(
-          child: const RepaintBoundary(
+          child: RepaintBoundary(
             child: TextField(
               cursorWidth: 15.0,
+              controller: controller,
+              focusNode: focusNode,
             ),
           ),
         )
     );
-    await tester.enterText(find.byType(TextField), ' ');
-    await skipPastScrollingAnimation(tester);
+    focusNode.requestFocus();
+    await tester.pump();
 
     await expectLater(
       find.byType(TextField),
@@ -880,19 +886,25 @@ void main() {
   });
 
   testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController.fromValue(
+      const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
+    );
+    final FocusNode focusNode = FocusNode();
     EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
         overlay(
-          child: const RepaintBoundary(
+          child: RepaintBoundary(
             child: TextField(
               cursorWidth: 15.0,
-              cursorRadius: Radius.circular(3.0),
+              cursorRadius: const Radius.circular(3.0),
+              controller: controller,
+              focusNode: focusNode,
             ),
           ),
         )
     );
-    await tester.enterText(find.byType(TextField), ' ');
-    await skipPastScrollingAnimation(tester);
+    focusNode.requestFocus();
+    await tester.pump();
 
     await expectLater(
       find.byType(TextField),
@@ -902,19 +914,25 @@ void main() {
   });
 
   testWidgets('cursor layout has correct height', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController.fromValue(
+      const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
+    );
+    final FocusNode focusNode = FocusNode();
     EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
         overlay(
-          child: const RepaintBoundary(
+          child: RepaintBoundary(
             child: TextField(
               cursorWidth: 15.0,
               cursorHeight: 30.0,
+              controller: controller,
+              focusNode: focusNode,
             ),
           ),
         )
     );
-    await tester.enterText(find.byType(TextField), ' ');
-    await skipPastScrollingAnimation(tester);
+    focusNode.requestFocus();
+    await tester.pump();
 
     await expectLater(
       find.byType(TextField),
@@ -1126,8 +1144,8 @@ void main() {
     await tester.tapAt(ePos);
     await tester.pump();
 
-    expect(controller.selection.baseOffset, -1);
-    expect(controller.selection.extentOffset, -1);
+    expect(controller.selection.baseOffset, testValue.length);
+    expect(controller.selection.isCollapsed, isTrue);
   });
 
   testWidgets('Can long press to select', (WidgetTester tester) async {
@@ -1599,8 +1617,7 @@ void main() {
     await tester.pump();
 
     expect(controller.selection.isCollapsed, true);
-    expect(controller.selection.baseOffset, -1);
-    expect(controller.selection.extentOffset, -1);
+    expect(controller.selection.baseOffset, testValue.length);
   });
 
   testWidgets('Can select text by dragging with a mouse', (WidgetTester tester) async {
@@ -5238,7 +5255,8 @@ void main() {
     const String testValue = 'x';
     await tester.enterText(find.byType(TextField), testValue);
     await skipPastScrollingAnimation(tester);
-    expect(controller.selection.baseOffset, -1);
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, testValue.length);
 
     // Tap the selection handle to bring up the "paste / select all" menu.
     await tester.tapAt(textOffsetToPosition(tester, 0));
