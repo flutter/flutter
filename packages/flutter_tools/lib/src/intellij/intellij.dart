@@ -10,7 +10,7 @@ import 'package:meta/meta.dart';
 import '../base/file_system.dart';
 import '../base/version.dart';
 import '../convert.dart';
-import '../doctor.dart';
+import '../doctor_validator.dart';
 
 /// A parser for the Intellij and Android Studio plugin JAR files.
 ///

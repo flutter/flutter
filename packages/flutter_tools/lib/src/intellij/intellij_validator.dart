@@ -10,7 +10,7 @@ import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../base/user_messages.dart' hide userMessages;
 import '../base/version.dart';
-import '../doctor.dart';
+import '../doctor_validator.dart';
 import '../ios/plist_parser.dart';
 import 'intellij.dart';
 
