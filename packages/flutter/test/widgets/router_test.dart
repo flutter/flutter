@@ -746,7 +746,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
                 Text(information!.location!),
                 BackButtonListener(
                   child: Container(),
-                  onBackPressed: () {
+                  onBackButtonPressed: () {
                       provider.value = const RouteInformation(
                         location: 'popped inner1',
                       );
@@ -788,7 +788,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
                 Text(information!.location!),
                 BackButtonListener(
                   child: Container(),
-                  onBackPressed: () {
+                  onBackButtonPressed: () {
                       provider.value = const RouteInformation(
                         location: 'first callback',
                       );
@@ -822,7 +822,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
             Text(information!.location!),
             BackButtonListener(
               child: Container(),
-              onBackPressed: () {
+              onBackButtonPressed: () {
                   provider.value = const RouteInformation(
                     location: 'second callback',
                   );
@@ -867,7 +867,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
                 Text(information!.location!),
                 BackButtonListener(
                   child: Container(),
-                  onBackPressed: () {
+                  onBackButtonPressed: () {
                       provider.value = const RouteInformation(
                         location: 'first callback',
                       );
@@ -943,14 +943,14 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
                 BackButtonListener(
                   child: BackButtonListener(
                     child: Container(),
-                    onBackPressed: () {
+                    onBackButtonPressed: () {
                       provider.value = const RouteInformation(
                         location: 'popped inner2',
                       );
                       return SynchronousFuture<bool>(true);
                     },
                   ),
-                  onBackPressed: () {
+                  onBackButtonPressed: () {
                       provider.value = const RouteInformation(
                         location: 'popped inner1',
                       );
@@ -998,14 +998,14 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
                 BackButtonListener(
                   child: BackButtonListener(
                     child: Container(),
-                    onBackPressed: () {
+                    onBackButtonPressed: () {
                       provider.value = const RouteInformation(
                         location: 'popped inner2',
                       );
                       return SynchronousFuture<bool>(false);
                     },
                   ),
-                  onBackPressed: () {
+                  onBackButtonPressed: () {
                       provider.value = const RouteInformation(
                         location: 'popped inner1',
                       );
