@@ -48,9 +48,10 @@ void main() {
     await tester.pumpWidget(
       wrap(
         child: Theme(
-          data: ThemeData(iconTheme: const IconThemeData(size: 10)),
+          data: ThemeData(iconTheme: const IconThemeData(size: 80)),
           child: IconButton(
             onPressed: mockOnPressedFunction.handler,
+            padding: EdgeInsets.zero,
             icon: const Icon(Icons.link),
           ),
         ),
@@ -58,7 +59,7 @@ void main() {
     );
 
     final RenderBox iconButton = tester.renderObject(find.byType(IconButton));
-    expect(iconButton.size, const Size(48.0, 48.0));
+    expect(iconButton.size, const Size(80.0, 80.0));
 
     await tester.tap(find.byType(IconButton));
     expect(mockOnPressedFunction.called, 1);
