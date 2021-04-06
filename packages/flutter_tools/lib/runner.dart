@@ -96,6 +96,9 @@ Future<int> _handleToolError(
   bool reportCrashes,
   String Function() getFlutterVersion,
 ) async {
+  if (verbose) {
+    print(stackTrace);
+  }
   if (error is UsageException) {
     globals.printError('${error.message}\n');
     globals.printError("Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.");
