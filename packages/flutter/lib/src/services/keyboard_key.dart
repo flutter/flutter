@@ -306,7 +306,7 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// It is used, for example, to make sets of keys with members like
   /// [controlRight] and [controlLeft] and convert that set to contain just
   /// [control], so that the question "is any control key down?" can be asked.
-  static Set<LogicalKeyboardKey> collapseSynonyms(Iterable<LogicalKeyboardKey> input) {
+  static Set<LogicalKeyboardKey> collapseSynonyms(Set<LogicalKeyboardKey> input) {
     final Set<LogicalKeyboardKey> result = <LogicalKeyboardKey>{};
     for (final LogicalKeyboardKey key in input) {
       final LogicalKeyboardKey? synonym = _synonyms[key];
@@ -321,8 +321,6 @@ class LogicalKeyboardKey extends KeyboardKey {
     properties.add(StringProperty('keyId', '0x${keyId.toRadixString(16).padLeft(8, '0')}', showName: true));
     properties.add(StringProperty('debugName', debugName, showName: true, defaultValue: null));
   }
-
-  static final Map<int, LogicalKeyboardKey> _additionalKeyPool = <int, LogicalKeyboardKey>{};
 
   /// Mask for the 32-bit value portion of the key code.
   ///
@@ -355,7 +353,6 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// The code prefix for keys which have a Unicode representation.
   ///
   /// This is used by platform-specific code to generate Flutter key codes.
-  ///
   static const int unicodePlane = 0x00000000000;
 
   /// The code prefix for keys which do not have a Unicode representation.
@@ -2445,8 +2442,6 @@ class PhysicalKeyboardKey extends KeyboardKey {
     properties.add(StringProperty('usbHidUsage', '0x${usbHidUsage.toRadixString(16).padLeft(8, '0')}', showName: true));
     properties.add(StringProperty('debugName', debugName, showName: true, defaultValue: null));
   }
-
-  static final Map<int, PhysicalKeyboardKey> _additionalKeyPool = <int, PhysicalKeyboardKey>{};
 
   // Key constants for all keyboard keys in the USB HID specification at the
   // time Flutter was built.

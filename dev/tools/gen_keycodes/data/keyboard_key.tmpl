@@ -322,8 +322,6 @@ class LogicalKeyboardKey extends KeyboardKey {
     properties.add(StringProperty('debugName', debugName, showName: true, defaultValue: null));
   }
 
-  static final Map<int, LogicalKeyboardKey> _additionalKeyPool = <int, LogicalKeyboardKey>{};
-
   /// Mask for the 32-bit value portion of the key code.
   ///
   /// This is used by platform-specific code to generate Flutter key codes.
@@ -518,8 +516,6 @@ class PhysicalKeyboardKey extends KeyboardKey {
     properties.add(StringProperty('usbHidUsage', '0x${usbHidUsage.toRadixString(16).padLeft(8, '0')}', showName: true));
     properties.add(StringProperty('debugName', debugName, showName: true, defaultValue: null));
   }
-
-  static final Map<int, PhysicalKeyboardKey> _additionalKeyPool = <int, PhysicalKeyboardKey>{};
 
   // Key constants for all keyboard keys in the USB HID specification at the
   // time Flutter was built.
