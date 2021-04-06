@@ -54,6 +54,26 @@ DeviceDiscovery get devices => DeviceDiscovery();
 /// Device operating system the test is configured to test.
 enum DeviceOperatingSystem { android, androidArm, androidArm64 ,ios, fuchsia, fake }
 
+/// Helper function to allow passing the target platform as a task arg instead
+/// of hardcoding it in the task.
+DeviceOperatingSystem deviceOperatingSystemFromString(String os) {
+  switch (os) {
+    case 'android':
+      return DeviceOperatingSystem.android;
+    case 'android_arm':
+      return DeviceOperatingSystem.androidArm;
+    case 'android_arm64':
+      return DeviceOperatingSystem.androidArm64;
+    case 'fake':
+      return DeviceOperatingSystem.fake;
+    case 'fuchsia':
+      return DeviceOperatingSystem.fuchsia;
+    case 'ios':
+      return DeviceOperatingSystem.ios;
+  }
+  throw UnimplementedError('$os is not defined in function deviceOperatingSystemFromString');
+}
+
 /// Device OS to test on.
 DeviceOperatingSystem deviceOperatingSystem = DeviceOperatingSystem.android;
 

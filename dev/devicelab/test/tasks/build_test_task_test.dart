@@ -11,7 +11,7 @@ void main() {
   final Map<String, String> isolateParams = <String, String>{
     'runFlutterConfig': 'false',
     'runProcessCleanup': 'false',
-    'timeoutInMinutes': '1',
+    'timeoutInSeconds': '5',
   };
 
   test('runs build and test when no args are passed', () async {
@@ -61,5 +61,24 @@ void main() {
       isolateParams: isolateParams,
     );
     expect(result.message, 'Task failed: Exception: Application binary path is only used for tests');
+  });
+
+  test('sets target platform when given', () async {
+    final TaskResult result = await runTask(
+      'smoke_test_build_test_target_platform',
+      taskArgs: <String>['--target-platform=fake'],
+      deviceId: 'FAKE_SUCCESS',
+      isolateParams: isolateParams,
+    );
+    expect(result.message, 'success');
+  });
+
+  test('defaults target platform to task deviceOperatingSystem', () async {
+    final TaskResult result = await runTask(
+      'smoke_test_build_test_target_platform',
+      deviceId: 'FAKE_SUCCESS',
+      isolateParams: isolateParams,
+    );
+    expect(result.message, 'Task failed: Exception: Only DeviceOperatingSystem.fake is supported');
   });
 }

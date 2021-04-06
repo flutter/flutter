@@ -20,6 +20,7 @@ import 'utils.dart';
 /// Identifiers for devices that should never be rebooted.
 final Set<String> noRebootForbidList = <String>{
   '822ef7958bba573829d85eef4df6cbdd86593730', // 32bit iPhone requires manual intervention on reboot.
+  'FAKE_SUCCESS', // Fake device id used in unit tests
 };
 
 /// The maximum number of test runs before a device must be rebooted.
@@ -61,8 +62,8 @@ class _TaskRunner {
   _TaskRunner(this.task) {
     registerExtension('ext.cocoonRunTask',
         (String method, Map<String, String> parameters) async {
-      final Duration taskTimeout = parameters.containsKey('timeoutInMinutes')
-        ? Duration(minutes: int.parse(parameters['timeoutInMinutes']))
+      final Duration taskTimeout = parameters.containsKey('timeoutInMinutes') || parameters.containsKey('timeoutInSeconds')
+        ? Duration(minutes: int.parse(parameters['timeoutInMinutes'] ?? '0'), seconds: int.parse(parameters['timeoutInSeconds'] ?? '0'))
         : null;
       // This is only expected to be passed in unit test runs so they do not
       // kill the Dart process that is running them and waste time running config.
@@ -170,8 +171,12 @@ class _TaskRunner {
       print(stackTrace);
       return TaskResult.failure('Task timed out after $taskTimeout');
     } finally {
-      await checkForRebootRequired();
-      await forceQuitRunningProcesses();
+      if (runProcessCleanup) {
+        await checkForRebootRequired();
+        await forceQuitRunningProcesses();
+      } else {
+        print('Skipped checkForRebootRequired and forceQuitRunningProcesses');
+      }
       _closeKeepAlivePort();
     }
   }

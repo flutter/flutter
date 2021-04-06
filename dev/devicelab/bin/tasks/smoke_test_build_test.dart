@@ -14,18 +14,23 @@ Future<void> main(List<String> args) async {
 }
 
 class FakeBuildTestTask extends BuildTestTask {
-  FakeBuildTestTask(List<String> args) : super(args, runFlutterClean: false) {
-    deviceOperatingSystem = DeviceOperatingSystem.fake;
-  }
+  FakeBuildTestTask(List<String> args) : super(args, runFlutterClean: false);
 
   @override
   // In prod, tasks always run some unit of work and the test framework assumes
   // there will be some work done when managing the isolate. To fake this, add a delay.
-  Future<void> build() => Future<void>.delayed(const Duration(milliseconds: 500));
+  Future<void> build() async {
+    if (targetPlatform != DeviceOperatingSystem.fake) {
+      throw Exception('Only DeviceOperatingSystem.fake is supported');
+    }
+  }
 
   @override
   Future<TaskResult> test() async {
-    await Future<void>.delayed(const Duration(milliseconds: 500));
+    if (targetPlatform != DeviceOperatingSystem.fake) {
+      throw Exception('Only DeviceOperatingSystem.fake is supported');
+    }
+
     return TaskResult.success(<String, String>{'benchmark': 'data'});
   }
 }
