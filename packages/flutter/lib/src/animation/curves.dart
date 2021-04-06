@@ -931,17 +931,21 @@ class CatmullRomCurve extends Curve {
           i < controlPoints.length - 2 &&
           (controlPoints[i].dx <= 0.0 || controlPoints[i].dx >= 1.0)) {
         assert(() {
-          reasons?.add('Control points must have X values between 0.0 and 1.0, exclusive. '
-              'Point $i has an x value (${controlPoints![i].dx}) which is outside the range.');
+          reasons?.add(
+            'Control points must have X values between 0.0 and 1.0, exclusive. '
+            'Point $i has an x value (${controlPoints![i].dx}) which is outside the range.',
+          );
           return true;
         }());
         return false;
       }
       if (controlPoints[i].dx <= lastX) {
         assert(() {
-          reasons?.add('Each X coordinate must be greater than the preceding X coordinate '
-              '(i.e. must be monotonically increasing in X). Point $i has an x value of '
-              '${controlPoints![i].dx}, which is not greater than $lastX');
+          reasons?.add(
+            'Each X coordinate must be greater than the preceding X coordinate '
+            '(i.e. must be monotonically increasing in X). Point $i has an x value of '
+            '${controlPoints![i].dx}, which is not greater than $lastX',
+          );
           return true;
         }());
         return false;
@@ -964,9 +968,11 @@ class CatmullRomCurve extends Curve {
       bool bail = true;
       success = false;
       assert(() {
-        reasons?.add('The curve has more than one Y value at X = ${samplePoints.first.value.dx}. '
-            'Try moving some control points further away from this value of X, or increasing '
-            'the tension.');
+        reasons?.add(
+          'The curve has more than one Y value at X = ${samplePoints.first.value.dx}. '
+          'Try moving some control points further away from this value of X, or increasing '
+          'the tension.',
+        );
         // No need to keep going if we're not giving reasons.
         bail = reasons == null;
         return true;
@@ -985,8 +991,10 @@ class CatmullRomCurve extends Curve {
         bool bail = true;
         success = false;
         assert(() {
-          reasons?.add('The resulting curve has an X value ($x) which is outside '
-              'the range [0.0, 1.0], inclusive.');
+          reasons?.add(
+            'The resulting curve has an X value ($x) which is outside '
+            'the range [0.0, 1.0], inclusive.',
+          );
           // No need to keep going if we're not giving reasons.
           bail = reasons == null;
           return true;
@@ -1001,8 +1009,10 @@ class CatmullRomCurve extends Curve {
         bool bail = true;
         success = false;
         assert(() {
-          reasons?.add('The curve has more than one Y value at x = $x. Try moving '
-            'some control points further apart in X, or increasing the tension.');
+          reasons?.add(
+            'The curve has more than one Y value at x = $x. Try moving '
+            'some control points further apart in X, or increasing the tension.',
+          );
           // No need to keep going if we're not giving reasons.
           bail = reasons == null;
           return true;

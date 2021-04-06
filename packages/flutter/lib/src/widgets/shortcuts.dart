@@ -347,11 +347,13 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
       return KeyEventResult.ignored;
     }
     assert(context != null);
-    assert(keysPressed != null || RawKeyboard.instance.keysPressed.isNotEmpty,
+    assert(
+      keysPressed != null || RawKeyboard.instance.keysPressed.isNotEmpty,
       'Received a key down event when no keys are in keysPressed. '
       "This state can occur if the key event being sent doesn't properly "
       'set its modifier flags. This was the event: $event and its data: '
-      '${event.data}');
+      '${event.data}',
+    );
     final Intent? matchedIntent = _find(keysPressed: keysPressed);
     if (matchedIntent != null) {
       final BuildContext primaryContext = primaryFocus!.context!;
@@ -622,13 +624,15 @@ class Shortcuts extends StatefulWidget {
     final _ShortcutsMarker? inherited = context.dependOnInheritedWidgetOfExactType<_ShortcutsMarker>();
     assert(() {
       if (inherited == null) {
-        throw FlutterError('Unable to find a $Shortcuts widget in the context.\n'
-            '$Shortcuts.of() was called with a context that does not contain a '
-            '$Shortcuts widget.\n'
-            'No $Shortcuts ancestor could be found starting from the context that was '
-            'passed to $Shortcuts.of().\n'
-            'The context used was:\n'
-            '  $context');
+        throw FlutterError(
+          'Unable to find a $Shortcuts widget in the context.\n'
+          '$Shortcuts.of() was called with a context that does not contain a '
+          '$Shortcuts widget.\n'
+          'No $Shortcuts ancestor could be found starting from the context that was '
+          'passed to $Shortcuts.of().\n'
+          'The context used was:\n'
+          '  $context',
+        );
       }
       return true;
     }());

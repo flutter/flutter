@@ -956,7 +956,6 @@ void main() {
     },
   );
 
-
   testWidgets('NavBar draws a light system bar for a dark background', (WidgetTester tester) async {
     await tester.pumpWidget(
       WidgetsApp(

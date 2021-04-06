@@ -741,6 +741,11 @@ String getWindowsBuildDirectory() {
   return globals.fs.path.join(getBuildDirectory(), 'windows');
 }
 
+/// Returns the Windows UWP build output directory.
+String getWindowsBuildUwpDirectory() {
+  return globals.fs.path.join(getBuildDirectory(), 'winuwp');
+}
+
 /// Returns the Fuchsia build output directory.
 String getFuchsiaBuildDirectory() {
   return globals.fs.path.join(getBuildDirectory(), 'fuchsia');

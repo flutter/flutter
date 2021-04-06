@@ -4,6 +4,7 @@
 
 import 'package:process/process.dart';
 
+import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
 import 'base/config.dart';
 import 'base/context.dart';
@@ -28,6 +29,7 @@ Logger get logger => context.get<Logger>()!;
 OperatingSystemUtils get os => context.get<OperatingSystemUtils>()!;
 Signals get signals => context.get<Signals>() ?? LocalSignals.instance;
 AndroidStudio? get androidStudio => context.get<AndroidStudio>();
+AndroidSdk? get androidSdk => context.get<AndroidSdk>();
 
 /// Currently active implementation of the file system.
 ///
