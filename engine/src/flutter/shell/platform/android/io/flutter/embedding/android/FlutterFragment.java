@@ -5,6 +5,7 @@
 package io.flutter.embedding.android;
 
 import android.app.Activity;
+import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -35,7 +36,6 @@ import io.flutter.plugin.platform.PlatformPlugin;
  *   <li>{@link #onRequestPermissionsResult(int, String[], int[])} ()}
  *   <li>{@link #onNewIntent(Intent)} ()}
  *   <li>{@link #onUserLeaveHint()}
- *   <li>{@link #onTrimMemory(int)}
  * </ol>
  *
  * Additionally, when starting an {@code Activity} for a result from this {@code Fragment}, be sure
@@ -81,7 +81,8 @@ import io.flutter.plugin.platform.PlatformPlugin;
  * FlutterView}. Using a {@link FlutterView} requires forwarding some calls from an {@code
  * Activity}, as well as forwarding lifecycle calls from an {@code Activity} or a {@code Fragment}.
  */
-public class FlutterFragment extends Fragment implements FlutterActivityAndFragmentDelegate.Host {
+public class FlutterFragment extends Fragment
+    implements FlutterActivityAndFragmentDelegate.Host, ComponentCallbacks2 {
   private static final String TAG = "FlutterFragment";
 
   /** The Dart entrypoint method name that is executed upon initialization. */
@@ -791,7 +792,7 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
    *
    * @param level level
    */
-  @ActivityCallThrough
+  @Override
   public void onTrimMemory(int level) {
     if (stillAttachedForEvent("onTrimMemory")) {
       delegate.onTrimMemory(level);
