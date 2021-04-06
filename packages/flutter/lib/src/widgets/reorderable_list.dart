@@ -829,8 +829,10 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
       // When dragging, the dragged item is still in the list but has been replaced
       // by a zero height SizedBox, so that the gap can move around. To make the
       // list extent stable we add a dummy entry to the end.
-      delegate: SliverChildBuilderDelegate(_itemBuilder,
-        childCount: widget.itemCount + (_dragInfo != null ? 1 : 0)),
+      delegate: SliverChildBuilderDelegate(
+        _itemBuilder,
+        childCount: widget.itemCount + (_dragInfo != null ? 1 : 0),
+      ),
     );
   }
 }

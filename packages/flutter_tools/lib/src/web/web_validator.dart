@@ -7,7 +7,7 @@
 import 'package:meta/meta.dart';
 
 import '../base/platform.dart';
-import '../doctor.dart';
+import '../doctor_validator.dart';
 import 'chrome.dart';
 
 /// A validator for Chromium-based browsers.
