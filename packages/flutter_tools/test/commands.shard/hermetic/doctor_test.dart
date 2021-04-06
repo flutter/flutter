@@ -30,13 +30,11 @@ import 'package:flutter_tools/src/vscode/vscode.dart';
 import 'package:flutter_tools/src/vscode/vscode_validator.dart';
 import 'package:flutter_tools/src/web/workflow.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 import 'package:fake_async/fake_async.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
-import '../../src/testbed.dart';
 
 FakePlatform _kNoColorOutputPlatform() => FakePlatform(
   localeName: 'en_US.UTF-8',
