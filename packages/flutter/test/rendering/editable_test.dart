@@ -1175,6 +1175,45 @@ void main() {
     expect(delegate.textEditingValue.text, 'W Sczebrzeszynie chrząszcz brzmi w trzcinie');
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
+  test('RenderEditable registers and unregisters raw keyboard listener correctly', () async {
+    final TextSelectionDelegate delegate = FakeEditableTextState()
+      ..textEditingValue = const TextEditingValue(
+        text: 'how are you',
+        selection: TextSelection.collapsed(offset: 0),
+      );
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      offset: viewportOffset,
+      hasFocus: true,
+      textSelectionDelegate: delegate,
+      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        renderObject.selection = selection;
+      },
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      text: const TextSpan(
+        text: 'how are you',
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+      selection: const TextSelection.collapsed(
+        offset: 0,
+      ),
+    );
+
+    final PipelineOwner pipelineOwner = PipelineOwner();
+    editable.attach(pipelineOwner);
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
+    expect(delegate.textEditingValue.text, 'ow are you');
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
+
   test('arrow keys with selection text', () async {
     const String text = '012345';
     final TextSelectionDelegate delegate = FakeEditableTextState()
