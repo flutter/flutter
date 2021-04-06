@@ -1121,6 +1121,14 @@ typedef struct {
   const char* variant_code;
 } FlutterLocale;
 
+/// Callback that returns the system locale.
+///
+/// Embedders that implement this callback should return the `FlutterLocale`
+/// from the `supported_locales` list that most closely matches the
+/// user/device's preferred locale.
+///
+/// This callback does not currently provide the user_data baton.
+/// https://github.com/flutter/flutter/issues/79826
 typedef const FlutterLocale* (*FlutterComputePlatformResolvedLocaleCallback)(
     const FlutterLocale** /* supported_locales*/,
     size_t /* Number of locales*/);
