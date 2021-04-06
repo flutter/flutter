@@ -331,7 +331,6 @@ dev_dependencies:
     ]);
 
     expect(fakePackageTest.lastArgs, contains('--concurrency=1'));
-    expect(fakePackageTest.lastArgs, contains('--no-chain-stack-traces'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),

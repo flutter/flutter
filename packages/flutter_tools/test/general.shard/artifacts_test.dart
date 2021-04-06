@@ -33,6 +33,7 @@ void main() {
         platform: platform,
         logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
+        artifacts: <ArtifactSet>[],
       );
       artifacts = CachedArtifacts(
         fileSystem: fileSystem,
@@ -187,6 +188,7 @@ void main() {
         platform: platform,
         logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
+        artifacts: <ArtifactSet>[],
       );
       artifacts = LocalEngineArtifacts(
         fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'),
