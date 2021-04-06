@@ -259,7 +259,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   }
 
   /// Draws the selectionOverlay.
-  Widget _buildSelectionOverlay(Widget? selectionOverlay) {
+  Widget _buildSelectionOverlay(Widget selectionOverlay) {
     final double height = widget.itemExtent * widget.magnification;
 
     return IgnorePointer(
@@ -301,7 +301,8 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
               ),
             ),
           ),
-          _buildSelectionOverlay(widget.selectionOverlay),
+          if (widget.selectionOverlay != null)
+            _buildSelectionOverlay(widget.selectionOverlay!),
         ],
       ),
     );
