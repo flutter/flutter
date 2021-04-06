@@ -2085,6 +2085,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// focus, the control will then attach to the keyboard and request that the
   /// keyboard become visible.
   /// {@endtemplate}
+  @override
   void requestKeyboard() {
     if (_hasFocus) {
       _openInputConnection();

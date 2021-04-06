@@ -104,11 +104,16 @@ void main() {
     TextSelectionGestureDetectorBuilder(delegate: delegate);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: provider.buildGestureDetector(
-          behavior: HitTestBehavior.translucent,
-          child: FakeEditableText(key: editableTextKey),
-        ),
+      Builder(
+        builder: (BuildContext context) {
+          return MaterialApp(
+            home: provider.buildGestureDetector(
+              context: context,
+              behavior: HitTestBehavior.translucent,
+              child: FakeEditableText(key: editableTextKey),
+            ),
+          );
+        },
       ),
     );
   }

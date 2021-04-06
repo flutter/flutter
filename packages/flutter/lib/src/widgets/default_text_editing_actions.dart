@@ -298,7 +298,7 @@ class _SelectLastTapDownPositionOrEdgeTextAction extends CallbackAction<SingleTa
       if (!intent.editableTextState.renderEditable.selectionEnabled) {
         return null;
       }
-      switch (intent.details.kind) {
+      switch (intent.kind) {
         case PointerDeviceKind.mouse:
         case PointerDeviceKind.stylus:
         case PointerDeviceKind.invertedStylus:

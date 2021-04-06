@@ -1065,7 +1065,7 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   void onSingleTapUp(TapUpDetails details) {
     Actions.invoke<SingleTapUpTextIntent>(_context, SingleTapUpTextIntent(
-      details: details,
+      kind: details.kind,
       editableTextState: editableText,
     ));
   }

@@ -229,10 +229,13 @@ class MoveSelectionUpTextIntent extends Intent {
 class SingleTapUpTextIntent extends Intent {
   /// Creates an instance of SingleTapUpTextIntent.
   const SingleTapUpTextIntent({
-    required this.details,
+    required this.kind,
     required this.editableTextState,
   });
 
-  final TapUpDetails details;
+  /// The [PointerDeviceKind] that caused this to be invoked.
+  final PointerDeviceKind kind;
+
+  /// The [EditableTextState] that was the target of the single tap up.
   final EditableTextState editableTextState;
 }
