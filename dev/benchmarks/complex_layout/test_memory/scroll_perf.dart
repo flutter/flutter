@@ -27,7 +27,7 @@ Future<void> main() async {
       ready.complete();
     },
     behavior: HitTestBehavior.opaque,
-    child: IgnorePointer(
+    child: const IgnorePointer(
       ignoring: true,
       child: ComplexLayoutApp(),
     ),
@@ -45,7 +45,7 @@ Future<void> main() async {
 
   // remove onTap handler, enable pointer events for app
   runApp(GestureDetector(
-    child: IgnorePointer(
+    child: const IgnorePointer(
       ignoring: false,
       child: ComplexLayoutApp(),
     ),

@@ -767,7 +767,7 @@ mixin WidgetInspectorService {
   /// name "ext.flutter.inspector.name"), which takes no arguments.
   void _registerSignalServiceExtension({
     required String name,
-    required FutureOr<Object?> callback(),
+    required FutureOr<Object?> Function() callback,
   }) {
     registerServiceExtension(
       name: name,
@@ -785,7 +785,7 @@ mixin WidgetInspectorService {
   /// references to avoid leaking memory.
   void _registerObjectGroupServiceExtension({
     required String name,
-    required FutureOr<Object?> callback(String objectGroup),
+    required FutureOr<Object?> Function(String objectGroup) callback,
   }) {
     registerServiceExtension(
       name: name,
@@ -854,7 +854,7 @@ mixin WidgetInspectorService {
   /// lifetimes of object references in the returned JSON (see [disposeGroup]).
   void _registerServiceExtensionWithArg({
     required String name,
-    required FutureOr<Object?> callback(String? objectId, String objectGroup),
+    required FutureOr<Object?> Function(String? objectId, String objectGroup) callback,
   }) {
     registerServiceExtension(
       name: name,
@@ -872,7 +872,7 @@ mixin WidgetInspectorService {
   /// "arg0", "arg1", "arg2", ..., "argn".
   void _registerServiceExtensionVarArgs({
     required String name,
-    required FutureOr<Object?> callback(List<String> args),
+    required FutureOr<Object?> Function(List<String> args) callback,
   }) {
     registerServiceExtension(
       name: name,
@@ -1544,8 +1544,9 @@ mixin WidgetInspectorService {
 
   List<DiagnosticsNode> _truncateNodes(Iterable<DiagnosticsNode> nodes, int maxDescendentsTruncatableNode) {
     if (nodes.every((DiagnosticsNode node) => node.value is Element) && isWidgetCreationTracked()) {
-      final List<DiagnosticsNode> localNodes = nodes.where((DiagnosticsNode node) =>
-          _isValueCreatedByLocalProject(node.value)).toList();
+      final List<DiagnosticsNode> localNodes = nodes
+        .where((DiagnosticsNode node) => _isValueCreatedByLocalProject(node.value))
+        .toList();
       if (localNodes.isNotEmpty) {
         return localNodes;
       }
@@ -2590,7 +2591,7 @@ class _InspectorOverlayLayer extends Layer {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary(
           'The inspector should never be used in production mode due to the '
-          'negative performance impact.'
+          'negative performance impact.',
         ),
       ]);
     }
@@ -2688,7 +2689,8 @@ class _InspectorOverlayLayer extends Layer {
     }
 
     final Rect targetRect = MatrixUtils.transformRect(
-        state.selected.transform, state.selected.rect);
+      state.selected.transform, state.selected.rect,
+    );
     final Offset target = Offset(targetRect.left, targetRect.center.dy);
     const double offsetFromWidget = 9.0;
     final double verticalOffset = (targetRect.height) / 2 + offsetFromWidget;
@@ -2755,7 +2757,7 @@ class _InspectorOverlayLayer extends Layer {
       Offset(wedgeX + wedgeSize, wedgeY),
       Offset(wedgeX, wedgeY + (tooltipBelow ? -wedgeSize : wedgeSize)),
     ];
-    canvas.drawPath(Path()..addPolygon(wedge, true,), tooltipBackground);
+    canvas.drawPath(Path()..addPolygon(wedge, true), tooltipBackground);
     _textPainter!.paint(canvas, tipOffset + const Offset(_kTooltipPadding, _kTooltipPadding));
     canvas.restore();
   }
@@ -2848,7 +2850,8 @@ class _Location {
     }
     if (parameterLocations != null) {
       json['parameterLocations'] = parameterLocations!.map<Map<String, Object?>>(
-          (_Location location) => location.toJsonMap()).toList();
+        (_Location location) => location.toJsonMap(),
+      ).toList();
     }
     return json;
   }

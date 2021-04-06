@@ -102,7 +102,7 @@ ${_projectMetadataInformation()}
       '&body=${Uri.encodeQueryComponent(body)}'
       '&labels=${Uri.encodeQueryComponent('tool,severe: crash')}';
 
-    return await _shortURL(fullURL);
+    return _shortURL(fullURL);
   }
 
   /// Provide information about the Flutter project in the working directory, if present.

@@ -1141,20 +1141,16 @@ void main() {
             children: <Widget>[
               Focus(
                 key: key2,
-                child: Container(
-                  child: Focus(
-                    key: key3,
-                    child: Container(),
-                  ),
+                child: Focus(
+                  key: key3,
+                  child: Container(),
                 ),
               ),
               Focus(
                 key: key4,
-                child: Container(
-                  child: Focus(
-                    key: key5,
-                    child: Container(),
-                  ),
+                child: Focus(
+                  key: key5,
+                  child: Container(),
                 ),
               ),
               Focus(

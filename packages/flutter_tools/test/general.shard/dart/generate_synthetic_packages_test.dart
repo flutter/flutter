@@ -4,6 +4,8 @@
 
 // @dart = 2.8
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -11,14 +13,14 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/dart/generate_synthetic_packages.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/localizations.dart';
-import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 void main() {
-  testWithoutContext('calls buildSystem.build with blank l10n.yaml file', () {
+  testWithoutContext('calls buildSystem.build with blank l10n.yaml file', () async {
     // Project directory setup for gen_l10n logic
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
@@ -42,23 +44,27 @@ void main() {
       artifacts: artifacts,
       processManager: FakeProcessManager.any(),
     );
-    final BuildSystem buildSystem = MockBuildSystem();
+    final Completer<void> completer = Completer<void>();
+    final BuildResult exception = BuildResult(success: false, exceptions: <String, ExceptionMeasurement>{
+      'hello': ExceptionMeasurement('hello', 'bar', null),
+    });
+    final TestBuildSystem buildSystem = TestBuildSystem.all(exception, (Target target, Environment environment) {
+      expect(target, const GenerateLocalizationsTarget());
+      expect(environment, environment);
+      completer.complete();
+    });
 
-    expect(
+    await expectLater(
       () => generateLocalizationsSyntheticPackage(
         environment: environment,
         buildSystem: buildSystem,
       ),
       throwsToolExit(message: 'Generating synthetic localizations package has failed.'),
     );
-    // [BuildSystem] should have called build with [GenerateLocalizationsTarget].
-    verify(buildSystem.build(
-      const GenerateLocalizationsTarget(),
-      environment,
-    )).called(1);
+    await completer.future;
   });
 
-  testWithoutContext('calls buildSystem.build with l10n.yaml synthetic-package: true', () {
+  testWithoutContext('calls buildSystem.build with l10n.yaml synthetic-package: true', () async {
     // Project directory setup for gen_l10n logic
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
@@ -83,23 +89,27 @@ void main() {
       artifacts: artifacts,
       processManager: fakeProcessManager,
     );
-    final BuildSystem buildSystem = MockBuildSystem();
+    final Completer<void> completer = Completer<void>();
+    final BuildResult exception = BuildResult(success: false, exceptions: <String, ExceptionMeasurement>{
+      'hello': ExceptionMeasurement('hello', 'bar', null),
+    });
+    final TestBuildSystem buildSystem = TestBuildSystem.all(exception, (Target target, Environment environment) {
+      expect(target, const GenerateLocalizationsTarget());
+      expect(environment, environment);
+      completer.complete();
+    });
 
-    expect(
+    await expectLater(
       () => generateLocalizationsSyntheticPackage(
         environment: environment,
         buildSystem: buildSystem,
       ),
       throwsToolExit(message: 'Generating synthetic localizations package has failed.'),
     );
-    // [BuildSystem] should have called build with [GenerateLocalizationsTarget].
-    verify(buildSystem.build(
-      const GenerateLocalizationsTarget(),
-      environment,
-    )).called(1);
+    await completer.future;
   });
 
-  testWithoutContext('calls buildSystem.build with l10n.yaml synthetic-package: null', () {
+  testWithoutContext('calls buildSystem.build with l10n.yaml synthetic-package: null', () async {
     // Project directory setup for gen_l10n logic
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
@@ -122,20 +132,24 @@ void main() {
       artifacts: Artifacts.test(),
       processManager: FakeProcessManager.any(),
     );
-    final BuildSystem buildSystem = MockBuildSystem();
+    final Completer<void> completer = Completer<void>();
+    final BuildResult exception = BuildResult(success: false, exceptions: <String, ExceptionMeasurement>{
+      'hello': ExceptionMeasurement('hello', 'bar', null),
+    });
+    final TestBuildSystem buildSystem = TestBuildSystem.all(exception, (Target target, Environment environment) {
+      expect(target, const GenerateLocalizationsTarget());
+      expect(environment, environment);
+      completer.complete();
+    });
 
-    expect(
+    await expectLater(
       () => generateLocalizationsSyntheticPackage(
         environment: environment,
         buildSystem: buildSystem,
       ),
       throwsToolExit(message: 'Generating synthetic localizations package has failed.'),
     );
-    // [BuildSystem] should have called build with [GenerateLocalizationsTarget].
-    verify(buildSystem.build(
-      const GenerateLocalizationsTarget(),
-      environment,
-    )).called(1);
+    await completer.future;
   });
 
   testWithoutContext('does not call buildSystem.build when l10n.yaml is not present', () async {
@@ -158,20 +172,16 @@ void main() {
       artifacts: Artifacts.test(),
       processManager: FakeProcessManager.any(),
     );
-    final BuildSystem buildSystem = MockBuildSystem();
+    // Will throw if build is called.
+    final TestBuildSystem buildSystem = TestBuildSystem.all(null);
 
     await generateLocalizationsSyntheticPackage(
       environment: environment,
       buildSystem: buildSystem,
     );
-    // [BuildSystem] should not be called with [GenerateLocalizationsTarget].
-    verifyNever(buildSystem.build(
-      const GenerateLocalizationsTarget(),
-      environment,
-    ));
   });
 
-  testWithoutContext('does not call buildSystem.build with incorrect l10n.yaml format', () {
+  testWithoutContext('does not call buildSystem.build with incorrect l10n.yaml format', () async {
     // Project directory setup for gen_l10n logic
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
@@ -194,23 +204,19 @@ void main() {
       artifacts: Artifacts.test(),
       processManager: FakeProcessManager.any(),
     );
-    final BuildSystem buildSystem = MockBuildSystem();
+    // Will throw if build is called.
+    final TestBuildSystem buildSystem = TestBuildSystem.all(null);
 
-    expect(
+    await expectLater(
       () => generateLocalizationsSyntheticPackage(
         environment: environment,
         buildSystem: buildSystem,
       ),
       throwsToolExit(message: 'to contain a map, instead was helloWorld'),
     );
-    // [BuildSystem] should not be called with [GenerateLocalizationsTarget].
-    verifyNever(buildSystem.build(
-      const GenerateLocalizationsTarget(),
-      environment,
-    ));
   });
 
-  testWithoutContext('does not call buildSystem.build with non-bool "synthetic-package" value', () {
+  testWithoutContext('does not call buildSystem.build with non-bool "synthetic-package" value', () async {
     // Project directory setup for gen_l10n logic
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
@@ -233,21 +239,15 @@ void main() {
       artifacts: Artifacts.test(),
       processManager: FakeProcessManager.any(),
     );
-    final BuildSystem buildSystem = MockBuildSystem();
+    // Will throw if build is called.
+    final TestBuildSystem buildSystem = TestBuildSystem.all(null);
 
-    expect(
+    await expectLater(
       () => generateLocalizationsSyntheticPackage(
         environment: environment,
         buildSystem: buildSystem,
       ),
       throwsToolExit(message: 'to have a bool value, instead was "nonBoolValue"'),
     );
-    // [BuildSystem] should not be called with [GenerateLocalizationsTarget].
-    verifyNever(buildSystem.build(
-      const GenerateLocalizationsTarget(),
-      environment,
-    ));
   });
 }
-
-class MockBuildSystem extends Mock implements BuildSystem {}

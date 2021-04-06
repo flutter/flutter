@@ -119,6 +119,8 @@ void main() {
     expect(tester.testTextInput.isVisible, isTrue);
 
     tester.testTextInput.hide();
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    state.connectionClosed();
 
     expect(tester.testTextInput.isVisible, isFalse);
 

@@ -130,7 +130,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: Container(
+          child: SizedBox(
             height: 24.0,
             child: Row(
               children: const <Widget>[

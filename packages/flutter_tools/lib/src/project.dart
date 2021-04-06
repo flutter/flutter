@@ -170,6 +170,10 @@ class FlutterProject {
   WindowsProject _windows;
   WindowsProject get windows => _windows ??= WindowsProject._(this);
 
+  /// The Windows UWP sub project of this project.
+  WindowsUwpProject _windowUwp;
+  WindowsUwpProject get windowsUwp => _windowUwp ??= WindowsUwpProject._(this);
+
   /// The Fuchsia sub project of this project.
   FuchsiaProject _fuchsia;
   FuchsiaProject get fuchsia => _fuchsia ??= FuchsiaProject._(this);
@@ -287,6 +291,7 @@ class FlutterProject {
     bool macOSPlatform = false,
     bool windowsPlatform = false,
     bool webPlatform = false,
+    bool windowsUwpPlatform = false,
   }) async {
     if (!directory.existsSync() || hasExampleApp || isPlugin) {
       return;
@@ -309,6 +314,9 @@ class FlutterProject {
     }
     if (webPlatform) {
       await web.ensureReadyForPlatformSpecificTooling();
+    }
+    if (windowsUwpPlatform) {
+      await windowsUwp.ensureReadyForPlatformSpecificTooling();
     }
     await injectPlugins(
       this,
@@ -428,7 +436,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   static const String _productBundleIdVariable = r'$(PRODUCT_BUNDLE_IDENTIFIER)';
   static const String _hostAppProjectName = 'Runner';
 
-  Directory get ephemeralDirectory => parent.directory.childDirectory('.ios');
+  Directory get ephemeralModuleDirectory => parent.directory.childDirectory('.ios');
   Directory get _editableDirectory => parent.directory.childDirectory('ios');
 
   /// This parent folder of `Runner.xcodeproj`.
@@ -436,7 +444,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
     if (!isModule || _editableDirectory.existsSync()) {
       return _editableDirectory;
     }
-    return ephemeralDirectory;
+    return ephemeralModuleDirectory;
   }
 
   /// The root directory of the iOS wrapping of Flutter and plugins. This is the
@@ -445,13 +453,16 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   ///
   /// This is the same as [hostAppRoot] except when the project is
   /// a Flutter module with an editable host app.
-  Directory get _flutterLibRoot => isModule ? ephemeralDirectory : _editableDirectory;
+  Directory get _flutterLibRoot => isModule ? ephemeralModuleDirectory : _editableDirectory;
 
   /// True, if the parent Flutter project is a module project.
   bool get isModule => parent.isModule;
 
   /// Whether the flutter application has an iOS project.
   bool get exists => hostAppRoot.existsSync();
+
+  /// Put generated files here.
+  Directory get ephemeralDirectory => _flutterLibRoot.childDirectory('Flutter').childDirectory('ephemeral');
 
   @override
   File xcodeConfigFor(String mode) => _flutterLibRoot.childDirectory('Flutter').childFile('$mode.xcconfig');
@@ -664,29 +675,29 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
       return;
     }
     final bool pubspecChanged = globals.fsUtils.isOlderThanReference(
-      entity: ephemeralDirectory,
+      entity: ephemeralModuleDirectory,
       referenceFile: parent.pubspecFile,
     );
-    final bool toolingChanged = globals.cache.isOlderThanToolsStamp(ephemeralDirectory);
+    final bool toolingChanged = globals.cache.isOlderThanToolsStamp(ephemeralModuleDirectory);
     if (!pubspecChanged && !toolingChanged) {
       return;
     }
 
-    _deleteIfExistsSync(ephemeralDirectory);
+    _deleteIfExistsSync(ephemeralModuleDirectory);
     await _overwriteFromTemplate(
       globals.fs.path.join('module', 'ios', 'library'),
-      ephemeralDirectory,
+      ephemeralModuleDirectory,
     );
     // Add ephemeral host app, if a editable host app does not already exist.
     if (!_editableDirectory.existsSync()) {
       await _overwriteFromTemplate(
         globals.fs.path.join('module', 'ios', 'host_app_ephemeral'),
-        ephemeralDirectory,
+        ephemeralModuleDirectory,
       );
       if (hasPlugins(parent)) {
         await _overwriteFromTemplate(
           globals.fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'),
-          ephemeralDirectory,
+          ephemeralModuleDirectory,
         );
       }
       // Use release mode so host project can link on bitcode variant.
@@ -759,7 +770,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
 
   Directory get engineCopyDirectory {
     return isModule
-        ? ephemeralDirectory.childDirectory('Flutter').childDirectory('engine')
+        ? ephemeralModuleDirectory.childDirectory('Flutter').childDirectory('engine')
         : hostAppRoot.childDirectory('Flutter');
   }
 
@@ -1160,6 +1171,8 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
   @override
   String get pluginConfigKey => WindowsPlugin.kConfigKey;
 
+  String get _childDirectory => 'windows';
+
   @override
   bool existsSync() => _editableDirectory.existsSync() && cmakeFile.existsSync();
 
@@ -1178,7 +1191,7 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
   @override
   Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
 
-  Directory get _editableDirectory => parent.directory.childDirectory('windows');
+  Directory get _editableDirectory => parent.directory.childDirectory(_childDirectory);
 
   /// The directory in the project that is managed by Flutter. As much as
   /// possible, files that are edited by Flutter tooling after initial project
@@ -1191,6 +1204,17 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
   Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {}
+}
+
+/// The Windows UWP version of the Windows project.
+class WindowsUwpProject extends WindowsProject {
+  WindowsUwpProject._(FlutterProject parent) : super._(parent);
+
+  @override
+  String get _childDirectory => 'winuwp';
+
+  /// Eventually this will be used to check if the user's unstable project needs to be regenerated.
+  int get projectVersion => int.tryParse(_editableDirectory.childFile('project_version').readAsStringSync());
 }
 
 /// The Linux sub project.

@@ -18,7 +18,7 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
@@ -32,7 +32,7 @@ import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
@@ -56,7 +56,7 @@ typedef ContextInitializer = void Function(AppContext testContext);
 @isTest
 void testUsingContext(
   String description,
-  dynamic testMethod(), {
+  dynamic Function() testMethod, {
   Map<Type, Generator> overrides = const <Type, Generator>{},
   bool initializeFlutterRoot = true,
   String testOn,
@@ -112,7 +112,7 @@ void testUsingContext(
           Config: () => buildConfig(globals.fs),
           DeviceManager: () => FakeDeviceManager(),
           Doctor: () => FakeDoctor(globals.logger),
-          FlutterVersion: () => MockFlutterVersion(),
+          FlutterVersion: () => FakeFlutterVersion(),
           HttpClient: () => FakeHttpClient.any(),
           IOSSimulatorUtils: () {
             final MockIOSSimulatorUtils mock = MockIOSSimulatorUtils();
@@ -338,16 +338,16 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   bool get isInstalled => true;
 
   @override
-  String get versionText => 'Xcode 11.0';
+  String get versionText => 'Xcode 12.0.1';
 
   @override
-  int get majorVersion => 11;
+  int get majorVersion => 12;
 
   @override
   int get minorVersion => 0;
 
   @override
-  int get patchVersion => 0;
+  int get patchVersion => 1;
 
   @override
   Future<Map<String, String>> getBuildSettings(
@@ -376,8 +376,6 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   @override
   List<String> xcrunCommand() => <String>['xcrun'];
 }
-
-class MockFlutterVersion extends Mock implements FlutterVersion {}
 
 class MockCrashReporter extends Mock implements CrashReporter {}
 

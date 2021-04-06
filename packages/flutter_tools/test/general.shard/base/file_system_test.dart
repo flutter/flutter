@@ -30,16 +30,6 @@ void main() {
       );
     });
 
-    testWithoutContext('ensureDirectoryExists recursively creates a directory if it does not exist', () async {
-      fsUtils.ensureDirectoryExists('foo/bar/baz.flx');
-      expect(fs.isDirectorySync('foo/bar'), true);
-    });
-
-    testWithoutContext('ensureDirectoryExists throws tool exit on failure to create', () async {
-      fs.file('foo').createSync();
-      expect(() => fsUtils.ensureDirectoryExists('foo/bar.flx'), throwsToolExit());
-    });
-
     testWithoutContext('getUniqueFile creates a unique file name', () async {
       final File fileA = fsUtils.getUniqueFile(fs.currentDirectory, 'foo', 'json')
         ..createSync();

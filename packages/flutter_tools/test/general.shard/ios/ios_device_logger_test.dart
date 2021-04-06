@@ -9,6 +9,7 @@ import 'dart:async';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
@@ -20,18 +21,17 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/testbed.dart';
 
 void main() {
   FakeProcessManager processManager;
   Artifacts artifacts;
-  FakeCache fakeCache;
+  Cache fakeCache;
   BufferLogger logger;
   String ideviceSyslogPath;
 
   setUp(() {
     processManager = FakeProcessManager.list(<FakeCommand>[]);
-    fakeCache = FakeCache();
+    fakeCache = Cache.test();
     artifacts = Artifacts.test();
     logger = BufferLogger.test();
     ideviceSyslogPath = artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios);
@@ -40,8 +40,8 @@ void main() {
   group('syslog stream', () {
     testWithoutContext('decodeSyslog decodes a syslog-encoded line', () {
       final String decoded = decodeSyslog(
-          r'I \M-b\M^]\M-$\M-o\M-8\M^O syslog \M-B\M-/\'
-          r'134_(\M-c\M^C\M^D)_/\M-B\M-/ \M-l\M^F\240!');
+          r'I \M-b\M^]\M-$\M-o\M-8\M^O syslog '
+          r'\M-B\M-/\134_(\M-c\M^C\M^D)_/\M-B\M-/ \M-l\M^F\240!');
 
       expect(decoded, r'I ❤️ syslog ¯\_(ツ)_/¯ 솠!');
     });

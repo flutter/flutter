@@ -127,7 +127,7 @@ void main() {
       logger: BufferLogger.test(),
       httpClient: FakeHttpClient.any(),
     );
-    expect(() async => await devFS.create(), throwsA(isA<DevFSException>()));
+    expect(() async => devFS.create(), throwsA(isA<DevFSException>()));
   });
 
   testWithoutContext('DevFS destroy is resilient to vmservice disconnection', () async {
@@ -423,7 +423,7 @@ void main() {
     final File file = MockFile();
     when(file.copySync(any)).thenThrow(const FileSystemException('foo'));
 
-    await expectLater(() async => await writer.write(<Uri, DevFSContent>{
+    await expectLater(() async => writer.write(<Uri, DevFSContent>{
       Uri.parse('goodbye'): DevFSFileContent(file),
     }, Uri.parse('/foo/bar/devfs/')), throwsA(isA<DevFSException>()));
   });

@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/web/web_validator.dart';
 import 'package:flutter_tools/src/windows/visual_studio_validator.dart';
 
 import '../src/common.dart';
+import '../src/fakes.dart';
 import '../src/testbed.dart';
 
 void main() {

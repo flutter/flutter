@@ -102,6 +102,89 @@ const double _inputFormLandscapeHeight = 108.0;
 /// [DatePickerMode.day] mode. It defaults to [DatePickerMode.day], and
 /// must be non-null.
 ///
+/// ### State Restoration
+///
+/// Using this method will not enable state restoration for the date picker.
+/// In order to enable state restoration for a date picker, use
+/// [Navigator.restorablePush] or [Navigator.restorablePushNamed] with
+/// [DatePickerDialog].
+///
+/// For more information about state restoration, see [RestorationManager].
+///
+/// {@macro flutter.widgets.RestorationManager}
+///
+/// {@tool sample --template=stateful_widget_restoration_material}
+///
+/// This sample demonstrates how to create a restorable Material date picker.
+/// This is accomplished by enabling state restoration by specifying
+/// [MaterialApp.restorationScopeId] and using [Navigator.restorablePush] to
+/// push [DatePickerDialog] when the button is tapped.
+///
+/// ```dart
+/// final RestorableDateTime _selectedDate = RestorableDateTime(DateTime(2021, 7, 25));
+/// late final RestorableRouteFuture<DateTime?> _restorableDatePickerRouteFuture = RestorableRouteFuture<DateTime?>(
+///   onComplete: _selectDate,
+///   onPresent: (NavigatorState navigator, Object? arguments) {
+///     return navigator.restorablePush(
+///       _datePickerRoute,
+///       arguments: _selectedDate.value.millisecondsSinceEpoch,
+///     );
+///   },
+/// );
+///
+/// static Route<DateTime> _datePickerRoute(
+///   BuildContext context,
+///   Object? arguments,
+/// ) {
+///   return DialogRoute<DateTime>(
+///     context: context,
+///     builder: (BuildContext context) {
+///       return DatePickerDialog(
+///         restorationId: 'date_picker_dialog',
+///         initialEntryMode: DatePickerEntryMode.calendarOnly,
+///         initialDate: DateTime.fromMillisecondsSinceEpoch(arguments! as int),
+///         firstDate: DateTime(2021, 1, 1),
+///         lastDate: DateTime(2022, 1, 1),
+///       );
+///     },
+///   );
+/// }
+///
+/// @override
+/// void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+///   registerForRestoration(_selectedDate, 'selected_date');
+///   registerForRestoration(_restorableDatePickerRouteFuture, 'date_picker_route_future');
+/// }
+///
+/// void _selectDate(DateTime? newSelectedDate) {
+///   if (newSelectedDate != null) {
+///     setState(() {
+///       _selectedDate.value = newSelectedDate;
+///       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+///         content: Text(
+///           'Selected: ${_selectedDate.value.day}/${_selectedDate.value.month}/${_selectedDate.value.year}'),
+///       ));
+///     });
+///   }
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: OutlinedButton(
+///         onPressed: () {
+///           _restorableDatePickerRouteFuture.present();
+///         },
+///         child: const Text('Open Date Picker'),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+///
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [showDateRangePicker], which shows a material design date range picker
@@ -140,26 +223,26 @@ Future<DateTime?> showDatePicker({
   lastDate = DateUtils.dateOnly(lastDate);
   assert(
     !lastDate.isBefore(firstDate),
-    'lastDate $lastDate must be on or after firstDate $firstDate.'
+    'lastDate $lastDate must be on or after firstDate $firstDate.',
   );
   assert(
     !initialDate.isBefore(firstDate),
-    'initialDate $initialDate must be on or after firstDate $firstDate.'
+    'initialDate $initialDate must be on or after firstDate $firstDate.',
   );
   assert(
     !initialDate.isAfter(lastDate),
-    'initialDate $initialDate must be on or before lastDate $lastDate.'
+    'initialDate $initialDate must be on or before lastDate $lastDate.',
   );
   assert(
     selectableDayPredicate == null || selectableDayPredicate(initialDate),
-    'Provided initialDate $initialDate must satisfy provided selectableDayPredicate.'
+    'Provided initialDate $initialDate must satisfy provided selectableDayPredicate.',
   );
   assert(initialEntryMode != null);
   assert(useRootNavigator != null);
   assert(initialDatePickerMode != null);
   assert(debugCheckHasMaterialLocalizations(context));
 
-  Widget dialog = _DatePickerDialog(
+  Widget dialog = DatePickerDialog(
     initialDate: initialDate,
     firstDate: firstDate,
     lastDate: lastDate,
@@ -201,8 +284,18 @@ Future<DateTime?> showDatePicker({
   );
 }
 
-class _DatePickerDialog extends StatefulWidget {
-  _DatePickerDialog({
+/// A Material-style date picker dialog.
+///
+/// It is used internally by [showDatePicker] or can be directly pushed
+/// onto the [Navigator] stack to enable state restoration. See
+/// [showDatePicker] for a state restoration app example.
+///
+/// See also:
+///
+///  * [showDatePicker], which is a way to display the date picker.
+class DatePickerDialog extends StatefulWidget {
+  /// A Material-style date picker dialog.
+  DatePickerDialog({
     Key? key,
     required DateTime initialDate,
     required DateTime firstDate,
@@ -218,6 +311,7 @@ class _DatePickerDialog extends StatefulWidget {
     this.errorInvalidText,
     this.fieldHintText,
     this.fieldLabelText,
+    this.restorationId,
   }) : assert(initialDate != null),
        assert(firstDate != null),
        assert(lastDate != null),
@@ -230,19 +324,19 @@ class _DatePickerDialog extends StatefulWidget {
        super(key: key) {
     assert(
       !this.lastDate.isBefore(this.firstDate),
-      'lastDate ${this.lastDate} must be on or after firstDate ${this.firstDate}.'
+      'lastDate ${this.lastDate} must be on or after firstDate ${this.firstDate}.',
     );
     assert(
       !this.initialDate.isBefore(this.firstDate),
-      'initialDate ${this.initialDate} must be on or after firstDate ${this.firstDate}.'
+      'initialDate ${this.initialDate} must be on or after firstDate ${this.firstDate}.',
     );
     assert(
       !this.initialDate.isAfter(this.lastDate),
-      'initialDate ${this.initialDate} must be on or before lastDate ${this.lastDate}.'
+      'initialDate ${this.initialDate} must be on or before lastDate ${this.lastDate}.',
     );
     assert(
       selectableDayPredicate == null || selectableDayPredicate!(this.initialDate),
-      'Provided initialDate ${this.initialDate} must satisfy provided selectableDayPredicate'
+      'Provided initialDate ${this.initialDate} must satisfy provided selectableDayPredicate',
     );
   }
 
@@ -258,6 +352,10 @@ class _DatePickerDialog extends StatefulWidget {
   /// The [DateTime] representing today. It will be highlighted in the day grid.
   final DateTime currentDate;
 
+  /// The initial mode of date entry method for the date picker dialog.
+  ///
+  /// See [DatePickerEntryMode] for more details on the different data entry
+  /// modes available.
   final DatePickerEntryMode initialEntryMode;
 
   /// Function to provide full control over which [DateTime] can be selected.
@@ -277,44 +375,73 @@ class _DatePickerDialog extends StatefulWidget {
   /// The initial display of the calendar picker.
   final DatePickerMode initialCalendarMode;
 
+  /// The error text displayed if the entered date is not in the correct format.
   final String? errorFormatText;
 
+  /// The error text displayed if the date is not valid.
+  ///
+  /// A date is not valid if it is earlier than [firstDate], later than
+  /// [lastDate], or doesn't pass the [selectableDayPredicate].
   final String? errorInvalidText;
 
+  /// The hint text displayed in the [TextField].
+  ///
+  /// If this is null, it will default to the date format string. For example,
+  /// 'mm/dd/yyyy' for en_US.
   final String? fieldHintText;
 
+  /// The label text displayed in the [TextField].
+  ///
+  /// If this is null, it will default to the words representing the date format
+  /// string. For example, 'Month, Day, Year' for en_US.
   final String? fieldLabelText;
+
+  /// Restoration ID to save and restore the state of the [DatePickerDialog].
+  ///
+  /// If it is non-null, the date picker will persist and restore the
+  /// date selected on the dialog.
+  ///
+  /// The state of this widget is persisted in a [RestorationBucket] claimed
+  /// from the surrounding [RestorationScope] using the provided restoration ID.
+  ///
+  /// See also:
+  ///
+  ///  * [RestorationManager], which explains how state restoration works in
+  ///    Flutter.
+  final String? restorationId;
 
   @override
   _DatePickerDialogState createState() => _DatePickerDialogState();
 }
 
-class _DatePickerDialogState extends State<_DatePickerDialog> {
+class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMixin {
+  late final RestorableDateTime _selectedDate = RestorableDateTime(widget.initialDate);
+  late final _RestorableDatePickerEntryMode _entryMode = _RestorableDatePickerEntryMode(widget.initialEntryMode);
+  final RestorableBool _autoValidate = RestorableBool(false);
 
-  late DatePickerEntryMode _entryMode;
-  late DateTime _selectedDate;
-  late bool _autoValidate;
+  @override
+  String? get restorationId => widget.restorationId;
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    registerForRestoration(_selectedDate, 'selected_date');
+    registerForRestoration(_autoValidate, 'autovalidate');
+    registerForRestoration(_entryMode, 'calendar_entry_mode');
+  }
+
   final GlobalKey _calendarPickerKey = GlobalKey();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  @override
-  void initState() {
-    super.initState();
-    _entryMode = widget.initialEntryMode;
-    _selectedDate = widget.initialDate;
-    _autoValidate = false;
-  }
-
   void _handleOk() {
-    if (_entryMode == DatePickerEntryMode.input) {
+    if (_entryMode.value == DatePickerEntryMode.input || _entryMode.value == DatePickerEntryMode.inputOnly) {
       final FormState form = _formKey.currentState!;
       if (!form.validate()) {
-        setState(() => _autoValidate = true);
+        setState(() => _autoValidate.value = true);
         return;
       }
       form.save();
     }
-    Navigator.pop(context, _selectedDate);
+    Navigator.pop(context, _selectedDate.value);
   }
 
   void _handleCancel() {
@@ -323,14 +450,14 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 
   void _handleEntryModeToggle() {
     setState(() {
-      switch (_entryMode) {
+      switch (_entryMode.value) {
         case DatePickerEntryMode.calendar:
-          _autoValidate = false;
-          _entryMode = DatePickerEntryMode.input;
+          _autoValidate.value = false;
+          _entryMode.value = DatePickerEntryMode.input;
           break;
         case DatePickerEntryMode.input:
           _formKey.currentState!.save();
-          _entryMode = DatePickerEntryMode.calendar;
+          _entryMode.value = DatePickerEntryMode.calendar;
           break;
         case DatePickerEntryMode.calendarOnly:
         case DatePickerEntryMode.inputOnly:
@@ -341,12 +468,14 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
   }
 
   void _handleDateChanged(DateTime date) {
-    setState(() => _selectedDate = date);
+    setState(() {
+      _selectedDate.value = date;
+    });
   }
 
   Size _dialogSize(BuildContext context) {
     final Orientation orientation = MediaQuery.of(context).orientation;
-    switch (_entryMode) {
+    switch (_entryMode.value) {
       case DatePickerEntryMode.calendar:
       case DatePickerEntryMode.calendarOnly:
         switch (orientation) {
@@ -382,7 +511,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     // layout issues.
     final double textScaleFactor = math.min(MediaQuery.of(context).textScaleFactor, 1.3);
 
-    final String dateText = localizations.formatMediumDate(_selectedDate);
+    final String dateText = localizations.formatMediumDate(_selectedDate.value);
     final Color onPrimarySurface = colorScheme.brightness == Brightness.light
       ? colorScheme.onPrimary
       : colorScheme.onSurface;
@@ -412,7 +541,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     CalendarDatePicker calendarDatePicker() {
       return CalendarDatePicker(
         key: _calendarPickerKey,
-        initialDate: _selectedDate,
+        initialDate: _selectedDate.value,
         firstDate: widget.firstDate,
         lastDate: widget.lastDate,
         currentDate: widget.currentDate,
@@ -425,7 +554,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     Form inputDatePicker() {
       return Form(
         key: _formKey,
-        autovalidate: _autoValidate,
+        autovalidate: _autoValidate.value,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           height: orientation == Orientation.portrait ? _inputFormPortraitHeight : _inputFormLandscapeHeight,
@@ -435,7 +564,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
               children: <Widget>[
                 const Spacer(),
                 InputDatePickerFormField(
-                  initialDate: _selectedDate,
+                  initialDate: _selectedDate.value,
                   firstDate: widget.firstDate,
                   lastDate: widget.lastDate,
                   onDateSubmitted: _handleDateChanged,
@@ -457,7 +586,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 
     final Widget picker;
     final Widget? entryModeButton;
-    switch (_entryMode) {
+    switch (_entryMode.value) {
       case DatePickerEntryMode.calendar:
         picker = calendarDatePicker();
         entryModeButton = IconButton(
@@ -547,6 +676,32 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
       clipBehavior: Clip.antiAlias,
     );
   }
+}
+
+// A restorable [DatePickerEntryMode] value.
+//
+// This serializes each entry as a unique `int` value.
+class _RestorableDatePickerEntryMode extends RestorableValue<DatePickerEntryMode> {
+  _RestorableDatePickerEntryMode(
+    DatePickerEntryMode defaultValue,
+  ) : _defaultValue = defaultValue;
+
+  final DatePickerEntryMode _defaultValue;
+
+  @override
+  DatePickerEntryMode createDefaultValue() => _defaultValue;
+
+  @override
+  void didUpdateValue(DatePickerEntryMode? oldValue) {
+    assert(debugIsSerializableForRestoration(value.index));
+    notifyListeners();
+  }
+
+  @override
+  DatePickerEntryMode fromPrimitives(Object? data) => DatePickerEntryMode.values[data! as int];
+
+  @override
+  Object? toPrimitives() => value.index;
 }
 
 /// Re-usable widget that displays the selected date (in large font) and the
@@ -713,14 +868,14 @@ class _DatePickerHeader extends StatelessWidget {
 /// returned.
 ///
 /// If [initialDateRange] is non-null, then it will be used as the initially
-/// selected date range. If it is provided, [initialDateRange.start] must be
-/// before or on [initialDateRange.end].
+/// selected date range. If it is provided, `initialDateRange.start` must be
+/// before or on `initialDateRange.end`.
 ///
 /// The [firstDate] is the earliest allowable date. The [lastDate] is the latest
 /// allowable date. Both must be non-null.
 ///
-/// If an initial date range is provided, [initialDateRange.start]
-/// and [initialDateRange.end] must both fall between or on [firstDate] and
+/// If an initial date range is provided, `initialDateRange.start`
+/// and `initialDateRange.end` must both fall between or on [firstDate] and
 /// [lastDate]. For all of these [DateTime] values, only their dates are
 /// considered. Their time fields are ignored.
 ///
@@ -770,6 +925,100 @@ class _DatePickerHeader extends StatelessWidget {
 /// The [builder] parameter can be used to wrap the dialog widget
 /// to add inherited widgets like [Theme].
 ///
+/// ### State Restoration
+///
+/// Using this method will not enable state restoration for the date range picker.
+/// In order to enable state restoration for a date range picker, use
+/// [Navigator.restorablePush] or [Navigator.restorablePushNamed] with
+/// [DateRangePickerDialog].
+///
+/// For more information about state restoration, see [RestorationManager].
+///
+/// {@macro flutter.widgets.RestorationManager}
+///
+/// {@tool sample --template=stateful_widget_restoration_material}
+///
+/// This sample demonstrates how to create a restorable Material date range picker.
+/// This is accomplished by enabling state restoration by specifying
+/// [MaterialApp.restorationScopeId] and using [Navigator.restorablePush] to
+/// push [DateRangePickerDialog] when the button is tapped.
+///
+/// ```dart
+/// final RestorableDateTimeN _startDate = RestorableDateTimeN(DateTime(2021, 1, 1));
+/// final RestorableDateTimeN _endDate = RestorableDateTimeN(DateTime(2021, 1, 5));
+/// late final RestorableRouteFuture<DateTimeRange?> _restorableDateRangePickerRouteFuture = RestorableRouteFuture<DateTimeRange?>(
+///   onComplete: _selectDateRange,
+///   onPresent: (NavigatorState navigator, Object? arguments) {
+///     return navigator.restorablePush(
+///       _dateRangePickerRoute,
+///       arguments: <String, dynamic>{
+///         'initialStartDate': _startDate.value?.millisecondsSinceEpoch,
+///         'initialEndDate': _endDate.value?.millisecondsSinceEpoch,
+///       }
+///     );
+///   },
+/// );
+///
+/// void _selectDateRange(DateTimeRange? newSelectedDate) {
+///   if (newSelectedDate != null) {
+///     setState(() {
+///       _startDate.value = newSelectedDate.start;
+///       _endDate.value = newSelectedDate.end;
+///     });
+///   }
+/// }
+///
+/// @override
+/// void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+///   registerForRestoration(_startDate, 'start_date');
+///   registerForRestoration(_endDate, 'end_date');
+///   registerForRestoration(_restorableDateRangePickerRouteFuture, 'date_picker_route_future');
+/// }
+///
+/// static Route<DateTimeRange?> _dateRangePickerRoute(
+///   BuildContext context,
+///   Object? arguments,
+/// ) {
+///   return DialogRoute<DateTimeRange?>(
+///     context: context,
+///     builder: (BuildContext context) {
+///       return DateRangePickerDialog(
+///         restorationId: 'date_picker_dialog',
+///         initialDateRange: _initialDateTimeRange(arguments! as Map<dynamic, dynamic>),
+///         firstDate: DateTime(2021, 1, 1),
+///         currentDate: DateTime(2021, 1, 25),
+///         lastDate: DateTime(2022, 1, 1),
+///       );
+///     },
+///   );
+/// }
+///
+/// static DateTimeRange? _initialDateTimeRange(Map<dynamic, dynamic> arguments) {
+///   if (arguments['initialStartDate'] != null && arguments['initialEndDate'] != null) {
+///     return DateTimeRange(
+///       start: DateTime.fromMillisecondsSinceEpoch(arguments['initialStartDate'] as int),
+///       end: DateTime.fromMillisecondsSinceEpoch(arguments['initialEndDate'] as int),
+///     );
+///   }
+///
+///   return null;
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: OutlinedButton(
+///         onPressed: () { _restorableDateRangePickerRouteFuture.present(); },
+///         child: const Text('Open Date Range Picker'),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+///
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [showDatePicker], which shows a material design date picker used to
@@ -803,11 +1052,11 @@ Future<DateTimeRange?> showDateRangePicker({
   assert(context != null);
   assert(
     initialDateRange == null || (initialDateRange.start != null && initialDateRange.end != null),
-    'initialDateRange must be null or have non-null start and end dates.'
+    'initialDateRange must be null or have non-null start and end dates.',
   );
   assert(
     initialDateRange == null || !initialDateRange.start.isAfter(initialDateRange.end),
-    'initialDateRange\'s start date must not be after it\'s end date.'
+    'initialDateRange\'s start date must not be after it\'s end date.',
   );
   initialDateRange = initialDateRange == null ? null : DateUtils.datesOnly(initialDateRange);
   assert(firstDate != null);
@@ -816,30 +1065,30 @@ Future<DateTimeRange?> showDateRangePicker({
   lastDate = DateUtils.dateOnly(lastDate);
   assert(
     !lastDate.isBefore(firstDate),
-    'lastDate $lastDate must be on or after firstDate $firstDate.'
+    'lastDate $lastDate must be on or after firstDate $firstDate.',
   );
   assert(
     initialDateRange == null || !initialDateRange.start.isBefore(firstDate),
-    'initialDateRange\'s start date must be on or after firstDate $firstDate.'
+    'initialDateRange\'s start date must be on or after firstDate $firstDate.',
   );
   assert(
     initialDateRange == null || !initialDateRange.end.isBefore(firstDate),
-    'initialDateRange\'s end date must be on or after firstDate $firstDate.'
+    'initialDateRange\'s end date must be on or after firstDate $firstDate.',
   );
   assert(
     initialDateRange == null || !initialDateRange.start.isAfter(lastDate),
-    'initialDateRange\'s start date must be on or before lastDate $lastDate.'
+    'initialDateRange\'s start date must be on or before lastDate $lastDate.',
   );
   assert(
     initialDateRange == null || !initialDateRange.end.isAfter(lastDate),
-    'initialDateRange\'s end date must be on or before lastDate $lastDate.'
+    'initialDateRange\'s end date must be on or before lastDate $lastDate.',
   );
   currentDate = DateUtils.dateOnly(currentDate ?? DateTime.now());
   assert(initialEntryMode != null);
   assert(useRootNavigator != null);
   assert(debugCheckHasMaterialLocalizations(context));
 
-  Widget dialog = _DateRangePickerDialog(
+  Widget dialog = DateRangePickerDialog(
     initialDateRange: initialDateRange,
     firstDate: firstDate,
     lastDate: lastDate,
@@ -912,8 +1161,18 @@ String _formatRangeEndDate(MaterialLocalizations localizations, DateTime? startD
       : localizations.formatShortDate(endDate);
 }
 
-class _DateRangePickerDialog extends StatefulWidget {
-  const _DateRangePickerDialog({
+/// A Material-style date range picker dialog.
+///
+/// It is used internally by [showDateRangePicker] or can be directly pushed
+/// onto the [Navigator] stack to enable state restoration. See
+/// [showDateRangePicker] for a state restoration app example.
+///
+/// See also:
+///
+///  * [showDateRangePicker], which is a way to display the date picker.
+class DateRangePickerDialog extends StatefulWidget {
+  /// A Material-style date range picker dialog.
+  const DateRangePickerDialog({
     Key? key,
     this.initialDateRange,
     required this.firstDate,
@@ -931,58 +1190,161 @@ class _DateRangePickerDialog extends StatefulWidget {
     this.fieldEndHintText,
     this.fieldStartLabelText,
     this.fieldEndLabelText,
+    this.restorationId,
   }) : super(key: key);
 
+  /// The date range that the date range picker starts with when it opens.
+  ///
+  /// If an initial date range is provided, `initialDateRange.start`
+  /// and `initialDateRange.end` must both fall between or on [firstDate] and
+  /// [lastDate]. For all of these [DateTime] values, only their dates are
+  /// considered. Their time fields are ignored.
+  ///
+  /// If [initialDateRange] is non-null, then it will be used as the initially
+  /// selected date range. If it is provided, `initialDateRange.start` must be
+  /// before or on `initialDateRange.end`.
   final DateTimeRange? initialDateRange;
+
+  /// The earliest allowable date on the date range.
   final DateTime firstDate;
+
+  /// The latest allowable date on the date range.
   final DateTime lastDate;
+
+  /// The [currentDate] represents the current day (i.e. today).
+  ///
+  /// This date will be highlighted in the day grid.
+  ///
+  /// If `null`, the date of `DateTime.now()` will be used.
   final DateTime? currentDate;
+
+  /// The initial date range picker entry mode.
+  ///
+  /// The date range has two main modes: [DatePickerEntryMode.calendar] (a
+  /// scrollable calendar month grid) or [DatePickerEntryMode.input] (two text
+  /// input fields) mode.
+  ///
+  /// It defaults to [DatePickerEntryMode.calendar] and must be non-null.
   final DatePickerEntryMode initialEntryMode;
+
+  /// The label on the cancel button for the text input mode.
+  ///
+  /// If null, the localized value of
+  /// [MaterialLocalizations.cancelButtonLabel] is used.
   final String? cancelText;
+
+  /// The label on the "OK" button for the text input mode.
+  ///
+  /// If null, the localized value of
+  /// [MaterialLocalizations.okButtonLabel] is used.
   final String? confirmText;
+
+  /// The label on the save button for the fullscreen calendar mode.
+  ///
+  /// If null, the localized value of
+  /// [MaterialLocalizations.saveButtonLabel] is used.
   final String? saveText;
+
+  /// The label displayed at the top of the dialog.
+  ///
+  /// If null, the localized value of
+  /// [MaterialLocalizations.dateRangePickerHelpText] is used.
   final String? helpText;
+
+  /// The message used when the date range is invalid (e.g. start date is after
+  /// end date).
+  ///
+  /// If null, the localized value of
+  /// [MaterialLocalizations.invalidDateRangeLabel] is used.
   final String? errorInvalidRangeText;
+
+  /// The message used when an input text isn't in a proper date format.
+  ///
+  /// If null, the localized value of
+  /// [MaterialLocalizations.invalidDateFormatLabel] is used.
   final String? errorFormatText;
+
+  /// The message used when an input text isn't a selectable date.
+  ///
+  /// If null, the localized value of
+  /// [MaterialLocalizations.dateOutOfRangeLabel] is used.
   final String? errorInvalidText;
+
+  /// The text used to prompt the user when no text has been entered in the
+  /// start field.
+  ///
+  /// If null, the localized value of
+  /// [MaterialLocalizations.dateHelpText] is used.
   final String? fieldStartHintText;
+
+  /// The text used to prompt the user when no text has been entered in the
+  /// end field.
+  ///
+  /// If null, the localized value of [MaterialLocalizations.dateHelpText] is
+  /// used.
   final String? fieldEndHintText;
+
+  /// The label for the start date text input field.
+  ///
+  /// If null, the localized value of [MaterialLocalizations.dateRangeStartLabel]
+  /// is used.
   final String? fieldStartLabelText;
+
+  /// The label for the end date text input field.
+  ///
+  /// If null, the localized value of [MaterialLocalizations.dateRangeEndLabel]
+  /// is used.
   final String? fieldEndLabelText;
+
+  /// Restoration ID to save and restore the state of the [DateRangePickerDialog].
+  ///
+  /// If it is non-null, the date range picker will persist and restore the
+  /// date range selected on the dialog.
+  ///
+  /// The state of this widget is persisted in a [RestorationBucket] claimed
+  /// from the surrounding [RestorationScope] using the provided restoration ID.
+  ///
+  /// See also:
+  ///
+  ///  * [RestorationManager], which explains how state restoration works in
+  ///    Flutter.
+  final String? restorationId;
 
   @override
   _DateRangePickerDialogState createState() => _DateRangePickerDialogState();
 }
 
-class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
-  late DatePickerEntryMode _entryMode;
-  DateTime? _selectedStart;
-  DateTime? _selectedEnd;
-  late bool _autoValidate;
+class _DateRangePickerDialogState extends State<DateRangePickerDialog> with RestorationMixin {
+  late final _RestorableDatePickerEntryMode _entryMode = _RestorableDatePickerEntryMode(widget.initialEntryMode);
+  late final RestorableDateTimeN _selectedStart = RestorableDateTimeN(widget.initialDateRange?.start);
+  late final RestorableDateTimeN _selectedEnd = RestorableDateTimeN(widget.initialDateRange?.end);
+  final RestorableBool _autoValidate = RestorableBool(false);
   final GlobalKey _calendarPickerKey = GlobalKey();
   final GlobalKey<_InputDateRangePickerState> _inputPickerKey = GlobalKey<_InputDateRangePickerState>();
 
   @override
-  void initState() {
-    super.initState();
-    _selectedStart = widget.initialDateRange?.start;
-    _selectedEnd = widget.initialDateRange?.end;
-    _entryMode = widget.initialEntryMode;
-    _autoValidate = false;
+  String? get restorationId => widget.restorationId;
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    registerForRestoration(_entryMode, 'entry_mode');
+    registerForRestoration(_selectedStart, 'selected_start');
+    registerForRestoration(_selectedEnd, 'selected_end');
+    registerForRestoration(_autoValidate, 'autovalidate');
   }
 
   void _handleOk() {
-    if (_entryMode == DatePickerEntryMode.input) {
+    if (_entryMode.value == DatePickerEntryMode.input || _entryMode.value == DatePickerEntryMode.inputOnly) {
       final _InputDateRangePickerState picker = _inputPickerKey.currentState!;
       if (!picker.validate()) {
         setState(() {
-          _autoValidate = true;
+          _autoValidate.value = true;
         });
         return;
       }
     }
     final DateTimeRange? selectedRange = _hasSelectedDateRange
-        ? DateTimeRange(start: _selectedStart!, end: _selectedEnd!)
+        ? DateTimeRange(start: _selectedStart.value!, end: _selectedEnd.value!)
         : null;
 
     Navigator.pop(context, selectedRange);
@@ -994,29 +1356,29 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
 
   void _handleEntryModeToggle() {
     setState(() {
-      switch (_entryMode) {
+      switch (_entryMode.value) {
         case DatePickerEntryMode.calendar:
-          _autoValidate = false;
-          _entryMode = DatePickerEntryMode.input;
+          _autoValidate.value = false;
+          _entryMode.value = DatePickerEntryMode.input;
           break;
 
         case DatePickerEntryMode.input:
         // Validate the range dates
-          if (_selectedStart != null &&
-              (_selectedStart!.isBefore(widget.firstDate) || _selectedStart!.isAfter(widget.lastDate))) {
-            _selectedStart = null;
+          if (_selectedStart.value != null &&
+              (_selectedStart.value!.isBefore(widget.firstDate) || _selectedStart.value!.isAfter(widget.lastDate))) {
+            _selectedStart.value = null;
             // With no valid start date, having an end date makes no sense for the UI.
-            _selectedEnd = null;
+            _selectedEnd.value = null;
           }
-          if (_selectedEnd != null &&
-              (_selectedEnd!.isBefore(widget.firstDate) || _selectedEnd!.isAfter(widget.lastDate))) {
-            _selectedEnd = null;
+          if (_selectedEnd.value != null &&
+              (_selectedEnd.value!.isBefore(widget.firstDate) || _selectedEnd.value!.isAfter(widget.lastDate))) {
+            _selectedEnd.value = null;
           }
           // If invalid range (start after end), then just use the start date
-          if (_selectedStart != null && _selectedEnd != null && _selectedStart!.isAfter(_selectedEnd!)) {
-            _selectedEnd = null;
+          if (_selectedStart.value != null && _selectedEnd.value != null && _selectedStart.value!.isAfter(_selectedEnd.value!)) {
+            _selectedEnd.value = null;
           }
-          _entryMode = DatePickerEntryMode.calendar;
+          _entryMode.value = DatePickerEntryMode.calendar;
           break;
 
         case DatePickerEntryMode.calendarOnly:
@@ -1028,14 +1390,14 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
   }
 
   void _handleStartDateChanged(DateTime? date) {
-    setState(() => _selectedStart = date);
+    setState(() => _selectedStart.value = date);
   }
 
   void _handleEndDateChanged(DateTime? date) {
-    setState(() => _selectedEnd = date);
+    setState(() => _selectedEnd.value = date);
   }
 
-  bool get _hasSelectedDateRange => _selectedStart != null && _selectedEnd != null;
+  bool get _hasSelectedDateRange => _selectedStart.value != null && _selectedEnd.value != null;
 
   @override
   Widget build(BuildContext context) {
@@ -1054,15 +1416,15 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
     final double elevation;
     final EdgeInsets insetPadding;
     final bool showEntryModeButton =
-      _entryMode == DatePickerEntryMode.calendar ||
-      _entryMode == DatePickerEntryMode.input;
-    switch (_entryMode) {
+      _entryMode.value == DatePickerEntryMode.calendar ||
+      _entryMode.value == DatePickerEntryMode.input;
+    switch (_entryMode.value) {
       case DatePickerEntryMode.calendar:
       case DatePickerEntryMode.calendarOnly:
         contents = _CalendarRangePickerDialog(
           key: _calendarPickerKey,
-          selectedStartDate: _selectedStart,
-          selectedEndDate: _selectedEnd,
+          selectedStartDate: _selectedStart.value,
+          selectedEndDate: _selectedEnd.value,
           firstDate: widget.firstDate,
           lastDate: widget.lastDate,
           currentDate: widget.currentDate,
@@ -1091,8 +1453,8 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
       case DatePickerEntryMode.input:
       case DatePickerEntryMode.inputOnly:
         contents = _InputDateRangePickerDialog(
-          selectedStartDate: _selectedStart,
-          selectedEndDate: _selectedEnd,
+          selectedStartDate: _selectedStart.value,
+          selectedEndDate: _selectedEnd.value,
           currentDate: widget.currentDate,
           picker: Container(
             padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -1104,14 +1466,14 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
                 const Spacer(),
                 _InputDateRangePicker(
                   key: _inputPickerKey,
-                  initialStartDate: _selectedStart,
-                  initialEndDate: _selectedEnd,
+                  initialStartDate: _selectedStart.value,
+                  initialEndDate: _selectedEnd.value,
                   firstDate: widget.firstDate,
                   lastDate: widget.lastDate,
                   onStartDateChanged: _handleStartDateChanged,
                   onEndDateChanged: _handleEndDateChanged,
                   autofocus: true,
-                  autovalidate: _autoValidate,
+                  autovalidate: _autoValidate.value,
                   helpText: widget.helpText,
                   errorInvalidRangeText: widget.errorInvalidRangeText,
                   errorFormatText: widget.errorFormatText,
@@ -1216,13 +1578,13 @@ class _CalendarRangePickerDialog extends StatelessWidget {
     final String endDateText = _formatRangeEndDate(localizations, selectedStartDate, selectedEndDate, DateTime.now());
     final TextStyle? headlineStyle = textTheme.headline5;
     final TextStyle? startDateStyle = headlineStyle?.apply(
-        color: selectedStartDate != null ? headerForeground : headerDisabledForeground
+        color: selectedStartDate != null ? headerForeground : headerDisabledForeground,
     );
     final TextStyle? endDateStyle = headlineStyle?.apply(
-        color: selectedEndDate != null ? headerForeground : headerDisabledForeground
+        color: selectedEndDate != null ? headerForeground : headerDisabledForeground,
     );
     final TextStyle saveButtonStyle = textTheme.button!.apply(
-        color: onConfirm != null ? headerForeground : headerDisabledForeground
+        color: onConfirm != null ? headerForeground : headerDisabledForeground,
     );
 
     return SafeArea(
@@ -1341,11 +1703,11 @@ class _CalendarDateRangePicker extends StatefulWidget {
        super(key: key) {
     assert(
       this.initialStartDate == null || this.initialEndDate == null || !this.initialStartDate!.isAfter(initialEndDate!),
-      'initialStartDate must be on or before initialEndDate.'
+      'initialStartDate must be on or before initialEndDate.',
     );
     assert(
       !this.lastDate.isBefore(this.firstDate),
-      'firstDate must be on or before lastDate.'
+      'firstDate must be on or before lastDate.',
     );
   }
 
@@ -1941,7 +2303,7 @@ class _MonthItemState extends State<_MonthItem> {
     final int daysInMonth = DateUtils.getDaysInMonth(widget.displayedMonth.year, widget.displayedMonth.month);
     _dayFocusNodes = List<FocusNode>.generate(
         daysInMonth,
-        (int index) => FocusNode(skipTraversal: true, debugLabel: 'Day ${index + 1}')
+        (int index) => FocusNode(skipTraversal: true, debugLabel: 'Day ${index + 1}'),
     );
   }
 

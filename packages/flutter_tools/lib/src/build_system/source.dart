@@ -146,7 +146,7 @@ class SourceVisitor implements ResolvedFiles {
       throw InvalidPatternException(pattern);
     }
     if (!environment.fileSystem.directory(filePath).existsSync()) {
-      throw Exception('$filePath does not exist!');
+      environment.fileSystem.directory(filePath).createSync(recursive: true);
     }
     for (final FileSystemEntity entity in environment.fileSystem.directory(filePath).listSync()) {
       final String filename = environment.fileSystem.path.basename(entity.path);

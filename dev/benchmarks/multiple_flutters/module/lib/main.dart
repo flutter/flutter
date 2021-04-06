@@ -13,7 +13,7 @@ void topMain() => runApp(const MyApp(Colors.green));
 void bottomMain() => runApp(const MyApp(Colors.purple));
 
 class MyApp extends StatelessWidget {
-  const MyApp(this.color);
+  const MyApp(this.color, {Key key}) : super(key: key);
 
   final Color color;
 

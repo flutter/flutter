@@ -725,6 +725,8 @@ class _TextStyleProxy implements TextStyle {
   @override
   double? get height => _delegate.height;
   @override
+  TextLeadingDistribution? get leadingDistribution => _delegate.leadingDistribution;
+  @override
   Locale? get locale => _delegate.locale;
   @override
   ui.Paint? get foreground => _delegate.foreground;
@@ -778,6 +780,7 @@ class _TextStyleProxy implements TextStyle {
     double wordSpacingDelta = 0.0,
     double heightFactor = 1.0,
     double heightDelta = 0.0,
+    TextLeadingDistribution? leadingDistribution,
     TextBaseline? textBaseline,
     Locale? locale,
     List<ui.Shadow>? shadows,
@@ -805,6 +808,7 @@ class _TextStyleProxy implements TextStyle {
     double? wordSpacing,
     TextBaseline? textBaseline,
     double? height,
+    TextLeadingDistribution? leadingDistribution,
     Locale? locale,
     ui.Paint? foreground,
     ui.Paint? background,

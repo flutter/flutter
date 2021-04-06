@@ -10,7 +10,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../vmservice.dart';
 
@@ -132,7 +132,7 @@ class ScreenshotCommand extends FlutterCommand {
 
   Future<bool> runSkia(File outputFile) async {
     final Uri observatoryUri = Uri.parse(stringArg(_kObservatoryUri));
-    final FlutterVmService vmService = await connectToVmService(observatoryUri);
+    final FlutterVmService vmService = await connectToVmService(observatoryUri, logger: globals.logger);
     final vm_service.Response skp = await vmService.screenshotSkp();
     if (skp == null) {
       globals.printError(
@@ -156,7 +156,7 @@ class ScreenshotCommand extends FlutterCommand {
 
   Future<bool> runRasterizer(File outputFile) async {
     final Uri observatoryUri = Uri.parse(stringArg(_kObservatoryUri));
-    final FlutterVmService vmService = await connectToVmService(observatoryUri);
+    final FlutterVmService vmService = await connectToVmService(observatoryUri, logger: globals.logger);
     final vm_service.Response response = await vmService.screenshot();
     if (response == null) {
       globals.printError(

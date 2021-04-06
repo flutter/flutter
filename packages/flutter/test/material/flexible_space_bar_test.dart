@@ -141,7 +141,7 @@ void main() {
                 delegate: SliverChildListDelegate(
                   <Widget>[
                     for (int i = 0; i < 50; i++)
-                      Container(
+                      SizedBox(
                         height: 200,
                         child: Center(child: Text('Item $i')),
                       ),

@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/flutter_cache.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
@@ -95,7 +96,7 @@ void main() {
       fileSystem.file(fileSystem.path.join('bin', 'cache', 'lockfile'))
         .createSync(recursive: true);
 
-      expect(() async => await cache.lock(), throwsToolExit());
+      expect(() async => cache.lock(), throwsToolExit());
     }, skip: true); // TODO(jonahwilliams): implement support for lock so this can be tested with the memory file system.
 
     testWithoutContext('should not throw when FLUTTER_ALREADY_LOCKED is set', () {
@@ -134,6 +135,28 @@ void main() {
       fileSystem.file(fileSystem.path.join(directory.path, 'gradle', 'wrapper', 'gradle-wrapper.jar')).createSync(recursive: true);
 
       expect(gradleWrapper.isUpToDateInner(fileSystem), false);
+    });
+
+    testWithoutContext('Gradle wrapper will delete .properties/NOTICES if they exist', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Cache cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
+      final OperatingSystemUtils operatingSystemUtils = OperatingSystemUtils(
+        processManager: FakeProcessManager.any(),
+        platform: FakePlatform(),
+        logger: BufferLogger.test(),
+        fileSystem: fileSystem,
+      );
+      final GradleWrapper gradleWrapper = GradleWrapper(cache);
+      final Directory directory = cache.getCacheDir(fileSystem.path.join('artifacts', 'gradle_wrapper'));
+      final File propertiesFile = fileSystem.file(fileSystem.path.join(directory.path, 'gradle', 'wrapper', 'gradle-wrapper.properties'))
+        ..createSync(recursive: true);
+      final File noticeFile = fileSystem.file(fileSystem.path.join(directory.path, 'NOTICE'))
+        ..createSync(recursive: true);
+
+      await gradleWrapper.updateInner(FakeArtifactUpdater(), fileSystem, operatingSystemUtils);
+
+      expect(propertiesFile, isNot(exists));
+      expect(noticeFile, isNot(exists));
     });
 
     testWithoutContext('Gradle wrapper should be up to date, only if all cached artifact are available', () {
@@ -306,6 +329,33 @@ void main() {
     expect(dir, isNotNull);
     expect(dir.path, artifactDir.childDirectory('bin_dir').path);
     verify(operatingSystemUtils.chmod(argThat(hasPath(dir.path)), 'a+r,a+x'));
+  });
+
+  testWithoutContext('EngineCachedArtifact removes unzipped FlutterMacOS.framework before replacing', () async {
+    final OperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils();
+    final MockCache cache = MockCache();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_artifact.');
+    final Directory downloadDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_download.');
+
+    when(cache.getArtifactDirectory(any)).thenReturn(artifactDir);
+    when(cache.getDownloadDir()).thenReturn(downloadDir);
+    final Directory binDir = artifactDir.childDirectory('bin_dir')..createSync();
+    binDir.childFile('FlutterMacOS.framework.zip').createSync();
+    final Directory unzippedFramework = binDir.childDirectory('FlutterMacOS.framework');
+    final File staleFile = unzippedFramework.childFile('stale_file')..createSync(recursive: true);
+    artifactDir.childFile('unused_url_path').createSync();
+
+    final FakeCachedArtifact artifact = FakeCachedArtifact(
+      cache: cache,
+      binaryDirs: <List<String>>[
+        <String>['bin_dir', 'unused_url_path'],
+      ],
+      requiredArtifacts: DevelopmentArtifact.universal,
+    );
+    await artifact.updateInner(MockArtifactUpdater(), fileSystem, operatingSystemUtils);
+    expect(unzippedFramework, exists);
+    expect(staleFile, isNot(exists));
   });
 
   testWithoutContext('IosUsbArtifacts verifies executables for libimobiledevice in isUpToDateInner', () async {
@@ -912,5 +962,12 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
   @override
   void reinitialize() {
     reinitialized = true;
+  }
+}
+
+class FakeArtifactUpdater extends Fake implements ArtifactUpdater {
+  @override
+  Future<void> downloadZippedTarball(String message, Uri url, Directory location) async {
+    return;
   }
 }

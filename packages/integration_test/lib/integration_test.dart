@@ -20,24 +20,37 @@ import 'common.dart';
 
 const String _success = 'success';
 
+/// Whether results should be reported to the native side over the method
+/// channel.
+///
+/// This is enabled by default for use by native test frameworks like Android
+/// instrumentation or XCTest. When running with the Flutter Tool through
+/// `flutter test integration_test` though, it will be disabled as the Flutter
+/// tool will be responsible for collection of test results.
+const bool _shouldReportResultsToNative = bool.fromEnvironment(
+  'INTEGRATION_TEST_SHOULD_REPORT_RESULTS_TO_NATIVE',
+  defaultValue: true,
+);
+
 /// A subclass of [LiveTestWidgetsFlutterBinding] that reports tests results
 /// on a channel to adapt them to native instrumentation test format.
 class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding implements IntegrationTestResults {
   /// Sets up a listener to report that the tests are finished when everything is
   /// torn down.
   IntegrationTestWidgetsFlutterBinding() {
-    // TODO(jackson): Report test results as they arrive
     tearDownAll(() async {
+      if (!_allTestsPassed.isCompleted) {
+        _allTestsPassed.complete(true);
+      }
+      callbackManager.cleanup();
+
+      // TODO(jiahaog): Print the message directing users to run with
+      // `flutter test` when Web is supported.
+      if (!_shouldReportResultsToNative || kIsWeb) {
+        return;
+      }
+
       try {
-        // For web integration tests we are not using the
-        // `plugins.flutter.io/integration_test`. Mark the tests as complete
-        // before invoking the channel.
-        if (kIsWeb) {
-          if (!_allTestsPassed.isCompleted) {
-            _allTestsPassed.complete(true);
-          }
-        }
-        callbackManager.cleanup();
         await _channel.invokeMethod<void>(
           'allTestsFinished',
           <String, dynamic>{
@@ -50,15 +63,22 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
           },
         );
       } on MissingPluginException {
-        print('Warning: integration_test test plugin was not detected.');
-      }
-      if (!_allTestsPassed.isCompleted) {
-        _allTestsPassed.complete(true);
+        print(r'''
+Warning: integration_test plugin was not detected.
+
+If you're running the tests with `flutter drive`, please make sure your tests
+are in the `integration_test/` directory of your package and use
+`flutter test $path_to_test` to run it instead.
+
+If you're running the tests with Android instrumentation or XCTest, this means
+that you are not capturing test results properly! See the following link for
+how to set up the integration_test plugin:
+
+https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
+''');
       }
     });
 
-    // TODO(jackson): Report the results individually instead of all at once
-    // See https://github.com/flutter/flutter/issues/38985
     final TestExceptionReporter oldTestExceptionReporter = reportTestException;
     reportTestException =
         (FlutterErrorDetails details, String testDescription) {
@@ -162,7 +182,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
   /// The callback function to response the driver side input.
   @visibleForTesting
   Future<Map<String, dynamic>> callback(Map<String, String> params) async {
-    return await callbackManager.callback(
+    return callbackManager.callback(
         params, this /* as IntegrationTestResults */);
   }
 
@@ -180,7 +200,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
 
   @override
   Future<void> runTest(
-    Future<void> testBody(),
+    Future<void> Function() testBody,
     VoidCallback invariantTester, {
     String description = '',
     Duration? timeout,
@@ -202,7 +222,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
     List<String> streams = const <String>['all'],
     @visibleForTesting vm.VmService? vmService,
   }) async {
-    assert(streams != null); // ignore: unnecessary_null_comparison
+    assert(streams != null);
     assert(streams.isNotEmpty);
     if (vmService != null) {
       _vmService = vmService;
@@ -232,21 +252,21 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
   /// [action]. Otherwise, prior events are cleared before calling [action]. By
   /// default, prior events are cleared.
   Future<vm.Timeline> traceTimeline(
-    Future<dynamic> action(), {
+    Future<dynamic> Function() action, {
     List<String> streams = const <String>['all'],
     bool retainPriorEvents = false,
   }) async {
     await enableTimeline(streams: streams);
     if (retainPriorEvents) {
       await action();
-      return await _vmService!.getVMTimeline();
+      return _vmService!.getVMTimeline();
     }
 
     await _vmService!.clearVMTimeline();
     final vm.Timestamp startTime = await _vmService!.getVMTimelineMicros();
     await action();
     final vm.Timestamp endTime = await _vmService!.getVMTimelineMicros();
-    return await _vmService!.getVMTimeline(
+    return _vmService!.getVMTimeline(
       timeOriginMicros: startTime.timestamp,
       timeExtentMicros: endTime.timestamp,
     );
@@ -268,7 +288,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
   /// The `streams` and `retainPriorEvents` parameters are passed as-is to
   /// [traceTimeline].
   Future<void> traceAction(
-    Future<dynamic> action(), {
+    Future<dynamic> Function() action, {
     List<String> streams = const <String>['all'],
     bool retainPriorEvents = false,
     String reportKey = 'timeline',
@@ -288,7 +308,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
   /// This can be used to implement performance tests previously using
   /// [traceAction] and [TimelineSummary] from [flutter_driver]
   Future<void> watchPerformance(
-    Future<void> action(), {
+    Future<void> Function() action, {
     String reportKey = 'performance',
   }) async {
     assert(() {
@@ -305,10 +325,19 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
     // TODO(CareF): remove this when flush FrameTiming is readly in engine.
     //              See https://github.com/flutter/flutter/issues/64808
     //              and https://github.com/flutter/flutter/issues/67593
-    Future<void> delayForFrameTimings() => Future<void>.delayed(const Duration(seconds: 2));
-
-    await delayForFrameTimings(); // flush old FrameTimings
     final List<FrameTiming> frameTimings = <FrameTiming>[];
+    Future<void> delayForFrameTimings() async {
+      int count = 0;
+      while (frameTimings.isEmpty) {
+        count++;
+        await Future<void>.delayed(const Duration(seconds: 2));
+        if (count > 20) {
+          print('delayForFrameTimings is taking longer than expected...');
+        }
+      }
+    }
+
+    await Future<void>.delayed(const Duration(seconds: 2)); // flush old FrameTimings
     final TimingsCallback watcher = frameTimings.addAll;
     addTimingsCallback(watcher);
     await action();

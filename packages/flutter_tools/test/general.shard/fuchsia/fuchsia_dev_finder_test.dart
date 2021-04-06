@@ -38,7 +38,7 @@ void main() {
         processManager: FakeProcessManager.any(),
       );
 
-      expect(() async => await fuchsiaDevFinder.list(),
+      expect(() async => fuchsiaDevFinder.list(),
         throwsToolExit(message: 'Fuchsia device-finder tool not found.'));
     });
 

@@ -151,16 +151,16 @@ void main() {
 
         testWithoutContext('xcodeVersionSatisfactory is true when version meets minimum', () {
           when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-          when(mockXcodeProjectInterpreter.majorVersion).thenReturn(11);
+          when(mockXcodeProjectInterpreter.majorVersion).thenReturn(12);
           when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
-          when(mockXcodeProjectInterpreter.patchVersion).thenReturn(0);
+          when(mockXcodeProjectInterpreter.patchVersion).thenReturn(1);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('xcodeVersionSatisfactory is true when major version exceeds minimum', () {
           when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-          when(mockXcodeProjectInterpreter.majorVersion).thenReturn(12);
+          when(mockXcodeProjectInterpreter.majorVersion).thenReturn(13);
           when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
           when(mockXcodeProjectInterpreter.patchVersion).thenReturn(0);
 
@@ -169,7 +169,7 @@ void main() {
 
         testWithoutContext('xcodeVersionSatisfactory is true when minor version exceeds minimum', () {
           when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-          when(mockXcodeProjectInterpreter.majorVersion).thenReturn(11);
+          when(mockXcodeProjectInterpreter.majorVersion).thenReturn(12);
           when(mockXcodeProjectInterpreter.minorVersion).thenReturn(3);
           when(mockXcodeProjectInterpreter.patchVersion).thenReturn(0);
 
@@ -178,16 +178,16 @@ void main() {
 
         testWithoutContext('xcodeVersionSatisfactory is true when patch version exceeds minimum', () {
           when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-          when(mockXcodeProjectInterpreter.majorVersion).thenReturn(11);
+          when(mockXcodeProjectInterpreter.majorVersion).thenReturn(12);
           when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
-          when(mockXcodeProjectInterpreter.patchVersion).thenReturn(1);
+          when(mockXcodeProjectInterpreter.patchVersion).thenReturn(2);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('isRecommendedVersionSatisfactory is false when version is less than minimum', () {
           when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-          when(mockXcodeProjectInterpreter.majorVersion).thenReturn(9);
+          when(mockXcodeProjectInterpreter.majorVersion).thenReturn(11);
           when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
           when(mockXcodeProjectInterpreter.patchVersion).thenReturn(0);
 
@@ -255,9 +255,9 @@ void main() {
 
         testWithoutContext('isInstalledAndMeetsVersionCheck is true when macOS and installed and version is satisfied', () {
           when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-          when(mockXcodeProjectInterpreter.majorVersion).thenReturn(11);
+          when(mockXcodeProjectInterpreter.majorVersion).thenReturn(12);
           when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
-          when(mockXcodeProjectInterpreter.patchVersion).thenReturn(0);
+          when(mockXcodeProjectInterpreter.patchVersion).thenReturn(1);
 
           expect(xcode.isInstalledAndMeetsVersionCheck, isTrue);
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
@@ -328,7 +328,7 @@ void main() {
               stderr: 'xcrun: error:',
             ));
 
-            expect(() async => await xcode.sdkLocation(EnvironmentType.physical),
+            expect(() async => xcode.sdkLocation(EnvironmentType.physical),
               throwsToolExit(message: 'Could not find SDK location'));
             expect(fakeProcessManager.hasRemainingExpectations, isFalse);
           });

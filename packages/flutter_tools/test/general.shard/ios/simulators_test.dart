@@ -5,16 +5,16 @@
 // @dart = 2.8
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/device_port_forwarder.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
@@ -24,7 +24,6 @@ import 'package:mockito/mockito.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
-import '../../src/mocks.dart';
 
 final Platform macosPlatform = FakePlatform(
   operatingSystem: 'macos',
@@ -482,13 +481,13 @@ void main() {
 
   group('log reader', () {
     FakeProcessManager fakeProcessManager;
-    MockIosProject mockIosProject;
+    FakeIosProject mockIosProject;
     MockSimControl mockSimControl;
     Xcode xcode;
 
     setUp(() {
       fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
-      mockIosProject = MockIosProject();
+      mockIosProject = FakeIosProject();
       mockSimControl = MockSimControl();
       xcode = Xcode.test(processManager: FakeProcessManager.any());
     });
@@ -809,7 +808,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       ));
 
       expect(
-        () async => await simControl.install(deviceId, appId),
+        () async => simControl.install(deviceId, appId),
         throwsToolExit(message: r'Unable to install'),
       );
     });
@@ -827,7 +826,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       ));
 
       expect(
-        () async => await simControl.uninstall(deviceId, appId),
+        () async => simControl.uninstall(deviceId, appId),
         throwsToolExit(message: r'Unable to uninstall'),
       );
     });
@@ -845,7 +844,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       ));
 
       expect(
-        () async => await simControl.launch(deviceId, appId),
+        () async => simControl.launch(deviceId, appId),
         throwsToolExit(message: r'Unable to launch'),
       );
     });
@@ -987,4 +986,10 @@ flutter:
   });
 }
 
-class MockBuildSystem extends Mock implements BuildSystem {}
+class FakeIosProject extends Fake implements IosProject {
+  @override
+  Future<String> productBundleIdentifier(BuildInfo buildInfo) async => 'com.example.test';
+
+  @override
+  Future<String> hostAppBundleName(BuildInfo buildInfo) async => 'My Super Awesome App.app';
+}

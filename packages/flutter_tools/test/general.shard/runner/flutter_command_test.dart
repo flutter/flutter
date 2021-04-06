@@ -19,7 +19,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 
@@ -135,7 +134,7 @@ void main() {
       final FakeTargetCommand fakeTargetCommand = FakeTargetCommand();
       final CommandRunner<void> runner = createTestCommandRunner(fakeTargetCommand);
 
-      expect(() async => await runner.run(<String>['test', '-t', 'lib/foo.dart']), throwsToolExit());
+      expect(() async => runner.run(<String>['test', '-t', 'lib/foo.dart']), throwsToolExit());
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -242,7 +241,6 @@ void main() {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
           throwToolExit('fail');
-          return null; // unreachable
         }
       );
       try {
@@ -470,7 +468,6 @@ void main() {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
           throwToolExit('fail');
-          return null; // unreachable
         },
       );
 
@@ -624,7 +621,6 @@ class FakeReportingNullSafetyCommand extends FlutterCommand {
   }
 }
 
-class MockVersion extends Mock implements FlutterVersion {}
 class MockProcessInfo extends Mock implements ProcessInfo {}
 class MockIoProcessSignal extends Mock implements io.ProcessSignal {}
 
@@ -639,7 +635,7 @@ class FakeSignals implements Signals {
 
   @override
   Object addHandler(ProcessSignal signal, SignalHandler handler) {
-    if (signal == ProcessSignal.SIGTERM) {
+    if (signal == ProcessSignal.sigterm) {
       return delegate.addHandler(subForSigTerm, handler);
     }
     return delegate.addHandler(signal, handler);

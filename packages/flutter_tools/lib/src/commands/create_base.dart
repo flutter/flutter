@@ -16,6 +16,7 @@ import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
+import '../features.dart';
 import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -29,6 +30,18 @@ const List<String> _kAvailablePlatforms = <String>[
   'linux',
   'macos',
   'web',
+];
+
+/// A list of all possible create platforms, even those that may not be enabled
+/// with the current config.
+const List<String> kAllCreatePlatforms = <String>[
+  'ios',
+  'android',
+  'windows',
+  'linux',
+  'macos',
+  'web',
+  'winuwp',
 ];
 
 const String _kDefaultPlatformArgumentHelp =
@@ -130,17 +143,28 @@ abstract class CreateBase extends FlutterCommand {
   @protected
   void addPlatformsOptions({String customHelp}) {
     argParser.addMultiOption('platforms',
-        help: customHelp ?? _kDefaultPlatformArgumentHelp,
-        defaultsTo: _kAvailablePlatforms,
-        allowed: _kAvailablePlatforms);
+      help: customHelp ?? _kDefaultPlatformArgumentHelp,
+      defaultsTo: <String>[
+        ..._kAvailablePlatforms,
+        if (featureFlags.isWindowsUwpEnabled)
+          'winuwp',
+      ],
+      allowed: <String>[
+        ..._kAvailablePlatforms,
+        if (featureFlags.isWindowsUwpEnabled)
+          'winuwp',
+      ],
+    );
   }
 
   /// Throw with exit code 2 if the output directory is invalid.
   @protected
   void validateOutputDirectoryArg() {
     if (argResults.rest.isEmpty) {
-      throwToolExit('No option specified for the output directory.\n$usage',
-          exitCode: 2);
+      throwToolExit(
+        'No option specified for the output directory.\n$usage',
+        exitCode: 2,
+      );
     }
 
     if (argResults.rest.length > 1) {
@@ -156,37 +180,8 @@ abstract class CreateBase extends FlutterCommand {
   }
 
   /// Gets the flutter root directory.
-  ///
-  /// Throw with exit code 2 if the flutter sdk installed is invalid.
   @protected
-  String get flutterRoot {
-    if (Cache.flutterRoot == null) {
-      throwToolExit(
-          'The FLUTTER_ROOT environment variable was not specified. Unable to find package:flutter.',
-          exitCode: 2);
-    }
-    final String flutterRoot = globals.fs.path.absolute(Cache.flutterRoot);
-
-    final String flutterPackagesDirectory =
-        globals.fs.path.join(flutterRoot, 'packages');
-    final String flutterPackagePath =
-        globals.fs.path.join(flutterPackagesDirectory, 'flutter');
-    if (!globals.fs
-        .isFileSync(globals.fs.path.join(flutterPackagePath, 'pubspec.yaml'))) {
-      throwToolExit('Unable to find package:flutter in $flutterPackagePath',
-          exitCode: 2);
-    }
-
-    final String flutterDriverPackagePath =
-        globals.fs.path.join(flutterRoot, 'packages', 'flutter_driver');
-    if (!globals.fs.isFileSync(
-        globals.fs.path.join(flutterDriverPackagePath, 'pubspec.yaml'))) {
-      throwToolExit(
-          'Unable to find package:flutter_driver in $flutterDriverPackagePath',
-          exitCode: 2);
-    }
-    return flutterRoot;
-  }
+  String get flutterRoot => Cache.flutterRoot;
 
   /// Determines the project type in an existing flutter project.
   ///
@@ -332,9 +327,8 @@ abstract class CreateBase extends FlutterCommand {
     bool linux = false,
     bool macos = false,
     bool windows = false,
+    bool windowsUwp = false,
   }) {
-    flutterRoot = globals.fs.path.normalize(flutterRoot);
-
     final String pluginDartClass = _createPluginClassName(projectName);
     final String pluginClass = pluginDartClass.endsWith('Plugin')
         ? pluginDartClass
@@ -379,6 +373,7 @@ abstract class CreateBase extends FlutterCommand {
       'linux': linux,
       'macos': macos,
       'windows': windows,
+      'winuwp': windowsUwp,
       'year': DateTime.now().year,
       'dartSdkVersionBounds': dartSdkVersionBounds,
     };
@@ -410,8 +405,12 @@ abstract class CreateBase extends FlutterCommand {
       Directory directory, Map<String, dynamic> templateContext,
       {bool overwrite = false, bool pluginExampleApp = false}) async {
     int generatedCount = 0;
-    generatedCount += await renderTemplate('app', directory, templateContext,
-        overwrite: overwrite);
+    generatedCount += await renderTemplate(
+      'app',
+      directory,
+      templateContext,
+      overwrite: overwrite,
+    );
     final FlutterProject project = FlutterProject.fromDirectory(directory);
     if (templateContext['android'] == true) {
       generatedCount += _injectGradleWrapper(project);
@@ -432,6 +431,7 @@ abstract class CreateBase extends FlutterCommand {
         macOSPlatform: templateContext['macos'] as bool ?? false,
         windowsPlatform: templateContext['windows'] as bool ?? false,
         webPlatform: templateContext['web'] as bool ?? false,
+        windowsUwpPlatform: templateContext['winuwp'] as bool ?? false,
       );
     }
     if (templateContext['android'] == true) {
@@ -616,32 +616,10 @@ const Set<String> _keywords = <String>{
 };
 
 const Set<String> _packageDependencies = <String>{
-  'analyzer',
-  'args',
-  'async',
   'collection',
-  'convert',
-  'crypto',
   'flutter',
   'flutter_test',
-  'front_end',
-  'html',
-  'http',
-  'intl',
-  'io',
-  'isolate',
-  'kernel',
-  'logging',
-  'matcher',
   'meta',
-  'mime',
-  'path',
-  'plugin',
-  'pool',
-  'test',
-  'utf',
-  'watcher',
-  'yaml',
 };
 
 /// Whether [name] is a valid Pub package.

@@ -10,9 +10,7 @@ import 'package:flutter_tools/src/android/deferred_components_validator.dart';
 import 'package:flutter_tools/src/base/deferred_component.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/targets/common.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/base/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -20,37 +18,23 @@ import '../../src/context.dart';
 void main() {
   FileSystem fileSystem;
   BufferLogger logger;
-  Environment env;
-
-  Environment createEnvironment() {
-    final Map<String, String> defines = <String, String>{ kSplitAot: 'true' };
-    final Environment result = Environment(
-      outputDir: fileSystem.directory('/output'),
-      buildDir: fileSystem.directory('/build'),
-      projectDir: fileSystem.directory('/project'),
-      defines: defines,
-      inputs: <String, String>{},
-      cacheDir: fileSystem.directory('/cache'),
-      flutterRootDir: fileSystem.directory('/flutter_root'),
-      artifacts: globals.artifacts,
-      fileSystem: fileSystem,
-      logger: logger,
-      processManager: globals.processManager,
-      engineVersion: 'invalidEngineVersion',
-      generateDartPluginRegistry: false,
-    );
-    return result;
-  }
+  Directory projectDir;
+  Platform platform;
+  Directory flutterRootDir;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
-    env = createEnvironment();
+    projectDir = fileSystem.directory('/project');
+    flutterRootDir = fileSystem.directory('/flutter_root');
+    platform = FakePlatform();
   });
 
   testWithoutContext('No checks passes', () async {
     final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
-      env,
+      projectDir,
+      logger,
+      platform,
       exitOnFail: false,
       title: 'test check',
     );
@@ -61,7 +45,9 @@ void main() {
 
   testWithoutContext('clearTempDir passes', () async {
     final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
-      env,
+      projectDir,
+      logger,
+      platform,
       exitOnFail: false,
       title: 'test check',
     );
@@ -72,7 +58,7 @@ void main() {
   });
 
   testUsingContext('androidComponentSetup build.gradle does not exist', () async {
-    final Directory templatesDir = env.flutterRootDir.childDirectory('templates').childDirectory('deferred_component');
+    final Directory templatesDir = flutterRootDir.childDirectory('templates').childDirectory('deferred_component');
     final File buildGradleTemplate = templatesDir.childFile('build.gradle.tmpl');
     final File androidManifestTemplate = templatesDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml.tmpl');
     if (templatesDir.existsSync()) {
@@ -84,12 +70,14 @@ void main() {
     androidManifestTemplate.writeAsStringSync('fake AndroidManigest.xml template {{componentName}}', flush: true, mode: FileMode.append);
 
     final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
-      env,
+      projectDir,
+      logger,
+      platform,
       exitOnFail: false,
       title: 'test check',
       templatesDir: templatesDir,
     );
-    final Directory componentDir = env.projectDir.childDirectory('android').childDirectory('component1');
+    final Directory componentDir = projectDir.childDirectory('android').childDirectory('component1');
     final File file = componentDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml');
     if (file.existsSync()) {
       file.deleteSync();
@@ -109,7 +97,7 @@ void main() {
   });
 
   testUsingContext('androidComponentSetup AndroidManifest.xml does not exist', () async {
-    final Directory templatesDir = env.flutterRootDir.childDirectory('templates').childDirectory('deferred_component');
+    final Directory templatesDir = flutterRootDir.childDirectory('templates').childDirectory('deferred_component');
     final File buildGradleTemplate = templatesDir.childFile('build.gradle.tmpl');
     final File androidManifestTemplate = templatesDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml.tmpl');
     if (templatesDir.existsSync()) {
@@ -121,12 +109,14 @@ void main() {
     androidManifestTemplate.writeAsStringSync('fake AndroidManigest.xml template {{componentName}}', flush: true, mode: FileMode.append);
 
     final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
-      env,
+      projectDir,
+      logger,
+      platform,
       exitOnFail: false,
       title: 'test check',
       templatesDir: templatesDir,
     );
-    final Directory componentDir = env.projectDir.childDirectory('android').childDirectory('component1');
+    final Directory componentDir = projectDir.childDirectory('android').childDirectory('component1');
     final File file = componentDir.childFile('build.gradle');
     if (file.existsSync()) {
       file.deleteSync();
@@ -145,8 +135,8 @@ void main() {
     expect(logger.statusText.contains('build/${DeferredComponentsValidator.kDeferredComponentsTempDirectory}/component1/src/main/AndroidManifest.xml\n'), true);
   });
 
-  testUsingContext('androidComponentSetup all files exist passes', () async {
-    final Directory templatesDir = env.flutterRootDir.childDirectory('templates').childDirectory('deferred_component');
+  testWithoutContext('androidComponentSetup all files exist passes', () async {
+    final Directory templatesDir = flutterRootDir.childDirectory('templates').childDirectory('deferred_component');
     final File buildGradleTemplate = templatesDir.childFile('build.gradle.tmpl');
     final File androidManifestTemplate = templatesDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml.tmpl');
     if (templatesDir.existsSync()) {
@@ -158,12 +148,14 @@ void main() {
     androidManifestTemplate.writeAsStringSync('fake AndroidManigest.xml template {{componentName}}', flush: true, mode: FileMode.append);
 
     final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
-      env,
+      projectDir,
+      logger,
+      platform,
       exitOnFail: false,
       title: 'test check',
       templatesDir: templatesDir,
     );
-    final Directory componentDir = env.projectDir.childDirectory('android').childDirectory('component1');
+    final Directory componentDir = projectDir.childDirectory('android').childDirectory('component1');
     final File buildGradle = componentDir.childFile('build.gradle');
     if (buildGradle.existsSync()) {
       buildGradle.deleteSync();
@@ -189,11 +181,13 @@ void main() {
 
   testWithoutContext('androidStringMapping creates new file', () async {
     final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
-      env,
+      projectDir,
+      logger,
+      platform,
       exitOnFail: false,
       title: 'test check',
     );
-    final Directory baseModuleDir = env.projectDir.childDirectory('android').childDirectory('app');
+    final Directory baseModuleDir = projectDir.childDirectory('android').childDirectory('app');
     final File stringRes = baseModuleDir.childDirectory('src').childDirectory('main').childDirectory('res').childDirectory('values').childFile('strings.xml');
     if (stringRes.existsSync()) {
       stringRes.deleteSync();
@@ -239,7 +233,7 @@ void main() {
     expect(logger.statusText.contains('Newly generated android files:\n'), true);
     expect(logger.statusText.contains('build/${DeferredComponentsValidator.kDeferredComponentsTempDirectory}/app/src/main/res/values/strings.xml\n'), true);
 
-    final File stringsOutput = env.projectDir
+    final File stringsOutput = projectDir
       .childDirectory('build')
       .childDirectory(DeferredComponentsValidator.kDeferredComponentsTempDirectory)
       .childDirectory('app')
@@ -255,11 +249,13 @@ void main() {
 
   testWithoutContext('androidStringMapping modifies strings file', () async {
     final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
-      env,
+      projectDir,
+      logger,
+      platform,
       exitOnFail: false,
       title: 'test check',
     );
-    final Directory baseModuleDir = env.projectDir.childDirectory('android').childDirectory('app');
+    final Directory baseModuleDir = projectDir.childDirectory('android').childDirectory('app');
     final File stringRes = baseModuleDir.childDirectory('src').childDirectory('main').childDirectory('res').childDirectory('values').childFile('strings.xml');
     if (stringRes.existsSync()) {
       stringRes.deleteSync();
@@ -285,7 +281,7 @@ void main() {
     expect(logger.statusText.contains('Modified android files:\n'), true);
     expect(logger.statusText.contains('build/${DeferredComponentsValidator.kDeferredComponentsTempDirectory}/app/src/main/res/values/strings.xml\n'), true);
 
-    final File stringsOutput = env.projectDir
+    final File stringsOutput = projectDir
       .childDirectory('build')
       .childDirectory(DeferredComponentsValidator.kDeferredComponentsTempDirectory)
       .childDirectory('app')

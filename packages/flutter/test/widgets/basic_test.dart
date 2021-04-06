@@ -220,21 +220,19 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: Container(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: <Widget>[
-                  Text('big text',
-                    key: key1,
-                    style: const TextStyle(fontSize: fontSize1),
-                  ),
-                  Text('one\ntwo\nthree\nfour\nfive\nsix\nseven',
-                    key: key2,
-                    style: const TextStyle(fontSize: fontSize2),
-                  ),
-                ],
-              ),
+            body: Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: <Widget>[
+                Text('big text',
+                  key: key1,
+                  style: const TextStyle(fontSize: fontSize1),
+                ),
+                Text('one\ntwo\nthree\nfour\nfive\nsix\nseven',
+                  key: key2,
+                  style: const TextStyle(fontSize: fontSize2),
+                ),
+              ],
             ),
           ),
         ),
@@ -277,22 +275,20 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: Container(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: <Widget>[
-                  Text('big text',
-                    key: key1,
-                    style: const TextStyle(fontSize: fontSize1),
-                  ),
-                  Text('one\ntwo\nthree\nfour\nfive\nsix\nseven',
-                    key: key2,
-                    style: const TextStyle(fontSize: fontSize2),
-                  ),
-                  const FlutterLogo(size: 250),
-                ],
-              ),
+            body: Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: <Widget>[
+                Text('big text',
+                  key: key1,
+                  style: const TextStyle(fontSize: fontSize1),
+                ),
+                Text('one\ntwo\nthree\nfour\nfive\nsix\nseven',
+                  key: key2,
+                  style: const TextStyle(fontSize: fontSize2),
+                ),
+                const FlutterLogo(size: 250),
+              ],
             ),
           ),
         ),
@@ -324,9 +320,10 @@ void main() {
 
   test('UnconstrainedBox toString', () {
     expect(
-      const UnconstrainedBox(constrainedAxis: Axis.vertical,).toString(),
+      const UnconstrainedBox(constrainedAxis: Axis.vertical).toString(),
       equals('UnconstrainedBox(alignment: Alignment.center, constrainedAxis: vertical)'),
     );
+
     expect(
       const UnconstrainedBox(constrainedAxis: Axis.horizontal, textDirection: TextDirection.rtl, alignment: Alignment.topRight).toString(),
       equals('UnconstrainedBox(alignment: Alignment.topRight, constrainedAxis: horizontal, textDirection: rtl)'),
@@ -335,11 +332,30 @@ void main() {
 
   testWidgets('UnconstrainedBox can set and update clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(const UnconstrainedBox());
-    final RenderUnconstrainedBox renderObject = tester.allRenderObjects.whereType<RenderUnconstrainedBox>().first;
+    final RenderConstraintsTransformBox renderObject = tester.allRenderObjects.whereType<RenderConstraintsTransformBox>().first;
     expect(renderObject.clipBehavior, equals(Clip.none));
 
     await tester.pumpWidget(const UnconstrainedBox(clipBehavior: Clip.antiAlias));
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+  });
+
+  group('ConstraintsTransformBox', () {
+    test('toString', () {
+      expect(
+        const ConstraintsTransformBox(
+          constraintsTransform: ConstraintsTransformBox.unconstrained,
+        ).toString(),
+        equals('ConstraintsTransformBox(alignment: Alignment.center, constraints transform: unconstrained)'),
+      );
+      expect(
+        const ConstraintsTransformBox(
+          textDirection: TextDirection.rtl,
+          alignment: Alignment.topRight,
+          constraintsTransform: ConstraintsTransformBox.widthUnconstrained,
+        ).toString(),
+        equals('ConstraintsTransformBox(alignment: Alignment.topRight, textDirection: rtl, constraints transform: width constraints removed)'),
+      );
+    });
   });
 
   group('ColoredBox', () {

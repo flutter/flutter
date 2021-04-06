@@ -35,13 +35,13 @@ TaskFunction createMicrobenchmarkTask() {
             device.deviceId,
           ];
           options.add(benchmarkPath);
-          return await _startFlutter(
+          return _startFlutter(
             options: options,
             canFail: false,
           );
         });
 
-        return await _readJsonResults(flutterProcess);
+        return _readJsonResults(flutterProcess);
       }
       return _run();
     }

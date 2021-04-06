@@ -8,35 +8,33 @@ import 'dart:async';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/user_messages.dart';
-import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/doctor.dart';
-import 'package:flutter_tools/src/vmservice.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
-import 'package:path/path.dart' as path; // ignore: package_path_import
-
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
+import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/doctor_validator.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
-import 'package:fake_async/fake_async.dart';
-import 'package:test_api/test_api.dart' as test_package show TypeMatcher, test; // ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf; // ignore: deprecated_member_use
-// ignore: deprecated_member_use
-export 'package:test_core/test_core.dart' hide TypeMatcher, isInstanceOf, test; // Defines a 'package:test' shim.
+import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
+import 'package:test_api/test_api.dart' as test_package show test; // ignore: deprecated_member_use
+import 'package:test_api/test_api.dart' hide test; // ignore: deprecated_member_use
+import 'package:vm_service/vm_service.dart' as vm_service;
+
+export 'package:test_api/test_api.dart' hide test, isInstanceOf; // ignore: deprecated_member_use
 
 /// A matcher that compares the type of the actual value to the type argument T.
-// TODO(ianh): Remove this once https://github.com/dart-lang/matcher/issues/98 is fixed
-test_package.TypeMatcher<T> isInstanceOf<T>() => isA<T>();
+TypeMatcher<T> isInstanceOf<T>() => isA<T>();
 
 void tryToDelete(Directory directory) {
   // This should not be necessary, but it turns out that
@@ -81,13 +79,22 @@ String getFlutterRoot() {
       throw invalidScript();
   }
 
-  final List<String> parts = path.split(LocalFileSystem.instance.path.fromUri(scriptUri));
+  final List<String> parts = path.split(globals.localFileSystem.path.fromUri(scriptUri));
   final int toolsIndex = parts.indexOf('flutter_tools');
   if (toolsIndex == -1) {
     throw invalidScript();
   }
   final String toolsPath = path.joinAll(parts.sublist(0, toolsIndex + 1));
   return path.normalize(path.join(toolsPath, '..', '..'));
+}
+
+/// Gets the path to the root of the Android SDK from the environment variable.
+String getAndroidSdkRoot() {
+  const Platform platform = LocalPlatform();
+  if (platform.environment.containsKey('ANDROID_SDK_ROOT')) {
+    return platform.environment['ANDROID_SDK_ROOT'];
+  }
+  throw StateError('ANDROID_SDK_ROOT environment varible not set');
 }
 
 CommandRunner<void> createTestCommandRunner([ FlutterCommand command ]) {
@@ -126,7 +133,7 @@ Matcher throwsToolExit({ int exitCode, Pattern message }) {
 }
 
 /// Matcher for [ToolExit]s.
-final test_package.TypeMatcher<ToolExit> isToolExit = isA<ToolExit>();
+final TypeMatcher<ToolExit> isToolExit = isA<ToolExit>();
 
 /// Matcher for functions that throw [ProcessException].
 Matcher throwsProcessException({ Pattern message }) {
@@ -138,7 +145,7 @@ Matcher throwsProcessException({ Pattern message }) {
 }
 
 /// Matcher for [ProcessException]s.
-final test_package.TypeMatcher<ProcessException> isProcessException = isA<ProcessException>();
+final TypeMatcher<ProcessException> isProcessException = isA<ProcessException>();
 
 /// Creates a flutter project in the [temp] directory using the
 /// [arguments] list if specified, or `--no-pub` if not.
@@ -179,7 +186,7 @@ Matcher containsIgnoringWhitespace(String toSearch) {
 /// system temporary directory are deleted after each test by calling
 /// `LocalFileSystem.dispose()`.
 @isTest
-void test(String description, FutureOr<void> body(), {
+void test(String description, FutureOr<void> Function() body, {
   String testOn,
   Timeout timeout,
   dynamic skip,
@@ -191,7 +198,7 @@ void test(String description, FutureOr<void> body(), {
     description,
     () async {
       addTearDown(() async {
-        await LocalFileSystem.dispose();
+        await globals.localFileSystem.dispose();
       });
       return body();
     },
@@ -213,7 +220,7 @@ void test(String description, FutureOr<void> body(), {
 ///
 /// For more information, see https://github.com/flutter/flutter/issues/47161
 @isTest
-void testWithoutContext(String description, FutureOr<void> body(), {
+void testWithoutContext(String description, FutureOr<void> Function() body, {
   String testOn,
   Timeout timeout,
   dynamic skip,
@@ -430,7 +437,7 @@ Matcher matchDoctorValidation({
   String statusInfo,
   dynamic messages
 }) {
-  return const test_package.TypeMatcher<ValidationResult>()
+  return const TypeMatcher<ValidationResult>()
     .having((ValidationResult result) => result.type, 'type', validationType)
     .having((ValidationResult result) => result.statusInfo, 'statusInfo', statusInfo)
     .having((ValidationResult result) => result.messages, 'messages', messages);

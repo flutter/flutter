@@ -55,7 +55,7 @@ abstract class PersistentToolState {
   /// Whether this client was already determined to be or not be a bot.
   bool isRunningOnBot;
 
-  /// The last time the the DevTools package was activated from pub.
+  /// The last time the DevTools package was activated from pub.
   DateTime lastDevToolsActivationTime;
 }
 

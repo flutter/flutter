@@ -890,7 +890,7 @@ abstract class WidgetController {
   /// in the documentation for the [flutter_test] library.
   static bool hitTestWarningShouldBeFatal = false;
 
-  Offset _getElementPoint(Finder finder, Offset sizeToPoint(Size size), { required bool warnIfMissed, required String callee }) {
+  Offset _getElementPoint(Finder finder, Offset Function(Size size) sizeToPoint, { required bool warnIfMissed, required String callee }) {
     TestAsyncUtils.guardSync();
     final Iterable<Element> elements = finder.evaluate();
     if (elements.isEmpty) {
@@ -910,7 +910,7 @@ abstract class WidgetController {
     if (renderObject is! RenderBox) {
       throw FlutterError(
         'The finder "$finder" (used in a call to "$callee()") found an element whose corresponding render object is not a RenderBox (it is a ${renderObject.runtimeType}: "$renderObject"). '
-        'Unfortunately "$callee()" only supports targetting widgets that correspond to RenderBox objects in the rendering.'
+        'Unfortunately "$callee()" only supports targeting widgets that correspond to RenderBox objects in the rendering.'
       );
     }
     final RenderBox box = element.renderObject! as RenderBox;

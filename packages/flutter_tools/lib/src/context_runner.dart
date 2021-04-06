@@ -24,11 +24,13 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/process.dart';
+import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
+import 'custom_devices/custom_devices_config.dart';
 import 'dart/pub.dart';
 import 'devfs.dart';
 import 'device.dart';
@@ -36,6 +38,10 @@ import 'devtools_launcher.dart';
 import 'doctor.dart';
 import 'emulator.dart';
 import 'features.dart';
+import 'flutter_application_package.dart';
+import 'flutter_cache.dart';
+import 'flutter_device_manager.dart';
+import 'flutter_features.dart';
 import 'fuchsia/fuchsia_device.dart' show FuchsiaDeviceTools;
 import 'fuchsia/fuchsia_sdk.dart' show FuchsiaSdk, FuchsiaArtifacts;
 import 'fuchsia/fuchsia_workflow.dart' show FuchsiaWorkflow, fuchsiaWorkflow;
@@ -62,7 +68,7 @@ import 'windows/visual_studio_validator.dart';
 import 'windows/windows_workflow.dart';
 
 Future<T> runInContext<T>(
-  FutureOr<T> runner(), {
+  FutureOr<T> Function() runner, {
   Map<Type, Generator> overrides,
 }) async {
 
@@ -74,7 +80,7 @@ Future<T> runInContext<T>(
     return runner();
   }
 
-  return await context.run<T>(
+  return context.run<T>(
     name: 'global fallbacks',
     body: runnerWrapper,
     overrides: overrides,
@@ -115,7 +121,7 @@ Future<T> runInContext<T>(
         featureFlags: featureFlags,
         operatingSystemUtils: globals.os,
       ),
-      ApplicationPackageFactory: () => ApplicationPackageFactory(
+      ApplicationPackageFactory: () => FlutterApplicationPackageFactory(
         userMessages: globals.userMessages,
         processManager: globals.processManager,
         logger: globals.logger,
@@ -140,7 +146,7 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
       ),
-      Cache: () => Cache(
+      Cache: () => FlutterCache(
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
@@ -194,6 +200,11 @@ Future<T> runInContext<T>(
         ),
         operatingSystemUtils: globals.os,
         terminal: globals.terminal,
+        customDevicesConfig: CustomDevicesConfig(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          platform: globals.platform
+        ),
       ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
@@ -275,12 +286,17 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         processManager: globals.processManager,
       ),
+      OutputPreferences: () => OutputPreferences(
+        wrapText: globals.stdio.hasTerminal ?? false,
+        showColor:  globals.platform.stdoutSupportsAnsi,
+        stdio: globals.stdio,
+      ),
       PersistentToolState: () => PersistentToolState(
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
       ),
-      ProcessInfo: () => ProcessInfo(),
+      ProcessInfo: () => ProcessInfo(globals.fs),
       ProcessManager: () => ErrorHandlingProcessManager(
         delegate: const LocalProcessManager(),
         platform: globals.platform,
@@ -351,7 +367,6 @@ Future<T> runInContext<T>(
         processManager: globals.processManager,
         platform: globals.platform,
         fileSystem: globals.fs,
-        terminal: globals.terminal,
         usage: globals.flutterUsage,
       ),
     },

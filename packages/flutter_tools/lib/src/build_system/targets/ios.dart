@@ -11,9 +11,8 @@ import '../../base/build.dart';
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
-import '../../base/process.dart';
 import '../../build_info.dart';
-import '../../globals.dart' as globals hide fs, logger, processManager, artifacts;
+import '../../globals.dart' as globals show xcode;
 import '../../macos/xcode.dart';
 import '../../project.dart';
 import '../build_system.dart';
@@ -231,14 +230,11 @@ class DebugUniversalFramework extends Target {
       .childDirectory('App.framework')
       .childFile('App');
     environment.buildDir.createSync(recursive: true);
-    final RunResult createFrameworkResult = await createStubAppFramework(
+    await _createStubAppFramework(
       output,
-      environment.defines[kSdkRoot],
+      environment,
       iosArchNames,
     );
-    if (createFrameworkResult.exitCode != 0) {
-      throw Exception('Failed to create App.framework.');
-    }
   }
 }
 
@@ -277,6 +273,25 @@ abstract class UnpackIOS extends Target {
     if (environment.defines[kSdkRoot] == null) {
       throw MissingDefineException(kSdkRoot, name);
     }
+    if (environment.defines[kIosArchs] == null) {
+      throw MissingDefineException(kIosArchs, name);
+    }
+    if (environment.defines[kBitcodeFlag] == null) {
+      throw MissingDefineException(kBitcodeFlag, name);
+    }
+    _copyFramework(environment);
+
+    final File frameworkBinary = environment.outputDir.childDirectory('Flutter.framework').childFile('Flutter');
+    final String frameworkBinaryPath = frameworkBinary.path;
+    if (!frameworkBinary.existsSync()) {
+      throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
+    }
+    _thinFramework(environment, frameworkBinaryPath);
+    _bitcodeStripFramework(environment, frameworkBinaryPath);
+    _signFramework(environment, frameworkBinaryPath, buildMode);
+  }
+
+  void _copyFramework(Environment environment) {
     final Directory sdkRoot = environment.fileSystem.directory(environment.defines[kSdkRoot]);
     final EnvironmentType environmentType = environmentTypeFromSdkroot(sdkRoot);
     final String basePath = environment.artifacts.getArtifactPath(
@@ -300,6 +315,71 @@ abstract class UnpackIOS extends Target {
         'Failed to copy framework (exit ${result.exitCode}:\n'
         '${result.stdout}\n---\n${result.stderr}',
       );
+    }
+  }
+
+  /// Destructively thin Flutter.framework to include only the specified architectures.
+  void _thinFramework(Environment environment, String frameworkBinaryPath) {
+    final String archs = environment.defines[kIosArchs];
+    final List<String> archList = archs.split(' ').toList();
+    final ProcessResult infoResult = environment.processManager.runSync(<String>[
+      'lipo',
+      '-info',
+      frameworkBinaryPath,
+    ]);
+    final String lipoInfo = infoResult.stdout as String;
+
+    final ProcessResult verifyResult = environment.processManager.runSync(<String>[
+      'lipo',
+      frameworkBinaryPath,
+      '-verify_arch',
+      ...archList
+    ]);
+
+    if (verifyResult.exitCode != 0) {
+      throw Exception('Binary $frameworkBinaryPath does not contain $archs. Running lipo -info:\n$lipoInfo');
+    }
+
+    // Skip thinning for non-fat executables.
+    if (lipoInfo.startsWith('Non-fat file:')) {
+      environment.logger.printTrace('Skipping lipo for non-fat file $frameworkBinaryPath');
+      return;
+    }
+
+    // Thin in-place.
+    final ProcessResult extractResult = environment.processManager.runSync(<String>[
+      'lipo',
+      '-output',
+      frameworkBinaryPath,
+      for (final String arch in archList)
+        ...<String>[
+          '-extract',
+          arch,
+        ],
+      ...<String>[frameworkBinaryPath],
+    ]);
+
+    if (extractResult.exitCode != 0) {
+      throw Exception('Failed to extract $archs for $frameworkBinaryPath.\n${extractResult.stderr}\nRunning lipo -info:\n$lipoInfo');
+    }
+  }
+
+  /// Destructively strip bitcode from the framework, if needed.
+  void _bitcodeStripFramework(Environment environment, String frameworkBinaryPath) {
+    if (environment.defines[kBitcodeFlag] == 'true') {
+      return;
+    }
+    final ProcessResult stripResult = environment.processManager.runSync(<String>[
+      'xcrun',
+      'bitcode_strip',
+      frameworkBinaryPath,
+      '-m', // leave the bitcode marker.
+      '-o',
+      frameworkBinaryPath,
+    ]);
+
+    if (stripResult.exitCode != 0) {
+      throw Exception('Failed to strip bitcode for $frameworkBinaryPath.\n${stripResult.stderr}');
     }
   }
 }
@@ -377,6 +457,7 @@ abstract class IosAssetBundle extends Target {
     }
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
+    final String frameworkBinaryPath = frameworkDirectory.childFile('App').path;
     final Directory assetDirectory = frameworkDirectory.childDirectory('flutter_assets');
     frameworkDirectory.createSync(recursive: true);
     assetDirectory.createSync();
@@ -387,7 +468,7 @@ abstract class IosAssetBundle extends Target {
       environment.buildDir
         .childDirectory('App.framework')
         .childFile('App')
-        .copySync(frameworkDirectory.childFile('App').path);
+        .copySync(frameworkBinaryPath);
 
       final String vmSnapshotData = environment.artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug);
       final String isolateSnapshotData = environment.artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug);
@@ -399,7 +480,7 @@ abstract class IosAssetBundle extends Target {
           .copySync(assetDirectory.childFile('isolate_snapshot_data').path);
     } else {
       environment.buildDir.childDirectory('App.framework').childFile('App')
-        .copySync(frameworkDirectory.childFile('App').path);
+        .copySync(frameworkBinaryPath);
     }
 
     // Copy the assets.
@@ -421,7 +502,7 @@ abstract class IosAssetBundle extends Target {
     // TODO(jonahwilliams): add plist to inputs
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
     final Directory plistRoot = flutterProject.isModule
-      ? flutterProject.ios.ephemeralDirectory
+      ? flutterProject.ios.ephemeralModuleDirectory
       : environment.projectDir.childDirectory('ios');
     plistRoot
       .childDirectory('Flutter')
@@ -429,6 +510,8 @@ abstract class IosAssetBundle extends Target {
       .copySync(environment.outputDir
       .childDirectory('App.framework')
       .childFile('Info.plist').path);
+
+    _signFramework(environment, frameworkBinaryPath, buildMode);
   }
 }
 
@@ -493,7 +576,7 @@ class ReleaseIosApplicationBundle extends IosAssetBundle {
 /// This framework needs to exist for the Xcode project to link/bundle,
 /// but it isn't actually executed. To generate something valid, we compile a trivial
 /// constant.
-Future<RunResult> createStubAppFramework(File outputFile, String sdkRoot,
+Future<void> _createStubAppFramework(File outputFile, Environment environment,
     Set<String> iosArchNames) async {
   try {
     outputFile.createSync(recursive: true);
@@ -509,7 +592,8 @@ Future<RunResult> createStubAppFramework(File outputFile, String sdkRoot,
   static const int Moo = 88;
   ''');
 
-    return await globals.xcode.clang(<String>[
+    final String sdkRoot = environment.defines[kSdkRoot];
+    await globals.xcode.clang(<String>[
       '-x',
       'c',
       for (String arch in iosArchNames) ...<String>['-arch', arch],
@@ -533,85 +617,27 @@ Future<RunResult> createStubAppFramework(File outputFile, String sdkRoot,
       throwToolExit('Failed to create App.framework stub at ${outputFile.path}: $e');
     }
   }
+
+  _signFramework(environment, outputFile.path, BuildMode.debug);
 }
 
-/// Destructively thins the specified executable file to include only the specified architectures.
-///
-/// This target is not fingerprinted and will always run.
-class ThinIosApplicationFrameworks extends Target {
-  const ThinIosApplicationFrameworks();
-
-  @override
-  String get name => 'thin_ios_application_frameworks';
-
-  @override
-  List<Target> get dependencies => const <Target>[];
-
-  @override
-  List<Source> get inputs => const <Source>[];
-
-  @override
-  List<Source> get outputs => const <Source>[];
-
-  @override
-  Future<void> build(Environment environment) async {
-    if (environment.defines[kIosArchs] == null) {
-      throw MissingDefineException(kIosArchs, 'thin_ios_application_frameworks');
-    }
-    final Directory frameworkDirectory = environment.outputDir;
-
-    final File appFramework = frameworkDirectory.childDirectory('App.framework').childFile('App');
-    final File flutterFramework = frameworkDirectory.childDirectory('Flutter.framework').childFile('Flutter');
-    await _thinBinary(appFramework, environment);
-    await _thinBinary(flutterFramework, environment);
+void _signFramework(Environment environment, String binaryPath, BuildMode buildMode) {
+  final String codesignIdentity = environment.defines[kCodesignIdentity];
+  if (codesignIdentity == null || codesignIdentity.isEmpty) {
+    return;
   }
-
-  Future<void> _thinBinary(File binary, Environment environment) async {
-    final String binaryPath = binary.path;
-    if (!binary.existsSync()) {
-      throw Exception('Binary $binaryPath does not exist, cannot thin');
-    }
-    final String archs = environment.defines[kIosArchs];
-    final List<String> archList = archs.split(' ').toList();
-    final ProcessResult infoResult = environment.processManager.runSync(<String>[
-      'lipo',
-      '-info',
-      binaryPath,
-    ]);
-    final String lipoInfo = infoResult.stdout as String;
-
-    final ProcessResult verifyResult = environment.processManager.runSync(<String>[
-      'lipo',
-      binaryPath,
-      '-verify_arch',
-      ...archList
-    ]);
-
-    if (verifyResult.exitCode != 0) {
-      throw Exception('Binary $binaryPath does not contain $archs. Running lipo -info:\n$lipoInfo');
-    }
-
-    // Skip this step for non-fat executables.
-    if (lipoInfo.startsWith('Non-fat file:')) {
-      environment.logger.printTrace('Skipping lipo for non-fat file $binaryPath');
-      return;
-    }
-
-    // Thin in-place.
-    final ProcessResult extractResult = environment.processManager.runSync(<String>[
-      'lipo',
-      '-output',
-      binaryPath,
-      for (final String arch in archList)
-        ...<String>[
-          '-extract',
-          arch,
-        ],
-      ...<String>[binaryPath],
-    ]);
-
-    if (extractResult.exitCode != 0) {
-      throw Exception('Failed to extract $archs for $binaryPath.\n${extractResult.stderr}\nRunning lipo -info:\n$lipoInfo');
-    }
+  final ProcessResult result = environment.processManager.runSync(<String>[
+    'codesign',
+    '--force',
+    '--sign',
+    codesignIdentity,
+    if (buildMode != BuildMode.release) ...<String>[
+      // Mimic Xcode's timestamp codesigning behavior on non-release binaries.
+      '--timestamp=none',
+    ],
+    binaryPath,
+  ]);
+  if (result.exitCode != 0) {
+    throw Exception('Failed to codesign $binaryPath with identity $codesignIdentity.\n${result.stderr}');
   }
 }

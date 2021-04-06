@@ -383,7 +383,7 @@ class ArchiveUnpublisher {
       if (mimeType != null) ...<String>['-h', 'Content-Type:$mimeType'],
       ...<String>['cp', src, dest],
     ];
-    return await _runGsUtil(args, confirm: confirmed);
+    return _runGsUtil(args, confirm: confirmed);
   }
 }
 

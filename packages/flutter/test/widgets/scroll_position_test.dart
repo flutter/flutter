@@ -39,13 +39,13 @@ Future<void> performTest(WidgetTester tester, bool maintainState) async {
           if (settings.name == '/') {
             return MaterialPageRoute<void>(
               settings: settings,
-              builder: (_) => Container(child: const ThePositiveNumbers(from: 0)),
+              builder: (_) => const ThePositiveNumbers(from: 0),
               maintainState: maintainState,
             );
           } else if (settings.name == '/second') {
             return MaterialPageRoute<void>(
               settings: settings,
-              builder: (_) => Container(child: const ThePositiveNumbers(from: 10000)),
+              builder: (_) => const ThePositiveNumbers(from: 10000),
               maintainState: maintainState,
             );
           }
@@ -224,7 +224,7 @@ void main() {
     expect(controller.position.pixels, equals(0.0));
   });
 
-  testWidgets('jumpTo recomends deferred loading', (WidgetTester tester) async {
+  testWidgets('jumpTo recommends deferred loading', (WidgetTester tester) async {
     int loadedWithDeferral = 0;
     int buildCount = 0;
     const double height = 500;

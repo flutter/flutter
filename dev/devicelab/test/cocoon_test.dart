@@ -126,7 +126,7 @@ void main() {
       const String updateTaskJson = '{'
           '"CommitBranch":"master",'
           '"CommitSha":"$commitSha",'
-          '"BuilderName":"builder a b c",'
+          '"BuilderName":"builder a b c",'  //ignore: missing_whitespace_between_adjacent_strings
           '"NewStatus":"Succeeded",'
           '"ResultData":{},'
           '"BenchmarkScoreKeys":[]}';

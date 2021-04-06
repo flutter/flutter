@@ -14,14 +14,11 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/io.dart' as io;
-import '../base/signals.dart';
-import '../base/terminal.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/common.dart' show kExtraFrontEndOptions, kExtraGenSnapshotOptions; // for "useLegacyNames" only
-import '../build_system/targets/icon_tree_shaker.dart' show kIconTreeShakerEnabledDefault;
 import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../dart/generate_synthetic_packages.dart';
@@ -120,6 +117,7 @@ class FlutterOptions {
   static const String kAnalyzeSize = 'analyze-size';
   static const String kNullAssertions = 'null-assertions';
   static const String kAndroidGradleDaemon = 'android-gradle-daemon';
+  static const String kDeferredComponents = 'deferred-components';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -225,6 +223,15 @@ abstract class FlutterCommand extends Command<void> {
       defaultsTo: 'sse',
       help: 'The protocol (SSE or WebSockets) to use for the Dart Debug Extension '
       'backend service when using the Web Server device. '
+      'Using WebSockets can improve performance but may fail when connecting through '
+      'some proxy servers.',
+      hide: !verboseHelp,
+    );
+    argParser.addOption('web-server-debug-injected-client-protocol',
+      allowed: <String>['sse', 'ws'],
+      defaultsTo: 'sse',
+      help: 'The protocol (SSE or WebSockets) to use for the injected client '
+      'when using the Web Server device. '
       'Using WebSockets can improve performance but may fail when connecting through '
       'some proxy servers.',
       hide: !verboseHelp,
@@ -379,7 +386,6 @@ abstract class FlutterCommand extends Command<void> {
     } on FormatException catch (error) {
       throwToolExit('Invalid port for `--observatory-port/--host-vmservice-port`: $error');
     }
-    return null;
   }
 
   int get ddsPort {
@@ -441,15 +447,14 @@ abstract class FlutterCommand extends Command<void> {
     } on FormatException catch (error) {
       throwToolExit('Invalid port for `--device-vmservice-port`: $error');
     }
-    return null;
   }
 
   void addPublishPort({ bool enabledByDefault = true, bool verboseHelp = false }) {
     argParser.addFlag('publish-port',
         negatable: true,
         hide: !verboseHelp,
-        help: 'Publish the VM service port over mDNS. Disable to prevent the'
-            'local network permission app dialog in debug and profile build modes (iOS devices only.)',
+        help: 'Publish the VM service port over mDNS. Disable to prevent the '
+              'local network permission app dialog in debug and profile build modes (iOS devices only.)',
         defaultsTo: enabledByDefault);
   }
 
@@ -670,7 +675,7 @@ abstract class FlutterCommand extends Command<void> {
     );
     argParser.addMultiOption(useLegacyNames ? kExtraGenSnapshotOptions : FlutterOptions.kExtraGenSnapshotOptions,
       help: 'A comma-separated list of additional command line arguments that will be passed directly to the Dart native compiler. '
-            '(Only used in "--profile" or "--release" builds.)'
+            '(Only used in "--profile" or "--release" builds.) '
             'For example, "--${FlutterOptions.kExtraGenSnapshotOptions}=--no-strip".',
       valueHelp: '--foo,--bar',
       splitCommas: true,
@@ -886,6 +891,7 @@ abstract class FlutterCommand extends Command<void> {
         final LanguageVersion languageVersion = determineLanguageVersion(
           entrypointFile,
           packageConfig.packageOf(entrypointFile.absolute.uri),
+          Cache.flutterRoot,
         );
         // Extra frontend options are only provided if explicitly
         // requested.
@@ -1046,7 +1052,7 @@ abstract class FlutterCommand extends Command<void> {
 
   void _printDeprecationWarning() {
     if (deprecated) {
-      globals.printStatus('$warningMark The "$name" command is deprecated and '
+      globals.printStatus('${globals.logger.terminal.warningMark} The "$name" command is deprecated and '
           'will be removed in a future version of Flutter. '
           'See https://flutter.dev/docs/development/tools/sdk/releases '
           'for previous releases of Flutter.');
@@ -1067,7 +1073,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void _registerSignalHandlers(String commandPath, DateTime startTime) {
-    final SignalHandler handler = (io.ProcessSignal s) {
+    void handler(io.ProcessSignal s) {
       globals.cache.releaseLock();
       _sendPostUsage(
         commandPath,
@@ -1075,9 +1081,9 @@ abstract class FlutterCommand extends Command<void> {
         startTime,
         globals.systemClock.now(),
       );
-    };
-    globals.signals.addHandler(io.ProcessSignal.SIGTERM, handler);
-    globals.signals.addHandler(io.ProcessSignal.SIGINT, handler);
+    }
+    globals.signals.addHandler(io.ProcessSignal.sigterm, handler);
+    globals.signals.addHandler(io.ProcessSignal.sigint, handler);
   }
 
   /// Logs data about this command.
@@ -1152,8 +1158,8 @@ abstract class FlutterCommand extends Command<void> {
         flutterRootDir: globals.fs.directory(Cache.flutterRoot),
         outputDir: globals.fs.directory(getBuildDirectory()),
         processManager: globals.processManager,
+        platform: globals.platform,
         projectDir: project.directory,
-        generateDartPluginRegistry: true,
       );
 
       await generateLocalizationsSyntheticPackage(
@@ -1183,7 +1189,7 @@ abstract class FlutterCommand extends Command<void> {
       Usage.command(commandPath, parameters: additionalUsageValues);
     }
 
-    return await runCommand();
+    return runCommand();
   }
 
   Future<void> _sendNullSafetyAnalyticsEvents(FlutterProject project) async {
@@ -1326,7 +1332,7 @@ abstract class FlutterCommand extends Command<void> {
     );
     final String help = <String>[
       if (deprecated)
-        '$warningMark Deprecated. This command will be removed in a future version of Flutter.',
+        '${globals.logger.terminal.warningMark} Deprecated. This command will be removed in a future version of Flutter.',
       description,
       '',
       'Global options:',
@@ -1366,7 +1372,7 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
     };
     for (final Device device in devices) {
       final TargetPlatform targetPlatform = await device.targetPlatform;
-      final DevelopmentArtifact developmentArtifact = _artifactFromTargetPlatform(targetPlatform);
+      final DevelopmentArtifact developmentArtifact = artifactFromTargetPlatform(targetPlatform);
       if (developmentArtifact != null) {
         artifacts.add(developmentArtifact);
       }
@@ -1375,31 +1381,10 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
   }
 }
 
-/// A mixin which applies an implementation of [requiredArtifacts] that only
-/// downloads artifacts corresponding to a target device.
-mixin TargetPlatformBasedDevelopmentArtifacts on FlutterCommand {
-  @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
-    // If there is no specified target device, fallback to the default
-    // configuration.
-    final String rawTargetPlatform = stringArg('target-platform');
-    final TargetPlatform targetPlatform = getTargetPlatformForName(rawTargetPlatform);
-    if (targetPlatform == null) {
-      return super.requiredArtifacts;
-    }
-
-    final Set<DevelopmentArtifact> artifacts = <DevelopmentArtifact>{};
-    final DevelopmentArtifact developmentArtifact = _artifactFromTargetPlatform(targetPlatform);
-    if (developmentArtifact != null) {
-      artifacts.add(developmentArtifact);
-    }
-    return artifacts;
-  }
-}
-
 // Returns the development artifact for the target platform, or null
 // if none is supported
-DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
+@protected
+DevelopmentArtifact artifactFromTargetPlatform(TargetPlatform targetPlatform) {
   switch (targetPlatform) {
     case TargetPlatform.android:
     case TargetPlatform.android_arm:
@@ -1430,6 +1415,7 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.fuchsia_arm64:
     case TargetPlatform.fuchsia_x64:
     case TargetPlatform.tester:
+    case TargetPlatform.windows_uwp_x64:
       // No artifacts currently supported.
       return null;
   }

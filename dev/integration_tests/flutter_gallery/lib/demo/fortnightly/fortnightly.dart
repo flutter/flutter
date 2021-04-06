@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 
 class FortnightlyDemo extends StatelessWidget {
+  const FortnightlyDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/fortnightly';
 
   @override
@@ -15,7 +17,7 @@ class FortnightlyDemo extends StatelessWidget {
       home: Scaffold(
         body: Stack(
           children: <Widget>[
-            FruitPage(),
+            const FruitPage(),
             SafeArea(
               child: ShortAppBar(
                 onBackPressed: () {
@@ -31,7 +33,7 @@ class FortnightlyDemo extends StatelessWidget {
 }
 
 class ShortAppBar extends StatelessWidget {
-  const ShortAppBar({ this.onBackPressed });
+  const ShortAppBar({ Key? key, this.onBackPressed }) : super(key: key);
 
   final VoidCallback? onBackPressed;
 
@@ -66,6 +68,8 @@ class ShortAppBar extends StatelessWidget {
 }
 
 class FruitPage extends StatelessWidget {
+  const FruitPage({Key? key}) : super(key: key);
+
   static final String paragraph1 = '''
 Have you ever held a quince? It's strange;
 covered in a fuzz somewhere between peach skin and a spider web. And it's

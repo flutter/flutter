@@ -30,10 +30,17 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
   /// When [exitOnFail] is set to true, the [handleResults] and [attemptToolExit]
   /// methods will exit the tool when this validator detects a recommended
   /// change. This defaults to true.
-  DeferredComponentsGenSnapshotValidator(Environment env, {
+  DeferredComponentsGenSnapshotValidator(this.env, {
     bool exitOnFail = true,
     String title,
-  }) : super(env, exitOnFail: exitOnFail, title: title);
+  }) : super(env.projectDir, env.logger, env.platform, exitOnFail: exitOnFail, title: title);
+
+  /// The build environment that should be used to find the input files to run
+  /// checks against.
+  ///
+  /// The checks in this class are meant to be used as part of a build process,
+  /// so an environment should be available.
+  final Environment env;
 
   // The key used to identify the metadata element as the loading unit id to
   // deferred component mapping.
@@ -58,8 +65,8 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
   /// Where loading unit 2 is included in componentA, loading unit 3 is included
   /// in componentB, and loading unit 4 is included in componentC.
   bool checkAppAndroidManifestComponentLoadingUnitMapping(List<DeferredComponent> components, List<LoadingUnit> generatedLoadingUnits) {
-    final Directory androidDir = env.projectDir.childDirectory('android');
-    inputs.add(env.projectDir.childFile('pubspec.yaml'));
+    final Directory androidDir = projectDir.childDirectory('android');
+    inputs.add(projectDir.childFile('pubspec.yaml'));
 
     // We do not use the Xml package to handle the writing, as we do not want to
     // erase any user applied formatting and comments. The changes can be
@@ -100,25 +107,36 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
         }
       }
     }
+    for (final LoadingUnit unit in generatedLoadingUnits) {
+      if (!mapping.containsKey(unit.id)) {
+        // Store an empty string for unassigned loading units,
+        // indicating that it is in the base component.
+        mapping[unit.id] = '';
+      }
+    }
     // Encode the mapping as a string.
     final StringBuffer mappingBuffer = StringBuffer();
     for (final int key in mapping.keys) {
       mappingBuffer.write('$key:${mapping[key]},');
     }
     String encodedMapping = mappingBuffer.toString();
-    // remove trailing comma.
-    encodedMapping = encodedMapping.substring(0, encodedMapping.length - 1);
+    // remove trailing comma if any
+    if (encodedMapping.endsWith(',')) {
+      encodedMapping = encodedMapping.substring(0, encodedMapping.length - 1);
+    }
     // Check for existing metadata entry and see if needs changes.
     bool exists = false;
     bool modified = false;
-    for (final XmlElement metaData in document.findAllElements('meta-data')) {
-      final String name = metaData.getAttribute('android:name');
-      if (name == _mappingKey) {
-        exists = true;
-        final String storedMappingString = metaData.getAttribute('android:value');
-        if (storedMappingString != encodedMapping) {
-          metaData.setAttribute('android:value', encodedMapping);
-          modified = true;
+    for (final XmlElement application in document.findAllElements('application')) {
+      for (final XmlElement metaData in application.findElements('meta-data')) {
+        final String name = metaData.getAttribute('android:name');
+        if (name == _mappingKey) {
+          exists = true;
+          final String storedMappingString = metaData.getAttribute('android:value');
+          if (storedMappingString != encodedMapping) {
+            metaData.setAttribute('android:value', encodedMapping);
+            modified = true;
+          }
         }
       }
     }
@@ -163,7 +181,7 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
   /// considered new.
   bool checkAgainstLoadingUnitsCache(
       List<LoadingUnit> generatedLoadingUnits) {
-    final List<LoadingUnit> cachedLoadingUnits = _parseLodingUnitsCache(env.projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName));
+    final List<LoadingUnit> cachedLoadingUnits = _parseLodingUnitsCache(projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName));
     loadingUnitComparisonResults = <String, dynamic>{};
     final Set<LoadingUnit> unmatchedLoadingUnits = <LoadingUnit>{};
     final List<LoadingUnit> newLoadingUnits = <LoadingUnit>[];
@@ -276,7 +294,7 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
   /// deferred components.
   void writeLoadingUnitsCache(List<LoadingUnit> generatedLoadingUnits) {
     generatedLoadingUnits ??= <LoadingUnit>[];
-    final File cacheFile = env.projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
+    final File cacheFile = projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
     outputs.add(cacheFile);
     ErrorHandlingFileSystem.deleteIfExists(cacheFile);
     cacheFile.createSync(recursive: true);

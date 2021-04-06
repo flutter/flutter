@@ -2397,14 +2397,12 @@ void main() {
       required List<String> tabs,
     }) {
       return boilerplate(
-        child: Container(
-          child: TabBar(
-            controller: controller,
-            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
-            onTap: (int index) {
-              tabIndex = index;
-            },
-          ),
+        child: TabBar(
+          controller: controller,
+          tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+          onTap: (int index) {
+            tabIndex = index;
+          },
         ),
       );
     }
@@ -2619,7 +2617,7 @@ void main() {
             length: 1,
             child: TabBar(
               tabs: <Tab>[
-                Tab(text: 'A',)
+                Tab(text: 'A')
               ],
             )
           )
@@ -2643,7 +2641,7 @@ void main() {
             length: 1,
             child: TabBar(
               tabs: <Tab>[
-                Tab(text: 'A',)
+                Tab(text: 'A')
               ],
               enableFeedback: false,
             ),
@@ -2671,7 +2669,7 @@ void main() {
             length: 1,
             child: TabBar(
               tabs: const <Tab>[
-                Tab(text: 'A',)
+                Tab(text: 'A')
               ],
               overlayColor: MaterialStateProperty.resolveWith<Color>(
                 (Set<MaterialState> states) {
@@ -2704,7 +2702,7 @@ void main() {
           length: 1,
           child: TabBar(
             tabs: const <Tab>[
-              Tab(text: 'A',)
+              Tab(text: 'A')
             ],
             overlayColor: MaterialStateProperty.resolveWith<Color>(
               (Set<MaterialState> states) {
@@ -3167,8 +3165,8 @@ void main() {
       Tab(icon: Icon(Icons.notifications), child: Text('Test')),
     ];
 
-    const TabBar tabBarWithText = TabBar(tabs: tabListWithText, indicatorWeight: indicatorWeight,);
-    const TabBar tabBarWithTextChild = TabBar(tabs: tabListWithTextChild, indicatorWeight: indicatorWeight,);
+    const TabBar tabBarWithText = TabBar(tabs: tabListWithText, indicatorWeight: indicatorWeight);
+    const TabBar tabBarWithTextChild = TabBar(tabs: tabListWithTextChild, indicatorWeight: indicatorWeight);
 
     expect(tabBarWithText.preferredSize, tabBarWithTextChild.preferredSize);
    });
@@ -3308,7 +3306,7 @@ void main() {
   });
 
   testWidgets('Crash on dispose', (WidgetTester tester) async {
-    await tester.pumpWidget(Padding(padding: const EdgeInsets.only(right: 200.0), child: TabBarDemo()));
+    await tester.pumpWidget(const Padding(padding: EdgeInsets.only(right: 200.0), child: TabBarDemo()));
     await tester.tap(find.byIcon(Icons.directions_bike));
     // There was a time where this would throw an exception
     // because we tried to send a notification on dispose.
@@ -3428,6 +3426,8 @@ class _KeepAliveInkState extends State<KeepAliveInk> with AutomaticKeepAliveClie
 }
 
 class TabBarDemo extends StatelessWidget {
+  const TabBarDemo({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

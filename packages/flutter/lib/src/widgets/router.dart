@@ -146,7 +146,7 @@ class RouteInformation {
 /// considered unusual for these delegates to change during the lifetime of the
 /// [Router].
 ///
-/// If the [Router] itself is disposed while an an asynchronous operation is in
+/// If the [Router] itself is disposed while an asynchronous operation is in
 /// progress, all active asynchronous operations will have their results
 /// discarded also.
 ///
@@ -247,7 +247,7 @@ class Router<T> extends StatefulWidget {
           (routeInformationProvider == null) == (routeInformationParser == null),
           'Both routeInformationProvider and routeInformationParser must be provided '
           'if this router parses route information. Otherwise, they should both '
-          'be null.'
+          'be null.',
         ),
         assert(routerDelegate != null),
         super(key: key);
@@ -313,7 +313,7 @@ class Router<T> extends StatefulWidget {
         throw FlutterError(
           'Router operation requested with a context that does not include a Router.\n'
           'The context used to retrieve the Router must be that of a widget that '
-          'is a descendant of a Router widget.'
+          'is a descendant of a Router widget.',
         );
       }
       return true;
@@ -496,7 +496,7 @@ class _RouterState<T> extends State<Router<T>> {
               'Router.routeInformationParser returns a null RouteInformation. '
               'If you opt for route information reporting, the '
               'routeInformationParser must not report null for a given '
-              'configuration.'
+              'configuration.',
           ),
         );
       }
@@ -520,7 +520,7 @@ class _RouterState<T> extends State<Router<T>> {
               'Both Router.navigate and Router.neglect have been called in this '
               'build cycle, and the Router cannot decide whether to report the '
               'route information. Please make sure only one of them is called '
-              'within the same build cycle.'
+              'within the same build cycle.',
           ),
         );
       }
@@ -1108,7 +1108,7 @@ abstract class RouterDelegate<T> extends Listenable {
   /// When overriding this method, the configuration returned by this getter
   /// must be able to construct the current app state and build the widget
   /// with the same configuration in the [build] method if it is passed back
-  /// to the the [setNewRoutePath]. Otherwise, the browser backward and forward
+  /// to the [setNewRoutePath]. Otherwise, the browser backward and forward
   /// buttons will not work properly.
   ///
   /// By default, this getter returns null, which prevents the [Router] from
@@ -1184,7 +1184,7 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
   /// Use the [initialRouteInformation] to set the default route information for this
   /// provider.
   PlatformRouteInformationProvider({
-    RouteInformation? initialRouteInformation
+    RouteInformation? initialRouteInformation,
   }) : _value = initialRouteInformation;
 
   @override

@@ -16,9 +16,8 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/user_messages.dart' hide userMessages;
 import '../base/version.dart';
-import '../build_info.dart';
 import '../convert.dart';
-import '../doctor.dart';
+import '../doctor_validator.dart';
 import '../features.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart';
@@ -453,7 +452,6 @@ class AndroidLicenseValidator extends DoctorValidator {
         e.toString(),
         _platform,
       ));
-      return false;
     }
   }
 

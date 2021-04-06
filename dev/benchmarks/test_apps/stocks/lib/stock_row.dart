@@ -11,20 +11,20 @@ typedef StockRowActionCallback = void Function(Stock stock);
 
 class StockRow extends StatelessWidget {
   StockRow({
-    this.stock,
+    required this.stock,
     this.onPressed,
     this.onDoubleTap,
     this.onLongPressed,
   }) : super(key: ObjectKey(stock));
 
   final Stock stock;
-  final StockRowActionCallback onPressed;
-  final StockRowActionCallback onDoubleTap;
-  final StockRowActionCallback onLongPressed;
+  final StockRowActionCallback? onPressed;
+  final StockRowActionCallback? onDoubleTap;
+  final StockRowActionCallback? onLongPressed;
 
   static const double kHeight = 79.0;
 
-  GestureTapCallback _getHandler(StockRowActionCallback callback) {
+  GestureTapCallback? _getHandler(StockRowActionCallback? callback) {
     return callback == null ? null : () => callback(stock);
   }
 

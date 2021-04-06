@@ -220,7 +220,6 @@ class UpgradeCommandRunner {
         'Error: $error.'
       );
     }
-    return false;
   }
 
   /// Returns the remote HEAD flutter version.
@@ -305,7 +304,7 @@ class UpgradeCommandRunner {
   Future<void> updatePackages(FlutterVersion flutterVersion) async {
     globals.printStatus('');
     globals.printStatus(flutterVersion.toString());
-    final String projectRoot = findProjectRoot();
+    final String projectRoot = findProjectRoot(globals.fs);
     if (projectRoot != null) {
       globals.printStatus('');
       await pub.get(
