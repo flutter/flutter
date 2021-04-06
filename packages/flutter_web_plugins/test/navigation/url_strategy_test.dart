@@ -172,14 +172,10 @@ class TestPlatformLocation extends PlatformLocation {
   }
 
   @override
-  void pushState(Object? state, String title, String url) {
-    throw UnimplementedError();
-  }
+  void pushState(Object? state, String title, String url) {}
 
   @override
-  void replaceState(Object? state, String title, String url) {
-    throw UnimplementedError();
-  }
+  void replaceState(Object? state, String title, String url) {}
 
   @override
   void go(int count) {
