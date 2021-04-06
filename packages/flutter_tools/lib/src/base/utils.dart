@@ -7,8 +7,12 @@ import 'dart:math' as math;
 
 import 'package:intl/intl.dart';
 import 'package:file/file.dart';
+import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 
 import '../convert.dart';
+
+/// A path jointer for URL paths.
+final path.Context urlContext = path.url;
 
 /// Convert `foo_bar` to `fooBar`.
 String camelCase(String str) {
@@ -388,4 +392,56 @@ bool isWhitespace(_AnsiRun run) {
       rune == 0x205F ||
       rune == 0x3000 ||
       rune == 0xFEFF;
+}
+
+final RegExp _interpolationRegex = RegExp(r'\$\{([^}]*)\}');
+
+/// Given a string that possibly contains string interpolation sequences
+/// (so for example, something like `ping -n 1 ${host}`), replace all those
+/// interpolation sequences with the matching value given in [replacementValues].
+///
+/// If the value could not be found inside [replacementValues], an empty
+/// string will be substituted instead.
+///
+/// However, if the dollar sign inside the string is preceded with a backslash,
+/// the sequences won't be substituted at all.
+///
+/// Example:
+/// ```dart
+/// final interpolated = _interpolateString(r'ping -n 1 ${host}', {'host': 'raspberrypi'});
+/// print(interpolated);  // will print 'ping -n 1 raspberrypi'
+///
+/// final interpolated2 = _interpolateString(r'ping -n 1 ${_host}', {'host': 'raspberrypi'});
+/// print(interpolated2); // will print 'ping -n 1 '
+/// ```
+String interpolateString(String toInterpolate, Map<String, String> replacementValues) {
+  return toInterpolate.replaceAllMapped(_interpolationRegex, (Match match) {
+    /// The name of the variable to be inserted into the string.
+    /// Example: If the source string is 'ping -n 1 ${host}',
+    ///   `name` would be 'host'
+    final String name = match.group(1)!;
+    return replacementValues.containsKey(name) ? replacementValues[name]! : '';
+  });
+}
+
+/// Given a list of strings possibly containing string interpolation sequences
+/// (so for example, something like `['ping', '-n', '1', '${host}']`), replace
+/// all those interpolation sequences with the matching value given in [replacementValues].
+///
+/// If the value could not be found inside [replacementValues], an empty
+/// string will be substituted instead.
+///
+/// However, if the dollar sign inside the string is preceded with a backslash,
+/// the sequences won't be substituted at all.
+///
+/// Example:
+/// ```dart
+/// final interpolated = _interpolateString(['ping', '-n', '1', r'${host}'], {'host': 'raspberrypi'});
+/// print(interpolated);  // will print '[ping, -n, 1, raspberrypi]'
+///
+/// final interpolated2 = _interpolateString(['ping', '-n', '1', r'${_host}'], {'host': 'raspberrypi'});
+/// print(interpolated2); // will print '[ping, -n, 1, ]'
+/// ```
+List<String> interpolateStringList(List<String> toInterpolate, Map<String, String> replacementValues) {
+  return toInterpolate.map((String s) => interpolateString(s, replacementValues)).toList();
 }

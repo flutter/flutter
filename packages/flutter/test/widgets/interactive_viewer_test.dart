@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart' show Quad, Vector3, Matrix4;
@@ -717,15 +718,15 @@ void main() {
             body: Center(
               child: InteractiveViewer(
                 transformationController: transformationController,
-                onInteractionStart: (ScaleStartDetails details){
+                onInteractionStart: (ScaleStartDetails details) {
                   calledStart = true;
                 },
-                onInteractionUpdate: (ScaleUpdateDetails details){
+                onInteractionUpdate: (ScaleUpdateDetails details) {
                   scaleChange = details.scale;
                   focalPoint = details.focalPoint;
                   localFocalPoint = details.localFocalPoint;
                 },
-                onInteractionEnd: (ScaleEndDetails details){
+                onInteractionEnd: (ScaleEndDetails details) {
                   currentVelocity = details.velocity;
                 },
                 child: const SizedBox(width: 200.0, height: 200.0),
@@ -757,6 +758,140 @@ void main() {
       expect(scenePoint.dx, greaterThan(0.0));
       expect(scenePoint.dy, greaterThan(0.0));
     });
+
+    testWidgets('onInteraction is called even when disabled (touch)', (WidgetTester tester) async {
+      final TransformationController transformationController = TransformationController();
+      bool calledStart = false;
+      bool calledUpdate = false;
+      bool calledEnd = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                transformationController: transformationController,
+                scaleEnabled: false,
+                onInteractionStart: (ScaleStartDetails details) {
+                  calledStart = true;
+                },
+                onInteractionUpdate: (ScaleUpdateDetails details) {
+                  calledUpdate = true;
+                },
+                onInteractionEnd: (ScaleEndDetails details) {
+                  calledEnd = true;
+                },
+                child: const SizedBox(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset childOffset = tester.getTopLeft(find.byType(SizedBox));
+      final Offset childInterior = Offset(
+        childOffset.dx + 20.0,
+        childOffset.dy + 20.0,
+      );
+      TestGesture gesture = await tester.startGesture(childOffset);
+
+      // Attempting to pan doesn't work because it's disabled, but the
+      // interaction methods are still called.
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.moveTo(childInterior);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(transformationController.value, equals(Matrix4.identity()));
+      expect(calledStart, isTrue);
+      expect(calledUpdate, isTrue);
+      expect(calledEnd, isTrue);
+
+      // Attempting to pinch to zoom doesn't work because it's disabled, but the
+      // interaction methods are still called.
+      calledStart = false;
+      calledUpdate = false;
+      calledEnd = false;
+      final Offset scaleStart1 = childInterior;
+      final Offset scaleStart2 = Offset(childInterior.dx + 10.0, childInterior.dy);
+      final Offset scaleEnd1 = Offset(childInterior.dx - 10.0, childInterior.dy);
+      final Offset scaleEnd2 = Offset(childInterior.dx + 20.0, childInterior.dy);
+      gesture = await tester.startGesture(scaleStart1);
+      final TestGesture gesture2 = await tester.startGesture(scaleStart2);
+      addTearDown(gesture2.removePointer);
+      await tester.pump();
+      await gesture.moveTo(scaleEnd1);
+      await gesture2.moveTo(scaleEnd2);
+      await tester.pump();
+      await gesture.up();
+      await gesture2.up();
+      await tester.pumpAndSettle();
+      expect(transformationController.value, equals(Matrix4.identity()));
+      expect(calledStart, isTrue);
+      expect(calledUpdate, isTrue);
+      expect(calledEnd, isTrue);
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
+
+    testWidgets('onInteraction is called even when disabled (mouse)', (WidgetTester tester) async {
+      final TransformationController transformationController = TransformationController();
+      bool calledStart = false;
+      bool calledUpdate = false;
+      bool calledEnd = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                transformationController: transformationController,
+                scaleEnabled: false,
+                onInteractionStart: (ScaleStartDetails details) {
+                  calledStart = true;
+                },
+                onInteractionUpdate: (ScaleUpdateDetails details) {
+                  calledUpdate = true;
+                },
+                onInteractionEnd: (ScaleEndDetails details) {
+                  calledEnd = true;
+                },
+                child: const SizedBox(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset childOffset = tester.getTopLeft(find.byType(SizedBox));
+      final Offset childInterior = Offset(
+        childOffset.dx + 20.0,
+        childOffset.dy + 20.0,
+      );
+      final TestGesture gesture = await tester.startGesture(childOffset, kind: PointerDeviceKind.mouse);
+
+      // Attempting to pan doesn't work because it's disabled, but the
+      // interaction methods are still called.
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.moveTo(childInterior);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(transformationController.value, equals(Matrix4.identity()));
+      expect(calledStart, isTrue);
+      expect(calledUpdate, isTrue);
+      expect(calledEnd, isTrue);
+
+      // Attempting to scroll with a mouse to zoom doesn't work because it's
+      // disabled, but the interaction methods are still called.
+      calledStart = false;
+      calledUpdate = false;
+      calledEnd = false;
+      await scrollAt(childInterior, tester, const Offset(0.0, -20.0));
+      await tester.pumpAndSettle();
+      expect(transformationController.value, equals(Matrix4.identity()));
+      expect(calledStart, isTrue);
+      expect(calledUpdate, isTrue);
+      expect(calledEnd, isTrue);
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.windows }));
 
     testWidgets('viewport changes size', (WidgetTester tester) async {
       final TransformationController transformationController = TransformationController();

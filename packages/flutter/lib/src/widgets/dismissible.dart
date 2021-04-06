@@ -529,7 +529,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         _sizePriorToCollapse = context.size;
         _resizeAnimation = _resizeController!.drive(
           CurveTween(
-            curve: _kResizeTimeCurve
+            curve: _kResizeTimeCurve,
           ),
         ).drive(
           Tween<double>(
@@ -571,8 +571,8 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
             ErrorSummary('A dismissed Dismissible widget is still part of the tree.'),
             ErrorHint(
               'Make sure to implement the onDismissed handler and to immediately remove the Dismissible '
-              'widget from the application once that handler has fired.'
-            )
+              'widget from the application once that handler has fired.',
+            ),
           ]);
         }
         return true;

@@ -322,7 +322,7 @@ class Hero extends StatefulWidget {
             ErrorDescription(
               'Within each subtree for which heroes are to be animated (i.e. a PageRoute subtree), '
               'each Hero must have a unique non-null tag.\n'
-              'In this case, multiple heroes had the following tag: $tag\n'
+              'In this case, multiple heroes had the following tag: $tag',
             ),
             DiagnosticsProperty<StatefulElement>('Here is the subtree for one of the offending heroes', hero, linePrefix: '# ', style: DiagnosticsTreeStyle.dense),
           ]);
@@ -437,7 +437,7 @@ class _HeroState extends State<Hero> {
   Widget build(BuildContext context) {
     assert(
       context.findAncestorWidgetOfExactType<Hero>() == null,
-      'A Hero widget cannot be the descendant of another Hero widget.'
+      'A Hero widget cannot be the descendant of another Hero widget.',
     );
 
     final bool showPlaceholder = _placeholderSize != null;

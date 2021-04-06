@@ -15,7 +15,6 @@ import 'package:vector_math/vector_math_64.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'layout_helper.dart';
-import 'mouse_tracker.dart';
 import 'object.dart';
 
 export 'package:flutter/gestures.dart' show
@@ -503,7 +502,7 @@ class RenderAspectRatio extends RenderProxyBox {
           'This $runtimeType was given an aspect ratio of $aspectRatio but was given '
           'both unbounded width and unbounded height constraints. Because both '
           'constraints were unbounded, this render object doesn\'t know how much '
-          'size to consume.'
+          'size to consume.',
         );
       }
       return true;
@@ -1601,8 +1600,10 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
     assert(_clip != null);
     final Offset center = _clip!.center;
     // convert the position to an offset from the center of the unit circle
-    final Offset offset = Offset((position.dx - center.dx) / _clip!.width,
-                                     (position.dy - center.dy) / _clip!.height);
+    final Offset offset = Offset(
+      (position.dx - center.dx) / _clip!.width,
+      (position.dy - center.dy) / _clip!.height,
+    );
     // check if the point is outside the unit circle
     if (offset.distanceSquared > 0.25) // x^2 + y^2 > r^2
       return false;
@@ -2147,7 +2148,7 @@ class RenderDecoratedBox extends RenderProxyBox {
             ErrorDescription(
               'Before painting the decoration, the canvas save count was $debugSaveCount. '
               'After painting it, the canvas save count was ${context.canvas.getSaveCount()}. '
-              'Every call to save() or saveLayer() must be matched by a call to restore().'
+              'Every call to save() or saveLayer() must be matched by a call to restore().',
             ),
             DiagnosticsProperty<Decoration>('The decoration was', decoration, style: DiagnosticsTreeStyle.errorProperty),
             DiagnosticsProperty<BoxPainter>('The painter was', _painter, style: DiagnosticsTreeStyle.errorProperty),
@@ -2583,8 +2584,13 @@ class RenderFittedBox extends RenderProxyBox {
   TransformLayer? _paintChildWithTransform(PaintingContext context, Offset offset) {
     final Offset? childOffset = MatrixUtils.getAsTranslation(_transform!);
     if (childOffset == null)
-      return context.pushTransform(needsCompositing, offset, _transform!, super.paint,
-          oldLayer: layer is TransformLayer ? layer! as TransformLayer : null);
+      return context.pushTransform(
+        needsCompositing,
+        offset,
+        _transform!,
+        super.paint,
+        oldLayer: layer is TransformLayer ? layer! as TransformLayer : null,
+      );
     else
       super.paint(context, offset + childOffset);
     return null;
@@ -2597,8 +2603,14 @@ class RenderFittedBox extends RenderProxyBox {
     _updatePaintData();
     if (child != null) {
       if (_hasVisualOverflow! && clipBehavior != Clip.none)
-        layer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintChildWithTransform,
-            oldLayer: layer is ClipRectLayer ? layer! as ClipRectLayer : null, clipBehavior: clipBehavior);
+        layer = context.pushClipRect(
+          needsCompositing,
+          offset,
+          Offset.zero & size,
+          _paintChildWithTransform,
+          oldLayer: layer is ClipRectLayer ? layer! as ClipRectLayer : null,
+          clipBehavior: clipBehavior,
+        );
       else
         layer = _paintChildWithTransform(context, offset);
     }
@@ -3705,6 +3717,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool? selected,
     bool? button,
     bool? slider,
+    bool? keyboardKey,
     bool? link,
     bool? header,
     bool? textField,
@@ -3761,6 +3774,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _selected = selected,
        _button = button,
        _slider = slider,
+       _keyboardKey = keyboardKey,
        _link = link,
        _header = header,
        _textField = textField,
@@ -3917,6 +3931,17 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (slider == value)
       return;
     _slider = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsConfiguration.isKeyboardKey] semantic to the
+  /// given value.
+  bool? get keyboardKey => _keyboardKey;
+  bool? _keyboardKey;
+  set keyboardKey(bool? value) {
+    if (keyboardKey == value)
+      return;
+    _keyboardKey = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -4643,10 +4668,14 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = container;
     config.explicitChildNodes = explicitChildNodes;
-    assert((scopesRoute == true && explicitChildNodes == true) || scopesRoute != true,
-      'explicitChildNodes must be set to true if scopes route is true');
-    assert(!(toggled == true && checked == true),
-      'A semantics node cannot be toggled and checked at the same time');
+    assert(
+      (scopesRoute == true && explicitChildNodes == true) || scopesRoute != true,
+      'explicitChildNodes must be set to true if scopes route is true',
+    );
+    assert(
+      !(toggled == true && checked == true),
+      'A semantics node cannot be toggled and checked at the same time',
+    );
 
     if (enabled != null)
       config.isEnabled = enabled;
@@ -4662,6 +4691,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isLink = link!;
     if (slider != null)
       config.isSlider = slider!;
+    if (keyboardKey != null)
+      config.isKeyboardKey = keyboardKey!;
     if (header != null)
       config.isHeader = header!;
     if (textField != null)
