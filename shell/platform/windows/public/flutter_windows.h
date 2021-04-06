@@ -131,9 +131,10 @@ FLUTTER_EXPORT bool FlutterDesktopViewControllerHandleTopLevelWindowProc(
 // Creates a Flutter engine with the given properties.
 //
 // The caller owns the returned reference, and is responsible for calling
-// FlutterDesktopEngineDestroy.
+// FlutterDesktopEngineDestroy. The lifetime of |engine_properties| is required
+// to extend only until the end of this call.
 FLUTTER_EXPORT FlutterDesktopEngineRef FlutterDesktopEngineCreate(
-    const FlutterDesktopEngineProperties& engine_properties);
+    const FlutterDesktopEngineProperties* engine_properties);
 
 // Shuts down and destroys the given engine instance. Returns true if the
 // shutdown was successful, or if the engine was not running.
