@@ -1192,7 +1192,7 @@ Future<void> injectPlugins(
   bool linuxPlatform = false,
   bool macOSPlatform = false,
   bool windowsPlatform = false,
-  bool winuwpPlatform = false,
+  bool winUwpPlatform = false,
   bool webPlatform = false,
 }) async {
   final List<Plugin> plugins = await findPlugins(project);
@@ -1213,7 +1213,7 @@ Future<void> injectPlugins(
   if (windowsPlatform) {
     await _writeWindowsPluginFiles(project, plugins);
   }
-  if (winuwpPlatform) {
+  if (winUwpPlatform) {
     await _writeWindowsUwpPluginFiles(project, plugins);
   }
   if (!project.isModule) {
