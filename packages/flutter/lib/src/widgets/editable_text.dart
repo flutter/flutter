@@ -11,6 +11,7 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:characters/characters.dart';
 
 import 'autofill.dart';
 import 'automatic_keep_alive.dart';
@@ -2452,9 +2453,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _cachedText = text.toString();
       _cachedFirstRect = firstRect;
       _cachedSize = size;
-      final List<Rect> rects = List<Rect>.generate(
-        text.length,
-        (int i) => renderEditable.getBoxesForSelection(TextSelection(baseOffset: i, extentOffset: i + 1)).first,
+      final List<SelectionRect> rects = List<SelectionRect>.generate(
+        _cachedText.characters.length,
+        (int i) {
+          final int offset = _cachedText.characters.getRange(0, i).string.length;
+          return SelectionRect(
+            bounds: renderEditable.getBoxesForSelection(TextSelection(baseOffset: offset, extentOffset: offset + _cachedText.characters.characterAt(i).string.length)).first,
+            position: offset,
+          );
+        },
       );
       _textInputConnection!.setSelectionRects(rects);
     }

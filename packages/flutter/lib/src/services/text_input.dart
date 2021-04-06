@@ -947,6 +947,40 @@ abstract class ScribbleClient {
   Rect get bounds;
 }
 
+/// Represents a selection rect and it's position in the text.
+///
+/// This is used to report the current text selection rect and position data
+/// to the engine for Scribble support on iPadOS 14.
+@immutable
+class SelectionRect {
+  /// Constructor for creating a [SelectionRect] from a text [position] and
+  /// [bounds].
+  const SelectionRect({required this.position, required this.bounds});
+
+  /// The position of this selection rect within the text.
+  final int position;
+
+  /// The rectangle representing the bounds of this selection rect.
+  final Rect bounds;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (runtimeType != other.runtimeType)
+      return false;
+    return other is SelectionRect
+        && other.position == position
+        && other.bounds   == bounds;
+  }
+
+  @override
+  int get hashCode => hashValues(position, bounds);
+
+  @override
+  String toString() => 'SelectionRect($position, $bounds)';
+}
+
 /// An interface for interacting with a text input control.
 ///
 /// See also:
@@ -964,7 +998,7 @@ class TextInputConnection {
   Matrix4? _cachedTransform;
   Rect? _cachedRect;
   Rect? _cachedCaretRect;
-  List<Rect> _cachedTextBoxes = <Rect>[];
+  List<SelectionRect> _cachedSelectionRects = <SelectionRect>[];
 
   static int _nextId = 1;
   final int _id;
@@ -1094,11 +1128,11 @@ class TextInputConnection {
   /// Send selection rects.
   ///
   /// These are used by the engine during a UIDirectScribbleInteraction.
-  void setSelectionRects(List<Rect> textBoxes) {
-    if (!listEquals(_cachedTextBoxes, textBoxes)) {
-      _cachedTextBoxes = textBoxes;
-      TextInput._instance._setSelectionRects(textBoxes.map((Rect rect) {
-        return <double>[rect.left, rect.top, rect.width, rect.height];
+  void setSelectionRects(List<SelectionRect> selectionRects) {
+    if (!listEquals(_cachedSelectionRects, selectionRects)) {
+      _cachedSelectionRects = selectionRects;
+      TextInput._instance._setSelectionRects(selectionRects.map((SelectionRect rect) {
+        return <num>[rect.bounds.left, rect.bounds.top, rect.bounds.width, rect.bounds.height, rect.position];
       }).toList());
     }
   }
@@ -1543,7 +1577,7 @@ class TextInput {
     );
   }
 
-  void _setSelectionRects(List<List<double>> args) {
+  void _setSelectionRects(List<List<num>> args) {
     _channel.invokeMethod<void>(
       'TextInput.setSelectionRects',
       args,
