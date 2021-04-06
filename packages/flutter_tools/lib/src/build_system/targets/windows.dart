@@ -133,6 +133,8 @@ class UnpackWindowsUwp extends Target {
 
   @override
   Future<void> build(Environment environment) async {
+    // These artifact look ups need to modified to windows-x64-uwp once
+    // the cache updates have landed.
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String engineSourcePath = environment.artifacts
       .getArtifactPath(
