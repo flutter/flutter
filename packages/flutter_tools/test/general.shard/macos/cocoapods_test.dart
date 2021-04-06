@@ -335,7 +335,7 @@ void main() {
         xcodeProject: projectUnderTest.ios,
         buildMode: BuildMode.debug,
       ), throwsToolExit(message: 'CocoaPods not installed or not in valid state'));
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
@@ -347,7 +347,7 @@ void main() {
         xcodeProject: projectUnderTest.ios,
         buildMode: BuildMode.debug,
       ), throwsToolExit(message: 'CocoaPods not installed or not in valid state'));
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
@@ -385,15 +385,21 @@ void main() {
       final FlutterProject projectUnderTest = setupProjectUnderTest();
       pretendPodIsInstalled();
       pretendPodVersionIs('1.10.0');
-      fakeProcessManager.addCommand(
-        const FakeCommand(
+      fakeProcessManager.addCommands(const <FakeCommand>[
+        FakeCommand(
           command: <String>['pod', 'install', '--verbose'],
         ),
-      );
+        FakeCommand(
+          command: <String>['touch', 'project/macos/Podfile.lock'],
+        ),
+      ]);
 
-      fileSystem.file(fileSystem.path.join('project', 'macos', 'Podfile'))
+      projectUnderTest.macos.podfile
         ..createSync()
         ..writeAsStringSync('plugin_pods = parse_KV_file(\'../.flutter-plugins\')');
+      projectUnderTest.macos.podfileLock
+        ..createSync()
+        ..writeAsStringSync('Existing lock file.');
 
       await cocoaPodsUnderTest.processPods(
         xcodeProject: projectUnderTest.macos,
@@ -411,7 +417,7 @@ void main() {
         xcodeProject: projectUnderTest.ios,
         buildMode: BuildMode.debug,
       ), throwsToolExit(message: 'Podfile missing'));
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('throws, if specs repo is outdated.', () async {
@@ -556,20 +562,20 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         ..createSync(recursive: true)
         ..writeAsStringSync('Existing lock file.');
 
-      fakeProcessManager.addCommand(
-        const FakeCommand(
+      fakeProcessManager.addCommands(const <FakeCommand>[
+        FakeCommand(
           command: <String>['pod', 'install', '--verbose'],
           workingDirectory: 'project/ios',
           environment: <String, String>{'COCOAPODS_DISABLE_STATS': 'true', 'LANG': 'en_US.UTF-8'},
         ),
-      );
+      ]);
       final bool didInstall = await cocoaPodsUnderTest.processPods(
         xcodeProject: projectUnderTest.ios,
         buildMode: BuildMode.debug,
         dependenciesChanged: false,
       );
       expect(didInstall, isTrue);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('runs iOS pod install, if Manifest.lock is missing', () async {
@@ -582,20 +588,23 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       projectUnderTest.ios.podfileLock
         ..createSync()
         ..writeAsStringSync('Existing lock file.');
-      fakeProcessManager.addCommand(
-        const FakeCommand(
+      fakeProcessManager.addCommands(const <FakeCommand>[
+        FakeCommand(
           command: <String>['pod', 'install', '--verbose'],
           workingDirectory: 'project/ios',
           environment: <String, String>{'COCOAPODS_DISABLE_STATS': 'true', 'LANG': 'en_US.UTF-8'},
         ),
-      );
+        FakeCommand(
+          command: <String>['touch', 'project/ios/Podfile.lock'],
+        ),
+      ]);
       final bool didInstall = await cocoaPodsUnderTest.processPods(
         xcodeProject: projectUnderTest.ios,
         buildMode: BuildMode.debug,
         dependenciesChanged: false,
       );
       expect(didInstall, isTrue);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('runs macOS pod install, if Manifest.lock is missing', () async {
@@ -608,20 +617,23 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       projectUnderTest.macos.podfileLock
         ..createSync()
         ..writeAsStringSync('Existing lock file.');
-      fakeProcessManager.addCommand(
-        const FakeCommand(
+      fakeProcessManager.addCommands(const <FakeCommand>[
+        FakeCommand(
           command: <String>['pod', 'install', '--verbose'],
           workingDirectory: 'project/macos',
           environment: <String, String>{'COCOAPODS_DISABLE_STATS': 'true', 'LANG': 'en_US.UTF-8'},
         ),
-      );
+        FakeCommand(
+          command: <String>['touch', 'project/macos/Podfile.lock'],
+        ),
+      ]);
       final bool didInstall = await cocoaPodsUnderTest.processPods(
         xcodeProject: projectUnderTest.macos,
         buildMode: BuildMode.debug,
         dependenciesChanged: false,
       );
       expect(didInstall, isTrue);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('runs pod install, if Manifest.lock different from Podspec.lock', () async {
@@ -637,20 +649,23 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       projectUnderTest.ios.podManifestLock
         ..createSync(recursive: true)
         ..writeAsStringSync('Different lock file.');
-      fakeProcessManager.addCommand(
-        const FakeCommand(
+      fakeProcessManager.addCommands(const <FakeCommand>[
+        FakeCommand(
           command: <String>['pod', 'install', '--verbose'],
           workingDirectory: 'project/ios',
           environment: <String, String>{'COCOAPODS_DISABLE_STATS': 'true', 'LANG': 'en_US.UTF-8'},
         ),
-      );
+        FakeCommand(
+          command: <String>['touch', 'project/ios/Podfile.lock'],
+        ),
+      ]);
       final bool didInstall = await cocoaPodsUnderTest.processPods(
         xcodeProject: projectUnderTest.ios,
         buildMode: BuildMode.debug,
         dependenciesChanged: false,
       );
       expect(didInstall, isTrue);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('runs pod install, if flutter framework changed', () async {
@@ -666,20 +681,23 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       projectUnderTest.ios.podManifestLock
         ..createSync(recursive: true)
         ..writeAsStringSync('Existing lock file.');
-      fakeProcessManager.addCommand(
-        const FakeCommand(
+      fakeProcessManager.addCommands(const <FakeCommand>[
+        FakeCommand(
           command: <String>['pod', 'install', '--verbose'],
           workingDirectory: 'project/ios',
           environment: <String, String>{'COCOAPODS_DISABLE_STATS': 'true', 'LANG': 'en_US.UTF-8'},
         ),
-      );
+        FakeCommand(
+          command: <String>['touch', 'project/ios/Podfile.lock'],
+        ),
+      ]);
       final bool didInstall = await cocoaPodsUnderTest.processPods(
         xcodeProject: projectUnderTest.ios,
         buildMode: BuildMode.debug,
         dependenciesChanged: true,
       );
       expect(didInstall, isTrue);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('runs pod install, if Podfile.lock is older than Podfile', () async {
@@ -698,19 +716,22 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       await Future<void>.delayed(const Duration(milliseconds: 10));
       projectUnderTest.ios.podfile
         .writeAsStringSync('Updated Podfile');
-      fakeProcessManager.addCommand(
-        const FakeCommand(
+      fakeProcessManager.addCommands(const <FakeCommand>[
+        FakeCommand(
           command: <String>['pod', 'install', '--verbose'],
           workingDirectory: 'project/ios',
           environment: <String, String>{'COCOAPODS_DISABLE_STATS': 'true', 'LANG': 'en_US.UTF-8'},
         ),
-      );
+        FakeCommand(
+          command: <String>['touch', 'project/ios/Podfile.lock'],
+        ),
+      ]);
       await cocoaPodsUnderTest.processPods(
         xcodeProject: projectUnderTest.ios,
         buildMode: BuildMode.debug,
         dependenciesChanged: false,
       );
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('skips pod install, if nothing changed', () async {
@@ -730,7 +751,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         dependenciesChanged: false,
       );
       expect(didInstall, isFalse);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('a failed pod install deletes Pods/Manifest.lock', () async {
