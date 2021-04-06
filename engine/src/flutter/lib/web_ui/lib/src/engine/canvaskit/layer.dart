@@ -401,7 +401,8 @@ class ShaderMaskEngineLayer extends ContainerLayer implements ui.ShaderMaskEngin
     paintContext.leafNodesCanvas!.save();
     paintContext.leafNodesCanvas!.translate(maskRect.left, maskRect.top);
 
-    paintContext.leafNodesCanvas!.drawRect(maskRect, paint);
+    paintContext.leafNodesCanvas!.drawRect(
+        ui.Rect.fromLTWH(0, 0, maskRect.width, maskRect.height), paint);
     paintContext.leafNodesCanvas!.restore();
 
     paintContext.internalNodesCanvas.restore();
