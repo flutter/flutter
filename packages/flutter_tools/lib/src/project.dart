@@ -279,6 +279,7 @@ class FlutterProject {
       macOSPlatform: featureFlags.isMacOSEnabled && macos.existsSync(),
       windowsPlatform: featureFlags.isWindowsEnabled && windows.existsSync(),
       webPlatform: featureFlags.isWebEnabled && web.existsSync(),
+      winuwpPlatform: featureFlags.isWindowsUwpEnabled && windowsUwp.existsSync(),
     );
   }
 
@@ -291,7 +292,7 @@ class FlutterProject {
     bool macOSPlatform = false,
     bool windowsPlatform = false,
     bool webPlatform = false,
-    bool windowsUwpPlatform = false,
+    bool winuwpPlatform = false,
   }) async {
     if (!directory.existsSync() || hasExampleApp || isPlugin) {
       return;
@@ -315,7 +316,7 @@ class FlutterProject {
     if (webPlatform) {
       await web.ensureReadyForPlatformSpecificTooling();
     }
-    if (windowsUwpPlatform) {
+    if (winuwpPlatform) {
       await windowsUwp.ensureReadyForPlatformSpecificTooling();
     }
     await injectPlugins(
@@ -326,6 +327,7 @@ class FlutterProject {
       macOSPlatform: macOSPlatform,
       windowsPlatform: windowsPlatform,
       webPlatform: webPlatform,
+      winuwpPlatform: winuwpPlatform,
     );
   }
 

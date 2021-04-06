@@ -150,11 +150,13 @@ Future<void> buildWindowsUwp(WindowsUwpProject windowsProject, BuildInfo buildIn
   }
 
   final Directory buildDirectory = globals.fs.directory(getWindowsBuildUwpDirectory());
+  final String buildModeName = getNameForBuildMode(buildInfo.mode ?? BuildMode.release);
   final Status status = globals.logger.startProgress(
     'Building Windows application...',
   );
   try {
     await _runCmakeGeneration(cmakePath, buildDirectory, windowsProject.cmakeFile.parent);
+    await _runBuild(cmakePath, buildDirectory, buildModeName);
   } finally {
     status.cancel();
   }
