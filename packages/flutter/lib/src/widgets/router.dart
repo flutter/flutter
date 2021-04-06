@@ -998,6 +998,74 @@ class ChildBackButtonDispatcher extends BackButtonDispatcher {
   }
 }
 
+/// A convenience widget that registers a callback for when the back button is pressed.
+///
+/// In order to use this widget, there must be an ancestor [Router] widget in the tree
+/// that has a [RootBackButtonDispatcher]. e.g. The [Router] widget created by the
+/// [MaterialApp.router] has a built-in [RootBackButtonDispatcher] by default.
+///
+/// It only applies to platforms that accept back button clicks, such as Android.
+///
+/// It can be useful for scenarios, in which you create a different state in your
+/// screen but don't want to use a new page for that.
+class BackButtonListener extends StatefulWidget {
+  /// Creates a BackButtonListener widget .
+  ///
+  /// The [child] and [onBackButtonPressed] arguments must not be null.
+  const BackButtonListener({
+    Key? key,
+    required this.child,
+    required this.onBackButtonPressed,
+  }) : super(key: key);
+
+  /// The widget below this widget in the tree.
+  final Widget child;
+
+  /// The callback function that will be called when the back button is pressed.
+  ///
+  /// It must return a boolean future with true if this child will handle the request;
+  /// otherwise, return a boolean future with false.
+  final ValueGetter<Future<bool>> onBackButtonPressed;
+
+  @override
+  _BackButtonListenerState createState() => _BackButtonListenerState();
+}
+
+class _BackButtonListenerState extends State<BackButtonListener> {
+  BackButtonDispatcher? dispatcher;
+
+  @override
+  void didChangeDependencies() {
+    dispatcher?.removeCallback(widget.onBackButtonPressed);
+
+    final BackButtonDispatcher? rootBackDispatcher = Router.of(context).backButtonDispatcher;
+    assert(rootBackDispatcher != null, 'The parent router must have a backButtonDispatcher to use this widget');
+
+    dispatcher = rootBackDispatcher!.createChildBackButtonDispatcher()
+      ..addCallback(widget.onBackButtonPressed)
+      ..takePriority();
+    super.didChangeDependencies();
+  }
+
+  @override
+  void didUpdateWidget(covariant BackButtonListener oldWidget) {
+    if (oldWidget.onBackButtonPressed != widget.onBackButtonPressed) {
+      dispatcher?.removeCallback(oldWidget.onBackButtonPressed);
+      dispatcher?.addCallback(widget.onBackButtonPressed);
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() {
+    dispatcher?.removeCallback(widget.onBackButtonPressed);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
 /// A delegate that is used by the [Router] widget to parse a route information
 /// into a configuration of type T.
 ///
