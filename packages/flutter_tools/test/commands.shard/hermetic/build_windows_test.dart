@@ -107,16 +107,20 @@ void main() {
     bool verbose = false,
     void Function() onRun,
     String stdout = '',
+    bool winuwp = false,
   }) {
     return FakeCommand(
       command: <String>[
         cmakePath,
         '--build',
-        r'build\windows',
+        if (winuwp)
+          r'build\winuwp'
+        else
+          r'build\windows',
         '--config',
         buildMode,
-        '--target',
-        'INSTALL',
+        if (!winuwp)
+          ...<String>['--target', 'INSTALL'],
         if (verbose)
           '--verbose'
       ],
@@ -498,7 +502,10 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
     FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[cmakeGenerationCommand(winuwp: true)]),
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+      cmakeGenerationCommand(winuwp: true),
+      buildCommand('Release',  stdout: 'STDOUT STUFF', winuwp: true),
+    ]),
     FeatureFlags: () => TestFeatureFlags(isWindowsUwpEnabled: true),
   });
 }
