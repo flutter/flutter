@@ -865,10 +865,12 @@ class BoxHitTestResult extends HitTestResult {
     required BoxHitTestWithOutOfBandPosition hitTest,
   }) {
     assert(hitTest != null);
-    assert((paintOffset == null && paintTransform == null && rawTransform != null) ||
-           (paintOffset == null && paintTransform != null && rawTransform == null) ||
-           (paintOffset != null && paintTransform == null && rawTransform == null),
-           'Exactly one transform or offset argument must be provided.');
+    assert(
+      (paintOffset == null && paintTransform == null && rawTransform != null) ||
+      (paintOffset == null && paintTransform != null && rawTransform == null) ||
+      (paintOffset != null && paintTransform == null && rawTransform == null),
+      'Exactly one transform or offset argument must be provided.',
+    );
     if (paintOffset != null) {
       pushOffset(-paintOffset);
     } else if (rawTransform != null) {
