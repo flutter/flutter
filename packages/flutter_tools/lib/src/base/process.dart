@@ -167,11 +167,11 @@ abstract class ProcessUtils {
   Future<RunResult> run(
     List<String> cmd, {
     bool throwOnError = false,
-    RunResultChecker allowedFailures,
-    String workingDirectory,
+    RunResultChecker? allowedFailures,
+    String? workingDirectory,
     bool allowReentrantFlutter = false,
-    Map<String, String> environment,
-    Duration timeout,
+    Map<String, String>? environment,
+    Duration? timeout,
     int timeoutRetries = 0,
   });
 
@@ -180,10 +180,10 @@ abstract class ProcessUtils {
     List<String> cmd, {
     bool throwOnError = false,
     bool verboseExceptions = false,
-    RunResultChecker allowedFailures,
+    RunResultChecker? allowedFailures,
     bool hideStdout = false,
-    String workingDirectory,
-    Map<String, String> environment,
+    String? workingDirectory,
+    Map<String, String>? environment,
     bool allowReentrantFlutter = false,
     Encoding encoding = systemEncoding,
   });
@@ -192,9 +192,9 @@ abstract class ProcessUtils {
   /// directory. Completes when the process has been started.
   Future<Process> start(
     List<String> cmd, {
-    String workingDirectory,
+    String? workingDirectory,
     bool allowReentrantFlutter = false,
-    Map<String, String> environment,
+    Map<String, String>? environment,
   });
 
   /// This runs the command and streams stdout/stderr from the child process to
@@ -210,24 +210,24 @@ abstract class ProcessUtils {
   /// treated as errors, just as if they had been logged to stderr instead.
   Future<int> stream(
     List<String> cmd, {
-    String workingDirectory,
+    String? workingDirectory,
     bool allowReentrantFlutter = false,
     String prefix = '',
     bool trace = false,
-    RegExp filter,
-    RegExp stdoutErrorMatcher,
-    StringConverter mapFunction,
-    Map<String, String> environment,
+    RegExp? filter,
+    RegExp? stdoutErrorMatcher,
+    StringConverter? mapFunction,
+    Map<String, String>? environment,
   });
 
   bool exitsHappySync(
     List<String> cli, {
-    Map<String, String> environment,
+    Map<String, String>? environment,
   });
 
   Future<bool> exitsHappy(
     List<String> cli, {
-    Map<String, String> environment,
+    Map<String, String>? environment,
   });
 }
 

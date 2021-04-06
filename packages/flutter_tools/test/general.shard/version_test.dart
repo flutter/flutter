@@ -14,7 +14,7 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 
@@ -290,39 +290,6 @@ void main() {
         FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => mockProcessManager,
         Cache: () => mockCache,
-      });
-
-      testUsingContext('versions comparison', () async {
-        fakeData(
-          mockProcessManager,
-          mockCache,
-          localCommitDate: getChannelOutOfDateVersion(),
-          errorOnFetch: true,
-          expectServerPing: true,
-          expectSetStamp: true,
-          channel: channel,
-        );
-        final FlutterVersion version = globals.flutterVersion;
-
-        when(mockProcessManager.runSync(
-          <String>['git', 'merge-base', '--is-ancestor', 'abcdef', '123456'],
-          workingDirectory: anyNamed('workingDirectory'),
-        )).thenReturn(ProcessResult(1, 0, '', ''));
-
-        expect(
-            version.checkRevisionAncestry(
-              tentativeDescendantRevision: '123456',
-              tentativeAncestorRevision: 'abcdef',
-            ),
-            true);
-
-        verify(mockProcessManager.runSync(
-          <String>['git', 'merge-base', '--is-ancestor', 'abcdef', '123456'],
-          workingDirectory: anyNamed('workingDirectory'),
-        ));
-      }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(clock: _testClock),
-        ProcessManager: () => mockProcessManager,
       });
     });
 

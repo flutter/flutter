@@ -25,7 +25,6 @@ import 'persistent_tool_state.dart';
 import 'project.dart';
 import 'reporting/reporting.dart';
 import 'runner/local_engine.dart';
-import 'version.dart';
 
 export 'globals_null_migrated.dart';
 
@@ -49,7 +48,6 @@ CocoaPodsValidator get cocoapodsValidator => context.get<CocoaPodsValidator>();
 LocalEngineLocator get localEngineLocator => context.get<LocalEngineLocator>();
 
 CocoaPods get cocoaPods => context.get<CocoaPods>();
-FlutterVersion get flutterVersion => context.get<FlutterVersion>();
 FuchsiaArtifacts get fuchsiaArtifacts => context.get<FuchsiaArtifacts>();
 IOSSimulatorUtils get iosSimulatorUtils => context.get<IOSSimulatorUtils>();
 IOSWorkflow get iosWorkflow => context.get<IOSWorkflow>();
