@@ -453,7 +453,8 @@ TEST_F(EmbedderTest, InvalidPlatformMessages) {
 }
 
 //------------------------------------------------------------------------------
-/// Tests that setting a custom log callback works as expected.
+/// Tests that setting a custom log callback works as expected and defaults to
+/// using tag "flutter".
 TEST_F(EmbedderTest, CanSetCustomLogMessageCallback) {
   fml::AutoResetWaitableEvent callback_latch;
   auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
@@ -463,6 +464,26 @@ TEST_F(EmbedderTest, CanSetCustomLogMessageCallback) {
   context.SetLogMessageCallback(
       [&callback_latch](const char* tag, const char* message) {
         EXPECT_EQ(std::string(tag), "flutter");
+        EXPECT_EQ(std::string(message), "hello world");
+        callback_latch.Signal();
+      });
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  callback_latch.Wait();
+}
+
+//------------------------------------------------------------------------------
+/// Tests that setting a custom log tag works.
+TEST_F(EmbedderTest, CanSetCustomLogTag) {
+  fml::AutoResetWaitableEvent callback_latch;
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+  EmbedderConfigBuilder builder(context);
+  builder.SetDartEntrypoint("custom_logger");
+  builder.SetSoftwareRendererConfig();
+  builder.SetLogTag("butterfly");
+  context.SetLogMessageCallback(
+      [&callback_latch](const char* tag, const char* message) {
+        EXPECT_EQ(std::string(tag), "butterfly");
         EXPECT_EQ(std::string(message), "hello world");
         callback_latch.Signal();
       });

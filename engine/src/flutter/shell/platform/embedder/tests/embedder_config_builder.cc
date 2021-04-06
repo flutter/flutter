@@ -217,6 +217,11 @@ void EmbedderConfigBuilder::SetLogMessageCallbackHook() {
       EmbedderTestContext::GetLogMessageCallbackHook();
 }
 
+void EmbedderConfigBuilder::SetLogTag(std::string tag) {
+  log_tag_ = std::move(tag);
+  project_args_.log_tag = log_tag_.c_str();
+}
+
 void EmbedderConfigBuilder::SetLocalizationCallbackHooks() {
   project_args_.compute_platform_resolved_locale_callback =
       EmbedderTestContext::GetComputePlatformResolvedLocaleCallbackHook();
