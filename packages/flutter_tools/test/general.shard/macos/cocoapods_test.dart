@@ -335,7 +335,7 @@ void main() {
         xcodeProject: projectUnderTest.ios,
         buildMode: BuildMode.debug,
       ), throwsToolExit(message: 'CocoaPods not installed or not in valid state'));
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
@@ -347,22 +347,12 @@ void main() {
         xcodeProject: projectUnderTest.ios,
         buildMode: BuildMode.debug,
       ), throwsToolExit(message: 'CocoaPods not installed or not in valid state'));
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('exits if Podfile creates the Flutter engine symlink', () async {
-      pretendPodIsInstalled();
-      pretendPodVersionIs('1.10.0');
-      fakeProcessManager.addCommands(const <FakeCommand>[
-        FakeCommand(
-          command: <String>['pod', 'install', '--verbose'],
-        ),
-        FakeCommand(
-          command: <String>['touch', 'project/ios/Podfile.lock'],
-        ),
-      ]);
-
+    testUsingContext('exits if Podfile creates the Flutter engine symlink', () async {
+      final FlutterProject projectUnderTest = setupProjectUnderTest();
       fileSystem.file(fileSystem.path.join('project', 'ios', 'Podfile'))
         ..createSync()
         ..writeAsStringSync('Existing Podfile');
@@ -378,18 +368,8 @@ void main() {
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('exits if iOS Podfile parses .flutter-plugins', () async {
-      pretendPodIsInstalled();
-      pretendPodVersionIs('1.10.0');
-      fakeProcessManager.addCommands(const <FakeCommand>[
-        FakeCommand(
-          command: <String>['pod', 'install', '--verbose'],
-        ),
-        FakeCommand(
-          command: <String>['touch', 'project/ios/Podfile.lock'],
-        ),
-      ]);
-
+    testUsingContext('exits if iOS Podfile parses .flutter-plugins', () async {
+      final FlutterProject projectUnderTest = setupProjectUnderTest();
       fileSystem.file(fileSystem.path.join('project', 'ios', 'Podfile'))
         ..createSync()
         ..writeAsStringSync('plugin_pods = parse_KV_file(\'../.flutter-plugins\')');
@@ -414,9 +394,12 @@ void main() {
         ),
       ]);
 
-      fileSystem.file(fileSystem.path.join('project', 'macos', 'Podfile'))
+      projectUnderTest.macos.podfile
         ..createSync()
         ..writeAsStringSync('plugin_pods = parse_KV_file(\'../.flutter-plugins\')');
+      projectUnderTest.macos.podfileLock
+        ..createSync()
+        ..writeAsStringSync('Existing lock file.');
 
       await cocoaPodsUnderTest.processPods(
         xcodeProject: projectUnderTest.macos,
@@ -434,7 +417,7 @@ void main() {
         xcodeProject: projectUnderTest.ios,
         buildMode: BuildMode.debug,
       ), throwsToolExit(message: 'Podfile missing'));
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('throws, if specs repo is outdated.', () async {
@@ -592,7 +575,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         dependenciesChanged: false,
       );
       expect(didInstall, isTrue);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('runs iOS pod install, if Manifest.lock is missing', () async {
@@ -621,7 +604,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         dependenciesChanged: false,
       );
       expect(didInstall, isTrue);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('runs macOS pod install, if Manifest.lock is missing', () async {
@@ -650,7 +633,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         dependenciesChanged: false,
       );
       expect(didInstall, isTrue);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('runs pod install, if Manifest.lock different from Podspec.lock', () async {
@@ -682,7 +665,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         dependenciesChanged: false,
       );
       expect(didInstall, isTrue);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('runs pod install, if flutter framework changed', () async {
@@ -714,7 +697,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         dependenciesChanged: true,
       );
       expect(didInstall, isTrue);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('runs pod install, if Podfile.lock is older than Podfile', () async {
@@ -748,7 +731,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         buildMode: BuildMode.debug,
         dependenciesChanged: false,
       );
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('skips pod install, if nothing changed', () async {
@@ -768,7 +751,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         dependenciesChanged: false,
       );
       expect(didInstall, isFalse);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('a failed pod install deletes Pods/Manifest.lock', () async {
