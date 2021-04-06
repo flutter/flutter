@@ -243,11 +243,41 @@ class FormState extends State<Form> {
     return _validate();
   }
 
-  bool _validate() {
+  dynamic _validate({bool isBool = true}) {
     bool hasError = false;
-    for (final FormFieldState<dynamic> field in _fields)
-      hasError = !field.validate() || hasError;
+    dynamic error;
+    for (final FormFieldState<dynamic> field in _fields) {
+      if (isBool) {
+        hasError = field.validate() != null || hasError;
+      } else {
+        error = field.validate(isBool: false);
+        if (error != null) {
+          return error;
+        }
+      }
+    }
     return !hasError;
+  }
+  
+  /// Validates every [FormField] that is a descendant of this [Form], and
+  /// returns String empty if there are no errors.
+  /// ```dart
+  ///    String error = _formKey.currentState.validateToGetError();
+  ///    if (error.isNotEmpty) {
+  ///       showToast(error); //use any dialog you want
+  ///       return;
+  ///    }
+  ///    todo api request
+  /// ```
+  String validateToGetError() {
+    _hasInteractedByUser = true;
+    _forceRebuild();
+    final dynamic error = _validate(isBool: false);
+    if (error != null) {
+      return error.toString();
+    } else {
+      return '';
+    }
   }
 }
 
@@ -448,16 +478,23 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   /// Calls [FormField.validator] to set the [errorText]. Returns true if there
   /// were no errors.
-  ///
+  /// [isBool] which to get bool return
   /// See also:
   ///
   ///  * [isValid], which passively gets the validity without setting
   ///    [errorText] or [hasError].
-  bool validate() {
-    setState(() {
+  dynamic validate({bool isBool = true}) {
+    if (isBool) {
+      setState(() {
+        _validate();
+      });
+      return !hasError;
+    } else {
       _validate();
-    });
-    return !hasError;
+      final String? error = hasError ? _errorText : null;
+      _errorText = null;
+      return error;
+    }
   }
 
   void _validate() {
