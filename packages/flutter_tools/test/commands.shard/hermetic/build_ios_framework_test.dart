@@ -53,6 +53,7 @@ void main() {
           rootOverride: rootOverride,
           platform: fakePlatform,
           fileSystem: memoryFileSystem,
+          processManager: FakeProcessManager.any(),
         );
         rootOverride.childDirectory('bin').childDirectory('internal').childFile('engine.version')
           ..createSync(recursive: true)

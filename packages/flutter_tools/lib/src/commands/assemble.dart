@@ -79,6 +79,10 @@ List<Target> _kDefaultTargets = <Target>[
   const DebugBundleWindowsAssets(),
   const ProfileBundleWindowsAssets(),
   const ReleaseBundleWindowsAssets(),
+  // Windows UWP targets
+  const DebugBundleWindowsAssetsUwp(),
+  const ProfileBundleWindowsAssetsUwp(),
+  const ReleaseBundleWindowsAssetsUwp(),
 ];
 
 // TODO(ianh): https://github.com/dart-lang/args/issues/181 will allow us to remove useLegacyNames

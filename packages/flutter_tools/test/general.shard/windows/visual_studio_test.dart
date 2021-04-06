@@ -259,7 +259,7 @@ void setMockEncodedAnyVisualStudioInstallation(
 // Sets up the mock environment for a Windows 10 SDK query.
 //
 // registryPresent controls whether or not the registry key is found.
-// filesPresent controles where or not there are any SDK folders at the location
+// filesPresent controls where or not there are any SDK folders at the location
 // returned by the registry query.
 void setMockSdkRegResponse(
   FileSystem fileSystem,

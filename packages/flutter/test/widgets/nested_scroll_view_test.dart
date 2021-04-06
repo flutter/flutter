@@ -2380,7 +2380,7 @@ class _TestLayoutExtentIsNegative extends StatelessWidget {
                     margin:const EdgeInsets.all(20),
                   ),
                 );
-              },),
+              }),
               SliverOverlapAbsorber(
                 handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                 sliver: SliverAppBar(
@@ -2407,7 +2407,7 @@ class _TestLayoutExtentIsNegative extends StatelessWidget {
                   height: 200,
                   margin: const EdgeInsets.all(20),
                 );
-              },),
+              }),
             ),
           ),
         ),

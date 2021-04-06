@@ -418,8 +418,8 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
       final Size childSize = child!.getDryLayout(constraints.loosen());
       return constraints.constrain(Size(
         shrinkWrapWidth ? childSize.width * (_widthFactor ?? 1.0) : double.infinity,
-        shrinkWrapHeight ? childSize.height * (_heightFactor ?? 1.0) : double.infinity),
-      );
+        shrinkWrapHeight ? childSize.height * (_heightFactor ?? 1.0) : double.infinity,
+      ));
     }
     return constraints.constrain(Size(
       shrinkWrapWidth ? 0.0 : double.infinity,
@@ -435,12 +435,16 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
 
     if (child != null) {
       child!.layout(constraints.loosen(), parentUsesSize: true);
-      size = constraints.constrain(Size(shrinkWrapWidth ? child!.size.width * (_widthFactor ?? 1.0) : double.infinity,
-                                        shrinkWrapHeight ? child!.size.height * (_heightFactor ?? 1.0) : double.infinity));
+      size = constraints.constrain(Size(
+        shrinkWrapWidth ? child!.size.width * (_widthFactor ?? 1.0) : double.infinity,
+        shrinkWrapHeight ? child!.size.height * (_heightFactor ?? 1.0) : double.infinity,
+      ));
       alignChild();
     } else {
-      size = constraints.constrain(Size(shrinkWrapWidth ? 0.0 : double.infinity,
-                                        shrinkWrapHeight ? 0.0 : double.infinity));
+      size = constraints.constrain(Size(
+        shrinkWrapWidth ? 0.0 : double.infinity,
+        shrinkWrapHeight ? 0.0 : double.infinity,
+      ));
     }
   }
 
@@ -654,7 +658,7 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
 /// When [child] is null, this [RenderBox] takes the smallest possible size and
 /// never overflows.
 ///
-/// This [RenderBox] can be used to ensure some of [child]'s natrual dimensions
+/// This [RenderBox] can be used to ensure some of [child]'s natural dimensions
 /// are honored, and get an early warning during development otherwise. For
 /// instance, if [child] requires a minimum height to fully display its content,
 /// [constraintsTransform] can be set to a function that removes the `maxHeight`
@@ -801,8 +805,14 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
       super.paint(context, offset);
     } else {
       // We have overflow and the clipBehavior isn't none. Clip it.
-      _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, super.paint,
-          clipBehavior: clipBehavior, oldLayer:_clipRectLayer);
+      _clipRectLayer = context.pushClipRect(
+        needsCompositing,
+        offset,
+        Offset.zero & size,
+        super.paint,
+        clipBehavior: clipBehavior,
+        oldLayer:_clipRectLayer,
+      );
     }
 
     // Display the overflow indicator.
@@ -857,7 +867,7 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
 ///
 @Deprecated(
   'Use RenderConstraintsTransformBox instead. '
-  'This feature was deprecated after v2.1.0-11.0.pre.'
+  'This feature was deprecated after v2.1.0-11.0.pre.',
 )
 class RenderUnconstrainedBox extends RenderConstraintsTransformBox {
   /// Create a render object that sizes itself to the child but does not
@@ -866,7 +876,7 @@ class RenderUnconstrainedBox extends RenderConstraintsTransformBox {
   /// The [alignment] and [clipBehavior] must not be null.
   @Deprecated(
     'Use RenderConstraintsTransformBox instead. '
-    'This feature was deprecated after v2.1.0-11.0.pre.'
+    'This feature was deprecated after v2.1.0-11.0.pre.',
   )
   RenderUnconstrainedBox({
     required AlignmentGeometry alignment,

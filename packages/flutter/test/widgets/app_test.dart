@@ -327,11 +327,6 @@ void main() {
   });
 }
 
-class MockScrollBehavior extends ScrollBehavior {
-  @override
-  ScrollPhysics getScrollPhysics(BuildContext context) => const NeverScrollableScrollPhysics();
-}
-
 typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);
 typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(Route<T> route, T result, SimpleNavigatorRouterDelegate delegate);
 

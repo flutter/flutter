@@ -499,6 +499,136 @@ void main() {
     expect(currentSelection.extentOffset, 9);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61026
 
+  test('selects readonly renderEditable matches native behavior for android', () {
+    // Regression test for https://github.com/flutter/flutter/issues/79166.
+    final TargetPlatform? previousPlatform = debugDefaultTargetPlatformOverride;
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    const String text = '  test';
+    final TextSelectionDelegate delegate = FakeEditableTextState()
+      ..textEditingValue = const TextEditingValue(text: text);
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    late TextSelection currentSelection;
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      readOnly: true,
+      offset: viewportOffset,
+      textSelectionDelegate: delegate,
+      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        currentSelection = selection;
+      },
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      text: const TextSpan(
+        text: text,
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+      selection: const TextSelection.collapsed(
+        offset: 4,
+      ),
+    );
+
+    layout(editable);
+
+    // Select the second white space, where the text position = 1.
+    editable.selectWordsInRange(from: const Offset(10, 2), cause:SelectionChangedCause.longPress);
+    pumpFrame();
+    expect(currentSelection.isCollapsed, false);
+    expect(currentSelection.baseOffset, 1);
+    expect(currentSelection.extentOffset, 2);
+    debugDefaultTargetPlatformOverride = previousPlatform;
+  });
+
+  test('selects renderEditable matches native behavior for iOS case 1', () {
+    // Regression test for https://github.com/flutter/flutter/issues/79166.
+    final TargetPlatform? previousPlatform = debugDefaultTargetPlatformOverride;
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    const String text = '  test';
+    final TextSelectionDelegate delegate = FakeEditableTextState()
+      ..textEditingValue = const TextEditingValue(text: text);
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    late TextSelection currentSelection;
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      offset: viewportOffset,
+      textSelectionDelegate: delegate,
+      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        currentSelection = selection;
+      },
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      text: const TextSpan(
+        text: text,
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+      selection: const TextSelection.collapsed(
+        offset: 4,
+      ),
+    );
+
+    layout(editable);
+
+    // Select the second white space, where the text position = 1.
+    editable.selectWordsInRange(from: const Offset(10, 2), cause:SelectionChangedCause.longPress);
+    pumpFrame();
+    expect(currentSelection.isCollapsed, false);
+    expect(currentSelection.baseOffset, 1);
+    expect(currentSelection.extentOffset, 6);
+    debugDefaultTargetPlatformOverride = previousPlatform;
+  });
+
+  test('selects renderEditable matches native behavior for iOS case 2', () {
+    // Regression test for https://github.com/flutter/flutter/issues/79166.
+    final TargetPlatform? previousPlatform = debugDefaultTargetPlatformOverride;
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    const String text = '   ';
+    final TextSelectionDelegate delegate = FakeEditableTextState()
+      ..textEditingValue = const TextEditingValue(text: text);
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    late TextSelection currentSelection;
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      offset: viewportOffset,
+      textSelectionDelegate: delegate,
+      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        currentSelection = selection;
+      },
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      text: const TextSpan(
+        text: text,
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+      selection: const TextSelection.collapsed(
+        offset: 4,
+      ),
+    );
+
+    layout(editable);
+
+    // Select the second white space, where the text position = 1.
+    editable.selectWordsInRange(from: const Offset(10, 2), cause:SelectionChangedCause.longPress);
+    pumpFrame();
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 1);
+    expect(currentSelection.extentOffset, 1);
+    debugDefaultTargetPlatformOverride = previousPlatform;
+  });
+
   test('selects correct place when offsets are flipped', () {
     const String text = 'abc def ghi';
     final TextSelectionDelegate delegate = FakeEditableTextState()
@@ -1043,6 +1173,45 @@ void main() {
     await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
     await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
     expect(delegate.textEditingValue.text, 'W Sczebrzeszynie chrząszcz brzmi w trzcinie');
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
+
+  test('RenderEditable registers and unregisters raw keyboard listener correctly', () async {
+    final TextSelectionDelegate delegate = FakeEditableTextState()
+      ..textEditingValue = const TextEditingValue(
+        text: 'how are you',
+        selection: TextSelection.collapsed(offset: 0),
+      );
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      offset: viewportOffset,
+      hasFocus: true,
+      textSelectionDelegate: delegate,
+      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        renderObject.selection = selection;
+      },
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      text: const TextSpan(
+        text: 'how are you',
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+      selection: const TextSelection.collapsed(
+        offset: 0,
+      ),
+    );
+
+    final PipelineOwner pipelineOwner = PipelineOwner();
+    editable.attach(pipelineOwner);
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
+    expect(delegate.textEditingValue.text, 'ow are you');
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
   test('arrow keys with selection text', () async {

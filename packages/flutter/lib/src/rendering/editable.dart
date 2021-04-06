@@ -35,7 +35,7 @@ const Radius _kFloatingCaretRadius = Radius.circular(1.0);
 @Deprecated(
   'Signature of a deprecated class method, '
   'textSelectionDelegate.userUpdateTextEditingValue. '
-  'This feature was deprecated after v1.26.0-17.2.pre.'
+  'This feature was deprecated after v1.26.0-17.2.pre.',
 )
 typedef SelectionChangedHandler = void Function(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause);
 
@@ -171,7 +171,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     required ViewportOffset offset,
     @Deprecated(
       'Uses the textSelectionDelegate.userUpdateTextEditingValue instead. '
-      'This feature was deprecated after v1.26.0-17.2.pre.'
+      'This feature was deprecated after v1.26.0-17.2.pre.',
     )
     this.onSelectionChanged,
     this.onCaretChanged,
@@ -257,10 +257,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        _obscureText = obscureText,
        _readOnly = readOnly,
        _forceLine = forceLine,
-       _clipBehavior = clipBehavior {
+       _clipBehavior = clipBehavior,
+       _hasFocus = hasFocus ?? false {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
-    this.hasFocus = hasFocus ?? false;
 
     _selectionPainter.highlightColor = selectionColor;
     _selectionPainter.highlightedRange = selection;
@@ -378,7 +378,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// If this is null, then selection changes will be ignored.
   @Deprecated(
     'Uses the textSelectionDelegate.userUpdateTextEditingValue instead. '
-    'This feature was deprecated after v1.26.0-17.2.pre.'
+    'This feature was deprecated after v1.26.0-17.2.pre.',
   )
   SelectionChangedHandler? onSelectionChanged;
 
@@ -1399,9 +1399,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return _extendSelectionToStart(cause);
     }
 
-    assert(_textLayoutLastMaxWidth == constraints.maxWidth &&
-           _textLayoutLastMinWidth == constraints.minWidth,
-      'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');
+    assert(
+      _textLayoutLastMaxWidth == constraints.maxWidth &&
+      _textLayoutLastMinWidth == constraints.minWidth,
+      'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).',
+    );
     final TextSelection nextSelection = _extendGivenSelectionLeftByWord(
       _textPainter,
       selection!,
@@ -1437,9 +1439,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return _extendSelectionToEnd(cause);
     }
 
-    assert(_textLayoutLastMaxWidth == constraints.maxWidth &&
-           _textLayoutLastMinWidth == constraints.minWidth,
-      'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');
+    assert(
+      _textLayoutLastMaxWidth == constraints.maxWidth &&
+      _textLayoutLastMinWidth == constraints.minWidth,
+      'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).',
+    );
     final TextSelection nextSelection = _extendGivenSelectionRightByWord(
       _textPainter,
       selection!,
@@ -1597,9 +1601,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return moveSelectionToStart(cause);
     }
 
-    assert(_textLayoutLastMaxWidth == constraints.maxWidth &&
-           _textLayoutLastMinWidth == constraints.minWidth,
-      'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');
+    assert(
+      _textLayoutLastMaxWidth == constraints.maxWidth &&
+      _textLayoutLastMinWidth == constraints.minWidth,
+      'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).',
+    );
     final TextSelection nextSelection = _moveGivenSelectionLeftByWord(
       _textPainter,
       selection!,
@@ -1683,9 +1689,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return moveSelectionToEnd(cause);
     }
 
-    assert(_textLayoutLastMaxWidth == constraints.maxWidth &&
-           _textLayoutLastMinWidth == constraints.minWidth,
-      'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');
+    assert(
+      _textLayoutLastMaxWidth == constraints.maxWidth &&
+      _textLayoutLastMinWidth == constraints.minWidth,
+      'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).',
+    );
     final TextSelection nextSelection = _moveGivenSelectionRightByWord(
       _textPainter,
       selection!,
@@ -1775,8 +1783,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     assert(_shortcutKeys.contains(key), 'shortcut key $key not recognized.');
     if (key == LogicalKeyboardKey.keyC) {
       if (!selection.isCollapsed) {
-        Clipboard.setData(
-            ClipboardData(text: selection.textInside(text)));
+        Clipboard.setData(ClipboardData(text: selection.textInside(text)));
       }
       return;
     }
@@ -2009,6 +2016,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (_hasFocus == value)
       return;
     _hasFocus = value;
+    markNeedsSemanticsUpdate();
+
+    if (!attached) {
+      assert(!_listenerAttached);
+      return;
+    }
+
     if (_hasFocus) {
       assert(!_listenerAttached);
       // TODO(justinmc): This listener should be ported to Actions and removed.
@@ -2022,7 +2036,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       RawKeyboard.instance.removeListener(_handleKeyEvent);
       _listenerAttached = false;
     }
-    markNeedsSemanticsUpdate();
   }
 
   /// Whether this rendering object will take a full line regardless the text width.
@@ -2519,7 +2532,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final int baseOffset = !extentSelection ? extentOffset : selection!.baseOffset;
     _setSelection(
       TextSelection(baseOffset: baseOffset, extentOffset: extentOffset),
-      SelectionChangedCause.keyboard
+      SelectionChangedCause.keyboard,
     );
   }
 
@@ -2551,7 +2564,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         baseOffset: baseOffset,
         extentOffset: previousWord.start,
       ),
-      SelectionChangedCause.keyboard
+      SelectionChangedCause.keyboard,
     );
   }
 
@@ -2607,8 +2620,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _offset.addListener(markNeedsPaint);
     _showHideCursor();
     _showCursor.addListener(_showHideCursor);
-    if (_listenerAttached)
+    assert(!_listenerAttached);
+    if (_hasFocus) {
       RawKeyboard.instance.addListener(_handleKeyEvent);
+      _listenerAttached = true;
+    }
   }
 
   @override
@@ -2619,8 +2635,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _showCursor.removeListener(_showHideCursor);
     // TODO(justinmc): This listener should be ported to Actions and removed.
     // https://github.com/flutter/flutter/issues/75004
-    if (_listenerAttached)
+    if (_listenerAttached) {
       RawKeyboard.instance.removeListener(_handleKeyEvent);
+      _listenerAttached = false;
+    }
     super.detach();
     _foregroundRenderObject?.detach();
     _backgroundRenderObject?.detach();
@@ -3033,9 +3051,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   TextSelection _getWordAtOffset(TextPosition position) {
-    assert(_textLayoutLastMaxWidth == constraints.maxWidth &&
-           _textLayoutLastMinWidth == constraints.minWidth,
-      'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');
+    assert(
+      _textLayoutLastMaxWidth == constraints.maxWidth &&
+      _textLayoutLastMinWidth == constraints.minWidth,
+      'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).',
+    );
     final TextRange word = _textPainter.getWordBoundary(position);
     // When long-pressing past the end of the text, we want a collapsed cursor.
     if (position.offset >= word.end)
@@ -3043,22 +3063,43 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     // If text is obscured, the entire sentence should be treated as one word.
     if (obscureText) {
       return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
-    // If the word is a space, on iOS try to select the previous word instead.
-    // On Android try to select the previous word instead only if the text is read only.
+    // On iOS, select the previous word if there is a previous word, or select
+    // to the end of the next word if there is a next word. Select nothing if
+    // there is neither a previous word nor a next word.
+    //
+    // If the platform is Android and the text is read only, try to select the
+    // previous word if there is one; otherwise, select the single whitespace at
+    // the position.
     } else if (_isWhitespace(_plainText.codeUnitAt(position.offset))
         && position.offset > 0) {
       assert(defaultTargetPlatform != null);
       final TextRange? previousWord = _getPreviousWord(word.start);
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
+          if (previousWord == null) {
+            final TextRange? nextWord = _getNextWord(word.start);
+            if (nextWord == null) {
+              return TextSelection.collapsed(offset: position.offset);
+            }
+            return TextSelection(
+              baseOffset: position.offset,
+              extentOffset: nextWord.end,
+            );
+          }
           return TextSelection(
-            baseOffset: previousWord!.start,
+            baseOffset: previousWord.start,
             extentOffset: position.offset,
           );
         case TargetPlatform.android:
           if (readOnly) {
+            if (previousWord == null) {
+              return TextSelection(
+                baseOffset: position.offset,
+                extentOffset: position.offset + 1,
+              );
+            }
             return TextSelection(
-              baseOffset: previousWord!.start,
+              baseOffset: previousWord.start,
               extentOffset: position.offset,
             );
           }
@@ -3075,9 +3116,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   TextSelection _getLineAtOffset(TextPosition position) {
-    assert(_textLayoutLastMaxWidth == constraints.maxWidth &&
-        _textLayoutLastMinWidth == constraints.minWidth,
-    'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');
+    assert(
+      _textLayoutLastMaxWidth == constraints.maxWidth &&
+      _textLayoutLastMinWidth == constraints.minWidth,
+      'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).',
+    );
     final TextRange line = _textPainter.getLineBoundary(position);
     if (position.offset >= line.end)
       return TextSelection.fromPosition(position);
@@ -3274,9 +3317,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   void _paintContents(PaintingContext context, Offset offset) {
-    assert(_textLayoutLastMaxWidth == constraints.maxWidth &&
-           _textLayoutLastMinWidth == constraints.minWidth,
-      'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');
+    assert(
+      _textLayoutLastMaxWidth == constraints.maxWidth &&
+      _textLayoutLastMinWidth == constraints.minWidth,
+      'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).',
+    );
     final Offset effectiveOffset = offset + _paintOffset;
 
     if (selection != null && !_floatingCursorOn) {
@@ -3326,8 +3371,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void paint(PaintingContext context, Offset offset) {
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     if (_hasVisualOverflow && clipBehavior != Clip.none) {
-      _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintContents,
-          clipBehavior: clipBehavior, oldLayer: _clipRectLayer);
+      _clipRectLayer = context.pushClipRect(
+        needsCompositing,
+        offset,
+        Offset.zero & size,
+        _paintContents,
+        clipBehavior: clipBehavior,
+        oldLayer: _clipRectLayer,
+      );
     } else {
       _clipRectLayer = null;
       _paintContents(context, offset);
@@ -3480,7 +3531,7 @@ abstract class RenderEditablePainter extends ChangeNotifier {
 class _TextHighlightPainter extends RenderEditablePainter {
   _TextHighlightPainter({
       TextRange? highlightedRange,
-      Color? highlightColor
+      Color? highlightColor,
   }) : _highlightedRange = highlightedRange,
        _highlightColor = highlightColor;
 
@@ -3542,7 +3593,7 @@ class _TextHighlightPainter extends RenderEditablePainter {
     final List<TextBox> boxes = renderEditable._textPainter.getBoxesForSelection(
       TextSelection(baseOffset: range.start, extentOffset: range.end),
       boxHeightStyle: selectionHeightStyle,
-      boxWidthStyle: selectionWidthStyle
+      boxWidthStyle: selectionWidthStyle,
     );
 
     for (final TextBox box in boxes)

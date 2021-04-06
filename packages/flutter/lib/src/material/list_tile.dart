@@ -1687,7 +1687,7 @@ class _RenderListTile extends RenderBox {
   @override
   Size computeDryLayout(BoxConstraints constraints) {
     assert(debugCannotComputeDryLayout(
-      reason: 'Layout requires baseline metrics, which are only available after a full layout.'
+      reason: 'Layout requires baseline metrics, which are only available after a full layout.',
     ));
     return Size.zero;
   }
@@ -1722,13 +1722,13 @@ class _RenderListTile extends RenderBox {
       tileWidth != leadingSize.width || tileWidth == 0.0,
       'Leading widget consumes entire tile width. Please use a sized widget, '
       'or consider replacing ListTile with a custom widget '
-      '(see https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4)'
+      '(see https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4)',
     );
     assert(
       tileWidth != trailingSize.width || tileWidth == 0.0,
       'Trailing widget consumes entire tile width. Please use a sized widget, '
       'or consider replacing ListTile with a custom widget '
-      '(see https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4)'
+      '(see https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4)',
     );
 
     final double titleStart = hasLeading

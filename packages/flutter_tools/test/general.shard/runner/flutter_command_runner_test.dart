@@ -108,6 +108,40 @@ void main() {
         BotDetector: () => const FakeBotDetector(true),
       }, initializeFlutterRoot: false);
 
+      testUsingContext('checks that Flutter installation is up-to-date if shell completion to terminal', () async {
+        final FlutterCommand command = DummyFlutterCommand(name: 'bash-completion');
+        final FlutterCommandRunner runner = createTestCommandRunner(command) as FlutterCommandRunner;
+        final FakeFlutterVersion version = globals.flutterVersion as FakeFlutterVersion;
+
+        await runner.run(<String>['bash-completion']);
+
+        expect(version.didCheckFlutterVersionFreshness, true);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Platform: () => platform,
+        FlutterVersion: () => FakeFlutterVersion(),
+        BotDetector: () => const FakeBotDetector(false),
+        Stdio: () => FakeStdio(hasFakeTerminal: true),
+      });
+
+      testUsingContext('does not check that Flutter installation is up-to-date if redirecting shell completion', () async {
+        final FlutterCommand command = DummyFlutterCommand(name: 'bash-completion');
+        final FlutterCommandRunner runner = createTestCommandRunner(command) as FlutterCommandRunner;
+        final FakeFlutterVersion version = globals.flutterVersion as FakeFlutterVersion;
+
+        await runner.run(<String>['bash-completion']);
+
+        expect(version.didCheckFlutterVersionFreshness, false);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Platform: () => platform,
+        FlutterVersion: () => FakeFlutterVersion(),
+        BotDetector: () => const FakeBotDetector(false),
+        Stdio: () => FakeStdio(hasFakeTerminal: false),
+      });
+
       testUsingContext('Fetches tags when --version is used', () async {
         final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
         final FakeFlutterVersion version = globals.flutterVersion as FakeFlutterVersion;
