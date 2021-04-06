@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:crypto/crypto.dart';
@@ -41,7 +39,7 @@ class DevelopmentArtifact {
   final String name;
 
   /// A feature to control the visibility of this artifact.
-  final Feature feature;
+  final Feature? feature;
 
   /// Artifacts required for Android development.
   static const DevelopmentArtifact androidGenSnapshot = DevelopmentArtifact._('android_gen_snapshot', feature: flutterAndroidFeature);
@@ -104,12 +102,12 @@ class Cache {
   /// [rootOverride] is configurable for testing.
   /// [artifacts] is configurable for testing.
   Cache({
-    @protected Directory rootOverride,
-    @protected List<ArtifactSet> artifacts,
-    @required Logger logger,
-    @required FileSystem fileSystem,
-    @required Platform platform,
-    @required OperatingSystemUtils osUtils,
+    @protected Directory? rootOverride,
+    @protected List<ArtifactSet>? artifacts,
+    required Logger logger,
+    required FileSystem fileSystem,
+    required Platform platform,
+    required OperatingSystemUtils osUtils,
   }) : _rootOverride = rootOverride,
        _logger = logger,
        _fileSystem = fileSystem,
@@ -117,7 +115,7 @@ class Cache {
        _osUtils = osUtils,
       _net = Net(logger: logger, platform: platform),
       _fsUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
-      _artifacts = artifacts;
+      _artifacts = artifacts ?? <ArtifactSet>[];
 
   /// Create a [Cache] for testing.
   ///
@@ -126,12 +124,12 @@ class Cache {
   /// By default, the root cache directory path is "cache".
   @visibleForTesting
   factory Cache.test({
-    Directory rootOverride,
-    List<ArtifactSet> artifacts,
-    Logger logger,
-    FileSystem fileSystem,
-    Platform platform,
-    ProcessManager processManager,
+    Directory? rootOverride,
+    List<ArtifactSet>? artifacts,
+    Logger? logger,
+    FileSystem? fileSystem,
+    Platform? platform,
+    required ProcessManager processManager,
   }) {
     fileSystem ??= rootOverride?.fileSystem ?? MemoryFileSystem.test();
     platform ??= FakePlatform(environment: <String, String>{});
@@ -155,13 +153,13 @@ class Cache {
   final Platform _platform;
   final FileSystem _fileSystem;
   final OperatingSystemUtils _osUtils;
-  final Directory _rootOverride;
+  final Directory? _rootOverride;
   final List<ArtifactSet> _artifacts;
   final Net _net;
   final FileSystemUtils _fsUtils;
 
   ArtifactUpdater get _artifactUpdater => __artifactUpdater ??= _createUpdater();
-  ArtifactUpdater __artifactUpdater;
+  ArtifactUpdater? __artifactUpdater;
 
   @protected
   void registerArtifact(ArtifactSet artifactSet) {
@@ -185,7 +183,8 @@ class Cache {
   ];
 
   // Initialized by FlutterCommandRunner on startup.
-  static String flutterRoot;
+  // Explore making this field lazy to catch non-initialized access.
+  static String? flutterRoot;
 
   /// Determine the absolute and normalized path for the root of the current
   /// Flutter checkout.
@@ -208,15 +207,15 @@ class Cache {
   /// If an exception is thrown during any of these checks, an error message is
   /// printed and `.` is returned by default (6).
   static String defaultFlutterRoot({
-    @required Platform platform,
-    @required FileSystem fileSystem,
-    @required UserMessages userMessages,
+    required Platform platform,
+    required FileSystem fileSystem,
+    required UserMessages userMessages,
   }) {
     String normalize(String path) {
       return fileSystem.path.normalize(fileSystem.path.absolute(path));
     }
     if (platform.environment.containsKey(kFlutterRootEnvironmentVariableName)) {
-      return normalize(platform.environment[kFlutterRootEnvironmentVariableName]);
+      return normalize(platform.environment[kFlutterRootEnvironmentVariableName]!);
     }
     try {
       if (platform.script.scheme == 'data') {
@@ -225,7 +224,7 @@ class Cache {
       final String Function(String) dirname = fileSystem.path.dirname;
 
       if (platform.script.scheme == 'package') {
-        final String packageConfigPath = Uri.parse(platform.packageConfig).toFilePath(
+        final String packageConfigPath = Uri.parse(platform.packageConfig!).toFilePath(
           windows: platform.isWindows,
         );
         return normalize(dirname(dirname(dirname(packageConfigPath))));
@@ -255,12 +254,12 @@ class Cache {
 
   // Names of artifacts which should be cached even if they would normally
   // be filtered out for the current platform.
-  Set<String> platformOverrideArtifacts;
+  Set<String>? platformOverrideArtifacts;
 
   // Whether to cache the unsigned mac binaries. Defaults to caching the signed binaries.
   bool useUnsignedMacBinaries = false;
 
-  static RandomAccessFile _lock;
+  static RandomAccessFile? _lock;
   static bool _lockEnabled = true;
 
   /// Turn off the [lock]/[releaseLock] mechanism.
@@ -300,7 +299,7 @@ class Cache {
     }
     assert(_lock == null);
     final File lockFile =
-      _fileSystem.file(_fileSystem.path.join(flutterRoot, 'bin', 'cache', 'lockfile'));
+      _fileSystem.file(_fileSystem.path.join(flutterRoot!, 'bin', 'cache', 'lockfile'));
     try {
       _lock = lockFile.openSync(mode: FileMode.write);
     } on FileSystemException catch (e) {
@@ -312,11 +311,11 @@ class Cache {
     bool printed = false;
     while (!locked) {
       try {
-        _lock.lockSync();
+        _lock!.lockSync();
         locked = true;
       } on FileSystemException {
         if (!printed) {
-          _logger.printTrace('Waiting to be able to obtain lock of Flutter binary artifacts directory: ${_lock.path}');
+          _logger.printTrace('Waiting to be able to obtain lock of Flutter binary artifacts directory: ${_lock!.path}');
           _logger.printStatus('Waiting for another flutter command to release the startup lock...');
           printed = true;
         }
@@ -333,7 +332,7 @@ class Cache {
     if (!_lockEnabled || _lock == null) {
       return;
     }
-    _lock.closeSync();
+    _lock!.closeSync();
     _lock = null;
   }
 
@@ -354,23 +353,26 @@ class Cache {
       // Changes '2.1.0-dev.8.0.flutter-4312ae32' to '2.1.0 (build 2.1.0-dev.8.0 4312ae32)'
       final String justVersion = _platform.version.split(' ')[0];
       _dartSdkVersion = justVersion.replaceFirstMapped(RegExp(r'(\d+\.\d+\.\d+)(.+)'), (Match match) {
-        final String noFlutter = match[2].replaceAll('.flutter-', ' ');
+        final String noFlutter = match[2]!.replaceAll('.flutter-', ' ');
         return '${match[1]} (build ${match[1]}$noFlutter)';
       });
     }
-    return _dartSdkVersion;
+    return _dartSdkVersion!;
   }
-  String _dartSdkVersion;
+  String? _dartSdkVersion;
 
   /// The current version of the Flutter engine the flutter tool will download.
   String get engineRevision {
     _engineRevision ??= getVersionFor('engine');
-    return _engineRevision;
+    if (_engineRevision == null) {
+      throwToolExit('Could not determine engine revision.');
+    }
+    return _engineRevision!;
   }
-  String _engineRevision;
+  String? _engineRevision;
 
   String get storageBaseUrl {
-    final String overrideUrl = _platform.environment['FLUTTER_STORAGE_BASE_URL'];
+    final String? overrideUrl = _platform.environment['FLUTTER_STORAGE_BASE_URL'];
     if (overrideUrl == null) {
       return 'https://storage.googleapis.com';
     }
@@ -400,9 +402,9 @@ class Cache {
   /// Return the top-level directory in the cache; this is `bin/cache`.
   Directory getRoot() {
     if (_rootOverride != null) {
-      return _fileSystem.directory(_fileSystem.path.join(_rootOverride.path, 'bin', 'cache'));
+      return _fileSystem.directory(_fileSystem.path.join(_rootOverride!.path, 'bin', 'cache'));
     } else {
-      return _fileSystem.directory(_fileSystem.path.join(flutterRoot, 'bin', 'cache'));
+      return _fileSystem.directory(_fileSystem.path.join(flutterRoot!, 'bin', 'cache'));
     }
   }
 
@@ -427,7 +429,7 @@ class Cache {
   Directory getCacheArtifacts() => getCacheDir('artifacts');
 
   /// Location of LICENSE file.
-  File getLicenseFile() => _fileSystem.file(_fileSystem.path.join(flutterRoot, 'LICENSE'));
+  File getLicenseFile() => _fileSystem.file(_fileSystem.path.join(flutterRoot!, 'LICENSE'));
 
   /// Get a named directory from with the cache's artifact directory; for example,
   /// `material_fonts` would return `bin/cache/artifacts/material_fonts`.
@@ -437,7 +439,7 @@ class Cache {
 
   MapEntry<String, String> get dyLdLibEntry {
     if (_dyLdLibEntry != null) {
-      return _dyLdLibEntry;
+      return _dyLdLibEntry!;
     }
     final List<String> paths = <String>[];
     for (final ArtifactSet artifact in _artifacts) {
@@ -445,16 +447,16 @@ class Cache {
       if (env == null || !env.containsKey('DYLD_LIBRARY_PATH')) {
         continue;
       }
-      final String path = env['DYLD_LIBRARY_PATH'];
+      final String path = env['DYLD_LIBRARY_PATH']!;
       if (path.isEmpty) {
         continue;
       }
       paths.add(path);
     }
     _dyLdLibEntry = MapEntry<String, String>('DYLD_LIBRARY_PATH', paths.join(':'));
-    return _dyLdLibEntry;
+    return _dyLdLibEntry!;
   }
-  MapEntry<String, String> _dyLdLibEntry;
+  MapEntry<String, String>? _dyLdLibEntry;
 
   /// The web sdk has to be co-located with the dart-sdk so that they can share source
   /// code.
@@ -462,9 +464,9 @@ class Cache {
     return getRoot().childDirectory('flutter_web_sdk');
   }
 
-  String getVersionFor(String artifactName) {
+  String? getVersionFor(String artifactName) {
     final File versionFile = _fileSystem.file(_fileSystem.path.join(
-      _rootOverride?.path ?? flutterRoot,
+      _rootOverride?.path ?? flutterRoot!,
       'bin',
       'internal',
       '$artifactName.version',
@@ -488,7 +490,7 @@ class Cache {
   /// Read the stamp for [artifactName].
   ///
   /// If the file is missing or cannot be parsed, returns `null`.
-  String getStampFor(String artifactName) {
+  String? getStampFor(String artifactName) {
     final File stampFile = getStampFileFor(artifactName);
     if (!stampFile.existsSync()) {
       return null;
@@ -557,7 +559,7 @@ class Cache {
   }
 
   Future<bool> areRemoteArtifactsAvailable({
-    String engineVersion,
+    String? engineVersion,
     bool includeAllPlatforms = true,
   }) async {
     final bool includeAllPlatformsState = this.includeAllPlatforms;
@@ -634,12 +636,13 @@ abstract class CachedArtifact extends ArtifactSet {
   String get stampName => name;
 
   Directory get location => cache.getArtifactDirectory(name);
-  String get version => cache.getVersionFor(name);
+
+  String? get version => cache.getVersionFor(name);
 
   // Whether or not to bypass normal platform filtering for this artifact.
   bool get ignorePlatformFiltering {
     return cache.includeAllPlatforms ||
-      (cache.platformOverrideArtifacts != null && cache.platformOverrideArtifacts.contains(developmentArtifact.name));
+      (cache.platformOverrideArtifacts != null && cache.platformOverrideArtifacts!.contains(developmentArtifact.name));
   }
 
   @override
@@ -673,7 +676,15 @@ abstract class CachedArtifact extends ArtifactSet {
     }
     await updateInner(artifactUpdater, fileSystem, operatingSystemUtils);
     try {
-      cache.setStampFor(stampName, version);
+      if (version == null) {
+        logger.printError(
+          'No known version for the artifact name "$name". '
+          'Flutter can continue, but the artifact may be re-downloaded on '
+          'subsequent invocations until the problem is resolved.',
+        );
+      } else {
+        cache.setStampFor(stampName, version!);
+      }
     } on FileSystemException catch (err) {
       logger.printError(
         'The new artifact "$name" was downloaded, but Flutter failed to update '
@@ -781,7 +792,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
     }
   }
 
-  Future<bool> checkForArtifacts(String engineVersion) async {
+  Future<bool> checkForArtifacts(String? engineVersion) async {
     engineVersion ??= version;
     final String url = '${cache.storageBaseUrl}/flutter_infra_release/flutter/$engineVersion/';
 
@@ -822,12 +833,12 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 /// additional source code.
 class ArtifactUpdater {
   ArtifactUpdater({
-    @required OperatingSystemUtils operatingSystemUtils,
-    @required Logger logger,
-    @required FileSystem fileSystem,
-    @required Directory tempStorage,
-    @required HttpClient httpClient,
-    @required Platform platform,
+    required OperatingSystemUtils operatingSystemUtils,
+    required Logger logger,
+    required FileSystem fileSystem,
+    required Directory tempStorage,
+    required HttpClient httpClient,
+    required Platform platform,
   }) : _operatingSystemUtils = operatingSystemUtils,
        _httpClient = httpClient,
        _logger = logger,
@@ -912,7 +923,7 @@ class ArtifactUpdater {
         }
         continue;
       } on ArgumentError catch (error) {
-        final String overrideUrl = _platform.environment['FLUTTER_STORAGE_BASE_URL'];
+        final String? overrideUrl = _platform.environment['FLUTTER_STORAGE_BASE_URL'];
         if (overrideUrl != null && url.toString().contains(overrideUrl)) {
           _logger.printError(error.toString());
           throwToolExit(
@@ -944,7 +955,7 @@ class ArtifactUpdater {
         // cannot be deleted. For the cache, this is either the analyzer reading
         // the sky_engine package or a running flutter_tester device.
         const int kSharingViolation = 32;
-        if (_platform.isWindows && error.osError.errorCode == kSharingViolation) {
+        if (_platform.isWindows && error.osError?.errorCode == kSharingViolation) {
           throwToolExit(
             'Failed to delete ${destination.path} because the local file/directory is in use '
             'by another process. Try closing any running IDEs or editors and trying '
@@ -987,9 +998,9 @@ class ArtifactUpdater {
       throw Exception(response.statusCode);
     }
 
-    final String md5Hash = _expectedMd5(response.headers);
-    ByteConversionSink inputSink;
-    StreamController<Digest> digests;
+    final String? md5Hash = _expectedMd5(response.headers);
+    ByteConversionSink? inputSink;
+    late StreamController<Digest> digests;
     if (md5Hash != null) {
       _logger.printTrace('Content $url md5 hash: $md5Hash');
       digests = StreamController<Digest>();
@@ -1016,14 +1027,18 @@ class ArtifactUpdater {
     }
   }
 
-  String _expectedMd5(HttpHeaders httpHeaders) {
-    final List<String> values = httpHeaders['x-goog-hash'];
+  String? _expectedMd5(HttpHeaders httpHeaders) {
+    final List<String>? values = httpHeaders['x-goog-hash'];
     if (values == null) {
       return null;
     }
-    final String rawMd5Hash = values.firstWhere((String value) {
-      return value.startsWith('md5=');
-    }, orElse: () => null);
+    String? rawMd5Hash;
+    for (final String value in values) {
+      if (value.startsWith('md5=')) {
+        rawMd5Hash = value;
+        break;
+      }
+    }
     if (rawMd5Hash == null) {
       return null;
     }

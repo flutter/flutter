@@ -382,7 +382,7 @@ void main() {
         )));
       }, overrides: <Type, Generator>{
         Artifacts: () => artifacts,
-        Cache: () => Cache.test(),
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
         DeviceManager: () => mockDeviceManager,
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
