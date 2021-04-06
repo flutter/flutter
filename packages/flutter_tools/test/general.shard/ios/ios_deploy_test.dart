@@ -337,6 +337,7 @@ IOSDeploy setUpIOSDeploy(ProcessManager processManager, {
     artifacts: <ArtifactSet>[
       FakeDyldEnvironmentArtifact(),
     ],
+    processManager: FakeProcessManager.any(),
   );
 
   return IOSDeploy(

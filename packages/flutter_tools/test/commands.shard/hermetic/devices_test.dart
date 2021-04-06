@@ -27,7 +27,7 @@ void main() {
     Cache cache;
 
     setUp(() {
-      cache = Cache.test();
+      cache = Cache.test(processManager: FakeProcessManager.any());
     });
 
     testUsingContext('returns 0 when called', () async {
