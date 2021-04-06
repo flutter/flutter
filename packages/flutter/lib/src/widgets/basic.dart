@@ -377,6 +377,12 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// widget's clip. If there's no clip, the filter will be applied to the full
 /// screen.
 ///
+/// The results of the filter will be blended back into the background
+/// using the [blendMode] parameter. This parameter is not supported on all
+/// platforms, notably the html DOM renderer on the web platform, so using
+/// any blend mode except for the default [BlendMode.srcOver] is not portable
+/// at this time.
+///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=dYRs7Q1vfYI}
 ///
 /// {@tool snippet}
@@ -431,6 +437,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
     Key? key,
     required this.filter,
     Widget? child,
+    this.blendMode = BlendMode.srcOver,
   }) : assert(filter != null),
        super(key: key, child: child);
 
@@ -440,14 +447,27 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   /// blur effect.
   final ui.ImageFilter filter;
 
+  /// The blend mode to use to apply the filtered background content onto the background
+  /// surface.
+  ///
+  /// The default mode is [BlendMode.srcOver] which is the most compatible mode, but
+  /// using this widget inside of a parent that uses a saveLayer may produce surprising
+  /// results. When rendering inside a saveLayer which implicitly presents a transparent
+  /// background, the results would look better with a [BlendMode.src] mode. Note that
+  /// the DOM-html renderer on web does not support this parameter so using any mode
+  /// but the default may produce different results.
+  final BlendMode blendMode;
+
   @override
   RenderBackdropFilter createRenderObject(BuildContext context) {
-    return RenderBackdropFilter(filter: filter);
+    return RenderBackdropFilter(filter: filter, blendMode: blendMode);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderBackdropFilter renderObject) {
-    renderObject.filter = filter;
+    renderObject
+      ..filter = filter
+      ..blendMode = blendMode;
   }
 }
 

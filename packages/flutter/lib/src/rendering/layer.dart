@@ -1818,11 +1818,29 @@ class BackdropFilterLayer extends ContainerLayer {
     }
   }
 
+  /// The blend mode to use to apply the filtered background content onto the background
+  /// surface.
+  ///
+  /// The default mode is [BlendMode.srcOver] which is the most compatible mode, but
+  /// using this widget inside of a parent that uses a saveLayer may produce surprising
+  /// results. When rendering inside a saveLayer which implicitly presents a transparent
+  /// background, the results would look better with a [BlendMode.src] mode. Note that
+  /// the DOM-html renderer on web does not support this parameter so using any mode
+  /// but the default may produce different results.
+  BlendMode? get blendMode => _blendMode;
+  BlendMode? _blendMode;
+  set blendMode(BlendMode? value) {
+    if (value != _blendMode)
+      _blendMode = value;
+    markNeedsAddToScene();
+  }
+
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     assert(filter != null);
     engineLayer = builder.pushBackdropFilter(
       filter!,
+      blendMode: blendMode!,
       oldLayer: _engineLayer as ui.BackdropFilterEngineLayer?,
     );
     addChildrenToScene(builder, layerOffset);
