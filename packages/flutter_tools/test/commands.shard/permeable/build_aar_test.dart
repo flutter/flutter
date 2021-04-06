@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:test/fake.dart';
 
 import '../../src/android_common.dart';
