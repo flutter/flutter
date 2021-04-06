@@ -6,7 +6,6 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
-import 'key_labels.dart';
 import 'test_async_utils.dart';
 
 // TODO(gspencergoog): Replace this with more robust key simulation code once

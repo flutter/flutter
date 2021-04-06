@@ -734,7 +734,8 @@ class RawKeyboard {
   };
 
   void _synchronizeModifiers(RawKeyEvent event) {
-    // For every desynchronized state, update the state to the ground truth.
+    // Compare modifier states to the ground truth as specified by
+    // [RawKeyEvent.data.modifiersPressed] and update unsynchronized ones.
     //
     // Don't send any key events for these changes, since there *should* be
     // separate events for each modifier key down/up that occurs while the app
@@ -742,9 +743,10 @@ class RawKeyboard {
     // pressed/released while the app doesn't have focus, to make sure that
     // _keysPressed reflects reality at all times.
     //
-    // If the given modifier state is [KeyboardSide.any], then only update an
-    // unpressed key to being pressed, and pressed keys to be unpressed, but not
-    // between pressed sides.
+    // If the given modifier state is [KeyboardSide.any], then "no down"
+    // modifiers might be updated to "left down", or "any down" modifiers might
+    // be updated to "no down", depending on the ground truth; pressed modifiers
+    // won't be updated of sides.
 
     final Map<ModifierKey, KeyboardSide?> modifiersPressed = event.data.modifiersPressed;
     final Map<PhysicalKeyboardKey, LogicalKeyboardKey> modifierKeys = <PhysicalKeyboardKey, LogicalKeyboardKey>{};
