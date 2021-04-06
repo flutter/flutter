@@ -107,7 +107,7 @@ void main() {
     bool verbose = false,
     void Function() onRun,
     String stdout = '',
-    bool winuwp = true,
+    bool winuwp = false,
   }) {
     return FakeCommand(
       command: <String>[

@@ -182,6 +182,7 @@ void main() {
     expect(fileSystem.file(r'C:\winuwp\flutter\ephemeral\flutter_plugin_registrar.h'), exists);
     expect(fileSystem.file(r'C:\winuwp\flutter\ephemeral\flutter_texture_registrar.h'), exists);
     expect(fileSystem.file(r'C:\winuwp\flutter\ephemeral\flutter_windows.h'), exists);
+    expect(fileSystem.file(r'C:\winuwp\flutter\flutter_windows.h'), exists);
     expect(fileSystem.file('C:\\winuwp\\flutter\\ephemeral\\$icuData'), exists);
     expect(fileSystem.file('C:\\winuwp\\flutter\\ephemeral\\$windowsCppClientWrapper\\foo'), exists);
 
@@ -220,6 +221,7 @@ void main() {
       r'C:\winuwp\flutter\ephemeral\flutter_plugin_registrar.h',
       r'C:\winuwp\flutter\ephemeral\flutter_texture_registrar.h',
       r'C:\winuwp\flutter\ephemeral\flutter_windows.h',
+      r'C:\winuwp\flutter\flutter_windows.h',
       'C:\\winuwp\\flutter\\ephemeral\\$icuData',
       'C:\\winuwp\\flutter\\ephemeral\\$windowsCppClientWrapper\\foo',
     ]));

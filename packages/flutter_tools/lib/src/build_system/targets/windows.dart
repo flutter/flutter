@@ -167,6 +167,13 @@ class UnpackWindowsUwp extends Target {
         platform: TargetPlatform.windows_x64
       )
     );
+    // Copy flutter_windows.h into flutter directory as well.
+    final File flutterWindows = outputDirectory.childFile('flutter_windows.h');
+    final File flutterWindowsDest = flutterWindows.parent.parent.childFile('flutter_windows.h');
+    flutterWindows.copySync(flutterWindowsDest.path);
+    depfile.outputs.add(flutterWindowsDest);
+    //
+
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
