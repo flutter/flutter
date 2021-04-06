@@ -292,12 +292,15 @@ class _MoveSelectionToStartTextAction extends TextEditingAction<MoveSelectionToS
   }
 }
 
+// Similar to _SelectLastTapDownPositionTextAction, but selects the position or
+// the edge based on the pointer type.
 class _SelectLastTapDownPositionOrEdgeTextAction extends CallbackAction<SingleTapUpTextIntent> {
   _SelectLastTapDownPositionOrEdgeTextAction() : super(
     onInvoke: (SingleTapUpTextIntent intent, [BuildContext? context]) {
       if (!intent.editableTextState.renderEditable.selectionEnabled) {
         return null;
       }
+      intent.editableTextState.hideToolbar();
       switch (intent.kind) {
         case PointerDeviceKind.mouse:
         case PointerDeviceKind.stylus:
@@ -309,10 +312,13 @@ class _SelectLastTapDownPositionOrEdgeTextAction extends CallbackAction<SingleTa
           intent.editableTextState.renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
           break;
       }
+      intent.editableTextState.requestKeyboard();
     },
   );
 }
 
+// Similar to _SelectLastTapDownPositionOrEdgeTextAction, but always selects the
+// position regardless of the pointer type.
 class _SelectLastTapDownPositionTextAction extends CallbackAction<SingleTapUpTextIntent> {
   _SelectLastTapDownPositionTextAction() : super(
     onInvoke: (SingleTapUpTextIntent intent, [BuildContext? context]) {

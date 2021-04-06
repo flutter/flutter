@@ -83,7 +83,6 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
     }
   }
 
-  // TODO(justinmc): Check this in other text editing widgets.
   @override
   void onSingleTapUp(TapUpDetails details) {
     super.onSingleTapUp(details);
