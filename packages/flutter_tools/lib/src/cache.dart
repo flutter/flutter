@@ -184,7 +184,7 @@ class Cache {
 
   // Initialized by FlutterCommandRunner on startup.
   // Explore making this field lazy to catch non-initialized access.
-  static String flutterRoot = '';
+  static String? flutterRoot;
 
   /// Determine the absolute and normalized path for the root of the current
   /// Flutter checkout.
@@ -299,7 +299,7 @@ class Cache {
     }
     assert(_lock == null);
     final File lockFile =
-      _fileSystem.file(_fileSystem.path.join(flutterRoot, 'bin', 'cache', 'lockfile'));
+      _fileSystem.file(_fileSystem.path.join(flutterRoot!, 'bin', 'cache', 'lockfile'));
     try {
       _lock = lockFile.openSync(mode: FileMode.write);
     } on FileSystemException catch (e) {
@@ -404,7 +404,7 @@ class Cache {
     if (_rootOverride != null) {
       return _fileSystem.directory(_fileSystem.path.join(_rootOverride!.path, 'bin', 'cache'));
     } else {
-      return _fileSystem.directory(_fileSystem.path.join(flutterRoot, 'bin', 'cache'));
+      return _fileSystem.directory(_fileSystem.path.join(flutterRoot!, 'bin', 'cache'));
     }
   }
 
@@ -429,7 +429,7 @@ class Cache {
   Directory getCacheArtifacts() => getCacheDir('artifacts');
 
   /// Location of LICENSE file.
-  File getLicenseFile() => _fileSystem.file(_fileSystem.path.join(flutterRoot, 'LICENSE'));
+  File getLicenseFile() => _fileSystem.file(_fileSystem.path.join(flutterRoot!, 'LICENSE'));
 
   /// Get a named directory from with the cache's artifact directory; for example,
   /// `material_fonts` would return `bin/cache/artifacts/material_fonts`.
@@ -466,7 +466,7 @@ class Cache {
 
   String? getVersionFor(String artifactName) {
     final File versionFile = _fileSystem.file(_fileSystem.path.join(
-      _rootOverride?.path ?? flutterRoot,
+      _rootOverride?.path ?? flutterRoot!,
       'bin',
       'internal',
       '$artifactName.version',
