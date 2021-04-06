@@ -55,6 +55,7 @@ void main() {
     });
 
     test('allows null state', () {
+      location.baseHref = '/';
       final PathUrlStrategy strategy = PathUrlStrategy(location);
       expect(() => strategy.pushState(null, '', '/'), returnsNormally);
       expect(() => strategy.replaceState(null, '', '/'), returnsNormally);
