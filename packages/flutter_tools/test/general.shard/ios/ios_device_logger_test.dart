@@ -31,7 +31,7 @@ void main() {
 
   setUp(() {
     processManager = FakeProcessManager.list(<FakeCommand>[]);
-    fakeCache = Cache.test();
+    fakeCache = Cache.test(processManager: FakeProcessManager.any());
     artifacts = Artifacts.test();
     logger = BufferLogger.test();
     ideviceSyslogPath = artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios);
