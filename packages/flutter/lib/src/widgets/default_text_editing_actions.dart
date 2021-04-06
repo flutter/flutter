@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-
 import 'actions.dart';
 import 'editable_text.dart';
 import 'framework.dart';
@@ -72,7 +70,7 @@ class _DoNothingAndStopPropagationTextAction extends TextEditingAction<DoNothing
   _DoNothingAndStopPropagationTextAction();
 
   @override
-  bool consumesKey(Intent intent) => true;
+  bool consumesKey(Intent intent) => false;
 
   @override
   void invoke(DoNothingAndStopPropagationTextIntent intent, [BuildContext? context]) {}

@@ -53,7 +53,7 @@ typedef DraggableCanceledCallback = void Function(Velocity velocity, Offset offs
 /// was dropped is available in the [DraggableDetails]. Also included in the
 /// `details` is whether the draggable's [DragTarget] accepted it.
 ///
-/// Used by [Draggable.onDragEnd]
+/// Used by [Draggable.onDragEnd].
 typedef DragEndCallback = void Function(DraggableDetails details);
 
 /// Signature for when a [Draggable] leaves a [DragTarget].
@@ -66,41 +66,83 @@ typedef DragTargetLeave<T> = void Function(T? data);
 /// Used by [DragTarget.onMove].
 typedef DragTargetMove<T> = void Function(DragTargetDetails<T> details);
 
-/// Signature for the strategy that determines the drag start point.
+/// Signature for the strategy that determines the drag start point of a [Draggable].
 ///
-/// Used for the built-in strategies switched via [DragAnchor] and the optinally
-/// injectable [Draggable.dragAnchorStrategy]
+/// Used by [Draggable.dragAnchorStrategy].
+///
+/// There are two built-in strategies:
+///
+///  * [childDragAnchorStrategy], which displays the feedback anchored at the
+///    position of the original child.
+///
+///  * [pointerDragAnchorStrategy], which displays the feedback anchored at the
+///    position of the touch that started the drag.
 typedef DragAnchorStrategy = Offset Function(Draggable<Object> draggable, BuildContext context, Offset position);
 
-/// The default [DragAnchorStrategy] used when [Draggable.dragAnchor] is not set
-/// or set to [DragAnchor.child]
+/// Display the feedback anchored at the position of the original child.
+///
+/// If feedback is identical to the child, then this means the feedback will
+/// exactly overlap the original child when the drag starts.
+///
+/// This is the default [DragAnchorStrategy] and replaces [DragAnchor.child].
+///
+/// See also:
+///
+///  * [DragAnchorStrategy], the typedef that this function implements.
+///  * [Draggable.dragAnchorStrategy], for which this is a built-in value.
 Offset childDragAnchorStrategy(Draggable<Object> draggable, BuildContext context, Offset position) {
   final RenderBox renderObject = context.findRenderObject()! as RenderBox;
   return renderObject.globalToLocal(position);
 }
 
-/// The [DragAnchorStrategy] used when [Draggable.dragAnchor] set to
-/// [DragAnchor.pointer]
+/// Display the feedback anchored at the position of the touch that started
+/// the drag.
+///
+/// If feedback is identical to the child, then this means the top left of the
+/// feedback will be under the finger when the drag starts. This will likely not
+/// exactly overlap the original child, e.g. if the child is big and the touch
+/// was not centered. This mode is useful when the feedback is transformed so as
+/// to move the feedback to the left by half its width, and up by half its width
+/// plus the height of the finger, since then it appears as if putting the
+/// finger down makes the touch feedback appear above the finger. (It feels
+/// weird for it to appear offset from the original child if it's anchored to
+/// the child and not the finger.)
+///
+/// This replaces [DragAnchor.pointer], which has been deprecated.
+///
+/// See also:
+///
+///  * [DragAnchorStrategy], the typedef that this function implements.
+///  * [Draggable.dragAnchorStrategy], for which this is a built-in value.
 Offset pointerDragAnchorStrategy(Draggable<Object> draggable, BuildContext context, Offset position) {
   return Offset.zero;
 }
+
 /// Where the [Draggable] should be anchored during a drag.
+///
+/// This has been replaced by the more configurable [DragAnchorStrategy].
+@Deprecated(
+  'Use dragAnchorStrategy instead. '
+  'This feature was deprecated after v2.1.0-10.0.pre.',
+)
 enum DragAnchor {
-  /// Display the feedback anchored at the position of the original child. If
-  /// feedback is identical to the child, then this means the feedback will
-  /// exactly overlap the original child when the drag starts.
+  /// Display the feedback anchored at the position of the original child.
+  ///
+  /// Replaced by [childDragAnchorStrategy].
+  @Deprecated(
+    'Use childDragAnchorStrategy instead. '
+    'This feature was deprecated after v2.1.0-10.0.pre.',
+  )
   child,
 
   /// Display the feedback anchored at the position of the touch that started
-  /// the drag. If feedback is identical to the child, then this means the top
-  /// left of the feedback will be under the finger when the drag starts. This
-  /// will likely not exactly overlap the original child, e.g. if the child is
-  /// big and the touch was not centered. This mode is useful when the feedback
-  /// is transformed so as to move the feedback to the left by half its width,
-  /// and up by half its width plus the height of the finger, since then it
-  /// appears as if putting the finger down makes the touch feedback appear
-  /// above the finger. (It feels weird for it to appear offset from the
-  /// original child if it's anchored to the child and not the finger.)
+  /// the drag.
+  ///
+  /// Replaced by [pointerDragAnchorStrategy].
+  @Deprecated(
+    'Use pointerDragAnchorStrategy instead. '
+    'This feature was deprecated after v2.1.0-10.0.pre.',
+  )
   pointer,
 }
 
@@ -211,7 +253,9 @@ class Draggable<T extends Object> extends StatefulWidget {
     this.feedbackOffset = Offset.zero,
     @Deprecated(
       'Use dragAnchorStrategy instead. '
-      'This feature was deprecated after v2.1.0-10.0.pre.'
+      'Replace "dragAnchor: DragAnchor.child" with "dragAnchorStrategy: childDragAnchorStrategy". '
+      'Replace "dragAnchor: DragAnchor.pointer" with "dragAnchorStrategy: pointerDragAnchorStrategy". '
+      'This feature was deprecated after v2.1.0-10.0.pre.',
     )
     this.dragAnchor = DragAnchor.child,
     this.dragAnchorStrategy,
@@ -292,15 +336,28 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// Defaults to [DragAnchor.child].
   @Deprecated(
     'Use dragAnchorStrategy instead. '
-    'This feature was deprecated after v2.1.0-10.0.pre.'
+    'This feature was deprecated after v2.1.0-10.0.pre.',
   )
   final DragAnchor dragAnchor;
 
-  /// A strategy that is used by this draggable to get the anchor offset when it is dragged.
+  /// A strategy that is used by this draggable to get the anchor offset when it
+  /// is dragged.
   ///
-  /// The anchor offset refers to the distance between the users' fingers and the [feedback] widget when this draggable is dragged.
+  /// The anchor offset refers to the distance between the users' fingers and
+  /// the [feedback] widget when this draggable is dragged.
   ///
-  /// Defaults to [childDragAnchorStrategy] if the [dragAnchor] is set to [DragAnchor.child] or [pointerDragAnchorStrategy] if the [dragAnchor] is set to [DragAnchor.pointer].
+  /// This property's value is a function that implements [DragAnchorStrategy].
+  /// There are two built-in functions that can be used:
+  ///
+  ///  * [childDragAnchorStrategy], which displays the feedback anchored at the
+  ///    position of the original child.
+  ///
+  ///  * [pointerDragAnchorStrategy], which displays the feedback anchored at the
+  ///    position of the touch that started the drag.
+  ///
+  /// Defaults to [childDragAnchorStrategy] if the deprecated [dragAnchor]
+  /// property is set to [DragAnchor.child], and [pointerDragAnchorStrategy] if
+  /// the [dragAnchor] is set to [DragAnchor.pointer].
   final DragAnchorStrategy? dragAnchorStrategy;
 
   /// Whether the semantics of the [feedback] widget is ignored when building
@@ -435,7 +492,14 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
     Axis? axis,
     Widget? childWhenDragging,
     Offset feedbackOffset = Offset.zero,
+    @Deprecated(
+      'Use dragAnchorStrategy instead. '
+      'Replace "dragAnchor: DragAnchor.child" with "dragAnchorStrategy: childDragAnchorStrategy". '
+      'Replace "dragAnchor: DragAnchor.pointer" with "dragAnchorStrategy: pointerDragAnchorStrategy". '
+      'This feature was deprecated after v2.1.0-10.0.pre.',
+    )
     DragAnchor dragAnchor = DragAnchor.child,
+    DragAnchorStrategy? dragAnchorStrategy,
     int? maxSimultaneousDrags,
     VoidCallback? onDragStarted,
     DragUpdateCallback? onDragUpdate,
@@ -454,6 +518,7 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
     childWhenDragging: childWhenDragging,
     feedbackOffset: feedbackOffset,
     dragAnchor: dragAnchor,
+    dragAnchorStrategy: dragAnchorStrategy,
     maxSimultaneousDrags: maxSimultaneousDrags,
     onDragStarted: onDragStarted,
     onDragUpdate: onDragUpdate,
@@ -576,8 +641,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
           widget.onDraggableCanceled!(velocity, offset);
       },
     );
-    if (widget.onDragStarted != null)
-      widget.onDragStarted!();
+    widget.onDragStarted?.call();
     return avatar;
   }
 
@@ -754,8 +818,7 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
       _candidateAvatars.remove(avatar);
       _rejectedAvatars.remove(avatar);
     });
-    if (widget.onLeave != null)
-      widget.onLeave!(avatar.data as T?);
+    widget.onLeave?.call(avatar.data as T?);
   }
 
   void didDrop(_DragAvatar<Object> avatar) {
@@ -765,17 +828,14 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
     setState(() {
       _candidateAvatars.remove(avatar);
     });
-    if (widget.onAccept != null)
-      widget.onAccept!(avatar.data! as T);
-    if (widget.onAcceptWithDetails != null)
-      widget.onAcceptWithDetails!(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
+    widget.onAccept?.call(avatar.data! as T);
+    widget.onAcceptWithDetails?.call(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
   }
 
   void didMove(_DragAvatar<Object> avatar) {
     if (!mounted)
       return;
-    if (widget.onMove != null)
-      widget.onMove!(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
+    widget.onMove?.call(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
   }
 
   @override
@@ -937,8 +997,7 @@ class _DragAvatar<T extends Object> extends Drag {
     _entry!.remove();
     _entry = null;
     // TODO(ianh): consider passing _entry as well so the client can perform an animation.
-    if (onDragEnd != null)
-      onDragEnd!(velocity ?? Velocity.zero, _lastOffset!, wasAccepted);
+    onDragEnd?.call(velocity ?? Velocity.zero, _lastOffset!, wasAccepted);
   }
 
   Widget _build(BuildContext context) {
