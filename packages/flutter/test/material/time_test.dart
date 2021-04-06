@@ -25,24 +25,5 @@ void main() {
       expect(await pumpTest(false), '7:00 AM');
       expect(await pumpTest(true), '07:00');
     });
-
-    testWidgets('return 12 hours at noon', (WidgetTester tester) async {
-      Future<String> pumpTest(bool alwaysUse24HourFormat) async {
-        late String formattedValue;
-        await tester.pumpWidget(MaterialApp(
-          home: MediaQuery(
-            data: MediaQueryData(alwaysUse24HourFormat: alwaysUse24HourFormat),
-            child: Builder(builder: (BuildContext context) {
-              formattedValue = const TimeOfDay(hour: 12, minute: 0).format(context);
-              return Container();
-            }),
-          ),
-        ));
-        return formattedValue;
-      }
-
-      expect(await pumpTest(false), '12:00 PM');
-      expect(await pumpTest(true), '12:00');
-    });
   });
 }
