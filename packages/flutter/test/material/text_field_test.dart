@@ -9453,4 +9453,72 @@ void main() {
       expect(state.currentTextEditingValue.composing, TextRange.empty);
     });
   });
+
+  testWidgets('can override single tap up', (WidgetTester tester) async {
+    bool override = false;
+    const String testText = 'XXXXX          XXXXX';
+    final TextEditingController controller = TextEditingController(text: testText);
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 0,
+      affinity: TextAffinity.upstream,
+    );
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return Actions(
+              actions: <Type, Action<Intent>>{
+                SingleTapUpTextIntent: CallbackAction<SingleTapUpTextIntent>(
+                  onInvoke: (SingleTapUpTextIntent intent) {
+                    if (!override) {
+                      return Actions.invoke<SingleTapUpTextIntent>(context, intent);
+                    }
+                    intent.editableTextState.renderEditable.selectWord(
+                      cause: SelectionChangedCause.tap,
+                    );
+                  },
+                ),
+              },
+              child: TextField(
+                controller: controller,
+                autofocus: true,
+              ),
+            );
+          },
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 0);
+
+    // Tapping moves the cursor as usual.
+    await tester.tapAt(textOffsetToPosition(tester, 2));
+    await tester.pumpAndSettle();
+    expect(controller.selection.isCollapsed, isTrue);
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(controller.selection.baseOffset, 2);
+        break;
+      case TargetPlatform.macOS:
+      case TargetPlatform.iOS:
+        expect(controller.selection.baseOffset, 5);
+        break;
+    }
+
+    // We can override the behavior to select the word.
+    override = true;
+    await tester.tapAt(textOffsetToPosition(tester, 17));
+    await tester.pumpAndSettle();
+    expect(controller.selection.isCollapsed, isFalse);
+    expect(controller.selection.baseOffset, 15);
+    expect(controller.selection.extentOffset, 20);
+
+    // On web, this is handled by the browser.
+  }, skip: kIsWeb);
 }
