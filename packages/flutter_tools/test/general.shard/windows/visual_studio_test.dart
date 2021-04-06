@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessException;
@@ -102,17 +100,17 @@ const List<String> _requirementsBuildTools = <String>[
 void setMockVswhereResponse(
   FileSystem fileSystem,
   FakeProcessManager processManager, [
-  List<String> requiredComponents,
-  List<String> additionalArguments,
-  Map<String, dynamic> response,
-  String responseOverride,
-  int exitCode,
-  Exception exception,
+  List<String>? requiredComponents,
+  List<String>? additionalArguments,
+  Map<String, dynamic>? response,
+  String? responseOverride,
+  int? exitCode,
+  Exception? exception,
 ]) {
   fileSystem.file(vswherePath).createSync(recursive: true);
   fileSystem.file(cmakePath).createSync(recursive: true);
   final String finalResponse = responseOverride
-    ?? json.encode(<Map<String, dynamic>>[response]);
+    ?? (response != null ? json.encode(<Map<String, dynamic>>[response]) : '');
   final List<String> requirementArguments = requiredComponents == null
     ? <String>[]
     : <String>['-requires', ...requiredComponents];
@@ -127,7 +125,7 @@ void setMockVswhereResponse(
       '-utf8',
       '-latest',
       ...?additionalArguments,
-      ...?requirementArguments,
+      ...requirementArguments,
     ],
     stdout: finalResponse,
     exception: exception,
@@ -138,11 +136,11 @@ void setMockVswhereResponse(
 // Sets whether or not a vswhere query with the required components will
 // return an installation.
 void setMockCompatibleVisualStudioInstallation(
-  Map<String, dynamic> response,
+  Map<String, dynamic>? response,
   FileSystem fileSystem,
   FakeProcessManager processManager, [
-  int exitCode,
-  Exception exception,
+  int? exitCode,
+  Exception? exception,
 ]) {
   setMockVswhereResponse(
     fileSystem,
@@ -159,11 +157,11 @@ void setMockCompatibleVisualStudioInstallation(
 // Sets whether or not a vswhere query with the required components will
 // return a pre-release installation.
 void setMockPrereleaseVisualStudioInstallation(
-  Map<String, dynamic> response,
+  Map<String, dynamic>? response,
   FileSystem fileSystem,
   FakeProcessManager processManager, [
-  int exitCode,
-  Exception exception,
+  int? exitCode,
+  Exception? exception,
 ]) {
   setMockVswhereResponse(
     fileSystem,
@@ -180,11 +178,11 @@ void setMockPrereleaseVisualStudioInstallation(
 // Sets whether or not a vswhere query with the required components will
 // return an Build Tools installation.
 void setMockCompatibleVisualStudioBuildToolsInstallation(
-  Map<String, dynamic> response,
+  Map<String, dynamic>? response,
   FileSystem fileSystem,
   FakeProcessManager processManager, [
-  int exitCode,
-  Exception exception,
+  int? exitCode,
+  Exception? exception,
 ]) {
   setMockVswhereResponse(
     fileSystem,
@@ -201,11 +199,11 @@ void setMockCompatibleVisualStudioBuildToolsInstallation(
 // Sets whether or not a vswhere query with the required components will
 // return a pre-release Build Tools installation.
 void setMockPrereleaseVisualStudioBuildToolsInstallation(
-  Map<String, dynamic> response,
+  Map<String, dynamic>? response,
   FileSystem fileSystem,
   FakeProcessManager processManager, [
-  int exitCode,
-  Exception exception,
+  int? exitCode,
+  Exception? exception,
 ]) {
   setMockVswhereResponse(
     fileSystem,
@@ -222,11 +220,11 @@ void setMockPrereleaseVisualStudioBuildToolsInstallation(
 // Sets whether or not a vswhere query searching for 'all' and 'prerelease'
 // versions will return an installation.
 void setMockAnyVisualStudioInstallation(
-  Map<String, dynamic> response,
+  Map<String, dynamic>? response,
   FileSystem fileSystem,
   FakeProcessManager processManager, [
-  int exitCode,
-  Exception exception,
+  int? exitCode,
+  Exception? exception,
 ]) {
   setMockVswhereResponse(
     fileSystem,
