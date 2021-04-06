@@ -962,6 +962,9 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
       callback(tag.c_str(), message.c_str(), user_data);
     };
   }
+  if (SAFE_ACCESS(args, log_tag, nullptr) != nullptr) {
+    settings.log_tag = SAFE_ACCESS(args, log_tag, nullptr);
+  }
 
   flutter::PlatformViewEmbedder::UpdateSemanticsNodesCallback
       update_semantics_nodes_callback = nullptr;

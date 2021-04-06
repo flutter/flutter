@@ -72,7 +72,11 @@ class EmbedderConfigBuilder {
 
   void SetSemanticsCallbackHooks();
 
+  // Used to set a custom log message handler.
   void SetLogMessageCallbackHook();
+
+  // Used to set a custom log tag.
+  void SetLogTag(std::string tag);
 
   void SetLocalizationCallbackHooks();
 
@@ -117,6 +121,7 @@ class EmbedderConfigBuilder {
   FlutterCompositor compositor_ = {};
   std::vector<std::string> command_line_arguments_;
   std::vector<std::string> dart_entrypoint_arguments_;
+  std::string log_tag_;
 
   UniqueEngine SetupEngine(bool run) const;
 
