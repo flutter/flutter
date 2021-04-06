@@ -20,7 +20,7 @@ final Animatable<BorderRadius> _kFrontHeadingBevelRadius = BorderRadiusTween(
     topLeft: Radius.circular(_kFrontHeadingHeight),
     topRight: Radius.circular(_kFrontHeadingHeight),
   ),
-);
+) as Animatable<BorderRadius>;
 
 class _TappableWhileStatusIs extends StatefulWidget {
   const _TappableWhileStatusIs(
