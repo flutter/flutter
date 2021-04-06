@@ -1513,6 +1513,13 @@ typedef struct {
   // thread and embedders must re-thread if necessary. Performing blocking calls
   // in this callback may introduce application jank.
   FlutterLogMessageCallback log_message_callback;
+
+  // A tag string associated with application log messages.
+  //
+  // A log message tag string that can be used convey application, subsystem,
+  // or component name to embedder's logger. This string will be passed to to
+  // callbacks on `log_message_callback`. Defaults to "flutter" if unspecified.
+  const char* log_tag;
 } FlutterProjectArgs;
 
 #ifndef FLUTTER_ENGINE_NO_PROTOTYPES
