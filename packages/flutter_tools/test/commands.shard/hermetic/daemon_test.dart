@@ -24,6 +24,21 @@ import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/mocks.dart';
 
+/// Runs a callback using FakeAsync.run while continually pumping the
+/// microtask queue. This avoids a deadlock when tests `await` a Future
+/// which queues a microtask that will not be processed unless the queue
+/// is flushed.
+Future<T> _runFakeAsync<T>(Future<T> Function(FakeAsync time) f) async {
+  return FakeAsync().run((FakeAsync time) async {
+    bool pump = true;
+    final Future<T> future = f(time).whenComplete(() => pump = false);
+    while (pump) {
+      time.flushMicrotasks();
+    }
+    return future;
+  });
+}
+
 void main() {
   Daemon daemon;
   NotifyingLogger notifyingLogger;
@@ -426,7 +441,7 @@ void main() {
     testWithoutContext(
         'debounces/merges same operation type and returns same result',
         () async {
-      await runFakeAsync((FakeAsync time) async {
+      await _runFakeAsync((FakeAsync time) async {
         final List<Future<int>> operations = <Future<int>>[
           queue.queueAndDebounce('OP1', debounceDuration, () async => 1),
           queue.queueAndDebounce('OP1', debounceDuration, () async => 2),
@@ -441,7 +456,7 @@ void main() {
 
     testWithoutContext('does not merge results outside of the debounce duration',
         () async {
-      await runFakeAsync((FakeAsync time) async {
+      await _runFakeAsync((FakeAsync time) async {
         final List<Future<int>> operations = <Future<int>>[
           queue.queueAndDebounce('OP1', debounceDuration, () async => 1),
           Future<int>.delayed(debounceDuration * 2).then((_) =>
@@ -457,7 +472,7 @@ void main() {
 
     testWithoutContext('does not merge results of different operations',
         () async {
-      await runFakeAsync((FakeAsync time) async {
+      await _runFakeAsync((FakeAsync time) async {
         final List<Future<int>> operations = <Future<int>>[
           queue.queueAndDebounce('OP1', debounceDuration, () async => 1),
           queue.queueAndDebounce('OP2', debounceDuration, () async => 2),
@@ -484,7 +499,7 @@ void main() {
         return ret;
       }
 
-      await runFakeAsync((FakeAsync time) async {
+      await _runFakeAsync((FakeAsync time) async {
         final List<Future<int>> operations = <Future<int>>[
           queue.queueAndDebounce('OP1', debounceDuration, () => f(1)),
           queue.queueAndDebounce('OP2', debounceDuration, () => f(2)),

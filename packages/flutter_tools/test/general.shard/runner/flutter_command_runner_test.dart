@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/version.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+import '../../src/test_flutter_command_runner.dart';
 import 'utils.dart';
 
 const String _kFlutterRoot = '/flutter/flutter';

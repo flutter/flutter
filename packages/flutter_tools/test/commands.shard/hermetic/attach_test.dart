@@ -29,8 +29,10 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_vm_services.dart';
 import '../../src/fakes.dart';
 import '../../src/mocks.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   id: '1',
