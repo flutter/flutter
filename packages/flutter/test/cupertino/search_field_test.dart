@@ -496,4 +496,21 @@ void main() {
     await tester.tap(find.byType(CupertinoTextField));
     expect(onTapCallCount, 1);
   });
+
+  testWidgets('autocorrect is properly forwarded to the inner text field',
+      (WidgetTester tester) async {
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoSearchTextField(
+            autocorrect: false,
+          ),
+        ),
+      ),
+    );
+
+    final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
+    expect(textField.autocorrect, false);
+  });
 }
