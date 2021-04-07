@@ -23,6 +23,7 @@ import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'cache.dart';
 import 'ios/plist_parser.dart';
+import 'version.dart';
 
 Cache get cache => context.get<Cache>()!;
 Config get config => context.get<Config>()!;
@@ -32,6 +33,7 @@ OperatingSystemUtils get os => context.get<OperatingSystemUtils>()!;
 Signals get signals => context.get<Signals>() ?? LocalSignals.instance;
 AndroidStudio? get androidStudio => context.get<AndroidStudio>();
 AndroidSdk? get androidSdk => context.get<AndroidSdk>();
+FlutterVersion get flutterVersion => context.get<FlutterVersion>()!;
 
 /// Currently active implementation of the file system.
 ///
