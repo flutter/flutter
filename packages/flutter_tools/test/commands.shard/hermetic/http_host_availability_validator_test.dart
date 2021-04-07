@@ -5,7 +5,7 @@
 // @dart = 2.9
 
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/http_host_availability_validator.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 
