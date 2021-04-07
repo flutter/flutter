@@ -15,6 +15,6 @@ closeComment: >
   If you find this problem please file a new issue with the same description,
   what happens, logs and the output of 'flutter doctor -v'. All system setups
   can be slightly different so it's always better to open new issues and reference
-  related the related ones.
+  the related ones.
 
   Thanks for your contribution.
