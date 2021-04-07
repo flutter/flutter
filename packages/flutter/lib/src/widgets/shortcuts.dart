@@ -146,7 +146,7 @@ class KeySet<T extends KeyboardKey> {
 /// [Shortcuts] widget receives a key event, it looks up a matching activator
 /// in the following way, and triggers the intent it maps to:
 ///
-///  * Find the registered [ShortcutActivator]s whose [trigger]s contain the
+///  * Find the registered [ShortcutActivator]s whose [triggers] contain the
 ///    incoming event in asertion order.
 ///  * Of the previous list, finds the first activator whose [accepts] returns
 ///    true.
