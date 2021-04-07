@@ -1322,7 +1322,7 @@ void main() {
       );
       expect(tester.widget<CupertinoActivityIndicator>(find.byType(CupertinoActivityIndicator)).progress, 100.0 / 100.0);
     });
-    
+
     testWidgets('indicator should not become larger when overscrolled', (WidgetTester tester) async {
       // test for https://github.com/flutter/flutter/issues/79841
       await tester.pumpWidget(
