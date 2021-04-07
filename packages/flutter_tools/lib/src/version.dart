@@ -99,24 +99,24 @@ class FlutterVersion {
   String get channel {
     String? channel = _channel;
     if (channel == null) {
-      channel = _runGit(
+      final String gitChannel = _runGit(
         'git rev-parse --abbrev-ref --symbolic @{u}',
         globals.processUtils,
         _workingDirectory,
       );
-      final int slash = channel.indexOf('/');
+      final int slash = gitChannel.indexOf('/');
       if (slash != -1) {
-        final String remote = channel.substring(0, slash);
+        final String remote = gitChannel.substring(0, slash);
         _repositoryUrl = _runGit(
           'git ls-remote --get-url $remote',
           globals.processUtils,
           _workingDirectory,
         );
-        channel = channel.substring(slash + 1);
-      } else if (channel.isEmpty) {
+        channel = gitChannel.substring(slash + 1);
+      } else if (gitChannel.isEmpty) {
         channel = 'unknown';
       } else {
-        channel = channel;
+        channel = gitChannel;
       }
       _channel = channel;
     }
