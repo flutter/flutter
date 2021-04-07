@@ -269,7 +269,7 @@ class KernelSnapshot extends Target {
     final CompilerOutput output = await compiler.compile(
       sdkRoot: environment.artifacts.getArtifactPath(
         Artifact.flutterPatchedSdkPath,
-        platform: targetPlatform,
+        platform: null,
         mode: buildMode,
       ),
       aot: buildMode.isPrecompiled,
