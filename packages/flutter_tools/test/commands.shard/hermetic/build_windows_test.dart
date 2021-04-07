@@ -20,6 +20,7 @@ import 'package:process/process.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+import '../../src/test_flutter_command_runner.dart';
 import '../../src/testbed.dart';
 
 const String flutterRoot = r'C:\flutter';
@@ -84,14 +85,17 @@ void main() {
 
   // Returns the command matching the build_windows call to generate CMake
   // files.
-  FakeCommand cmakeGenerationCommand({void Function() onRun}) {
+  FakeCommand cmakeGenerationCommand({void Function() onRun, bool winuwp = false}) {
     return FakeCommand(
       command: <String>[
         cmakePath,
         '-S',
-        fileSystem.path.dirname(buildFilePath),
+        fileSystem.path.dirname(winuwp ? buildUwpFilePath : buildFilePath),
         '-B',
-        r'build\windows',
+        if (winuwp)
+          r'build\winuwp'
+        else
+          r'build\windows',
         '-G',
         'Visual Studio 16 2019',
       ],
@@ -104,16 +108,20 @@ void main() {
     bool verbose = false,
     void Function() onRun,
     String stdout = '',
+    bool winuwp = false,
   }) {
     return FakeCommand(
       command: <String>[
         cmakePath,
         '--build',
-        r'build\windows',
+        if (winuwp)
+          r'build\winuwp'
+        else
+          r'build\windows',
         '--config',
         buildMode,
-        '--target',
-        'INSTALL',
+        if (!winuwp)
+          ...<String>['--target', 'INSTALL'],
         if (verbose)
           '--verbose'
       ],
@@ -466,7 +474,7 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
     FeatureFlags: () => TestFeatureFlags(isWindowsUwpEnabled: true),
   });
 
-  testUsingContext('Windows build fails when the project version is out of date', () async {
+  testUsingContext('Windows UWP build fails when the project version is out of date', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
     final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
       ..visualStudioOverride = fakeVisualStudio;
@@ -480,6 +488,25 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
     Platform: () => windowsPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isWindowsUwpEnabled: true),
+  });
+
+  testUsingContext('Windows UWP build fails after writing Cmake file', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
+    final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
+      ..visualStudioOverride = fakeVisualStudio;
+    setUpMockUwpFilesForBuild(0);
+
+    expect(createTestCommandRunner(command).run(
+      const <String>['winuwp', '--no-pub']
+    ), throwsToolExit(message: 'Windows UWP builds are not implemented'));
+  }, overrides: <Type, Generator>{
+    Platform: () => windowsPlatform,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+      cmakeGenerationCommand(winuwp: true),
+      buildCommand('Release',  stdout: 'STDOUT STUFF', winuwp: true),
+    ]),
     FeatureFlags: () => TestFeatureFlags(isWindowsUwpEnabled: true),
   });
 }

@@ -106,13 +106,14 @@ class GalleryTransitionTest {
       ]);
     });
 
+    final String testOutputDirectory = Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? '${galleryDirectory.path}/build';
     final Map<String, dynamic> summary = json.decode(
-      file('${galleryDirectory.path}/build/$timelineSummaryFile.json').readAsStringSync(),
+      file('$testOutputDirectory/$timelineSummaryFile.json').readAsStringSync(),
     ) as Map<String, dynamic>;
 
     if (transitionDurationFile != null) {
       final Map<String, dynamic> original = json.decode(
-        file('${galleryDirectory.path}/build/$transitionDurationFile.json').readAsStringSync(),
+        file('$testOutputDirectory/$transitionDurationFile.json').readAsStringSync(),
       ) as Map<String, dynamic>;
       final Map<String, List<int>> transitions = <String, List<int>>{};
       for (final String key in original.keys) {
@@ -125,9 +126,9 @@ class GalleryTransitionTest {
     return TaskResult.success(summary,
       detailFiles: <String>[
         if (transitionDurationFile != null)
-          '${galleryDirectory.path}/build/$transitionDurationFile.json',
+          '$testOutputDirectory/$transitionDurationFile.json',
         if (timelineTraceFile != null)
-          '${galleryDirectory.path}/build/$timelineTraceFile.json'
+          '$testOutputDirectory/$timelineTraceFile.json'
       ],
       benchmarkScoreKeys: <String>[
         if (transitionDurationFile != null)

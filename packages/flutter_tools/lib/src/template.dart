@@ -112,7 +112,6 @@ class Template {
     } on FileSystemException catch (err) {
       _logger.printError(err.toString());
       throwToolExit('Failed to flutter create at ${destination.path}.');
-      return 0;
     }
     int fileCount = 0;
 

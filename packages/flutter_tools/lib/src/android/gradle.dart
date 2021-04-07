@@ -1083,7 +1083,6 @@ String _getLocalArtifactVersion(String pomPath, FileSystem fileSystem) {
     }
   }
   throwToolExit('Error while parsing the <version> element from $pomPath');
-  return null;
 }
 
 /// Returns the local Maven repository for a local engine build.

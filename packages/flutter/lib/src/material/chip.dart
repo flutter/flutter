@@ -2189,7 +2189,7 @@ class _RenderChipElement extends RenderObjectElement {
   }
 
   @override
-  void mount(Element? parent, dynamic newSlot) {
+  void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     _mountChild(widget.theme.avatar, _ChipSlot.avatar);
     _mountChild(widget.theme.deleteIcon, _ChipSlot.deleteIcon);
@@ -2246,7 +2246,7 @@ class _RenderChipElement extends RenderObjectElement {
   }
 
   @override
-  void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
+  void moveRenderObjectChild(RenderObject child, Object? oldSlot, Object? newSlot) {
     assert(false, 'not reachable');
   }
 }
@@ -2779,13 +2779,15 @@ class _RenderChip extends RenderBox {
     );
     size = constraints.constrain(paddedSize);
     assert(
-        size.height == constraints.constrainHeight(paddedSize.height),
-        "Constrained height ${size.height} doesn't match expected height "
-        '${constraints.constrainWidth(paddedSize.height)}');
+      size.height == constraints.constrainHeight(paddedSize.height),
+      "Constrained height ${size.height} doesn't match expected height "
+      '${constraints.constrainWidth(paddedSize.height)}',
+    );
     assert(
-        size.width == constraints.constrainWidth(paddedSize.width),
-        "Constrained width ${size.width} doesn't match expected width "
-        '${constraints.constrainWidth(paddedSize.width)}');
+      size.width == constraints.constrainWidth(paddedSize.width),
+      "Constrained width ${size.width} doesn't match expected width "
+      '${constraints.constrainWidth(paddedSize.width)}',
+    );
   }
 
   static final ColorTween selectionScrimTween = ColorTween(

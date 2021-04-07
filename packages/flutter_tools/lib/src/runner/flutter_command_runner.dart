@@ -22,12 +22,6 @@ import '../globals.dart' as globals;
 import '../tester/flutter_tester.dart';
 import '../web/web_device.dart';
 
-const String kFlutterRootEnvironmentVariableName = 'FLUTTER_ROOT'; // should point to //flutter/ (root of flutter/flutter repo)
-const String kFlutterEngineEnvironmentVariableName = 'FLUTTER_ENGINE'; // should point to //engine/src/ (root of flutter/engine repo)
-const String kSnapshotFileName = 'flutter_tools.snapshot'; // in //flutter/bin/cache/
-const String kFlutterToolsScriptFileName = 'flutter_tools.dart'; // in //flutter/packages/flutter_tools/bin/
-const String kFlutterEnginePackageName = 'sky_engine';
-
 class FlutterCommandRunner extends CommandRunner<void> {
   FlutterCommandRunner({ bool verboseHelp = false }) : super(
     'flutter',
@@ -170,7 +164,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
       }
 
       command.usageException(error.message);
-      return null;
     }
   }
 
@@ -254,11 +247,14 @@ class FlutterCommandRunner extends CommandRunner<void> {
         globals.flutterVersion.ensureVersionFile();
         final bool machineFlag = topLevelResults['machine'] as bool;
         final bool ci = await globals.botDetector.isRunningOnBot;
+        final bool redirectedCompletion = !globals.stdio.hasTerminal &&
+            (topLevelResults.command?.name ?? '').endsWith('-completion');
+        final bool isMachine = machineFlag || ci || redirectedCompletion;
         final bool versionCheckFlag = topLevelResults['version-check'] as bool;
         final bool explicitVersionCheckPassed = topLevelResults.wasParsed('version-check') && versionCheckFlag;
 
         if (topLevelResults.command?.name != 'upgrade' &&
-            (explicitVersionCheckPassed || (versionCheckFlag && !ci && !machineFlag))) {
+            (explicitVersionCheckPassed || (versionCheckFlag && !isMachine))) {
           await globals.flutterVersion.checkFlutterVersionFreshness();
         }
 

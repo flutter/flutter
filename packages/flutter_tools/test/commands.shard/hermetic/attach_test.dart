@@ -11,13 +11,13 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/device_port_forwarder.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -25,13 +25,14 @@ import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_vm_services.dart';
 import '../../src/fakes.dart';
 import '../../src/mocks.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   id: '1',
@@ -93,7 +94,7 @@ void main() {
           .thenAnswer((_) async {});
         when(device.dds).thenReturn(mockDds);
         final Completer<void> noopCompleter = Completer<void>();
-        when(mockDds.startDartDevelopmentService(any, any, false, any)).thenReturn(null);
+        when(mockDds.startDartDevelopmentService(any, any, false, any, logger: anyNamed('logger'))).thenReturn(null);
         when(mockDds.uri).thenReturn(Uri.parse('http://localhost:8181'));
         when(mockDds.done).thenAnswer((_) => noopCompleter.future);
 
@@ -322,7 +323,7 @@ void main() {
       )).thenReturn(mockHotRunner);
       when(mockHotRunner.exited).thenReturn(false);
       when(mockHotRunner.isWaitingForObservatory).thenReturn(false);
-      when(mockDds.startDartDevelopmentService(any, any, false, any)).thenReturn(null);
+      when(mockDds.startDartDevelopmentService(any, any, false, any, logger: anyNamed('logger'))).thenReturn(null);
       when(mockDds.uri).thenReturn(Uri.parse('http://localhost:8181'));
 
       testDeviceManager.addDevice(device);
@@ -409,7 +410,7 @@ void main() {
       )).thenReturn(mockHotRunner);
       when(mockHotRunner.exited).thenReturn(false);
       when(mockHotRunner.isWaitingForObservatory).thenReturn(false);
-      when(mockDds.startDartDevelopmentService(any, any, false, any)).thenReturn(null);
+      when(mockDds.startDartDevelopmentService(any, any, false, any, logger: anyNamed('logger'))).thenReturn(null);
       when(mockDds.uri).thenReturn(Uri.parse('http://localhost:8181'));
 
       testDeviceManager.addDevice(device);
@@ -456,7 +457,7 @@ void main() {
           .thenAnswer((_) async {});
         when(device.dds)
           .thenReturn(mockDds);
-        when(mockDds.startDartDevelopmentService(any, any, any, any))
+        when(mockDds.startDartDevelopmentService(any, any, any, any, logger: anyNamed('logger')))
           .thenReturn(null);
         when(mockDds.uri).thenReturn(Uri.parse('http://localhost:8181'));
         final Completer<void> noopCompleter = Completer<void>();
@@ -839,6 +840,7 @@ VMServiceConnector getFakeVmServiceFactory({
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
     CompressionOptions compression,
     Device device,
+    Logger logger,
   }) async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[

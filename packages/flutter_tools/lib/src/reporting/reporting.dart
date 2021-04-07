@@ -28,7 +28,7 @@ import '../build_system/exceptions.dart';
 import '../convert.dart';
 import '../dart/language_version.dart';
 import '../devfs.dart';
-import '../doctor.dart';
+import '../doctor_validator.dart';
 import '../features.dart';
 import '../flutter_manifest.dart';
 import '../flutter_project_metadata.dart';

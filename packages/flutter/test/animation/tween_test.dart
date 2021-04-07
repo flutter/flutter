@@ -139,6 +139,17 @@ void main() {
     expect(animation.toStringDetails(), hasOneLineDescription);
   });
 
+  test('BorderTween nullable test', () {
+    BorderTween tween = BorderTween();
+    expect(tween.lerp(0.0),  null);
+    expect(tween.lerp(1.0),  null);
+
+    tween = BorderTween(begin: null, end: const Border(top: BorderSide()));
+    expect(tween.lerp(0.0),  const Border());
+    expect(tween.lerp(0.5),  const Border(top: BorderSide(width: 0.5)));
+    expect(tween.lerp(1.0),  const Border(top: BorderSide()));
+  });
+
   test('SizeTween', () {
     final SizeTween tween = SizeTween(begin: Size.zero, end: const Size(20.0, 30.0));
     expect(tween.lerp(0.5), equals(const Size(10.0, 15.0)));

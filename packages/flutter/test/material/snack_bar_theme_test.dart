@@ -189,7 +189,7 @@ void main() {
   testWidgets('SnackBar theme behavior is correct for floating', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
-          snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating,)
+        snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating)
       ),
       home: Scaffold(
         floatingActionButton: FloatingActionButton(
@@ -231,7 +231,7 @@ void main() {
   testWidgets('SnackBar theme behavior is correct for fixed', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
-          snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.fixed,)
+        snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.fixed)
       ),
       home: Scaffold(
         floatingActionButton: FloatingActionButton(

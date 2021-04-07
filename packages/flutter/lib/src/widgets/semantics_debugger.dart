@@ -184,7 +184,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
 class _SemanticsClient extends ChangeNotifier {
   _SemanticsClient(PipelineOwner pipelineOwner) {
     _semanticsHandle = pipelineOwner.ensureSemantics(
-      listener: _didUpdateSemantics
+      listener: _didUpdateSemantics,
     );
   }
 

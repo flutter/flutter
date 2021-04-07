@@ -49,9 +49,19 @@ Widget _buildBoilerplate({
     textDirection: textDirection,
     child: MediaQuery(
       data: MediaQueryData(padding: padding),
-      child: child,
+      child: ScrollConfiguration(
+        behavior: const NoScrollbarBehavior(),
+        child: child,
+      ),
     ),
   );
+}
+
+class NoScrollbarBehavior extends MaterialScrollBehavior {
+  const NoScrollbarBehavior();
+
+  @override
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) => child;
 }
 
 void main() {
@@ -785,7 +795,7 @@ void main() {
     await dragScrollbarGesture.up();
     await tester.pumpAndSettle();
 
-    // The view has scrolled more than it would have by a swipe gesture of the
+    // The view has scrolled more than it would have by a swipe pointer of the
     // same distance.
     expect(scrollController.offset, greaterThan(scrollAmount * 2));
     expect(
@@ -809,18 +819,11 @@ void main() {
   });
 
   testWidgets('Scrollbar thumb color completes a hover animation', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
-        home: PrimaryScrollController(
-          controller: scrollController,
-          child: Scrollbar(
-            isAlwaysShown: true,
-            controller: scrollController,
-            child: const SingleChildScrollView(
-              child: SizedBox(width: 4000.0, height: 4000.0)
-            ),
-          ),
+        theme: ThemeData(scrollbarTheme: const ScrollbarThemeData(isAlwaysShown: true)),
+        home: const SingleChildScrollView(
+          child: SizedBox(width: 4000.0, height: 4000.0)
         ),
       ),
     );
@@ -858,24 +861,18 @@ void main() {
       TargetPlatform.linux,
       TargetPlatform.macOS,
       TargetPlatform.windows,
-      TargetPlatform.fuchsia,
     }),
   );
 
   testWidgets('Hover animation is not triggered by tap gestures', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
-        home: PrimaryScrollController(
-          controller: scrollController,
-          child: Scrollbar(
-            isAlwaysShown: true,
-            showTrackOnHover: true,
-            controller: scrollController,
-            child: const SingleChildScrollView(
-              child: SizedBox(width: 4000.0, height: 4000.0)
-            ),
-          ),
+        theme: ThemeData(scrollbarTheme: const ScrollbarThemeData(
+          isAlwaysShown: true,
+          showTrackOnHover: true,
+        )),
+        home: const SingleChildScrollView(
+          child: SizedBox(width: 4000.0, height: 4000.0)
         ),
       ),
     );
@@ -936,27 +933,19 @@ void main() {
           color: const Color(0x80000000),
         ),
     );
-
   },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.linux,
-    }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux }),
   );
 
   testWidgets('Scrollbar showTrackOnHover', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
-        home: PrimaryScrollController(
-          controller: scrollController,
-          child: Scrollbar(
-            isAlwaysShown: true,
-            showTrackOnHover: true,
-            controller: scrollController,
-            child: const SingleChildScrollView(
-              child: SizedBox(width: 4000.0, height: 4000.0)
-            ),
-          ),
+        theme: ThemeData(scrollbarTheme: const ScrollbarThemeData(
+          isAlwaysShown: true,
+          showTrackOnHover: true,
+        )),
+        home: const SingleChildScrollView(
+          child: SizedBox(width: 4000.0, height: 4000.0)
         ),
       ),
     );
@@ -1006,7 +995,6 @@ void main() {
       TargetPlatform.linux,
       TargetPlatform.macOS,
       TargetPlatform.windows,
-      TargetPlatform.fuchsia,
     }),
   );
 
@@ -1088,33 +1076,36 @@ void main() {
         textDirection: TextDirection.ltr,
         child: MediaQuery(
           data: const MediaQueryData(),
-          child: Scrollbar(
-            key: key2,
-            notificationPredicate: null,
-            child: SingleChildScrollView(
-              key: outerKey,
-              child: SizedBox(
-                height: 1000.0,
-                width: double.infinity,
-                child: Column(
-                  children: <Widget>[
-                    Scrollbar(
-                      key: key1,
-                      notificationPredicate: null,
-                      child: SizedBox(
-                        height: 300.0,
-                        width: double.infinity,
-                        child: SingleChildScrollView(
-                          key: innerKey,
-                          child: const SizedBox(
-                            key: Key('Inner scrollable'),
-                            height: 1000.0,
-                            width: double.infinity,
+          child: ScrollConfiguration(
+            behavior: const NoScrollbarBehavior(),
+            child: Scrollbar(
+              key: key2,
+              notificationPredicate: null,
+              child: SingleChildScrollView(
+                key: outerKey,
+                child: SizedBox(
+                  height: 1000.0,
+                  width: double.infinity,
+                  child: Column(
+                    children: <Widget>[
+                      Scrollbar(
+                        key: key1,
+                        notificationPredicate: null,
+                        child: SizedBox(
+                          height: 300.0,
+                          width: double.infinity,
+                          child: SingleChildScrollView(
+                            key: innerKey,
+                            child: const SizedBox(
+                              key: Key('Inner scrollable'),
+                              height: 1000.0,
+                              width: double.infinity,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -1206,11 +1197,7 @@ void main() {
     await tester.pumpAndSettle();
     // The offset should not have changed.
     expect(scrollController.offset, scrollAmount);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{
-    TargetPlatform.linux,
-    TargetPlatform.windows,
-    TargetPlatform.fuchsia,
-  }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.fuchsia }));
 
   testWidgets('Scrollbar dragging is disabled by default on Android', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
@@ -1274,5 +1261,229 @@ void main() {
     await tester.pumpAndSettle();
     // The offset should not have changed.
     expect(scrollController.offset, scrollAmount);
+  });
+
+  testWidgets('Simultaneous dragging and pointer scrolling does not cause a crash', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/70105
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PrimaryScrollController(
+          controller: scrollController,
+          child: Scrollbar(
+            interactive: true,
+            isAlwaysShown: true,
+            controller: scrollController,
+            child: const SingleChildScrollView(
+                child: SizedBox(width: 4000.0, height: 4000.0)
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: _kAndroidTrackDimensions,
+          color: Colors.transparent,
+        )
+        ..line(
+          p1: _kTrackBorderPoint1,
+          p2: _kTrackBorderPoint2,
+          strokeWidth: 1.0,
+          color: Colors.transparent,
+        )
+        ..rect(
+          rect: getStartingThumbRect(isAndroid: true),
+          color: _kAndroidThumbIdleColor,
+        ),
+    );
+
+    // Drag the thumb down to scroll down.
+    const double scrollAmount = 10.0;
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: _kAndroidTrackDimensions,
+          color: Colors.transparent,
+        )
+        ..line(
+          p1: _kTrackBorderPoint1,
+          p2: _kTrackBorderPoint2,
+          strokeWidth: 1.0,
+          color: Colors.transparent,
+        )
+        ..rect(
+          rect: getStartingThumbRect(isAndroid: true),
+          // Drag color
+          color: const Color(0x99000000),
+        ),
+    );
+
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, greaterThan(10.0));
+    final double previousOffset = scrollController.offset;
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
+          color: Colors.transparent,
+        )
+        ..line(
+          p1: const Offset(796.0, 0.0),
+          p2: const Offset(796.0, 600.0),
+          strokeWidth: 1.0,
+          color: Colors.transparent,
+        )
+        ..rect(
+          rect: const Rect.fromLTRB(796.0, 10.0, 800.0, 100.0),
+          color: const Color(0x99000000),
+        ),
+    );
+
+    // Execute a pointer scroll while dragging (drag gesture has not come up yet)
+    final TestPointer pointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    pointer.hover(const Offset(798.0, 15.0));
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 20.0)));
+    await tester.pumpAndSettle();
+    // Scrolling while holding the drag on the scrollbar and still hovered over
+    // the scrollbar should not have changed the scroll offset.
+    expect(pointer.location, const Offset(798.0, 15.0));
+    expect(scrollController.offset, previousOffset);
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
+          color: Colors.transparent,
+        )
+        ..line(
+          p1: const Offset(796.0, 0.0),
+          p2: const Offset(796.0, 600.0),
+          strokeWidth: 1.0,
+          color: Colors.transparent,
+        )
+        ..rect(
+          rect: const Rect.fromLTRB(796.0, 10.0, 800.0, 100.0),
+          color: const Color(0x99000000),
+        ),
+    );
+
+    // Drag is still being held, move pointer to be hovering over another area
+    // of the scrollable (not over the scrollbar) and execute another pointer scroll
+    pointer.hover(tester.getCenter(find.byType(SingleChildScrollView)));
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, -70.0)));
+    await tester.pumpAndSettle();
+    // Scrolling while holding the drag on the scrollbar changed the offset
+    expect(pointer.location, const Offset(400.0, 300.0));
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
+          color: Colors.transparent,
+        )
+        ..line(
+          p1: const Offset(796.0, 0.0),
+          p2: const Offset(796.0, 600.0),
+          strokeWidth: 1.0,
+          color: Colors.transparent,
+        )
+        ..rect(
+          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 90.0),
+          color: const Color(0x99000000),
+        ),
+    );
+
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
+          color: Colors.transparent,
+        )
+        ..line(
+          p1: const Offset(796.0, 0.0),
+          p2: const Offset(796.0, 600.0),
+          strokeWidth: 1.0,
+          color: Colors.transparent,
+        )
+        ..rect(
+          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 90.0),
+          color: const Color(0xffbcbcbc),
+        ),
+    );
+  });
+
+  testWidgets('Scrollbar.isAlwaysShown triggers assertion when multiple ScrollPositions are attached.', (WidgetTester tester) async {
+    Widget _getTabContent({ ScrollController? scrollController }) {
+      return Scrollbar(
+        isAlwaysShown: true,
+        controller: scrollController,
+        child: ListView.builder(
+          controller: scrollController,
+          itemCount: 200,
+          itemBuilder: (BuildContext context, int index) => const Text('Test'),
+        ),
+      );
+    }
+
+    Widget _buildApp({ ScrollController? scrollController }) {
+      return MaterialApp(
+        home: DefaultTabController(
+          length: 2,
+          child: Scaffold(
+            body: TabBarView(
+              children: <Widget>[
+                _getTabContent(scrollController: scrollController),
+                _getTabContent(scrollController: scrollController),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Asserts when using the PrimaryScrollController.
+    await tester.pumpWidget(_buildApp());
+
+    // Swipe to the second tab, resulting in two attached ScrollPositions during
+    // the transition.
+    try {
+      await tester.drag(find.text('Test').first, const Offset(10.0, 0.0));
+    } on FlutterError catch (error) {
+      expect(
+        error.message,
+        contains('The Scrollbar attempted to paint using the position attached to the PrimaryScrollController.'),
+      );
+    }
+
+    // Asserts when using the ScrollController provided by the user.
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(_buildApp(scrollController: scrollController));
+
+    // Swipe to the second tab, resulting in two attached ScrollPositions during
+    // the transition.
+    try {
+      await tester.drag(find.text('Test').first, const Offset(10.0, 0.0));
+    } on AssertionError catch (error) {
+      expect(
+        error.message,
+        contains('The Scrollbar attempted to paint using the position attached to the provided ScrollController.'),
+      );
+    }
   });
 }

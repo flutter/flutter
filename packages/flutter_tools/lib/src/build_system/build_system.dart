@@ -330,6 +330,7 @@ class Environment {
     @required Logger logger,
     @required Artifacts artifacts,
     @required ProcessManager processManager,
+    @required Platform platform,
     @required String engineVersion,
     Directory buildDir,
     Map<String, String> defines = const <String, String>{},
@@ -368,6 +369,7 @@ class Environment {
       logger: logger,
       artifacts: artifacts,
       processManager: processManager,
+      platform: platform,
       engineVersion: engineVersion,
       inputs: inputs,
     );
@@ -386,6 +388,7 @@ class Environment {
     Map<String, String> defines = const <String, String>{},
     Map<String, String> inputs = const <String, String>{},
     String engineVersion,
+    Platform platform,
     @required FileSystem fileSystem,
     @required Logger logger,
     @required Artifacts artifacts,
@@ -403,6 +406,7 @@ class Environment {
       logger: logger,
       artifacts: artifacts,
       processManager: processManager,
+      platform: platform ?? FakePlatform(),
       engineVersion: engineVersion,
     );
   }
@@ -416,6 +420,7 @@ class Environment {
     @required this.defines,
     @required this.flutterRootDir,
     @required this.processManager,
+    @required this.platform,
     @required this.logger,
     @required this.fileSystem,
     @required this.artifacts,
@@ -489,6 +494,8 @@ class Environment {
   final Directory rootBuildDir;
 
   final ProcessManager processManager;
+
+  final Platform platform;
 
   final Logger logger;
 
