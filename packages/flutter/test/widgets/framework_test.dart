@@ -1582,7 +1582,7 @@ void main() {
     await tester.pumpWidget(Container());
     // Accessing state/widget now throws a CastError because they have been
     // nulled out to reduce severity of memory leaks when an Element (e.g. in
-    // the form of a BuildContext) is retained past its useful life. See als
+    // the form of a BuildContext) is retained past its useful life. See also
     // https://github.com/flutter/flutter/issues/79605 for examples why this may
     // occur.
     expect(() => element.state, throwsA(TypeError));
