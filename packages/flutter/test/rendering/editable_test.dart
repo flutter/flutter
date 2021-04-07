@@ -1204,8 +1204,7 @@ void main() {
     final PipelineOwner pipelineOwner = PipelineOwner();
     editable.attach(pipelineOwner);
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
+    editable.deleteForward(SelectionChangedCause.keyboard);
     expect(delegate.textEditingValue.text, 'ow are you');
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
