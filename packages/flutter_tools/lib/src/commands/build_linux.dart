@@ -68,7 +68,7 @@ class BuildLinuxCommand extends BuildSubCommand {
             != getNameForTargetPlatformArch(targetPlatform);
 
     if (!featureFlags.isLinuxEnabled) {
-      throwToolExit('"build linux" is not currently supported.');
+      throwToolExit('"build linux" is not currently supported. To enable, run "flutter config --enable-linux-desktop".');
     }
     if (!globals.platform.isLinux) {
       throwToolExit('"build linux" only supported on Linux hosts.');
