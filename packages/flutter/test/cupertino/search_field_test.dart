@@ -513,4 +513,21 @@ void main() {
     final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
     expect(textField.autocorrect, false);
   });
+
+  testWidgets('enabled is properly forwarded to the inner text field',
+      (WidgetTester tester) async {
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoSearchTextField(
+            enabled: false,
+          ),
+        ),
+      ),
+    );
+
+    final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
+    expect(textField.enabled, false);
+  });
 }

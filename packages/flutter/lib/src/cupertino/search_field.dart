@@ -149,6 +149,7 @@ class CupertinoSearchTextField extends StatefulWidget {
     this.focusNode,
     this.onTap,
     this.autocorrect = true,
+    this.enabled,
   })  : assert(padding != null),
         assert(itemColor != null),
         assert(itemSize != null),
@@ -283,6 +284,9 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.autocorrect}
   final bool autocorrect;
 
+  /// {@macro flutter.widgets.editableText.enabled}
+  final bool? enabled;
+
   @override
   State<StatefulWidget> createState() => _CupertinoSearchTextFieldState();
 }
@@ -402,6 +406,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       prefix: prefix,
       suffix: suffix,
       onTap: widget.onTap,
+      enabled: widget.enabled,
       suffixMode: widget.suffixMode,
       placeholder: placeholder,
       placeholderStyle: placeholderStyle,
