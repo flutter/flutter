@@ -4119,7 +4119,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   /// A short, textual description of this element.
   @override
-  String toStringShort() => _widget?.toStringShort() ?? 'Defunct Element';
+  String toStringShort() => _widget?.toStringShort() ?? '${describeIdentity(this)}(DEFUNCT)';
 
   @override
   DiagnosticsNode toDiagnosticsNode({ String? name, DiagnosticsTreeStyle? style }) {
