@@ -115,11 +115,10 @@ flutter:
         projectDir: fileSystem.currentDirectory,
         dependenciesDir: fileSystem.currentDirectory,
       ),
-      throwsA(isA<Exception>()),
-    );
-    expect(
-      logger.errorText,
-      contains('Attempted to generate localizations code without having the flutter: generate flag turned on.'),
+      throwsToolExit(
+        message: 'Attempted to generate localizations code without having the '
+          'flutter: generate flag turned on.',
+      ),
     );
   });
 
