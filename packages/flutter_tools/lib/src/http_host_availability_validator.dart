@@ -4,9 +4,11 @@
 
 // @dart = 2.9
 
+import 'package:meta/meta.dart';
+
 import 'base/io.dart';
 import 'base/platform.dart';
-import 'doctor.dart';
+import 'doctor_validator.dart';
 import 'features.dart';
 
 // The environment variables used to override some URLs
@@ -16,9 +18,9 @@ const String kCloudUrl = 'FLUTTER_STORAGE_BASE_URL';
 /// Validation class that checks if all the given URLs are reachable
 class HttpHostAvailabilityValidator extends DoctorValidator {
   HttpHostAvailabilityValidator({
-    Platform platform,
-    FeatureFlags featureFlags,
-    HttpClient httpClient,
+    @required Platform platform,
+    @required FeatureFlags featureFlags,
+    @required HttpClient httpClient,
   })   : _platform = platform,
         _featureFlags = featureFlags,
         _httpClient = httpClient,
