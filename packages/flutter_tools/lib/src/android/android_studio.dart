@@ -220,7 +220,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
 
   /// Locates the newest, valid version of Android Studio.
   static AndroidStudio? latestValid() {
-    final String configuredStudio = globals.config.getValue('android-studio-dir') as String;
+    final String? configuredStudio = globals.config.getValue('android-studio-dir') as String?;
     if (configuredStudio != null) {
       String configuredStudioPath = configuredStudio;
       if (globals.platform.isMacOS && !configuredStudioPath.endsWith('Contents')) {
@@ -283,7 +283,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       ));
     }
 
-    final String configuredStudioDir = globals.config.getValue('android-studio-dir') as String;
+    final String? configuredStudioDir = globals.config.getValue('android-studio-dir') as String?;
     if (configuredStudioDir != null) {
       FileSystemEntity configuredStudio = globals.fs.file(configuredStudioDir);
       if (configuredStudio.basename == 'Contents') {
@@ -377,7 +377,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       }
     }
 
-    final String configuredStudioDir = globals.config.getValue('android-studio-dir') as String;
+    final String? configuredStudioDir = globals.config.getValue('android-studio-dir') as String?;
     if (configuredStudioDir != null && !_hasStudioAt(configuredStudioDir)) {
       studios.add(AndroidStudio(configuredStudioDir,
           configured: configuredStudioDir));
