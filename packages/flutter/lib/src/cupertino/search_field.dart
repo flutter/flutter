@@ -147,6 +147,7 @@ class CupertinoSearchTextField extends StatefulWidget {
     this.onSuffixTap,
     this.restorationId,
     this.focusNode,
+    this.onTap,
   })  : assert(padding != null),
         assert(itemColor != null),
         assert(itemSize != null),
@@ -275,6 +276,9 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
 
+  /// {@macro flutter.material.textfield.onTap}
+  final VoidCallback? onTap;
+
   @override
   State<StatefulWidget> createState() => _CupertinoSearchTextFieldState();
 }
@@ -393,6 +397,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       style: widget.style,
       prefix: prefix,
       suffix: suffix,
+      onTap: widget.onTap,
       suffixMode: widget.suffixMode,
       placeholder: placeholder,
       placeholderStyle: placeholderStyle,
