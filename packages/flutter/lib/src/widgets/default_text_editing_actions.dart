@@ -113,7 +113,7 @@ class DefaultTextEditingActions extends Actions{
 
 // This allows the web engine to handle text editing events natively while using
 // the same TextEditingAction logic to only handle events from a
-// TextEditingTarget.
+// TextEditingActionTarget.
 class _DoNothingAndStopPropagationTextAction extends TextEditingAction<DoNothingAndStopPropagationTextIntent> {
   _DoNothingAndStopPropagationTextAction();
 

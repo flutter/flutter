@@ -8,7 +8,7 @@ import 'actions.dart';
 import 'editable_text.dart';
 
 /// An [Intent] to send the event straight to the engine, but only if a
-/// TextEditingTarget is focused.
+/// [TextEditingActionTarget] is focused.
 ///
 /// {@template flutter.widgets.TextEditingIntents.seeAlso}
 /// See also:
@@ -223,7 +223,7 @@ class MoveSelectionUpTextIntent extends Intent {
 }
 
 /// An [Intent] that indicates that a single tap ended in the currently active
-/// [TextEditingTarget].
+/// [TextEditingActionTarget].
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
 class SingleTapUpTextIntent extends Intent {
