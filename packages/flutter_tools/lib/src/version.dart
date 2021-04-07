@@ -112,11 +112,11 @@ class FlutterVersion {
           globals.processUtils,
           _workingDirectory,
         );
-        _channel = channel.substring(slash + 1);
+        channel = channel.substring(slash + 1);
       } else if (channel.isEmpty) {
-        _channel = 'unknown';
+        channel = 'unknown';
       } else {
-        _channel = channel;
+        channel = channel;
       }
       _channel = channel;
     }
