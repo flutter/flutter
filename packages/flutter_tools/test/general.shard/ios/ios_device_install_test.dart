@@ -20,7 +20,6 @@ import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:meta/meta.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
@@ -289,6 +288,7 @@ IOSDevice setUpIOSDevice({
     artifacts: <ArtifactSet>[
       FakeDyldEnvironmentArtifact(),
     ],
+    processManager: FakeProcessManager.any(),
   );
   return IOSDevice(
     '1234',

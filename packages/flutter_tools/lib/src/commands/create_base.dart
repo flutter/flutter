@@ -431,7 +431,7 @@ abstract class CreateBase extends FlutterCommand {
         macOSPlatform: templateContext['macos'] as bool ?? false,
         windowsPlatform: templateContext['windows'] as bool ?? false,
         webPlatform: templateContext['web'] as bool ?? false,
-        windowsUwpPlatform: templateContext['winuwp'] as bool ?? false,
+        winUwpPlatform: templateContext['winuwp'] as bool ?? false,
       );
     }
     if (templateContext['android'] == true) {

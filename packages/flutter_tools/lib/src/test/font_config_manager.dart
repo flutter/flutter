@@ -7,7 +7,7 @@
 import 'dart:async';
 
 import '../base/file_system.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 
 /// Manages a Font configuration that can be shared across multiple tests.
 class FontConfigManager {

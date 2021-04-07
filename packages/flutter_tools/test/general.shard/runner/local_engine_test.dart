@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/runner/local_engine.dart';
-import 'package:matcher/matcher.dart';
 
 import '../../src/common.dart';
 
@@ -94,6 +93,31 @@ void main() {
       ),
     );
     expect(logger.traceText, contains('Local engine source at /arbitrary/engine/src'));
+  });
+
+  testWithoutContext('treats winuwp_debug_unopt as a host engine', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory localEngine = fileSystem
+        .directory('$kArbitraryEngineRoot/src/out/winuwp_debug_unopt/')
+        ..createSync(recursive: true);
+    fileSystem.directory('$kArbitraryEngineRoot/src/out/winuwp_debug_unopt/').createSync(recursive: true);
+
+    final BufferLogger logger = BufferLogger.test();
+    final LocalEngineLocator localEngineLocator = LocalEngineLocator(
+      fileSystem: fileSystem,
+      flutterRoot: 'flutter/flutter',
+      logger: logger,
+      userMessages: UserMessages(),
+      platform: FakePlatform(environment: <String, String>{}),
+    );
+
+    expect(
+      await localEngineLocator.findEnginePath(null, localEngine.path, null),
+      matchesEngineBuildPaths(
+        hostEngine: '/arbitrary/engine/src/out/winuwp_debug_unopt',
+        targetEngine: '/arbitrary/engine/src/out/winuwp_debug_unopt',
+      ),
+    );
   });
 
   testWithoutContext('works if --local-engine is specified and --local-engine-src-path '

@@ -3435,12 +3435,14 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   void update(covariant Widget newWidget) {
     // This code is hot when hot reloading, so we try to
     // only call _AssertionError._evaluateAssertion once.
-    assert(_lifecycleState == _ElementLifecycle.active
+    assert(
+      _lifecycleState == _ElementLifecycle.active
         && widget != null
         && newWidget != null
         && newWidget != widget
         && depth != null
-        && Widget.canUpdate(widget, newWidget));
+        && Widget.canUpdate(widget, newWidget),
+    );
     // This Element was told to update and we can now release all the global key
     // reservations of forgotten children. We cannot do this earlier because the
     // forgotten children still represent global key duplications if the element
@@ -5694,17 +5696,21 @@ abstract class RenderObjectElement extends Element {
   @override
   void deactivate() {
     super.deactivate();
-    assert(!renderObject.attached,
+    assert(
+      !renderObject.attached,
       'A RenderObject was still attached when attempting to deactivate its '
-      'RenderObjectElement: $renderObject');
+      'RenderObjectElement: $renderObject',
+    );
   }
 
   @override
   void unmount() {
     super.unmount();
-    assert(!renderObject.attached,
+    assert(
+      !renderObject.attached,
       'A RenderObject was still attached when attempting to unmount its '
-      'RenderObjectElement: $renderObject');
+      'RenderObjectElement: $renderObject',
+    );
     widget.didUnmountRenderObject(renderObject);
   }
 
@@ -5798,15 +5804,19 @@ abstract class RenderObjectElement extends Element {
           name: 'insertChildRenderObject() was called on this Element',
           style: DiagnosticsTreeStyle.shallow,
         ),
-        ErrorDescription('insertChildRenderObject() has been deprecated in favor of '
+        ErrorDescription(
+          'insertChildRenderObject() has been deprecated in favor of '
           'insertRenderObjectChild(). See https://github.com/flutter/flutter/issues/63269 '
-          'for details.'),
-        ErrorHint('Rather than overriding insertChildRenderObject() in your '
+          'for details.',
+        ),
+        ErrorHint(
+          'Rather than overriding insertChildRenderObject() in your '
           'RenderObjectElement subclass, override insertRenderObjectChild() instead, '
           "and DON'T call super.insertRenderObjectChild(). If you're implementing a "
           'new RenderObjectElement, you should override/implement '
           'insertRenderObjectChild(), moveRenderObjectChild(), and '
-          'removeRenderObjectChild().'),
+          'removeRenderObjectChild().',
+        ),
       ]);
     }());
   }
@@ -5871,15 +5881,19 @@ abstract class RenderObjectElement extends Element {
           name: 'super.moveChildRenderObject() was called on this Element',
           style: DiagnosticsTreeStyle.shallow,
         ),
-        ErrorDescription('moveChildRenderObject() has been deprecated in favor of '
-            'moveRenderObjectChild(). See https://github.com/flutter/flutter/issues/63269 '
-            'for details.'),
-        ErrorHint('Rather than overriding moveChildRenderObject() in your '
-            'RenderObjectElement subclass, override moveRenderObjectChild() instead, '
-            "and DON'T call super.moveRenderObjectChild(). If you're implementing a "
-            'new RenderObjectElement, you should override/implement '
-            'insertRenderObjectChild(), moveRenderObjectChild(), and '
-            'removeRenderObjectChild().'),
+        ErrorDescription(
+          'moveChildRenderObject() has been deprecated in favor of '
+          'moveRenderObjectChild(). See https://github.com/flutter/flutter/issues/63269 '
+          'for details.',
+        ),
+        ErrorHint(
+          'Rather than overriding moveChildRenderObject() in your '
+          'RenderObjectElement subclass, override moveRenderObjectChild() instead, '
+          "and DON'T call super.moveRenderObjectChild(). If you're implementing a "
+          'new RenderObjectElement, you should override/implement '
+          'insertRenderObjectChild(), moveRenderObjectChild(), and '
+          'removeRenderObjectChild().',
+        ),
       ]);
     }());
   }
@@ -5938,15 +5952,19 @@ abstract class RenderObjectElement extends Element {
           name: 'super.removeChildRenderObject() was called on this Element',
           style: DiagnosticsTreeStyle.shallow,
         ),
-        ErrorDescription('removeChildRenderObject() has been deprecated in favor of '
-            'removeRenderObjectChild(). See https://github.com/flutter/flutter/issues/63269 '
-            'for details.'),
-        ErrorHint('Rather than overriding removeChildRenderObject() in your '
-            'RenderObjectElement subclass, override removeRenderObjectChild() instead, '
-            "and DON'T call super.removeRenderObjectChild(). If you're implementing a "
-            'new RenderObjectElement, you should override/implement '
-            'insertRenderObjectChild(), moveRenderObjectChild(), and '
-            'removeRenderObjectChild().'),
+        ErrorDescription(
+          'removeChildRenderObject() has been deprecated in favor of '
+          'removeRenderObjectChild(). See https://github.com/flutter/flutter/issues/63269 '
+          'for details.',
+        ),
+        ErrorHint(
+          'Rather than overriding removeChildRenderObject() in your '
+          'RenderObjectElement subclass, override removeRenderObjectChild() instead, '
+          "and DON'T call super.removeRenderObjectChild(). If you're implementing a "
+          'new RenderObjectElement, you should override/implement '
+          'insertRenderObjectChild(), moveRenderObjectChild(), and '
+          'removeRenderObjectChild().',
+        ),
       ]);
     }());
   }

@@ -34,18 +34,30 @@ void main() {
         'clean',
       ], workingDirectory: workingDirectory);
 
-      final ProcessResult result = processManager.runSync(<String>[
+      final File podfile = fileSystem.file(fileSystem.path.join(workingDirectory, 'macos', 'Podfile'));
+      final File podfileLock = fileSystem.file(fileSystem.path.join(workingDirectory, 'macos', 'Podfile.lock'));
+      expect(podfile, exists);
+      expect(podfileLock, exists);
+
+      // Simulate a newer Podfile than Podfile.lock.
+      podfile.setLastModifiedSync(DateTime.now());
+      podfileLock.setLastModifiedSync(DateTime.now().subtract(const Duration(days: 1)));
+      expect(podfileLock.lastModifiedSync().isBefore(podfile.lastModifiedSync()), isTrue);
+
+      final List<String> buildCommand = <String>[
         flutterBin,
         ...getLocalEngineArguments(),
         'build',
         'macos',
         '--$buildModeLower',
-      ], workingDirectory: workingDirectory);
+      ];
+      final ProcessResult result = processManager.runSync(buildCommand, workingDirectory: workingDirectory);
 
       print(result.stdout);
       print(result.stderr);
-
       expect(result.exitCode, 0);
+
+      expect(result.stdout, contains('Running pod install'));
 
       final Directory outputApp = fileSystem.directory(fileSystem.path.join(
         workingDirectory,
@@ -56,6 +68,7 @@ void main() {
         buildMode,
         'flutter_gallery.app',
       ));
+      expect(podfile.lastModifiedSync().isBefore(podfileLock.lastModifiedSync()), isTrue);
 
       final Directory outputAppFramework =
           fileSystem.directory(fileSystem.path.join(
@@ -117,6 +130,15 @@ void main() {
         containsBitcode(outputFlutterFrameworkBinary.path, processManager),
         isFalse,
       );
+
+      // Build again without cleaning.
+      final ProcessResult secondBuild = processManager.runSync(buildCommand, workingDirectory: workingDirectory);
+
+      print(secondBuild.stdout);
+      print(secondBuild.stderr);
+      expect(secondBuild.exitCode, 0);
+
+      expect(secondBuild.stdout, isNot(contains('Running pod install')));
 
       processManager.runSync(<String>[
         flutterBin,

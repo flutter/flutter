@@ -373,9 +373,11 @@ class RenderParagraph extends RenderBox
         case ui.PlaceholderAlignment.baseline:
         case ui.PlaceholderAlignment.aboveBaseline:
         case ui.PlaceholderAlignment.belowBaseline: {
-          assert(RenderObject.debugCheckingIntrinsics,
+          assert(
+            RenderObject.debugCheckingIntrinsics,
             'Intrinsics are not available for PlaceholderAlignment.baseline, '
-            'PlaceholderAlignment.aboveBaseline, or PlaceholderAlignment.belowBaseline.');
+            'PlaceholderAlignment.aboveBaseline, or PlaceholderAlignment.belowBaseline.',
+          );
           return false;
         }
         case ui.PlaceholderAlignment.top:

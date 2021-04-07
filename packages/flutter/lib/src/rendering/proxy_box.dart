@@ -1600,8 +1600,10 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
     assert(_clip != null);
     final Offset center = _clip!.center;
     // convert the position to an offset from the center of the unit circle
-    final Offset offset = Offset((position.dx - center.dx) / _clip!.width,
-                                     (position.dy - center.dy) / _clip!.height);
+    final Offset offset = Offset(
+      (position.dx - center.dx) / _clip!.width,
+      (position.dy - center.dy) / _clip!.height,
+    );
     // check if the point is outside the unit circle
     if (offset.distanceSquared > 0.25) // x^2 + y^2 > r^2
       return false;
@@ -2582,8 +2584,13 @@ class RenderFittedBox extends RenderProxyBox {
   TransformLayer? _paintChildWithTransform(PaintingContext context, Offset offset) {
     final Offset? childOffset = MatrixUtils.getAsTranslation(_transform!);
     if (childOffset == null)
-      return context.pushTransform(needsCompositing, offset, _transform!, super.paint,
-          oldLayer: layer is TransformLayer ? layer! as TransformLayer : null);
+      return context.pushTransform(
+        needsCompositing,
+        offset,
+        _transform!,
+        super.paint,
+        oldLayer: layer is TransformLayer ? layer! as TransformLayer : null,
+      );
     else
       super.paint(context, offset + childOffset);
     return null;
@@ -2596,8 +2603,14 @@ class RenderFittedBox extends RenderProxyBox {
     _updatePaintData();
     if (child != null) {
       if (_hasVisualOverflow! && clipBehavior != Clip.none)
-        layer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintChildWithTransform,
-            oldLayer: layer is ClipRectLayer ? layer! as ClipRectLayer : null, clipBehavior: clipBehavior);
+        layer = context.pushClipRect(
+          needsCompositing,
+          offset,
+          Offset.zero & size,
+          _paintChildWithTransform,
+          oldLayer: layer is ClipRectLayer ? layer! as ClipRectLayer : null,
+          clipBehavior: clipBehavior,
+        );
       else
         layer = _paintChildWithTransform(context, offset);
     }
@@ -4655,10 +4668,14 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = container;
     config.explicitChildNodes = explicitChildNodes;
-    assert((scopesRoute == true && explicitChildNodes == true) || scopesRoute != true,
-      'explicitChildNodes must be set to true if scopes route is true');
-    assert(!(toggled == true && checked == true),
-      'A semantics node cannot be toggled and checked at the same time');
+    assert(
+      (scopesRoute == true && explicitChildNodes == true) || scopesRoute != true,
+      'explicitChildNodes must be set to true if scopes route is true',
+    );
+    assert(
+      !(toggled == true && checked == true),
+      'A semantics node cannot be toggled and checked at the same time',
+    );
 
     if (enabled != null)
       config.isEnabled = enabled;
