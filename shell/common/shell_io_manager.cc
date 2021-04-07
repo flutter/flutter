@@ -53,7 +53,7 @@ sk_sp<GrDirectContext> ShellIOManager::CreateCompatibleResourceLoadingContext(
 
 ShellIOManager::ShellIOManager(
     sk_sp<GrDirectContext> resource_context,
-    std::shared_ptr<fml::SyncSwitch> is_gpu_disabled_sync_switch,
+    std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
     fml::RefPtr<fml::TaskRunner> unref_queue_task_runner)
     : resource_context_(std::move(resource_context)),
       resource_context_weak_factory_(
@@ -125,7 +125,8 @@ fml::WeakPtr<IOManager> ShellIOManager::GetWeakIOManager() const {
 }
 
 // |IOManager|
-std::shared_ptr<fml::SyncSwitch> ShellIOManager::GetIsGpuDisabledSyncSwitch() {
+std::shared_ptr<const fml::SyncSwitch>
+ShellIOManager::GetIsGpuDisabledSyncSwitch() {
   return is_gpu_disabled_sync_switch_;
 }
 

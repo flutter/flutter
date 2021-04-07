@@ -71,7 +71,7 @@ class TestIOManager final : public IOManager {
   }
 
   // |IOManager|
-  std::shared_ptr<fml::SyncSwitch> GetIsGpuDisabledSyncSwitch() override {
+  std::shared_ptr<const fml::SyncSwitch> GetIsGpuDisabledSyncSwitch() override {
     did_access_is_gpu_disabled_sync_switch_ = true;
     return is_gpu_disabled_sync_switch_;
   }

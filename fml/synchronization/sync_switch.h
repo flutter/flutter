@@ -32,13 +32,10 @@ class SyncSwitch {
     std::function<void()> false_handler = [] {};
   };
 
-  /// Create a |SyncSwitch| with the false value.
-  SyncSwitch();
-
   /// Create a |SyncSwitch| with the specified value.
   ///
   /// @param[in]  value  Default value for the |SyncSwitch|.
-  SyncSwitch(bool value);
+  explicit SyncSwitch(bool value = false);
 
   /// Diverge execution between true and false values of the SyncSwitch.
   ///
@@ -46,7 +43,7 @@ class SyncSwitch {
   /// |SetSwitch| inside of the handlers will result in a self deadlock.
   ///
   /// @param[in]  handlers  Called for the correct value of the |SyncSwitch|.
-  void Execute(const Handlers& handlers);
+  void Execute(const Handlers& handlers) const;
 
   /// Set the value of the SyncSwitch.
   ///
@@ -56,7 +53,7 @@ class SyncSwitch {
   void SetSwitch(bool value);
 
  private:
-  std::mutex mutex_;
+  mutable std::mutex mutex_;
   bool value_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(SyncSwitch);
