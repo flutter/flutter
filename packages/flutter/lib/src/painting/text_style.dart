@@ -6,11 +6,11 @@
 import 'dart:ui' as ui show ParagraphStyle, TextStyle, StrutStyle, lerpDouble, Shadow, FontFeature, TextHeightBehavior, TextLeadingDistribution;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart' show TextOverflow;
 
 import 'basic_types.dart';
 import 'colors.dart';
 import 'strut_style.dart';
+import 'text_painter.dart';
 
 const String _kDefaultDebugLabel = 'unknown';
 
