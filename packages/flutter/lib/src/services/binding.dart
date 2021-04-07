@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -12,8 +11,90 @@ import 'package:flutter/scheduler.dart';
 
 import 'asset_bundle.dart';
 import 'binary_messenger.dart';
+import 'hardware_keyboard.dart';
+import 'keyboard_key.dart';
+import 'keyboard_keys.dart';
+import 'raw_keyboard.dart';
 import 'restoration.dart';
 import 'system_channels.dart';
+
+class _ServiceHardwareKeyboard extends HardwareKeyboard {
+  _ServiceHardwareKeyboard(KeyEventCallback onEvent) {
+    this.onEvent = onEvent;
+  }
+
+  bool handleKeyEvent(KeyEvent event) {
+    receivingKeyData = true;
+    return dispatchKeyEvent(event);
+  }
+
+  void handleRawEvent(RawKeyEvent rawEvent) {
+    // Raw events are a backup plan for platforms that do not support key data.
+    // A platform that supports key data should not use raw events.
+    if (!receivingKeyData)
+      dispatchKeyEvent(_eventFromRawEvent(rawEvent));
+  }
+
+  static KeyEvent _eventFromRawEvent(RawKeyEvent rawEvent) {
+    final LogicalKeyboardKey logical = rawEvent.logicalKey;
+    final PhysicalKeyboardKey physical = rawEvent.physicalKey;
+    final Duration timeStamp = SchedulerBinding.instance!.currentSystemFrameTimeStamp;
+    final String character = rawEvent.data.keyLabel;
+    if (rawEvent is RawKeyDownEvent) {
+      return KeyDownEvent(
+        logical: logical,
+        physical: physical,
+        timeStamp: timeStamp,
+        character: character,
+        synthesized: false,
+      );
+    }
+    if (rawEvent is RawKeyUpEvent) {
+      return KeyUpEvent(
+        logical: logical,
+        physical: physical,
+        timeStamp: timeStamp,
+        synthesized: false,
+      );
+    }
+    throw UnimplementedError(
+        'Unexpected subclass of RawKeyEvent: ${rawEvent.runtimeType}');
+  }
+}
+
+KeyEvent _keyEventFromData(ui.KeyData keyData) {
+  final PhysicalKeyboardKey physicalKey =
+      PhysicalKeyboardKey.findKeyByCode(keyData.physical) ??
+          PhysicalKeyboardKey(keyData.physical);
+  final LogicalKeyboardKey logicalKey =
+      LogicalKeyboardKey.findKeyByKeyId(keyData.logical) ??
+          LogicalKeyboardKey(keyData.logical);
+  final Duration timeStamp = keyData.timeStamp;
+  switch (keyData.type) {
+    case ui.KeyEventType.down:
+      return KeyDownEvent(
+        physical: physicalKey,
+        logical: logicalKey,
+        timeStamp: timeStamp,
+        character: keyData.character,
+        synthesized: keyData.synthesized,
+      );
+    case ui.KeyEventType.up:
+      return KeyUpEvent(
+        physical: physicalKey,
+        logical: logicalKey,
+        timeStamp: timeStamp,
+        synthesized: keyData.synthesized,
+      );
+    case ui.KeyEventType.repeat:
+      return KeyRepeatEvent(
+        physical: physicalKey,
+        logical: logicalKey,
+        timeStamp: timeStamp,
+        character: keyData.character,
+      );
+  }
+}
 
 /// Listens for platform messages and directs them to the [defaultBinaryMessenger].
 ///
@@ -29,8 +110,10 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     _defaultBinaryMessenger = createBinaryMessenger();
     _restorationManager = createRestorationManager();
     window.onPlatformMessage = defaultBinaryMessenger.handlePlatformMessage;
+    initHardwareKeyboard();
     initLicenses();
-    SystemChannels.system.setMessageHandler((dynamic message) => handleSystemMessage(message as Object));
+    SystemChannels.system.setMessageHandler(
+        (dynamic message) => handleSystemMessage(message as Object));
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
     readInitialLifecycleStateFromNativeWindow();
   }
@@ -38,6 +121,32 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// The current [ServicesBinding], if one has been created.
   static ServicesBinding? get instance => _instance;
   static ServicesBinding? _instance;
+
+  KeyEventCallback? onKeyEvent;
+
+  HardwareKeyboard get hardwareKeyboard => _hardwareKeyboard!;
+  _ServiceHardwareKeyboard? _hardwareKeyboard;
+
+  @protected
+  @mustCallSuper
+  void initHardwareKeyboard() {
+    if (_hardwareKeyboard != null)
+      RawKeyboard.instance.removeListener(_hardwareKeyboard!.handleRawEvent);
+    _hardwareKeyboard = _ServiceHardwareKeyboard(
+      (KeyEvent event) => onKeyEvent?.call(event) ?? false,
+    );
+    window.onKeyData = _handleKeyData;
+    RawKeyboard.instance.addListener(_hardwareKeyboard!.handleRawEvent);
+  }
+
+  bool _handleKeyData(ui.KeyData keyData) {
+    return handleKeyEvent(_keyEventFromData(keyData));
+  }
+
+  /// Dispatch an event to the targets found by a hit test on its position.
+  bool handleKeyEvent(KeyEvent event) {
+    return _hardwareKeyboard!.handleKeyEvent(event);
+  }
 
   /// The default instance of [BinaryMessenger].
   ///
@@ -54,7 +163,6 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     return const _DefaultBinaryMessenger._();
   }
 
-
   /// Called when the operating system notifies the application of a memory
   /// pressure situation.
   ///
@@ -62,7 +170,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// [SystemChannels.system].
   @protected
   @mustCallSuper
-  void handleMemoryPressure() { }
+  void handleMemoryPressure() {}
 
   /// Handler called for messages received on the [SystemChannels.system]
   /// message channel.
@@ -104,12 +212,16 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     // TODO(ianh): Remove this complexity once these bugs are fixed.
     final Completer<String> rawLicenses = Completer<String>();
     scheduleTask(() async {
-      rawLicenses.complete(await rootBundle.loadString('NOTICES', cache: false));
+      rawLicenses
+          .complete(await rootBundle.loadString('NOTICES', cache: false));
     }, Priority.animation);
     await rawLicenses.future;
-    final Completer<List<LicenseEntry>> parsedLicenses = Completer<List<LicenseEntry>>();
+    final Completer<List<LicenseEntry>> parsedLicenses =
+        Completer<List<LicenseEntry>>();
     scheduleTask(() async {
-      parsedLicenses.complete(compute<String, List<LicenseEntry>>(_parseLicenses, await rawLicenses.future, debugLabel: 'parseLicenses'));
+      parsedLicenses.complete(compute<String, List<LicenseEntry>>(
+          _parseLicenses, await rawLicenses.future,
+          debugLabel: 'parseLicenses'));
     }, Priority.animation);
     await parsedLicenses.future;
     yield* Stream<LicenseEntry>.fromIterable(await parsedLicenses.future);
@@ -182,7 +294,8 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     if (lifecycleState != null) {
       return;
     }
-    final AppLifecycleState? state = _parseAppLifecycleMessage(window.initialLifecycleState);
+    final AppLifecycleState? state =
+        _parseAppLifecycleMessage(window.initialLifecycleState);
     if (state != null) {
       handleAppLifecycleStateChanged(state);
     }
@@ -256,7 +369,8 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
     // ui.PlatformDispatcher.instance because the PlatformDispatcher may be
     // dependency injected elsewhere with a different instance. However, static
     // access at this location seems to be the least bad option.
-    ui.PlatformDispatcher.instance.sendPlatformMessage(channel, message, (ByteData? reply) {
+    ui.PlatformDispatcher.instance.sendPlatformMessage(channel, message,
+        (ByteData? reply) {
       try {
         completer.complete(reply);
       } catch (exception, stack) {
@@ -264,7 +378,8 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
           exception: exception,
           stack: stack,
           library: 'services library',
-          context: ErrorDescription('during a platform message response callback'),
+          context:
+              ErrorDescription('during a platform message response callback'),
         ));
       }
     });
@@ -303,8 +418,7 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
   @override
   Future<ByteData?>? send(String channel, ByteData? message) {
     final MessageHandler? handler = _mockHandlers[channel];
-    if (handler != null)
-      return handler(message);
+    if (handler != null) return handler(message);
     return _sendPlatformMessage(channel, message);
   }
 
@@ -314,14 +428,16 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
       _handlers.remove(channel);
     } else {
       _handlers[channel] = handler;
-      ui.channelBuffers.drain(channel, (ByteData? data, ui.PlatformMessageResponseCallback callback) async {
+      ui.channelBuffers.drain(channel,
+          (ByteData? data, ui.PlatformMessageResponseCallback callback) async {
         await handlePlatformMessage(channel, data, callback);
       });
     }
   }
 
   @override
-  bool checkMessageHandler(String channel, MessageHandler? handler) => _handlers[channel] == handler;
+  bool checkMessageHandler(String channel, MessageHandler? handler) =>
+      _handlers[channel] == handler;
 
   @override
   void setMockMessageHandler(String channel, MessageHandler? handler) {
@@ -332,5 +448,6 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
   }
 
   @override
-  bool checkMockMessageHandler(String channel, MessageHandler? handler) => _mockHandlers[channel] == handler;
+  bool checkMockMessageHandler(String channel, MessageHandler? handler) =>
+      _mockHandlers[channel] == handler;
 }

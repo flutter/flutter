@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 
-import 'keyboard_key.dart';
+import 'package:flutter/foundation.dart';
+
+import 'keyboard_keys.dart';
 import 'keyboard_maps.dart';
 import 'raw_keyboard.dart';
 

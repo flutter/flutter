@@ -6,15 +6,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/services/keyboard_keys.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 typedef PostInvokeCallback = void Function({Action<Intent> action, Intent intent, BuildContext? context, ActionDispatcher dispatcher});
-
-class ShortcutsTestBinding extends AutomatedTestWidgetsFlutterBinding {
-  void resetHardwareKeyboard() {
-    super.initHardwareKeyboard();
-  }
-}
 
 class TestAction extends CallbackAction<TestIntent> {
   TestAction({
@@ -56,10 +51,7 @@ class TestShortcutManager extends ShortcutManager {
   }
 }
 
-final ShortcutsTestBinding binding = ShortcutsTestBinding();
-
 void main() {
-  setUp(binding.resetHardwareKeyboard);
   group(LogicalKeySet, () {
     test('LogicalKeySet passes parameters correctly.', () {
       final LogicalKeySet set1 = LogicalKeySet(LogicalKeyboardKey.keyA);
@@ -78,6 +70,7 @@ void main() {
         LogicalKeyboardKey.keyC,
         LogicalKeyboardKey.keyD,
       );
+      // ignore: prefer_const_literals_to_create_immutables, https://github.com/dart-lang/linter/issues/2026
       final LogicalKeySet setFromSet = LogicalKeySet.fromSet(<LogicalKeyboardKey>{
         LogicalKeyboardKey.keyA,
         LogicalKeyboardKey.keyB,
@@ -133,6 +126,7 @@ void main() {
         LogicalKeyboardKey.keyB,
         LogicalKeyboardKey.keyA,
       );
+      // ignore: prefer_const_literals_to_create_immutables, https://github.com/dart-lang/linter/issues/2026
       final LogicalKeySet set4 = LogicalKeySet.fromSet(<LogicalKeyboardKey>{
         LogicalKeyboardKey.keyD,
         LogicalKeyboardKey.keyC,
@@ -148,6 +142,7 @@ void main() {
       expect(map.containsKey(LogicalKeySet(LogicalKeyboardKey.keyA)), isTrue);
       expect(
           set2,
+          // ignore: prefer_const_literals_to_create_immutables, https://github.com/dart-lang/linter/issues/2026
           equals(LogicalKeySet.fromSet(<LogicalKeyboardKey>{
             LogicalKeyboardKey.keyA,
             LogicalKeyboardKey.keyB,
@@ -228,7 +223,7 @@ void main() {
           },
           child: Focus(
             autofocus: true,
-            child: SizedBox(key: containerKey, width: 100, height: 100),
+            child: Container(key: containerKey, width: 100, height: 100),
           ),
         ),
       );
@@ -289,14 +284,14 @@ void main() {
             },
             child: Focus(
               autofocus: true,
-              child: SizedBox(key: containerKey, width: 100, height: 100),
+              child: Container(key: containerKey, width: 100, height: 100),
             ),
           ),
         ),
       );
       await tester.pump();
       expect(Shortcuts.of(containerKey.currentContext!), isNotNull);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft, physicalKey: PhysicalKeyboardKey.shiftLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
       expect(invoked, isTrue);
       expect(pressedKeys, equals(<LogicalKeyboardKey>[LogicalKeyboardKey.shiftLeft]));
     });
@@ -326,7 +321,7 @@ void main() {
               },
               child: Focus(
                 autofocus: true,
-                child: SizedBox(key: containerKey, width: 100, height: 100),
+                child: Container(key: containerKey, width: 100, height: 100),
               ),
             ),
           ),
@@ -334,7 +329,7 @@ void main() {
       );
       await tester.pump();
       expect(Shortcuts.of(containerKey.currentContext!), isNotNull);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft, physicalKey: PhysicalKeyboardKey.shiftLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
       expect(invoked, isTrue);
       expect(pressedKeys, equals(<LogicalKeyboardKey>[LogicalKeyboardKey.shiftLeft]));
     });
@@ -365,7 +360,7 @@ void main() {
                 },
                 child: Focus(
                   autofocus: true,
-                  child: SizedBox(key: containerKey, width: 100, height: 100),
+                  child: Container(key: containerKey, width: 100, height: 100),
                 ),
               ),
             ),
@@ -374,7 +369,7 @@ void main() {
       );
       await tester.pump();
       expect(Shortcuts.of(containerKey.currentContext!), isNotNull);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft, physicalKey: PhysicalKeyboardKey.shiftLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
       expect(invoked, isFalse);
       expect(pressedKeys, isEmpty);
     });
@@ -397,7 +392,7 @@ void main() {
       );
       await tester.pump();
       expect(Shortcuts.of(textFieldKey.currentContext!), isNotNull);
-      final bool handled = await tester.sendKeyEvent(LogicalKeyboardKey.keyA, physicalKey: PhysicalKeyboardKey.keyA, character: 'a');
+      final bool handled = await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
       expect(handled, isFalse);
       expect(pressedKeys, equals(<LogicalKeyboardKey>[LogicalKeyboardKey.keyA]));
     });
@@ -431,7 +426,7 @@ void main() {
       );
       await tester.pump();
       expect(Shortcuts.of(textFieldKey.currentContext!), isNotNull);
-      final bool result = await tester.sendKeyEvent(LogicalKeyboardKey.keyA, physicalKey: PhysicalKeyboardKey.keyA, character: 'a');
+      final bool result = await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
       expect(result, isTrue);
       expect(pressedKeys, equals(<LogicalKeyboardKey>[LogicalKeyboardKey.keyA]));
       expect(invoked, isTrue);
@@ -510,7 +505,7 @@ void main() {
       );
       await tester.pump();
       expect(Shortcuts.of(textFieldKey.currentContext!), isNotNull);
-      final bool result = await tester.sendKeyEvent(LogicalKeyboardKey.keyA, physicalKey: PhysicalKeyboardKey.keyA, character: 'a');
+      final bool result = await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
       expect(result, isFalse);
       expect(invoked, isFalse);
     });

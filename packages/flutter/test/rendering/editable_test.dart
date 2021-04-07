@@ -962,8 +962,8 @@ void main() {
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 0);
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
+    await simulateKeyDownEvent(LogicalKeyboardKey.delete, physicalKey: PhysicalKeyboardKey.delete, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.delete, physicalKey: PhysicalKeyboardKey.delete, platform: 'android');
     expect(delegate.textEditingValue.text, 'est');
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
@@ -1013,8 +1013,8 @@ void main() {
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 4);
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
+    await simulateKeyDownEvent(LogicalKeyboardKey.delete, physicalKey: PhysicalKeyboardKey.delete, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.delete, physicalKey: PhysicalKeyboardKey.delete, platform: 'android');
     expect(delegate.textEditingValue.text, '01236789');
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
@@ -1064,8 +1064,8 @@ void main() {
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 4);
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
+    await simulateKeyDownEvent(LogicalKeyboardKey.delete, physicalKey: PhysicalKeyboardKey.delete, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.delete, physicalKey: PhysicalKeyboardKey.delete, platform: 'android');
     expect(delegate.textEditingValue.text, '01232345');
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
@@ -1114,8 +1114,8 @@ void main() {
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 0);
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
+    await simulateKeyDownEvent(LogicalKeyboardKey.delete, physicalKey: PhysicalKeyboardKey.delete, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.delete, physicalKey: PhysicalKeyboardKey.delete, platform: 'android');
     expect(delegate.textEditingValue.text, '');
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
@@ -1373,7 +1373,7 @@ void main() {
     editable.selection = const TextSelection.collapsed(offset: 2);
     pumpFrame();
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.shift);
+    await simulateKeyDownEvent(LogicalKeyboardKey.shiftLeft, physicalKey: PhysicalKeyboardKey.shiftLeft);
 
     editable.moveSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
@@ -1397,7 +1397,7 @@ void main() {
     expect(currentSelection.baseOffset, 0);
 
     await simulateKeyUpEvent(wordModifier);
-    await simulateKeyUpEvent(LogicalKeyboardKey.shift);
+    await simulateKeyUpEvent(LogicalKeyboardKey.shiftLeft, physicalKey: PhysicalKeyboardKey.shiftLeft);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/58068
 
   group('delete', () {
@@ -1431,8 +1431,8 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
-      await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
+      await simulateKeyDownEvent(LogicalKeyboardKey.delete, physicalKey: PhysicalKeyboardKey.delete, platform: 'android');
+      await simulateKeyUpEvent(LogicalKeyboardKey.delete, physicalKey: PhysicalKeyboardKey.delete, platform: 'android');
       expect(delegate.textEditingValue.text, 'tt');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 1);
@@ -1468,8 +1468,8 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
-      await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
+      await simulateKeyDownEvent(LogicalKeyboardKey.delete, physicalKey: PhysicalKeyboardKey.delete, platform: 'android');
+      await simulateKeyUpEvent(LogicalKeyboardKey.delete, physicalKey: PhysicalKeyboardKey.delete, platform: 'android');
       expect(delegate.textEditingValue.text, 'test');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 4);
@@ -1507,8 +1507,8 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
-      await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
+      await simulateKeyDownEvent(LogicalKeyboardKey.delete, physicalKey: PhysicalKeyboardKey.delete, platform: 'android');
+      await simulateKeyUpEvent(LogicalKeyboardKey.delete, physicalKey: PhysicalKeyboardKey.delete, platform: 'android');
 
       expect(delegate.textEditingValue.text, 'est');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
@@ -1547,8 +1547,8 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      await simulateKeyDownEvent(LogicalKeyboardKey.backspace, platform: 'android');
-      await simulateKeyUpEvent(LogicalKeyboardKey.backspace, platform: 'android');
+      await simulateKeyDownEvent(LogicalKeyboardKey.backspace, physicalKey: PhysicalKeyboardKey.backspace, platform: 'android');
+      await simulateKeyUpEvent(LogicalKeyboardKey.backspace, physicalKey: PhysicalKeyboardKey.backspace, platform: 'android');
       expect(delegate.textEditingValue.text, 'tt');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 1);
@@ -1584,8 +1584,8 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      await simulateKeyDownEvent(LogicalKeyboardKey.backspace, platform: 'android');
-      await simulateKeyUpEvent(LogicalKeyboardKey.backspace, platform: 'android');
+      await simulateKeyDownEvent(LogicalKeyboardKey.backspace, physicalKey: PhysicalKeyboardKey.backspace, platform: 'android');
+      await simulateKeyUpEvent(LogicalKeyboardKey.backspace, physicalKey: PhysicalKeyboardKey.backspace, platform: 'android');
       expect(delegate.textEditingValue.text, 'tet');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 2);
@@ -1621,8 +1621,8 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      await simulateKeyDownEvent(LogicalKeyboardKey.backspace, platform: 'android');
-      await simulateKeyUpEvent(LogicalKeyboardKey.backspace, platform: 'android');
+      await simulateKeyDownEvent(LogicalKeyboardKey.backspace, physicalKey: PhysicalKeyboardKey.backspace, platform: 'android');
+      await simulateKeyUpEvent(LogicalKeyboardKey.backspace, physicalKey: PhysicalKeyboardKey.backspace, platform: 'android');
       expect(delegate.textEditingValue.text, '');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 0);
@@ -1658,8 +1658,8 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      await simulateKeyDownEvent(LogicalKeyboardKey.backspace, platform: 'android');
-      await simulateKeyUpEvent(LogicalKeyboardKey.backspace, platform: 'android');
+      await simulateKeyDownEvent(LogicalKeyboardKey.backspace, physicalKey: PhysicalKeyboardKey.backspace, platform: 'android');
+      await simulateKeyUpEvent(LogicalKeyboardKey.backspace, physicalKey: PhysicalKeyboardKey.backspace, platform: 'android');
       expect(delegate.textEditingValue.text, '01232345');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 4);
@@ -1695,8 +1695,8 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      await simulateKeyDownEvent(LogicalKeyboardKey.backspace, platform: 'android');
-      await simulateKeyUpEvent(LogicalKeyboardKey.backspace, platform: 'android');
+      await simulateKeyDownEvent(LogicalKeyboardKey.backspace, physicalKey: PhysicalKeyboardKey.backspace, platform: 'android');
+      await simulateKeyUpEvent(LogicalKeyboardKey.backspace, physicalKey: PhysicalKeyboardKey.backspace, platform: 'android');
       expect(delegate.textEditingValue.text, 'test');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 0);
@@ -1734,8 +1734,8 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      await simulateKeyDownEvent(LogicalKeyboardKey.backspace, platform: 'android');
-      await simulateKeyUpEvent(LogicalKeyboardKey.backspace, platform: 'android');
+      await simulateKeyDownEvent(LogicalKeyboardKey.backspace, physicalKey: PhysicalKeyboardKey.backspace, platform: 'android');
+      await simulateKeyUpEvent(LogicalKeyboardKey.backspace, physicalKey: PhysicalKeyboardKey.backspace, platform: 'android');
 
       expect(delegate.textEditingValue.text, 'tes');
       expect(delegate.textEditingValue.selection.isCollapsed, true);

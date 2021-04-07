@@ -5,7 +5,7 @@
 
 import 'package:flutter/foundation.dart';
 
-import 'keyboard_key.dart';
+import 'keyboard_keys.dart';
 import 'keyboard_maps.dart';
 import 'raw_keyboard.dart';
 
@@ -105,8 +105,9 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
     // the physical key's HID usage and debugName. This avoids duplicating the
     // physical key map.
     if (physicalKey != PhysicalKeyboardKey.none) {
-      final int keyId = physicalKey.usbHidUsage | LogicalKeyboardKey.hidPlane;
-      return LogicalKeyboardKey.findKeyByKeyId(keyId) ?? LogicalKeyboardKey(keyId);
+      return kMacOsToLogicalKey[keyCode] ?? LogicalKeyboardKey(
+        physicalKey.usbHidUsage | LogicalKeyboardKey.hidPlane,
+      );
     }
 
     // This is a non-printable key that is unrecognized, so a new code is minted

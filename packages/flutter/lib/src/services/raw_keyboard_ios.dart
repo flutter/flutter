@@ -4,7 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
-import 'keyboard_key.dart';
+import 'keyboard_keys.dart';
 import 'keyboard_maps.dart';
 import 'raw_keyboard.dart';
 
@@ -94,12 +94,11 @@ class RawKeyEventDataIos extends RawKeyEventData {
 
   @override
   LogicalKeyboardKey get logicalKey {
-    // Look to see if the keyCode is a printable number pad key, so that a
-    // difference between regular keys (e.g. "=") and the number pad version
-    // (e.g. the "=" on the number pad) can be determined.
-    final LogicalKeyboardKey? numPadKey = kIosNumPadMap[keyCode];
-    if (numPadKey != null) {
-      return numPadKey;
+    /// A number of keys can already be determined using their physical key (key
+    /// code). Check this map first.
+    final LogicalKeyboardKey? maybeFromKeyCode = kIosToLogicalKey[keyCode];
+    if (maybeFromKeyCode != null) {
+      return maybeFromKeyCode;
     }
 
     // Look to see if the [keyLabel] is one we know about and have a mapping for.
@@ -124,8 +123,9 @@ class RawKeyEventDataIos extends RawKeyEventData {
         codeUnit = (codeUnit << 16) | secondCode;
       }
 
-      final int keyId = LogicalKeyboardKey.unicodePlane | (codeUnit & LogicalKeyboardKey.valueMask);
-      return LogicalKeyboardKey.findKeyByKeyId(keyId) ?? LogicalKeyboardKey(keyId);
+      return kIosToLogicalKey[keyCode] ?? LogicalKeyboardKey(
+        LogicalKeyboardKey.unicodePlane | (codeUnit & LogicalKeyboardKey.valueMask),
+      );
     }
 
     // Control keys like "backspace" and movement keys like arrow keys don't

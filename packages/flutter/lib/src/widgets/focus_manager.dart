@@ -58,6 +58,15 @@ enum KeyEventResult {
 // TODO(gspencergoog): Convert this from dynamic to KeyEventResult once migration is complete.
 typedef FocusOnKeyCallback = dynamic Function(FocusNode node, RawKeyEvent event);
 
+/// Signature of a callback used by [Focus.onKeyEvent] and [FocusScope.onKeyEvent]
+/// to receive key events.
+///
+/// The [node] is the node that received the event.
+///
+/// Returns a [KeyEventResult] that describes how, and whether, the key event
+/// was handled.
+typedef FocusOnKeyEventCallback = KeyEventResult Function(FocusNode node, KeyEvent event);
+
 /// An attachment point for a [FocusNode].
 ///
 /// Using a [FocusAttachment] is rarely needed, unless you are building
@@ -268,12 +277,13 @@ enum UnfocusDisposition {
 /// {@template flutter.widgets.FocusNode.keyEvents}
 /// ## Key Event Propagation
 ///
-/// The [FocusManager] receives key events from [RawKeyboard] and will pass them
-/// to the focused nodes. It starts with the node with the primary focus, and
-/// will call the [onKey] callback for that node. If the callback returns false,
-/// indicating that it did not handle the event, the [FocusManager] will move to
-/// the parent of that node and call its [onKey]. If that [onKey] returns true,
-/// then it will stop propagating the event. If it reaches the root
+/// The [FocusManager] receives key events from [RawKeyboard] and
+/// [HardwareKeyboard] and will pass them to the focused nodes. It starts with
+/// the node with the primary focus, and will call the [onKey] or [onKeyEvent]
+/// callback for that node. If the callback returns false, indicating that it did
+/// not handle the event, the [FocusManager] will move to the parent of that node
+/// and call its [onKey] or [onKeyEvent]. If that [onKey] or [onKeyEvent] returns
+/// true, then it will stop propagating the event. If it reaches the root
 /// [FocusScopeNode], [FocusManager.rootScope], the event is discarded.
 /// {@endtemplate}
 ///
@@ -430,9 +440,14 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// The [skipTraversal], [descendantsAreFocusable], and [canRequestFocus]
   /// arguments must not be null.
+  ///
+  /// To receive key events that focuses on this node, pass a listener to `onKeyEvent`.
+  /// The `onKey` is a legacy API based on [RawKeyEvent] and will be deprecated
+  /// in the future.
   FocusNode({
     String? debugLabel,
     this.onKey,
+    this.onKeyEvent,
     bool skipTraversal = false,
     bool canRequestFocus = true,
     bool descendantsAreFocusable = true,
@@ -571,8 +586,17 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Called if this focus node receives a key event while focused (i.e. when
   /// [hasFocus] returns true).
   ///
+  /// This is a legacy API based on [RawKeyEvent] and will be deprecated in the
+  /// future. Prefer [onKeyEvent] instead.
+  ///
   /// {@macro flutter.widgets.FocusNode.keyEvents}
   FocusOnKeyCallback? onKey;
+
+  /// Called if this focus node receives a key event while focused (i.e. when
+  /// [hasFocus] returns true).
+  ///
+  /// {@macro flutter.widgets.FocusNode.keyEvents}
+  FocusOnKeyEventCallback? onKeyEvent;
 
   FocusManager? _manager;
   List<FocusNode>? _ancestors;
@@ -1025,10 +1049,19 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// need to be attached. [FocusAttachment.detach] should be called on the old
   /// node, and then [attach] called on the new node. This typically happens in
   /// the [State.didUpdateWidget] method.
+  ///
+  /// To receive key events that focuses on this node, pass a listener to `onKeyEvent`.
+  /// The `onKey` is a legacy API based on [RawKeyEvent] and will be deprecated
+  /// in the future.
   @mustCallSuper
-  FocusAttachment attach(BuildContext? context, {FocusOnKeyCallback? onKey}) {
+  FocusAttachment attach(
+    BuildContext? context, {
+    FocusOnKeyCallback? onKey,
+    FocusOnKeyEventCallback? onKeyEvent,
+  }) {
     _context = context;
     this.onKey = onKey ?? this.onKey;
+    this.onKeyEvent = onKeyEvent ?? this.onKeyEvent;
     _attachment = FocusAttachment._(this);
     return _attachment!;
   }
@@ -1223,6 +1256,7 @@ class FocusScopeNode extends FocusNode {
   FocusScopeNode({
     String? debugLabel,
     FocusOnKeyCallback? onKey,
+    FocusOnKeyEventCallback? onKeyEvent,
     bool skipTraversal = false,
     bool canRequestFocus = true,
   })  : assert(skipTraversal != null),
@@ -1230,6 +1264,7 @@ class FocusScopeNode extends FocusNode {
         super(
           debugLabel: debugLabel,
           onKey: onKey,
+          onKeyEvent: onKeyEvent,
           canRequestFocus: canRequestFocus,
           descendantsAreFocusable: true,
           skipTraversal: skipTraversal,
@@ -1462,6 +1497,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   void registerGlobalHandlers() {
     assert(RawKeyboard.instance.keyEventHandler == null);
     RawKeyboard.instance.keyEventHandler = _handleRawKeyEvent;
+    ServicesBinding.instance!.onKeyEvent = _handleKeyEvent;
     GestureBinding.instance!.pointerRouter.addGlobalRoute(_handlePointerEvent);
   }
 
@@ -1701,6 +1737,49 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
           } else {
             continue;
           }
+        }
+        break;
+      }
+    }
+    if (!handled) {
+      assert(_focusDebug('Key event not handled by anyone: $event.'));
+    }
+    return handled;
+  }
+
+  bool _handleKeyEvent(KeyEvent event) {
+    print('FocusManager._handleKeyEvent event $event');
+    // Update highlightMode first, since things responding to the keys might
+    // look at the highlight mode, and it should be accurate.
+    _lastInteractionWasTouch = false;
+    _updateHighlightMode();
+
+    assert(_focusDebug('Received key event ${event.logical}'));
+    if (_primaryFocus == null) {
+      assert(_focusDebug('No primary focus for key event, ignored: $event'));
+      return false;
+    }
+
+    // Walk the current focus from the leaf to the root, calling each one's
+    // onKey on the way up, and if one responds that they handled it or want to
+    // stop propagation, stop.
+    bool handled = false;
+    print('Before for');
+    for (final FocusNode node in <FocusNode>[_primaryFocus!, ..._primaryFocus!.ancestors]) {
+      if (node.onKeyEvent != null) {
+        final KeyEventResult result = node.onKeyEvent!(node, event);
+        print('Node $node result $result');
+        switch (result) {
+          case KeyEventResult.handled:
+            assert(_focusDebug('Node $node handled key event $event.'));
+            handled = true;
+            break;
+          case KeyEventResult.skipRemainingHandlers:
+            assert(_focusDebug('Node $node stopped key event propagation: $event.'));
+            handled = false;
+            break;
+          case KeyEventResult.ignored:
+            continue;
         }
         break;
       }
