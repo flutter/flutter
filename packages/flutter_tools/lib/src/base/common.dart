@@ -17,7 +17,7 @@ Never throwToolExit(String message, { int? exitCode }) {
 class ToolExit implements Exception {
   ToolExit(this.message, { this.exitCode });
 
-  final String message;
+  final String? message;
   final int? exitCode;
 
   @override
