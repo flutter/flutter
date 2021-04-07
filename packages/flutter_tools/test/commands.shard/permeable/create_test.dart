@@ -32,6 +32,7 @@ import '../../src/context.dart';
 import '../../src/fake_http_client.dart';
 import '../../src/fakes.dart';
 import '../../src/pubspec_schema.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 const String _kNoPlatformsMessage = 'You\'ve created a plugin project that doesn\'t yet support any platforms.\n';
 const String frameworkRevision = '12345678';

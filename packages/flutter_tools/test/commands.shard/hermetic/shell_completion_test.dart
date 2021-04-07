@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   group('shell_completion', () {

@@ -17,6 +17,7 @@ import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fake_vm_services.dart';
 
 final vm_service.Isolate isolate = vm_service.Isolate(
   id: '1',
