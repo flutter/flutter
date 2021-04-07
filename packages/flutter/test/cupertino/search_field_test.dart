@@ -470,7 +470,7 @@ void main() {
           (WidgetTester tester) async {
     int onTapCallCount = 0;
 
-    // onTap can be null
+    // onTap can be null.
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
@@ -479,7 +479,7 @@ void main() {
       ),
     );
 
-    // onTap callback is called if not null
+    // onTap callback is called if not null.
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
