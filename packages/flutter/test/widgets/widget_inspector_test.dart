@@ -231,8 +231,12 @@ void main() {
 class _TestWidgetInspectorService extends TestWidgetInspectorService {
   // These tests need access to protected members of WidgetInspectorService.
   static void runTests() {
-    final TestWidgetInspectorService service = TestWidgetInspectorService();
-    WidgetInspectorService.instance = service;
+    late TestWidgetInspectorService service;
+
+    setUp(() {
+      service = TestWidgetInspectorService();
+      WidgetInspectorService.instance = service;
+    });
 
     testWidgets('WidgetInspector smoke test', (WidgetTester tester) async {
       // This is a smoke test to verify that adding the inspector doesn't crash.
