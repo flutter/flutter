@@ -74,10 +74,10 @@ class FuchsiaExternalViewEmbedder final : public flutter::ExternalViewEmbedder {
       fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) override;
 
   // |ExternalViewEmbedder|
-  void SubmitFrame(
-      GrDirectContext* context,
-      std::unique_ptr<flutter::SurfaceFrame> frame,
-      const std::shared_ptr<fml::SyncSwitch>& gpu_disable_sync_switch) override;
+  void SubmitFrame(GrDirectContext* context,
+                   std::unique_ptr<flutter::SurfaceFrame> frame,
+                   const std::shared_ptr<const fml::SyncSwitch>&
+                       gpu_disable_sync_switch) override;
 
   // |ExternalViewEmbedder|
   void CancelFrame() override { Reset(); }
