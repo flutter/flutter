@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:async';
 
@@ -32,7 +31,7 @@ Future<void> syncAndAsyncError() {
 Future<void> delayedThrow(FakeAsync time) {
   final Future<void> result =
     Future<void>.delayed(const Duration(milliseconds: 10))
-      .then((_) {
+      .then((_) async {
         throw 'Delayed Doom';
       });
   time.elapse(const Duration(seconds: 1));
@@ -41,10 +40,10 @@ Future<void> delayedThrow(FakeAsync time) {
 }
 
 void main() {
-  Completer<void> caughtInZone;
+  late Completer<void> caughtInZone;
   bool caughtByZone = false;
   bool caughtByHandler = false;
-  Zone zone;
+  late Zone zone;
 
   setUp(() {
     caughtInZone = Completer<void>();
@@ -172,7 +171,7 @@ void main() {
         if (!completer.isCompleted) {
           completer.complete(null);
         }
-      }));
+      })!);
       time.elapse(const Duration(seconds: 1));
       time.flushMicrotasks();
       return completer.future;
@@ -210,7 +209,7 @@ void main() {
         if (!completer.isCompleted) {
           completer.complete(null);
         }
-      }));
+      })!);
       time.elapse(const Duration(seconds: 1));
       time.flushMicrotasks();
       return completer.future;
@@ -248,7 +247,7 @@ void main() {
         if (!completer.isCompleted) {
           completer.complete(null);
         }
-      }));
+      })!);
       time.elapse(const Duration(seconds: 1));
       time.flushMicrotasks();
       return completer.future;
@@ -270,7 +269,7 @@ void main() {
       unawaited(runZonedGuarded(() async {
         final Future<void> f = asyncGuard<void>(
           () => delayedThrow(time),
-          onError: (Object e, [StackTrace s]) {
+          onError: (Object e, [StackTrace? s]) {
             caughtByOnError = true;
             nonNullStackTrace = s != null;
           },
@@ -288,7 +287,7 @@ void main() {
         if (!completer.isCompleted) {
           completer.complete(null);
         }
-      }));
+      })!);
       time.elapse(const Duration(seconds: 1));
       time.flushMicrotasks();
       return completer.future;
