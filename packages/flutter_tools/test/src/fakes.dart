@@ -527,11 +527,6 @@ class FakeFlutterVersion implements FlutterVersion {
   }
 
   @override
-  bool checkRevisionAncestry({String tentativeDescendantRevision, String tentativeAncestorRevision}) {
-    throw UnimplementedError();
-  }
-
-  @override
   Future<void> ensureVersionFile() async { }
 
   @override
