@@ -434,8 +434,8 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   /// @override
   /// Widget build(BuildContext context) {
   ///   return Shortcuts(
-  ///     shortcuts: <ShortcutActivator, Intent>{
-  ///       SingleActivator(LogicalKeyboardKey.keyC, control: true): const IncrementIntent(),
+  ///     shortcuts: const <ShortcutActivator, Intent>{
+  ///       SingleActivator(LogicalKeyboardKey.keyC, control: true): IncrementIntent(),
   ///     },
   ///     child: Actions(
   ///       actions: <Type, Action<Intent>>{
