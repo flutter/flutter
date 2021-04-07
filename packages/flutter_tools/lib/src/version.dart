@@ -141,8 +141,8 @@ class FlutterVersion {
     );
   }
 
-  String? _frameworkVersion;
-  String? get frameworkVersion => _frameworkVersion;
+  late String _frameworkVersion;
+  String get frameworkVersion => _frameworkVersion;
 
   String get dartSdkVersion => globals.cache.dartSdkVersion;
 
@@ -150,8 +150,8 @@ class FlutterVersion {
   String get engineRevisionShort => _shortGitRevision(engineRevision);
 
   void ensureVersionFile() {
-    if (Cache.flutterRoot != null && _frameworkVersion != null) {
-      globals.fs.file(globals.fs.path.join(Cache.flutterRoot!, 'version')).writeAsStringSync(_frameworkVersion!);
+    if (Cache.flutterRoot != null) {
+      globals.fs.file(globals.fs.path.join(Cache.flutterRoot!, 'version')).writeAsStringSync(_frameworkVersion);
     }
   }
 
@@ -172,7 +172,7 @@ class FlutterVersion {
   }
 
   Map<String, Object> toJson() => <String, Object>{
-    'frameworkVersion': frameworkVersion ?? 'unknown',
+    'frameworkVersion': frameworkVersion,
     'channel': channel,
     'repositoryUrl': repositoryUrl ?? 'unknown source',
     'frameworkRevision': frameworkRevision,
