@@ -152,9 +152,7 @@ class FlutterVersion {
   String get engineRevisionShort => _shortGitRevision(engineRevision);
 
   void ensureVersionFile() {
-    if (Cache.flutterRoot != null) {
-      globals.fs.file(globals.fs.path.join(Cache.flutterRoot!, 'version')).writeAsStringSync(_frameworkVersion);
-    }
+    globals.fs.file(globals.fs.path.join(Cache.flutterRoot!, 'version')).writeAsStringSync(_frameworkVersion);
   }
 
   @override
