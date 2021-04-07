@@ -11,7 +11,6 @@ import 'base/context.dart';
 import 'base/io.dart';
 import 'base/net.dart';
 import 'build_system/build_system.dart';
-import 'cache.dart';
 import 'device.dart';
 import 'doctor.dart';
 import 'fuchsia/fuchsia_sdk.dart';
@@ -32,7 +31,6 @@ export 'globals_null_migrated.dart';
 
 Artifacts get artifacts => context.get<Artifacts>();
 BuildSystem get buildSystem => context.get<BuildSystem>();
-Cache get cache => context.get<Cache>();
 CrashReporter get crashReporter => context.get<CrashReporter>();
 Doctor get doctor => context.get<Doctor>();
 PersistentToolState get persistentToolState => PersistentToolState.instance;

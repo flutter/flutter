@@ -14,7 +14,7 @@ import 'base/platform.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'cache.dart';
-import 'globals.dart' as globals;
+import 'globals_null_migrated.dart' as globals;
 
 enum Artifact {
   /// The tool which compiles a dart kernel file into native code.

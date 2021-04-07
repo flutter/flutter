@@ -150,11 +150,13 @@ Future<void> buildWindowsUwp(WindowsUwpProject windowsProject, BuildInfo buildIn
   }
 
   final Directory buildDirectory = globals.fs.directory(getWindowsBuildUwpDirectory());
+  final String buildModeName = getNameForBuildMode(buildInfo.mode ?? BuildMode.release);
   final Status status = globals.logger.startProgress(
     'Building Windows application...',
   );
   try {
     await _runCmakeGeneration(cmakePath, buildDirectory, windowsProject.cmakeFile.parent);
+    await _runBuild(cmakePath, buildDirectory, buildModeName, install: false);
   } finally {
     status.cancel();
   }
@@ -188,7 +190,12 @@ Future<void> _runCmakeGeneration(String cmakePath, Directory buildDir, Directory
   globals.flutterUsage.sendTiming('build', 'windows-cmake-generation', Duration(milliseconds: sw.elapsedMilliseconds));
 }
 
-Future<void> _runBuild(String cmakePath, Directory buildDir, String buildModeName) async {
+Future<void> _runBuild(
+  String cmakePath,
+  Directory buildDir,
+  String buildModeName,
+  { bool install = true }
+) async {
   final Stopwatch sw = Stopwatch()..start();
 
   // MSBuild sends all output to stdout, including build errors. This surfaces
@@ -204,8 +211,8 @@ Future<void> _runBuild(String cmakePath, Directory buildDir, String buildModeNam
         buildDir.path,
         '--config',
         toTitleCase(buildModeName),
-        '--target',
-        'INSTALL',
+        if (install)
+          ...<String>['--target', 'INSTALL'],
         if (globals.logger.isVerbose)
           '--verbose'
       ],
