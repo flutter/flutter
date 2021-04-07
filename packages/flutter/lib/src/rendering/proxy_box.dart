@@ -2289,9 +2289,7 @@ class RenderTransform extends RenderProxyBox {
 
   /// The filter quality with which to apply the transform as a bitmap operation.
   ///
-  /// The transform will be applied by re-rendering the child if this value is null,
-  /// otherwise it controls the quality of the bitmap transform applied to a bitmap
-  /// rendering of the child.
+  /// {@macro flutter.widgets.Transform.optional.FilterQuality}
   FilterQuality? get filterQuality => _filterQuality;
   FilterQuality? _filterQuality;
   set filterQuality(FilterQuality? value) {

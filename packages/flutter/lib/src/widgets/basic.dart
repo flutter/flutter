@@ -1320,9 +1320,11 @@ class Transform extends SingleChildRenderObjectWidget {
 
   /// The filter quality with which to apply the transform as a bitmap operation.
   ///
-  /// The transform will be applied by re-rendering the child if this value is null,
-  /// otherwise it controls the quality of the bitmap transform applied to a bitmap
+  /// {@template flutter.widgets.Transform.optional.FilterQuality}
+  /// The transform will be applied by re-rendering the child if [filterQuality] is null,
+  /// otherwise it controls the quality of an [ImageFilter.matrix] applied to a bitmap
   /// rendering of the child.
+  /// {@endtemplate}
   final FilterQuality? filterQuality;
 
   @override
