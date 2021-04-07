@@ -78,4 +78,11 @@ class FlutterFeatureFlags implements FeatureFlags {
     }
     return isEnabled;
   }
+
+  @override
+  bool canBeEnabled(Feature feature) {
+    final String currentChannel = _flutterVersion.channel;
+    final FeatureChannelSetting featureSetting = feature.getSettingForChannel(currentChannel);
+    return featureSetting.available;
+  }
 }

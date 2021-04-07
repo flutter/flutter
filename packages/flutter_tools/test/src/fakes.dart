@@ -628,6 +628,9 @@ class TestFeatureFlags implements FeatureFlags {
     }
     return false;
   }
+
+  @override
+  bool canBeEnabled(Feature feature) => true;
 }
 
 class FakeStatusLogger extends DelegatingLogger {

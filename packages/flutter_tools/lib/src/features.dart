@@ -57,6 +57,9 @@ abstract class FeatureFlags {
   ///
   /// Prefer using one of the specific getters above instead of this API.
   bool isEnabled(Feature feature) => false;
+
+  /// Whether the feature can be enabled on the current channel.
+  bool canBeEnabled(Feature feature) => true;
 }
 
 /// All current Flutter feature flags.

@@ -76,6 +76,25 @@ void main() {
       expect(feature.getSettingForChannel('unknown'), masterSetting);
     });
 
+    testWithoutContext('canBeEnabled only checks the channel for compatibility', () {
+      const FeatureChannelSetting masterSetting = FeatureChannelSetting(available: true);
+      const FeatureChannelSetting devSetting = FeatureChannelSetting(available: true);
+      const FeatureChannelSetting betaSetting = FeatureChannelSetting(available: false);
+      const FeatureChannelSetting stableSetting = FeatureChannelSetting(available: false);
+      const Feature feature = Feature(
+        name: 'example',
+        master: masterSetting,
+        dev: devSetting,
+        beta: betaSetting,
+        stable: stableSetting,
+      );
+
+      expect(createFlags('master').canBeEnabled(feature), true);
+      expect(createFlags('dev').canBeEnabled(feature), true);
+      expect(createFlags('beta').canBeEnabled(feature), false);
+      expect(createFlags('stable').canBeEnabled(feature), false);
+    });
+
     testWithoutContext('env variables are only enabled with "true" string', () {
       platform.environment = <String, String>{'FLUTTER_WEB': 'hello'};
 
