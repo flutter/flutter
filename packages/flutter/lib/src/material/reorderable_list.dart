@@ -121,11 +121,11 @@ class ReorderableListView extends StatefulWidget {
   /// constructor. Even more efficient, however, is to create the instances
   /// on demand using this constructor's `itemBuilder` callback.
   ///
-  /// This example mirrors the previous one, creating the same list using the
+  /// This example creates a list using the
   /// [ReorderableListView.builder] constructor. Using the [IndexedWidgetBuilder], The
   /// list items are built lazily on demand.
   /// {@tool dartpad --template=stateful_widget_material}
-  /// 
+  ///
   /// ```dart
   /// final List<int> _items = List<int>.generate(50, (int index) => index);
   ///
