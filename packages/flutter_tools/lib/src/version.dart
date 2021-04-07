@@ -16,6 +16,8 @@ import 'globals_null_migrated.dart' as globals;
 /// The flutter GitHub repository.
 String get _flutterGit => globals.platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
 
+const String _unknownFrameworkVersion = '0.0.0-unknown';
+
 /// The names of each channel/branch in order of increasing stability.
 enum Channel {
   master,
@@ -157,7 +159,7 @@ class FlutterVersion {
 
   @override
   String toString() {
-    final String versionText = frameworkVersion == 'unknown' ? '' : ' $frameworkVersion';
+    final String versionText = frameworkVersion == _unknownFrameworkVersion ? '' : ' $frameworkVersion';
     final String flutterText = 'Flutter$versionText • channel $channel • ${repositoryUrl ?? 'unknown source'}';
     final String frameworkText = 'Framework • revision $frameworkRevisionShort ($frameworkAge) • $frameworkCommitDate';
     final String engineText = 'Engine • revision $engineRevisionShort';
@@ -272,7 +274,7 @@ class FlutterVersion {
 
   /// Return a short string for the version (e.g. `master/0.0.59-pre.92`, `scroll_refactor/a76bc8e22b`).
   String getVersionString({ bool redactUnknownBranches = false }) {
-    if (frameworkVersion != 'unknown') {
+    if (frameworkVersion != _unknownFrameworkVersion) {
       return '${getBranchName(redactUnknownBranches: redactUnknownBranches)}/$frameworkVersion';
     }
     return '${getBranchName(redactUnknownBranches: redactUnknownBranches)}/$frameworkRevisionShort';
@@ -812,7 +814,7 @@ class GitTagVersion {
 
   String frameworkVersionFor(String revision) {
     if (x == null || y == null || z == null || (hash != null && !revision.startsWith(hash!))) {
-      return '0.0.0-unknown';
+      return _unknownFrameworkVersion;
     }
     if (commits == 0 && gitTag != null) {
       return gitTag!;
