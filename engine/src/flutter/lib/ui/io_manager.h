@@ -24,7 +24,8 @@ class IOManager {
 
   virtual fml::RefPtr<flutter::SkiaUnrefQueue> GetSkiaUnrefQueue() const = 0;
 
-  virtual std::shared_ptr<fml::SyncSwitch> GetIsGpuDisabledSyncSwitch() = 0;
+  virtual std::shared_ptr<const fml::SyncSwitch>
+  GetIsGpuDisabledSyncSwitch() = 0;
 };
 
 }  // namespace flutter

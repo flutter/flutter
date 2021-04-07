@@ -1806,8 +1806,33 @@ bool Shell::ReloadSystemFonts() {
   return true;
 }
 
-std::shared_ptr<fml::SyncSwitch> Shell::GetIsGpuDisabledSyncSwitch() const {
+std::shared_ptr<const fml::SyncSwitch> Shell::GetIsGpuDisabledSyncSwitch()
+    const {
   return is_gpu_disabled_sync_switch_;
+}
+
+void Shell::SetGpuAvailability(GpuAvailability availability) {
+  switch (availability) {
+    case GpuAvailability::kAvailable:
+      is_gpu_disabled_sync_switch_->SetSwitch(false);
+      return;
+    case GpuAvailability::kFlushAndMakeUnavailable: {
+      fml::AutoResetWaitableEvent latch;
+      fml::TaskRunner::RunNowOrPostTask(
+          task_runners_.GetIOTaskRunner(),
+          [io_manager = io_manager_.get(), &latch]() {
+            io_manager->GetSkiaUnrefQueue()->Drain();
+            latch.Signal();
+          });
+      latch.Wait();
+    }
+      // FALLTHROUGH
+    case GpuAvailability::kUnavailable:
+      is_gpu_disabled_sync_switch_->SetSwitch(true);
+      return;
+    default:
+      FML_DCHECK(false);
+  }
 }
 
 void Shell::OnDisplayUpdates(DisplayUpdateType update_type,

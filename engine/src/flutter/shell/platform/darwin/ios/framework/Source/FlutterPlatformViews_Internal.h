@@ -174,7 +174,7 @@ class FlutterPlatformViewsController {
   bool SubmitFrame(GrDirectContext* gr_context,
                    std::shared_ptr<IOSContext> ios_context,
                    std::unique_ptr<SurfaceFrame> frame,
-                   const std::shared_ptr<fml::SyncSwitch>& gpu_disable_sync_switch);
+                   const std::shared_ptr<const fml::SyncSwitch>& gpu_disable_sync_switch);
 
   void OnMethodCall(FlutterMethodCall* call, FlutterResult& result);
 
