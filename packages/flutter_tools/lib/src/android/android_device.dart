@@ -97,6 +97,9 @@ class AndroidDevice extends Device {
   Map<String, String> _properties;
   bool _isLocalEmulator;
   TargetPlatform _applicationPlatform;
+  /// The current process id, or `null` if the look failed or if it has
+  /// not run yet.
+  int _pid;
 
   Future<String> _getProperty(String name) async {
     if (_properties == null) {
@@ -669,6 +672,7 @@ class AndroidDevice extends Device {
       _logger.printError(result.trim(), wrap: false);
       return LaunchResult.failed();
     }
+    _pid = await _queryForPid(package);
 
     _package = package;
     if (!debuggingOptions.debuggingEnabled) {
@@ -696,6 +700,34 @@ class AndroidDevice extends Device {
       return LaunchResult.failed();
     } finally {
       await observatoryDiscovery.cancel();
+    }
+  }
+
+  /// Query for the launched application's PID.
+  ///
+  /// This may need to run several times, since the application does not immediately
+  /// appear in the PID query after launch. If this continually fails, we can fall
+  /// back to using the VM Service PID query.
+  ///
+  /// Returns `null` if the query fails.
+  Future<int> _queryForPid(AndroidApk package) async {
+    while (true) {
+      ProcessResult pidoff;
+      try {
+        pidoff = await _processManager.run(adbCommandForDevice(<String>[
+          'shell',
+          'pidof',
+          package.id,
+          '-s',
+        ]));
+      } on ProcessException {
+        return null;
+      }
+      final String content = pidoff.stdout.toString()?.trim();
+      if (content.isNotEmpty) {
+        return int.tryParse(content);
+      }
+      await Future<void>.delayed(const Duration(seconds: 1));
     }
   }
 
@@ -755,18 +787,21 @@ class AndroidDevice extends Device {
     bool includePastLogs = false,
   }) async {
     // The Android log reader isn't app-specific. The `app` parameter isn't used.
+    AdbLogReader logReader;
     if (includePastLogs) {
-      return _pastLogReader ??= await AdbLogReader.createLogReader(
+      logReader = _pastLogReader ??= await AdbLogReader.createLogReader(
         this,
         _processManager,
         includePastLogs: true,
       );
     } else {
-      return _logReader ??= await AdbLogReader.createLogReader(
+      logReader = _logReader ??= await AdbLogReader.createLogReader(
         this,
         _processManager,
       );
     }
+    logReader.appPid ??= _pid;
+    return logReader;
   }
 
   @override

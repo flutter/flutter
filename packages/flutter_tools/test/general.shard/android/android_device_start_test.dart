@@ -41,6 +41,19 @@ const FakeCommand kShaCommand = FakeCommand(
   ],
 );
 
+const FakeCommand kPidQuery = FakeCommand(
+  command: <String>[
+    'adb',
+    '-s',
+    '1234',
+    'shell',
+    'pidof',
+    'FlutterApp',
+    '-s',
+  ],
+  stdout: '9123',
+);
+
 void main() {
   FileSystem fileSystem;
   FakeProcessManager processManager;
@@ -110,6 +123,19 @@ void main() {
           'FlutterActivity',
         ],
       ));
+      processManager.addCommand(kPidQuery);
+      processManager.addCommand(const FakeCommand(
+        command: <String>[
+          'adb',
+          '-s',
+          '1234',
+          'shell',
+          '-x',
+          'logcat',
+          '-v',
+          'time',
+        ],
+      ));
 
       final LaunchResult launchResult = await device.startApp(
         apk,
@@ -121,6 +147,11 @@ void main() {
       );
 
       expect(launchResult.started, true);
+
+      final DeviceLogReader logReader = await device.getLogReader(app: apk);
+
+      /// The application PID is set from the `kPidQuery` result.
+      expect(logReader.appPid, 9123);
       expect(processManager, hasNoRemainingExpectations);
     });
   }
@@ -257,6 +288,7 @@ void main() {
         'FlutterActivity',
       ],
     ));
+    processManager.addCommand(kPidQuery);
 
     final LaunchResult launchResult = await device.startApp(
       apk,

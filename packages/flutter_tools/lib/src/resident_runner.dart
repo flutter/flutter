@@ -561,7 +561,7 @@ class FlutterDevice {
   Future<void> initLogReader() async {
     final vm_service.VM vm = await vmService.service.getVM();
     final DeviceLogReader logReader = await device.getLogReader(app: package);
-    logReader.appPid = vm.pid;
+    logReader.appPid ??= vm.pid;
   }
 
   Future<int> runHot({

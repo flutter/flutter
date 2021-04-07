@@ -223,7 +223,7 @@ class FlutterDriverService extends DriverService {
     logReader.logLines.listen(_logger.printStatus);
 
     final vm_service.VM vm = await _vmService.service.getVM();
-    logReader.appPid = vm.pid;
+    logReader.appPid ??= vm.pid;
   }
 
   @override
