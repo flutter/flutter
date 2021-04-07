@@ -21,8 +21,10 @@ import 'base/template.dart';
 import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
+import 'cache.dart';
 import 'ios/plist_parser.dart';
 
+Cache get cache => context.get<Cache>()!;
 Config get config => context.get<Config>()!;
 HttpClientFactory get httpClientFactory => context.get<HttpClientFactory>()!;
 Logger get logger => context.get<Logger>()!;

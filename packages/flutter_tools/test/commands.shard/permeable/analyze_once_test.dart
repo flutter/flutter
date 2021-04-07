@@ -5,8 +5,10 @@
 // @dart = 2.8
 
 import 'package:flutter_tools/src/base/error_handling_io.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/flutter_cache.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -114,11 +116,17 @@ void main() {
     fileSystem = globals.localFileSystem;
     logger = BufferLogger.test();
     analyzerSeparator = platform.isWindows ? '-' : '•';
+    final OperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     artifacts = CachedArtifacts(
-      cache: globals.cache,
+      cache: FlutterCache(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        osUtils: operatingSystemUtils,
+      ),
       fileSystem: fileSystem,
       platform: platform,
-      operatingSystemUtils: FakeOperatingSystemUtils(),
+      operatingSystemUtils: operatingSystemUtils,
     );
     Cache.flutterRoot = Cache.defaultFlutterRoot(
       fileSystem: fileSystem,
