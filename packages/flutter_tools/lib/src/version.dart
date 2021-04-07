@@ -95,8 +95,9 @@ class FlutterVersion {
   /// The channel is the upstream branch.
   /// `master`, `dev`, `beta`, `stable`; or old ones, like `alpha`, `hackathon`, ...
   String get channel {
-    if (_channel == null) {
-      final String channel = _runGit(
+    String? channel = _channel;
+    if (channel == null) {
+      channel = _runGit(
         'git rev-parse --abbrev-ref --symbolic @{u}',
         globals.processUtils,
         _workingDirectory,
@@ -115,8 +116,9 @@ class FlutterVersion {
       } else {
         _channel = channel;
       }
+      _channel = channel;
     }
-    return _channel!;
+    return channel;
   }
 
   late GitTagVersion _gitTagVersion;
