@@ -102,6 +102,7 @@ const Feature flutterMacOSDesktopFeature = Feature(
   name: 'beta-quality support for desktop on macOS',
   configSetting: 'enable-macos-desktop',
   environmentOverride: 'FLUTTER_MACOS',
+  extraHelpText: 'Newer beta versions are available on the beta channel.',
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
@@ -125,6 +126,7 @@ const Feature flutterLinuxDesktopFeature = Feature(
   name: 'beta-quality support for desktop on Linux',
   configSetting: 'enable-linux-desktop',
   environmentOverride: 'FLUTTER_LINUX',
+  extraHelpText: 'Newer beta versions are available on the beta channel.',
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
@@ -148,6 +150,7 @@ const Feature flutterWindowsDesktopFeature = Feature(
   name: 'beta-quality support for desktop on Windows',
   configSetting: 'enable-windows-desktop',
   environmentOverride: 'FLUTTER_WINDOWS',
+  extraHelpText: 'Newer beta versions are available on the beta channel.',
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
