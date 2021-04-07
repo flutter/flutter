@@ -63,4 +63,11 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       binding.buildOwner!.reassemble(binding.renderViewElement!);
     }
   }
+
+  @override
+  void resetAllState() {
+    super.resetAllState();
+    eventsDispatched.clear();
+    rebuildCount = 0;
+  }
 }

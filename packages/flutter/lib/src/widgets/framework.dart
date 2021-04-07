@@ -3088,6 +3088,19 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   Widget get widget => _widget!;
   Widget? _widget;
 
+  /// Returns true if the Element is defunct.
+  ///
+  /// This getter always returns false in profile and release builds.
+  /// See the lifecycle documentation for [Element] for additional information.
+  bool get debugIsDefunct {
+    bool isDefunct = false;
+    assert(() {
+      isDefunct = _lifecycleState == _ElementLifecycle.defunct;
+      return true;
+    }());
+    return isDefunct;
+  }
+
   /// The object that manages the lifecycle of this element.
   @override
   BuildOwner? get owner => _owner;
@@ -3808,6 +3821,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     // Release resources to reduce the severity of memory leaks caused by
     // defunct, but accidentally retained Elements.
     _widget = null;
+    _dependencies = null;
     _lifecycleState = _ElementLifecycle.defunct;
   }
 
@@ -4299,7 +4313,9 @@ class _ElementDiagnosticableTreeNode extends DiagnosticableTreeNode {
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
     final Map<String, Object?> json = super.toJsonMap(delegate);
     final Element element = value as Element;
-    json['widgetRuntimeType'] = element.widget.runtimeType.toString();
+    if (!element.debugIsDefunct) {
+      json['widgetRuntimeType'] = element.widget.runtimeType.toString();
+    }
     json['stateful'] = stateful;
     return json;
   }
