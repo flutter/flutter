@@ -82,9 +82,6 @@ class PlatformView final : public flutter::PlatformView,
   void DispatchSemanticsAction(int32_t node_id,
                                flutter::SemanticsAction action) override;
 
-  // |PlatformView|
-  flutter::PointerDataDispatcherMaker GetDispatcherMaker() override;
-
   // |flutter::PlatformView|
   std::shared_ptr<flutter::ExternalViewEmbedder> CreateExternalViewEmbedder()
       override;
