@@ -841,7 +841,7 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// Throws a [ToolExit] if the current set of options is not compatible with
   /// each other.
-  Future<BuildInfo> getBuildInfo({ BuildMode forcedBuildMode }) async {
+  Future<BuildInfo> getBuildInfo({ BuildMode forcedBuildMode, File forcedTargetFile }) async {
     final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation') &&
       boolArg('track-widget-creation');
 
@@ -891,8 +891,8 @@ abstract class FlutterCommand extends Command<void> {
       // passing a flag. Examine the entrypoint file to determine if it
       // is opted in or out.
       final bool wasNullSafetyFlagParsed = argResults.wasParsed(FlutterOptions.kNullSafety);
-      if (!wasNullSafetyFlagParsed && argParser.options.containsKey('target')) {
-        final File entrypointFile = globals.fs.file(targetFile);
+      if (!wasNullSafetyFlagParsed && (argParser.options.containsKey('target') || forcedTargetFile != null)) {
+        final File entrypointFile = forcedTargetFile ?? globals.fs.file(targetFile);
         final LanguageVersion languageVersion = determineLanguageVersion(
           entrypointFile,
           packageConfig.packageOf(entrypointFile.absolute.uri),
