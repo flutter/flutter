@@ -53,10 +53,10 @@ void main() {
       component.assignLoadingUnits(loadingUnits1);
 
       expect(component.assigned, true);
-      expect(component.loadingUnits!.length, 2);
-      expect(component.loadingUnits!.contains(loadingUnits1[0]), true);
-      expect(component.loadingUnits!.contains(loadingUnits1[1]), true);
-      expect(component.loadingUnits!.contains(loadingUnits1[2]), false);
+      expect(component.loadingUnits, hasLength(2));
+      expect(component.loadingUnits, contains(loadingUnits1[0]));
+      expect(component.loadingUnits, contains(loadingUnits1[1]));
+      expect(component.loadingUnits, isNot(contains(loadingUnits1[2])));
 
       final List<LoadingUnit> loadingUnits2 = <LoadingUnit>[
         LoadingUnit(
@@ -79,15 +79,15 @@ void main() {
       component.assignLoadingUnits(loadingUnits2);
 
       expect(component.assigned, true);
-      expect(component.loadingUnits!.length, 1);
-      expect(component.loadingUnits!.contains(loadingUnits2[0]), true);
-      expect(component.loadingUnits!.contains(loadingUnits2[1]), false);
-      expect(component.loadingUnits!.contains(loadingUnits2[2]), false);
+      expect(component.loadingUnits, hasLength(1));
+      expect(component.loadingUnits, contains(loadingUnits2[0]));
+      expect(component.loadingUnits, isNot(contains(loadingUnits2[1])));
+      expect(component.loadingUnits, isNot(contains(loadingUnits2[2])));
 
       component.assignLoadingUnits(<LoadingUnit>[]);
 
       expect(component.assigned, true);
-      expect(component.loadingUnits!.length, 0);
+      expect(component.loadingUnits, hasLength(0));
     });
 
     testWithoutContext('toString produces correct string for unassigned component', () {

@@ -171,7 +171,7 @@ void main() {
         if (!completer.isCompleted) {
           completer.complete(null);
         }
-      })!);
+      }));
       time.elapse(const Duration(seconds: 1));
       time.flushMicrotasks();
       return completer.future;
@@ -209,7 +209,7 @@ void main() {
         if (!completer.isCompleted) {
           completer.complete(null);
         }
-      })!);
+      }));
       time.elapse(const Duration(seconds: 1));
       time.flushMicrotasks();
       return completer.future;
@@ -247,7 +247,7 @@ void main() {
         if (!completer.isCompleted) {
           completer.complete(null);
         }
-      })!);
+      }));
       time.elapse(const Duration(seconds: 1));
       time.flushMicrotasks();
       return completer.future;
@@ -287,7 +287,7 @@ void main() {
         if (!completer.isCompleted) {
           completer.complete(null);
         }
-      })!);
+      }));
       time.elapse(const Duration(seconds: 1));
       time.flushMicrotasks();
       return completer.future;
