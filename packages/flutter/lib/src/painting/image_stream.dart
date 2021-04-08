@@ -886,7 +886,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       _decodeNextFrameAndSchedule();
     }
   }
-  
+
   void _handleAppFrame(Duration timestamp) {
     _frameCallbackScheduled = false;
     if (!hasListeners)
