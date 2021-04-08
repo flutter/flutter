@@ -50,7 +50,7 @@ assignees: ''
      Without this we will unlikely be able to progress on the issue, and because of that
      we regretfully will have to close it.
 
-     If your problem goes out of what can be placed in file, for example
+     If your problem goes out of what can be placed in a single file, for example
      you have a problem with native channels, you can upload the full code of
      your reproduction into a separate repository and link it.
 
