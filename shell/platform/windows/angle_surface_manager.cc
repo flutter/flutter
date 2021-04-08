@@ -26,6 +26,8 @@ static void LogEglError(std::string message) {
 
 namespace flutter {
 
+int AngleSurfaceManager::instance_count_ = 0;
+
 std::unique_ptr<AngleSurfaceManager> AngleSurfaceManager::Create() {
   std::unique_ptr<AngleSurfaceManager> manager;
   manager.reset(new AngleSurfaceManager());
@@ -40,10 +42,12 @@ AngleSurfaceManager::AngleSurfaceManager()
       egl_display_(EGL_NO_DISPLAY),
       egl_context_(EGL_NO_CONTEXT) {
   initialize_succeeded_ = Initialize();
+  ++instance_count_;
 }
 
 AngleSurfaceManager::~AngleSurfaceManager() {
   CleanUp();
+  --instance_count_;
 }
 
 bool AngleSurfaceManager::InitializeEGL(
@@ -200,7 +204,11 @@ void AngleSurfaceManager::CleanUp() {
   }
 
   if (egl_display_ != EGL_NO_DISPLAY) {
-    eglTerminate(egl_display_);
+    // Display is reused between instances so only terminate display
+    // if destroying last instance
+    if (instance_count_ == 1) {
+      eglTerminate(egl_display_);
+    }
     egl_display_ = EGL_NO_DISPLAY;
   }
 }
