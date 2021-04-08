@@ -978,7 +978,7 @@ abstract class WidgetController {
   ///
   /// Specify `platform` as one of the platforms allowed in
   /// [Platform.operatingSystem] to make the event appear to be from that type
-  /// of system. Defaults to "android", except for "web" for web. Must not be
+  /// of system. Defaults to "web" on web, and "android" everywhere else. Must not be
   /// null. Some platforms (e.g. Windows, iOS) are not yet supported.
   ///
   /// Keys that are down when the test completes are cleared after each test.
@@ -1008,7 +1008,7 @@ abstract class WidgetController {
   ///
   /// Specify `platform` as one of the platforms allowed in
   /// [Platform.operatingSystem] to make the event appear to be from that type
-  /// of system. Defaults to "android", except for "web" for web. Must not be
+  /// of system. Defaults to "web" on web, and "android" everywhere else. Must not be
   /// null. Some platforms (e.g. Windows, iOS) are not yet supported.
   ///
   /// Keys that are down when the test completes are cleared after each test.
@@ -1032,7 +1032,7 @@ abstract class WidgetController {
   ///
   /// Specify `platform` as one of the platforms allowed in
   /// [Platform.operatingSystem] to make the event appear to be from that type of
-  /// system. Defaults to "android", except for "web" for web. May not be null.
+  /// system. Defaults to "web" on web, and "android" everywhere else. May not be null.
   ///
   /// Returns true if the key event was handled by the framework.
   ///
