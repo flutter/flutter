@@ -124,7 +124,7 @@ class _FakeProcess implements io.Process {
     Duration duration,
     this.pid,
     this._stderr,
-    this.stdin,
+    IOSink? stdin,
     this._stdout,
     this._completer,
   ) : exitCode = Future<void>.delayed(duration).then((void value) {
@@ -133,6 +133,7 @@ class _FakeProcess implements io.Process {
         }
         return _exitCode;
       }),
+      stdin = stdin ?? IOSink(StreamController<List<int>>().sink),
       stderr = _stderr == null
         ? const Stream<List<int>>.empty()
         : Stream<List<int>>.value(utf8.encode(_stderr)),
@@ -245,7 +246,7 @@ abstract class FakeProcessManager implements ProcessManager {
       fakeCommand.duration,
       _pid,
       fakeCommand.stderr,
-      fakeCommand.stdin ?? IOSink(StreamController<List<int>>().sink),
+      fakeCommand.stdin,
       fakeCommand.stdout,
       fakeCommand.completer,
     );
