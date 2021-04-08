@@ -291,7 +291,15 @@ class AssembleCommand extends FlutterCommand {
       }
     }
     Target target;
-    final List<String> decodedDefines = decodeDartDefines(environment.defines, kDartDefines);
+    List<String> decodedDefines;
+    try {
+      decodedDefines = decodeDartDefines(environment.defines, kDartDefines);
+    } on FormatException {
+      throwToolExit(
+        'Error parsing assemble command: your generated configuration may be out of date. '
+        "Try re-running 'flutter build ios' or the appropriate build command."
+      );
+    }
     if (FlutterProject.current().manifest.deferredComponents != null
         && decodedDefines.contains('validate-deferred-components=true')
         && deferredTargets.isNotEmpty
