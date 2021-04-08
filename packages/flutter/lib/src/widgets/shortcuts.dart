@@ -185,7 +185,7 @@ abstract class ShortcutActivator {
   /// the Shift keys, Alt keys, or Meta keys are pressed; it doesn't have to
   /// check if KeyA is pressed, since it's already guaranteed.
   ///
-  /// This method must not cause any side effect to `state`. Typically
+  /// This method must not cause any side effects for the `state`. Typically
   /// this is only used to query whether [RawKeyboard.keysPressed] contains
   /// a key.
   ///
@@ -381,20 +381,20 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutActivator, Int
 
 /// A shortcut key combination of a single key and modifiers.
 ///
-/// This [ShortcutActivator] implements the typical shortcuts such as:
+/// This [ShortcutActivator] implements typical shortcuts such as:
 ///
 ///  * ArrowLeft
 ///  * Shift + Delete
 ///  * Control + Alt + Meta + Shift + A
 ///
-/// More specifically, it create shortcut key combinations that are composed of a
+/// More specifically, it creates shortcut key combinations that are composed of a
 /// [trigger] key, and zero, some, or all of the four modifiers (control, shift,
 /// alt, meta). The shortcut is activated when the following conditions are met:
 ///
-///  * The incoming event is a down event with the [trigger] key.
-///  * If [control] is true, then either or all control keys must be held.
+///  * The incoming event is a down event for a [trigger] key.
+///  * If [control] is true, then at least one control key must be held.
 ///    Otherwise, no control keys must be held.
-///  * The similar condition goes for [alt], [shift], and [meta].
+///  * Similar conditions apply for the [alt], [shift], and [meta] keys.
 ///
 /// This resembles the typical behavior of operation systems, and marks a major
 /// difference from [LogicalKeySet]:
@@ -467,7 +467,7 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
     this.meta = false,
   }) : // The enumerated check with `identical` is cumbersome but the only way
        // since const constructors can not call functions such as `==` or
-       // `Set.contain`. Checking with `identical` is sufficient since
+       // `Set.contains`. Checking with `identical` is sufficient since
        // `LogicalKeyboardKey` only provides cached values.
        assert(!identical(trigger, LogicalKeyboardKey.control)
            && !identical(trigger, LogicalKeyboardKey.controlLeft)
@@ -489,7 +489,7 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   /// [LogicalKeyboardKey.keyC].
   final LogicalKeyboardKey trigger;
 
-  /// Whether either (or both) control key should be held for [trigger] to
+  /// Whether either (or both) control keys should be held for [trigger] to
   /// activate the shortcut.
   ///
   /// If false, then all control keys must be released at the event.
@@ -499,7 +499,7 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   ///  * [LogicalKeyboardKey.controlLeft], [LogicalKeyboardKey.controlRight].
   final bool control;
 
-  /// Whether either (or both) shift key should be held for [trigger] to
+  /// Whether either (or both) shift keys should be held for [trigger] to
   /// activate the shortcut.
   ///
   /// If false, then all shift keys must be released at the event.
@@ -509,7 +509,7 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   ///  * [LogicalKeyboardKey.shiftLeft], [LogicalKeyboardKey.shiftRight].
   final bool shift;
 
-  /// Whether either (or both) alt key should be held for [trigger] to
+  /// Whether either (or both) alt keys should be held for [trigger] to
   /// activate the shortcut.
   ///
   /// If false, then all alt keys must be released at the event.
@@ -519,7 +519,7 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   ///  * [LogicalKeyboardKey.altLeft], [LogicalKeyboardKey.altRight].
   final bool alt;
 
-  /// Whether either (or both) meta key should be held for [trigger] to
+  /// Whether either (or both) meta keys should be held for [trigger] to
   /// activate the shortcut.
   ///
   /// If false, then all meta keys must be released at the event.
