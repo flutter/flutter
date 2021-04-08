@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:package_config/package_config_types.dart';
 
@@ -33,23 +30,21 @@ import 'dart/package_map.dart';
 /// 'img.tmpl', or '-<language>.tmpl' extensions.
 class Template {
   Template(Directory templateSource, Directory baseDir, this.imageSourceDir, {
-    @required FileSystem fileSystem,
-    @required Logger logger,
-    @required TemplateRenderer templateRenderer,
-    @required Set<Uri> templateManifest,
+    required FileSystem fileSystem,
+    required Logger logger,
+    required TemplateRenderer templateRenderer,
+    required Set<Uri>? templateManifest,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _templateRenderer = templateRenderer,
-       _templateManifest = templateManifest {
-    _templateFilePaths = <String, String>{};
-
+       _templateManifest = templateManifest ?? <Uri>{} {
     if (!templateSource.existsSync()) {
       return;
     }
 
     final List<FileSystemEntity> templateFiles = templateSource.listSync(recursive: true);
     for (final FileSystemEntity entity in templateFiles.whereType<File>()) {
-      if (_templateManifest != null && !_templateManifest.contains(Uri.file(entity.absolute.path))) {
+      if (_templateManifest.isNotEmpty && !_templateManifest.contains(Uri.file(entity.absolute.path))) {
         _logger.printTrace('Skipping ${entity.absolute.path}, missing from the template manifest.');
         // Skip stale files in the flutter_tools directory.
         continue;
@@ -67,10 +62,10 @@ class Template {
   }
 
   static Future<Template> fromName(String name, {
-    @required FileSystem fileSystem,
-    @required Set<Uri> templateManifest,
-    @required Logger logger,
-    @required TemplateRenderer templateRenderer,
+    required FileSystem fileSystem,
+    required Set<Uri>? templateManifest,
+    required Logger logger,
+    required TemplateRenderer templateRenderer,
   }) async {
     // All named templates are placed in the 'templates' directory
     final Directory templateDir = _templateDirectoryInPackage(name, fileSystem);
@@ -96,14 +91,14 @@ class Template {
   final Pattern _kTemplateLanguageVariant = RegExp(r'(\w+)-(\w+)\.tmpl.*');
   final Directory imageSourceDir;
 
-  Map<String /* relative */, String /* absolute source */> _templateFilePaths;
+  final Map<String /* relative */, String /* absolute source */> _templateFilePaths = <String, String>{};
 
   /// Render the template into [directory].
   ///
   /// May throw a [ToolExit] if the directory is not writable.
   int render(
     Directory destination,
-    Map<String, dynamic> context, {
+    Map<String, Object> context, {
     bool overwriteExisting = true,
     bool printStatusWhenWriting = true,
   }) {
@@ -120,57 +115,57 @@ class Template {
     /// expansion on the path itself.
     ///
     /// Returns null if the given raw destination path has been filtered.
-    String renderPath(String relativeDestinationPath) {
-      final Match match = _kTemplateLanguageVariant.matchAsPrefix(relativeDestinationPath);
+    String? renderPath(String relativeDestinationPath) {
+      final Match? match = _kTemplateLanguageVariant.matchAsPrefix(relativeDestinationPath);
       if (match != null) {
-        final String platform = match.group(1);
-        final String language = context['${platform}Language'] as String;
+        final String platform = match.group(1)!;
+        final String? language = context['${platform}Language'] as String?;
         if (language != match.group(2)) {
           return null;
         }
         relativeDestinationPath = relativeDestinationPath.replaceAll('$platform-$language.tmpl', platform);
       }
 
-      final bool android = context['android'] as bool;
+      final bool android = (context['android'] as bool?) == true;
       if (relativeDestinationPath.contains('android') && !android) {
         return null;
       }
 
-      final bool ios = context['ios'] as bool;
+      final bool ios = (context['ios'] as bool?) == true;
       if (relativeDestinationPath.contains('ios') && !ios) {
         return null;
       }
 
       // Only build a web project if explicitly asked.
-      final bool web = context['web'] as bool;
+      final bool web = (context['web'] as bool?) == true;
       if (relativeDestinationPath.contains('web') && !web) {
         return null;
       }
       // Only build a Linux project if explicitly asked.
-      final bool linux = context['linux'] as bool;
+      final bool linux = (context['linux'] as bool?) == true;
       if (relativeDestinationPath.startsWith('linux.tmpl') && !linux) {
         return null;
       }
       // Only build a macOS project if explicitly asked.
-      final bool macOS = context['macos'] as bool;
+      final bool macOS = (context['macos'] as bool?) == true;
       if (relativeDestinationPath.startsWith('macos.tmpl') && !macOS) {
         return null;
       }
       // Only build a Windows project if explicitly asked.
-      final bool windows = context['windows'] as bool;
+      final bool windows = (context['windows'] as bool?) == true;
       if (relativeDestinationPath.startsWith('windows.tmpl') && !windows) {
         return null;
       }
       // Only build a Windows UWP project if explicitly asked.
-      final bool windowsUwp = context['winuwp'] as bool;
+      final bool windowsUwp = (context['winuwp'] as bool?) == true;
       if (relativeDestinationPath.startsWith('winuwp.tmpl') && !windowsUwp) {
         return null;
       }
 
-      final String projectName = context['projectName'] as String;
-      final String androidIdentifier = context['androidIdentifier'] as String;
-      final String pluginClass = context['pluginClass'] as String;
-      final String pluginClassSnakeCase = context['pluginClassSnakeCase'] as String;
+      final String? projectName = context['projectName'] as String?;
+      final String? androidIdentifier = context['androidIdentifier'] as String?;
+      final String? pluginClass = context['pluginClass'] as String?;
+      final String? pluginClassSnakeCase = context['pluginClassSnakeCase'] as String?;
       final String destinationDirPath = destination.absolute.path;
       final String pathSeparator = _fileSystem.path.separator;
       String finalDestinationPath = _fileSystem.path
@@ -197,12 +192,12 @@ class Template {
     }
 
     _templateFilePaths.forEach((String relativeDestinationPath, String absoluteSourcePath) {
-      final bool withRootModule = context['withRootModule'] as bool ?? false;
+      final bool withRootModule = context['withRootModule'] as bool? ?? false;
       if (!withRootModule && absoluteSourcePath.contains('flutter_root')) {
         return;
       }
 
-      final String finalDestinationPath = renderPath(relativeDestinationPath);
+      final String? finalDestinationPath = renderPath(relativeDestinationPath);
       if (finalDestinationPath == null) {
         return;
       }
@@ -277,7 +272,7 @@ class Template {
 }
 
 Directory _templateDirectoryInPackage(String name, FileSystem fileSystem) {
-  final String templatesDir = fileSystem.path.join(Cache.flutterRoot,
+  final String templatesDir = fileSystem.path.join(Cache.flutterRoot!,
       'packages', 'flutter_tools', 'templates');
   return fileSystem.directory(fileSystem.path.join(templatesDir, name));
 }
@@ -286,13 +281,13 @@ Directory _templateDirectoryInPackage(String name, FileSystem fileSystem) {
 // flutter_template_images, to resolve image placeholder against.
 Future<Directory> _templateImageDirectory(String name, FileSystem fileSystem, Logger logger) async {
   final String toolPackagePath = fileSystem.path.join(
-      Cache.flutterRoot, 'packages', 'flutter_tools');
+      Cache.flutterRoot!, 'packages', 'flutter_tools');
   final String packageFilePath = fileSystem.path.join(toolPackagePath, '.dart_tool', 'package_config.json');
   final PackageConfig packageConfig = await loadPackageConfigWithLogging(
     fileSystem.file(packageFilePath),
     logger: logger,
   );
-  final Uri imagePackageLibDir = packageConfig['flutter_template_images']?.packageUriRoot;
+  final Uri? imagePackageLibDir = packageConfig['flutter_template_images']?.packageUriRoot;
   return fileSystem.directory(imagePackageLibDir)
       .parent
       .childDirectory('templates')

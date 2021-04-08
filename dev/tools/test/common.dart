@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:dev_tools/stdio.dart';
