@@ -903,9 +903,11 @@ class _PageViewState extends State<PageView> {
     final AxisDirection axisDirection = _getDirection(context);
     final ScrollPhysics physics = _ForceImplicitScrollPhysics(
       allowImplicitScrolling: widget.allowImplicitScrolling,
-    ).applyTo(widget.pageSnapping
+    ).applyTo(
+      widget.pageSnapping
         ? _kPagePhysics.applyTo(widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context))
-        : widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context));
+        : widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context),
+    );
 
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {

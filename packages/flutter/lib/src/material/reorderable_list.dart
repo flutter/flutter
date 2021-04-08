@@ -121,6 +121,44 @@ class ReorderableListView extends StatefulWidget {
   /// constructor. Even more efficient, however, is to create the instances
   /// on demand using this constructor's `itemBuilder` callback.
   ///
+  /// This example creates a list using the
+  /// [ReorderableListView.builder] constructor. Using the [IndexedWidgetBuilder], The
+  /// list items are built lazily on demand.
+  /// {@tool dartpad --template=stateful_widget_material}
+  ///
+  /// ```dart
+  /// final List<int> _items = List<int>.generate(50, (int index) => index);
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   final ColorScheme colorScheme = Theme.of(context).colorScheme;
+  ///   final Color oddItemColor = colorScheme.primary.withOpacity(0.05);
+  ///   final Color evenItemColor = colorScheme.primary.withOpacity(0.15);
+  ///
+  ///   return ReorderableListView.builder(
+  ///     padding: const EdgeInsets.symmetric(horizontal: 40),
+  ///     itemCount:_items.length,
+  ///     itemBuilder: (BuildContext context, int index) {
+  ///       return ListTile(
+  ///         key: Key('$index'),
+  ///         tileColor: _items[index].isOdd ? oddItemColor : evenItemColor,
+  ///         title: Text('Item ${_items[index]}'),
+  ///         );
+  ///     },
+  ///     onReorder: (int oldIndex, int newIndex) {
+  ///       setState(() {
+  ///         if (oldIndex < newIndex) {
+  ///           newIndex -= 1;
+  ///         }
+  ///         final int item = _items.removeAt(oldIndex);
+  ///         _items.insert(newIndex, item);
+  ///       });
+  ///     },
+  ///   );
+  /// }
+  ///
+  /// ```
+  /// {@end-tool}
   /// See also:
   ///
   ///   * [ReorderableListView], which allows you to build a reorderable

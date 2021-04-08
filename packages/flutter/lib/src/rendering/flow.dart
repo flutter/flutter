@@ -392,8 +392,14 @@ class RenderFlow extends RenderBox
       _clipRectLayer = null;
       _paintWithDelegate(context, offset);
     } else {
-      _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintWithDelegate,
-          clipBehavior: clipBehavior, oldLayer: _clipRectLayer);
+      _clipRectLayer = context.pushClipRect(
+        needsCompositing,
+        offset,
+        Offset.zero & size,
+        _paintWithDelegate,
+        clipBehavior: clipBehavior,
+        oldLayer: _clipRectLayer,
+      );
     }
   }
 

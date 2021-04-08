@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/test_flutter_command_runner.dart';
 
 void main() {
   Directory tempDir;

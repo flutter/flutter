@@ -224,8 +224,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
       if (overflow.right > 0.0) '${_formatPixels(overflow.right)} pixels on the right',
     ];
     String overflowText = '';
-    assert(overflows.isNotEmpty,
-        "Somehow $runtimeType didn't actually overflow like it thought it did.");
+    assert(overflows.isNotEmpty, "Somehow $runtimeType didn't actually overflow like it thought it did.");
     switch (overflows.length) {
       case 1:
         overflowText = overflows.first;

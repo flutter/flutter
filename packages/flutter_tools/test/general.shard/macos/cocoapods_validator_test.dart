@@ -5,7 +5,7 @@
 // @dart = 2.8
 
 import 'package:flutter_tools/src/base/user_messages.dart';
-import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/macos/cocoapods_validator.dart';
 import 'package:test/fake.dart';
