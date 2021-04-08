@@ -20,7 +20,9 @@ class HasListenersTester<T> extends ValueNotifier<T> {
 
 class A {
   bool result = false;
-  void test() { result = true; }
+  void test() {
+    result = true;
+  }
 }
 
 class B extends A with ChangeNotifier {
@@ -49,9 +51,18 @@ class Counter with ChangeNotifier {
 void main() {
   testWidgets('ChangeNotifier', (WidgetTester tester) async {
     final List<String> log = <String>[];
-    void listener() { log.add('listener'); }
-    void listener1() { log.add('listener1'); }
-    void listener2() { log.add('listener2'); }
+    void listener() {
+      log.add('listener');
+    }
+
+    void listener1() {
+      log.add('listener1');
+    }
+
+    void listener2() {
+      log.add('listener2');
+    }
+
     void badListener() {
       log.add('badListener');
       throw ArgumentError();
@@ -126,9 +137,18 @@ void main() {
     final TestNotifier test = TestNotifier();
     final List<String> log = <String>[];
 
-    void listener1() { log.add('listener1'); }
-    void listener3() { log.add('listener3'); }
-    void listener4() { log.add('listener4'); }
+    void listener1() {
+      log.add('listener1');
+    }
+
+    void listener3() {
+      log.add('listener3');
+    }
+
+    void listener4() {
+      log.add('listener4');
+    }
+
     void listener2() {
       log.add('listener2');
       test.removeListener(listener1);
@@ -152,12 +172,19 @@ void main() {
     log.clear();
   });
 
-  test('During notifyListeners, a listener was added and removed immediately', () {
+  test('During notifyListeners, a listener was added and removed immediately',
+      () {
     final TestNotifier source = TestNotifier();
     final List<String> log = <String>[];
 
-    void listener3() { log.add('listener3'); }
-    void listener2() { log.add('listener2'); }
+    void listener3() {
+      log.add('listener3');
+    }
+
+    void listener2() {
+      log.add('listener2');
+    }
+
     void listener1() {
       log.add('listener1');
       source.addListener(listener2);
@@ -182,7 +209,10 @@ void main() {
       log.add('selfRemovingListener');
       source.removeListener(selfRemovingListener);
     }
-    void listener1() { log.add('listener1'); }
+
+    void listener1() {
+      log.add('listener1');
+    }
 
     source.addListener(listener1);
     source.addListener(selfRemovingListener);
@@ -193,7 +223,9 @@ void main() {
     expect(log, <String>['listener1', 'selfRemovingListener', 'listener1']);
   });
 
-  test('If the first listener removes itself, notifyListeners still notify all listeners', () {
+  test(
+      'If the first listener removes itself, notifyListeners still notify all listeners',
+      () {
     final TestNotifier source = TestNotifier();
     final List<String> log = <String>[];
 
@@ -201,6 +233,7 @@ void main() {
       log.add('selfRemovingListener');
       source.removeListener(selfRemovingListener);
     }
+
     void listener1() {
       log.add('listener1');
     }
@@ -220,8 +253,13 @@ void main() {
     final List<String> log = <String>[];
 
     final Listenable merged = Listenable.merge(<Listenable>[source1, source2]);
-    void listener1() { log.add('listener1'); }
-    void listener2() { log.add('listener2'); }
+    void listener1() {
+      log.add('listener1');
+    }
+
+    void listener2() {
+      log.add('listener2');
+    }
 
     merged.addListener(listener1);
     source1.notify();
@@ -251,8 +289,11 @@ void main() {
     final TestNotifier source2 = TestNotifier();
     final List<String> log = <String>[];
 
-    final Listenable merged = Listenable.merge(<Listenable?>[null, source1, null, source2, null]);
-    void listener() { log.add('listener'); }
+    final Listenable merged =
+        Listenable.merge(<Listenable?>[null, source1, null, source2, null]);
+    void listener() {
+      log.add('listener');
+    }
 
     merged.addListener(listener);
     source1.notify();
@@ -267,7 +308,9 @@ void main() {
     final List<String> log = <String>[];
 
     final Listenable merged = Listenable.merge(<Listenable>[source1, source2]);
-    void listener() { log.add('listener'); }
+    void listener() {
+      log.add('listener');
+    }
 
     merged.addListener(listener);
     source1.notify();
@@ -284,22 +327,32 @@ void main() {
   test('Cannot use a disposed ChangeNotifier', () {
     final TestNotifier source = TestNotifier();
     source.dispose();
-    expect(() { source.addListener(() { }); }, throwsFlutterError);
-    expect(() { source.removeListener(() { }); }, throwsFlutterError);
-    expect(() { source.dispose(); }, throwsFlutterError);
-    expect(() { source.notify(); }, throwsFlutterError);
+    expect(() {
+      source.addListener(() {});
+    }, throwsFlutterError);
+    expect(() {
+      source.removeListener(() {});
+    }, throwsFlutterError);
+    expect(() {
+      source.dispose();
+    }, throwsFlutterError);
+    expect(() {
+      source.notify();
+    }, throwsFlutterError);
   });
 
   test('Value notifier', () {
     final ValueNotifier<double> notifier = ValueNotifier<double>(2.0);
 
     final List<double> log = <double>[];
-    void listener() { log.add(notifier.value); }
+    void listener() {
+      log.add(notifier.value);
+    }
 
     notifier.addListener(listener);
     notifier.value = 3.0;
 
-    expect(log, equals(<double>[ 3.0 ]));
+    expect(log, equals(<double>[3.0]));
     log.clear();
 
     notifier.value = 3.0;
@@ -340,9 +393,10 @@ void main() {
 
     final TestNotifier source1 = TestNotifier();
     final TestNotifier source2 = TestNotifier();
-    void fakeListener() { }
+    void fakeListener() {}
 
-    final Listenable listenableUnderTest = Listenable.merge(<Listenable>[source1, source2]);
+    final Listenable listenableUnderTest =
+        Listenable.merge(<Listenable>[source1, source2]);
     expect(source1.isListenedTo, isFalse);
     expect(source2.isListenedTo, isFalse);
     listenableUnderTest.addListener(fakeListener);
@@ -354,12 +408,11 @@ void main() {
     expect(source2.isListenedTo, isFalse);
   });
 
-
   test('hasListeners', () {
     final HasListenersTester<bool> notifier = HasListenersTester<bool>(true);
     expect(notifier.testHasListeners, isFalse);
-    void test1() { }
-    void test2() { }
+    void test1() {}
+    void test2() {}
     notifier.addListener(test1);
     expect(notifier.testHasListeners, isTrue);
     notifier.addListener(test1);
@@ -403,12 +456,12 @@ void main() {
     }
     expect(error, isNotNull);
     expect(error!, isFlutterError);
-    expect(error.toStringDeep(), equalsIgnoringHashCodes(
-      'FlutterError\n'
-      '   A TestNotifier was used after being disposed.\n'
-      '   Once you have called dispose() on a TestNotifier, it can no\n'
-      '   longer be used.\n'
-    ));
+    expect(
+        error.toStringDeep(),
+        equalsIgnoringHashCodes('FlutterError\n'
+            '   A TestNotifier was used after being disposed.\n'
+            '   Once you have called dispose() on a TestNotifier, it can no\n'
+            '   longer be used.\n'));
   });
 
   test('notifyListener can be called recursively', () {
@@ -420,7 +473,7 @@ void main() {
       if (counter.value < 0) {
         counter.value = 0;
       }
-    };
+    }
 
     counter.addListener(listener1);
     counter.notify();
@@ -441,7 +494,7 @@ void main() {
     final List<String> log = <String>[];
     final List<VoidCallback> listeners = <VoidCallback>[];
 
-    void autoRemove(){
+    void autoRemove() {
       // We remove 4 listeners.
       // We will end up with (13-4 = 9) listeners.
       test.removeListener(listeners[1]);
@@ -454,13 +507,27 @@ void main() {
 
     // We add 12 more listeners.
     for (int i = 0; i < 12; i++) {
-      void listener () { log.add('listener$i'); }
+      void listener() {
+        log.add('listener$i');
+      }
+
       listeners.add(listener);
       test.addListener(listener);
     }
 
-    final List<int> remainingListenerIndexes = <int>[0,2,5,6,7,8,9,10,11];
-    final List<String> expectedLog = remainingListenerIndexes.map((int i) => 'listener$i').toList();
+    final List<int> remainingListenerIndexes = <int>[
+      0,
+      2,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ];
+    final List<String> expectedLog =
+        remainingListenerIndexes.map((int i) => 'listener$i').toList();
 
     test.notify();
     expect(log, expectedLog);
