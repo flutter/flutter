@@ -14,24 +14,22 @@ for information on using the dashboards.
 * [How the DeviceLab runs tests](#how-the-devicelab-runs-tests)
 * [Running tests locally](#running-tests-locally)
 * [Writing tests](#writing-tests)
-* [Adding tests to continuous integration](#adding-tests-to-ci)
+* [Adding tests to continuous integration](#adding-tests-to-continuous-integration)
+* [Adding tests to presubmit](#adding-tests-to-presubmit)
 
 
 ## How the DeviceLab runs tests
-
-<a name="how-the-devicelab-runs-tests"/>
 
 DeviceLab tests are run against physical devices in Flutter's lab (the "DeviceLab").
 
 Tasks specify the type of device they are to run on (`linux_android`, `mac_ios`, `mac_android`, `windows_android`, etc).
 When a device in the lab is free, it will pickup tasks that need to be completed.
 
-1. If the task succeeds, the test runner reports the success and uploads its performance metrics to Flutter's infrastructure
-2. If the task fails, the test runner reports the failure to Flutter's infrastructure and no performance metrics are collected
+1. If the task succeeds, the test runner reports the success and uploads its performance metrics to Flutter's infrastructure. Not
+all tasks record performance metrics.
+3. If the task fails, the test runner reports the failure to Flutter's infrastructure and no performance metrics are collected
 
 ## Running tests locally
-
-<a name="running-tests-locally"/>
 
 Do make sure your tests pass locally before deploying to the CI environment.
 Below is a handful of commands that run tests in a similar way to how the
@@ -163,8 +161,6 @@ the `run.dart` command. For example:
 
 ## Writing tests
 
-<a name="writing-tests"/>
-
 A test is a simple Dart program that lives under `bin/tasks` and uses
 `package:flutter_devicelab/framework/framework.dart` to define and run a _task_.
 
@@ -201,8 +197,6 @@ lets the CI system time out and clean up tasks that get stuck.
 
 ## Adding tests to continuous integration
 
-<a name="adding-tests-to-ci"/>
-
 Host only tests should be added to `flutter_tools`.
 
 There are several PRs needed to add a DeviceLab task to CI.
@@ -225,3 +219,6 @@ for each operating system.
 ## Adding tests to presubmit
 
 Flutter's DeviceLab does not currently have capacity to run tests against physical devices in presubmit.
+
+Host only tests are okay to add in presubmit. However, consider creating your integration test in packages/flutter_tools/test/integration.shard 
+to avoid using limited DeviceLab scheduling resources. Example: https://github.com/flutter/flutter/pull/73577/files"
