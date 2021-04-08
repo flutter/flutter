@@ -1224,7 +1224,7 @@ mixin WidgetInspectorService {
   void resetAllState() {
     disposeAllGroups();
     selection.clear();
-    setPubRootDirectories([]);
+    setPubRootDirectories(<String>[]);
   }
 
   /// Free all references to objects in a group.

@@ -3025,7 +3025,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
   }
 
   static void setupDefaultPubRootDirectory(TestWidgetInspectorService service) {
-    final String groupName = "set-pub-root-directories";
     final Map<String, Object?> jsonObject = const SizedBox().toDiagnosticsNode().toJsonMap(InspectorSerializationDelegate(service: service));
     final Map<String, Object?> creationLocation = jsonObject['creationLocation']! as Map<String, Object?>;
     expect(creationLocation, isNotNull);
