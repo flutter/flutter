@@ -62,7 +62,7 @@ To run a test, use option `-t` (`--task`):
 
 ```sh
 # from the .../flutter/dev/devicelab directory
-../../bin/cache/dart-sdk/bin/dart bin/test_runner.dart -t {NAME_OR_PATH_OF_TEST}
+../../bin/cache/dart-sdk/bin/dart bin/test_runner.dart test -t {NAME_OR_PATH_OF_TEST}
 ```
 
 Where `NAME_OR_PATH_OF_TEST` can be either of:
