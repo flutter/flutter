@@ -7,25 +7,31 @@ the tests are referred to as "tasks" in the API, but since we primarily use it
 for testing, this document refers to them as "tests".
 
 Current statuses for the devicelab are available at
-https://flutter-dashboard.appspot.com. See [dashboard user guide](https://github.com/flutter/cocoon/blob/master/app_flutter/USER_GUIDE.md)
+https://flutter-dashboard.appspot.com/#/build. See [dashboard user guide](https://github.com/flutter/cocoon/blob/master/app_flutter/USER_GUIDE.md)
 for information on using the dashboards.
 
-## How the DeviceLab runs tasks
+## Table of Contents
+* [How the DeviceLab runs tests](#how-the-devicelab-runs-tasks)
+* [Running tests locally](#running-tests-locally)
+* [Writing tests](#writing-tests)
+* [Adding tests to continuous integration](#adding-tests-to-ci)
 
-The DeviceLab devices continuously ask Flutter's continuous integration system
-[Cocoon](https://github.com/flutter/cocoon) for tasks to run. When Cocoon has a
-task that is suitable for the device (e.g. Android test), it reserves that
-task for the device. See [manifest.yaml](manifest.yaml) for more information on
-the information used for scheduling tasks.
 
-1. If the task succeeds, the test runner reports the success to Cocoon. The dashboards
-will show that task in green.
-2.  If the task fails, the test runner reports the failure to the server. Cocoon
-increments the run attempt counter and puts the task back in the pool of available
-tasks. If a task does not succeed after a certain number of attempts (as of this writing the limit is 2),
-the task is marked as failed and is displayed using a red color on the dashboard.
+## How the DeviceLab runs tests
+
+<a name="how-the-devicelab-runs-tests"/>
+
+DeviceLab tests are run against physical devices in Flutter's lab (the "DeviceLab").
+
+Tasks specify the type of device they are to run on (`linux_android`, `mac_ios`, `mac_android`, `windows_android`, etc).
+When a device in the lab is free, it will pickup tasks that need to be completed.
+
+1. If the task succeeds, the test runner reports the success and uploads its performance metrics to Flutter's infrastructure
+2. If the task fails, the test runner reports the failure to Flutter's infrastructure and no performance metrics are collected
 
 ## Running tests locally
+
+<a name="running-tests-locally"/>
 
 Do make sure your tests pass locally before deploying to the CI environment.
 Below is a handful of commands that run tests in a similar way to how the
@@ -48,14 +54,7 @@ Notably, it will start and stop Gradle, for instance.
 
 ### Running all tests
 
-To run all tests defined in `manifest.yaml`, use option `-a` (`--all`):
-
-```sh
-../../bin/cache/dart-sdk/bin/dart bin/run.dart -a
-```
-
-This defaults to only running tests supported by your host device's platform
-(`--match-host-platform`) and exiting after the first failure (`--exit`).
+`TODO(chillers): Update to use .ci.yaml. https://github.com/flutter/flutter/issues/74660`
 
 ### Running specific tests
 
@@ -63,13 +62,12 @@ To run a test, use option `-t` (`--task`):
 
 ```sh
 # from the .../flutter/dev/devicelab directory
-../../bin/cache/dart-sdk/bin/dart bin/run.dart -t {NAME_OR_PATH_OF_TEST}
+../../bin/cache/dart-sdk/bin/dart bin/test_runner.dart -t {NAME_OR_PATH_OF_TEST}
 ```
 
 Where `NAME_OR_PATH_OF_TEST` can be either of:
 
-- the _name_ of a task, which you can find in the `manifest.yaml` file in this
-  directory. Example: `complex_layout__start_up`.
+- the _name_ of a task, which is a file's basename in `bin/tasks`. Example: `complex_layout__start_up`.
 - the path to a Dart _file_ corresponding to a task, which resides in `bin/tasks`.
   Tip: most shells support path auto-completion using the Tab key. Example:
   `bin/tasks/complex_layout__start_up.dart`.
@@ -78,14 +76,6 @@ To run multiple tests, repeat option `-t` (`--task`) multiple times:
 
 ```sh
 ../../bin/cache/dart-sdk/bin/dart bin/run.dart -t test1 -t test2 -t test3
-```
-
-To run tests from a specific stage, use option `-s` (`--stage`).
-Currently, there are only three stages defined, `devicelab`,
-`devicelab_ios` and `devicelab_win`.
-
-```sh
-../../bin/cache/dart-sdk/bin/dart bin/run.dart -s {NAME_OF_STAGE}
 ```
 
 ### Running tests against a local engine build
@@ -177,6 +167,8 @@ the `run.dart` command. For example:
 
 ## Writing tests
 
+<a name="writing-tests"/>
+
 A test is a simple Dart program that lives under `bin/tasks` and uses
 `package:flutter_devicelab/framework/framework.dart` to define and run a _task_.
 
@@ -211,31 +203,36 @@ A task runs in its own standalone Dart VM and reports results via Dart VM
 service protocol. This ensures that tasks do not interfere with each other and
 lets the CI system time out and clean up tasks that get stuck.
 
-## Adding tests to the CI environment
+## Adding tests to continuous integration
 
-The `manifest.yaml` file describes a subset of tests we run in the CI. To add
-your test edit `manifest.yaml` and add the following in the "tasks" dictionary:
+<a name="adding-tests-to-ci"/>
 
-```
-  {NAME_OF_TEST}:
-    description: {DESCRIPTION}
-    stage: {STAGE}
-    required_agent_capabilities: {CAPABILITIES}
-```
+There are several PRs needed to add a DeviceLab task to CI.
 
-Where:
-
-- `{NAME_OF_TEST}` is the name of your test that also matches the name of the
+_TASK_- the name of your test that also matches the name of the
   file in `bin/tasks` without the `.dart` extension.
-- `{DESCRIPTION}` is the plain English description of your test that helps
-  others understand what this test is testing.
-- `{STAGE}` is `devicelab` if you want to run on Android, or `devicelab_ios` if
-  you want to run on iOS.
-- `{CAPABILITIES}` is an array that lists the capabilities required of
-  the test agent (the computer that runs the test) to run your test. As of writing,
-  the available capabilities are: `linux`, `linux/android`, `linux-vm`,
-  `mac`, `mac/ios`, `mac/iphonexs`, `mac/ios32`, `mac-catalina/ios`,
-  `mac-catalina/android`, `ios/gl-render-image`, `windows`, `windows/android`.
+
+1. Add prod builder to [flutter/infra devicelab_config.star](https://github.com/flutter/infra/blob/master/config/devicelab_config.star)
+  - Example PR: https://github.com/flutter/infra/pull/401/files
+  - This will need to soak for 15 minutes after merged to propagate
+  - There are various lists for the different testbeds a test can run on
+2. Add task to [flutter/flutter prod_builders.json](https://github.com/flutter/flutter/blob/master/dev/prod_builders.json)
+  - Example PR: https://github.com/flutter/flutter/pull/79913/files
+  - Set `flaky: true` for validation before blocking tree
+3. After 10 green runs, update [flutter/flutter prod_builders.json](https://github.com/flutter/flutter/blob/master/dev/prod_builders.json) to `flaky:false`
 
 If your test needs to run on multiple operating systems, create a separate test
 for each operating system.
+
+## Adding tests to presubmit
+
+Flutter's DeviceLab does not currently have capacity to run tests against physical devices in presubmit.
+
+Host only tests are okay. First add them to [continuous-integration](#adding-tests-to-ci), and after marked blocking add them to presubmit.
+
+1. Add try builder to [flutter/infra devicelab_config.star](https://github.com/flutter/infra/blob/master/config/devicelab_config.star)
+  - Example PR: https://github.com/flutter/infra/pull/401/files
+  - This will need to soak for 15 minutes after merged to propagate
+  - There are various lists for the different testbeds a test can run on
+2. Add task to [flutter/flutter try_builders.json](https://github.com/flutter/flutter/blob/master/dev/try_builders.json)
+  - Example PR: https://github.com/flutter/flutter/pull/79913/files
