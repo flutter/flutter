@@ -771,6 +771,17 @@ void main() {
       expect(textField.style!.color, themeData.textTheme.bodyText1!.color);
       expect(textField.style!.color, isNot(equals(themeData.primaryColor)));
   });
+
+  // Regression test for: https://github.com/flutter/flutter/issues/78144
+  testWidgets('Leading and Actions widget can be null', (WidgetTester tester) async {
+    final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate();
+    await tester.pumpWidget(TestHomePage(delegate: delegate));
+
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  });
 }
 
 class TestHomePage extends StatelessWidget {
@@ -910,4 +921,20 @@ class _TestSearchDelegate extends SearchDelegate<String> {
       child: Text('Bottom'),
     );
   }
+}
+
+class _TestEmptySearchDelegate extends SearchDelegate<String> {
+  _TestEmptySearchDelegate() : super();
+
+  @override
+  Widget? buildLeading(BuildContext context) => null;
+
+  @override
+  List<Widget>? buildActions(BuildContext context) => null;
+
+  @override
+  Widget buildSuggestions(BuildContext context) => const SizedBox();
+
+  @override
+  Widget buildResults(BuildContext context) => const SizedBox();
 }
