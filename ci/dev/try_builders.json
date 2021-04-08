@@ -108,6 +108,11 @@
          "enabled": true
       },
       {
+         "name":"Windows UWP Engine",
+         "repo":"engine",
+         "enabled": true
+      },
+      {
          "name":"Windows Web Engine",
          "repo":"engine",
          "enabled": true,
