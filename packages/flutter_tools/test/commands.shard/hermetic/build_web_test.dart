@@ -87,7 +87,7 @@ void main() {
 
     expect(
       () => runner.run(<String>['build', 'web']),
-      throwsToolExit(),
+      throwsToolExit(message: '"build web" is not currently supported. To enable, run "flutter config --enable-web".')
     );
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
