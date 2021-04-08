@@ -283,6 +283,11 @@ abstract class FlutterCommand extends Command<void> {
     return bundle.defaultMainPath;
   }
 
+  /// Path to the Dart's package config file.
+  ///
+  /// This can be overridden by some of its subclasses.
+  String get packagesPath => globalResults['packages'] as String;
+
   void usesPubOption({bool hide = false}) {
     argParser.addFlag('pub',
       defaultsTo: true,
@@ -845,7 +850,7 @@ abstract class FlutterCommand extends Command<void> {
       : null;
 
     final File packagesFile = globals.fs.file(
-      globalResults['packages'] as String ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'));
+      packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'));
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
         packagesFile, logger: globals.logger, throwOnError: false);
 
@@ -989,8 +994,7 @@ abstract class FlutterCommand extends Command<void> {
       bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
       performanceMeasurementFile: performanceMeasurementFile,
-      packagesPath: globalResults['packages'] as String
-        ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'),
+      packagesPath: packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'),
       nullSafetyMode: nullSafetyMode,
       codeSizeDirectory: codeSizeDirectory,
       androidGradleDaemon: androidGradleDaemon,
