@@ -210,12 +210,16 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   /// Pushes a backdrop filter operation onto the operation stack.
   ///
   /// The given filter is applied to the current contents of the scene prior to
-  /// rasterizing the given objects.
+  /// rasterizing the child layers.
+  ///
+  /// The [blendMode] argument is required for [ui.SceneBuilder] compatibility, but is
+  /// ignored by the DOM renderer.
   ///
   /// See [pop] for details about the operation stack.
   @override
   ui.BackdropFilterEngineLayer pushBackdropFilter(
     ui.ImageFilter filter, {
+    ui.BlendMode blendMode = ui.BlendMode.srcOver,
     ui.BackdropFilterEngineLayer? oldLayer,
   }) {
     return _pushSurface<PersistedBackdropFilter>(PersistedBackdropFilter(

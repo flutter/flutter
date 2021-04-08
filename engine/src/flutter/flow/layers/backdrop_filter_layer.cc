@@ -6,8 +6,9 @@
 
 namespace flutter {
 
-BackdropFilterLayer::BackdropFilterLayer(sk_sp<SkImageFilter> filter)
-    : filter_(std::move(filter)) {}
+BackdropFilterLayer::BackdropFilterLayer(sk_sp<SkImageFilter> filter,
+                                         SkBlendMode blend_mode)
+    : filter_(std::move(filter)), blend_mode_(blend_mode) {}
 
 #ifdef FLUTTER_ENABLE_DIFF_CONTEXT
 
@@ -57,9 +58,11 @@ void BackdropFilterLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "BackdropFilterLayer::Paint");
   FML_DCHECK(needs_painting(context));
 
+  SkPaint paint;
+  paint.setBlendMode(blend_mode_);
   Layer::AutoSaveLayer save = Layer::AutoSaveLayer::Create(
       context,
-      SkCanvas::SaveLayerRec{&paint_bounds(), nullptr, filter_.get(), 0});
+      SkCanvas::SaveLayerRec{&paint_bounds(), &paint, filter_.get(), 0});
   PaintChildren(context);
 }
 

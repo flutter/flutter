@@ -72,6 +72,7 @@ class SceneBuilder : public RefCountedDartWrappable<SceneBuilder> {
                        fml::RefPtr<EngineLayer> oldLayer);
   void pushBackdropFilter(Dart_Handle layer_handle,
                           ImageFilter* filter,
+                          int blendMode,
                           fml::RefPtr<EngineLayer> oldLayer);
   void pushShaderMask(Dart_Handle layer_handle,
                       Shader* shader,
