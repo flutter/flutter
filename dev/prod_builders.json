@@ -880,7 +880,7 @@
       "name": "Mac gradle_plugin_light_apk_test",
       "repo": "flutter",
       "task_name": "mac_gradle_plugin_light_apk_test",
-      "flaky": false
+      "flaky": true
     },
     {
       "name": "Mac module_custom_host_app_name_test",
