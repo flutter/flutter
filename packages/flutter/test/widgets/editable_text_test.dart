@@ -2716,7 +2716,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('password fields hide the last char when obscureText is true', (WidgetTester tester) async {
+  testWidgets('password fields hide the last char when obscure is ObscureTextBehavior.all', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     controller.text = 'super-secret-password!!1';
@@ -2724,63 +2724,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
-        obscureText: true,
-        showLastCharWhenObscureText: false,
-        controller: controller,
-        focusNode: focusNode,
-        style: textStyle,
-        cursorColor: cursorColor,
-      ),
-    ));
-
-    final String expectedValue = '•' *controller.text.length;
-
-    expect(
-      semantics,
-      hasSemantics(
-        TestSemantics(
-          children: <TestSemantics>[
-            TestSemantics.rootChild(
-              children: <TestSemantics>[
-                TestSemantics(
-                  children: <TestSemantics>[
-                    TestSemantics(
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.isTextField,
-                            SemanticsFlag.isObscured,
-                          ],
-                          value: expectedValue,
-                          textDirection: TextDirection.ltr,
-                        ),
-                      ],
-                    )
-                  ],
-                )
-              ],
-            ),
-          ],
-        ),
-        ignoreTransform: true,
-        ignoreRect: true,
-        ignoreId: true,
-      ),
-    );
-
-    semantics.dispose();
-  });
-
-  testWidgets('password fields hide the last char when obscure is Obscure.all', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-
-    controller.text = 'super-secret-password!!1';
-
-    await tester.pumpWidget(MaterialApp(
-      home: EditableText(
-        backgroundCursorColor: Colors.grey,
-        obscure: Obscure.all,
+        obscureTextBehavior: ObscureTextBehavior.all,
         controller: controller,
         focusNode: focusNode,
         style: textStyle,

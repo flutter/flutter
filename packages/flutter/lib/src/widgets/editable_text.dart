@@ -423,7 +423,7 @@ class EditableText extends StatefulWidget {
   /// is null (the default) and [readOnly] is true.
   ///
   /// The [controller], [focusNode], [obscureText], 
-  /// [showLastCharWhenObscureText], [obscure], [autocorrect], [autofocus],
+  /// [obscureTextBehavior], [autocorrect], [autofocus],
   /// [showSelectionHandles], [enableInteractiveSelection], [forceLine],
   /// [style], [cursorColor], [cursorOpacityAnimates],[backgroundCursorColor],
   /// [enableSuggestions], [paintCursorAboveText], [selectionHeightStyle],
@@ -437,8 +437,7 @@ class EditableText extends StatefulWidget {
     this.readOnly = false,
     this.obscuringCharacter = '•',
     this.obscureText = false,
-    this.showLastCharWhenObscureText = true,
-    this.obscure = Obscure.none,
+    this.obscureTextBehavior = ObscureTextBehavior.none,
     this.autocorrect = true,
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
@@ -503,8 +502,7 @@ class EditableText extends StatefulWidget {
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
        assert(obscureText != null),
-       assert(showLastCharWhenObscureText != null),
-       assert(obscure != null),
+       assert(obscureTextBehavior != null),
        assert(autocorrect != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
@@ -579,28 +577,16 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final bool obscureText;
   
-  /// {@template flutter.widgets.editableText.showLastCharWhenObscureText}
+  /// {@template flutter.widgets.editableText.obscureTextBehavior}
   /// Whether or not the last character entered is shown before
   /// being obscured.
-  /// When this is set to true, the last characters in the text field is
+  /// When this is set to [ObscureTextBehavior.all] or [ObscureTextBehavior.delayed], the last characters in the text field is
   /// replaced by [obscuringCharacter].
   ///
-  /// Defaults to true. Cannot be null.
-  ///
-  /// Only has an effect when [obscureText] is set to true.
-  /// {@endtemplate}
-  final bool showLastCharWhenObscureText;
-  
-  /// {@template flutter.widgets.editableText.obscure}
-  /// Whether or not the last character entered is shown before
-  /// being obscured.
-  /// When this is set to [Obscure.all] or [Obscure.last], the last characters in the text field is
-  /// replaced by [obscuringCharacter].
-  ///
-  /// Defaults to [Obscure.none]. Cannot be null.
+  /// Defaults to [ObscureTextBehavior.none]. Cannot be null.
   ///
   /// {@endtemplate}
-  final Obscure obscure;
+  final ObscureTextBehavior obscureTextBehavior;
 
 
   /// {@macro flutter.dart:ui.textHeightBehavior}
@@ -1507,8 +1493,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<TextEditingController>('controller', controller));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
-    properties.add(DiagnosticsProperty<bool>('showLastCharWhenObscureText', showLastCharWhenObscureText, defaultValue: true));
-    properties.add(DiagnosticsProperty<Obscure>('obscure', obscure, defaultValue: true));
+    properties.add(DiagnosticsProperty<ObscureTextBehavior>('obscureTextBehavior', obscureTextBehavior, defaultValue: ObscureTextBehavior.none));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
     properties.add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType, defaultValue: obscureText ? SmartDashesType.disabled : SmartDashesType.enabled));
     properties.add(EnumProperty<SmartQuotesType>('smartQuotesType', smartQuotesType, defaultValue: obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled));
@@ -2597,8 +2582,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       inputType: widget.keyboardType,
       readOnly: widget.readOnly,
       obscureText: widget.obscureText,
-      showLastCharWhenObscureText: widget.showLastCharWhenObscureText,
-      obscure: widget.obscure,
+      obscureTextBehavior: widget.obscureTextBehavior,
       autocorrect: widget.autocorrect,
       smartDashesType: widget.smartDashesType,
       smartQuotesType: widget.smartQuotesType,
@@ -2703,8 +2687,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 textWidthBasis: widget.textWidthBasis,
                 obscuringCharacter: widget.obscuringCharacter,
                 obscureText: widget.obscureText,
-                showLastCharWhenObscureText: widget.showLastCharWhenObscureText,
-                obscure: widget.obscure,
+                obscureTextBehavior: widget.obscureTextBehavior,
                 autocorrect: widget.autocorrect,
                 smartDashesType: widget.smartDashesType,
                 smartQuotesType: widget.smartQuotesType,
@@ -2738,15 +2721,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// By default makes text in composing range appear as underlined.
   /// Descendants can override this method to customize appearance of text.
   TextSpan buildTextSpan() {
-    if (widget.obscureText || widget.obscure != Obscure.none) {
+    if (widget.obscureText || 
+      widget.obscureTextBehavior != ObscureTextBehavior.none) {
       String text = _value.text;
       text = widget.obscuringCharacter * text.length;
       // Reveal the latest character in an obscured field only on mobile.
       if ((defaultTargetPlatform == TargetPlatform.android ||
               defaultTargetPlatform == TargetPlatform.iOS ||
               defaultTargetPlatform == TargetPlatform.fuchsia) &&
-          !kIsWeb && (widget.showLastCharWhenObscureText || 
-          widget.obscure == Obscure.last)) {
+          !kIsWeb && 
+          widget.obscureTextBehavior == ObscureTextBehavior.delayed) {
         final int? o =
             _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
         if (o != null && o >= 0 && o < text.length)
@@ -2789,8 +2773,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.locale,
     required this.obscuringCharacter,
     required this.obscureText,
-    required this.showLastCharWhenObscureText,
-    required this.obscure,
+    required this.obscureTextBehavior,
     required this.autocorrect,
     required this.smartDashesType,
     required this.smartQuotesType,
@@ -2836,8 +2819,7 @@ class _Editable extends LeafRenderObjectWidget {
   final Locale? locale;
   final String obscuringCharacter;
   final bool obscureText;
-  final bool showLastCharWhenObscureText;
-  final Obscure obscure;
+  final ObscureTextBehavior obscureTextBehavior;
   final TextHeightBehavior? textHeightBehavior;
   final TextWidthBasis textWidthBasis;
   final bool autocorrect;
@@ -2888,8 +2870,7 @@ class _Editable extends LeafRenderObjectWidget {
       ignorePointer: rendererIgnoresPointer,
       obscuringCharacter: obscuringCharacter,
       obscureText: obscureText,
-      showLastCharWhenObscureText: showLastCharWhenObscureText,
-      obscure: obscure,
+      obscureTextBehavior: obscureTextBehavior,
       textHeightBehavior: textHeightBehavior,
       textWidthBasis: textWidthBasis,
       cursorWidth: cursorWidth,
@@ -2936,8 +2917,7 @@ class _Editable extends LeafRenderObjectWidget {
       ..textWidthBasis = textWidthBasis
       ..obscuringCharacter = obscuringCharacter
       ..obscureText = obscureText
-      ..showLastCharWhenObscureText = showLastCharWhenObscureText
-      ..obscure = obscure
+      ..obscureTextBehavior = obscureTextBehavior
       ..cursorWidth = cursorWidth
       ..cursorHeight = cursorHeight
       ..cursorRadius = cursorRadius

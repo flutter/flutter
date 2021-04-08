@@ -428,13 +428,13 @@ enum TextCapitalization {
   none,
 }
 
-enum Obscure {
+enum ObscureTextBehavior {
   /// show all text
   none,
   /// obscure all text
   all,
-  /// obscure all text but the last char
-  last
+  /// obscure all text but the last char just at a short delay
+  delayed
 }
 
 /// Controls the visual appearance of the text input control.
@@ -463,8 +463,7 @@ class TextInputConfiguration {
     this.inputType = TextInputType.text,
     this.readOnly = false,
     this.obscureText = false,
-    this.showLastCharWhenObscureText = true,
-    this.obscure = Obscure.none,
+    this.obscureTextBehavior = ObscureTextBehavior.none,
     this.autocorrect = true,
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
@@ -476,8 +475,7 @@ class TextInputConfiguration {
     this.autofillConfiguration,
   }) : assert(inputType != null),
        assert(obscureText != null),
-       assert(showLastCharWhenObscureText != null),
-       assert(obscure != null),
+       assert(obscureTextBehavior != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(autocorrect != null),
@@ -505,18 +503,12 @@ class TextInputConfiguration {
   @Deprecated(
     'use obscure instead.'
   )
-  /// Whether or not the last character entered is shown before
-  /// being obscured.
-  ///
-  /// Defaults to true.
-  /// Only has an effect when [obscureText] is set to true.
-  final bool showLastCharWhenObscureText;
 
   /// Whether or not the last character entered is shown before
   /// being obscured.
   ///
-  /// Defaults to [Obscure.none].
-  final Obscure obscure;
+  /// Defaults to [ObscureTextBehavior.none].
+  final ObscureTextBehavior obscureTextBehavior;
 
   /// Whether to enable autocorrection.
   ///
@@ -625,8 +617,7 @@ class TextInputConfiguration {
       'inputType': inputType.toJson(),
       'readOnly': readOnly,
       'obscureText': obscureText,
-      'showLastCharWhenObscureText': showLastCharWhenObscureText,
-      'obscure': obscure,
+      'obscureTextBehavior': obscureTextBehavior,
       'autocorrect': autocorrect,
       'smartDashesType': smartDashesType.index.toString(),
       'smartQuotesType': smartQuotesType.index.toString(),

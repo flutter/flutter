@@ -183,8 +183,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     String obscuringCharacter = '•',
     bool obscureText = false,
-    bool showLastCharWhenObscureText = true,
-    Obscure obscure = Obscure.none,
+    ObscureTextBehavior obscureTextBehavior = ObscureTextBehavior.none,
     Locale? locale,
     double cursorWidth = 1.0,
     double? cursorHeight,
@@ -224,8 +223,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        assert(paintCursorAboveText != null),
        assert(obscuringCharacter != null && obscuringCharacter.characters.length == 1),
        assert(obscureText != null),
-       assert(showLastCharWhenObscureText != null),
-       assert(obscure != null),
+       assert(obscureTextBehavior != null),
        assert(textSelectionDelegate != null),
        assert(cursorWidth != null && cursorWidth >= 0.0),
        assert(cursorHeight == null || cursorHeight >= 0.0),
@@ -260,8 +258,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        _endHandleLayerLink = endHandleLayerLink,
        _obscuringCharacter = obscuringCharacter,
        _obscureText = obscureText,
-       _showLastCharWhenObscureText = showLastCharWhenObscureText,
-       _obscure = obscure,
+       _obscureTextBehavior = obscureTextBehavior,
        _readOnly = readOnly,
        _forceLine = forceLine,
        _clipBehavior = clipBehavior {
@@ -472,26 +469,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     markNeedsSemanticsUpdate();
   }
 
- /// Whether or not the last character entered is shown before
- /// being obscured.
- ///
- /// Only has an effect when [obscureText] is set to true.
-  bool get showLastCharWhenObscureText => _showLastCharWhenObscureText;
-  bool _showLastCharWhenObscureText;
-  set showLastCharWhenObscureText(bool value) {
-    if (_showLastCharWhenObscureText == value)
-      return;
-    _showLastCharWhenObscureText = value;
-    markNeedsSemanticsUpdate();
-  }
-
  /// Whether to hide the text being edited (e.g., for passwords).
-  Obscure get obscure => _obscure;
-  Obscure _obscure;
-  set obscure(Obscure value) {
-    if (_obscure == value)
+  ObscureTextBehavior get obscureTextBehavior => _obscureTextBehavior;
+  ObscureTextBehavior _obscureTextBehavior;
+  set obscureTextBehavior(ObscureTextBehavior value) {
+    if (_obscureTextBehavior == value)
       return;
-    _obscure = value;
+    _obscureTextBehavior = value;
     markNeedsSemanticsUpdate();
   }
 
