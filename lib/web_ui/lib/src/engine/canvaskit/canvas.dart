@@ -269,11 +269,11 @@ class CkCanvas {
     skCanvas.saveLayer(paint?.skiaObject, null, null, null);
   }
 
-  void saveLayerWithFilter(ui.Rect bounds, ui.ImageFilter filter) {
+  void saveLayerWithFilter(ui.Rect bounds, ui.ImageFilter filter, [ CkPaint? paint ]) {
     final _CkManagedSkImageFilterConvertible convertible =
         filter as _CkManagedSkImageFilterConvertible;
     return skCanvas.saveLayer(
-      null,
+      paint?.skiaObject,
       toSkRect(bounds),
       convertible._imageFilter.skiaObject,
       0,
@@ -505,9 +505,9 @@ class RecordingCkCanvas extends CkCanvas {
   }
 
   @override
-  void saveLayerWithFilter(ui.Rect bounds, ui.ImageFilter filter) {
-    super.saveLayerWithFilter(bounds, filter);
-    _addCommand(CkSaveLayerWithFilterCommand(bounds, filter));
+  void saveLayerWithFilter(ui.Rect bounds, ui.ImageFilter filter, [ CkPaint? paint ]) {
+    super.saveLayerWithFilter(bounds, filter, paint);
+    _addCommand(CkSaveLayerWithFilterCommand(bounds, filter, paint));
   }
 
   @override
@@ -1121,17 +1121,18 @@ class CkSaveLayerWithoutBoundsCommand extends CkPaintCommand {
 }
 
 class CkSaveLayerWithFilterCommand extends CkPaintCommand {
-  CkSaveLayerWithFilterCommand(this.bounds, this.filter);
+  CkSaveLayerWithFilterCommand(this.bounds, this.filter, this.paint);
 
   final ui.Rect bounds;
   final ui.ImageFilter filter;
+  final CkPaint? paint;
 
   @override
   void apply(SkCanvas canvas) {
     final _CkManagedSkImageFilterConvertible convertible =
         filter as _CkManagedSkImageFilterConvertible;
     return canvas.saveLayer(
-      null,
+      paint?.skiaObject,
       toSkRect(bounds),
       convertible._imageFilter.skiaObject,
       0,
