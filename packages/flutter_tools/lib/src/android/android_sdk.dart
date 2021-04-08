@@ -69,7 +69,7 @@ class AndroidSdk {
     String? findAndroidHomeDir() {
       String? androidHomeDir;
       if (globals.config.containsKey('android-sdk')) {
-        androidHomeDir = globals.config.getValue('android-sdk') as String;
+        androidHomeDir = globals.config.getValue('android-sdk') as String?;
       } else if (globals.platform.environment.containsKey(kAndroidHome)) {
         androidHomeDir = globals.platform.environment[kAndroidHome];
       } else if (globals.platform.environment.containsKey(kAndroidSdkRoot)) {

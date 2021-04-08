@@ -223,7 +223,7 @@ Future<String?> _chooseSigningIdentity(
   }
 
   if (validCodeSigningIdentities.length > 1) {
-    final String savedCertChoice = config.getValue('ios-signing-cert') as String;
+    final String? savedCertChoice = config.getValue('ios-signing-cert') as String?;
 
     if (savedCertChoice != null) {
       if (validCodeSigningIdentities.contains(savedCertChoice)) {

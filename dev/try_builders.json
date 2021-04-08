@@ -222,6 +222,12 @@
       "run_if": ["dev/", "packages/flutter_tools/", "bin/"]
     },
     {
+      "name": "Linux validate_ci_config",
+      "repo": "flutter",
+      "task_name": "linux_validate_ci_config",
+      "enabled": true
+    },
+    {
       "name": "Linux web_tool_tests",
       "repo": "flutter",
       "task_name": "linux_web_tool_tests",
