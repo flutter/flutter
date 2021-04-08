@@ -4,12 +4,11 @@
 
 // @dart = 2.8
 
-import 'dart:io';
+import 'dart:io' hide Directory;
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 
 import 'package:flutter_tools/src/cache.dart';
@@ -24,6 +23,7 @@ import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart' hide MockAndroidSdk;
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   Cache.disableLocking();

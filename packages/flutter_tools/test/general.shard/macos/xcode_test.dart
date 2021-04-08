@@ -354,7 +354,7 @@ void main() {
           xcode: xcode,
           platform: null,
           artifacts: Artifacts.test(),
-          cache: Cache.test(),
+          cache: Cache.test(processManager: FakeProcessManager.any()),
           iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
         );
       });
@@ -382,7 +382,7 @@ void main() {
           xcode: xcode,
           platform: null,
           artifacts: Artifacts.test(),
-          cache: Cache.test(),
+          cache: Cache.test(processManager: FakeProcessManager.any()),
           iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
         );
       });

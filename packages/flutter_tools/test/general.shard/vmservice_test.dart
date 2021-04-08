@@ -19,6 +19,7 @@ import 'package:fake_async/fake_async.dart';
 
 import '../src/common.dart';
 import '../src/context.dart' hide testLogger;
+import '../src/fake_vm_services.dart';
 
 final Map<String, Object> vm = <String, dynamic>{
   'type': 'VM',
