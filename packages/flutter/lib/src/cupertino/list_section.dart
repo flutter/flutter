@@ -302,7 +302,7 @@ class CupertinoListSection extends StatelessWidget {
   /// {@macro flutter.material.Material.clipBehavior}
   const CupertinoListSection({
     Key? key,
-    required this.children,
+    this.children,
     this.header,
     this.footer,
     this.margin = _kDefaultRowsMargin,
@@ -313,11 +313,11 @@ class CupertinoListSection extends StatelessWidget {
     double? additionalDividerMargin,
     this.topMargin = _kMarginTop,
     bool hasLeading = true,
-  })  : assert(children.length > 0),
-        _type = _CupertinoListSectionType.base,
-        additionalDividerMargin = additionalDividerMargin ??
-            (hasLeading ? _kBaseAdditionalDividerMargin : 0.0),
-        super(key: key);
+  }) : assert((children != null && children.length > 0) || header != null),
+       _type = _CupertinoListSectionType.base,
+       additionalDividerMargin = additionalDividerMargin ??
+           (hasLeading ? _kBaseAdditionalDividerMargin : 0.0),
+       super(key: key);
 
   /// Creates a section that mimicks standard "Inset Grouped" iOS list section.
   ///
@@ -366,7 +366,7 @@ class CupertinoListSection extends StatelessWidget {
   /// {@macro flutter.material.Material.clipBehavior}
   const CupertinoListSection.insetGrouped({
     Key? key,
-    required this.children,
+    this.children,
     this.header,
     this.footer,
     EdgeInsetsGeometry? margin,
@@ -377,7 +377,7 @@ class CupertinoListSection extends StatelessWidget {
     double? additionalDividerMargin,
     this.topMargin,
     bool hasLeading = true,
-  }) : assert(children.length > 0),
+  }) : assert((children != null && children.length > 0) || header != null),
        _type = _CupertinoListSectionType.insetGrouped,
        additionalDividerMargin = additionalDividerMargin ??
            (hasLeading
@@ -409,7 +409,7 @@ class CupertinoListSection extends StatelessWidget {
   /// lazy builds, because such lists are intended to be short in row count.
   /// It is recommended that only [CupertinoListTile] widget be included in the
   /// [children] list in order to retain the iOS look.
-  final List<Widget> children;
+  final List<Widget>? children;
 
   /// Sets the decoration around [children].
   ///
@@ -493,49 +493,52 @@ class CupertinoListSection extends StatelessWidget {
       );
     }
 
-    // We construct childrenWithDividers as follows:
-    // Insert a short divider between all rows.
-    // If it is a `_CupertinoListSectionType.base` type, add a long divider
-    // to the top and bottom of the rows.
-    final List<Widget> childrenWithDividers = <Widget>[];
+    BorderRadius? childrenGroupBorderRadius;
+    DecoratedBox? decoratedChildrenGroup;
+    if (children != null && children!.isNotEmpty) {
+      // We construct childrenWithDividers as follows:
+      // Insert a short divider between all rows.
+      // If it is a `_CupertinoListSectionType.base` type, add a long divider
+      // to the top and bottom of the rows.
+      final List<Widget> childrenWithDividers = <Widget>[];
 
-    if (_type == _CupertinoListSectionType.base) {
-      childrenWithDividers.add(longDivider);
+      if (_type == _CupertinoListSectionType.base) {
+        childrenWithDividers.add(longDivider);
+      }
+
+      children!.sublist(0, children!.length - 1).forEach((Widget widget) {
+        childrenWithDividers.add(widget);
+        childrenWithDividers.add(shortDivider);
+      });
+
+      childrenWithDividers.add(children!.last);
+      if (_type == _CupertinoListSectionType.base) {
+        childrenWithDividers.add(longDivider);
+      }
+
+      switch (_type) {
+        case _CupertinoListSectionType.insetGrouped:
+          childrenGroupBorderRadius = _kDefaultInsetGroupedBorderRadius;
+          break;
+        case _CupertinoListSectionType.base:
+          childrenGroupBorderRadius = BorderRadius.zero;
+          break;
+      }
+
+      // Refactored the decorate children group in one place to avoid repeating it
+      // twice down bellow in the returned widget.
+      decoratedChildrenGroup = DecoratedBox(
+        decoration: decoration ??
+            BoxDecoration(
+              color: CupertinoDynamicColor.resolve(
+                  decoration?.color ??
+                      CupertinoColors.secondarySystemGroupedBackground,
+                  context),
+              borderRadius: childrenGroupBorderRadius,
+            ),
+        child: Column(children: childrenWithDividers),
+      );
     }
-
-    children.sublist(0, children.length - 1).forEach((Widget widget) {
-      childrenWithDividers.add(widget);
-      childrenWithDividers.add(shortDivider);
-    });
-
-    childrenWithDividers.add(children.last);
-    if (_type == _CupertinoListSectionType.base) {
-      childrenWithDividers.add(longDivider);
-    }
-
-    final BorderRadius childrenGroupBorderRadius;
-    switch (_type) {
-      case _CupertinoListSectionType.insetGrouped:
-        childrenGroupBorderRadius = _kDefaultInsetGroupedBorderRadius;
-        break;
-      case _CupertinoListSectionType.base:
-        childrenGroupBorderRadius = BorderRadius.zero;
-        break;
-    }
-
-    // Refactored the decorate children group in one place to avoid repeating it
-    // twice down bellow in the returned widget.
-    final DecoratedBox decoratedChildrenGroup = DecoratedBox(
-      decoration: decoration ??
-          BoxDecoration(
-            color: CupertinoDynamicColor.resolve(
-                decoration?.color ??
-                    CupertinoColors.secondarySystemGroupedBackground,
-                context),
-            borderRadius: childrenGroupBorderRadius,
-          ),
-      child: Column(children: childrenWithDividers),
-    );
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -554,15 +557,17 @@ class CupertinoListSection extends StatelessWidget {
                 child: _header,
               ),
             ),
-          Padding(
-            padding: margin,
-            child: clipBehavior == Clip.none
-                ? decoratedChildrenGroup
-                : ClipRRect(
-                    borderRadius: childrenGroupBorderRadius,
-                    clipBehavior: clipBehavior,
-                    child: decoratedChildrenGroup),
-          ),
+          if (children != null && children!.isNotEmpty)
+            Padding(
+              padding: margin,
+              child: clipBehavior == Clip.none
+                  ? decoratedChildrenGroup
+                  : ClipRRect(
+                      borderRadius: childrenGroupBorderRadius,
+                      clipBehavior: clipBehavior,
+                      child: decoratedChildrenGroup!,
+                    ),
+            ),
           if (_footer != null)
             Align(
               alignment: AlignmentDirectional.centerStart,
