@@ -377,7 +377,7 @@ def main():
         if not args.skip_build:
           BuildTarget(runtime_mode, arch, optimized, enable_lto, enable_legacy,
                       args.asan, not args.no_dart_version_git_info,
-                      args.targets.split(","))
+                      args.targets.split(",") if args.targets else [])
         BuildBucket(runtime_mode, arch, optimized, product)
 
   # Create and optionally upload CIPD package
