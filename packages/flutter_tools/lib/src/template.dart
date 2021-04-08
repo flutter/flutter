@@ -118,12 +118,12 @@ class Template {
     String? renderPath(String relativeDestinationPath) {
       final Match? match = _kTemplateLanguageVariant.matchAsPrefix(relativeDestinationPath);
       if (match != null) {
-        final String? platform = match.group(1);
+        final String platform = match.group(1)!;
         final String? language = context['${platform}Language'] as String?;
         if (language != match.group(2)) {
           return null;
         }
-        relativeDestinationPath = relativeDestinationPath.replaceAll('$platform-$language.tmpl', platform!);
+        relativeDestinationPath = relativeDestinationPath.replaceAll('$platform-$language.tmpl', platform);
       }
 
       final bool android = (context['android'] as bool?) == true;
