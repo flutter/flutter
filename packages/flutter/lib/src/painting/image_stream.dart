@@ -869,7 +869,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   late Duration _shownTimestamp;
   // The requested duration for the current frame.
   Duration? _frameDuration;
-  // The default duration for the frame that _frameDuration is 0.
+  // The default duration for the frame that _frameDuration less than 10ms.
   static const Duration _DefaultDuration = Duration(milliseconds: 67);
   // How many frames have been emitted so far.
   int _framesEmitted = 0;
@@ -900,8 +900,8 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       ));
       _shownTimestamp = timestamp;
       _frameDuration = _nextFrame!.duration;
-      // When the _frameDuration is 0, give the default delay time.
-      if (_frameDuration!.inMilliseconds == 0) {
+      // When the _frameDuration is less then 10ms, give the default delay time.
+      if (_frameDuration!.inMilliseconds < 10) {
         _frameDuration = _DefaultDuration;
       }
       _nextFrame!.image.dispose();
