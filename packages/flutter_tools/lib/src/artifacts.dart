@@ -76,6 +76,10 @@ enum Artifact {
   windowsDesktopPath,
   /// The root of the cpp client code for Windows desktop.
   windowsCppClientWrapper,
+  /// The root of the Windows UWP desktop sources.
+  windowsUwpDesktopPath,
+  /// The root of the cpp client code for Windows Uwp desktop.
+  windowsUwpCppClientWrapper,
   /// The root of the sky_engine package.
   skyEnginePath,
   /// The location of the macOS engine podspec file.
@@ -149,6 +153,10 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
     case Artifact.windowsDesktopPath:
       return '';
     case Artifact.windowsCppClientWrapper:
+      return 'cpp_client_wrapper';
+    case Artifact.windowsUwpDesktopPath:
+      return '';
+    case Artifact.windowsUwpCppClientWrapper:
       return 'cpp_client_wrapper';
     case Artifact.skyEnginePath:
       return 'sky_engine';
@@ -679,13 +687,6 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
         return _cache.getArtifactDirectory('ios-deploy').childFile(artifactFileName).path;
       case Artifact.iproxy:
         return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName).path;
-      case Artifact.linuxDesktopPath:
-      case Artifact.linuxHeaders:
-        return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
-      case Artifact.windowsDesktopPath:
-        return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
-      case Artifact.windowsCppClientWrapper:
-        return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
       case Artifact.skyEnginePath:
         return _fileSystem.path.join(_hostEngineOutPath, 'gen', 'dart-pkg', artifactFileName);
       case Artifact.flutterMacOSPodspec:
@@ -735,6 +736,13 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-html-sound', artifactFileName);
       case Artifact.pubExecutable:
         return _fileSystem.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', _artifactToFileName(artifact, platform, mode));
+      case Artifact.windowsUwpDesktopPath:
+      case Artifact.windowsUwpCppClientWrapper:
+      case Artifact.linuxDesktopPath:
+      case Artifact.linuxHeaders:
+      case Artifact.windowsDesktopPath:
+      case Artifact.windowsCppClientWrapper:
+        return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;
