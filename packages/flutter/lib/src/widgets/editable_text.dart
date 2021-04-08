@@ -2995,7 +2995,7 @@ class _Editable extends LeafRenderObjectWidget {
 
 class _ScribbleFocusable extends StatefulWidget {
   const _ScribbleFocusable({Key? key, required this.child, required this.focusNode, required this.editableKey}): super(key: key);
-  
+
   final Widget child;
   final FocusNode focusNode;
   final GlobalKey editableKey;

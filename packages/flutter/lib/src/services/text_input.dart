@@ -935,7 +935,7 @@ abstract class ScribbleClient {
   /// A unique identifier for this element.
   String get elementIdentifier;
 
-  /// Called by the engine when the [ScribbleClient] should receive focus. 
+  /// Called by the engine when the [ScribbleClient] should receive focus.
   ///
   /// For example, this method is called during a UIIndirectScribbleInteraction.
   void onScribbleFocus(Offset offset);
