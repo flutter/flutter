@@ -415,7 +415,7 @@ void main() {
     final Counter counter = Counter();
     final List<String> log = <String>[];
 
-    final VoidCallback listener1 = () {
+    void listener1() {
       log.add('listener1');
       if (counter.value < 0) {
         counter.value = 0;
@@ -454,7 +454,7 @@ void main() {
 
     // We add 12 more listeners.
     for (int i = 0; i < 12; i++) {
-      final VoidCallback listener = () { log.add('listener$i'); };
+      void listener () { log.add('listener$i'); }
       listeners.add(listener);
       test.addListener(listener);
     }
