@@ -101,9 +101,13 @@ class LayerSceneBuilder implements ui.SceneBuilder {
   @override
   BackdropFilterEngineLayer? pushBackdropFilter(
     ui.ImageFilter filter, {
+    ui.BlendMode blendMode = ui.BlendMode.srcOver,
     ui.EngineLayer? oldLayer,
   }) {
-    return pushLayer<BackdropFilterEngineLayer>(BackdropFilterEngineLayer(filter));
+    return pushLayer<BackdropFilterEngineLayer>(BackdropFilterEngineLayer(
+      filter,
+      blendMode,
+    ));
   }
 
   @override

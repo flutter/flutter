@@ -31,9 +31,9 @@ class CkNWayCanvas {
   }
 
   /// Calls [saveLayerWithFilter] on all canvases.
-  void saveLayerWithFilter(ui.Rect bounds, ui.ImageFilter filter) {
+  void saveLayerWithFilter(ui.Rect bounds, ui.ImageFilter filter, [ CkPaint? paint ]) {
     for (int i = 0; i < _canvases.length; i++) {
-      _canvases[i]!.saveLayerWithFilter(bounds, filter);
+      _canvases[i]!.saveLayerWithFilter(bounds, filter, paint);
     }
   }
 

@@ -152,8 +152,9 @@ class RootLayer extends ContainerLayer {
 
 class BackdropFilterEngineLayer extends ContainerLayer implements ui.BackdropFilterEngineLayer {
   final ui.ImageFilter _filter;
+  final ui.BlendMode _blendMode;
 
-  BackdropFilterEngineLayer(this._filter);
+  BackdropFilterEngineLayer(this._filter, this._blendMode);
 
   @override
   void preroll(PrerollContext preRollContext, Matrix4 matrix) {
@@ -163,7 +164,8 @@ class BackdropFilterEngineLayer extends ContainerLayer implements ui.BackdropFil
 
   @override
   void paint(PaintContext context) {
-    context.internalNodesCanvas.saveLayerWithFilter(paintBounds, _filter);
+    CkPaint paint = CkPaint()..blendMode = _blendMode;
+    context.internalNodesCanvas.saveLayerWithFilter(paintBounds, _filter, paint);
     paintChildren(context);
     context.internalNodesCanvas.restore();
   }
