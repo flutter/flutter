@@ -53,6 +53,7 @@ void main() {
     const TextStyle textStyle = TextStyle(fontSize: 12.0);
     const EdgeInsets padding = EdgeInsets.all(3);
     const Size minimumSize = Size(200, 200);
+    const Size maximumSize = Size(500, 500);
     const BorderSide side = BorderSide(color: Colors.green, width: 2);
     const OutlinedBorder shape = RoundedRectangleBorder(side: side, borderRadius: BorderRadius.all(Radius.circular(2)));
     const MouseCursor enabledMouseCursor = SystemMouseCursors.text;
