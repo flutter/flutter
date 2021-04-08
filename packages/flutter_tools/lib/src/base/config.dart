@@ -62,7 +62,7 @@ class Config {
     }
     try {
       ErrorHandlingFileSystem.noExitOnFailure(() {
-        _values = castStringKeyedMap(json.decode(_file.readAsStringSync())) as Map<String, Object>? ?? <String, Object>{};
+        _values = castStringKeyedMap(json.decode(_file.readAsStringSync())) ?? <String, Object>{};
       });
     } on FormatException {
       _logger
@@ -110,7 +110,7 @@ class Config {
 
   String get configPath => _file.path;
 
-  Map<String, Object> _values = <String, Object>{};
+  Map<String, dynamic> _values = <String, Object>{};
 
   Iterable<String> get keys => _values.keys;
 
