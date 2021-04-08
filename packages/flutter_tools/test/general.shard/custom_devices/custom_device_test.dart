@@ -16,7 +16,7 @@ import 'package:flutter_tools/src/custom_devices/custom_device_config.dart';
 import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/linux/application_package.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 
 import 'package:file/memory.dart';
 import 'package:file/file.dart';

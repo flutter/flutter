@@ -335,10 +335,18 @@ class CocoaPods {
         _logger.printStatus(stderr, indent: 4);
       }
     }
+
     if (result.exitCode != 0) {
       invalidatePodInstallOutput(xcodeProject);
       _diagnosePodInstallFailure(result);
       throwToolExit('Error running pod install');
+    } else if (xcodeProject.podfileLock.existsSync()) {
+      // Even if the Podfile.lock didn't change, update its modified date to now
+      // so Podfile.lock is newer than Podfile.
+      _processManager.runSync(
+        <String>['touch', xcodeProject.podfileLock.path],
+        workingDirectory: _fileSystem.path.dirname(xcodeProject.podfile.path),
+      );
     }
   }
 

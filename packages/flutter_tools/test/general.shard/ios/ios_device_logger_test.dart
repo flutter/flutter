@@ -21,6 +21,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_vm_services.dart';
 
 void main() {
   FakeProcessManager processManager;
@@ -31,7 +32,7 @@ void main() {
 
   setUp(() {
     processManager = FakeProcessManager.list(<FakeCommand>[]);
-    fakeCache = Cache.test();
+    fakeCache = Cache.test(processManager: FakeProcessManager.any());
     artifacts = Artifacts.test();
     logger = BufferLogger.test();
     ideviceSyslogPath = artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios);

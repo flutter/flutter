@@ -45,7 +45,7 @@ void main() {
 
     setUp(() {
       final Artifacts artifacts = Artifacts.test();
-      cache = Cache.test();
+      cache = Cache.test(processManager: FakeProcessManager.any());
       logger = BufferLogger.test();
       iosDeploy = IOSDeploy(
         artifacts: artifacts,
@@ -248,7 +248,9 @@ void main() {
         mockProcess2 = MockProcess();
         mockProcess3 = MockProcess();
         forwardedPort = ForwardedPort.withContext(123, 456, mockProcess3);
-        cache = Cache.test();
+        cache = Cache.test(
+          processManager: FakeProcessManager.any(),
+        );
         iosDeploy = IOSDeploy(
           artifacts: Artifacts.test(),
           cache: cache,
@@ -302,7 +304,7 @@ void main() {
     setUp(() {
       mockXcdevice = MockXcdevice();
       final Artifacts artifacts = Artifacts.test();
-      cache = Cache.test();
+      cache = Cache.test(processManager: FakeProcessManager.any());
       logger = BufferLogger.test();
       mockIosWorkflow = MockIOSWorkflow();
       fakeProcessManager = FakeProcessManager.any();

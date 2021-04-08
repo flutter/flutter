@@ -13,7 +13,7 @@ import 'base/logger.dart';
 import 'build_info.dart';
 import 'convert.dart';
 import 'device.dart';
-import 'globals.dart' as globals;
+import 'globals_null_migrated.dart' as globals;
 
 Future<String> sharedSkSlWriter(Device device, Map<String, Object> data, {
   File outputFile,

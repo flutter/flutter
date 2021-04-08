@@ -11,7 +11,6 @@ import 'base/context.dart';
 import 'base/io.dart';
 import 'base/net.dart';
 import 'build_system/build_system.dart';
-import 'cache.dart';
 import 'device.dart';
 import 'doctor.dart';
 import 'fuchsia/fuchsia_sdk.dart';
@@ -26,13 +25,11 @@ import 'persistent_tool_state.dart';
 import 'project.dart';
 import 'reporting/reporting.dart';
 import 'runner/local_engine.dart';
-import 'version.dart';
 
 export 'globals_null_migrated.dart';
 
 Artifacts get artifacts => context.get<Artifacts>();
 BuildSystem get buildSystem => context.get<BuildSystem>();
-Cache get cache => context.get<Cache>();
 CrashReporter get crashReporter => context.get<CrashReporter>();
 Doctor get doctor => context.get<Doctor>();
 PersistentToolState get persistentToolState => PersistentToolState.instance;
@@ -51,7 +48,6 @@ CocoaPodsValidator get cocoapodsValidator => context.get<CocoaPodsValidator>();
 LocalEngineLocator get localEngineLocator => context.get<LocalEngineLocator>();
 
 CocoaPods get cocoaPods => context.get<CocoaPods>();
-FlutterVersion get flutterVersion => context.get<FlutterVersion>();
 FuchsiaArtifacts get fuchsiaArtifacts => context.get<FuchsiaArtifacts>();
 IOSSimulatorUtils get iosSimulatorUtils => context.get<IOSSimulatorUtils>();
 IOSWorkflow get iosWorkflow => context.get<IOSWorkflow>();
