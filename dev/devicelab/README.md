@@ -27,7 +27,7 @@ When a device in the lab is free, it will pickup tasks that need to be completed
 
 1. If the task succeeds, the test runner reports the success and uploads its performance metrics to Flutter's infrastructure. Not
 all tasks record performance metrics.
-3. If the task fails, the test runner reports the failure to Flutter's infrastructure and no performance metrics are collected
+2. If the task fails, the test runner reports the failure to Flutter's infrastructure and no performance metrics are collected
 
 ## Running tests locally
 
@@ -220,5 +220,5 @@ for each operating system.
 
 Flutter's DeviceLab does not currently have capacity to run tests against physical devices in presubmit.
 
-Host only tests are okay to add in presubmit. However, consider creating your integration test in packages/flutter_tools/test/integration.shard 
+Host only tests are okay to add in presubmit. However, consider creating your integration test in packages/flutter_tools/test/integration.shard
 to avoid using limited DeviceLab scheduling resources. Example: https://github.com/flutter/flutter/pull/73577/files"
