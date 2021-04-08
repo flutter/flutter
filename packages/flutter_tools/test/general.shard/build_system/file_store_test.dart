@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:typed_data';
 
 import 'package:file/memory.dart';
@@ -78,7 +76,7 @@ void main() {
     fileCache.initialize();
     fileCache.diffFileList(<File>[file]);
     fileCache.persist();
-    final String currentHash =  fileCache.currentAssetKeys[file.path];
+    final String? currentHash = fileCache.currentAssetKeys[file.path];
     final Uint8List buffer = cacheFile
         .readAsBytesSync();
     FileStorage fileStorage = FileStorage.fromBuffer(buffer);
