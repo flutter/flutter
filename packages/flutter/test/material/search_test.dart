@@ -773,7 +773,7 @@ void main() {
   });
 
   // Regression test for: https://github.com/flutter/flutter/issues/78144
-  testWidgets('Leading and Actions widget can be null', (WidgetTester tester) async {
+  testWidgets('Leading and Actions widgets can be null', (WidgetTester tester) async {
     final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate();
     await tester.pumpWidget(TestHomePage(delegate: delegate));
 
