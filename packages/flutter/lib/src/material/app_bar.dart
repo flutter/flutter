@@ -19,6 +19,7 @@ import 'icon_button.dart';
 import 'icons.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'material_state.dart';
 import 'scaffold.dart';
 import 'tabs.dart';
 import 'text_theme.dart';
@@ -709,6 +710,12 @@ class _AppBarState extends State<AppBar> {
     Scaffold.of(context).openEndDrawer();
   }
 
+  Color _resolveColor(Set<MaterialState> states, Color? widgetColor, Color? themeColor, Color defaultColor) {
+    return MaterialStateProperty.resolveAs<Color?>(widgetColor, states)
+        ?? MaterialStateProperty.resolveAs<Color?>(themeColor, states)
+        ?? MaterialStateProperty.resolveAs<Color>(defaultColor, states);
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(!widget.primary || debugCheckHasMediaQuery(context));
@@ -718,6 +725,10 @@ class _AppBarState extends State<AppBar> {
     final AppBarTheme appBarTheme = AppBarTheme.of(context);
     final ScaffoldState? scaffold = Scaffold.maybeOf(context);
     final ModalRoute<dynamic>? parentRoute = ModalRoute.of(context);
+    final FlexibleSpaceBarSettings? settings = context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
+    final Set<MaterialState> states = <MaterialState>{
+      if (settings?.isScrolledUnder == true) MaterialState.scrolledUnder,
+    };
 
     final bool hasDrawer = scaffold?.hasDrawer ?? false;
     final bool hasEndDrawer = scaffold?.hasEndDrawer ?? false;
@@ -731,9 +742,11 @@ class _AppBarState extends State<AppBar> {
       ? widget.backgroundColor
         ?? appBarTheme.backgroundColor
         ?? theme.primaryColor
-      : widget.backgroundColor
-        ?? appBarTheme.backgroundColor
-        ?? (colorScheme.brightness == Brightness.dark ? colorScheme.surface : colorScheme.primary);
+      : _resolveColor(
+          states,
+          widget.backgroundColor,
+          appBarTheme.backgroundColor,
+          colorScheme.brightness == Brightness.dark ? colorScheme.surface : colorScheme.primary);
 
     final Color foregroundColor = widget.foregroundColor
       ?? appBarTheme.foregroundColor
@@ -1135,6 +1148,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     final double extraToolbarHeight = math.max(minExtent - _bottomHeight - topPadding - (toolbarHeight ?? kToolbarHeight), 0.0);
     final double visibleToolbarHeight = visibleMainHeight - _bottomHeight - extraToolbarHeight;
 
+    final bool isScrolledUnder = overlapsContent || (pinned && shrinkOffset > maxExtent - minExtent);
     final bool isPinnedWithOpacityFade = pinned && floating && bottom != null && extraToolbarHeight == 0.0;
     final double toolbarOpacity = !pinned || isPinnedWithOpacityFade
       ? (visibleToolbarHeight / (toolbarHeight ?? kToolbarHeight)).clamp(0.0, 1.0)
@@ -1145,6 +1159,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
       maxExtent: maxExtent,
       currentExtent: math.max(minExtent, maxExtent - shrinkOffset),
       toolbarOpacity: toolbarOpacity,
+      isScrolledUnder: isScrolledUnder,
       child: AppBar(
         leading: leading,
         automaticallyImplyLeading: automaticallyImplyLeading,
@@ -1154,7 +1169,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
           ? Semantics(child: flexibleSpace, header: true)
           : flexibleSpace,
         bottom: bottom,
-        elevation: forceElevated || overlapsContent || (pinned && shrinkOffset > maxExtent - minExtent) ? elevation : 0.0,
+        elevation: forceElevated || isScrolledUnder ? elevation : 0.0,
         shadowColor: shadowColor,
         backgroundColor: backgroundColor,
         foregroundColor: foregroundColor,
@@ -1513,6 +1528,10 @@ class SliverAppBar extends StatefulWidget {
   /// {@macro flutter.material.appbar.backgroundColor}
   ///
   /// This property is used to configure an [AppBar].
+  ///
+  /// If this color is a [MaterialStateColor] it will be resolved against
+  /// [MaterialState.scrolledUnder] when the content of the app's
+  /// primary scrollable overlaps the app bar.
   final Color? backgroundColor;
 
   /// {@macro flutter.material.appbar.foregroundColor}
