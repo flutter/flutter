@@ -188,6 +188,28 @@ void main() {
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => fakeAndroidBuilder,
     });
+
+    testUsingContext('supports configuring the target file', () async {
+      final String projectPath = await createProject(tempDir,
+        arguments: <String>['--no-pub']);
+      final File entrypoint = globals.fs.file(globals.fs.path.join(projectPath, 'lib', 'foo.dart'))
+        ..createSync(recursive: true);
+      await runCommandIn(
+        projectPath,
+        arguments: <String>[
+          '--no-debug',
+          '--no-profile',
+          '-t',
+          entrypoint.path,
+          '--target-platform',
+          'android-x86',
+        ],
+      );
+
+      expect(fakeAndroidBuilder.target,  entrypoint.path);
+    }, overrides: <Type, Generator>{
+      AndroidBuilder: () => fakeAndroidBuilder,
+    });
   });
 
   group('Gradle', () {

@@ -37,6 +37,7 @@ class BuildAarCommand extends BuildSubCommand {
         help: 'Build a release version of the current project.',
       );
     addTreeShakeIconsFlag();
+    usesTargetOption();
     usesFlavorOption();
     usesBuildNumberOption();
     usesPubOption();
@@ -131,7 +132,7 @@ class BuildAarCommand extends BuildSubCommand {
     displayNullSafetyMode(androidBuildInfo.first.buildInfo);
     await androidBuilder.buildAar(
       project: _getProject(),
-      target: '', // Not needed because this command only builds Android's code.
+      target: targetFile,
       androidBuildInfo: androidBuildInfo,
       outputDirectoryPath: stringArg('output-dir'),
       buildNumber: buildNumber,
