@@ -1,4 +1,4 @@
-Signature: 74b9365c52c765b00dd8625c3fbf2c71
+Signature: 5d235c4cc274f924c6c7947f0c37c5f1
 
 UNUSED LICENSES:
 
@@ -11777,6 +11777,7 @@ FILE: ../../../third_party/dart/runtime/vm/virtual_memory_compressed.cc
 FILE: ../../../third_party/dart/runtime/vm/virtual_memory_compressed.h
 FILE: ../../../third_party/dart/samples/ffi/resource_management/utf8_helpers.dart
 FILE: ../../../third_party/dart/samples_2/ffi/resource_management/utf8_helpers.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/late_helper.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_allocation_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/allocation.dart
 ----------------------------------------------------------------------------------------------------
