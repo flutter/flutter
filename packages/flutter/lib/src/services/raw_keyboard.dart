@@ -737,16 +737,18 @@ class RawKeyboard {
     // Compare modifier states to the ground truth as specified by
     // [RawKeyEvent.data.modifiersPressed] and update unsynchronized ones.
     //
-    // Don't send any key events for these changes, since there *should* be
-    // separate events for each modifier key down/up that occurs while the app
-    // has focus. This is just to synchronize the modifier keys when they are
-    // pressed/released while the app doesn't have focus, to make sure that
-    // _keysPressed reflects reality at all times.
+    // This function will update the state of modifier keys in `_keysPressed` so
+    // that they match the ones given by [RawKeyEvent.data.modifiersPressed].
+    // For a `modifiersPressed` result of anything but [KeyboardSide.any], the
+    // states in `_keysPressed` will be updated to exactly match the result,
+    // i.e. exactly one of "no down", "left down", "right down" or "both down".
     //
-    // If the given modifier state is [KeyboardSide.any], then "no down"
-    // modifiers might be updated to "left down", or "any down" modifiers might
-    // be updated to "no down", depending on the ground truth; pressed modifiers
-    // won't be updated of sides.
+    // If `modifiersPressed` returns [KeyboardSide.any], the states in
+    // `_keysPressed` will be updated to a rough match, i.e. "either side down"
+    // or "no down". If `_keysPressed` has no modifier down, a
+    // [KeyboardSide.any] will synchronize by forcing the left modifier down. If
+    // `_keysPressed` has any modifier down, a [KeyboardSide.any] will not cause
+    // a state change.
 
     final Map<ModifierKey, KeyboardSide?> modifiersPressed = event.data.modifiersPressed;
     final Map<PhysicalKeyboardKey, LogicalKeyboardKey> modifierKeys = <PhysicalKeyboardKey, LogicalKeyboardKey>{};
@@ -759,7 +761,6 @@ class RawKeyboard {
     for (final ModifierKey key in modifiersPressed.keys) {
       if (modifiersPressed[key] == KeyboardSide.any) {
         final Set<PhysicalKeyboardKey>? thisModifierKeys = _modifierKeyMap[_ModifierSidePair(key, KeyboardSide.all)];
-        assert(thisModifierKeys != null);
         anySideKeys.addAll(thisModifierKeys!);
         if (thisModifierKeys.any(keysPressedAfterEvent.contains)) {
           continue;

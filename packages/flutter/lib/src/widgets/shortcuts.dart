@@ -146,10 +146,20 @@ class KeySet<T extends KeyboardKey> {
 /// [Shortcuts] widget receives a key event, it looks up a matching activator
 /// in the following way, and triggers the intent it maps to:
 ///
+/// [ShortcutActivator]s are used by [Shortcuts] widgets, and are mapped to
+/// [Intent]s, the intended behavior that the key combination should trigger.
+/// When a [Shortcuts] widget receives a key event, its [ShortcutManager] looks
+/// up the first matching [ShortcutActivator], and signals the corresponding
+/// [Intent], which might trigger an action as defined by a hierarchy of
+/// [Actions] widgets. For a detailed introduction on the mechanism and use of
+/// the shortcut-action system, see [Actions].
+///
+/// The matching [ShortcutActivator] is looked up in the following way:
+///
 ///  * Find the registered [ShortcutActivator]s whose [triggers] contain the
-///    incoming event in asertion order.
+///    incoming event.
 ///  * Of the previous list, finds the first activator whose [accepts] returns
-///    true.
+///    true in the order of insertion.
 ///
 /// See also:
 ///
@@ -396,15 +406,16 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutActivator, Int
 ///    Otherwise, no control keys must be held.
 ///  * Similar conditions apply for the [alt], [shift], and [meta] keys.
 ///
-/// This resembles the typical behavior of operation systems, and marks a major
-/// difference from [LogicalKeySet]:
+/// This resembles the typical behavior of most operating systems, and handles
+/// modifier keys differently from [LogicalKeySet] in the following way:
 ///
-///  * Additional non-modifier keys are allowed. For example,
-///    pressing key X while holding ControlLeft and key A *will* activate a
-///    `SingleActivator(LogicalKeyboardKey.keyX, control: true)`
-///  * The modifiers must not be the trigger key. For example, pressing
-///    ControlLeft while holding key X *will not* activate a
-///    `SingleActivator(LogicalKeyboardKey.keyX, control: true)`
+///  * [SingleActivator]s allow additional non-modifier keys being pressed in
+///    order to activate the shortcut. For example, pressing key X while holding
+///    ControlLeft *and key A* will be accepted by
+///    `SingleActivator(LogicalKeyboardKey.keyX, control: true)`.
+///  * [SingleActivator]s do not consider modifiers to be a trigger key. For
+///    example, pressing ControlLeft while holding key X *will not* activate a
+///    `SingleActivator(LogicalKeyboardKey.keyX, control: true)`.
 class SingleActivator with Diagnosticable implements ShortcutActivator {
   /// Create an activator of a trigger key and modifiers.
   ///
@@ -492,7 +503,8 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   /// Whether either (or both) control keys should be held for [trigger] to
   /// activate the shortcut.
   ///
-  /// If false, then all control keys must be released at the event.
+  /// If false, then all control keys must be released when the event is received
+  /// in order to activate the shortcut.
   ///
   /// See also:
   ///
@@ -502,7 +514,8 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   /// Whether either (or both) shift keys should be held for [trigger] to
   /// activate the shortcut.
   ///
-  /// If false, then all shift keys must be released at the event.
+  /// If false, then all shift keys must be released when the event is received
+  /// in order to activate the shortcut.
   ///
   /// See also:
   ///
@@ -512,7 +525,8 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   /// Whether either (or both) alt keys should be held for [trigger] to
   /// activate the shortcut.
   ///
-  /// If false, then all alt keys must be released at the event.
+  /// If false, then all alt keys must be released when the event is received
+  /// in order to activate the shortcut.
   ///
   /// See also:
   ///
@@ -522,7 +536,8 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   /// Whether either (or both) meta keys should be held for [trigger] to
   /// activate the shortcut.
   ///
-  /// If false, then all meta keys must be released at the event.
+  /// If false, then all meta keys must be released when the event is received
+  /// in order to activate the shortcut.
   ///
   /// See also:
   ///
@@ -544,19 +559,25 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
       && (meta == (pressed.contains(LogicalKeyboardKey.metaLeft) || pressed.contains(LogicalKeyboardKey.metaRight)));
   }
 
-  /// Returns a description of the key set that is short and readable.
+  /// Returns a short and readable description of the key combination.
   ///
-  /// Intended to be used in debug mode for logging purposes.
+  /// Intended to be used in debug mode for logging purposes. In release mode,
+  /// [debugDescribeKeys] returns an empty string.
   @override
   String debugDescribeKeys() {
-    final List<String> keys = <String>[
-      if (control) 'Control',
-      if (alt) 'Alt',
-      if (meta) 'Meta',
-      if (shift) 'Shift',
-      trigger.debugName ?? trigger.toStringShort(),
-    ];
-    return keys.join(' + ');
+    String result = '';
+    assert(() {
+      final List<String> keys = <String>[
+        if (control) 'Control',
+        if (alt) 'Alt',
+        if (meta) 'Meta',
+        if (shift) 'Shift',
+        trigger.debugName ?? trigger.toStringShort(),
+      ];
+      result = keys.join(' + ');
+      return true;
+    }());
+    return result;
   }
 
   @override
@@ -657,8 +678,9 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 
   /// Handles a key press `event` in the given `context`.
   ///
-  /// If a key mapping is found, then the associated action will be invoked
-  /// using the [Intent], and the currently focused widget's context (from
+  /// If a key mapping is found, then the associated action will be invoked using
+  /// the [Intent] activated by the [ShortcutActivator] in the [shortcuts] map,
+  /// and the currently focused widget's context (from
   /// [FocusManager.primaryFocus]).
   ///
   /// Returns a [KeyEventResult.handled] if an action was invoked, otherwise a
