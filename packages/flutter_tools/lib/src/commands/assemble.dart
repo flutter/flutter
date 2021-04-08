@@ -90,7 +90,6 @@ List<Target> _kDefaultTargets = <Target>[
 // When fixing this, remove the hack in test/general.shard/args_test.dart that ignores these names.
 const bool useLegacyNames = true;
 
-
 /// Assemble provides a low level API to interact with the flutter tool build
 /// system.
 class AssembleCommand extends FlutterCommand {
