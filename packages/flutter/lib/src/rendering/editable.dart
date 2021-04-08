@@ -2152,11 +2152,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       // Snapshot the input before using `await`.
       // See https://github.com/flutter/flutter/issues/11427
       final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
-      if (data != null) {
+      if (data != null && selection.isValid) {
         value = TextEditingValue(
-          text: selection.isValid ? selection.textBefore(text) + data.text! + selection.textAfter(text) : data.text! + text,
+          text: selection.textBefore(text) + data.text! + selection.textAfter(text),
           selection: TextSelection.collapsed(
-            offset: math.max(math.min(selection.start, selection.end), 0) + data.text!.length,
+            offset: math.min(selection.start, selection.end) + data.text!.length,
           ),
         );
       }

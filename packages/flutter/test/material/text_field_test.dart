@@ -4824,14 +4824,13 @@ void main() {
   }, skip: areKeyEventsHandledByPlatform);
 
   // Regressing test for https://github.com/flutter/flutter/issues/78219
-  testWidgets('Paste do not crash when the section is inValid', (WidgetTester tester) async {
+  testWidgets('Paste does not crash when the section is inValid', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     final TextEditingController controller = TextEditingController();
-    final TextField textField =
-      TextField(
-        controller: controller,
-        obscureText: true,
-      );
+    final TextField textField = TextField(
+      controller: controller,
+      obscureText: true,
+    );
 
     const String clipboardContent = 'I love Flutter!';
     SystemChannels.platform
@@ -4870,8 +4869,9 @@ void main() {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlRight);
     await tester.pumpAndSettle();
 
-    expect(find.text(clipboardContent), findsOneWidget, reason: 'Because text contains ${controller.text}');
-    expect(controller.selection, const TextSelection.collapsed(offset: clipboardContent.length));
+    // Do nothing.
+    expect(find.text(clipboardContent), findsNothing);
+    expect(controller.selection, const TextSelection.collapsed(offset: -1));
   });
 
   testWidgets('Cut test', (WidgetTester tester) async {
