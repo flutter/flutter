@@ -867,8 +867,10 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   ui.FrameInfo? _nextFrame;
   // When the current was first shown.
   late Duration _shownTimestamp;
-  // The requested duration for the current frame;
+  // The requested duration for the current frame.
   Duration? _frameDuration;
+  // The default duration for the frame that _frameDuration is 0.
+  final Duration _DEFAULT_DURATION = Duration(milliseconds: 67);
   // How many frames have been emitted so far.
   int _framesEmitted = 0;
   Timer? _timer;
@@ -884,7 +886,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       _decodeNextFrameAndSchedule();
     }
   }
-
+  
   void _handleAppFrame(Duration timestamp) {
     _frameCallbackScheduled = false;
     if (!hasListeners)
@@ -898,6 +900,10 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       ));
       _shownTimestamp = timestamp;
       _frameDuration = _nextFrame!.duration;
+      // When the _frameDuration is 0, give the default delay time.
+      if (_frameDuration!.inMilliseconds == 0) {
+        _frameDuration = _DEFAULT_DURATION;
+      }
       _nextFrame!.image.dispose();
       _nextFrame = null;
       final int completedCycles = _framesEmitted ~/ _codec!.frameCount;
