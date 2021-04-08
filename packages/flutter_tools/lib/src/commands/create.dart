@@ -227,7 +227,7 @@ class CreateCommand extends CreateBase {
       );
     }
 
-    final Map<String, dynamic> templateContext = createTemplateContext(
+    final Map<String, Object> templateContext = createTemplateContext(
       organization: organization,
       projectName: projectName,
       projectDescription: stringArg('description'),
