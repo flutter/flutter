@@ -123,6 +123,8 @@ mixin AnimationLocalListenersMixin {
   ///
   /// This method is typically called from the `dispose` method of the class
   /// using this mixin if the class also uses the [AnimationEagerListenerMixin].
+  ///
+  /// Calling this method will not trigger [didUnregisterListener].
   @protected
   void clearListeners() {
     _listeners.clear();
@@ -209,6 +211,8 @@ mixin AnimationLocalStatusListenersMixin {
   ///
   /// This method is typically called from the `dispose` method of the class
   /// using this mixin if the class also uses the [AnimationEagerListenerMixin].
+  ///
+  /// Calling this method will not trigger [didUnregisterListener].
   @protected
   void clearStatusListeners() {
     _statusListeners.clear();
