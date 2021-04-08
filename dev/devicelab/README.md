@@ -11,7 +11,7 @@ https://flutter-dashboard.appspot.com/#/build. See [dashboard user guide](https:
 for information on using the dashboards.
 
 ## Table of Contents
-* [How the DeviceLab runs tests](#how-the-devicelab-runs-tasks)
+* [How the DeviceLab runs tests](#how-the-devicelab-runs-tests)
 * [Running tests locally](#running-tests-locally)
 * [Writing tests](#writing-tests)
 * [Adding tests to continuous integration](#adding-tests-to-ci)
@@ -51,10 +51,6 @@ You can find where your Android SDK is using `flutter doctor`.
 Running the devicelab will do things to your environment.
 
 Notably, it will start and stop Gradle, for instance.
-
-### Running all tests
-
-`TODO(chillers): Update to use .ci.yaml. https://github.com/flutter/flutter/issues/74660`
 
 ### Running specific tests
 
@@ -207,6 +203,8 @@ lets the CI system time out and clean up tasks that get stuck.
 
 <a name="adding-tests-to-ci"/>
 
+Host only tests should be added to `flutter_tools`.
+
 There are several PRs needed to add a DeviceLab task to CI.
 
 _TASK_- the name of your test that also matches the name of the
@@ -214,7 +212,7 @@ _TASK_- the name of your test that also matches the name of the
 
 1. Add prod builder to [flutter/infra devicelab_config.star](https://github.com/flutter/infra/blob/master/config/devicelab_config.star)
   - Example PR: https://github.com/flutter/infra/pull/401/files
-  - This will need to soak for 15 minutes after merged to propagate
+  - This will need to soak for 15 minutes after merged to propagate (should show up in [LUCI console[(https://ci.chromium.org/p/flutter/g/devicelab/console))
   - There are various lists for the different testbeds a test can run on
 2. Add task to [flutter/flutter prod_builders.json](https://github.com/flutter/flutter/blob/master/dev/prod_builders.json)
   - Example PR: https://github.com/flutter/flutter/pull/79913/files
@@ -227,12 +225,3 @@ for each operating system.
 ## Adding tests to presubmit
 
 Flutter's DeviceLab does not currently have capacity to run tests against physical devices in presubmit.
-
-Host only tests are okay. First add them to [continuous-integration](#adding-tests-to-ci), and after marked blocking add them to presubmit.
-
-1. Add try builder to [flutter/infra devicelab_config.star](https://github.com/flutter/infra/blob/master/config/devicelab_config.star)
-  - Example PR: https://github.com/flutter/infra/pull/401/files
-  - This will need to soak for 15 minutes after merged to propagate
-  - There are various lists for the different testbeds a test can run on
-2. Add task to [flutter/flutter try_builders.json](https://github.com/flutter/flutter/blob/master/dev/try_builders.json)
-  - Example PR: https://github.com/flutter/flutter/pull/79913/files
