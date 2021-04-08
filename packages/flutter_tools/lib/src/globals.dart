@@ -6,10 +6,7 @@
 
 import 'android/gradle_utils.dart';
 import 'artifacts.dart';
-import 'base/bot_detector.dart';
 import 'base/context.dart';
-import 'base/io.dart';
-import 'base/net.dart';
 import 'build_system/build_system.dart';
 import 'device.dart';
 import 'doctor.dart';
@@ -21,7 +18,6 @@ import 'ios/xcodeproj.dart';
 import 'macos/cocoapods.dart';
 import 'macos/cocoapods_validator.dart';
 import 'macos/xcode.dart';
-import 'persistent_tool_state.dart';
 import 'project.dart';
 import 'reporting/reporting.dart';
 import 'runner/local_engine.dart';
@@ -32,7 +28,6 @@ Artifacts get artifacts => context.get<Artifacts>();
 BuildSystem get buildSystem => context.get<BuildSystem>();
 CrashReporter get crashReporter => context.get<CrashReporter>();
 Doctor get doctor => context.get<Doctor>();
-PersistentToolState get persistentToolState => PersistentToolState.instance;
 Usage get flutterUsage => context.get<Usage>();
 DeviceManager get deviceManager => context.get<DeviceManager>();
 
@@ -55,16 +50,6 @@ Xcode get xcode => context.get<Xcode>();
 XcodeProjectInterpreter get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
 
 XCDevice get xcdevice => context.get<XCDevice>();
-
-final BotDetector _defaultBotDetector = BotDetector(
-  httpClientFactory: context.get<HttpClientFactory>() ?? () => HttpClient(),
-  platform: globals.platform,
-  persistentToolState: persistentToolState,
-);
-
-BotDetector get botDetector => context.get<BotDetector>() ?? _defaultBotDetector;
-
-Future<bool> get isRunningOnBot => botDetector.isRunningOnBot;
 
 /// Gradle utils in the current [AppContext].
 GradleUtils get gradleUtils => context.get<GradleUtils>();
