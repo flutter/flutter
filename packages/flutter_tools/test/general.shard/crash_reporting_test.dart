@@ -20,8 +20,8 @@ import 'package:http/http.dart';
 import 'package:http/testing.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fake_http_client.dart';
+import '../src/fake_process_manager.dart';
 
 void main() {
   BufferLogger logger;

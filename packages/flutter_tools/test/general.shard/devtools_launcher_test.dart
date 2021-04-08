@@ -16,8 +16,8 @@ import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fake_http_client.dart';
+import '../src/fake_process_manager.dart';
 
 void main() {
   BufferLogger logger;

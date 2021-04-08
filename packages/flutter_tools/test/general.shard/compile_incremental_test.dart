@@ -17,7 +17,6 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:package_config/package_config.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 
