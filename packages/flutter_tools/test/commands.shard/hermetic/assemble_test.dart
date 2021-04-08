@@ -99,6 +99,28 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
+  testUsingContext('flutter assemble throws ToolExit if dart-defines are not base64 encoded', () async {
+    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+    ));
+
+    final List<String> command = <String>[
+      'assemble',
+      '--output',
+      'Output',
+      '--DartDefines=flutter.inspector.structuredErrors%3Dtrue',
+      'debug_macos_bundle_flutter_assets',
+    ];
+    expect(
+      commandRunner.run(command),
+      throwsToolExit(message: 'Error parsing assemble command: your generated configuration may be out of date')
+    );
+  }, overrides: <Type, Generator>{
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
   testUsingContext('flutter assemble throws ToolExit if called with non-existent rule', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
