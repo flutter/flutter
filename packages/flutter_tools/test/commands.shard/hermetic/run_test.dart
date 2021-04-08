@@ -31,6 +31,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_devices.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 

@@ -25,7 +25,6 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 import 'utils.dart';
 
@@ -566,23 +565,6 @@ class FakeDeprecatedCommand extends FlutterCommand {
   }
 }
 
-class FakeNullSafeCommand extends FlutterCommand {
-  FakeNullSafeCommand() {
-    addEnableExperimentation(hide: false);
-  }
-
-  @override
-  String get description => 'test null safety';
-
-  @override
-  String get name => 'safety';
-
-  @override
-  Future<FlutterCommandResult> runCommand() async {
-    return FlutterCommandResult.success();
-  }
-}
-
 class FakeTargetCommand extends FlutterCommand {
   FakeTargetCommand() {
     usesTargetOption();
@@ -667,3 +649,17 @@ class FakeClock extends Fake implements SystemClock {
 }
 
 class MockCache extends Mock implements Cache {}
+
+class FakePub extends Fake implements Pub {
+  @override
+  Future<void> get({
+    PubContext context,
+    String directory,
+    bool skipIfAbsent = false,
+    bool upgrade = false,
+    bool offline = false,
+    bool generateSyntheticPackage = false,
+    String flutterRootOverride,
+    bool checkUpToDate = false,
+  }) async { }
+}
