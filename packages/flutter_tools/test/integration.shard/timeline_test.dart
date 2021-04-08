@@ -47,26 +47,35 @@ void main() {
         'for the bug this test is attempting to exercise.'
       );
     });
-    await vmService.streamListen(EventStreams.kVM);
-    await vmService.streamListen(EventStreams.kIsolate);
-    await vmService.streamListen(EventStreams.kDebug);
-    await vmService.streamListen(EventStreams.kGC);
-    await vmService.streamListen(EventStreams.kExtension);
-    await vmService.streamListen(EventStreams.kTimeline);
-    await vmService.streamListen(EventStreams.kLogging);
-    await vmService.streamListen(EventStreams.kService);
-    await vmService.streamListen(EventStreams.kHeapSnapshot);
-    await vmService.streamListen(EventStreams.kStdout);
-    await vmService.streamListen(EventStreams.kStderr);
-    await Future<void>.delayed(const Duration(seconds: 10));
 
-    // Verify that the app can be interacted with by querying the brightness
+    // Subscribe to all available streams.
+    await Future.wait(<Future<void>>[
+      vmService.streamListen(EventStreams.kVM),
+      vmService.streamListen(EventStreams.kIsolate),
+      vmService.streamListen(EventStreams.kDebug),
+      vmService.streamListen(EventStreams.kGC),
+      vmService.streamListen(EventStreams.kExtension),
+      vmService.streamListen(EventStreams.kTimeline),
+      vmService.streamListen(EventStreams.kLogging),
+      vmService.streamListen(EventStreams.kService),
+      vmService.streamListen(EventStreams.kHeapSnapshot),
+      vmService.streamListen(EventStreams.kStdout),
+      vmService.streamListen(EventStreams.kStderr),
+    ]);
+
+
+    // Verify that the app can be interacted with by querying the brightness.
+    // There may be a delay before the app stops responding, so poll for at least
+    // 30 seconds.
     final Isolate isolate = await waitForExtension(vmService, 'ext.flutter.brightnessOverride');
-    final Response response = await vmService.callServiceExtension(
-      'ext.flutter.brightnessOverride',
-      isolateId: isolate.id,
-    );
-    expect(response.json['value'], 'Brightness.light');
+    for (int i = 0; i < 10; i++) {
+      final Response response = await vmService.callServiceExtension(
+        'ext.flutter.brightnessOverride',
+        isolateId: isolate.id,
+      );
+      expect(response.json['value'], 'Brightness.light');
+      await Future<void>.delayed(const Duration(seconds: 3));
+    }
     timer.cancel();
   });
 }
