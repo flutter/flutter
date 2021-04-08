@@ -23,7 +23,7 @@ The Flutter engine follows Google style for the languages it uses:
   - **Note**: The Linux embedding generally follows idiomatic GObject-based C style.
     Use of C++ is discouraged in that embedding to avoid creating hybrid code that
     feels unfamiliar to either developers used to working with GObject or C++ developers.
-    E.g., do not use STL collections or std::string. Exceptions:
+    For example, do not use STL collections or std::string. Exceptions:
       - C-style casts are forbidden; use C++ casts.
       - Use `nullptr` rather than `NULL`.
       - Avoid `#define`; for internal constants use `static constexpr` instead.
