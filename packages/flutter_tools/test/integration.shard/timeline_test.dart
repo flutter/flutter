@@ -64,17 +64,20 @@ void main() {
     ]);
 
 
-    // Verify that the app can be interacted with by querying the brightness.
-    // There may be a delay before the app stops responding, so poll for at least
-    // 30 seconds.
+    // Verify that the app can be interacted with by querying the brightness
+    // for 30 seconds. Once this time has elapsed, wait for any pending requests and
+    // exit. If the app stops responding, the requests made will hang.
+    bool interactionCompleted = false;
+    Timer(const Duration(seconds: 30), () {
+      interactionCompleted = true;
+    });
     final Isolate isolate = await waitForExtension(vmService, 'ext.flutter.brightnessOverride');
-    for (int i = 0; i < 10; i++) {
+    while (!interactionCompleted) {
       final Response response = await vmService.callServiceExtension(
         'ext.flutter.brightnessOverride',
         isolateId: isolate.id,
       );
       expect(response.json['value'], 'Brightness.light');
-      await Future<void>.delayed(const Duration(seconds: 3));
     }
     timer.cancel();
   });
