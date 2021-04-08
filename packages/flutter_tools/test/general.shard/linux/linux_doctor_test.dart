@@ -9,7 +9,7 @@ import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/linux/linux_doctor.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 
 // A command that will return typical-looking 'clang++ --version' output with
 // the given version number.
