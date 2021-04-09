@@ -61,10 +61,10 @@ class FirstRunMessenger {
   /// that the license terms are not printed during a `flutter upgrade`, until the
   /// user manually runs the tool.
   bool shouldDisplayLicenseTerms() {
-    if (_persistentToolState.redisplayWelcomeMessage == false) {
+    if (_persistentToolState.shouldRedisplayWelcomeMessage == false) {
       return false;
     }
-    final String oldHash = _persistentToolState.lastActiveLicenseTerms;
+    final String oldHash = _persistentToolState.lastActiveLicenseTermsHash;
     return oldHash != _currentHash;
   }
 
