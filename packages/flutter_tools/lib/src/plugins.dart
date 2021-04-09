@@ -567,7 +567,7 @@ package io.flutter.plugins;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
-import android.util.Log;
+import io.flutter.Log;
 
 import io.flutter.embedding.engine.FlutterEngine;
 {{#needsShim}}
@@ -591,8 +591,7 @@ public final class GeneratedPluginRegistrant {
     try {
       flutterEngine.getPlugins().add(new {{package}}.{{class}}());
     } catch(Exception e) {
-      Log.e(TAG, "Error registering plugin {{name}}, {{package}}.{{class}} " +
-      "The app might not function as expected unless you remove it from pubspec.yaml.", e);
+      Log.e(TAG, "Error registering plugin {{name}}, {{package}}.{{class}}", e);
     }
   {{/supportsEmbeddingV2}}
   {{^supportsEmbeddingV2}}
@@ -600,8 +599,7 @@ public final class GeneratedPluginRegistrant {
     try {
       {{package}}.{{class}}.registerWith(shimPluginRegistry.registrarFor("{{package}}.{{class}}"));
     } catch(Exception e) {
-      Log.e(TAG, "Error registering plugin {{name}}, {{package}}.{{class}} " +
-      "The app might not function as expected unless you remove it from pubspec.yaml.", e);
+      Log.e(TAG, "Error registering plugin {{name}}, {{package}}.{{class}}", e);
     }
     {{/supportsEmbeddingV1}}
   {{/supportsEmbeddingV2}}
