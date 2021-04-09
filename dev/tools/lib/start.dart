@@ -154,12 +154,12 @@ class StartCommand extends Command<void> {
       argResults,
       platform.environment,
     );
-    List<String> frameworkCherrypickRevisions = getValuesFromEnvOrArgs(
+    final List<String> frameworkCherrypickRevisions = getValuesFromEnvOrArgs(
       kFrameworkCherrypicksOption,
       argResults,
       platform.environment,
     );
-    List<String> engineCherrypickRevisions = getValuesFromEnvOrArgs(
+    final List<String> engineCherrypickRevisions = getValuesFromEnvOrArgs(
       kEngineCherrypicksOption,
       argResults,
       platform.environment,

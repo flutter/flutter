@@ -108,12 +108,12 @@ class NextCommand extends Command<void> {
         assert(false); // should be unreachable
         break;
       case ReleasePhase.APPLY_ENGINE_CHERRYPICKS:
-        // TODO push should be
+        // TODO(fujino): push should be
         // `git push --set-upstream $MIRROR_REMOTE HEAD:cherrypicks-CANDIDATE_BRANCH_NAME`
       case ReleasePhase.CODESIGN_ENGINE_BINARIES:
       case ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
       case ReleasePhase.PUBLISH_VERSION:
-        // Need to checkout actual RC branch with correct tracking
+        // TODO(fujino): Need to checkout actual RC branch with correct tracking
         // git fetch $UPSTREAM_REMOTE
         // git checkout --track $UPSTREAM_REMOTE/$BRANCH_NAME
       case ReleasePhase.PUBLISH_CHANNEL:

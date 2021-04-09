@@ -50,7 +50,6 @@ String presentState(pb.ConductorState state) {
   if (state.engine.cherrypicks.isNotEmpty) {
     buffer.writeln('${state.engine.cherrypicks.length} Engine Cherrypicks:');
     for (final pb.Cherrypick cherrypick in state.engine.cherrypicks) {
-      // TODO does this look good?
       buffer.writeln('\t${cherrypick.trunkRevision} - ${cherrypick.state}');
     }
   } else {

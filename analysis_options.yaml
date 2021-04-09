@@ -40,8 +40,8 @@ analyzer:
     unnecessary_null_comparison: ignore
   exclude:
     - "bin/cache/**"
-    # Relative to dev/tools, this is protoc generated-code
-    - "lib/proto"
+      # Ignore protoc generated files
+    - "dev/tools/lib/proto/*"
 
 linter:
   rules:
