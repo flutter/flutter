@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 part of reporting;
 
 const String _kFlutterUA = 'UA-67589403-6';
@@ -77,12 +75,12 @@ abstract class Usage {
   /// [logFile] are used for testing.
   factory Usage({
     String settingsName = 'flutter',
-    String versionOverride,
-    String configDirOverride,
-    String logFile,
-    AnalyticsFactory analyticsIOFactory,
-    FirstRunMessenger firstRunMessenger,
-    @required bool runningOnBot,
+    String? versionOverride,
+    String? configDirOverride,
+    String? logFile,
+    AnalyticsFactory? analyticsIOFactory,
+    FirstRunMessenger? firstRunMessenger,
+    required bool runningOnBot,
   }) => _DefaultUsage(settingsName: settingsName,
                       versionOverride: versionOverride,
                       configDirOverride: configDirOverride,
@@ -93,8 +91,8 @@ abstract class Usage {
 
   /// Uses the global [Usage] instance to send a 'command' to analytics.
   static void command(String command, {
-    Map<CustomDimensions, Object> parameters,
-  }) => globals.flutterUsage.sendCommand(command, parameters: _useCdKeys(parameters));
+    Map<CustomDimensions, Object>? parameters,
+  }) => globals.flutterUsage.sendCommand(command, parameters: parameters == null ? null : _useCdKeys(parameters));
 
   /// Whether analytics reporting should be suppressed.
   bool get suppressAnalytics;
@@ -118,7 +116,7 @@ abstract class Usage {
   /// keys are well-defined in [CustomDimensions] above.
   void sendCommand(
     String command, {
-    Map<String, String> parameters,
+    Map<String, String>? parameters,
   });
 
   /// Sends an 'event' to the underlying analytics implementation.
@@ -130,9 +128,9 @@ abstract class Usage {
   void sendEvent(
     String category,
     String parameter, {
-    String label,
-    int value,
-    Map<String, String> parameters,
+    String? label,
+    int? value,
+    Map<String, String>? parameters,
   });
 
   /// Sends timing information to the underlying analytics implementation.
@@ -140,7 +138,7 @@ abstract class Usage {
     String category,
     String variableName,
     Duration duration, {
-    String label,
+    String? label,
   });
 
   /// Sends an exception to the underlying analytics implementation.
@@ -164,15 +162,15 @@ typedef AnalyticsFactory = Analytics Function(
   String applicationName,
   String applicationVersion, {
   String analyticsUrl,
-  Directory documentDirectory,
+  Directory? documentDirectory,
 });
 
 Analytics _defaultAnalyticsIOFactory(
   String trackingId,
   String applicationName,
   String applicationVersion, {
-  String analyticsUrl,
-  Directory documentDirectory,
+  String? analyticsUrl,
+  Directory? documentDirectory,
 }) {
   return AnalyticsIO(
     trackingId,
@@ -186,20 +184,20 @@ Analytics _defaultAnalyticsIOFactory(
 class _DefaultUsage implements Usage {
   _DefaultUsage({
     String settingsName = 'flutter',
-    String versionOverride,
-    String configDirOverride,
-    String logFile,
-    AnalyticsFactory analyticsIOFactory,
-    @required this.firstRunMessenger,
-    @required bool runningOnBot,
+    String? versionOverride,
+    String? configDirOverride,
+    String? logFile,
+    AnalyticsFactory? analyticsIOFactory,
+    required this.firstRunMessenger,
+    required bool runningOnBot,
   }) {
     final FlutterVersion flutterVersion = globals.flutterVersion;
     final String version = versionOverride ?? flutterVersion.getVersionString(redactUnknownBranches: true);
     final bool suppressEnvFlag = globals.platform.environment['FLUTTER_SUPPRESS_ANALYTICS'] == 'true';
-    final String logFilePath = logFile ?? globals.platform.environment['FLUTTER_ANALYTICS_LOG_FILE'];
+    final String? logFilePath = logFile ?? globals.platform.environment['FLUTTER_ANALYTICS_LOG_FILE'];
     final bool usingLogFile = logFilePath != null && logFilePath.isNotEmpty;
 
-    analyticsIOFactory ??= _defaultAnalyticsIOFactory;
+    final AnalyticsFactory analyticsFactory = analyticsIOFactory ?? _defaultAnalyticsIOFactory;
     _clock = globals.systemClock;
 
     if (// To support testing, only allow other signals to suppress analytics
@@ -225,7 +223,7 @@ class _DefaultUsage implements Usage {
     } else {
       try {
         ErrorHandlingFileSystem.noExitOnFailure(() {
-          _analytics = analyticsIOFactory(
+          _analytics = analyticsFactory(
             _kFlutterUA,
             settingsName,
             version,
@@ -258,7 +256,7 @@ class _DefaultUsage implements Usage {
     final String enabledFeatures = allFeatures
       .where((Feature feature) {
         return feature.configSetting != null &&
-               globals.config.getValue(feature.configSetting) == true;
+               globals.config.getValue(feature.configSetting!) == true;
       })
       .map((Feature feature) => feature.configSetting)
       .join(',');
@@ -274,12 +272,12 @@ class _DefaultUsage implements Usage {
     _analytics.analyticsOpt = AnalyticsOpt.optOut;
   }
 
-  Analytics _analytics;
-  final FirstRunMessenger firstRunMessenger;
+  late Analytics _analytics;
+  final FirstRunMessenger? firstRunMessenger;
 
   bool _printedWelcome = false;
   bool _suppressAnalytics = false;
-  SystemClock _clock;
+  late SystemClock _clock;
 
   @override
   bool get suppressAnalytics => _suppressAnalytics || _analytics.firstRun;
@@ -301,7 +299,7 @@ class _DefaultUsage implements Usage {
   String get clientId => _analytics.clientId;
 
   @override
-  void sendCommand(String command, { Map<String, String> parameters }) {
+  void sendCommand(String command, { Map<String, String>? parameters }) {
     if (suppressAnalytics) {
       return;
     }
@@ -317,9 +315,9 @@ class _DefaultUsage implements Usage {
   void sendEvent(
     String category,
     String parameter, {
-    String label,
-    int value,
-    Map<String, String> parameters,
+    String? label,
+    int? value,
+    Map<String, String>? parameters,
   }) {
     if (suppressAnalytics) {
       return;
@@ -344,7 +342,7 @@ class _DefaultUsage implements Usage {
     String category,
     String variableName,
     Duration duration, {
-    String label,
+    String? label,
   }) {
     if (suppressAnalytics) {
       return;
@@ -384,11 +382,11 @@ class _DefaultUsage implements Usage {
     }
     // Display the welcome message if this is the first run of the tool or if
     // the license terms have changed since it was last displayed.
-    if (firstRunMessenger != null && firstRunMessenger.shouldDisplayLicenseTerms() ?? true) {
+    if (firstRunMessenger != null && firstRunMessenger!.shouldDisplayLicenseTerms()) {
       globals.printStatus('');
-      globals.printStatus(firstRunMessenger.licenseTerms, emphasis: true);
+      globals.printStatus(firstRunMessenger!.licenseTerms, emphasis: true);
       _printedWelcome = true;
-      firstRunMessenger.confirmLicenseTermsDisplayed();
+      firstRunMessenger!.confirmLicenseTermsDisplayed();
     }
   }
 }
@@ -412,7 +410,7 @@ class LogToFileAnalytics extends AnalyticsMock {
 
   @override
   Future<void> sendScreenView(String viewName, {
-    Map<String, String> parameters,
+    Map<String, String>? parameters,
   }) {
     if (!enabled) {
       return Future<void>.value(null);
@@ -427,7 +425,7 @@ class LogToFileAnalytics extends AnalyticsMock {
 
   @override
   Future<void> sendEvent(String category, String action,
-      {String label, int value, Map<String, String> parameters}) {
+      {String? label, int? value, Map<String, String>? parameters}) {
     if (!enabled) {
       return Future<void>.value(null);
     }
@@ -441,7 +439,7 @@ class LogToFileAnalytics extends AnalyticsMock {
 
   @override
   Future<void> sendTiming(String variableName, int time,
-      {String category, String label}) {
+      {String? category, String? label}) {
     if (!enabled) {
       return Future<void>.value(null);
     }
@@ -496,12 +494,12 @@ class TestUsage implements Usage {
   void printWelcome() { }
 
   @override
-  void sendCommand(String command, {Map<String, String> parameters}) {
+  void sendCommand(String command, {Map<String, String>? parameters}) {
     commands.add(TestUsageCommand(command, parameters: parameters));
   }
 
   @override
-  void sendEvent(String category, String parameter, {String label, int value, Map<String, String> parameters}) {
+  void sendEvent(String category, String parameter, {String? label, int? value, Map<String, String>? parameters}) {
     events.add(TestUsageEvent(category, parameter, label: label, value: value, parameters: parameters));
   }
 
@@ -511,7 +509,7 @@ class TestUsage implements Usage {
   }
 
   @override
-  void sendTiming(String category, String variableName, Duration duration, {String label}) {
+  void sendTiming(String category, String variableName, Duration duration, {String? label}) {
     timings.add(TestTimingEvent(category, variableName, duration, label: label));
   }
 }
@@ -522,7 +520,7 @@ class TestUsageCommand {
   const TestUsageCommand(this.command, {this.parameters});
 
   final String command;
-  final Map<String, String> parameters;
+  final Map<String, String>? parameters;
 
   @override
   bool operator ==(Object other) {
@@ -545,9 +543,9 @@ class TestUsageEvent {
 
   final String category;
   final String parameter;
-  final String label;
-  final int value;
-  final Map<String, String> parameters;
+  final String? label;
+  final int? value;
+  final Map<String, String>? parameters;
 
   @override
   bool operator ==(Object other) {
@@ -578,7 +576,7 @@ class TestTimingEvent {
   final String category;
   final String variableName;
   final Duration duration;
-  final String label;
+  final String? label;
 
   @override
   bool operator ==(Object other) {
@@ -599,7 +597,7 @@ class TestTimingEvent {
   String toString() => 'TestTimingEvent($category, $variableName, $duration, label:$label)';
 }
 
-bool _mapsEqual(Map<dynamic, dynamic> a, Map<dynamic, dynamic> b) {
+bool _mapsEqual(Map<dynamic, dynamic>? a, Map<dynamic, dynamic>? b) {
   if (a == b) {
     return true;
   }
