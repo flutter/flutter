@@ -67,7 +67,7 @@ void main() {
     );
 
     final DateTime time = DateTime.now();
-    state1.lastDevToolsActivationTime = time;
+    state1.lastDevToolsActivation = time;
 
     final PersistentToolState state2 = PersistentToolState.test(
       directory: directory,

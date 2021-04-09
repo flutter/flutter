@@ -57,7 +57,8 @@ abstract class PersistentToolState {
   set runningOnBot(bool value); // Enforced nonnull setter.
 
   /// The last time the DevTools package was activated from pub.
-  DateTime? lastDevToolsActivationTime;
+  DateTime? get lastDevToolsActivationTime;
+  set lastDevToolsActivation(DateTime value); // Enforced nonnull setter.
 }
 
 class _DefaultPersistentToolState implements PersistentToolState {
@@ -147,6 +148,6 @@ class _DefaultPersistentToolState implements PersistentToolState {
   }
 
   @override
-  set lastDevToolsActivationTime(DateTime? time) =>
+  set lastDevToolsActivation(DateTime time) =>
       _config.setValue(_kLastDevToolsActivationTimeKey, time.toString());
 }

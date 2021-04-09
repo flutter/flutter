@@ -235,7 +235,7 @@ void main() {
   });
 
   testWithoutContext('DevtoolsLauncher does not activate DevTools if it was recently activated', () async {
-    persistentToolState.lastDevToolsActivationTime = DateTime.now();
+    persistentToolState.lastDevToolsActivation = DateTime.now();
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       pubExecutable: 'pub',
       logger: logger,
