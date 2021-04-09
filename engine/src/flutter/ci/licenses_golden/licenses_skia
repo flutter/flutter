@@ -1,4 +1,4 @@
-Signature: d9bdd622670a7784c9cd6461fc337f95
+Signature: 0870f33624ae758f8512965ba898003d
 
 UNUSED LICENSES:
 
@@ -5663,6 +5663,7 @@ FILE: ../../../third_party/skia/gm/aarecteffect.cpp
 FILE: ../../../third_party/skia/gm/colorspace.cpp
 FILE: ../../../third_party/skia/gm/largeclippedpath.cpp
 FILE: ../../../third_party/skia/include/private/GrMtlTypesPriv.h
+FILE: ../../../third_party/skia/modules/androidkit/Canvas.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/FractalNoiseEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/SphereEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/ThresholdEffect.cpp
