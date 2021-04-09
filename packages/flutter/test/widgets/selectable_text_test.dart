@@ -1417,6 +1417,45 @@ void main() {
     expect(controller.selection, equals(TextRange.empty));
   });
 
+    testWidgets('Selectable text is skipped during focus traversal',
+      (WidgetTester tester) async {
+    final FocusNode firstFieldFocus = FocusNode();
+    final FocusNode lastFieldFocus = FocusNode();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                TextField(
+                  focusNode: firstFieldFocus,
+                  autofocus: true,
+                ),
+                const SelectableText('some text'),
+                TextField(
+                  focusNode: lastFieldFocus,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    expect(firstFieldFocus.hasFocus, isTrue);
+    expect(lastFieldFocus.hasFocus, isFalse);
+
+    firstFieldFocus.nextFocus();
+    await tester.pump();
+
+    // expecting focus to skip straight to the second field
+    expect(firstFieldFocus.hasFocus, isFalse);
+    expect(lastFieldFocus.hasFocus, isTrue);
+  });
+
   testWidgets('Selectable text identifies as text field in semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
