@@ -268,6 +268,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final EdgeInsetsGeometry? resolvedPadding = resolve<EdgeInsetsGeometry?>((ButtonStyle? style) => style?.padding);
     final Size? resolvedMinimumSize = resolve<Size?>((ButtonStyle? style) => style?.minimumSize);
     final Size? resolvedFixedSize = resolve<Size?>((ButtonStyle? style) => style?.fixedSize);
+    final Size? resolvedMaximumSize = resolve<Size?>((ButtonStyle? style) => style?.maximumSize);
     final BorderSide? resolvedSide = resolve<BorderSide?>((ButtonStyle? style) => style?.side);
     final OutlinedBorder? resolvedShape = resolve<OutlinedBorder?>((ButtonStyle? style) => style?.shape);
 
@@ -291,6 +292,8 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       BoxConstraints(
         minWidth: resolvedMinimumSize!.width,
         minHeight: resolvedMinimumSize.height,
+        maxWidth: resolvedMaximumSize!.width,
+        maxHeight: resolvedMaximumSize.height,
       ),
     );
     if (resolvedFixedSize != null) {
