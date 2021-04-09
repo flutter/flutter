@@ -493,7 +493,7 @@
       "name": "Mac gradle_plugin_light_apk_test",
       "repo": "flutter",
       "task_name": "mac_gradle_plugin_light_apk_test",
-      "enabled": true,
+      "enabled": false,
       "run_if": ["dev/**", "bin/**"]
     },
     {
