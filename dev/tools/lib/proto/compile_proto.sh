@@ -29,7 +29,13 @@ for SOURCE_FILE in $(ls "$DIR"/*.pb*.dart); do
   "$DARTFMT" --overwrite --line-length 120 "$SOURCE_FILE"
 
   # Create temp copy with the license header prepended
-  cat license_header.txt "$SOURCE_FILE" > "${SOURCE_FILE}.tmp"
+  cp license_header.txt "${SOURCE_FILE}.tmp"
+
+  # Add an extra newline required by analysis (analysis also prevents
+  # license_header.txt from having the trailing newline)
+  echo '' >> "${SOURCE_FILE}.tmp"
+
+  cat "$SOURCE_FILE" >> "${SOURCE_FILE}.tmp"
 
   # Move temp version (with license) over the original
   mv "${SOURCE_FILE}.tmp" "$SOURCE_FILE"
