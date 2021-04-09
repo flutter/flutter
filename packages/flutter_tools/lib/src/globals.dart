@@ -19,6 +19,7 @@ import 'macos/cocoapods.dart';
 import 'macos/cocoapods_validator.dart';
 import 'macos/xcode.dart';
 import 'project.dart';
+import 'reporting/crash_reporting.dart';
 import 'reporting/reporting.dart';
 import 'runner/local_engine.dart';
 
