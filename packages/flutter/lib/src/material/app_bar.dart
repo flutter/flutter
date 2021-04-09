@@ -702,12 +702,45 @@ class _AppBarState extends State<AppBar> {
   static const double _defaultElevation = 4.0;
   static const Color _defaultShadowColor = Color(0xFF000000);
 
+  ScrollNotificationObserverState? _scrollNotificationObserver;
+  bool _scrolledUnder = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_scrollNotificationObserver != null)
+      _scrollNotificationObserver!.removeListener(_handleScrollNotification);
+    _scrollNotificationObserver = ScrollNotificationObserver.of(context);
+    if (_scrollNotificationObserver != null)
+      _scrollNotificationObserver!.addListener(_handleScrollNotification);
+  }
+
+  @override
+  void dispose() {
+    if (_scrollNotificationObserver != null) {
+      _scrollNotificationObserver!.removeListener(_handleScrollNotification);
+      _scrollNotificationObserver = null;
+    }
+    super.dispose();
+  }
+
   void _handleDrawerButton() {
     Scaffold.of(context).openDrawer();
   }
 
   void _handleDrawerButtonEnd() {
     Scaffold.of(context).openEndDrawer();
+  }
+
+  void _handleScrollNotification(ScrollNotification notification) {
+    final bool oldScrolledUnder = _scrolledUnder;
+    _scrolledUnder = notification.depth == 0 && notification.metrics.extentBefore > 0;
+    if (_scrolledUnder != oldScrolledUnder) {
+      setState(() {
+        print('scrolledUnder=$_scrolledUnder');
+        // React to a change in MaterialState.scrolledUnder
+      });
+    }
   }
 
   Color _resolveColor(Set<MaterialState> states, Color? widgetColor, Color? themeColor, Color defaultColor) {
@@ -725,9 +758,10 @@ class _AppBarState extends State<AppBar> {
     final AppBarTheme appBarTheme = AppBarTheme.of(context);
     final ScaffoldState? scaffold = Scaffold.maybeOf(context);
     final ModalRoute<dynamic>? parentRoute = ModalRoute.of(context);
+
     final FlexibleSpaceBarSettings? settings = context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
     final Set<MaterialState> states = <MaterialState>{
-      if (settings?.isScrolledUnder == true) MaterialState.scrolledUnder,
+      if (settings?.isScrolledUnder ?? _scrolledUnder) MaterialState.scrolledUnder,
     };
 
     final bool hasDrawer = scaffold?.hasDrawer ?? false;
