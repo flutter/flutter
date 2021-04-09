@@ -17,7 +17,7 @@ import '../image_data.dart';
 ByteData testByteData(double scale) => ByteData(8)..setFloat64(0, scale);
 
 extension on ByteData {
-  double get scale => this.getFloat64(0);
+  double get scale => getFloat64(0);
 }
 
 const String testManifest = '''
