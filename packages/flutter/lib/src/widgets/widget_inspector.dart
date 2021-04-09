@@ -2962,8 +2962,6 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(
     // TODO(chunhtai): should print out all the widgets that are about to cross
     // package boundaries.
     if (debugIsLocalCreationLocation(target)) {
-
-
       DiagnosticsNode? devToolsDiagnostic;
 
       // TODO(kenz): once the inspector is better at dealing with broken trees,
