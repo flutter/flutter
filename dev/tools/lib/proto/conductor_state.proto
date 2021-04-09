@@ -27,6 +27,32 @@ enum ReleasePhase {
   VERIFY_RELEASE = 6;
 }
 
+enum CherrypickState {
+  // The cherrypick has not yet been applied.
+  PENDING = 0;
+
+  // The cherrypick has not been applied and will require manual resolution.
+  PENDING_WITH_CONFLICT = 1;
+
+  // The cherrypick has been successfully applied to the local checkout.
+  //
+  // This state requires Cherrypick.appliedRevision to also be set.
+  COMPLETED = 2;
+
+  // The cherrypick will NOT be applied in this release.
+  ABANDONED = 3;
+}
+
+message Cherrypick {
+  // The revision on trunk to cherrypick.
+  string trunkRevision = 1;
+
+  // Once applied, the actual commit revision of the cherrypick.
+  string appliedRevision = 2;
+
+  CherrypickState state = 3;
+}
+
 message Repository {
   // The development git branch the release is based on.
   //
@@ -51,8 +77,8 @@ message Repository {
   // This should be a mirror owned by the user conducting the release.
   Remote mirror = 6;
 
-  // Each string should be a full git commit hash.
-  repeated string cherrypicks = 7;
+  // Desired cherrypicks.
+  repeated Cherrypick cherrypicks = 7;
 }
 
 message ConductorState {

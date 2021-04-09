@@ -11,13 +11,14 @@ import './proto/conductor_state.pbenum.dart' show ReleasePhase;
 const String kStateFileName = '.flutter_conductor_state.json';
 
 String luciConsoleLink(String channel, String groupName) {
-  const Set<String> supportedBuilderGroupNames = <String>{
-    'master',
-    'dev',
-    'beta',
-    'stable',
-  };
-  assert(supportedBuilderGroupNames.contains(groupName));
+  assert(
+    <String>['stable', 'beta', 'dev', 'master'].contains(channel),
+    'channel $channel not recognized',
+  );
+  assert(
+    <String>['framework', 'engine', 'devicelab'].contains(groupName),
+    'group named $groupName not recognized',
+  );
   final String consoleName = channel == 'master' ? groupName : '${channel}_$groupName';
   return 'https://ci.chromium.org/p/flutter/g/$consoleName/console';
 }
@@ -48,8 +49,9 @@ String presentState(pb.ConductorState state) {
   buffer.writeln('\tPost-submit LUCI dashboard: ${luciConsoleLink(state.releaseChannel, 'engine')}');
   if (state.engine.cherrypicks.isNotEmpty) {
     buffer.writeln('${state.engine.cherrypicks.length} Engine Cherrypicks:');
-    for (final String cherrypick in state.engine.cherrypicks) {
-      buffer.writeln('\t$cherrypick');
+    for (final pb.Cherrypick cherrypick in state.engine.cherrypicks) {
+      // TODO does this look good?
+      buffer.writeln('\t${cherrypick.trunkRevision} - ${cherrypick.state}');
     }
   } else {
     buffer.writeln('0 Engine cherrypicks.');
@@ -63,8 +65,8 @@ String presentState(pb.ConductorState state) {
   buffer.writeln('\tDevicelab LUCI dashboard: ${luciConsoleLink(state.releaseChannel, 'devicelab')}');
   if (state.framework.cherrypicks.isNotEmpty) {
     buffer.writeln('${state.framework.cherrypicks.length} Framework Cherrypicks:');
-    for (final String cherrypick in state.framework.cherrypicks) {
-      buffer.writeln('\t$cherrypick');
+    for (final pb.Cherrypick cherrypick in state.framework.cherrypicks) {
+      buffer.writeln('\t${cherrypick.trunkRevision} - ${cherrypick.state}');
     }
   } else {
     buffer.writeln('0 Framework cherrypicks.');
@@ -118,8 +120,8 @@ String phaseInstructions(pb.ConductorState state) {
       return <String>[
         'You must now manually apply the following engine cherrypicks to the checkout',
         'at ${state.engine.checkoutPath} in order:',
-        for (final String cherrypick in state.engine.cherrypicks)
-          '\t$cherrypick',
+        for (final pb.Cherrypick cherrypick in state.engine.cherrypicks)
+          '\t${cherrypick.trunkRevision}',
         'See $kReleaseDocumentationUrl for more information.',
       ].join('\n');
     case ReleasePhase.APPLY_ENGINE_CHERRYPICKS:
@@ -131,8 +133,8 @@ String phaseInstructions(pb.ConductorState state) {
       return <String>[
         'You must now manually apply the following framework cherrypicks to the checkout',
         'at ${state.framework.checkoutPath} in order:',
-        for (final String cherrypick in state.framework.cherrypicks)
-          '\t$cherrypick',
+        for (final pb.Cherrypick cherrypick in state.framework.cherrypicks)
+          '\t${cherrypick.trunkRevision}',
       ].join('\n');
     case ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
       return <String>[

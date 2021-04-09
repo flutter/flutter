@@ -154,12 +154,12 @@ class StartCommand extends Command<void> {
       argResults,
       platform.environment,
     );
-    List<String> frameworkCherrypicks = getValuesFromEnvOrArgs(
+    List<String> frameworkCherrypickRevisions = getValuesFromEnvOrArgs(
       kFrameworkCherrypicksOption,
       argResults,
       platform.environment,
     );
-    List<String> engineCherrypicks = getValuesFromEnvOrArgs(
+    List<String> engineCherrypickRevisions = getValuesFromEnvOrArgs(
       kEngineCherrypicksOption,
       argResults,
       platform.environment,
@@ -170,7 +170,7 @@ class StartCommand extends Command<void> {
           'Text should match the regex pattern /${releaseCandidateBranchRegex.pattern}/.');
     }
 
-    // TODO add dart-hash flag
+    // TODO(fujino): add dart-hash flags, https://blah.com
 
     final Int64 unixDate = Int64(DateTime.now().millisecondsSinceEpoch);
     final pb.ConductorState state = pb.ConductorState();
@@ -194,14 +194,26 @@ class StartCommand extends Command<void> {
     // Create a new branch so that we don't accidentally push to upstream
     // candidateBranch.
     engine.newBranch('cherrypicks-$candidateBranch');
-    engineCherrypicks = _sortCherrypicks(
+    final List<pb.Cherrypick> engineCherrypicks = _sortCherrypicks(
       repository: engine,
-      cherrypicks: engineCherrypicks,
+      cherrypicks: engineCherrypickRevisions,
       upstreamRef: EngineRepository.defaultBranch,
       releaseRef: candidateBranch,
-    );
+    ).map((String revision) => pb.Cherrypick(
+      trunkRevision: revision,
+      state: pb.CherrypickState.PENDING,
+    )).toList();
 
-    // TODO try to apply
+    for (final pb.Cherrypick cherrypick in engineCherrypicks) {
+      final String revision = cherrypick.trunkRevision;
+      final bool success = engine.canCherryPick(revision);
+      stdio.printTrace(
+        'Attempt to cherrypick $revision ${success ? 'succeeded' : 'failed'}',
+      );
+      if (!success) {
+        cherrypick.state = pb.CherrypickState.PENDING_WITH_CONFLICT;
+      }
+    }
     final String engineHead = engine.reverseParse('HEAD');
     state.engine = pb.Repository(
       candidateBranch: candidateBranch,
@@ -223,12 +235,24 @@ class StartCommand extends Command<void> {
       ),
     );
     framework.newBranch('cherrypicks-$candidateBranch');
-    frameworkCherrypicks = _sortCherrypicks(
+    final List<pb.Cherrypick> frameworkCherrypicks = _sortCherrypicks(
       repository: framework,
-      cherrypicks: frameworkCherrypicks,
+      cherrypicks: frameworkCherrypickRevisions,
       upstreamRef: FrameworkRepository.defaultBranch,
       releaseRef: candidateBranch,
-    );
+    ).map((String revision) => pb.Cherrypick(
+      trunkRevision: revision,
+      state: pb.CherrypickState.PENDING,
+    )).toList();
+
+    for (final pb.Cherrypick cherrypick in frameworkCherrypicks) {
+      final String revision = cherrypick.trunkRevision;
+      final bool result = framework.canCherryPick(revision);
+      stdio.printTrace(
+        'Attempt to cherrypick $cherrypick ${result ? 'succeeded' : 'failed'}',
+      );
+    }
+
     final String frameworkHead = framework.reverseParse('HEAD');
     state.framework = pb.Repository(
       candidateBranch: candidateBranch,

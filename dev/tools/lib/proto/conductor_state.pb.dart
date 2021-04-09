@@ -85,6 +85,98 @@ class Remote extends $pb.GeneratedMessage {
   void clearUrl() => clearField(2);
 }
 
+class Cherrypick extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Cherrypick',
+      package: const $pb.PackageName(
+          const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'conductor_state'),
+      createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trunkRevision',
+        protoName: 'trunkRevision')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'appliedRevision',
+        protoName: 'appliedRevision')
+    ..e<CherrypickState>(
+        3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'state', $pb.PbFieldType.OE,
+        defaultOrMaker: CherrypickState.PENDING, valueOf: CherrypickState.valueOf, enumValues: CherrypickState.values)
+    ..hasRequiredFields = false;
+
+  Cherrypick._() : super();
+  factory Cherrypick({
+    $core.String trunkRevision,
+    $core.String appliedRevision,
+    CherrypickState state,
+  }) {
+    final _result = create();
+    if (trunkRevision != null) {
+      _result.trunkRevision = trunkRevision;
+    }
+    if (appliedRevision != null) {
+      _result.appliedRevision = appliedRevision;
+    }
+    if (state != null) {
+      _result.state = state;
+    }
+    return _result;
+  }
+  factory Cherrypick.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory Cherrypick.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
+  Cherrypick clone() => Cherrypick()..mergeFromMessage(this);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  Cherrypick copyWith(void Function(Cherrypick) updates) =>
+      super.copyWith((message) => updates(message as Cherrypick)) as Cherrypick; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static Cherrypick create() => Cherrypick._();
+  Cherrypick createEmptyInstance() => create();
+  static $pb.PbList<Cherrypick> createRepeated() => $pb.PbList<Cherrypick>();
+  @$core.pragma('dart2js:noInline')
+  static Cherrypick getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Cherrypick>(create);
+  static Cherrypick _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get trunkRevision => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set trunkRevision($core.String v) {
+    $_setString(0, v);
+  }
+
+  @$pb.TagNumber(1)
+  $core.bool hasTrunkRevision() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearTrunkRevision() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get appliedRevision => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set appliedRevision($core.String v) {
+    $_setString(1, v);
+  }
+
+  @$pb.TagNumber(2)
+  $core.bool hasAppliedRevision() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearAppliedRevision() => clearField(2);
+
+  @$pb.TagNumber(3)
+  CherrypickState get state => $_getN(2);
+  @$pb.TagNumber(3)
+  set state(CherrypickState v) {
+    setField(3, v);
+  }
+
+  @$pb.TagNumber(3)
+  $core.bool hasState() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearState() => clearField(3);
+}
+
 class Repository extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Repository',
@@ -103,7 +195,9 @@ class Repository extends $pb.GeneratedMessage {
         subBuilder: Remote.create)
     ..aOM<Remote>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'mirror',
         subBuilder: Remote.create)
-    ..pPS(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'cherrypicks')
+    ..pc<Cherrypick>(
+        7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'cherrypicks', $pb.PbFieldType.PM,
+        subBuilder: Cherrypick.create)
     ..hasRequiredFields = false;
 
   Repository._() : super();
@@ -114,7 +208,7 @@ class Repository extends $pb.GeneratedMessage {
     $core.String checkoutPath,
     Remote upstream,
     Remote mirror,
-    $core.Iterable<$core.String> cherrypicks,
+    $core.Iterable<Cherrypick> cherrypicks,
   }) {
     final _result = create();
     if (candidateBranch != null) {
@@ -239,7 +333,7 @@ class Repository extends $pb.GeneratedMessage {
   Remote ensureMirror() => $_ensure(5);
 
   @$pb.TagNumber(7)
-  $core.List<$core.String> get cherrypicks => $_getList(6);
+  $core.List<Cherrypick> get cherrypicks => $_getList(6);
 }
 
 class ConductorState extends $pb.GeneratedMessage {

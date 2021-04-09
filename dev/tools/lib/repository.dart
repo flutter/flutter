@@ -279,11 +279,55 @@ abstract class Repository {
     return exitcode == 0;
   }
 
+  /// Determines if a commit will cherry-pick to current HEAD without conflict.
+  bool canCherryPick(String commit) {
+    assert(
+      gitCheckoutClean(),
+      'cannot cherry-pick because git checkout ${checkoutDirectory.path} is not clean',
+    );
+
+    final int exitcode = git.run(
+      <String>['cherry-pick', '--no-commit', commit],
+      'attempt to cherry-pick $commit without committing',
+      allowNonZeroExitCode: true,
+      workingDirectory: checkoutDirectory.path,
+    );
+
+    final bool result = exitcode == 0;
+
+    if (result == false) {
+      stdio.printError(git.getOutput(
+        <String>['diff'],
+        'get diff of failed cherry-pick',
+        workingDirectory: checkoutDirectory.path,
+      ));
+    }
+
+    reset('HEAD');
+    return result;
+  }
+
+  /// Cherry-pick a [commit] to the current HEAD.
+  ///
+  /// This method will throw a [GitException] if the command fails.
+  void cherryPick(String commit) {
+    assert(
+      gitCheckoutClean(),
+      'cannot cherry-pick because git checkout ${checkoutDirectory.path} is not clean',
+    );
+
+    git.run(
+      <String>['cherry-pick', '--no-commit', commit],
+      'attempt to cherry-pick $commit without committing',
+      workingDirectory: checkoutDirectory.path,
+    );
+  }
+
   /// Resets repository HEAD to [ref].
   void reset(String ref) {
     git.run(
       <String>['reset', ref, '--hard'],
-      'reset to the release ref',
+      'reset to $ref',
       workingDirectory: checkoutDirectory.path,
     );
   }

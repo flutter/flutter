@@ -40,3 +40,26 @@ class ReleasePhase extends $pb.ProtobufEnum {
 
   const ReleasePhase._($core.int v, $core.String n) : super(v, n);
 }
+
+class CherrypickState extends $pb.ProtobufEnum {
+  static const CherrypickState PENDING =
+      CherrypickState._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'PENDING');
+  static const CherrypickState PENDING_WITH_CONFLICT =
+      CherrypickState._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'PENDING_WITH_CONFLICT');
+  static const CherrypickState COMPLETED =
+      CherrypickState._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'COMPLETED');
+  static const CherrypickState ABANDONED =
+      CherrypickState._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ABANDONED');
+
+  static const $core.List<CherrypickState> values = <CherrypickState>[
+    PENDING,
+    PENDING_WITH_CONFLICT,
+    COMPLETED,
+    ABANDONED,
+  ];
+
+  static final $core.Map<$core.int, CherrypickState> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static CherrypickState valueOf($core.int value) => _byValue[value];
+
+  const CherrypickState._($core.int v, $core.String n) : super(v, n);
+}
