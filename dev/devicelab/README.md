@@ -220,5 +220,11 @@ for each operating system.
 
 Flutter's DeviceLab does not currently have capacity to run tests against physical devices in presubmit.
 
-Host only tests are okay to add in presubmit. However, consider creating your integration test in packages/flutter_tools/test/integration.shard
-to avoid using limited DeviceLab scheduling resources. Example: https://github.com/flutter/flutter/pull/73577/files"
+Note that DeviceLab tests should generally require a tethered device. If you are adding host-only tests, considering adding your test to `packages/flutter_tools/test/integration.shard`.  Example: https://github.com/flutter/flutter/pull/73577/files"
+
+1. Add try builder to [flutter/infra devicelab_config.star](https://github.com/flutter/infra/blob/master/config/devicelab_config.star)
+  - Example PR: https://github.com/flutter/infra/pull/401/files
+  - This will need to soak for 15 minutes after merged to propagate
+  - There are various lists for the different testbeds a test can run on
+2. Add task to [flutter/flutter try_builders.json](https://github.com/flutter/flutter/blob/master/dev/try_builders.json)
+  - Example PR: https://github.com/flutter/flutter/pull/79913/files
