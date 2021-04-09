@@ -25,15 +25,17 @@ void main() {
     Checkouts checkouts;
     FrameworkRepository frameworkUpstream;
     FrameworkRepository framework;
+    Directory tempDir;
 
     setUp(() {
       platform = const LocalPlatform();
       fileSystem = const LocalFileSystem();
       processManager = const LocalProcessManager();
       stdio = TestStdio(verbose: true);
+      tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_conductor_checkouts');
       checkouts = Checkouts(
         fileSystem: fileSystem,
-        parentDirectory: localFlutterRoot.parent,
+        parentDirectory: tempDir,
         platform: platform,
         processManager: processManager,
         stdio: stdio,
@@ -59,7 +61,7 @@ void main() {
         commit: latestCommit,
         // Ensure this test passes after a dev release with hotfixes
         force: true,
-        remote: 'origin',
+        remote: 'upstream',
       );
 
       expect(
@@ -96,7 +98,7 @@ void main() {
         commit: latestCommit,
         // Ensure this test passes after a dev release with hotfixes
         force: true,
-        remote: 'origin',
+        remote: 'upstream',
       );
 
       expect(

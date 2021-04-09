@@ -7,14 +7,6 @@ import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:platform/platform.dart';
 
-const String kIncrement = 'increment';
-const String kCommit = 'commit';
-const String kRemoteName = 'remote';
-const String kJustPrint = 'just-print';
-const String kYes = 'yes';
-const String kForce = 'force';
-const String kSkipTagging = 'skip-tagging';
-
 const String kUpstreamRemote = 'https://github.com/flutter/flutter.git';
 
 const String gsutilBinary = 'gsutil.py';
