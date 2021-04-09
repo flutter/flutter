@@ -205,13 +205,13 @@ class WidgetsApp extends StatefulWidget {
          home == null ||
          onGenerateInitialRoutes == null,
          'If onGenerateInitialRoutes is specified, the home argument will be '
-         'redundant.'
+         'redundant.',
        ),
        assert(
          home == null ||
          !routes.containsKey(Navigator.defaultRouteName),
          'If the home property is specified, the routes table '
-         'cannot include an entry for "/", since it would be redundant.'
+         'cannot include an entry for "/", since it would be redundant.',
        ),
        assert(
          builder != null ||
@@ -225,7 +225,7 @@ class WidgetsApp extends StatefulWidget {
          'or there must be an onUnknownRoute callback specified, '
          'or the builder property must be specified, '
          'because otherwise there is nothing to fall back on if the '
-         'app is started with an intent that specifies an unknown route.'
+         'app is started with an intent that specifies an unknown route.',
        ),
        assert(
          (home != null ||
@@ -243,7 +243,7 @@ class WidgetsApp extends StatefulWidget {
          'and the other navigator-related properties, '
          'navigatorKey, initialRoute, and navigatorObservers, '
          'must have their initial values '
-         '(null, null, and the empty list, respectively).'
+         '(null, null, and the empty list, respectively).',
        ),
        assert(
          builder != null ||
@@ -251,7 +251,7 @@ class WidgetsApp extends StatefulWidget {
          pageRouteBuilder != null,
          'If neither builder nor onGenerateRoute are provided, the '
          'pageRouteBuilder must be specified so that the default handler '
-         'will know what kind of PageRoute transition to build.'
+         'will know what kind of PageRoute transition to build.',
        ),
        assert(title != null),
        assert(color != null),
@@ -298,7 +298,7 @@ class WidgetsApp extends StatefulWidget {
   }) : assert(
          routeInformationParser != null &&
          routerDelegate != null,
-         'The routeInformationParser and routerDelegate cannot be null.'
+         'The routeInformationParser and routerDelegate cannot be null.',
        ),
        assert(title != null),
        assert(color != null),
@@ -1205,15 +1205,16 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         : widget.routes![name];
 
     if (pageContentBuilder != null) {
-      assert(widget.pageRouteBuilder != null,
+      assert(
+        widget.pageRouteBuilder != null,
         'The default onGenerateRoute handler for WidgetsApp must have a '
-        'pageRouteBuilder set if the home or routes properties are set.');
+        'pageRouteBuilder set if the home or routes properties are set.',
+      );
       final Route<dynamic> route = widget.pageRouteBuilder!<dynamic>(
         settings,
         pageContentBuilder,
       );
-      assert(route != null,
-        'The pageRouteBuilder for WidgetsApp must return a valid non-null Route.');
+      assert(route != null, 'The pageRouteBuilder for WidgetsApp must return a valid non-null Route.');
       return route;
     }
     if (widget.onGenerateRoute != null)

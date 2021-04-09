@@ -84,7 +84,7 @@ abstract class DeferredComponentsValidator {
   /// Returns true if there were any recommended changes that should
   /// be applied.
   ///
-  /// Retuns false if no problems or recommendations were detected.
+  /// Returns false if no problems or recommendations were detected.
   ///
   /// If no checks are run, then this will default to false and will remain so
   /// until a failing check finishes running.

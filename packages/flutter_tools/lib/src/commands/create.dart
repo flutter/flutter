@@ -15,7 +15,7 @@ import '../dart/pub.dart';
 import '../features.dart';
 import '../flutter_manifest.dart';
 import '../flutter_project_metadata.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
@@ -227,7 +227,7 @@ class CreateCommand extends CreateBase {
       );
     }
 
-    final Map<String, dynamic> templateContext = createTemplateContext(
+    final Map<String, Object> templateContext = createTemplateContext(
       organization: organization,
       projectName: projectName,
       projectDescription: stringArg('description'),

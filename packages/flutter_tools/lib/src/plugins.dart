@@ -567,6 +567,7 @@ package io.flutter.plugins;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
+import io.flutter.Log;
 
 import io.flutter.embedding.engine.FlutterEngine;
 {{#needsShim}}
@@ -580,17 +581,26 @@ import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistry;
  */
 @Keep
 public final class GeneratedPluginRegistrant {
+  private static final String TAG = "GeneratedPluginRegistrant";
   public static void registerWith(@NonNull FlutterEngine flutterEngine) {
 {{#needsShim}}
     ShimPluginRegistry shimPluginRegistry = new ShimPluginRegistry(flutterEngine);
 {{/needsShim}}
 {{#plugins}}
   {{#supportsEmbeddingV2}}
-    flutterEngine.getPlugins().add(new {{package}}.{{class}}());
+    try {
+      flutterEngine.getPlugins().add(new {{package}}.{{class}}());
+    } catch(Exception e) {
+      Log.e(TAG, "Error registering plugin {{name}}, {{package}}.{{class}}", e);
+    }
   {{/supportsEmbeddingV2}}
   {{^supportsEmbeddingV2}}
     {{#supportsEmbeddingV1}}
+    try {
       {{package}}.{{class}}.registerWith(shimPluginRegistry.registrarFor("{{package}}.{{class}}"));
+    } catch(Exception e) {
+      Log.e(TAG, "Error registering plugin {{name}}, {{package}}.{{class}}", e);
+    }
     {{/supportsEmbeddingV1}}
   {{/supportsEmbeddingV2}}
 {{/plugins}}
@@ -1003,7 +1013,7 @@ List<Plugin> _filterNativePlugins(List<Plugin> plugins, String platformKey) {
 }
 
 Future<void> _writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugins) async {
-  final List<Plugin>nativePlugins = _filterNativePlugins(plugins, WindowsPlugin.kConfigKey);
+  final List<Plugin> nativePlugins = _filterNativePlugins(plugins, WindowsPlugin.kConfigKey);
   final List<Map<String, dynamic>> windowsPlugins = _extractPlatformMaps(nativePlugins, WindowsPlugin.kConfigKey);
   final Map<String, dynamic> context = <String, dynamic>{
     'os': 'windows',
@@ -1012,6 +1022,21 @@ Future<void> _writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugi
   };
   await _writeCppPluginRegistrant(project.windows.managedDirectory, context);
   await _writePluginCmakefile(project.windows.generatedPluginCmakeFile, context);
+}
+
+/// The tooling does not currently support any UWP plugins.
+///
+/// Always generates an empty file to satisfy the cmake template.
+Future<void> _writeWindowsUwpPluginFiles(FlutterProject project, List<Plugin> plugins) async {
+  final List<Plugin> nativePlugins = <Plugin>[];
+  final List<Map<String, dynamic>> windowsPlugins = _extractPlatformMaps(nativePlugins, WindowsPlugin.kConfigKey);
+  final Map<String, dynamic> context = <String, dynamic>{
+    'os': 'windows',
+    'plugins': windowsPlugins,
+    'pluginsDir': _cmakeRelativePluginSymlinkDirectoryPath(project.windowsUwp),
+  };
+  await _writeCppPluginRegistrant(project.windowsUwp.managedDirectory, context);
+  await _writePluginCmakefile(project.windowsUwp.generatedPluginCmakeFile, context);
 }
 
 Future<void> _writeCppPluginRegistrant(Directory destination, Map<String, dynamic> templateContext) async {
@@ -1075,6 +1100,13 @@ void createPluginSymlinks(FlutterProject project, {bool force = false}) {
     _createPlatformPluginSymlinks(
       project.linux.pluginSymlinkDirectory,
       platformPlugins[project.linux.pluginConfigKey] as List<dynamic>,
+      force: force,
+    );
+  }
+  if (featureFlags.isWindowsUwpEnabled && project.windowsUwp.existsSync()) {
+    _createPlatformPluginSymlinks(
+      project.windowsUwp.pluginSymlinkDirectory,
+      <dynamic>[],
       force: force,
     );
   }
@@ -1170,6 +1202,7 @@ Future<void> injectPlugins(
   bool linuxPlatform = false,
   bool macOSPlatform = false,
   bool windowsPlatform = false,
+  bool winUwpPlatform = false,
   bool webPlatform = false,
 }) async {
   final List<Plugin> plugins = await findPlugins(project);
@@ -1189,6 +1222,9 @@ Future<void> injectPlugins(
   }
   if (windowsPlatform) {
     await _writeWindowsPluginFiles(project, plugins);
+  }
+  if (winUwpPlatform) {
+    await _writeWindowsUwpPluginFiles(project, plugins);
   }
   if (!project.isModule) {
     final List<XcodeBasedProject> darwinProjects = <XcodeBasedProject>[

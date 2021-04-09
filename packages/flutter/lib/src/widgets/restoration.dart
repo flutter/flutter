@@ -842,7 +842,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
            'Property is already registered under ${property._restorationId}.',
     );
     assert(_debugDoingRestore || !_properties.keys.map((RestorableProperty<Object?> r) => r._restorationId).contains(restorationId),
-           '"$restorationId" is already registered to another property.'
+           '"$restorationId" is already registered to another property.',
     );
     final bool hasSerializedValue = bucket?.contains(restorationId) == true;
     final Object? initialValue = hasSerializedValue
@@ -863,7 +863,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
     assert(
       property._restorationId == restorationId &&
       property._owner == this &&
-      _properties.containsKey(property)
+      _properties.containsKey(property),
     );
 
     property.initWithValue(initialValue);

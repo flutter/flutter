@@ -1205,12 +1205,26 @@ mixin WidgetInspectorService {
   ///
   /// Use this method only for testing to ensure that object references from one
   /// test case do not impact other test cases.
+  @visibleForTesting
   @protected
   void disposeAllGroups() {
     _groups.clear();
     _idToReferenceData.clear();
     _objectToId.clear();
     _nextId = 0;
+  }
+
+  /// Reset all InspectorService state.
+  ///
+  /// Use this method only for testing to write hermetic tests for
+  /// WidgetInspectorService.
+  @visibleForTesting
+  @protected
+  @mustCallSuper
+  void resetAllState() {
+    disposeAllGroups();
+    selection.clear();
+    setPubRootDirectories(<String>[]);
   }
 
   /// Free all references to objects in a group.
@@ -1544,8 +1558,9 @@ mixin WidgetInspectorService {
 
   List<DiagnosticsNode> _truncateNodes(Iterable<DiagnosticsNode> nodes, int maxDescendentsTruncatableNode) {
     if (nodes.every((DiagnosticsNode node) => node.value is Element) && isWidgetCreationTracked()) {
-      final List<DiagnosticsNode> localNodes = nodes.where((DiagnosticsNode node) =>
-          _isValueCreatedByLocalProject(node.value)).toList();
+      final List<DiagnosticsNode> localNodes = nodes
+        .where((DiagnosticsNode node) => _isValueCreatedByLocalProject(node.value))
+        .toList();
       if (localNodes.isNotEmpty) {
         return localNodes;
       }
@@ -2412,7 +2427,8 @@ class InspectorSelection {
   /// Setting [candidates] or calling [clear] resets the selection.
   ///
   /// Returns null if the selection is invalid.
-  RenderObject? get current => _current;
+  RenderObject? get current => active ? _current : null;
+
   RenderObject? _current;
   set current(RenderObject? value) {
     if (_current != value) {
@@ -2426,7 +2442,10 @@ class InspectorSelection {
   /// Setting [candidates] or calling [clear] resets the selection.
   ///
   /// Returns null if the selection is invalid.
-  Element? get currentElement => _currentElement;
+  Element? get currentElement {
+    return _currentElement?.debugIsDefunct ?? true ? null : _currentElement;
+  }
+
   Element? _currentElement;
   set currentElement(Element? element) {
     if (currentElement != element) {
@@ -3038,7 +3057,7 @@ String? _describeCreationLocation(Object object) {
 ///
 /// Currently creation locations are only available for [Widget] and [Element].
 _Location? _getCreationLocation(Object? object) {
-  final Object? candidate =  object is Element ? object.widget : object;
+  final Object? candidate =  object is Element && !object.debugIsDefunct ? object.widget : object;
   return candidate is _HasCreationLocation ? candidate._location : null;
 }
 

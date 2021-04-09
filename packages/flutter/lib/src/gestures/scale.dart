@@ -441,7 +441,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
         pointerEndId: _pointerQueue[1],
         pointerEndLocation: _pointerLocations[_pointerQueue[1]]!,
       );
-      _currentLine = null;
+      _currentLine = _initialLine;
     }
   }
 

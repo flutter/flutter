@@ -15,16 +15,18 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/time.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+import '../../src/test_flutter_command_runner.dart';
 import 'utils.dart';
 
 void main() {
@@ -538,6 +540,12 @@ void main() {
       Usage: () => usage,
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('use packagesPath to generate BuildInfo', () async {
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
+      final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+      expect(buildInfo.packagesPath, 'foo');
     });
   });
 }

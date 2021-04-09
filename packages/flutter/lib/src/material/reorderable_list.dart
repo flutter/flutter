@@ -121,6 +121,44 @@ class ReorderableListView extends StatefulWidget {
   /// constructor. Even more efficient, however, is to create the instances
   /// on demand using this constructor's `itemBuilder` callback.
   ///
+  /// This example creates a list using the
+  /// [ReorderableListView.builder] constructor. Using the [IndexedWidgetBuilder], The
+  /// list items are built lazily on demand.
+  /// {@tool dartpad --template=stateful_widget_material}
+  ///
+  /// ```dart
+  /// final List<int> _items = List<int>.generate(50, (int index) => index);
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   final ColorScheme colorScheme = Theme.of(context).colorScheme;
+  ///   final Color oddItemColor = colorScheme.primary.withOpacity(0.05);
+  ///   final Color evenItemColor = colorScheme.primary.withOpacity(0.15);
+  ///
+  ///   return ReorderableListView.builder(
+  ///     padding: const EdgeInsets.symmetric(horizontal: 40),
+  ///     itemCount:_items.length,
+  ///     itemBuilder: (BuildContext context, int index) {
+  ///       return ListTile(
+  ///         key: Key('$index'),
+  ///         tileColor: _items[index].isOdd ? oddItemColor : evenItemColor,
+  ///         title: Text('Item ${_items[index]}'),
+  ///         );
+  ///     },
+  ///     onReorder: (int oldIndex, int newIndex) {
+  ///       setState(() {
+  ///         if (oldIndex < newIndex) {
+  ///           newIndex -= 1;
+  ///         }
+  ///         final int item = _items.removeAt(oldIndex);
+  ///         _items.insert(newIndex, item);
+  ///       });
+  ///     },
+  ///   );
+  /// }
+  ///
+  /// ```
+  /// {@end-tool}
   /// See also:
   ///
   ///   * [ReorderableListView], which allows you to build a reorderable
@@ -369,25 +407,48 @@ class _ReorderableListViewState extends State<ReorderableListView> {
         case TargetPlatform.linux:
         case TargetPlatform.windows:
         case TargetPlatform.macOS:
-          return Stack(
-            key: itemGlobalKey,
-            children: <Widget>[
-              itemWithSemantics,
-              Positioned.directional(
-                textDirection: Directionality.of(context),
-                top: 0,
-                bottom: 0,
-                end: 8,
-                child: Align(
-                  alignment: AlignmentDirectional.centerEnd,
-                  child: ReorderableDragStartListener(
-                    index: index,
-                    child: const Icon(Icons.drag_handle),
+          switch (widget.scrollDirection) {
+            case Axis.horizontal:
+              return Stack(
+                key: itemGlobalKey,
+                children: <Widget>[
+                  itemWithSemantics,
+                  Positioned.directional(
+                    textDirection: Directionality.of(context),
+                    start: 0,
+                    end: 0,
+                    bottom: 8,
+                    child: Align(
+                      alignment: AlignmentDirectional.bottomCenter,
+                      child: ReorderableDragStartListener(
+                        index: index,
+                        child: const Icon(Icons.drag_handle),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ],
-          );
+                ],
+              );
+            case Axis.vertical:
+              return Stack(
+                key: itemGlobalKey,
+                children: <Widget>[
+                  itemWithSemantics,
+                  Positioned.directional(
+                    textDirection: Directionality.of(context),
+                    top: 0,
+                    bottom: 0,
+                    end: 8,
+                    child: Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: ReorderableDragStartListener(
+                        index: index,
+                        child: const Icon(Icons.drag_handle),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+          }
 
         case TargetPlatform.iOS:
         case TargetPlatform.android:

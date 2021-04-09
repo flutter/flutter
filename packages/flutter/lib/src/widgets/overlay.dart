@@ -364,11 +364,11 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     assert(_debugVerifyInsertPosition(above, below));
     assert(
       entries.every((OverlayEntry entry) => !_entries.contains(entry)),
-      'One or more of the specified entries are already present in the Overlay.'
+      'One or more of the specified entries are already present in the Overlay.',
     );
     assert(
       entries.every((OverlayEntry entry) => entry._overlay == null),
-      'One or more of the specified entries are already present in another Overlay.'
+      'One or more of the specified entries are already present in another Overlay.',
     );
     if (entries.isEmpty)
       return;
@@ -419,11 +419,11 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     assert(_debugVerifyInsertPosition(above, below, newEntries: newEntriesList));
     assert(
       newEntriesList.every((OverlayEntry entry) => entry._overlay == null || entry._overlay == this),
-      'One or more of the specified entries are already present in another Overlay.'
+      'One or more of the specified entries are already present in another Overlay.',
     );
     assert(
       newEntriesList.every((OverlayEntry entry) => _entries.indexOf(entry) == _entries.lastIndexOf(entry)),
-      'One or more of the specified entries are specified multiple times.'
+      'One or more of the specified entries are specified multiple times.',
     );
     if (newEntriesList.isEmpty)
       return;
@@ -785,8 +785,14 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
   @override
   void paint(PaintingContext context, Offset offset) {
     if (_hasVisualOverflow && clipBehavior != Clip.none) {
-      _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintStack,
-          clipBehavior: clipBehavior, oldLayer: _clipRectLayer);
+      _clipRectLayer = context.pushClipRect(
+        needsCompositing,
+        offset,
+        Offset.zero & size,
+        paintStack,
+        clipBehavior: clipBehavior,
+        oldLayer: _clipRectLayer,
+      );
     } else {
       _clipRectLayer = null;
       paintStack(context, offset);

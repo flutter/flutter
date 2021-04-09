@@ -105,19 +105,19 @@ class CalendarDatePicker extends StatefulWidget {
        super(key: key) {
     assert(
       !this.lastDate.isBefore(this.firstDate),
-      'lastDate ${this.lastDate} must be on or after firstDate ${this.firstDate}.'
+      'lastDate ${this.lastDate} must be on or after firstDate ${this.firstDate}.',
     );
     assert(
       !this.initialDate.isBefore(this.firstDate),
-      'initialDate ${this.initialDate} must be on or after firstDate ${this.firstDate}.'
+      'initialDate ${this.initialDate} must be on or after firstDate ${this.firstDate}.',
     );
     assert(
       !this.initialDate.isAfter(this.lastDate),
-      'initialDate ${this.initialDate} must be on or before lastDate ${this.lastDate}.'
+      'initialDate ${this.initialDate} must be on or before lastDate ${this.lastDate}.',
     );
     assert(
       selectableDayPredicate == null || selectableDayPredicate!(this.initialDate),
-      'Provided initialDate ${this.initialDate} must satisfy provided selectableDayPredicate.'
+      'Provided initialDate ${this.initialDate} must satisfy provided selectableDayPredicate.',
     );
   }
 
@@ -1064,8 +1064,10 @@ class _DayPickerGridDelegate extends SliverGridDelegate {
   SliverGridLayout getLayout(SliverConstraints constraints) {
     const int columnCount = DateTime.daysPerWeek;
     final double tileWidth = constraints.crossAxisExtent / columnCount;
-    final double tileHeight = math.min(_dayPickerRowHeight,
-      constraints.viewportMainAxisExtent / (_maxDayPickerRowCount + 1));
+    final double tileHeight = math.min(
+      _dayPickerRowHeight,
+      constraints.viewportMainAxisExtent / (_maxDayPickerRowCount + 1),
+    );
     return SliverGridRegularTileLayout(
       childCrossAxisExtent: tileWidth,
       childMainAxisExtent: tileHeight,

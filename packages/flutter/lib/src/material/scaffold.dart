@@ -457,8 +457,10 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
         if (_snackBarController!.isCompleted && _snackBarTimer == null) {
           final SnackBar snackBar = _snackBars.first._widget;
           _snackBarTimer = Timer(snackBar.duration, () {
-            assert(_snackBarController!.status == AnimationStatus.forward ||
-                   _snackBarController!.status == AnimationStatus.completed);
+            assert(
+              _snackBarController!.status == AnimationStatus.forward ||
+                _snackBarController!.status == AnimationStatus.completed,
+            );
             // Look up MediaQuery again in case the setting changed.
             final MediaQueryData mediaQuery = MediaQuery.of(context);
             if (mediaQuery.accessibleNavigation && snackBar.action != null)
@@ -2984,8 +2986,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         if (_snackBarController!.isCompleted && _snackBarTimer == null) {
           final SnackBar snackBar = _snackBars.first._widget;
           _snackBarTimer = Timer(snackBar.duration, () {
-            assert(_snackBarController!.status == AnimationStatus.forward ||
-                   _snackBarController!.status == AnimationStatus.completed);
+            assert(
+              _snackBarController!.status == AnimationStatus.forward ||
+                _snackBarController!.status == AnimationStatus.completed,
+            );
             // Look up MediaQuery again in case the setting changed.
             final MediaQueryData mediaQuery = MediaQuery.of(context);
             if (mediaQuery.accessibleNavigation && snackBar.action != null)
@@ -3059,7 +3063,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     assert(
       _snackBars.isEmpty || _messengerSnackBar == null,
       'Only one API should be used to manage SnackBars. The ScaffoldMessenger is '
-      'the preferred API instead of the Scaffold methods.'
+      'the preferred API instead of the Scaffold methods.',
     );
 
     if (_currentBottomSheet != null || _dismissedBottomSheets.isNotEmpty) {
@@ -3374,8 +3378,10 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
   void initState() {
     super.initState();
     assert(widget.animationController != null);
-    assert(widget.animationController.status == AnimationStatus.forward
-        || widget.animationController.status == AnimationStatus.completed);
+    assert(
+      widget.animationController.status == AnimationStatus.forward
+        || widget.animationController.status == AnimationStatus.completed,
+    );
     widget.animationController.addStatusListener(_handleStatusChange);
   }
 

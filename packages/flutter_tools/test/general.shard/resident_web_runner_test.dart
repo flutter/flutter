@@ -34,9 +34,8 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/fake_process_manager.dart';
+import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
-import '../src/testbed.dart';
 
 const List<VmServiceExpectation> kAttachLogExpectations = <VmServiceExpectation>[
   FakeVmServiceRequest(
@@ -130,7 +129,11 @@ void main() {
     when(mockFlutterDevice.devFS).thenReturn(mockWebDevFS);
     when(mockFlutterDevice.device).thenReturn(mockDevice);
     when(mockWebDevFS.connect(any)).thenAnswer((Invocation invocation) async {
-      return ConnectionResult(mockAppConnection, mockDebugConnection);
+      return ConnectionResult(
+        mockAppConnection,
+        mockDebugConnection,
+        mockDebugConnection.vmService,
+      );
     });
     fileSystem.file('.packages').writeAsStringSync('\n');
   });

@@ -479,10 +479,9 @@ abstract class Widget extends DiagnosticableTree {
 /// ```
 /// {@end-tool}
 ///
-/// By convention, widget constructors only use named arguments. Named arguments
-/// can be marked as required using [@required]. Also by convention, the first
-/// argument is [key], and the last argument is `child`, `children`, or the
-/// equivalent.
+/// By convention, widget constructors only use named arguments. Also by
+/// convention, the first argument is [key], and the last argument is `child`,
+/// `children`, or the equivalent.
 ///
 /// See also:
 ///
@@ -716,10 +715,9 @@ abstract class StatelessWidget extends Widget {
 /// ```
 /// {@end-tool}
 ///
-/// By convention, widget constructors only use named arguments. Named arguments
-/// can be marked as required using [@required]. Also by convention, the first
-/// argument is [key], and the last argument is `child`, `children`, or the
-/// equivalent.
+/// By convention, widget constructors only use named arguments. Also by
+/// convention, the first argument is [key], and the last argument is `child`,
+/// `children`, or the equivalent.
 ///
 /// See also:
 ///
@@ -3087,8 +3085,21 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   /// The configuration for this element.
   @override
-  Widget get widget => _widget;
-  Widget _widget;
+  Widget get widget => _widget!;
+  Widget? _widget;
+
+  /// Returns true if the Element is defunct.
+  ///
+  /// This getter always returns false in profile and release builds.
+  /// See the lifecycle documentation for [Element] for additional information.
+  bool get debugIsDefunct {
+    bool isDefunct = false;
+    assert(() {
+      isDefunct = _lifecycleState == _ElementLifecycle.defunct;
+      return true;
+    }());
+    return isDefunct;
+  }
 
   /// The object that manages the lifecycle of this element.
   @override
@@ -3437,12 +3448,14 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   void update(covariant Widget newWidget) {
     // This code is hot when hot reloading, so we try to
     // only call _AssertionError._evaluateAssertion once.
-    assert(_lifecycleState == _ElementLifecycle.active
+    assert(
+      _lifecycleState == _ElementLifecycle.active
         && widget != null
         && newWidget != null
         && newWidget != widget
         && depth != null
-        && Widget.canUpdate(widget, newWidget));
+        && Widget.canUpdate(widget, newWidget),
+    );
     // This Element was told to update and we can now release all the global key
     // reservations of forgotten children. We cannot do this earlier because the
     // forgotten children still represent global key duplications if the element
@@ -3801,10 +3814,14 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(depth != null);
     assert(owner != null);
     // Use the private property to avoid a CastError during hot reload.
-    final Key? key = _widget.key;
+    final Key? key = _widget!.key;
     if (key is GlobalKey) {
       owner!._unregisterGlobalKey(key, this);
     }
+    // Release resources to reduce the severity of memory leaks caused by
+    // defunct, but accidentally retained Elements.
+    _widget = null;
+    _dependencies = null;
     _lifecycleState = _ElementLifecycle.defunct;
   }
 
@@ -4116,7 +4133,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   /// A short, textual description of this element.
   @override
-  String toStringShort() => widget.toStringShort();
+  String toStringShort() => _widget?.toStringShort() ?? '${describeIdentity(this)}(DEFUNCT)';
 
   @override
   DiagnosticsNode toDiagnosticsNode({ String? name, DiagnosticsTreeStyle? style }) {
@@ -4134,9 +4151,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     if (_lifecycleState != _ElementLifecycle.initial) {
       properties.add(ObjectFlagProperty<int>('depth', depth, ifNull: 'no depth'));
     }
-    properties.add(ObjectFlagProperty<Widget>('widget', widget, ifNull: 'no widget'));
-    properties.add(DiagnosticsProperty<Key>('key', widget.key, showName: false, defaultValue: null, level: DiagnosticLevel.hidden));
-    widget.debugFillProperties(properties);
+    properties.add(ObjectFlagProperty<Widget>('widget', _widget, ifNull: 'no widget'));
+    properties.add(DiagnosticsProperty<Key>('key', _widget?.key, showName: false, defaultValue: null, level: DiagnosticLevel.hidden));
+    _widget?.debugFillProperties(properties);
     properties.add(FlagProperty('dirty', value: dirty, ifTrue: 'dirty'));
     if (_dependencies != null && _dependencies!.isNotEmpty) {
       final List<DiagnosticsNode> diagnosticsDependencies = _dependencies!
@@ -4296,7 +4313,9 @@ class _ElementDiagnosticableTreeNode extends DiagnosticableTreeNode {
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
     final Map<String, Object?> json = super.toJsonMap(delegate);
     final Element element = value as Element;
-    json['widgetRuntimeType'] = element.widget.runtimeType.toString();
+    if (!element.debugIsDefunct) {
+      json['widgetRuntimeType'] = element.widget.runtimeType.toString();
+    }
     json['stateful'] = stateful;
     return json;
   }
@@ -4660,7 +4679,7 @@ class StatelessElement extends ComponentElement {
 class StatefulElement extends ComponentElement {
   /// Creates an element that uses the given widget as its configuration.
   StatefulElement(StatefulWidget widget)
-      : state = widget.createState(),
+      : _state = widget.createState(),
         super(widget) {
     assert(() {
       if (!state._debugTypesAreRight(widget)) {
@@ -4695,7 +4714,8 @@ class StatefulElement extends ComponentElement {
   /// There is a one-to-one relationship between [State] objects and the
   /// [StatefulElement] objects that hold them. The [State] objects are created
   /// by [StatefulElement] in [mount].
-  final State<StatefulWidget> state;
+  State<StatefulWidget> get state => _state!;
+  State<StatefulWidget>? _state;
 
   @override
   void reassemble() {
@@ -4810,6 +4830,9 @@ class StatefulElement extends ComponentElement {
       ]);
     }());
     state._element = null;
+    // Release resources to reduce the severity of memory leaks caused by
+    // defunct, but accidentally retained Elements.
+    _state = null;
   }
 
   @override
@@ -4895,7 +4918,7 @@ class StatefulElement extends ComponentElement {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<State<StatefulWidget>>('state', state, defaultValue: null));
+    properties.add(DiagnosticsProperty<State<StatefulWidget>>('state', _state, defaultValue: null));
   }
 }
 
@@ -5696,18 +5719,23 @@ abstract class RenderObjectElement extends Element {
   @override
   void deactivate() {
     super.deactivate();
-    assert(!renderObject.attached,
+    assert(
+      !renderObject.attached,
       'A RenderObject was still attached when attempting to deactivate its '
-      'RenderObjectElement: $renderObject');
+      'RenderObjectElement: $renderObject',
+    );
   }
 
   @override
   void unmount() {
+    final RenderObjectWidget oldWidget = widget;
     super.unmount();
-    assert(!renderObject.attached,
+    assert(
+      !renderObject.attached,
       'A RenderObject was still attached when attempting to unmount its '
-      'RenderObjectElement: $renderObject');
-    widget.didUnmountRenderObject(renderObject);
+      'RenderObjectElement: $renderObject',
+    );
+    oldWidget.didUnmountRenderObject(renderObject);
   }
 
   void _updateParentData(ParentDataWidget<ParentData> parentDataWidget) {
@@ -5800,15 +5828,19 @@ abstract class RenderObjectElement extends Element {
           name: 'insertChildRenderObject() was called on this Element',
           style: DiagnosticsTreeStyle.shallow,
         ),
-        ErrorDescription('insertChildRenderObject() has been deprecated in favor of '
+        ErrorDescription(
+          'insertChildRenderObject() has been deprecated in favor of '
           'insertRenderObjectChild(). See https://github.com/flutter/flutter/issues/63269 '
-          'for details.'),
-        ErrorHint('Rather than overriding insertChildRenderObject() in your '
+          'for details.',
+        ),
+        ErrorHint(
+          'Rather than overriding insertChildRenderObject() in your '
           'RenderObjectElement subclass, override insertRenderObjectChild() instead, '
           "and DON'T call super.insertRenderObjectChild(). If you're implementing a "
           'new RenderObjectElement, you should override/implement '
           'insertRenderObjectChild(), moveRenderObjectChild(), and '
-          'removeRenderObjectChild().'),
+          'removeRenderObjectChild().',
+        ),
       ]);
     }());
   }
@@ -5873,15 +5905,19 @@ abstract class RenderObjectElement extends Element {
           name: 'super.moveChildRenderObject() was called on this Element',
           style: DiagnosticsTreeStyle.shallow,
         ),
-        ErrorDescription('moveChildRenderObject() has been deprecated in favor of '
-            'moveRenderObjectChild(). See https://github.com/flutter/flutter/issues/63269 '
-            'for details.'),
-        ErrorHint('Rather than overriding moveChildRenderObject() in your '
-            'RenderObjectElement subclass, override moveRenderObjectChild() instead, '
-            "and DON'T call super.moveRenderObjectChild(). If you're implementing a "
-            'new RenderObjectElement, you should override/implement '
-            'insertRenderObjectChild(), moveRenderObjectChild(), and '
-            'removeRenderObjectChild().'),
+        ErrorDescription(
+          'moveChildRenderObject() has been deprecated in favor of '
+          'moveRenderObjectChild(). See https://github.com/flutter/flutter/issues/63269 '
+          'for details.',
+        ),
+        ErrorHint(
+          'Rather than overriding moveChildRenderObject() in your '
+          'RenderObjectElement subclass, override moveRenderObjectChild() instead, '
+          "and DON'T call super.moveRenderObjectChild(). If you're implementing a "
+          'new RenderObjectElement, you should override/implement '
+          'insertRenderObjectChild(), moveRenderObjectChild(), and '
+          'removeRenderObjectChild().',
+        ),
       ]);
     }());
   }
@@ -5940,15 +5976,19 @@ abstract class RenderObjectElement extends Element {
           name: 'super.removeChildRenderObject() was called on this Element',
           style: DiagnosticsTreeStyle.shallow,
         ),
-        ErrorDescription('removeChildRenderObject() has been deprecated in favor of '
-            'removeRenderObjectChild(). See https://github.com/flutter/flutter/issues/63269 '
-            'for details.'),
-        ErrorHint('Rather than overriding removeChildRenderObject() in your '
-            'RenderObjectElement subclass, override removeRenderObjectChild() instead, '
-            "and DON'T call super.removeRenderObjectChild(). If you're implementing a "
-            'new RenderObjectElement, you should override/implement '
-            'insertRenderObjectChild(), moveRenderObjectChild(), and '
-            'removeRenderObjectChild().'),
+        ErrorDescription(
+          'removeChildRenderObject() has been deprecated in favor of '
+          'removeRenderObjectChild(). See https://github.com/flutter/flutter/issues/63269 '
+          'for details.',
+        ),
+        ErrorHint(
+          'Rather than overriding removeChildRenderObject() in your '
+          'RenderObjectElement subclass, override removeRenderObjectChild() instead, '
+          "and DON'T call super.removeRenderObjectChild(). If you're implementing a "
+          'new RenderObjectElement, you should override/implement '
+          'insertRenderObjectChild(), moveRenderObjectChild(), and '
+          'removeRenderObjectChild().',
+        ),
       ]);
     }());
   }

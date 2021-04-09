@@ -311,7 +311,7 @@ class IOSScrollViewFlingVelocityTracker extends VelocityTracker {
 
   // Computes the velocity using 2 adjacent points in history. When index = 0,
   // it uses the latest point recorded and the point recorded immediately before
-  // it. The smaller index is, the ealier in history the points used are.
+  // it. The smaller index is, the earlier in history the points used are.
   Offset _previousVelocityAt(int index) {
     final int endIndex = (_index + index) % _sampleSize;
     final int startIndex = (_index + index - 1) % _sampleSize;

@@ -370,7 +370,7 @@
       "name": "Linux new_gallery__crane_perf",
       "repo": "flutter",
       "task_name": "linux_new_gallery__crane_perf",
-      "flaky": true
+      "flaky": false
     },
     {
       "name": "Linux picture_cache_perf__e2e_summary",
@@ -437,6 +437,12 @@
       "repo": "flutter",
       "task_name": "linux_tool_integration_tests_3_3",
       "flaky": false
+    },
+    {
+      "name": "Linux validate_ci_config",
+      "repo": "flutter",
+      "task_name": "linux_validate_ci_config",
+      "flaky": true
     },
     {
       "name": "Linux web_tool_tests",
@@ -1234,7 +1240,7 @@
       "name": "Windows gradle_plugin_light_apk_test",
       "repo": "flutter",
       "task_name": "win_gradle_plugin_light_apk_test",
-      "flaky": false
+      "flaky": true
     },
     {
       "name": "Windows gradle_non_android_plugin_test",

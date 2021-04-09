@@ -865,10 +865,12 @@ class BoxHitTestResult extends HitTestResult {
     required BoxHitTestWithOutOfBandPosition hitTest,
   }) {
     assert(hitTest != null);
-    assert((paintOffset == null && paintTransform == null && rawTransform != null) ||
-           (paintOffset == null && paintTransform != null && rawTransform == null) ||
-           (paintOffset != null && paintTransform == null && rawTransform == null),
-           'Exactly one transform or offset argument must be provided.');
+    assert(
+      (paintOffset == null && paintTransform == null && rawTransform != null) ||
+      (paintOffset == null && paintTransform != null && rawTransform == null) ||
+      (paintOffset != null && paintTransform == null && rawTransform == null),
+      'Exactly one transform or offset argument must be provided.',
+    );
     if (paintOffset != null) {
       pushOffset(-paintOffset);
     } else if (rawTransform != null) {
@@ -1940,7 +1942,7 @@ abstract class RenderBox extends RenderObject {
             'otherwise, the only object that is allowed to read RenderBox.size '
             'is its parent, if they have said they will. It you hit this assert '
             'trying to access a child\'s size, pass "parentUsesSize: true" to '
-            'that child\'s layout().'
+            'that child\'s layout().',
           );
         }
         assert(_size == this._size);

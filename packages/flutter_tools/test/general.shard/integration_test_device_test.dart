@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'package:flutter_tools/src/base/io.dart' as io;
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/test/integration_test_device.dart';
@@ -15,6 +16,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_devices.dart';
+import '../src/fake_vm_services.dart';
 
 final Map<String, Object> vm = <String, dynamic>{
   'isolates': <dynamic>[
@@ -133,6 +135,7 @@ void main() {
       PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
       io.CompressionOptions compression,
       Device device,
+      Logger logger,
     }) async => fakeVmServiceHost.vmService,
   });
 
@@ -150,6 +153,7 @@ void main() {
       PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
       io.CompressionOptions compression,
       Device device,
+      Logger logger,
     }) async => fakeVmServiceHost.vmService,
   });
 

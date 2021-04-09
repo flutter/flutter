@@ -28,11 +28,12 @@ class Config {
     required FileSystem fileSystem,
     required Logger logger,
     required Platform platform,
+    bool deleteFileOnFormatException = true
   }) {
     final String filePath = _configPath(platform, fileSystem, name);
     final File file = fileSystem.file(filePath);
     file.parent.createSync(recursive: true);
-    return Config.createForTesting(file, logger);
+    return Config.createForTesting(file, logger, deleteFileOnFormatException: deleteFileOnFormatException);
   }
 
   /// Constructs a new [Config] object from a file called [name] in
@@ -43,20 +44,25 @@ class Config {
     String name = 'test',
     Directory? directory,
     Logger? logger,
+    bool deleteFileOnFormatException = true
   }) {
     directory ??= MemoryFileSystem.test().directory('/');
-    return Config.createForTesting(directory.childFile('.${kConfigDir}_$name'), logger ?? BufferLogger.test());
+    return Config.createForTesting(
+      directory.childFile('.${kConfigDir}_$name'),
+      logger ?? BufferLogger.test(),
+      deleteFileOnFormatException: deleteFileOnFormatException
+    );
   }
 
   /// Test only access to the Config constructor.
   @visibleForTesting
-  Config.createForTesting(File file, Logger logger) : _file = file, _logger = logger {
+  Config.createForTesting(File file, Logger logger, {bool deleteFileOnFormatException = true}) : _file = file, _logger = logger {
     if (!_file.existsSync()) {
       return;
     }
     try {
       ErrorHandlingFileSystem.noExitOnFailure(() {
-        _values = castStringKeyedMap(json.decode(_file.readAsStringSync())) ?? <String, dynamic>{};
+        _values = castStringKeyedMap(json.decode(_file.readAsStringSync())) ?? <String, Object>{};
       });
     } on FormatException {
       _logger
@@ -65,7 +71,10 @@ class Config {
             'You may need to reapply any previously saved configuration '
             'with the "flutter config" command.',
         );
-      _file.deleteSync();
+
+      if (deleteFileOnFormatException) {
+        _file.deleteSync();
+      }
     } on Exception catch (err) {
       _logger
         ..printError('Could not read preferences in ${file.path}.\n$err')
@@ -101,13 +110,13 @@ class Config {
 
   String get configPath => _file.path;
 
-  Map<String, dynamic> _values = <String, dynamic>{};
+  Map<String, dynamic> _values = <String, Object>{};
 
   Iterable<String> get keys => _values.keys;
 
   bool containsKey(String key) => _values.containsKey(key);
 
-  dynamic getValue(String key) => _values[key];
+  Object? getValue(String key) => _values[key];
 
   void setValue(String key, Object value) {
     _values[key] = value;

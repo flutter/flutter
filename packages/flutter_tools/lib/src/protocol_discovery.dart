@@ -11,7 +11,7 @@ import 'package:meta/meta.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'device.dart';
-import 'device_port_forwader.dart';
+import 'device_port_forwarder.dart';
 
 /// Discovers a specific service protocol on a device, and forwards the service
 /// protocol device port to the host.
@@ -149,8 +149,7 @@ class ProtocolDiscovery {
       hostUri = deviceUri.replace(port: actualHostPort);
     }
 
-    assert(InternetAddress(hostUri.host).isLoopback);
-    if (ipv6) {
+    if (InternetAddress(hostUri.host).isLoopback && ipv6) {
       hostUri = hostUri.replace(host: InternetAddress.loopbackIPv6.host);
     }
     return hostUri;

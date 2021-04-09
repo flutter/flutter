@@ -7,7 +7,7 @@
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../cache.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../template.dart';
 
@@ -234,7 +234,7 @@ class IdeConfigCommand extends FlutterCommand {
 
     globals.printStatus('Updating IDE configuration for Flutter tree at $dirPath...');
     int generatedCount = 0;
-    generatedCount += _renderTemplate(_ideName, dirPath, <String, dynamic>{
+    generatedCount += _renderTemplate(_ideName, dirPath, <String, Object>{
       'withRootModule': boolArg('with-root-module'),
       'android': true,
     });
@@ -247,7 +247,7 @@ class IdeConfigCommand extends FlutterCommand {
     return FlutterCommandResult.success();
   }
 
-  int _renderTemplate(String templateName, String dirPath, Map<String, dynamic> context) {
+  int _renderTemplate(String templateName, String dirPath, Map<String, Object> context) {
     final Template template = Template(
       _templateDirectory,
       _templateDirectory,
