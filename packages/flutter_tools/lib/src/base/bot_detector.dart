@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -15,9 +13,9 @@ import 'platform.dart';
 
 class BotDetector {
   BotDetector({
-    @required HttpClientFactory httpClientFactory,
-    @required Platform platform,
-    @required PersistentToolState persistentToolState,
+    required HttpClientFactory httpClientFactory,
+    required Platform platform,
+    required PersistentToolState persistentToolState,
   }) :
     _platform = platform,
     _azureDetector = AzureDetector(
@@ -31,7 +29,7 @@ class BotDetector {
 
   Future<bool> get isRunningOnBot async {
     if (_persistentToolState.isRunningOnBot != null) {
-      return _persistentToolState.isRunningOnBot;
+      return _persistentToolState.isRunningOnBot!;
     }
     if (
       // Explicitly stated to not be a bot.
@@ -86,18 +84,18 @@ class BotDetector {
 @visibleForTesting
 class AzureDetector {
   AzureDetector({
-    @required HttpClientFactory httpClientFactory,
+    required HttpClientFactory httpClientFactory,
   }) : _httpClientFactory = httpClientFactory;
 
   static const String _serviceUrl = 'http://169.254.169.254/metadata/instance';
 
   final HttpClientFactory _httpClientFactory;
 
-  bool _isRunningOnAzure;
+  bool? _isRunningOnAzure;
 
   Future<bool> get isRunningOnAzure async {
     if (_isRunningOnAzure != null) {
-      return _isRunningOnAzure;
+      return _isRunningOnAzure!;
     }
     const Duration connectionTimeout = Duration(milliseconds: 250);
     const Duration requestTimeout = Duration(seconds: 1);
