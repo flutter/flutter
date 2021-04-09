@@ -48,7 +48,6 @@ class TestStdio extends Stdio {
   String get stdout => logs.where((String log) {
     return log.startsWith(r'[status] ') || log.startsWith(r'[trace] ');
   }).join('\n');
-  //String get stdout => _stdout.toString();
 
   final bool verbose;
   List<String> _stdin;
