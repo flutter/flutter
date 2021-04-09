@@ -21,6 +21,8 @@ void main() {
 
   group('Validate screenshot options', () {
     testUsingContext('rasterizer and skia screenshots do not require a device', () async {
+      // Throw a specific exception when attempting to make a VM Service connection to
+      // verify that we've made it past the initial validation.
       openChannelForTesting = (String url, {CompressionOptions compression, Logger logger}) async {
         expect(url, 'ws://localhost:8181/ws');
         throw Exception('dummy');
@@ -28,12 +30,12 @@ void main() {
 
       await expectLater(() => createTestCommandRunner(ScreenshotCommand())
         .run(<String>['screenshot', '--type=skia', '--observatory-uri=http://localhost:8181']),
-        throwsException,
+        throwsA(isA<Exception>().having((dynamic exception) => exception.toString(), 'message', contains('dummy'))),
       );
 
       await expectLater(() => createTestCommandRunner(ScreenshotCommand())
         .run(<String>['screenshot', '--type=rasterizer', '--observatory-uri=http://localhost:8181']),
-        throwsException,
+        throwsA(isA<Exception>().having((dynamic exception) => exception.toString(), 'message', contains('dummy'))),
       );
     });
 
