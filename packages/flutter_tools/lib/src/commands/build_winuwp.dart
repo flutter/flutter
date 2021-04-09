@@ -46,10 +46,10 @@ class BuildWindowsUwpCommand extends BuildSubCommand {
     final FlutterProject flutterProject = FlutterProject.current();
     final BuildInfo buildInfo = await getBuildInfo();
     if (!featureFlags.isWindowsUwpEnabled) {
-      throwToolExit('"build windows" is not currently supported.');
+      throwToolExit('"build winuwp" is not currently supported.');
     }
     if (!globals.platform.isWindows) {
-      throwToolExit('"build windows" only supported on Windows hosts.');
+      throwToolExit('"build winuwp" only supported on Windows hosts.');
     }
     displayNullSafetyMode(buildInfo);
     await buildWindowsUwp(
