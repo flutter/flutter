@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
-
 import '../base/platform.dart';
 import '../doctor_validator.dart';
 import 'chrome.dart';
@@ -52,8 +48,8 @@ abstract class ChromiumValidator extends DoctorValidator {
 /// A validator that checks whether Chrome is installed and can run.
 class ChromeValidator extends ChromiumValidator {
   const ChromeValidator({
-    @required Platform platform,
-    @required ChromiumLauncher chromiumLauncher,
+    required Platform platform,
+    required ChromiumLauncher chromiumLauncher,
   }) : _platform = platform,
        _chromiumLauncher = chromiumLauncher,
        super('Chrome - develop for the web');
@@ -71,8 +67,8 @@ class ChromeValidator extends ChromiumValidator {
 /// A validator that checks whether Edge is installed and can run.
 class EdgeValidator extends ChromiumValidator {
   const EdgeValidator({
-    @required Platform platform,
-    @required ChromiumLauncher chromiumLauncher,
+    required Platform platform,
+    required ChromiumLauncher chromiumLauncher,
   }) : _platform = platform,
        _chromiumLauncher = chromiumLauncher,
        super('Edge - develop for the web');
