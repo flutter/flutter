@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -20,7 +18,7 @@ const String kPath1 = '/bar/bin/$kExecutable';
 const String kPath2 = '/another/bin/$kExecutable';
 
 void main() {
-  FakeProcessManager fakeProcessManager;
+  late FakeProcessManager fakeProcessManager;
 
   setUp(() {
     fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
@@ -61,7 +59,7 @@ void main() {
         ),
       );
       final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'linux'));
-      expect(utils.which(kExecutable).path, kPath1);
+      expect(utils.which(kExecutable)!.path, kPath1);
     });
 
     testWithoutContext('returns all results for whichAll', () async {
@@ -131,7 +129,7 @@ void main() {
         ),
       );
       final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
-      expect(utils.which(kExecutable).path, kPath1);
+      expect(utils.which(kExecutable)!.path, kPath1);
     });
 
     testWithoutContext('returns all results for whichAll', () async {
