@@ -1,4 +1,4 @@
-Signature: 5d235c4cc274f924c6c7947f0c37c5f1
+Signature: 5f5056c15e97149de0fd79d97e297bf7
 
 UNUSED LICENSES:
 
@@ -89,6 +89,39 @@ DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
 SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+ORIGIN: ../../../third_party/dart/runtime/third_party/double-conversion/LICENSE
+TYPE: LicenseType.bsd
+----------------------------------------------------------------------------------------------------
+Copyright 2006-2011, the V8 project authors.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+    * Neither the name of Google LLC nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
@@ -9493,6 +9526,34 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8x1
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8x10/x64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8x10/x64_macos.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8x10/x64_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union16bytesHomogenousx10/arm64_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union16bytesHomogenousx10/arm64_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union16bytesHomogenousx10/arm64_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union16bytesHomogenousx10/arm64_macos.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union16bytesHomogenousx10/arm_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union16bytesHomogenousx10/arm_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union16bytesHomogenousx10/arm_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union16bytesHomogenousx10/ia32_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union16bytesHomogenousx10/ia32_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union16bytesHomogenousx10/ia32_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union16bytesHomogenousx10/x64_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union16bytesHomogenousx10/x64_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union16bytesHomogenousx10/x64_macos.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union16bytesHomogenousx10/x64_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union5bytesPackedx10/arm64_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union5bytesPackedx10/arm64_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union5bytesPackedx10/arm64_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union5bytesPackedx10/arm64_macos.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union5bytesPackedx10/arm_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union5bytesPackedx10/arm_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union5bytesPackedx10/arm_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union5bytesPackedx10/ia32_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union5bytesPackedx10/ia32_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union5bytesPackedx10/ia32_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union5bytesPackedx10/x64_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union5bytesPackedx10/x64_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union5bytesPackedx10/x64_macos.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union5bytesPackedx10/x64_win.expect
 FILE: ../../../third_party/dart/samples/ffi/sqlite/docs/lib/scenario-default.svg
 FILE: ../../../third_party/dart/samples/ffi/sqlite/docs/lib/scenario-full.svg
 FILE: ../../../third_party/dart/samples_2/ffi/sqlite/docs/lib/scenario-default.svg
@@ -9516,9 +9577,10 @@ met:
       copyright notice, this list of conditions and the following
       disclaimer in the documentation and/or other materials provided
       with the distribution.
-    * Neither the name of Google Inc. nor the names of its
+    * Neither the name of Google LLC nor the names of its
       contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
+
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -9756,9 +9818,10 @@ met:
       copyright notice, this list of conditions and the following
       disclaimer in the documentation and/or other materials provided
       with the distribution.
-    * Neither the name of Google Inc. nor the names of its
+    * Neither the name of Google LLC nor the names of its
       contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
+
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -9927,9 +9990,10 @@ met:
       copyright notice, this list of conditions and the following
       disclaimer in the documentation and/or other materials provided
       with the distribution.
-    * Neither the name of Google Inc. nor the names of its
+    * Neither the name of Google LLC nor the names of its
       contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
+
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -10403,9 +10467,10 @@ met:
       copyright notice, this list of conditions and the following
       disclaimer in the documentation and/or other materials provided
       with the distribution.
-    * Neither the name of Google Inc. nor the names of its
+    * Neither the name of Google LLC nor the names of its
       contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
+
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -10543,9 +10608,10 @@ met:
       copyright notice, this list of conditions and the following
       disclaimer in the documentation and/or other materials provided
       with the distribution.
-    * Neither the name of Google Inc. nor the names of its
+    * Neither the name of Google LLC nor the names of its
       contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
+
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -10730,9 +10796,10 @@ met:
       copyright notice, this list of conditions and the following
       disclaimer in the documentation and/or other materials provided
       with the distribution.
-    * Neither the name of Google Inc. nor the names of its
+    * Neither the name of Google LLC nor the names of its
       contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
+
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -10766,9 +10833,10 @@ met:
       copyright notice, this list of conditions and the following
       disclaimer in the documentation and/or other materials provided
       with the distribution.
-    * Neither the name of Google Inc. nor the names of its
+    * Neither the name of Google LLC nor the names of its
       contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
+
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -10850,9 +10918,10 @@ met:
       copyright notice, this list of conditions and the following
       disclaimer in the documentation and/or other materials provided
       with the distribution.
-    * Neither the name of Google Inc. nor the names of its
+    * Neither the name of Google LLC nor the names of its
       contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
+
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -11243,9 +11312,10 @@ met:
       copyright notice, this list of conditions and the following
       disclaimer in the documentation and/or other materials provided
       with the distribution.
-    * Neither the name of Google Inc. nor the names of its
+    * Neither the name of Google LLC nor the names of its
       contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
+
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -11627,9 +11697,10 @@ met:
       copyright notice, this list of conditions and the following
       disclaimer in the documentation and/or other materials provided
       with the distribution.
-    * Neither the name of Google Inc. nor the names of its
+    * Neither the name of Google LLC nor the names of its
       contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
+
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -11749,9 +11820,10 @@ met:
       copyright notice, this list of conditions and the following
       disclaimer in the documentation and/or other materials provided
       with the distribution.
-    * Neither the name of Google Inc. nor the names of its
+    * Neither the name of Google LLC nor the names of its
       contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
+
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -11793,9 +11865,10 @@ met:
       copyright notice, this list of conditions and the following
       disclaimer in the documentation and/or other materials provided
       with the distribution.
-    * Neither the name of Google Inc. nor the names of its
+    * Neither the name of Google LLC nor the names of its
       contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
+
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -11953,9 +12026,10 @@ met:
       copyright notice, this list of conditions and the following
       disclaimer in the documentation and/or other materials provided
       with the distribution.
-    * Neither the name of Google Inc. nor the names of its
+    * Neither the name of Google LLC nor the names of its
       contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
+
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -12024,9 +12098,10 @@ met:
       copyright notice, this list of conditions and the following
       disclaimer in the documentation and/or other materials provided
       with the distribution.
-    * Neither the name of Google Inc. nor the names of its
+    * Neither the name of Google LLC nor the names of its
       contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
+
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -12106,9 +12181,10 @@ met:
       copyright notice, this list of conditions and the following
       disclaimer in the documentation and/or other materials provided
       with the distribution.
-    * Neither the name of Google Inc. nor the names of its
+    * Neither the name of Google LLC nor the names of its
       contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
+
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -18060,7 +18136,7 @@ written authorization of the copyright holder.
 
 ====================================================================================================
 LIBRARY: icu
-ORIGIN: ../../../third_party/icu/filters/android.json + ../../../third_party/dart/runtime/third_party/double-conversion/COPYING
+ORIGIN: ../../../third_party/icu/filters/android.json + ../../../third_party/dart/runtime/third_party/double-conversion/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/icu/filters/android.json
 FILE: ../../../third_party/icu/filters/android_extra.json
@@ -18083,7 +18159,7 @@ met:
       copyright notice, this list of conditions and the following
       disclaimer in the documentation and/or other materials provided
       with the distribution.
-    * Neither the name of Google Inc. nor the names of its
+    * Neither the name of Google LLC nor the names of its
       contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
 
@@ -24764,4 +24840,4 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 ====================================================================================================
-Total license count: 374
+Total license count: 375
