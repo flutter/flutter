@@ -50,14 +50,26 @@ class CleanCommand extends Command<void> {
 
   @override
   void run() {
-    final File stateFile = checkouts.fileSystem.file(argResults['state-file']);
+    final File stateFile = checkouts.fileSystem.file(argResults[kStateOption]);
     if (!stateFile.existsSync()) {
       throw ConductorException(
           'No persistent state file found at ${stateFile.path}!');
     }
 
-    // TODO use flag
-    stdio.printStatus('Deleting file ${stateFile.path}...');
+    if (!(argResults[kYesFlag] as bool)) {
+      stdio.printStatus(
+        'Are you sure you want to clean up the persistent state file at\n'
+        '${stateFile.path} (y/n)?',
+      );
+      final String response = stdio.readLineSync();
+
+      // Only proceed if the first character of stdin is 'y' or 'Y'
+      if (response.isEmpty || response[0].toLowerCase() != 'y') {
+        stdio.printStatus('Aborting clean operation.');
+        return;
+      }
+    }
+    stdio.printStatus('Deleting persistent state file ${stateFile.path}...');
     stateFile.deleteSync();
   }
 }
