@@ -119,7 +119,7 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'checkout',
-          'master',
+          'upstream/master',
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -212,7 +212,7 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'checkout',
-          'master',
+          'upstream/master',
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -305,7 +305,7 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'checkout',
-          'master',
+          'upstream/master',
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -370,7 +370,7 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'checkout',
-          'master',
+          'upstream/master',
         ]),
         const FakeCommand(command: <String>[
           'git',
