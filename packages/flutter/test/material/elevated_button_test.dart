@@ -1176,10 +1176,6 @@ void main() {
   testWidgets('ElevatedButton maximumSize', (WidgetTester tester) async {
     final Key key0 = UniqueKey();
     final Key key1 = UniqueKey();
-    final ButtonStyle style = TextButton.styleFrom(
-      maximumSize: Size.fromWidth(64),
-      visualDensity: const VisualDensity(), // dx=0, dy=0
-    );
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1191,22 +1187,21 @@ void main() {
                 ElevatedButton(
                   key: key0,
                   style: TextButton.styleFrom(
-                    minimumSize: Size(24, 36),
-                    maximumSize: Size.fromWidth(64),
+                    minimumSize: const Size(24, 36),
+                    maximumSize: const Size.fromWidth(64),
                   ),
                   onPressed: () { },
-                  child: Text('A B C D E F G H I J K L M N O P'),
+                  child: const Text('A B C D E F G H I J K L M N O P'),
                 ),
-                SizedBox(height: 16),
                 ElevatedButton.icon(
                   key: key1,
                   style: TextButton.styleFrom(
-                    minimumSize: Size(24, 36),
-                    maximumSize: Size.fromWidth(104),
+                    minimumSize: const Size(24, 36),
+                    maximumSize: const Size.fromWidth(104),
                   ),
                   onPressed: () {},
                   icon: Container(color: Colors.red, width: 32, height: 32),
-                  label: Text('A B C D E F G H I J K L M N O P'),
+                  label: const Text('A B C D E F G H I J K L M N O P'),
                 ),
               ],
             ),
