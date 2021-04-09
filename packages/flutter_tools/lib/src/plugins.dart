@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 // @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
@@ -14,7 +15,6 @@ import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
-
 import 'base/template.dart';
 import 'base/version.dart';
 import 'convert.dart';
