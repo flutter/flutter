@@ -68,6 +68,9 @@ class ScreenshotCommand extends FlutterCommand {
   Future<void> _validateOptions(String screenshotType, String observatoryUri) async {
     switch (screenshotType) {
       case _kDeviceType:
+        if (observatoryUri != null) {
+          throwToolExit('Observatory URI cannot be provided for screenshot type $screenshotType');
+        }
         device = await findTargetDevice();
         if (device == null) {
           throwToolExit('Must have a connected device for screenshot type $screenshotType');

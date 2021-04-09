@@ -56,5 +56,12 @@ void main() {
         throwsToolExit(message: 'Must have a connected device for screenshot type device'),
       );
     });
+
+    testUsingContext('device screenshots cannot provided Observatory', () async {
+      await expectLater(() => createTestCommandRunner(ScreenshotCommand())
+        .run(<String>['screenshot',  '--observatory-uri=http://localhost:8181']),
+        throwsToolExit(message: 'Observatory URI cannot be provided for screenshot type device'),
+      );
+    });
   });
 }
