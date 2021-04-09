@@ -65,9 +65,10 @@ class ScreenshotCommand extends FlutterCommand {
 
   Device device;
 
-  static void validateOptions(String screenshotType, Device device, String observatoryUri) {
+  Future<void> _validateOptions(String screenshotType, String observatoryUri) async {
     switch (screenshotType) {
       case _kDeviceType:
+        device = await findTargetDevice();
         if (device == null) {
           throwToolExit('Must have a connected device for screenshot type $screenshotType');
         }
@@ -87,8 +88,7 @@ class ScreenshotCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
-    device = await findTargetDevice();
-    validateOptions(stringArg(_kType), device, stringArg(_kObservatoryUri));
+    await _validateOptions(stringArg(_kType), stringArg(_kObservatoryUri));
     return super.verifyThenRunCommand(commandPath);
   }
 
