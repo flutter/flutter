@@ -567,6 +567,7 @@ package io.flutter.plugins;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
+import io.flutter.Log;
 
 import io.flutter.embedding.engine.FlutterEngine;
 {{#needsShim}}
@@ -580,17 +581,26 @@ import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistry;
  */
 @Keep
 public final class GeneratedPluginRegistrant {
+  private static final String TAG = "GeneratedPluginRegistrant";
   public static void registerWith(@NonNull FlutterEngine flutterEngine) {
 {{#needsShim}}
     ShimPluginRegistry shimPluginRegistry = new ShimPluginRegistry(flutterEngine);
 {{/needsShim}}
 {{#plugins}}
   {{#supportsEmbeddingV2}}
-    flutterEngine.getPlugins().add(new {{package}}.{{class}}());
+    try {
+      flutterEngine.getPlugins().add(new {{package}}.{{class}}());
+    } catch(Exception e) {
+      Log.e(TAG, "Error registering plugin {{name}}, {{package}}.{{class}}", e);
+    }
   {{/supportsEmbeddingV2}}
   {{^supportsEmbeddingV2}}
     {{#supportsEmbeddingV1}}
+    try {
       {{package}}.{{class}}.registerWith(shimPluginRegistry.registrarFor("{{package}}.{{class}}"));
+    } catch(Exception e) {
+      Log.e(TAG, "Error registering plugin {{name}}, {{package}}.{{class}}", e);
+    }
     {{/supportsEmbeddingV1}}
   {{/supportsEmbeddingV2}}
 {{/plugins}}
