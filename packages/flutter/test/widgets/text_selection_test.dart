@@ -526,7 +526,7 @@ void main() {
     await gesture.down(globalCharLocation);
     await gesture.up();
     await tester.pump();
-    expect(renderEditable.selectWordCalled, isFalse);   
+    expect(renderEditable.selectWordCalled, isFalse);
   });
 
   testWidgets('test TextSelectionGestureDetectorBuilder tap', (WidgetTester tester) async {
