@@ -2139,7 +2139,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // EditableWidget, not just changes triggered by user gestures.
     requestKeyboard();
     if (widget.selectionControls == null) {
-      _selectionOverlay?.hide();
+      _selectionOverlay?.dispose();
       _selectionOverlay = null;
     } else {
       if (_selectionOverlay == null) {

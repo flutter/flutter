@@ -4823,6 +4823,57 @@ void main() {
     expect(find.text(expected), findsOneWidget, reason: 'Because text contains ${controller.text}');
   }, skip: areKeyEventsHandledByPlatform);
 
+  // Regressing test for https://github.com/flutter/flutter/issues/78219
+  testWidgets('Paste does not crash when the section is inValid', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    final TextEditingController controller = TextEditingController();
+    final TextField textField = TextField(
+      controller: controller,
+      obscureText: true,
+    );
+
+    const String clipboardContent = 'I love Flutter!';
+    SystemChannels.platform
+      .setMockMethodCallHandler((MethodCall methodCall) async {
+        if (methodCall.method == 'Clipboard.getData')
+          return <String, dynamic>{'text': clipboardContent};
+        return null;
+      });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: RawKeyboardListener(
+            focusNode: focusNode,
+            onKey: null,
+            child: textField,
+          ),
+        ),
+      ),
+    );
+    focusNode.requestFocus();
+    await tester.pump();
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    // This setter will set `selection` invalid.
+    controller.text = '';
+
+    // Paste clipboardContent to the text field.
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlRight);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.keyV);
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.keyV);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlRight);
+    await tester.pumpAndSettle();
+
+    // Do nothing.
+    expect(find.text(clipboardContent), findsNothing);
+    expect(controller.selection, const TextSelection.collapsed(offset: -1));
+  });
+
   testWidgets('Cut test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     final TextEditingController controller = TextEditingController();

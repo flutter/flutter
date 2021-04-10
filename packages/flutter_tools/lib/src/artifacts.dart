@@ -74,8 +74,10 @@ enum Artifact {
   linuxHeaders,
   /// The root of the Windows desktop sources.
   windowsDesktopPath,
-  /// The root of the cpp client code for Windows desktop.
+  /// The root of the cpp client code for Windows desktop and Windows UWP desktop.
   windowsCppClientWrapper,
+  /// The root of the Windows UWP desktop sources.
+  windowsUwpDesktopPath,
   /// The root of the sky_engine package.
   skyEnginePath,
   /// The location of the macOS engine podspec file.
@@ -146,10 +148,11 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return '';
     case Artifact.linuxHeaders:
       return 'flutter_linux';
-    case Artifact.windowsDesktopPath:
-      return '';
     case Artifact.windowsCppClientWrapper:
       return 'cpp_client_wrapper';
+    case Artifact.windowsUwpDesktopPath:
+    case Artifact.windowsDesktopPath:
+      return '';
     case Artifact.skyEnginePath:
       return 'sky_engine';
     case Artifact.flutterMacOSPodspec:
@@ -284,6 +287,7 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_uwp_x64:
         return _getDesktopArtifactPath(artifact, platform, mode);
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
@@ -444,6 +448,9 @@ class CachedArtifacts implements Artifacts {
         }
         final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
         return _fileSystem.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact, platform, mode));
+      case Artifact.windowsUwpDesktopPath:
+        final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
+         return _fileSystem.path.join(engineArtifactsPath, 'windows-uwp-x64-${getNameForBuildMode(mode)}', _artifactToFileName(artifact, platform, mode));
       case Artifact.windowsCppClientWrapper:
         final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
         return _fileSystem.path.join(engineArtifactsPath, 'windows-x64', _artifactToFileName(artifact, platform, mode));
@@ -515,14 +522,12 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
+      case TargetPlatform.windows_uwp_x64:
         assert(mode != null, 'Need to specify a build mode for platform $platform.');
         final String suffix = mode != BuildMode.debug ? '-${snakeCase(getModeName(mode), '-')}' : '';
         return _fileSystem.path.join(engineDir, platformName + suffix);
       case TargetPlatform.android:
         assert(false, 'cannot use TargetPlatform.android to look up artifacts');
-        return null;
-      case TargetPlatform.windows_uwp_x64:
-        assert(false, 'cannot use TargetPlatform.windows_uwp_x64 to look up artifacts');
         return null;
     }
     assert(false, 'Invalid platform $platform.');
@@ -679,13 +684,6 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
         return _cache.getArtifactDirectory('ios-deploy').childFile(artifactFileName).path;
       case Artifact.iproxy:
         return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName).path;
-      case Artifact.linuxDesktopPath:
-      case Artifact.linuxHeaders:
-        return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
-      case Artifact.windowsDesktopPath:
-        return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
-      case Artifact.windowsCppClientWrapper:
-        return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
       case Artifact.skyEnginePath:
         return _fileSystem.path.join(_hostEngineOutPath, 'gen', 'dart-pkg', artifactFileName);
       case Artifact.flutterMacOSPodspec:
@@ -735,6 +733,12 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-html-sound', artifactFileName);
       case Artifact.pubExecutable:
         return _fileSystem.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', _artifactToFileName(artifact, platform, mode));
+      case Artifact.windowsUwpDesktopPath:
+      case Artifact.linuxDesktopPath:
+      case Artifact.linuxHeaders:
+      case Artifact.windowsDesktopPath:
+      case Artifact.windowsCppClientWrapper:
+        return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;

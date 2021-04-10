@@ -16,7 +16,7 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
+import '../src/fake_process_manager.dart';
 import '../src/fake_vm_services.dart';
 
 final vm_service.Isolate isolate = vm_service.Isolate(

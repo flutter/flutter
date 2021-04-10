@@ -1172,6 +1172,77 @@ void main() {
     expect(tester.getRect(find.byKey(iconKey)), const Rect.fromLTRB(46.0, 0.0, 96.0, 100.0));
     expect(tester.getRect(find.byKey(labelKey)), const Rect.fromLTRB(104.0, 0.0, 154.0, 100.0));
   });
+
+  testWidgets('ElevatedButton maximumSize', (WidgetTester tester) async {
+    final Key key0 = UniqueKey();
+    final Key key1 = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                ElevatedButton(
+                  key: key0,
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(24, 36),
+                    maximumSize: const Size.fromWidth(64),
+                  ),
+                  onPressed: () { },
+                  child: const Text('A B C D E F G H I J K L M N O P'),
+                ),
+                ElevatedButton.icon(
+                  key: key1,
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(24, 36),
+                    maximumSize: const Size.fromWidth(104),
+                  ),
+                  onPressed: () {},
+                  icon: Container(color: Colors.red, width: 32, height: 32),
+                  label: const Text('A B C D E F G H I J K L M N O P'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key0)), const Size(64.0, 224.0));
+    expect(tester.getSize(find.byKey(key1)), const Size(104.0, 224.0));
+  });
+
+  testWidgets('Fixed size ElevatedButton, same as minimumSize == maximumSize', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(fixedSize: const Size(200, 200)),
+                onPressed: () { },
+                child: const Text('200x200'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(200, 200),
+                  maximumSize: const Size(200, 200),
+                ),
+                onPressed: () { },
+                child: const Text('200,200'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.widgetWithText(ElevatedButton, '200x200')), const Size(200, 200));
+    expect(tester.getSize(find.widgetWithText(ElevatedButton, '200,200')), const Size(200, 200));
+  });
 }
 
 TextStyle _iconStyle(WidgetTester tester, IconData icon) {
