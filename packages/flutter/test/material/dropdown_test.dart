@@ -3241,7 +3241,9 @@ void main() {
     try {
       // try to get the focus node for disabled item
       final FocusNode node = Focus.of(tester.element(find.text('disabled').hitTestable()));
-      // if it is possible to get it, means this disabled item is focusable, which it shouldn't be.
+      // For disabled item, [Focus.of] should throw an exception,
+      // but it doesn't when platform=chrome and web-renderer=html when flutter test is run
+      // In that case, the node should not be able to request focus
       expect(node.canRequestFocus, false, reason: 'Disabled menu item should not be able to request focus');
     } on AssertionError catch (error) {
       expect(
