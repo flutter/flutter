@@ -639,6 +639,8 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   static Map<LogicalKeyboardKey?, List<_ActivatorIntentPair>> _indexShortcuts(Map<ShortcutActivator, Intent> source) {
     final Map<LogicalKeyboardKey?, List<_ActivatorIntentPair>> result = <LogicalKeyboardKey?, List<_ActivatorIntentPair>>{};
     source.forEach((ShortcutActivator activator, Intent intent) {
+      // Use a intermediate variable because Dart reports an error otherwise.
+      // https://github.com/dart-lang/language/issues/1572
       final Iterable<LogicalKeyboardKey?>? triggeringKeys = activator.triggers;
       for (final LogicalKeyboardKey? trigger in triggeringKeys ?? <LogicalKeyboardKey?>[null]) {
         result.putIfAbsent(trigger, () => <_ActivatorIntentPair>[])
