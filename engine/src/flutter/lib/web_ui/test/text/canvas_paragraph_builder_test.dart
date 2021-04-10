@@ -11,8 +11,8 @@ import 'package:ui/ui.dart';
 bool get isIosSafari => browserEngine == BrowserEngine.webkit &&
           operatingSystem == OperatingSystem.iOs;
 
-String get defaultFontFamily {
-  String fontFamily = canonicalizeFontFamily('Ahem')!;
+String fontFamilyToAttribute(String fontFamily) {
+  fontFamily = canonicalizeFontFamily(fontFamily)!;
   if (browserEngine == BrowserEngine.firefox) {
     fontFamily = fontFamily.replaceAll('"', '&quot;');
   } else if (browserEngine == BrowserEngine.blink ||
@@ -22,6 +22,8 @@ String get defaultFontFamily {
   }
   return 'font-family: $fontFamily;';
 }
+
+final String defaultFontFamily = fontFamilyToAttribute('Ahem');
 const String defaultColor = 'color: rgb(255, 0, 0);';
 const String defaultFontSize = 'font-size: 14px;';
 final String paragraphStyle =
@@ -52,7 +54,7 @@ void testMain() async {
     paragraph.layout(ParagraphConstraints(width: double.infinity));
     expect(
       paragraph.toDomElement().outerHtml,
-      '<p style="$paragraphStyle">'
+      '<p style="font-size: 13px; $defaultFontFamily $paragraphStyle">'
       '<span style="$defaultColor font-size: 13px; $defaultFontFamily">'
       'Hello'
       '</span>'
@@ -63,7 +65,7 @@ void testMain() async {
     paragraph.layout(ParagraphConstraints(width: 39.0));
     expect(
       paragraph.toDomElement().outerHtml,
-      '<p style="$paragraphStyle">'
+      '<p style="font-size: 13px; $defaultFontFamily $paragraphStyle">'
       '<span style="$defaultColor font-size: 13px; $defaultFontFamily">'
       'Hel<br>lo'
       '</span>'
@@ -91,7 +93,11 @@ void testMain() async {
     paragraph.layout(ParagraphConstraints(width: double.infinity));
     expect(
       paragraph.toDomElement().outerHtml,
-      '<p style="$paragraphStyle"><span style="$defaultColor $defaultFontSize $defaultFontFamily">Hello</span></p>',
+      '<p style="$defaultFontSize $defaultFontFamily $paragraphStyle">'
+      '<span style="$defaultColor $defaultFontSize $defaultFontFamily">'
+      'Hello'
+      '</span>'
+      '</p>',
     );
 
     final FlatTextSpan textSpan = paragraph.spans.single as FlatTextSpan;
@@ -116,7 +122,7 @@ void testMain() async {
     paragraph.layout(ParagraphConstraints(width: double.infinity));
     expect(
       paragraph.toDomElement().outerHtml,
-      '<p style="$paragraphStyle overflow-y: hidden; height: ${expectedHeight}px;">'
+      '<p style="$defaultFontSize $defaultFontFamily $paragraphStyle overflow-y: hidden; height: ${expectedHeight}px;">'
       '<span style="$defaultColor $defaultFontSize $defaultFontFamily">'
       'Hello'
       '</span>'
@@ -142,7 +148,7 @@ void testMain() async {
     paragraph.layout(ParagraphConstraints(width: double.infinity));
     expect(
       paragraph.toDomElement().outerHtml,
-      '<p style="$paragraphStyle overflow: hidden; height: ${expectedHeight}px; text-overflow: ellipsis;">'
+      '<p style="$defaultFontSize $defaultFontFamily $paragraphStyle overflow: hidden; height: ${expectedHeight}px; text-overflow: ellipsis;">'
       '<span style="$defaultColor $defaultFontSize $defaultFontFamily">'
       'Hello'
       '</span>'
@@ -170,7 +176,7 @@ void testMain() async {
     paragraph.layout(ParagraphConstraints(width: double.infinity));
     expect(
       paragraph.toDomElement().outerHtml,
-      '<p style="line-height: 1.5; $paragraphStyle">'
+      '<p style="line-height: 1.5; font-size: 9px; $defaultFontFamily $paragraphStyle">'
       '<span style="$defaultColor line-height: 1.5; font-size: 9px; font-weight: bold; font-style: italic; $defaultFontFamily letter-spacing: 2px;">'
       'Hello'
       '</span>'
@@ -208,7 +214,7 @@ void testMain() async {
     paragraph.layout(ParagraphConstraints(width: double.infinity));
     expect(
       paragraph.toDomElement().outerHtml,
-      '<p style="$paragraphStyle">'
+      '<p style="font-size: 13px; $defaultFontFamily $paragraphStyle">'
       '<span style="$defaultColor font-size: 13px; font-weight: bold; $defaultFontFamily">'
       'Hello'
       '</span>'
@@ -222,7 +228,7 @@ void testMain() async {
     paragraph.layout(ParagraphConstraints(width: 75.0));
     expect(
       paragraph.toDomElement().outerHtml,
-      '<p style="$paragraphStyle width: 75px;">'
+      '<p style="font-size: 13px; $defaultFontFamily $paragraphStyle width: 75px;">'
       '<span style="$defaultColor font-size: 13px; font-weight: bold; $defaultFontFamily">'
       'Hello'
       '</span>'
@@ -273,7 +279,7 @@ void testMain() async {
     paragraph.layout(ParagraphConstraints(width: double.infinity));
     expect(
       paragraph.toDomElement().outerHtml,
-      '<p style="$paragraphStyle">'
+      '<p style="font-size: 13px; $defaultFontFamily $paragraphStyle">'
       '<span style="$defaultColor line-height: 2; font-size: 13px; font-weight: bold; $defaultFontFamily">'
       'Hello'
       '</span>'
@@ -337,7 +343,7 @@ void testMain() async {
     paragraph.layout(ParagraphConstraints(width: double.infinity));
     expect(
       paragraph.toDomElement().outerHtml,
-      '<p style="$paragraphStyle">'
+      '<p style="font-size: 13px; $defaultFontFamily $paragraphStyle">'
       '<span style="$defaultColor font-size: 13px; $defaultFontFamily">'
       'First<br>Second '
       '</span>'
@@ -351,7 +357,7 @@ void testMain() async {
     paragraph.layout(ParagraphConstraints(width: 180.0));
     expect(
       paragraph.toDomElement().outerHtml,
-      '<p style="$paragraphStyle width: 180px;">'
+      '<p style="font-size: 13px; $defaultFontFamily $paragraphStyle width: 180px;">'
       '<span style="$defaultColor font-size: 13px; $defaultFontFamily">'
       'First<br>Second <br>'
       '</span>'
@@ -360,6 +366,44 @@ void testMain() async {
       '</span>'
       '</p>',
     );
+  });
+
+  test('various font sizes', () {
+    // Paragraphs and spans force the Ahem font in test mode. We need to trick
+    // them into thinking they are not in test mode, so they use the provided
+    // font family.
+    debugEmulateFlutterTesterEnvironment = false;
+    final EngineParagraphStyle style = EngineParagraphStyle(fontSize: 12.0, fontFamily: 'first');
+    final CanvasParagraphBuilder builder = CanvasParagraphBuilder(style);
+
+    builder.addText('First ');
+    builder.pushStyle(TextStyle(fontSize: 18.0, fontFamily: 'second'));
+    builder.addText('Second ');
+    builder.pushStyle(TextStyle(fontSize: 10.0, fontFamily: 'third'));
+    builder.addText('Third');
+
+    final CanvasParagraph paragraph = builder.build();
+    expect(paragraph.toPlainText(), 'First Second Third');
+    expect(paragraph.spans, hasLength(3));
+
+    // The paragraph should take the font size and family from the span with the
+    // greatest font size.
+    paragraph.layout(ParagraphConstraints(width: double.infinity));
+    expect(
+      paragraph.toDomElement().outerHtml,
+      '<p style="font-size: 18px; ${fontFamilyToAttribute('second')} $paragraphStyle">'
+      '<span style="$defaultColor font-size: 12px; ${fontFamilyToAttribute('first')}">'
+      'First '
+      '</span>'
+      '<span style="$defaultColor font-size: 18px; ${fontFamilyToAttribute('second')}">'
+      'Second '
+      '</span>'
+      '<span style="$defaultColor font-size: 10px; ${fontFamilyToAttribute('third')}">'
+      'Third'
+      '</span>'
+      '</p>',
+    );
+    debugEmulateFlutterTesterEnvironment = true;
   });
 }
 
