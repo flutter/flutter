@@ -41,6 +41,8 @@ typedef SelectionChangedCallback = void Function(TextSelection selection, Select
 /// Signature for the callback that reports the app private command results.
 typedef AppPrivateCommandCallback = void Function(String, Map<String, dynamic>);
 
+typedef InlineSpanGenerator = InlineSpan Function(String value);
+
 // The time it takes for the cursor to fade from fully opaque to fully
 // transparent and vice versa. A full cursor blink, from transparent to opaque
 // to transparent, is twice this duration.
@@ -53,6 +55,16 @@ const Duration _kCursorBlinkWaitForStart = Duration(milliseconds: 150);
 // Number of cursor ticks during which the most recently entered character
 // is shown in an obscured text field.
 const int _kObscureShowLatestCharCursorTicks = 3;
+
+class TextEditingInlineSpanReplacement {
+
+  TextEditingInlineSpanReplacement(this.pattern, this.generator);
+
+  Pattern pattern;
+
+  InlineSpanGenerator generator;
+}
+
 
 /// A controller for an editable text field.
 ///
@@ -139,14 +151,14 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   ///
   /// This constructor treats a null [text] argument as if it were the empty
   /// string.
-  TextEditingController({ String? text })
+  TextEditingController({ String? text, this.textEditingInlineSpanReplacements = const <TextEditingInlineSpanReplacement>[] })
     : super(text == null ? TextEditingValue.empty : TextEditingValue(text: text));
 
   /// Creates a controller for an editable text field from an initial [TextEditingValue].
   ///
   /// This constructor treats a null [value] argument as if it were
   /// [TextEditingValue.empty].
-  TextEditingController.fromValue(TextEditingValue? value)
+  TextEditingController.fromValue(TextEditingValue? value, { this.textEditingInlineSpanReplacements = const <TextEditingInlineSpanReplacement>[] })
     : assert(
         value == null || !value.composing.isValid || value.isComposingRangeValid,
         'New TextEditingValue $value has an invalid non-empty composing range '
@@ -154,6 +166,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
         'even for readonly text fields',
       ),
       super(value ?? TextEditingValue.empty);
+
+  List<TextEditingInlineSpanReplacement> textEditingInlineSpanReplacements;
 
   /// The current string the user is editing.
   String get text => value.text;
@@ -191,25 +205,59 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// can override this method to customize appearance of text.
   TextSpan buildTextSpan({required BuildContext context, TextStyle? style , required bool withComposing}) {
     assert(!value.composing.isValid || !withComposing || value.isComposingRangeValid);
+
+    final Map<TextRange, InlineSpan> rangeSpanMapping= <TextRange, InlineSpan>{};
     // If the composing range is out of range for the current text, ignore it to
     // preserve the tree integrity, otherwise in release mode a RangeError will
     // be thrown and this EditableText will be built with a broken subtree.
-    if (!value.isComposingRangeValid || !withComposing) {
-      return TextSpan(style: style, text: text);
+    if (value.isComposingRangeValid && withComposing) {
+      // return TextSpan(style: style, text: text);
+      final TextStyle composingStyle = style!.merge(
+        const TextStyle(decoration: TextDecoration.underline),
+      );
+      rangeSpanMapping[value.composing] = TextSpan(
+        style: composingStyle,
+        text: value.composing.textInside(value.text),
+      );
     }
-    final TextStyle composingStyle = style!.merge(
-      const TextStyle(decoration: TextDecoration.underline),
-    );
-    return TextSpan(
+    for (final TextEditingInlineSpanReplacement replacement in textEditingInlineSpanReplacements) {
+      for (final Match match in replacement.pattern.allMatches(value.text)) {
+        bool overlap = false;
+        for (final TextRange range in rangeSpanMapping.keys) {
+          // Only the first match for a given text range is replaced.
+          // Overlapping matches are ignored.
+          if (match.start < range.start &&
+              match.end <= range.start ||
+              match.start >= range.end &&
+              match.end > range.end) {
+            overlap = true;
+            break;
+          }
+        }
+        if (!overlap) {
+          final TextRange range = TextRange(start: match.start, end: match.end);
+          rangeSpanMapping[range] = replacement.generator(range.textInside(value.text));
+        }
+      }
+    }
+    List<TextRange> sortedRanges = rangeSpanMapping.keys.toList();
+    sortedRanges.sort((a, b) => a.start.compareTo(b.start));
+
+    final List<InlineSpan> spans = <InlineSpan>[];
+    int previousEndIndex = 0;
+    for (final TextRange range in sortedRanges) {
+      if (range.start > previousEndIndex) {
+        spans.add(TextSpan(text: value.text.substring(previousEndIndex, range.start)));
+        previousEndIndex = range.start;
+      }
+      spans.add(rangeSpanMapping[range]!);
+    }
+    if (previousEndIndex < value.text.length) {
+      spans.add(TextSpan(text: value.text.substring(previousEndIndex, value.text.length)));
+    }
+    return spans.length == 1 ? TextSpan(style: style, text: text) : TextSpan(
       style: style,
-      children: <TextSpan>[
-        TextSpan(text: value.composing.textBefore(value.text)),
-        TextSpan(
-          style: composingStyle,
-          text: value.composing.textInside(value.text),
-        ),
-        TextSpan(text: value.composing.textAfter(value.text)),
-      ],
+      children: spans,
     );
   }
 
