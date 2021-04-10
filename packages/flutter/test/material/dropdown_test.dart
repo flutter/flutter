@@ -3240,9 +3240,9 @@ void main() {
 
     try {
       // try to get the focus node for disabled item
-      Focus.of(tester.element(find.text('disabled').hitTestable()));
+      final FocusNode node = Focus.of(tester.element(find.text('disabled').hitTestable()));
       // if it is possible to get it, means this disabled item is focusable, which it shouldn't be.
-      fail('Disabled menu item should not be able to request focus');
+      expect(node.canRequestFocus, false, reason: 'Disabled menu item should not be able to request focus');
     } on AssertionError catch (error) {
       expect(
         error.toString(),
