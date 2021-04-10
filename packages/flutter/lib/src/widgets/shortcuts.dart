@@ -179,7 +179,7 @@ abstract class ShortcutActivator {
   /// [Intent]s are stored in a [Map] and indexed by trigger keys. Subclasses
   /// should make sure that the return value of this method does not change
   /// throughout the lifespan of this object.
-  Iterable<LogicalKeyboardKey>? get triggers;
+  Iterable<LogicalKeyboardKey> get triggers;
 
   /// Whether the triggering `event` and the keyboard `state` at the time of the
   /// event meet required conditions, providing that the event is a triggering
@@ -296,7 +296,7 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
   LogicalKeySet.fromSet(Set<LogicalKeyboardKey> keys) : super.fromSet(keys);
 
   @override
-  Iterable<LogicalKeyboardKey>? get triggers => _triggers;
+  Iterable<LogicalKeyboardKey> get triggers => _triggers;
   late final Set<LogicalKeyboardKey> _triggers = keys.expand(
     (LogicalKeyboardKey key) => _unmapSynonyms[key] ?? <LogicalKeyboardKey>[key]).toSet();
 
@@ -540,7 +540,7 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   final bool meta;
 
   @override
-  Iterable<LogicalKeyboardKey>? get triggers sync* {
+  Iterable<LogicalKeyboardKey> get triggers sync* {
     yield trigger;
   }
 
@@ -636,23 +636,20 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
     }
   }
 
-  static Map<LogicalKeyboardKey?, List<_ActivatorIntentPair>> _indexShortcuts(Map<ShortcutActivator, Intent> source) {
-    final Map<LogicalKeyboardKey?, List<_ActivatorIntentPair>> result = <LogicalKeyboardKey?, List<_ActivatorIntentPair>>{};
+  static Map<LogicalKeyboardKey, List<_ActivatorIntentPair>> _indexShortcuts(Map<ShortcutActivator, Intent> source) {
+    final Map<LogicalKeyboardKey, List<_ActivatorIntentPair>> result = <LogicalKeyboardKey, List<_ActivatorIntentPair>>{};
     source.forEach((ShortcutActivator activator, Intent intent) {
-      // Use a intermediate variable because Dart reports an error otherwise.
-      // https://github.com/dart-lang/language/issues/1572
-      final Iterable<LogicalKeyboardKey?>? triggeringKeys = activator.triggers;
-      for (final LogicalKeyboardKey? trigger in triggeringKeys ?? <LogicalKeyboardKey?>[null]) {
+      for (final LogicalKeyboardKey trigger in activator.triggers) {
         result.putIfAbsent(trigger, () => <_ActivatorIntentPair>[])
           .add(_ActivatorIntentPair(activator, intent));
       }
     });
     return result;
   }
-  Map<LogicalKeyboardKey?, List<_ActivatorIntentPair>> get _indexedShortcuts {
+  Map<LogicalKeyboardKey, List<_ActivatorIntentPair>> get _indexedShortcuts {
     return _indexedShortcutsCache ??= _indexShortcuts(_shortcuts);
   }
-  Map<LogicalKeyboardKey?, List<_ActivatorIntentPair>>? _indexedShortcutsCache;
+  Map<LogicalKeyboardKey, List<_ActivatorIntentPair>>? _indexedShortcutsCache;
 
   /// Returns the [Intent], if any, that matches the current set of pressed
   /// keys.
