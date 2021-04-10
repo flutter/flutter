@@ -39,13 +39,8 @@ source_set("flutter_windows_headers") {
 
   public_deps = [ "//flutter/shell/platform/common:common_cpp_library_headers" ]
 
-  if (target_os == "winuwp") {
-    configs +=
-        [ "//flutter/shell/platform/common:desktop_library_implementation" ]
-  } else {
-    configs +=
-        [ "//flutter/shell/platform/common:desktop_library_implementation" ]
-  }
+  configs +=
+      [ "//flutter/shell/platform/common:desktop_library_implementation" ]
 
   public_configs =
       [ "//flutter/shell/platform/common:relative_flutter_library_headers" ]
