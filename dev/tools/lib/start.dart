@@ -170,8 +170,6 @@ class StartCommand extends Command<void> {
           'Text should match the regex pattern /${releaseCandidateBranchRegex.pattern}/.');
     }
 
-    // TODO(fujino): add dart-hash flags, https://blah.com
-
     final Int64 unixDate = Int64(DateTime.now().millisecondsSinceEpoch);
     final pb.ConductorState state = pb.ConductorState();
 
