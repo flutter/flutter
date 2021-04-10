@@ -83,10 +83,6 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
         defaultsTo: true,
         hide: !verboseHelp,
       )
-      ..addFlag('include-dsym',
-          help: 'Whether to include dSYM and bcsymbolmap to xcframework',
-          negatable: false,
-          defaultsTo: false)
       ..addFlag('cocoapods',
         help: 'Produce a Flutter.podspec instead of an engine Flutter.xcframework (recommended if host app uses CocoaPods).',
       )
@@ -530,15 +526,14 @@ end
       for (Directory framework in frameworks) ...<String>[
         '-framework',
         framework.path,
-        if (boolArg('include-dsym'))
-          ...framework.parent
-              .listSync()
-              .where((FileSystemEntity entity) =>
-                  entity.basename.endsWith('bcsymbolmap') ||
-                  entity.basename.endsWith('dSYM'))
-              .map((FileSystemEntity entity) =>
-                  <String>['-debug-symbols', entity.path])
-              .expand((i) => i)
+        ...framework.parent
+            .listSync()
+            .where((FileSystemEntity entity) =>
+                entity.basename.endsWith('bcsymbolmap') ||
+                entity.basename.endsWith('dSYM'))
+            .map((FileSystemEntity entity) =>
+                <String>['-debug-symbols', entity.path])
+            .expand((i) => i)
       ],
       '-output',
       outputDirectory.childDirectory('$frameworkBinaryName.xcframework').path
