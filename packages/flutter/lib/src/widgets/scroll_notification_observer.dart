@@ -121,5 +121,6 @@ class ScrollNotificationObserver extends StatefulWidget {
     return context.dependOnInheritedWidgetOfExactType<_ScrollNotificationObserverScope>()?._scrollNotificationObserverState;
   }
 
+  @override
   ScrollNotificationObserverState createState() => ScrollNotificationObserverState();
 }
