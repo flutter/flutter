@@ -546,11 +546,6 @@ class RenderCustomPaint extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  @override
-  Size computeSizeForNoChild(BoxConstraints constraints) {
-    return constraints.constrain(preferredSize);
-  }
-
   void _paintWithPainter(Canvas canvas, Offset offset, CustomPainter painter) {
     late int debugPreviousCanvasSaveCount;
     canvas.save();

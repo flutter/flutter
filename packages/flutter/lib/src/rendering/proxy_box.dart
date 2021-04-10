@@ -2716,11 +2716,6 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   PointerSignalEventListener? onPointerSignal;
 
   @override
-  Size computeSizeForNoChild(BoxConstraints constraints) {
-    return constraints.biggest;
-  }
-
-  @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
     if (event is PointerDownEvent)
@@ -2875,11 +2870,6 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
     // the callbacks from being called.
     _validForMouseTracker = false;
     super.detach();
-  }
-
-  @override
-  Size computeSizeForNoChild(BoxConstraints constraints) {
-    return constraints.biggest;
   }
 
   @override
