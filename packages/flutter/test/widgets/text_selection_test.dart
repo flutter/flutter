@@ -487,7 +487,7 @@ void main() {
     expect(renderEditable.selectPositionAtCalled, isTrue);
   });
 
-    testWidgets('TextSelectionGestureDetectorBuilder left click', (WidgetTester tester) async {
+    testWidgets('TextSelectionGestureDetectorBuilder right click', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
 
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
@@ -506,13 +506,13 @@ void main() {
         .getLocalRectForCaret(const TextPosition(offset: 10)).center;
     final Offset globalCharLocation = charLocation + tester.getTopLeft(find.byType(FakeEditable));
 
-    // Left clicking on a word should select it
+    // Right clicking on a word should select it
     await gesture.down(globalCharLocation);
     await gesture.up();
     await tester.pump();
     expect(renderEditable.selectWordCalled, isTrue);
 
-    // Left clicking on a word within a selection shouldn't change the selection
+    // Right clicking on a word within a selection shouldn't change the selection
     renderEditable.selectWordCalled = false;
     renderEditable.selection = const TextSelection(baseOffset: 3, extentOffset: 20);
     await gesture.down(globalCharLocation);
@@ -520,7 +520,7 @@ void main() {
     await tester.pump();
     expect(renderEditable.selectWordCalled, isFalse);
 
-    // Left clicking on a word within a reverse (right-to-left) selection shouldn't change the selection
+    // Right clicking on a word within a reverse (right-to-left) selection shouldn't change the selection
     renderEditable.selectWordCalled = false;
     renderEditable.selection = const TextSelection(baseOffset: 20, extentOffset: 3);
     await gesture.down(globalCharLocation);
