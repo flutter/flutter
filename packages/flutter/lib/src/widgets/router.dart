@@ -630,7 +630,7 @@ class _RouterState<T> extends State<Router<T>> {
           widget.routerDelegate == originalWidget.routerDelegate) {
         return SynchronousFuture<T>(data);
       }
-      return _never as Future<T> ;
+      return _never as Future<T>;
     };
   }
 
