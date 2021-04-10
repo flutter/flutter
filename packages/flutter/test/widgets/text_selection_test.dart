@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/gestures.dart' show PointerDeviceKind;
+import 'package:flutter/gestures.dart' show PointerDeviceKind, kSecondaryButton;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -485,6 +485,43 @@ void main() {
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
     expect(state.showToolbarCalled, isTrue);
     expect(renderEditable.selectPositionAtCalled, isTrue);
+  });
+
+    testWidgets('TextSelectionGestureDetectorBuilder left click', (WidgetTester tester) async {
+    await pumpTextSelectionGestureDetectorBuilder(tester);
+
+    final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
+    renderEditable.text = const TextSpan(text: 'one two three four five six seven');
+    await tester.pump();
+
+    final TestGesture gesture = await tester.createGesture(
+      pointer: 0,
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryButton,
+    );
+    addTearDown(gesture.removePointer);
+
+    // Left clicking on a word should select it
+    await gesture.down(const Offset(200.0, 200.0));
+    await gesture.up();
+    await tester.pump();
+    expect(renderEditable.selectWordCalled, isTrue);
+
+    // Left clicking on a word within a selection shouldn't change the selection
+    renderEditable.selectWordCalled = false;
+    renderEditable.selection = const TextSelection(baseOffset: 3, extentOffset: 20);
+    await gesture.down(const Offset(200.0, 200.0));
+    await gesture.up();
+    await tester.pump();
+    expect(renderEditable.selectWordCalled, isFalse);
+
+    // Left clicking on a word within a reverse (right-to-left) selection shouldn't change the selection
+    renderEditable.selectWordCalled = false;
+    renderEditable.selection = const TextSelection(baseOffset: 20, extentOffset: 3);
+    await gesture.down(const Offset(200.0, 200.0));
+    await gesture.up();
+    await tester.pump();
+    expect(renderEditable.selectWordCalled, isFalse);    
   });
 
   testWidgets('test TextSelectionGestureDetectorBuilder tap', (WidgetTester tester) async {
