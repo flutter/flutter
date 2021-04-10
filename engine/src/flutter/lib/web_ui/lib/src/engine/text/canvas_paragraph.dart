@@ -134,6 +134,7 @@ class CanvasParagraph implements EngineParagraph {
 
     // 1. Set paragraph-level styles.
     _applyNecessaryParagraphStyles(element: rootElement, style: paragraphStyle);
+    _applySpanStylesToParagraph(element: rootElement, spans: spans);
     final html.CssStyleDeclaration cssStyle = rootElement.style;
     cssStyle
       ..position = 'absolute'
@@ -281,6 +282,39 @@ void _applyNecessaryParagraphStyles({
   }
   if (style._textDirection != null) {
     cssStyle.direction = _textDirectionToCss(style._textDirection);
+  }
+}
+
+/// Applies some span-level style to a paragraph [element].
+///
+/// For example, it looks for the greatest font size among spans, and applies it
+/// to the paragraph. While this seems to have no effect, it prevents the
+/// paragraph from inheriting its font size from the body tag, which leads to
+/// incorrect vertical alignment of spans.
+void _applySpanStylesToParagraph({
+  required html.HtmlElement element,
+  required List<ParagraphSpan> spans,
+}) {
+  double fontSize = 0.0;
+  String? fontFamily;
+  for (final ParagraphSpan span in spans) {
+    if (span is FlatTextSpan) {
+      final double? spanFontSize = span.style._fontSize;
+      if (spanFontSize != null && spanFontSize > fontSize) {
+        fontSize = spanFontSize;
+        if (span.style._isFontFamilyProvided) {
+          fontFamily = span.style._effectiveFontFamily;
+        }
+      }
+    }
+  }
+
+  final html.CssStyleDeclaration cssStyle = element.style;
+  if (fontSize != 0.0) {
+    cssStyle.fontSize = '${fontSize}px';
+  }
+  if (fontFamily != null) {
+    cssStyle.fontFamily = canonicalizeFontFamily(fontFamily);
   }
 }
 

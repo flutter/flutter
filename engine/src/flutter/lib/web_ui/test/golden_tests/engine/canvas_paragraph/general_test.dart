@@ -4,6 +4,7 @@
 
 // @dart = 2.6
 import 'dart:async';
+import 'dart:html' as html;
 import 'dart:math' as math;
 
 import 'package:test/bootstrap/browser.dart';
@@ -224,6 +225,63 @@ void testMain() async {
     final canvas = DomCanvas(domRenderer.createElement('flt-picture'));
     testGiantParagraphStyles(canvas);
     return takeScreenshot(canvas, bounds, 'canvas_paragraph_giant_paragraph_style_dom');
+  });
+
+  test('giant font size on the body tag (DOM)', () async {
+    const Rect bounds = Rect.fromLTWH(0, 0, 600, 200);
+
+    // Store the old font size value on the body, and set a gaint font size.
+    final String oldBodyFontSize = html.document.body.style.fontSize;
+    html.document.body.style.fontSize = '100px';
+
+    final canvas = DomCanvas(domRenderer.createElement('flt-picture'));
+    Offset offset = Offset(10.0, 10.0);
+
+    final CanvasParagraph paragraph = rich(
+      ParagraphStyle(fontFamily: 'Roboto'),
+      (CanvasParagraphBuilder builder) {
+        builder.pushStyle(EngineTextStyle.only(color: yellow, fontSize: 24.0));
+        builder.addText('Lorem ');
+        builder.pushStyle(EngineTextStyle.only(color: red, fontSize: 48.0));
+        builder.addText('ipsum');
+      },
+    )..layout(constrain(double.infinity));
+    final Rect rect = Rect.fromLTWH(offset.dx, offset.dy, paragraph.maxIntrinsicWidth, paragraph.height);
+    canvas.drawRect(rect, SurfacePaintData()..color = black);
+    canvas.drawParagraph(paragraph, offset);
+    offset = offset.translate(paragraph.maxIntrinsicWidth, 0.0);
+
+    // Add some extra padding between the two paragraphs.
+    offset = offset.translate(20.0, 0.0);
+
+    // Use the same height as the previous paragraph so that the 2 paragraphs
+    // look nice in the screenshot.
+    final double placeholderHeight = paragraph.height;
+    final double placeholderWidth = paragraph.height * 2;
+
+    final CanvasParagraph paragraph2 = rich(
+      ParagraphStyle(),
+      (CanvasParagraphBuilder builder) {
+        builder.addPlaceholder(placeholderWidth, placeholderHeight, PlaceholderAlignment.baseline, baseline: TextBaseline.alphabetic);
+      },
+    )..layout(constrain(double.infinity));
+    final Rect rect2 = Rect.fromLTWH(offset.dx, offset.dy, paragraph2.maxIntrinsicWidth, paragraph2.height);
+    canvas.drawRect(rect2, SurfacePaintData()..color = black);
+    canvas.drawParagraph(paragraph2, offset);
+    // Draw a rect in the placeholder.
+    // Leave some padding around the placeholder to make the black paragraph
+    // background visible.
+    final double padding = 5;
+    final TextBox placeholderBox = paragraph2.getBoxesForPlaceholders().single;
+    canvas.drawRect(
+      placeholderBox.toRect().shift(offset).deflate(padding),
+      SurfacePaintData()..color = red,
+    );
+
+    await takeScreenshot(canvas, bounds, 'canvas_paragraph_giant_body_font_size_dom');
+
+    // Restore the old font size value.
+    html.document.body.style.fontSize = oldBodyFontSize;
   });
 
   test('paints spans with varying heights/baselines', () {
