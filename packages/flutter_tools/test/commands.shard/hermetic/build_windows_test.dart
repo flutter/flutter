@@ -175,12 +175,28 @@ void main() {
 
     expect(createTestCommandRunner(command).run(
       const <String>['windows', '--no-pub']
-    ), throwsToolExit());
+    ), throwsToolExit(message: '"build windows" only supported on Windows hosts.'));
   }, overrides: <Type, Generator>{
     Platform: () => notWindowsPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
+
+  testUsingContext('Windows build fails when feature is disabled', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
+    final BuildWindowsCommand command = BuildWindowsCommand()
+      ..visualStudioOverride = fakeVisualStudio;
+    setUpMockProjectFilesForBuild();
+
+    expect(createTestCommandRunner(command).run(
+        const <String>['windows', '--no-pub']
+    ), throwsToolExit(message: '"build windows" is not currently supported. To enable, run "flutter config --enable-windows-desktop".'));
+  }, overrides: <Type, Generator>{
+    Platform: () => windowsPlatform,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: false),
   });
 
   testUsingContext('Windows build does not spew stdout to status logger', () async {
@@ -474,6 +490,22 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
     FeatureFlags: () => TestFeatureFlags(isWindowsUwpEnabled: true),
   });
 
+  testUsingContext('Windows UWP uild fails on non windows platform', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
+    final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
+      ..visualStudioOverride = fakeVisualStudio;
+    setUpMockProjectFilesForBuild();
+
+    expect(createTestCommandRunner(command).run(
+        const <String>['winuwp', '--no-pub']
+    ), throwsToolExit(message: '"build winuwp" only supported on Windows hosts.'));
+  }, overrides: <Type, Generator>{
+    Platform: () => notWindowsPlatform,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isWindowsUwpEnabled: true),
+  });
+
   testUsingContext('Windows UWP build fails when the project version is out of date', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
     final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
@@ -489,6 +521,24 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isWindowsUwpEnabled: true),
+  });
+
+  testUsingContext('Windows UWP build fails when feature is disabled', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
+    final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
+      ..visualStudioOverride = fakeVisualStudio;
+    setUpMockProjectFilesForBuild();
+
+    // This message should include 'To enable, run "flutter config --enable-windows-uwp-desktop"."
+    // once the `windowsUwpEmbedding` feature is available on all platforms.
+    expect(createTestCommandRunner(command).run(
+        const <String>['winuwp', '--no-pub']
+    ), throwsToolExit(message: RegExp(r'"build winuwp" is not currently supported\.$')));
+  }, overrides: <Type, Generator>{
+    Platform: () => windowsPlatform,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isWindowsUwpEnabled: false),
   });
 
   testUsingContext('Windows UWP build fails after writing Cmake file', () async {
