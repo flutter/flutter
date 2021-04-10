@@ -737,7 +737,6 @@ class _AppBarState extends State<AppBar> {
     _scrolledUnder = notification.depth == 0 && notification.metrics.extentBefore > 0;
     if (_scrolledUnder != oldScrolledUnder) {
       setState(() {
-        print('scrolledUnder=$_scrolledUnder');
         // React to a change in MaterialState.scrolledUnder
       });
     }

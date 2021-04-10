@@ -60,8 +60,8 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
     return true;
   }
 
-  /// Add a [ScrollNotificationCallback] that will be called each time a descendant
-  /// scrolls.
+  /// Add a [ScrollNotificationCallback] that will be called each time
+  /// a descendant scrolls.
   void addListener(ScrollNotificationCallback listener) {
     assert(_debugAssertNotDisposed());
     _listeners!.add(_ListenerEntry(listener));
