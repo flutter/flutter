@@ -141,11 +141,6 @@ class KeySet<T extends KeyboardKey> {
 
 /// An interface to define the keyboard key combination to trigger a shortcut.
 ///
-/// [ShortcutActivator]s are used by [Shortcuts] widgets, and are mapped to to
-/// [Intent]s, the behavior that the key combination should trigger. When a
-/// [Shortcuts] widget receives a key event, it looks up a matching activator
-/// in the following way, and triggers the intent it maps to:
-///
 /// [ShortcutActivator]s are used by [Shortcuts] widgets, and are mapped to
 /// [Intent]s, the intended behavior that the key combination should trigger.
 /// When a [Shortcuts] widget receives a key event, its [ShortcutManager] looks
