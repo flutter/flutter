@@ -2,8 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/file.dart';
 import 'package:package_config/package_config.dart';
+
+import '../base/version.dart';
 
 final RegExp _languageVersion = RegExp(r'\/\/\s*@dart\s*=\s*([0-9])\.([0-9]+)');
 final RegExp _declarationEnd = RegExp('(import)|(library)|(part)');
@@ -12,6 +16,28 @@ const String _blockCommentEnd = '*/';
 
 /// The first language version where null safety was available by default.
 final LanguageVersion nullSafeVersion = LanguageVersion(2, 12);
+
+LanguageVersion? _currentLanguageVersion;
+
+/// Lookup the current Dart language version.
+LanguageVersion currentLanguageVersion(FileSystem fileSystem, String flutterRoot) {
+  if (_currentLanguageVersion != null) {
+    return _currentLanguageVersion!;
+  }
+  // Either reading the file or parsing the version could fail on a corrupt Dart SDK.
+  // let it crash so it shows up in crash logging.
+  final File versionFile = fileSystem.file(fileSystem.path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'version'));
+  if (!versionFile.existsSync() && _inUnitTest()) {
+    return LanguageVersion(2, 12);
+  }
+  final Version version = Version.parse(versionFile.readAsStringSync())!;
+  return _currentLanguageVersion = LanguageVersion(version.major, version.minor);
+}
+
+// Whether the tool is executing in a unit test.
+bool _inUnitTest() {
+  return Zone.current[#test.declarer] != null;
+}
 
 /// Attempts to read the language version of a dart [file].
 ///
@@ -22,7 +48,7 @@ final LanguageVersion nullSafeVersion = LanguageVersion(2, 12);
 ///
 /// The specification for the language version tag is defined at:
 /// https://github.com/dart-lang/language/blob/master/accepted/future-releases/language-versioning/feature-specification.md#individual-library-language-version-override
-LanguageVersion determineLanguageVersion(File file, Package package) {
+LanguageVersion determineLanguageVersion(File file, Package? package, String flutterRoot) {
   int blockCommentDepth = 0;
   // If reading the file fails, default to a null-safe version. The
   // command will likely fail later in the process with a better error
@@ -31,7 +57,7 @@ LanguageVersion determineLanguageVersion(File file, Package package) {
   try {
     lines = file.readAsLinesSync();
   } on FileSystemException {
-    return nullSafeVersion;
+    return currentLanguageVersion(file.fileSystem, flutterRoot);
   }
 
   for (final String line in lines) {
@@ -84,8 +110,8 @@ LanguageVersion determineLanguageVersion(File file, Package package) {
 
   // If the language version cannot be found, use the package version.
   if (package != null) {
-    return package.languageVersion ?? nullSafeVersion;
+    return package.languageVersion ?? currentLanguageVersion(file.fileSystem, flutterRoot);
   }
-  // Default to 2.12
-  return nullSafeVersion;
+  // Default to current version.
+  return currentLanguageVersion(file.fileSystem, flutterRoot);
 }

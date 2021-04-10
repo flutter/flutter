@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/flutter_cache.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
@@ -64,13 +65,13 @@ void main() {
     });
 
     testWithoutContext('should throw when locking is not acquired', () {
-      final Cache cache = Cache.test();
+      final Cache cache = Cache.test(processManager: FakeProcessManager.any());
 
       expect(cache.checkLockAcquired, throwsStateError);
     });
 
     testWithoutContext('should not throw when locking is disabled', () {
-      final Cache cache = Cache.test();
+      final Cache cache = Cache.test(processManager: FakeProcessManager.any());
       Cache.disableLocking();
 
       expect(cache.checkLockAcquired, returnsNormally);
@@ -79,7 +80,7 @@ void main() {
     testWithoutContext('should not throw when lock is acquired', () async {
       Cache.flutterRoot = '';
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final Cache cache = Cache.test(fileSystem: fileSystem);
+      final Cache cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
       fileSystem.file(fileSystem.path.join('bin', 'cache', 'lockfile'))
         .createSync(recursive: true);
 
@@ -91,7 +92,7 @@ void main() {
 
     testWithoutContext('throws tool exit when lockfile open fails', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final Cache cache = Cache.test(fileSystem: fileSystem);
+      final Cache cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
       fileSystem.file(fileSystem.path.join('bin', 'cache', 'lockfile'))
         .createSync(recursive: true);
 
@@ -99,9 +100,12 @@ void main() {
     }, skip: true); // TODO(jonahwilliams): implement support for lock so this can be tested with the memory file system.
 
     testWithoutContext('should not throw when FLUTTER_ALREADY_LOCKED is set', () {
-     final Cache cache = Cache.test(platform: FakePlatform(environment: <String, String>{
-       'FLUTTER_ALREADY_LOCKED': 'true',
-     }));
+     final Cache cache = Cache.test(
+       platform: FakePlatform(environment: <String, String>{
+        'FLUTTER_ALREADY_LOCKED': 'true',
+       }),
+       processManager: FakeProcessManager.any(),
+     );
 
       expect(cache.checkLockAcquired, returnsNormally);
     });
@@ -115,6 +119,7 @@ void main() {
       final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_artifact.');
       final Directory downloadDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_download.');
 
+      when(mockCache.getVersionFor(any)).thenReturn('asdasd');
       when(mockCache.getArtifactDirectory(any)).thenReturn(artifactDir);
       when(mockCache.getDownloadDir()).thenReturn(downloadDir);
       when(mockCache.setStampFor(any, any)).thenAnswer((_) {
@@ -124,6 +129,22 @@ void main() {
       await artifact.update(MockArtifactUpdater(), logger, fileSystem, MockOperatingSystemUtils());
 
       expect(logger.errorText, contains('stamp write failed'));
+    });
+
+    testWithoutContext('Continues on missing version file', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final BufferLogger logger = BufferLogger.test();
+      final Cache mockCache = MockCache();
+      final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_artifact.');
+      final Directory downloadDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_download.');
+
+      when(mockCache.getVersionFor(any)).thenReturn(null); // version is missing.
+      when(mockCache.getArtifactDirectory(any)).thenReturn(artifactDir);
+      when(mockCache.getDownloadDir()).thenReturn(downloadDir);
+      final FakeSimpleArtifact artifact = FakeSimpleArtifact(mockCache);
+      await artifact.update(MockArtifactUpdater(), logger, fileSystem, MockOperatingSystemUtils());
+
+      expect(logger.errorText, contains('No known version for the artifact name "fake"'));
     });
 
     testWithoutContext('Gradle wrapper should not be up to date, if some cached artifact is not available', () {
@@ -286,9 +307,10 @@ void main() {
     testWithoutContext('Invalid URI for FLUTTER_STORAGE_BASE_URL throws ToolExit', () async {
       final Cache cache = Cache.test(
         platform: FakePlatform(environment: <String, String>{
-        'FLUTTER_STORAGE_BASE_URL': ' http://foo',
-        },
-      ));
+          'FLUTTER_STORAGE_BASE_URL': ' http://foo',
+        }),
+        processManager: FakeProcessManager.any(),
+      );
 
       expect(() => cache.storageBaseUrl, throwsToolExit());
     });
@@ -399,7 +421,7 @@ void main() {
   });
 
   testWithoutContext('IosUsbArtifacts uses unsigned when specified', () async {
-    final Cache cache = Cache.test();
+    final Cache cache = Cache.test(processManager: FakeProcessManager.any());
     cache.useUnsignedMacBinaries = true;
 
     final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('name', cache, platform: FakePlatform(operatingSystem: 'macos'));
@@ -407,7 +429,7 @@ void main() {
   });
 
   testWithoutContext('IosUsbArtifacts does not use unsigned when not specified', () async {
-    final Cache cache = Cache.test();
+    final Cache cache = Cache.test(processManager: FakeProcessManager.any());
     final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('name', cache, platform: FakePlatform(operatingSystem: 'macos'));
 
     expect(iosUsbArtifacts.archiveUri.toString(), isNot(contains('/unsigned/')));
@@ -436,7 +458,7 @@ void main() {
   });
 
   testWithoutContext('FontSubset in universal artifacts', () {
-    final Cache cache = Cache.test();
+    final Cache cache = Cache.test(processManager: FakeProcessManager.any());
     final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'linux'));
 
     expect(artifacts.developmentArtifact, DevelopmentArtifact.universal);
@@ -534,7 +556,7 @@ void main() {
   });
 
   testWithoutContext('macOS desktop artifacts ignore filtering when requested', () {
-    final Cache cache = Cache.test();
+    final Cache cache = Cache.test(processManager: FakeProcessManager.any());
     final MacOSEngineArtifacts artifacts = MacOSEngineArtifacts(cache, platform: FakePlatform(operatingSystem: 'linux'));
     cache.includeAllPlatforms = false;
     cache.platformOverrideArtifacts = <String>{'macos'};
@@ -543,7 +565,7 @@ void main() {
   });
 
   testWithoutContext('Windows desktop artifacts ignore filtering when requested', () {
-    final Cache cache = Cache.test();
+    final Cache cache = Cache.test(processManager: FakeProcessManager.any());
     final WindowsEngineArtifacts artifacts = WindowsEngineArtifacts(
       cache,
       platform: FakePlatform(operatingSystem: 'linux'),
@@ -555,7 +577,7 @@ void main() {
   });
 
   testWithoutContext('Windows desktop artifacts include profile and release artifacts', () {
-    final Cache cache = Cache.test();
+    final Cache cache = Cache.test(processManager: FakeProcessManager.any());
     final WindowsEngineArtifacts artifacts = WindowsEngineArtifacts(
       cache,
       platform: FakePlatform(operatingSystem: 'windows'),
@@ -564,6 +586,20 @@ void main() {
     expect(artifacts.getBinaryDirs(), containsAll(<Matcher>[
       contains(contains('profile')),
       contains(contains('release')),
+    ]));
+  });
+
+  testWithoutContext('Windows UWP desktop artifacts include profile, debug, and release artifacts', () {
+    final Cache cache = Cache.test(processManager: FakeProcessManager.any());
+    final WindowsUwpEngineArtifacts artifacts = WindowsUwpEngineArtifacts(
+      cache,
+      platform: FakePlatform(operatingSystem: 'windows'),
+    );
+
+    expect(artifacts.getBinaryDirs(), containsAll(<Matcher>[
+      contains(contains('profile')),
+      contains(contains('release')),
+      contains(contains('debug')),
     ]));
   });
 

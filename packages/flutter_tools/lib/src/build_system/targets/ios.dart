@@ -12,7 +12,7 @@ import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../build_info.dart';
-import '../../globals.dart' as globals hide fs, logger, processManager, artifacts;
+import '../../globals.dart' as globals show xcode;
 import '../../macos/xcode.dart';
 import '../../project.dart';
 import '../build_system.dart';

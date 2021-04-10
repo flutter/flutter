@@ -12,7 +12,7 @@ import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../template.dart';
 import 'deferred_components_validator.dart';
@@ -267,7 +267,7 @@ class _DeferredComponentAndroidFiles {
         templateRenderer: globals.templateRenderer,
       );
     }
-    final Map<String, dynamic> context = <String, dynamic>{
+    final Map<String, Object> context = <String, Object>{
       'androidIdentifier': FlutterProject.current().manifest.androidPackage ?? 'com.example.${FlutterProject.current().manifest.appName}',
       'componentName': name,
     };

@@ -194,4 +194,96 @@ void main() {
   InputDecorationTheme(hasFloatingPlaceholder: false);
   InputDecorationTheme();
   inputDecorationTheme.hasFloatingPlaceholder;
+
+  // Changes made in https://github.com/flutter/flutter/pull/66482
+  ThemeData(textSelectionColor: Colors.red);
+  ThemeData(cursorColor: Colors.blue);
+  ThemeData(textSelectionHandleColor: Colors.yellow);
+  ThemeData(useTextSelectionTheme: false);
+  ThemeData(textSelectionColor: Colors.red, useTextSelectionTheme: false);
+  ThemeData(cursorColor: Colors.blue, useTextSelectionTheme: false);
+  ThemeData(textSelectionHandleColor: Colors.yellow, useTextSelectionTheme: false);
+  ThemeData(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+  );
+  ThemeData(
+    textSelectionHandleColor: Colors.yellow,
+    cursorColor: Colors.blue,
+  );
+  ThemeData(
+    textSelectionColor: Colors.red,
+    textSelectionHandleColor: Colors.yellow,
+  );
+  ThemeData(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+    useTextSelectionTheme: false,
+  );
+  ThemeData(
+    textSelectionHandleColor: Colors.yellow,
+    cursorColor: Colors.blue,
+    useTextSelectionTheme: true,
+  );
+  ThemeData(
+    textSelectionColor: Colors.red,
+    textSelectionHandleColor: Colors.yellow,
+    useTextSelectionTheme: false,
+  );
+  ThemeData(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+    textSelectionHandleColor: Colors.yellow,
+  );
+  ThemeData(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+    textSelectionHandleColor: Colors.yellow,
+    useTextSelectionTheme: false,
+  );
+  ThemeData.raw(textSelectionColor: Colors.red);
+  ThemeData.raw(cursorColor: Colors.blue);
+  ThemeData.raw(textSelectionHandleColor: Colors.yellow);
+  ThemeData.raw(useTextSelectionTheme: false);
+  ThemeData.raw(textSelectionColor: Colors.red, useTextSelectionTheme: false);
+  ThemeData.raw(cursorColor: Colors.blue, useTextSelectionTheme: false);
+  ThemeData.raw(textSelectionHandleColor: Colors.yellow, useTextSelectionTheme: false);
+  ThemeData.raw(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+  );
+  ThemeData.raw(
+    textSelectionHandleColor: Colors.yellow,
+    cursorColor: Colors.blue,
+  );
+  ThemeData.raw(
+    textSelectionColor: Colors.red,
+    textSelectionHandleColor: Colors.yellow,
+  );
+  ThemeData.raw(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+    useTextSelectionTheme: false,
+  );
+  ThemeData.raw(
+    textSelectionHandleColor: Colors.yellow,
+    cursorColor: Colors.blue,
+    useTextSelectionTheme: true,
+  );
+  ThemeData.raw(
+    textSelectionColor: Colors.red,
+    textSelectionHandleColor: Colors.yellow,
+    useTextSelectionTheme: false,
+  );
+  ThemeData.raw(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+    textSelectionHandleColor: Colors.yellow,
+  );
+  ThemeData.raw(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+    textSelectionHandleColor: Colors.yellow,
+    useTextSelectionTheme: false,
+  );
 }

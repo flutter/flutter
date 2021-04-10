@@ -233,7 +233,7 @@ class _ViewportElement extends MultiChildRenderObjectElement {
     // TODO(ianh): cache the keys to make this faster
     if (widget.center != null) {
       renderObject.center = children.singleWhere(
-        (Element element) => element.widget.key == widget.center
+        (Element element) => element.widget.key == widget.center,
       ).renderObject as RenderSliver?;
     } else if (children.isNotEmpty) {
       renderObject.center = children.first.renderObject as RenderSliver?;

@@ -19,7 +19,7 @@ import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 
 class MockFile extends Mock implements File {}
 class MockFileSystem extends Mock implements FileSystem {}
@@ -684,29 +684,46 @@ void main() {
     });
   });
 
-  test('skipCommandLookup invokes Process calls directly', () async {
-    final ErrorHandlingProcessManager processManager = ErrorHandlingProcessManager(
-      delegate: const LocalProcessManager(),
-      platform: windowsPlatform,
-    );
-
-    // Throws an argument error because package:process fails to locate the executable.
-    expect(() => processManager.runSync(<String>['foo']), throwsArgumentError);
-    expect(() => processManager.run(<String>['foo']), throwsArgumentError);
-    expect(() => processManager.start(<String>['foo']), throwsArgumentError);
-
-    // Throws process exception because the executable does not exist.
-    await ErrorHandlingProcessManager.skipCommandLookup<void>(() async {
-      expect(() => processManager.runSync(<String>['foo']), throwsA(isA<ProcessException>()));
-      expect(() => processManager.run(<String>['foo']), throwsA(isA<ProcessException>()));
-      expect(() => processManager.start(<String>['foo']), throwsA(isA<ProcessException>()));
-    });
-  });
-
   group('ProcessManager on windows throws tool exit', () {
     const int kDeviceFull = 112;
     const int kUserMappedSectionOpened = 1224;
     const int kUserPermissionDenied = 5;
+
+    test('when PackageProcess throws an exception containg non-executable bits', () {
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('', candidates: <String>['not-empty'])),
+        const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('', candidates: <String>['not-empty'])),
+      ]);
+
+      final ProcessManager processManager = ErrorHandlingProcessManager(
+        delegate: fakeProcessManager,
+        platform: windowsPlatform,
+      );
+
+      const String expectedMessage = 'The Flutter tool could not locate an executable with suitable permissions';
+
+      expect(() async => processManager.start(<String>['foo']),
+             throwsToolExit(message: expectedMessage));
+      expect(() async => processManager.runSync(<String>['foo']),
+             throwsToolExit(message: expectedMessage));
+    });
+
+    test('when PackageProcess throws an exception without containing non-executable bits', () {
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('', candidates: <String>[])),
+        const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('', candidates: <String>[])),
+      ]);
+
+      final ProcessManager processManager = ErrorHandlingProcessManager(
+        delegate: fakeProcessManager,
+        platform: windowsPlatform,
+      );
+
+      // If there were no located executables treat this as a programming error and rethrow the original
+      // exception.
+      expect(() async => processManager.start(<String>['foo']), throwsProcessException());
+      expect(() async => processManager.runSync(<String>['foo']), throwsProcessException());
+    });
 
     test('when the device is full', () {
       final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[

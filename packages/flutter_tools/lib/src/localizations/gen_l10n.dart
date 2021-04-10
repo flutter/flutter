@@ -6,11 +6,12 @@
 
 import 'package:meta/meta.dart';
 
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 
 import 'gen_l10n_templates.dart';
 import 'gen_l10n_types.dart';
@@ -32,7 +33,7 @@ void generateLocalizations({
     logger: logger,
   );
   if (options.useSyntheticPackage && !flutterManifest.generateSyntheticPackage) {
-    logger.printError(
+    throwToolExit(
       'Attempted to generate localizations code without having '
       'the flutter: generate flag turned on.'
       '\n'
@@ -40,7 +41,6 @@ void generateLocalizations({
       'been added and rebuild the project. Otherwise, the localizations '
       'source code will not be importable.'
     );
-    throw Exception();
   }
 
   precacheLanguageAndRegionTags();
@@ -66,12 +66,12 @@ void generateLocalizations({
         useSyntheticPackage: options.useSyntheticPackage ?? true,
         areResourceAttributesRequired: options.areResourceAttributesRequired ?? false,
         untranslatedMessagesFile: options?.untranslatedMessagesFile?.toFilePath(),
+        usesNullableGetter: options?.usesNullableGetter ?? true,
       )
       ..loadResources()
       ..writeOutputFiles(logger, isFromYaml: true);
   } on L10nException catch (e) {
-    logger.printError(e.message);
-    throw Exception();
+    throwToolExit(e.message);
   }
 }
 
@@ -545,6 +545,10 @@ class LocalizationsGenerator {
   AppResourceBundleCollection _allBundles;
   LocaleInfo _templateArbLocale;
   bool _useSyntheticPackage = true;
+  // Used to decide if the generated code is nullable or not
+  // (whether AppLocalizations? or AppLocalizations is returned from
+  // `static {name}Localizations{?} of (BuildContext context))`
+  bool _usesNullableGetter = true;
 
   /// The directory that contains the project's arb files, as well as the
   /// header file, if specified.
@@ -689,8 +693,10 @@ class LocalizationsGenerator {
     String projectPathString,
     bool areResourceAttributesRequired = false,
     String untranslatedMessagesFile,
+    bool usesNullableGetter = true,
   }) {
     _useSyntheticPackage = useSyntheticPackage;
+    _usesNullableGetter = usesNullableGetter;
     setProjectDir(projectPathString);
     setInputDirectory(inputPathString);
     setOutputDirectory(outputPathString ?? inputPathString);
@@ -1162,7 +1168,10 @@ class LocalizationsGenerator {
       .replaceAll('@(supportedLanguageCodes)', supportedLanguageCodes.join(', '))
       .replaceAll('@(messageClassImports)', sortedClassImports.join('\n'))
       .replaceAll('@(delegateClass)', delegateClass)
-      .replaceAll('@(requiresIntlImport)', _containsPluralMessage() ? "import 'package:intl/intl.dart' as intl;" : '');
+      .replaceAll('@(requiresFoundationImport)', _useDeferredLoading ? '' : "import 'package:flutter/foundation.dart';")
+      .replaceAll('@(requiresIntlImport)', _containsPluralMessage() ? "import 'package:intl/intl.dart' as intl;" : '')
+      .replaceAll('@(canBeNullable)', _usesNullableGetter ? '?' : '')
+      .replaceAll('@(needsNullCheck)', _usesNullableGetter ? '' : '!');
   }
 
   bool _containsPluralMessage() => _allMessages.any((Message message) => message.isPlural);

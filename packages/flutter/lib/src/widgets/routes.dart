@@ -416,6 +416,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   @override
   void dispose() {
     assert(!_transitionCompleter.isCompleted, 'Cannot dispose a $runtimeType twice.');
+    _animation?.removeStatusListener(_handleStatusChanged);
     _controller?.dispose();
     _transitionCompleter.complete(_result);
     super.dispose();
@@ -445,8 +446,7 @@ class LocalHistoryEntry {
   }
 
   void _notifyRemoved() {
-    if (onRemove != null)
-      onRemove!();
+    onRemove?.call();
   }
 }
 
@@ -1560,7 +1560,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
         key: _scopeKey,
         route: this,
         // _ModalScope calls buildTransitions() and buildChild(), defined above
-      )
+      ),
     );
   }
 
@@ -1833,11 +1833,12 @@ class RawDialogRoute<T> extends PopupRoute<T> {
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     if (_transitionBuilder == null) {
       return FadeTransition(
-          opacity: CurvedAnimation(
-            parent: animation,
-            curve: Curves.linear,
-          ),
-          child: child);
+        opacity: CurvedAnimation(
+          parent: animation,
+          curve: Curves.linear,
+        ),
+        child: child,
+      );
     } // Some default transition
     return _transitionBuilder!(context, animation, secondaryAnimation, child);
   }

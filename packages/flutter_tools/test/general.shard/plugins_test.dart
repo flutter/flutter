@@ -14,7 +14,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -27,7 +27,6 @@ import '../src/common.dart';
 import '../src/context.dart' hide FakeOperatingSystemUtils;
 import '../src/fakes.dart';
 import '../src/pubspec_schema.dart';
-import '../src/testbed.dart';
 
 void main() {
   group('plugins', () {
@@ -824,6 +823,32 @@ dependencies:
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
 
+      testUsingContext('Module using multiple old and new plugins should be wrapped with try catch', () async {
+        when(flutterProject.isModule).thenReturn(true);
+        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v2);
+
+        createOldJavaPlugin('abcplugin1');
+        createNewJavaPlugin1();
+
+        await injectPlugins(flutterProject, androidPlatform: true);
+
+        final File registrant = flutterProject.directory
+          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+          .childFile('GeneratedPluginRegistrant.java');
+        const String newPluginName = 'flutterEngine.getPlugins().add(new plugin1.UseNewEmbedding());';
+        const String oldPluginName = 'abcplugin1.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("abcplugin1.UseOldEmbedding"));';
+        final String content = registrant.readAsStringSync();
+        for(final String plugin in <String>[newPluginName,oldPluginName]){
+          expect(content, contains(plugin));
+          expect(content.split(plugin).first.trim().endsWith('try {'), isTrue);
+          expect(content.split(plugin).last.trim().startsWith('} catch(Exception e) {'), isTrue);
+        }
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+      });
+
       testUsingContext('Does not throw when AndroidManifest.xml is not found', () async {
         when(flutterProject.isModule).thenReturn(false);
 
@@ -1307,7 +1332,7 @@ flutter:
         projectDir.childFile('pubspec.yaml')..createSync(recursive: true)..writeAsStringSync(yamlString);
       }
 
-      test('validatePubspecForPlugin works', () async {
+      testUsingContext('validatePubspecForPlugin works', () async {
         const String pluginYaml = '''
   flutter:
     plugin:
@@ -1333,7 +1358,7 @@ flutter:
         ], androidIdentifier: 'AndroidPackage', webFileName: 'lib/SomeFile.dart');
       });
 
-      test('createPlatformsYamlMap should create the correct map', () async {
+      testUsingContext('createPlatformsYamlMap should create the correct map', () async {
         final YamlMap map = Plugin.createPlatformsYamlMap(<String>['ios', 'android', 'linux'], 'PluginClass', 'some.android.package');
         expect(map['ios'], <String, String> {
           'pluginClass' : 'PluginClass'
@@ -1347,7 +1372,7 @@ flutter:
         });
       });
 
-      test('createPlatformsYamlMap should create empty map', () async {
+      testUsingContext('createPlatformsYamlMap should create empty map', () async {
         final YamlMap map = Plugin.createPlatformsYamlMap(<String>[], null, null);
         expect(map.isEmpty, true);
       });

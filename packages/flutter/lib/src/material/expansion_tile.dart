@@ -242,8 +242,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       }
       PageStorage.of(context)?.writeState(context, _isExpanded);
     });
-    if (widget.onExpansionChanged != null)
-      widget.onExpansionChanged!(_isExpanded);
+    widget.onExpansionChanged?.call(_isExpanded);
   }
 
   Widget _buildChildren(BuildContext context, Widget? child) {
@@ -320,7 +319,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
         ),
         enabled: !closed,
       ),
-      offstage: closed
+      offstage: closed,
     );
 
     return AnimatedBuilder(

@@ -21,7 +21,7 @@ import '../base/process.dart';
 import '../base/time.dart';
 import '../build_info.dart';
 import '../device.dart';
-import '../device_port_forwader.dart';
+import '../device_port_forwarder.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../vmservice.dart';
@@ -51,7 +51,7 @@ final String _ipv6Loopback = InternetAddress.loopbackIPv6.address;
 
 // Enables testing the fuchsia isolate discovery
 Future<FlutterVmService> _kDefaultFuchsiaIsolateDiscoveryConnector(Uri uri) {
-  return connectToVmService(uri);
+  return connectToVmService(uri, logger: globals.logger);
 }
 
 Future<void> _kDefaultDartDevelopmentServiceStarter(
@@ -64,6 +64,7 @@ Future<void> _kDefaultDartDevelopmentServiceStarter(
     0,
     true,
     disableServiceAuthCodes,
+    logger: globals.logger,
   );
 }
 
@@ -698,7 +699,7 @@ class FuchsiaDevice extends Device {
         // netstat shows that the local port is actually being used on the IPv6
         // loopback (::1).
         final Uri uri = Uri.parse('http://[$_ipv6Loopback]:$port');
-        final FlutterVmService vmService = await connectToVmService(uri);
+        final FlutterVmService vmService = await connectToVmService(uri, logger: globals.logger);
         final List<FlutterView> flutterViews = await vmService.getFlutterViews();
         for (final FlutterView flutterView in flutterViews) {
           if (flutterView.uiIsolate == null) {

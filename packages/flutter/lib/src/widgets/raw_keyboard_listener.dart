@@ -121,8 +121,7 @@ class _RawKeyboardListenerState extends State<RawKeyboardListener> {
   }
 
   void _handleRawKeyEvent(RawKeyEvent event) {
-    if (widget.onKey != null)
-      widget.onKey!(event);
+    widget.onKey?.call(event);
   }
 
   @override

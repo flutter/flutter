@@ -102,8 +102,7 @@ class TestTextInput {
       case 'TextInput.clearClient':
         _client = 0;
         _isVisible = false;
-        if (onCleared != null)
-          onCleared!();
+        onCleared?.call();
         break;
       case 'TextInput.setEditingState':
         editingState = methodCall.arguments as Map<String, dynamic>;
@@ -167,10 +166,14 @@ class TestTextInput {
   }
 
   /// Simulates the user typing the given text.
+  ///
+  /// Calling this method replaces the content of the connected input field with
+  /// `text`, and places the caret at the end of the text.
   void enterText(String text) {
     assert(isRegistered);
     updateEditingValue(TextEditingValue(
       text: text,
+      selection: TextSelection.collapsed(offset: text.length),
     ));
   }
 

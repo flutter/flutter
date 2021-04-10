@@ -88,21 +88,6 @@ class _DropdownMenuPainter extends CustomPainter {
   }
 }
 
-// Do not use the platform-specific default scroll configuration.
-// Dropdown menus should never overscroll or display an overscroll indicator.
-class _DropdownScrollBehavior extends ScrollBehavior {
-  const _DropdownScrollBehavior();
-
-  @override
-  TargetPlatform getPlatform(BuildContext context) => Theme.of(context).platform;
-
-  @override
-  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) => child;
-
-  @override
-  ScrollPhysics getScrollPhysics(BuildContext context) => const ClampingScrollPhysics();
-}
-
 // The widget that is the button wrapping the menu items.
 class _DropdownMenuItemButton<T> extends StatefulWidget {
   const _DropdownMenuItemButton({
@@ -138,7 +123,10 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
 
     if (focused && inTraditionalMode) {
       final _MenuLimits menuLimits = widget.route.getMenuLimits(
-          widget.buttonRect, widget.constraints.maxHeight, widget.itemIndex);
+        widget.buttonRect,
+        widget.constraints.maxHeight,
+        widget.itemIndex,
+      );
       widget.route.scrollController!.animateTo(
         menuLimits.scrollOffset,
         curve: Curves.easeInOut,
@@ -150,9 +138,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
   void _handleOnTap() {
     final DropdownMenuItem<T> dropdownMenuItem = widget.route.items[widget.itemIndex].item!;
 
-    if (dropdownMenuItem.onTap != null) {
-      dropdownMenuItem.onTap!();
-    }
+    dropdownMenuItem.onTap?.call();
 
     Navigator.pop(
       context,
@@ -288,7 +274,14 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
             type: MaterialType.transparency,
             textStyle: route.style,
             child: ScrollConfiguration(
-              behavior: const _DropdownScrollBehavior(),
+              // Dropdown menus should never overscroll or display an overscroll indicator.
+              // The default scrollbar platforms will apply.
+              // Platform must use Theme and ScrollPhysics must be Clamping.
+              behavior: ScrollConfiguration.of(context).copyWith(
+                overscroll: false,
+                physics: const ClampingScrollPhysics(),
+                platform: Theme.of(context).platform,
+              ),
               child: PrimaryScrollController(
                 controller: widget.route.scrollController!,
                 child: Scrollbar(
@@ -461,7 +454,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
           style: style,
           dropdownColor: dropdownColor,
         );
-      }
+      },
     );
   }
 
@@ -1245,7 +1238,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
           _dropdownRoute!.itemHeights[index] = size.height;
         },
-      )
+      ),
     ];
 
     final NavigatorState navigator = Navigator.of(context);
@@ -1270,13 +1263,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       _removeDropdownRoute();
       if (!mounted || newValue == null)
         return;
-      if (widget.onChanged != null)
-        widget.onChanged!(newValue.result);
+      widget.onChanged?.call(newValue.result);
     });
 
-    if (widget.onTap != null) {
-      widget.onTap!();
-    }
+    widget.onTap?.call();
   }
 
   // When isDense is true, reduce the height of this button from _kMenuItemHeight to
@@ -1508,7 +1498,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     @Deprecated(
       'Use autovalidateMode parameter which provide more specific '
       'behaviour related to auto validation. '
-      'This feature was deprecated after v1.19.0.'
+      'This feature was deprecated after v1.19.0.',
     )
     bool autovalidate = false,
     AutovalidateMode? autovalidateMode,
@@ -1532,7 +1522,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
        assert(
          autovalidate == false ||
          autovalidate == true && autovalidateMode == null,
-         'autovalidate and autovalidateMode should not be used together.'
+         'autovalidate and autovalidateMode should not be used together.',
        ),
        decoration = decoration ?? InputDecoration(focusColor: focusColor),
        super(

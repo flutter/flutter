@@ -4,6 +4,54 @@
 
 import 'actions.dart';
 
+/// An [Intent] to delete a character in the backwards direction.
+///
+/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
+class DeleteTextIntent extends Intent{
+  /// Creates an instance of DeleteTextIntent.
+  const DeleteTextIntent();
+}
+
+/// An [Intent] to delete a word in the backwards direction.
+///
+/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
+class DeleteByWordTextIntent extends Intent{
+  /// Creates an instance of DeleteByWordTextIntent.
+  const DeleteByWordTextIntent();
+}
+
+/// An [Intent] to delete a line in the backwards direction.
+///
+/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
+class DeleteByLineTextIntent extends Intent{
+  /// Creates an instance of DeleteByLineTextIntent.
+  const DeleteByLineTextIntent();
+}
+
+/// An [Intent] to delete in the forward direction.
+///
+/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
+class DeleteForwardTextIntent extends Intent{
+  /// Creates an instance of DeleteForwardTextIntent.
+  const DeleteForwardTextIntent();
+}
+
+/// An [Intent] to delete a word in the forward direction.
+///
+/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
+class DeleteForwardByWordTextIntent extends Intent{
+  /// Creates an instance of DeleteByWordTextIntent.
+  const DeleteForwardByWordTextIntent();
+}
+
+/// An [Intent] to delete a line in the forward direction.
+///
+/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
+class DeleteForwardByLineTextIntent extends Intent{
+  /// Creates an instance of DeleteByLineTextIntent.
+  const DeleteForwardByLineTextIntent();
+}
+
 /// An [Intent] to send the event straight to the engine, but only if a
 /// TextEditingTarget is focused.
 ///

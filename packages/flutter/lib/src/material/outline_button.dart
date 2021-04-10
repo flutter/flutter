@@ -36,7 +36,7 @@ const Duration _kElevationDuration = Duration(milliseconds: 75);
 /// [flutter.dev/go/material-button-migration-guide](https://flutter.dev/go/material-button-migration-guide).
 @Deprecated(
   'Use OutlinedButton instead. See the migration guide in flutter.dev/go/material-button-migration-guide). '
-  'This feature was deprecated after v1.26.0-18.0.pre.'
+  'This feature was deprecated after v1.26.0-18.0.pre.',
 )
 class OutlineButton extends MaterialButton {
   /// Create an outline button.
@@ -45,7 +45,7 @@ class OutlineButton extends MaterialButton {
   /// and the [autofocus] and [clipBehavior] arguments must not be null.
   @Deprecated(
     'Use OutlinedButton instead. See the migration guide in flutter.dev/go/material-button-migration-guide). '
-    'This feature was deprecated after v1.26.0-18.0.pre.'
+    'This feature was deprecated after v1.26.0-18.0.pre.',
   )
   const OutlineButton({
     Key? key,
@@ -109,7 +109,7 @@ class OutlineButton extends MaterialButton {
   /// [icon], [label], [autofocus], and [clipBehavior] arguments must not be null.
   @Deprecated(
     'Use OutlinedButton instead. See the migration guide in flutter.dev/go/material-button-migration-guide). '
-    'This feature was deprecated after v1.26.0-18.0.pre.'
+    'This feature was deprecated after v1.26.0-18.0.pre.',
   )
   factory OutlineButton.icon({
     Key? key,
@@ -581,7 +581,7 @@ class _OutlineBorder extends ShapeBorder implements MaterialStateProperty<ShapeB
   ShapeBorder resolve(Set<MaterialState> states) {
     return _OutlineBorder(
       shape: shape,
-      side: side.copyWith(color: MaterialStateProperty.resolveAs<Color>(side.color, states),
-    ));
+      side: side.copyWith(color: MaterialStateProperty.resolveAs<Color>(side.color, states)),
+    );
   }
 }
