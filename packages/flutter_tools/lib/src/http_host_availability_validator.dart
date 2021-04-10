@@ -4,9 +4,9 @@
 
 // @dart = 2.9
 
-import 'package:meta/meta.dart';
-
 import 'dart:async';
+
+import 'package:meta/meta.dart';
 
 import 'base/io.dart';
 import 'base/platform.dart';
@@ -69,9 +69,9 @@ class HttpHostAvailabilityValidator extends DoctorValidator {
       // If there is an error, it will be caught in the on ... catch blocks below.
       // Else return a successful result
       return _HttpHostAvailabilityResult.pass(hostUrl);
-    } on TimeoutException catch (timeoutError) {
+    } on TimeoutException {
       // Return a failed result
-      return _HttpHostAvailabilityResult.fail(hostUrl, 'failed to connect to ${hostUrl} in 10 seconds');
+      return _HttpHostAvailabilityResult.fail(hostUrl, 'failed to connect to $hostUrl in 10 seconds');
     } on SocketException catch (socketError) {
       // Return a failed result
       return _HttpHostAvailabilityResult.fail(hostUrl, socketError.message);
