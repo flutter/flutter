@@ -39,7 +39,7 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 /// [radiusWhileDragging], respectively.
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
-/// This sample shows a [Scrollbar] that executes a fade animation as scrolling occurs.
+/// This sample shows a [CupertinoScrollbar] that executes a fade animation as scrolling occurs.
 /// The Scrollbar will fade into view as the user scrolls, and fade out when scrolling stops.
 ///
 /// ```dart imports
@@ -49,10 +49,8 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return CupertinoScrollbar(
-///     child: GridView.builder(
+///     child: ListView.builder(
 ///       itemCount: 120,
-///       gridDelegate:
-///         const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
 ///       itemBuilder: (BuildContext context, int index) {
 ///         return Center(
 ///           child: Text('item $index'),
@@ -76,16 +74,15 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 /// ```dart
 /// final ScrollController _controllerOne = ScrollController();
 ///
-/// @override
 /// Widget build(BuildContext context) {
 ///   return CupertinoScrollbar(
+///     thickness: 6.0,
+///     radius: const Radius.circular(34),
 ///     controller: _controllerOne,
 ///     isAlwaysShown: true,
-///     child: GridView.builder(
+///     child: ListView.builder(
 ///       controller: _controllerOne,
 ///       itemCount: 120,
-///       gridDelegate:
-///         const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
 ///       itemBuilder: (BuildContext context, int index) {
 ///         return Center(
 ///           child: Text('item $index'),
