@@ -287,7 +287,7 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// Disables the text field when false.
   ///
   /// Text fields in disabled states have a light grey background and don't
-  /// respond to touch events.
+  /// respond to touch events including the [suffixIcon] and the search button.
   final bool? enabled;
 
   @override
