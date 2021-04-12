@@ -5,12 +5,17 @@
 #include "testing.h"
 
 #include "flutter/fml/file.h"
+#include "flutter/fml/paths.h"
 
 namespace flutter {
 namespace testing {
 
 std::string GetCurrentTestName() {
   return ::testing::UnitTest::GetInstance()->current_test_info()->name();
+}
+
+std::string GetDefaultKernelFilePath() {
+  return fml::paths::JoinPaths({GetFixturesPath(), "kernel_blob.bin"});
 }
 
 fml::UniqueFD OpenFixturesDirectory() {

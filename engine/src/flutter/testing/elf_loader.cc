@@ -12,13 +12,13 @@
 namespace flutter {
 namespace testing {
 
-ELFAOTSymbols LoadELFSymbolFromFixturesIfNeccessary() {
+ELFAOTSymbols LoadELFSymbolFromFixturesIfNeccessary(std::string elf_filename) {
   if (!DartVM::IsRunningPrecompiledCode()) {
     return {};
   }
 
   const auto elf_path =
-      fml::paths::JoinPaths({GetFixturesPath(), kAOTAppELFFileName});
+      fml::paths::JoinPaths({GetFixturesPath(), elf_filename});
 
   if (!fml::IsFile(elf_path)) {
     FML_LOG(ERROR) << "App AOT file does not exist for this fixture. Attempts "
@@ -60,13 +60,14 @@ ELFAOTSymbols LoadELFSymbolFromFixturesIfNeccessary() {
   return symbols;
 }
 
-ELFAOTSymbols LoadELFSplitSymbolFromFixturesIfNeccessary() {
+ELFAOTSymbols LoadELFSplitSymbolFromFixturesIfNeccessary(
+    std::string elf_split_filename) {
   if (!DartVM::IsRunningPrecompiledCode()) {
     return {};
   }
 
   const auto elf_path =
-      fml::paths::JoinPaths({GetFixturesPath(), kAOTAppELFSplitFileName});
+      fml::paths::JoinPaths({GetFixturesPath(), elf_split_filename});
 
   if (!fml::IsFile(elf_path)) {
     // We do not log here, as there is no expectation for a split library to

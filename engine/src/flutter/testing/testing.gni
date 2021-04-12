@@ -110,11 +110,16 @@ template("dart_snapshot_kernel") {
 # Arguments:
 #
 #     dart_kernel (required): The path to the kernel snapshot.
+#
+#     dart_elf_filename (required): The filename of the AOT ELF snapshot.
 template("dart_snapshot_aot") {
   testonly = true
 
   assert(defined(invoker.dart_kernel),
          "The Dart Kernel file location must be specified")
+
+  assert(defined(invoker.dart_elf_filename),
+         "The main Dart ELF filename must be specified.")
 
   compiled_action(target_name) {
     testonly = true
@@ -124,7 +129,7 @@ template("dart_snapshot_aot") {
     inputs = [ invoker.dart_kernel ]
 
     # Custom ELF loader is used for Mac and Windows.
-    elf_object = "$target_gen_dir/assets/app_elf_snapshot.so"
+    elf_object = "$target_gen_dir/assets/${invoker.dart_elf_filename}"
 
     loading_unit_manifest = "$target_gen_dir/assets/loading_unit_manifest.json"
 
@@ -150,13 +155,22 @@ template("dart_snapshot_aot") {
 # Arguments:
 #
 #     dart_main (required): The path to the main Dart file.
+#
+#     dart_kernel_filename (required): The filename of the kernel blob.
+#
+#     dart_elf_filename (required): The filename of the AOT ELF snapshot only if is_aot_test is true.
 template("dart_snapshot") {
   assert(defined(invoker.dart_main), "The main Dart file must be specified.")
+  assert(defined(invoker.dart_kernel_filename),
+         "The main Dart kernel filename must be specified.")
 
   testonly = true
 
   dart_snapshot_kernel_target_name = "_dsk_$target_name"
-  dart_snapshot_kernel_path = "$target_gen_dir/assets/kernel_blob.bin"
+
+  dart_snapshot_kernel_path =
+      "$target_gen_dir/assets/${invoker.dart_kernel_filename}"
+
   dart_snapshot_kernel(dart_snapshot_kernel_target_name) {
     dart_main = invoker.dart_main
     dart_kernel = dart_snapshot_kernel_path
@@ -166,9 +180,13 @@ template("dart_snapshot") {
   snapshot_public_deps = [ ":$dart_snapshot_kernel_target_name" ]
 
   if (is_aot_test) {
+    assert(defined(invoker.dart_elf_filename),
+           "The main Dart ELF filename must be specified.")
+
     dart_snapshot_aot_target_name = "_dsa_$target_name"
     dart_snapshot_aot(dart_snapshot_aot_target_name) {
       dart_kernel = dart_snapshot_kernel_path
+      dart_elf_filename = invoker.dart_elf_filename
       deps = [ ":$dart_snapshot_kernel_target_name" ]
     }
     snapshot_deps += [ ":$dart_snapshot_aot_target_name" ]
@@ -228,6 +246,8 @@ template("copy_fixtures") {
 #
 #     dart_main (optional): The path to the main Dart file. If specified, it is
 #                           snapshotted.
+#
+#     use_target_as_artifact_prefix(optional): If true, adds the target name as prefix of the kernel and AOT ELF snapshot filename.
 template("test_fixtures") {
   # Even if no fixtures are present, the location of the fixtures directory
   # must always be known to tests.
@@ -254,10 +274,21 @@ template("test_fixtures") {
   # If a Dart file is specified, snapshot it and place it in the generated
   # assets directory.
   if (defined(invoker.dart_main)) {
+    if (defined(invoker.use_target_as_artifact_prefix) &&
+        invoker.use_target_as_artifact_prefix) {
+      artifact_prefix = "${target_name}_"
+    } else {
+      artifact_prefix = ""
+    }
     dart_snapshot_target_name = "_ds_$target_name"
     dart_snapshot(dart_snapshot_target_name) {
       dart_main = invoker.dart_main
+      dart_kernel_filename = "${artifact_prefix}kernel_blob.bin"
+      if (is_aot_test) {
+        dart_elf_filename = "${artifact_prefix}app_elf_snapshot.so"
+      }
     }
+
     test_public_deps += [ ":$dart_snapshot_target_name" ]
   }
 
