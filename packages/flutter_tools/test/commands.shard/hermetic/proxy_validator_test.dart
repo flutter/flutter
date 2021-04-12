@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/proxy_validator.dart';

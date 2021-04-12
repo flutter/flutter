@@ -145,7 +145,7 @@ void main() {
     );
     environment.buildDir.createSync(recursive: true);
 
-    final String windowsDesktopPath = artifacts.getArtifactPath(Artifact.windowsDesktopPath, platform: TargetPlatform.windows_x64, mode: BuildMode.debug);
+    final String windowsDesktopPath = artifacts.getArtifactPath(Artifact.windowsUwpDesktopPath, platform: TargetPlatform.windows_x64, mode: BuildMode.debug);
     final String windowsCppClientWrapper = artifacts.getArtifactPath(Artifact.windowsCppClientWrapper, platform: TargetPlatform.windows_x64, mode: BuildMode.debug);
     final String icuData = artifacts.getArtifactPath(Artifact.icuData, platform: TargetPlatform.windows_x64);
     final List<String> requiredFiles = <String>[

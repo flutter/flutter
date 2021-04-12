@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:meta/meta.dart';
 
 import '../base/config.dart';
@@ -23,9 +21,9 @@ class CustomDevicesConfig {
   /// when it's not valid JSON (which other configurations do) and will not
   /// be implicitly created when it doesn't exist.
   CustomDevicesConfig({
-    @required FileSystem fileSystem,
-    @required Logger logger,
-    @required Platform platform
+    required FileSystem fileSystem,
+    required Logger logger,
+    required Platform platform
   }) : _fileSystem = fileSystem,
        _config = Config(
          _kCustomDevicesConfigName,
@@ -40,9 +38,9 @@ class CustomDevicesConfig {
 
   @visibleForTesting
   CustomDevicesConfig.test({
-    @required FileSystem fileSystem,
-    Directory directory,
-    @required Logger logger
+    required FileSystem fileSystem,
+    Directory? directory,
+    required Logger logger
   }) : _fileSystem = fileSystem,
        _config = Config.test(
          name: _kCustomDevicesConfigName,

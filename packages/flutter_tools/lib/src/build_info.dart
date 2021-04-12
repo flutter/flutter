@@ -600,6 +600,8 @@ TargetPlatform? getTargetPlatformForName(String platform) {
       return TargetPlatform.linux_arm64;
     case 'windows-x64':
       return TargetPlatform.windows_x64;
+    case 'windows-uwp-x64':
+      return TargetPlatform.windows_uwp_x64;
     case 'web-javascript':
       return TargetPlatform.web_javascript;
   }
