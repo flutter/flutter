@@ -40,6 +40,12 @@ NS_ASSUME_NONNULL_BEGIN
                                 texture:(NSObject<FlutterTexture>*)texture;
 
 /**
+ * Creates a GrDirectContext with the provided `MTLDevice` and `MTLCommandQueue`.
+ */
++ (sk_sp<GrDirectContext>)createGrContext:(id<MTLDevice>)device
+                             commandQueue:(id<MTLCommandQueue>)commandQueue;
+
+/**
  * MTLDevice that is backing this context.s
  */
 @property(nonatomic, readonly) id<MTLDevice> device;
