@@ -49,6 +49,7 @@ class PluginRegistrarWindows : public PluginRegistrar {
 
   FlutterView* GetView() { return view_.get(); }
 
+#ifndef WINUWP
   // Registers |delegate| to receive WindowProc callbacks for the top-level
   // window containing this Flutter instance. Returns an ID that can be used to
   // unregister the handler.
@@ -80,8 +81,10 @@ class PluginRegistrarWindows : public PluginRegistrar {
           registrar(), PluginRegistrarWindows::OnTopLevelWindowProc);
     }
   }
+#endif
 
  private:
+#ifndef WINUWP
   // A FlutterDesktopWindowProcCallback implementation that forwards back to
   // a PluginRegistarWindows instance provided as |user_data|.
   static bool OnTopLevelWindowProc(HWND hwnd,
@@ -113,14 +116,17 @@ class PluginRegistrarWindows : public PluginRegistrar {
     }
     return result;
   }
+#endif
 
   // The associated FlutterView, if any.
   std::unique_ptr<FlutterView> view_;
 
+#ifndef WINUWP
   // The next ID to return from RegisterWindowProcDelegate.
   int next_window_proc_delegate_id_ = 1;
 
   std::map<int, WindowProcDelegate> window_proc_delegates_;
+#endif
 };
 
 }  // namespace flutter
