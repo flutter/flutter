@@ -1088,7 +1088,8 @@ Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plug
 ///
 /// This uses [project.flutterPluginsDependenciesFile], so it should only be
 /// run after refreshPluginList has been run since the last plugin change.
-void createPluginSymlinks(FlutterProject project, {bool force = false}) {
+void createPluginSymlinks(FlutterProject project, {bool force = false, @visibleForTesting FeatureFlags featureFlagsOverride}) {
+  final FeatureFlags localFeatureFlags = featureFlagsOverride ?? featureFlags;
   Map<String, dynamic> platformPlugins;
   final String pluginFileContent = _readFileContent(project.flutterPluginsDependenciesFile);
   if (pluginFileContent != null) {
@@ -1097,24 +1098,24 @@ void createPluginSymlinks(FlutterProject project, {bool force = false}) {
   }
   platformPlugins ??= <String, dynamic>{};
 
-  if (featureFlags.isWindowsEnabled && project.windows.existsSync()) {
+  if (localFeatureFlags.isWindowsEnabled && project.windows.existsSync()) {
     _createPlatformPluginSymlinks(
       project.windows.pluginSymlinkDirectory,
       platformPlugins[project.windows.pluginConfigKey] as List<dynamic>,
       force: force,
     );
   }
-  if (featureFlags.isLinuxEnabled && project.linux.existsSync()) {
+  if (localFeatureFlags.isLinuxEnabled && project.linux.existsSync()) {
     _createPlatformPluginSymlinks(
       project.linux.pluginSymlinkDirectory,
       platformPlugins[project.linux.pluginConfigKey] as List<dynamic>,
       force: force,
     );
   }
-  if (featureFlags.isWindowsUwpEnabled && project.windowsUwp.existsSync()) {
+  if (localFeatureFlags.isWindowsUwpEnabled && project.windowsUwp.existsSync()) {
     _createPlatformPluginSymlinks(
       project.windowsUwp.pluginSymlinkDirectory,
-      <dynamic>[],
+      platformPlugins[project.windows.pluginConfigKey] as List<dynamic>,
       force: force,
     );
   }
