@@ -152,6 +152,7 @@ class BuildEvent extends UsageEvent {
     String settings,
     String eventError,
     @required Usage flutterUsage,
+    @required String type,
   }) : _command = command,
   _settings = settings,
   _eventError = eventError,
@@ -159,9 +160,7 @@ class BuildEvent extends UsageEvent {
     // category
     'build',
     // parameter
-    FlutterCommand.current == null
-      ? 'unspecified'
-      : FlutterCommand.current.name,
+    type,
     label: label,
     flutterUsage: flutterUsage,
   );
@@ -191,10 +190,10 @@ class BuildEvent extends UsageEvent {
 
 /// An event that reports the result of a top-level command.
 class CommandResultEvent extends UsageEvent {
-  CommandResultEvent(String commandPath, FlutterCommandResult result)
+  CommandResultEvent(String commandPath, String result)
       : assert(commandPath != null),
         assert(result != null),
-        super(commandPath, result.toString(), flutterUsage: globals.flutterUsage);
+        super(commandPath, result, flutterUsage: globals.flutterUsage);
 
   @override
   void send() {
