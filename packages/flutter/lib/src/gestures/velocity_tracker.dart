@@ -31,14 +31,12 @@ class Velocity {
 
   /// Return the difference of two velocities.
   Velocity operator -(Velocity other) {
-    return Velocity(
-        pixelsPerSecond: pixelsPerSecond - other.pixelsPerSecond);
+    return Velocity(pixelsPerSecond: pixelsPerSecond - other.pixelsPerSecond);
   }
 
   /// Return the sum of two velocities.
   Velocity operator +(Velocity other) {
-    return Velocity(
-        pixelsPerSecond: pixelsPerSecond + other.pixelsPerSecond);
+    return Velocity(pixelsPerSecond: pixelsPerSecond + other.pixelsPerSecond);
   }
 
   /// Return a velocity whose magnitude has been clamped to [minValue]
@@ -149,7 +147,7 @@ class VelocityTracker {
   /// Create a new velocity tracker for a pointer [kind].
   @Deprecated(
     'Use VelocityTracker.withKind and provide the PointerDeviceKind associated with the gesture being tracked. '
-    'This feature was deprecated after v1.22.0-12.1.pre.'
+    'This feature was deprecated after v1.22.0-12.1.pre.',
   )
   VelocityTracker([this.kind = PointerDeviceKind.touch]);
 
@@ -304,7 +302,7 @@ class IOSScrollViewFlingVelocityTracker extends VelocityTracker {
         return true;
       throw FlutterError(
         'The position being added ($position) has a smaller timestamp ($time) '
-        'than its predecessor: $previousPoint.'
+        'than its predecessor: $previousPoint.',
       );
     }());
     _index = (_index + 1) % _sampleSize;
@@ -313,7 +311,7 @@ class IOSScrollViewFlingVelocityTracker extends VelocityTracker {
 
   // Computes the velocity using 2 adjacent points in history. When index = 0,
   // it uses the latest point recorded and the point recorded immediately before
-  // it. The smaller index is, the ealier in history the points used are.
+  // it. The smaller index is, the earlier in history the points used are.
   Offset _previousVelocityAt(int index) {
     final int endIndex = (_index + index) % _sampleSize;
     final int startIndex = (_index + index - 1) % _sampleSize;

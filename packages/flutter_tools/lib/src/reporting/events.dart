@@ -124,7 +124,7 @@ class DoctorResultEvent extends UsageEvent {
     }
     final GroupedValidator group = validator as GroupedValidator;
     // The validator crashed.
-    if (group.subResults == null) {
+    if (group.subResults.isEmpty) {
       flutterUsage.sendEvent(category, parameter, label: label);
       return;
     }

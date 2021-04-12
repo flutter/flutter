@@ -2,23 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 
 import '../src/common.dart';
 
 void main() {
-  BufferLogger logger;
+  late BufferLogger logger;
   setUp(() {
     logger = BufferLogger.test();
   });
 
   group('Validate build number', () {
     testWithoutContext('CFBundleVersion for iOS', () async {
-      String buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, 'xyz', logger);
+      String? buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, 'xyz', logger);
       expect(buildName, isNull);
       buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, '0.0.1', logger);
       expect(buildName, '0.0.1');
@@ -29,7 +26,7 @@ void main() {
     });
 
     testWithoutContext('versionCode for Android', () async {
-      String buildName = validatedBuildNumberForPlatform(TargetPlatform.android_arm, '123.abc+-', logger);
+      String? buildName = validatedBuildNumberForPlatform(TargetPlatform.android_arm, '123.abc+-', logger);
       expect(buildName, '123');
       buildName = validatedBuildNumberForPlatform(TargetPlatform.android_arm, 'abc', logger);
       expect(buildName, '1');
@@ -38,7 +35,7 @@ void main() {
 
   group('Validate build name', () {
     testWithoutContext('CFBundleShortVersionString for iOS', () async {
-      String buildName = validatedBuildNameForPlatform(TargetPlatform.ios, 'xyz', logger);
+      String? buildName = validatedBuildNameForPlatform(TargetPlatform.ios, 'xyz', logger);
       expect(buildName, isNull);
       buildName = validatedBuildNameForPlatform(TargetPlatform.ios, '0.0.1', logger);
       expect(buildName, '0.0.1');
@@ -52,7 +49,7 @@ void main() {
     });
 
     testWithoutContext('versionName for Android', () async {
-      String buildName = validatedBuildNameForPlatform(TargetPlatform.android_arm, '123.abc+-', logger);
+      String? buildName = validatedBuildNameForPlatform(TargetPlatform.android_arm, '123.abc+-', logger);
       expect(buildName, '123.abc+-');
       buildName = validatedBuildNameForPlatform(TargetPlatform.android_arm, 'abc+-', logger);
       expect(buildName, 'abc+-');

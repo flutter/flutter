@@ -64,13 +64,12 @@ Future<void> buildWeb(
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
+      platform: globals.platform,
       cacheDir: globals.cache.getRoot(),
       engineVersion: globals.artifacts.isLocalEngine
         ? null
         : globals.flutterVersion.engineRevision,
       flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-      // Web uses a different Dart plugin registry.
-      generateDartPluginRegistry: false,
     ));
     if (!result.success) {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {

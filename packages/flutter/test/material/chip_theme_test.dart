@@ -466,6 +466,45 @@ void main() {
     await gesture.removePointer();
   });
 
+  testWidgets('Chip uses stateful border side from resolveWith pattern', (WidgetTester tester) async {
+    const Color selectedColor = Color(0x00000001);
+    const Color defaultColor = Color(0x00000002);
+
+    BorderSide getBorderSide(Set<MaterialState> states) {
+      Color color = defaultColor;
+
+      if (states.contains(MaterialState.selected))
+        color = selectedColor;
+
+      return BorderSide(color: color, width: 1);
+    }
+
+    Widget chipWidget({ bool selected = false }) {
+      return MaterialApp(
+        theme: ThemeData(
+          chipTheme: ThemeData.light().chipTheme.copyWith(
+            side: MaterialStateBorderSide.resolveWith(getBorderSide),
+          ),
+        ),
+        home: Scaffold(
+          body: ChoiceChip(
+            label: const Text('Chip'),
+            selected: selected,
+            onSelected: (_) {},
+          ),
+        ),
+      );
+    }
+
+    // Default.
+    await tester.pumpWidget(chipWidget());
+    expect(find.byType(RawChip), paints..rrect(color: defaultColor));
+
+    // Selected.
+    await tester.pumpWidget(chipWidget(selected: true));
+    expect(find.byType(RawChip), paints..rrect(color: selectedColor));
+  });
+
   testWidgets('Chip uses stateful border side from chip theme', (WidgetTester tester) async {
     const Color selectedColor = Color(0x00000001);
     const Color defaultColor = Color(0x00000002);

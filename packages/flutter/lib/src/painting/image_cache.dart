@@ -250,7 +250,7 @@ class ImageCache {
     if (pendingImage != null) {
       if (!kReleaseMode) {
         Timeline.instantSync('ImageCache.evict', arguments: <String, dynamic>{
-          'type': 'pending'
+          'type': 'pending',
         });
       }
       pendingImage.removeListener();

@@ -12,12 +12,13 @@ import 'base/common.dart';
 import 'base/file_system.dart';
 import 'build_info.dart';
 import 'device.dart';
-import 'globals.dart' as globals;
+import 'globals_null_migrated.dart' as globals;
 import 'resident_devtools_handler.dart';
 import 'resident_runner.dart';
 import 'tracing.dart';
 import 'vmservice.dart';
 
+const String kFlutterTestOutputsDirEnvName = 'FLUTTER_TEST_OUTPUTS_DIR';
 class ColdRunner extends ResidentRunner {
   ColdRunner(
     List<FlutterDevice> devices, {
@@ -118,11 +119,12 @@ class ColdRunner extends ResidentRunner {
       final FlutterDevice device = flutterDevices.first;
       if (device.vmService != null) {
         globals.printStatus('Tracing startup on ${device.device.name}.');
+        final String outputPath = globals.platform.environment[kFlutterTestOutputsDirEnvName] ?? getBuildDirectory();
         await downloadStartupTrace(
           device.vmService,
           awaitFirstFrame: awaitFirstFrameWhenTracing,
           logger: globals.logger,
-          output: globals.fs.directory(getBuildDirectory()),
+          output: globals.fs.directory(outputPath),
         );
       }
       appFinished();

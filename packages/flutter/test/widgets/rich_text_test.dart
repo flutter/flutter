@@ -64,7 +64,7 @@ void main() {
                     WidgetSpan(
                       child: Row(
                         children: const <Widget>[
-                          SizedBox(height: 16, width: 16,),
+                          SizedBox(height: 16, width: 16),
                         ],
                       ),
                     ),
@@ -114,7 +114,7 @@ void main() {
       contains('textWidthBasis: longestLine'),
       contains('text: "rich text"'),
       contains('locale: zh_HK'),
-      allOf(startsWith('strutStyle: StrutStyle('), contains('size: 16.0'),),
+      allOf(startsWith('strutStyle: StrutStyle('), contains('size: 16.0')),
       allOf(
         startsWith('textHeightBehavior: TextHeightBehavior('),
         contains('applyHeightToFirstAscent: false'),

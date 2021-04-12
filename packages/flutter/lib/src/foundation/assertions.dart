@@ -676,7 +676,7 @@ class FlutterErrorDetails with Diagnosticable {
             'provide substantially more information in this error message to help you determine '
             'and fix the underlying cause.\n'
             'In either case, please report this assertion by filing a bug on GitHub:\n'
-            '  https://github.com/flutter/flutter/issues/new?template=2_bug.md'
+            '  https://github.com/flutter/flutter/issues/new?template=2_bug.md',
           ));
         }
       }
@@ -802,17 +802,17 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
         ErrorSummary('FlutterError is missing a summary.'),
         ErrorDescription(
           'All FlutterError objects should start with a short (one line) '
-          'summary description of the problem that was detected.'
+          'summary description of the problem that was detected.',
         ),
         DiagnosticsProperty<FlutterError>('Malformed', this, expandableValue: true, showSeparator: false, style: DiagnosticsTreeStyle.whitespace),
         ErrorDescription(
           '\nThis error should still help you solve your problem, '
           'however please also report this malformed error in the '
           'framework by filing a bug on GitHub:\n'
-          '  https://github.com/flutter/flutter/issues/new?template=2_bug.md'
+          '  https://github.com/flutter/flutter/issues/new?template=2_bug.md',
         ),
-      ],
-    ));
+      ]),
+    );
     assert(() {
       final Iterable<DiagnosticsNode> summaries = diagnostics.where((DiagnosticsNode node) => node.level == DiagnosticLevel.summary);
       if (summaries.length > 1) {
@@ -821,7 +821,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
           ErrorDescription(
             'All FlutterError objects should have only a single short '
             '(one line) summary description of the problem that was '
-            'detected.'
+            'detected.',
           ),
           DiagnosticsProperty<FlutterError>('Malformed', this, expandableValue: true, showSeparator: false, style: DiagnosticsTreeStyle.whitespace),
           ErrorDescription('\nThe malformed error has ${summaries.length} summaries.'),
@@ -835,7 +835,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
           '\nThis error should still help you solve your problem, '
           'however please also report this malformed error in the '
           'framework by filing a bug on GitHub:\n'
-          '  https://github.com/flutter/flutter/issues/new?template=2_bug.md'
+          '  https://github.com/flutter/flutter/issues/new?template=2_bug.md',
         ));
         throw FlutterError.fromParts(message);
       }
@@ -1065,7 +1065,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
     final List<String> where = <String>[
       for (MapEntry<String, int> entry in removedPackagesAndClasses.entries)
         if (entry.value > 0)
-          entry.key
+          entry.key,
     ]..sort();
     if (skipped == 1) {
       result.add('(elided one frame from ${where.single})');
@@ -1104,9 +1104,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   static void reportError(FlutterErrorDetails details) {
     assert(details != null);
     assert(details.exception != null);
-    if (onError != null) {
-      onError!(details);
-    }
+    onError?.call(details);
   }
 }
 

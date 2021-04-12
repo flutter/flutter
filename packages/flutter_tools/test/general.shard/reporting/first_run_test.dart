@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
@@ -48,10 +46,12 @@ void main() {
   });
 }
 
-FirstRunMessenger setUpFirstRunMessenger({bool redisplayWelcomeMessage, bool test = false }) {
+FirstRunMessenger setUpFirstRunMessenger({bool? redisplayWelcomeMessage, bool test = false }) {
   final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-  final PersistentToolState state = PersistentToolState.test(directory: fileSystem.currentDirectory, logger: BufferLogger.test())
-    ..redisplayWelcomeMessage = redisplayWelcomeMessage;
+  final PersistentToolState state = PersistentToolState.test(directory: fileSystem.currentDirectory, logger: BufferLogger.test());
+  if (redisplayWelcomeMessage != null) {
+    state.redisplayWelcomeMessage = redisplayWelcomeMessage;
+  }
   if (test) {
     return TestFirstRunMessenger(state);
   }
@@ -61,7 +61,7 @@ FirstRunMessenger setUpFirstRunMessenger({bool redisplayWelcomeMessage, bool tes
 class TestFirstRunMessenger extends FirstRunMessenger {
   TestFirstRunMessenger(PersistentToolState persistentToolState) : super(persistentToolState: persistentToolState);
 
-  String overrideLicenseTerms;
+  String? overrideLicenseTerms;
 
   @override
   String get licenseTerms => overrideLicenseTerms ?? super.licenseTerms;

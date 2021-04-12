@@ -74,7 +74,10 @@ void main() {
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: <Widget>[
-              Focus(focusNode: focusNode1, child: const SizedBox(width: 200, height: 100),),
+              Focus(
+                focusNode: focusNode1,
+                child: const SizedBox(width: 200, height: 100),
+              ),
               Transform.translate(
                 offset: const Offset(10, 20),
                 child: Transform.scale(

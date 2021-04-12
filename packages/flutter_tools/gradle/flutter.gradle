@@ -214,7 +214,7 @@ class FlutterPlugin implements Plugin<Project> {
         project.android.buildTypes.all this.&addFlutterDependencies
     }
 
-    private static Boolean shouldShrinkResources(Project project) { 
+    private static Boolean shouldShrinkResources(Project project) {
         if (project.hasProperty("shrink")) {
             return project.property("shrink").toBoolean()
         }
@@ -595,7 +595,7 @@ class FlutterPlugin implements Plugin<Project> {
 
     /**
      * Gets the directory that contains the Flutter source code.
-     * This is the the directory containing the `android/` directory.
+     * This is the directory containing the `android/` directory.
      */
     private File getFlutterSourceDirectory() {
         if (project.flutter.source == null) {
@@ -842,7 +842,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
             return copyFlutterAssetsTask
         } // end def addFlutterDeps
-        
+
         if (isFlutterAppProject()) {
             project.android.applicationVariants.all { variant ->
                 Task assembleTask = getAssembleTask(variant)
@@ -953,18 +953,21 @@ class FlutterExtension {
 }
 
 abstract class BaseFlutterTask extends DefaultTask {
+    @Internal
     File flutterRoot
+    @Internal
     File flutterExecutable
+    @Input
     String buildMode
     @Optional @Input
     String localEngine
     @Optional @Input
     String localEngineSrcPath
-    @Input
+    @Optional @Input
     Boolean fastStart
     @Input
     String targetPath
-    @Optional
+    @Optional @Internal
     Boolean verbose
     @Optional @Input
     String[] fileSystemRoots
@@ -974,7 +977,9 @@ abstract class BaseFlutterTask extends DefaultTask {
     Boolean trackWidgetCreation
     @Optional @Input
     List<String> targetPlatformValues
+    @Internal
     File sourceDir
+    @Internal
     File intermediateDir
     @Optional @Input
     String extraFrontEndOptions
@@ -992,6 +997,7 @@ abstract class BaseFlutterTask extends DefaultTask {
     String bundleSkSLPath
     @Optional @Input
     String codeSizeDirectory;
+    @Optional @Input
     String performanceMeasurementFile;
     @Optional @Input
     Boolean deferredComponents
@@ -1091,10 +1097,12 @@ class FlutterTask extends BaseFlutterTask {
         return intermediateDir
     }
 
+    @Internal
     String getAssetsDirectory() {
         return "${outputDirectory}/flutter_assets"
     }
 
+    @Internal
     CopySpec getAssets() {
         return project.copySpec {
             from "${intermediateDir}"
@@ -1102,6 +1110,7 @@ class FlutterTask extends BaseFlutterTask {
         }
     }
 
+    @Internal
     CopySpec getSnapshots() {
         return project.copySpec {
             from "${intermediateDir}"

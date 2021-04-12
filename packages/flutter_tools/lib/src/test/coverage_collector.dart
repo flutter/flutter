@@ -12,7 +12,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../vmservice.dart';
 
 import 'test_device.dart';
@@ -204,7 +204,7 @@ class CoverageCollector extends TestWatcher {
 
 Future<FlutterVmService> _defaultConnect(Uri serviceUri) {
   return connectToVmService(
-      serviceUri, compression: CompressionOptions.compressionOff);
+      serviceUri, compression: CompressionOptions.compressionOff, logger: globals.logger,);
 }
 
 Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libraryPredicate, {

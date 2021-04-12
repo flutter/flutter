@@ -1233,7 +1233,7 @@ void main() {
   testWidgets('Floating SnackBar button text alignment', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
-        snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating,)
+        snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating)
       ),
       home: MediaQuery(
         data: const MediaQueryData(

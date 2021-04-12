@@ -505,8 +505,8 @@ class PictureLayer extends Layer {
     properties.add(DiagnosticsProperty<String>('picture', describeIdentity(_picture)));
     properties.add(DiagnosticsProperty<String>(
       'raster cache hints',
-      'isComplex = $isComplexHint, willChange = $willChangeHint'),
-    );
+      'isComplex = $isComplexHint, willChange = $willChangeHint',
+    ));
   }
 
   @override
@@ -790,9 +790,11 @@ class ContainerLayer extends Layer {
 
   List<PictureLayer> _processConflictingPhysicalLayers(PhysicalModelLayer predecessor, PhysicalModelLayer child) {
     FlutterError.reportError(FlutterErrorDetails(
-      exception: FlutterError('Painting order is out of order with respect to elevation.\n'
-                              'See https://api.flutter.dev/flutter/rendering/debugCheckElevationsEnabled.html '
-                              'for more details.'),
+      exception: FlutterError(
+        'Painting order is out of order with respect to elevation.\n'
+        'See https://api.flutter.dev/flutter/rendering/debugCheckElevationsEnabled.html '
+        'for more details.',
+      ),
       library: 'rendering library',
       context: ErrorDescription('during compositing'),
       informationCollector: () {
@@ -1580,7 +1582,7 @@ class TransformLayer extends OffsetLayer {
   Offset? _transformOffset(Offset localPosition) {
     if (_inverseDirty) {
       _invertedTransform = Matrix4.tryInvert(
-        PointerEvent.removePerspectiveTransform(transform!)
+        PointerEvent.removePerspectiveTransform(transform!),
       );
       _inverseDirty = false;
     }

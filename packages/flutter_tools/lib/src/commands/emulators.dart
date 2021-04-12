@@ -6,7 +6,7 @@
 
 import '../base/common.dart';
 import '../base/utils.dart';
-import '../doctor.dart';
+import '../doctor_validator.dart';
 import '../emulator.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';

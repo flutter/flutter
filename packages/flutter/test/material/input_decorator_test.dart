@@ -4548,4 +4548,29 @@ void main() {
     expect(errorDetails?.toString(), contains("InputDecorator's children reported a negative baseline"));
     expect(errorDetails?.toString(), contains('RenderStack'));
   });
+
+  testWidgets('min intrinsic height for TextField with no content padding', (WidgetTester tester) async {
+    // Regression test for: https://github.com/flutter/flutter/issues/75509
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: IntrinsicHeight(
+            child: Column(
+              children: const <Widget>[
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: 'Label Text',
+                    helperText: 'Helper Text',
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    expect(tester.takeException(), isNull);
+  });
 }

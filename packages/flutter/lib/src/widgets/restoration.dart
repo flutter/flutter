@@ -522,7 +522,7 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
       if (_disposed) {
         throw FlutterError(
           'A $runtimeType was used after being disposed.\n'
-          'Once you have called dispose() on a $runtimeType, it can no longer be used.'
+          'Once you have called dispose() on a $runtimeType, it can no longer be used.',
         );
       }
       return true;
@@ -842,7 +842,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
            'Property is already registered under ${property._restorationId}.',
     );
     assert(_debugDoingRestore || !_properties.keys.map((RestorableProperty<Object?> r) => r._restorationId).contains(restorationId),
-           '"$restorationId" is already registered to another property.'
+           '"$restorationId" is already registered to another property.',
     );
     final bool hasSerializedValue = bucket?.contains(restorationId) == true;
     final Object? initialValue = hasSerializedValue
@@ -863,7 +863,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
     assert(
       property._restorationId == restorationId &&
       property._owner == this &&
-      _properties.containsKey(property)
+      _properties.containsKey(property),
     );
 
     property.initWithValue(initialValue);

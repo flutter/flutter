@@ -4,7 +4,7 @@ This directory exists to support building Flutter on our build infrastructure.
 
 Flutter build results are available at:
 * https://flutter-dashboard.appspot.com/#/build
-  - Aggregate dashboard of the the separate CI systems used by Flutter.
+  - Aggregate dashboard of the separate CI systems used by Flutter.
 * https://cirrus-ci.com/github/flutter/flutter/master
   - Testing is done on PRs and submitted changes on GitHub.
 * https://ci.chromium.org/p/flutter/

@@ -41,7 +41,7 @@ void main() {
       ),
     );
 
-    // Originall at full opacity.
+    // Original at full opacity.
     FadeTransition opacity = tester.widget(find.descendant(
       of: find.byType(CupertinoTextSelectionToolbarButton),
       matching: find.byType(FadeTransition),

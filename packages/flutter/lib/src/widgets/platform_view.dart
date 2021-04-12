@@ -638,9 +638,7 @@ class _UiKitViewState extends State<UiKitView> {
       controller.dispose();
       return;
     }
-    if (widget.onPlatformViewCreated != null) {
-      widget.onPlatformViewCreated!(id);
-    }
+    widget.onPlatformViewCreated?.call(id);
     setState(() { _controller = controller; });
   }
 }
@@ -854,7 +852,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
 
   @override
   void initState() {
-    _focusNode = FocusNode(debugLabel: 'PlatformView(id: $_id)',);
+    _focusNode = FocusNode(debugLabel: 'PlatformView(id: $_id)');
     _initialize();
     super.initState();
   }
@@ -1033,10 +1031,11 @@ class AndroidViewSurface extends PlatformViewSurface {
        assert(hitTestBehavior != null),
        assert(gestureRecognizers != null),
        super(
-          key: key,
-          controller: controller,
-          hitTestBehavior: hitTestBehavior,
-          gestureRecognizers: gestureRecognizers);
+         key: key,
+         controller: controller,
+         hitTestBehavior: hitTestBehavior,
+         gestureRecognizers: gestureRecognizers,
+       );
 
   @override
   RenderObject createRenderObject(BuildContext context) {

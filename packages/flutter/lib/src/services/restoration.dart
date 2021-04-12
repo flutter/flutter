@@ -858,7 +858,7 @@ class RestorationBucket {
       }
       final List<DiagnosticsNode> error = <DiagnosticsNode>[
         ErrorSummary('Multiple owners claimed child RestorationBuckets with the same IDs.'),
-        ErrorDescription('The following IDs were claimed multiple times from the parent $this:')
+        ErrorDescription('The following IDs were claimed multiple times from the parent $this:'),
       ];
       for (final MapEntry<String, List<RestorationBucket>> child in _childrenToAdd.entries) {
         final String id = child.key;
@@ -986,7 +986,7 @@ class RestorationBucket {
       if (_debugDisposed) {
         throw FlutterError(
             'A $runtimeType was used after being disposed.\n'
-            'Once you have called dispose() on a $runtimeType, it can no longer be used.'
+            'Once you have called dispose() on a $runtimeType, it can no longer be used.',
         );
       }
       return true;

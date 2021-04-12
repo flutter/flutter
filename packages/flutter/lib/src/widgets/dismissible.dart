@@ -92,7 +92,7 @@ enum DismissDirection {
 ///         key: ValueKey<int>(items[index]),
 ///         onDismissed: (DismissDirection direction) {
 ///           setState(() {
-///             items.remove(index);
+///             items.removeAt(index);
 ///           });
 ///         },
 ///       );
@@ -529,7 +529,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         _sizePriorToCollapse = context.size;
         _resizeAnimation = _resizeController!.drive(
           CurveTween(
-            curve: _kResizeTimeCurve
+            curve: _kResizeTimeCurve,
           ),
         ).drive(
           Tween<double>(
@@ -543,13 +543,9 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
 
   void _handleResizeProgressChanged() {
     if (_resizeController!.isCompleted) {
-      if (widget.onDismissed != null) {
-        final DismissDirection direction = _dismissDirection;
-        widget.onDismissed!(direction);
-      }
+      widget.onDismissed?.call(_dismissDirection);
     } else {
-      if (widget.onResize != null)
-        widget.onResize!();
+      widget.onResize?.call();
     }
   }
 
@@ -575,8 +571,8 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
             ErrorSummary('A dismissed Dismissible widget is still part of the tree.'),
             ErrorHint(
               'Make sure to implement the onDismissed handler and to immediately remove the Dismissible '
-              'widget from the application once that handler has fired.'
-            )
+              'widget from the application once that handler has fired.',
+            ),
           ]);
         }
         return true;

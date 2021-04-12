@@ -69,7 +69,7 @@ const _DayPickerGridDelegate _kDayPickerGridDelegate = _DayPickerGridDelegate();
 ///
 @Deprecated(
   'Use CalendarDatePicker instead. '
-  'This feature was deprecated after v1.26.0-18.0.pre.'
+  'This feature was deprecated after v1.26.0-18.0.pre.',
 )
 class DayPicker extends StatelessWidget {
   /// Creates a day picker.
@@ -77,7 +77,7 @@ class DayPicker extends StatelessWidget {
   /// Rarely used directly. Instead, typically used as part of a [MonthPicker].
   @Deprecated(
     'Use CalendarDatePicker instead. '
-    'This feature was deprecated after v1.26.0-18.0.pre.'
+    'This feature was deprecated after v1.26.0-18.0.pre.',
   )
   DayPicker({
     Key? key,
@@ -355,7 +355,7 @@ class DayPicker extends StatelessWidget {
 ///
 @Deprecated(
   'Use CalendarDatePicker instead. '
-  'This feature was deprecated after v1.26.0-18.0.pre.'
+  'This feature was deprecated after v1.26.0-18.0.pre.',
 )
 class MonthPicker extends StatefulWidget {
   /// Creates a month picker.
@@ -364,7 +364,7 @@ class MonthPicker extends StatefulWidget {
   /// by [showDatePicker].
   @Deprecated(
     'Use CalendarDatePicker instead. '
-    'This feature was deprecated after v1.26.0-18.0.pre.'
+    'This feature was deprecated after v1.26.0-18.0.pre.',
   )
   MonthPicker({
     Key? key,
@@ -504,14 +504,12 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
 
   /// True if the earliest allowable month is displayed.
   bool get _isDisplayingFirstMonth {
-    return !_currentDisplayedMonthDate.isAfter(
-        DateTime(widget.firstDate.year, widget.firstDate.month));
+    return !_currentDisplayedMonthDate.isAfter(DateTime(widget.firstDate.year, widget.firstDate.month));
   }
 
   /// True if the latest allowable month is displayed.
   bool get _isDisplayingLastMonth {
-    return !_currentDisplayedMonthDate.isBefore(
-        DateTime(widget.lastDate.year, widget.lastDate.month));
+    return !_currentDisplayedMonthDate.isBefore(DateTime(widget.lastDate.year, widget.lastDate.month));
   }
 
   late DateTime _previousMonthDate;

@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/version.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+import '../../src/test_build_system.dart';
 
 void main() {
   group('build ios-framework', () {
@@ -53,6 +54,7 @@ void main() {
           rootOverride: rootOverride,
           platform: fakePlatform,
           fileSystem: memoryFileSystem,
+          processManager: FakeProcessManager.any(),
         );
         rootOverride.childDirectory('bin').childDirectory('internal').childFile('engine.version')
           ..createSync(recursive: true)

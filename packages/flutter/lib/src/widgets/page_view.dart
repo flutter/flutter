@@ -13,6 +13,7 @@ import 'debug.dart';
 import 'framework.dart';
 import 'notification_listener.dart';
 import 'page_storage.dart';
+import 'scroll_configuration.dart';
 import 'scroll_context.dart';
 import 'scroll_controller.dart';
 import 'scroll_metrics.dart';
@@ -635,6 +636,7 @@ class PageView extends StatefulWidget {
     this.allowImplicitScrolling = false,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
+    this.scrollBehavior,
   }) : assert(allowImplicitScrolling != null),
        assert(clipBehavior != null),
        controller = controller ?? _defaultPageController,
@@ -673,6 +675,7 @@ class PageView extends StatefulWidget {
     this.allowImplicitScrolling = false,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
+    this.scrollBehavior,
   }) : assert(allowImplicitScrolling != null),
        assert(clipBehavior != null),
        controller = controller ?? _defaultPageController,
@@ -776,6 +779,7 @@ class PageView extends StatefulWidget {
     this.allowImplicitScrolling = false,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
+    this.scrollBehavior,
   }) : assert(childrenDelegate != null),
        assert(allowImplicitScrolling != null),
        assert(clipBehavior != null),
@@ -829,6 +833,10 @@ class PageView extends StatefulWidget {
   /// The physics are modified to snap to page boundaries using
   /// [PageScrollPhysics] prior to being used.
   ///
+  /// If an explicit [ScrollBehavior] is provided to [scrollBehavior], the
+  /// [ScrollPhysics] provided by that behavior will take precedence after
+  /// [physics].
+  ///
   /// Defaults to matching platform conventions.
   final ScrollPhysics? physics;
 
@@ -853,6 +861,17 @@ class PageView extends StatefulWidget {
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
+
+  /// {@macro flutter.widgets.shadow.scrollBehavior}
+  ///
+  /// [ScrollBehavior]s also provide [ScrollPhysics]. If an explicit
+  /// [ScrollPhysics] is provided in [physics], it will take precedence,
+  /// followed by [scrollBehavior], and then the inherited ancestor
+  /// [ScrollBehavior].
+  ///
+  /// The [ScrollBehavior] of the inherited [ScrollConfiguration] will be
+  /// modified by default to not apply a [Scrollbar].
+  final ScrollBehavior? scrollBehavior;
 
   @override
   _PageViewState createState() => _PageViewState();
@@ -884,9 +903,11 @@ class _PageViewState extends State<PageView> {
     final AxisDirection axisDirection = _getDirection(context);
     final ScrollPhysics physics = _ForceImplicitScrollPhysics(
       allowImplicitScrolling: widget.allowImplicitScrolling,
-    ).applyTo(widget.pageSnapping
-        ? _kPagePhysics.applyTo(widget.physics)
-        : widget.physics);
+    ).applyTo(
+      widget.pageSnapping
+        ? _kPagePhysics.applyTo(widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context))
+        : widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context),
+    );
 
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
@@ -906,6 +927,7 @@ class _PageViewState extends State<PageView> {
         controller: widget.controller,
         physics: physics,
         restorationId: widget.restorationId,
+        scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false),
         viewportBuilder: (BuildContext context, ViewportOffset position) {
           return Viewport(
             // TODO(dnfield): we should provide a way to set cacheExtent

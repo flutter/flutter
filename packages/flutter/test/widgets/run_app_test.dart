@@ -13,7 +13,7 @@ void main() {
         child: Material(
           child: ElevatedButton(
             onPressed: () {
-              runApp(const Center(child: Text('Done', textDirection: TextDirection.ltr,)));
+              runApp(const Center(child: Text('Done', textDirection: TextDirection.ltr)));
             },
             child: const Text('GO'),
           ),

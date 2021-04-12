@@ -445,7 +445,7 @@ class SliverFillRemaining extends StatelessWidget {
       DiagnosticsProperty<Widget>(
         'child',
         child,
-      )
+      ),
     );
     final List<String> flags = <String>[
       if (hasScrollBody) 'scrollable',

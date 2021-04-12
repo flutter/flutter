@@ -405,7 +405,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
           ErrorHint(
             'If you are merely trying to shrink-wrap the viewport in the main axis direction, '
             'consider a RenderShrinkWrappingViewport render object (ShrinkWrappingViewport widget), '
-            'which achieves that effect without implementing the intrinsic dimension API.'
+            'which achieves that effect without implementing the intrinsic dimension API.',
           ),
         ]);
       }
@@ -632,8 +632,14 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     if (firstChild == null)
       return;
     if (hasVisualOverflow && clipBehavior != Clip.none) {
-      _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintContents,
-          clipBehavior: clipBehavior, oldLayer: _clipRectLayer);
+      _clipRectLayer = context.pushClipRect(
+        needsCompositing,
+        offset,
+        Offset.zero & size,
+        _paintContents,
+        clipBehavior: clipBehavior,
+        oldLayer: _clipRectLayer,
+      );
     } else {
       _clipRectLayer = null;
       _paintContents(context, offset);
@@ -1366,7 +1372,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
                   'Viewports expand in the scrolling direction to fill their container. '
                   'In this case, a vertical viewport was given an unlimited amount of '
                   'vertical space in which to expand. This situation typically happens '
-                  'when a scrollable widget is nested inside another scrollable widget.'
+                  'when a scrollable widget is nested inside another scrollable widget.',
                 ),
                 ErrorHint(
                   'If this widget is always nested in a scrollable widget there '
@@ -1374,8 +1380,8 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
                   'vertical space for the children. In this case, consider using a '
                   'Column instead. Otherwise, consider using the "shrinkWrap" property '
                   '(or a ShrinkWrappingViewport) to size the height of the viewport '
-                  'to the sum of the heights of its children.'
-                )
+                  'to the sum of the heights of its children.',
+                ),
               ]);
             }
             if (!constraints.hasBoundedWidth) {
@@ -1384,7 +1390,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
                 'Viewports expand in the cross axis to fill their container and '
                 'constrain their children to match their extent in the cross axis. '
                 'In this case, a vertical viewport was given an unlimited amount of '
-                'horizontal space in which to expand.'
+                'horizontal space in which to expand.',
               );
             }
             break;
@@ -1396,7 +1402,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
                   'Viewports expand in the scrolling direction to fill their container. '
                   'In this case, a horizontal viewport was given an unlimited amount of '
                   'horizontal space in which to expand. This situation typically happens '
-                  'when a scrollable widget is nested inside another scrollable widget.'
+                  'when a scrollable widget is nested inside another scrollable widget.',
                 ),
                 ErrorHint(
                   'If this widget is always nested in a scrollable widget there '
@@ -1404,8 +1410,8 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
                   'horizontal space for the children. In this case, consider using a '
                   'Row instead. Otherwise, consider using the "shrinkWrap" property '
                   '(or a ShrinkWrappingViewport) to size the width of the viewport '
-                  'to the sum of the widths of its children.'
-                )
+                  'to the sum of the widths of its children.',
+                ),
               ]);
             }
             if (!constraints.hasBoundedHeight) {
@@ -1414,7 +1420,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
                 'Viewports expand in the cross axis to fill their container and '
                 'constrain their children to match their extent in the cross axis. '
                 'In this case, a horizontal viewport was given an unlimited amount of '
-                'vertical space in which to expand.'
+                'vertical space in which to expand.',
               );
             }
             break;
@@ -1505,7 +1511,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
           ' applies a reverse correction, leading to an infinite loop of corrections.\n'
           ' * There is a pathological case that would eventually resolve, but it is'
           ' so complicated that it cannot be resolved in any reasonable number of'
-          ' layout passes.'
+          ' layout passes.',
         );
       }
       return true;
@@ -1806,13 +1812,13 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
           ErrorSummary('$runtimeType does not support returning intrinsic dimensions.'),
           ErrorDescription(
            'Calculating the intrinsic dimensions would require instantiating every child of '
-           'the viewport, which defeats the point of viewports being lazy.'
+           'the viewport, which defeats the point of viewports being lazy.',
           ),
           ErrorHint(
             'If you are merely trying to shrink-wrap the viewport in the main axis direction, '
             'you should be able to achieve that effect by just giving the viewport loose '
-            'constraints, without needing to measure its intrinsic dimensions.'
-          )
+            'constraints, without needing to measure its intrinsic dimensions.',
+          ),
         ]);
       }
       return true;

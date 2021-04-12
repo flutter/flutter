@@ -99,7 +99,7 @@ class BoxDecoration extends Decoration {
        assert(
          backgroundBlendMode == null || color != null || gradient != null,
          "backgroundBlendMode applies to BoxDecoration's background color or "
-         'gradient, but no color or gradient was provided.'
+         'gradient, but no color or gradient was provided.',
        );
 
   /// Creates a copy of this object but with the given fields replaced with the
@@ -128,8 +128,7 @@ class BoxDecoration extends Decoration {
 
   @override
   bool debugAssertIsValid() {
-    assert(shape != BoxShape.circle ||
-          borderRadius == null); // Can't have a border radius if you're a circle.
+    assert(shape != BoxShape.circle || borderRadius == null); // Can't have a border radius if you're a circle.
     return super.debugAssertIsValid();
   }
 

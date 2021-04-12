@@ -445,8 +445,8 @@ abstract class ImageProvider<T extends Object> {
       specification: ZoneSpecification(
         handleUncaughtError: (Zone zone, ZoneDelegate delegate, Zone parent, Object error, StackTrace stackTrace) {
           handleError(error, stackTrace);
-        }
-      )
+        },
+      ),
     );
     dangerZone.runGuarded(() {
       Future<T> key;
@@ -655,7 +655,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
       codec: _loadAsync(key, decode),
       scale: key.scale,
       debugLabel: key.name,
-      informationCollector: collector
+      informationCollector: collector,
     );
   }
 
@@ -764,7 +764,7 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
       assert(
         cacheWidth == null && cacheHeight == null && allowUpscaling == null,
         'ResizeImage cannot be composed with another ImageProvider that applies '
-        'cacheWidth, cacheHeight, or allowUpscaling.'
+        'cacheWidth, cacheHeight, or allowUpscaling.',
       );
       return decode(bytes, cacheWidth: width, cacheHeight: height, allowUpscaling: this.allowUpscaling);
     }

@@ -132,7 +132,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
           return <String, Object>{
             'data': data,
           };
-        }
+        },
       );
 
       registerServiceExtension(
@@ -282,8 +282,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         event is PointerAddedEvent ||
         event is PointerRemovedEvent) {
       assert(event.position != null);
-      _mouseTracker!.updateWithEvent(event,
-          () => hitTestResult ?? renderView.hitTestMouseTrackers(event.position));
+      _mouseTracker!.updateWithEvent(event, () => hitTestResult ?? renderView.hitTestMouseTrackers(event.position));
     }
     super.dispatchEvent(event, hitTestResult);
   }

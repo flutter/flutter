@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
-
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/os.dart';
@@ -13,7 +9,7 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/version.dart';
 import '../convert.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import 'android_studio.dart';
 
 // ANDROID_HOME is deprecated.
@@ -48,8 +44,8 @@ class AndroidSdk {
   /// The Android SDK root directory.
   final Directory directory;
 
-  List<AndroidSdkVersion> _sdkVersions;
-  AndroidSdkVersion _latestVersion;
+  List<AndroidSdkVersion> _sdkVersions = <AndroidSdkVersion>[];
+  AndroidSdkVersion? _latestVersion;
 
   /// Whether the `platform-tools` or `cmdline-tools` directory exists in the Android SDK.
   ///
@@ -69,11 +65,11 @@ class AndroidSdk {
   /// the SDK on demand.
   bool get licensesAvailable => directory.childDirectory('licenses').existsSync();
 
-  static AndroidSdk locateAndroidSdk() {
-    String findAndroidHomeDir() {
-      String androidHomeDir;
+  static AndroidSdk? locateAndroidSdk() {
+    String? findAndroidHomeDir() {
+      String? androidHomeDir;
       if (globals.config.containsKey('android-sdk')) {
-        androidHomeDir = globals.config.getValue('android-sdk') as String;
+        androidHomeDir = globals.config.getValue('android-sdk') as String?;
       } else if (globals.platform.environment.containsKey(kAndroidHome)) {
         androidHomeDir = globals.platform.environment[kAndroidHome];
       } else if (globals.platform.environment.containsKey(kAndroidSdkRoot)) {
@@ -81,7 +77,7 @@ class AndroidSdk {
       } else if (globals.platform.isLinux) {
         if (globals.fsUtils.homeDirPath != null) {
           androidHomeDir = globals.fs.path.join(
-            globals.fsUtils.homeDirPath,
+            globals.fsUtils.homeDirPath!,
             'Android',
             'Sdk',
           );
@@ -89,7 +85,7 @@ class AndroidSdk {
       } else if (globals.platform.isMacOS) {
         if (globals.fsUtils.homeDirPath != null) {
           androidHomeDir = globals.fs.path.join(
-            globals.fsUtils.homeDirPath,
+            globals.fsUtils.homeDirPath!,
             'Library',
             'Android',
             'sdk',
@@ -98,7 +94,7 @@ class AndroidSdk {
       } else if (globals.platform.isWindows) {
         if (globals.fsUtils.homeDirPath != null) {
           androidHomeDir = globals.fs.path.join(
-            globals.fsUtils.homeDirPath,
+            globals.fsUtils.homeDirPath!,
             'AppData',
             'Local',
             'Android',
@@ -141,7 +137,7 @@ class AndroidSdk {
       return null;
     }
 
-    final String androidHomeDir = findAndroidHomeDir();
+    final String? androidHomeDir = findAndroidHomeDir();
     if (androidHomeDir == null) {
       // No dice.
       globals.printTrace('Unable to locate an Android SDK.');
@@ -165,26 +161,29 @@ class AndroidSdk {
 
   List<AndroidSdkVersion> get sdkVersions => _sdkVersions;
 
-  AndroidSdkVersion get latestVersion => _latestVersion;
+  AndroidSdkVersion? get latestVersion => _latestVersion;
 
-  String get adbPath => _adbPath ??= getPlatformToolsPath(globals.platform.isWindows ? 'adb.exe' : 'adb');
-  String _adbPath;
+  String? get adbPath => _adbPath ??= getPlatformToolsPath(globals.platform.isWindows ? 'adb.exe' : 'adb');
+  String? _adbPath;
 
-  String get emulatorPath => getEmulatorPath();
+  String? get emulatorPath => getEmulatorPath();
 
-  String get avdManagerPath => getAvdManagerPath();
+  String? get avdManagerPath => getAvdManagerPath();
 
   /// Locate the path for storing AVD emulator images. Returns null if none found.
-  String getAvdPath() {
+  String? getAvdPath() {
+    final String? avdHome = globals.platform.environment['ANDROID_AVD_HOME'];
+    final String? home = globals.platform.environment['HOME'];
     final List<String> searchPaths = <String>[
-      globals.platform.environment['ANDROID_AVD_HOME'],
-      if (globals.platform.environment['HOME'] != null)
-        globals.fs.path.join(globals.platform.environment['HOME'], '.android', 'avd'),
+      if (avdHome != null)
+        avdHome,
+      if (home != null)
+        globals.fs.path.join(home, '.android', 'avd'),
     ];
 
     if (globals.platform.isWindows) {
-      final String homeDrive = globals.platform.environment['HOMEDRIVE'];
-      final String homePath = globals.platform.environment['HOMEPATH'];
+      final String? homeDrive = globals.platform.environment['HOMEDRIVE'];
+      final String? homePath = globals.platform.environment['HOMEPATH'];
 
       if (homeDrive != null && homePath != null) {
         // Can't use path.join for HOMEDRIVE/HOMEPATH
@@ -194,10 +193,12 @@ class AndroidSdk {
       }
     }
 
-    return searchPaths.where((String p) => p != null).firstWhere(
-      (String p) => globals.fs.directory(p).existsSync(),
-      orElse: () => null,
-    );
+    for (final String searchPath in searchPaths.whereType<String>()) {
+      if (globals.fs.directory(searchPath).existsSync()) {
+        return searchPath;
+      }
+    }
+    return null;
   }
 
   Directory get _platformsDir => directory.childDirectory('platforms');
@@ -232,10 +233,10 @@ class AndroidSdk {
       return <String>[msg.toString()];
     }
 
-    return latestVersion.validateSdkWellFormed();
+    return latestVersion!.validateSdkWellFormed();
   }
 
-  String getPlatformToolsPath(String binaryName) {
+  String? getPlatformToolsPath(String binaryName) {
     final File cmdlineToolsBinary = directory.childDirectory('cmdline-tools').childFile(binaryName);
     if (cmdlineToolsBinary.existsSync()) {
       return cmdlineToolsBinary.path;
@@ -247,7 +248,7 @@ class AndroidSdk {
     return null;
   }
 
-  String getEmulatorPath() {
+  String? getEmulatorPath() {
     final String binaryName = globals.platform.isWindows ? 'emulator.exe' : 'emulator';
     // Emulator now lives inside "emulator" but used to live inside "tools" so
     // try both.
@@ -261,22 +262,56 @@ class AndroidSdk {
     return null;
   }
 
-  String getAvdManagerPath() {
-    final String binaryName = globals.platform.isWindows ? 'avdmanager.bat' : 'avdmanager';
-    final File cmdlineToolsBinary = directory
+  String? getCmdlineToolsPath(String binaryName) {
+    // First look for the latest version of the command-line tools
+    final File cmdlineToolsLatestBinary = directory
       .childDirectory('cmdline-tools')
       .childDirectory('latest')
       .childDirectory('bin')
       .childFile(binaryName);
-    if (cmdlineToolsBinary.existsSync()) {
-      return cmdlineToolsBinary.path;
+    if (cmdlineToolsLatestBinary.existsSync()) {
+      return cmdlineToolsLatestBinary.path;
     }
+
+    // Next look for the highest version of the command-line tools
+    final Directory cmdlineToolsDir = directory.childDirectory('cmdline-tools');
+    if (cmdlineToolsDir.existsSync()) {
+      final List<Version> cmdlineTools = cmdlineToolsDir
+        .listSync()
+        .whereType<Directory>()
+        .map((Directory subDirectory) {
+          try {
+            return Version.parse(subDirectory.basename);
+          } on Exception {
+            return null;
+          }
+        })
+        .whereType<Version>()
+        .toList();
+      cmdlineTools.sort();
+
+      for (final Version cmdlineToolsVersion in cmdlineTools.reversed) {
+        final File cmdlineToolsBinary = directory
+          .childDirectory('cmdline-tools')
+          .childDirectory(cmdlineToolsVersion.toString())
+          .childDirectory('bin')
+          .childFile(binaryName);
+        if (cmdlineToolsBinary.existsSync()) {
+          return cmdlineToolsBinary.path;
+        }
+      }
+    }
+
+    // Finally fallback to the old SDK tools
     final File toolsBinary = directory.childDirectory('tools').childDirectory('bin').childFile(binaryName);
     if (toolsBinary.existsSync()) {
       return toolsBinary.path;
     }
+
     return null;
   }
+
+  String? getAvdManagerPath() => getCmdlineToolsPath(globals.platform.isWindows ? 'avdmanager.bat' : 'avdmanager');
 
   /// Sets up various paths used internally.
   ///
@@ -296,33 +331,37 @@ class AndroidSdk {
             return null;
           }
         })
-        .where((Version version) => version != null)
+        .whereType<Version>()
         .toList();
     }
 
     // Match up platforms with the best corresponding build-tools.
-    _sdkVersions = _platforms.map<AndroidSdkVersion>((Directory platformDir) {
+    _sdkVersions = _platforms.map<AndroidSdkVersion?>((Directory platformDir) {
       final String platformName = platformDir.basename;
       int platformVersion;
 
       try {
-        final Match numberedVersion = _numberedAndroidPlatformRe.firstMatch(platformName);
+        final Match? numberedVersion = _numberedAndroidPlatformRe.firstMatch(platformName);
         if (numberedVersion != null) {
-          platformVersion = int.parse(numberedVersion.group(1));
+          platformVersion = int.parse(numberedVersion.group(1)!);
         } else {
           final String buildProps = platformDir.childFile('build.prop').readAsStringSync();
-          final String versionString = const LineSplitter()
+          final String? versionString = const LineSplitter()
               .convert(buildProps)
-              .map<Match>(_sdkVersionRe.firstMatch)
-              .firstWhere((Match match) => match != null)
+              .map<RegExpMatch?>(_sdkVersionRe.firstMatch)
+              .whereType<Match>()
+              .first
               .group(1);
+          if (versionString == null) {
+            return null;
+          }
           platformVersion = int.parse(versionString);
         }
       } on Exception {
         return null;
       }
 
-      Version buildToolsVersion = Version.primary(buildTools.where((Version version) {
+      Version? buildToolsVersion = Version.primary(buildTools.where((Version version) {
         return version.major == platformVersion;
       }).toList());
 
@@ -339,7 +378,7 @@ class AndroidSdk {
         buildToolsVersion: buildToolsVersion,
         fileSystem: globals.fs,
       );
-    }).where((AndroidSdkVersion version) => version != null).toList();
+    }).whereType<AndroidSdkVersion>().toList();
 
     _sdkVersions.sort();
 
@@ -354,14 +393,11 @@ class AndroidSdk {
     final String executable = globals.platform.isWindows
       ? 'sdkmanager.bat'
       : 'sdkmanager';
-    final File cmdlineTool = directory
-      .childDirectory('cmdline-tools')
-      .childDirectory('latest')
-      .childDirectory('bin')
-      .childFile(executable);
-    if (cmdlineTool.existsSync()) {
-      return cmdlineTool.path;
+    final String? path = getCmdlineToolsPath(executable);
+    if (path != null) {
+      return path;
     }
+    // If no binary was found, return the default location
     return directory
       .childDirectory('tools')
       .childDirectory('bin')
@@ -370,17 +406,17 @@ class AndroidSdk {
   }
 
   /// First try Java bundled with Android Studio, then sniff JAVA_HOME, then fallback to PATH.
-  static String findJavaBinary({
-    @required AndroidStudio androidStudio,
-    @required FileSystem fileSystem,
-    @required OperatingSystemUtils operatingSystemUtils,
-    @required Platform platform,
+  static String? findJavaBinary({
+    required AndroidStudio? androidStudio,
+    required FileSystem fileSystem,
+    required OperatingSystemUtils operatingSystemUtils,
+    required Platform platform,
   }) {
     if (androidStudio?.javaPath != null) {
-      return fileSystem.path.join(androidStudio.javaPath, 'bin', 'java');
+      return fileSystem.path.join(androidStudio!.javaPath!, 'bin', 'java');
     }
 
-    final String javaHomeEnv = platform.environment[_javaHomeEnvironmentVariable];
+    final String? javaHomeEnv = platform.environment[_javaHomeEnvironmentVariable];
     if (javaHomeEnv != null) {
       // Trust JAVA_HOME.
       return fileSystem.path.join(javaHomeEnv, 'bin', 'java');
@@ -408,30 +444,30 @@ class AndroidSdk {
     return operatingSystemUtils.which(_javaExecutable)?.path;
   }
 
-  Map<String, String> _sdkManagerEnv;
+  Map<String, String>? _sdkManagerEnv;
   /// Returns an environment with the Java folder added to PATH for use in calling
   /// Java-based Android SDK commands such as sdkmanager and avdmanager.
   Map<String, String> get sdkManagerEnv {
     if (_sdkManagerEnv == null) {
       // If we can locate Java, then add it to the path used to run the Android SDK manager.
       _sdkManagerEnv = <String, String>{};
-      final String javaBinary = findJavaBinary(
+      final String? javaBinary = findJavaBinary(
         androidStudio: globals.androidStudio,
         fileSystem: globals.fs,
         operatingSystemUtils: globals.os,
         platform: globals.platform,
       );
-      if (javaBinary != null) {
-        _sdkManagerEnv['PATH'] = globals.fs.path.dirname(javaBinary) +
+      if (javaBinary != null && globals.platform.environment['PATH'] != null) {
+        _sdkManagerEnv!['PATH'] = globals.fs.path.dirname(javaBinary) +
                                  globals.os.pathVarSeparator +
-                                 globals.platform.environment['PATH'];
+                                 globals.platform.environment['PATH']!;
       }
     }
-    return _sdkManagerEnv;
+    return _sdkManagerEnv!;
   }
 
   /// Returns the version of the Android SDK manager tool or null if not found.
-  String get sdkManagerVersion {
+  String? get sdkManagerVersion {
     if (!globals.processManager.canRun(sdkManagerPath)) {
       throwToolExit('Android sdkmanager not found. Update to the latest Android SDK to resolve this.');
     }
@@ -453,10 +489,10 @@ class AndroidSdk {
 class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
   AndroidSdkVersion._(
     this.sdk, {
-    @required this.sdkLevel,
-    @required this.platformName,
-    @required this.buildToolsVersion,
-    @required FileSystem fileSystem,
+    required this.sdkLevel,
+    required this.platformName,
+    required this.buildToolsVersion,
+    required FileSystem fileSystem,
   }) : assert(sdkLevel != null),
        assert(platformName != null),
        assert(buildToolsVersion != null),
@@ -482,12 +518,14 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
   String get aaptPath => getBuildToolsPath('aapt');
 
   List<String> validateSdkWellFormed() {
-    if (_exists(androidJarPath) != null) {
-      return <String>[_exists(androidJarPath)];
+    final String? existsAndroidJarPath = _exists(androidJarPath);
+    if (existsAndroidJarPath != null) {
+      return <String>[existsAndroidJarPath];
     }
 
-    if (_canRun(aaptPath) != null) {
-      return <String>[_canRun(aaptPath)];
+    final String? canRunAaptPath = _canRun(aaptPath);
+    if (canRunAaptPath != null) {
+      return <String>[canRunAaptPath];
     }
 
     return <String>[];
@@ -507,14 +545,14 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
   @override
   String toString() => '[${sdk.directory}, SDK version $sdkLevel, build-tools $buildToolsVersionName]';
 
-  String _exists(String path) {
+  String? _exists(String path) {
     if (!_fileSystem.isFileSync(path)) {
       return 'Android SDK file not found: $path.';
     }
     return null;
   }
 
-  String _canRun(String path) {
+  String? _canRun(String path) {
     if (!globals.processManager.canRun(path)) {
       return 'Android SDK file not found: $path.';
     }

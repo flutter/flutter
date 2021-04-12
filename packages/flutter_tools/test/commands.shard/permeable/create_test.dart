@@ -32,7 +32,7 @@ import '../../src/context.dart';
 import '../../src/fake_http_client.dart';
 import '../../src/fakes.dart';
 import '../../src/pubspec_schema.dart';
-import '../../src/testbed.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 const String _kNoPlatformsMessage = 'You\'ve created a plugin project that doesn\'t yet support any platforms.\n';
 const String frameworkRevision = '12345678';
@@ -691,6 +691,44 @@ void main() {
     expect(logger.statusText, isNot(contains('https://flutter.dev/go/android-project-migration')));
   }, overrides: <Type, Generator>{
     Logger: () => logger,
+  });
+
+  testUsingContext('app supports android and ios by default', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+
+    expect(projectDir.childDirectory('android'), exists);
+    expect(projectDir.childDirectory('ios'), exists);
+  }, overrides: <Type, Generator>{});
+
+  testUsingContext('app does not include android if disabled in config', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+
+    expect(projectDir.childDirectory('android'), isNot(exists));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false),
+  });
+
+  testUsingContext('app does not include ios if disabled in config', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+
+    expect(projectDir.childDirectory('ios'), isNot(exists));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isIOSEnabled: false),
   });
 
   testUsingContext('app does not include desktop or web by default', () async {
@@ -2410,25 +2448,6 @@ void main() {
 
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true, isAndroidEnabled: false, isIOSEnabled: false),
-    Logger: () => logger,
-  });
-
-  testUsingContext('flutter create prints note about null safety', () async {
-    await _createProject(
-      projectDir,
-      <String>[],
-      <String>[],
-    );
-    expect(logger.statusText, contains('dart migrate --apply-changes'));
-  }, overrides: <Type, Generator>{
-    Pub: () => Pub(
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      processManager: globals.processManager,
-      usage: globals.flutterUsage,
-      botDetector: globals.botDetector,
-      platform: globals.platform,
-    ),
     Logger: () => logger,
   });
 }

@@ -50,7 +50,6 @@ void main() {
       });
 
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
-      await summary.writeSummaryToFile(summaryName, pretty: true);
       await summary.writeTimelineToFile(summaryName, pretty: true);
     }
 

@@ -189,7 +189,7 @@ class _TimePickerHeader extends StatelessWidget {
                       orientation: orientation,
                       onChanged: onChanged,
                     ),
-                  ]
+                  ],
                 ],
               ),
             ),
@@ -1074,9 +1074,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     _center = null;
     _animateTo(_getThetaForTime(widget.selectedTime));
     if (widget.mode == _TimePickerMode.hour) {
-      if (widget.onHourSelected != null) {
-        widget.onHourSelected!();
-      }
+      widget.onHourSelected?.call();
     }
   }
 
@@ -1092,9 +1090,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       } else {
         _announceToAccessibility(context, localizations.formatDecimal(newTime.hourOfPeriod));
       }
-      if (widget.onHourSelected != null) {
-        widget.onHourSelected!();
-      }
+      widget.onHourSelected?.call();
     } else {
       _announceToAccessibility(context, localizations.formatDecimal(newTime.minute));
     }
@@ -1252,17 +1248,17 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
         if (widget.use24HourDials) {
           selectedDialValue = widget.selectedTime.hour;
           primaryLabels = _build24HourRing(theme.textTheme, primaryLabelColor);
-          secondaryLabels = _build24HourRing(theme.accentTextTheme, secondaryLabelColor);
+          secondaryLabels = _build24HourRing(theme.textTheme, secondaryLabelColor);
         } else {
           selectedDialValue = widget.selectedTime.hourOfPeriod;
           primaryLabels = _build12HourRing(theme.textTheme, primaryLabelColor);
-          secondaryLabels = _build12HourRing(theme.accentTextTheme, secondaryLabelColor);
+          secondaryLabels = _build12HourRing(theme.textTheme, secondaryLabelColor);
         }
         break;
       case _TimePickerMode.minute:
         selectedDialValue = widget.selectedTime.minute;
         primaryLabels = _buildMinutes(theme.textTheme, primaryLabelColor);
-        secondaryLabels = _buildMinutes(theme.accentTextTheme, secondaryLabelColor);
+        secondaryLabels = _buildMinutes(theme.textTheme, secondaryLabelColor);
         break;
     }
 

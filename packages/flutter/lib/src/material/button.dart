@@ -330,9 +330,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
     if (_pressed != value) {
       setState(() {
         _updateState(MaterialState.pressed, value);
-        if (widget.onHighlightChanged != null) {
-          widget.onHighlightChanged!(value);
-        }
+        widget.onHighlightChanged?.call(value);
       });
     }
   }

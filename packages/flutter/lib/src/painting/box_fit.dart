@@ -173,8 +173,7 @@ FittedSizes applyBoxFit(BoxFit fit, Size inputSize, Size outputSize) {
       destinationSize = Size(sourceSize.width * outputSize.height / sourceSize.height, outputSize.height);
       break;
     case BoxFit.none:
-      sourceSize = Size(math.min(inputSize.width, outputSize.width),
-                            math.min(inputSize.height, outputSize.height));
+      sourceSize = Size(math.min(inputSize.width, outputSize.width), math.min(inputSize.height, outputSize.height));
       destinationSize = sourceSize;
       break;
     case BoxFit.scaleDown:

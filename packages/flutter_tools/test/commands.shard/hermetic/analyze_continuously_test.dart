@@ -24,6 +24,7 @@ import 'package:process/process.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   setUpAll(() {
@@ -39,7 +40,7 @@ void main() {
   Logger logger;
 
   setUp(() {
-    fileSystem = LocalFileSystem.instance;
+    fileSystem = globals.localFileSystem;
     platform = const LocalPlatform();
     processManager = const LocalProcessManager();
     terminal = AnsiTerminal(platform: platform, stdio: Stdio());

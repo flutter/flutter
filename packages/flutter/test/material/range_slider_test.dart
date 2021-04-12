@@ -1867,8 +1867,8 @@ void main() {
           // right inactive track RRect
           ..rrect(rrect: RRect.fromLTRBAndCorners(0.0, 3.0, 24.0, 7.0, topRight: const Radius.circular(2.0), bottomRight: const Radius.circular(2.0)))
           // thumbs
-          ..circle(x: -12.0, y: 5.0, radius: 10.0,)
-          ..circle(x: 0.0, y: 5.0, radius: 10.0,)
+          ..circle(x: -12.0, y: 5.0, radius: 10.0)
+          ..circle(x: 0.0, y: 5.0, radius: 10.0)
     );
   });
 
@@ -1911,8 +1911,8 @@ void main() {
         // right inactive track RRect
           ..rect(rect: const Rect.fromLTRB(0.0, 3.0, 24.0, 7.0))
         // thumbs
-          ..circle(x: -12.0, y: 5.0, radius: 10.0,)
-          ..circle(x: 0.0, y: 5.0, radius: 10.0,)
+          ..circle(x: -12.0, y: 5.0, radius: 10.0)
+          ..circle(x: 0.0, y: 5.0, radius: 10.0)
     );
   });
 

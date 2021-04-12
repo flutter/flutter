@@ -392,9 +392,7 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
 
   // Handle the start of a gesture of _GestureType.
   void _onScaleStart(ScaleStartDetails details) {
-    if (widget.onScaleStart != null) {
-      widget.onScaleStart!(details);
-    }
+    widget.onScaleStart?.call(details);
 
     if (_controller.isAnimating) {
       _controller.stop();
@@ -417,13 +415,11 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
   // Handle an update to an ongoing gesture of _GestureType.
   void _onScaleUpdate(ScaleUpdateDetails details) {
     double scale = _transform.getMaxScaleOnAxis();
-    if (widget.onScaleUpdate != null) {
-      widget.onScaleUpdate!(ScaleUpdateDetails(
-        focalPoint: fromViewport(details.focalPoint, _transform),
-        scale: details.scale,
-        rotation: details.rotation,
-      ));
-    }
+    widget.onScaleUpdate?.call(ScaleUpdateDetails(
+      focalPoint: fromViewport(details.focalPoint, _transform),
+      scale: details.scale,
+      rotation: details.rotation,
+    ));
     final Offset focalPointScene = fromViewport(
       details.focalPoint,
       _transform,
@@ -476,9 +472,7 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
 
   // Handle the end of a gesture of _GestureType.
   void _onScaleEnd(ScaleEndDetails details) {
-    if (widget.onScaleEnd != null) {
-      widget.onScaleEnd!(details);
-    }
+    widget.onScaleEnd?.call(details);
     setState(() {
       _scaleStart = null;
       _rotationStart = null;

@@ -39,7 +39,7 @@ class SystemNavigator {
   /// information.
   static void routeInformationUpdated({
     required String location,
-    Object? state
+    Object? state,
   }) {
     SystemChannels.navigation.invokeMethod<void>(
       'routeInformationUpdated',
@@ -55,7 +55,7 @@ class SystemNavigator {
   /// On Web, updates the URL bar with the [routeName].
   static void routeUpdated({
     String? routeName,
-    String? previousRouteName
+    String? previousRouteName,
   }) {
     SystemChannels.navigation.invokeMethod<void>(
       'routeUpdated',

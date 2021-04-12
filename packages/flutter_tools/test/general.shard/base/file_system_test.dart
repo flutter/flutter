@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:io' as io;
 
@@ -15,12 +13,11 @@ import 'package:flutter_tools/src/base/signals.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 
 void main() {
   group('fsUtils', () {
-    MemoryFileSystem fs;
-    FileSystemUtils fsUtils;
+    late MemoryFileSystem fs;
+    late FileSystemUtils fsUtils;
 
     setUp(() {
       fs = MemoryFileSystem.test();
@@ -129,15 +126,15 @@ void main() {
   });
 
   group('LocalFileSystem', () {
-    FakeProcessSignal fakeSignal;
-    ProcessSignal signalUnderTest;
+    late FakeProcessSignal fakeSignal;
+    late ProcessSignal signalUnderTest;
 
     setUp(() {
       fakeSignal = FakeProcessSignal();
       signalUnderTest = ProcessSignal(fakeSignal);
     });
 
-    testUsingContext('deletes system temp entry on a fatal signal', () async {
+    testWithoutContext('deletes system temp entry on a fatal signal', () async {
       final Completer<void> completer = Completer<void>();
       final Signals signals = Signals.test();
       final LocalFileSystem localFileSystem = LocalFileSystem.test(

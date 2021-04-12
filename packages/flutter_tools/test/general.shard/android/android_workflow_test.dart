@@ -13,8 +13,7 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/version.dart';
-import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
@@ -298,6 +297,7 @@ void main() {
     // Test with invalid SDK and build tools
     when(mockSdkVersion.sdkLevel).thenReturn(28);
     when(mockSdkVersion.buildToolsVersion).thenReturn(Version(26, 0, 3));
+    when(sdk.directory).thenReturn(fileSystem.directory('/foo/bar'));
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     when(sdk.latestVersion).thenReturn(mockSdkVersion);
     when(sdk.validateSdkWellFormed()).thenReturn(<String>[]);
@@ -358,6 +358,7 @@ void main() {
     when(sdk.platformToolsAvailable).thenReturn(true);
     when(mockSdkVersion.sdkLevel).thenReturn(29);
     when(mockSdkVersion.buildToolsVersion).thenReturn(Version(28, 0, 3));
+    when(sdk.directory).thenReturn(fileSystem.directory('/foo/bar'));
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     when(sdk.latestVersion).thenReturn(mockSdkVersion);
     when(sdk.validateSdkWellFormed()).thenReturn(<String>[]);

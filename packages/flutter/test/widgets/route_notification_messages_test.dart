@@ -126,7 +126,7 @@ void main() {
       child: Navigator(
         pages: const <Page<void>>[
           TestPage(name: '/'),
-          TestPage(name: '/abc',),
+          TestPage(name: '/abc'),
         ],
         onPopPage: (Route<void> route, void result) => false,
       )

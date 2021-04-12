@@ -341,7 +341,7 @@ void main() {
         'StatefulWidget that built the AnimatedList. Please see the\n'
         'AnimatedList documentation for examples of how to refer to an\n'
         'AnimatedListState object:\n'
-        'https://api.flutter.dev/flutter/widgets/AnimatedListState-class.html\n'
+        '  https://api.flutter.dev/flutter/widgets/AnimatedListState-class.html\n'
       ),
     );
     expect(error.diagnostics[3], isA<DiagnosticsProperty<Element>>());
@@ -357,7 +357,7 @@ void main() {
         '   StatefulWidget that built the AnimatedList. Please see the\n'
         '   AnimatedList documentation for examples of how to refer to an\n'
         '   AnimatedListState object:\n'
-        '   https://api.flutter.dev/flutter/widgets/AnimatedListState-class.html\n'
+        '     https://api.flutter.dev/flutter/widgets/AnimatedListState-class.html\n'
         '   The context used was:\n'
         '     Container-[GlobalKey#32cc6]\n'
       ),

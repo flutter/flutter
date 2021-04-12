@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -37,7 +35,7 @@ void main() {
   });
 
   group('ANSI coloring and bold', () {
-    AnsiTerminal terminal;
+    late AnsiTerminal terminal;
 
     setUp(() {
       terminal = AnsiTerminal(
@@ -108,7 +106,7 @@ void main() {
   });
 
   group('character input prompt', () {
-    AnsiTerminal terminalUnderTest;
+    late AnsiTerminal terminalUnderTest;
 
     setUp(() {
       terminalUnderTest = TestTerminal(stdio: FakeStdio());
@@ -118,7 +116,7 @@ void main() {
       expect(terminalUnderTest.promptForCharInput(
         <String>['a', 'b', 'c'],
         prompt: 'Please choose something',
-        logger: null,
+        logger: BufferLogger.test(),
       ), throwsStateError);
     });
 
@@ -183,13 +181,13 @@ void main() {
   });
 }
 
-Stream<String> mockStdInStream;
+late Stream<String> mockStdInStream;
 
 class TestTerminal extends AnsiTerminal {
   TestTerminal({
-    Stdio stdio,
+    Stdio? stdio,
     Platform platform = const LocalPlatform(),
-  }) : super(stdio: stdio, platform: platform);
+  }) : super(stdio: stdio ?? Stdio(), platform: platform);
 
   @override
   Stream<String> get keystrokes {

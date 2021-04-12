@@ -180,6 +180,9 @@ class TabController extends ChangeNotifier {
     required int? length,
     required int? previousIndex,
   }) {
+    if (index != null) {
+      _animationController!.value = index.toDouble();
+    }
     return TabController._(
       index: index ?? _index,
       length: length ?? this.length,

@@ -9,7 +9,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_tools/src/test/flutter_web_goldens.dart';
 import 'package:flutter_tools/src/test/test_compiler.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 

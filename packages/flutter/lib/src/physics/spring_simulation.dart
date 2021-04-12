@@ -250,8 +250,8 @@ class _UnderdampedSolution implements _SpringSolution {
     double distance,
     double velocity,
   ) {
-    final double w = math.sqrt(4.0 * spring.mass * spring.stiffness -
-                     spring.damping * spring.damping) / (2.0 * spring.mass);
+    final double w = math.sqrt(4.0 * spring.mass * spring.stiffness - spring.damping * spring.damping) /
+        (2.0 * spring.mass);
     final double r = -(spring.damping / 2.0 * spring.mass);
     final double c1 = distance;
     final double c2 = (velocity - r * distance) / w;

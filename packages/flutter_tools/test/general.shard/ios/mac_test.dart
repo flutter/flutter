@@ -46,7 +46,9 @@ void main() {
       cache = Cache.test(
         artifacts: <ArtifactSet>[
           FakeDyldEnvironmentArtifact(),
-        ]);
+        ],
+        processManager: FakeProcessManager.any(),
+      );
     });
 
     group('screenshot', () {

@@ -18,7 +18,7 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/analysis.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 
 /// Common behavior for `flutter analyze` and `flutter analyze --watch`
 abstract class AnalyzeBase {
@@ -86,6 +86,7 @@ abstract class AnalyzeBase {
   String get sdkPath => argResults['dart-sdk'] as String ?? artifacts.getArtifactPath(Artifact.engineDartSdkPath);
   bool get isBenchmarking => argResults['benchmark'] as bool;
   bool get isDartDocs => argResults['dartdocs'] as bool;
+  String get protocolTrafficLog => argResults['protocol-traffic-log'] as String;
 
   static int countMissingDartDocs(List<AnalysisError> errors) {
     return errors.where((AnalysisError error) {

@@ -2,18 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../ios/plist_parser.dart';
-
-AndroidStudio get androidStudio => context.get<AndroidStudio>();
 
 // Android Studio layout:
 
@@ -30,12 +25,12 @@ AndroidStudio get androidStudio => context.get<AndroidStudio>();
 final RegExp _dotHomeStudioVersionMatcher =
     RegExp(r'^\.?(AndroidStudio[^\d]*)([\d.]+)');
 
-String get javaPath => androidStudio?.javaPath;
+String? get javaPath => globals.androidStudio?.javaPath;
 
 class AndroidStudio implements Comparable<AndroidStudio> {
   AndroidStudio(
     this.directory, {
-    Version version,
+    Version? version,
     this.configured,
     this.studioAppName = 'AndroidStudio',
     this.presetPluginsPath,
@@ -58,27 +53,28 @@ class AndroidStudio implements Comparable<AndroidStudio> {
 
     final String versionString = plistValues[PlistParser.kCFBundleShortVersionStringKey] as String;
 
-    Version version;
+    Version? version;
     if (versionString != null) {
       version = Version.parse(versionString);
     }
 
-    String pathsSelectorValue;
-    final Map<String, dynamic> jvmOptions = castStringKeyedMap(plistValues['JVMOptions']);
+    String? pathsSelectorValue;
+    final Map<String, dynamic>? jvmOptions = castStringKeyedMap(plistValues['JVMOptions']);
     if (jvmOptions != null) {
-      final Map<String, dynamic> jvmProperties = castStringKeyedMap(jvmOptions['Properties']);
+      final Map<String, dynamic>? jvmProperties = castStringKeyedMap(jvmOptions['Properties']);
       if (jvmProperties != null) {
         pathsSelectorValue = jvmProperties['idea.paths.selector'] as String;
       }
     }
 
-    final int major = version?.major;
-    final int minor = version?.minor;
-    String presetPluginsPath;
-    if (pathsSelectorValue != null) {
+    final int? major = version?.major;
+    final int? minor = version?.minor;
+    String? presetPluginsPath;
+    final String? homeDirPath = globals.fsUtils.homeDirPath;
+    if (homeDirPath != null && pathsSelectorValue != null) {
       if (major != null && major >= 4 && minor != null && minor >= 1) {
         presetPluginsPath = globals.fs.path.join(
-          globals.fsUtils.homeDirPath,
+          homeDirPath,
           'Library',
           'Application Support',
           'Google',
@@ -86,7 +82,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
         );
       } else {
         presetPluginsPath = globals.fs.path.join(
-          globals.fsUtils.homeDirPath,
+          homeDirPath,
           'Library',
           'Application Support',
           pathsSelectorValue,
@@ -96,20 +92,20 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     return AndroidStudio(studioPath, version: version, presetPluginsPath: presetPluginsPath);
   }
 
-  factory AndroidStudio.fromHomeDot(Directory homeDotDir) {
-    final Match versionMatch =
+  static AndroidStudio? fromHomeDot(Directory homeDotDir) {
+    final Match? versionMatch =
         _dotHomeStudioVersionMatcher.firstMatch(homeDotDir.basename);
     if (versionMatch?.groupCount != 2) {
       return null;
     }
-    final Version version = Version.parse(versionMatch[2]);
-    final String studioAppName = versionMatch[1];
+    final Version? version = Version.parse(versionMatch![2]);
+    final String? studioAppName = versionMatch[1];
     if (studioAppName == null || version == null) {
       return null;
     }
 
-    final int major = version?.major;
-    final int minor = version?.minor;
+    final int major = version.major;
+    final int minor = version.minor;
 
     // The install path is written in a .home text file,
     // it location is in <base dir>/.home for Android Studio >= 4.1
@@ -123,7 +119,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
           globals.fs.path.join(homeDotDir.path, 'system', '.home');
     }
 
-    String installPath;
+    String? installPath;
 
     try {
       installPath = globals.fs.file(dotHomeFilePath).readAsStringSync();
@@ -144,28 +140,32 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   final String directory;
   final String studioAppName;
   final Version version;
-  final String configured;
-  final String presetPluginsPath;
+  final String? configured;
+  final String? presetPluginsPath;
 
-  String _javaPath;
+  String? _javaPath;
   bool _isValid = false;
   final List<String> _validationMessages = <String>[];
 
-  String get javaPath => _javaPath;
+  String? get javaPath => _javaPath;
 
   bool get isValid => _isValid;
 
-  String get pluginsPath {
+  String? get pluginsPath {
     if (presetPluginsPath != null) {
-      return presetPluginsPath;
+      return presetPluginsPath!;
     }
-    final int major = version?.major;
-    final int minor = version?.minor;
+    final int major = version.major;
+    final int minor = version.minor;
+    final String? homeDirPath = globals.fsUtils.homeDirPath;
+    if (homeDirPath == null) {
+      return null;
+    }
     if (globals.platform.isMacOS) {
       /// plugin path of Android Studio has been changed after version 4.1.
       if (major != null && major >= 4 && minor != null && minor >= 1) {
         return globals.fs.path.join(
-          globals.fsUtils.homeDirPath,
+          homeDirPath,
           'Library',
           'Application Support',
           'Google',
@@ -173,7 +173,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
         );
       } else {
         return globals.fs.path.join(
-          globals.fsUtils.homeDirPath,
+          homeDirPath,
           'Library',
           'Application Support',
           'AndroidStudio$major.$minor',
@@ -190,7 +190,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       if (major != null && major >= 4 && minor != null && minor >= 1 &&
           globals.platform.isLinux) {
         return globals.fs.path.join(
-          globals.fsUtils.homeDirPath,
+          homeDirPath,
           '.local',
           'share',
           'Google',
@@ -199,7 +199,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       }
 
       return globals.fs.path.join(
-        globals.fsUtils.homeDirPath,
+        homeDirPath,
         '.$studioAppName$major.$minor',
         'config',
         'plugins',
@@ -219,8 +219,8 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   }
 
   /// Locates the newest, valid version of Android Studio.
-  static AndroidStudio latestValid() {
-    final String configuredStudio = globals.config.getValue('android-studio-dir') as String;
+  static AndroidStudio? latestValid() {
+    final String? configuredStudio = globals.config.getValue('android-studio-dir') as String?;
     if (configuredStudio != null) {
       String configuredStudioPath = configuredStudio;
       if (globals.platform.isMacOS && !configuredStudioPath.endsWith('Contents')) {
@@ -235,9 +235,14 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     if (studios.isEmpty) {
       return null;
     }
-    studios.sort();
-    return studios.lastWhere((AndroidStudio s) => s.isValid,
-        orElse: () => null);
+    AndroidStudio? newest;
+    for (final AndroidStudio studio in studios.where((AndroidStudio s) => s.isValid)) {
+      if (newest == null || studio.compareTo(newest) > 0) {
+        newest = studio;
+      }
+    }
+
+    return newest;
   }
 
   static List<AndroidStudio> allInstalled() =>
@@ -270,12 +275,15 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     }
 
     _checkForStudio('/Applications');
-    _checkForStudio(globals.fs.path.join(
-      globals.fsUtils.homeDirPath,
-      'Applications',
-    ));
+    final String? homeDirPath = globals.fsUtils.homeDirPath;
+    if (homeDirPath != null) {
+      _checkForStudio(globals.fs.path.join(
+        homeDirPath,
+        'Applications',
+      ));
+    }
 
-    final String configuredStudioDir = globals.config.getValue('android-studio-dir') as String;
+    final String? configuredStudioDir = globals.config.getValue('android-studio-dir') as String?;
     if (configuredStudioDir != null) {
       FileSystemEntity configuredStudio = globals.fs.file(configuredStudioDir);
       if (configuredStudio.basename == 'Contents') {
@@ -296,7 +304,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   static List<AndroidStudio> _allLinuxOrWindows() {
     final List<AndroidStudio> studios = <AndroidStudio>[];
 
-    bool _hasStudioAt(String path, { Version newerThan }) {
+    bool _hasStudioAt(String path, { Version? newerThan }) {
       return studios.any((AndroidStudio studio) {
         if (studio.directory != path) {
           return false;
@@ -312,7 +320,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     // or $HOME/.cache/Google/AndroidStudio*/.home files.
     // There may be several pointing to the same installation,
     // so we grab only the latest one.
-    final String homeDirPath = globals.fsUtils.homeDirPath;
+    final String? homeDirPath = globals.fsUtils.homeDirPath;
 
     if (homeDirPath != null && globals.fs.directory(homeDirPath).existsSync()) {
       final Directory homeDir = globals.fs.directory(homeDirPath);
@@ -337,7 +345,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       }
 
       for (final Directory entity in entities) {
-        final AndroidStudio studio = AndroidStudio.fromHomeDot(entity);
+        final AndroidStudio? studio = AndroidStudio.fromHomeDot(entity);
         if (studio != null && !_hasStudioAt(studio.directory, newerThan: studio.version)) {
           studios.removeWhere((AndroidStudio other) => other.directory == studio.directory);
           studios.add(studio);
@@ -348,7 +356,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     // 4.1 has a different location for AndroidStudio installs on Windows.
     if (globals.platform.isWindows && globals.platform.environment.containsKey('LOCALAPPDATA')) {
       final File homeDot = globals.fs.file(globals.fs.path.join(
-        globals.platform.environment['LOCALAPPDATA'],
+        globals.platform.environment['LOCALAPPDATA']!,
         'Google',
         'AndroidStudio4.1',
         '.home',
@@ -369,7 +377,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       }
     }
 
-    final String configuredStudioDir = globals.config.getValue('android-studio-dir') as String;
+    final String? configuredStudioDir = globals.config.getValue('android-studio-dir') as String?;
     if (configuredStudioDir != null && !_hasStudioAt(configuredStudioDir)) {
       studios.add(AndroidStudio(configuredStudioDir,
           configured: configuredStudioDir));
@@ -389,11 +397,11 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     return studios;
   }
 
-  static String extractStudioPlistValueWithMatcher(String plistValue, RegExp keyMatcher) {
+  static String? extractStudioPlistValueWithMatcher(String plistValue, RegExp keyMatcher) {
     if (plistValue == null || keyMatcher == null) {
       return null;
     }
-    return keyMatcher?.stringMatch(plistValue)?.split('=')?.last?.trim()?.replaceAll('"', '');
+    return keyMatcher.stringMatch(plistValue)?.split('=').last.trim().replaceAll('"', '');
   }
 
   void _init() {
@@ -416,7 +424,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     if (!globals.processManager.canRun(javaExecutable)) {
       _validationMessages.add('Unable to find bundled Java version.');
     } else {
-      RunResult result;
+      RunResult? result;
       try {
         result = globals.processUtils.runSync(<String>[javaExecutable, '-version']);
       } on ProcessException catch (e) {

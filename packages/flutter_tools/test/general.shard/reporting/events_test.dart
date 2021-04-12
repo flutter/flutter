@@ -5,7 +5,7 @@
 // @dart = 2.8
 
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:package_config/package_config.dart';
 

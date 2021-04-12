@@ -7,6 +7,7 @@
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/flutter_features.dart';
 
 import '../src/common.dart';
 import '../src/fakes.dart';

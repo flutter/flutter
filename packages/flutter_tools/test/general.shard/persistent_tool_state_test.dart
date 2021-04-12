@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -22,18 +20,18 @@ void main() {
       directory: directory,
       logger: BufferLogger.test(),
     );
-    expect(state1.redisplayWelcomeMessage, null);
+    expect(state1.shouldRedisplayWelcomeMessage, null);
     state1.redisplayWelcomeMessage = true;
     expect(stateFile.existsSync(), true);
-    expect(state1.redisplayWelcomeMessage, true);
+    expect(state1.shouldRedisplayWelcomeMessage, true);
     state1.redisplayWelcomeMessage = false;
-    expect(state1.redisplayWelcomeMessage, false);
+    expect(state1.shouldRedisplayWelcomeMessage, false);
 
     final PersistentToolState state2 = PersistentToolState.test(
       directory: directory,
       logger: BufferLogger.test(),
     );
-    expect(state2.redisplayWelcomeMessage, false);
+    expect(state2.shouldRedisplayWelcomeMessage, false);
   });
 
   testWithoutContext('channel versions can be cached and stored', () {
@@ -69,7 +67,7 @@ void main() {
     );
 
     final DateTime time = DateTime.now();
-    state1.lastDevToolsActivationTime = time;
+    state1.lastDevToolsActivation = time;
 
     final PersistentToolState state2 = PersistentToolState.test(
       directory: directory,

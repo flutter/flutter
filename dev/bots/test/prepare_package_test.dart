@@ -29,7 +29,7 @@ void main() {
     } on PreparePackageException catch (e) {
       expect(
         e.message,
-        contains('Invalid argument(s): Failed to resolve this_executable_better_not_exist_2857632534321 to an executable.'),
+        contains('ProcessException: Failed to find "this_executable_better_not_exist_2857632534321" in the search path'),
       );
     }
   });
@@ -301,13 +301,13 @@ void main() {
           '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
           '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
           '$gsutilCall -- rm $gsJsonPath': null,
-          '$gsutilCall -- -h Content-Type:application/json cp $jsonPath $gsJsonPath': null,
+          '$gsutilCall -- -h Content-Type:application/json -h Cache-Control:max-age=60 cp $jsonPath $gsJsonPath': null,
           '$gsutilCall -- stat $newGsArchivePath': <ProcessResult>[ProcessResult(0, 1, '', '')],
           '$gsutilCall -- rm $newGsArchivePath': null,
           '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $newGsArchivePath': null,
           '$gsutilCall -- cp $newGsJsonPath $jsonPath': null,
           '$gsutilCall -- rm $newGsJsonPath': null,
-          '$gsutilCall -- -h Content-Type:application/json cp $jsonPath $newGsJsonPath': null,
+          '$gsutilCall -- -h Content-Type:application/json -h Cache-Control:max-age=60 cp $jsonPath $newGsJsonPath': null,
         };
         processManager.addCommands(convertResults(calls));
         final File outputFile = File(path.join(tempDir.absolute.path, archiveName));
@@ -437,12 +437,12 @@ void main() {
           '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
           '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
           '$gsutilCall -- rm $gsJsonPath': null,
-          '$gsutilCall -- -h Content-Type:application/json cp $jsonPath $gsJsonPath': null,
+          '$gsutilCall -- -h Content-Type:application/json -h Cache-Control:max-age=60 cp $jsonPath $gsJsonPath': null,
           '$gsutilCall -- rm $newGsArchivePath': null,
           '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $newGsArchivePath': null,
           '$gsutilCall -- cp $newGsJsonPath $jsonPath': null,
           '$gsutilCall -- rm $newGsJsonPath': null,
-          '$gsutilCall -- -h Content-Type:application/json cp $jsonPath $newGsJsonPath': null,
+          '$gsutilCall -- -h Content-Type:application/json -h Cache-Control:max-age=60 cp $jsonPath $newGsJsonPath': null,
         };
         processManager.addCommands(convertResults(calls));
         assert(tempDir.existsSync());

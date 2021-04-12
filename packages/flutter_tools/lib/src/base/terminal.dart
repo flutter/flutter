@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
-
 import '../convert.dart';
 import 'io.dart' as io;
 import 'logger.dart';
@@ -25,12 +21,12 @@ enum TerminalColor {
 /// console.
 class OutputPreferences {
   OutputPreferences({
-    bool wrapText,
-    int wrapColumn,
-    bool showColor,
-    io.Stdio stdio,
+    bool? wrapText,
+    int? wrapColumn,
+    bool? showColor,
+    io.Stdio? stdio,
   }) : _stdio = stdio,
-       wrapText = wrapText ?? stdio.hasTerminal,
+       wrapText = wrapText ?? stdio?.hasTerminal ?? false,
        _overrideWrapColumn = wrapColumn,
        showColor = showColor ?? false;
 
@@ -38,7 +34,7 @@ class OutputPreferences {
   OutputPreferences.test({this.wrapText = false, int wrapColumn = kDefaultTerminalColumns, this.showColor = false})
     : _overrideWrapColumn = wrapColumn, _stdio = null;
 
-  final io.Stdio _stdio;
+  final io.Stdio? _stdio;
 
   /// If [wrapText] is true, then any text sent to the context's [Logger]
   /// instance (e.g. from the [printError] or [printStatus] functions) will be
@@ -56,7 +52,7 @@ class OutputPreferences {
   /// (e.g. from the [printError] or [printStatus] functions) will be wrapped.
   /// Ignored if [wrapText] is false. Defaults to the width of the output
   /// terminal, or to [kDefaultTerminalColumns] if not writing to a terminal.
-  final int _overrideWrapColumn;
+  final int? _overrideWrapColumn;
   int get wrapColumn {
     return _overrideWrapColumn ?? _stdio?.terminalColumns ?? kDefaultTerminalColumns;
   }
@@ -136,17 +132,17 @@ abstract class Terminal {
   /// If [usesTerminalUi] is false, throws a [StateError].
   Future<String> promptForCharInput(
     List<String> acceptedCharacters, {
-    @required Logger logger,
-    String prompt,
-    int defaultChoiceIndex,
+    required Logger logger,
+    String? prompt,
+    int? defaultChoiceIndex,
     bool displayAcceptedCharacters = true,
   });
 }
 
 class AnsiTerminal implements Terminal {
   AnsiTerminal({
-    @required io.Stdio stdio,
-    @required Platform platform,
+    required io.Stdio stdio,
+    required Platform platform,
   })
     : _stdio = stdio,
       _platform = platform;
@@ -178,10 +174,10 @@ class AnsiTerminal implements Terminal {
     TerminalColor.grey: grey,
   };
 
-  static String colorCode(TerminalColor color) => _colorMap[color];
+  static String colorCode(TerminalColor color) => _colorMap[color]!;
 
   @override
-  bool get supportsColor => _platform?.stdoutSupportsAnsi ?? false;
+  bool get supportsColor => _platform.stdoutSupportsAnsi;
 
   // Assume unicode emojis are supported when not on Windows.
   // If we are on Windows, unicode emojis are supported in Windows Terminal,
@@ -236,7 +232,7 @@ class AnsiTerminal implements Terminal {
       return message;
     }
     final StringBuffer buffer = StringBuffer();
-    final String colorCodes = _colorMap[color];
+    final String colorCodes = _colorMap[color]!;
     for (String line in message.split('\n')) {
       // If there were resets in the string before, then keep them, but
       // restart the color right after. This prevents embedded resets from
@@ -273,26 +269,23 @@ class AnsiTerminal implements Terminal {
   @override
   bool get stdinHasTerminal => _stdio.stdinHasTerminal;
 
-  Stream<String> _broadcastStdInString;
+  Stream<String>? _broadcastStdInString;
 
   @override
   Stream<String> get keystrokes {
-    _broadcastStdInString ??= _stdio.stdin.transform<String>(const AsciiDecoder(allowInvalid: true)).asBroadcastStream();
-    return _broadcastStdInString;
+    return _broadcastStdInString ??= _stdio.stdin.transform<String>(const AsciiDecoder(allowInvalid: true)).asBroadcastStream();
   }
 
   @override
   Future<String> promptForCharInput(
     List<String> acceptedCharacters, {
-    @required Logger logger,
-    String prompt,
-    int defaultChoiceIndex,
+    required Logger logger,
+    String? prompt,
+    int? defaultChoiceIndex,
     bool displayAcceptedCharacters = true,
   }) async {
-    assert(acceptedCharacters != null);
     assert(acceptedCharacters.isNotEmpty);
     assert(prompt == null || prompt.isNotEmpty);
-    assert(displayAcceptedCharacters != null);
     if (!usesTerminalUi) {
       throw StateError('cannot prompt without a terminal ui');
     }
@@ -303,7 +296,7 @@ class AnsiTerminal implements Terminal {
       charactersToDisplay[defaultChoiceIndex] = bolden(charactersToDisplay[defaultChoiceIndex]);
       acceptedCharacters.add('');
     }
-    String choice;
+    String? choice;
     singleCharMode = true;
     while (choice == null || choice.length > 1 || !acceptedCharacters.contains(choice)) {
       if (prompt != null) {
@@ -329,7 +322,7 @@ class _TestTerminal implements Terminal {
   _TestTerminal({this.supportsColor = false, this.supportsEmoji = false});
 
   @override
-  bool usesTerminalUi;
+  bool usesTerminalUi = false;
 
   @override
   String bolden(String message) => message;
@@ -345,9 +338,9 @@ class _TestTerminal implements Terminal {
 
   @override
   Future<String> promptForCharInput(List<String> acceptedCharacters, {
-    @required Logger logger,
-    String prompt,
-    int defaultChoiceIndex,
+    required Logger logger,
+    String? prompt,
+    int? defaultChoiceIndex,
     bool displayAcceptedCharacters = true,
   }) {
     throw UnsupportedError('promptForCharInput not supported in the test terminal.');

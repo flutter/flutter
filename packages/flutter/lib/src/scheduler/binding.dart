@@ -98,13 +98,13 @@ class _FrameCallbackEntry {
               ErrorDescription(
                 'The "rescheduling" argument should only be set to true if the '
                 'callback is being reregistered from within the callback itself, '
-                'and only then if the callback itself is entirely synchronous.'
+                'and only then if the callback itself is entirely synchronous.',
               ),
               ErrorHint(
                 'If this is the initial registration of the callback, or if the '
                 'callback is asynchronous, then do not use the "rescheduling" '
-                'argument.'
-              )
+                'argument.',
+              ),
             ]);
           }
           return true;
@@ -304,7 +304,7 @@ mixin SchedulerBinding on BindingBase {
           exception: exception,
           stack: stack,
           context: ErrorDescription('while executing callbacks for FrameTiming'),
-          informationCollector: collector
+          informationCollector: collector,
         ));
       }
     }
@@ -573,12 +573,12 @@ mixin SchedulerBinding on BindingBase {
               // TODO(jacobr): I have added an extra line break in this case.
               yield ErrorDescription(
                 'There was one transient callback left. '
-                'The stack trace for when it was registered is as follows:'
+                'The stack trace for when it was registered is as follows:',
               );
             } else {
               yield ErrorDescription(
                 'There were $count transient callbacks left. '
-                'The stack traces for when they were registered are as follows:'
+                'The stack traces for when they were registered are as follows:',
               );
             }
             for (final int id in callbacks.keys) {
@@ -620,8 +620,8 @@ mixin SchedulerBinding on BindingBase {
           FlutterError.defaultStackFilter(
             FlutterError.demangleStackTrace(
               _FrameCallbackEntry.debugCurrentCallbackStack!,
-            ).toString().trimRight().split('\n')
-          ).join('\n')
+            ).toString().trimRight().split('\n'),
+          ).join('\n'),
         );
       } else {
         debugPrint('No transient callback is currently executing.');

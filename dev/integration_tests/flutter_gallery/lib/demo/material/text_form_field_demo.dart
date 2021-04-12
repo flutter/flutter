@@ -143,7 +143,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
     if (form == null || !_formWasEdited || form.validate())
       return true;
 
-    return showDialog<bool>(
+    final bool? result = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -161,7 +161,8 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
           ],
         );
       },
-    ) as Future<bool>;
+    );
+    return result!;
   }
 
   @override

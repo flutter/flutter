@@ -194,7 +194,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
         stack: stack,
         library: 'gesture',
         context: ErrorDescription('while handling a gesture'),
-        informationCollector: collector
+        informationCollector: collector,
       ));
     }
     return result;

@@ -40,6 +40,24 @@ void main() {
     expect(windowsDevice.supportsRuntimeMode(BuildMode.jitRelease), false);
   });
 
+  testWithoutContext('WindowsUwpDevice defaults', () async {
+    final WindowsUWPDevice windowsDevice = setUpWindowsUwpDevice();
+    final PrebuiltWindowsApp windowsApp = PrebuiltWindowsApp(executable: 'foo');
+
+    expect(await windowsDevice.targetPlatform, TargetPlatform.windows_uwp_x64);
+    expect(windowsDevice.name, 'Windows (UWP)');
+    expect(await windowsDevice.installApp(windowsApp), true);
+    expect(await windowsDevice.uninstallApp(windowsApp), true);
+    expect(await windowsDevice.isLatestBuildInstalled(windowsApp), true);
+    expect(await windowsDevice.isAppInstalled(windowsApp), true);
+    expect(windowsDevice.category, Category.desktop);
+
+    expect(windowsDevice.supportsRuntimeMode(BuildMode.debug), true);
+    expect(windowsDevice.supportsRuntimeMode(BuildMode.profile), true);
+    expect(windowsDevice.supportsRuntimeMode(BuildMode.release), true);
+    expect(windowsDevice.supportsRuntimeMode(BuildMode.jitRelease), false);
+  });
+
   testWithoutContext('WindowsDevices does not list devices if the workflow is unsupported', () async {
     expect(await WindowsDevices(
       windowsWorkflow: WindowsWorkflow(
@@ -157,6 +175,19 @@ WindowsDevice setUpWindowsDevice({
   ProcessManager processManager,
 }) {
   return WindowsDevice(
+    fileSystem: fileSystem ?? MemoryFileSystem.test(),
+    logger: logger ?? BufferLogger.test(),
+    processManager: processManager ?? FakeProcessManager.any(),
+    operatingSystemUtils: FakeOperatingSystemUtils(),
+  );
+}
+
+WindowsUWPDevice setUpWindowsUwpDevice({
+  FileSystem fileSystem,
+  Logger logger,
+  ProcessManager processManager,
+}) {
+  return WindowsUWPDevice(
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
     logger: logger ?? BufferLogger.test(),
     processManager: processManager ?? FakeProcessManager.any(),

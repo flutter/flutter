@@ -29,21 +29,13 @@ class HoverClient extends StatefulWidget {
 
 class HoverClientState extends State<HoverClient> {
   void _onExit(PointerExitEvent details) {
-    if (widget.onExit != null) {
-      widget.onExit!();
-    }
-    if (widget.onHover != null) {
-      widget.onHover!(false);
-    }
+    widget.onExit?.call();
+    widget.onHover?.call(false);
   }
 
   void _onEnter(PointerEnterEvent details) {
-    if (widget.onEnter != null) {
-      widget.onEnter!();
-    }
-    if (widget.onHover != null) {
-      widget.onHover!(true);
-    }
+    widget.onEnter?.call();
+    widget.onHover?.call(true);
   }
 
   @override

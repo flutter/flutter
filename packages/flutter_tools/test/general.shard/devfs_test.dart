@@ -23,6 +23,7 @@ import 'package:package_config/package_config.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_http_client.dart';
+import '../src/fake_vm_services.dart';
 
 final FakeVmServiceRequest createDevFSRequest = FakeVmServiceRequest(
   method: '_createDevFS',

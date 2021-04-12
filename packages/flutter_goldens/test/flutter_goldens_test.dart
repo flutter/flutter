@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:core';
-import 'dart:io';
+import 'dart:io' hide Directory;
 import 'dart:typed_data';
 import 'dart:ui' show hashValues, hashList;
 

@@ -16,6 +16,7 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../device.dart';
+import '../sksl_writer.dart';
 import '../vmservice.dart';
 import 'web_driver_service.dart';
 
@@ -209,6 +210,7 @@ class FlutterDriverService extends DriverService {
         debuggingOptions.ddsPort,
         ipv6,
         debuggingOptions.disableServiceAuthCodes,
+        logger: _logger,
       );
       _vmServiceUri = device.dds.uri.toString();
     } on dds.DartDevelopmentServiceException {

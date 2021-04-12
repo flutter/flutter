@@ -736,7 +736,7 @@ void main() {
   });
 
   testWidgets('Image.memory control test', (WidgetTester tester) async {
-    await tester.pumpWidget(Image.memory(Uint8List.fromList(kTransparentImage), excludeFromSemantics: true,));
+    await tester.pumpWidget(Image.memory(Uint8List.fromList(kTransparentImage), excludeFromSemantics: true));
   });
 
   testWidgets('Image color and colorBlend parameters', (WidgetTester tester) async {
@@ -2026,9 +2026,7 @@ class _TestImageStreamCompleter extends ImageStreamCompleter {
   }) {
     final List<ImageStreamListener> localListeners = listeners.toList();
     for (final ImageStreamListener listener in localListeners) {
-      if (listener.onError != null) {
-        listener.onError!(exception, stackTrace);
-      }
+      listener.onError?.call(exception, stackTrace);
     }
   }
 }

@@ -519,6 +519,7 @@ void main() {
           selected: true,
           button: true,
           slider: true,
+          keyboardKey: true,
           link: true,
           textField: true,
           readOnly: true,

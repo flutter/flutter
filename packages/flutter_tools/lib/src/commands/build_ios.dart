@@ -7,7 +7,6 @@
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
-import '../application_package.dart';
 import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/logger.dart';
@@ -16,6 +15,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
+import '../ios/application_package.dart';
 import '../ios/mac.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';

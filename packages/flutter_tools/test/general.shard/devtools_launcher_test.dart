@@ -11,13 +11,13 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/devtools_launcher.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fake_http_client.dart';
+import '../src/fake_process_manager.dart';
 
 void main() {
   BufferLogger logger;
@@ -235,7 +235,7 @@ void main() {
   });
 
   testWithoutContext('DevtoolsLauncher does not activate DevTools if it was recently activated', () async {
-    persistentToolState.lastDevToolsActivationTime = DateTime.now();
+    persistentToolState.lastDevToolsActivation = DateTime.now();
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       pubExecutable: 'pub',
       logger: logger,

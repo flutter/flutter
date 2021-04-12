@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/tester/flutter_tester.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+import '../../src/test_build_system.dart';
 
 void main() {
   MemoryFileSystem fileSystem;

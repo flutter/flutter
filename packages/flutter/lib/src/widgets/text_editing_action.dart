@@ -61,8 +61,7 @@ abstract class TextEditingAction<T extends Intent> extends ContextAction<T> {
 
   @override
   bool isEnabled(T intent) {
-    // The Action is disabled if there is no focused TextEditingActionTarget, or
-    // if the platform is web, because web lets the browser handle text editing.
-    return !kIsWeb && textEditingActionTarget != null;
+    // The Action is disabled if there is no focused TextEditingActionTarget.
+    return textEditingActionTarget != null;
   }
 }

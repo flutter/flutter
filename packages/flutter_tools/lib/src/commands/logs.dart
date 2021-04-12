@@ -8,9 +8,8 @@ import 'dart:async';
 
 import '../base/common.dart';
 import '../base/io.dart';
-import '../cache.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class LogsCommand extends FlutterCommand {

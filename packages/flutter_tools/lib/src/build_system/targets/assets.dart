@@ -13,7 +13,6 @@ import '../../base/logger.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
-import '../../globals.dart' as globals;
 import '../build_system.dart';
 import '../depfile.dart';
 import 'common.dart';
@@ -51,7 +50,7 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
   final AssetBundle assetBundle = AssetBundleFactory.defaultInstance(
     logger: environment.logger,
     fileSystem: environment.fileSystem,
-    platform: globals.platform,
+    platform: environment.platform,
     splitDeferredAssets: buildMode != BuildMode.debug && buildMode != BuildMode.jitRelease,
   ).createBundle();
   final int resultCode = await assetBundle.build(

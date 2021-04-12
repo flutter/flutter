@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/template.dart';
-import 'src/common.dart';
+import '../src/common.dart';
 
 void main() {
   testWithoutContext('Template.render throws ToolExit when FileSystem exception is raised', () {
@@ -19,7 +17,7 @@ void main() {
     final Template template = Template(
       fileSystem.directory('examples'),
       fileSystem.currentDirectory,
-      null,
+      fileSystem.currentDirectory,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       templateRenderer: FakeTemplateRenderer(),

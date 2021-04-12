@@ -475,18 +475,14 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
 
   void _startInteraction(Offset globalPosition) {
     if (isInteractive) {
-      if (onChangeStart != null) {
-        onChangeStart!(_discretizedCurrentDragValue);
-      }
+      onChangeStart?.call(_discretizedCurrentDragValue);
       _currentDragValue = _value;
       onChanged!(_discretizedCurrentDragValue);
     }
   }
 
   void _endInteraction() {
-    if (onChangeEnd != null) {
-      onChangeEnd!(_discretizedCurrentDragValue);
-    }
+    onChangeEnd?.call(_discretizedCurrentDragValue);
     _currentDragValue = 0.0;
   }
 

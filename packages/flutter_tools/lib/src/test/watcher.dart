@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'test_device.dart';
 
 /// Callbacks for reporting progress while running tests.
@@ -12,7 +10,7 @@ abstract class TestWatcher {
   ///
   /// If startPaused was true, the caller needs to resume in Observatory to
   /// start running the tests.
-  void handleStartedDevice(Uri observatoryUri) { }
+  void handleStartedDevice(Uri? observatoryUri) { }
 
   /// Called after the tests finish but before the test device exits.
   ///

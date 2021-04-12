@@ -45,38 +45,38 @@ class KeyboardKeysCodeGenerator extends BaseCodeGenerator {
       definitions.write('''
 
 $firstComment  ///
-$otherComments  static const PhysicalKeyboardKey ${entry.constantName} = PhysicalKeyboardKey(${toHex(entry.usbHidCode, digits: 8)}, debugName: kReleaseMode ? null : '${entry.commentName}');
+$otherComments  static const PhysicalKeyboardKey ${entry.constantName} = PhysicalKeyboardKey(${toHex(entry.usbHidCode, digits: 8)});
 ''');
     }
     return definitions.toString();
   }
 
+  String get _physicalDebugNames {
+    final StringBuffer result = StringBuffer();
+    for (final Key entry in keyData.data) {
+      result.write('''
+      ${toHex(entry.usbHidCode, digits: 8)}: '${entry.commentName}',
+''');
+    }
+    return result.toString();
+  }
+
   /// Gets the generated definitions of LogicalKeyboardKeys.
   String get _logicalDefinitions {
-    String escapeLabel(String label) => label.contains("'") ? 'r"$label"' : "r'$label'";
     final StringBuffer definitions = StringBuffer();
-    void printKey(int flutterId, String keyLabel, String constantName, String commentName, {String otherComments}) {
+    void printKey(int flutterId, String constantName, String commentName, {String otherComments}) {
       final String firstComment = _wrapString('Represents the logical "$commentName" key on the keyboard.');
       otherComments ??= _wrapString('See the function [RawKeyEvent.logicalKey] for more information.');
-      if (keyLabel == null) {
-        definitions.write('''
+      definitions.write('''
 
 $firstComment  ///
-$otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardKey(${toHex(flutterId, digits: 11)}, debugName: kReleaseMode ? null : '$commentName');
+$otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardKey(${toHex(flutterId, digits: 11)});
 ''');
-      } else {
-        definitions.write('''
-
-$firstComment  ///
-$otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardKey(${toHex(flutterId, digits: 11)}, keyLabel: ${escapeLabel(keyLabel)}, debugName: kReleaseMode ? null : '$commentName');
-''');
-      }
     }
 
     for (final Key entry in keyData.data) {
       printKey(
         entry.flutterId,
-        entry.keyLabel,
         entry.constantName,
         entry.commentName,
       );
@@ -89,7 +89,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
       final Set<String> unionNames = Key.synonyms[name].map<String>((dynamic name) {
         return upperCamelToLowerCamel(name as String);
       }).toSet();
-      printKey(Key.synonymPlane | entry.flutterId, entry.keyLabel, name, Key.getCommentName(name),
+      printKey(Key.synonymPlane | entry.flutterId, name, Key.getCommentName(name),
           otherComments: _wrapString('This key represents the union of the keys '
               '$unionNames when comparing keys. This key will never be generated '
               'directly, its main use is in defining key maps.'));
@@ -106,6 +106,25 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
       }
     }
     return synonyms.toString();
+  }
+
+  String get _logicalKeyLabels {
+    final StringBuffer result = StringBuffer();
+    for (final Key entry in keyData.data) {
+      result.write('''
+    ${toHex(entry.flutterId, digits: 11)}: '${entry.commentName}',
+''');
+    }
+    for (final String name in Key.synonyms.keys) {
+      // Use the first item in the synonyms as a template for the ID to use.
+      // It won't end up being the same value because it'll be in the pseudo-key
+      // plane.
+      final Key entry = keyData.data.firstWhere((Key item) => item.name == Key.synonyms[name][0]);
+      result.write('''
+    ${toHex(Key.synonymPlane | entry.flutterId, digits: 11)}: '${Key.getCommentName(name)}',
+''');
+    }
+    return result.toString();
   }
 
   /// This generates the map of USB HID codes to physical keys.
@@ -146,7 +165,9 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
       'LOGICAL_KEY_MAP': _predefinedKeyCodeMap,
       'LOGICAL_KEY_DEFINITIONS': _logicalDefinitions,
       'LOGICAL_KEY_SYNONYMS': _logicalSynonyms,
+      'LOGICAL_KEY_KEY_LABELS': _logicalKeyLabels,
       'PHYSICAL_KEY_DEFINITIONS': _physicalDefinitions,
+      'PHYSICAL_KEY_DEBUG_NAMES': _physicalDebugNames,
     };
   }
 }

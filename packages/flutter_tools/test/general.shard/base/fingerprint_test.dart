@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert' show json;
 
 import 'package:file/memory.dart';
@@ -12,9 +10,10 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 
 import '../../src/common.dart';
+
 void main() {
   group('Fingerprinter', () {
-    MemoryFileSystem fileSystem;
+    late MemoryFileSystem fileSystem;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
@@ -85,7 +84,7 @@ void main() {
 
   group('Fingerprint', () {
     group('fromBuildInputs', () {
-      MemoryFileSystem fileSystem;
+      late MemoryFileSystem fileSystem;
 
       setUp(() {
         fileSystem = MemoryFileSystem.test();
@@ -104,8 +103,8 @@ void main() {
         fileSystem.file('b.dart').writeAsStringSync('This is b');
         final Fingerprint fingerprint = Fingerprint.fromBuildInputs(const <String>['a.dart', 'b.dart'], fileSystem);
 
-        final Map<String, dynamic> jsonObject = castStringKeyedMap(json.decode(fingerprint.toJson()));
-        expect(jsonObject['files'], hasLength(2));
+        final Map<String, dynamic>? jsonObject = castStringKeyedMap(json.decode(fingerprint.toJson()));
+        expect(jsonObject!['files'], hasLength(2));
         expect(jsonObject['files']['a.dart'], '8a21a15fad560b799f6731d436c1b698');
         expect(jsonObject['files']['b.dart'], '6f144e08b58cd0925328610fad7ac07c');
       });
@@ -124,9 +123,9 @@ void main() {
           },
         });
         final Fingerprint fingerprint = Fingerprint.fromJson(jsonString);
-        final Map<String, dynamic> content = castStringKeyedMap(json.decode(fingerprint.toJson()));
+        final Map<String, dynamic>? content = castStringKeyedMap(json.decode(fingerprint.toJson()));
         expect(content, hasLength(1));
-        expect(content['files'], hasLength(2));
+        expect(content!['files'], hasLength(2));
         expect(content['files']['a.dart'], '8a21a15fad560b799f6731d436c1b698');
         expect(content['files']['b.dart'], '6f144e08b58cd0925328610fad7ac07c');
       });

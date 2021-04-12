@@ -574,6 +574,7 @@ void main() {
          isSelected: true,
          isButton: true,
          isSlider: true,
+         isKeyboardKey: true,
          isLink: true,
          isTextField: true,
          isReadOnly: true,

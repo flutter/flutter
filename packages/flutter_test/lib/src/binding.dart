@@ -227,13 +227,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   @protected
   bool get disableShadows => false;
 
-  /// Determines whether the Dart [HttpClient] class should be overriden to
+  /// Determines whether the Dart [HttpClient] class should be overridden to
   /// always return a failure response.
   ///
   /// By default, this value is true, so that unit tests will not become flaky
-  /// due to intermitten network errors. The value may be overriden by a binding
-  /// intended for use in integration tests that do end to end application
-  /// testing, including working with real network responses.
+  /// due to intermittent network errors. The value may be overridden by a
+  /// binding intended for use in integration tests that do end to end
+  /// application testing, including working with real network responses.
   @protected
   bool get overrideHttpClient => true;
 
@@ -284,7 +284,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// typically used in `flutter test`), this advances the fake [clock] for the
   /// period and also increases timeout (see [addTime]).
   ///
-  /// In the live test environemnt ([LiveTestWidgetsFlutterBinding], typically
+  /// In the live test environment ([LiveTestWidgetsFlutterBinding], typically
   /// used for `flutter run` and for [e2e](https://pub.dev/packages/e2e)), it is
   /// equivalent as [Future.delayed].
   Future<void> delayed(Duration duration);
@@ -1293,7 +1293,7 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   /// Strictly show only frames that are explicitly pumped.
   ///
   /// This most closely matches the [AutomatedTestWidgetsFlutterBinding]
-  /// (the defualt binding for `flutter test`) behavior.
+  /// (the default binding for `flutter test`) behavior.
   onlyPumps,
 
   /// Show pumped frames, and additionally schedule and run frames to fade

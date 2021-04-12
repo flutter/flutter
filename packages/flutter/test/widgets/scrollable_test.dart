@@ -19,6 +19,7 @@ Future<void> pumpTest(
   ScrollController? controller,
 }) async {
   await tester.pumpWidget(MaterialApp(
+    scrollBehavior: const NoScrollbarBehavior(),
     theme: ThemeData(
       platform: platform,
     ),
@@ -32,6 +33,13 @@ Future<void> pumpTest(
     ),
   ));
   await tester.pump(const Duration(seconds: 5)); // to let the theme animate
+}
+
+class NoScrollbarBehavior extends MaterialScrollBehavior {
+  const NoScrollbarBehavior();
+
+  @override
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) => child;
 }
 
 // Pump a nested scrollable. The outer scrollable contains a sliver of a
@@ -169,6 +177,23 @@ void main() {
     // velocity of the last fling.
     expect(getScrollVelocity(tester), moreOrLessEquals(1000.0));
   });
+
+  testWidgets('A slower final fling does not apply carried momentum', (WidgetTester tester) async {
+    await pumpTest(tester, debugDefaultTargetPlatformOverride);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
+    await tester.pump(); // trigger fling
+    await tester.pump(const Duration(milliseconds: 10));
+    // Repeat the exact same motion to build momentum.
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
+    await tester.pump(); // trigger the second fling
+    await tester.pump(const Duration(milliseconds: 10));
+    // Make a final fling that is much slower.
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 200.0);
+    await tester.pump(); // trigger the third fling
+    await tester.pump(const Duration(milliseconds: 10));
+    // expect that there is no carried velocity
+    expect(getScrollVelocity(tester), lessThan(200.0));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('No iOS/macOS momentum build with flings in opposite directions', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
@@ -376,7 +401,7 @@ void main() {
             slivers: <Widget>[SliverToBoxAdapter(
               child: SizedBox(
                 height: 2000,
-                child: GestureDetector(onTap: () {},),
+                child: GestureDetector(onTap: () {}),
               ),
             )],
           ),

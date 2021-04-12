@@ -566,7 +566,7 @@ class _CompoundBorder extends ShapeBorder {
   @override
   ShapeBorder scale(double t) {
     return _CompoundBorder(
-      borders.map<ShapeBorder>((ShapeBorder border) => border.scale(t)).toList()
+      borders.map<ShapeBorder>((ShapeBorder border) => border.scale(t)).toList(),
     );
   }
 

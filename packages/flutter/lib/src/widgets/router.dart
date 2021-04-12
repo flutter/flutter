@@ -146,7 +146,7 @@ class RouteInformation {
 /// considered unusual for these delegates to change during the lifetime of the
 /// [Router].
 ///
-/// If the [Router] itself is disposed while an an asynchronous operation is in
+/// If the [Router] itself is disposed while an asynchronous operation is in
 /// progress, all active asynchronous operations will have their results
 /// discarded also.
 ///
@@ -247,7 +247,7 @@ class Router<T> extends StatefulWidget {
           (routeInformationProvider == null) == (routeInformationParser == null),
           'Both routeInformationProvider and routeInformationParser must be provided '
           'if this router parses route information. Otherwise, they should both '
-          'be null.'
+          'be null.',
         ),
         assert(routerDelegate != null),
         super(key: key);
@@ -313,7 +313,7 @@ class Router<T> extends StatefulWidget {
         throw FlutterError(
           'Router operation requested with a context that does not include a Router.\n'
           'The context used to retrieve the Router must be that of a widget that '
-          'is a descendant of a Router widget.'
+          'is a descendant of a Router widget.',
         );
       }
       return true;
@@ -496,7 +496,7 @@ class _RouterState<T> extends State<Router<T>> {
               'Router.routeInformationParser returns a null RouteInformation. '
               'If you opt for route information reporting, the '
               'routeInformationParser must not report null for a given '
-              'configuration.'
+              'configuration.',
           ),
         );
       }
@@ -520,7 +520,7 @@ class _RouterState<T> extends State<Router<T>> {
               'Both Router.navigate and Router.neglect have been called in this '
               'build cycle, and the Router cannot decide whether to report the '
               'route information. Please make sure only one of them is called '
-              'within the same build cycle.'
+              'within the same build cycle.',
           ),
         );
       }
@@ -998,6 +998,74 @@ class ChildBackButtonDispatcher extends BackButtonDispatcher {
   }
 }
 
+/// A convenience widget that registers a callback for when the back button is pressed.
+///
+/// In order to use this widget, there must be an ancestor [Router] widget in the tree
+/// that has a [RootBackButtonDispatcher]. e.g. The [Router] widget created by the
+/// [MaterialApp.router] has a built-in [RootBackButtonDispatcher] by default.
+///
+/// It only applies to platforms that accept back button clicks, such as Android.
+///
+/// It can be useful for scenarios, in which you create a different state in your
+/// screen but don't want to use a new page for that.
+class BackButtonListener extends StatefulWidget {
+  /// Creates a BackButtonListener widget .
+  ///
+  /// The [child] and [onBackButtonPressed] arguments must not be null.
+  const BackButtonListener({
+    Key? key,
+    required this.child,
+    required this.onBackButtonPressed,
+  }) : super(key: key);
+
+  /// The widget below this widget in the tree.
+  final Widget child;
+
+  /// The callback function that will be called when the back button is pressed.
+  ///
+  /// It must return a boolean future with true if this child will handle the request;
+  /// otherwise, return a boolean future with false.
+  final ValueGetter<Future<bool>> onBackButtonPressed;
+
+  @override
+  _BackButtonListenerState createState() => _BackButtonListenerState();
+}
+
+class _BackButtonListenerState extends State<BackButtonListener> {
+  BackButtonDispatcher? dispatcher;
+
+  @override
+  void didChangeDependencies() {
+    dispatcher?.removeCallback(widget.onBackButtonPressed);
+
+    final BackButtonDispatcher? rootBackDispatcher = Router.of(context).backButtonDispatcher;
+    assert(rootBackDispatcher != null, 'The parent router must have a backButtonDispatcher to use this widget');
+
+    dispatcher = rootBackDispatcher!.createChildBackButtonDispatcher()
+      ..addCallback(widget.onBackButtonPressed)
+      ..takePriority();
+    super.didChangeDependencies();
+  }
+
+  @override
+  void didUpdateWidget(covariant BackButtonListener oldWidget) {
+    if (oldWidget.onBackButtonPressed != widget.onBackButtonPressed) {
+      dispatcher?.removeCallback(oldWidget.onBackButtonPressed);
+      dispatcher?.addCallback(widget.onBackButtonPressed);
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() {
+    dispatcher?.removeCallback(widget.onBackButtonPressed);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
 /// A delegate that is used by the [Router] widget to parse a route information
 /// into a configuration of type T.
 ///
@@ -1108,7 +1176,7 @@ abstract class RouterDelegate<T> extends Listenable {
   /// When overriding this method, the configuration returned by this getter
   /// must be able to construct the current app state and build the widget
   /// with the same configuration in the [build] method if it is passed back
-  /// to the the [setNewRoutePath]. Otherwise, the browser backward and forward
+  /// to the [setNewRoutePath]. Otherwise, the browser backward and forward
   /// buttons will not work properly.
   ///
   /// By default, this getter returns null, which prevents the [Router] from
@@ -1184,7 +1252,7 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
   /// Use the [initialRouteInformation] to set the default route information for this
   /// provider.
   PlatformRouteInformationProvider({
-    RouteInformation? initialRouteInformation
+    RouteInformation? initialRouteInformation,
   }) : _value = initialRouteInformation;
 
   @override

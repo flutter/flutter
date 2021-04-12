@@ -130,9 +130,7 @@ class PassiveGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void acceptGesture(int pointer) {
-    if (onGestureAccepted != null) {
-      onGestureAccepted!();
-    }
+    onGestureAccepted?.call();
   }
 
   @override

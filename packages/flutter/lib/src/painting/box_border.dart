@@ -158,7 +158,7 @@ abstract class BoxBorder extends ShapeBorder {
         'BoxBorder.lerp() was called with two objects of type ${a.runtimeType} and ${b.runtimeType}:\n'
         '  $a\n'
         '  $b\n'
-        'However, only Border and BorderDirectional classes are supported by this method.'
+        'However, only Border and BorderDirectional classes are supported by this method.',
       ),
       ErrorHint('For a more general interpolation method, consider using ShapeBorder.lerp instead.'),
     ]);

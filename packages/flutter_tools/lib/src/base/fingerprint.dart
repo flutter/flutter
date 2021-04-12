@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:crypto/crypto.dart' show md5;
 import 'package:meta/meta.dart';
 
@@ -19,10 +17,10 @@ import 'utils.dart';
 /// such as checking if Cocoapods should be run.
 class Fingerprinter {
   Fingerprinter({
-    @required this.fingerprintPath,
-    @required Iterable<String> paths,
-    @required FileSystem fileSystem,
-    @required Logger logger,
+    required this.fingerprintPath,
+    required Iterable<String> paths,
+    required FileSystem fileSystem,
+    required Logger logger,
   }) : _paths = paths.toList(),
        assert(fingerprintPath != null),
        assert(paths != null && paths.every((String path) => path != null)),
@@ -81,8 +79,8 @@ class Fingerprinter {
 @immutable
 class Fingerprint {
   const Fingerprint._({
-    Map<String, String> checksums,
-  })  : _checksums = checksums;
+    Map<String, String>? checksums,
+  })  : _checksums = checksums ?? const <String, String>{};
 
   factory Fingerprint.fromBuildInputs(Iterable<String> inputPaths, FileSystem fileSystem) {
     final Iterable<File> files = inputPaths.map<File>(fileSystem.file);
@@ -103,9 +101,12 @@ class Fingerprint {
   /// Throws [Exception], if there is a version mismatch between the
   /// serializing framework and this framework.
   factory Fingerprint.fromJson(String jsonData) {
-    final Map<String, dynamic> content = castStringKeyedMap(json.decode(jsonData));
+    final Map<String, dynamic>? content = castStringKeyedMap(json.decode(jsonData));
+    final Map<String, String>? files = content == null
+        ? null
+        : castStringKeyedMap(content['files'])?.cast<String, String>();
     return Fingerprint._(
-      checksums: castStringKeyedMap(content['files'])?.cast<String,String>() ?? <String, String>{},
+      checksums: files ?? <String, String>{},
     );
   }
 

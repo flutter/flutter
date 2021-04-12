@@ -666,7 +666,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
           RouteInformation(
             location: routeArguments['location'] as String,
             state: routeArguments['state'] as Object?,
-          )
+          ),
         )
       )
       return;
@@ -746,7 +746,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
           ErrorSummary('Build scheduled during frame.'),
           ErrorDescription(
             'While the widget tree was being built, laid out, and painted, '
-            'a new frame was scheduled to rebuild the widget tree.'
+            'a new frame was scheduled to rebuild the widget tree.',
           ),
           ErrorHint(
             'This might be because setState() was called from a layout or '
@@ -761,7 +761,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
             'animation, consider scheduling the frame in a post-frame callback '
             'using SchedulerBinding.addPostFrameCallback or '
             'using an AnimationController to trigger the animation.',
-          )
+          ),
         ]);
       }
       return true;
@@ -1153,7 +1153,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
   }
 
   @override
-  void mount(Element? parent, dynamic newSlot) {
+  void mount(Element? parent, Object? newSlot) {
     assert(parent == null);
     super.mount(parent, newSlot);
     _rebuild();
@@ -1204,19 +1204,19 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
   RenderObjectWithChildMixin<T> get renderObject => super.renderObject as RenderObjectWithChildMixin<T>;
 
   @override
-  void insertRenderObjectChild(RenderObject child, dynamic slot) {
+  void insertRenderObjectChild(RenderObject child, Object? slot) {
     assert(slot == _rootChildSlot);
     assert(renderObject.debugValidateChild(child));
     renderObject.child = child as T;
   }
 
   @override
-  void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
+  void moveRenderObjectChild(RenderObject child, Object? oldSlot, Object? newSlot) {
     assert(false);
   }
 
   @override
-  void removeRenderObjectChild(RenderObject child, dynamic slot) {
+  void removeRenderObjectChild(RenderObject child, Object? slot) {
     assert(renderObject.child == child);
     renderObject.child = null;
   }

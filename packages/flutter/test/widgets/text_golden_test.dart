@@ -5,7 +5,6 @@
 @TestOn('!chrome')
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('Centered text', (WidgetTester tester) async {
@@ -565,7 +564,7 @@ void main() {
                             ),
                           ),
                         ),
-                        TextSpan(text: 'hello world! sieze the day!'),
+                        TextSpan(text: 'hello world! seize the day!'),
                         WidgetSpan(
                           child: Checkbox(value: false, onChanged: null),
                         ),
@@ -837,7 +836,7 @@ void main() {
                             ),
                           ),
                         ),
-                        TextSpan(text: 'hello world! sieze the day!'),
+                        TextSpan(text: 'hello world! seize the day!'),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.baseline,
                           baseline: TextBaseline.alphabetic,
@@ -944,7 +943,7 @@ void main() {
                             ),
                           ),
                         ),
-                        TextSpan(text: 'hello world! sieze the day!'),
+                        TextSpan(text: 'hello world! seize the day!'),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.aboveBaseline,
                           baseline: TextBaseline.alphabetic,
@@ -1051,7 +1050,7 @@ void main() {
                             ),
                           ),
                         ),
-                        TextSpan(text: 'hello world! sieze the day!'),
+                        TextSpan(text: 'hello world! seize the day!'),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.belowBaseline,
                           baseline: TextBaseline.alphabetic,
@@ -1158,7 +1157,7 @@ void main() {
                             ),
                           ),
                         ),
-                        TextSpan(text: 'hello world! sieze the day!'),
+                        TextSpan(text: 'hello world! seize the day!'),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.top,
                           baseline: TextBaseline.alphabetic,
@@ -1265,7 +1264,7 @@ void main() {
                             ),
                           ),
                         ),
-                        TextSpan(text: 'hello world! sieze the day!'),
+                        TextSpan(text: 'hello world! seize the day!'),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.middle,
                           baseline: TextBaseline.alphabetic,
@@ -1331,11 +1330,11 @@ void main() {
               children: const <Widget>[
                 Text('Hello\nLine 2\nLine 3',
                   textDirection: TextDirection.ltr,
-                  style: TextStyle(height: 5,),
+                  style: TextStyle(height: 5),
                 ),
                 Text('Hello\nLine 2\nLine 3',
                   textDirection: TextDirection.ltr,
-                  style: TextStyle(height: 5,),
+                  style: TextStyle(height: 5),
                   textHeightBehavior: TextHeightBehavior(
                     applyHeightToFirstAscent: false,
                     applyHeightToLastDescent: false,
@@ -1343,7 +1342,7 @@ void main() {
                 ),
                 Text('Hello',
                   textDirection: TextDirection.ltr,
-                  style: TextStyle(height: 5,),
+                  style: TextStyle(height: 5),
                   textHeightBehavior: TextHeightBehavior(
                     applyHeightToFirstAscent: false,
                   ),

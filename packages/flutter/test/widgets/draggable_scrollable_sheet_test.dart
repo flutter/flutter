@@ -18,33 +18,36 @@ void main() {
   }) {
     return Directionality(
       textDirection: TextDirection.ltr,
-      child: Stack(
-        children: <Widget>[
-          TextButton(
-            child: const Text('TapHere'),
-            onPressed: onButtonPressed,
-          ),
-          DraggableScrollableSheet(
-            maxChildSize: maxChildSize,
-            minChildSize: minChildSize,
-            initialChildSize: initialChildSize,
-            builder: (BuildContext context, ScrollController scrollController) {
-              return NotificationListener<ScrollNotification>(
-                onNotification: onScrollNotification,
-                child: Container(
-                  key: containerKey,
-                  color: const Color(0xFFABCDEF),
-                  child: ListView.builder(
-                    controller: scrollController,
-                    itemExtent: itemExtent,
-                    itemCount: itemCount,
-                    itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+      child: MediaQuery(
+        data: const MediaQueryData(),
+        child: Stack(
+          children: <Widget>[
+            TextButton(
+              child: const Text('TapHere'),
+              onPressed: onButtonPressed,
+            ),
+            DraggableScrollableSheet(
+              maxChildSize: maxChildSize,
+              minChildSize: minChildSize,
+              initialChildSize: initialChildSize,
+              builder: (BuildContext context, ScrollController scrollController) {
+                return NotificationListener<ScrollNotification>(
+                  onNotification: onScrollNotification,
+                  child: Container(
+                    key: containerKey,
+                    color: const Color(0xFFABCDEF),
+                    child: ListView.builder(
+                      controller: scrollController,
+                      itemExtent: itemExtent,
+                      itemCount: itemCount,
+                      itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-        ],
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

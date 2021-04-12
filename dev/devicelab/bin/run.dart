@@ -106,6 +106,8 @@ Future<void> main(List<String> rawArgs) async {
   } else {
     await runTasks(_taskNames,
       silent: silent,
+      localEngine: localEngine,
+      localEngineSrcPath: localEngineSrcPath,
       deviceId: deviceId,
       exitOnFirstTestFailure: exitOnFirstTestFailure,
       gitBranch: gitBranch,

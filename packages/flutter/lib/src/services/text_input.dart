@@ -804,7 +804,7 @@ mixin TextSelectionDelegate {
   /// formatting.
   @Deprecated(
     'Use the userUpdateTextEditingValue instead. '
-    'This feature was deprecated after v1.26.0-17.2.pre.'
+    'This feature was deprecated after v1.26.0-17.2.pre.',
   )
   set textEditingValue(TextEditingValue value) {}
 
@@ -926,6 +926,7 @@ class TextInputConnection {
   Size? _cachedSize;
   Matrix4? _cachedTransform;
   Rect? _cachedRect;
+  Rect? _cachedCaretRect;
 
   static int _nextId = 1;
   final int _id;
@@ -1019,6 +1020,24 @@ class TextInputConnection {
     _cachedRect = rect;
     final Rect validRect = rect.isFinite ? rect : Offset.zero & const Size(-1, -1);
     TextInput._instance._setComposingTextRect(
+      <String, dynamic>{
+        'width': validRect.width,
+        'height': validRect.height,
+        'x': validRect.left,
+        'y': validRect.top,
+      },
+    );
+  }
+
+  /// Sends the coordinates of caret rect. This is used on macOS for positioning
+  /// the accent selection menu.
+  void setCaretRect(Rect rect) {
+    assert(rect != null);
+    if (rect == _cachedCaretRect)
+      return;
+    _cachedCaretRect = rect;
+    final Rect validRect = rect.isFinite ? rect : Offset.zero & const Size(-1, -1);
+    TextInput._instance._setCaretRect(
       <String, dynamic>{
         'width': validRect.width,
         'height': validRect.height,
@@ -1336,7 +1355,8 @@ class TextInput {
         break;
       case 'TextInputClient.performPrivateCommand':
         _currentConnection!._client.performPrivateCommand(
-          args[1]['action'] as String, args[1]['data'] as Map<String, dynamic>);
+          args[1]['action'] as String, args[1]['data'] as Map<String, dynamic>,
+        );
         break;
       case 'TextInputClient.updateFloatingCursor':
         _currentConnection!._client.updateFloatingCursor(_toTextPoint(
@@ -1412,6 +1432,13 @@ class TextInput {
   void _setComposingTextRect(Map<String, dynamic> args) {
     _channel.invokeMethod<void>(
       'TextInput.setMarkedTextRect',
+      args,
+    );
+  }
+
+  void _setCaretRect(Map<String, dynamic> args) {
+    _channel.invokeMethod<void>(
+      'TextInput.setCaretRect',
       args,
     );
   }

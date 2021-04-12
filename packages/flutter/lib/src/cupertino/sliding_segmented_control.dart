@@ -130,7 +130,7 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
       highlightPressScaleAnimation = highlightPressScaleController.drive(
         Tween<double>(
           begin: highlightPressScaleAnimation.value,
-          end: widget.shouldScaleContent ? _kMinThumbScale : 1.0
+          end: widget.shouldScaleContent ? _kMinThumbScale : 1.0,
         ),
       );
       highlightPressScaleController.animateWith(_kThumbSpringAnimationSimulation);
@@ -166,7 +166,7 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
                 scale: highlightPressScaleAnimation,
                 child: widget.child,
               ),
-            )
+            ),
           ),
           // The entire widget will assume the size of this widget, so when a
           // segment's "highlight" animation plays the size of the parent stays
@@ -520,7 +520,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
       Tween<double>(
         begin: thumbScaleAnimation.value,
         end: isExpanding ? 1 : _kMinThumbScale,
-      )
+      ),
     );
     thumbScaleController.animateWith(_kThumbSpringAnimationSimulation);
   }
@@ -976,7 +976,7 @@ class _RenderSegmentedControl<T> extends RenderBox
 
   // This method is used to convert the original unscaled thumb rect painted in
   // the previous frame, to a Rect that is within the valid boundary defined by
-  // the the child segments.
+  // the child segments.
   //
   // The overall size does not include that of the thumb. That is, if the thumb
   // is located at the first or the last segment, the thumb can get cut off if

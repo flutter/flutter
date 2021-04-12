@@ -288,7 +288,8 @@ void main() {
               return false;
             },
           ),
-      ],),
+        ],
+      ),
     };
 
     await tester.pumpWidget(MaterialApp(routes: routes));
@@ -328,7 +329,8 @@ void main() {
               return true;
             },
           ),
-        ],),
+        ],
+      ),
     };
 
     await tester.pumpWidget(MaterialApp(routes: routes));
@@ -378,7 +380,7 @@ void main() {
       children: <TestSemantics>[
         TestSemantics.rootChild(
           rect: TestSemantics.fullScreen,
-          actions: SemanticsAction.tap.index,
+          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
           label: 'Dismiss',
           textDirection: TextDirection.ltr,
         ),

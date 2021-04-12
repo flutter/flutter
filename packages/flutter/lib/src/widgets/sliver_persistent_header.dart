@@ -173,7 +173,7 @@ class SliverPersistentHeader extends StatelessWidget {
       DiagnosticsProperty<SliverPersistentHeaderDelegate>(
         'delegate',
         delegate,
-      )
+      ),
     );
     final List<String> flags = <String>[
       if (pinned) 'pinned',
@@ -195,7 +195,7 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
   _RenderSliverPersistentHeaderForWidgetsMixin get renderObject => super.renderObject as _RenderSliverPersistentHeaderForWidgetsMixin;
 
   @override
-  void mount(Element? parent, dynamic newSlot) {
+  void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     renderObject._element = this;
   }
@@ -232,7 +232,7 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
         widget.delegate.build(
           this,
           shrinkOffset,
-          overlapsContent
+          overlapsContent,
         ),
         null,
       );
@@ -247,18 +247,18 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
   }
 
   @override
-  void insertRenderObjectChild(covariant RenderBox child, dynamic slot) {
+  void insertRenderObjectChild(covariant RenderBox child, Object? slot) {
     assert(renderObject.debugValidateChild(child));
     renderObject.child = child;
   }
 
   @override
-  void moveRenderObjectChild(covariant RenderObject child, dynamic oldSlot, dynamic newSlot) {
+  void moveRenderObjectChild(covariant RenderObject child, Object? oldSlot, Object? newSlot) {
     assert(false);
   }
 
   @override
-  void removeRenderObjectChild(covariant RenderObject child, dynamic slot) {
+  void removeRenderObjectChild(covariant RenderObject child, Object? slot) {
     renderObject.child = null;
   }
 
@@ -291,7 +291,7 @@ abstract class _SliverPersistentHeaderRenderObjectWidget extends RenderObjectWid
       DiagnosticsProperty<SliverPersistentHeaderDelegate>(
         'delegate',
         delegate,
-      )
+      ),
     );
   }
 }
@@ -329,7 +329,7 @@ class _SliverScrollingPersistentHeader extends _SliverPersistentHeaderRenderObje
   @override
   _RenderSliverPersistentHeaderForWidgetsMixin createRenderObject(BuildContext context) {
     return _RenderSliverScrollingPersistentHeaderForWidgets(
-      stretchConfiguration: delegate.stretchConfiguration
+      stretchConfiguration: delegate.stretchConfiguration,
     );
   }
 }

@@ -104,7 +104,7 @@ abstract class SwapperElement extends RenderObjectElement {
   }
 
   @override
-  void mount(Element? parent, dynamic newSlot) {
+  void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     _updateChildren(widget);
   }
@@ -120,13 +120,13 @@ class SwapperElementWithProperOverrides extends SwapperElement {
   SwapperElementWithProperOverrides(Swapper widget) : super(widget);
 
   @override
-  void insertRenderObjectChild(RenderBox child, dynamic slot) {
+  void insertRenderObjectChild(RenderBox child, Object? slot) {
     insertSlots.add(slot);
     assert(child != null);
     if (slot == 'stable')
       renderObject.stable = child;
     else
-      renderObject.setSwapper(child, slot as bool);
+      renderObject.setSwapper(child, slot! as bool);
   }
 
   @override
@@ -137,12 +137,12 @@ class SwapperElementWithProperOverrides extends SwapperElement {
   }
 
   @override
-  void removeRenderObjectChild(RenderBox child, dynamic slot) {
+  void removeRenderObjectChild(RenderBox child, Object? slot) {
     removeSlots.add(slot);
     if (slot == 'stable')
       renderObject.stable = null;
     else
-      renderObject.setSwapper(null, slot as bool);
+      renderObject.setSwapper(null, slot! as bool);
   }
 }
 
@@ -155,13 +155,13 @@ class SwapperElementWithDeprecatedOverrides extends SwapperElement {
 
   @override
   // ignore: must_call_super
-  void insertChildRenderObject(RenderBox child, dynamic slot) {
+  void insertChildRenderObject(RenderBox child, Object? slot) {
     insertSlots.add(slot);
     assert(child != null);
     if (slot == 'stable')
       renderObject.stable = child;
     else
-      renderObject.setSwapper(child, slot as bool);
+      renderObject.setSwapper(child, slot! as bool);
   }
 
   @override

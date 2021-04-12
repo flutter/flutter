@@ -8,7 +8,12 @@ and native Android instrumentation testing.
 
 Add a dependency on the `integration_test` and `flutter_test` package in the
 `dev_dependencies` section of `pubspec.yaml`. For plugins, do this in the
-`pubspec.yaml` of the example app.
+`pubspec.yaml` of the example app:
+
+```yaml
+integration_test:
+  sdk: flutter
+```
 
 Create a `integration_test/` directory for your package. In this directory,
 create a `<name>_test.dart`, using the following as a starting point to make
@@ -241,7 +246,7 @@ zip -r "ios_tests.zip" "Release-iphoneos" "Runner_iphoneos$dev_target-arm64.xcte
 popd
 ```
 
-You can verify locally that your tests are succesful by running the following command:
+You can verify locally that your tests are successful by running the following command:
 
 ```sh
 xcodebuild test-without-building -xctestrun "build/ios_integ/Build/Products/Runner_iphoneos14.3-arm64.xctestrun" -destination id=<YOUR_DEVICE_ID>

@@ -10,7 +10,11 @@ responseRequiredLabel: "waiting for customer response"
 closeComment: >
   Without additional information, we are unfortunately not sure how to
   resolve this issue. We are therefore reluctantly going to close this
-  bug for now. Please don't hesitate to comment on the bug if you have
-  any more information for us; we will reopen it right away!
+  bug for now.
+
+  If you find this problem please file a new issue with the same description,
+  what happens, logs and the output of 'flutter doctor -v'. All system setups
+  can be slightly different so it's always better to open new issues and reference
+  the related ones.
 
   Thanks for your contribution.
