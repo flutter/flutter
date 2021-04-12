@@ -5,11 +5,11 @@
 #include "flutter/shell/platform/embedder/embedder_surface_metal.h"
 
 #include "flutter/fml/logging.h"
-#include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/gpu/gpu_surface_metal_delegate.h"
 #import "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetal.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 
+FLUTTER_ASSERT_NOT_ARC
 namespace flutter {
 
 EmbedderSurfaceMetal::EmbedderSurfaceMetal(
@@ -20,12 +20,11 @@ EmbedderSurfaceMetal::EmbedderSurfaceMetal(
     : GPUSurfaceMetalDelegate(MTLRenderTargetType::kMTLTexture),
       metal_dispatch_table_(metal_dispatch_table),
       external_view_embedder_(external_view_embedder) {
-  auto darwin_metal_context =
-      fml::scoped_nsobject<FlutterDarwinContextMetal>{[[[FlutterDarwinContextMetal alloc]
-          initWithMTLDevice:(id<MTLDevice>)device
-               commandQueue:(id<MTLCommandQueue>)command_queue] retain]};
-  main_context_ = darwin_metal_context.get().mainContext;
-  resource_context_ = darwin_metal_context.get().resourceContext;
+  main_context_ = [FlutterDarwinContextMetal createGrContext:(id<MTLDevice>)device
+                                                commandQueue:(id<MTLCommandQueue>)command_queue];
+  resource_context_ =
+      [FlutterDarwinContextMetal createGrContext:(id<MTLDevice>)device
+                                    commandQueue:(id<MTLCommandQueue>)command_queue];
   valid_ = main_context_ && resource_context_;
 }
 
