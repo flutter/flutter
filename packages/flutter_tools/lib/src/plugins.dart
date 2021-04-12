@@ -1007,7 +1007,7 @@ Future<void> generateMainDartWithPluginRegistrant(
     _renderTemplateToFile(
       _dartPluginRegistryForDesktopTemplate,
       templateContext,
-      newMainDart.path,
+      newMainDart,
       globals.templateRenderer,
       fileSystem: rootProject.directory.fileSystem,
     );
