@@ -1114,7 +1114,7 @@ void createPluginSymlinks(FlutterProject project, {bool force = false}) {
   if (featureFlags.isWindowsUwpEnabled && project.windowsUwp.existsSync()) {
     _createPlatformPluginSymlinks(
       project.windowsUwp.pluginSymlinkDirectory,
-      <dynamic>[],
+      platformPlugins[project.windows.pluginConfigKey] as List<dynamic>,
       force: force,
     );
   }
