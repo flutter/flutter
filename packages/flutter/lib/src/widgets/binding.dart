@@ -291,7 +291,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     window.onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
     assert(() {
-      FlutterErrorDetails.propertiesTransformers.add(transformDebugCreator);
+      FlutterErrorDetails.propertiesTransformers.add(debugTransformDebugCreator);
       return true;
     }());
   }
