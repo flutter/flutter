@@ -832,7 +832,7 @@ abstract class FlutterCommand extends Command<void> {
             'This flag is only supported on "--release" builds. When building for Android, a single '
             'ABI must be specified at a time with the "--target-platform" flag. When building for iOS, '
             'only the symbols from the arm64 architecture are used to analyze code size.\n'
-            'By default, the intermediate output files will be placed in a temporary directory in the '
+            'By default, the intermediate output files will be placed in a transient directory in the '
             'build directory. This can be overriden with the --${FlutterOptions.kCodeSizeDirectory} option.\n'
             'This flag cannot be combined with "--${FlutterOptions.kSplitDebugInfoOption}".'
     );
@@ -890,11 +890,8 @@ abstract class FlutterCommand extends Command<void> {
         globals.fs.directory(getBuildDirectory()),
         'flutter_size',
       );
-      if (argParser.options.containsKey(FlutterOptions.kCodeSizeDirectory) && argResults[FlutterOptions.kCodeSizeDirectory] != null) {
-        final String codeSizePathArgument = stringArg(FlutterOptions.kCodeSizeDirectory);
-        if (codeSizePathArgument.isNotEmpty) {
-          directory = globals.fs.directory(codeSizePathArgument);
-        }
+      if (argParser.options.containsKey(FlutterOptions.kCodeSizeDirectory) && stringArg(FlutterOptions.kCodeSizeDirectory) != null) {
+        directory = globals.fs.directory(stringArg(FlutterOptions.kCodeSizeDirectory));
       }
       directory.createSync(recursive: true);
       codeSizeDirectory = directory.path;
