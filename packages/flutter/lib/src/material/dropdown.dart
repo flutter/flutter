@@ -685,7 +685,7 @@ class DropdownMenuItem<T> extends _DropdownMenuItemContainer {
   ///
   /// The [child] argument is required.
   ///
-  /// If [enabled] is `false`, [value] and [onTap] should be null
+  /// If [enabled] is `false`, [value] and [onTap] should be null.
   const DropdownMenuItem({
     Key? key,
     this.onTap,
