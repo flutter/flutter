@@ -649,7 +649,6 @@ Future<void> _runFrameworkTests() async {
     );
   }
 
-
   Future<void> runMisc() async {
     print('${green}Running package tests$reset for directories other than packages/flutter');
     await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'));

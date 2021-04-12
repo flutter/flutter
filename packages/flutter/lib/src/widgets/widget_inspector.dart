@@ -2896,7 +2896,7 @@ bool _isDebugCreator(DiagnosticsNode node) => node is DiagnosticsDebugCreator;
 /// This is meant to be called only in debug mode. In other modes, it yeilds an empty list.
 Iterable<DiagnosticsNode> debugTransformDebugCreator(Iterable<DiagnosticsNode> properties) sync* {
   if (kDebugMode) {
-    break;
+    return;
   }
   final List<DiagnosticsNode> pending = <DiagnosticsNode>[];
   ErrorSummary? errorSummary;
