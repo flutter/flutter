@@ -28,7 +28,7 @@ class TypeConversionsTest : public FixtureTest {
                                             thread, thread, thread);
     auto isolate =
         RunDartCodeInIsolate(vm_, settings_, single_threaded_task_runner,
-                             entrypoint, {}, GetFixturesPath());
+                             entrypoint, {}, GetDefaultKernelFilePath());
     if (!isolate || isolate->get()->GetPhase() != DartIsolate::Phase::Running) {
       return false;
     }

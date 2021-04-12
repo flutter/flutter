@@ -8,12 +8,21 @@ namespace flutter {
 namespace testing {
 
 FixtureTest::FixtureTest()
+    : FixtureTest("kernel_blob.bin",
+                  kDefaultAOTAppELFFileName,
+                  kDefaultAOTAppELFSplitFileName) {}
+
+FixtureTest::FixtureTest(std::string kernel_filename,
+                         std::string elf_filename,
+                         std::string elf_split_filename)
     : native_resolver_(std::make_shared<TestDartNativeResolver>()),
-      split_aot_symbols_(LoadELFSplitSymbolFromFixturesIfNeccessary()),
+      split_aot_symbols_(
+          LoadELFSplitSymbolFromFixturesIfNeccessary(elf_split_filename)),
+      kernel_filename_(kernel_filename),
       assets_dir_(fml::OpenDirectory(GetFixturesPath(),
                                      false,
                                      fml::FilePermission::kRead)),
-      aot_symbols_(LoadELFSymbolFromFixturesIfNeccessary()) {}
+      aot_symbols_(LoadELFSymbolFromFixturesIfNeccessary(elf_filename)) {}
 
 Settings FixtureTest::CreateSettingsForFixture() {
   Settings settings;
@@ -44,7 +53,7 @@ void FixtureTest::SetSnapshotsAndAssets(Settings& settings) {
     settings.application_kernels = [this]() -> Mappings {
       std::vector<std::unique_ptr<const fml::Mapping>> kernel_mappings;
       auto kernel_mapping =
-          fml::FileMapping::CreateReadOnly(assets_dir_, "kernel_blob.bin");
+          fml::FileMapping::CreateReadOnly(assets_dir_, kernel_filename_);
       if (!kernel_mapping || !kernel_mapping->IsValid()) {
         FML_LOG(ERROR) << "Could not find kernel blob for test fixture not "
                           "running in precompiled mode.";

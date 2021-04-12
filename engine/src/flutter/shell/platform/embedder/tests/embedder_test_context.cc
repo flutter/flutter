@@ -17,7 +17,8 @@ namespace testing {
 
 EmbedderTestContext::EmbedderTestContext(std::string assets_path)
     : assets_path_(std::move(assets_path)),
-      aot_symbols_(LoadELFSymbolFromFixturesIfNeccessary()),
+      aot_symbols_(
+          LoadELFSymbolFromFixturesIfNeccessary(kDefaultAOTAppELFFileName)),
       native_resolver_(std::make_shared<TestDartNativeResolver>()) {
   SetupAOTMappingsIfNecessary();
   SetupAOTDataIfNecessary();
@@ -53,8 +54,8 @@ void EmbedderTestContext::SetupAOTDataIfNecessary() {
   FlutterEngineAOTDataSource data_in = {};
   FlutterEngineAOTData data_out = nullptr;
 
-  const auto elf_path =
-      fml::paths::JoinPaths({GetFixturesPath(), kAOTAppELFFileName});
+  const auto elf_path = fml::paths::JoinPaths(
+      {GetFixturesPath(), testing::kDefaultAOTAppELFFileName});
 
   data_in.type = kFlutterEngineAOTDataSourceTypeElfPath;
   data_in.elf_path = elf_path.c_str();

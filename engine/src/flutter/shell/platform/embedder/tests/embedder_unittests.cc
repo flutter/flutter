@@ -1194,7 +1194,7 @@ TEST_F(EmbedderTest, CanCreateAndCollectAValidElfSource) {
   ASSERT_EQ(FlutterEngineCollectAOTData(data_out), kSuccess);
 
   const auto elf_path =
-      fml::paths::JoinPaths({GetFixturesPath(), kAOTAppELFFileName});
+      fml::paths::JoinPaths({GetFixturesPath(), kDefaultAOTAppELFFileName});
 
   data_in.type = kFlutterEngineAOTDataSourceTypeElfPath;
   data_in.elf_path = elf_path.c_str();
