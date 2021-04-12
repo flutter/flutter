@@ -275,7 +275,7 @@ void main() {
       p.paint(testCanvas, size);
       final Rect rect0 = captureRect();
       expect(rect0.top, padding.top);
-      expect(size.width - rect0.right, padding.right);
+      expect(size.width - rect0.right, 0);
 
       // Bottom overscroll.
       p.update(
@@ -289,7 +289,7 @@ void main() {
       p.paint(testCanvas, size);
       final Rect rect1 = captureRect();
       expect(size.height - rect1.bottom, padding.bottom);
-      expect(size.width - rect1.right, padding.right);
+      expect(size.width - rect1.right, 0);
     });
 
     testWidgets('up', (WidgetTester tester) async {
@@ -306,7 +306,7 @@ void main() {
       p.paint(testCanvas, size);
       final Rect rect0 = captureRect();
       expect(rect0.top, padding.top);
-      expect(size.width - rect0.right, padding.right);
+      expect(size.width - rect0.right, 0);
 
       // Bottom overscroll.
       p.update(
@@ -321,7 +321,7 @@ void main() {
       p.paint(testCanvas, size);
       final Rect rect1 = captureRect();
       expect(size.height - rect1.bottom, padding.bottom);
-      expect(size.width - rect1.right, padding.right);
+      expect(size.width - rect1.right, 0);
     });
 
     testWidgets('left', (WidgetTester tester) async {
@@ -337,7 +337,7 @@ void main() {
       // Right overscroll.
       p.paint(testCanvas, size);
       final Rect rect0 = captureRect();
-      expect(size.height - rect0.bottom, padding.bottom);
+      expect(size.height - rect0.bottom, 0);
       expect(size.width - rect0.right, padding.right);
 
       // Left overscroll.
@@ -352,7 +352,7 @@ void main() {
 
       p.paint(testCanvas, size);
       final Rect rect1 = captureRect();
-      expect(size.height - rect1.bottom, padding.bottom);
+      expect(size.height - rect1.bottom, 0);
       expect(rect1.left, padding.left);
     });
 
@@ -369,7 +369,7 @@ void main() {
       // Right overscroll.
       p.paint(testCanvas, size);
       final Rect rect0 = captureRect();
-      expect(size.height - rect0.bottom, padding.bottom);
+      expect(size.height - rect0.bottom, 0);
       expect(size.width - rect0.right, padding.right);
 
       // Left overscroll.
@@ -384,7 +384,7 @@ void main() {
 
       p.paint(testCanvas, size);
       final Rect rect1 = captureRect();
-      expect(size.height - rect1.bottom, padding.bottom);
+      expect(size.height - rect1.bottom, 0);
       expect(rect1.left, padding.left);
     });
   });
