@@ -32,7 +32,7 @@ static void BM_PlatformMessageResponseDartComplete(benchmark::State& state) {
   auto vm_ref = DartVMRef::Create(settings);
   auto isolate =
       testing::RunDartCodeInIsolate(vm_ref, settings, task_runners, "main", {},
-                                    testing::GetFixturesPath(), {});
+                                    testing::GetDefaultKernelFilePath(), {});
 
   while (state.KeepRunning()) {
     state.PauseTiming();

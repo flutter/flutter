@@ -14,14 +14,14 @@
 namespace flutter {
 namespace testing {
 
-inline constexpr const char* kAOTAppELFFileName = "app_elf_snapshot.so";
+inline constexpr const char* kDefaultAOTAppELFFileName = "app_elf_snapshot.so";
 
 // This file name is what gen_snapshot defaults to. It is based off of the
 // name of the base file, with the `2` indicating that this split corresponds
 // to loading unit id of 2. The base module id is 1 and is omitted as it is not
 // considered a split. If dart changes the naming convention, this should be
 // changed to match, however, this is considered unlikely to happen.
-inline constexpr const char* kAOTAppELFSplitFileName =
+inline constexpr const char* kDefaultAOTAppELFSplitFileName =
     "app_elf_snapshot.so-2.part.so";
 
 struct LoadedELFDeleter {
@@ -44,9 +44,11 @@ struct ELFAOTSymbols {
 ///             generator. This only returns valid symbols when the VM is
 ///             configured for AOT.
 ///
+/// @param[in]  elf_filename  The AOT ELF filename from the fixtures generator.
+///
 /// @return     The loaded ELF symbols.
 ///
-ELFAOTSymbols LoadELFSymbolFromFixturesIfNeccessary();
+ELFAOTSymbols LoadELFSymbolFromFixturesIfNeccessary(std::string elf_filename);
 
 //------------------------------------------------------------------------------
 /// @brief      Attempts to resolve split loading unit AOT symbols from the
@@ -55,9 +57,13 @@ ELFAOTSymbols LoadELFSymbolFromFixturesIfNeccessary();
 ///             This only returns valid symbols when the VM is configured for
 ///             AOT.
 ///
+/// @param[in]  elf_split_filename  The split AOT ELF filename from the fixtures
+/// generator.
+///
 /// @return     The loaded ELF symbols.
 ///
-ELFAOTSymbols LoadELFSplitSymbolFromFixturesIfNeccessary();
+ELFAOTSymbols LoadELFSplitSymbolFromFixturesIfNeccessary(
+    std::string elf_split_filename);
 
 //------------------------------------------------------------------------------
 /// @brief      Prepare the settings objects various AOT mappings resolvers with

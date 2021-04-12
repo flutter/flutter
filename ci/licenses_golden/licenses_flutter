@@ -609,10 +609,12 @@ FILE: ../../../flutter/runtime/dart_vm_lifecycle.h
 FILE: ../../../flutter/runtime/dart_vm_unittests.cc
 FILE: ../../../flutter/runtime/embedder_resources.cc
 FILE: ../../../flutter/runtime/embedder_resources.h
+FILE: ../../../flutter/runtime/fixtures/no_dart_plugin_registrant_test.dart
 FILE: ../../../flutter/runtime/fixtures/runtime_test.dart
 FILE: ../../../flutter/runtime/fixtures/split_lib_test.dart
 FILE: ../../../flutter/runtime/isolate_configuration.cc
 FILE: ../../../flutter/runtime/isolate_configuration.h
+FILE: ../../../flutter/runtime/no_dart_plugin_registrant_unittests.cc
 FILE: ../../../flutter/runtime/platform_data.cc
 FILE: ../../../flutter/runtime/platform_data.h
 FILE: ../../../flutter/runtime/ptrace_check.cc
