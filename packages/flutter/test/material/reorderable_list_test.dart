@@ -33,6 +33,8 @@ void main() {
     Widget build({
       Widget? header,
       Axis scrollDirection = Axis.vertical,
+      bool reverse = false,
+      EdgeInsets padding = EdgeInsets.zero,
       TextDirection textDirection = TextDirection.ltr,
       TargetPlatform? platform,
     }) {
@@ -48,6 +50,8 @@ void main() {
               children: listItems.map<Widget>(listItemToWidget).toList(),
               scrollDirection: scrollDirection,
               onReorder: onReorder,
+              reverse: reverse,
+              padding: padding,
             ),
           ),
         ),
@@ -276,7 +280,7 @@ void main() {
         // first with a gap between the first and third and a drop shadow on
         // the dragged item.
         await expectLater(
-          find.byType(ReorderableListView),
+          find.byType(Overlay).last,
           matchesGoldenFile('reorderable_list_test.vertical.drop_area.png'),
         );
         debugDisableShadows = true;
@@ -888,7 +892,7 @@ void main() {
         // first with a gap between the first and third and a drop shadow on
         // the dragged item.
         await expectLater(
-          find.byType(ReorderableListView),
+          find.byType(Overlay).last,
           matchesGoldenFile('reorderable_list_test.horizontal.drop_area.png'),
         );
         debugDisableShadows = true;
@@ -1236,6 +1240,53 @@ void main() {
 
       // Should have only created the first 18 items.
       expect(itemsCreated, <int>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17});
+    });
+
+    group('Padding', () {
+      testWidgets('Padding with no header', (WidgetTester tester) async {
+        const EdgeInsets padding = EdgeInsets.fromLTRB(10, 20, 30, 40);
+
+        // Vertical
+        await tester.pumpWidget(build(padding: padding));
+        expect(tester.getRect(find.byKey(const Key('Item 1'))), const Rect.fromLTRB(10, 20, 770, 68));
+        expect(tester.getRect(find.byKey(const Key('Item 4'))), const Rect.fromLTRB(10, 164, 770, 212));
+
+        // Horizontal
+        await tester.pumpWidget(build(padding: padding, scrollDirection: Axis.horizontal));
+        expect(tester.getRect(find.byKey(const Key('Item 1'))), const Rect.fromLTRB(10, 20, 58, 560));
+        expect(tester.getRect(find.byKey(const Key('Item 4'))), const Rect.fromLTRB(154, 20, 202, 560));
+      });
+
+      testWidgets('Padding with header', (WidgetTester tester) async {
+        const EdgeInsets padding = EdgeInsets.fromLTRB(10, 20, 30, 40);
+        const Key headerKey = Key('Header');
+        const Widget verticalHeader = SizedBox(key: headerKey, height: 10);
+        const Widget horizontalHeader = SizedBox(key: headerKey, width: 10);
+
+        // Vertical
+        await tester.pumpWidget(build(padding: padding, header: verticalHeader));
+        expect(tester.getRect(find.byKey(headerKey)), const Rect.fromLTRB(10, 20, 770, 30));
+        expect(tester.getRect(find.byKey(const Key('Item 1'))), const Rect.fromLTRB(10, 30, 770, 78));
+        expect(tester.getRect(find.byKey(const Key('Item 4'))), const Rect.fromLTRB(10, 174, 770, 222));
+
+        // Vertical, reversed
+        await tester.pumpWidget(build(padding: padding, header: verticalHeader, reverse: true));
+        expect(tester.getRect(find.byKey(headerKey)), const Rect.fromLTRB(10, 550, 770, 560));
+        expect(tester.getRect(find.byKey(const Key('Item 1'))), const Rect.fromLTRB(10, 502, 770, 550));
+        expect(tester.getRect(find.byKey(const Key('Item 4'))), const Rect.fromLTRB(10, 358, 770, 406));
+
+        // Horizontal
+        await tester.pumpWidget(build(padding: padding, header: horizontalHeader, scrollDirection: Axis.horizontal));
+        expect(tester.getRect(find.byKey(headerKey)), const Rect.fromLTRB(10, 20, 20, 560));
+        expect(tester.getRect(find.byKey(const Key('Item 1'))), const Rect.fromLTRB(20, 20, 68, 560));
+        expect(tester.getRect(find.byKey(const Key('Item 4'))), const Rect.fromLTRB(164, 20, 212, 560));
+
+        // Horizontal, reversed
+        await tester.pumpWidget(build(padding: padding, header: horizontalHeader, scrollDirection: Axis.horizontal, reverse: true));
+        expect(tester.getRect(find.byKey(headerKey)), const Rect.fromLTRB(760, 20, 770, 560));
+        expect(tester.getRect(find.byKey(const Key('Item 1'))), const Rect.fromLTRB(712, 20, 760, 560));
+        expect(tester.getRect(find.byKey(const Key('Item 4'))), const Rect.fromLTRB(568, 20, 616, 560));
+      });
     });
 
     testWidgets('ReorderableListView can be reversed', (WidgetTester tester) async {
