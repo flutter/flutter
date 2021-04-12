@@ -637,6 +637,19 @@ Future<void> _runFrameworkTests() async {
     );
   }
 
+  Future<void> runForbiddenFromReleaseTests() async {
+    final List<String> args = <String>[
+      path.join(flutterRoot, 'dev', 'forbidden_from_release_tests', 'bin', 'main.dart'),
+      '--forbidden-type', 'WidgetInspectorService',
+    ];
+    await runCommand(
+      dart,
+      args,
+      workingDirectory: flutterRoot,
+    );
+  }
+
+
   Future<void> runMisc() async {
     print('${green}Running package tests$reset for directories other than packages/flutter');
     await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'));
@@ -685,6 +698,7 @@ Future<void> _runFrameworkTests() async {
         return null;
       },
     );
+    await runForbiddenFromReleaseTests();
   }
 
   await selectSubshard(<String, ShardRunner>{
