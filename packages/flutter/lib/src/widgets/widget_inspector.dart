@@ -2893,9 +2893,9 @@ bool _isDebugCreator(DiagnosticsNode node) => node is DiagnosticsDebugCreator;
 /// This function will be registered to [FlutterErrorDetails.propertiesTransformers]
 /// in [WidgetsBinding.initInstances].
 ///
-/// This is meant to be called only in debug mode. In other modes, it yeilds an empty list.
+/// This is meant to be called only in debug mode. In other modes, it yields an empty list.
 Iterable<DiagnosticsNode> debugTransformDebugCreator(Iterable<DiagnosticsNode> properties) sync* {
-  if (kDebugMode) {
+  if (!kDebugMode) {
     return;
   }
   final List<DiagnosticsNode> pending = <DiagnosticsNode>[];

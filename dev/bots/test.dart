@@ -638,6 +638,19 @@ Future<void> _runFrameworkTests() async {
   }
 
   Future<void> runForbiddenFromReleaseTests() async {
+    // First, a smoke test.
+    final List<String> smokeTestArgs = <String>[
+      path.join(flutterRoot, 'dev', 'forbidden_from_release_tests', 'bin', 'main.dart'),
+      '--forbidden-type', 'Widget',
+    ];
+    await runCommand(
+      dart,
+      smokeTestArgs,
+      workingDirectory: flutterRoot,
+      expectNonZeroExit: true,
+    );
+
+    // Actual test.
     final List<String> args = <String>[
       path.join(flutterRoot, 'dev', 'forbidden_from_release_tests', 'bin', 'main.dart'),
       '--forbidden-type', 'WidgetInspectorService',

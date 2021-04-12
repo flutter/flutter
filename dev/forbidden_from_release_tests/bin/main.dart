@@ -49,22 +49,17 @@ Future<void> main(List<String> args) async {
     exit(-1);
   }
 
+  print('No forbidden types found.');
   tempDirectory.deleteSync(recursive: true);
 }
 
 Future<void> pubGet(File flutter, Directory target) async {
   final List<String> command = <String>[flutter.path, 'pub', 'get'];
-  print('Running command: ${command.join(' ')} in ${target.path}');
-  final ProcessResult pubGetResult = await processManager.run(
+
+  await _runStreamed(
     command,
     workingDirectory: target.path,
   );
-  if (pubGetResult.exitCode != 0) {
-    print(pubGetResult.stdout);
-    print('Error running pub get.');
-    print(pubGetResult.stderr);
-    exit(pubGetResult.exitCode);
-  }
 }
 
 Future<File> compileKernel({
@@ -96,14 +91,8 @@ Future<File> compileKernel({
     dill.path,
     packageName,
   ];
-  print('Running command: ${command.join(' ')}');
-  final ProcessResult kernelResult = await processManager.run(command);
-  if (kernelResult.exitCode != 0) {
-    print('Error running dart compile.');
-    print(kernelResult.stdout);
-    print(kernelResult.stderr);
-    exit(kernelResult.exitCode);
-  }
+
+  await _runStreamed(command);
   return dill;
 }
 
@@ -122,14 +111,8 @@ Future<File> compileAOTSnapshot({
     '--strip',
     dill.path,
   ];
-  print('Running command: ${command.join(' ')}');
-  final ProcessResult aotResult = await processManager.run(command);
-  if (aotResult.exitCode != 0) {
-    print('Error running gen_snapshot.');
-    print(aotResult.stdout);
-    print(aotResult.stderr);
-    exit(aotResult.exitCode);
-  }
+
+  await _runStreamed(command);
   return v8SnapshotProfile;
 }
 
@@ -180,6 +163,7 @@ class Options {
     argParser.addOption(
       'target',
       abbr: 't',
+      help: 'The Dart entrypoint file.',
       valueHelp: path.join(r'$FLUTTER_ROOT', 'examples', 'hello_world', 'lib', 'main.dart'),
       defaultsTo: path.join(fs.currentDirectory.path, 'examples', 'hello_world', 'lib', 'main.dart'),
     );
@@ -268,5 +252,21 @@ class Options {
       exit(-1);
     }
     return result;
+  }
+}
+
+Future<void> _runStreamed(List<String> command, {String? workingDirectory}) async {
+  final String workingDirectoryInstruction = workingDirectory != null
+      ? ' in directory $workingDirectory'
+      : '';
+
+  print('Running command ${command.join(' ')}$workingDirectoryInstruction');
+  final Process process = await processManager.start(command, workingDirectory: workingDirectory);
+  stdout.addStream(process.stdout);
+  stderr.addStream(process.stderr);
+
+  final int exitCode = await process.exitCode;
+  if (exitCode != 0) {
+    exit(exitCode);
   }
 }
