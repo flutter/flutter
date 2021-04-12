@@ -620,6 +620,7 @@ class AndroidDevice extends Device {
     final String dartVmFlags = computeDartVmFlags(debuggingOptions);
     final List<String> cmd = <String>[
       'shell', 'am', 'start',
+      '-W', // Wait for launch to complete
       '-a', 'android.intent.action.RUN',
       '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
       '--ez', 'enable-background-compilation', 'true',
@@ -673,6 +674,10 @@ class AndroidDevice extends Device {
       return LaunchResult.failed();
     }
     _pid = await _queryForPid(package);
+    // If the PID cannot be located the app likely did not start.
+    if (_pid == null) {
+      return LaunchResult.failed();
+    }
 
     _package = package;
     if (!debuggingOptions.debuggingEnabled) {
@@ -705,30 +710,15 @@ class AndroidDevice extends Device {
 
   /// Query for the launched application's PID.
   ///
-  /// This may need to run several times, since the application does not immediately
-  /// appear in the PID query after launch. If this continually fails, we can fall
-  /// back to using the VM Service PID query.
-  ///
   /// Returns `null` if the query fails.
   Future<int> _queryForPid(AndroidApk package) async {
-    while (true) {
-      ProcessResult pidoff;
-      try {
-        pidoff = await _processManager.run(adbCommandForDevice(<String>[
-          'shell',
-          'pidof',
-          package.id,
-          '-s',
-        ]));
-      } on ProcessException {
-        return null;
-      }
-      final String content = pidoff.stdout.toString()?.trim();
-      if (content.isNotEmpty) {
-        return int.tryParse(content);
-      }
-      await Future<void>.delayed(const Duration(seconds: 1));
-    }
+    final ProcessResult pidoff = await _processManager.run(adbCommandForDevice(<String>[
+      'shell',
+      'pidof',
+      package.id,
+      '-s',
+    ]));
+    return int.tryParse(pidoff.stdout.toString()?.trim() ?? '');
   }
 
   @override
