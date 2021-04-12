@@ -1134,12 +1134,12 @@ void registerPlugins(Registrar registrar) {
 }
 ''';
 
-const String _dartPluginRegisterWith = '''
+const String _dartPluginRegisterWith = r'''
       try {
         {{dartClass}}.registerWith();
       } catch (err) {
         print(
-          '`{{pluginName}}` threw an error: \$err. '
+          '`{{pluginName}}` threw an error: $err. '
           'The app may not function as expected until you remove this plugin from pubspec.yaml'
         );
       }
