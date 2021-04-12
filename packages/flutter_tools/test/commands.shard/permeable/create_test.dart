@@ -32,7 +32,7 @@ import '../../src/context.dart';
 import '../../src/fake_http_client.dart';
 import '../../src/fakes.dart';
 import '../../src/pubspec_schema.dart';
-import '../../src/testbed.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 const String _kNoPlatformsMessage = 'You\'ve created a plugin project that doesn\'t yet support any platforms.\n';
 const String frameworkRevision = '12345678';
@@ -2448,25 +2448,6 @@ void main() {
 
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true, isAndroidEnabled: false, isIOSEnabled: false),
-    Logger: () => logger,
-  });
-
-  testUsingContext('flutter create prints note about null safety', () async {
-    await _createProject(
-      projectDir,
-      <String>[],
-      <String>[],
-    );
-    expect(logger.statusText, contains('dart migrate --apply-changes'));
-  }, overrides: <Type, Generator>{
-    Pub: () => Pub(
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      processManager: globals.processManager,
-      usage: globals.flutterUsage,
-      botDetector: globals.botDetector,
-      platform: globals.platform,
-    ),
     Logger: () => logger,
   });
 }

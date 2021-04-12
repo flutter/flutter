@@ -584,7 +584,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 ///
 /// If the scrollbar is wrapped around multiple [ScrollView]s, it only responds to
 /// the nearest scrollView and shows the corresponding scrollbar thumb by default.
-/// Set [notificationPredicate] to something else for more complicated behaviors.
+/// The [notificationPredicate] allows the ability to customize which
+/// [ScrollNotification]s the Scrollbar should listen to.
 ///
 /// Scrollbars are interactive and will also use the [PrimaryScrollController] if
 /// a [controller] is not set. Scrollbar thumbs can be dragged along the main axis
@@ -596,6 +597,17 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// painted. In this case, the scrollbar cannot accurately represent the
 /// relative location of the visible area, or calculate the accurate delta to
 /// apply when  dragging on the thumb or tapping on the track.
+///
+/// Scrollbars are added to most [Scrollable] widgets by default on Desktop
+/// platforms in [ScrollBehavior.buildScrollbar] as part of an app's
+/// [ScrollConfiguration]. Scrollable widgets that do not have automatically
+/// applied Scrollbars include
+///
+///   * [EditableText]
+///   * [ListWheelScrollView]
+///   * [PageView]
+///   * [NestedScrollView]
+///   * [DropdownButton]
 /// {@endtemplate}
 ///
 // TODO(Piinks): Add code sample
@@ -615,8 +627,8 @@ class RawScrollbar extends StatefulWidget {
   /// The [child], or a descendant of the [child], should be a source of
   /// [ScrollNotification] notifications, typically a [Scrollable] widget.
   ///
-  /// The [child], [thickness], [thumbColor], [isAlwaysShown], [fadeDuration],
-  /// and [timeToFade] arguments must not be null.
+  /// The [child], [fadeDuration], [pressDuration], and [timeToFade] arguments
+  /// must not be null.
   const RawScrollbar({
     Key? key,
     required this.child,
@@ -641,6 +653,9 @@ class RawScrollbar extends StatefulWidget {
   ///
   /// The scrollbar will be stacked on top of this child. This child (and its
   /// subtree) should include a source of [ScrollNotification] notifications.
+  /// Typically a [Scrollbar] is created on desktop platforms by a
+  /// [ScrollBehavior.buildScrollbar] method, in which case the child is usually
+  /// the one provided as an argument to that method.
   ///
   /// Typically a [ListView] or [CustomScrollView].
   /// {@endtemplate}
@@ -944,10 +959,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
           if (!scrollController!.hasClients) {
             throw FlutterError.fromParts(<DiagnosticsNode>[
               ErrorSummary(
-                'The Scrollbar\'s ScrollController has no ScrollPosition attached.'
+                'The Scrollbar\'s ScrollController has no ScrollPosition attached.',
               ),
               ErrorDescription(
-                'A Scrollbar cannot be painted without a ScrollPosition. '
+                'A Scrollbar cannot be painted without a ScrollPosition. ',
               ),
               ErrorHint(
                 'The Scrollbar attempted to use the $controllerForError. This '
@@ -962,7 +977,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
                     'to true for the Scrollable widget.'
                   : 'When providing your own ScrollController, ensure both the '
                     'Scrollbar and the Scrollable widget use the same one.'
-                }'
+                }',
               ),
             ]);
           }
@@ -975,10 +990,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
             throw FlutterError.fromParts(<DiagnosticsNode>[
               ErrorSummary(
                 'The $controllerForError is currently attached to more than one '
-                'ScrollPosition.'
+                'ScrollPosition.',
               ),
               ErrorDescription(
-                'The Scrollbar requires a single ScrollPosition in order to be painted.'
+                'The Scrollbar requires a single ScrollPosition in order to be painted.',
               ),
               ErrorHint(
                 'When Scrollbar.isAlwaysShown is true, the associated Scrollable '
@@ -991,7 +1006,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
                     'to use the PrimaryScrollController of the current context.'
                   : 'The provided ScrollController must be unique to a '
                     'Scrollable widget.'
-                }'
+                }',
               ),
             ]);
           }
@@ -1142,14 +1157,14 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     double scrollIncrement;
     // Is an increment calculator available?
     final ScrollIncrementCalculator? calculator = Scrollable.of(
-      _currentController!.position.context.notificationContext!
+      _currentController!.position.context.notificationContext!,
     )?.widget.incrementCalculator;
     if (calculator != null) {
       scrollIncrement = calculator(
         ScrollIncrementDetails(
           type: ScrollIncrementType.page,
           metrics: _currentController!.position,
-        )
+        ),
       );
     } else {
       // Default page increment
@@ -1355,7 +1370,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
               key: _scrollbarPainterKey,
               foregroundPainter: scrollbarPainter,
               child: RepaintBoundary(child: widget.child),
-            )
+            ),
           ),
         ),
       ),

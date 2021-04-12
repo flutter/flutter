@@ -533,6 +533,8 @@ class ErrorHandlingLink
   String toString() => delegate.toString();
 }
 
+const String _kNoExecutableFound = 'The Flutter tool could not locate an executable with suitable permissions';
+
 Future<T> _run<T>(Future<T> Function() op, {
   required Platform platform,
   String? failureMessage,
@@ -540,6 +542,11 @@ Future<T> _run<T>(Future<T> Function() op, {
   assert(platform != null);
   try {
     return await op();
+  } on ProcessPackageExecutableNotFoundException catch (e) {
+    if (e.candidates.isNotEmpty) {
+      throwToolExit('$_kNoExecutableFound: $e');
+    }
+    rethrow;
   } on FileSystemException catch (e) {
     if (platform.isWindows) {
       _handleWindowsException(e, failureMessage, e.osError?.errorCode ?? 0);
@@ -564,6 +571,11 @@ T _runSync<T>(T Function() op, {
   assert(platform != null);
   try {
     return op();
+  } on ProcessPackageExecutableNotFoundException catch (e) {
+    if (e.candidates.isNotEmpty) {
+      throwToolExit('$_kNoExecutableFound: $e');
+    }
+    rethrow;
   } on FileSystemException catch (e) {
     if (platform.isWindows) {
       _handleWindowsException(e, failureMessage, e.osError?.errorCode ?? 0);
@@ -581,69 +593,6 @@ T _runSync<T>(T Function() op, {
   }
 }
 
-class _ProcessDelegate {
-  const _ProcessDelegate();
-
-  Future<io.Process> start(
-    List<String> command, {
-    String? workingDirectory,
-    Map<String, String>? environment,
-    bool includeParentEnvironment = true,
-    bool runInShell = false,
-    io.ProcessStartMode mode = io.ProcessStartMode.normal,
-  }) {
-    return io.Process.start(
-      command[0],
-      command.skip(1).toList(),
-      workingDirectory: workingDirectory,
-      environment: environment,
-      includeParentEnvironment: includeParentEnvironment,
-      runInShell: runInShell,
-    );
-  }
-
-  Future<io.ProcessResult> run(
-    List<String> command, {
-    String? workingDirectory,
-    Map<String, String>? environment,
-    bool includeParentEnvironment = true,
-    bool runInShell = false,
-    Encoding stdoutEncoding = io.systemEncoding,
-    Encoding stderrEncoding = io.systemEncoding,
-  }) {
-    return io.Process.run(
-      command[0],
-      command.skip(1).toList(),
-      workingDirectory: workingDirectory,
-      environment: environment,
-      includeParentEnvironment: includeParentEnvironment,
-      runInShell: runInShell,
-      stdoutEncoding: stdoutEncoding,
-      stderrEncoding: stderrEncoding,
-    );
-  }
-
-  io.ProcessResult runSync(
-    List<String> command, {
-    String? workingDirectory,
-    Map<String, String>? environment,
-    bool includeParentEnvironment = true,
-    bool runInShell = false,
-    Encoding stdoutEncoding = io.systemEncoding,
-    Encoding stderrEncoding = io.systemEncoding,
-  }) {
-    return io.Process.runSync(
-      command[0],
-      command.skip(1).toList(),
-      workingDirectory: workingDirectory,
-      environment: environment,
-      includeParentEnvironment: includeParentEnvironment,
-      runInShell: runInShell,
-      stdoutEncoding: stdoutEncoding,
-      stderrEncoding: stderrEncoding,
-    );
-  }
-}
 
 /// A [ProcessManager] that throws a [ToolExit] on certain errors.
 ///
@@ -662,21 +611,6 @@ class ErrorHandlingProcessManager extends ProcessManager {
 
   final ProcessManager _delegate;
   final Platform _platform;
-  static const _ProcessDelegate _processDelegate = _ProcessDelegate();
-  static bool _skipCommandLookup = false;
-
-  /// Bypass package:process command lookup for all functions in this block.
-  ///
-  /// This required that the fully resolved executable path is provided.
-  static Future<T> skipCommandLookup<T>(Future<T> Function() operation) async {
-    final bool previousValue = ErrorHandlingProcessManager._skipCommandLookup;
-    try {
-      ErrorHandlingProcessManager._skipCommandLookup = true;
-      return await operation();
-    } finally {
-      ErrorHandlingProcessManager._skipCommandLookup = previousValue;
-    }
-  }
 
   @override
   bool canRun(dynamic executable, {String? workingDirectory}) {
@@ -705,17 +639,6 @@ class ErrorHandlingProcessManager extends ProcessManager {
     Encoding stderrEncoding = io.systemEncoding,
   }) {
     return _run(() {
-      if (_skipCommandLookup && _delegate is LocalProcessManager) {
-       return _processDelegate.run(
-          command.cast<String>(),
-          workingDirectory: workingDirectory,
-          environment: environment,
-          includeParentEnvironment: includeParentEnvironment,
-          runInShell: runInShell,
-          stdoutEncoding: stdoutEncoding,
-          stderrEncoding: stderrEncoding,
-        );
-      }
       return _delegate.run(
         command,
         workingDirectory: workingDirectory,
@@ -738,15 +661,6 @@ class ErrorHandlingProcessManager extends ProcessManager {
     io.ProcessStartMode mode = io.ProcessStartMode.normal,
   }) {
     return _run(() {
-      if (_skipCommandLookup && _delegate is LocalProcessManager) {
-        return _processDelegate.start(
-          command.cast<String>(),
-          workingDirectory: workingDirectory,
-          environment: environment,
-          includeParentEnvironment: includeParentEnvironment,
-          runInShell: runInShell,
-        );
-      }
       return _delegate.start(
         command,
         workingDirectory: workingDirectory,
@@ -768,17 +682,6 @@ class ErrorHandlingProcessManager extends ProcessManager {
     Encoding stderrEncoding = io.systemEncoding,
   }) {
     return _runSync(() {
-      if (_skipCommandLookup && _delegate is LocalProcessManager) {
-        return _processDelegate.runSync(
-          command.cast<String>(),
-          workingDirectory: workingDirectory,
-          environment: environment,
-          includeParentEnvironment: includeParentEnvironment,
-          runInShell: runInShell,
-          stdoutEncoding: stdoutEncoding,
-          stderrEncoding: stderrEncoding,
-        );
-      }
       return _delegate.runSync(
         command,
         workingDirectory: workingDirectory,

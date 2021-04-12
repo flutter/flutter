@@ -213,8 +213,8 @@ abstract class TextSelectionControls {
         text: value.selection.textBefore(value.text)
             + value.selection.textAfter(value.text),
         selection: TextSelection.collapsed(
-          offset: value.selection.start
-        )
+          offset: value.selection.start,
+        ),
       ),
       SelectionChangedCause.toolBar,
     );
@@ -280,7 +280,7 @@ abstract class TextSelectionControls {
               + data.text!
               + value.selection.textAfter(value.text),
           selection: TextSelection.collapsed(
-              offset: value.selection.start + data.text!.length
+              offset: value.selection.start + data.text!.length,
           ),
         ),
         SelectionChangedCause.toolBar,
@@ -340,10 +340,12 @@ class TextSelectionOverlay {
        _handlesVisible = handlesVisible,
        _value = value {
     final OverlayState? overlay = Overlay.of(context, rootOverlay: true);
-    assert(overlay != null,
+    assert(
+      overlay != null,
       'No Overlay widget exists above $context.\n'
       'Usually the Navigator created by WidgetsApp provides the overlay. Perhaps your '
-      'app content was created above the Navigator with the WidgetsApp builder parameter.');
+      'app content was created above the Navigator with the WidgetsApp builder parameter.',
+    );
     _toolbarController = AnimationController(duration: fadeDuration, vsync: overlay!);
   }
 
@@ -584,7 +586,7 @@ class TextSelectionOverlay {
           selectionControls: selectionControls,
           position: position,
           dragStartBehavior: dragStartBehavior,
-        )
+        ),
       );
     }
     return ExcludeSemantics(

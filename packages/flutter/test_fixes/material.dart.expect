@@ -194,4 +194,68 @@ void main() {
   InputDecorationTheme(floatingLabelBehavior: FloatingLabelBehavior.never);
   InputDecorationTheme();
   inputDecorationTheme.floatingLabelBehavior;
+
+  // Changes made in https://github.com/flutter/flutter/pull/66482
+  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red));
+  ThemeData(textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue));
+  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colors.yellow));
+  ThemeData();
+  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red));
+  ThemeData(textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue));
+  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colors.yellow));
+  ThemeData(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionColor: Colors.red,),
+  );
+  ThemeData(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionHandleColor: Colors.yellow,),
+  );
+  ThemeData(
+    textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, selectionHandleColor: Colors.yellow,),
+  );
+  ThemeData(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionColor: Colors.red,),
+  );
+  ThemeData(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionHandleColor: Colors.yellow,),
+  );
+  ThemeData(
+    textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, selectionHandleColor: Colors.yellow,),
+  );
+  ThemeData(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionColor: Colors.red, selectionHandleColor: Colors.yellow,),
+  );
+  ThemeData(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionColor: Colors.red, selectionHandleColor: Colors.yellow,),
+  );
+  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red));
+  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue));
+  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colors.yellow));
+  ThemeData.raw();
+  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red));
+  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue));
+  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colors.yellow));
+  ThemeData.raw(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionColor: Colors.red,),
+  );
+  ThemeData.raw(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionHandleColor: Colors.yellow,),
+  );
+  ThemeData.raw(
+    textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, selectionHandleColor: Colors.yellow,),
+  );
+  ThemeData.raw(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionColor: Colors.red,),
+  );
+  ThemeData.raw(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionHandleColor: Colors.yellow,),
+  );
+  ThemeData.raw(
+    textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, selectionHandleColor: Colors.yellow,),
+  );
+  ThemeData.raw(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionColor: Colors.red, selectionHandleColor: Colors.yellow,),
+  );
+  ThemeData.raw(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionColor: Colors.red, selectionHandleColor: Colors.yellow,),
+  );
 }

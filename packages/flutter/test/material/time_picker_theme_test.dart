@@ -231,7 +231,7 @@ void main() {
   testWidgets('Time picker uses values from TimePickerThemeData', (WidgetTester tester) async {
     final TimePickerThemeData timePickerTheme = _timePickerTheme();
     final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme);
-    await tester.pumpWidget(_TimePickerLauncher(themeData: theme,));
+    await tester.pumpWidget(_TimePickerLauncher(themeData: theme));
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle(const Duration(seconds: 1));
 

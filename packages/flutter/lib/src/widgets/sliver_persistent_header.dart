@@ -173,7 +173,7 @@ class SliverPersistentHeader extends StatelessWidget {
       DiagnosticsProperty<SliverPersistentHeaderDelegate>(
         'delegate',
         delegate,
-      )
+      ),
     );
     final List<String> flags = <String>[
       if (pinned) 'pinned',
@@ -232,7 +232,7 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
         widget.delegate.build(
           this,
           shrinkOffset,
-          overlapsContent
+          overlapsContent,
         ),
         null,
       );
@@ -291,7 +291,7 @@ abstract class _SliverPersistentHeaderRenderObjectWidget extends RenderObjectWid
       DiagnosticsProperty<SliverPersistentHeaderDelegate>(
         'delegate',
         delegate,
-      )
+      ),
     );
   }
 }
@@ -329,7 +329,7 @@ class _SliverScrollingPersistentHeader extends _SliverPersistentHeaderRenderObje
   @override
   _RenderSliverPersistentHeaderForWidgetsMixin createRenderObject(BuildContext context) {
     return _RenderSliverScrollingPersistentHeaderForWidgets(
-      stretchConfiguration: delegate.stretchConfiguration
+      stretchConfiguration: delegate.stretchConfiguration,
     );
   }
 }

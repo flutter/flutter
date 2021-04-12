@@ -6,7 +6,6 @@ import 'dart:collection' show Queue;
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 import 'bottom_navigation_bar_theme.dart';
@@ -290,7 +289,7 @@ class BottomNavigationBar extends StatefulWidget {
        assert(iconSize != null && iconSize >= 0.0),
        assert(
          selectedItemColor == null || fixedColor == null,
-         'Either selectedItemColor or fixedColor can be specified, but not both'
+         'Either selectedItemColor or fixedColor can be specified, but not both',
        ),
        assert(selectedFontSize != null && selectedFontSize >= 0.0),
        assert(unselectedFontSize != null && unselectedFontSize >= 0.0),

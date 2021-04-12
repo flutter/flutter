@@ -434,12 +434,34 @@ void main() {
         restoreFileSystem();
       });
 
-      test('writes timeline to JSON file', () async {
+      test('writes timeline to JSON file without summary', () async {
         await summarize(<Map<String, String>>[<String, String>{'foo': 'bar'}])
-          .writeTimelineToFile('test', destinationDirectory: tempDir.path);
+          .writeTimelineToFile('test', destinationDirectory: tempDir.path, includeSummary: false);
         final String written =
             await fs.file(path.join(tempDir.path, 'test.timeline.json')).readAsString();
         expect(written, '{"traceEvents":[{"foo":"bar"}]}');
+      });
+
+      test('writes timeline to JSON file with summary', () async {
+        await summarize(<Map<String, dynamic>>[
+          <String, String>{'foo': 'bar'},
+          begin(1000), end(19000),
+          frameBegin(1000), frameEnd(18000),
+        ]).writeTimelineToFile(
+          'test',
+          destinationDirectory: tempDir.path,
+          includeSummary: true,
+        );
+        final String written =
+            await fs.file(path.join(tempDir.path, 'test.timeline.json')).readAsString();
+        expect(
+          written,
+          '{"traceEvents":[{"foo":"bar"},'
+          '{"name":"GPURasterizer::Draw","ph":"B","ts":1000},'
+          '{"name":"GPURasterizer::Draw","ph":"E","ts":19000},'
+          '{"name":"Frame","ph":"B","ts":1000},'
+          '{"name":"Frame","ph":"E","ts":18000}]}',
+        );
       });
 
       test('writes summary to JSON file', () async {
@@ -456,7 +478,7 @@ void main() {
           cpuUsage(5000, 20), cpuUsage(5010, 60),
           memoryUsage(6000, 20, 40), memoryUsage(6100, 30, 45),
           platformVsync(7000), vsyncCallback(7500),
-        ]).writeSummaryToFile('test', destinationDirectory: tempDir.path);
+        ]).writeTimelineToFile('test', destinationDirectory: tempDir.path);
         final String written =
             await fs.file(path.join(tempDir.path, 'test.timeline_summary.json')).readAsString();
         expect(json.decode(written), <String, dynamic>{

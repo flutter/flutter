@@ -576,21 +576,22 @@ class RenderCustomPaint extends RenderProxyBox {
             'The $painter custom painter called canvas.save() or canvas.saveLayer() at least '
             '${debugNewCanvasSaveCount - debugPreviousCanvasSaveCount} more '
             'time${debugNewCanvasSaveCount - debugPreviousCanvasSaveCount == 1 ? '' : 's' } '
-            'than it called canvas.restore().'
+            'than it called canvas.restore().',
           ),
           ErrorDescription('This leaves the canvas in an inconsistent state and will probably result in a broken display.'),
-          ErrorHint('You must pair each call to save()/saveLayer() with a later matching call to restore().')
+          ErrorHint('You must pair each call to save()/saveLayer() with a later matching call to restore().'),
         ]);
       }
       if (debugNewCanvasSaveCount < debugPreviousCanvasSaveCount) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('The $painter custom painter called canvas.restore() '
+          ErrorSummary(
+            'The $painter custom painter called canvas.restore() '
             '${debugPreviousCanvasSaveCount - debugNewCanvasSaveCount} more '
             'time${debugPreviousCanvasSaveCount - debugNewCanvasSaveCount == 1 ? '' : 's' } '
-            'than it called canvas.save() or canvas.saveLayer().'
+            'than it called canvas.save() or canvas.saveLayer().',
           ),
           ErrorDescription('This leaves the canvas in an inconsistent state and will result in a broken display.'),
-          ErrorHint('You should only call restore() if you first called save() or saveLayer().')
+          ErrorHint('You should only call restore() if you first called save() or saveLayer().'),
         ]);
       }
       return debugNewCanvasSaveCount == debugPreviousCanvasSaveCount;
@@ -649,8 +650,8 @@ class RenderCustomPaint extends RenderProxyBox {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary(
             '$runtimeType does not have a child widget but received a non-empty list of child SemanticsNode:\n'
-            '${children.join('\n')}'
-          )
+            '${children.join('\n')}',
+          ),
         ]);
       }
       return true;
@@ -872,6 +873,9 @@ class RenderCustomPaint extends RenderProxyBox {
     }
     if (properties.slider != null) {
       config.isSlider = properties.slider!;
+    }
+    if (properties.keyboardKey != null) {
+      config.isKeyboardKey = properties.keyboardKey!;
     }
     if (properties.readOnly != null) {
       config.isReadOnly = properties.readOnly!;

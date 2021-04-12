@@ -18,13 +18,12 @@ import 'package:flutter_tools/src/commands/build_linux.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:process/process.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
-import '../../src/testbed.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 const String _kTestFlutterRoot = '/flutter';
 
@@ -131,12 +130,26 @@ void main() {
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'linux', '--no-pub']
-    ), throwsToolExit());
+    ), throwsToolExit(message: '"build linux" only supported on Linux hosts.'));
   }, overrides: <Type, Generator>{
     Platform: () => notLinuxPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+  });
+
+  testUsingContext('Linux build fails when feature is disabled', () async {
+    final BuildCommand command = BuildCommand();
+    setUpMockProjectFilesForBuild();
+
+    expect(createTestCommandRunner(command).run(
+        const <String>['build', 'linux', '--no-pub']
+    ), throwsToolExit(message: '"build linux" is not currently supported. To enable, run "flutter config --enable-linux-desktop".'));
+  }, overrides: <Type, Generator>{
+    Platform: () => linuxPlatform,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });
 
   testUsingContext('Linux build invokes CMake and ninja, and writes temporary files', () async {

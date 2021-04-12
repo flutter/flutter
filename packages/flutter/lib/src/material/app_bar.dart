@@ -1264,115 +1264,107 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=freeform}
-///
-/// This sample shows a [SliverAppBar] and it's behaviors when using the [pinned], [snap] and [floating] parameters.
-///
-/// ```dart imports
-/// import 'package:flutter/material.dart';
-/// ```
+/// {@tool dartpad --template=stateful_widget_material}
+/// This sample shows a [SliverAppBar] and it's behavior when using the
+/// [pinned], [snap] and [floating] parameters.
 ///
 /// ```dart
-/// void main() => runApp(const MyApp());
+/// bool _pinned = true;
+/// bool _snap = false;
+/// bool _floating = false;
 ///
-/// class MyApp extends StatefulWidget {
-///   const MyApp({Key? key}) : super(key: key);
-///
-///   @override
-///   State<StatefulWidget> createState() => _MyAppState();
-/// }
-///
-/// class _MyAppState extends State<MyApp> {
-///   bool _pinned = true;
-///   bool _snap = false;
-///   bool _floating = false;
-///
-///   // SliverAppBar is declared in Scaffold.body, in slivers of a
-///   // CustomScrollView.
-///   @override
-///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       home: Scaffold(
-///         body: CustomScrollView(
-///           slivers: <Widget>[
-///             SliverAppBar(
-///               pinned: _pinned,
-///               snap: _snap,
-///               floating: _floating,
-///               expandedHeight: 160.0,
-///               flexibleSpace: const FlexibleSpaceBar(
-///                 title: Text('SliverAppBar'),
-///                 background: FlutterLogo(),
-///               ),
-///             ),
-///             const SliverToBoxAdapter(
-///               child: Center(
-///                 child: SizedBox(
-///                   height: 2000,
-///                   child: const Text('Scroll to see SliverAppBar in effect .'),
-///                 ),
-///               ),
-///             ),
-///           ],
+/// // [SliverAppBar]s are typically used in [CustomScrollView.slivers], which in
+/// // turn can be placed in a [Scaffold.body].
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: CustomScrollView(
+///       slivers: <Widget>[
+///         SliverAppBar(
+///           pinned: _pinned,
+///           snap: _snap,
+///           floating: _floating,
+///           expandedHeight: 160.0,
+///           flexibleSpace: const FlexibleSpaceBar(
+///             title: Text('SliverAppBar'),
+///             background: FlutterLogo(),
+///           ),
 ///         ),
-///         bottomNavigationBar: BottomAppBar(
-///           child: ButtonBar(
-///             alignment: MainAxisAlignment.spaceEvenly,
+///         const SliverToBoxAdapter(
+///           child: SizedBox(
+///             height: 20,
+///             child: Center(
+///               child: const Text('Scroll to see the SliverAppBar in effect.'),
+///             ),
+///           ),
+///         ),
+///         SliverList(
+///          delegate: SliverChildBuilderDelegate(
+///            (BuildContext context, int index) {
+///              return Container(
+///                color: index.isOdd ? Colors.white : Colors.black12,
+///                height: 100.0,
+///                child: Center(
+///                  child: Text('$index', textScaleFactor: 5),
+///                ),
+///              );
+///            },
+///            childCount: 20,
+///          ),
+///        ),
+///       ],
+///     ),
+///     bottomNavigationBar: BottomAppBar(
+///       child: ButtonBar(
+///         alignment: MainAxisAlignment.spaceEvenly,
+///         children: <Widget>[
+///           Row(
 ///             children: <Widget>[
-///               Row(
-///                 children: <Widget>[
-///                   const Text('pinned'),
-///                   Switch(
-///                     onChanged: (bool val) {
-///                       setState(() {
-///                         _pinned = val;
-///                       });
-///                     },
-///                     value: _pinned,
-///                   ),
-///                 ],
-///               ),
-///               Row(
-///                 children: <Widget>[
-///                   const Text('snap'),
-///                   Switch(
-///                     onChanged: (bool val) {
-///                       setState(() {
-///                         _snap = val;
-///                         //Snapping only applies when the app bar is floating.
-///                         _floating = _floating || val;
-///                       });
-///                     },
-///                     value: _snap,
-///                   ),
-///                 ],
-///               ),
-///               Row(
-///                 children: <Widget>[
-///                   const Text('floating'),
-///                   Switch(
-///                     onChanged: (bool val) {
-///                       setState(() {
-///                         _floating = val;
-///                         if (_snap == true) {
-///                           if (_floating != true) {
-///                             _snap = false;
-///                           }
-///                         }
-///                       });
-///                     },
-///                     value: _floating,
-///                   ),
-///                 ],
+///               const Text('pinned'),
+///               Switch(
+///                 onChanged: (bool val) {
+///                   setState(() {
+///                     _pinned = val;
+///                   });
+///                 },
+///                 value: _pinned,
 ///               ),
 ///             ],
 ///           ),
-///         ),
+///           Row(
+///             children: <Widget>[
+///               const Text('snap'),
+///               Switch(
+///                 onChanged: (bool val) {
+///                   setState(() {
+///                     _snap = val;
+///                     // Snapping only applies when the app bar is floating.
+///                     _floating = _floating || _snap;
+///                   });
+///                 },
+///                 value: _snap,
+///               ),
+///             ],
+///           ),
+///           Row(
+///             children: <Widget>[
+///               const Text('floating'),
+///               Switch(
+///                 onChanged: (bool val) {
+///                   setState(() {
+///                     _floating = val;
+///                     _snap = _snap && _floating;
+///                   });
+///                 },
+///                 value: _floating,
+///               ),
+///             ],
+///           ),
+///         ],
 ///       ),
-///     );
-///   }
+///     ),
+///   );
 /// }
-///
 /// ```
 /// {@end-tool}
 ///
