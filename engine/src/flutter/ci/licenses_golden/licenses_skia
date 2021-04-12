@@ -1,4 +1,4 @@
-Signature: c5549b25cddbabfaa3e387069eb6be55
+Signature: 9bf5b5d7a81c0d1a1e880755e4003ca9
 
 UNUSED LICENSES:
 
@@ -2820,6 +2820,7 @@ FILE: ../../../third_party/skia/src/gpu/GrClientMappedBufferManager.h
 FILE: ../../../third_party/skia/src/gpu/GrCopyRenderTask.cpp
 FILE: ../../../third_party/skia/src/gpu/GrCopyRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/GrImageInfo.h
+FILE: ../../../third_party/skia/src/gpu/GrPersistentCacheUtils.h
 FILE: ../../../third_party/skia/src/gpu/GrProgramInfo.cpp
 FILE: ../../../third_party/skia/src/gpu/GrProgramInfo.h
 FILE: ../../../third_party/skia/src/gpu/GrRenderTask.cpp
@@ -5060,7 +5061,6 @@ FILE: ../../../third_party/skia/src/core/SkMalloc.cpp
 FILE: ../../../third_party/skia/src/core/SkPixelRefPriv.h
 FILE: ../../../third_party/skia/src/core/SkTextBlobTrace.cpp
 FILE: ../../../third_party/skia/src/core/SkTextBlobTrace.h
-FILE: ../../../third_party/skia/src/gpu/GrPersistentCacheUtils.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathInnerTriangulateOp.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathInnerTriangulateOp.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStencilPathShader.cpp
@@ -5123,6 +5123,7 @@ FILE: ../../../third_party/skia/include/gpu/gl/egl/GrGLMakeEGLInterface.h
 FILE: ../../../third_party/skia/include/gpu/gl/glx/GrGLMakeGLXInterface.h
 FILE: ../../../third_party/skia/src/core/SkYUVAInfoLocation.h
 FILE: ../../../third_party/skia/src/gpu/GrInnerFanTriangulator.h
+FILE: ../../../third_party/skia/src/gpu/GrPersistentCacheUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/GrWritePixelsRenderTask.cpp
 FILE: ../../../third_party/skia/src/gpu/GrWritePixelsRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/GrYUVATextureProxies.cpp
@@ -5429,6 +5430,7 @@ ORIGIN: ../../../third_party/skia/experimental/ddlbench/ddlbench.cpp + ../../../
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/experimental/ddlbench/ddlbench.cpp
 FILE: ../../../third_party/skia/gm/dsl_processor_test.cpp
+FILE: ../../../third_party/skia/include/private/SkSLProgramKind.h
 FILE: ../../../third_party/skia/include/sksl/DSLBlock.h
 FILE: ../../../third_party/skia/include/sksl/DSLCase.h
 FILE: ../../../third_party/skia/include/sksl/DSLErrorHandling.h
