@@ -1827,12 +1827,16 @@ class BackdropFilterLayer extends ContainerLayer {
   /// background, the results would look better with a [BlendMode.src] mode. Note that
   /// the DOM-html renderer on web does not support this parameter so using any mode
   /// but the default may produce different results.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
   BlendMode? get blendMode => _blendMode;
   BlendMode? _blendMode;
   set blendMode(BlendMode? value) {
-    if (value != _blendMode)
+    if (value != _blendMode) {
       _blendMode = value;
-    markNeedsAddToScene();
+      markNeedsAddToScene();
+    }
   }
 
   @override
