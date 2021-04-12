@@ -476,7 +476,7 @@ class FlexibleSpaceBarSettings extends InheritedWidget {
   /// i.e.  to enable apps to specify different colors when content
   /// has been scrolled up and behind the app bar.
   ///
-  /// Null if the called hasn't determined if the FlexibleSpaceBar
+  /// Null if the caller hasn't determined if the FlexibleSpaceBar
   /// overlaps the primary scrollable's contents.
   final bool? isScrolledUnder;
 

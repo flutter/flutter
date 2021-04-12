@@ -37,6 +37,51 @@ class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
   final ScrollNotificationCallback listener;
 }
 
+/// Notifies its listeners when a descendant scrolls.
+///
+/// To add a listener to a [ScrollNotificationObserver] ancestor:
+/// ```dart
+/// void listener(ScrollNotification notification) {
+///   // Do something, maybe setState()
+/// }
+/// ScrollNotificationObserver.of(context).addListener(listener)
+/// ```
+///
+/// To remove the listener from a [ScrollNotificationObserver] ancestor:
+/// ```dart
+/// ScrollNotificationObserver.of(context).removeListener(listener);
+///```
+///
+/// Stateful widgets that share an ancestor [ScrollNotificationObserver] typically
+/// add a listener in [State.didChangeDependencies] (removing the old one
+/// if necessary) and remove the listener in their [State.dispose] method.
+///
+/// This widget is similar to [NotificationListener]. It supports
+/// a listener list instead of just a single listener and its listeners
+/// run unconditionally, they do not require a gating boolean return value.
+class ScrollNotificationObserver extends StatefulWidget {
+  /// Create a [ScrollNotificationObserver].
+  ///
+  /// The [child] parameter must not be null.
+  const ScrollNotificationObserver({
+    Key? key,
+    required this.child,
+  }) : assert(child != null), super(key: key);
+
+  /// The subtree below this widget.
+  final Widget child;
+
+  /// The closest instance of this class that encloses the given context.
+  ///
+  /// If there is no enclosing [ScrollNotificationObserver] widget, then null is returned.
+  static ScrollNotificationObserverState? of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<_ScrollNotificationObserverScope>()?._scrollNotificationObserverState;
+  }
+
+  @override
+  ScrollNotificationObserverState createState() => ScrollNotificationObserverState();
+}
+
 /// The listener list state for a [ScrollNotificationObserver] returned by
 /// [ScrollNotificationObserver.of].
 ///
@@ -126,49 +171,4 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
     _listeners = null;
     super.dispose();
   }
-}
-
-/// Notifies its listeners when a descendant scrolls.
-///
-/// To add a listener to a [ScrollNotificationObserver] ancestor:
-/// ```dart
-/// void listener(ScrollNotification notification) {
-///   // Do something, maybe setState()
-/// }
-/// ScrollNotificationObserver.of(context).addListener(listener)
-/// ```
-///
-/// To remove the listener from a [ScrollNotificationObserver] ancestor:
-/// ```dart
-/// ScrollNotificationObserver.of(context).removeListener(listener);
-///```
-///
-/// Stateful widgets that share an ancestor [ScrollNotificationObserver] typically
-/// add a listener in [State.didChangeDependencies] (removing the old one
-/// if necessary) and remove the listener in their [State.dispose] method.
-///
-/// This widget is similar to [NotificationListener]. It supports
-/// a listener list instead of just a single listener and its listeners
-/// run unconditionally, they do not require a gating boolean return value.
-class ScrollNotificationObserver extends StatefulWidget {
-  /// Create a [ScrollNotificationObserver].
-  ///
-  /// The [child] parameter must not be null.
-  const ScrollNotificationObserver({
-    Key? key,
-    required this.child,
-  }) : assert(child != null), super(key: key);
-
-  /// The subtree below this widget.
-  final Widget child;
-
-  /// The closest instance of this class that encloses the given context.
-  ///
-  /// If there is no enclosing [ScrollNotificationObserver] widget, then null is returned.
-  static ScrollNotificationObserverState? of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<_ScrollNotificationObserverScope>()?._scrollNotificationObserverState;
-  }
-
-  @override
-  ScrollNotificationObserverState createState() => ScrollNotificationObserverState();
 }
