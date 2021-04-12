@@ -833,7 +833,7 @@ abstract class FlutterCommand extends Command<void> {
             'ABI must be specified at a time with the "--target-platform" flag. When building for iOS, '
             'only the symbols from the arm64 architecture are used to analyze code size.\n'
             'By default, the intermediate output files will be placed in a transient directory in the '
-            'build directory. This can be overriden with the --${FlutterOptions.kCodeSizeDirectory} option.\n'
+            'build directory. This can be overriden with the "--${FlutterOptions.kCodeSizeDirectory}" option.\n'
             'This flag cannot be combined with "--${FlutterOptions.kSplitDebugInfoOption}".'
     );
 
