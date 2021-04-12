@@ -15,6 +15,7 @@ import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
+import 'base/template.dart';
 import 'base/version.dart';
 import 'cache.dart';
 import 'convert.dart';
@@ -25,11 +26,16 @@ import 'globals.dart' as globals;
 import 'platform_plugins.dart';
 import 'project.dart';
 
-void _renderTemplateToFile(String template, dynamic context, String filePath, {FileSystem fileSystem}){
-  final String renderedTemplate = globals.templateRenderer
-    .renderString(template, context, htmlEscapeValues: false);
+void _renderTemplateToFile(
+  String template,
+  dynamic context,
+  File file,
+  TemplateRenderer templateRenderer, {
+  FileSystem fileSystem,
+}) {
   final FileSystem fs = fileSystem ?? globals.fs;
-  final File file = fs.file(filePath);
+  final String renderedTemplate = templateRenderer
+    .renderString(template, context, htmlEscapeValues: false);
   file.createSync(recursive: true);
   file.writeAsStringSync(renderedTemplate);
 }
@@ -813,6 +819,7 @@ package io.flutter.plugins;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
+import io.flutter.Log;
 
 import io.flutter.embedding.engine.FlutterEngine;
 {{#needsShim}}
@@ -826,17 +833,26 @@ import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistry;
  */
 @Keep
 public final class GeneratedPluginRegistrant {
+  private static final String TAG = "GeneratedPluginRegistrant";
   public static void registerWith(@NonNull FlutterEngine flutterEngine) {
 {{#needsShim}}
     ShimPluginRegistry shimPluginRegistry = new ShimPluginRegistry(flutterEngine);
 {{/needsShim}}
 {{#plugins}}
   {{#supportsEmbeddingV2}}
-    flutterEngine.getPlugins().add(new {{package}}.{{class}}());
+    try {
+      flutterEngine.getPlugins().add(new {{package}}.{{class}}());
+    } catch(Exception e) {
+      Log.e(TAG, "Error registering plugin {{name}}, {{package}}.{{class}}", e);
+    }
   {{/supportsEmbeddingV2}}
   {{^supportsEmbeddingV2}}
     {{#supportsEmbeddingV1}}
+    try {
       {{package}}.{{class}}.registerWith(shimPluginRegistry.registrarFor("{{package}}.{{class}}"));
+    } catch(Exception e) {
+      Log.e(TAG, "Error registering plugin {{name}}, {{package}}.{{class}}", e);
+    }
     {{/supportsEmbeddingV1}}
   {{/supportsEmbeddingV2}}
 {{/plugins}}
@@ -926,7 +942,8 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
   _renderTemplateToFile(
     templateContent,
     templateContext,
-    registryPath,
+    globals.fs.file(registryPath),
+    globals.templateRenderer,
   );
 }
 
@@ -991,6 +1008,7 @@ Future<void> generateMainDartWithPluginRegistrant(
       _dartPluginRegistryForDesktopTemplate,
       templateContext,
       newMainDart.path,
+      globals.templateRenderer,
       fileSystem: rootProject.directory.fileSystem,
     );
   } on FileSystemException catch (error) {
@@ -1269,22 +1287,25 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
     'plugins': iosPlugins,
   };
   if (project.isModule) {
-    final String registryDirectory = project.ios.pluginRegistrantHost.path;
+    final Directory registryDirectory = project.ios.pluginRegistrantHost;
     _renderTemplateToFile(
       _pluginRegistrantPodspecTemplate,
       context,
-      globals.fs.path.join(registryDirectory, 'FlutterPluginRegistrant.podspec'),
+      registryDirectory.childFile('FlutterPluginRegistrant.podspec'),
+      globals.templateRenderer,
     );
   }
   _renderTemplateToFile(
     _objcPluginRegistryHeaderTemplate,
     context,
-    project.ios.pluginRegistrantHeader.path,
+    project.ios.pluginRegistrantHeader,
+    globals.templateRenderer,
   );
   _renderTemplateToFile(
     _objcPluginRegistryImplementationTemplate,
     context,
-    project.ios.pluginRegistrantImplementation.path,
+    project.ios.pluginRegistrantImplementation,
+    globals.templateRenderer,
   );
 }
 
@@ -1295,10 +1316,11 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
 /// designed to be included by the main CMakeLists.txt, so it relative to
 /// that file, rather than the generated file.
 String _cmakeRelativePluginSymlinkDirectoryPath(CmakeBasedProject project) {
+  final FileSystem fileSystem = project.pluginSymlinkDirectory.fileSystem;
   final String makefileDirPath = project.cmakeFile.parent.absolute.path;
   // CMake always uses posix-style path separators, regardless of the platform.
   final path.Context cmakePathContext = path.Context(style: path.Style.posix);
-  final List<String> relativePathComponents = globals.fs.path.split(globals.fs.path.relative(
+  final List<String> relativePathComponents = fileSystem.path.split(fileSystem.path.relative(
     project.pluginSymlinkDirectory.absolute.path,
     from: makefileDirPath,
   ));
@@ -1314,28 +1336,30 @@ Future<void> _writeLinuxPluginFiles(FlutterProject project, List<Plugin> plugins
     'pluginsDir': _cmakeRelativePluginSymlinkDirectoryPath(project.linux),
   };
   await _writeLinuxPluginRegistrant(project.linux.managedDirectory, context);
-  await _writePluginCmakefile(project.linux.generatedPluginCmakeFile, context);
+  await _writePluginCmakefile(project.linux.generatedPluginCmakeFile, context, globals.templateRenderer);
 }
 
 Future<void> _writeLinuxPluginRegistrant(Directory destination, Map<String, dynamic> templateContext) async {
-  final String registryDirectory = destination.path;
   _renderTemplateToFile(
     _linuxPluginRegistryHeaderTemplate,
     templateContext,
-    globals.fs.path.join(registryDirectory, 'generated_plugin_registrant.h'),
+    destination.childFile('generated_plugin_registrant.h'),
+    globals.templateRenderer,
   );
   _renderTemplateToFile(
     _linuxPluginRegistryImplementationTemplate,
     templateContext,
-    globals.fs.path.join(registryDirectory, 'generated_plugin_registrant.cc'),
+    destination.childFile('generated_plugin_registrant.cc'),
+    globals.templateRenderer,
   );
 }
 
-Future<void> _writePluginCmakefile(File destinationFile, Map<String, dynamic> templateContext) async {
+Future<void> _writePluginCmakefile(File destinationFile, Map<String, dynamic> templateContext, TemplateRenderer templateRenderer) async {
   _renderTemplateToFile(
     _pluginCmakefileTemplate,
     templateContext,
-    destinationFile.path,
+    destinationFile,
+    templateRenderer,
   );
 }
 
@@ -1347,11 +1371,11 @@ Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> pl
     'framework': 'FlutterMacOS',
     'plugins': macosPlugins,
   };
-  final String registryDirectory = project.macos.managedDirectory.path;
   _renderTemplateToFile(
     _swiftPluginRegistryTemplate,
     context,
-    globals.fs.path.join(registryDirectory, 'GeneratedPluginRegistrant.swift'),
+    project.macos.managedDirectory.childFile('GeneratedPluginRegistrant.swift'),
+    globals.templateRenderer,
   );
 }
 
@@ -1371,29 +1395,46 @@ List<Plugin> _filterNativePlugins(List<Plugin> plugins, String platformKey) {
   }).toList();
 }
 
-Future<void> _writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugins) async {
-  final List<Plugin>nativePlugins = _filterNativePlugins(plugins, WindowsPlugin.kConfigKey);
+@visibleForTesting
+Future<void> writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugins, TemplateRenderer templateRenderer) async {
+  final List<Plugin> nativePlugins = _filterNativePlugins(plugins, WindowsPlugin.kConfigKey);
   final List<Map<String, dynamic>> windowsPlugins = _extractPlatformMaps(nativePlugins, WindowsPlugin.kConfigKey);
   final Map<String, dynamic> context = <String, dynamic>{
     'os': 'windows',
     'plugins': windowsPlugins,
     'pluginsDir': _cmakeRelativePluginSymlinkDirectoryPath(project.windows),
   };
-  await _writeCppPluginRegistrant(project.windows.managedDirectory, context);
-  await _writePluginCmakefile(project.windows.generatedPluginCmakeFile, context);
+  await _writeCppPluginRegistrant(project.windows.managedDirectory, context, templateRenderer);
+  await _writePluginCmakefile(project.windows.generatedPluginCmakeFile, context, templateRenderer);
 }
 
-Future<void> _writeCppPluginRegistrant(Directory destination, Map<String, dynamic> templateContext) async {
-  final String registryDirectory = destination.path;
+/// The tooling currently treats UWP and win32 as identical for the
+/// purposes of tooling support and initial UWP bootstrap.
+@visibleForTesting
+Future<void> writeWindowsUwpPluginFiles(FlutterProject project, List<Plugin> plugins, TemplateRenderer templateRenderer) async {
+  final List<Plugin> nativePlugins = _filterNativePlugins(plugins, WindowsPlugin.kConfigKey);
+  final List<Map<String, dynamic>> windowsPlugins = _extractPlatformMaps(nativePlugins, WindowsPlugin.kConfigKey);
+  final Map<String, dynamic> context = <String, dynamic>{
+    'os': 'windows',
+    'plugins': windowsPlugins,
+    'pluginsDir': _cmakeRelativePluginSymlinkDirectoryPath(project.windowsUwp),
+  };
+  await _writeCppPluginRegistrant(project.windowsUwp.managedDirectory, context, templateRenderer);
+  await _writePluginCmakefile(project.windowsUwp.generatedPluginCmakeFile, context, templateRenderer);
+}
+
+Future<void> _writeCppPluginRegistrant(Directory destination, Map<String, dynamic> templateContext, TemplateRenderer templateRenderer) async {
   _renderTemplateToFile(
     _cppPluginRegistryHeaderTemplate,
     templateContext,
-    globals.fs.path.join(registryDirectory, 'generated_plugin_registrant.h'),
+    destination.childFile('generated_plugin_registrant.h'),
+    templateRenderer,
   );
   _renderTemplateToFile(
     _cppPluginRegistryImplementationTemplate,
     templateContext,
-    globals.fs.path.join(registryDirectory, 'generated_plugin_registrant.cc'),
+    destination.childFile('generated_plugin_registrant.cc'),
+    templateRenderer,
   );
 }
 
@@ -1402,16 +1443,15 @@ Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plug
   final Map<String, dynamic> context = <String, dynamic>{
     'plugins': webPlugins,
   };
-  final String registryDirectory = project.web.libDirectory.path;
-  final String filePath = globals.fs.path.join(registryDirectory, 'generated_plugin_registrant.dart');
+  final File pluginFile = project.web.libDirectory.childFile('generated_plugin_registrant.dart');
   if (webPlugins.isEmpty) {
-    final File file = globals.fs.file(filePath);
-    return ErrorHandlingFileSystem.deleteIfExists(file);
+    return ErrorHandlingFileSystem.deleteIfExists(pluginFile);
   } else {
     _renderTemplateToFile(
       _dartPluginRegistryForWebTemplate,
       context,
-      filePath,
+      pluginFile,
+      globals.templateRenderer,
     );
   }
 }
@@ -1444,6 +1484,13 @@ void createPluginSymlinks(FlutterProject project, {bool force = false}) {
     _createPlatformPluginSymlinks(
       project.linux.pluginSymlinkDirectory,
       platformPlugins[project.linux.pluginConfigKey] as List<dynamic>,
+      force: force,
+    );
+  }
+  if (featureFlags.isWindowsUwpEnabled && project.windowsUwp.existsSync()) {
+    _createPlatformPluginSymlinks(
+      project.windowsUwp.pluginSymlinkDirectory,
+      <dynamic>[],
       force: force,
     );
   }
@@ -1539,6 +1586,7 @@ Future<void> injectPlugins(
   bool linuxPlatform = false,
   bool macOSPlatform = false,
   bool windowsPlatform = false,
+  bool winUwpPlatform = false,
   bool webPlatform = false,
 }) async {
   final List<Plugin> plugins = await findPlugins(project);
@@ -1557,7 +1605,10 @@ Future<void> injectPlugins(
     await _writeMacOSPluginRegistrant(project, plugins);
   }
   if (windowsPlatform) {
-    await _writeWindowsPluginFiles(project, plugins);
+    await writeWindowsPluginFiles(project, plugins, globals.templateRenderer);
+  }
+  if (winUwpPlatform) {
+    await writeWindowsUwpPluginFiles(project, plugins, globals.templateRenderer);
   }
   if (!project.isModule) {
     final List<XcodeBasedProject> darwinProjects = <XcodeBasedProject>[

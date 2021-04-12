@@ -61,8 +61,9 @@ or
     else
       'flutter'
   ]);
-  final String bundlePlatform = targetPlatform == 'windows-x64' ? 'windows' : targetPlatform;
-  final String target = '${buildMode}_bundle_${bundlePlatform}_assets';
+  final bool uwp = targetPlatform.contains('uwp');
+  final String bundlePlatform = targetPlatform.startsWith('windows') ? 'windows' : targetPlatform;
+  final String target = '${buildMode}_bundle_${bundlePlatform}_assets${uwp ? '_uwp' : ''}';
   final Process assembleProcess = await Process.start(
     flutterExecutable,
     <String>[

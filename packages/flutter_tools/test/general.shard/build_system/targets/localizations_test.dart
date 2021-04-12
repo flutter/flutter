@@ -14,7 +14,7 @@ import 'package:flutter_tools/src/localizations/localizations_utils.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
+import '../../../src/fake_process_manager.dart';
 
 void main() {
   // Verifies that values are correctly passed through the localizations
@@ -115,11 +115,10 @@ flutter:
         projectDir: fileSystem.currentDirectory,
         dependenciesDir: fileSystem.currentDirectory,
       ),
-      throwsA(isA<Exception>()),
-    );
-    expect(
-      logger.errorText,
-      contains('Attempted to generate localizations code without having the flutter: generate flag turned on.'),
+      throwsToolExit(
+        message: 'Attempted to generate localizations code without having the '
+          'flutter: generate flag turned on.',
+      ),
     );
   });
 

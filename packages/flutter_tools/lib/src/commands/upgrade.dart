@@ -13,7 +13,7 @@ import '../base/process.dart';
 import '../base/time.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../version.dart';
 

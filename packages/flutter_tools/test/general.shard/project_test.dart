@@ -24,7 +24,6 @@ import 'package:mockito/mockito.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fakes.dart';
-import '../src/testbed.dart';
 
 void main() {
   // TODO(jonahwilliams): remove once FlutterProject is fully refactored.
@@ -825,6 +824,7 @@ void _testInMemory(String description, Future<void> Function() testMethod) {
   transfer(Cache(
     fileSystem: globals.fs,
     logger: logger,
+    artifacts: <ArtifactSet>[],
     osUtils: OperatingSystemUtils(
       fileSystem: globals.fs,
       logger: logger,
@@ -869,6 +869,7 @@ void _testInMemory(String description, Future<void> Function() testMethod) {
         fileSystem: testFileSystem,
         osUtils: globals.os,
         platform: globals.platform,
+        artifacts: <ArtifactSet>[],
       ),
       FlutterProjectFactory: () => FlutterProjectFactory(
         fileSystem: testFileSystem,

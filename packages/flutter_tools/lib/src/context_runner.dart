@@ -39,6 +39,7 @@ import 'doctor.dart';
 import 'emulator.dart';
 import 'features.dart';
 import 'flutter_application_package.dart';
+import 'flutter_cache.dart';
 import 'flutter_device_manager.dart';
 import 'flutter_features.dart';
 import 'fuchsia/fuchsia_device.dart' show FuchsiaDeviceTools;
@@ -55,6 +56,7 @@ import 'macos/macos_workflow.dart';
 import 'macos/xcode.dart';
 import 'mdns_discovery.dart';
 import 'persistent_tool_state.dart';
+import 'reporting/crash_reporting.dart';
 import 'reporting/first_run.dart';
 import 'reporting/reporting.dart';
 import 'resident_runner.dart';
@@ -145,7 +147,7 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
       ),
-      Cache: () => Cache(
+      Cache: () => FlutterCache(
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,

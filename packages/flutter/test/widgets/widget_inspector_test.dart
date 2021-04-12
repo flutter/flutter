@@ -12,7 +12,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'widget_inspector_test_utils.dart';
@@ -233,6 +232,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
   static void runTests() {
     final TestWidgetInspectorService service = TestWidgetInspectorService();
     WidgetInspectorService.instance = service;
+
+    tearDown(() {
+      service.resetAllState();
+    });
 
     testWidgets('WidgetInspector smoke test', (WidgetTester tester) async {
       // This is a smoke test to verify that adding the inspector doesn't crash.
@@ -760,6 +763,61 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(service.selection.currentElement, equals(elementA));
     });
 
+    testWidgets('WidgetInspectorService defunct selection regression test', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: const <Widget>[
+              Text('a', textDirection: TextDirection.ltr),
+            ],
+          ),
+        ),
+      );
+      final Element elementA = find.text('a').evaluate().first;
+
+      service.setSelection(elementA);
+      expect(service.selection.currentElement, equals(elementA));
+      expect(service.selection.current, equals(elementA.renderObject));
+
+      await tester.pumpWidget(
+        const SizedBox(
+          child: Text('b', textDirection: TextDirection.ltr),
+        ),
+      );
+      // Selection is now empty as the element is defunct.
+      expect(service.selection.currentElement, equals(null));
+      expect(service.selection.current, equals(null));
+
+      // Verify that getting the debug creation location of the defunct element
+      // does not crash.
+      expect(debugIsLocalCreationLocation(elementA), isFalse);
+
+      // Verify that generating json for a defunct element does not crash.
+      expect(
+        elementA.toDiagnosticsNode().toJsonMap(
+          InspectorSerializationDelegate(
+            service: service,
+            summaryTree: false,
+            includeProperties: true,
+            addAdditionalPropertiesCallback: null,
+          ),
+        ),
+        isNotNull,
+      );
+
+      final Element elementB = find.text('b').evaluate().first;
+      service.setSelection(elementB);
+      expect(service.selection.currentElement, equals(elementB));
+      expect(service.selection.current, equals(elementB.renderObject));
+
+      // Set selection back to a defunct element.
+      service.setSelection(elementA);
+
+      expect(service.selection.currentElement, equals(null));
+      expect(service.selection.current, equals(null));
+    });
+
     testWidgets('WidgetInspectorService getParentChain', (WidgetTester tester) async {
       const String group = 'test-group';
 
@@ -935,6 +993,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ),
       );
       final Element elementA = find.text('a').evaluate().first;
+      service.setSelection(elementA, 'my-group');
       late String pubRootTest;
       if (widgetTracked) {
         final Map<String, Object?> jsonObject = json.decode(
@@ -1048,6 +1107,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       activeDevToolsServerAddress = 'http://127.0.0.1:9100';
       connectedVmServiceUri = 'http://127.0.0.1:55269/798ay5al_FM=/';
 
+      setupDefaultPubRootDirectory(service);
+
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -1080,6 +1141,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     testWidgets('test transformDebugCreator will not add DevToolsDeepLinkProperty for non-overflow errors', (WidgetTester tester) async {
       activeDevToolsServerAddress = 'http://127.0.0.1:9100';
       connectedVmServiceUri = 'http://127.0.0.1:55269/798ay5al_FM=/';
+      setupDefaultPubRootDirectory(service);
 
       await tester.pumpWidget(
         Directionality(
@@ -1111,6 +1173,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     testWidgets('test transformDebugCreator will not add DevToolsDeepLinkProperty if devtoolsServerAddress is unavailable', (WidgetTester tester) async {
       activeDevToolsServerAddress = null;
       connectedVmServiceUri = 'http://127.0.0.1:55269/798ay5al_FM=/';
+      setupDefaultPubRootDirectory(service);
 
       await tester.pumpWidget(
         Directionality(
@@ -1937,7 +2000,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       _CreationLocation location = knownLocations[id]!;
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(54));
+      expect(location.line, equals(53));
       expect(location.column, equals(9));
       expect(count, equals(1));
 
@@ -1946,7 +2009,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(92));
+      expect(location.line, equals(91));
       expect(location.column, equals(12));
       expect(count, equals(1));
 
@@ -1971,7 +2034,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(54));
+      expect(location.line, equals(53));
       expect(location.column, equals(9));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
 
@@ -1980,7 +2043,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(92));
+      expect(location.line, equals(91));
       expect(location.column, equals(12));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
 
@@ -2783,6 +2846,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           ),
         ),
       );
+      service.setSelection(find.text('Hello, World!').evaluate().first, 'my-group');
 
       // Figure out the pubRootDirectory
       final Map<String, Object?> jsonObject = (await service.testExtension(
@@ -2856,10 +2920,13 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               final Map<String, Object> additionalJson = <String, Object>{};
               final Object? value = node.value;
               if (value is Element) {
-                additionalJson['renderObject'] =
-                  value.renderObject!.toDiagnosticsNode().toJsonMap(
-                    delegate.copyWith(subtreeDepth: 0),
-                  );
+                final RenderObject? renderObject = value.renderObject;
+                if (renderObject != null) {
+                  additionalJson['renderObject'] =
+                      renderObject.toDiagnosticsNode().toJsonMap(
+                        delegate.copyWith(subtreeDepth: 0),
+                      );
+                }
               }
               additionalJson['callbackExecuted'] = true;
               return additionalJson;
@@ -2893,6 +2960,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     });
 
     testWidgets('debugIsLocalCreationLocation test', (WidgetTester tester) async {
+      setupDefaultPubRootDirectory(service);
 
       final GlobalKey key = GlobalKey();
 
@@ -2953,6 +3021,23 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         }),
       );
     });
+  }
+
+  static void setupDefaultPubRootDirectory(TestWidgetInspectorService service) {
+    final Map<String, Object?> jsonObject = const SizedBox().toDiagnosticsNode().toJsonMap(InspectorSerializationDelegate(service: service));
+    final Map<String, Object?> creationLocation = jsonObject['creationLocation']! as Map<String, Object?>;
+    expect(creationLocation, isNotNull);
+    final String file = creationLocation['file']! as String;
+    expect(file, endsWith('widget_inspector_test.dart'));
+    final List<String> segments = Uri
+        .parse(file)
+        .pathSegments;
+    final String pubRootTest = '/' +
+        segments.take(segments.length - 2).join('/');
+
+    // Strip a couple subdirectories away to generate a plausible pub root
+    // directory.
+    service.setPubRootDirectories(<String>[pubRootTest]);
   }
 }
 
