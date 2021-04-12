@@ -240,6 +240,18 @@ FLUTTER_ASSERT_ARC
   XCTAssert([[passwordView.textField description] containsString:@"TextField"]);
 }
 
+- (void)testInputViewCrash {
+  FlutterTextInputView* activeView = nil;
+  @autoreleasepool {
+    FlutterTextInputPlugin* inputPlugin = [FlutterTextInputPlugin new];
+    activeView = inputPlugin.activeView;
+    FlutterEngine* flutterEngine = [[FlutterEngine alloc] init];
+    activeView.textInputDelegate = (id<FlutterTextInputDelegate>)flutterEngine;
+  }
+  XCTAssert(!activeView.textInputDelegate);
+  [activeView updateEditingState];
+}
+
 - (void)ensureOnlyActiveViewCanBecomeFirstResponder {
   for (FlutterTextInputView* inputView in self.installedInputViews) {
     XCTAssertEqual(inputView.canBecomeFirstResponder, inputView == textInputPlugin.activeView);
