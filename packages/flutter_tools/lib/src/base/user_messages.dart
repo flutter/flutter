@@ -5,7 +5,7 @@
 import 'context.dart';
 import 'platform.dart';
 
-UserMessages get userMessages => context.get<UserMessages>();
+UserMessages get userMessages => context.get<UserMessages>()!;
 
 /// Class containing message strings that can be produced by Flutter tools.
 class UserMessages {
@@ -14,7 +14,7 @@ class UserMessages {
       'Please report a bug at https://github.com/flutter/flutter/issues.';
 
   // Messages used in FlutterValidator
-  String flutterStatusInfo(String channel, String version, String os, String locale) =>
+  String flutterStatusInfo(String? channel, String? version, String os, String locale) =>
       'Channel ${channel ?? 'unknown'}, ${version ?? 'Unknown'}, on $os, locale $locale';
   String flutterVersion(String version, String flutterRoot) =>
       'Flutter version $version at $flutterRoot';
@@ -230,10 +230,6 @@ class UserMessages {
   String pkgConfigTooOld(String minimumVersion) => 'pkg-config $minimumVersion or later is required.';
   String get gtkLibrariesMissing => 'GTK 3.0 development libraries are required for Linux development.\n'
       'They are likely available from your distribution (e.g.: apt install libgtk-3-dev)';
-  String get blkidLibraryMissing => 'The blkid development library is required for Linux development.\n'
-      'It is likely available from your distribution (e.g.: apt install libblkid-dev)';
-  String get lzmaLibraryMissing => 'The lzma development library is required for Linux development.\n'
-      'It is likely available from your distribution (e.g.: apt install liblzma-dev)';
 
   // Messages used in FlutterCommand
   String flutterElapsedTime(String name, String elapsedTime) => '"flutter $name" took $elapsedTime.';

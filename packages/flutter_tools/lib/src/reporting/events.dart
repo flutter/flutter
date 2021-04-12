@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 part of reporting;
 
 /// A generic usage even that does not involve custom dimensions.
@@ -122,7 +124,7 @@ class DoctorResultEvent extends UsageEvent {
     }
     final GroupedValidator group = validator as GroupedValidator;
     // The validator crashed.
-    if (group.subResults == null) {
+    if (group.subResults.isEmpty) {
       flutterUsage.sendEvent(category, parameter, label: label);
       return;
     }
@@ -207,7 +209,7 @@ class CommandResultEvent extends UsageEvent {
     // so that we can get the command result even if trying to grab maxRss
     // throws an exception.
     try {
-      final int maxRss = processInfo.maxRss;
+      final int maxRss = globals.processInfo.maxRss;
       flutterUsage.sendEvent(
         'tool-command-max-rss',
         category,

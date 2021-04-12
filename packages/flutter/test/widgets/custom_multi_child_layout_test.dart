@@ -124,8 +124,8 @@ class DuplicateLayoutDelegate extends MultiChildLayoutDelegate {
 class NonExistentPositionDelegate extends MultiChildLayoutDelegate {
   @override
   void performLayout(Size size) {
-    positionChild(0, const Offset(0, 0));
-    positionChild(1, const Offset(0, 0));
+    positionChild(0, Offset.zero);
+    positionChild(1, Offset.zero);
   }
 
   @override
@@ -303,7 +303,7 @@ void main() {
     }
 
     testWidgets('layoutChild on non existent child', (WidgetTester tester) async {
-      expectFlutterErrorMessage(
+      await expectFlutterErrorMessage(
         tester: tester,
         delegate: ZeroAndOneIdLayoutDelegate(),
         message:
@@ -315,7 +315,7 @@ void main() {
     });
 
     testWidgets('layoutChild more than once', (WidgetTester tester) async {
-      expectFlutterErrorMessage(
+      await expectFlutterErrorMessage(
           tester: tester,
           delegate: DuplicateLayoutDelegate(),
           message:
@@ -327,7 +327,7 @@ void main() {
     });
 
     testWidgets('layoutChild on invalid size constraint', (WidgetTester tester) async {
-      expectFlutterErrorMessage(
+      await expectFlutterErrorMessage(
         tester: tester,
         delegate: InvalidConstraintsChildLayoutDelegate(),
         message:
@@ -346,7 +346,7 @@ void main() {
     });
 
     testWidgets('positionChild on non existent child', (WidgetTester tester) async {
-      expectFlutterErrorMessage(
+      await expectFlutterErrorMessage(
         tester: tester,
         delegate: NonExistentPositionDelegate(),
         message:
@@ -358,7 +358,7 @@ void main() {
     });
 
     testWidgets("_callPerformLayout on child that doesn't have id", (WidgetTester tester) async {
-      expectFlutterErrorMessage(
+      await expectFlutterErrorMessage(
         widget: Center(
           child: CustomMultiChildLayout(
             children: <Widget>[LayoutWithMissingId(child: Container(width: 100))],
@@ -381,7 +381,7 @@ void main() {
     });
 
     testWidgets('performLayout did not layout a child', (WidgetTester tester) async {
-      expectFlutterErrorMessage(
+      await expectFlutterErrorMessage(
         widget: Center(
           child: CustomMultiChildLayout(
             children: <Widget>[
@@ -403,7 +403,7 @@ void main() {
     });
 
     testWidgets('performLayout did not layout multiple child', (WidgetTester tester) async {
-      expectFlutterErrorMessage(
+      await expectFlutterErrorMessage(
         widget: Center(
           child: CustomMultiChildLayout(
             children: <Widget>[

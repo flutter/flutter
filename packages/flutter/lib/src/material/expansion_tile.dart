@@ -4,11 +4,11 @@
 
 import 'package:flutter/widgets.dart';
 
+import 'color_scheme.dart';
 import 'colors.dart';
 import 'icons.dart';
 import 'list_tile.dart';
 import 'theme.dart';
-import 'theme_data.dart';
 
 const Duration _kExpand = Duration(milliseconds: 200);
 
@@ -21,12 +21,17 @@ const Duration _kExpand = Duration(milliseconds: 200);
 /// [ExpansionTile] to save and restore its expanded state when it is scrolled
 /// in and out of view.
 ///
+/// This class overrides the [ListTileTheme.iconColor] and [ListTileTheme.textColor]
+/// theme properties for its [ListTile]. These colors animate between values when
+/// the tile is expanded and collapsed: between [iconColor], [collapsedIconColor] and
+/// between [textColor] and [collapsedTextColor].
+///
 /// See also:
 ///
 ///  * [ListTile], useful for creating expansion tile [children] when the
 ///    expansion tile represents a sublist.
-///  * The "Expand/collapse" section of
-///    <https://material.io/guidelines/components/lists-controls.html>.
+///  * The "Expand and collapse" section of
+///    <https://material.io/components/lists#types>
 class ExpansionTile extends StatefulWidget {
   /// Creates a single-line [ListTile] with a trailing button that expands or collapses
   /// the tile to reveal or hide the [children]. The [initiallyExpanded] property must
@@ -36,7 +41,6 @@ class ExpansionTile extends StatefulWidget {
     this.leading,
     required this.title,
     this.subtitle,
-    this.backgroundColor,
     this.onExpansionChanged,
     this.children = const <Widget>[],
     this.trailing,
@@ -46,7 +50,12 @@ class ExpansionTile extends StatefulWidget {
     this.expandedCrossAxisAlignment,
     this.expandedAlignment,
     this.childrenPadding,
+    this.backgroundColor,
     this.collapsedBackgroundColor,
+    this.textColor,
+    this.collapsedTextColor,
+    this.iconColor,
+    this.collapsedIconColor,
   }) : assert(initiallyExpanded != null),
        assert(maintainState != null),
        assert(
@@ -148,6 +157,29 @@ class ExpansionTile extends StatefulWidget {
   /// When the value is null, the value of `childrenPadding` is [EdgeInsets.zero].
   final EdgeInsetsGeometry? childrenPadding;
 
+  /// The icon color of tile's [trailing] expansion icon when the
+  /// sublist is expanded.
+  ///
+  /// Used to override to the [ListTileTheme.iconColor].
+  final Color? iconColor;
+
+  /// The icon color of tile's [trailing] expansion icon when the
+  /// sublist is collapsed.
+  ///
+  /// Used to override to the [ListTileTheme.iconColor].
+  final Color? collapsedIconColor;
+
+
+  /// The color of the tile's titles when the sublist is expanded.
+  ///
+  /// Used to override to the [ListTileTheme.textColor].
+  final Color? textColor;
+
+  /// The color of the tile's titles when the sublist is collapsed.
+  ///
+  /// Used to override to the [ListTileTheme.textColor].
+  final Color? collapsedTextColor;
+
   @override
   _ExpansionTileState createState() => _ExpansionTileState();
 }
@@ -210,8 +242,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       }
       PageStorage.of(context)?.writeState(context, _isExpanded);
     });
-    if (widget.onExpansionChanged != null)
-      widget.onExpansionChanged!(_isExpanded);
+    widget.onExpansionChanged?.call(_isExpanded);
   }
 
   Widget _buildChildren(BuildContext context, Widget? child) {
@@ -258,13 +289,14 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   @override
   void didChangeDependencies() {
     final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
     _borderColorTween.end = theme.dividerColor;
     _headerColorTween
-      ..begin = theme.textTheme.subtitle1!.color
-      ..end = theme.accentColor;
+      ..begin = widget.collapsedTextColor ?? theme.textTheme.subtitle1!.color
+      ..end = widget.textColor ?? colorScheme.secondary;
     _iconColorTween
-      ..begin = theme.unselectedWidgetColor
-      ..end = theme.accentColor;
+      ..begin = widget.collapsedIconColor ?? theme.unselectedWidgetColor
+      ..end = widget.iconColor ?? colorScheme.secondary;
     _backgroundColorTween
       ..begin = widget.collapsedBackgroundColor
       ..end = widget.backgroundColor;
@@ -287,7 +319,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
         ),
         enabled: !closed,
       ),
-      offstage: closed
+      offstage: closed,
     );
 
     return AnimatedBuilder(

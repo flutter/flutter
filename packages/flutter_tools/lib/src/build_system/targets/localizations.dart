@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import '../../base/file_system.dart';
 import '../../convert.dart';
-import '../../globals.dart' as globals;
 import '../../localizations/gen_l10n.dart';
 import '../../localizations/localizations_utils.dart';
 import '../build_system.dart';
@@ -51,7 +52,7 @@ class GenerateLocalizationsTarget extends Target {
 
     final LocalizationOptions options = parseLocalizationsOptions(
       file: configFile,
-      logger: globals.logger,
+      logger: environment.logger,
     );
     final DepfileService depfileService = DepfileService(
       logger: environment.logger,

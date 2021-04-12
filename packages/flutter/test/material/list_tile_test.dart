@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -73,10 +72,10 @@ void main() {
           child: Material(
             child: Center(
               child: ListTile(
-                leading: Container(key: leadingKey, width: 24.0, height: 24.0),
+                leading: SizedBox(key: leadingKey, width: 24.0, height: 24.0),
                 title: const Text('title'),
                 subtitle: hasSubtitle ? Text('subtitle', textScaleFactor: subtitleScaleFactor) : null,
-                trailing: Container(key: trailingKey, width: 24.0, height: 24.0),
+                trailing: SizedBox(key: trailingKey, width: 24.0, height: 24.0),
                 dense: dense,
                 isThreeLine: isThreeLine,
               ),
@@ -251,6 +250,11 @@ void main() {
     expect(find.text('first'), findsOneWidget);
     expect(find.text('second'), findsOneWidget);
     expect(find.text('third'), findsOneWidget);
+  });
+
+  testWidgets('ListTile.divideTiles with empty list', (WidgetTester tester) async {
+    final Iterable<Widget> output = ListTile.divideTiles(tiles: <Widget>[], color: Colors.grey);
+    expect(output, isEmpty);
   });
 
   testWidgets('ListTileTheme', (WidgetTester tester) async {
@@ -1250,7 +1254,6 @@ void main() {
   testWidgets('ListTile is focusable and has correct focus color', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'ListTile');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    const Key tileKey = Key('listTile');
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
         home: Material(
@@ -1261,7 +1264,6 @@ void main() {
                 height: 100,
                 color: Colors.white,
                 child: ListTile(
-                  key: tileKey,
                   onTap: enabled ? () {} : null,
                   focusColor: Colors.orange[500],
                   autofocus: true,
@@ -1278,16 +1280,14 @@ void main() {
     await tester.pumpAndSettle();
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(
-      Material.of(tester.element(find.byKey(tileKey))),
+      find.byType(Material),
       paints
         ..rect(
-          color: Colors.orange[500],
-          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-        )
+            color: Colors.orange[500],
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
         ..rect(
-          color: const Color(0xffffffff),
-          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-        ),
+            color: const Color(0xffffffff),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0)),
     );
 
     // Check when the list tile is disabled.
@@ -1295,7 +1295,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(focusNode.hasPrimaryFocus, isFalse);
     expect(
-      Material.of(tester.element(find.byKey(tileKey))),
+      find.byType(Material),
       paints
         ..rect(
             color: const Color(0xffffffff),
@@ -1305,7 +1305,6 @@ void main() {
 
   testWidgets('ListTile can be hovered and has correct hover color', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    const Key tileKey = Key('ListTile');
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
         home: Material(
@@ -1316,7 +1315,6 @@ void main() {
                 height: 100,
                 color: Colors.white,
                 child: ListTile(
-                  key: tileKey,
                   onTap: enabled ? () {} : null,
                   hoverColor: Colors.orange[500],
                   autofocus: true,
@@ -1332,7 +1330,7 @@ void main() {
     await tester.pump();
     await tester.pumpAndSettle();
     expect(
-      Material.of(tester.element(find.byKey(tileKey))),
+      find.byType(Material),
       paints
         ..rect(
             color: const Color(0x1f000000),
@@ -1345,30 +1343,30 @@ void main() {
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(gesture.removePointer);
-    await gesture.moveTo(tester.getCenter(find.byKey(tileKey)));
+    await gesture.moveTo(tester.getCenter(find.byType(ListTile)));
 
     await tester.pumpWidget(buildApp());
     await tester.pump();
     await tester.pumpAndSettle();
     expect(
-        Material.of(tester.element(find.byKey(tileKey))),
-        paints
-          ..rect(
-              color: const Color(0x1f000000),
-              rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
-          ..rect(
-              color: Colors.orange[500],
-              rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
-          ..rect(
-              color: const Color(0xffffffff),
-              rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0)),
+      find.byType(Material),
+      paints
+        ..rect(
+            color: const Color(0x1f000000),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
+        ..rect(
+            color: Colors.orange[500],
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
+        ..rect(
+            color: const Color(0xffffffff),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0)),
     );
 
     await tester.pumpWidget(buildApp(enabled: false));
     await tester.pump();
     await tester.pumpAndSettle();
     expect(
-      Material.of(tester.element(find.byKey(tileKey))),
+      find.byType(Material),
       paints
         ..rect(
             color: Colors.orange[500],
@@ -1421,7 +1419,7 @@ void main() {
   testWidgets('ListTile responds to density changes.', (WidgetTester tester) async {
     const Key key = Key('test');
     Future<void> buildTest(VisualDensity visualDensity) async {
-      return await tester.pumpWidget(
+      return tester.pumpWidget(
         MaterialApp(
           home: Material(
             child: Center(
@@ -1437,7 +1435,7 @@ void main() {
       );
     }
 
-    await buildTest(const VisualDensity());
+    await buildTest(VisualDensity.standard);
     final RenderBox box = tester.renderObject(find.byKey(key));
     await tester.pumpAndSettle();
     expect(box.size, equals(const Size(800, 56)));
@@ -1453,6 +1451,75 @@ void main() {
     await buildTest(const VisualDensity(horizontal: 3.0, vertical: -3.0));
     await tester.pumpAndSettle();
     expect(box.size, equals(const Size(800, 44)));
+  });
+
+  testWidgets('ListTile shape is painted correctly', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/63877
+    const ShapeBorder rectShape = RoundedRectangleBorder();
+    const ShapeBorder stadiumShape = StadiumBorder();
+    final Color tileColor = Colors.red.shade500;
+
+    Widget buildListTile(ShapeBorder shape) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: ListTile(shape: shape, tileColor: tileColor),
+          ),
+        ),
+      );
+    }
+
+    // Test rectangle shape
+    await tester.pumpWidget(buildListTile(rectShape));
+    Rect rect = tester.getRect(find.byType(ListTile));
+
+    // Check if a path was painted with the correct color and shape
+    expect(
+      find.byType(Material),
+      paints..path(
+        color: tileColor,
+        // Corners should be included
+        includes: <Offset>[
+          Offset(rect.left, rect.top),
+          Offset(rect.right, rect.top),
+          Offset(rect.left, rect.bottom),
+          Offset(rect.right, rect.bottom),
+        ],
+        // Points outside rect should be excluded
+        excludes: <Offset>[
+          Offset(rect.left - 1, rect.top - 1),
+          Offset(rect.right + 1, rect.top - 1),
+          Offset(rect.left - 1, rect.bottom + 1),
+          Offset(rect.right + 1, rect.bottom + 1),
+        ],
+      ),
+    );
+
+    // Test stadium shape
+    await tester.pumpWidget(buildListTile(stadiumShape));
+    rect = tester.getRect(find.byType(ListTile));
+
+    // Check if a path was painted with the correct color and shape
+    expect(
+      find.byType(Material),
+      paints..path(
+        color: tileColor,
+        // Center points of sides should be included
+        includes: <Offset>[
+          Offset(rect.left + rect.width / 2, rect.top),
+          Offset(rect.left, rect.top + rect.height / 2),
+          Offset(rect.right, rect.top + rect.height / 2),
+          Offset(rect.left + rect.width / 2, rect.bottom),
+        ],
+        // Corners should be excluded
+        excludes: <Offset>[
+          Offset(rect.left, rect.top),
+          Offset(rect.right, rect.top),
+          Offset(rect.left, rect.bottom),
+          Offset(rect.right, rect.bottom),
+        ],
+      ),
+    );
   });
 
   testWidgets('ListTile changes mouse cursor when hovered', (WidgetTester tester) async {
@@ -1536,8 +1603,8 @@ void main() {
 
   testWidgets('ListTile respects tileColor & selectedTileColor', (WidgetTester tester) async {
     bool isSelected = false;
-    const Color selectedTileColor = Colors.red;
-    const Color tileColor = Colors.green;
+    final Color tileColor = Colors.green.shade500;
+    final Color selectedTileColor = Colors.red.shade500;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1562,16 +1629,48 @@ void main() {
     );
 
     // Initially, when isSelected is false, the ListTile should respect tileColor.
-    ColoredBox coloredBox = tester.widget(find.byType(ColoredBox));
-    expect(coloredBox.color, tileColor);
+    expect(find.byType(Material), paints..path(color: tileColor));
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
     // When isSelected is true, the ListTile should respect selectedTileColor.
-    coloredBox = tester.widget(find.byType(ColoredBox));
-    expect(coloredBox.color, selectedTileColor);
+    expect(find.byType(Material), paints..path(color: selectedTileColor));
+  });
+
+  testWidgets('ListTile shows Material ripple effects on top of tileColor', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/73616
+    final Color tileColor = Colors.red.shade500;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: ListTile(
+              tileColor: tileColor,
+              onTap: () {},
+              title: const Text('Title'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Before ListTile is tapped, it should be tileColor
+    expect(find.byType(Material), paints..path(color: tileColor));
+
+    // Tap on tile to trigger ink effect and wait for it to be underway.
+    await tester.tap(find.byType(ListTile));
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // After tap, the tile could be drawn in tileColor, with the ripple (circle) on top
+    expect(
+      find.byType(Material),
+      paints
+        ..path(color: tileColor)
+        ..circle(),
+    );
   });
 
   testWidgets('ListTile default tile color', (WidgetTester tester) async {
@@ -1598,16 +1697,13 @@ void main() {
       ),
     );
 
-    ColoredBox coloredBox = tester.widget(find.byType(ColoredBox));
-    expect(coloredBox.color, defaultColor);
+    expect(find.byType(Material), paints..path(color: defaultColor));
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
-    coloredBox = tester.widget(find.byType(ColoredBox));
-    expect(isSelected, isTrue);
-    expect(coloredBox.color, defaultColor);
+    expect(find.byType(Material), paints..path(color: defaultColor));
   });
 
   testWidgets('ListTile respects ListTileTheme\'s tileColor & selectedTileColor', (WidgetTester tester) async {
@@ -1618,8 +1714,8 @@ void main() {
       MaterialApp(
         home: Material(
           child: ListTileTheme(
-            selectedTileColor: Colors.green,
-            tileColor: Colors.red,
+            tileColor: Colors.green.shade500,
+            selectedTileColor: Colors.red.shade500,
             child: Center(
               child: StatefulBuilder(
                 builder: (BuildContext context, StateSetter setState) {
@@ -1639,21 +1735,19 @@ void main() {
       ),
     );
 
-    ColoredBox coloredBox = tester.widget(find.byType(ColoredBox));
-    expect(coloredBox.color, theme.tileColor);
+    expect(find.byType(Material), paints..path(color: theme.tileColor));
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
-    coloredBox = tester.widget(find.byType(ColoredBox));
-    expect(coloredBox.color, theme.selectedTileColor);
+    expect(find.byType(Material), paints..path(color: theme.selectedTileColor));
   });
 
   testWidgets('ListTileTheme\'s tileColor & selectedTileColor are overridden by ListTile properties', (WidgetTester tester) async {
     bool isSelected = false;
-    const Color tileColor = Colors.brown;
-    const Color selectedTileColor = Colors.purple;
+    final Color tileColor = Colors.green.shade500;
+    final Color selectedTileColor = Colors.red.shade500;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1681,15 +1775,13 @@ void main() {
       ),
     );
 
-    ColoredBox coloredBox = tester.widget(find.byType(ColoredBox));
-    expect(coloredBox.color, tileColor);
+    expect(find.byType(Material), paints..path(color: tileColor));
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
-    coloredBox = tester.widget(find.byType(ColoredBox));
-    expect(coloredBox.color, selectedTileColor);
+    expect(find.byType(Material), paints..path(color: selectedTileColor));
   });
 
   testWidgets('ListTile layout at zero size', (WidgetTester tester) async {
@@ -2191,5 +2283,54 @@ void main() {
     // Disabled color should be ThemeData.disabledColor.
     expect(textColor(leadingKey), theme.disabledColor);
     expect(textColor(trailingKey), theme.disabledColor);
+  });
+
+  testWidgets('selected, enabled ListTile default icon color, light and dark themes', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/pull/77004
+
+    const ColorScheme lightColorScheme = ColorScheme.light();
+    const ColorScheme darkColorScheme = ColorScheme.dark();
+    final Key leadingKey = UniqueKey();
+    final Key trailingKey = UniqueKey();
+
+    Widget buildFrame({ required Brightness brightness, required bool selected }) {
+      final ThemeData theme = brightness == Brightness.light
+        ? ThemeData.from(colorScheme: const ColorScheme.light())
+        : ThemeData.from(colorScheme: const ColorScheme.dark());
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: ListTile(
+              enabled: true,
+              selected: selected,
+              leading: TestIcon(key: leadingKey),
+              trailing: TestIcon(key: trailingKey),
+            ),
+          ),
+        ),
+      );
+    }
+
+    Color iconColor(Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color!;
+
+    await tester.pumpWidget(buildFrame(brightness: Brightness.light, selected: true));
+    expect(iconColor(leadingKey), lightColorScheme.primary);
+    expect(iconColor(trailingKey), lightColorScheme.primary);
+
+    await tester.pumpWidget(buildFrame(brightness: Brightness.light, selected: false));
+    expect(iconColor(leadingKey), Colors.black45);
+    expect(iconColor(trailingKey), Colors.black45);
+
+    await tester.pumpWidget(buildFrame(brightness: Brightness.dark, selected: true));
+    await tester.pumpAndSettle(); // Animated theme change
+    expect(iconColor(leadingKey), darkColorScheme.primary);
+    expect(iconColor(trailingKey), darkColorScheme.primary);
+
+    // For this configuration, ListTile defers to the default IconTheme.
+    // The default dark theme's IconTheme has color:white
+    await tester.pumpWidget(buildFrame(brightness: Brightness.dark, selected: false));
+    expect(iconColor(leadingKey),  Colors.white);
+    expect(iconColor(trailingKey), Colors.white);
   });
 }

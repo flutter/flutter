@@ -3,11 +3,107 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:vector_math/vector_math_64.dart';
+
+const String kApiDocsLink = 'See "Types with special considerations" at https://api.flutter.dev/flutter/animation/Tween-class.html for more information.';
 
 void main() {
+  test('throws flutter error when tweening types that do not fully satisfy tween requirements - Object', () {
+    final Tween<Object> objectTween = Tween<Object>(
+      begin: Object(),
+      end: Object(),
+    );
+
+    FlutterError? error;
+    try {
+      objectTween.transform(0.1);
+    } on FlutterError catch (err) {
+      error = err;
+    }
+
+    if (error == null) {
+      fail('Expected Tween.transform to throw a FlutterError');
+    }
+
+    expect(error.diagnostics.map((DiagnosticsNode node) => node.toString()), <String>[
+      'Cannot lerp between "Instance of \'Object\'" and "Instance of \'Object\'".',
+      'The type Object might not fully implement `+`, `-`, and/or `*`. $kApiDocsLink',
+      'There may be a dedicated "ObjectTween" for this type, or you may need to create one.'
+    ]);
+  });
+
+  test('throws flutter error when tweening types that do not fully satisfy tween requirements - Color', () {
+    final Tween<Color> colorTween = Tween<Color>(
+      begin: const Color(0xFF000000),
+      end: const Color(0xFFFFFFFF),
+    );
+
+    FlutterError? error;
+    try {
+      colorTween.transform(0.1);
+    } on FlutterError catch (err) {
+      error = err;
+    }
+
+    if (error == null) {
+      fail('Expected Tween.transform to throw a FlutterError');
+    }
+
+    expect(error.diagnostics.map((DiagnosticsNode node) => node.toString()), <String>[
+      'Cannot lerp between "Color(0xff000000)" and "Color(0xffffffff)".',
+      'The type Color might not fully implement `+`, `-`, and/or `*`. $kApiDocsLink',
+      'To lerp colors, consider ColorTween instead.',
+    ]);
+  });
+
+  test('throws flutter error when tweening types that do not fully satisfy tween requirements - Rect', () {
+    final Tween<Rect> rectTween = Tween<Rect>(
+      begin: const Rect.fromLTWH(0, 0, 10, 10),
+      end: const Rect.fromLTWH(2, 2, 2, 2)
+    );
+
+    FlutterError? error;
+    try {
+      rectTween.transform(0.1);
+    } on FlutterError catch (err) {
+      error = err;
+    }
+
+    if (error == null) {
+      fail('Expected Tween.transform to throw a FlutterError');
+    }
+
+    expect(error.diagnostics.map((DiagnosticsNode node) => node.toString()), <String>[
+      'Cannot lerp between "Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)" and "Rect.fromLTRB(2.0, 2.0, 4.0, 4.0)".',
+      'The type Rect might not fully implement `+`, `-`, and/or `*`. $kApiDocsLink',
+      'To lerp rects, consider RectTween instead.',
+    ]);
+  });
+
+  test('throws flutter error when tweening types that do not fully satisfy tween requirements - int', () {
+    final Tween<int> colorTween = Tween<int>(
+      begin: 0,
+      end: 1,
+    );
+
+    FlutterError? error;
+    try {
+      colorTween.transform(0.1);
+    } on FlutterError catch (err) {
+      error = err;
+    }
+
+    if (error == null) {
+      fail('Expected Tween.transform to throw a FlutterError');
+    }
+
+    expect(error.diagnostics.map((DiagnosticsNode node) => node.toString()), <String>[
+      'Cannot lerp between "0" and "1".',
+      'The type int returned a double after multiplication with a double value. $kApiDocsLink',
+      'To lerp int values, consider IntTween or StepTween instead.',
+    ]);
+  });
+
   test('Can chain tweens', () {
     final Tween<double> tween = Tween<double>(begin: 0.30, end: 0.50);
     expect(tween, hasOneLineDescription);
@@ -41,6 +137,17 @@ void main() {
     expect(animation.value, 0.40);
     expect(animation, hasOneLineDescription);
     expect(animation.toStringDetails(), hasOneLineDescription);
+  });
+
+  test('BorderTween nullable test', () {
+    BorderTween tween = BorderTween();
+    expect(tween.lerp(0.0),  null);
+    expect(tween.lerp(1.0),  null);
+
+    tween = BorderTween(begin: null, end: const Border(top: BorderSide()));
+    expect(tween.lerp(0.0),  const Border());
+    expect(tween.lerp(0.5),  const Border(top: BorderSide(width: 0.5)));
+    expect(tween.lerp(1.0),  const Border(top: BorderSide()));
   });
 
   test('SizeTween', () {

@@ -2,17 +2,1353 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# TODO(Piinks): Add link to public user guide when available.
+# For details regarding the *Flutter Fix* feature, see
+# https://flutter.dev/docs/development/tools/flutter-fix
 
 # Please add new fixes to the top of the file, separated by one blank line
 # from other fixes. In a comment, include a link to the PR where the change
 # requiring the fix was made.
 
+# For documentation about this file format, see
+# https://dart.dev/go/data-driven-fixes.
+
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/66482
+  - title: "Migrate to 'TextSelectionThemeData'"
+    date: 2020-09-24
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    oneOf:
+      - if: "textSelectionColor != '' && cursorColor != '' && textSelectionHandleColor != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(cursorColor: {% cursorColor %}, selectionColor: {% textSelectionColor %}, selectionHandleColor: {% textSelectionHandleColor %},)'
+              requiredIf: "textSelectionColor != '' && cursorColor != '' && textSelectionHandleColor != ''"
+          - kind: 'removeParameter'
+            name: 'textSelectionColor'
+          - kind: 'removeParameter'
+            name: 'cursorColor'
+          - kind: 'removeParameter'
+            name: 'textSelectionHandleColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor == '' && cursorColor != '' && textSelectionHandleColor != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(cursorColor: {% cursorColor %}, selectionHandleColor: {% textSelectionHandleColor %},)'
+              requiredIf: "textSelectionColor == '' && cursorColor != '' && textSelectionHandleColor != ''"
+          - kind: 'removeParameter'
+            name: 'cursorColor'
+          - kind: 'removeParameter'
+            name: 'textSelectionHandleColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor != '' && cursorColor != '' && textSelectionHandleColor == ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(cursorColor: {% cursorColor %}, selectionColor: {% textSelectionColor %},)'
+              requiredIf: "textSelectionColor != '' && cursorColor != '' && textSelectionHandleColor == ''"
+          - kind: 'removeParameter'
+            name: 'textSelectionColor'
+          - kind: 'removeParameter'
+            name: 'cursorColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor != '' && cursorColor == '' && textSelectionHandleColor != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(selectionColor: {% textSelectionColor %}, selectionHandleColor: {% textSelectionHandleColor %},)'
+              requiredIf: "textSelectionColor != '' && cursorColor == '' && textSelectionHandleColor != ''"
+          - kind: 'removeParameter'
+            name: 'textSelectionColor'
+          - kind: 'removeParameter'
+            name: 'textSelectionHandleColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor == '' && cursorColor != '' && textSelectionHandleColor == ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(cursorColor: {% cursorColor %})'
+              requiredIf: "textSelectionColor == '' && cursorColor != '' && textSelectionHandleColor == ''"
+          - kind: 'removeParameter'
+            name: 'cursorColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor != '' && cursorColor == '' && textSelectionHandleColor == ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(selectionColor: {% textSelectionColor %})'
+              requiredIf: "textSelectionColor != '' && cursorColor == '' && textSelectionHandleColor == ''"
+          - kind: 'removeParameter'
+            name: 'textSelectionColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor == '' && cursorColor == '' && textSelectionHandleColor != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(selectionHandleColor: {% textSelectionHandleColor %})'
+              requiredIf: "textSelectionColor == '' && cursorColor == '' && textSelectionHandleColor != ''"
+          - kind: 'removeParameter'
+            name: 'textSelectionHandleColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "useTextSelectionTheme != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+    variables:
+      textSelectionColor:
+        kind: 'fragment'
+        value: 'arguments[textSelectionColor]'
+      cursorColor:
+        kind: 'fragment'
+        value: 'arguments[cursorColor]'
+      textSelectionHandleColor:
+        kind: 'fragment'
+        value: 'arguments[textSelectionHandleColor]'
+      useTextSelectionTheme:
+        kind: 'fragment'
+        value: 'arguments[useTextSelectionTheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/66482
+  - title: "Migrate to 'TextSelectionThemeData'"
+    date: 2020-09-24
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    oneOf:
+      - if: "textSelectionColor != '' && cursorColor != '' && textSelectionHandleColor != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(cursorColor: {% cursorColor %}, selectionColor: {% textSelectionColor %}, selectionHandleColor: {% textSelectionHandleColor %},)'
+              requiredIf: "textSelectionColor != '' && cursorColor != '' && textSelectionHandleColor != ''"
+          - kind: 'removeParameter'
+            name: 'textSelectionColor'
+          - kind: 'removeParameter'
+            name: 'cursorColor'
+          - kind: 'removeParameter'
+            name: 'textSelectionHandleColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor == '' && cursorColor != '' && textSelectionHandleColor != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(cursorColor: {% cursorColor %}, selectionHandleColor: {% textSelectionHandleColor %},)'
+              requiredIf: "textSelectionColor == '' && cursorColor != '' && textSelectionHandleColor != ''"
+          - kind: 'removeParameter'
+            name: 'cursorColor'
+          - kind: 'removeParameter'
+            name: 'textSelectionHandleColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor != '' && cursorColor != '' && textSelectionHandleColor == ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(cursorColor: {% cursorColor %}, selectionColor: {% textSelectionColor %},)'
+              requiredIf: "textSelectionColor != '' && cursorColor != '' && textSelectionHandleColor == ''"
+          - kind: 'removeParameter'
+            name: 'textSelectionColor'
+          - kind: 'removeParameter'
+            name: 'cursorColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor != '' && cursorColor == '' && textSelectionHandleColor != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(selectionColor: {% textSelectionColor %}, selectionHandleColor: {% textSelectionHandleColor %},)'
+              requiredIf: "textSelectionColor != '' && cursorColor == '' && textSelectionHandleColor != ''"
+          - kind: 'removeParameter'
+            name: 'textSelectionColor'
+          - kind: 'removeParameter'
+            name: 'textSelectionHandleColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor == '' && cursorColor != '' && textSelectionHandleColor == ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(cursorColor: {% cursorColor %})'
+              requiredIf: "textSelectionColor == '' && cursorColor != '' && textSelectionHandleColor == ''"
+          - kind: 'removeParameter'
+            name: 'cursorColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor != '' && cursorColor == '' && textSelectionHandleColor == ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(selectionColor: {% textSelectionColor %})'
+              requiredIf: "textSelectionColor != '' && cursorColor == '' && textSelectionHandleColor == ''"
+          - kind: 'removeParameter'
+            name: 'textSelectionColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor == '' && cursorColor == '' && textSelectionHandleColor != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(selectionHandleColor: {% textSelectionHandleColor %})'
+              requiredIf: "textSelectionColor == '' && cursorColor == '' && textSelectionHandleColor != ''"
+          - kind: 'removeParameter'
+            name: 'textSelectionHandleColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "useTextSelectionTheme != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+    variables:
+      textSelectionColor:
+        kind: 'fragment'
+        value: 'arguments[textSelectionColor]'
+      cursorColor:
+        kind: 'fragment'
+        value: 'arguments[cursorColor]'
+      textSelectionHandleColor:
+        kind: 'fragment'
+        value: 'arguments[textSelectionHandleColor]'
+      useTextSelectionTheme:
+        kind: 'fragment'
+        value: 'arguments[useTextSelectionTheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/65246
+  - title: "Remove 'disabledThumbGapWidth'"
+    date: 2020-11-17
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'RectangularSliderTrackShape'
+    changes:
+      - kind: 'removeParameter'
+        name: 'disabledThumbGapWidth'
+
+  # Changes made in https://github.com/flutter/flutter/pull/46115
+  - title: "Migrate to 'floatingLabelBehavior'"
+    date: 2020-01-15
+    element:
+      uris: [ 'material.dart' ]
+      field: 'hasFloatingPlaceholder'
+      inClass: 'InputDecorationTheme'
+    changes:
+      - kind: 'rename'
+        newName: 'floatingLabelBehavior'
+
+  # Changes made in https://github.com/flutter/flutter/pull/46115
+  - title: "Migrate to 'floatingLabelBehavior'"
+    date: 2020-01-15
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'InputDecorationTheme'
+    oneOf:
+      - if: "hasFloatingPlaceholder == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% FloatingLabelBehavior %}.auto'
+              requiredIf: "hasFloatingPlaceholder == 'true'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+      - if: "hasFloatingPlaceholder == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% FloatingLabelBehavior %}.never'
+              requiredIf: "hasFloatingPlaceholder == 'false'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+      - if: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% hasFloatingPlaceholder %} ? {% FloatingLabelBehavior %}.auto : {% FloatingLabelBehavior %}.never'
+              requiredIf: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+    variables:
+      hasFloatingPlaceholder:
+        kind: 'fragment'
+        value: 'arguments[hasFloatingPlaceholder]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/46115
+  - title: "Migrate to 'floatingLabelBehavior'"
+    date: 2020-01-15
+    element:
+      uris: [ 'material.dart' ]
+      field: 'hasFloatingPlaceholder'
+      inClass: 'InputDecoration'
+    changes:
+      - kind: 'rename'
+        newName: 'floatingLabelBehavior'
+
+  # Changes made in https://github.com/flutter/flutter/pull/46115
+  - title: "Rename to 'floatingLabelBehavior'"
+    date: 2020-01-15
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'collapsed'
+      inClass: 'InputDecoration'
+    oneOf:
+      - if: "hasFloatingPlaceholder == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% FloatingLabelBehavior %}.auto'
+              requiredIf: "hasFloatingPlaceholder == 'true'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+      - if: "hasFloatingPlaceholder == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% FloatingLabelBehavior %}.never'
+              requiredIf: "hasFloatingPlaceholder == 'false'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+      - if: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% hasFloatingPlaceholder %} ? {% FloatingLabelBehavior %}.auto : {% FloatingLabelBehavior %}.never'
+              requiredIf: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+    variables:
+      hasFloatingPlaceholder:
+        kind: 'fragment'
+        value: 'arguments[hasFloatingPlaceholder]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/46115
+  - title: "Rename to 'floatingLabelBehavior'"
+    date: 2020-01-15
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'InputDecoration'
+    oneOf:
+      - if: "hasFloatingPlaceholder == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% FloatingLabelBehavior %}.auto'
+              requiredIf: "hasFloatingPlaceholder == 'true'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+      - if: "hasFloatingPlaceholder == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% FloatingLabelBehavior %}.never'
+              requiredIf: "hasFloatingPlaceholder == 'false'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+      - if: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% hasFloatingPlaceholder %} ? {% FloatingLabelBehavior %}.auto : {% FloatingLabelBehavior %}.never'
+              requiredIf: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+    variables:
+      hasFloatingPlaceholder:
+        kind: 'fragment'
+        value: 'arguments[hasFloatingPlaceholder]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/59127
+  - title: "Migrate to 'label'"
+    date: 2020-07-09
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      field: 'title'
+      inClass: 'BottomNavigationBarItem'
+    changes:
+      - kind: 'rename'
+        newName: 'label'
+
+  # Changes made in https://github.com/flutter/flutter/pull/59127
+  - title: "Migrate to 'label'"
+    date: 2020-07-09
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'BottomNavigationBarItem'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'title'
+        newName: 'label'
+
+  # Changes made in https://github.com/flutter/flutter/pull/66043
+  - title: "Use withKind"
+    date: 2020-09-17
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'VelocityTracker'
+    oneOf:
+      - if: "pointerDeviceKind == ''"
+        changes:
+          - kind: 'rename'
+            newName: 'withKind'
+          - kind: 'addParameter'
+            index: 0
+            name: 'kind'
+            style: required_positional
+            argumentValue:
+              expression: 'PointerDeviceKind.touch'
+      - if: "pointerDeviceKind != ''"
+        changes:
+          - kind: 'rename'
+            newName: 'withKind'
+    variables:
+      pointerDeviceKind:
+          kind: 'fragment'
+          value: 'arguments[0]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/72043
+  - title: "Migrate to 'maxLengthEnforcement'"
+    date: 2020-12-13
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'TextFormField'
+    oneOf:
+      - if: "maxLengthEnforced == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'maxLengthEnforcement'
+            style: optional_named
+            argumentValue:
+              expression: 'MaxLengthEnforcement.enforce'
+              requiredIf: "maxLengthEnforced == 'true'"
+          - kind: 'removeParameter'
+            name: 'maxLengthEnforced'
+      - if: "maxLengthEnforced == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'maxLengthEnforcement'
+            style: optional_named
+            argumentValue:
+              expression: 'MaxLengthEnforcement.none'
+              requiredIf: "maxLengthEnforced == 'false'"
+          - kind: 'removeParameter'
+            name: 'maxLengthEnforced'
+    variables:
+      maxLengthEnforced:
+        kind: 'fragment'
+        value: 'arguments[maxLengthEnforced]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/72043
+  - title: "Migrate to 'maxLengthEnforcement'"
+    date: 2020-12-13
+    element:
+      uris: [ 'material.dart' ]
+      field: 'maxLengthEnforced'
+      inClass: 'TextField'
+    changes:
+      - kind: 'rename'
+        newName: 'maxLengthEnforcement'
+
+  # Changes made in https://github.com/flutter/flutter/pull/72043
+  - title: "Migrate to 'maxLengthEnforcement'"
+    date: 2020-12-13
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'TextField'
+    oneOf:
+      - if: "maxLengthEnforced == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'maxLengthEnforcement'
+            style: optional_named
+            argumentValue:
+              expression: 'MaxLengthEnforcement.enforce'
+              requiredIf: "maxLengthEnforced == 'true'"
+          - kind: 'removeParameter'
+            name: 'maxLengthEnforced'
+      - if: "maxLengthEnforced == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'maxLengthEnforcement'
+            style: optional_named
+            argumentValue:
+              expression: 'MaxLengthEnforcement.none'
+              requiredIf: "maxLengthEnforced == 'false'"
+          - kind: 'removeParameter'
+            name: 'maxLengthEnforced'
+    variables:
+      maxLengthEnforced:
+        kind: 'fragment'
+        value: 'arguments[maxLengthEnforced]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/72043
+  - title: "Migrate to 'maxLengthEnforcement'"
+    date: 2020-12-13
+    element:
+      uris: [ 'cupertino.dart' ]
+      field: 'maxLengthEnforced'
+      inClass: 'CupertinoTextField'
+    changes:
+      - kind: 'rename'
+        newName: 'maxLengthEnforcement'
+
+  # Changes made in https://github.com/flutter/flutter/pull/72043
+  - title: "Migrate to 'maxLengthEnforcement'"
+    date: 2020-12-13
+    element:
+      uris: [ 'cupertino.dart' ]
+      constructor: 'borderless'
+      inClass: 'CupertinoTextField'
+    oneOf:
+      - if: "maxLengthEnforced == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'maxLengthEnforcement'
+            style: optional_named
+            argumentValue:
+              expression: 'MaxLengthEnforcement.enforce'
+              requiredIf: "maxLengthEnforced == 'true'"
+          - kind: 'removeParameter'
+            name: 'maxLengthEnforced'
+      - if: "maxLengthEnforced == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'maxLengthEnforcement'
+            style: optional_named
+            argumentValue:
+              expression: 'MaxLengthEnforcement.none'
+              requiredIf: "maxLengthEnforced == 'false'"
+          - kind: 'removeParameter'
+            name: 'maxLengthEnforced'
+    variables:
+      maxLengthEnforced:
+        kind: 'fragment'
+        value: 'arguments[maxLengthEnforced]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/72043
+  - title: "Migrate to 'maxLengthEnforcement'"
+    date: 2020-12-13
+    element:
+      uris: [ 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'CupertinoTextField'
+    oneOf:
+      - if: "maxLengthEnforced == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'maxLengthEnforcement'
+            style: optional_named
+            argumentValue:
+              expression: 'MaxLengthEnforcement.enforce'
+              requiredIf: "maxLengthEnforced == 'true'"
+          - kind: 'removeParameter'
+            name: 'maxLengthEnforced'
+      - if: "maxLengthEnforced == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'maxLengthEnforcement'
+            style: optional_named
+            argumentValue:
+              expression: 'MaxLengthEnforcement.none'
+              requiredIf: "maxLengthEnforced == 'false'"
+          - kind: 'removeParameter'
+            name: 'maxLengthEnforced'
+    variables:
+      maxLengthEnforced:
+        kind: 'fragment'
+        value: 'arguments[maxLengthEnforced]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68905.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'material.dart' ]
+      method: 'resolveFrom'
+      inClass: 'MaterialBasedCupertinoThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'nullOk'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68905.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'cupertino.dart' ]
+      method: 'resolveFrom'
+      inClass: 'CupertinoTextThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'nullOk'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68905.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'cupertino.dart' ]
+      method: 'resolveFrom'
+      inClass: 'NoDefaultCupertinoThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'nullOk'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68905.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'cupertino.dart' ]
+      method: 'resolveFrom'
+      inClass: 'CupertinoThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'nullOk'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68736.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'cupertino.dart' ]
+      method: 'brightnessOf'
+      inClass: 'CupertinoTheme'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeBrightnessOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68905.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'cupertino.dart' ]
+      method: 'of'
+      inClass: 'CupertinoUserInterfaceLevel'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68905.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'cupertino.dart' ]
+      method: 'resolveFrom'
+      inClass: 'CupertinoDynamicColor'
+    changes:
+      - kind: 'removeParameter'
+        name: 'nullOk'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68905.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'cupertino.dart' ]
+      method: 'resolve'
+      inClass: 'CupertinoDynamicColor'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeResolve'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68925.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      method: 'of'
+      inClass: 'SliverAnimatedList'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68925.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      method: 'of'
+      inClass: 'AnimatedList'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68921.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      method: 'invoke'
+      inClass: 'Actions'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeInvoke'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68921.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      method: 'find'
+      inClass: 'Actions'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeFind'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68921.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      method: 'handler'
+      inClass: 'Actions'
+    changes:
+      - kind: 'removeParameter'
+        name: 'nullOk'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68921.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      method: 'of'
+      inClass: 'Shortcuts'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68917.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      method: 'of'
+      inClass: 'Focus'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68917.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      method: 'of'
+      inClass: 'FocusTraversalGroup'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68917.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      method: 'of'
+      inClass: 'FocusTraversalOrder'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68911.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      method: 'localeOf'
+      inClass: 'Localizations'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeLocaleOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68910.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      method: 'of'
+      inClass: 'Router'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68908.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'material.dart' ]
+      method: 'of'
+      inClass: 'Scaffold'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68908.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'material.dart' ]
+      method: 'of'
+      inClass: 'ScaffoldMessenger'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/70726.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      method: 'of'
+      inClass: 'Navigator'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68736.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      method: 'of'
+      inClass: 'MediaQuery'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/44189.
+  - title: "Rename to 'dependOnInheritedElement'"
+    date: 2020-12-23
+    element:
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
+      method: 'inheritFromElement'
+      inClass: 'Element'
+    changes:
+      - kind: 'rename'
+        newName: 'dependOnInheritedElement'
+
+  # Changes made in https://github.com/flutter/flutter/pull/44189.
+  - title: "Rename to 'dependOnInheritedWidgetOfExactType'"
+    date: 2020-09-14
+    element:
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
+      method: 'inheritFromWidgetOfExactType'
+      inClass: 'Element'
+    changes:
+      - kind: 'rename'
+        newName: 'dependOnInheritedWidgetOfExactType'
+      - kind: 'addTypeParameter'
+        index: 0
+        name: 'T'
+        argumentValue:
+          expression: '{% type %}'
+          variables:
+            type:
+              kind: 'fragment'
+              value: 'arguments[0]'
+      - kind: 'removeParameter'
+        index: 0
+
+  # Changes made in https://github.com/flutter/flutter/pull/44189.
+  - title: "Rename to 'getElementForInheritedWidgetOfExactType'"
+    date: 2020-09-14
+    element:
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
+      method: 'ancestorInheritedElementForWidgetOfExactType'
+      inClass: 'Element'
+    changes:
+      - kind: 'rename'
+        newName: 'getElementForInheritedWidgetOfExactType'
+      - kind: 'addTypeParameter'
+        index: 0
+        name: 'T'
+        argumentValue:
+          expression: '{% type %}'
+          variables:
+            type:
+              kind: 'fragment'
+              value: 'arguments[0]'
+      - kind: 'removeParameter'
+        index: 0
+
+  # Changes made in https://github.com/flutter/flutter/pull/44189.
+  - title: "Rename to 'getElementForInheritedWidgetOfExactType'"
+    date: 2020-12-23
+    element:
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
+      method: 'ancestorWidgetOfExactType'
+      inClass: 'Element'
+    changes:
+      - kind: 'rename'
+        newName: 'findAncestorWidgetOfExactType'
+      - kind: 'addTypeParameter'
+        index: 0
+        name: 'T'
+        argumentValue:
+          expression: '{% type %}'
+          variables:
+            type:
+              kind: 'fragment'
+              value: 'arguments[0]'
+      - kind: 'removeParameter'
+        index: 0
+
+  # Changes made in https://github.com/flutter/flutter/pull/44189.
+  - title: "Rename to 'findAncestorStateOfType'"
+    date: 2020-12-23
+    element:
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
+      method: 'ancestorStateOfType'
+      inClass: 'Element'
+    changes:
+      - kind: 'rename'
+        newName: 'findAncestorStateOfType'
+      - kind: 'addTypeParameter'
+        index: 0
+        name: 'T'
+        argumentValue:
+          expression: '{% type %}'
+          variables:
+            type:
+              kind: 'fragment'
+              value: 'arguments[0].typeArguments[0]'
+      - kind: 'removeParameter'
+        index: 0
+
+  # Changes made in https://github.com/flutter/flutter/pull/44189.
+  - title: "Rename to 'findAncestorRenderObjectOfType'"
+    date: 2020-12-23
+    element:
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
+      method: 'ancestorRenderObjectOfType'
+      inClass: 'Element'
+    changes:
+      - kind: 'rename'
+        newName: 'findAncestorRenderObjectOfType'
+      - kind: 'addTypeParameter'
+        index: 0
+        name: 'T'
+        argumentValue:
+          expression: '{% type %}'
+          variables:
+            type:
+              kind: 'fragment'
+              value: 'arguments[0].typeArguments[0]'
+      - kind: 'removeParameter'
+        index: 0
+
+  # Changes made in https://github.com/flutter/flutter/pull/44189.
+  - title: "Rename to 'findAncestorRenderObjectOfType'"
+    date: 2020-12-23
+    element:
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
+      method: 'rootAncestorStateOfType'
+      inClass: 'Element'
+    changes:
+      - kind: 'rename'
+        newName: 'findRootAncestorStateOfType'
+      - kind: 'addTypeParameter'
+        index: 0
+        name: 'T'
+        argumentValue:
+          expression: '{% type %}'
+          variables:
+            type:
+              kind: 'fragment'
+              value: 'arguments[0].typeArguments[0]'
+      - kind: 'removeParameter'
+        index: 0
+
+  # Changes made in https://github.com/flutter/flutter/pull/26259
+  - title: "Rename to 'resizeToAvoidBottomInset'"
+    date: 2020-12-23
+    element:
+      uris: [ 'material.dart' ]
+      field: 'resizeToAvoidBottomPadding'
+      inClass: 'Scaffold'
+    changes:
+      - kind: 'rename'
+        newName: 'resizeToAvoidBottomInset'
+
+  # Changes made in https://github.com/flutter/flutter/pull/26259
+  - title: "Rename to 'resizeToAvoidBottomInset'"
+    date: 2020-12-23
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'Scaffold'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'resizeToAvoidBottomPadding'
+        newName: 'resizeToAvoidBottomInset'
+
+  # Change made in https://github.com/flutter/flutter/pull/20649
+  # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
+  - title: "Replace with 'CupertinoPopupSurface'"
+    date: 2021-01-07
+    bulkApply: false
+    element:
+      uris: [ 'cupertino.dart' ]
+      class: 'CupertinoDialog'
+    changes:
+      - kind: 'rename'
+        newName: 'CupertinoPopupSurface'
+
+  # Change made in https://github.com/flutter/flutter/pull/20649
+  # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
+  - title: "Replace with 'CupertinoAlertDialog'"
+    date: 2021-01-07
+    bulkApply: false
+    element:
+      uris: [ 'cupertino.dart' ]
+      class: 'CupertinoDialog'
+    changes:
+      - kind: 'rename'
+        newName: 'CupertinoAlertDialog'
+      - kind: 'renameParameter'
+        oldName: 'child'
+        newName: 'content'
+
   # Changes made in https://github.com/flutter/flutter/pull/61648
-  - title: 'Migrate to autovalidateMode'
+  - title: "Migrate to 'autovalidateMode'"
     date: 2020-09-02
     element:
       uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
@@ -23,7 +1359,7 @@ transforms:
         newName: 'autovalidateMode'
 
   # Changes made in https://github.com/flutter/flutter/pull/61648
-  - title: 'Migrate to autovalidateMode'
+  - title: "Migrate to 'autovalidateMode'"
     date: 2020-09-02
     element:
       uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
@@ -37,7 +1373,7 @@ transforms:
             name: 'autovalidateMode'
             style: optional_named
             argumentValue:
-              expression: 'AutoValidateMode.always'
+              expression: 'AutovalidateMode.always'
               requiredIf: "autovalidate == 'true'"
           - kind: 'removeParameter'
             name: 'autovalidate'
@@ -48,7 +1384,7 @@ transforms:
             name: 'autovalidateMode'
             style: optional_named
             argumentValue:
-              expression: 'AutoValidateMode.disabled'
+              expression: 'AutovalidateMode.disabled'
               requiredIf: "autovalidate == 'false'"
           - kind: 'removeParameter'
             name: 'autovalidate'
@@ -58,7 +1394,7 @@ transforms:
         value: 'arguments[autovalidate]'
 
   # Changes made in https://github.com/flutter/flutter/pull/61648
-  - title: 'Migrate to autovalidateMode'
+  - title: "Migrate to 'autovalidateMode'"
     date: 2020-09-02
     element:
       uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
@@ -69,7 +1405,7 @@ transforms:
         newName: 'autovalidateMode'
 
   # Changes made in https://github.com/flutter/flutter/pull/61648
-  - title: 'Migrate to autovalidateMode'
+  - title: "Migrate to 'autovalidateMode'"
     date: 2020-09-02
     element:
       uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
@@ -83,7 +1419,7 @@ transforms:
             name: 'autovalidateMode'
             style: optional_named
             argumentValue:
-              expression: 'AutoValidateMode.always'
+              expression: 'AutovalidateMode.always'
               requiredIf: "autovalidate == 'true'"
           - kind: 'removeParameter'
             name: 'autovalidate'
@@ -94,7 +1430,7 @@ transforms:
             name: 'autovalidateMode'
             style: optional_named
             argumentValue:
-              expression: 'AutoValidateMode.disabled'
+              expression: 'AutovalidateMode.disabled'
               requiredIf: "autovalidate == 'false'"
           - kind: 'removeParameter'
             name: 'autovalidate'
@@ -104,7 +1440,7 @@ transforms:
         value: 'arguments[autovalidate]'
 
   # Changes made in https://github.com/flutter/flutter/pull/61648
-  - title: 'Migrate to autovalidateMode'
+  - title: "Migrate to 'autovalidateMode'"
     date: 2020-09-02
     element:
       uris: [ 'material.dart' ]
@@ -118,7 +1454,7 @@ transforms:
             name: 'autovalidateMode'
             style: optional_named
             argumentValue:
-              expression: 'AutoValidateMode.always'
+              expression: 'AutovalidateMode.always'
               requiredIf: "autovalidate == 'true'"
           - kind: 'removeParameter'
             name: 'autovalidate'
@@ -129,7 +1465,7 @@ transforms:
             name: 'autovalidateMode'
             style: optional_named
             argumentValue:
-              expression: 'AutoValidateMode.disabled'
+              expression: 'AutovalidateMode.disabled'
               requiredIf: "autovalidate == 'false'"
           - kind: 'removeParameter'
             name: 'autovalidate'
@@ -139,7 +1475,7 @@ transforms:
         value: 'arguments[autovalidate]'
 
   # Changes made in https://github.com/flutter/flutter/pull/61648
-  - title: 'Migrate to autovalidateMode'
+  - title: "Migrate to 'autovalidateMode'"
     date: 2020-09-02
     element:
       uris: [ 'material.dart' ]
@@ -153,7 +1489,7 @@ transforms:
             name: 'autovalidateMode'
             style: optional_named
             argumentValue:
-              expression: 'AutoValidateMode.always'
+              expression: 'AutovalidateMode.always'
               requiredIf: "autovalidate == 'true'"
           - kind: 'removeParameter'
             name: 'autovalidate'
@@ -164,7 +1500,7 @@ transforms:
             name: 'autovalidateMode'
             style: optional_named
             argumentValue:
-              expression: 'AutoValidateMode.disabled'
+              expression: 'AutovalidateMode.disabled'
               requiredIf: "autovalidate == 'false'"
           - kind: 'removeParameter'
             name: 'autovalidate'
@@ -174,7 +1510,7 @@ transforms:
         value: 'arguments[autovalidate]'
 
   # Changes made in https://github.com/flutter/flutter/pull/48547
-  - title: 'Renamed to headline1'
+  - title: "Rename to 'headline1'"
     date: 2020-01-24
     element:
       uris: [ 'material.dart' ]
@@ -185,7 +1521,7 @@ transforms:
         newName: 'headline1'
 
   # Changes made in https://github.com/flutter/flutter/pull/48547
-  - title: 'Renamed to headline2'
+  - title: "Rename to 'headline2'"
     date: 2020-01-24
     element:
       uris: [ 'material.dart' ]
@@ -196,7 +1532,7 @@ transforms:
         newName: 'headline2'
 
   # Changes made in https://github.com/flutter/flutter/pull/48547
-  - title: 'Renamed to headline3'
+  - title: "Rename to 'headline3'"
     date: 2020-01-24
     element:
       uris: [ 'material.dart' ]
@@ -207,7 +1543,7 @@ transforms:
         newName: 'headline3'
 
   # Changes made in https://github.com/flutter/flutter/pull/48547
-  - title: 'Renamed to headline4'
+  - title: "Rename to 'headline4'"
     date: 2020-01-24
     element:
       uris: [ 'material.dart' ]
@@ -218,7 +1554,7 @@ transforms:
         newName: 'headline4'
 
   # Changes made in https://github.com/flutter/flutter/pull/48547
-  - title: 'Renamed to headline5'
+  - title: "Rename to 'headline5'"
     date: 2020-01-24
     element:
       uris: [ 'material.dart' ]
@@ -229,7 +1565,7 @@ transforms:
         newName: 'headline5'
 
   # Changes made in https://github.com/flutter/flutter/pull/48547
-  - title: 'Renamed to headline6'
+  - title: "Rename to 'headline6'"
     date: 2020-01-24
     element:
       uris: [ 'material.dart' ]
@@ -240,7 +1576,7 @@ transforms:
         newName: 'headline6'
 
   # Changes made in https://github.com/flutter/flutter/pull/48547
-  - title: 'Renamed to subtitle1'
+  - title: "Rename to 'subtitle1'"
     date: 2020-01-24
     element:
       uris: [ 'material.dart' ]
@@ -251,7 +1587,7 @@ transforms:
         newName: 'subtitle1'
 
   # Changes made in https://github.com/flutter/flutter/pull/48547
-  - title: 'Renamed to bodyText1'
+  - title: "Rename to 'bodyText1'"
     date: 2020-01-24
     element:
       uris: [ 'material.dart' ]
@@ -262,7 +1598,7 @@ transforms:
         newName: 'bodyText1'
 
   # Changes made in https://github.com/flutter/flutter/pull/48547
-  - title: 'Renamed to bodyText2'
+  - title: "Rename to 'bodyText2'"
     date: 2020-01-24
     element:
       uris: [ 'material.dart' ]
@@ -273,7 +1609,7 @@ transforms:
         newName: 'bodyText2'
 
   # Changes made in https://github.com/flutter/flutter/pull/48547
-  - title: 'Renamed to subtitle2'
+  - title: "Rename to 'subtitle2'"
     date: 2020-01-24
     element:
       uris: [ 'material.dart' ]
@@ -362,7 +1698,7 @@ transforms:
         newName: 'bodyText2'
 
   # Changes made in https://github.com/flutter/flutter/pull/66305
-  - title: 'Migrate to clipBehavior'
+  - title: "Migrate to 'clipBehavior'"
     date: 2020-09-22
     element:
       uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
@@ -373,7 +1709,7 @@ transforms:
         newName: 'clipBehavior'
 
   # Changes made in https://github.com/flutter/flutter/pull/66305
-  - title: 'Migrate to clipBehavior'
+  - title: "Migrate to 'clipBehavior'"
     date: 2020-09-22
     element:
       uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
@@ -408,7 +1744,7 @@ transforms:
         value: 'arguments[overflow]'
 
   # Change made in https://github.com/flutter/flutter/pull/44189.
-  - title: 'Rename to dependOnInheritedElement'
+  - title: "Rename to 'dependOnInheritedElement'"
     date: 2019-11-22
     element:
       uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
@@ -419,7 +1755,7 @@ transforms:
         newName: 'dependOnInheritedElement'
 
   # Change made in https://github.com/flutter/flutter/pull/44189.
-  - title: 'Migrate to dependOnInheritedWidgetOfExactType'
+  - title: "Migrate to 'dependOnInheritedWidgetOfExactType'"
     date: 2019-11-22
     element:
       uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
@@ -441,7 +1777,7 @@ transforms:
               value: 'arguments[0]'
 
   # Change made in https://github.com/flutter/flutter/pull/44189.
-  - title: 'Migrate to getElementForInheritedWidgetOfExactType'
+  - title: "Migrate to 'getElementForInheritedWidgetOfExactType'"
     date: 2019-11-22
     element:
       uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
@@ -463,7 +1799,7 @@ transforms:
               value: 'arguments[0]'
 
   # Change made in https://github.com/flutter/flutter/pull/44189.
-  - title: 'Migrate to findAncestorWidgetOfExactType'
+  - title: "Migrate to 'findAncestorWidgetOfExactType'"
     date: 2019-11-22
     element:
       uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
@@ -485,7 +1821,7 @@ transforms:
               value: 'arguments[0]'
 
   # Change made in https://github.com/flutter/flutter/pull/44189.
-  - title: 'Migrate to findAncestorStateOfType'
+  - title: "Migrate to 'findAncestorStateOfType'"
     date: 2019-11-22
     element:
       uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
@@ -507,7 +1843,7 @@ transforms:
               value: 'arguments[0].typeArguments[0]'
 
   # Change made in https://github.com/flutter/flutter/pull/44189.
-  - title: 'Migrate to rootAncestorStateOfType'
+  - title: "Migrate to 'rootAncestorStateOfType'"
     date: 2019-11-22
     element:
       uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
@@ -529,7 +1865,7 @@ transforms:
               value: 'arguments[0].typeArguments[0]'
 
   # Change made in https://github.com/flutter/flutter/pull/44189.
-  - title: 'Migrate to ancestorRenderObjectOfType'
+  - title: "Migrate to 'ancestorRenderObjectOfType'"
     date: 2019-11-22
     element:
       uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
@@ -551,7 +1887,7 @@ transforms:
               value: 'arguments[0].typeArguments[0]'
 
   # Changes made in https://github.com/flutter/flutter/pull/45941
-  - title: 'Rename to deferFirstFrame'
+  - title: "Rename to 'deferFirstFrame'"
     date: 2020-12-23
     element:
       uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
@@ -562,7 +1898,7 @@ transforms:
         newName: 'deferFirstFrame'
 
   # Changes made in https://github.com/flutter/flutter/pull/45941
-  - title: 'Rename to allowFirstFrame'
+  - title: "Rename to 'allowFirstFrame'"
     date: 2020-12-23
     element:
       uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
@@ -573,7 +1909,7 @@ transforms:
         newName: 'allowFirstFrame'
 
   # Changes made in https://github.com/flutter/flutter/pull/44189
-  - title: 'Rename to dependOnInheritedElement'
+  - title: "Rename to 'dependOnInheritedElement'"
     date: 2020-12-23
     element:
       uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
@@ -584,7 +1920,7 @@ transforms:
         newName: 'dependOnInheritedElement'
 
   # Changes made in https://github.com/flutter/flutter/pull/15303
-  - title: 'Replace child with builder'
+  - title: "Replace 'child' with 'builder'"
     date: 2020-12-17
     element:
       uris: [ 'material.dart' ]
@@ -605,7 +1941,7 @@ transforms:
         name: 'child'
 
   # Changes made in https://github.com/flutter/flutter/pull/28602
-  - title: 'Rename to fromMouseEvent'
+  - title: "Rename to 'fromMouseEvent'"
     date: 2020-12-15
     element:
       uris: [ 'gestures.dart' ]
@@ -616,7 +1952,7 @@ transforms:
         newName: 'fromMouseEvent'
 
   # Changes made in https://github.com/flutter/flutter/pull/28602
-  - title: 'Rename to fromMouseEvent'
+  - title: "Rename to 'fromMouseEvent'"
     date: 2020-12-15
     element:
       uris: [ 'gestures.dart' ]
@@ -627,7 +1963,7 @@ transforms:
         newName: 'fromMouseEvent'
 
   # Changes made in https://github.com/flutter/flutter/pull/41859
-  - title: 'Remove brightness'
+  - title: "Remove 'brightness'"
     date: 2020-12-10
     element:
       uris: [ 'cupertino.dart' ]
@@ -638,7 +1974,7 @@ transforms:
         name: 'brightness'
 
   # Changes made in https://github.com/flutter/flutter/pull/41859
-  - title: 'Remove brightness'
+  - title: "Remove 'brightness'"
     date: 2020-12-10
     element:
       uris: [ 'cupertino.dart' ]

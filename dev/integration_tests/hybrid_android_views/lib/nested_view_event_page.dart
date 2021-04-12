@@ -3,25 +3,25 @@
 // found in the LICENSE file.
 
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 import 'android_platform_view.dart';
 import 'future_data_handler.dart';
 import 'page.dart';
 
 class NestedViewEventPage extends PageWidget {
-  const NestedViewEventPage()
-      : super('Nested View Event Tests', const ValueKey<String>('NestedViewEventTile'));
+  const NestedViewEventPage({Key key})
+      : super('Nested View Event Tests', const ValueKey<String>('NestedViewEventTile'), key: key);
 
   @override
-  Widget build(BuildContext context) => NestedViewEventBody();
+  Widget build(BuildContext context) => const NestedViewEventBody();
 }
 
 class NestedViewEventBody extends StatefulWidget {
+  const NestedViewEventBody({Key key}) : super(key: key);
+
   @override
   State<NestedViewEventBody> createState() => NestedViewEventBodyState();
 }

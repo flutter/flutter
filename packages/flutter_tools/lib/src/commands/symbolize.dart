@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -43,7 +45,7 @@ class SymbolizeCommand extends FlutterCommand {
     argParser.addOption(
       'output',
       abbr: 'o',
-      valueHelp: 'A file path for a symbolized stack trace to be written to.'
+      help: 'A file path for a symbolized stack trace to be written to.'
     );
   }
 

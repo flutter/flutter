@@ -10,9 +10,9 @@ import 'package:file/memory.dart';
 import '../src/common.dart';
 
 void main() {
-  FileSystem fileSystem;
-  BufferLogger logger;
-  File metadataFile;
+  late FileSystem fileSystem;
+  late BufferLogger logger;
+  late File metadataFile;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();

@@ -7,7 +7,6 @@ import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 class MockClipboard {
   MockClipboard({
@@ -238,7 +237,7 @@ void main() {
 
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: const Offset(0.0, 0.0),
+      position: Offset.zero,
       pressure: 0.5,
       pressureMin: 0,
       pressureMax: 1,
@@ -258,7 +257,7 @@ void main() {
     );
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: const Offset(0.0, 0.0),
+      position: Offset.zero,
       pressure: 0.5,
       pressureMin: 0,
       pressureMax: 1,
@@ -278,7 +277,7 @@ void main() {
     );
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: const Offset(0.0, 0.0),
+      position: Offset.zero,
       pressure: 0.5,
       pressureMin: 0,
       pressureMax: 1,
@@ -298,7 +297,7 @@ void main() {
     );
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: const Offset(0.0, 0.0),
+      position: Offset.zero,
       pressure: 0.5,
       pressureMin: 0,
       pressureMax: 1,
@@ -328,7 +327,7 @@ void main() {
     await gesture.updateWithCustomEvent(
       PointerMoveEvent(
         pointer: pointerValue,
-        position: const Offset(0.0, 0.0),
+        position: Offset.zero,
         pressure: 0.0,
         pressureMin: 0,
         pressureMax: 1,
@@ -350,7 +349,7 @@ void main() {
     );
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: const Offset(0.0, 0.0),
+      position: Offset.zero,
       pressure: 0.5,
       pressureMin: 0,
       pressureMax: 1,
@@ -603,7 +602,7 @@ void main() {
   testWidgets('test TextSelectionGestureDetectorBuilder mouse drag disabled', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester, selectionEnabled: false);
     final TestGesture gesture = await tester.startGesture(
-      const Offset(0.0, 0.0),
+      Offset.zero,
       kind: PointerDeviceKind.mouse,
     );
     addTearDown(gesture.removePointer);
@@ -672,7 +671,7 @@ void main() {
 
     expect(hitRect.size.width, lessThan(textFieldRect.size.width));
     expect(hitRect.size.height, lessThan(textFieldRect.size.height));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   group('ClipboardStatusNotifier', () {
     group('when Clipboard fails', () {
@@ -797,6 +796,7 @@ class FakeRenderEditable extends RenderEditable {
     ),
     startHandleLayerLink: LayerLink(),
     endHandleLayerLink: LayerLink(),
+    ignorePointer: true,
     textAlign: TextAlign.start,
     textDirection: TextDirection.ltr,
     locale: const Locale('en', 'US'),

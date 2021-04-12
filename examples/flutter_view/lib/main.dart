@@ -7,10 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() {
-  runApp(FlutterView());
+  runApp(const FlutterView());
 }
 
 class FlutterView extends StatelessWidget {
+  const FlutterView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -19,12 +20,14 @@ class FlutterView extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.grey,
       ),
-      home: MyHomePage(),
+      home: const MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
+  const MyHomePage({Key? key}) : super(key: key);
+
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
@@ -33,8 +36,8 @@ class _MyHomePageState extends State<MyHomePage> {
   static const String _channel = 'increment';
   static const String _pong = 'pong';
   static const String _emptyMessage = '';
-  static const BasicMessageChannel<String> platform =
-      BasicMessageChannel<String>(_channel, StringCodec());
+  static const BasicMessageChannel<String?> platform =
+      BasicMessageChannel<String?>(_channel, StringCodec());
 
   int _counter = 0;
 
@@ -44,7 +47,7 @@ class _MyHomePageState extends State<MyHomePage> {
     platform.setMessageHandler(_handlePlatformIncrement);
   }
 
-  Future<String> _handlePlatformIncrement(String message) async {
+  Future<String> _handlePlatformIncrement(String? message) async {
     setState(() {
       _counter++;
     });

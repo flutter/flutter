@@ -179,11 +179,9 @@ void main() {
     );
 
     await tester.tap(find.text('SHOW'));
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(seconds: 1)); // end animation
     expect(Theme.of(tester.element(find.text('bottomSheet'))).brightness, equals(Brightness.light));
-
-    await tester.tap(find.text('bottomSheet')); // dismiss the bottom sheet
-    await tester.pump(const Duration(seconds: 1));
   });
 
   testWidgets('Dialog inherits shadowed app theme', (WidgetTester tester) async {
@@ -727,6 +725,8 @@ class _TextStyleProxy implements TextStyle {
   @override
   double? get height => _delegate.height;
   @override
+  TextLeadingDistribution? get leadingDistribution => _delegate.leadingDistribution;
+  @override
   Locale? get locale => _delegate.locale;
   @override
   ui.Paint? get foreground => _delegate.foreground;
@@ -780,6 +780,7 @@ class _TextStyleProxy implements TextStyle {
     double wordSpacingDelta = 0.0,
     double heightFactor = 1.0,
     double heightDelta = 0.0,
+    TextLeadingDistribution? leadingDistribution,
     TextBaseline? textBaseline,
     Locale? locale,
     List<ui.Shadow>? shadows,
@@ -807,6 +808,7 @@ class _TextStyleProxy implements TextStyle {
     double? wordSpacing,
     TextBaseline? textBaseline,
     double? height,
+    TextLeadingDistribution? leadingDistribution,
     Locale? locale,
     ui.Paint? foreground,
     ui.Paint? background,

@@ -923,7 +923,7 @@ void main() {
     );
 
     expect(bottomTapCount, 0);
-    await tester.tap(find.byKey(overlayKey));
+    await tester.tap(find.byKey(overlayKey), warnIfMissed: false); // gesture detector is translucent; no hit is registered between it and the render view
     expect(bottomTapCount, 1);
 
     overlayKey.currentState!.insert(OverlayEntry(
@@ -938,7 +938,7 @@ void main() {
     // Bottom is offstage and does not receive tap events.
     expect(find.byType(GestureDetector), findsNothing);
     expect(find.byType(GestureDetector, skipOffstage: false), findsOneWidget);
-    await tester.tap(find.byKey(overlayKey));
+    await tester.tap(find.byKey(overlayKey), warnIfMissed: false); // gesture detector is translucent; no hit is registered between it and the render view
     expect(bottomTapCount, 1);
 
     int topTapCount = 0;
@@ -956,7 +956,7 @@ void main() {
     await tester.pump();
 
     expect(topTapCount, 0);
-    await tester.tap(find.byKey(overlayKey));
+    await tester.tap(find.byKey(overlayKey), warnIfMissed: false); // gesture detector is translucent; no hit is registered between it and the render view
     expect(topTapCount, 1);
     expect(bottomTapCount, 1);
   });
@@ -1035,7 +1035,6 @@ void main() {
     );
 
     // By default, clipBehavior should be Clip.hardEdge
-    // ignore: unnecessary_nullable_for_final_variable_declarations
     final dynamic renderObject = tester.renderObject(find.byType(Overlay));
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 

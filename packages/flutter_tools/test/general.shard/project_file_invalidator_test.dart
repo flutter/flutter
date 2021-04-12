@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -80,8 +82,7 @@ void main() {
       );
     });
 
-    testWithoutContext('Picks up changes to the .packages file and updates package_config.json'
-      ', asyncScanning: $asyncScanning', () async {
+    testWithoutContext('Picks up changes to the .packages file and updates package_config.json, asyncScanning: $asyncScanning', () async {
       final DateTime past = DateTime.now().subtract(const Duration(seconds: 1));
       final FileSystem fileSystem = MemoryFileSystem.test();
       const PackageConfig packageConfig = PackageConfig.empty;
@@ -122,9 +123,7 @@ void main() {
       ]));
     });
 
-
-    testWithoutContext('Picks up changes to the .packages file and updates PackageConfig'
-      ', asyncScanning: $asyncScanning', () async {
+    testWithoutContext('Picks up changes to the .packages file and updates PackageConfig, asyncScanning: $asyncScanning', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
       const PackageConfig packageConfig = PackageConfig.empty;
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(

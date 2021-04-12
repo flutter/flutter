@@ -750,9 +750,9 @@ class TimeseriesStats {
   String toString() {
     final StringBuffer buffer = StringBuffer();
     buffer.writeln(
-      '$name: (samples: $cleanSampleCount clean/$outlierSampleCount outliers/'
-      '${cleanSampleCount + outlierSampleCount} measured/'
-      '${samples.length} total)');
+      '$name: (samples: $cleanSampleCount clean/$outlierSampleCount '
+      'outliers/${cleanSampleCount + outlierSampleCount} '
+      'measured/${samples.length} total)');
     buffer.writeln(' | average: $average μs');
     buffer.writeln(' | outlier average: $outlierAverage μs');
     buffer.writeln(' | outlier/clean ratio: ${outlierRatio}x');

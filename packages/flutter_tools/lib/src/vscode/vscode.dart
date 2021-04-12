@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-
 import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../convert.dart';
-import '../doctor.dart';
+import '../doctor_validator.dart';
 
 // Include VS Code insiders (useful for debugging).
 const bool _includeInsiders = false;
@@ -19,7 +17,7 @@ const String extensionMarketplaceUrl =
   'https://marketplace.visualstudio.com/items?itemName=$extensionIdentifier';
 
 class VsCode {
-  VsCode._(this.directory, this.extensionDirectory, { Version version, this.edition, @required FileSystem fileSystem})
+  VsCode._(this.directory, this.extensionDirectory, { Version? version, this.edition, required FileSystem fileSystem})
       : version = version ?? Version.unknown {
 
     if (!fileSystem.isDirectorySync(directory)) {
@@ -62,13 +60,13 @@ class VsCode {
   factory VsCode.fromDirectory(
     String installPath,
     String extensionDirectory, {
-    String edition,
-    @required FileSystem fileSystem,
+    String? edition,
+    required FileSystem fileSystem,
   }) {
     final String packageJsonPath =
         fileSystem.path.join(installPath, 'resources', 'app', 'package.json');
-    final String versionString = _getVersionFromPackageJson(packageJsonPath, fileSystem);
-    Version version;
+    final String? versionString = _getVersionFromPackageJson(packageJsonPath, fileSystem);
+    Version? version;
     if (versionString != null) {
       version = Version.parse(versionString);
     }
@@ -78,9 +76,9 @@ class VsCode {
   final String directory;
   final String extensionDirectory;
   final Version version;
-  final String edition;
+  final String? edition;
 
-  Version _extensionVersion;
+  Version? _extensionVersion;
   final List<ValidationMessage> _validationMessages = <ValidationMessage>[];
 
   String get productName => 'VS Code' + (edition != null ? ', $edition' : '');
@@ -113,35 +111,38 @@ class VsCode {
   //   $HOME/.vscode/extensions
   //   $HOME/.vscode-insiders/extensions
   static List<VsCode> _installedMacOS(FileSystem fileSystem, Platform platform) {
+    final String? homeDirPath = FileSystemUtils(fileSystem: fileSystem, platform: platform).homeDirPath;
     return _findInstalled(<_VsCodeInstallLocation>[
       _VsCodeInstallLocation(
         fileSystem.path.join('/Applications', 'Visual Studio Code.app', 'Contents'),
         '.vscode',
       ),
-      _VsCodeInstallLocation(
-        fileSystem.path.join(
-          FileSystemUtils(fileSystem: fileSystem, platform: platform).homeDirPath,
-          'Applications',
-          'Visual Studio Code.app',
-          'Contents',
+      if (homeDirPath != null)
+        _VsCodeInstallLocation(
+          fileSystem.path.join(
+            homeDirPath,
+            'Applications',
+            'Visual Studio Code.app',
+            'Contents',
+          ),
+          '.vscode',
         ),
-        '.vscode',
-      ),
       _VsCodeInstallLocation(
         fileSystem.path.join('/Applications', 'Visual Studio Code - Insiders.app', 'Contents'),
         '.vscode-insiders',
         isInsiders: true,
       ),
-      _VsCodeInstallLocation(
-        fileSystem.path.join(
-          FileSystemUtils(fileSystem: fileSystem, platform: platform).homeDirPath,
-          'Applications',
-          'Visual Studio Code - Insiders.app',
-          'Contents',
+      if (homeDirPath != null)
+        _VsCodeInstallLocation(
+          fileSystem.path.join(
+            homeDirPath,
+            'Applications',
+            'Visual Studio Code - Insiders.app',
+            'Contents',
+          ),
+          '.vscode-insiders',
+          isInsiders: true,
         ),
-        '.vscode-insiders',
-        isInsiders: true,
-      ),
     ], fileSystem, platform);
   }
 
@@ -161,9 +162,9 @@ class VsCode {
     FileSystem fileSystem,
     Platform platform,
   ) {
-    final String progFiles86 = platform.environment['programfiles(x86)'];
-    final String progFiles = platform.environment['programfiles'];
-    final String localAppData = platform.environment['localappdata'];
+    final String? progFiles86 = platform.environment['programfiles(x86)'];
+    final String? progFiles = platform.environment['programfiles'];
+    final String? localAppData = platform.environment['localappdata'];
 
     final List<_VsCodeInstallLocation> searchLocations = <_VsCodeInstallLocation>[
       if (localAppData != null)
@@ -239,9 +240,10 @@ class VsCode {
     final List<VsCode> results = <VsCode>[];
 
     for (final _VsCodeInstallLocation searchLocation in searchLocations) {
-      if (fileSystem.isDirectorySync(searchLocation.installPath)) {
+      final String? homeDirPath = FileSystemUtils(fileSystem: fileSystem, platform: platform).homeDirPath;
+      if (homeDirPath != null && fileSystem.isDirectorySync(searchLocation.installPath)) {
         final String extensionDirectory = fileSystem.path.join(
-          FileSystemUtils(fileSystem: fileSystem, platform: platform).homeDirPath,
+          homeDirPath,
           searchLocation.extensionsFolder,
           'extensions',
         );
@@ -261,17 +263,20 @@ class VsCode {
   String toString() =>
       'VS Code ($version)${_extensionVersion != Version.unknown ? ', Flutter ($_extensionVersion)' : ''}';
 
-  static String _getVersionFromPackageJson(String packageJsonPath, FileSystem fileSystem) {
+  static String? _getVersionFromPackageJson(String packageJsonPath, FileSystem fileSystem) {
     if (!fileSystem.isFileSync(packageJsonPath)) {
       return null;
     }
     final String jsonString = fileSystem.file(packageJsonPath).readAsStringSync();
     try {
-      final Map<String, dynamic> jsonObject = castStringKeyedMap(json.decode(jsonString));
-      return jsonObject['version'] as String;
+      final Map<String, dynamic>? jsonObject = castStringKeyedMap(json.decode(jsonString));
+      if (jsonObject?.containsKey('version') == true) {
+        return jsonObject!['version'] as String;
+      }
     } on FormatException {
       return null;
     }
+    return null;
   }
 }
 
@@ -280,11 +285,11 @@ class _VsCodeInstallLocation {
     this.installPath,
     this.extensionsFolder, {
     this.edition,
-    bool isInsiders
+    bool? isInsiders
   }) : isInsiders = isInsiders ?? false;
 
   final String installPath;
   final String extensionsFolder;
-  final String edition;
+  final String? edition;
   final bool isInsiders;
 }

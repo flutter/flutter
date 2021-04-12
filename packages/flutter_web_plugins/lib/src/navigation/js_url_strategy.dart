@@ -90,12 +90,12 @@ abstract class JsUrlStrategy {
   /// Push a new history entry.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
-  external void pushState(Object state, String title, String url);
+  external void pushState(Object? state, String title, String url);
 
   /// Replace the currently active history entry.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState
-  external void replaceState(Object state, String title, String url);
+  external void replaceState(Object? state, String title, String url);
 
   /// Moves forwards or backwards through the history stack.
   ///

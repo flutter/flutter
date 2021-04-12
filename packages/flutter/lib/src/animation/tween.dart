@@ -256,6 +256,51 @@ class Tween<T extends dynamic> extends Animatable<T> {
   T lerp(double t) {
     assert(begin != null);
     assert(end != null);
+    assert(() {
+      // Assertions that attempt to catch common cases of tweening types
+      // that do not conform to the Tween requirements.
+      dynamic result;
+      try {
+        result = begin + (end - begin) * t;
+        result as T;
+        return true;
+      } on NoSuchMethodError {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Cannot lerp between "$begin" and "$end".'),
+          ErrorDescription(
+            'The type ${begin.runtimeType} might not fully implement `+`, `-`, and/or `*`. '
+            'See "Types with special considerations" at https://api.flutter.dev/flutter/animation/Tween-class.html '
+            'for more information.',
+          ),
+          if (begin is Color || end is Color)
+            ErrorHint('To lerp colors, consider ColorTween instead.')
+          else if (begin is Rect || end is Rect)
+            ErrorHint('To lerp rects, consider RectTween instead.')
+          else
+            ErrorHint(
+              'There may be a dedicated "${begin.runtimeType}Tween" for this type, '
+              'or you may need to create one.',
+            ),
+        ]);
+      } on TypeError {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Cannot lerp between "$begin" and "$end".'),
+          ErrorDescription(
+            'The type ${begin.runtimeType} returned a ${result.runtimeType} after '
+            'multiplication with a double value. '
+            'See "Types with special considerations" at https://api.flutter.dev/flutter/animation/Tween-class.html '
+            'for more information.',
+          ),
+          if (begin is int || end is int)
+            ErrorHint('To lerp int values, consider IntTween or StepTween instead.')
+          else
+            ErrorHint(
+              'There may be a dedicated "${begin.runtimeType}Tween" for this type, '
+              'or you may need to create one.',
+            ),
+        ]);
+      }
+    }());
     return begin + (end - begin) * t as T;
   }
 

@@ -101,11 +101,20 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
   return clock.elapsedMilliseconds;
 }
 
+Future<void> pubGetDependencies(List<Directory> directories) async {
+  for (final Directory directory in directories) {
+    await inDirectory<void>(directory, () async {
+      await flutter('pub', options: <String>['get']);
+    });
+  }
+}
+
 void main() {
   task(() async {
     final File nodeSourceFile = File(path.join(
       flutterDirectory.path, 'packages', 'flutter', 'lib', 'src', 'foundation', 'node.dart',
     ));
+    await pubGetDependencies(<Directory>[Directory(path.join(flutterDirectory.path, 'dev', 'automated_tests')),]);
     final String originalSource = await nodeSourceFile.readAsString();
     try {
       await runTest(noPub: true); // first number is meaningless; could have had to build the tool, run pub get, have a cache, etc

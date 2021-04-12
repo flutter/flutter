@@ -30,7 +30,7 @@ void main() {
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-              return Container(height: 100.0, child: const Text('Target'));
+              return const SizedBox(height: 100.0, child: Text('Target'));
             },
             onMove: (_) => moveCount++,
             onAccept: accepted.add,
@@ -85,6 +85,83 @@ void main() {
     expect(moveCount, 1);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/76825
+  testWidgets('Drag and drop - onLeave callback fires correctly with generic parameter',
+      (WidgetTester tester) async {
+    final Map<String,int> leftBehind = <String,int>{
+      'Target 1': 0,
+      'Target 2': 0,
+    };
+
+    await tester.pumpWidget(MaterialApp(
+      home: Column(
+        children: <Widget>[
+          const Draggable<int>(
+            data: 1,
+            child: Text('Source'),
+            feedback: Text('Dragging'),
+          ),
+          DragTarget<int>(
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
+              return const SizedBox(height: 100.0, child: Text('Target 1'));
+            },
+            onLeave: (int? data) {
+              if (data != null) {
+                leftBehind['Target 1'] = leftBehind['Target 1']! + data;
+              }
+            },
+          ),
+          DragTarget<int>(
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
+              return const SizedBox(height: 100.0, child: Text('Target 2'));
+            },
+            onLeave: (int? data) {
+              if (data != null) {
+                leftBehind['Target 2'] = leftBehind['Target 2']! + data;
+              }
+            },
+          ),
+        ],
+      ),
+    ));
+
+    expect(leftBehind['Target 1'], equals(0));
+    expect(leftBehind['Target 2'], equals(0));
+
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+
+    expect(leftBehind['Target 1'], equals(0));
+    expect(leftBehind['Target 2'], equals(0));
+
+    final Offset secondLocation = tester.getCenter(find.text('Target 1'));
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+
+    expect(leftBehind['Target 1'], equals(0));
+    expect(leftBehind['Target 2'], equals(0));
+
+    final Offset thirdLocation = tester.getCenter(find.text('Target 2'));
+    await gesture.moveTo(thirdLocation);
+    await tester.pump();
+
+    expect(leftBehind['Target 1'], equals(1));
+    expect(leftBehind['Target 2'], equals(0));
+
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+
+    expect(leftBehind['Target 1'], equals(1));
+    expect(leftBehind['Target 2'], equals(1));
+
+    await gesture.up();
+    await tester.pump();
+
+    expect(leftBehind['Target 1'], equals(1));
+    expect(leftBehind['Target 2'], equals(1));
+  });
+
   testWidgets('Drag and drop - onLeave callback fires correctly', (WidgetTester tester) async {
     final Map<String,int> leftBehind = <String,int>{
       'Target 1': 0,
@@ -101,7 +178,7 @@ void main() {
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-              return Container(height: 100.0, child: const Text('Target 1'));
+              return const SizedBox(height: 100.0, child: Text('Target 1'));
             },
             onLeave: (Object? data) {
               if (data is int) {
@@ -111,7 +188,7 @@ void main() {
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-              return Container(height: 100.0, child: const Text('Target 2'));
+              return const SizedBox(height: 100.0, child: Text('Target 2'));
             },
             onLeave: (Object? data) {
               if (data is int) {
@@ -160,6 +237,81 @@ void main() {
     expect(leftBehind['Target 2'], equals(1));
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/76825
+  testWidgets('Drag and drop - onMove callback fires correctly with generic parameter',
+      (WidgetTester tester) async {
+    final Map<String,int> targetMoveCount = <String,int>{
+      'Target 1': 0,
+      'Target 2': 0,
+    };
+
+    await tester.pumpWidget(MaterialApp(
+      home: Column(
+        children: <Widget>[
+          const Draggable<int>(
+            data: 1,
+            child: Text('Source'),
+            feedback: Text('Dragging'),
+          ),
+          DragTarget<int>(
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
+              return const SizedBox(height: 100.0, child: Text('Target 1'));
+            },
+            onMove: (DragTargetDetails<int> details) {
+              targetMoveCount['Target 1'] =
+                  targetMoveCount['Target 1']! + details.data;
+            },
+          ),
+          DragTarget<int>(
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
+              return const SizedBox(height: 100.0, child: Text('Target 2'));
+            },
+            onMove: (DragTargetDetails<int> details) {
+              targetMoveCount['Target 2'] =
+                  targetMoveCount['Target 2']! + details.data;
+            },
+          ),
+        ],
+      ),
+    ));
+
+    expect(targetMoveCount['Target 1'], equals(0));
+    expect(targetMoveCount['Target 2'], equals(0));
+
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+
+    expect(targetMoveCount['Target 1'], equals(0));
+    expect(targetMoveCount['Target 2'], equals(0));
+
+    final Offset secondLocation = tester.getCenter(find.text('Target 1'));
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+
+    expect(targetMoveCount['Target 1'], equals(1));
+    expect(targetMoveCount['Target 2'], equals(0));
+
+    final Offset thirdLocation = tester.getCenter(find.text('Target 2'));
+    await gesture.moveTo(thirdLocation);
+    await tester.pump();
+
+    expect(targetMoveCount['Target 1'], equals(1));
+    expect(targetMoveCount['Target 2'], equals(1));
+
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+
+    expect(targetMoveCount['Target 1'], equals(2));
+    expect(targetMoveCount['Target 2'], equals(1));
+
+    await gesture.up();
+    await tester.pump();
+
+    expect(targetMoveCount['Target 1'], equals(2));
+    expect(targetMoveCount['Target 2'], equals(1));
+  });
+
   testWidgets('Drag and drop - onMove callback fires correctly', (WidgetTester tester) async {
     final Map<String,int> targetMoveCount = <String,int>{
       'Target 1': 0,
@@ -176,7 +328,7 @@ void main() {
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-              return Container(height: 100.0, child: const Text('Target 1'));
+              return const SizedBox(height: 100.0, child: Text('Target 1'));
             },
             onMove: (DragTargetDetails<dynamic> details) {
               if (details.data is int) {
@@ -187,7 +339,7 @@ void main() {
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-              return Container(height: 100.0, child: const Text('Target 2'));
+              return const SizedBox(height: 100.0, child: Text('Target 2'));
             },
             onMove: (DragTargetDetails<dynamic> details) {
               if (details.data is int) {
@@ -256,14 +408,12 @@ void main() {
                 onTap: () {
                   events.add('tap');
                 },
-                child: Container(
-                  child: const Text('Button'),
-                ),
+                child: const Text('Button'),
               ),
               DragTarget<int>(
                 builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-                  return IgnorePointer(
-                    child: Container(child: const Text('Target')),
+                  return const IgnorePointer(
+                    child: Text('Target'),
                   );
                 },
                 onAccept: (int? data) {
@@ -293,7 +443,7 @@ void main() {
     events.clear();
 
     expect(events, isEmpty);
-    await tester.tap(find.text('Target'));
+    await tester.tap(find.text('Target'), warnIfMissed: false); // (inside IgnorePointer)
     expect(events, equals(<String>['tap']));
     events.clear();
 
@@ -325,7 +475,7 @@ void main() {
 
     expect(events, isEmpty);
     await tester.tap(find.text('Button'));
-    await tester.tap(find.text('Target'));
+    await tester.tap(find.text('Target'), warnIfMissed: false); // (inside IgnorePointer)
     await gesture.up();
     await tester.pump();
     expect(events, equals(<String>['tap', 'tap', 'drop', 'details']));
@@ -346,7 +496,7 @@ void main() {
               onTap: () {
                 events.add('tap');
               },
-              child: Container(child: const Text('Button')),
+              child: const Text('Button'),
             ),
             feedback: const Text('Dragging'),
           ),
@@ -1011,7 +1161,7 @@ void main() {
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-              return Container(height: 100.0, child: const Text('Target'));
+              return const SizedBox(height: 100.0, child: Text('Target'));
             },
             onAccept: accepted.add,
             onAcceptWithDetails: acceptedDetails.add,
@@ -1083,9 +1233,9 @@ void main() {
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-              return Container(
+              return const SizedBox(
                 height: 100.0,
-                child: const Text('Target'),
+                child: Text('Target'),
               );
             },
             onWillAccept: (int? data) => false,
@@ -1159,10 +1309,7 @@ void main() {
         ),
         DragTarget<int>(
           builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-            return Container(
-              height: 100.0,
-              child: const Text('Target'),
-            );
+            return const SizedBox(height: 100.0, child: Text('Target'));
           },
           onWillAccept: (int? data) => false,
           onAccept: accepted.add,
@@ -1212,10 +1359,7 @@ void main() {
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-              return Container(
-                height: 100.0,
-                child: const Text('Target'),
-              );
+              return const SizedBox(height: 100.0, child: Text('Target'));
             },
             onWillAccept: (int? data) => false,
             onAccept: accepted.add,
@@ -1282,7 +1426,7 @@ void main() {
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-              return Container(
+              return SizedBox(
                 height: 100.0,
                 child: rejects.isNotEmpty
                     ? const Text('Rejected')
@@ -1340,7 +1484,7 @@ void main() {
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-              return Container(
+              return SizedBox(
                 height: 100.0,
                 child: rejects.isNotEmpty
                     ? const Text('Rejected')
@@ -1425,9 +1569,9 @@ void main() {
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-              return Container(
+              return const SizedBox(
                 height: 100.0,
-                child: const Text('Target'),
+                child: Text('Target'),
               );
             },
             onWillAccept: (int? data) => false,
@@ -1497,7 +1641,7 @@ void main() {
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-              return Container(height: 100.0, child: const Text('Target'));
+              return const SizedBox(height: 100.0, child: Text('Target'));
             },
             onAccept: accepted.add,
             onAcceptWithDetails: acceptedDetails.add,
@@ -1638,7 +1782,7 @@ void main() {
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-              return Container(height: 100.0, child: const Text('Target'));
+              return const SizedBox(height: 100.0, child: Text('Target'));
             },
             onAccept: accepted.add,
             onAcceptWithDetails: acceptedDetails.add,
@@ -1711,10 +1855,10 @@ void main() {
             children: <Widget>[
               DragTarget<int>(
                 builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-                  return IgnorePointer(
-                    child: Container(
+                  return const IgnorePointer(
+                    child: SizedBox(
                       height: 100.0,
-                      child: const Text('Target1'),
+                      child: Text('Target1'),
                     ),
                   );
                 },
@@ -1723,10 +1867,10 @@ void main() {
               ),
               DragTarget<double>(
                 builder: (BuildContext context, List<double?> data, List<dynamic> rejects) {
-                  return IgnorePointer(
-                    child: Container(
+                  return const IgnorePointer(
+                    child: SizedBox(
                       height: 100.0,
-                      child: const Text('Target2'),
+                      child: Text('Target2'),
                     ),
                   );
                 },
@@ -1840,10 +1984,10 @@ void main() {
             children: <Widget>[
               DragTarget<DragTargetData>(
                 builder: (BuildContext context, List<DragTargetData?> data, List<dynamic> rejects) {
-                  return IgnorePointer(
-                    child: Container(
+                  return const IgnorePointer(
+                    child: SizedBox(
                       height: 100.0,
-                      child: const Text('Target1'),
+                      child: Text('Target1'),
                     ),
                   );
                 }, onAccept: acceptedDragTargetDatas.add,
@@ -1851,10 +1995,10 @@ void main() {
               ),
               DragTarget<ExtendedDragTargetData>(
                 builder: (BuildContext context, List<ExtendedDragTargetData?> data, List<dynamic> rejects) {
-                  return IgnorePointer(
-                    child: Container(
+                  return const IgnorePointer(
+                    child: SizedBox(
                       height: 100.0,
-                      child: const Text('Target2'),
+                      child: Text('Target2'),
                     ),
                   );
                 },
@@ -1906,7 +2050,7 @@ void main() {
             ),
             DragTarget<int>(
               builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-                return Container(height: 100.0, child: const Text('Target'));
+                return const SizedBox(height: 100.0, child: Text('Target'));
               },
               onAccept: accepted.add,
               onAcceptWithDetails: acceptedDetails.add,
@@ -2165,7 +2309,7 @@ void main() {
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-              return Container(height: 100.0, child: const Text('Target'));
+              return const SizedBox(height: 100.0, child: Text('Target'));
             },
             onAccept: accepted.add,
             onAcceptWithDetails: acceptedDetails.add,
@@ -2195,7 +2339,7 @@ void main() {
         children: <Widget>[
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-              return Container(height: 100.0, child: const Text('Target'));
+              return const SizedBox(height: 100.0, child: Text('Target'));
             },
             onAccept: accepted.add,
             onAcceptWithDetails: acceptedDetails.add,
@@ -2275,7 +2419,7 @@ void main() {
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-              return Container(height: 100.0, child: const Text('Target'));
+              return const SizedBox(height: 100.0, child: Text('Target'));
             },
             onAccept: accepted.add,
             onAcceptWithDetails: acceptedDetails.add,
@@ -2360,7 +2504,7 @@ void main() {
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-              return Container(height: 100.0, child: const Text('Target'));
+              return const SizedBox(height: 100.0, child: Text('Target'));
             },
             onAccept: accepted.add,
             onAcceptWithDetails: acceptedDetails.add,
@@ -2395,7 +2539,6 @@ void main() {
     expect(find.text('Dragging'), findsOneWidget);
     expect(find.text('Target'), findsOneWidget);
     expect(onDragCompletedCalled, isFalse);
-
 
     final Offset secondLocation = tester.getCenter(find.text('Target'));
     await gesture.moveTo(secondLocation);
@@ -2452,6 +2595,73 @@ void main() {
     expect(onDragStartedCalled, isTrue);
   });
 
+  testWidgets('Custom long press delay for LongPressDraggable', (WidgetTester tester) async {
+    bool onDragStartedCalled = false;
+    await tester.pumpWidget(MaterialApp(
+      home: LongPressDraggable<int>(
+        data: 1,
+        delay: const Duration(seconds: 2),
+        child: const Text('Source'),
+        feedback: const Text('Dragging'),
+        onDragStarted: () {
+          onDragStartedCalled = true;
+        },
+      ),
+    ));
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(onDragStartedCalled, isFalse);
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(onDragStartedCalled, isFalse);
+    // Halfway into the long press duration.
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(onDragStartedCalled, isFalse);
+    // Long press draggable should be showing.
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsOneWidget);
+    expect(onDragStartedCalled, isTrue);
+  });
+
+  testWidgets('Default long press delay for LongPressDraggable', (WidgetTester tester) async {
+    bool onDragStartedCalled = false;
+    await tester.pumpWidget(MaterialApp(
+      home: LongPressDraggable<int>(
+        data: 1,
+        child: const Text('Source'),
+        feedback: const Text('Dragging'),
+        onDragStarted: () {
+          onDragStartedCalled = true;
+        },
+      ),
+    ));
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(onDragStartedCalled, isFalse);
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(onDragStartedCalled, isFalse);
+    // Halfway into the long press duration.
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(onDragStartedCalled, isFalse);
+    // Long press draggable should be showing.
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsOneWidget);
+    expect(onDragStartedCalled, isTrue);
+  });
+
   testWidgets('long-press draggable calls Haptic Feedback onStart', (WidgetTester tester) async {
     await _testLongPressDraggableHapticFeedback(tester: tester, hapticFeedbackOnStart: true, expectedHapticFeedbackCount: 1);
   });
@@ -2477,7 +2687,7 @@ void main() {
         navigatorKey: rootNavigatorKey,
         home: Column(
           children: <Widget>[
-            Container(
+            SizedBox(
               height: 200.0,
               child: Navigator(
                 key: childNavigatorKey,
@@ -2499,8 +2709,8 @@ void main() {
             ),
             DragTarget<int>(
               builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-                return Container(
-                    height: 300.0, child: const Center(child: Text('Target 1')),
+                return const SizedBox(
+                    height: 300.0, child: Center(child: Text('Target 1')),
                 );
               },
             ),
@@ -2546,7 +2756,7 @@ void main() {
           ),
           DragTarget<Object>(
             builder: (BuildContext context, List<Object?> data, List<dynamic> rejects) {
-              return Container(height: 100.0, child: const Text('Target'));
+              return const SizedBox(height: 100.0, child: Text('Target'));
             },
             onAccept: accepted.add,
           ),
@@ -2582,7 +2792,7 @@ void main() {
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-              return Container(height: 100.0, child: const Text('Target'));
+              return const SizedBox(height: 100.0, child: Text('Target'));
             },
             onAccept: accepted.add,
           ),
@@ -2618,7 +2828,7 @@ void main() {
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-              return Container(height: 100.0, child: const Text('Target'));
+              return const SizedBox(height: 100.0, child: Text('Target'));
             },
             onAccept: accepted.add,
             onWillAccept: (int? data) {
@@ -2807,6 +3017,84 @@ void main() {
     ), ignoreTransform: true, ignoreRect: true));
     semantics.dispose();
   });
+
+  testWidgets('Drag and drop - when a dragAnchorStrategy is provided it gets called', (WidgetTester tester) async {
+    bool dragAnchorStrategyCalled = false;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Column(
+        children: <Widget>[
+          Draggable<int>(
+            child: const Text('Source'),
+            feedback: const Text('Feedback'),
+            dragAnchorStrategy: (Draggable<Object> widget, BuildContext context, Offset position) {
+              dragAnchorStrategyCalled = true;
+              return const Offset(0, 0);
+            }
+          )
+        ],
+      ),
+    ));
+
+    final Offset location = tester.getCenter(find.text('Source'));
+    await tester.startGesture(location, pointer: 7);
+
+    expect(dragAnchorStrategyCalled, true);
+  });
+
+  testWidgets('configurable Draggable hit test behavior', (WidgetTester tester) async {
+    const HitTestBehavior hitTestBehavior = HitTestBehavior.deferToChild;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Column(
+          children: const <Widget>[
+            Draggable<int>(
+              hitTestBehavior: hitTestBehavior,
+              feedback: SizedBox(height: 50.0, child: Text('Draggable')),
+              child: SizedBox(height: 50.0, child: Text('Target')),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(tester.widget<Listener>(find.byType(Listener).first).behavior, hitTestBehavior);
+  });
+
+  testWidgets('configurable DragTarget hit test behavior', (WidgetTester tester) async {
+    const HitTestBehavior hitTestBehavior = HitTestBehavior.deferToChild;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Column(
+          children: <Widget>[
+            DragTarget<int>(
+              hitTestBehavior: hitTestBehavior,
+              builder: (BuildContext context, List<int?> data,
+                  List<dynamic> rejects) {
+                return const SizedBox(height: 100.0, child: Text('Target'));
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(tester.widget<MetaData>(find.byType(MetaData)).behavior, hitTestBehavior);
+  });
+
+  testWidgets('LongPressDraggable.dragAnchorStrategy', (WidgetTester tester) async {
+    const Widget widget1 = Placeholder(key: ValueKey<int>(1));
+    const Widget widget2 = Placeholder(key: ValueKey<int>(2));
+    Offset dummyStrategy(Draggable<Object> draggable, BuildContext context, Offset position) => Offset.zero;
+    expect(const LongPressDraggable<int>(child: widget1, feedback: widget2), isA<Draggable<int>>());
+    expect(const LongPressDraggable<int>(child: widget1, feedback: widget2).child, widget1);
+    expect(const LongPressDraggable<int>(child: widget1, feedback: widget2).feedback, widget2);
+    expect(const LongPressDraggable<int>(child: widget1, feedback: widget2, dragAnchor: DragAnchor.child).dragAnchor, DragAnchor.child);
+    expect(const LongPressDraggable<int>(child: widget1, feedback: widget2, dragAnchor: DragAnchor.pointer).dragAnchor, DragAnchor.pointer);
+    expect(LongPressDraggable<int>(child: widget1, feedback: widget2, dragAnchorStrategy: dummyStrategy).dragAnchorStrategy, dummyStrategy);
+  });
 }
 
 Future<void> _testLongPressDraggableHapticFeedback({ required WidgetTester tester, required bool hapticFeedbackOnStart, required int expectedHapticFeedbackCount }) async {
@@ -2878,7 +3166,7 @@ Future<void> _testChildAnchorFeedbackPosition({ required WidgetTester tester, do
                 ),
                 DragTarget<int>(
                   builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-                    return Container(height: 100.0, child: const Text('Target'));
+                    return const SizedBox(height: 100.0, child: Text('Target'));
                   },
                   onAccept: accepted.add,
                   onAcceptWithDetails: acceptedDetails.add,

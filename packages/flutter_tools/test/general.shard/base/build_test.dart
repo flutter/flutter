@@ -2,19 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/build.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 
 const FakeCommand kWhichSysctlCommand = FakeCommand(
   command: <String>[
@@ -185,30 +183,16 @@ void main() {
     AOTSnapshotter snapshotter;
     Artifacts artifacts;
     FakeProcessManager processManager;
-    Logger logger;
 
     setUp(() async {
-      final Platform platform = FakePlatform(operatingSystem: 'macos');
-      logger = BufferLogger.test();
       fileSystem = MemoryFileSystem.test();
       artifacts = Artifacts.test();
       processManager = FakeProcessManager.list(<FakeCommand>[]);
       snapshotter = AOTSnapshotter(
         fileSystem: fileSystem,
-        logger: logger,
-        xcode: Xcode(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: FakePlatform(operatingSystem: 'macos'),
+        logger: BufferLogger.test(),
+        xcode: Xcode.test(
           processManager: processManager,
-          xcodeProjectInterpreter: XcodeProjectInterpreter(
-            platform: platform,
-            processManager: processManager,
-            logger: logger,
-            fileSystem: fileSystem,
-            terminal: Terminal.test(),
-            usage: Usage.test(),
-          ),
         ),
         artifacts: artifacts,
         processManager: processManager,
@@ -312,7 +296,7 @@ void main() {
       );
 
       expect(genSnapshotExitCode, 0);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('builds iOS armv7 snapshot with dwarStackTraces', () async {
@@ -370,7 +354,7 @@ void main() {
       );
 
       expect(genSnapshotExitCode, 0);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('builds iOS armv7 snapshot with obfuscate', () async {
@@ -426,7 +410,7 @@ void main() {
       );
 
       expect(genSnapshotExitCode, 0);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
 
@@ -481,7 +465,7 @@ void main() {
       );
 
       expect(genSnapshotExitCode, 0);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('builds iOS arm64 snapshot', () async {
@@ -533,7 +517,7 @@ void main() {
       );
 
       expect(genSnapshotExitCode, 0);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('builds shared library for android-arm (32bit)', () async {
@@ -562,7 +546,7 @@ void main() {
       );
 
       expect(genSnapshotExitCode, 0);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('builds shared library for android-arm with dwarf stack traces', () async {
@@ -594,7 +578,7 @@ void main() {
       );
 
       expect(genSnapshotExitCode, 0);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('builds shared library for android-arm with obfuscate', () async {
@@ -624,7 +608,7 @@ void main() {
       );
 
       expect(genSnapshotExitCode, 0);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('builds shared library for android-arm without dwarf stack traces due to empty string', () async {
@@ -653,7 +637,7 @@ void main() {
       );
 
       expect(genSnapshotExitCode, 0);
-       expect(processManager.hasRemainingExpectations, false);
+       expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('builds shared library for android-arm64', () async {
@@ -680,7 +664,34 @@ void main() {
       );
 
       expect(genSnapshotExitCode, 0);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('--no-strip in extraGenSnapshotOptions suppresses --strip', () async {
+      final String outputPath = fileSystem.path.join('build', 'foo');
+      processManager.addCommand(FakeCommand(
+        command: <String>[
+          artifacts.getArtifactPath(Artifact.genSnapshot, platform: TargetPlatform.android_arm64, mode: BuildMode.release),
+          '--deterministic',
+          '--snapshot_kind=app-aot-elf',
+          '--elf=build/foo/app.so',
+          'main.dill',
+        ]
+      ));
+
+      final int genSnapshotExitCode = await snapshotter.build(
+        platform: TargetPlatform.android_arm64,
+        buildMode: BuildMode.release,
+        mainPath: 'main.dill',
+        outputPath: outputPath,
+        bitcode: false,
+        splitDebugInfo: null,
+        dartObfuscation: false,
+        extraGenSnapshotOptions: const <String>['--no-strip'],
+      );
+
+      expect(genSnapshotExitCode, 0);
+      expect(processManager, hasNoRemainingExpectations);
     });
   });
 }

@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/animation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
@@ -270,7 +269,7 @@ void main() {
         ratio: 2.0,
       ),
     );
-    tick(const Duration(milliseconds: 0));
+    tick(Duration.zero);
     tick(const Duration(milliseconds: 50));
 
     expect(customSpringController.value < controller.value, true);
@@ -316,7 +315,7 @@ void main() {
 
     // mid-flight
     controller.forward();
-    tick(const Duration(milliseconds: 0));
+    tick(Duration.zero);
     tick(const Duration(milliseconds: 500));
     expect(controller.velocity, inInclusiveRange(0.9, 1.1));
 
@@ -461,7 +460,7 @@ void main() {
     expect(controller.value, equals(0.0));
 
     controller.forward();
-    tick(const Duration(milliseconds: 0));
+    tick(Duration.zero);
     tick(const Duration(milliseconds: 500));
     expect(controller.value, inInclusiveRange(0.4, 0.6));
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward ]));
@@ -483,7 +482,7 @@ void main() {
     expect(controller.value, equals(1.0));
 
     controller.reverse();
-    tick(const Duration(milliseconds: 0));
+    tick(Duration.zero);
     tick(const Duration(milliseconds: 500));
     expect(controller.value, inInclusiveRange(0.4, 0.6));
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.reverse ]));
@@ -527,7 +526,7 @@ void main() {
 
     statusLog.clear();
     controller.forward();
-    tick(const Duration(milliseconds: 0));
+    tick(Duration.zero);
     tick(const Duration(milliseconds: 50));
     expect(controller.status, AnimationStatus.forward);
     controller.reset();
@@ -539,7 +538,7 @@ void main() {
     controller.value = 1.0;
     statusLog.clear();
     controller.reverse();
-    tick(const Duration(milliseconds: 0));
+    tick(Duration.zero);
     tick(const Duration(milliseconds: 50));
     expect(controller.status, AnimationStatus.reverse);
     controller.reset();
@@ -550,7 +549,7 @@ void main() {
 
     statusLog.clear();
     controller.forward();
-    tick(const Duration(milliseconds: 0));
+    tick(Duration.zero);
     tick(const Duration(milliseconds: 150));
     expect(controller.status, AnimationStatus.completed);
     controller.reset();
@@ -603,7 +602,7 @@ void main() {
 
     // Animate from 0.0 to 0.5
     controller.animateTo(0.5);
-    tick(const Duration(milliseconds: 0));
+    tick(Duration.zero);
     tick(const Duration(milliseconds: 150));
     expect(controller.value, 0.5);
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
@@ -611,7 +610,7 @@ void main() {
 
     // Animate from 0.5 to 1.0
     controller.animateTo(1.0);
-    tick(const Duration(milliseconds: 0));
+    tick(Duration.zero);
     tick(const Duration(milliseconds: 150));
     expect(controller.value, 1.0);
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
@@ -619,7 +618,7 @@ void main() {
 
     // Animate from 1.0 to 0.5
     controller.animateTo(0.5);
-    tick(const Duration(milliseconds: 0));
+    tick(Duration.zero);
     tick(const Duration(milliseconds: 150));
     expect(controller.value, 0.5);
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
@@ -627,7 +626,7 @@ void main() {
 
     // Animate from 0.5 to 1.0
     controller.animateTo(0.0);
-    tick(const Duration(milliseconds: 0));
+    tick(Duration.zero);
     tick(const Duration(milliseconds: 150));
     expect(controller.value, 0.0);
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
@@ -648,14 +647,14 @@ void main() {
     expect(controller.status, AnimationStatus.completed);
 
     controller.reverse();
-    tick(const Duration(milliseconds: 0));
+    tick(Duration.zero);
     tick(const Duration(milliseconds: 150));
     expect(controller.value, 0.0);
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.reverse, AnimationStatus.dismissed ]));
     statusLog.clear();
 
     controller.animateTo(0.5);
-    tick(const Duration(milliseconds: 0));
+    tick(Duration.zero);
     tick(const Duration(milliseconds: 150));
     expect(controller.value, 0.5);
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
@@ -676,14 +675,14 @@ void main() {
     expect(controller.status, AnimationStatus.dismissed);
 
     controller.forward();
-    tick(const Duration(milliseconds: 0));
+    tick(Duration.zero);
     tick(const Duration(milliseconds: 150));
     expect(controller.value, 1.0);
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
     statusLog.clear();
 
     controller.animateTo(0.5);
-    tick(const Duration(milliseconds: 0));
+    tick(Duration.zero);
     tick(const Duration(milliseconds: 150));
     expect(controller.value, 0.5);
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
@@ -705,11 +704,11 @@ void main() {
       expect(controller.value, 0.0);
 
       controller.repeat(reverse: true);
-      tick(const Duration(milliseconds: 0));
+      tick(Duration.zero);
       tick(const Duration(milliseconds: 25));
       expect(controller.value, 0.25);
 
-      tick(const Duration(milliseconds: 0));
+      tick(Duration.zero);
       tick(const Duration(milliseconds: 125));
       expect(controller.value, 0.75);
 
@@ -718,11 +717,11 @@ void main() {
       expect(controller.value, 1.0);
 
       controller.repeat(reverse: true);
-      tick(const Duration(milliseconds: 0));
+      tick(Duration.zero);
       tick(const Duration(milliseconds: 25));
       expect(controller.value, 0.75);
 
-      tick(const Duration(milliseconds: 0));
+      tick(Duration.zero);
       tick(const Duration(milliseconds: 125));
       expect(controller.value, 0.25);
 
@@ -731,11 +730,11 @@ void main() {
       expect(controller.value, 0.5);
 
       controller.repeat(reverse: true);
-      tick(const Duration(milliseconds: 0));
+      tick(Duration.zero);
       tick(const Duration(milliseconds: 50));
       expect(controller.value, 1.0);
 
-      tick(const Duration(milliseconds: 0));
+      tick(Duration.zero);
       tick(const Duration(milliseconds: 150));
       expect(controller.value, 0.0);
     },
@@ -756,15 +755,15 @@ void main() {
       expect(controller.value, 0.0);
 
       controller.repeat(reverse: true, min: 0.5, max: 1.0);
-      tick(const Duration(milliseconds: 0));
+      tick(Duration.zero);
       tick(const Duration(milliseconds: 50));
       expect(controller.value, 0.75);
 
-      tick(const Duration(milliseconds: 0));
+      tick(Duration.zero);
       tick(const Duration(milliseconds: 100));
       expect(controller.value, 1.00);
 
-      tick(const Duration(milliseconds: 0));
+      tick(Duration.zero);
       tick(const Duration(milliseconds: 200));
       expect(controller.value, 0.5);
 
@@ -773,11 +772,11 @@ void main() {
       expect(controller.value, 0.0);
 
       controller.repeat(reverse: true, min: 1.0, max: 1.0);
-      tick(const Duration(milliseconds: 0));
+      tick(Duration.zero);
       tick(const Duration(milliseconds: 25));
       expect(controller.value, 1.0);
 
-      tick(const Duration(milliseconds: 0));
+      tick(Duration.zero);
       tick(const Duration(milliseconds: 125));
       expect(controller.value, 1.0);
     },
@@ -792,7 +791,7 @@ void main() {
       expect(repeating.animationBehavior, AnimationBehavior.preserve);
     });
 
-    test('AnimationBehavior.preserve runs at normal speed when animatingTo', () async {
+    test('AnimationBehavior.preserve runs at normal speed when animatingTo', () {
       debugSemanticsDisableAnimations = true;
       final AnimationController controller = AnimationController(
         vsync: const TestVSync(),
@@ -803,13 +802,13 @@ void main() {
       expect(controller.status, AnimationStatus.dismissed);
 
       controller.animateTo(1.0, duration: const Duration(milliseconds: 100));
-      tick(const Duration(milliseconds: 0));
+      tick(Duration.zero);
       tick(const Duration(milliseconds: 50));
 
       expect(controller.value, 0.5);
       expect(controller.status, AnimationStatus.forward);
 
-      tick(const Duration(milliseconds: 0));
+      tick(Duration.zero);
       tick(const Duration(milliseconds: 150));
 
       expect(controller.value, 1.0);
@@ -817,7 +816,7 @@ void main() {
       debugSemanticsDisableAnimations = false;
     });
 
-    test('AnimationBehavior.normal runs at 20x speed when animatingTo', () async {
+    test('AnimationBehavior.normal runs at 20x speed when animatingTo', () {
       debugSemanticsDisableAnimations = true;
       final AnimationController controller = AnimationController(
         vsync: const TestVSync(),
@@ -828,13 +827,13 @@ void main() {
       expect(controller.status, AnimationStatus.dismissed);
 
       controller.animateTo(1.0, duration: const Duration(milliseconds: 100));
-      tick(const Duration(milliseconds: 0));
+      tick(Duration.zero);
       tick(const Duration(microseconds: 2500));
 
       expect(controller.value, 0.5);
       expect(controller.status, AnimationStatus.forward);
 
-      tick(const Duration(milliseconds: 0));
+      tick(Duration.zero);
       tick(const Duration(milliseconds: 5, microseconds: 1000));
 
       expect(controller.value, 1.0);
@@ -853,7 +852,7 @@ void main() {
 
       controller.fling(velocity: 1.0, animationBehavior: AnimationBehavior.preserve);
       fastController.fling(velocity: 1.0, animationBehavior: AnimationBehavior.normal);
-      tick(const Duration(milliseconds: 0));
+      tick(Duration.zero);
       tick(const Duration(milliseconds: 50));
 
       // We don't assert a specific faction that normal animation.
@@ -887,7 +886,7 @@ void main() {
     });
 
     controller.animateWith(TestSimulation());
-    tick(const Duration(milliseconds: 0));
+    tick(Duration.zero);
     tick(const Duration(seconds: 2));
     expect(statuses, <AnimationStatus>[AnimationStatus.forward]);
   });
@@ -901,13 +900,13 @@ void main() {
       statuses.add(status);
     });
     controller.reverse(from: 1.0);
-    tick(const Duration(milliseconds: 0));
+    tick(Duration.zero);
     tick(const Duration(seconds: 2));
     expect(statuses, <AnimationStatus>[AnimationStatus.completed, AnimationStatus.reverse, AnimationStatus.dismissed]);
     statuses.clear();
 
     controller.animateWith(TestSimulation());
-    tick(const Duration(milliseconds: 0));
+    tick(Duration.zero);
     tick(const Duration(seconds: 2));
     expect(statuses, <AnimationStatus>[AnimationStatus.forward]);
   });
@@ -922,7 +921,7 @@ void main() {
     });
 
     controller.repeat(reverse: true);
-    tick(const Duration(milliseconds: 0));
+    tick(Duration.zero);
     tick(const Duration(milliseconds: 999));
     expect(statuses, <AnimationStatus>[AnimationStatus.forward]);
     statuses.clear();
@@ -943,7 +942,7 @@ void main() {
 
     expect(statuses, <AnimationStatus>[AnimationStatus.reverse]);
     statuses.clear();
-    tick(const Duration(milliseconds: 0));
+    tick(Duration.zero);
     tick(const Duration(seconds: 2));
     expect(statuses, <AnimationStatus>[AnimationStatus.dismissed]);
 

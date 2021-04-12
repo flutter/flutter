@@ -8,7 +8,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/painting.dart';
 
 import '../rendering/mock_canvas.dart';
 
@@ -61,7 +60,21 @@ void main() {
 
     expect(chipTheme.backgroundColor, equals(Colors.black.withAlpha(0x1f)));
     expect(chipTheme.selectedColor, equals(Colors.black.withAlpha(0x3d)));
+    expect(chipTheme.secondarySelectedColor, equals(Colors.red.withAlpha(0x3d)));
     expect(chipTheme.deleteIconColor, equals(Colors.black.withAlpha(0xde)));
+  });
+
+  testWidgets('Chip theme is built by ThemeData with dark mode enabled', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      platform: TargetPlatform.android,
+      brightness: Brightness.dark,
+    );
+    final ChipThemeData chipTheme = theme.chipTheme;
+
+    expect(chipTheme.backgroundColor, equals(Colors.white.withAlpha(0x1f)));
+    expect(chipTheme.selectedColor, equals(Colors.white.withAlpha(0x3d)));
+    expect(chipTheme.secondarySelectedColor, equals(Colors.tealAccent[200]!.withAlpha(0x3d)));
+    expect(chipTheme.deleteIconColor, equals(Colors.white.withAlpha(0xde)));
   });
 
   testWidgets('Chip uses ThemeData chip theme if present', (WidgetTester tester) async {
@@ -451,6 +464,45 @@ void main() {
 
     // Teardown.
     await gesture.removePointer();
+  });
+
+  testWidgets('Chip uses stateful border side from resolveWith pattern', (WidgetTester tester) async {
+    const Color selectedColor = Color(0x00000001);
+    const Color defaultColor = Color(0x00000002);
+
+    BorderSide getBorderSide(Set<MaterialState> states) {
+      Color color = defaultColor;
+
+      if (states.contains(MaterialState.selected))
+        color = selectedColor;
+
+      return BorderSide(color: color, width: 1);
+    }
+
+    Widget chipWidget({ bool selected = false }) {
+      return MaterialApp(
+        theme: ThemeData(
+          chipTheme: ThemeData.light().chipTheme.copyWith(
+            side: MaterialStateBorderSide.resolveWith(getBorderSide),
+          ),
+        ),
+        home: Scaffold(
+          body: ChoiceChip(
+            label: const Text('Chip'),
+            selected: selected,
+            onSelected: (_) {},
+          ),
+        ),
+      );
+    }
+
+    // Default.
+    await tester.pumpWidget(chipWidget());
+    expect(find.byType(RawChip), paints..rrect(color: defaultColor));
+
+    // Selected.
+    await tester.pumpWidget(chipWidget(selected: true));
+    expect(find.byType(RawChip), paints..rrect(color: selectedColor));
   });
 
   testWidgets('Chip uses stateful border side from chip theme', (WidgetTester tester) async {

@@ -28,9 +28,9 @@ void main() {
     final WebMemoryFS webMemoryFS = WebMemoryFS();
     webMemoryFS.write(source, manifest, sourcemap, metadata);
 
-    expect(utf8.decode(webMemoryFS.files['foo.js']), 'main() {}');
-    expect(utf8.decode(webMemoryFS.sourcemaps['foo.js.map']), '{}');
-    expect(utf8.decode(webMemoryFS.metadataFiles['foo.js.metadata']), '{}');
+    expect(utf8.decode(webMemoryFS.files['foo.js']!), 'main() {}');
+    expect(utf8.decode(webMemoryFS.sourcemaps['foo.js.map']!), '{}');
+    expect(utf8.decode(webMemoryFS.metadataFiles['foo.js.metadata']!), '{}');
     expect(webMemoryFS.mergedMetadata, '{}');
   });
 }

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/widgets.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 
@@ -40,6 +39,7 @@ void main() {
 
     await tester.tap(find.text('Go'));
     await tester.pump();
+    await tester.pump(const Duration(seconds: 5));
 
     expect(find.text('Action Sheet'), findsOneWidget);
 

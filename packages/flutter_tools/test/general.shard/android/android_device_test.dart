@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -17,11 +19,10 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 
 void main() {
   testWithoutContext('AndroidDevice stores the requested id', () {
@@ -62,7 +63,7 @@ void main() {
       platform: FakePlatform(operatingSystem: 'macos')
     );
 
-    // Parsing succeedes despite the error.
+    // Parsing succeeds despite the error.
     expect(await windowsDevice.isLocalEmulator, true);
 
     // Parsing fails and these default to false.
@@ -239,7 +240,7 @@ flutter:
       ]),
       id: 'emulator-5555',
       androidConsoleSocketFactory: (String host, int port) async =>
-        MockWorkingAndroidConsoleSocket('dummyEmulatorId'),
+        FakeWorkingAndroidConsoleSocket('dummyEmulatorId'),
     );
 
     expect(await device.emulatorId, equals('dummyEmulatorId'));
@@ -311,7 +312,7 @@ flutter:
         )
       ]),
       androidConsoleSocketFactory: (String host, int port) async =>
-        MockUnresponsiveAndroidConsoleSocket(),
+        FakeUnresponsiveAndroidConsoleSocket(),
     );
 
     expect(await device.emulatorId, isNull);
@@ -326,7 +327,7 @@ flutter:
         )
       ]),
       androidConsoleSocketFactory: (String host, int port) async =>
-        MockDisconnectingAndroidConsoleSocket()
+        FakeDisconnectingAndroidConsoleSocket()
     );
 
     expect(await device.emulatorId, isNull);
@@ -465,8 +466,7 @@ AndroidDevice setUpAndroidDevice({
   Platform platform,
   AndroidConsoleSocketFactory androidConsoleSocketFactory = kAndroidConsoleSocketFactory,
 }) {
-  androidSdk ??= MockAndroidSdk();
-  when(androidSdk.adbPath).thenReturn('adb');
+  androidSdk ??= FakeAndroidSdk();
   return AndroidDevice(id ?? '1234',
     logger: BufferLogger.test(),
     platform: platform ?? FakePlatform(operatingSystem: 'linux'),
@@ -477,8 +477,10 @@ AndroidDevice setUpAndroidDevice({
   );
 }
 
-class MockAndroidSdk extends Mock implements AndroidSdk {}
-class MockProcessManager extends Mock implements ProcessManager {}
+class FakeAndroidSdk extends Fake implements AndroidSdk {
+  @override
+  String get adbPath => 'adb';
+}
 
 const String kAdbShellGetprop = '''
 [dalvik.vm.dex2oat-Xms]: [64m]
@@ -640,8 +642,8 @@ const String kAdbShellGetprop = '''
 
 /// A mock Android Console that presents a connection banner and responds to
 /// "avd name" requests with the supplied name.
-class MockWorkingAndroidConsoleSocket extends Fake implements Socket {
-  MockWorkingAndroidConsoleSocket(this.avdName) {
+class FakeWorkingAndroidConsoleSocket extends Fake implements Socket {
+  FakeWorkingAndroidConsoleSocket(this.avdName) {
     _controller.add('Android Console: Welcome!\n');
     // Include OK in the same packet here. In the response to "avd name"
     // it's sent alone to ensure both are handled.
@@ -652,7 +654,7 @@ class MockWorkingAndroidConsoleSocket extends Fake implements Socket {
   final StreamController<String> _controller = StreamController<String>();
 
   @override
-  Stream<E> asyncMap<E>(FutureOr<E> convert(Uint8List event)) => _controller.stream as Stream<E>;
+  Stream<E> asyncMap<E>(FutureOr<E> Function(Uint8List event) convert) => _controller.stream as Stream<E>;
 
   @override
   void add(List<int> data) {
@@ -672,11 +674,11 @@ class MockWorkingAndroidConsoleSocket extends Fake implements Socket {
 }
 
 /// An Android console socket that drops all input and returns no output.
-class MockUnresponsiveAndroidConsoleSocket extends Fake implements Socket {
+class FakeUnresponsiveAndroidConsoleSocket extends Fake implements Socket {
   final StreamController<String> _controller = StreamController<String>();
 
   @override
-  Stream<E> asyncMap<E>(FutureOr<E> convert(Uint8List event)) => _controller.stream as Stream<E>;
+  Stream<E> asyncMap<E>(FutureOr<E> Function(Uint8List event) convert) => _controller.stream as Stream<E>;
 
   @override
   void add(List<int> data) {}
@@ -686,8 +688,8 @@ class MockUnresponsiveAndroidConsoleSocket extends Fake implements Socket {
 }
 
 /// An Android console socket that drops all input and returns no output.
-class MockDisconnectingAndroidConsoleSocket extends Fake implements Socket {
-  MockDisconnectingAndroidConsoleSocket() {
+class FakeDisconnectingAndroidConsoleSocket extends Fake implements Socket {
+  FakeDisconnectingAndroidConsoleSocket() {
     _controller.add('Android Console: Welcome!\n');
     // Include OK in the same packet here. In the response to "avd name"
     // it's sent alone to ensure both are handled.
@@ -697,7 +699,7 @@ class MockDisconnectingAndroidConsoleSocket extends Fake implements Socket {
   final StreamController<String> _controller = StreamController<String>();
 
   @override
-  Stream<E> asyncMap<E>(FutureOr<E> convert(Uint8List event)) => _controller.stream as Stream<E>;
+  Stream<E> asyncMap<E>(FutureOr<E> Function(Uint8List event) convert) => _controller.stream as Stream<E>;
 
   @override
   void add(List<int> data) {

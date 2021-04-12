@@ -12,14 +12,14 @@ import 'package:flutter/services.dart';
 
 import 'box.dart';
 import 'debug.dart';
-import 'mouse_tracking.dart';
+import 'mouse_tracker.dart';
 import 'object.dart';
 import 'view.dart';
 
 export 'package:flutter/gestures.dart' show HitTestResult;
 
 // Examples can assume:
-// dynamic context;
+// late BuildContext context;
 
 /// The glue between the render tree and the Flutter engine.
 mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureBinding, SemanticsBinding, HitTestable {
@@ -111,11 +111,13 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
           return _forceRepaint();
         },
       );
-      registerSignalServiceExtension(
+      registerServiceExtension(
         name: 'debugDumpLayerTree',
-        callback: () {
-          debugDumpLayerTree();
-          return debugPrintDone;
+        callback: (Map<String, String> parameters) async {
+          final String data = RendererBinding.instance?.renderView.debugLayer?.toStringDeep() ?? 'Layer tree unavailable.';
+          return <String, Object>{
+            'data': data,
+          };
         },
       );
       return true;
@@ -123,27 +125,35 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
     if (!kReleaseMode) {
       // these service extensions work in debug or profile mode
-      registerSignalServiceExtension(
+      registerServiceExtension(
         name: 'debugDumpRenderTree',
-        callback: () {
-          debugDumpRenderTree();
-          return debugPrintDone;
+        callback: (Map<String, String> parameters) async {
+          final String data = RendererBinding.instance?.renderView.toStringDeep() ?? 'Render tree unavailable.';
+          return <String, Object>{
+            'data': data,
+          };
         },
       );
 
-      registerSignalServiceExtension(
+      registerServiceExtension(
         name: 'debugDumpSemanticsTreeInTraversalOrder',
-        callback: () {
-          debugDumpSemanticsTree(DebugSemanticsDumpOrder.traversalOrder);
-          return debugPrintDone;
+        callback: (Map<String, String> parameters) async {
+          final String data = RendererBinding.instance?.renderView.debugSemantics
+            ?.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversalOrder) ?? 'Semantics not collected.';
+          return <String, Object>{
+            'data': data,
+          };
         },
       );
 
-      registerSignalServiceExtension(
+      registerServiceExtension(
         name: 'debugDumpSemanticsTreeInInverseHitTestOrder',
-        callback: () {
-          debugDumpSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest);
-          return debugPrintDone;
+        callback: (Map<String, String> parameters) async {
+          final String data = RendererBinding.instance?.renderView.debugSemantics
+            ?.toStringDeep(childOrder: DebugSemanticsDumpOrder.inverseHitTest) ?? 'Semantics not collected.';
+          return <String, Object>{
+            'data': data,
+          };
         },
       );
     }
@@ -272,8 +282,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         event is PointerAddedEvent ||
         event is PointerRemovedEvent) {
       assert(event.position != null);
-      _mouseTracker!.updateWithEvent(event,
-          () => hitTestResult ?? renderView.hitTestMouseTrackers(event.position));
+      _mouseTracker!.updateWithEvent(event, () => hitTestResult ?? renderView.hitTestMouseTrackers(event.position));
     }
     super.dispatchEvent(event, hitTestResult);
   }

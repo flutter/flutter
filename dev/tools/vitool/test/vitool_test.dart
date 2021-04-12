@@ -10,8 +10,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vitool/vitool.dart';
 import 'package:path/path.dart' as path;
 
-const String kPackagePath = '..';
-
 void main() {
 
   test('parsePixels', () {
@@ -694,5 +692,5 @@ class PathAnimationMatcher extends Matcher {
 }
 
 String testAsset(String name) {
-  return path.join(kPackagePath, 'test_assets', name);
+  return path.join('test_assets', name);
 }

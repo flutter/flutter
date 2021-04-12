@@ -105,7 +105,7 @@ void main() {
     await tester.idle();
     expect(mockCodec.numFramesAsked, 0);
 
-    final ImageListener listener = (ImageInfo image, bool synchronousCall) { };
+    void listener(ImageInfo image, bool synchronousCall) { }
     imageStream.addListener(ImageStreamListener(listener));
     await tester.idle();
     expect(mockCodec.numFramesAsked, 1);
@@ -120,7 +120,7 @@ void main() {
       scale: 1.0,
     );
 
-    final ImageListener listener = (ImageInfo image, bool synchronousCall) { };
+    void listener(ImageInfo image, bool synchronousCall) { }
     imageStream.addListener(ImageStreamListener(listener));
     await tester.idle();
     expect(mockCodec.numFramesAsked, 0);
@@ -143,7 +143,7 @@ void main() {
     await tester.idle();
     expect(mockCodec.numFramesAsked, 0);
 
-    final ImageListener listener = (ImageInfo image, bool synchronousCall) { };
+    void listener(ImageInfo image, bool synchronousCall) { }
     final ImageStreamListener streamListener = ImageStreamListener(listener);
     imageStream.addListener(streamListener);
     await tester.idle();
@@ -291,7 +291,7 @@ void main() {
       scale: 1.0,
     );
 
-    final ImageListener listener = (ImageInfo image, bool synchronousCall) { };
+    void listener(ImageInfo image, bool synchronousCall) { }
     imageStream.addListener(ImageStreamListener(listener));
     codecCompleter.complete(mockCodec);
     // MultiFrameImageStreamCompleter only sets an error handler for the next
@@ -467,7 +467,7 @@ void main() {
       scale: 1.0,
     );
 
-    final ImageListener listener = (ImageInfo image, bool synchronousCall) { };
+    void listener(ImageInfo image, bool synchronousCall) { }
     imageStream.addListener(ImageStreamListener(listener));
     final ImageStreamCompleterHandle handle = imageStream.keepAlive();
 
@@ -508,13 +508,13 @@ void main() {
     );
 
     final List<ImageInfo> emittedImages1 = <ImageInfo>[];
-    final ImageListener listener1 = (ImageInfo image, bool synchronousCall) {
+    void listener1(ImageInfo image, bool synchronousCall) {
       emittedImages1.add(image);
-    };
+    }
     final List<ImageInfo> emittedImages2 = <ImageInfo>[];
-    final ImageListener listener2 = (ImageInfo image, bool synchronousCall) {
+    void listener2(ImageInfo image, bool synchronousCall) {
       emittedImages2.add(image);
-    };
+    }
     imageStream.addListener(ImageStreamListener(listener1));
     imageStream.addListener(ImageStreamListener(listener2));
 
@@ -554,7 +554,7 @@ void main() {
       scale: 1.0,
     );
 
-    final ImageListener listener = (ImageInfo image, bool synchronousCall) { };
+    void listener(ImageInfo image, bool synchronousCall) { }
     imageStream.addListener(ImageStreamListener(listener));
 
     codecCompleter.complete(mockCodec);
@@ -587,7 +587,7 @@ void main() {
       scale: 1.0,
     );
 
-    final ImageListener listener = (ImageInfo image, bool synchronousCall) { };
+    void listener(ImageInfo image, bool synchronousCall) { }
     imageStream.addListener(ImageStreamListener(listener));
 
     codecCompleter.complete(mockCodec);
@@ -623,9 +623,9 @@ void main() {
     );
 
     dynamic capturedException;
-    final ImageErrorListener errorListener = (dynamic exception, StackTrace? stackTrace) {
+    void errorListener(dynamic exception, StackTrace? stackTrace) {
       capturedException = exception;
-    };
+    }
 
     streamUnderTest.addListener(ImageStreamListener(
       (ImageInfo image, bool synchronousCall) { },
@@ -658,7 +658,7 @@ void main() {
       scale: 1.0,
     );
 
-    final ImageListener listener = (ImageInfo image, bool synchronousCall) { };
+    void listener(ImageInfo image, bool synchronousCall) { }
     imageStream.addListener(ImageStreamListener(listener));
 
     codecCompleter.complete(mockCodec);
@@ -723,9 +723,9 @@ void main() {
     );
 
     int onImageCount = 0;
-    final ImageListener activeListener = (ImageInfo image, bool synchronousCall) {
+    void activeListener(ImageInfo image, bool synchronousCall) {
       onImageCount += 1;
-    };
+    }
     bool lastListenerDropped = false;
     imageStream.addOnLastListenerRemovedCallback(() {
       lastListenerDropped = true;
@@ -801,7 +801,7 @@ void main() {
   //
   //   final FrameInfo frame1 = FakeFrameInfo(20, 10, const Duration(milliseconds: 200));
   //   final FrameInfo frame2 = FakeFrameInfo(200, 100, const Duration(milliseconds: 400));
-  //   final FrameInfo frame3 = FakeFrameInfo(200, 100, const Duration(milliseconds: 0));
+  //   final FrameInfo frame3 = FakeFrameInfo(200, 100, Duration.zero);
   //
   //   mockCodec.completeNextFrame(frame1);
   //   await tester.idle(); // let nextFrameFuture complete

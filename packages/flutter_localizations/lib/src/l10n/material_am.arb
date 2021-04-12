@@ -8,6 +8,8 @@
   "nextMonthTooltip": "ቀጣይ ወር",
   "previousMonthTooltip": "ቀዳሚ ወር",
   "nextPageTooltip": "ቀጣይ ገጽ",
+  "firstPageTooltip": "First page",
+  "lastPageTooltip": "Last page",
   "previousPageTooltip": "ቀዳሚ ገጽ",
   "showMenuTooltip": "ምናሌን አሳይ",
   "aboutListTileTitle": "ስለ $applicationName",

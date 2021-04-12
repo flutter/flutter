@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:dds/dds.dart' as dds;
@@ -22,9 +24,6 @@ Future<dds.DartDevelopmentService> Function(
 /// Helper class to launch a [dds.DartDevelopmentService]. Allows for us to
 /// mock out this functionality for testing purposes.
 class DartDevelopmentService {
-  DartDevelopmentService({@required this.logger});
-
-  final Logger logger;
   dds.DartDevelopmentService _ddsInstance;
 
   Uri get uri => _ddsInstance?.uri ?? _existingDdsUri;
@@ -37,8 +36,9 @@ class DartDevelopmentService {
     Uri observatoryUri,
     int hostPort,
     bool ipv6,
-    bool disableServiceAuthCodes,
-  ) async {
+    bool disableServiceAuthCodes, {
+    @required Logger logger,
+  }) async {
     final Uri ddsUri = Uri(
       scheme: 'http',
       host: (ipv6 ?
@@ -72,14 +72,16 @@ class DartDevelopmentService {
             e.message.split(' ').firstWhere((String e) => e.startsWith('http'))
           );
         } on StateError {
+          if (e.message.contains('Existing VM service clients prevent DDS from taking control.')) {
+            throwToolExit('${e.message}. Please rebuild your application with a newer version of Flutter.');
+          }
           logger.printError(
             'DDS has failed to start and there is not an existing DDS instance '
-            'available to connect to. Please comment on '
-            'https://github.com/flutter/flutter/issues/72385 with output from '
-            '"flutter doctor -v" and the following error message:\n\n ${e.message}.'
+            'available to connect to. Please file an issue at https://github.com/flutter/flutter/issues '
+            'with the following error message:\n\n ${e.message}.'
           );
-          // Wrap the DDS error message in a StateError so it can be collected
-          // by the crash handler.
+          // DDS was unable to start for an unknown reason. Raise a StateError
+          // so it can be reported by the crash reporter.
           throw StateError(e.message);
         }
       }
@@ -90,5 +92,5 @@ class DartDevelopmentService {
     }
   }
 
-  Future<void> shutdown() async => await _ddsInstance?.shutdown();
+  Future<void> shutdown() async => _ddsInstance?.shutdown();
 }

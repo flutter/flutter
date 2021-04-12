@@ -169,6 +169,9 @@ class AnimationSheetBuilder {
         image: image.clone(),
         width: frameSize.width,
         height: frameSize.height,
+        // Disable quality enhancement because the point of this class is to
+        // precisely record what the widget looks like.
+        filterQuality: ui.FilterQuality.none,
       )).toList(),
     );
   }

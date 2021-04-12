@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/painting.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
@@ -131,7 +130,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: Container(
+          child: SizedBox(
             height: 24.0,
             child: Row(
               children: const <Widget>[

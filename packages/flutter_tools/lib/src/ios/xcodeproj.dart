@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
+import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -108,7 +111,9 @@ void _updateGeneratedEnvironmentVariablesScript({
   localsBuffer.writeln('#!/bin/sh');
   localsBuffer.writeln('# This is a generated file; do not edit or check into version control.');
   for (final String line in xcodeBuildSettings) {
-    localsBuffer.writeln('export "$line"');
+    if (!line.contains('[')) { // Exported conditional Xcode build settings do not work.
+      localsBuffer.writeln('export "$line"');
+    }
   }
 
   final File generatedModuleBuildPhaseScript = useMacOSConfig
@@ -169,6 +174,10 @@ List<String> _xcodeBuildSettingsLines({
   // This holds because requiresProjectRoot is true for this command
   xcodeBuildSettings.add('FLUTTER_APPLICATION_PATH=${globals.fs.path.normalize(project.directory.path)}');
 
+  // Tell CocoaPods behavior to codesign in parallel with rest of scripts to speed it up.
+  // Value must be "true", not "YES". https://github.com/CocoaPods/CocoaPods/pull/6088
+  xcodeBuildSettings.add('COCOAPODS_PARALLEL_CODE_SIGN=true');
+
   // Relative to FLUTTER_APPLICATION_PATH, which is [Directory.current].
   if (targetOverride != null) {
     xcodeBuildSettings.add('FLUTTER_TARGET=$targetOverride');
@@ -219,6 +228,9 @@ List<String> _xcodeBuildSettingsLines({
   if (useMacOSConfig) {
     // ARM not yet supported https://github.com/flutter/flutter/issues/69221
     xcodeBuildSettings.add('EXCLUDED_ARCHS=arm64');
+  } else {
+    // Apple Silicon ARM simulators not yet supported.
+    xcodeBuildSettings.add('EXCLUDED_ARCHS[sdk=iphonesimulator*]=arm64 i386');
   }
 
   for (final MapEntry<String, String> config in buildInfo.toEnvironmentConfig().entries) {
@@ -229,31 +241,78 @@ List<String> _xcodeBuildSettingsLines({
 
 /// Interpreter of Xcode projects.
 class XcodeProjectInterpreter {
-  XcodeProjectInterpreter({
+  factory XcodeProjectInterpreter({
     @required Platform platform,
     @required ProcessManager processManager,
     @required Logger logger,
     @required FileSystem fileSystem,
-    @required Terminal terminal,
     @required Usage usage,
+  }) {
+    return XcodeProjectInterpreter._(
+      platform: platform,
+      processManager: processManager,
+      logger: logger,
+      fileSystem: fileSystem,
+      usage: usage,
+    );
+  }
+
+  XcodeProjectInterpreter._({
+    @required Platform platform,
+    @required ProcessManager processManager,
+    @required Logger logger,
+    @required FileSystem fileSystem,
+    @required Usage usage,
+    int majorVersion,
+    int minorVersion,
+    int patchVersion,
   }) : _platform = platform,
-      _fileSystem = fileSystem,
-      _terminal = terminal,
-      _logger = logger,
-      _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-      _operatingSystemUtils = OperatingSystemUtils(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
-      ),
-      _usage = usage;
+        _fileSystem = fileSystem,
+        _logger = logger,
+        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
+        _operatingSystemUtils = OperatingSystemUtils(
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        ),
+        _majorVersion = majorVersion,
+        _minorVersion = minorVersion,
+        _patchVersion = patchVersion,
+        _usage = usage;
+
+  /// Create an [XcodeProjectInterpreter] for testing.
+  ///
+  /// Defaults to installed with sufficient version,
+  /// a memory file system, fake platform, buffer logger,
+  /// test [Usage], and test [Terminal].
+  /// Set [majorVersion] to null to simulate Xcode not being installed.
+  factory XcodeProjectInterpreter.test({
+    @required ProcessManager processManager,
+    int majorVersion = 1000,
+    int minorVersion = 0,
+    int patchVersion = 0,
+  }) {
+    final Platform platform = FakePlatform(
+      operatingSystem: 'macos',
+      environment: <String, String>{},
+    );
+    return XcodeProjectInterpreter._(
+      fileSystem: MemoryFileSystem.test(),
+      platform: platform,
+      processManager: processManager,
+      usage: TestUsage(),
+      logger: BufferLogger.test(),
+      majorVersion: majorVersion,
+      minorVersion: minorVersion,
+      patchVersion: patchVersion,
+    );
+  }
 
   final Platform _platform;
   final FileSystem _fileSystem;
   final ProcessUtils _processUtils;
   final OperatingSystemUtils _operatingSystemUtils;
-  final Terminal _terminal;
   final Logger _logger;
   final Usage _usage;
 
@@ -350,10 +409,7 @@ class XcodeProjectInterpreter {
     String scheme,
     Duration timeout = const Duration(minutes: 1),
   }) async {
-    final Status status = Status.withSpinner(
-      stopwatch: Stopwatch(),
-      terminal: _terminal,
-    );
+    final Status status = _logger.startSpinner();
     final List<String> showBuildSettingsCommand = <String>[
       ...xcrunCommand(),
       'xcodebuild',
@@ -585,7 +641,7 @@ class XcodeProjectInfo {
     return 'Release';
   }
 
-  static String _uniqueMatch(Iterable<String> strings, bool matches(String s)) {
+  static String _uniqueMatch(Iterable<String> strings, bool Function(String s) matches) {
     final List<String> options = strings.where(matches).toList();
     if (options.length == 1) {
       return options.first;

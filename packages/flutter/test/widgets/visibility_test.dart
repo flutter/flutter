@@ -84,7 +84,7 @@ void main() {
     expect(tester.getSize(find.byType(Visibility)), const Size(800.0, 600.0));
     expect(semantics, expectedSemanticsWhenAbsent);
     expect(log, <String>[]);
-    await tester.tap(find.byType(Visibility));
+    await tester.tap(find.byType(Visibility), warnIfMissed: false);
     expect(log, <String>[]);
     log.clear();
 
@@ -100,7 +100,7 @@ void main() {
     expect(tester.getSize(find.byType(Visibility)), Size.zero);
     expect(semantics, expectedSemanticsWhenAbsent);
     expect(log, <String>[]);
-    await tester.tap(find.byType(Visibility));
+    await tester.tap(find.byType(Visibility), warnIfMissed: false);
     expect(log, <String>[]);
     log.clear();
 
@@ -117,7 +117,7 @@ void main() {
     expect(tester.getSize(find.byType(Visibility)), const Size(800.0, 600.0));
     expect(semantics, expectedSemanticsWhenAbsent);
     expect(log, <String>[]);
-    await tester.tap(find.byType(Visibility));
+    await tester.tap(find.byType(Visibility), warnIfMissed: false);
     expect(log, <String>[]);
     log.clear();
 
@@ -221,7 +221,7 @@ void main() {
     expect(tester.getSize(find.byType(Visibility)), const Size(84.0, 14.0));
     expect(semantics, expectedSemanticsWhenPresent);
     expect(log, <String>['created new state']);
-    await tester.tap(find.byType(Visibility));
+    await tester.tap(find.byType(Visibility), warnIfMissed: false);
     expect(log, <String>['created new state']);
     log.clear();
 
@@ -241,7 +241,7 @@ void main() {
     expect(tester.getSize(find.byType(Visibility)), const Size(84.0, 14.0));
     expect(semantics, expectedSemanticsWhenAbsent);
     expect(log, <String>[]);
-    await tester.tap(find.byType(Visibility));
+    await tester.tap(find.byType(Visibility), warnIfMissed: false);
     expect(log, <String>[]);
     log.clear();
 
@@ -261,7 +261,7 @@ void main() {
     expect(tester.getSize(find.byType(Visibility)), Size.zero);
     expect(semantics, expectedSemanticsWhenAbsent);
     expect(log, <String>['created new state']);
-    await tester.tap(find.byType(Visibility));
+    await tester.tap(find.byType(Visibility), warnIfMissed: false);
     expect(log, <String>['created new state']);
     log.clear();
 
@@ -280,7 +280,7 @@ void main() {
     expect(tester.getSize(find.byType(Visibility)), Size.zero);
     expect(semantics, expectedSemanticsWhenAbsent);
     expect(log, <String>['created new state']);
-    await tester.tap(find.byType(Visibility));
+    await tester.tap(find.byType(Visibility), warnIfMissed: false);
     expect(log, <String>['created new state']);
     log.clear();
 
@@ -300,7 +300,7 @@ void main() {
     expect(tester.getSize(find.byType(Visibility)), const Size(84.0, 14.0));
     expect(semantics, expectedSemanticsWhenPresent);
     expect(log, <String>[]);
-    await tester.tap(find.byType(Visibility));
+    await tester.tap(find.byType(Visibility), warnIfMissed: false);
     expect(log, <String>['tap']);
     log.clear();
 
@@ -319,7 +319,7 @@ void main() {
     expect(tester.getSize(find.byType(Visibility)), Size.zero);
     expect(semantics, expectedSemanticsWhenAbsent);
     expect(log, <String>[]);
-    await tester.tap(find.byType(Visibility));
+    await tester.tap(find.byType(Visibility), warnIfMissed: false);
     expect(log, <String>[]);
     log.clear();
 
@@ -356,7 +356,7 @@ void main() {
     expect(tester.getSize(find.byType(Visibility)), Size.zero);
     expect(semantics, expectedSemanticsWhenAbsent);
     expect(log, <String>[]);
-    await tester.tap(find.byType(Visibility));
+    await tester.tap(find.byType(Visibility), warnIfMissed: false);
     expect(log, <String>[]);
     log.clear();
 
@@ -374,7 +374,7 @@ void main() {
     expect(tester.getSize(find.byType(Visibility)), Size.zero);
     expect(semantics, expectedSemanticsWhenAbsent);
     expect(log, <String>[]);
-    await tester.tap(find.byType(Visibility));
+    await tester.tap(find.byType(Visibility), warnIfMissed: false);
     expect(log, <String>[]);
     log.clear();
 
@@ -407,7 +407,7 @@ void main() {
     expect(tester.getSize(find.byType(Visibility)), Size.zero);
     expect(semantics, expectedSemanticsWhenAbsent);
     expect(log, <String>[]);
-    await tester.tap(find.byType(Visibility));
+    await tester.tap(find.byType(Visibility), warnIfMissed: false);
     expect(log, <String>[]);
     log.clear();
 

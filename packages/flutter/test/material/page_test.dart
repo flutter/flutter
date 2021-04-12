@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
 import 'package:flutter/rendering.dart';
@@ -104,14 +103,17 @@ void main() {
     expect(widget1InitialTopLeft.dy == widget2TopLeft.dy, true);
     // Page 2 is coming in from the right.
     expect(widget2TopLeft.dx > widget1InitialTopLeft.dx, true);
-    // The shadow should be drawn to one screen width to the left of where
-    // the page 2 box is. `paints` tests relative to the painter's given canvas
-    // rather than relative to the screen so assert that it's one screen
-    // width to the left of 0 offset box rect and nothing is drawn inside the
-    // box's rect.
-    expect(box, paints..rect(
-      rect: const Rect.fromLTWH(-800.0, 0.0, 800.0, 600.0)
-    ));
+    // As explained in _CupertinoEdgeShadowPainter.paint the shadow is drawn
+    // as a bunch of rects. The rects are covering an area to the left of
+    // where the page 2 box is and a width of 5% of the page 2 box width.
+    // `paints` tests relative to the painter's given canvas
+    // rather than relative to the screen so assert that the shadow starts at
+    // offset.dx = 0.
+    final PaintPattern paintsShadow = paints;
+    for (int i = 0; i < 0.05 * 800; i += 1) {
+      paintsShadow.rect(rect: Rect.fromLTWH(-i.toDouble() - 1.0 , 0.0, 1.0, 600));
+    }
+    expect(box, paintsShadow);
 
     await tester.pumpAndSettle();
 
@@ -285,7 +287,7 @@ void main() {
           onPressed: () { Navigator.of(context).pushNamed('/b'); },
         ),
       ),
-      '/b': (BuildContext context) => Container(child: const Text('HELLO')),
+      '/b': (BuildContext context) => const Text('HELLO'),
     };
     await tester.pumpWidget(
       MaterialApp(
@@ -701,12 +703,12 @@ void main() {
 
     // Tapping on the "page" route doesn't trigger the GestureDetector because
     // it's being dragged.
-    await tester.tap(find.byKey(pageScaffoldKey));
+    await tester.tap(find.byKey(pageScaffoldKey), warnIfMissed: false);
     expect(homeTapCount, 1);
     expect(pageTapCount, 1);
 
     // Tapping the "page" route's back button doesn't do anything either.
-    await tester.tap(find.byTooltip('Back'));
+    await tester.tap(find.byTooltip('Back'), warnIfMissed: false);
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.byKey(pageScaffoldKey)), const Offset(400, 0));
     expect(tester.getTopLeft(find.byKey(homeScaffoldKey)).dx, lessThan(0));
@@ -911,6 +913,65 @@ void main() {
     expect(find.text('subpage'), findsOneWidget);
     expect(find.text('home'), findsOneWidget);
   });
+
+  testWidgets('MaterialPage restores its state', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      RootRestorationScope(
+        restorationId: 'root',
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Navigator(
+            onPopPage: (Route<dynamic> route, dynamic result) { return false; },
+            pages: const <Page<Object?>>[
+              MaterialPage<void>(
+                restorationId: 'p1',
+                child: TestRestorableWidget(restorationId: 'p1'),
+              ),
+            ],
+            restorationScopeId: 'nav',
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<void>(
+                settings: settings,
+                builder: (BuildContext context) {
+                  return TestRestorableWidget(restorationId: settings.name!);
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('p1'), findsOneWidget);
+    expect(find.text('count: 0'), findsOneWidget);
+
+    await tester.tap(find.text('increment'));
+    await tester.pump();
+    expect(find.text('count: 1'), findsOneWidget);
+
+    tester.state<NavigatorState>(find.byType(Navigator)).restorablePushNamed('p2');
+    await tester.pumpAndSettle();
+
+    expect(find.text('p1'), findsNothing);
+    expect(find.text('p2'), findsOneWidget);
+
+    await tester.tap(find.text('increment'));
+    await tester.pump();
+    await tester.tap(find.text('increment'));
+    await tester.pump();
+    expect(find.text('count: 2'), findsOneWidget);
+
+    await tester.restartAndRestore();
+
+    expect(find.text('p2'), findsOneWidget);
+    expect(find.text('count: 2'), findsOneWidget);
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pumpAndSettle();
+
+    expect(find.text('p1'), findsOneWidget);
+    expect(find.text('count: 1'), findsOneWidget);
+  });
 }
 
 class TransitionDetector extends DefaultTransitionDelegate<void> {
@@ -958,7 +1019,7 @@ Widget buildNavigator({
 }
 
 class KeepsStateTestWidget extends StatefulWidget {
-  const KeepsStateTestWidget({this.navigatorKey});
+  const KeepsStateTestWidget({Key? key, this.navigatorKey}) : super(key: key);
 
   final Key? navigatorKey;
 
@@ -988,6 +1049,45 @@ class _KeepsStateTestWidgetState extends State<KeepsStateTestWidget> {
           return true;
         },
       ),
+    );
+  }
+}
+
+class TestRestorableWidget extends StatefulWidget {
+  const TestRestorableWidget({Key? key, required this.restorationId}) : super(key: key);
+
+  final String restorationId;
+
+  @override
+  State<StatefulWidget> createState() => _TestRestorableWidgetState();
+}
+
+class _TestRestorableWidgetState extends State<TestRestorableWidget> with RestorationMixin {
+  @override
+  String? get restorationId => widget.restorationId;
+
+  final RestorableInt counter = RestorableInt(0);
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    registerForRestoration(counter, 'counter');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        Text(widget.restorationId),
+        Text('count: ${counter.value}'),
+        ElevatedButton(
+          onPressed: () {
+            setState(() {
+              counter.value++;
+            });
+          },
+          child: const Text('increment'),
+        ),
+      ],
     );
   }
 }

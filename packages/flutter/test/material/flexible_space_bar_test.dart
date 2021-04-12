@@ -71,10 +71,13 @@ void main() {
       ),
     ) as FlexibleSpaceBarSettings;
 
+    const Key dragTarget = Key('orange box');
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: CustomScrollView(
+            key: dragTarget,
             primary: true,
             slivers: <Widget>[
               SliverPersistentHeader(
@@ -112,7 +115,7 @@ void main() {
     expect(effectiveStyle.color?.alpha, 128); // Which is alpha of .5
 
     // We drag up to fully collapse the space bar.
-    await tester.drag(find.byType(Container).first, const Offset(0, -400.0));
+    await tester.drag(find.byKey(dragTarget), const Offset(0, -400.0));
     await tester.pumpAndSettle();
 
     expect(clipRect.size.height, minExtent);
@@ -138,7 +141,7 @@ void main() {
                 delegate: SliverChildListDelegate(
                   <Widget>[
                     for (int i = 0; i < 50; i++)
-                      Container(
+                      SizedBox(
                         height: 200,
                         child: Center(child: Text('Item $i')),
                       ),

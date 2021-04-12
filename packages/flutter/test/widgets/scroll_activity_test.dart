@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 List<Widget> children(int n) {
   return List<Widget>.generate(n, (int i) {
-    return Container(height: 100.0, child: Text('$i'));
+    return SizedBox(height: 100.0, child: Text('$i'));
   });
 }
 
@@ -116,7 +116,7 @@ void main() {
 }
 
 class PageView62209 extends StatefulWidget {
-  const PageView62209();
+  const PageView62209({Key? key}) : super(key: key);
 
   @override
   _PageView62209State createState() => _PageView62209State();

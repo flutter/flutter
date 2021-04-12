@@ -7,8 +7,6 @@
 // initialize a binding, which rendering_tester will attempt to re-initialize
 // (or vice versa).
 
-import 'dart:ui';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -53,13 +51,13 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             width: 300.0,
             child: ListView(
               controller: ScrollController(initialScrollOffset: 300.0),
               children: children = List<Widget>.generate(20, (int i) {
-                return Container(
+                return SizedBox(
                   height: 100.0,
                   width: 300.0,
                   child: Text('Tile $i'),
@@ -98,14 +96,14 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 300.0,
             width: 200.0,
             child: ListView(
               scrollDirection: Axis.horizontal,
               controller: ScrollController(initialScrollOffset: 300.0),
               children: children = List<Widget>.generate(20, (int i) {
-                return Container(
+                return SizedBox(
                   height: 300.0,
                   width: 100.0,
                   child: Text('Tile $i'),
@@ -144,14 +142,14 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             width: 300.0,
             child: ListView(
               controller: ScrollController(initialScrollOffset: 300.0),
               reverse: true,
               children: children = List<Widget>.generate(20, (int i) {
-                return Container(
+                return SizedBox(
                   height: 100.0,
                   width: 300.0,
                   child: Text('Tile $i'),
@@ -190,7 +188,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 300.0,
             width: 200.0,
             child: ListView(
@@ -198,7 +196,7 @@ void main() {
               reverse: true,
               controller: ScrollController(initialScrollOffset: 300.0),
               children: children = List<Widget>.generate(20, (int i) {
-                return Container(
+                return SizedBox(
                   height: 300.0,
                   width: 100.0,
                   child: Text('Tile $i'),
@@ -236,14 +234,14 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             width: 300.0,
             child: CustomScrollView(
               controller: ScrollController(initialScrollOffset: 300.0),
               slivers: List<Widget>.generate(20, (int i) {
                 final Widget sliver = SliverToBoxAdapter(
-                  child: Container(
+                  child: SizedBox(
                     height: 100.0,
                     child: Text('Tile $i'),
                   ),
@@ -282,7 +280,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 300.0,
             width: 200.0,
             child: CustomScrollView(
@@ -290,7 +288,7 @@ void main() {
               controller: ScrollController(initialScrollOffset: 300.0),
               slivers: List<Widget>.generate(20, (int i) {
                 final Widget sliver = SliverToBoxAdapter(
-                    child: Container(
+                    child: SizedBox(
                       width: 100.0,
                       child: Text('Tile $i'),
                     ),
@@ -329,7 +327,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             width: 300.0,
             child: CustomScrollView(
@@ -337,7 +335,7 @@ void main() {
               reverse: true,
               slivers: List<Widget>.generate(20, (int i) {
                 final Widget sliver = SliverToBoxAdapter(
-                    child: Container(
+                    child: SizedBox(
                       height: 100.0,
                       child: Text('Tile $i'),
                     ),
@@ -374,21 +372,21 @@ void main() {
   testWidgets('Viewport getOffsetToReveal Sliver - up - reverse growth', (WidgetTester tester) async {
     const Key centerKey = ValueKey<String>('center');
     const EdgeInsets padding = EdgeInsets.only(top: 22.0, bottom: 23.0);
-    final Widget centerSliver = SliverPadding(
+    const Widget centerSliver = SliverPadding(
       key: centerKey,
       padding: padding,
       sliver: SliverToBoxAdapter(
-        child: Container(
+        child: SizedBox(
           height: 100.0,
-          child: const Text('Tile center'),
+          child: Text('Tile center'),
         ),
       ),
     );
-    final Widget lowerItem = Container(
+    const Widget lowerItem = SizedBox(
       height: 100.0,
-      child: const Text('Tile lower'),
+      child: Text('Tile lower'),
     );
-    final Widget lowerSliver = SliverPadding(
+    const Widget lowerSliver = SliverPadding(
       padding: padding,
       sliver: SliverToBoxAdapter(
         child: lowerItem,
@@ -396,10 +394,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             width: 300.0,
             child: CustomScrollView(
@@ -431,21 +429,21 @@ void main() {
   testWidgets('Viewport getOffsetToReveal Sliver - left - reverse growth', (WidgetTester tester) async {
     const Key centerKey = ValueKey<String>('center');
     const EdgeInsets padding = EdgeInsets.only(left: 22.0, right: 23.0);
-    final Widget centerSliver = SliverPadding(
+    const Widget centerSliver = SliverPadding(
       key: centerKey,
       padding: padding,
       sliver: SliverToBoxAdapter(
-        child: Container(
+        child: SizedBox(
           width: 100.0,
-          child: const Text('Tile center'),
+          child: Text('Tile center'),
         ),
       ),
     );
-    final Widget lowerItem = Container(
+    const Widget lowerItem = SizedBox(
       width: 100.0,
-      child: const Text('Tile lower'),
+      child: Text('Tile lower'),
     );
-    final Widget lowerSliver = SliverPadding(
+    const Widget lowerSliver = SliverPadding(
       padding: padding,
       sliver: SliverToBoxAdapter(
         child: lowerItem,
@@ -453,10 +451,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             width: 300.0,
             child: CustomScrollView(
@@ -492,7 +490,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 300.0,
             width: 200.0,
             child: CustomScrollView(
@@ -501,7 +499,7 @@ void main() {
               controller: ScrollController(initialScrollOffset: 300.0),
               slivers: List<Widget>.generate(20, (int i) {
                 final Widget sliver = SliverToBoxAdapter(
-                    child: Container(
+                    child: SizedBox(
                       width: 100.0,
                       child: Text('Tile $i'),
                     ),
@@ -539,7 +537,7 @@ void main() {
     final ScrollController controllerY  = ScrollController(initialScrollOffset: 400.0);
     final List<List<Widget>> children = List<List<Widget>>.generate(10, (int y) {
       return List<Widget>.generate(10, (int x) {
-        return Container(
+        return SizedBox(
           height: 100.0,
           width: 100.0,
           child: Text('$x,$y'),
@@ -569,13 +567,13 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             width: 200.0,
             child: ListView(
               controller: controllerY,
               children: List<Widget>.generate(10, (int y) {
-                return Container(
+                return SizedBox(
                   height: 100.0,
                   child: ListView(
                     scrollDirection: Axis.horizontal,
@@ -696,7 +694,7 @@ void main() {
 
   group('Nested viewports (same orientation) showOnScreen', () {
     final List<Widget> children = List<Widget>.generate(10, (int i) {
-      return Container(
+      return SizedBox(
         height: 100.0,
         width: 300.0,
         child: Text('$i'),
@@ -708,16 +706,16 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: Container(
+            child: SizedBox(
               height: 200.0,
               width: 300.0,
               child: ListView(
                 controller: outer,
                 children: <Widget>[
-                  Container(
+                  const SizedBox(
                     height: 200.0,
                   ),
-                  Container(
+                  SizedBox(
                     height: 200.0,
                     width: 300.0,
                     child: ListView(
@@ -725,7 +723,7 @@ void main() {
                       children: children,
                     ),
                   ),
-                  Container(
+                  const SizedBox(
                     height: 200.0,
                   ),
                 ],
@@ -898,16 +896,16 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             width: 200.0,
             child: ListView(
               controller: controllerY,
               children: <Widget>[
-                Container(
+                const SizedBox(
                   height: 150.0,
                 ),
-                Container(
+                SizedBox(
                   height: 100.0,
                   child: ListView(
                     physics: const PageScrollPhysics(), // Turns off `allowImplicitScrolling`
@@ -923,7 +921,7 @@ void main() {
                     ],
                   ),
                 ),
-                Container(
+                const SizedBox(
                   height: 150.0,
                 ),
               ],
@@ -948,16 +946,16 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             width: 200.0,
             child: ListView(
               controller: controllerY,
               children: <Widget>[
-                Container(
+                const SizedBox(
                   height: 150.0,
                 ),
-                Container(
+                SizedBox(
                   height: 100.0,
                   child: CustomScrollView(
                     physics: const PageScrollPhysics(), // Turns off `allowImplicitScrolling`
@@ -983,7 +981,7 @@ void main() {
                     ],
                   ),
                 ),
-                Container(
+                const SizedBox(
                   height: 150.0,
                 ),
               ],
@@ -1007,12 +1005,12 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             child: ListView(
               controller: controller = ScrollController(initialScrollOffset: 300.0),
               children: children = List<Widget>.generate(20, (int i) {
-                return Container(
+                return SizedBox(
                   height: 300.0,
                   child: Text('Tile $i'),
                 );
@@ -1070,7 +1068,7 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: Container(
+            child: SizedBox(
               height: 600.0,
               child: CustomScrollView(
                 controller: controller = ScrollController(initialScrollOffset: 300.0),
@@ -1086,7 +1084,7 @@ void main() {
                     ),
                   )
                   : SliverToBoxAdapter(
-                    child: Container(
+                    child: SizedBox(
                       height: 300.0,
                       child: Text('Tile $i'),
                     ),
@@ -1136,7 +1134,7 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 400.0,
             width: 400.0,
             child: CustomScrollView(
@@ -1148,7 +1146,7 @@ void main() {
                   ? floatingHeader
                   : SliverToBoxAdapter(
                     key: (i == 19) ? const Key('19') : null,
-                    child: Container(
+                    child: SizedBox(
                       height: 300.0,
                       width: 300,
                       child: Text('Tile $i'),
@@ -1439,7 +1437,7 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 400.0,
             width: 400.0,
             child: CustomScrollView(
@@ -1547,14 +1545,14 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 300.0,
             child: CustomScrollView(
               cacheExtent: 0,
               controller: outerController,
               slivers: <Widget>[
                 SliverToBoxAdapter(
-                  child: Container(
+                  child: SizedBox(
                     height: 300,
                     child: CustomScrollView(
                       controller: innerController,
@@ -1582,7 +1580,7 @@ void main() {
       ),
     );
 
-    tester.renderObject(find.widgetWithText(SizedBox, 'Tile 1', skipOffstage: false)).showOnScreen();
+    tester.renderObject(find.widgetWithText(SizedBox, 'Tile 1', skipOffstage: false).first).showOnScreen();
     await tester.pumpAndSettle();
     // The inner viewport scrolls to reveal the 2nd tile.
     expect(innerController.offset, 300.0);
@@ -1594,17 +1592,13 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
-            child: ListView(
-              scrollDirection: a1,
-              children: List<Widget>.generate(10, (int y) {
-                return Container(
-                  child: ListView(
-                    scrollDirection: a2,
-                  ),
-                );
-              }),
-            ),
+          child: ListView(
+            scrollDirection: a1,
+            children: List<Widget>.generate(10, (int y) {
+              return ListView(
+                scrollDirection: a2,
+              );
+            }),
           ),
         ),
       );
@@ -1794,24 +1788,27 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            GridView(
-              shrinkWrap: true,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  childAspectRatio: 3,
-                  mainAxisSpacing: 3,
-                  crossAxisSpacing: 3),
-              children: const <Widget>[
-                Text('a'),
-                Text('b'),
-                Text('c'),
-              ],
-            ),
-          ],
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              GridView(
+                shrinkWrap: true,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    childAspectRatio: 3,
+                    mainAxisSpacing: 3,
+                    crossAxisSpacing: 3),
+                children: const <Widget>[
+                  Text('a'),
+                  Text('b'),
+                  Text('c'),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

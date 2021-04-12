@@ -6,8 +6,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 
 import 'arc.dart';
 import 'colors.dart';
@@ -16,6 +14,7 @@ import 'icons.dart';
 import 'material_localizations.dart';
 import 'page.dart';
 import 'scaffold.dart' show ScaffoldMessenger, ScaffoldMessengerState;
+import 'scrollbar.dart';
 import 'theme.dart';
 
 /// [MaterialApp] uses this [TextStyle] as its [DefaultTextStyle] to encourage
@@ -198,6 +197,7 @@ class MaterialApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
+    this.scrollBehavior,
   }) : assert(routes != null),
        assert(navigatorObservers != null),
        assert(title != null),
@@ -244,6 +244,7 @@ class MaterialApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
+    this.scrollBehavior,
   }) : assert(routeInformationParser != null),
        assert(routerDelegate != null),
        assert(title != null),
@@ -613,7 +614,7 @@ class MaterialApp extends StatefulWidget {
   ///   return WidgetsApp(
   ///     actions: <Type, Action<Intent>>{
   ///       ... WidgetsApp.defaultActions,
-  ///       ActivateAction: CallbackAction(
+  ///       ActivateAction: CallbackAction<Intent>(
   ///         onInvoke: (Intent intent) {
   ///           // Do something here...
   ///           return null;
@@ -633,6 +634,23 @@ class MaterialApp extends StatefulWidget {
 
   /// {@macro flutter.widgets.widgetsApp.restorationScopeId}
   final String? restorationScopeId;
+
+  /// {@template flutter.material.materialApp.scrollBehavior}
+  /// The default [ScrollBehavior] for the application.
+  ///
+  /// [ScrollBehavior]s describe how [Scrollable] widgets behave. Providing
+  /// a [ScrollBehavior] can set the default [ScrollPhysics] across
+  /// an application, and manage [Scrollable] decorations like [Scrollbar]s and
+  /// [GlowingOverscrollIndicator]s.
+  /// {@endtemplate}
+  ///
+  /// When null, defaults to [MaterialScrollBehavior].
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollConfiguration], which controls how [Scrollable] widgets behave
+  ///    in a subtree.
+  final ScrollBehavior? scrollBehavior;
 
   /// Turns on a [GridPaper] overlay that paints a baseline grid
   /// Material apps.
@@ -659,14 +677,55 @@ class MaterialApp extends StatefulWidget {
   }
 }
 
-class _MaterialScrollBehavior extends ScrollBehavior {
+/// Describes how [Scrollable] widgets behave for [MaterialApp]s.
+///
+/// {@macro flutter.widgets.scrollBehavior}
+///
+/// Setting a [MaterialScrollBehavior] will apply a
+/// [GlowingOverscrollIndicator] to [Scrollable] descendants when executing on
+/// [TargetPlatform.android] and [TargetPlatform.fuchsia].
+///
+/// When using the desktop platform, if the [Scrollable] widget scrolls in the
+/// [Axis.vertical], a [Scrollbar] is applied.
+///
+/// See also:
+///
+///  * [ScrollBehavior], the default scrolling behavior extended by this class.
+class MaterialScrollBehavior extends ScrollBehavior {
+  /// Creates a MaterialScrollBehavior that decorates [Scrollable]s with
+  /// [GlowingOverscrollIndicator]s and [Scrollbar]s based on the current
+  /// platform and provided [ScrollableDetails].
+  const MaterialScrollBehavior();
+
   @override
-  TargetPlatform getPlatform(BuildContext context) {
-    return Theme.of(context).platform;
+  TargetPlatform getPlatform(BuildContext context) => Theme.of(context).platform;
+
+  @override
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
+    // When modifying this function, consider modifying the implementation in
+    // the base class as well.
+    switch (axisDirectionToAxis(details.direction)) {
+      case Axis.horizontal:
+        return child;
+      case Axis.vertical:
+        switch (getPlatform(context)) {
+          case TargetPlatform.linux:
+          case TargetPlatform.macOS:
+          case TargetPlatform.windows:
+            return Scrollbar(
+              child: child,
+              controller: details.controller,
+            );
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.iOS:
+            return child;
+        }
+    }
   }
 
   @override
-  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
     // the base class as well.
     switch (getPlatform(context)) {
@@ -679,8 +738,8 @@ class _MaterialScrollBehavior extends ScrollBehavior {
       case TargetPlatform.fuchsia:
         return GlowingOverscrollIndicator(
           child: child,
-          axisDirection: axisDirection,
-          color: Theme.of(context).accentColor,
+          axisDirection: details.direction,
+          color: Theme.of(context).colorScheme.secondary,
         );
     }
   }
@@ -757,7 +816,7 @@ class _MaterialAppState extends State<MaterialApp> {
               },
             )
           : child!,
-      )
+      ),
     );
   }
 
@@ -852,11 +911,11 @@ class _MaterialAppState extends State<MaterialApp> {
     }());
 
     return ScrollConfiguration(
-      behavior: _MaterialScrollBehavior(),
+      behavior: widget.scrollBehavior ?? const MaterialScrollBehavior(),
       child: HeroControllerScope(
         controller: _heroController,
         child: result,
-      )
+      ),
     );
   }
 }

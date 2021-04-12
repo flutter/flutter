@@ -15,12 +15,12 @@ void main() {
       log.add(methodCall);
     });
 
-    await DeferredComponent.installDeferredComponent(moduleName: 'testModuleName');
+    await DeferredComponent.installDeferredComponent(componentName: 'testComponentName');
 
     expect(log, hasLength(1));
     expect(log.single, isMethodCall(
       'installDeferredComponent',
-      arguments: <String, dynamic>{'loadingUnitId': -1, 'moduleName': 'testModuleName'},
+      arguments: <String, dynamic>{'loadingUnitId': -1, 'componentName': 'testComponentName'},
     ));
   });
 
@@ -31,12 +31,12 @@ void main() {
       log.add(methodCall);
     });
 
-    await DeferredComponent.uninstallDeferredComponent(moduleName: 'testModuleName');
+    await DeferredComponent.uninstallDeferredComponent(componentName: 'testComponentName');
 
     expect(log, hasLength(1));
     expect(log.single, isMethodCall(
       'uninstallDeferredComponent',
-      arguments: <String, dynamic>{'loadingUnitId': -1, 'moduleName': 'testModuleName'},
+      arguments: <String, dynamic>{'loadingUnitId': -1, 'componentName': 'testComponentName'},
     ));
   });
 }

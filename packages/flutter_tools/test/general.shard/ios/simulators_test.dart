@@ -2,39 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show ProcessResult, Process;
+// @dart = 2.8
 
-import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/ios/mac.dart';
+import 'package:flutter_tools/src/device_port_forwarder.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
-
-class MockIMobileDevice extends Mock implements IMobileDevice {}
-class MockLogger extends Mock implements Logger {}
-class MockProcess extends Mock implements Process {}
-class MockProcessManager extends Mock implements ProcessManager {}
-class MockXcode extends Mock implements Xcode {}
-class MockSimControl extends Mock implements SimControl {}
-class MockPlistUtils extends Mock implements PlistParser {}
+import '../../src/fakes.dart';
 
 final Platform macosPlatform = FakePlatform(
   operatingSystem: 'macos',
@@ -59,11 +48,11 @@ void main() {
 
   group('_IOSSimulatorDevicePortForwarder', () {
     MockSimControl mockSimControl;
-    MockXcode mockXcode;
+    Xcode xcode;
 
     setUp(() {
       mockSimControl = MockSimControl();
-      mockXcode = MockXcode();
+      xcode = Xcode.test(processManager: FakeProcessManager.any());
     });
 
     testUsingContext('dispose() does not throw an exception', () async {
@@ -85,7 +74,7 @@ void main() {
       Platform: () => osx,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Xcode: () => mockXcode,
+      Xcode: () => xcode,
     }, testOn: 'posix');
   });
 
@@ -351,44 +340,12 @@ void main() {
   });
 
   group('Simulator screenshot', () {
-    MockXcode mockXcode;
-    MockLogger mockLogger;
-    MockProcessManager mockProcessManager;
-    IOSSimulator deviceUnderTest;
-
-    setUp(() {
-      mockXcode = MockXcode();
-      mockLogger = MockLogger();
-      mockProcessManager = MockProcessManager();
-      // Let everything else return exit code 0 so process.dart doesn't crash.
-      when(
-        mockProcessManager.run(any, environment: null, workingDirectory: null)
-      ).thenAnswer((Invocation invocation) =>
-        Future<ProcessResult>.value(ProcessResult(2, 0, '', ''))
-      );
-      // Test a real one. Screenshot doesn't require instance states.
-      final SimControl simControl = SimControl(
-        processManager: mockProcessManager,
-        logger: mockLogger,
-        xcode: mockXcode,
-      );
-      // Doesn't matter what the device is.
-      deviceUnderTest = IOSSimulator(
-        'x',
-        name: 'iPhone SE',
-        simControl: simControl,
-      );
-      when(mockXcode.xcrunCommand()).thenReturn(<String>['xcrun']);
-    });
-
-
-    testWithoutContext(
-      'supports screenshots',
-      () async {
-        final File screenshot = MemoryFileSystem.test().file('screenshot.png');
-        await deviceUnderTest.takeScreenshot(screenshot);
-        verify(mockProcessManager.run(
-          <String>[
+    testWithoutContext('supports screenshots', () async {
+      final Xcode xcode = Xcode.test(processManager: FakeProcessManager.any());
+      final Logger logger = BufferLogger.test();
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
             'xcrun',
             'simctl',
             'io',
@@ -396,25 +353,35 @@ void main() {
             'screenshot',
             'screenshot.png',
           ],
-          environment: null,
-          workingDirectory: null,
-        ));
-      },
-    );
+        ),
+      ]);
+
+      // Test a real one. Screenshot doesn't require instance states.
+      final SimControl simControl = SimControl(
+        processManager: fakeProcessManager,
+        logger: logger,
+        xcode: xcode,
+      );
+      // Doesn't matter what the device is.
+      final IOSSimulator deviceUnderTest = IOSSimulator(
+        'x',
+        name: 'iPhone SE',
+        simControl: simControl,
+      );
+
+      final File screenshot = MemoryFileSystem.test().file('screenshot.png');
+      await deviceUnderTest.takeScreenshot(screenshot);
+      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+    });
   });
 
   group('device log tool', () {
-    MockProcessManager mockProcessManager;
-    MockXcode mockXcode;
+    FakeProcessManager fakeProcessManager;
     MockSimControl mockSimControl;
 
     setUp(() {
-      mockProcessManager = MockProcessManager();
-      when(mockProcessManager.start(any, environment: null, workingDirectory: null))
-        .thenAnswer((Invocation invocation) => Future<Process>.value(MockProcess()));
+      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
       mockSimControl = MockSimControl();
-      mockXcode = MockXcode();
-      when(mockXcode.xcrunCommand()).thenReturn(<String>['xcrun']);
     });
 
     testUsingContext('syslog uses tail', () async {
@@ -424,14 +391,18 @@ void main() {
         simulatorCategory: 'iOS 9.3',
         simControl: mockSimControl,
       );
+      fakeProcessManager.addCommand(const FakeCommand(command: <String>[
+        'tail',
+        '-n',
+        '0',
+        '-F',
+        '/Library/Logs/CoreSimulator/x/system.log',
+      ]));
       await launchDeviceSystemLogTool(device);
-      expect(
-        verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null)).captured.single,
-        contains('tail'),
-      );
+      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     },
     overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
+      ProcessManager: () => fakeProcessManager,
       FileSystem: () => fileSystem,
       Platform: () => macosPlatform,
       FileSystemUtils: () => FileSystemUtils(
@@ -447,17 +418,13 @@ void main() {
         simulatorCategory: 'iOS 11.0',
         simControl: mockSimControl,
       );
-      await launchDeviceUnifiedLogging(device, 'My Super Awesome App');
-
       const String expectedPredicate = 'eventType = logEvent AND '
-        'processImagePath ENDSWITH "My Super Awesome App" AND '
-        '(senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" OR processImageUUID == senderImageUUID) AND '
-        'NOT(eventMessage CONTAINS ": could not find icon for representation -> com.apple.") AND '
-        'NOT(eventMessage BEGINSWITH "assertion failed: ") AND '
-        'NOT(eventMessage CONTAINS " libxpc.dylib ")';
-
-      final List<String> command = verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null)).captured.single as List<String>;
-      expect(command, <String>[
+          'processImagePath ENDSWITH "My Super Awesome App" AND '
+          '(senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" OR processImageUUID == senderImageUUID) AND '
+          'NOT(eventMessage CONTAINS ": could not find icon for representation -> com.apple.") AND '
+          'NOT(eventMessage BEGINSWITH "assertion failed: ") AND '
+          'NOT(eventMessage CONTAINS " libxpc.dylib ")';
+      fakeProcessManager.addCommand(const FakeCommand(command: <String>[
         'xcrun',
         'simctl',
         'spawn',
@@ -467,13 +434,15 @@ void main() {
         '--style',
         'json',
         '--predicate',
-        expectedPredicate
-      ]);
+        expectedPredicate,
+      ]));
+
+      await launchDeviceUnifiedLogging(device, 'My Super Awesome App');
+      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     },
       overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
+      ProcessManager: () => fakeProcessManager,
       FileSystem: () => fileSystem,
-      Xcode: () => mockXcode,
     });
 
     testUsingContext('unified logging without app name', () async {
@@ -483,16 +452,12 @@ void main() {
         simulatorCategory: 'iOS 11.0',
         simControl: mockSimControl,
       );
-      await launchDeviceUnifiedLogging(device, null);
-
       const String expectedPredicate = 'eventType = logEvent AND '
-        '(senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" OR processImageUUID == senderImageUUID) AND '
-        'NOT(eventMessage CONTAINS ": could not find icon for representation -> com.apple.") AND '
-        'NOT(eventMessage BEGINSWITH "assertion failed: ") AND '
-        'NOT(eventMessage CONTAINS " libxpc.dylib ")';
-
-      final List<String> command = verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null)).captured.single as List<String>;
-      expect(command, <String>[
+          '(senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" OR processImageUUID == senderImageUUID) AND '
+          'NOT(eventMessage CONTAINS ": could not find icon for representation -> com.apple.") AND '
+          'NOT(eventMessage BEGINSWITH "assertion failed: ") AND '
+          'NOT(eventMessage CONTAINS " libxpc.dylib ")';
+      fakeProcessManager.addCommand(const FakeCommand(command: <String>[
         'xcrun',
         'simctl',
         'spawn',
@@ -502,27 +467,29 @@ void main() {
         '--style',
         'json',
         '--predicate',
-        expectedPredicate
-      ]);
+        expectedPredicate,
+      ]));
+
+      await launchDeviceUnifiedLogging(device, null);
+      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     },
       overrides: <Type, Generator>{
-        ProcessManager: () => mockProcessManager,
+        ProcessManager: () => fakeProcessManager,
         FileSystem: () => fileSystem,
       });
   });
 
   group('log reader', () {
     FakeProcessManager fakeProcessManager;
-    MockIosProject mockIosProject;
+    FakeIosProject mockIosProject;
     MockSimControl mockSimControl;
-    MockXcode mockXcode;
+    Xcode xcode;
 
     setUp(() {
       fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
-      mockIosProject = MockIosProject();
+      mockIosProject = FakeIosProject();
       mockSimControl = MockSimControl();
-      mockXcode = MockXcode();
-      when(mockXcode.xcrunCommand()).thenReturn(<String>['xcrun']);
+      xcode = Xcode.test(processManager: FakeProcessManager.any());
     });
 
     group('syslog', () {
@@ -561,7 +528,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         ProcessManager: () => fakeProcessManager,
         FileSystem: () => fileSystem,
         Platform: () => osx,
-        Xcode: () => mockXcode,
+        Xcode: () => xcode,
       });
 
       testUsingContext('simulator can output `)`', () async {
@@ -597,7 +564,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         ProcessManager: () => fakeProcessManager,
         FileSystem: () => fileSystem,
         Platform: () => osx,
-        Xcode: () => mockXcode,
+        Xcode: () => xcode,
       });
 
       testUsingContext('multiline messages', () async {
@@ -649,7 +616,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         ProcessManager: () => fakeProcessManager,
         FileSystem: () => fileSystem,
         Platform: () => osx,
-        Xcode: () => mockXcode,
+        Xcode: () => xcode,
       });
     });
 
@@ -712,7 +679,6 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
   });
 
   group('SimControl', () {
-    const int mockPid = 123;
     const String validSimControlOutput = '''
 {
   "devices" : {
@@ -744,30 +710,34 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
 }
     ''';
 
-    MockLogger mockLogger;
-    MockProcessManager mockProcessManager;
-    MockXcode mockXcode;
+    FakeProcessManager fakeProcessManager;
+    Xcode xcode;
     SimControl simControl;
     const String deviceId = 'smart-phone';
     const String appId = 'flutterApp';
 
     setUp(() {
-      mockLogger = MockLogger();
-      mockProcessManager = MockProcessManager();
-      when(mockProcessManager.run(any)).thenAnswer((Invocation _) async {
-        return ProcessResult(mockPid, 0, validSimControlOutput, '');
-      });
-
-      mockXcode = MockXcode();
-      when(mockXcode.xcrunCommand()).thenReturn(<String>['xcrun']);
+      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      xcode = Xcode.test(processManager: FakeProcessManager.any());
       simControl = SimControl(
-        logger: mockLogger,
-        processManager: mockProcessManager,
-        xcode: mockXcode,
+        logger: BufferLogger.test(),
+        processManager: fakeProcessManager,
+        xcode: xcode,
       );
     });
 
     testWithoutContext('getDevices succeeds', () async {
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <String>[
+          'xcrun',
+          'simctl',
+          'list',
+          '--json',
+          'devices',
+        ],
+        stdout: validSimControlOutput,
+      ));
+
       final List<SimDevice> devices = await simControl.getDevices();
 
       final SimDevice watch = devices[0];
@@ -793,14 +763,25 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       expect(tv.name, 'Apple TV');
       expect(tv.udid, 'TEST-TV-UDID');
       expect(tv.isBooted, isFalse);
+      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     });
 
     testWithoutContext('getDevices handles bad simctl output', () async {
-      when(mockProcessManager.run(any))
-          .thenAnswer((Invocation _) async => ProcessResult(mockPid, 0, 'Install Started', ''));
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <String>[
+          'xcrun',
+          'simctl',
+          'list',
+          '--json',
+          'devices',
+        ],
+        stdout: 'Install Started',
+      ));
+
       final List<SimDevice> devices = await simControl.getDevices();
 
       expect(devices, isEmpty);
+      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     });
 
     testWithoutContext('sdkMajorVersion defaults to 11 when sdkNameAndVersion is junk', () async {
@@ -815,50 +796,69 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
     });
 
     testWithoutContext('.install() handles exceptions', () async {
-      when(mockProcessManager.run(
-        <String>['xcrun', 'simctl', 'install', deviceId, appId],
-        environment: anyNamed('environment'),
-        workingDirectory: anyNamed('workingDirectory'),
-      )).thenThrow(const ProcessException('xcrun', <String>[]));
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <String>[
+          'xcrun',
+          'simctl',
+          'install',
+          deviceId,
+          appId,
+        ],
+        exception: ProcessException('xcrun', <String>[]),
+      ));
+
       expect(
-        () async => await simControl.install(deviceId, appId),
+        () async => simControl.install(deviceId, appId),
         throwsToolExit(message: r'Unable to install'),
       );
     });
 
     testWithoutContext('.uninstall() handles exceptions', () async {
-      when(mockProcessManager.run(
-        <String>['xcrun', 'simctl', 'uninstall', deviceId, appId],
-        environment: anyNamed('environment'),
-        workingDirectory: anyNamed('workingDirectory'),
-      )).thenThrow(const ProcessException('xcrun', <String>[]));
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <String>[
+          'xcrun',
+          'simctl',
+          'uninstall',
+          deviceId,
+          appId,
+        ],
+        exception: ProcessException('xcrun', <String>[]),
+      ));
+
       expect(
-        () async => await simControl.uninstall(deviceId, appId),
+        () async => simControl.uninstall(deviceId, appId),
         throwsToolExit(message: r'Unable to uninstall'),
       );
     });
 
     testWithoutContext('.launch() handles exceptions', () async {
-      when(mockProcessManager.run(
-        <String>['xcrun', 'simctl', 'launch', deviceId, appId],
-        environment: anyNamed('environment'),
-        workingDirectory: anyNamed('workingDirectory'),
-      )).thenThrow(const ProcessException('xcrun', <String>[]));
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <String>[
+          'xcrun',
+          'simctl',
+          'launch',
+          deviceId,
+          appId,
+        ],
+        exception: ProcessException('xcrun', <String>[]),
+      ));
+
       expect(
-        () async => await simControl.launch(deviceId, appId),
+        () async => simControl.launch(deviceId, appId),
         throwsToolExit(message: r'Unable to launch'),
       );
     });
   });
 
   group('startApp', () {
+    FakePlistParser testPlistParser;
     SimControl simControl;
-    MockXcode mockXcode;
+    Xcode xcode;
 
     setUp(() {
       simControl = MockSimControl();
-      mockXcode = MockXcode();
-      when(mockXcode.xcrunCommand()).thenReturn(<String>['xcrun']);
+      xcode = Xcode.test(processManager: FakeProcessManager.any());
+      testPlistParser = FakePlistParser();
     });
 
     testUsingContext("startApp uses compiled app's Info.plist to find CFBundleIdentifier", () async {
@@ -868,7 +868,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         simulatorCategory: 'iOS 11.2',
         simControl: simControl,
       );
-      when(globals.plistParser.getValueFromFile(any, any)).thenReturn('correct');
+      testPlistParser.setProperty('CFBundleIdentifier', 'correct');
 
       final Directory mockDir = globals.fs.currentDirectory;
       final IOSApp package = PrebuiltIOSApp(projectBundleId: 'incorrect', bundleName: 'name', bundleDir: mockDir);
@@ -879,10 +879,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
 
       verify(simControl.launch(any, 'correct', any));
     }, overrides: <Type, Generator>{
-      PlistParser: () => MockPlistUtils(),
+      PlistParser: () => testPlistParser,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Xcode: () => mockXcode,
+      Xcode: () => xcode,
     });
 
     testUsingContext('startApp respects the enable software rendering flag', () async {
@@ -902,20 +902,20 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
 
       verify(simControl.launch(any, any, captureAny)).captured.contains('--enable-software-rendering');
     }, overrides: <Type, Generator>{
-      PlistParser: () => MockPlistUtils(),
+      PlistParser: () => testPlistParser,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Xcode: () => mockXcode,
+      Xcode: () => xcode,
     });
   });
 
   group('IOSDevice.isSupportedForProject', () {
     MockSimControl mockSimControl;
-    MockXcode mockXcode;
+    Xcode xcode;
 
     setUp(() {
       mockSimControl = MockSimControl();
-      mockXcode = MockXcode();
+      xcode = Xcode.test(processManager: FakeProcessManager.any());
     });
 
     testUsingContext('is true on module project', () async {
@@ -928,7 +928,7 @@ flutter:
   module: {}
 ''');
       globals.fs.file('.packages').createSync();
-      final FlutterProject flutterProject = FlutterProject.current();
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(globals.fs.currentDirectory);
 
       final IOSSimulator simulator = IOSSimulator(
         'test',
@@ -938,7 +938,7 @@ flutter:
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
-      Xcode: () => mockXcode,
+      Xcode: () => xcode,
     });
 
 
@@ -946,7 +946,7 @@ flutter:
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('.packages').createSync();
       globals.fs.directory('ios').createSync();
-      final FlutterProject flutterProject = FlutterProject.current();
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(globals.fs.currentDirectory);
 
       final IOSSimulator simulator = IOSSimulator(
         'test',
@@ -956,13 +956,13 @@ flutter:
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
-      Xcode: () => mockXcode,
+      Xcode: () => xcode,
     });
 
     testUsingContext('is false with no host app and no module', () async {
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('.packages').createSync();
-      final FlutterProject flutterProject = FlutterProject.current();
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(globals.fs.currentDirectory);
 
       final IOSSimulator simulator = IOSSimulator(
         'test',
@@ -972,7 +972,7 @@ flutter:
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
-      Xcode: () => mockXcode,
+      Xcode: () => xcode,
     });
 
     testUsingContext('createDevFSWriter returns a LocalDevFSWriter', () {
@@ -986,4 +986,10 @@ flutter:
   });
 }
 
-class MockBuildSystem extends Mock implements BuildSystem {}
+class FakeIosProject extends Fake implements IosProject {
+  @override
+  Future<String> productBundleIdentifier(BuildInfo buildInfo) async => 'com.example.test';
+
+  @override
+  Future<String> hostAppBundleName(BuildInfo buildInfo) async => 'My Super Awesome App.app';
+}

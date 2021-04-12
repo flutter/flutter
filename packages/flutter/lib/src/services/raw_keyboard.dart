@@ -114,10 +114,8 @@ enum ModifierKey {
 ///  * [RawKeyboard], which uses these interfaces to expose key data.
 @immutable
 abstract class RawKeyEventData {
-  /// Abstract const constructor.
-  ///
-  /// This constructor enables subclasses to provide const constructors so that
-  /// they can be used in const expressions.
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const RawKeyEventData();
 
   /// Returns true if the given [ModifierKey] was pressed at the time of this
@@ -174,10 +172,12 @@ abstract class RawKeyEventData {
         }
         assert((){
           if (side == null) {
-            debugPrint('Raw key data is returning inconsistent information for '
-                'pressed modifiers. isModifierPressed returns true for $key '
-                'being pressed, but when getModifierSide is called, it says '
-                'that no modifiers are pressed.');
+            debugPrint(
+              'Raw key data is returning inconsistent information for '
+              'pressed modifiers. isModifierPressed returns true for $key '
+              'being pressed, but when getModifierSide is called, it says '
+              'that no modifiers are pressed.',
+            );
             if (this is RawKeyEventDataAndroid) {
               debugPrint('Android raw key metaState: ${(this as RawKeyEventDataAndroid).metaState}');
             }
@@ -228,6 +228,24 @@ abstract class RawKeyEventData {
   /// interacting with an input method editor (IME).
   /// {@endtemplate}
   String get keyLabel;
+
+  /// Whether a key down event, and likewise its accompanying key up event,
+  /// should be dispatched.
+  ///
+  /// Certain events on some platforms should not be dispatched to listeners
+  /// according to Flutter's event model. For example, on macOS, Fn keys are
+  /// skipped to be consistent with other platform. On Win32, events dispatched
+  /// for IME (`VK_PROCESSKEY`) are also skipped.
+  ///
+  /// This method will be called upon every down events. By default, this method
+  /// always return true. Subclasses should override this method to define the
+  /// filtering rule for the platform. If this method returns false for an event
+  /// message, the event will not be dispatched to listeners, but respond with
+  /// "handled: true" immediately. Moreover, the following up event with the
+  /// same physical key will also be skipped.
+  bool shouldDispatchEvent() {
+    return true;
+  }
 }
 
 /// Defines the interface for raw key events.
@@ -255,8 +273,8 @@ abstract class RawKeyEventData {
 ///  * [RawKeyboardListener], a widget that listens for raw key events.
 @immutable
 abstract class RawKeyEvent with Diagnosticable {
-  /// Initializes fields for subclasses, and provides a const constructor for
-  /// const subclasses.
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const RawKeyEvent({
     required this.data,
     this.character,
@@ -268,93 +286,110 @@ abstract class RawKeyEvent with Diagnosticable {
     final RawKeyEventData data;
     String? character;
 
-    final String keymap = message['keymap'] as String;
-    switch (keymap) {
-      case 'android':
-        data = RawKeyEventDataAndroid(
-          flags: message['flags'] as int? ?? 0,
-          codePoint: message['codePoint'] as int? ?? 0,
-          keyCode: message['keyCode'] as int? ?? 0,
-          plainCodePoint: message['plainCodePoint'] as int? ?? 0,
-          scanCode: message['scanCode'] as int? ?? 0,
-          metaState: message['metaState'] as int? ?? 0,
-          eventSource: message['source'] as int? ?? 0,
-          vendorId: message['vendorId'] as int? ?? 0,
-          productId: message['productId'] as int? ?? 0,
-          deviceId: message['deviceId'] as int? ?? 0,
-          repeatCount: message['repeatCount'] as int? ?? 0,
-        );
-        if (message.containsKey('character')) {
-          character = message['character'] as String?;
-        }
-        break;
-      case 'fuchsia':
-        final int codePoint = message['codePoint'] as int? ?? 0;
-        data = RawKeyEventDataFuchsia(
-          hidUsage: message['hidUsage'] as int? ?? 0,
-          codePoint: codePoint,
-          modifiers: message['modifiers'] as int? ?? 0,
-        );
-        if (codePoint != 0) {
-          character = String.fromCharCode(codePoint);
-        }
-        break;
-      case 'macos':
-        data = RawKeyEventDataMacOs(
+    if (kIsWeb) {
+      final String? key = message['key'] as String?;
+      data = RawKeyEventDataWeb(
+        code: message['code'] as String? ?? '',
+        key: key ?? '',
+        metaState: message['metaState'] as int? ?? 0,
+      );
+      if (key != null && key.isNotEmpty) {
+        character = key;
+      }
+    } else {
+      final String keymap = message['keymap'] as String;
+      switch (keymap) {
+        case 'android':
+          data = RawKeyEventDataAndroid(
+            flags: message['flags'] as int? ?? 0,
+            codePoint: message['codePoint'] as int? ?? 0,
+            keyCode: message['keyCode'] as int? ?? 0,
+            plainCodePoint: message['plainCodePoint'] as int? ?? 0,
+            scanCode: message['scanCode'] as int? ?? 0,
+            metaState: message['metaState'] as int? ?? 0,
+            eventSource: message['source'] as int? ?? 0,
+            vendorId: message['vendorId'] as int? ?? 0,
+            productId: message['productId'] as int? ?? 0,
+            deviceId: message['deviceId'] as int? ?? 0,
+            repeatCount: message['repeatCount'] as int? ?? 0,
+          );
+          if (message.containsKey('character')) {
+            character = message['character'] as String?;
+          }
+          break;
+        case 'fuchsia':
+          final int codePoint = message['codePoint'] as int? ?? 0;
+          data = RawKeyEventDataFuchsia(
+            hidUsage: message['hidUsage'] as int? ?? 0,
+            codePoint: codePoint,
+            modifiers: message['modifiers'] as int? ?? 0,
+          );
+          if (codePoint != 0) {
+            character = String.fromCharCode(codePoint);
+          }
+          break;
+        case 'macos':
+          data = RawKeyEventDataMacOs(
             characters: message['characters'] as String? ?? '',
             charactersIgnoringModifiers: message['charactersIgnoringModifiers'] as String? ?? '',
             keyCode: message['keyCode'] as int? ?? 0,
-            modifiers: message['modifiers'] as int? ?? 0);
-        character = message['characters'] as String?;
-        break;
-      case 'ios':
-        data = RawKeyEventDataIos(
+            modifiers: message['modifiers'] as int? ?? 0,
+          );
+          character = message['characters'] as String?;
+          break;
+        case 'ios':
+          data = RawKeyEventDataIos(
             characters: message['characters'] as String? ?? '',
             charactersIgnoringModifiers: message['charactersIgnoringModifiers'] as String? ?? '',
             keyCode: message['keyCode'] as int? ?? 0,
-            modifiers: message['modifiers'] as int? ?? 0);
-        break;
-      case 'linux':
-        final int unicodeScalarValues = message['unicodeScalarValues'] as int? ?? 0;
-        data = RawKeyEventDataLinux(
+            modifiers: message['modifiers'] as int? ?? 0,
+          );
+          break;
+        case 'linux':
+          final int unicodeScalarValues = message['unicodeScalarValues'] as int? ?? 0;
+          data = RawKeyEventDataLinux(
             keyHelper: KeyHelper(message['toolkit'] as String? ?? ''),
             unicodeScalarValues: unicodeScalarValues,
             keyCode: message['keyCode'] as int? ?? 0,
             scanCode: message['scanCode'] as int? ?? 0,
             modifiers: message['modifiers'] as int? ?? 0,
-            isDown: message['type'] == 'keydown');
-        if (unicodeScalarValues != 0) {
-          character = String.fromCharCode(unicodeScalarValues);
-        }
-        break;
-      case 'web':
-        data = RawKeyEventDataWeb(
-          code: message['code'] as String? ?? '',
-          key: message['key'] as String? ?? '',
-          metaState: message['metaState'] as int? ?? 0,
-        );
-        character = message['key'] as String?;
-        break;
-      case 'windows':
-        final int characterCodePoint = message['characterCodePoint'] as int? ?? 0;
-        data = RawKeyEventDataWindows(
-          keyCode: message['keyCode'] as int? ?? 0,
-          scanCode: message['scanCode'] as int? ?? 0,
-          characterCodePoint: characterCodePoint,
-          modifiers: message['modifiers'] as int? ?? 0,
-        );
-        if (characterCodePoint != 0) {
-          character = String.fromCharCode(characterCodePoint);
-        }
-        break;
-      default:
-        /// This exception would only be hit on platforms that haven't yet
-        /// implemented raw key events, but will only be triggered if the
-        /// engine for those platforms sends raw key event messages in the
-        /// first place.
-        throw FlutterError('Unknown keymap for key events: $keymap');
+            isDown: message['type'] == 'keydown',
+          );
+          if (unicodeScalarValues != 0) {
+            character = String.fromCharCode(unicodeScalarValues);
+          }
+          break;
+        case 'windows':
+          final int characterCodePoint = message['characterCodePoint'] as int? ?? 0;
+          data = RawKeyEventDataWindows(
+            keyCode: message['keyCode'] as int? ?? 0,
+            scanCode: message['scanCode'] as int? ?? 0,
+            characterCodePoint: characterCodePoint,
+            modifiers: message['modifiers'] as int? ?? 0,
+          );
+          if (characterCodePoint != 0) {
+            character = String.fromCharCode(characterCodePoint);
+          }
+          break;
+        case 'web':
+          final String? key = message['key'] as String?;
+          data = RawKeyEventDataWeb(
+            code: message['code'] as String? ?? '',
+            key: key ?? '',
+            metaState: message['metaState'] as int? ?? 0,
+          );
+          if (key != null && key.isNotEmpty) {
+            character = key;
+          }
+          break;
+        default:
+          /// This exception would only be hit on platforms that haven't yet
+          /// implemented raw key events, but will only be triggered if the
+          /// engine for those platforms sends raw key event messages in the
+          /// first place.
+          throw FlutterError('Unknown keymap for key events: $keymap');
+      }
     }
-
     final String type = message['type'] as String;
     switch (type) {
       case 'keydown':
@@ -602,32 +637,38 @@ class RawKeyboard {
 
   Future<dynamic> _handleKeyEvent(dynamic message) async {
     final RawKeyEvent event = RawKeyEvent.fromMessage(message as Map<String, dynamic>);
-    if (event.data is RawKeyEventDataMacOs && event.logicalKey == LogicalKeyboardKey.fn) {
-      // On macOS laptop keyboards, the fn key is used to generate home/end and
-      // f1-f12, but it ALSO generates a separate down/up event for the fn key
-      // itself. Other platforms hide the fn key, and just produce the key that
-      // it is combined with, so to keep it possible to write cross platform
-      // code that looks at which keys are pressed, the fn key is ignored on
-      // macOS.
-      return;
-    }
+    bool shouldDispatch = true;
     if (event is RawKeyDownEvent) {
-      _keysPressed[event.physicalKey] = event.logicalKey;
+      if (event.data.shouldDispatchEvent()) {
+        _keysPressed[event.physicalKey] = event.logicalKey;
+      } else {
+        shouldDispatch = false;
+        _hiddenKeysPressed.add(event.physicalKey);
+      }
+    } else if (event is RawKeyUpEvent) {
+      if (!_hiddenKeysPressed.contains(event.physicalKey)) {
+        // Use the physical key in the key up event to find the physical key from
+        // the corresponding key down event and remove it, even if the logical
+        // keys don't match.
+        _keysPressed.remove(event.physicalKey);
+      } else {
+        _hiddenKeysPressed.remove(event.physicalKey);
+        shouldDispatch = false;
+      }
     }
-    if (event is RawKeyUpEvent) {
-      // Use the physical key in the key up event to find the physical key from
-      // the corresponding key down event and remove it, even if the logical
-      // keys don't match.
-      _keysPressed.remove(event.physicalKey);
+    if (!shouldDispatch) {
+      return <String, dynamic>{ 'handled': true };
     }
     // Make sure that the modifiers reflect reality, in case a modifier key was
     // pressed/released while the app didn't have focus.
     _synchronizeModifiers(event);
-    assert(event is! RawKeyDownEvent || _keysPressed.isNotEmpty,
-        'Attempted to send a key down event when no keys are in keysPressed. '
-        "This state can occur if the key event being sent doesn't properly "
-        'set its modifier flags. This was the event: $event and its data: '
-        '${event.data}');
+    assert(
+      event is! RawKeyDownEvent || _keysPressed.isNotEmpty,
+      'Attempted to send a key down event when no keys are in keysPressed. '
+      "This state can occur if the key event being sent doesn't properly "
+      'set its modifier flags. This was the event: $event and its data: '
+      '${event.data}',
+    );
     // Send the event to passive listeners.
     for (final ValueChanged<RawKeyEvent> listener in List<ValueChanged<RawKeyEvent>>.from(_listeners)) {
       if (_listeners.contains(listener)) {
@@ -705,9 +746,11 @@ class RawKeyboard {
       final Set<PhysicalKeyboardKey>? mappedKeys = _modifierKeyMap[_ModifierSidePair(key, modifiersPressed[key])];
       assert((){
         if (mappedKeys == null) {
-          debugPrint('Platform key support for ${Platform.operatingSystem} is '
-              'producing unsupported modifier combinations for '
-              'modifier $key on side ${modifiersPressed[key]}.');
+          debugPrint(
+            'Platform key support for ${Platform.operatingSystem} is '
+            'producing unsupported modifier combinations for '
+            'modifier $key on side ${modifiersPressed[key]}.',
+          );
           if (event.data is RawKeyEventDataAndroid) {
             debugPrint('Android raw key metaState: ${(event.data as RawKeyEventDataAndroid).metaState}');
           }
@@ -730,6 +773,7 @@ class RawKeyboard {
   }
 
   final Map<PhysicalKeyboardKey, LogicalKeyboardKey> _keysPressed = <PhysicalKeyboardKey, LogicalKeyboardKey>{};
+  final Set<PhysicalKeyboardKey> _hiddenKeysPressed = <PhysicalKeyboardKey>{};
 
   /// Returns the set of keys currently pressed.
   Set<LogicalKeyboardKey> get keysPressed => _keysPressed.values.toSet();

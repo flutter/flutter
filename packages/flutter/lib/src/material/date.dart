@@ -144,22 +144,38 @@ class DateUtils {
   }
 }
 
-/// Mode of the date picker dialog.
+/// Mode of date entry method for the date picker dialog.
 ///
-/// Either a calendar or text input. In [calendar] mode, a calendar view is
-/// displayed and the user taps the day they wish to select. In [input] mode a
-/// [TextField] is displayed and the user types in the date they wish to select.
+/// In [calendar] mode, a calendar grid is displayed and the user taps the
+/// day they wish to select. In [input] mode a TextField] is displayed and
+/// the user types in the date they wish to select.
+///
+/// [calendarOnly] and [inputOnly] are variants of the above that don't
+/// allow the user to change to the mode.
 ///
 /// See also:
 ///
 ///  * [showDatePicker] and [showDateRangePicker], which use this to control
 ///    the initial entry mode of their dialogs.
 enum DatePickerEntryMode {
-  /// Tapping on a calendar.
+  /// User picks a date from calendar grid. Can switch to [input] by activating
+  /// a mode button in the dialog.
   calendar,
 
-  /// Text input.
+  /// User can input the date by typing it into a text field.
+  ///
+  /// Can switch to [calendar] by activating a mode button in the dialog.
   input,
+
+  /// User can only pick a date from calendar grid.
+  ///
+  /// There is no user interface to switch to another mode.
+  calendarOnly,
+
+  /// User can only input the date by typing it into a text field.
+  ///
+  /// There is no user interface to switch to another mode.
+  inputOnly,
 }
 
 /// Initial display of a calendar date picker.

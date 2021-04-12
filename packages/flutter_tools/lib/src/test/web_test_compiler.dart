@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
@@ -14,6 +16,7 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
 import '../bundle.dart';
+import '../cache.dart';
 import '../compile.dart';
 import '../dart/language_version.dart';
 import '../web/bootstrap.dart';
@@ -61,7 +64,7 @@ class WebTestCompiler {
       }
     } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
       platformDillArtifact = Artifact.webPlatformSoundKernelDill;
-      languageVersion = nullSafeVersion;
+      languageVersion = currentLanguageVersion(_fileSystem, Cache.flutterRoot);
       if (!extraFrontEndOptions.contains('--sound-null-safety')) {
         extraFrontEndOptions.add('--sound-null-safety');
       }
@@ -80,7 +83,7 @@ class WebTestCompiler {
         ..writeAsStringSync(generateTestEntrypoint(
             relativeTestPath: relativeTestSegments.join('/'),
             absolutePath: testFilePath,
-            testConfigPath: findTestConfigFile(_fileSystem.file(testFilePath))?.path,
+            testConfigPath: findTestConfigFile(_fileSystem.file(testFilePath), _logger)?.path,
             languageVersion: languageVersion,
         ));
       generatedFiles.add(generatedFile);
@@ -128,6 +131,7 @@ class WebTestCompiler {
       processManager: _processManager,
       logger: _logger,
       platform: _platform,
+      fileSystem: _fileSystem,
     );
 
     final CompilerOutput output = await residentCompiler.recompile(

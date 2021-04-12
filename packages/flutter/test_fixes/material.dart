@@ -5,8 +5,25 @@
 import 'package:flutter/material.dart';
 
 void main() {
+  // Generic reference variables.
+  BuildContext context;
+
+  // Changes made in https://github.com/flutter/flutter/pull/26259
+  const Scaffold scaffold = Scaffold(resizeToAvoidBottomPadding: true);
+  final bool resize = scaffold.resizeToAvoidBottomPadding;
+
   // Change made in https://github.com/flutter/flutter/pull/15303
   showDialog(child: Text('Fix me.'));
+
+  // Changes made in https://github.com/flutter/flutter/pull/44189
+  const Element element = Element(myWidget);
+  element.inheritFromElement(ancestor);
+  element.inheritFromWidgetOfExactType(targetType);
+  element.ancestorInheritedElementForWidgetOfExactType(targetType);
+  element.ancestorWidgetOfExactType(targetType);
+  element.ancestorStateOfType(TypeMatcher<targetType>());
+  element.rootAncestorStateOfType(TypeMatcher<targetType>());
+  element.ancestorRenderObjectOfType(TypeMatcher<targetType>());
 
   // Changes made in https://github.com/flutter/flutter/pull/45941
   final WidgetsBinding binding = WidgetsBinding.instance!;
@@ -99,4 +116,174 @@ void main() {
   style = textTheme.button;
   style = textTheme.subtitle;
   style = textTheme.overline;
+
+  // Changes made in https://github.com/flutter/flutter/pull/68736
+  MediaQuery.of(context, nullOk: true);
+  MediaQuery.of(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/70726
+  Navigator.of(context, nullOk: true);
+  Navigator.of(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68908
+  ScaffoldMessenger.of(context, nullOk: true);
+  ScaffoldMessenger.of(context, nullOk: false);
+  Scaffold.of(context, nullOk: true);
+  Scaffold.of(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68910
+  Router.of(context, nullOk: true);
+  Router.of(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68911
+  Localizations.localeOf(context, nullOk: true);
+  Localizations.localeOf(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68917
+  FocusTraversalOrder.of(context, nullOk: true);
+  FocusTraversalOrder.of(context, nullOk: false);
+  FocusTraversalGroup.of(context, nullOk: true);
+  FocusTraversalGroup.of(context, nullOk: false);
+  Focus.of(context, nullOk: true);
+  Focus.of(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68921
+  Shortcuts.of(context, nullOk: true);
+  Shortcuts.of(context, nullOk: false);
+  Actions.find(context, nullOk: true);
+  Actions.find(context, nullOk: false);
+  Actions.handler(context, nullOk: true);
+  Actions.handler(context, nullOk: false);
+  Actions.invoke(context, nullOk: true);
+  Actions.invoke(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68925
+  AnimatedList.of(context, nullOk: true);
+  AnimatedList.of(context, nullOk: false);
+  SliverAnimatedList.of(context, nullOk: true);
+  SliverAnimatedList.of(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68905
+  MaterialBasedCupertinoThemeData.resolveFrom(context, nullOk: true);
+  MaterialBasedCupertinoThemeData.resolveFrom(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/72043
+  TextField(maxLengthEnforced: true);
+  TextField(maxLengthEnforced: false);
+  final TextField textField;
+  textField.maxLengthEnforced;
+  TextFormField(maxLengthEnforced: true);
+  TextFormField(maxLengthEnforced: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/59127
+  const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem(title: myTitle);
+  bottomNavigationBarItem.title;
+
+  // Changes made in https://github.com/flutter/flutter/pull/65246
+  RectangularSliderTrackShape(disabledThumbGapWidth: 2.0);
+
+  // Changes made in https://github.com/flutter/flutter/pull/46115
+  const InputDecoration inputDecoration = InputDecoration(hasFloatingPlaceholder: true);
+  InputDecoration(hasFloatingPlaceholder: false);
+  InputDecoration();
+  InputDecoration.collapsed(hasFloatingPlaceholder: true);
+  InputDecoration.collapsed(hasFloatingPlaceholder: false);
+  InputDecoration.collapsed();
+  inputDecoration.hasFloatingPlaceholder;
+  const InputDecorationTheme inputDecorationTheme = InputDecorationTheme(hasFloatingPlaceholder: true);
+  InputDecorationTheme(hasFloatingPlaceholder: false);
+  InputDecorationTheme();
+  inputDecorationTheme.hasFloatingPlaceholder;
+
+  // Changes made in https://github.com/flutter/flutter/pull/66482
+  ThemeData(textSelectionColor: Colors.red);
+  ThemeData(cursorColor: Colors.blue);
+  ThemeData(textSelectionHandleColor: Colors.yellow);
+  ThemeData(useTextSelectionTheme: false);
+  ThemeData(textSelectionColor: Colors.red, useTextSelectionTheme: false);
+  ThemeData(cursorColor: Colors.blue, useTextSelectionTheme: false);
+  ThemeData(textSelectionHandleColor: Colors.yellow, useTextSelectionTheme: false);
+  ThemeData(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+  );
+  ThemeData(
+    textSelectionHandleColor: Colors.yellow,
+    cursorColor: Colors.blue,
+  );
+  ThemeData(
+    textSelectionColor: Colors.red,
+    textSelectionHandleColor: Colors.yellow,
+  );
+  ThemeData(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+    useTextSelectionTheme: false,
+  );
+  ThemeData(
+    textSelectionHandleColor: Colors.yellow,
+    cursorColor: Colors.blue,
+    useTextSelectionTheme: true,
+  );
+  ThemeData(
+    textSelectionColor: Colors.red,
+    textSelectionHandleColor: Colors.yellow,
+    useTextSelectionTheme: false,
+  );
+  ThemeData(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+    textSelectionHandleColor: Colors.yellow,
+  );
+  ThemeData(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+    textSelectionHandleColor: Colors.yellow,
+    useTextSelectionTheme: false,
+  );
+  ThemeData.raw(textSelectionColor: Colors.red);
+  ThemeData.raw(cursorColor: Colors.blue);
+  ThemeData.raw(textSelectionHandleColor: Colors.yellow);
+  ThemeData.raw(useTextSelectionTheme: false);
+  ThemeData.raw(textSelectionColor: Colors.red, useTextSelectionTheme: false);
+  ThemeData.raw(cursorColor: Colors.blue, useTextSelectionTheme: false);
+  ThemeData.raw(textSelectionHandleColor: Colors.yellow, useTextSelectionTheme: false);
+  ThemeData.raw(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+  );
+  ThemeData.raw(
+    textSelectionHandleColor: Colors.yellow,
+    cursorColor: Colors.blue,
+  );
+  ThemeData.raw(
+    textSelectionColor: Colors.red,
+    textSelectionHandleColor: Colors.yellow,
+  );
+  ThemeData.raw(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+    useTextSelectionTheme: false,
+  );
+  ThemeData.raw(
+    textSelectionHandleColor: Colors.yellow,
+    cursorColor: Colors.blue,
+    useTextSelectionTheme: true,
+  );
+  ThemeData.raw(
+    textSelectionColor: Colors.red,
+    textSelectionHandleColor: Colors.yellow,
+    useTextSelectionTheme: false,
+  );
+  ThemeData.raw(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+    textSelectionHandleColor: Colors.yellow,
+  );
+  ThemeData.raw(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+    textSelectionHandleColor: Colors.yellow,
+    useTextSelectionTheme: false,
+  );
 }

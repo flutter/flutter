@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../globals.dart' as globals;
@@ -28,7 +30,8 @@ class FormatCommand extends FlutterCommand {
     );
     argParser.addOption('line-length',
       abbr: 'l',
-      help: 'Wrap lines longer than this length. Defaults to 80 characters.',
+      help: 'Wrap lines longer than this length.',
+      valueHelp: 'characters',
       defaultsTo: '80',
     );
   }

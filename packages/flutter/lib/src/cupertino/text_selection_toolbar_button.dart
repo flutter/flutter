@@ -45,12 +45,16 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
        ),
        super(key: key);
 
+  /// {@template flutter.cupertino.CupertinoTextSelectionToolbarButton.child}
   /// The child of this button.
   ///
   /// Usually a [Text] or an [Icon].
+  /// {@endtemplate}
   final Widget child;
 
+  /// {@template flutter.cupertino.CupertinoTextSelectionToolbarButton.onPressed}
   /// Called when this button is pressed.
+  /// {@endtemplate}
   final VoidCallback? onPressed;
 
   @override

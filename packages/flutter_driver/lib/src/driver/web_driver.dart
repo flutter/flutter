@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -53,7 +51,7 @@ class WebFlutterDriver extends FlutterDriver {
   /// DRIVER_SESSION_CAPABILITIES and ANDROID_CHROME_ON_EMULATOR for
   /// configurations.
   static Future<FlutterDriver> connectWeb(
-      {String hostUrl, Duration timeout}) async {
+      {String? hostUrl, Duration? timeout}) async {
     hostUrl ??= Platform.environment['VM_SERVICE_URL'];
     final Map<String, dynamic> settings = <String, dynamic>{
       'support-timeline-action': Platform.environment['SUPPORT_TIMELINE_ACTION'] == 'true',
@@ -64,7 +62,7 @@ class WebFlutterDriver extends FlutterDriver {
       'session-capabilities': Platform.environment['DRIVER_SESSION_CAPABILITIES'],
     };
     final FlutterWebConnection connection = await FlutterWebConnection.connect
-      (hostUrl, settings, timeout: timeout);
+      (hostUrl!, settings, timeout: timeout);
     return WebFlutterDriver.connectedTo(connection);
   }
 
@@ -90,7 +88,7 @@ class WebFlutterDriver extends FlutterDriver {
     final Map<String, String> serialized = command.serialize();
     try {
       final dynamic data = await _connection.sendCommand("window.\$flutterDriver('${jsonEncode(serialized)}')", command.timeout);
-      response = data != null ? json.decode(data as String) as Map<String, dynamic> : <String, dynamic>{};
+      response = data != null ? (json.decode(data as String) as Map<String, dynamic>?)! : <String, dynamic>{};
     } catch (error, stackTrace) {
       throw DriverError("Failed to respond to $command due to remote error\n : \$flutterDriver('${jsonEncode(serialized)}')",
           error,
@@ -132,7 +130,7 @@ class WebFlutterDriver extends FlutterDriver {
     final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
     for (final async_io.LogEntry entry in await _connection.logs.toList()) {
       if (_startTime.isBefore(entry.timestamp)) {
-        final Map<String, dynamic> data = jsonDecode(entry.message)['message'] as Map<String, dynamic>;
+        final Map<String, dynamic> data = jsonDecode(entry.message!)['message'] as Map<String, dynamic>;
         if (data['method'] == 'Tracing.dataCollected') {
           // 'ts' data collected from Chrome is in double format, conversion needed
           try {
@@ -142,7 +140,7 @@ class WebFlutterDriver extends FlutterDriver {
             // data is corrupted, skip
             continue;
           }
-          events.add(data['params'] as Map<String, dynamic>);
+          events.add(data['params']! as Map<String, dynamic>);
         }
       }
     }
@@ -203,7 +201,7 @@ class FlutterWebConnection {
   static Future<FlutterWebConnection> connect(
       String url,
       Map<String, dynamic> settings,
-      {Duration timeout}) async {
+      {Duration? timeout}) async {
     final String sessionId = settings['session-id'].toString();
     final Uri sessionUri = Uri.parse(settings['session-uri'].toString());
     final async_io.WebDriver driver = async_io.WebDriver(
@@ -226,7 +224,7 @@ class FlutterWebConnection {
   }
 
   /// Sends command via WebDriver to Flutter web application.
-  Future<dynamic> sendCommand(String script, Duration duration) async {
+  Future<dynamic> sendCommand(String script, Duration? duration) async {
     dynamic result;
     try {
       await _driver.execute(script, <void>[]);
@@ -265,7 +263,7 @@ class FlutterWebConnection {
 }
 
 /// Waits until extension is installed.
-Future<void> waitUntilExtensionInstalled(async_io.WebDriver driver, Duration timeout) async {
+Future<void> waitUntilExtensionInstalled(async_io.WebDriver driver, Duration? timeout) async {
   await waitFor<void>(() =>
       driver.execute(r'return typeof(window.$flutterDriver)', <String>[]),
       matcher: 'function',

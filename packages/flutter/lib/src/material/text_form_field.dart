@@ -76,6 +76,7 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 /// ```
 ///
 /// ```dart
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Material(
 ///     child: Center(
@@ -159,13 +160,13 @@ class TextFormField extends FormField<String> {
     @Deprecated(
       'Use autovalidateMode parameter which provide more specific '
       'behaviour related to auto validation. '
-      'This feature was deprecated after v1.19.0.'
+      'This feature was deprecated after v1.19.0.',
     )
     bool autovalidate = false,
     @Deprecated(
       'Use maxLengthEnforcement parameter which provides more specific '
       'behavior related to the maxLength limit. '
-      'This feature was deprecated after v1.25.0-5.0.pre.'
+      'This feature was deprecated after v1.25.0-5.0.pre.',
     )
     bool maxLengthEnforced = true,
     MaxLengthEnforcement? maxLengthEnforcement,
@@ -193,6 +194,7 @@ class TextFormField extends FormField<String> {
     ScrollPhysics? scrollPhysics,
     Iterable<String>? autofillHints,
     AutovalidateMode? autovalidateMode,
+    ScrollController? scrollController,
   }) : assert(initialValue == null || controller == null),
        assert(textAlign != null),
        assert(autofocus != null),
@@ -205,7 +207,7 @@ class TextFormField extends FormField<String> {
        assert(
          autovalidate == false ||
          autovalidate == true && autovalidateMode == null,
-         'autovalidate and autovalidateMode should not be used together.'
+         'autovalidate and autovalidateMode should not be used together.',
        ),
        assert(maxLengthEnforced != null),
        assert(
@@ -291,6 +293,7 @@ class TextFormField extends FormField<String> {
            selectionControls: selectionControls,
            buildCounter: buildCounter,
            autofillHints: autofillHints,
+           scrollController: scrollController,
          );
        },
      );

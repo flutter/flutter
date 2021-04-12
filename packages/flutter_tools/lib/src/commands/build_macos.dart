@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import '../base/analyze_size.dart';
@@ -42,7 +44,7 @@ class BuildMacosCommand extends BuildSubCommand {
     final BuildInfo buildInfo = await getBuildInfo();
     final FlutterProject flutterProject = FlutterProject.current();
     if (!featureFlags.isMacOSEnabled) {
-      throwToolExit('"build macos" is not currently supported.');
+      throwToolExit('"build macos" is not currently supported. To enable, run "flutter config --enable-macos-desktop".');
     }
     if (!globals.platform.isMacOS) {
       throwToolExit('"build macos" only supported on macOS hosts.');

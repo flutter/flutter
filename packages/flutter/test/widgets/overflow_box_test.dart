@@ -10,7 +10,7 @@ void main() {
   testWidgets('OverflowBox control test', (WidgetTester tester) async {
     final GlobalKey inner = GlobalKey();
     await tester.pumpWidget(Align(
-      alignment: const Alignment(1.0, 1.0),
+      alignment: Alignment.bottomRight,
       child: SizedBox(
         width: 10.0,
         height: 20.0,
@@ -58,7 +58,7 @@ void main() {
         child: SizedOverflowBox(
           size: const Size(100.0, 100.0),
           alignment: Alignment.topRight,
-          child: Container(height: 50.0, width: 50.0, key: inner),
+          child: SizedBox(height: 50.0, width: 50.0, key: inner),
         ),
       ),
     ));
@@ -81,7 +81,7 @@ void main() {
         child: SizedOverflowBox(
           size: const Size(100.0, 100.0),
           alignment: AlignmentDirectional.bottomStart,
-          child: Container(height: 50.0, width: 50.0, key: inner),
+          child: SizedBox(height: 50.0, width: 50.0, key: inner),
         ),
       ),
     ));

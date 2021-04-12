@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
 import 'package:meta/meta.dart';
 
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
-import '../base/terminal.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
-import 'gradle_utils.dart';
+import 'android_studio.dart';
 
 typedef GradleErrorTest = bool Function(String);
 
@@ -87,7 +87,7 @@ final GradleHandledError permissionDeniedErrorHandler = GradleHandledError(
     bool usesAndroidX,
     bool shouldBuildPluginAsAar,
   }) async {
-    globals.printStatus('$warningMark Gradle does not have execution permission.', emphasis: true);
+    globals.printStatus('${globals.logger.terminal.warningMark} Gradle does not have execution permission.', emphasis: true);
     globals.printStatus(
       'You should change the ownership of the project directory to your user, '
       'or move the project to a directory with execute permissions.',
@@ -125,7 +125,7 @@ final GradleHandledError networkErrorHandler = GradleHandledError(
     bool shouldBuildPluginAsAar,
   }) async {
     globals.printError(
-      '$warningMark Gradle threw an error while downloading artifacts from the network. '
+      '${globals.logger.terminal.warningMark} Gradle threw an error while downloading artifacts from the network. '
       'Retrying to download...'
     );
     try {
@@ -154,7 +154,7 @@ final GradleHandledError r8FailureHandler = GradleHandledError(
     bool usesAndroidX,
     bool shouldBuildPluginAsAar,
   }) async {
-    globals.printStatus('$warningMark The shrinker may have failed to optimize the Java bytecode.', emphasis: true);
+    globals.printStatus('${globals.logger.terminal.warningMark} The shrinker may have failed to optimize the Java bytecode.', emphasis: true);
     globals.printStatus('To disable the shrinker, pass the `--no-shrink` flag to this command.', indent: 4);
     globals.printStatus('To learn more, see: https://developer.android.com/studio/build/shrink-code', indent: 4);
     return GradleBuildStatus.exit;
@@ -264,7 +264,7 @@ final GradleHandledError licenseNotAcceptedHandler = GradleHandledError(
     assert(licenseFailure != null);
     final Match licenseMatch = licenseFailure.firstMatch(line);
     globals.printStatus(
-      '$warningMark Unable to download needed Android SDK components, as the '
+      '${globals.logger.terminal.warningMark} Unable to download needed Android SDK components, as the '
       'following licenses have not been accepted:\n'
       '${licenseMatch.group(1)}\n\n'
       'To resolve this, please run the following command in a Terminal:\n'
@@ -293,14 +293,17 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
   }) async {
     final RunResult tasksRunResult = await globals.processUtils.run(
       <String>[
-        gradleUtils.getExecutable(project),
+        globals.gradleUtils.getExecutable(project),
         'app:tasks' ,
         '--all',
         '--console=auto',
       ],
       throwOnError: true,
       workingDirectory: project.android.hostAppGradleRoot.path,
-      environment: gradleEnvironment,
+      environment: <String, String>{
+        if (javaPath != null)
+          'JAVA_HOME': javaPath,
+      },
     );
     // Extract build types and product flavors.
     final Set<String> variants = <String>{};
@@ -325,7 +328,7 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
       }
     }
     globals.printStatus(
-      '\n$warningMark  Gradle project does not define a task suitable '
+      '\n${globals.logger.terminal.warningMark}  Gradle project does not define a task suitable '
       'for the requested build.'
     );
     if (productFlavors.isEmpty) {

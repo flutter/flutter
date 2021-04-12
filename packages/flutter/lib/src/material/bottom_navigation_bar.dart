@@ -6,7 +6,6 @@ import 'dart:collection' show Queue;
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 import 'bottom_navigation_bar_theme.dart';
@@ -57,7 +56,9 @@ enum BottomNavigationBarType {
 ///  * [BottomNavigationBarType.fixed], the default when there are less than
 ///    four [items]. The selected item is rendered with the
 ///    [selectedItemColor] if it's non-null, otherwise the theme's
-///    [ThemeData.primaryColor] is used. If [backgroundColor] is null, The
+///    [ColorScheme.primary] color is used for [Brightness.light] themes
+///    and [ColorScheme.secondary] for [Brightness.dark] themes.
+///    If [backgroundColor] is null, The
 ///    navigation bar's background color defaults to the [Material] background
 ///    color, [ThemeData.canvasColor] (essentially opaque white).
 ///  * [BottomNavigationBarType.shifting], the default when there are four
@@ -275,6 +276,7 @@ class BottomNavigationBar extends StatefulWidget {
     this.showSelectedLabels,
     this.showUnselectedLabels,
     this.mouseCursor,
+    this.enableFeedback,
   }) : assert(items != null),
        assert(items.length >= 2),
        assert(
@@ -287,7 +289,7 @@ class BottomNavigationBar extends StatefulWidget {
        assert(iconSize != null && iconSize >= 0.0),
        assert(
          selectedItemColor == null || fixedColor == null,
-         'Either selectedItemColor or fixedColor can be specified, but not both'
+         'Either selectedItemColor or fixedColor can be specified, but not both',
        ),
        assert(selectedFontSize != null && selectedFontSize >= 0.0),
        assert(unselectedFontSize != null && unselectedFontSize >= 0.0),
@@ -410,6 +412,16 @@ class BottomNavigationBar extends StatefulWidget {
   /// If this property is null, [SystemMouseCursors.click] will be used.
   final MouseCursor? mouseCursor;
 
+  /// Whether detected gestures should provide acoustic and/or haptic feedback.
+  ///
+  /// For example, on Android a tap will produce a clicking sound and a
+  /// long-press will produce a short vibration, when feedback is enabled.
+  ///
+  /// See also:
+  ///
+  ///  * [Feedback] for providing platform-specific feedback to certain actions.
+  final bool? enableFeedback;
+
   @override
   _BottomNavigationBarState createState() => _BottomNavigationBarState();
 }
@@ -434,6 +446,7 @@ class _BottomNavigationTile extends StatelessWidget {
     required this.showUnselectedLabels,
     this.indexLabel,
     required this.mouseCursor,
+    required this.enableFeedback,
     }) : assert(type != null),
          assert(item != null),
          assert(animation != null),
@@ -458,6 +471,7 @@ class _BottomNavigationTile extends StatelessWidget {
   final bool showSelectedLabels;
   final bool showUnselectedLabels;
   final MouseCursor mouseCursor;
+  final bool enableFeedback;
 
   @override
   Widget build(BuildContext context) {
@@ -542,6 +556,7 @@ class _BottomNavigationTile extends StatelessWidget {
     Widget result = InkResponse(
       onTap: onTap,
       mouseCursor: mouseCursor,
+      enableFeedback: enableFeedback,
       child: Padding(
         padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
         child: Column(
@@ -641,11 +656,9 @@ class _TileIcon extends StatelessWidget {
     return Align(
       alignment: Alignment.topCenter,
       heightFactor: 1.0,
-      child: Container(
-        child: IconTheme(
-          data: iconThemeData,
-          child: selected ? item.activeIcon : item.icon,
-        ),
+      child: IconTheme(
+        data: iconThemeData,
+        child: selected ? item.activeIcon : item.icon,
       ),
     );
   }
@@ -925,10 +938,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     final Color themeColor;
     switch (themeData.brightness) {
       case Brightness.light:
-        themeColor = themeData.primaryColor;
+        themeColor = themeData.colorScheme.primary;
         break;
       case Brightness.dark:
-        themeColor = themeData.accentColor;
+        themeColor = themeData.colorScheme.secondary;
         break;
     }
 
@@ -969,9 +982,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         unselectedIconTheme: widget.unselectedIconTheme ?? bottomTheme.unselectedIconTheme,
         selectedLabelStyle: effectiveSelectedLabelStyle,
         unselectedLabelStyle: effectiveUnselectedLabelStyle,
+        enableFeedback: widget.enableFeedback ?? bottomTheme.enableFeedback ?? true,
         onTap: () {
-          if (widget.onTap != null)
-            widget.onTap!(i);
+          widget.onTap?.call(i);
         },
         colorTween: colorTween,
         flex: _evaluateFlex(_animations[i]),
@@ -1003,9 +1016,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     assert(Overlay.of(context, debugRequiredFor: widget) != null);
 
     final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
-
-    // Labels apply up to _bottomMargin padding. Remainder is media padding.
-    final double additionalBottomPadding = math.max(MediaQuery.of(context).padding.bottom - widget.selectedFontSize / 2.0, 0.0);
+    final double additionalBottomPadding = MediaQuery.of(context).padding.bottom;
     Color? backgroundColor;
     switch (_effectiveType) {
       case BottomNavigationBarType.fixed:

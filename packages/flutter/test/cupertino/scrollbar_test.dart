@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -770,6 +771,110 @@ void main() {
         color: _kScrollbarColor.color,
         rrect: RRect.fromLTRBR(794.0, 3.0, 797.0, 359.4, const Radius.circular(1.5)),
       )
+    );
+  });
+
+  testWidgets('Simultaneous dragging and pointer scrolling does not cause a crash', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/70105
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: PrimaryScrollController(
+          controller: scrollController,
+          child: CupertinoScrollbar(
+            isAlwaysShown: true,
+            controller: scrollController,
+            child: const SingleChildScrollView(
+                child: SizedBox(width: 4000.0, height: 4000.0)
+            ),
+          ),
+        ),
+      ),
+    );
+    const double scrollAmount = 10.0;
+
+    await tester.pumpAndSettle();
+    expect(
+        find.byType(CupertinoScrollbar),
+        paints..rrect(
+          rrect: RRect.fromRectAndRadius(
+            const Rect.fromLTRB(794.0, 3.0, 797.0, 92.1),
+            const Radius.circular(1.5),
+          ),
+          color: _kScrollbarColor.color,
+        ),
+    );
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(796.0, 50.0));
+    await tester.pump(_kLongPressDuration);
+    await tester.pump(_kScrollbarResizeDuration);
+
+    // Drag the thumb down to scroll down.
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, greaterThan(10.0));
+    final double previousOffset = scrollController.offset;
+    expect(
+      find.byType(CupertinoScrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(789.0, 13.0, 797.0, 102.1),
+          const Radius.circular(4.0),
+        ),
+        color: _kScrollbarColor.color,
+      ),
+    );
+
+    // Execute a pointer scroll while dragging (drag gesture has not come up yet)
+    final TestPointer pointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    pointer.hover(const Offset(793.0, 15.0));
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 20.0)));
+    await tester.pumpAndSettle();
+    // Scrolling while holding the drag on the scrollbar and still hovered over
+    // the scrollbar should not have changed the scroll offset.
+    expect(pointer.location, const Offset(793.0, 15.0));
+    expect(scrollController.offset, previousOffset);
+    expect(
+      find.byType(CupertinoScrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(789.0, 13.0, 797.0, 102.1),
+          const Radius.circular(4.0),
+        ),
+        color: _kScrollbarColor.color,
+      ),
+    );
+
+    // Drag is still being held, move pointer to be hovering over another area
+    // of the scrollable (not over the scrollbar) and execute another pointer scroll
+    pointer.hover(tester.getCenter(find.byType(SingleChildScrollView)));
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, -70.0)));
+    await tester.pumpAndSettle();
+    // Scrolling while holding the drag on the scrollbar changed the offset
+    expect(pointer.location, const Offset(400.0, 300.0));
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(CupertinoScrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(789.0, 3.0, 797.0, 92.1),
+          const Radius.circular(4.0),
+        ),
+        color: _kScrollbarColor.color,
+      ),
+    );
+
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(CupertinoScrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(794.0, 3.0, 797.0, 92.1),
+          const Radius.circular(1.5),
+        ),
+        color: _kScrollbarColor.color,
+      ),
     );
   });
 }

@@ -7,7 +7,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('toString control test', (WidgetTester tester) async {
@@ -154,8 +153,8 @@ void main() {
   testWidgets('AlignTransition animates', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
     final Animation<Alignment> alignmentTween = AlignmentTween(
-      begin: const Alignment(-1.0, 0.0),
-      end: const Alignment(1.0, 1.0),
+      begin: Alignment.centerLeft,
+      end: Alignment.bottomRight,
     ).animate(controller);
     final Widget widget = AlignTransition(
       alignment: alignmentTween,
@@ -167,7 +166,7 @@ void main() {
     final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
 
     Alignment actualAlignment = actualPositionedBox.alignment as Alignment;
-    expect(actualAlignment, const Alignment(-1.0, 0.0));
+    expect(actualAlignment, Alignment.centerLeft);
 
     controller.value = 0.5;
     await tester.pump();
@@ -178,8 +177,8 @@ void main() {
   testWidgets('AlignTransition keeps width and height factors', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
     final Animation<Alignment> alignmentTween = AlignmentTween(
-      begin: const Alignment(-1.0, 0.0),
-      end: const Alignment(1.0, 1.0),
+      begin: Alignment.centerLeft,
+      end: Alignment.bottomRight,
     ).animate(controller);
     final Widget widget = AlignTransition(
       alignment: alignmentTween,
@@ -298,13 +297,13 @@ void main() {
     await tester.pumpWidget(widget);
     RotationTransition actualRotatedBox = tester.widget(find.byType(RotationTransition));
     Alignment actualAlignment = actualRotatedBox.alignment;
-    expect(actualAlignment, const Alignment(1.0, -1.0));
+    expect(actualAlignment, Alignment.topRight);
 
     controller.value = 0.5;
     await tester.pump();
     actualRotatedBox = tester.widget(find.byType(RotationTransition));
     actualAlignment = actualRotatedBox.alignment;
-    expect(actualAlignment, const Alignment(1.0, -1.0));
+    expect(actualAlignment, Alignment.topRight);
   });
 
   group('FadeTransition', () {

@@ -11,7 +11,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
 import 'debug.dart';
@@ -1231,9 +1230,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       // We supply the *current* value as the start location, so that if we have
       // a tap, it consists of a call to onChangeStart with the previous value and
       // a call to onChangeEnd with the new value.
-      if (onChangeStart != null) {
-        onChangeStart!(_discretize(value));
-      }
+      onChangeStart?.call(_discretize(value));
       _currentDragValue = _getValueFromGlobalPosition(globalPosition);
       onChanged!(_discretize(_currentDragValue));
       _state.overlayController.forward();
@@ -1257,9 +1254,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     if (_active && _state.mounted) {
-      if (onChangeEnd != null) {
-        onChangeEnd!(_discretize(_currentDragValue));
-      }
+      onChangeEnd?.call(_discretize(_currentDragValue));
       _active = false;
       _currentDragValue = 0.0;
       _state.overlayController.reverse();
@@ -1514,7 +1509,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
 class _AdjustSliderIntent extends Intent {
   const _AdjustSliderIntent({
-    required this.type
+    required this.type,
   });
 
   const _AdjustSliderIntent.right() : type = _SliderAdjustmentType.right;
@@ -1585,9 +1580,7 @@ class _RenderValueIndicator extends RenderBox with RelayoutWhenSystemFontsChange
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_state.paintValueIndicator != null) {
-      _state.paintValueIndicator!(context, offset);
-    }
+    _state.paintValueIndicator?.call(context, offset);
   }
 
   @override

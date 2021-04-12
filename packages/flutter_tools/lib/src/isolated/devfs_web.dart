@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -15,6 +17,7 @@ import 'package:mime/mime.dart' as mime;
 import 'package:package_config/package_config.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf;
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../artifacts.dart';
 import '../asset.dart';
@@ -33,6 +36,7 @@ import '../dart/package_map.dart';
 import '../devfs.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
+import '../vmservice.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
@@ -49,6 +53,7 @@ typedef DwdsLauncher = Future<Dwds> Function(
     String hostname,
     bool useSseForDebugProxy,
     bool useSseForDebugBackend,
+    bool useSseForInjectedClient,
     bool serveDevTools,
     UrlEncoder urlEncoder,
     bool spawnDds});
@@ -101,7 +106,10 @@ class WebExpressionCompiler implements ExpressionCompiler {
   }
 
   @override
-  Future<bool> updateDependencies(Map<String, String> modules) async => true;
+  Future<void> initialize({String moduleFormat, bool soundNullSafety}) async {}
+
+  @override
+  Future<bool> updateDependencies(Map<String, ModuleInfo> modules) async => true;
 }
 
 /// A web server which handles serving JavaScript and assets.
@@ -167,8 +175,10 @@ class WebAssetServer implements AssetReader {
     UrlTunneller urlTunneller,
     bool useSseForDebugProxy,
     bool useSseForDebugBackend,
+    bool useSseForInjectedClient,
     BuildInfo buildInfo,
     bool enableDwds,
+    bool enableDds,
     Uri entrypoint,
     ExpressionCompiler expressionCompiler,
     NullSafetyMode nullSafetyMode, {
@@ -236,8 +246,7 @@ class WebAssetServer implements AssetReader {
     // load the through the isolate APIs.
     final Directory directory =
         await _loadDwdsDirectory(globals.fs, globals.logger);
-    final shelf.Middleware middleware =
-        (FutureOr<shelf.Response> Function(shelf.Request) innerHandler) {
+    shelf.Handler middleware(FutureOr<shelf.Response> Function(shelf.Request) innerHandler) {
       return (shelf.Request request) async {
         if (request.url.path.endsWith('dwds/src/injected/client.js')) {
           final Uri uri = directory.uri.resolve('src/injected/client.js');
@@ -249,7 +258,7 @@ class WebAssetServer implements AssetReader {
         }
         return innerHandler(request);
       };
-    };
+    }
 
     logging.Logger.root.onRecord.listen((logging.LogRecord event) {
       globals.printTrace('${event.loggerName}: ${event.message}');
@@ -269,6 +278,7 @@ class WebAssetServer implements AssetReader {
       enableDebugging: true,
       useSseForDebugProxy: useSseForDebugProxy,
       useSseForDebugBackend: useSseForDebugBackend,
+      useSseForInjectedClient: useSseForInjectedClient,
       serveDevTools: false,
       loadStrategy: FrontendServerRequireStrategyProvider(
         ReloadConfiguration.none,
@@ -276,7 +286,7 @@ class WebAssetServer implements AssetReader {
         _digestProvider,
       ).strategy,
       expressionCompiler: expressionCompiler,
-      spawnDds: true,
+      spawnDds: enableDds,
     );
     shelf.Pipeline pipeline = const shelf.Pipeline();
     if (enableDwds) {
@@ -448,7 +458,8 @@ class WebAssetServer implements AssetReader {
   }
 
   /// Tear down the http server running.
-  Future<void> dispose() {
+  Future<void> dispose() async {
+    await dwds?.stop();
     return _httpServer.close();
   }
 
@@ -552,6 +563,7 @@ class WebAssetServer implements AssetReader {
 
   @override
   Future<String> dartSourceContents(String serverPath) async {
+    serverPath = _stripBasePath(serverPath, basePath);
     final File result = _resolveDartFile(serverPath);
     if (result.existsSync()) {
       return result.readAsString();
@@ -561,18 +573,20 @@ class WebAssetServer implements AssetReader {
 
   @override
   Future<String> sourceMapContents(String serverPath) async {
+    serverPath = _stripBasePath(serverPath, basePath);
     return utf8.decode(_webMemoryFS.sourcemaps[serverPath]);
   }
 
   @override
   Future<String> metadataContents(String serverPath) async {
+    serverPath = _stripBasePath(serverPath, basePath);
     if (serverPath == 'main_module.ddc_merged_metadata') {
       return _webMemoryFS.mergedMetadata;
     }
     if (_webMemoryFS.metadataFiles.containsKey(serverPath)) {
       return utf8.decode(_webMemoryFS.metadataFiles[serverPath]);
     }
-    return null;
+    throw Exception('Could not find metadata contents for $serverPath');
   }
 
   @override
@@ -580,10 +594,11 @@ class WebAssetServer implements AssetReader {
 }
 
 class ConnectionResult {
-  ConnectionResult(this.appConnection, this.debugConnection);
+  ConnectionResult(this.appConnection, this.debugConnection, this.vmService);
 
   final AppConnection appConnection;
   final DebugConnection debugConnection;
+  final vm_service.VmService vmService;
 }
 
 /// The web specific DevFS implementation.
@@ -599,8 +614,10 @@ class WebDevFS implements DevFS {
     @required this.urlTunneller,
     @required this.useSseForDebugProxy,
     @required this.useSseForDebugBackend,
+    @required this.useSseForInjectedClient,
     @required this.buildInfo,
     @required this.enableDwds,
+    @required this.enableDds,
     @required this.entrypoint,
     @required this.expressionCompiler,
     @required this.chromiumLauncher,
@@ -616,8 +633,10 @@ class WebDevFS implements DevFS {
   final UrlTunneller urlTunneller;
   final bool useSseForDebugProxy;
   final bool useSseForDebugBackend;
+  final bool useSseForInjectedClient;
   final BuildInfo buildInfo;
   final bool enableDwds;
+  final bool enableDds;
   final bool testMode;
   final ExpressionCompiler expressionCompiler;
   final ChromiumLauncher chromiumLauncher;
@@ -649,8 +668,12 @@ class WebDevFS implements DevFS {
         if (firstConnection.isCompleted) {
           appConnection.runMain();
         } else {
+          final vm_service.VmService vmService = await createVmServiceDelegate(
+            Uri.parse(debugConnection.uri),
+            logger: globals.logger,
+          );
           firstConnection
-              .complete(ConnectionResult(appConnection, debugConnection));
+              .complete(ConnectionResult(appConnection, debugConnection, vmService));
         }
       } on Exception catch (error, stackTrace) {
         if (!firstConnection.isCompleted) {
@@ -693,8 +716,10 @@ class WebDevFS implements DevFS {
       urlTunneller,
       useSseForDebugProxy,
       useSseForDebugBackend,
+      useSseForInjectedClient,
       buildInfo,
       enableDwds,
+      enableDds,
       entrypoint,
       expressionCompiler,
       nullSafetyMode,

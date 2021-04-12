@@ -7,13 +7,20 @@ import 'dart:io';
 
 /// A result of running a single task.
 class TaskResult {
+   TaskResult.buildOnly()
+       : succeeded = true,
+        data = null,
+        detailFiles = null,
+        benchmarkScoreKeys = null,
+        message = 'No tests run';
+
   /// Constructs a successful result.
   TaskResult.success(this.data, {
     this.benchmarkScoreKeys = const <String>[],
     this.detailFiles = const <String>[],
+    this.message = 'success',
   })
-      : succeeded = true,
-        message = 'success' {
+      : succeeded = true {
     const JsonEncoder prettyJson = JsonEncoder.withIndent('  ');
     if (benchmarkScoreKeys != null) {
       for (final String key in benchmarkScoreKeys) {
@@ -49,6 +56,7 @@ class TaskResult {
       return TaskResult.success(json['data'] as Map<String, dynamic>,
         benchmarkScoreKeys: benchmarkScoreKeys,
         detailFiles: detailFiles,
+        message: json['reason'] as String,
       );
     }
 
@@ -106,7 +114,9 @@ class TaskResult {
       json['data'] = data;
       json['detailFiles'] = detailFiles;
       json['benchmarkScoreKeys'] = benchmarkScoreKeys;
-    } else {
+    }
+
+    if (message != null || !succeeded) {
       json['reason'] = message;
     }
 

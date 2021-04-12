@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/license_collector.dart';
 import 'package:package_config/package_config.dart';
-import 'package:package_config/package_config_types.dart';
 
 import '../src/common.dart';
 
@@ -428,7 +429,7 @@ void main() {
     expect(licenseResult.dependencies, isEmpty);
     expect(licenseResult.errorMessages.single,
       'package foo specified an additional license at /foo.txt, but this file could not be read:'
-      '\nFormatException: Invalid UTF-8 byte (at offset 0)',
+      '\nFileSystemException: Invalid UTF-8 byte, path = \'/foo.txt\'',
     );
   });
 }

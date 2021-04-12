@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
 import 'base/file_system.dart';
@@ -26,7 +25,7 @@ import 'base/file_system.dart';
 /// sources, and might need to include a license for each one.
 class LicenseCollector {
   LicenseCollector({
-    @required FileSystem fileSystem
+    required FileSystem fileSystem
   }) : _fileSystem = fileSystem;
 
   final FileSystem _fileSystem;
@@ -65,8 +64,8 @@ class LicenseCollector {
         .readAsStringSync()
         .split(licenseSeparator);
       for (final String rawLicense in rawLicenses) {
-        List<String> packageNames;
-        String licenseText;
+        List<String> packageNames = <String>[];
+        String? licenseText;
         if (rawLicenses.length > 1) {
           final int split = rawLicense.indexOf('\n\n');
           if (split >= 0) {
@@ -85,7 +84,7 @@ class LicenseCollector {
 
     final List<String> combinedLicensesList = packageLicenses.keys
       .map<String>((String license) {
-        final List<String> packageNames = packageLicenses[license].toList()
+        final List<String> packageNames = packageLicenses[license]!.toList()
           ..sort();
         return packageNames.join('\n') + '\n\n' + license;
       }).toList();
@@ -95,7 +94,7 @@ class LicenseCollector {
     final List<String> additionalLicenseText = <String>[];
     final List<String> errorMessages = <String>[];
     for (final String package in additionalLicenses.keys) {
-      for (final File license in additionalLicenses[package]) {
+      for (final File license in additionalLicenses[package]!) {
         if (!license.existsSync()) {
           errorMessages.add(
             'package $package specified an additional license at ${license.path}, but this file '
@@ -144,9 +143,9 @@ class LicenseCollector {
 /// The result of processing licenses with a [LicenseCollector].
 class LicenseResult {
   const LicenseResult({
-    @required this.combinedLicenses,
-    @required this.dependencies,
-    @required this.errorMessages,
+    required this.combinedLicenses,
+    required this.dependencies,
+    required this.errorMessages,
   });
 
   /// The raw text of the consumed licenses.

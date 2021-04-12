@@ -69,13 +69,13 @@ void main() {
     );
     final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
 
-    verifyPaintPosition(key1, const Offset(0.0, 0.0), true);
+    verifyPaintPosition(key1, Offset.zero, true);
     verifyPaintPosition(key2, const Offset(0.0, 1000.0), false);
     verifyPaintPosition(key3, const Offset(0.0, 1200.0), false);
 
     position.animateTo(bigHeight - 600.0 + delegate.maxExtent, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpAndSettle(const Duration(milliseconds: 1000));
-    verifyPaintPosition(key1, const Offset(0.0, 0.0), true);
+    verifyPaintPosition(key1, Offset.zero, true);
     verifyPaintPosition(key2, Offset(0.0, 600.0 - delegate.maxExtent), true);
     verifyActualBoxPosition(tester, find.byType(Container), 0, Rect.fromLTWH(0.0, 600.0 - delegate.maxExtent, 800.0, delegate.maxExtent));
     verifyPaintPosition(key3, const Offset(0.0, 600.0), false);
@@ -83,44 +83,44 @@ void main() {
     assert(delegate.maxExtent * 2.0 < 600.0); // make sure this fits on the test screen...
     position.animateTo(bigHeight - 600.0 + delegate.maxExtent * 2.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpAndSettle(const Duration(milliseconds: 1000));
-    verifyPaintPosition(key1, const Offset(0.0, 0.0), true);
+    verifyPaintPosition(key1, Offset.zero, true);
     verifyPaintPosition(key2, Offset(0.0, 600.0 - delegate.maxExtent * 2.0), true);
     verifyActualBoxPosition(tester, find.byType(Container), 0, Rect.fromLTWH(0.0, 600.0 - delegate.maxExtent * 2.0, 800.0, delegate.maxExtent));
     verifyPaintPosition(key3, Offset(0.0, 600.0 - delegate.maxExtent), true);
 
     position.animateTo(bigHeight, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpAndSettle(const Duration(milliseconds: 1000));
-    verifyPaintPosition(key1, const Offset(0.0, 0.0), false);
-    verifyPaintPosition(key2, const Offset(0.0, 0.0), true);
+    verifyPaintPosition(key1, Offset.zero, false);
+    verifyPaintPosition(key2, Offset.zero, true);
     verifyActualBoxPosition(tester, find.byType(Container), 0, Rect.fromLTWH(0.0, 0.0, 800.0, delegate.maxExtent));
     verifyPaintPosition(key3, Offset(0.0, delegate.maxExtent), true);
 
     position.animateTo(bigHeight + delegate.maxExtent * 0.1, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpAndSettle(const Duration(milliseconds: 1000));
-    verifyPaintPosition(key1, const Offset(0.0, 0.0), false);
-    verifyPaintPosition(key2, const Offset(0.0, 0.0), true);
+    verifyPaintPosition(key1, Offset.zero, false);
+    verifyPaintPosition(key2, Offset.zero, true);
     verifyActualBoxPosition(tester, find.byType(Container), 0, Rect.fromLTWH(0.0, 0.0, 800.0, delegate.maxExtent * 0.9));
     verifyPaintPosition(key3, Offset(0.0, delegate.maxExtent * 0.9), true);
 
     position.animateTo(bigHeight + delegate.maxExtent * 0.5, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpAndSettle(const Duration(milliseconds: 1000));
-    verifyPaintPosition(key1, const Offset(0.0, 0.0), false);
-    verifyPaintPosition(key2, const Offset(0.0, 0.0), true);
+    verifyPaintPosition(key1, Offset.zero, false);
+    verifyPaintPosition(key2, Offset.zero, true);
     verifyActualBoxPosition(tester, find.byType(Container), 0, Rect.fromLTWH(0.0, 0.0, 800.0, delegate.maxExtent * 0.5));
     verifyPaintPosition(key3, Offset(0.0, delegate.maxExtent * 0.5), true);
 
     position.animateTo(bigHeight + delegate.maxExtent * 0.9, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpAndSettle(const Duration(milliseconds: 1000));
-    verifyPaintPosition(key1, const Offset(0.0, 0.0), false);
-    verifyPaintPosition(key2, const Offset(0.0, 0.0), true);
+    verifyPaintPosition(key1, Offset.zero, false);
+    verifyPaintPosition(key2, Offset.zero, true);
     verifyActualBoxPosition(tester, find.byType(Container), 0, Rect.fromLTWH(0.0, -delegate.maxExtent * 0.4, 800.0, delegate.maxExtent * 0.5));
     verifyPaintPosition(key3, Offset(0.0, delegate.maxExtent * 0.1), true);
 
     position.animateTo(bigHeight + delegate.maxExtent * 2.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpAndSettle(const Duration(milliseconds: 1000));
-    verifyPaintPosition(key1, const Offset(0.0, 0.0), false);
-    verifyPaintPosition(key2, const Offset(0.0, 0.0), false);
-    verifyPaintPosition(key3, const Offset(0.0, 0.0), true);
+    verifyPaintPosition(key1, Offset.zero, false);
+    verifyPaintPosition(key2, Offset.zero, false);
+    verifyPaintPosition(key3, Offset.zero, true);
   });
 
   testWidgets('Sliver appbars - floating - no floating behavior when animating', (WidgetTester tester) async {
@@ -141,21 +141,21 @@ void main() {
     );
     final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
 
-    verifyPaintPosition(key1, const Offset(0.0, 0.0), true);
+    verifyPaintPosition(key1, Offset.zero, true);
     verifyPaintPosition(key2, const Offset(0.0, 1000.0), false);
     verifyPaintPosition(key3, const Offset(0.0, 1200.0), false);
 
     position.animateTo(bigHeight + delegate.maxExtent * 2.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpAndSettle(const Duration(milliseconds: 1000));
-    verifyPaintPosition(key1, const Offset(0.0, 0.0), false);
-    verifyPaintPosition(key2, const Offset(0.0, 0.0), false);
-    verifyPaintPosition(key3, const Offset(0.0, 0.0), true);
+    verifyPaintPosition(key1, Offset.zero, false);
+    verifyPaintPosition(key2, Offset.zero, false);
+    verifyPaintPosition(key3, Offset.zero, true);
 
     position.animateTo(bigHeight + delegate.maxExtent * 1.9, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpAndSettle(const Duration(milliseconds: 1000));
-    verifyPaintPosition(key1, const Offset(0.0, 0.0), false);
-    verifyPaintPosition(key2, const Offset(0.0, 0.0), false);
-    verifyPaintPosition(key3, const Offset(0.0, 0.0), true);
+    verifyPaintPosition(key1, Offset.zero, false);
+    verifyPaintPosition(key2, Offset.zero, false);
+    verifyPaintPosition(key3, Offset.zero, true);
   });
 
   testWidgets('Sliver appbars - floating - floating behavior when dragging down', (WidgetTester tester) async {
@@ -176,23 +176,23 @@ void main() {
     );
     final ScrollPositionWithSingleContext position = tester.state<ScrollableState>(find.byType(Scrollable)).position as ScrollPositionWithSingleContext;
 
-    verifyPaintPosition(key1, const Offset(0.0, 0.0), true);
+    verifyPaintPosition(key1, Offset.zero, true);
     verifyPaintPosition(key2, const Offset(0.0, 1000.0), false);
     verifyPaintPosition(key3, const Offset(0.0, 1200.0), false);
 
     position.animateTo(bigHeight + delegate.maxExtent * 2.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpAndSettle(const Duration(milliseconds: 1000));
-    verifyPaintPosition(key1, const Offset(0.0, 0.0), false);
-    verifyPaintPosition(key2, const Offset(0.0, 0.0), false);
-    verifyPaintPosition(key3, const Offset(0.0, 0.0), true);
+    verifyPaintPosition(key1, Offset.zero, false);
+    verifyPaintPosition(key2, Offset.zero, false);
+    verifyPaintPosition(key3, Offset.zero, true);
 
     position.animateTo(bigHeight + delegate.maxExtent * 1.9, curve: Curves.linear, duration: const Duration(minutes: 1));
     position.updateUserScrollDirection(ScrollDirection.forward);
     await tester.pumpAndSettle(const Duration(milliseconds: 1000));
-    verifyPaintPosition(key1, const Offset(0.0, 0.0), false);
-    verifyPaintPosition(key2, const Offset(0.0, 0.0), true);
+    verifyPaintPosition(key1, Offset.zero, false);
+    verifyPaintPosition(key2, Offset.zero, true);
     verifyActualBoxPosition(tester, find.byType(Container), 0, Rect.fromLTWH(0.0, -delegate.maxExtent * 0.4, 800.0, delegate.maxExtent * 0.5));
-    verifyPaintPosition(key3, const Offset(0.0, 0.0), true);
+    verifyPaintPosition(key3, Offset.zero, true);
   });
 
   testWidgets('Sliver appbars - floating - overscroll gap is below header', (WidgetTester tester) async {

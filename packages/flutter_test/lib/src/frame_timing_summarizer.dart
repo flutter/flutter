@@ -35,8 +35,7 @@ class FrameTimingSummarizer {
     );
     final List<Duration> vsyncOverheadSorted =
         List<Duration>.from(vsyncOverhead)..sort();
-    final Duration Function(Duration, Duration) add =
-        (Duration a, Duration b) => a + b;
+    Duration add(Duration a, Duration b) => a + b;
     return FrameTimingSummarizer._(
       frameBuildTime: frameBuildTime,
       frameRasterizerTime: frameRasterizerTime,

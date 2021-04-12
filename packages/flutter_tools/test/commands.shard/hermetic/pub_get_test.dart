@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -14,6 +16,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   FileSystem fileSystem;
@@ -58,6 +61,26 @@ void main() {
     fileSystem.currentDirectory.childFile('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsBytesSync(<int>[0]);
+
+    final PackagesGetCommand command = PackagesGetCommand('get', false);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+
+    await commandRunner.run(<String>['get']);
+
+    expect(await command.usageValues, <CustomDimensions, Object>{
+      CustomDimensions.commandPackagesNumberPlugins: '0',
+      CustomDimensions.commandPackagesProjectModule: 'false',
+      CustomDimensions.commandPackagesAndroidEmbeddingVersion: 'v1'
+    });
+  }, overrides: <Type, Generator>{
+    Pub: () => pub,
+    ProcessManager: () => FakeProcessManager.any(),
+    FileSystem: () => fileSystem,
+  });
+
+  testUsingContext('pub get skips example directory if it dooes not contain a pubspec.yaml', () async {
+    fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
+    fileSystem.currentDirectory.childDirectory('example').createSync(recursive: true);
 
     final PackagesGetCommand command = PackagesGetCommand('get', false);
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);

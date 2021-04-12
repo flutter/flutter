@@ -38,12 +38,16 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
   static const double _kMiddlePadding = 9.5;
   static const double _kEndPadding = 14.5;
 
+  /// {@template flutter.material.TextSelectionToolbarTextButton.child}
   /// The child of this button.
   ///
   /// Usually a [Text].
+  /// {@endtemplate}
   final Widget child;
 
+  /// {@template flutter.material.TextSelectionToolbarTextButton.onPressed}
   /// Called when this button is pressed.
+  /// {@endtemplate}
   final VoidCallback? onPressed;
 
   /// The padding between the button's edge and its child.

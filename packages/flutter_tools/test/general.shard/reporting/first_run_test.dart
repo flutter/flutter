@@ -46,10 +46,12 @@ void main() {
   });
 }
 
-FirstRunMessenger setUpFirstRunMessenger({bool redisplayWelcomeMessage, bool test = false }) {
+FirstRunMessenger setUpFirstRunMessenger({bool? redisplayWelcomeMessage, bool test = false }) {
   final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-  final PersistentToolState state = PersistentToolState.test(directory: fileSystem.currentDirectory, logger: BufferLogger.test())
-    ..redisplayWelcomeMessage = redisplayWelcomeMessage;
+  final PersistentToolState state = PersistentToolState.test(directory: fileSystem.currentDirectory, logger: BufferLogger.test());
+  if (redisplayWelcomeMessage != null) {
+    state.redisplayWelcomeMessage = redisplayWelcomeMessage;
+  }
   if (test) {
     return TestFirstRunMessenger(state);
   }
@@ -59,7 +61,7 @@ FirstRunMessenger setUpFirstRunMessenger({bool redisplayWelcomeMessage, bool tes
 class TestFirstRunMessenger extends FirstRunMessenger {
   TestFirstRunMessenger(PersistentToolState persistentToolState) : super(persistentToolState: persistentToolState);
 
-  String overrideLicenseTerms;
+  String? overrideLicenseTerms;
 
   @override
   String get licenseTerms => overrideLicenseTerms ?? super.licenseTerms;

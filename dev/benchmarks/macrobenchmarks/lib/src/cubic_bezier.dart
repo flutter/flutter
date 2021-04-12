@@ -4,12 +4,12 @@
 
 import 'dart:math';
 
-import 'package:flutter/widgets.dart';
-import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 
 // Based on https://github.com/eseidelGoogle/bezier_perf/blob/master/lib/main.dart
 class CubicBezierPage extends StatelessWidget {
+  const CubicBezierPage({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -24,7 +24,7 @@ class CubicBezierPage extends StatelessWidget {
 }
 
 class Bezier extends StatelessWidget {
-  const Bezier(this.color, this.scale, {this.blur = 0.0, this.delay = 0.0});
+  const Bezier(this.color, this.scale, {Key key, this.blur = 0.0, this.delay = 0.0}) : super(key: key);
 
   final Color color;
   final double scale;
@@ -93,7 +93,7 @@ class PathDetail {
 }
 
 class AnimatedBezier extends StatefulWidget {
-  const AnimatedBezier(this.color, this.scale, {this.blur = 0.0, this.delay});
+  const AnimatedBezier(this.color, this.scale, {Key key, this.blur = 0.0, this.delay}) : super(key: key);
 
   final Color color;
   final double scale;

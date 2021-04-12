@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.9
-
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_tools/src/base/common.dart';
 
-Process daemon;
+late Process daemon;
 
 // To use, start from the console and enter:
 //   version: print version
@@ -85,7 +83,7 @@ Future<void> main() async {
   });
 
   // Print in the callback can't fail.
-  unawaited(daemon.exitCode.then<void>((int code) {
+  unawaited(daemon.exitCode.then<int>((int code) {
     print('daemon exiting ($code)');
     exit(code);
   }));

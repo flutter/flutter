@@ -9,6 +9,8 @@
   "previousMonthTooltip": "Vorige maand",
   "nextPageTooltip": "Volgende pagina",
   "previousPageTooltip": "Vorige pagina",
+  "firstPageTooltip": "First page",
+  "lastPageTooltip": "Last page",
   "showMenuTooltip": "Menu weergeven",
   "aboutListTileTitle": "Over $applicationName",
   "licensesPageTitle": "Licenties",

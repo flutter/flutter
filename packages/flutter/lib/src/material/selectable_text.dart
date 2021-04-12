@@ -4,11 +4,10 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
+import 'desktop_text_selection.dart';
 import 'feedback.dart';
 import 'text_selection.dart';
 import 'text_selection_theme.dart';
@@ -26,12 +25,12 @@ class _TextSpanEditingController extends TextEditingController {
   _TextSpanEditingController({required TextSpan textSpan}):
     assert(textSpan != null),
     _textSpan = textSpan,
-    super(text: textSpan.toPlainText());
+    super(text: textSpan.toPlainText(includeSemanticsLabels: false));
 
   final TextSpan _textSpan;
 
   @override
-  TextSpan buildTextSpan({TextStyle? style ,bool? withComposing}) {
+  TextSpan buildTextSpan({required BuildContext context, TextStyle? style, required bool withComposing}) {
     // This does not care about composing.
     return TextSpan(
       style: style,
@@ -95,8 +94,7 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
           break;
       }
     }
-    if (_state.widget.onTap != null)
-      _state.widget.onTap!();
+    _state.widget.onTap?.call();
   }
 
   @override
@@ -126,7 +124,7 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
 /// {@tool snippet}
 ///
 /// ```dart
-/// SelectableText(
+/// const SelectableText(
 ///   'Hello! How are you?',
 ///   textAlign: TextAlign.center,
 ///   style: TextStyle(fontWeight: FontWeight.bold),
@@ -455,7 +453,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
     super.initState();
     _selectionGestureDetectorBuilder = _SelectableTextSelectionGestureDetectorBuilder(state: this);
     _controller = _TextSpanEditingController(
-        textSpan: widget.textSpan ?? TextSpan(text: widget.data)
+        textSpan: widget.textSpan ?? TextSpan(text: widget.data),
     );
     _controller.addListener(_onControllerChanged);
   }
@@ -466,7 +464,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
     if (widget.data != oldWidget.data || widget.textSpan != oldWidget.textSpan) {
       _controller.removeListener(_onControllerChanged);
       _controller = _TextSpanEditingController(
-          textSpan: widget.textSpan ?? TextSpan(text: widget.data)
+          textSpan: widget.textSpan ?? TextSpan(text: widget.data),
       );
       _controller.addListener(_onControllerChanged);
     }
@@ -495,6 +493,8 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
     });
   }
 
+  TextSelection? _lastSeenTextSelection;
+
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
     final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
     if (willShowSelectionHandles != _showSelectionHandles) {
@@ -502,10 +502,12 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
         _showSelectionHandles = willShowSelectionHandles;
       });
     }
-
-    if (widget.onSelectionChanged != null) {
+    // TODO(chunhtai): The selection may be the same. We should remove this
+    // check once this is fixed https://github.com/flutter/flutter/issues/76349.
+    if (widget.onSelectionChanged != null && _lastSeenTextSelection != selection) {
       widget.onSelectionChanged!(selection, cause);
     }
+    _lastSeenTextSelection = selection;
 
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
@@ -581,7 +583,6 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
 
     switch (theme.platform) {
       case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
         final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
         forcePressEnabled = true;
         textSelectionControls ??= cupertinoTextSelectionControls;
@@ -593,12 +594,32 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
         break;
 
+      case TargetPlatform.macOS:
+        final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
+        forcePressEnabled = false;
+        textSelectionControls ??= cupertinoDesktopTextSelectionControls;
+        paintCursorAboveText = true;
+        cursorOpacityAnimates = true;
+        cursorColor ??= selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
+        selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
+        cursorRadius ??= const Radius.circular(2.0);
+        cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
+        break;
+
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+        forcePressEnabled = false;
+        textSelectionControls ??= materialTextSelectionControls;
+        paintCursorAboveText = false;
+        cursorOpacityAnimates = false;
+        cursorColor ??= selectionTheme.cursorColor ?? theme.colorScheme.primary;
+        selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
+        break;
+
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         forcePressEnabled = false;
-        textSelectionControls ??= materialTextSelectionControls;
+        textSelectionControls ??= desktopTextSelectionControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
         cursorColor ??= selectionTheme.cursorColor ?? theme.colorScheme.primary;

@@ -416,6 +416,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   @override
   void dispose() {
     assert(!_transitionCompleter.isCompleted, 'Cannot dispose a $runtimeType twice.');
+    _animation?.removeStatusListener(_handleStatusChanged);
     _controller?.dispose();
     _transitionCompleter.complete(_result);
     super.dispose();
@@ -445,8 +446,7 @@ class LocalHistoryEntry {
   }
 
   void _notifyRemoved() {
-    if (onRemove != null)
-      onRemove!();
+    onRemove?.call();
   }
 }
 
@@ -484,20 +484,22 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///
   /// ```dart
   /// class App extends StatelessWidget {
+  ///   const App({Key? key}) : super(key: key);
+  ///
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     return MaterialApp(
   ///       initialRoute: '/',
-  ///       routes: {
-  ///         '/': (BuildContext context) => HomePage(),
-  ///         '/second_page': (BuildContext context) => SecondPage(),
+  ///       routes: <String, WidgetBuilder>{
+  ///         '/': (BuildContext context) => const HomePage(),
+  ///         '/second_page': (BuildContext context) => const SecondPage(),
   ///       },
   ///     );
   ///   }
   /// }
   ///
   /// class HomePage extends StatefulWidget {
-  ///   HomePage();
+  ///   const HomePage({Key? key}) : super(key: key);
   ///
   ///   @override
   ///   _HomePageState createState() => _HomePageState();
@@ -511,10 +513,10 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///         child: Column(
   ///           mainAxisSize: MainAxisSize.min,
   ///           children: <Widget>[
-  ///             Text('HomePage'),
+  ///             const Text('HomePage'),
   ///             // Press this button to open the SecondPage.
   ///             ElevatedButton(
-  ///               child: Text('Second Page >'),
+  ///               child: const Text('Second Page >'),
   ///               onPressed: () {
   ///                 Navigator.pushNamed(context, '/second_page');
   ///               },
@@ -527,6 +529,8 @@ mixin LocalHistoryRoute<T> on Route<T> {
   /// }
   ///
   /// class SecondPage extends StatefulWidget {
+  ///   const SecondPage({Key? key}) : super(key: key);
+  ///
   ///   @override
   ///   _SecondPageState createState() => _SecondPageState();
   /// }
@@ -535,7 +539,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///
   ///   bool _showRectangle = false;
   ///
-  ///   void _navigateLocallyToShowRectangle() async {
+  ///   Future<void> _navigateLocallyToShowRectangle() async {
   ///     // This local history entry essentially represents the display of the red
   ///     // rectangle. When this local history entry is removed, we hide the red
   ///     // rectangle.
@@ -552,14 +556,14 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     final localNavContent = _showRectangle
+  ///     final Widget localNavContent = _showRectangle
   ///       ? Container(
   ///           width: 100.0,
   ///           height: 100.0,
   ///           color: Colors.red,
   ///         )
   ///       : ElevatedButton(
-  ///           child: Text('Show Rectangle'),
+  ///           child: const Text('Show Rectangle'),
   ///           onPressed: _navigateLocallyToShowRectangle,
   ///         );
   ///
@@ -570,7 +574,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///           children: <Widget>[
   ///             localNavContent,
   ///             ElevatedButton(
-  ///               child: Text('< Back'),
+  ///               child: const Text('< Back'),
   ///               onPressed: () {
   ///                 // Pop a route. If this is pressed while the red rectangle is
   ///                 // visible then it will will pop our local history entry, which
@@ -1357,7 +1361,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       if (await callback() != true)
         return RoutePopDisposition.doNotPop;
     }
-    return await super.willPop();
+    return super.willPop();
   }
 
   /// Enables this route to veto attempts by the user to dismiss it.
@@ -1556,7 +1560,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
         key: _scopeKey,
         route: this,
         // _ModalScope calls buildTransitions() and buildChild(), defined above
-      )
+      ),
     );
   }
 
@@ -1610,8 +1614,8 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 /// be given with their type arguments. Since the [Route] class and its
 /// subclasses have a type argument, this includes the arguments passed to this
 /// class. Consider using `dynamic` to specify the entire class of routes rather
-/// than only specific subtypes. For example, to watch for all [PageRoute]
-/// variants, the `RouteObserver<PageRoute<dynamic>>` type may be used.
+/// than only specific subtypes. For example, to watch for all [ModalRoute]
+/// variants, the `RouteObserver<ModalRoute<dynamic>>` type may be used.
 ///
 /// {@tool snippet}
 ///
@@ -1620,15 +1624,18 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 ///
 /// ```dart
 /// // Register the RouteObserver as a navigation observer.
-/// final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
+/// final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
 /// void main() {
 ///   runApp(MaterialApp(
 ///     home: Container(),
-///     navigatorObservers: [routeObserver],
+///     navigatorObservers: <RouteObserver<ModalRoute<void>>>[ routeObserver ],
 ///   ));
 /// }
 ///
 /// class RouteAwareWidget extends StatefulWidget {
+///   const RouteAwareWidget({Key? key}) : super(key: key);
+///
+///   @override
 ///   State<RouteAwareWidget> createState() => RouteAwareWidgetState();
 /// }
 ///
@@ -1638,7 +1645,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 ///   @override
 ///   void didChangeDependencies() {
 ///     super.didChangeDependencies();
-///     routeObserver.subscribe(this, ModalRoute.of(context));
+///     routeObserver.subscribe(this, ModalRoute.of(context)!);
 ///   }
 ///
 ///   @override
@@ -1747,12 +1754,40 @@ abstract class RouteAware {
   void didPushNext() { }
 }
 
-class _DialogRoute<T> extends PopupRoute<T> {
-  _DialogRoute({
+/// A general dialog route which allows for customization of the dialog popup.
+///
+/// It is used internally by [showGeneralDialog] or can be directly pushed
+/// onto the [Navigator] stack to enable state restoration. See
+/// [showGeneralDialog] for a state restoration app example.
+///
+/// This function takes a `pageBuilder`, which typically builds a dialog.
+/// Content below the dialog is dimmed with a [ModalBarrier]. The widget
+/// returned by the `builder` does not share a context with the location that
+/// `showDialog` is originally called from. Use a [StatefulBuilder] or a
+/// custom [StatefulWidget] if the dialog needs to update dynamically.
+///
+/// The `barrierDismissible` argument is used to indicate whether tapping on the
+/// barrier will dismiss the dialog. It is `true` by default and cannot be `null`.
+///
+/// The `barrierColor` argument is used to specify the color of the modal
+/// barrier that darkens everything below the dialog. If `null`, the default
+/// color `Colors.black54` is used.
+///
+/// The `settings` argument define the settings for this route. See
+/// [RouteSettings] for details.
+///
+/// See also:
+///
+///  * [showGeneralDialog], which is a way to display a RawDialogRoute.
+///  * [showDialog], which is a way to display a DialogRoute.
+///  * [showCupertinoDialog], which displays an iOS-style dialog.
+class RawDialogRoute<T> extends PopupRoute<T> {
+  /// A general dialog route which allows for customization of the dialog popup.
+  RawDialogRoute({
     required RoutePageBuilder pageBuilder,
     bool barrierDismissible = true,
-    String? barrierLabel,
     Color? barrierColor = const Color(0x80000000),
+    String? barrierLabel,
     Duration transitionDuration = const Duration(milliseconds: 200),
     RouteTransitionsBuilder? transitionBuilder,
     RouteSettings? settings,
@@ -1798,11 +1833,12 @@ class _DialogRoute<T> extends PopupRoute<T> {
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     if (_transitionBuilder == null) {
       return FadeTransition(
-          opacity: CurvedAnimation(
-            parent: animation,
-            curve: Curves.linear,
-          ),
-          child: child);
+        opacity: CurvedAnimation(
+          parent: animation,
+          curve: Curves.linear,
+        ),
+        child: child,
+      );
     } // Some default transition
     return _transitionBuilder!(context, animation, secondaryAnimation, child);
   }
@@ -1835,11 +1871,11 @@ class _DialogRoute<T> extends PopupRoute<T> {
 ///
 /// The `barrierDismissible` argument is used to determine whether this route
 /// can be dismissed by tapping the modal barrier. This argument defaults
-/// to true. If `barrierDismissible` is true, a non-null `barrierLabel` must be
+/// to false. If `barrierDismissible` is true, a non-null `barrierLabel` must be
 /// provided.
 ///
 /// The `barrierLabel` argument is the semantic label used for a dismissible
-/// barrier. This argument defaults to "Dismiss".
+/// barrier. This argument defaults to `null`.
 ///
 /// The `barrierColor` argument is the color used for the modal barrier. This
 /// argument defaults to `Color(0x80000000)`.
@@ -1857,6 +1893,52 @@ class _DialogRoute<T> extends PopupRoute<T> {
 ///
 /// Returns a [Future] that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the dialog was closed.
+///
+/// ### State Restoration in Dialogs
+///
+/// Using this method will not enable state restoration for the dialog. In order
+/// to enable state restoration for a dialog, use [Navigator.restorablePush]
+/// or [Navigator.restorablePushNamed] with [RawDialogRoute].
+///
+/// For more information about state restoration, see [RestorationManager].
+///
+/// {@tool sample --template=stateless_widget_restoration_material}
+///
+/// This sample demonstrates how to create a restorable dialog. This is
+/// accomplished by enabling state restoration by specifying
+/// [WidgetsApp.restorationScopeId] and using [Navigator.restorablePush] to
+/// push [RawDialogRoute] when the button is tapped.
+///
+/// {@macro flutter.widgets.RestorationManager}
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: OutlinedButton(
+///         onPressed: () {
+///           Navigator.of(context).restorablePush(_dialogBuilder);
+///         },
+///         child: const Text('Open Dialog'),
+///       ),
+///     ),
+///   );
+/// }
+///
+/// static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
+///   return RawDialogRoute<void>(
+///     pageBuilder: (
+///       BuildContext context,
+///       Animation<double> animation,
+///       Animation<double> secondaryAnimation,
+///     ) {
+///       return const AlertDialog(title: Text('Alert!'));
+///     },
+///   );
+/// }
+/// ```
+///
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -1876,7 +1958,7 @@ Future<T?> showGeneralDialog<T extends Object?>({
   assert(pageBuilder != null);
   assert(useRootNavigator != null);
   assert(!barrierDismissible || barrierLabel != null);
-  return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(_DialogRoute<T>(
+  return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(RawDialogRoute<T>(
     pageBuilder: pageBuilder,
     barrierDismissible: barrierDismissible,
     barrierLabel: barrierLabel,

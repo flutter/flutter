@@ -155,7 +155,7 @@ void main() {
                     color: const Color(0xFF00FF00),
                   ),
                 ),
-                Container(
+                SizedBox(
                   width: 100.0,
                   height: 100.0,
                   child: GestureDetector(
@@ -252,7 +252,7 @@ void main() {
     }, variant: buttonVariant);
 
     testWidgets('cache render object', (WidgetTester tester) async {
-      final GestureTapCallback inputCallback = () { };
+      void inputCallback() { }
 
       await tester.pumpWidget(
         Center(
@@ -515,7 +515,7 @@ void main() {
 
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: const Offset(0.0, 0.0),
+      position: Offset.zero,
       pressure: 0.3,
       pressureMin: 0,
       pressureMax: 1,
@@ -528,7 +528,7 @@ void main() {
 
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: const Offset(0.0, 0.0),
+      position: Offset.zero,
       pressure: 0.5,
       pressureMin: 0,
       pressureMax: 1
@@ -541,28 +541,28 @@ void main() {
 
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: const Offset(0.0, 0.0),
+      position: Offset.zero,
       pressure: 0.6,
       pressureMin: 0,
       pressureMax: 1,
     ));
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: const Offset(0.0, 0.0),
+      position: Offset.zero,
       pressure: 0.7,
       pressureMin: 0,
       pressureMax: 1
     ));
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: const Offset(0.0, 0.0),
+      position: Offset.zero,
       pressure: 0.2,
       pressureMin: 0,
       pressureMax: 1
     ));
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: const Offset(0.0, 0.0),
+      position: Offset.zero,
       pressure: 0.3,
       pressureMin: 0,
       pressureMax: 1
@@ -575,7 +575,7 @@ void main() {
 
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: const Offset(0.0, 0.0),
+      position: Offset.zero,
       pressure: 0.9,
       pressureMin: 0,
       pressureMax: 1,
@@ -695,7 +695,7 @@ void main() {
 
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: const Offset(0.0, 0.0),
+      position: Offset.zero,
       pressure: 0.3,
       pressureMin: 0,
       pressureMax: 1
@@ -713,7 +713,7 @@ void main() {
     // Failed attempt to trigger the force press.
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: const Offset(0.0, 0.0),
+      position: Offset.zero,
       pressure: 0.5,
       pressureMin: 0,
       pressureMax: 1,
@@ -806,7 +806,7 @@ void main() {
       test('constructor redundant pan and scale', () {
         late FlutterError error;
         try {
-          GestureDetector(onScaleStart: (_) {}, onPanStart: (_) {},);
+          GestureDetector(onScaleStart: (_) {}, onPanStart: (_) {});
         } on FlutterError catch (e) {
           error = e;
         } finally {
@@ -858,9 +858,7 @@ void main() {
             textDirection: TextDirection.ltr,
             child: RawGestureDetector(
               key: key,
-              child: Container(
-                child: const Text('Text'),
-              ),
+              child: const Text('Text'),
             ),
           ),
         );
@@ -910,7 +908,7 @@ class ButtonVariant extends TestVariant<int> {
   const ButtonVariant({
     required this.values,
     required this.descriptions,
-  }) : assert(values.length != 0); // ignore: prefer_is_empty
+  }) : assert(values.length != 0);
 
   @override
   final List<int> values;

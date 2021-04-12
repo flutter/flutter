@@ -5,7 +5,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void checkEncoding<T>(MessageCodec<T> codec, T message, List<int> expectedBytes) {
   final ByteData encoded = codec.encodeMessage(message)!;
@@ -17,13 +17,13 @@ void checkEncoding<T>(MessageCodec<T> codec, T message, List<int> expectedBytes)
 
 void checkEncodeDecode<T>(MessageCodec<T> codec, T message) {
   final ByteData? encoded = codec.encodeMessage(message);
-  final T decoded = codec.decodeMessage(encoded);
+  final T? decoded = codec.decodeMessage(encoded);
   if (message == null) {
     expect(encoded, isNull);
     expect(decoded, isNull);
   } else {
     expect(deepEquals(message, decoded), isTrue);
-    final ByteData? encodedAgain = codec.encodeMessage(decoded);
+    final ByteData? encodedAgain = codec.encodeMessage(decoded as T);
     expect(
       encodedAgain!.buffer.asUint8List(),
       orderedEquals(encoded!.buffer.asUint8List()),

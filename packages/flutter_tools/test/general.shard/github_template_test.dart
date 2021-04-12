@@ -2,17 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/reporting/github_template.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/testbed.dart';
+import '../src/fake_http_client.dart';
 
 const String _kShortURL = 'https://www.example.com/short';
 
@@ -116,19 +118,19 @@ void main() {
       testWithoutContext('String', () {
         expect(
           GitHubTemplateCreator.sanitizedCrashException(
-            'May have non-tool-internal info, very long string, 0b8abb4724aa590dd0f429683339b'
-              '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
-              '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
-              '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
-              '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
-              '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
-              '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
-              '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
-              '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
-              '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
-              '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
-              '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
-              '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
+            'May have non-tool-internal info, very long string, 0b8abb4724aa590dd0f429683339b' // ignore: missing_whitespace_between_adjacent_strings
+            '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
+            '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
+            '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
+            '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
+            '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
+            '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
+            '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
+            '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
+            '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
+            '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
+            '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
+            '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
           ),
           'String: <1,016 characters>',
         );
@@ -159,7 +161,14 @@ void main() {
         final GitHubTemplateCreator creator = GitHubTemplateCreator(
           fileSystem: fs,
           logger: logger,
-          client: SuccessShortenURLFakeHttpClient(),
+          client: FakeHttpClient.list(<FakeRequest>[
+            FakeRequest(Uri.parse('https://git.io'), method: HttpMethod.post, response: const FakeResponse(
+              statusCode: 201,
+              headers: <String, List<String>>{
+                HttpHeaders.locationHeader: <String>[_kShortURL],
+              }
+            ))
+          ]),
           flutterProjectFactory: FlutterProjectFactory(
             fileSystem: fs,
             logger: logger,
@@ -178,7 +187,11 @@ void main() {
         final GitHubTemplateCreator creator = GitHubTemplateCreator(
           fileSystem: fs,
           logger: logger,
-          client: FakeHttpClient(),
+          client: FakeHttpClient.list(<FakeRequest>[
+            FakeRequest(Uri.parse('https://git.io'), method: HttpMethod.post, response: const FakeResponse(
+              statusCode: 500,
+            ))
+          ]),
           flutterProjectFactory: FlutterProjectFactory(
             fileSystem: fs,
             logger: logger,
@@ -204,7 +217,7 @@ void main() {
         final GitHubTemplateCreator creator = GitHubTemplateCreator(
           fileSystem: fs,
           logger: logger,
-          client: FakeHttpClient(),
+          client: FakeHttpClient.any(),
           flutterProjectFactory: FlutterProjectFactory(
             fileSystem: fs,
             logger: logger,
@@ -290,37 +303,7 @@ device_info-0.4.1+4
   });
 }
 
-
-class SuccessFakeHttpHeaders extends FakeHttpHeaders {
-  @override
-  List<String> operator [](String name) => <String>[_kShortURL];
-}
-
-class SuccessFakeHttpClientResponse extends FakeHttpClientResponse {
-  @override
-  int get statusCode => 201;
-
-  @override
-  HttpHeaders get headers {
-    return SuccessFakeHttpHeaders();
-  }
-}
-
-class SuccessFakeHttpClientRequest extends FakeHttpClientRequest {
-  @override
-  Future<HttpClientResponse> close() async {
-    return SuccessFakeHttpClientResponse();
-  }
-}
-
-class SuccessShortenURLFakeHttpClient extends FakeHttpClient {
-  @override
-  Future<HttpClientRequest> postUrl(Uri url) async {
-    return SuccessFakeHttpClientRequest();
-  }
-}
-
-class FakeError implements Error {
+class FakeError extends Error {
   @override
   StackTrace get stackTrace => StackTrace.fromString('''
 #0      _File.open.<anonymous closure> (dart:io/file_impl.dart:366:9)

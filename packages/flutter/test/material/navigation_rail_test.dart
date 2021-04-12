@@ -1869,7 +1869,7 @@ void main() {
                     leading: Builder(
                       builder: (BuildContext context) {
                         animation = NavigationRail.extendedAnimation(context);
-                        return FloatingActionButton(onPressed: () { },);
+                        return FloatingActionButton(onPressed: () { });
                       },
                     ),
                     destinations: _destinations(),
@@ -2021,6 +2021,129 @@ void main() {
     expect(semantics, hasSemantics(_expectedSemantics(), ignoreId: true, ignoreTransform: true, ignoreRect: true));
 
     semantics.dispose();
+  });
+
+  testWidgets('NavigationRailDestination padding properly applied - NavigationRailLabelType.all', (WidgetTester tester) async {
+    const EdgeInsets defaultPadding = EdgeInsets.symmetric(horizontal: 8.0);
+    const EdgeInsets secondItemPadding = EdgeInsets.symmetric(vertical: 30.0);
+    const EdgeInsets thirdItemPadding = EdgeInsets.symmetric(horizontal: 10.0);
+
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        labelType: NavigationRailLabelType.all,
+        selectedIndex: 0,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Def'),
+            padding: secondItemPadding,
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.star_border),
+            selectedIcon: Icon(Icons.star),
+            label: Text('Ghi'),
+            padding: thirdItemPadding,
+          ),
+        ],
+      ),
+    );
+
+    final Padding firstItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Abc'));
+    final Padding secondItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Def'));
+    final Padding thirdItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Ghi'));
+
+    expect(firstItem.padding, defaultPadding);
+    expect(secondItem.padding, secondItemPadding);
+    expect(thirdItem.padding, thirdItemPadding);
+  });
+
+  testWidgets('NavigationRailDestination padding properly applied - NavigationRailLabelType.selected', (WidgetTester tester) async {
+    const EdgeInsets defaultPadding = EdgeInsets.symmetric(horizontal: 8.0);
+    const EdgeInsets secondItemPadding = EdgeInsets.symmetric(vertical: 30.0);
+    const EdgeInsets thirdItemPadding = EdgeInsets.symmetric(horizontal: 10.0);
+
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        labelType: NavigationRailLabelType.selected,
+        selectedIndex: 0,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Def'),
+            padding: secondItemPadding,
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.star_border),
+            selectedIcon: Icon(Icons.star),
+            label: Text('Ghi'),
+            padding: thirdItemPadding,
+          ),
+        ],
+      ),
+    );
+
+    final Padding firstItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Abc'));
+    final Padding secondItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Def'));
+    final Padding thirdItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Ghi'));
+
+    expect(firstItem.padding, defaultPadding);
+    expect(secondItem.padding, secondItemPadding);
+    expect(thirdItem.padding, thirdItemPadding);
+  });
+
+  testWidgets('NavigationRailDestination padding properly applied - NavigationRailLabelType.none', (WidgetTester tester) async {
+    const EdgeInsets defaultPadding = EdgeInsets.zero;
+    const EdgeInsets secondItemPadding = EdgeInsets.symmetric(vertical: 30.0);
+    const EdgeInsets thirdItemPadding = EdgeInsets.symmetric(horizontal: 10.0);
+
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        labelType: NavigationRailLabelType.none,
+        selectedIndex: 0,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Def'),
+            padding: secondItemPadding,
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.star_border),
+            selectedIcon: Icon(Icons.star),
+            label: Text('Ghi'),
+            padding: thirdItemPadding,
+          ),
+        ],
+      ),
+    );
+
+    final Padding firstItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Abc'));
+    final Padding secondItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Def'));
+    final Padding thirdItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Ghi'));
+
+    expect(firstItem.padding, defaultPadding);
+    expect(secondItem.padding, secondItemPadding);
+    expect(thirdItem.padding, thirdItemPadding);
   });
 }
 

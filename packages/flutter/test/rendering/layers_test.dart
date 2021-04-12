@@ -215,7 +215,7 @@ void main() {
     );
   });
 
-  void checkNeedsAddToScene(Layer layer, void mutateCallback()) {
+  void checkNeedsAddToScene(Layer layer, void Function() mutateCallback) {
     layer.debugMarkClean();
     layer.updateSubtreeNeedsAddToScene();
     expect(layer.debugSubtreeNeedsAddToScene, false);
@@ -321,7 +321,7 @@ void main() {
   test('mutating ClipRRectLayer fields triggers needsAddToScene', () {
     final ClipRRectLayer layer = ClipRRectLayer(clipRRect: RRect.zero);
     checkNeedsAddToScene(layer, () {
-      layer.clipRRect = RRect.fromRectAndRadius(unitRect, const Radius.circular(0));
+      layer.clipRRect = RRect.fromRectAndRadius(unitRect, Radius.zero);
     });
     checkNeedsAddToScene(layer, () {
       layer.clipBehavior = Clip.antiAliasWithSaveLayer;

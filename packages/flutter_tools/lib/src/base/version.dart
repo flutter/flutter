@@ -7,7 +7,7 @@ import 'package:meta/meta.dart';
 @immutable
 class Version implements Comparable<Version> {
   /// Creates a new [Version] object.
-  factory Version(int major, int minor, int patch, {String text}) {
+  factory Version(int? major, int? minor, int? patch, {String? text}) {
     if (text == null) {
       text = major == null ? '0' : '$major';
       if (minor != null) {
@@ -34,8 +34,8 @@ class Version implements Comparable<Version> {
   }
 
   /// Creates a new [Version] by parsing [text].
-  factory Version.parse(String text) {
-    final Match match = versionPattern.firstMatch(text ?? '');
+  static Version? parse(String? text) {
+    final Match? match = versionPattern.firstMatch(text ?? '');
     if (match == null) {
       return null;
     }
@@ -44,7 +44,7 @@ class Version implements Comparable<Version> {
       final int major = int.parse(match[1] ?? '0');
       final int minor = int.parse(match[3] ?? '0');
       final int patch = int.parse(match[5] ?? '0');
-      return Version._(major, minor, patch, text);
+      return Version._(major, minor, patch, text ?? '');
     } on FormatException {
       return null;
     }
@@ -53,8 +53,8 @@ class Version implements Comparable<Version> {
   /// Returns the primary version out of a list of candidates.
   ///
   /// This is the highest-numbered stable version.
-  static Version primary(List<Version> versions) {
-    Version primary;
+  static Version? primary(List<Version> versions) {
+    Version? primary;
     for (final Version version in versions) {
       if (primary == null || (version > primary)) {
         primary = version;

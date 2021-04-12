@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
@@ -12,6 +14,7 @@ import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../build_info.dart';
+import '../../cache.dart';
 import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
 import '../../globals.dart' as globals;
@@ -101,6 +104,7 @@ class WebEntrypointTarget extends Target {
     final LanguageVersion languageVersion = determineLanguageVersion(
       environment.fileSystem.file(targetFile),
       packageConfig[flutterProject.manifest.appName],
+      Cache.flutterRoot,
     );
 
     // Use the PackageConfig to find the correct package-scheme import path
@@ -200,7 +204,7 @@ class Dart2JSTarget extends Target {
       '--disable-dart-dev',
       globals.artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
       '--libraries-spec=${globals.fs.path.join(globals.artifacts.getArtifactPath(Artifact.flutterWebSdk), 'libraries.json')}',
-      ...?decodeDartDefines(environment.defines, kExtraFrontEndOptions),
+      ...?decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
       if (nativeNullAssertions)
         '--native-null-assertions',
       if (buildMode == BuildMode.profile)
@@ -355,6 +359,12 @@ class WebReleaseBundle extends Target {
         final String randomHash = Random().nextInt(4294967296).toString();
         final String resultString = inputFile.readAsStringSync()
           .replaceFirst(
+            'var serviceWorkerVersion = null',
+            "var serviceWorkerVersion = '$randomHash'",
+          )
+          // This is for legacy index.html that still use the old service
+          // worker loading mechanism.
+          .replaceFirst(
             "navigator.serviceWorker.register('flutter_service_worker.js')",
             "navigator.serviceWorker.register('flutter_service_worker.js?v=$randomHash')",
           );
@@ -490,7 +500,7 @@ self.addEventListener("install", (event) => {
   return event.waitUntil(
     caches.open(TEMP).then((cache) => {
       return cache.addAll(
-        CORE.map((value) => new Request(value + '?revision=' + RESOURCES[value], {'cache': 'reload'})));
+        CORE.map((value) => new Request(value, {'cache': 'reload'})));
     })
   );
 });

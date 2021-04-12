@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -10,11 +12,12 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/downgrade.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
-import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   FileSystem fileSystem;
@@ -22,7 +25,6 @@ void main() {
   AnsiTerminal terminal;
   ProcessManager processManager;
   MockStdio mockStdio;
-  FlutterVersion flutterVersion;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -33,7 +35,6 @@ void main() {
   });
 
   setUp(() {
-    flutterVersion = MockFlutterVersion();
     mockStdio = MockStdio();
     processManager = FakeProcessManager.any();
     terminal = MockTerminal();
@@ -42,6 +43,7 @@ void main() {
   });
 
   testUsingContext('Downgrade exits on unknown channel', () async {
+    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'unknown');
     fileSystem.currentDirectory.childFile('.flutter_tool_state')
       .writeAsStringSync('{"last-active-master-version":"invalid"}');
     final DowngradeCommand command = DowngradeCommand(
@@ -49,7 +51,7 @@ void main() {
       processManager: processManager,
       terminal: terminal,
       stdio: mockStdio,
-      flutterVersion: flutterVersion,
+      flutterVersion: fakeFlutterVersion,
       logger: bufferLogger,
     );
 
@@ -58,7 +60,7 @@ void main() {
   });
 
   testUsingContext('Downgrade exits on no recorded version', () async {
-    when(flutterVersion.channel).thenReturn('dev');
+    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'dev');
     fileSystem.currentDirectory.childFile('.flutter_tool_state')
       .writeAsStringSync('{"last-active-master-version":"abcd"}');
     final DowngradeCommand command = DowngradeCommand(
@@ -74,7 +76,7 @@ void main() {
       ]),
       terminal: terminal,
       stdio: mockStdio,
-      flutterVersion: flutterVersion,
+      flutterVersion: fakeFlutterVersion,
       logger: bufferLogger,
     );
 
@@ -87,7 +89,7 @@ void main() {
   });
 
   testUsingContext('Downgrade exits on unknown recorded version', () async {
-    when(flutterVersion.channel).thenReturn('master');
+    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'master');
     fileSystem.currentDirectory.childFile('.flutter_tool_state')
       .writeAsStringSync('{"last-active-master-version":"invalid"}');
     final DowngradeCommand command = DowngradeCommand(
@@ -102,7 +104,7 @@ void main() {
       ]),
       terminal: terminal,
       stdio: mockStdio,
-      flutterVersion: flutterVersion,
+      flutterVersion: fakeFlutterVersion,
       logger: bufferLogger,
     );
 
@@ -111,7 +113,7 @@ void main() {
   });
 
    testUsingContext('Downgrade prompts for user input when terminal is attached - y', () async {
-    when(flutterVersion.channel).thenReturn('master');
+    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'master');
     when(mockStdio.hasTerminal).thenReturn(true);
     fileSystem.currentDirectory.childFile('.flutter_tool_state')
       .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
@@ -120,7 +122,7 @@ void main() {
       processManager: processManager,
       terminal: terminal,
       stdio: mockStdio,
-      flutterVersion: flutterVersion,
+      flutterVersion: fakeFlutterVersion,
       logger: bufferLogger,
     );
 
@@ -141,7 +143,7 @@ void main() {
   });
 
    testUsingContext('Downgrade prompts for user input when terminal is attached - n', () async {
-    when(flutterVersion.channel).thenReturn('master');
+    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'master');
     when(mockStdio.hasTerminal).thenReturn(true);
     fileSystem.currentDirectory.childFile('.flutter_tool_state')
       .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
@@ -150,7 +152,7 @@ void main() {
       processManager: processManager,
       terminal: terminal,
       stdio: mockStdio,
-      flutterVersion: flutterVersion,
+      flutterVersion: fakeFlutterVersion,
       logger: bufferLogger,
     );
 
@@ -171,7 +173,7 @@ void main() {
   });
 
   testUsingContext('Downgrade does not prompt when there is no terminal', () async {
-    when(flutterVersion.channel).thenReturn('master');
+    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'master');
     when(mockStdio.hasTerminal).thenReturn(false);
     fileSystem.currentDirectory.childFile('.flutter_tool_state')
       .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
@@ -183,7 +185,7 @@ void main() {
       processManager: processManager,
       terminal: terminal,
       stdio: mockStdio,
-      flutterVersion: flutterVersion,
+      flutterVersion: fakeFlutterVersion,
       logger: bufferLogger,
     );
 
@@ -198,7 +200,7 @@ void main() {
   });
 
   testUsingContext('Downgrade performs correct git commands', () async {
-    when(flutterVersion.channel).thenReturn('master');
+    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'master');
     when(mockStdio.hasTerminal).thenReturn(false);
     fileSystem.currentDirectory.childFile('.flutter_tool_state')
       .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
@@ -227,7 +229,7 @@ void main() {
       ]),
       terminal: terminal,
       stdio: mockStdio,
-      flutterVersion: flutterVersion,
+      flutterVersion: fakeFlutterVersion,
       logger: bufferLogger,
     );
 

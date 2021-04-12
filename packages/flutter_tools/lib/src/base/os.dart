@@ -7,8 +7,6 @@ import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
-import '../build_info.dart';
-import '../globals.dart' as globals;
 import 'common.dart';
 import 'file_system.dart';
 import 'io.dart';
@@ -18,10 +16,10 @@ import 'process.dart';
 
 abstract class OperatingSystemUtils {
   factory OperatingSystemUtils({
-    @required FileSystem fileSystem,
-    @required Logger logger,
-    @required Platform platform,
-    @required ProcessManager processManager,
+    required FileSystem fileSystem,
+    required Logger logger,
+    required Platform platform,
+    required ProcessManager processManager,
   }) {
     if (platform.isWindows) {
       return _WindowsUtils(
@@ -48,10 +46,10 @@ abstract class OperatingSystemUtils {
   }
 
   OperatingSystemUtils._private({
-    @required FileSystem fileSystem,
-    @required Logger logger,
-    @required Platform platform,
-    @required ProcessManager processManager,
+    required FileSystem fileSystem,
+    required Logger logger,
+    required Platform platform,
+    required ProcessManager processManager,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
@@ -83,7 +81,7 @@ abstract class OperatingSystemUtils {
 
   /// Return the path (with symlinks resolved) to the given executable, or null
   /// if `which` was not able to locate the binary.
-  File which(String execName) {
+  File? which(String execName) {
     final List<File> result = _which(execName);
     if (result == null || result.isEmpty) {
       return null;
@@ -117,7 +115,7 @@ abstract class OperatingSystemUtils {
       'windows': 'Windows',
     };
     final String osName = _platform.operatingSystem;
-    return osNames.containsKey(osName) ? osNames[osName] : osName;
+    return osNames[osName] ?? osName;
   }
 
   HostPlatform get hostPlatform;
@@ -135,7 +133,7 @@ abstract class OperatingSystemUtils {
   /// its intended user.
   Future<int> findFreePort({bool ipv6 = false}) async {
     int port = 0;
-    ServerSocket serverSocket;
+    ServerSocket? serverSocket;
     final InternetAddress loopback =
         ipv6 ? InternetAddress.loopbackIPv6 : InternetAddress.loopbackIPv4;
     try {
@@ -161,10 +159,10 @@ abstract class OperatingSystemUtils {
 
 class _PosixUtils extends OperatingSystemUtils {
   _PosixUtils({
-    @required FileSystem fileSystem,
-    @required Logger logger,
-    @required Platform platform,
-    @required ProcessManager processManager,
+    required FileSystem fileSystem,
+    required Logger logger,
+    required Platform platform,
+    required ProcessManager processManager,
   }) : super._private(
     fileSystem: fileSystem,
     logger: logger,
@@ -259,16 +257,38 @@ class _PosixUtils extends OperatingSystemUtils {
   @override
   String get pathVarSeparator => ':';
 
+  HostPlatform? _hostPlatform;
+
   @override
-  HostPlatform hostPlatform = HostPlatform.linux_x64;
+  HostPlatform get hostPlatform {
+    if (_hostPlatform == null) {
+      final RunResult hostPlatformCheck =
+          _processUtils.runSync(<String>['uname', '-m']);
+      // On x64 stdout is "uname -m: x86_64"
+      // On arm64 stdout is "uname -m: aarch64, arm64_v8a"
+      if (hostPlatformCheck.exitCode != 0) {
+        _logger.printError(
+          'Error trying to run uname -m'
+          '\nstdout: ${hostPlatformCheck.stdout}'
+          '\nstderr: ${hostPlatformCheck.stderr}',
+        );
+        _hostPlatform = HostPlatform.linux_x64;
+      } else if (hostPlatformCheck.stdout.trim().endsWith('x86_64')) {
+        _hostPlatform = HostPlatform.linux_x64;
+      } else {
+        _hostPlatform = HostPlatform.linux_arm64;
+      }
+    }
+    return _hostPlatform!;
+  }
 }
 
 class _MacOSUtils extends _PosixUtils {
   _MacOSUtils({
-    @required FileSystem fileSystem,
-    @required Logger logger,
-    @required Platform platform,
-    @required ProcessManager processManager,
+    required FileSystem fileSystem,
+    required Logger logger,
+    required Platform platform,
+    required ProcessManager processManager,
   }) : super(
           fileSystem: fileSystem,
           logger: logger,
@@ -276,7 +296,7 @@ class _MacOSUtils extends _PosixUtils {
           processManager: processManager,
         );
 
-  String _name;
+  String? _name;
 
   @override
   String get name {
@@ -292,16 +312,14 @@ class _MacOSUtils extends _PosixUtils {
       }
       _name ??= super.name;
     }
-    return _name;
+    return _name!;
   }
-
-  HostPlatform _hostPlatform;
 
   // On ARM returns arm64, even when this process is running in Rosetta.
   @override
   HostPlatform get hostPlatform {
     if (_hostPlatform == null) {
-      String sysctlPath;
+      String? sysctlPath;
       if (which('sysctl') == null) {
         // Fallback to known install locations.
         for (final String path in <String>[
@@ -329,16 +347,16 @@ class _MacOSUtils extends _PosixUtils {
         _hostPlatform = HostPlatform.darwin_x64;
       }
     }
-    return _hostPlatform;
+    return _hostPlatform!;
   }
 }
 
 class _WindowsUtils extends OperatingSystemUtils {
   _WindowsUtils({
-    @required FileSystem fileSystem,
-    @required Logger logger,
-    @required Platform platform,
-    @required ProcessManager processManager,
+    required FileSystem fileSystem,
+    required Logger logger,
+    required Platform platform,
+    required ProcessManager processManager,
   }) : super._private(
     fileSystem: fileSystem,
     logger: logger,
@@ -417,7 +435,7 @@ class _WindowsUtils extends OperatingSystemUtils {
     throw UnsupportedError('makePipe is not implemented on Windows.');
   }
 
-  String _name;
+  String? _name;
 
   @override
   String get name {
@@ -430,7 +448,7 @@ class _WindowsUtils extends OperatingSystemUtils {
         _name = super.name;
       }
     }
-    return _name;
+    return _name!;
   }
 
   @override
@@ -441,17 +459,40 @@ class _WindowsUtils extends OperatingSystemUtils {
 /// directory or the current working directory if none specified.
 /// Return null if the project root could not be found
 /// or if the project root is the flutter repository root.
-String findProjectRoot([ String directory ]) {
+String? findProjectRoot(FileSystem fileSystem, [ String? directory ]) {
   const String kProjectRootSentinel = 'pubspec.yaml';
-  directory ??= globals.fs.currentDirectory.path;
+  directory ??= fileSystem.currentDirectory.path;
   while (true) {
-    if (globals.fs.isFileSync(globals.fs.path.join(directory, kProjectRootSentinel))) {
+    if (fileSystem.isFileSync(fileSystem.path.join(directory!, kProjectRootSentinel))) {
       return directory;
     }
-    final String parent = globals.fs.path.dirname(directory);
+    final String parent = fileSystem.path.dirname(directory);
     if (directory == parent) {
       return null;
     }
     directory = parent;
+  }
+}
+
+enum HostPlatform {
+  darwin_x64,
+  darwin_arm,
+  linux_x64,
+  linux_arm64,
+  windows_x64,
+}
+
+String getNameForHostPlatform(HostPlatform platform) {
+  switch (platform) {
+    case HostPlatform.darwin_x64:
+      return 'darwin-x64';
+    case HostPlatform.darwin_arm:
+      return 'darwin-arm';
+    case HostPlatform.linux_x64:
+      return 'linux-x64';
+    case HostPlatform.linux_arm64:
+      return 'linux-arm64';
+    case HostPlatform.windows_x64:
+      return 'windows-x64';
   }
 }

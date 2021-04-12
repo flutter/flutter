@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -21,10 +23,8 @@ import '../../../src/context.dart';
 void main() {
   Environment environment;
   FileSystem fileSystem;
-  Platform platform;
 
   setUp(() {
-    platform = FakePlatform();
     fileSystem = MemoryFileSystem.test();
     environment = Environment.test(
       fileSystem.currentDirectory,
@@ -32,6 +32,7 @@ void main() {
       artifacts: Artifacts.test(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
+      platform: FakePlatform(),
     );
     fileSystem.file(environment.buildDir.childFile('app.dill')).createSync(recursive: true);
     fileSystem.file('packages/flutter_tools/lib/src/build_system/targets/assets.dart')
@@ -80,7 +81,6 @@ flutter:
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => platform,
   });
 
   testUsingContext('Copies files to correct asset directory', () async {
@@ -96,7 +96,6 @@ flutter:
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => platform,
   });
 
   testUsingContext('Throws exception if pubspec contains missing files', () async {
@@ -111,12 +110,11 @@ flutter:
 
 ''');
 
-    expect(() async => await const CopyAssets().build(environment),
+    expect(() async => const CopyAssets().build(environment),
       throwsA(isA<Exception>()));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => platform,
   });
 
   testWithoutContext('processSkSLBundle returns null if there is no path '

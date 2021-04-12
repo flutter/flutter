@@ -14,9 +14,9 @@ import 'package:test/fake.dart';
 import '../src/common.dart';
 
 void main() {
-  Config config;
-  MemoryFileSystem memoryFileSystem;
-  FakePlatform fakePlatform;
+  late Config config;
+  late MemoryFileSystem memoryFileSystem;
+  late FakePlatform fakePlatform;
 
   setUp(() {
     memoryFileSystem = MemoryFileSystem.test();
@@ -33,6 +33,7 @@ void main() {
       platform: fakePlatform,
     );
   });
+
   testWithoutContext('Config get set value', () async {
     expect(config.getValue('foo'), null);
     config.setValue('foo', 'bar');

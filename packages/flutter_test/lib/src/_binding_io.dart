@@ -9,7 +9,6 @@ import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package;

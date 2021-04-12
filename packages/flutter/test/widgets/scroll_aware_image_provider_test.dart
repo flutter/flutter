@@ -34,7 +34,7 @@ void main() {
     await tester.pumpWidget(TestWidget(key));
 
     final DisposableBuildContext context = DisposableBuildContext(key.currentState!);
-    final TestImageProvider testImageProvider = TestImageProvider(testImage);
+    final TestImageProvider testImageProvider = TestImageProvider(testImage.clone());
     final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
       imageProvider: testImageProvider,
@@ -69,7 +69,7 @@ void main() {
     ));
 
     final DisposableBuildContext context = DisposableBuildContext(key.currentState!);
-    final TestImageProvider testImageProvider = TestImageProvider(testImage);
+    final TestImageProvider testImageProvider = TestImageProvider(testImage.clone());
     final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
       imageProvider: testImageProvider,
@@ -109,7 +109,7 @@ void main() {
     ));
 
     final DisposableBuildContext context = DisposableBuildContext(keys.last.currentState!);
-    final TestImageProvider testImageProvider = TestImageProvider(testImage);
+    final TestImageProvider testImageProvider = TestImageProvider(testImage.clone());
     final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
       imageProvider: testImageProvider,
@@ -166,7 +166,7 @@ void main() {
     ));
 
     final DisposableBuildContext context = DisposableBuildContext(keys.last.currentState!);
-    final TestImageProvider testImageProvider = TestImageProvider(testImage);
+    final TestImageProvider testImageProvider = TestImageProvider(testImage.clone());
     final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
       imageProvider: testImageProvider,
@@ -233,7 +233,7 @@ void main() {
     ));
 
     final DisposableBuildContext context = DisposableBuildContext(keys.last.currentState!);
-    final TestImageProvider testImageProvider = TestImageProvider(testImage);
+    final TestImageProvider testImageProvider = TestImageProvider(testImage.clone());
     final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
       imageProvider: testImageProvider,
@@ -298,7 +298,7 @@ void main() {
     ));
 
     final DisposableBuildContext context = DisposableBuildContext(key.currentState!);
-    final TestImageProvider testImageProvider = TestImageProvider(testImage);
+    final TestImageProvider testImageProvider = TestImageProvider(testImage.clone());
     final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
       imageProvider: testImageProvider,
@@ -349,7 +349,7 @@ void main() {
     ));
 
     final DisposableBuildContext context = DisposableBuildContext(key.currentState!);
-    final TestImageProvider testImageProvider = TestImageProvider(testImage);
+    final TestImageProvider testImageProvider = TestImageProvider(testImage.clone());
     final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
       imageProvider: testImageProvider,

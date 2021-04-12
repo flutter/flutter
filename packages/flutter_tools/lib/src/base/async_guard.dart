@@ -80,7 +80,7 @@ import 'dart:async';
 /// [ArgumentError] will be thrown synchronously.
 Future<T> asyncGuard<T>(
   Future<T> Function() fn, {
-  Function onError,
+  Function? onError,
 }) {
   if (onError != null &&
       onError is! _UnaryOnError<T> &&

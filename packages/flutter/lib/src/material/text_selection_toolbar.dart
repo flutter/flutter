@@ -19,16 +19,6 @@ import 'material_localizations.dart';
 const double _kToolbarScreenPadding = 8.0;
 const double _kToolbarHeight = 44.0;
 
-/// The type for a Function that builds a toolbar's container with the given
-/// child.
-///
-/// See also:
-///
-///   * [TextSelectionToolbar.toolbarBuilder], which is of this type.
-///   * [CupertinoTextSelectionToolbar.toolbarBuilder], which is similar, but
-///     for a Cupertino-style toolbar.
-typedef ToolbarBuilder = Widget Function(BuildContext context, Widget child);
-
 /// A fully-functional Material-style text selection toolbar.
 ///
 /// Tries to position itself above [anchorAbove], but if it doesn't fit, then
@@ -514,7 +504,7 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
   // offset that painted children will be placed at.
   void _placeChildren() {
     int i = -1;
-    Size nextSize = const Size(0.0, 0.0);
+    Size nextSize = Size.zero;
     double fitWidth = 0.0;
     final RenderBox navButton = firstChild!;
     double overflowHeight = overflowOpen && !isAbove ? navButton.size.height : 0.0;

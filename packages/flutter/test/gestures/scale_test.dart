@@ -45,7 +45,7 @@ void main() {
 
     final TestPointer pointer1 = TestPointer(1);
 
-    final PointerDownEvent down = pointer1.down(const Offset(0.0, 0.0));
+    final PointerDownEvent down = pointer1.down(Offset.zero);
     scale.addPointer(down);
     tap.addPointer(down);
 
@@ -199,10 +199,10 @@ void main() {
     expect(didTap, isFalse);
 
     // Continue panning with one finger
-    tester.route(pointer3.move(const Offset(0.0, 0.0)));
+    tester.route(pointer3.move(Offset.zero));
     expect(didStartScale, isTrue);
     didStartScale = false;
-    expect(updatedFocalPoint, const Offset(0.0, 0.0));
+    expect(updatedFocalPoint, Offset.zero);
     updatedFocalPoint = null;
     expect(updatedScale, 1.0);
     updatedScale = null;
@@ -235,7 +235,7 @@ void main() {
 
     final TestPointer mousePointer = TestPointer(1, PointerDeviceKind.mouse);
 
-    final PointerDownEvent down = mousePointer.down(const Offset(0.0, 0.0));
+    final PointerDownEvent down = mousePointer.down(Offset.zero);
     scale.addPointer(down);
     tester.closeArena(1);
 
@@ -275,7 +275,7 @@ void main() {
 
     final TestPointer touchPointer = TestPointer(1, PointerDeviceKind.touch);
 
-    final PointerDownEvent down = touchPointer.down(const Offset(0.0, 0.0));
+    final PointerDownEvent down = touchPointer.down(Offset.zero);
     scale.addPointer(down);
     tester.closeArena(1);
 
@@ -284,7 +284,7 @@ void main() {
     expect(didStartScale, isTrue);
     didStartScale = false;
     expect(updatedScale, isNull);
-    expect(updatedFocalPoint, const Offset(0.0, 0.0));
+    expect(updatedFocalPoint, Offset.zero);
     expect(didEndScale, isFalse);
 
     // The gesture can start using one touch finger.
@@ -426,7 +426,7 @@ void main() {
 
     final TestPointer pointer1 = TestPointer(1);
 
-    final PointerDownEvent down = pointer1.down(const Offset(0.0, 0.0));
+    final PointerDownEvent down = pointer1.down(Offset.zero);
     scale.addPointer(down);
     tap.addPointer(down);
 
@@ -572,6 +572,34 @@ void main() {
     tap.dispose();
   });
 
+  // Regressing test for https://github.com/flutter/flutter/issues/78941
+  testGesture('First rotation test', (GestureTester tester) {
+    final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
+
+    double? updatedRotation;
+    scale.onUpdate = (ScaleUpdateDetails details) {
+      updatedRotation = details.rotation;
+    };
+
+    final TestPointer pointer1 = TestPointer(1);
+    final PointerDownEvent down = pointer1.down(Offset.zero);
+    scale.addPointer(down);
+    tester.closeArena(1);
+    tester.route(down);
+
+    final TestPointer pointer2 = TestPointer(2);
+    final PointerDownEvent down2 = pointer2.down(const Offset(10.0, 10.0));
+    scale.addPointer(down2);
+    tester.closeArena(2);
+    tester.route(down2);
+
+    expect(updatedRotation, isNull);
+
+    // Rotation 45°.
+    tester.route(pointer2.move(const Offset(0.0, 10.0)));
+    expect(updatedRotation, math.pi / 4.0);
+  });
+
   testGesture('Scale gestures pointer count test', (GestureTester tester) {
     final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
 
@@ -585,7 +613,7 @@ void main() {
     scale.onEnd = (ScaleEndDetails details) => pointerCountOfEnd = details.pointerCount;
 
     final TestPointer pointer1 = TestPointer(1);
-    final PointerDownEvent down = pointer1.down(const Offset(0.0, 0.0));
+    final PointerDownEvent down = pointer1.down(Offset.zero);
     scale.addPointer(down);
     tester.closeArena(1);
 

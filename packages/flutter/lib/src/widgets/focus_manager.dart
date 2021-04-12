@@ -314,7 +314,7 @@ enum UnfocusDisposition {
 ///
 /// ```dart preamble
 /// class ColorfulButton extends StatefulWidget {
-///   ColorfulButton({Key? key}) : super(key: key);
+///   const ColorfulButton({Key? key}) : super(key: key);
 ///
 ///   @override
 ///   _ColorfulButtonState createState() => _ColorfulButtonState();
@@ -407,7 +407,7 @@ enum UnfocusDisposition {
 ///   final TextTheme textTheme = Theme.of(context).textTheme;
 ///   return DefaultTextStyle(
 ///     style: textTheme.headline4!,
-///     child: ColorfulButton(),
+///     child: const ColorfulButton(),
 ///   );
 /// }
 /// ```
@@ -432,7 +432,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// arguments must not be null.
   FocusNode({
     String? debugLabel,
-    FocusOnKeyCallback? onKey,
+    this.onKey,
     bool skipTraversal = false,
     bool canRequestFocus = true,
     bool descendantsAreFocusable = true,
@@ -441,8 +441,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
         assert(descendantsAreFocusable != null),
         _skipTraversal = skipTraversal,
         _canRequestFocus = canRequestFocus,
-        _descendantsAreFocusable = descendantsAreFocusable,
-        _onKey = onKey {
+        _descendantsAreFocusable = descendantsAreFocusable {
     // Set it via the setter so that it does nothing on release builds.
     this.debugLabel = debugLabel;
   }
@@ -573,8 +572,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// [hasFocus] returns true).
   ///
   /// {@macro flutter.widgets.FocusNode.keyEvents}
-  FocusOnKeyCallback? get onKey => _onKey;
-  FocusOnKeyCallback? _onKey;
+  FocusOnKeyCallback? onKey;
 
   FocusManager? _manager;
   List<FocusNode>? _ancestors;
@@ -731,10 +729,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Offset is the offset of the transformed widget in global coordinates.
   Offset get offset {
     assert(
-        context != null,
-        "Tried to get the offset of a focus node that didn't have its context set yet.\n"
-        'The context needs to be set before trying to evaluate traversal policies. '
-        'Setting the context is typically done with the attach method.');
+      context != null,
+      "Tried to get the offset of a focus node that didn't have its context set yet.\n"
+      'The context needs to be set before trying to evaluate traversal policies. '
+      'Setting the context is typically done with the attach method.',
+    );
     final RenderObject object = context!.findRenderObject()!;
     return MatrixUtils.transformPoint(object.getTransformTo(null), object.semanticBounds.topLeft);
   }
@@ -745,10 +744,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Rect is the rectangle of the transformed widget in global coordinates.
   Rect get rect {
     assert(
-        context != null,
-        "Tried to get the bounds of a focus node that didn't have its context set yet.\n"
-        'The context needs to be set before trying to evaluate traversal policies. '
-        'Setting the context is typically done with the attach method.');
+      context != null,
+      "Tried to get the bounds of a focus node that didn't have its context set yet.\n"
+      'The context needs to be set before trying to evaluate traversal policies. '
+      'Setting the context is typically done with the attach method.',
+    );
     final RenderObject object = context!.findRenderObject()!;
     final Offset topLeft = MatrixUtils.transformPoint(object.getTransformTo(null), object.semanticBounds.topLeft);
     final Offset bottomRight = MatrixUtils.transformPoint(object.getTransformTo(null), object.semanticBounds.bottomRight);
@@ -814,7 +814,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///         children: <Widget>[
   ///           Wrap(
   ///             children: List<Widget>.generate(4, (int index) {
-  ///               return SizedBox(
+  ///               return const SizedBox(
   ///                 width: 200,
   ///                 child: Padding(
   ///                   padding: const EdgeInsets.all(8.0),
@@ -1028,7 +1028,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   @mustCallSuper
   FocusAttachment attach(BuildContext? context, {FocusOnKeyCallback? onKey}) {
     _context = context;
-    _onKey = onKey ?? _onKey;
+    this.onKey = onKey ?? this.onKey;
     _attachment = FocusAttachment._(this);
     return _attachment!;
   }
@@ -1441,10 +1441,37 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// This constructor is rarely called directly. To access the [FocusManager],
   /// consider using the [FocusManager.instance] accessor instead (which gets it
   /// from the [WidgetsBinding] singleton).
+  ///
+  /// This newly constructed focus manager does not have the necessary event
+  /// handlers registered to allow it to manage focus. To register those event
+  /// handlers, callers must call [registerGlobalHandlers]. See the
+  /// documentation in that method for caveats to watch out for.
   FocusManager() {
     rootScope._manager = this;
+  }
+
+  /// Registers global input event handlers that are needed to manage focus.
+  ///
+  /// This sets the [RawKeyboard.keyEventHandler] for the shared instance of
+  /// [RawKeyboard] and adds a route to the global entry in the gesture routing
+  /// table. As such, only one [FocusManager] instance should register its
+  /// global handlers.
+  ///
+  /// When this focus manager is no longer needed, calling [dispose] on it will
+  /// unregister these handlers.
+  void registerGlobalHandlers() {
+    assert(RawKeyboard.instance.keyEventHandler == null);
     RawKeyboard.instance.keyEventHandler = _handleRawKeyEvent;
     GestureBinding.instance!.pointerRouter.addGlobalRoute(_handlePointerEvent);
+  }
+
+  @override
+  void dispose() {
+    if (RawKeyboard.instance.keyEventHandler == _handleRawKeyEvent) {
+      RawKeyboard.instance.keyEventHandler = null;
+      GestureBinding.instance!.pointerRouter.removeGlobalRoute(_handlePointerEvent);
+    }
+    super.dispose();
   }
 
   /// Provides convenient access to the current [FocusManager] singleton from
@@ -1469,7 +1496,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// interaction type.
   ///
   /// The initial value of [highlightMode] depends upon the value of
-  /// [defaultTargetPlatform] and [BaseMouseTracker.mouseIsConnected] of
+  /// [defaultTargetPlatform] and [MouseTracker.mouseIsConnected] of
   /// [RendererBinding.mouseTracker], making a guess about which interaction is
   /// most appropriate for the initial interaction mode.
   ///
@@ -1649,8 +1676,10 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       if (node.onKey != null) {
         // TODO(gspencergoog): Convert this from dynamic to KeyEventResult once migration is complete.
         final dynamic result = node.onKey!(node, event);
-        assert(result is bool || result is KeyEventResult,
-            'Value returned from onKey handler must be a non-null bool or KeyEventResult, not ${result.runtimeType}');
+        assert(
+          result is bool || result is KeyEventResult,
+          'Value returned from onKey handler must be a non-null bool or KeyEventResult, not ${result.runtimeType}',
+        );
         if (result is KeyEventResult) {
           switch (result) {
             case KeyEventResult.handled:

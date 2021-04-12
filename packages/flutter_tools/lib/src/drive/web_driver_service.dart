@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -70,10 +72,15 @@ class WebDriverService extends DriverService {
       stayResident: false,
       urlTunneller: null,
       flutterProject: FlutterProject.current(),
+      fileSystem: globals.fs,
+      usage: globals.flutterUsage,
+      logger: globals.logger,
+      systemClock: globals.systemClock,
     );
     final Completer<void> appStartedCompleter = Completer<void>.sync();
     final int result = await _residentRunner.run(
       appStartedCompleter: appStartedCompleter,
+      enableDevTools: false,
       route: route,
     );
     _webUri = _residentRunner.uri;

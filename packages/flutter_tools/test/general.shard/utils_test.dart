@@ -27,24 +27,24 @@ baz=qux
       expect(Version.unknown.toString(), equals('unknown'));
       expect(Version(null, null, null).toString(), equals('0'));
 
-      final Version v1 = Version.parse('1');
+      final Version v1 = Version.parse('1')!;
       expect(v1.major, equals(1));
       expect(v1.minor, equals(0));
       expect(v1.patch, equals(0));
 
       expect(v1, greaterThan(Version.unknown));
 
-      final Version v2 = Version.parse('1.2');
+      final Version v2 = Version.parse('1.2')!;
       expect(v2.major, equals(1));
       expect(v2.minor, equals(2));
       expect(v2.patch, equals(0));
 
-      final Version v3 = Version.parse('1.2.3');
+      final Version v3 = Version.parse('1.2.3')!;
       expect(v3.major, equals(1));
       expect(v3.minor, equals(2));
       expect(v3.patch, equals(3));
 
-      final Version v4 = Version.parse('1.12');
+      final Version v4 = Version.parse('1.12')!;
       expect(v4, greaterThan(v2));
 
       expect(v3, greaterThan(v2));
@@ -247,6 +247,79 @@ needs to be wrapped.
 
   01234567890123456789012345678901234567
         890123456789'''));
+    });
+
+    testWithoutContext('', () {
+      expect(wrapText(
+        ' ' * 7 + 'abc def ghi', columnWidth: 20, hangingIndent: 5, indent: 3, shouldWrap: true),
+        equals(
+          '          abc def\n'
+          '          ghi'
+        ),
+      );
+      expect(wrapText(
+        'abc def ghi', columnWidth: 0, hangingIndent: 5, shouldWrap: true),
+        equals(
+          'abc def\n'
+          'ghi'
+        ),
+      );
+      expect(wrapText(
+        'abc def ghi', columnWidth: 0, indent: 5, shouldWrap: true),
+        equals(
+          'abc def\n'
+          'ghi'
+        ),
+      );
+      expect(wrapText(
+        '     abc def ghi', columnWidth: 0, shouldWrap: true),
+        equals(
+          'abc def\n'
+          'ghi'
+        ),
+      );
+      expect(wrapText(
+        'abc def ghi', columnWidth: kMinColumnWidth - 2, hangingIndent: 5, shouldWrap: true),
+        equals(
+          'abc def\n'
+          'ghi'
+        ),
+      );
+      expect(wrapText(
+        'abc def ghi', columnWidth: kMinColumnWidth - 2, indent: 5, shouldWrap: true),
+        equals(
+          'abc def\n'
+          'ghi'
+        ),
+      );
+      expect(wrapText(
+        '     abc def ghi', columnWidth: kMinColumnWidth - 2, shouldWrap: true),
+        equals(
+          'abc def\n'
+          'ghi'
+        ),
+      );
+      expect(wrapText(
+        'abc def ghi jkl', columnWidth: kMinColumnWidth + 2, hangingIndent: 5, shouldWrap: true),
+        equals(
+          'abc def ghi\n'
+          '  jkl'
+        ),
+      );
+      expect(wrapText(
+        'abc def ghi', columnWidth: kMinColumnWidth + 2, indent: 5, shouldWrap: true),
+        equals(
+          '  abc def\n'
+          '  ghi'
+        ),
+      );
+      expect(wrapText(
+        '     abc def ghi', columnWidth: kMinColumnWidth + 2, shouldWrap: true),
+        equals(
+          '  abc def\n'
+          '  ghi'
+        ),
+      );
     });
   });
 }

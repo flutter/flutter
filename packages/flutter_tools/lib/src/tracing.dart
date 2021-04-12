@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -28,12 +30,12 @@ class Tracing {
 
   static const String firstUsefulFrameEventName = kFirstFrameRasterizedEventName;
 
-  final vm_service.VmService vmService;
+  final FlutterVmService vmService;
   final Logger _logger;
 
   Future<void> startTracing() async {
-    await vmService.setVMTimelineFlags(<String>['Compiler', 'Dart', 'Embedder', 'GC']);
-    await vmService.clearVMTimeline();
+    await vmService.setTimelineFlags(<String>['Compiler', 'Dart', 'Embedder', 'GC']);
+    await vmService.service.clearVMTimeline();
   }
 
   /// Stops tracing; optionally wait for first frame.
@@ -47,12 +49,12 @@ class Tracing {
       try {
         final Completer<void> whenFirstFrameRendered = Completer<void>();
         try {
-          await vmService.streamListen(vm_service.EventStreams.kExtension);
+          await vmService.service.streamListen(vm_service.EventStreams.kExtension);
         } on vm_service.RPCError {
           // It is safe to ignore this error because we expect an error to be
           // thrown if we're already subscribed.
         }
-        vmService.onExtensionEvent.listen((vm_service.Event event) {
+        vmService.service.onExtensionEvent.listen((vm_service.Event event) {
           if (event.extensionKind == 'Flutter.FirstFrame') {
             whenFirstFrameRendered.complete();
           }
@@ -78,15 +80,20 @@ class Tracing {
       }
       status.stop();
     }
-    final vm_service.Timeline timeline = await vmService.getVMTimeline();
-    await vmService.setVMTimelineFlags(<String>[]);
+    final vm_service.Response timeline = await vmService.getTimeline();
+    await vmService.setTimelineFlags(<String>[]);
+    if (timeline == null) {
+      throwToolExit(
+        'The device disconnected before the timeline could be retrieved.',
+      );
+    }
     return timeline.json;
   }
 }
 
 /// Download the startup trace information from the given observatory client and
-/// store it to build/start_up_info.json.
-Future<void> downloadStartupTrace(vm_service.VmService vmService, {
+/// store it to `$output/start_up_info.json`.
+Future<void> downloadStartupTrace(FlutterVmService vmService, {
   bool awaitFirstFrame = true,
   @required Logger logger,
   @required Directory output,
