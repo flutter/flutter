@@ -11,6 +11,7 @@ import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
+import 'allowlist.dart';
 import 'run_command.dart';
 import 'utils.dart';
 
@@ -75,6 +76,11 @@ Future<void> run(List<String> arguments) async {
   await runCommand(flutter, <String>['update-packages', '--verify-only'],
     workingDirectory: flutterRoot,
   );
+
+  /// Ensure that no new dependencies have been accidentally
+  /// added to core packages.
+  print('$clock Package Allowlist...');
+  await _checkConsumerDependencies();
 
   // Analyze all the Dart code in the repo.
   print('$clock Dart analysis...');
@@ -1127,6 +1133,45 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
   }
 
   return result;
+}
+
+Future<void> _checkConsumerDependencies() async {
+  final ProcessResult result = await Process.run(flutter, <String>[
+    'update-packages',
+    '--transitive-closure',
+    '--consumer-only',
+  ]);
+  if (result.exitCode != 0) {
+    print(result.stdout);
+    print(result.stderr);
+    exit(result.exitCode);
+  }
+  final Set<String> dependencies = <String>{};
+  for (final String line in result.stdout.toString().split('\n')) {
+    if (!line.contains('->')) {
+      continue;
+    }
+    final List<String> parts = line.split('->');
+    final String name = parts[0].trim();
+    dependencies.add(name);
+  }
+  final List<String> disallowed = <String>[];
+  for (final String dependency in dependencies) {
+    if (!kCorePackageAllowList.contains(dependency)) {
+      disallowed.add(dependency);
+    }
+  }
+
+  if (disallowed.isEmpty) {
+    exit(0);
+  }
+  print(
+    'Warning: transitive closure contained non-allowlisted packages:\n'
+    '${disallowed..join(', ')}\n'
+    'See dev/bots/allowlist.dart for instructions on how to update the '
+    'package allowlist.',
+  );
+  exit(1);
 }
 
 Future<void> _runFlutterAnalyze(String workingDirectory, {
