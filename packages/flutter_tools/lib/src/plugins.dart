@@ -947,7 +947,7 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
 
 /// Generates the Dart plugin registrant, which allows to bind a platform
 /// implementation of a Dart only plugin to its interface.
-/// The new entrypoint wraps [currentMainUri], adds a [_registerPlugins] function,
+/// The new entrypoint wraps [currentMainUri], adds the [_PluginRegistrant] class,
 /// and writes the file to [newMainDart].
 ///
 /// [mainFile] is the main entrypoint file. e.g. /<app>/lib/main.dart.
@@ -1134,6 +1134,16 @@ void registerPlugins(Registrar registrar) {
 }
 ''';
 
+const String _dartPluginRegisterWith = '''
+      try {
+        {{dartClass}}.registerWith();
+      } catch (err) {
+        print(
+          '`{{pluginName}}` threw an error: \$err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+      }
+''';
 // TODO(egarciad): Evaluate merging the web and desktop plugin registry templates.
 const String _dartPluginRegistryForDesktopTemplate = '''
 //
@@ -1155,21 +1165,27 @@ import 'package:{{pluginName}}/{{pluginName}}.dart';
 {{/windows}}
 
 @pragma('vm:entry-point')
-void _registerPlugins() {
-  if (Platform.isLinux) {
-    {{#linux}}
-      {{dartClass}}.registerWith();
-    {{/linux}}
-  } else if (Platform.isMacOS) {
-    {{#macos}}
-      {{dartClass}}.registerWith();
-    {{/macos}}
-  } else if (Platform.isWindows) {
-    {{#windows}}
-      {{dartClass}}.registerWith();
-    {{/windows}}
+class _PluginRegistrant {
+
+  @pragma('vm:entry-point')
+  static void register() {
+    if (Platform.isLinux) {
+      {{#linux}}
+$_dartPluginRegisterWith
+      {{/linux}}
+    } else if (Platform.isMacOS) {
+      {{#macos}}
+$_dartPluginRegisterWith
+      {{/macos}}
+    } else if (Platform.isWindows) {
+      {{#windows}}
+$_dartPluginRegisterWith
+      {{/windows}}
+    }
   }
+
 }
+
 void main() {
   entrypoint.main();
 }

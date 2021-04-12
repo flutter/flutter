@@ -62,16 +62,43 @@ dependencies:
   path_provider_linux: 1.0.0
 ''';
 
-const String _kLinuxRegistrant = '''
-@pragma('vm:entry-point')
-void _registerPlugins() {
-  if (Platform.isLinux) {
-      PathProviderLinux.registerWith();
-  } else if (Platform.isMacOS) {
-  } else if (Platform.isWindows) {
-  }
-}
-''';
+const String _kLinuxRegistrant =
+'//\n'
+'// Generated file. Do not edit.\n'
+'//\n'
+'\n'
+'// @dart = 2.12\n'
+'\n'
+'import \'\' as entrypoint;\n'
+'import \'dart:io\'; // flutter_ignore: dart_io_import.\n'
+'import \'package:path_provider_linux/path_provider_linux.dart\';\n'
+'\n'
+'@pragma(\'vm:entry-point\')\n'
+'class _PluginRegistrant {\n'
+'\n'
+'  @pragma(\'vm:entry-point\')\n'
+'  static void register() {\n'
+'    if (Platform.isLinux) {\n'
+'      try {\n'
+'        PathProviderLinux.registerWith();\n'
+'      } catch (err) {\n'
+'        print(\n'
+'          \'`path_provider_linux` threw an error: \$err. \'\n'
+'          \'The app may not function as expected until you remove this plugin from pubspec.yaml\'\n'
+'        );\n'
+'      }\n'
+'\n'
+'    } else if (Platform.isMacOS) {\n'
+'    } else if (Platform.isWindows) {\n'
+'    }\n'
+'  }\n'
+'\n'
+'}\n'
+'\n'
+'void main() {\n'
+'  entrypoint.main();\n'
+'}\n'
+'';
 
 const String _kSamplePluginPubspec = '''
 name: path_provider_linux
