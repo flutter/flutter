@@ -28,8 +28,11 @@ void main() {
       Plugin(
         name: 'test',
         path: 'foo',
+        defaultPackagePlatforms: const <String, String>{},
+        pluginDartClassPlatforms: const <String, String>{},
         platforms: const <String, PluginPlatform>{WindowsPlugin.kConfigKey: WindowsPlugin(name: 'test', pluginClass: 'Foo')},
         dependencies: <String>[],
+        isDirectDependency: true,
       ),
     ], renderer);
 
@@ -51,8 +54,11 @@ void main() {
       Plugin(
         name: 'test',
         path: 'foo',
+        defaultPackagePlatforms: const <String, String>{},
+        pluginDartClassPlatforms: const <String, String>{},
         platforms: const <String, PluginPlatform>{WindowsPlugin.kConfigKey: WindowsPlugin(name: 'test', pluginClass: 'Foo')},
         dependencies: <String>[],
+        isDirectDependency: true,
       ),
     ], renderer);
 

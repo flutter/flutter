@@ -30,10 +30,8 @@ void _renderTemplateToFile(
   String template,
   dynamic context,
   File file,
-  TemplateRenderer templateRenderer, {
-  FileSystem fileSystem,
-}) {
-  final FileSystem fs = fileSystem ?? globals.fs;
+  TemplateRenderer templateRenderer
+) {
   final String renderedTemplate = templateRenderer
     .renderString(template, context, htmlEscapeValues: false);
   file.createSync(recursive: true);
@@ -1009,7 +1007,6 @@ Future<void> generateMainDartWithPluginRegistrant(
       templateContext,
       newMainDart,
       globals.templateRenderer,
-      fileSystem: rootProject.directory.fileSystem,
     );
   } on FileSystemException catch (error) {
     throwToolExit('Unable to write ${newMainDart.path}, received error: $error');

@@ -62,16 +62,6 @@ dependencies:
   path_provider_linux: 1.0.0
 ''';
 
-const String _kNoPluginsRegistrant = '''
-@pragma('vm:entry-point')
-void _registerPlugins() {
-  if (Platform.isLinux) {
-  } else if (Platform.isMacOS) {
-  } else if (Platform.isWindows) {
-  }
-}
-''';
-
 const String _kLinuxRegistrant = '''
 @pragma('vm:entry-point')
 void _registerPlugins() {
