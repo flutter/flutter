@@ -288,11 +288,12 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// MaterialApp(
   ///   home: Scaffold(
   ///     appBar: AppBar(
-  ///        title: SizedBox(
-  ///        height: toolbarHeight,
-  ///        child: child: Image.asset(logoAsset),
-  ///      ),
-  ///      toolbarHeight: toolbarHeight,
+  ///       title: SizedBox(
+  ///         height: toolbarHeight,
+  ///         child: Image.asset(logoAsset),
+  ///       ),
+  ///       toolbarHeight: toolbarHeight,
+  ///     ),
   ///   ),
   /// )
   /// ```
