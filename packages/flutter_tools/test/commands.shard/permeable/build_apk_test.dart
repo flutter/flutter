@@ -376,7 +376,7 @@ void main() {
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'apk',
+          'gradle',
           label: 'gradle-r8-failure',
           parameters: <String, String>{},
         ),
@@ -442,7 +442,7 @@ void main() {
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'apk',
+          'gradle',
           label: 'app-not-using-android-x',
           parameters: <String, String>{},
         ),
@@ -499,7 +499,7 @@ void main() {
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'apk',
+          'gradle',
           label: 'app-using-android-x',
           parameters: <String, String>{},
         ),
