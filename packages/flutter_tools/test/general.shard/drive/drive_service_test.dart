@@ -14,13 +14,17 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/drive_service.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_vm_services.dart';
+import '../../src/fakes.dart';
 
 
 final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
@@ -143,7 +147,7 @@ void main() {
     ))..failOnce = true;
 
     await expectLater(
-      () async => await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true),
+      () async => driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true),
       returnsNormally,
     );
   });
@@ -288,9 +292,13 @@ void main() {
     expect(json.decode(fileSystem.file('out.json').readAsStringSync()), <String, Object>{
       'platform': 'android',
       'name': 'test',
-      'engineRevision': null,
+      'engineRevision': 'abcdefghijklmnopqrstuvwxyz',
       'data': <String, Object>{'A': 'B'}
     });
+  }, overrides: <Type, Generator>{
+    FlutterVersion: () => FakeFlutterVersion(
+      engineRevision: 'abcdefghijklmnopqrstuvwxyz',
+    )
   });
 
   testWithoutContext('Can connect to existing application and stop it during cleanup', () async {
@@ -382,6 +390,7 @@ FlutterDriverService setUpDriverService({
       PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
       Object compression,
       Device device,
+      Logger logger,
     }) async {
       if (httpUri.scheme != 'http') {
         fail('Expected an HTTP scheme, found $httpUri');
@@ -481,8 +490,9 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
     Uri observatoryUri,
     int hostPort,
     bool ipv6,
-    bool disableServiceAuthCodes,
-  ) async {
+    bool disableServiceAuthCodes, {
+    @required Logger logger,
+  }) async {
     started = true;
   }
 

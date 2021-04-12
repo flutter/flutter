@@ -4,8 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-// ignore: implementation_imports
-import 'package:flutter_test/src/all_elements.dart';
+import 'package:flutter_test/flutter_test.dart' show collectAllElementsFrom;
 
 import '../common.dart';
 

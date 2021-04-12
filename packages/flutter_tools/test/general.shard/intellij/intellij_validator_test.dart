@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:archive/archive.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/intellij/intellij_validator.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:test/fake.dart';
@@ -332,7 +330,7 @@ class FakePlistParser extends Fake implements PlistParser {
   final Map<String, String> values;
 
   @override
-  String getValueFromFile(String plistFilePath, String key) {
+  String? getValueFromFile(String plistFilePath, String key) {
     return values[key];
   }
 }
@@ -379,7 +377,7 @@ void createIntellijFlutterPluginJar(String pluginJarPath, FileSystem fileSystem,
   flutterPlugins.addFile(ArchiveFile('META-INF/plugin.xml', flutterPluginBytes.length, flutterPluginBytes));
   fileSystem.file(pluginJarPath)
     ..createSync(recursive: true)
-    ..writeAsBytesSync(ZipEncoder().encode(flutterPlugins));
+    ..writeAsBytesSync(ZipEncoder().encode(flutterPlugins)!);
 
 }
 
@@ -416,5 +414,5 @@ void createIntellijDartPluginJar(String pluginJarPath, FileSystem fileSystem) {
   dartPlugins.addFile(ArchiveFile('META-INF/plugin.xml', dartPluginBytes.length, dartPluginBytes));
   fileSystem.file(pluginJarPath)
     ..createSync(recursive: true)
-    ..writeAsBytesSync(ZipEncoder().encode(dartPlugins));
+    ..writeAsBytesSync(ZipEncoder().encode(dartPlugins)!);
 }

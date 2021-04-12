@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
-
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -28,6 +24,44 @@ import 'toggleable.dart';
 /// [tristate] is false and the checkbox's [value] must be true or false.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
+///
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
+///
+/// This example shows how you can override the default theme of
+/// of a [Checkbox] with a [MaterialStateProperty].
+/// In this example, the checkbox's color will be `Colors.blue` when the [Checkbox]
+/// is being pressed, hovered, or focused. Otherwise, the checkbox's color will
+/// be `Colors.red`.
+///
+/// ```dart
+/// bool isChecked = false;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   Color getColor(Set<MaterialState> states) {
+///     const Set<MaterialState> interactiveStates = <MaterialState>{
+///       MaterialState.pressed,
+///       MaterialState.hovered,
+///       MaterialState.focused,
+///     };
+///     if (states.any(interactiveStates.contains)) {
+///       return Colors.blue;
+///     }
+///     return Colors.red;
+///   }
+///   return Checkbox(
+///     checkColor: Colors.white,
+///     fillColor: MaterialStateProperty.resolveWith(getColor),
+///     value: isChecked,
+///     onChanged: (bool? value) {
+///       setState(() {
+///         isChecked = value!;
+///       });
+///     },
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -441,7 +475,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
           ..value = value
           ..previousValue = _previousValue
           ..shape = widget.shape ?? themeData.checkboxTheme.shape ?? const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(1.0))
+              borderRadius: BorderRadius.all(Radius.circular(1.0)),
           )
           ..side = widget.side ?? themeData.checkboxTheme.side,
       ),

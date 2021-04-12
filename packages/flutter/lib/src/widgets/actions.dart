@@ -253,6 +253,8 @@ abstract class Action<T extends Intent> with Diagnosticable {
 ///
 /// ```dart preamble
 /// class ActionListenerExample extends StatefulWidget {
+///   const ActionListenerExample({Key? key}) : super(key: key);
+///
 ///   @override
 ///   _ActionListenerExampleState createState() => _ActionListenerExampleState();
 /// }
@@ -286,26 +288,26 @@ abstract class Action<T extends Intent> with Diagnosticable {
 ///             child: Text(_on ? 'Disable' : 'Enable'),
 ///           ),
 ///         ),
-///         _on
-///             ? Padding(
-///                 padding: const EdgeInsets.all(8.0),
-///                 child: ActionListener(
-///                   listener: (Action<Intent> action) {
-///                     if (action.intentType == MyIntent) {
-///                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-///                           content: const Text('Action Listener Called'),
-///                       ));
-///                     }
-///                   },
-///                   action: _myAction,
-///                   child: ElevatedButton(
-///                     onPressed: () =>
-///                         ActionDispatcher().invokeAction(_myAction, MyIntent()),
-///                     child: const Text('Call Action Listener'),
-///                   ),
-///                 ),
-///               )
-///             : Container(),
+///         if (_on)
+///           Padding(
+///             padding: const EdgeInsets.all(8.0),
+///             child: ActionListener(
+///               listener: (Action<Intent> action) {
+///                 if (action.intentType == MyIntent) {
+///                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+///                     content: Text('Action Listener Called'),
+///                   ));
+///                 }
+///               },
+///               action: _myAction,
+///               child: ElevatedButton(
+///                 onPressed: () => const ActionDispatcher()
+///                     .invokeAction(_myAction, const MyIntent()),
+///                 child: const Text('Call Action Listener'),
+///               ),
+///             ),
+///           ),
+///         if (!_on) Container(),
 ///       ],
 ///     );
 ///   }
@@ -313,13 +315,13 @@ abstract class Action<T extends Intent> with Diagnosticable {
 ///
 /// class MyAction extends Action<MyIntent> {
 ///   @override
-///   void addActionListener(listener) {
+///   void addActionListener(ActionListenerCallback listener) {
 ///     super.addActionListener(listener);
 ///     print('Action Listener was added');
 ///   }
 ///
 ///   @override
-///   void removeActionListener(listener) {
+///   void removeActionListener(ActionListenerCallback listener) {
 ///     super.removeActionListener(listener);
 ///     print('Action Listener was removed');
 ///   }
@@ -336,8 +338,9 @@ abstract class Action<T extends Intent> with Diagnosticable {
 /// ```
 ///
 /// ```dart
+/// @override
 /// Widget build(BuildContext context) {
-///   return ActionListenerExample();
+///   return const ActionListenerExample();
 /// }
 /// ```
 /// {@end-tool}
@@ -596,7 +599,7 @@ class ActionDispatcher with Diagnosticable {
 /// }
 ///
 /// class SaveButton extends StatefulWidget {
-///   const SaveButton(this.valueNotifier);
+///   const SaveButton(this.valueNotifier, {Key? key}) : super(key: key);
 ///
 ///   final ValueNotifier<bool> valueNotifier;
 ///
@@ -622,7 +625,7 @@ class ActionDispatcher with Diagnosticable {
 ///           ),
 ///           onPressed: () {
 ///             setState(() {
-///               savedValue = Actions.invoke(context, const SaveIntent()) as int;
+///               savedValue = Actions.invoke(context, const SaveIntent())! as int;
 ///             });
 ///           },
 ///         );
@@ -655,7 +658,7 @@ class ActionDispatcher with Diagnosticable {
 ///                 IconButton(
 ///                   icon: const Icon(Icons.exposure_plus_1),
 ///                   onPressed: () {
-///                     Actions.invoke(context, ModifyIntent(count++));
+///                     Actions.invoke(context, ModifyIntent(++count));
 ///                   },
 ///                 ),
 ///                 AnimatedBuilder(
@@ -670,7 +673,7 @@ class ActionDispatcher with Diagnosticable {
 ///                 IconButton(
 ///                   icon: const Icon(Icons.exposure_minus_1),
 ///                   onPressed: () {
-///                     Actions.invoke(context, ModifyIntent(count--));
+///                     Actions.invoke(context, ModifyIntent(--count));
 ///                   },
 ///                 ),
 ///               ],
@@ -811,14 +814,16 @@ class Actions extends StatefulWidget {
     assert(() {
       if (action == null) {
         final Type type = intent?.runtimeType ?? T;
-        throw FlutterError('Unable to find an action for a $type in an $Actions widget '
-            'in the given context.\n'
-            "$Actions.find() was called on a context that doesn't contain an "
-            '$Actions widget with a mapping for the given intent type.\n'
-            'The context used was:\n'
-            '  $context\n'
-            'The intent type requested was:\n'
-            '  $type');
+        throw FlutterError(
+          'Unable to find an action for a $type in an $Actions widget '
+          'in the given context.\n'
+          "$Actions.find() was called on a context that doesn't contain an "
+          '$Actions widget with a mapping for the given intent type.\n'
+          'The context used was:\n'
+          '  $context\n'
+          'The intent type requested was:\n'
+          '  $type',
+        );
       }
       return true;
     }());
@@ -854,7 +859,7 @@ class Actions extends StatefulWidget {
       'The type passed to "find" resolved to "Intent": either a non-Intent '
       'generic type argument or an example intent derived from Intent must be '
       'specified. Intent may be used as the generic type as long as the optional '
-      '"intent" argument is passed.'
+      '"intent" argument is passed.',
     );
 
     _visitActionsAncestors(context, (InheritedElement element) {
@@ -922,16 +927,18 @@ class Actions extends StatefulWidget {
 
     assert(() {
       if (actionElement == null) {
-        throw FlutterError('Unable to find an action for an Intent with type '
-            '${intent.runtimeType} in an $Actions widget in the given context.\n'
-            '$Actions.invoke() was unable to find an $Actions widget that '
-            "contained a mapping for the given intent, or the intent type isn't the "
-            'same as the type argument to invoke (which is $T - try supplying a '
-            'type argument to invoke if one was not given)\n'
-            'The context used was:\n'
-            '  $context\n'
-            'The intent type requested was:\n'
-            '  ${intent.runtimeType}');
+        throw FlutterError(
+          'Unable to find an action for an Intent with type '
+          '${intent.runtimeType} in an $Actions widget in the given context.\n'
+          '$Actions.invoke() was unable to find an $Actions widget that '
+          "contained a mapping for the given intent, or the intent type isn't the "
+          'same as the type argument to invoke (which is $T - try supplying a '
+          'type argument to invoke if one was not given)\n'
+          'The context used was:\n'
+          '  $context\n'
+          'The intent type requested was:\n'
+          '  ${intent.runtimeType}',
+        );
       }
       return true;
     }());
@@ -1135,7 +1142,7 @@ class _ActionsMarker extends InheritedWidget {
 ///   void initState() {
 ///     super.initState();
 ///     _actionMap = <Type, Action<Intent>>{
-///       ActivateIntent: CallbackAction(
+///       ActivateIntent: CallbackAction<Intent>(
 ///         onInvoke: (Intent intent) => _toggleState(),
 ///       ),
 ///     };
@@ -1185,14 +1192,14 @@ class _ActionsMarker extends InheritedWidget {
 ///         child: Row(
 ///           children: <Widget>[
 ///             Container(
-///               padding: EdgeInsets.all(10.0),
+///               padding: const EdgeInsets.all(10.0),
 ///               color: color,
 ///               child: widget.child,
 ///             ),
 ///             Container(
 ///               width: 30,
 ///               height: 30,
-///               margin: EdgeInsets.all(10.0),
+///               margin: const EdgeInsets.all(10.0),
 ///               color: _on ? Colors.red : Colors.transparent,
 ///             ),
 ///           ],
@@ -1204,10 +1211,11 @@ class _ActionsMarker extends InheritedWidget {
 /// ```
 ///
 /// ```dart
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     appBar: AppBar(
-///       title: Text('FocusableActionDetector Example'),
+///       title: const Text('FocusableActionDetector Example'),
 ///     ),
 ///     body: Center(
 ///       child: Row(
@@ -1215,11 +1223,11 @@ class _ActionsMarker extends InheritedWidget {
 ///         children: <Widget>[
 ///           Padding(
 ///             padding: const EdgeInsets.all(8.0),
-///             child: TextButton(onPressed: () {}, child: Text('Press Me')),
+///             child: TextButton(onPressed: () {}, child: const Text('Press Me')),
 ///           ),
 ///           Padding(
 ///             padding: const EdgeInsets.all(8.0),
-///             child: FadButton(onPressed: () {}, child: Text('And Me')),
+///             child: FadButton(onPressed: () {}, child: const Text('And Me')),
 ///           ),
 ///         ],
 ///       ),
@@ -1242,6 +1250,7 @@ class FocusableActionDetector extends StatefulWidget {
     this.enabled = true,
     this.focusNode,
     this.autofocus = false,
+    this.descendantsAreFocusable = true,
     this.shortcuts,
     this.actions,
     this.onShowFocusHighlight,
@@ -1269,6 +1278,9 @@ class FocusableActionDetector extends StatefulWidget {
 
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
+
+  /// {@macro flutter.widgets.Focus.descendantsAreFocusable}
+  final bool descendantsAreFocusable;
 
   /// {@macro flutter.widgets.actions.actions}
   final Map<Type, Action<Intent>>? actions;
@@ -1455,6 +1467,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
       child: Focus(
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
+        descendantsAreFocusable: widget.descendantsAreFocusable,
         canRequestFocus: _canRequestFocus,
         onFocusChange: _handleFocusChange,
         child: widget.child,

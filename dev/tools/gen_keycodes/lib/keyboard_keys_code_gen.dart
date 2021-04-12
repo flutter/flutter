@@ -34,71 +34,38 @@ class KeyboardKeysCodeGenerator extends BaseCodeGenerator {
       definitions.write('''
 
 $firstComment  ///
-$otherComments  static const PhysicalKeyboardKey ${entry.constantName} = PhysicalKeyboardKey(${toHex(entry.usbHidCode, digits: 8)}, debugName: kReleaseMode ? null : '${entry.commentName}');
+$otherComments  static const PhysicalKeyboardKey ${entry.constantName} = PhysicalKeyboardKey(${toHex(entry.usbHidCode, digits: 8)});
 ''');
     }
     return definitions.toString();
   }
 
-  // static List<LogicalKeyEntry> _alnumLogicalKeys() {
-  //   final List<_ExplicitKeySpecification> keys = <_ExplicitKeySpecification>[]
-  //     ..addAll(List<_ExplicitKeySpecification>.generate(26, (int i) {
-  //       final int code = i + 'a'.codeUnits[0];
-  //       final String char = String.fromCharCode(code);
-  //       return _ExplicitKeySpecification(code, 'lowercase${char.toUpperCase()}', 'lower${char.toUpperCase()}');
-  //     }))
-  //     ..addAll(List<_ExplicitKeySpecification>.generate(26, (int i) {
-  //       final int code = i + 'A'.codeUnits[0];
-  //       final String char = String.fromCharCode(code);
-  //       return _ExplicitKeySpecification(code, 'uppercase$char', 'upper$char');
-  //     }))
-  //     ..addAll(List<_ExplicitKeySpecification>.generate(10, (int i) {
-  //       final int code = i + '0'.codeUnits[0];
-  //       final String char = String.fromCharCode(code);
-  //       return _ExplicitKeySpecification(code, 'digit$char');
-  //     }))
-  //     ..add(_ExplicitKeySpecification(' '.codeUnits[0], 'space'));
-
-  //   return keys.map((_ExplicitKeySpecification key) {
-  //     final LogicalKeyEntry result = LogicalKeyEntry(
-  //       value: key.code,
-  //       commentName: LogicalKeyEntry.computeCommentName(key.name),
-  //       constantName: key.constantName ?? LogicalKeyEntry.computeConstantName(key.name),
-  //       gtkNames: [key.name],
-  //       gtkValues: [key.code],
-  //       webNames: [key.name],
-  //       webValues: [key.code],
-  //     );
-  //     return result;
-  //   }).toList();
-  // }
+  String get _physicalDebugNames {
+    final StringBuffer result = StringBuffer();
+    for (final PhysicalKeyEntry entry in keyData.data) {
+      result.write('''
+      ${toHex(entry.usbHidCode, digits: 8)}: '${entry.commentName}',
+''');
+    }
+    return result.toString();
+  }
 
   /// Gets the generated definitions of LogicalKeyboardKeys.
   String get _logicalDefinitions {
-    String escapeLabel(String label) {
-      label = label
-        .replaceAll('', '')
-        .replaceAll('\n', r'\n')
-        .replaceAll('\r', r'\r');
-      return label.isEmpty ? null :
-             label.contains("'") ? 'r"$label"' : "r'$label'";
-    }
     final StringBuffer definitions = StringBuffer();
-    void printKey(int flutterId, String keyLabel, String constantName, String commentName, {String otherComments}) {
+    void printKey(int flutterId, String constantName, String commentName, {String otherComments}) {
       final String firstComment = _wrapString('Represents the logical "$commentName" key on the keyboard.');
-      final String otherCommentsStr = otherComments ?? _wrapString('See the function [RawKeyEvent.logicalKey] for more information.');
-      final String keyLabelStr = keyLabel == null ? '' : ' keyLabel: ${escapeLabel(keyLabel)},';
+      otherComments ??= _wrapString('See the function [RawKeyEvent.logicalKey] for more information.');
       definitions.write('''
 
 $firstComment  ///
-$otherCommentsStr  static const LogicalKeyboardKey $constantName = LogicalKeyboardKey(${toHex(flutterId, digits: 11)},$keyLabelStr debugName: kReleaseMode ? null : '$commentName');
+$otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardKey(${toHex(flutterId, digits: 11)});
 ''');
     }
 
     for (final LogicalKeyEntry entry in logicalData.data.values) {
       printKey(
         entry.value,
-        entry.keyLabel,
         entry.constantName,
         entry.commentName,
       );
@@ -111,7 +78,7 @@ $otherCommentsStr  static const LogicalKeyboardKey $constantName = LogicalKeyboa
       final Set<String> unionNames = PhysicalKeyEntry.synonyms[name].map<String>((dynamic name) {
         return upperCamelToLowerCamel(name as String);
       }).toSet();
-      printKey(PhysicalKeyEntry.synonymPlane | entry.flutterId, entry.keyLabel, name, PhysicalKeyEntry.getCommentName(name),
+      printKey(PhysicalKeyEntry.synonymPlane | entry.flutterId, name, PhysicalKeyEntry.getCommentName(name),
           otherComments: _wrapString('This key represents the union of the keys '
               '$unionNames when comparing keys. This key will never be generated '
               'directly, its main use is in defining key maps.'));
@@ -128,6 +95,25 @@ $otherCommentsStr  static const LogicalKeyboardKey $constantName = LogicalKeyboa
       }
     }
     return synonyms.toString();
+  }
+
+  String get _logicalKeyLabels {
+    final StringBuffer result = StringBuffer();
+    for (final PhysicalKeyEntry entry in keyData.data) {
+      result.write('''
+    ${toHex(entry.flutterId, digits: 11)}: '${entry.commentName}',
+''');
+    }
+    for (final String name in PhysicalKeyEntry.synonyms.keys) {
+      // Use the first item in the synonyms as a template for the ID to use.
+      // It won't end up being the same value because it'll be in the pseudo-key
+      // plane.
+      final PhysicalKeyEntry entry = keyData.data.firstWhere((PhysicalKeyEntry item) => item.name == PhysicalKeyEntry.synonyms[name][0]);
+      result.write('''
+    ${toHex(PhysicalKeyEntry.synonymPlane | entry.flutterId, digits: 11)}: '${PhysicalKeyEntry.getCommentName(name)}',
+''');
+    }
+    return result.toString();
   }
 
   /// This generates the map of USB HID codes to physical keys.
@@ -168,7 +154,9 @@ $otherCommentsStr  static const LogicalKeyboardKey $constantName = LogicalKeyboa
       'LOGICAL_KEY_MAP': _predefinedKeyCodeMap,
       'LOGICAL_KEY_DEFINITIONS': _logicalDefinitions,
       'LOGICAL_KEY_SYNONYMS': _logicalSynonyms,
+      'LOGICAL_KEY_KEY_LABELS': _logicalKeyLabels,
       'PHYSICAL_KEY_DEFINITIONS': _physicalDefinitions,
+      'PHYSICAL_KEY_DEBUG_NAMES': _physicalDebugNames,
     };
   }
 }

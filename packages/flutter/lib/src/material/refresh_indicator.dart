@@ -113,6 +113,7 @@ class RefreshIndicator extends StatefulWidget {
     Key? key,
     required this.child,
     this.displacement = 40.0,
+    this.edgeOffset = 0.0,
     required this.onRefresh,
     this.color,
     this.backgroundColor,
@@ -136,10 +137,30 @@ class RefreshIndicator extends StatefulWidget {
   /// Typically a [ListView] or [CustomScrollView].
   final Widget child;
 
-  /// The distance from the child's top or bottom edge to where the refresh
-  /// indicator will settle. During the drag that exposes the refresh indicator,
-  /// its actual displacement may significantly exceed this value.
+  /// The distance from the child's top or bottom [edgeOffset] where
+  /// the refresh indicator will settle. During the drag that exposes the refresh
+  /// indicator, its actual displacement may significantly exceed this value.
+  ///
+  /// In most cases, [displacement] distance starts counting from the parent's
+  /// edges. However, if [edgeOffset] is larger than zero then the [displacement]
+  /// value is calculated from that offset instead of the parent's edge.
   final double displacement;
+
+  /// The offset where [RefreshProgressIndicator] starts to appear on drag start.
+  ///
+  /// Depending whether the indicator is showing on the top or bottom, the value
+  /// of this variable controls how far from the parent's edge the progress
+  /// indicator starts to appear. This may come in handy when, for example, the
+  /// UI contains a top [Widget] which covers the parent's edge where the progress
+  /// indicator would otherwise appear.
+  ///
+  /// By default, the edge offset is set to 0.
+  ///
+  /// See also:
+  ///
+  ///  * [displacement], can be used to change the distance from the edge that
+  ///    the indicator settles.
+  final double edgeOffset;
 
   /// A function that's called when the user has dragged the refresh indicator
   /// far enough to demonstrate that they want the app to refresh. The returned
@@ -147,7 +168,7 @@ class RefreshIndicator extends StatefulWidget {
   final RefreshCallback onRefresh;
 
   /// The progress indicator's foreground color. The current theme's
-  /// [ThemeData.accentColor] by default.
+  /// [ColorScheme.primary] by default.
   final Color? color;
 
   /// The progress indicator's background color. The current theme's
@@ -229,10 +250,10 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     final ThemeData theme = Theme.of(context);
     _valueColor = _positionController.drive(
       ColorTween(
-        begin: (widget.color ?? theme.accentColor).withOpacity(0.0),
-        end: (widget.color ?? theme.accentColor).withOpacity(1.0),
+        begin: (widget.color ?? theme.colorScheme.primary).withOpacity(0.0),
+        end: (widget.color ?? theme.colorScheme.primary).withOpacity(1.0),
       ).chain(CurveTween(
-        curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit)
+        curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit),
       )),
     );
     super.didChangeDependencies();
@@ -245,10 +266,10 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       final ThemeData theme = Theme.of(context);
       _valueColor = _positionController.drive(
         ColorTween(
-          begin: (widget.color ?? theme.accentColor).withOpacity(0.0),
-          end: (widget.color ?? theme.accentColor).withOpacity(1.0),
+          begin: (widget.color ?? theme.colorScheme.primary).withOpacity(0.0),
+          end: (widget.color ?? theme.colorScheme.primary).withOpacity(1.0),
         ).chain(CurveTween(
-            curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit)
+            curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit),
         )),
       );
     }
@@ -427,17 +448,14 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
               FlutterError.reportError(FlutterErrorDetails(
                 exception: FlutterError(
                   'The onRefresh callback returned null.\n'
-                  'The RefreshIndicator onRefresh callback must return a Future.'
+                  'The RefreshIndicator onRefresh callback must return a Future.',
                 ),
                 context: ErrorDescription('when calling onRefresh'),
                 library: 'material library',
               ));
             return true;
           }());
-          // `refreshResult` has a non-nullable type, but might be null when
-          // running with weak checking, so we need to null check it anyway (and
-          // ignore the warning that the null-handling logic is dead code).
-          if (refreshResult == null) // ignore: dead_code
+          if (refreshResult == null)
             return;
           refreshResult.whenComplete(() {
             if (mounted && _mode == _RefreshIndicatorMode.refresh) {
@@ -503,8 +521,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       children: <Widget>[
         child,
         if (_mode != null) Positioned(
-          top: _isIndicatorAtTop! ? 0.0 : null,
-          bottom: !_isIndicatorAtTop! ? 0.0 : null,
+          top: _isIndicatorAtTop! ? widget.edgeOffset : null,
+          bottom: !_isIndicatorAtTop! ? widget.edgeOffset : null,
           left: 0.0,
           right: 0.0,
           child: SizeTransition(

@@ -328,7 +328,7 @@ void main() {
               stderr: 'xcrun: error:',
             ));
 
-            expect(() async => await xcode.sdkLocation(EnvironmentType.physical),
+            expect(() async => xcode.sdkLocation(EnvironmentType.physical),
               throwsToolExit(message: 'Could not find SDK location'));
             expect(fakeProcessManager.hasRemainingExpectations, isFalse);
           });
@@ -354,7 +354,7 @@ void main() {
           xcode: xcode,
           platform: null,
           artifacts: Artifacts.test(),
-          cache: Cache.test(),
+          cache: Cache.test(processManager: FakeProcessManager.any()),
           iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
         );
       });
@@ -382,7 +382,7 @@ void main() {
           xcode: xcode,
           platform: null,
           artifacts: Artifacts.test(),
-          cache: Cache.test(),
+          cache: Cache.test(processManager: FakeProcessManager.any()),
           iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
         );
       });

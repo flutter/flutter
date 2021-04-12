@@ -385,7 +385,7 @@ class Switch extends StatelessWidget {
             value: value,
             onChanged: onChanged,
             activeColor: activeColor,
-            trackColor: inactiveTrackColor
+            trackColor: inactiveTrackColor,
         ),
       ),
     );
@@ -741,7 +741,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
             ..isInteractive = isInteractive
             ..trackInnerLength = _trackInnerLength
             ..textDirection = Directionality.of(context)
-            ..surfaceColor = theme.colorScheme.surface
+            ..surfaceColor = theme.colorScheme.surface,
         ),
       ),
     );

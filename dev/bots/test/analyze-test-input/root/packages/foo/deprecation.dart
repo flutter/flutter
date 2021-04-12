@@ -94,3 +94,9 @@ void test16() { }
   'This feature was deprecated after v1.20.0-1.0.pre.'
 )
 void test17() { }
+
+@Deprecated(
+  "Double quotes' test (should fail). "
+  'This feature was deprecated after v2.1.0-11.0.pre.'
+)
+void test18() { }

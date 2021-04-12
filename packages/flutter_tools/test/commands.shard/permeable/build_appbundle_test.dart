@@ -4,24 +4,21 @@
 
 // @dart = 2.8
 
-import 'dart:io';
-
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_appbundle.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:process/process.dart';
 import 'package:test/fake.dart';
 
 import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   Cache.disableLocking();
@@ -97,14 +94,14 @@ void main() {
   group('Gradle', () {
     Directory tempDir;
     FakeProcessManager processManager;
-    FakeAndroidSdk mockAndroidSdk;
+    FakeAndroidSdk fakeAndroidSdk;
     TestUsage testUsage;
 
     setUp(() {
       testUsage = TestUsage();
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
       processManager = FakeProcessManager.any();
-      mockAndroidSdk = FakeAndroidSdk(globals.fs.directory('irrelevant'));
+      fakeAndroidSdk = FakeAndroidSdk(globals.fs.directory('irrelevant'));
     });
 
     tearDown(() {
@@ -171,7 +168,7 @@ void main() {
       ));
     },
     overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
+      AndroidSdk: () => fakeAndroidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => processManager,
       Usage: () => testUsage,
@@ -211,7 +208,7 @@ void main() {
       ));
     },
     overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
+      AndroidSdk: () => fakeAndroidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => processManager,
       Usage: () => testUsage,

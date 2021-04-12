@@ -632,7 +632,7 @@ void main() {
   testWidgets('Radio responds to density changes.', (WidgetTester tester) async {
     const Key key = Key('test');
     Future<void> buildTest(VisualDensity visualDensity) async {
-      return await tester.pumpWidget(
+      return tester.pumpWidget(
         MaterialApp(
           home: Material(
             child: Center(
@@ -1101,6 +1101,6 @@ void main() {
     await tester.pumpWidget(buildRadio(false));
     expect(find.byKey(key), findsNothing);
     // Release pointer after widget disappeared.
-    gesture.up();
+    await gesture.up();
   });
 }

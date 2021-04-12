@@ -345,7 +345,7 @@ class RenderFlow extends RenderBox
         throw FlutterError(
           'Cannot call paintChild twice for the same child.\n'
           'The flow delegate of type ${_delegate.runtimeType} attempted to '
-          'paint child $i multiple times, which is not permitted.'
+          'paint child $i multiple times, which is not permitted.',
         );
       }
       return true;
@@ -392,8 +392,14 @@ class RenderFlow extends RenderBox
       _clipRectLayer = null;
       _paintWithDelegate(context, offset);
     } else {
-      _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintWithDelegate,
-          clipBehavior: clipBehavior, oldLayer: _clipRectLayer);
+      _clipRectLayer = context.pushClipRect(
+        needsCompositing,
+        offset,
+        Offset.zero & size,
+        _paintWithDelegate,
+        clipBehavior: clipBehavior,
+        oldLayer: _clipRectLayer,
+      );
     }
   }
 

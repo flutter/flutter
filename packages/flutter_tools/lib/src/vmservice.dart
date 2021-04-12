@@ -4,17 +4,18 @@
 
 // @dart = 2.8
 
-import 'package:file/file.dart';
-import 'package:meta/meta.dart' show required;
+import 'dart:async';
+
+import 'package:meta/meta.dart' show required, visibleForTesting;
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import 'base/common.dart';
 import 'base/context.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
-import 'build_info.dart';
+import 'base/utils.dart';
 import 'convert.dart';
 import 'device.dart';
-import 'globals.dart' as globals;
 import 'version.dart';
 
 const String kGetSkSLsMethod = '_flutter.getSkSLs';
@@ -30,11 +31,19 @@ const int kIsolateReloadBarred = 1005;
 
 /// Override `WebSocketConnector` in [context] to use a different constructor
 /// for [WebSocket]s (used by tests).
-typedef WebSocketConnector = Future<io.WebSocket> Function(String url, {io.CompressionOptions compression});
+typedef WebSocketConnector = Future<io.WebSocket> Function(String url, {io.CompressionOptions compression, @required Logger logger});
 
 typedef PrintStructuredErrorLogMethod = void Function(vm_service.Event);
 
 WebSocketConnector _openChannel = _defaultOpenChannel;
+
+/// A testing only override of the WebSocket connector.
+///
+/// Provide a `null` value to restore the original connector.
+@visibleForTesting
+set openChannelForTesting(WebSocketConnector connector) {
+  _openChannel = connector ?? _defaultOpenChannel;
+}
 
 /// The error codes for the JSON-RPC standard, including VM service specific
 /// error codes.
@@ -94,28 +103,29 @@ typedef CompileExpression = Future<String> Function(
 typedef GetSkSLMethod = Future<String> Function();
 
 Future<io.WebSocket> _defaultOpenChannel(String url, {
-  io.CompressionOptions compression = io.CompressionOptions.compressionDefault
+  io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
+  @required Logger logger,
 }) async {
   Duration delay = const Duration(milliseconds: 100);
   int attempts = 0;
   io.WebSocket socket;
 
   Future<void> handleError(dynamic e) async {
-    void Function(String) printVisibleTrace = globals.printTrace;
+    void Function(String) printVisibleTrace = logger.printTrace;
     if (attempts == 10) {
-      globals.printStatus('Connecting to the VM Service is taking longer than expected...');
+      logger.printStatus('Connecting to the VM Service is taking longer than expected...');
     } else if (attempts == 20) {
-      globals.printStatus('Still attempting to connect to the VM Service...');
-      globals.printStatus(
+      logger.printStatus('Still attempting to connect to the VM Service...');
+      logger.printStatus(
         'If you do NOT see the Flutter application running, it might have '
         'crashed. The device logs (e.g. from adb or XCode) might have more '
         'details.');
-      globals.printStatus(
+      logger.printStatus(
         'If you do see the Flutter application running on the device, try '
         're-running with --host-vmservice-port to use a specific port known to '
         'be available.');
     } else if (attempts % 50 == 0) {
-      printVisibleTrace = globals.printStatus;
+      printVisibleTrace = logger.printStatus;
     }
 
     printVisibleTrace('Exception attempting to connect to the VM Service: $e');
@@ -130,7 +140,11 @@ Future<io.WebSocket> _defaultOpenChannel(String url, {
     }
   }
 
-  final WebSocketConnector constructor = context.get<WebSocketConnector>() ?? io.WebSocket.connect;
+  final WebSocketConnector constructor = context.get<WebSocketConnector>() ?? (String url, {
+    io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
+    @required Logger logger,
+  }) => io.WebSocket.connect(url, compression: compression);
+
   while (socket == null) {
     attempts += 1;
     try {
@@ -154,10 +168,14 @@ typedef VMServiceConnector = Future<FlutterVmService> Function(Uri httpUri, {
   PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   io.CompressionOptions compression,
   Device device,
+  Logger logger,
 });
 
-/// A connection to the Dart VM Service.
-vm_service.VmService setUpVmService(
+/// Set up the VM Service client by attaching services for each of the provided
+/// callbacks.
+///
+/// All parameters besides [vmService] may be null.
+Future<vm_service.VmService> setUpVmService(
   ReloadSources reloadSources,
   Restart restart,
   CompileExpression compileExpression,
@@ -165,7 +183,11 @@ vm_service.VmService setUpVmService(
   GetSkSLMethod skSLMethod,
   PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   vm_service.VmService vmService
-) {
+) async {
+  // Each service registration requires a request to the attached VM service. Since the
+  // order of these requests does not mattter, store each future in a list and await
+  // all at the end of this method.
+  final List<Future<vm_service.Success>> registrationRequests = <Future<vm_service.Success>>[];
   if (reloadSources != null) {
     vmService.registerServiceCallback('reloadSources', (Map<String, dynamic> params) async {
       final String isolateId = _validateRpcStringParam('reloadSources', params, 'isolateId');
@@ -180,7 +202,7 @@ vm_service.VmService setUpVmService(
         }
       };
     });
-    vmService.registerService('reloadSources', 'Flutter Tools');
+    registrationRequests.add(vmService.registerService('reloadSources', 'Flutter Tools'));
   }
 
   if (restart != null) {
@@ -193,7 +215,7 @@ vm_service.VmService setUpVmService(
         }
       };
     });
-    vmService.registerService('hotRestart', 'Flutter Tools');
+    registrationRequests.add(vmService.registerService('hotRestart', 'Flutter Tools'));
   }
 
   vmService.registerServiceCallback('flutterVersion', (Map<String, dynamic> params) async {
@@ -208,7 +230,7 @@ vm_service.VmService setUpVmService(
       }
     };
   });
-  vmService.registerService('flutterVersion', 'Flutter Tools');
+  registrationRequests.add(vmService.registerService('flutterVersion', 'Flutter Tools'));
 
   if (compileExpression != null) {
     vmService.registerServiceCallback('compileExpression', (Map<String, dynamic> params) async {
@@ -228,7 +250,7 @@ vm_service.VmService setUpVmService(
         'result': <String, dynamic>{'kernelBytes': kernelBytesBase64},
       };
     });
-    vmService.registerService('compileExpression', 'Flutter Tools');
+    registrationRequests.add(vmService.registerService('compileExpression', 'Flutter Tools'));
   }
   if (device != null) {
     vmService.registerServiceCallback('flutterMemoryInfo', (Map<String, dynamic> params) async {
@@ -240,7 +262,7 @@ vm_service.VmService setUpVmService(
         }
       };
     });
-    vmService.registerService('flutterMemoryInfo', 'Flutter Tools');
+    registrationRequests.add(vmService.registerService('flutterMemoryInfo', 'Flutter Tools'));
   }
   if (skSLMethod != null) {
     vmService.registerServiceCallback('flutterGetSkSL', (Map<String, dynamic> params) async {
@@ -252,16 +274,22 @@ vm_service.VmService setUpVmService(
         }
       };
     });
-    vmService.registerService('flutterGetSkSL', 'Flutter Tools');
+    registrationRequests.add(vmService.registerService('flutterGetSkSL', 'Flutter Tools'));
   }
   if (printStructuredErrorLogMethod != null) {
-    try {
-      vmService.streamListen(vm_service.EventStreams.kExtension);
-    } on vm_service.RPCError {
-      // It is safe to ignore this error because we expect an error to be
-      // thrown if we're already subscribed.
-    }
     vmService.onExtensionEvent.listen(printStructuredErrorLogMethod);
+    // It is safe to ignore this error because we expect an error to be
+    // thrown if we're already subscribed.
+    registrationRequests.add(vmService
+      .streamListen(vm_service.EventStreams.kExtension)
+      .catchError((dynamic error) {}, test: (dynamic error) => error is vm_service.RPCError)
+    );
+  }
+
+  try {
+    await Future.wait(registrationRequests);
+  } on vm_service.RPCError catch (e) {
+    throwToolExit('Failed to register service methods on attached VM Service: $e');
   }
   return vmService;
 }
@@ -283,6 +311,7 @@ Future<FlutterVmService> connectToVmService(
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
     io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
     Device device,
+    @required Logger logger,
   }) async {
   final VMServiceConnector connector = context.get<VMServiceConnector>() ?? _connect;
   return connector(httpUri,
@@ -293,6 +322,23 @@ Future<FlutterVmService> connectToVmService(
     device: device,
     getSkSLMethod: getSkSLMethod,
     printStructuredErrorLogMethod: printStructuredErrorLogMethod,
+    logger: logger,
+  );
+}
+
+Future<vm_service.VmService> createVmServiceDelegate(
+  Uri wsUri, {
+    io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
+    @required Logger logger,
+  }) async {
+  final io.WebSocket channel = await _openChannel(wsUri.toString(), compression: compression, logger: logger);
+  return vm_service.VmService(
+    channel,
+    channel.add,
+    log: null,
+    disposeHandler: () async {
+      await channel.close();
+    },
   );
 }
 
@@ -305,19 +351,14 @@ Future<FlutterVmService> _connect(
   PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
   Device device,
+  @required Logger logger,
 }) async {
-  final Uri wsUri = httpUri.replace(scheme: 'ws', path: globals.fs.path.join(httpUri.path, 'ws'));
-  final io.WebSocket channel = await _openChannel(wsUri.toString(), compression: compression);
-  final vm_service.VmService delegateService = vm_service.VmService(
-    channel,
-    channel.add,
-    log: null,
-    disposeHandler: () async {
-      await channel.close();
-    },
+  final Uri wsUri = httpUri.replace(scheme: 'ws', path: urlContext.join(httpUri.path, 'ws'));
+  final vm_service.VmService delegateService = await createVmServiceDelegate(
+    wsUri, compression: compression, logger: logger,
   );
 
-  final vm_service.VmService service = setUpVmService(
+  final vm_service.VmService service = await setUpVmService(
     reloadSources,
     restart,
     compileExpression,
@@ -479,7 +520,7 @@ class FlutterVmService {
     @required Uri assetsDirectory,
   }) async {
     try {
-      await service.streamListen('Isolate');
+      await service.streamListen(vm_service.EventStreams.kIsolate);
     } on vm_service.RPCError {
       // Do nothing, since the tool is already subscribed.
     }
@@ -667,7 +708,6 @@ class FlutterVmService {
       'ext.flutter.exit',
       isolateId: isolateId,
     ).catchError((dynamic error, StackTrace stackTrace) {
-      globals.logger.printTrace('Failure in ext.flutter.exit: $error\n$stackTrace');
       // Do nothing on sentinel or exception, the isolate already exited.
     }, test: (dynamic error) => error is vm_service.SentinelException || error is vm_service.RPCError);
   }
@@ -784,6 +824,58 @@ class FlutterVmService {
     }
   }
 
+  /// Waits for a signal from the VM service that [extensionName] is registered.
+  ///
+  /// Looks at the list of loaded extensions for first Flutter view, as well as
+  /// the stream of added extensions to avoid races.
+  ///
+  /// Throws a [VmServiceDisappearedException] should the VM Service disappear
+  /// while making calls to it.
+  Future<vm_service.IsolateRef> findExtensionIsolate(String extensionName) async {
+    try {
+      await service.streamListen(vm_service.EventStreams.kIsolate);
+    } on vm_service.RPCError {
+      // Do nothing, since the tool is already subscribed.
+    }
+
+    final Completer<vm_service.IsolateRef> extensionAdded = Completer<vm_service.IsolateRef>();
+    StreamSubscription<vm_service.Event> isolateEvents;
+    isolateEvents = service.onIsolateEvent.listen((vm_service.Event event) {
+      if (event.kind == vm_service.EventKind.kServiceExtensionAdded
+          && event.extensionRPC == extensionName) {
+        isolateEvents.cancel();
+        extensionAdded.complete(event.isolate);
+      }
+    });
+
+    try {
+      final List<FlutterView> flutterViews = await getFlutterViews();
+      if (flutterViews.isEmpty) {
+        throw VmServiceDisappearedException();
+      }
+
+      for (final FlutterView flutterView in flutterViews) {
+        final vm_service.IsolateRef isolateRef = flutterView.uiIsolate;
+        if (isolateRef == null) {
+          continue;
+        }
+
+        final vm_service.Isolate isolate = await service.getIsolate(isolateRef.id);
+        if (isolate.extensionRPCs.contains(extensionName)) {
+          return isolateRef;
+        }
+      }
+      return await extensionAdded.future;
+    } finally {
+      await isolateEvents.cancel();
+      try {
+        await service.streamCancel(vm_service.EventStreams.kIsolate);
+      } on vm_service.RPCError {
+        // It's ok for cleanup to fail, such as when the service disappears.
+      }
+    }
+  }
+
   /// Attempt to retrieve the isolate with id [isolateId], or `null` if it has
   /// been collected.
   Future<vm_service.Isolate> getIsolateOrNull(String isolateId) {
@@ -838,12 +930,12 @@ class FlutterVmService {
   }
 
   Future<void> dispose() async {
-    // TODO(dnfield): Remove ignore once internal repo is up to date
-    // https://github.com/flutter/flutter/issues/74518
-    // ignore: await_only_futures
      await service.dispose();
   }
 }
+
+/// Thrown when the VM Service disappears while calls are being made to it.
+class VmServiceDisappearedException implements Exception {}
 
 /// Whether the event attached to an [Isolate.pauseEvent] should be considered
 /// a "pause" event.
@@ -855,54 +947,6 @@ bool isPauseEvent(String kind) {
          kind == vm_service.EventKind.kPauseException ||
          kind == vm_service.EventKind.kPausePostRequest ||
          kind == vm_service.EventKind.kNone;
-}
-
-// TODO(jonahwilliams): either refactor drive to use the resident runner
-// or delete it.
-Future<String> sharedSkSlWriter(Device device, Map<String, Object> data, {
-  File outputFile,
-  Logger logger,
-}) async {
-  logger ??= globals.logger;
-  if (data.isEmpty) {
-    logger.printStatus(
-      'No data was received. To ensure SkSL data can be generated use a '
-      'physical device then:\n'
-      '  1. Pass "--cache-sksl" as an argument to flutter run.\n'
-      '  2. Interact with the application to force shaders to be compiled.\n'
-    );
-    return null;
-  }
-  if (outputFile == null) {
-    outputFile = globals.fsUtils.getUniqueFile(
-      globals.fs.currentDirectory,
-      'flutter',
-      'sksl.json',
-    );
-  } else if (!outputFile.parent.existsSync()) {
-    outputFile.parent.createSync(recursive: true);
-  }
-  // Convert android sub-platforms to single target platform.
-  TargetPlatform targetPlatform = await device.targetPlatform;
-  switch (targetPlatform) {
-    case TargetPlatform.android_arm:
-    case TargetPlatform.android_arm64:
-    case TargetPlatform.android_x64:
-    case TargetPlatform.android_x86:
-      targetPlatform = TargetPlatform.android;
-      break;
-    default:
-      break;
-  }
-  final Map<String, Object> manifest = <String, Object>{
-    'platform': getNameForTargetPlatform(targetPlatform),
-    'name': device.name,
-    'engineRevision': globals.flutterVersion.engineRevision,
-    'data': data,
-  };
-  outputFile.writeAsStringSync(json.encode(manifest));
-  logger.printStatus('Wrote SkSL data to ${outputFile.path}.');
-  return outputFile.path;
 }
 
 /// A brightness enum that matches the values https://github.com/flutter/engine/blob/3a96741247528133c0201ab88500c0c3c036e64e/lib/ui/window.dart#L1328

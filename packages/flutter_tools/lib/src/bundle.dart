@@ -160,7 +160,7 @@ Future<void> buildWithAssemble({
     fileSystem: globals.fs,
     logger: globals.logger,
     processManager: globals.processManager,
-    generateDartPluginRegistry: true,
+    platform: globals.platform,
   );
   final Target target = buildMode == BuildMode.debug
     ? const CopyFlutterBundle()

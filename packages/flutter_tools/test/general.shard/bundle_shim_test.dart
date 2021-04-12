@@ -10,11 +10,11 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/fakes.dart';
+import '../src/test_build_system.dart';
 
 // Tests for the temporary flutter assemble/bundle shim.
 void main() {

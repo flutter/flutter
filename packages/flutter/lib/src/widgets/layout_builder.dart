@@ -79,7 +79,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
   }
 
   @override
-  void mount(Element? parent, dynamic newSlot) {
+  void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot); // Creates the renderObject.
     renderObject.updateCallback(_layout);
   }
@@ -152,7 +152,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
   }
 
   @override
-  void insertRenderObjectChild(RenderObject child, dynamic slot) {
+  void insertRenderObjectChild(RenderObject child, Object? slot) {
     final RenderObjectWithChildMixin<RenderObject> renderObject = this.renderObject;
     assert(slot == null);
     assert(renderObject.debugValidateChild(child));
@@ -161,12 +161,12 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
   }
 
   @override
-  void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
+  void moveRenderObjectChild(RenderObject child, Object? oldSlot, Object? newSlot) {
     assert(false);
   }
 
   @override
-  void removeRenderObjectChild(RenderObject child, dynamic slot) {
+  void removeRenderObjectChild(RenderObject child, Object? slot) {
     final RenderConstrainedLayoutBuilder<ConstraintType, RenderObject> renderObject = this.renderObject;
     assert(renderObject.child == child);
     renderObject.child = null;
@@ -251,9 +251,9 @@ mixin RenderConstrainedLayoutBuilder<ConstraintType extends Constraints, ChildTy
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
-///     appBar: AppBar(title: Text("LayoutBuilder Example")),
+///     appBar: AppBar(title: const Text('LayoutBuilder Example')),
 ///     body: LayoutBuilder(
-///       builder: (context, constraints) {
+///       builder: (BuildContext context, BoxConstraints constraints) {
 ///         if (constraints.maxWidth > 600) {
 ///           return _buildWideContainers();
 ///         } else {
@@ -390,7 +390,7 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
         throw FlutterError(
           'LayoutBuilder does not support returning intrinsic dimensions.\n'
           'Calculating the intrinsic dimensions would require running the layout '
-          'callback speculatively, which might mutate the live render object tree.'
+          'callback speculatively, which might mutate the live render object tree.',
         );
       }
       return true;

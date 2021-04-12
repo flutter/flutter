@@ -170,6 +170,10 @@ class FlutterProject {
   WindowsProject _windows;
   WindowsProject get windows => _windows ??= WindowsProject._(this);
 
+  /// The Windows UWP sub project of this project.
+  WindowsUwpProject _windowUwp;
+  WindowsUwpProject get windowsUwp => _windowUwp ??= WindowsUwpProject._(this);
+
   /// The Fuchsia sub project of this project.
   FuchsiaProject _fuchsia;
   FuchsiaProject get fuchsia => _fuchsia ??= FuchsiaProject._(this);
@@ -275,6 +279,7 @@ class FlutterProject {
       macOSPlatform: featureFlags.isMacOSEnabled && macos.existsSync(),
       windowsPlatform: featureFlags.isWindowsEnabled && windows.existsSync(),
       webPlatform: featureFlags.isWebEnabled && web.existsSync(),
+      winUwpPlatform: featureFlags.isWindowsUwpEnabled && windowsUwp.existsSync(),
     );
   }
 
@@ -287,6 +292,7 @@ class FlutterProject {
     bool macOSPlatform = false,
     bool windowsPlatform = false,
     bool webPlatform = false,
+    bool winUwpPlatform = false,
   }) async {
     if (!directory.existsSync() || hasExampleApp || isPlugin) {
       return;
@@ -310,6 +316,9 @@ class FlutterProject {
     if (webPlatform) {
       await web.ensureReadyForPlatformSpecificTooling();
     }
+    if (winUwpPlatform) {
+      await windowsUwp.ensureReadyForPlatformSpecificTooling();
+    }
     await injectPlugins(
       this,
       androidPlatform: androidPlatform,
@@ -318,6 +327,7 @@ class FlutterProject {
       macOSPlatform: macOSPlatform,
       windowsPlatform: windowsPlatform,
       webPlatform: webPlatform,
+      winUwpPlatform: winUwpPlatform,
     );
   }
 
@@ -776,7 +786,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
     );
     template.render(
       target,
-      <String, dynamic>{
+      <String, Object>{
         'ios': true,
         'projectName': parent.manifest.appName,
         'iosIdentifier': parent.manifest.iosBundleIdentifier,
@@ -960,7 +970,7 @@ to migrate your project.
     );
     template.render(
       target,
-      <String, dynamic>{
+      <String, Object>{
         'android': true,
         'projectName': parent.manifest.appName,
         'androidIdentifier': parent.manifest.androidPackage,
@@ -1163,6 +1173,8 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
   @override
   String get pluginConfigKey => WindowsPlugin.kConfigKey;
 
+  String get _childDirectory => 'windows';
+
   @override
   bool existsSync() => _editableDirectory.existsSync() && cmakeFile.existsSync();
 
@@ -1181,7 +1193,7 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
   @override
   Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
 
-  Directory get _editableDirectory => parent.directory.childDirectory('windows');
+  Directory get _editableDirectory => parent.directory.childDirectory(_childDirectory);
 
   /// The directory in the project that is managed by Flutter. As much as
   /// possible, files that are edited by Flutter tooling after initial project
@@ -1194,6 +1206,17 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
   Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {}
+}
+
+/// The Windows UWP version of the Windows project.
+class WindowsUwpProject extends WindowsProject {
+  WindowsUwpProject._(FlutterProject parent) : super._(parent);
+
+  @override
+  String get _childDirectory => 'winuwp';
+
+  /// Eventually this will be used to check if the user's unstable project needs to be regenerated.
+  int get projectVersion => int.tryParse(_editableDirectory.childFile('project_version').readAsStringSync());
 }
 
 /// The Linux sub project.

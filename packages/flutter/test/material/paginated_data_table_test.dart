@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 
@@ -10,10 +11,10 @@ import 'data_table_test_utils.dart';
 
 class TestDataSource extends DataTableSource {
   TestDataSource({
-    this.onSelectChanged,
+    this.allowSelection = false,
   });
 
-  final void Function(bool?)? onSelectChanged;
+  final bool allowSelection;
 
   int get generation => _generation;
   int _generation = 0;
@@ -24,18 +25,30 @@ class TestDataSource extends DataTableSource {
     notifyListeners();
   }
 
+  final Set<int> _selectedRows = <int>{};
+
+  void _handleSelected(int index, bool? selected) {
+    if (selected == true) {
+      _selectedRows.add(index);
+    } else {
+      _selectedRows.remove(index);
+    }
+    notifyListeners();
+  }
+
   @override
   DataRow getRow(int index) {
     final Dessert dessert = kDesserts[index % kDesserts.length];
     final int page = index ~/ kDesserts.length;
     return DataRow.byIndex(
       index: index,
+      selected: _selectedRows.contains(index),
       cells: <DataCell>[
         DataCell(Text('${dessert.name} ($page)')),
         DataCell(Text('${dessert.calories}')),
         DataCell(Text('$generation')),
       ],
-      onSelectChanged: onSelectChanged,
+      onSelectChanged: allowSelection ? (bool? selected) => _handleSelected(index, selected) : null,
     );
   }
 
@@ -46,7 +59,7 @@ class TestDataSource extends DataTableSource {
   bool get isRowCountApproximate => false;
 
   @override
-  int get selectedRowCount => 0;
+  int get selectedRowCount => _selectedRows.length;
 }
 
 void main() {
@@ -276,7 +289,7 @@ void main() {
       home: PaginatedDataTable(
         header: header != null ? Text(header) : null,
         actions: actions,
-        source: TestDataSource(onSelectChanged: (bool? value) {}),
+        source: TestDataSource(allowSelection: true),
         showCheckboxColumn: true,
         columns: const <DataColumn>[
           DataColumn(label: Text('Name')),
@@ -469,9 +482,7 @@ void main() {
     // much, resulting in our custom margin being ignored.
     await binding.setSurfaceSize(const Size(_width, _height));
 
-    final TestDataSource source = TestDataSource(
-      onSelectChanged: (bool? value) {},
-    );
+    final TestDataSource source = TestDataSource(allowSelection: true);
     Finder cellContent;
     Finder checkbox;
     Finder padding;
@@ -807,7 +818,7 @@ void main() {
     Widget buildTable(bool checkbox) => MaterialApp(
       home: PaginatedDataTable(
         header: const Text('Test table'),
-        source: TestDataSource(onSelectChanged: (bool? value) {}),
+        source: TestDataSource(allowSelection: true),
         showCheckboxColumn: checkbox,
         columns: const <DataColumn>[
           DataColumn(label: Text('Name')),
@@ -837,7 +848,7 @@ void main() {
         ),
         home: PaginatedDataTable(
           header: const Text('Test table'),
-          source: TestDataSource(onSelectChanged: (bool? value) {}),
+          source: TestDataSource(allowSelection: true),
           showCheckboxColumn: true,
           columns: const <DataColumn>[
             DataColumn(label: Text('Name')),
@@ -869,9 +880,7 @@ void main() {
     // much, resulting in our custom margin being ignored.
     await binding.setSurfaceSize(const Size(_width, _height));
 
-    final TestDataSource source = TestDataSource(
-      onSelectChanged: (bool? value) {},
-    );
+    final TestDataSource source = TestDataSource(allowSelection: true);
     Finder cellContent;
     Finder checkbox;
     Finder padding;
@@ -922,5 +931,44 @@ void main() {
 
     // Reset the surface size.
     await binding.setSurfaceSize(originalSize);
+  });
+
+  testWidgets('Items selected text uses secondary color', (WidgetTester tester) async {
+    const Color selectedTextColor = Color(0xff00ddff);
+    final ColorScheme colors = const ColorScheme.light().copyWith(secondary: selectedTextColor);
+    final ThemeData theme = ThemeData.from(colorScheme: colors);
+
+    Widget buildTable() {
+      return MaterialApp(
+        theme: theme,
+        home: PaginatedDataTable(
+          header: const Text('Test table'),
+          source: TestDataSource(allowSelection: true),
+          columns: const <DataColumn>[
+            DataColumn(label: Text('Name')),
+            DataColumn(label: Text('Calories'), numeric: true),
+            DataColumn(label: Text('Generation')),
+          ],
+        ),
+      );
+    }
+
+    await binding.setSurfaceSize(const Size(800, 800));
+    await tester.pumpWidget(buildTable());
+    expect(find.text('Test table'), findsOneWidget);
+
+    // Select a row with yogurt
+    await tester.tap(find.text('Frozen yogurt (0)'));
+    await tester.pumpAndSettle();
+
+    // The header should be replace with a selected text item
+    expect(find.text('Test table'), findsNothing);
+    expect(find.text('1 item selected'), findsOneWidget);
+
+    // The color of the selected text item should be the colorScheme.secondary
+    final TextStyle selectedTextStyle = tester.renderObject<RenderParagraph>(find.text('1 item selected')).text.style!;
+    expect(selectedTextStyle.color, equals(selectedTextColor));
+
+    await binding.setSurfaceSize(null);
   });
 }

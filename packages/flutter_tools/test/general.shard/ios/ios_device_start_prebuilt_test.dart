@@ -7,7 +7,6 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -15,6 +14,8 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/device_port_forwarder.dart';
+import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/iproxy.dart';
@@ -22,7 +23,8 @@ import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_devices.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 // The command used to actually launch the app with args in release/profile.
@@ -200,7 +202,7 @@ void main() {
     expect(launchResult.started, true);
     expect(launchResult.hasObservatory, false);
     expect(await device.stopApp(iosApp), false);
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('IOSDevice.startApp forwards all supported debugging options', () async {
@@ -290,7 +292,7 @@ void main() {
 
     expect(launchResult.started, true);
     expect(await device.stopApp(iosApp), false);
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 }
 
@@ -312,6 +314,7 @@ IOSDevice setUpIOSDevice({
     artifacts: <ArtifactSet>[
       FakeDyldEnvironmentArtifact(),
     ],
+    processManager: FakeProcessManager.any(),
   );
 
   return IOSDevice('123',

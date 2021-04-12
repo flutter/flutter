@@ -4,7 +4,23 @@
 
 // @dart = 2.8
 
-part of reporting;
+import 'dart:async';
+
+import 'package:file/file.dart';
+import 'package:intl/intl.dart';
+import 'package:meta/meta.dart';
+
+import '../base/file_system.dart';
+import '../base/io.dart';
+import '../base/logger.dart';
+import '../base/process.dart';
+import '../build_system/exceptions.dart';
+import '../convert.dart';
+import '../devfs.dart';
+import '../flutter_manifest.dart';
+import '../flutter_project_metadata.dart';
+import '../project.dart';
+import '../version.dart';
 
 /// Provide suggested GitHub issue templates to user when Flutter encounters an error.
 class GitHubTemplateCreator {
@@ -102,7 +118,7 @@ ${_projectMetadataInformation()}
       '&body=${Uri.encodeQueryComponent(body)}'
       '&labels=${Uri.encodeQueryComponent('tool,severe: crash')}';
 
-    return await _shortURL(fullURL);
+    return _shortURL(fullURL);
   }
 
   /// Provide information about the Flutter project in the working directory, if present.

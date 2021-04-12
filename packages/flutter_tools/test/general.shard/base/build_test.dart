@@ -12,7 +12,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 
 const FakeCommand kWhichSysctlCommand = FakeCommand(
   command: <String>[
@@ -296,7 +296,7 @@ void main() {
       );
 
       expect(genSnapshotExitCode, 0);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('builds iOS armv7 snapshot with dwarStackTraces', () async {
@@ -354,7 +354,7 @@ void main() {
       );
 
       expect(genSnapshotExitCode, 0);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('builds iOS armv7 snapshot with obfuscate', () async {
@@ -410,7 +410,7 @@ void main() {
       );
 
       expect(genSnapshotExitCode, 0);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
 
@@ -465,7 +465,7 @@ void main() {
       );
 
       expect(genSnapshotExitCode, 0);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('builds iOS arm64 snapshot', () async {
@@ -517,7 +517,7 @@ void main() {
       );
 
       expect(genSnapshotExitCode, 0);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('builds shared library for android-arm (32bit)', () async {
@@ -546,7 +546,7 @@ void main() {
       );
 
       expect(genSnapshotExitCode, 0);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('builds shared library for android-arm with dwarf stack traces', () async {
@@ -578,7 +578,7 @@ void main() {
       );
 
       expect(genSnapshotExitCode, 0);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('builds shared library for android-arm with obfuscate', () async {
@@ -608,7 +608,7 @@ void main() {
       );
 
       expect(genSnapshotExitCode, 0);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('builds shared library for android-arm without dwarf stack traces due to empty string', () async {
@@ -637,7 +637,7 @@ void main() {
       );
 
       expect(genSnapshotExitCode, 0);
-       expect(processManager.hasRemainingExpectations, false);
+       expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('builds shared library for android-arm64', () async {
@@ -664,7 +664,7 @@ void main() {
       );
 
       expect(genSnapshotExitCode, 0);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('--no-strip in extraGenSnapshotOptions suppresses --strip', () async {
@@ -691,7 +691,7 @@ void main() {
       );
 
       expect(genSnapshotExitCode, 0);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
   });
 }

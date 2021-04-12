@@ -12,7 +12,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
-import 'package:mockito/mockito.dart';
+
 import '../../src/common.dart';
 import '../../src/context.dart';
 
@@ -39,11 +39,7 @@ void main() {
 
   setUp(() {
     exceptionHandler = FileExceptionHandler();
-    operatingSystemUtils = MockOperatingSystemUtils();
-    when(operatingSystemUtils.findFreePort())
-        .thenAnswer((Invocation invocation) async {
-      return 1234;
-    });
+    operatingSystemUtils = FakeOperatingSystemUtils();
     platform = FakePlatform(operatingSystem: 'macos', environment: <String, String>{
       kChromeEnvironment: 'example_chrome',
     });
@@ -61,7 +57,7 @@ void main() {
 
   testWithoutContext('can launch chrome and connect to the devtools', () async {
     expect(
-      () async => await _testLaunchChrome(
+      () async => _testLaunchChrome(
         '/.tmp_rand0/flutter_tools_chrome_device.rand0',
         processManager,
         chromeLauncher,
@@ -78,7 +74,7 @@ void main() {
     );
 
     expect(
-      () async => await _testLaunchChrome(
+      () async => _testLaunchChrome(
         '/.tmp_rand0/flutter_tools_chrome_device.rand1',
         processManager,
         chromeLauncher,
@@ -96,7 +92,7 @@ void main() {
     await chrome.close();
 
     expect(
-      () async => await _testLaunchChrome(
+      () async => _testLaunchChrome(
         '/.tmp_rand0/flutter_tools_chrome_device.rand1',
         processManager,
         chromeLauncher,
@@ -119,7 +115,7 @@ void main() {
       command: <String>[
         'example_chrome',
         '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-        '--remote-debugging-port=1234',
+        '--remote-debugging-port=12345',
         ...kChromeArgs,
         'example_url',
       ],
@@ -171,7 +167,7 @@ void main() {
       command: <String>[
         'example_chrome',
         '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-        '--remote-debugging-port=1234',
+        '--remote-debugging-port=12345',
         ...kChromeArgs,
         'example_url',
       ],
@@ -206,7 +202,7 @@ void main() {
     ));
 
     expect(
-      () async => await chromeLauncher.launch(
+      () async => chromeLauncher.launch(
         'example_url',
         skipCheck: true,
         debugPort: 10000,
@@ -220,7 +216,7 @@ void main() {
       command: <String>[
         'example_chrome',
         '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-        '--remote-debugging-port=1234',
+        '--remote-debugging-port=12345',
         ...kChromeArgs,
         '--headless',
         '--disable-gpu',
@@ -232,7 +228,7 @@ void main() {
     ));
 
     expect(
-      () async => await chromeLauncher.launch(
+      () async => chromeLauncher.launch(
         'example_url',
         skipCheck: true,
         headless: true,
@@ -260,7 +256,7 @@ void main() {
       command: const <String>[
         'example_chrome',
         '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-        '--remote-debugging-port=1234',
+        '--remote-debugging-port=12345',
         ...kChromeArgs,
         'example_url',
       ],
@@ -294,7 +290,7 @@ void main() {
     const List<String> args = <String>[
       'example_chrome',
       '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-      '--remote-debugging-port=1234',
+      '--remote-debugging-port=12345',
       ...kChromeArgs,
       '--headless',
       '--disable-gpu',
@@ -320,7 +316,7 @@ void main() {
     ));
 
     expect(
-      () async => await chromeLauncher.launch(
+      () async => chromeLauncher.launch(
         'example_url',
         skipCheck: true,
         headless: true,
@@ -334,7 +330,7 @@ void main() {
       command: <String>[
         'example_chrome',
         '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-        '--remote-debugging-port=1234',
+        '--remote-debugging-port=12345',
         ...kChromeArgs,
         '--headless',
         '--disable-gpu',
@@ -346,7 +342,7 @@ void main() {
     ));
 
     expect(
-      () async => await chromeLauncher.launch(
+      () async => chromeLauncher.launch(
         'example_url',
         skipCheck: true,
         headless: true,
@@ -356,14 +352,12 @@ void main() {
   });
 }
 
-class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
-
 Future<Chromium> _testLaunchChrome(String userDataDir, FakeProcessManager processManager, ChromiumLauncher chromeLauncher) {
   processManager.addCommand(FakeCommand(
     command: <String>[
       'example_chrome',
       '--user-data-dir=$userDataDir',
-      '--remote-debugging-port=1234',
+      '--remote-debugging-port=12345',
       ...kChromeArgs,
       'example_url',
     ],

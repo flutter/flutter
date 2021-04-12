@@ -23,6 +23,7 @@ import 'package:package_config/package_config.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_http_client.dart';
+import '../src/fake_vm_services.dart';
 
 final FakeVmServiceRequest createDevFSRequest = FakeVmServiceRequest(
   method: '_createDevFS',
@@ -127,7 +128,7 @@ void main() {
       logger: BufferLogger.test(),
       httpClient: FakeHttpClient.any(),
     );
-    expect(() async => await devFS.create(), throwsA(isA<DevFSException>()));
+    expect(() async => devFS.create(), throwsA(isA<DevFSException>()));
   });
 
   testWithoutContext('DevFS destroy is resilient to vmservice disconnection', () async {
@@ -423,7 +424,7 @@ void main() {
     final File file = MockFile();
     when(file.copySync(any)).thenThrow(const FileSystemException('foo'));
 
-    await expectLater(() async => await writer.write(<Uri, DevFSContent>{
+    await expectLater(() async => writer.write(<Uri, DevFSContent>{
       Uri.parse('goodbye'): DevFSFileContent(file),
     }, Uri.parse('/foo/bar/devfs/')), throwsA(isA<DevFSException>()));
   });

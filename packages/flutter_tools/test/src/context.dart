@@ -18,7 +18,7 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
@@ -30,9 +30,10 @@ import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
@@ -112,7 +113,7 @@ void testUsingContext(
           Config: () => buildConfig(globals.fs),
           DeviceManager: () => FakeDeviceManager(),
           Doctor: () => FakeDoctor(globals.logger),
-          FlutterVersion: () => MockFlutterVersion(),
+          FlutterVersion: () => FakeFlutterVersion(),
           HttpClient: () => FakeHttpClient.any(),
           IOSSimulatorUtils: () {
             final MockIOSSimulatorUtils mock = MockIOSSimulatorUtils();
@@ -376,8 +377,6 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   @override
   List<String> xcrunCommand() => <String>['xcrun'];
 }
-
-class MockFlutterVersion extends Mock implements FlutterVersion {}
 
 class MockCrashReporter extends Mock implements CrashReporter {}
 

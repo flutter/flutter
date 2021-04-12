@@ -24,7 +24,7 @@ abstract class ScrollContext {
   /// This context is typically different that the context of the scrollable
   /// widget itself. For example, [Scrollable] uses a context outside the
   /// [Viewport] but inside the widgets created by
-  /// [ScrollBehavior.buildViewportChrome].
+  /// [ScrollBehavior.buildOverscrollIndicator] and [ScrollBehavior.buildScrollbar].
   BuildContext? get notificationContext;
 
   /// The [BuildContext] that should be used when searching for a [PageStorage].

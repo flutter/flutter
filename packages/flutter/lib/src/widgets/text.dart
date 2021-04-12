@@ -213,7 +213,7 @@ class _NullWidget extends StatelessWidget {
     throw FlutterError(
       'A DefaultTextStyle constructed with DefaultTextStyle.fallback cannot be incorporated into the widget tree, '
       'it is meant only to provide a fallback value returned by DefaultTextStyle.of() '
-      'when no enclosing default text style is present in a BuildContext.'
+      'when no enclosing default text style is present in a BuildContext.',
     );
   }
 }
@@ -304,7 +304,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 ///   'Hello, $_name! How are you?',
 ///   textAlign: TextAlign.center,
 ///   overflow: TextOverflow.ellipsis,
-///   style: TextStyle(fontWeight: FontWeight.bold),
+///   style: const TextStyle(fontWeight: FontWeight.bold),
 /// )
 /// ```
 /// {@end-tool}

@@ -7,10 +7,9 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'dart:ui';
 
+// This import is discouraged in general, but we need it to implement flutter_test.
 // ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' as test_package show TypeMatcher;
+import 'package:test_api/test_api.dart';
 import 'package:test_api/src/frontend/async_matcher.dart'; // ignore: implementation_imports
 
 import 'package:flutter/foundation.dart';
@@ -196,7 +195,7 @@ final Matcher throwsAssertionError = throwsA(isAssertionError);
 ///
 ///  * [throwsFlutterError], to test if a function throws a [FlutterError].
 ///  * [isAssertionError], to test if any object is any kind of [AssertionError].
-final test_package.TypeMatcher<FlutterError> isFlutterError = isA<FlutterError>();
+final TypeMatcher<FlutterError> isFlutterError = isA<FlutterError>();
 
 /// A matcher for [AssertionError].
 ///
@@ -206,11 +205,12 @@ final test_package.TypeMatcher<FlutterError> isFlutterError = isA<FlutterError>(
 ///
 ///  * [throwsAssertionError], to test if a function throws any [AssertionError].
 ///  * [isFlutterError], to test if any object is a [FlutterError].
-final test_package.TypeMatcher<AssertionError> isAssertionError = isA<AssertionError>();
+final TypeMatcher<AssertionError> isAssertionError = isA<AssertionError>();
 
 /// A matcher that compares the type of the actual value to the type argument T.
-// TODO(ianh): Remove this once https://github.com/dart-lang/matcher/issues/98 is fixed
-test_package.TypeMatcher<T> isInstanceOf<T>() => isA<T>();
+///
+/// This is identical to [isA] and is included for backwards compatibility.
+TypeMatcher<T> isInstanceOf<T>() => isA<T>();
 
 /// Asserts that two [double]s are equal, within some tolerated error.
 ///
@@ -450,6 +450,7 @@ Matcher matchesSemantics({
   bool isSelected = false,
   bool isButton = false,
   bool isSlider = false,
+  bool isKeyboardKey = false,
   bool isLink = false,
   bool isFocused = false,
   bool isFocusable = false,
@@ -503,6 +504,7 @@ Matcher matchesSemantics({
     if (isSelected) SemanticsFlag.isSelected,
     if (isButton) SemanticsFlag.isButton,
     if (isSlider) SemanticsFlag.isSlider,
+    if (isKeyboardKey) SemanticsFlag.isKeyboardKey,
     if (isLink) SemanticsFlag.isLink,
     if (isTextField) SemanticsFlag.isTextField,
     if (isReadOnly) SemanticsFlag.isReadOnly,

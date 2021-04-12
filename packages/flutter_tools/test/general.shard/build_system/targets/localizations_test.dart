@@ -14,12 +14,12 @@ import 'package:flutter_tools/src/localizations/localizations_utils.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
+import '../../../src/fake_process_manager.dart';
 
 void main() {
   // Verifies that values are correctly passed through the localizations
   // target, but does not validate them beyond the serialized data type.
-  testUsingContext('generateLocalizations forwards arguments correctly', () async {
+  testWithoutContext('generateLocalizations forwards arguments correctly', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Logger logger = BufferLogger.test();
     final Directory flutterProjectDirectory = fileSystem
@@ -44,6 +44,7 @@ void main() {
       untranslatedMessagesFile: Uri.file('untranslated'),
       useSyntheticPackage: false,
       areResourceAttributesRequired: true,
+      usesNullableGetter: false,
     );
 
     final LocalizationsGenerator mockLocalizationsGenerator = MockLocalizationsGenerator();
@@ -70,13 +71,14 @@ void main() {
         projectPathString: '/',
         areResourceAttributesRequired: true,
         untranslatedMessagesFile: 'untranslated',
+        usesNullableGetter: false,
       ),
     ).called(1);
     verify(mockLocalizationsGenerator.loadResources()).called(1);
     verify(mockLocalizationsGenerator.writeOutputFiles(logger, isFromYaml: true)).called(1);
   });
 
-  testUsingContext('generateLocalizations throws exception on missing flutter: generate: true flag', () async {
+  testWithoutContext('generateLocalizations throws exception on missing flutter: generate: true flag', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final Directory arbDirectory = fileSystem.directory('arb')
@@ -113,11 +115,10 @@ flutter:
         projectDir: fileSystem.currentDirectory,
         dependenciesDir: fileSystem.currentDirectory,
       ),
-      throwsA(isA<Exception>()),
-    );
-    expect(
-      logger.errorText,
-      contains('Attempted to generate localizations code without having the flutter: generate flag turned on.'),
+      throwsToolExit(
+        message: 'Attempted to generate localizations code without having the '
+          'flutter: generate flag turned on.',
+      ),
     );
   });
 
@@ -151,6 +152,9 @@ header-file: header
 header: HEADER
 use-deferred-loading: true
 preferred-supported-locales: en_US
+synthetic-package: false
+required-resource-attributes: false
+nullable-getter: false
 ''');
 
     final LocalizationOptions options = parseLocalizationsOptions(
@@ -167,6 +171,9 @@ preferred-supported-locales: en_US
     expect(options.header, 'HEADER');
     expect(options.deferredLoading, true);
     expect(options.preferredSupportedLocales, <String>['en_US']);
+    expect(options.useSyntheticPackage, false);
+    expect(options.areResourceAttributesRequired, false);
+    expect(options.usesNullableGetter, false);
   });
 
   testWithoutContext('parseLocalizationsOptions handles preferredSupportedLocales as list', () async {

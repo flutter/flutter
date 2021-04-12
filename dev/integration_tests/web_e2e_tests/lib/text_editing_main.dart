@@ -31,7 +31,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   String infoText = 'no-enter';
 
-  // Controller with no inital value;
+  // Controller with no initial value;
   final TextEditingController _emptyController = TextEditingController();
 
   final TextEditingController _controller =
