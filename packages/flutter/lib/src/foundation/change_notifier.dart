@@ -108,7 +108,7 @@ class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
 /// See also:
 ///
 ///  * [ValueNotifier], which is a [ChangeNotifier] that wraps a single value.
-class ChangeNotifier implements Listenable {
+mixin ChangeNotifier implements Listenable {
   LinkedList<_ListenerEntry>? _listeners = LinkedList<_ListenerEntry>();
 
   bool _debugAssertNotDisposed() {
@@ -290,7 +290,7 @@ class _MergingListenable extends Listenable {
 /// When [value] is replaced with something that is not equal to the old
 /// value as evaluated by the equality operator ==, this class notifies its
 /// listeners.
-class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
+class ValueNotifier<T> with ChangeNotifier implements ValueListenable<T> {
   /// Creates a [ChangeNotifier] that wraps this value.
   ValueNotifier(this._value);
 
