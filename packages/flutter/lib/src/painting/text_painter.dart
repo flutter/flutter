@@ -421,6 +421,7 @@ class TextPainter {
       });
       return placeholderCount;
     }() == value.length);
+    print('set dims in textPainter');
     _placeholderDimensions = value;
     markNeedsLayout();
   }

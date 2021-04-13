@@ -18,7 +18,7 @@ import 'object.dart';
 
 const String _kEllipsis = '\u2026';
 
-/// Parent data for use with [RenderParagraph].
+/// Parent data for use with [RenderParagraph] and [RenderEditable].
 class TextParentData extends ContainerBoxParentData<RenderBox> {
   /// The scaling of the text.
   double? scale;

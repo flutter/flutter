@@ -3816,9 +3816,8 @@ void main() {
     focusNode.unfocus();
     await tester.pump();
 
-    expect(renderEditable.text!.children, isNull);
     // Everything's just formated the same way now.
-    expect(renderEditable.text!.text, 'text composing text');
+    expect((renderEditable.text!.children![0] as TextSpan).text, 'text composing text');
     expect(renderEditable.text!.style!.decoration, isNull);
   });
 
