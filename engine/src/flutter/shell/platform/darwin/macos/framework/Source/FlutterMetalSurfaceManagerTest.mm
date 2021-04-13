@@ -25,14 +25,6 @@
   return self;
 }
 
-- (CALayer*)makeBackingLayer {
-  return [CAMetalLayer layer];
-}
-
-+ (Class)layerClass {
-  return [CAMetalLayer class];
-}
-
 @end
 
 namespace flutter::testing {
@@ -41,10 +33,10 @@ static FlutterMetalSurfaceManager* CreateSurfaceManager() {
   id<MTLDevice> device = MTLCreateSystemDefaultDevice();
   id<MTLCommandQueue> commandQueue = [device newCommandQueue];
   TestMetalView* metalView = [[TestMetalView alloc] init];
-  CAMetalLayer* layer = reinterpret_cast<CAMetalLayer*>(metalView.layer);
+  CALayer* layer = reinterpret_cast<CALayer*>(metalView.layer);
   return [[FlutterMetalSurfaceManager alloc] initWithDevice:device
                                                commandQueue:commandQueue
-                                                 metalLayer:layer];
+                                                      layer:layer];
 }
 
 TEST(FlutterMetalSurfaceManager, EnsureSizeUpdatesSize) {
