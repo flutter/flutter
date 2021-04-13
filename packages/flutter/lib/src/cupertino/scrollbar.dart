@@ -47,6 +47,7 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 /// ```
 ///
 /// ```dart
+/// @override
 /// Widget build(BuildContext context) {
 ///   return CupertinoScrollbar(
 ///     child: ListView.builder(
@@ -74,6 +75,7 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 /// ```dart
 /// final ScrollController _controllerOne = ScrollController();
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return CupertinoScrollbar(
 ///     thickness: 6.0,
