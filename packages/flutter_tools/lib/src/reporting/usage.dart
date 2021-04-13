@@ -81,13 +81,16 @@ abstract class Usage {
     AnalyticsFactory? analyticsIOFactory,
     FirstRunMessenger? firstRunMessenger,
     required bool runningOnBot,
-  }) => _DefaultUsage(settingsName: settingsName,
-                      versionOverride: versionOverride,
-                      configDirOverride: configDirOverride,
-                      logFile: logFile,
-                      analyticsIOFactory: analyticsIOFactory,
-                      runningOnBot: runningOnBot,
-                      firstRunMessenger: firstRunMessenger);
+  }) =>
+      _DefaultUsage.initialize(
+        settingsName: settingsName,
+        versionOverride: versionOverride,
+        configDirOverride: configDirOverride,
+        logFile: logFile,
+        analyticsIOFactory: analyticsIOFactory,
+        runningOnBot: runningOnBot,
+        firstRunMessenger: firstRunMessenger,
+      );
 
   /// Uses the global [Usage] instance to send a 'command' to analytics.
   static void command(String command, {
@@ -182,13 +185,22 @@ Analytics _defaultAnalyticsIOFactory(
 }
 
 class _DefaultUsage implements Usage {
-  _DefaultUsage({
+  _DefaultUsage._({
+    required bool suppressAnalytics,
+    required Analytics analytics,
+    required this.firstRunMessenger,
+    required SystemClock clock,
+  })  : _suppressAnalytics = suppressAnalytics,
+        _analytics = analytics,
+        _clock = clock;
+
+  static _DefaultUsage initialize({
     String settingsName = 'flutter',
     String? versionOverride,
     String? configDirOverride,
     String? logFile,
     AnalyticsFactory? analyticsIOFactory,
-    required this.firstRunMessenger,
+    required FirstRunMessenger? firstRunMessenger,
     required bool runningOnBot,
   }) {
     final FlutterVersion flutterVersion = globals.flutterVersion;
@@ -198,8 +210,9 @@ class _DefaultUsage implements Usage {
     final bool usingLogFile = logFilePath != null && logFilePath.isNotEmpty;
 
     final AnalyticsFactory analyticsFactory = analyticsIOFactory ?? _defaultAnalyticsIOFactory;
-    _clock = globals.systemClock;
-
+    bool suppressAnalytics = false;
+    bool skipAnalyticsSessionSetup = false;
+    Analytics? setupAnalytics;
     if (// To support testing, only allow other signals to suppress analytics
         // when analytics are not being shunted to a file.
         !usingLogFile && (
@@ -211,73 +224,81 @@ class _DefaultUsage implements Usage {
         runningOnBot ||
         // Ignore when suppressed by FLUTTER_SUPPRESS_ANALYTICS.
         suppressEnvFlag
-      )) {
+    )) {
       // If we think we're running on a CI system, suppress sending analytics.
       suppressAnalytics = true;
-      _analytics = AnalyticsMock();
-      return;
+      setupAnalytics = AnalyticsMock();
+      skipAnalyticsSessionSetup = true;
     }
-
     if (usingLogFile) {
-      _analytics = LogToFileAnalytics(logFilePath);
+      setupAnalytics ??= LogToFileAnalytics(logFilePath);
     } else {
       try {
         ErrorHandlingFileSystem.noExitOnFailure(() {
-          _analytics = analyticsFactory(
+          setupAnalytics = analyticsFactory(
             _kFlutterUA,
             settingsName,
             version,
             documentDirectory: configDirOverride != null
-              ? globals.fs.directory(configDirOverride)
-              : null,
+                ? globals.fs.directory(configDirOverride)
+                : null,
           );
         });
       } on Exception catch (e) {
         globals.printTrace('Failed to initialize analytics reporting: $e');
         suppressAnalytics = true;
-        _analytics = AnalyticsMock();
-        return;
+        setupAnalytics ??= AnalyticsMock();
+        skipAnalyticsSessionSetup = true;
       }
     }
-    assert(_analytics != null);
 
-    // Report a more detailed OS version string than package:usage does by default.
-    _analytics.setSessionValue(
-      cdKey(CustomDimensions.sessionHostOsDetails),
-      globals.os.name,
-    );
-    // Send the branch name as the "channel".
-    _analytics.setSessionValue(
-      cdKey(CustomDimensions.sessionChannelName),
-      flutterVersion.getBranchName(redactUnknownBranches: true),
-    );
-    // For each flutter experimental feature, record a session value in a comma
-    // separated list.
-    final String enabledFeatures = allFeatures
-      .where((Feature feature) {
-        return feature.configSetting != null &&
-               globals.config.getValue(feature.configSetting!) == true;
+    final Analytics analytics = setupAnalytics!;
+    if (!skipAnalyticsSessionSetup) {
+      // Report a more detailed OS version string than package:usage does by default.
+      analytics.setSessionValue(
+        cdKey(CustomDimensions.sessionHostOsDetails),
+        globals.os.name,
+      );
+      // Send the branch name as the "channel".
+      analytics.setSessionValue(
+        cdKey(CustomDimensions.sessionChannelName),
+        flutterVersion.getBranchName(redactUnknownBranches: true),
+      );
+      // For each flutter experimental feature, record a session value in a comma
+      // separated list.
+      final String enabledFeatures = allFeatures
+          .where((Feature feature) {
+        final String? configSetting = feature.configSetting;
+        return configSetting != null && globals.config.getValue(configSetting) == true;
       })
-      .map((Feature feature) => feature.configSetting)
-      .join(',');
-    _analytics.setSessionValue(
-      cdKey(CustomDimensions.enabledFlutterFeatures),
-      enabledFeatures,
-    );
+          .map((Feature feature) => feature.configSetting)
+          .join(',');
+      analytics.setSessionValue(
+        cdKey(CustomDimensions.enabledFlutterFeatures),
+        enabledFeatures,
+      );
 
-    // Record the host as the application installer ID - the context that flutter_tools is running in.
-    if (globals.platform.environment.containsKey('FLUTTER_HOST')) {
-      _analytics.setSessionValue('aiid', globals.platform.environment['FLUTTER_HOST']);
+      // Record the host as the application installer ID - the context that flutter_tools is running in.
+      if (globals.platform.environment.containsKey('FLUTTER_HOST')) {
+        analytics.setSessionValue('aiid', globals.platform.environment['FLUTTER_HOST']);
+      }
+      analytics.analyticsOpt = AnalyticsOpt.optOut;
     }
-    _analytics.analyticsOpt = AnalyticsOpt.optOut;
+
+    return _DefaultUsage._(
+      suppressAnalytics: suppressAnalytics,
+      analytics: analytics,
+      firstRunMessenger: firstRunMessenger,
+      clock: globals.systemClock,
+    );
   }
 
-  late Analytics _analytics;
+  final Analytics _analytics;
   final FirstRunMessenger? firstRunMessenger;
 
   bool _printedWelcome = false;
   bool _suppressAnalytics = false;
-  late SystemClock _clock;
+  final SystemClock _clock;
 
   @override
   bool get suppressAnalytics => _suppressAnalytics || _analytics.firstRun;
@@ -382,11 +403,12 @@ class _DefaultUsage implements Usage {
     }
     // Display the welcome message if this is the first run of the tool or if
     // the license terms have changed since it was last displayed.
-    if (firstRunMessenger != null && firstRunMessenger!.shouldDisplayLicenseTerms()) {
+    final FirstRunMessenger? messenger = firstRunMessenger;
+    if (messenger != null && messenger.shouldDisplayLicenseTerms()) {
       globals.printStatus('');
-      globals.printStatus(firstRunMessenger!.licenseTerms, emphasis: true);
+      globals.printStatus(messenger.licenseTerms, emphasis: true);
       _printedWelcome = true;
-      firstRunMessenger!.confirmLicenseTermsDisplayed();
+      messenger.confirmLicenseTermsDisplayed();
     }
   }
 }
