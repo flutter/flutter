@@ -178,7 +178,17 @@ class FontManager {
     try {
       final html.FontFace fontFace = html.FontFace(family, asset, descriptors);
       _fontLoadingFutures.add(fontFace.load().then((_) {
-        html.document.fonts!.add(fontFace);
+        // We could do:
+        // ```
+        // html.document.fonts!.add(fontFace);
+        // ```
+        // But dart:html expects the return value to be non-null, and Firefox
+        // returns null. This causes the app to crash in Firefox with a null
+        // check exception.
+        //
+        // TODO(mdebbar): Revert this once the dart:html type is fixed.
+        //                https://github.com/dart-lang/sdk/issues/45676
+        js_util.callMethod(html.document.fonts!, 'add', [fontFace]);
       }, onError: (dynamic e) {
         printWarning('Error while trying to load font family "$family":\n$e');
       }));
