@@ -225,15 +225,14 @@ class UpgradeCommandRunner {
     }
   }
 
-  /// Checks to see if the local copy of Flutter is tracking a "standard remote",
-  /// that is, either "https://github.com/flutter/flutter.git" or the one set as
-  /// `FLUTTER_GIT_URL` environment variable.
+  /// Checks if the Flutter git repository is tracking a "standard remote".
   ///
-  /// If the upstream remote url is configured to track a remote different
-  /// from `_flutterGit`, upgrading would not necessarily fetch the actual
-  /// upstream updates from the latter, which is used for version check and
-  /// inform users about the update in the first place.
-  void checkSupportedRemote(FlutterVersion localVersion) {
+  /// Using `flutter upgrade` is not supported from a non-standard remote. A git
+  /// remote should have the same url as [_flutterGit] to be considered as a
+  /// "standard" remote.
+  ///
+  /// Exits tool if the tracking remote is not standard.
+  void verifyStandardRemote(FlutterVersion localVersion) {
     if (localVersion.repositoryUrl != _flutterGit) {
       throwToolExit(
         'Unable to upgrade Flutter: Your local copy of Flutter is tracking a '
@@ -243,7 +242,9 @@ class UpgradeCommandRunner {
         'or to use the official remote, run '
         '"git remote add origin https://github.com/flutter/flutter" and '
         '"git branch --set-upstream-to=origin/${localVersion.channel}" if remote "origin" '
-        'exists in $workingDirectory.\n'
+        'exists in $workingDirectory.\n\n'
+        'If you are okay with losing local changes you made to the SDK, re-install '
+        'Flutter by going to https://flutter.dev/docs/get-started/install.'
       );
     }
   }
@@ -294,7 +295,7 @@ class UpgradeCommandRunner {
         throwToolExit(errorString);
       }
     }
-    checkSupportedRemote(localVersion);
+    verifyStandardRemote(localVersion);
     return FlutterVersion(workingDirectory: workingDirectory, frameworkRevision: revision);
   }
 
