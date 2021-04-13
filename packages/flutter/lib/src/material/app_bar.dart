@@ -19,7 +19,6 @@ import 'icon_button.dart';
 import 'icons.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'material_state.dart';
 import 'scaffold.dart';
 import 'tabs.dart';
 import 'text_theme.dart';
@@ -703,50 +702,12 @@ class _AppBarState extends State<AppBar> {
   static const double _defaultElevation = 4.0;
   static const Color _defaultShadowColor = Color(0xFF000000);
 
-  ScrollNotificationObserverState? _scrollNotificationObserver;
-  bool _scrolledUnder = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_scrollNotificationObserver != null)
-      _scrollNotificationObserver!.removeListener(_handleScrollNotification);
-    _scrollNotificationObserver = ScrollNotificationObserver.of(context);
-    if (_scrollNotificationObserver != null)
-      _scrollNotificationObserver!.addListener(_handleScrollNotification);
-  }
-
-  @override
-  void dispose() {
-    if (_scrollNotificationObserver != null) {
-      _scrollNotificationObserver!.removeListener(_handleScrollNotification);
-      _scrollNotificationObserver = null;
-    }
-    super.dispose();
-  }
-
   void _handleDrawerButton() {
     Scaffold.of(context).openDrawer();
   }
 
   void _handleDrawerButtonEnd() {
     Scaffold.of(context).openEndDrawer();
-  }
-
-  void _handleScrollNotification(ScrollNotification notification) {
-    final bool oldScrolledUnder = _scrolledUnder;
-    _scrolledUnder = notification.depth == 0 && notification.metrics.extentBefore > 0;
-    if (_scrolledUnder != oldScrolledUnder) {
-      setState(() {
-        // React to a change in MaterialState.scrolledUnder
-      });
-    }
-  }
-
-  Color _resolveColor(Set<MaterialState> states, Color? widgetColor, Color? themeColor, Color defaultColor) {
-    return MaterialStateProperty.resolveAs<Color?>(widgetColor, states)
-        ?? MaterialStateProperty.resolveAs<Color?>(themeColor, states)
-        ?? MaterialStateProperty.resolveAs<Color>(defaultColor, states);
   }
 
   @override
@@ -758,11 +719,6 @@ class _AppBarState extends State<AppBar> {
     final AppBarTheme appBarTheme = AppBarTheme.of(context);
     final ScaffoldState? scaffold = Scaffold.maybeOf(context);
     final ModalRoute<dynamic>? parentRoute = ModalRoute.of(context);
-
-    final FlexibleSpaceBarSettings? settings = context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
-    final Set<MaterialState> states = <MaterialState>{
-      if (settings?.isScrolledUnder ?? _scrolledUnder) MaterialState.scrolledUnder,
-    };
 
     final bool hasDrawer = scaffold?.hasDrawer ?? false;
     final bool hasEndDrawer = scaffold?.hasEndDrawer ?? false;
@@ -776,11 +732,9 @@ class _AppBarState extends State<AppBar> {
       ? widget.backgroundColor
         ?? appBarTheme.backgroundColor
         ?? theme.primaryColor
-      : _resolveColor(
-          states,
-          widget.backgroundColor,
-          appBarTheme.backgroundColor,
-          colorScheme.brightness == Brightness.dark ? colorScheme.surface : colorScheme.primary);
+      : widget.backgroundColor
+        ?? appBarTheme.backgroundColor
+        ?? (colorScheme.brightness == Brightness.dark ? colorScheme.surface : colorScheme.primary);
 
     final Color foregroundColor = widget.foregroundColor
       ?? appBarTheme.foregroundColor
@@ -1182,7 +1136,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     final double extraToolbarHeight = math.max(minExtent - _bottomHeight - topPadding - (toolbarHeight ?? kToolbarHeight), 0.0);
     final double visibleToolbarHeight = visibleMainHeight - _bottomHeight - extraToolbarHeight;
 
-    final bool isScrolledUnder = overlapsContent || (pinned && shrinkOffset > maxExtent - minExtent);
     final bool isPinnedWithOpacityFade = pinned && floating && bottom != null && extraToolbarHeight == 0.0;
     final double toolbarOpacity = !pinned || isPinnedWithOpacityFade
       ? (visibleToolbarHeight / (toolbarHeight ?? kToolbarHeight)).clamp(0.0, 1.0)
@@ -1193,7 +1146,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
       maxExtent: maxExtent,
       currentExtent: math.max(minExtent, maxExtent - shrinkOffset),
       toolbarOpacity: toolbarOpacity,
-      isScrolledUnder: isScrolledUnder,
       child: AppBar(
         leading: leading,
         automaticallyImplyLeading: automaticallyImplyLeading,
@@ -1203,7 +1155,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
           ? Semantics(child: flexibleSpace, header: true)
           : flexibleSpace,
         bottom: bottom,
-        elevation: forceElevated || isScrolledUnder ? elevation : 0.0,
+        elevation: forceElevated || overlapsContent || (pinned && shrinkOffset > maxExtent - minExtent) ? elevation : 0.0,
         shadowColor: shadowColor,
         backgroundColor: backgroundColor,
         foregroundColor: foregroundColor,
@@ -1562,10 +1514,6 @@ class SliverAppBar extends StatefulWidget {
   /// {@macro flutter.material.appbar.backgroundColor}
   ///
   /// This property is used to configure an [AppBar].
-  ///
-  /// If this color is a [MaterialStateColor] it will be resolved against
-  /// [MaterialState.scrolledUnder] when the content of the app's
-  /// primary scrollable overlaps the app bar.
   final Color? backgroundColor;
 
   /// {@macro flutter.material.appbar.foregroundColor}
