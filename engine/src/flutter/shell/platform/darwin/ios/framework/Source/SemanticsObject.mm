@@ -66,6 +66,10 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
   [anInvocation invoke];
 }
 
+// The following methods are explicitly forwarded to the wrapped SemanticsObject because the
+// forwarding logic above doesn't apply to them since they are also implemented in the UISwitch
+// class, the base class.
+
 - (CGRect)accessibilityFrame {
   return [_semanticsObject accessibilityFrame];
 }
@@ -95,6 +99,34 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
   } else {
     return [super accessibilityValue];
   }
+}
+
+- (BOOL)accessibilityActivate {
+  return [_semanticsObject accessibilityActivate];
+}
+
+- (void)accessibilityIncrement {
+  [_semanticsObject accessibilityIncrement];
+}
+
+- (void)accessibilityDecrement {
+  [_semanticsObject accessibilityDecrement];
+}
+
+- (BOOL)accessibilityScroll:(UIAccessibilityScrollDirection)direction {
+  return [_semanticsObject accessibilityScroll:direction];
+}
+
+- (BOOL)accessibilityPerformEscape {
+  return [_semanticsObject accessibilityPerformEscape];
+}
+
+- (void)accessibilityElementDidBecomeFocused {
+  [_semanticsObject accessibilityElementDidBecomeFocused];
+}
+
+- (void)accessibilityElementDidLoseFocus {
+  [_semanticsObject accessibilityElementDidLoseFocus];
 }
 
 @end  // FlutterSwitchSemanticsObject

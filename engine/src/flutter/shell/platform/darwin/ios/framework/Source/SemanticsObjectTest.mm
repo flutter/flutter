@@ -229,4 +229,35 @@ class MockAccessibilityBridge : public AccessibilityBridgeIos {
   XCTAssertNil(weakObject);
 }
 
+- (void)testFlutterSwitchSemanticsObjectForwardsCalls {
+  SemanticsObject* mockSemanticsObject = OCMClassMock([SemanticsObject class]);
+  FlutterSwitchSemanticsObject* switchObj =
+      [[FlutterSwitchSemanticsObject alloc] initWithSemanticsObject:mockSemanticsObject];
+  OCMStub([mockSemanticsObject accessibilityActivate]).andReturn(YES);
+  OCMStub([mockSemanticsObject accessibilityScroll:UIAccessibilityScrollDirectionRight])
+      .andReturn(NO);
+  OCMStub([mockSemanticsObject accessibilityPerformEscape]).andReturn(YES);
+
+  XCTAssertTrue([switchObj accessibilityActivate]);
+  OCMVerify([mockSemanticsObject accessibilityActivate]);
+
+  [switchObj accessibilityIncrement];
+  OCMVerify([mockSemanticsObject accessibilityIncrement]);
+
+  [switchObj accessibilityDecrement];
+  OCMVerify([mockSemanticsObject accessibilityDecrement]);
+
+  XCTAssertFalse([switchObj accessibilityScroll:UIAccessibilityScrollDirectionRight]);
+  OCMVerify([mockSemanticsObject accessibilityScroll:UIAccessibilityScrollDirectionRight]);
+
+  XCTAssertTrue([switchObj accessibilityPerformEscape]);
+  OCMVerify([mockSemanticsObject accessibilityPerformEscape]);
+
+  [switchObj accessibilityElementDidBecomeFocused];
+  OCMVerify([mockSemanticsObject accessibilityElementDidBecomeFocused]);
+
+  [switchObj accessibilityElementDidLoseFocus];
+  OCMVerify([mockSemanticsObject accessibilityElementDidLoseFocus]);
+}
+
 @end
