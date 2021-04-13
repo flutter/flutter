@@ -660,9 +660,11 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// {@template flutter.material.appbar.systemOverlayStyle}
   /// Specifies the style to use for the system overlays that overlap the AppBar.
   ///
-  /// If this property is null, then [SystemUiOverlayStyle.light] is used if the
-  /// overall theme is dark, [SystemUiOverlayStyle.dark] otherwise. Theme brightness
-  /// is defined by [ColorScheme.brightness] for [ThemeData.colorScheme].
+  /// This property is only used if [backwardsCompatibility] is set to false.
+  ///
+  /// If this property is null, then [AppBarTheme.systemOverlayStyle] of
+  /// [ThemeData.appBarTheme] is used. If that is also null, an appropriate
+  /// [SystemUiOverlayStyle] is calculated based on the [backgroundColor].
   ///
   /// The AppBar's descendants are built within a
   /// `AnnotatedRegion<SystemUiOverlayStyle>` widget, which causes
@@ -708,6 +710,10 @@ class _AppBarState extends State<AppBar> {
 
   void _handleDrawerButtonEnd() {
     Scaffold.of(context).openEndDrawer();
+  }
+
+  SystemUiOverlayStyle _systemOverlayStyleForBrightness(Brightness brightness) {
+    return brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark;
   }
 
   @override
@@ -953,12 +959,15 @@ class _AppBarState extends State<AppBar> {
       );
     }
 
-    final Brightness overlayStyleBrightness = widget.brightness ?? appBarTheme.brightness ?? colorScheme.brightness;
     final SystemUiOverlayStyle overlayStyle = backwardsCompatibility
-      ? (overlayStyleBrightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
+      ? _systemOverlayStyleForBrightness(
+          widget.brightness
+          ?? appBarTheme.brightness
+          ?? theme.primaryColorBrightness,
+        )
       : widget.systemOverlayStyle
         ?? appBarTheme.systemOverlayStyle
-        ?? (colorScheme.brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark);
+        ?? _systemOverlayStyleForBrightness(ThemeData.estimateBrightnessForColor(backgroundColor));
 
     return Semantics(
       container: true,
