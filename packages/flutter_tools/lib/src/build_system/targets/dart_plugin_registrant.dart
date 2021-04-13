@@ -73,7 +73,7 @@ class DartPluginRegistrantTarget extends Target {
 
   @override
   List<Source> get inputs => <Source>[
-        const Source.pattern('{PROJECT_DIR}/pubspec.lock'),
+        const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
       ];
 
   @override
