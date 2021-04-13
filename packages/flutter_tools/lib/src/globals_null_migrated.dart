@@ -6,6 +6,7 @@ import 'package:process/process.dart';
 
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
+import 'base/bot_detector.dart';
 import 'base/config.dart';
 import 'base/context.dart';
 import 'base/error_handling_io.dart';
@@ -23,6 +24,7 @@ import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'cache.dart';
 import 'ios/plist_parser.dart';
+import 'persistent_tool_state.dart';
 import 'version.dart';
 
 Cache get cache => context.get<Cache>()!;
@@ -34,6 +36,20 @@ Signals get signals => context.get<Signals>() ?? LocalSignals.instance;
 AndroidStudio? get androidStudio => context.get<AndroidStudio>();
 AndroidSdk? get androidSdk => context.get<AndroidSdk>();
 FlutterVersion get flutterVersion => context.get<FlutterVersion>()!;
+
+PersistentToolState? get persistentToolState => PersistentToolState.instance;
+
+BotDetector get botDetector => context.get<BotDetector>() ?? _defaultBotDetector;
+final BotDetector _defaultBotDetector = BotDetector(
+  httpClientFactory: context.get<HttpClientFactory>() ?? () => HttpClient(),
+  platform: platform,
+  persistentToolState: persistentToolState ?? PersistentToolState(
+    fileSystem: fs,
+    logger: logger,
+    platform: platform,
+  ),
+);
+Future<bool> get isRunningOnBot => botDetector.isRunningOnBot;
 
 /// Currently active implementation of the file system.
 ///

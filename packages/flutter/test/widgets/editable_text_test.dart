@@ -7367,6 +7367,71 @@ void main() {
       expect(controller.selection.baseOffset, 1);
     }
   });
+
+  testWidgets('the toolbar is disposed when selection changes and there is no selectionControls', (WidgetTester tester) async {
+    late StateSetter setState;
+    bool enableInteractiveSelection = true;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setter) {
+                setState = setter;
+                return EditableText(
+                  focusNode: focusNode,
+                  style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+                  cursorColor: Colors.blue,
+                  backgroundCursorColor: Colors.grey,
+                  selectionControls: enableInteractiveSelection ? materialTextSelectionControls : null,
+                  controller: controller,
+                  enableInteractiveSelection: enableInteractiveSelection,
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Can't show the toolbar when there's no focus.
+    expect(state.showToolbar(), false);
+    await tester.pumpAndSettle();
+    expect(find.text('Paste'), findsNothing);
+
+    // Can show the toolbar when focused even though there's no text.
+    state.renderEditable.selectWordsInRange(
+      from: Offset.zero,
+      cause: SelectionChangedCause.tap,
+    );
+    await tester.pump();
+    expect(state.showToolbar(), isTrue);
+    await tester.pumpAndSettle();
+    expect(find.text('Paste'), findsOneWidget);
+
+    // Find the FadeTransition in the toolbar and expect that it has not been
+    // disposed.
+    final FadeTransition fadeTransition = find.byType(FadeTransition).evaluate()
+      .map((Element element) => element.widget as FadeTransition)
+      .firstWhere((FadeTransition fadeTransition) {
+        return fadeTransition.child is CompositedTransformFollower;
+      });
+    expect(fadeTransition.toString(), isNot(contains('DISPOSED')));
+
+    // Turn off interactive selection and change the text, which triggers the
+    // toolbar to be disposed.
+    setState(() {
+      enableInteractiveSelection = false;
+    });
+    await tester.pump();
+    await tester.enterText(find.byType(EditableText), 'abc');
+    await tester.pump();
+
+    expect(fadeTransition.toString(), contains('DISPOSED'));
+  }, skip: kIsWeb);
 }
 
 class UnsettableController extends TextEditingController {
