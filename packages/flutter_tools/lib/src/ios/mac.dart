@@ -7,7 +7,6 @@
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
-import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -24,6 +23,7 @@ import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
+import 'application_package.dart';
 import 'code_signing.dart';
 import 'devices.dart';
 import 'migrations/project_base_configuration_migration.dart';
@@ -177,10 +177,11 @@ Future<XcodeBuildResult> buildXcodeProject({
   Map<String, String> autoSigningConfigs;
   if (codesign && buildForDevice) {
     autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeam(
-      iosApp: app,
+      buildSettings: await app.project.buildSettingsForBuildInfo(buildInfo),
       processManager: globals.processManager,
       logger: globals.logger,
-      buildInfo: buildInfo,
+      config: globals.config,
+      terminal: globals.terminal,
     );
   }
 
@@ -382,6 +383,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   } on ProcessException catch (e) {
     if (e.toString().contains('timed out')) {
       BuildEvent('xcode-show-build-settings-timeout',
+        type: 'ios',
         command: showBuildSettingsCommand.join(' '),
         flutterUsage: globals.flutterUsage,
       ).send();
@@ -534,6 +536,7 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsa
       result.xcodeBuildExecution.buildForPhysicalDevice &&
       result.stdout?.toUpperCase()?.contains('BITCODE') == true) {
     BuildEvent('xcode-bitcode-failure',
+      type: 'ios',
       command: result.xcodeBuildExecution.buildCommands.toString(),
       settings: result.xcodeBuildExecution.buildSettings.toString(),
       flutterUsage: flutterUsage,

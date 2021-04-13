@@ -19,7 +19,6 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/common.dart' show kExtraFrontEndOptions, kExtraGenSnapshotOptions; // for "useLegacyNames" only
-import '../build_system/targets/icon_tree_shaker.dart' show kIconTreeShakerEnabledDefault;
 import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../dart/generate_synthetic_packages.dart';
@@ -228,6 +227,15 @@ abstract class FlutterCommand extends Command<void> {
       'some proxy servers.',
       hide: !verboseHelp,
     );
+    argParser.addOption('web-server-debug-injected-client-protocol',
+      allowed: <String>['sse', 'ws'],
+      defaultsTo: 'sse',
+      help: 'The protocol (SSE or WebSockets) to use for the injected client '
+      'when using the Web Server device. '
+      'Using WebSockets can improve performance but may fail when connecting through '
+      'some proxy servers.',
+      hide: !verboseHelp,
+    );
     argParser.addFlag('web-allow-expose-url',
       defaultsTo: false,
       help: 'Enables daemon-to-editor requests (app.exposeUrl) for exposing URLs '
@@ -274,6 +282,11 @@ abstract class FlutterCommand extends Command<void> {
     }
     return bundle.defaultMainPath;
   }
+
+  /// Path to the Dart's package config file.
+  ///
+  /// This can be overridden by some of its subclasses.
+  String get packagesPath => globalResults['packages'] as String;
 
   void usesPubOption({bool hide = false}) {
     argParser.addFlag('pub',
@@ -378,7 +391,6 @@ abstract class FlutterCommand extends Command<void> {
     } on FormatException catch (error) {
       throwToolExit('Invalid port for `--observatory-port/--host-vmservice-port`: $error');
     }
-    return null;
   }
 
   int get ddsPort {
@@ -440,7 +452,6 @@ abstract class FlutterCommand extends Command<void> {
     } on FormatException catch (error) {
       throwToolExit('Invalid port for `--device-vmservice-port`: $error');
     }
-    return null;
   }
 
   void addPublishPort({ bool enabledByDefault = true, bool verboseHelp = false }) {
@@ -830,7 +841,7 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// Throws a [ToolExit] if the current set of options is not compatible with
   /// each other.
-  Future<BuildInfo> getBuildInfo({ BuildMode forcedBuildMode }) async {
+  Future<BuildInfo> getBuildInfo({ BuildMode forcedBuildMode, File forcedTargetFile }) async {
     final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation') &&
       boolArg('track-widget-creation');
 
@@ -839,7 +850,7 @@ abstract class FlutterCommand extends Command<void> {
       : null;
 
     final File packagesFile = globals.fs.file(
-      globalResults['packages'] as String ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'));
+      packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'));
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
         packagesFile, logger: globals.logger, throwOnError: false);
 
@@ -880,11 +891,12 @@ abstract class FlutterCommand extends Command<void> {
       // passing a flag. Examine the entrypoint file to determine if it
       // is opted in or out.
       final bool wasNullSafetyFlagParsed = argResults.wasParsed(FlutterOptions.kNullSafety);
-      if (!wasNullSafetyFlagParsed && argParser.options.containsKey('target')) {
-        final File entrypointFile = globals.fs.file(targetFile);
+      if (!wasNullSafetyFlagParsed && (argParser.options.containsKey('target') || forcedTargetFile != null)) {
+        final File entrypointFile = forcedTargetFile ?? globals.fs.file(targetFile);
         final LanguageVersion languageVersion = determineLanguageVersion(
           entrypointFile,
           packageConfig.packageOf(entrypointFile.absolute.uri),
+          Cache.flutterRoot,
         );
         // Extra frontend options are only provided if explicitly
         // requested.
@@ -982,8 +994,7 @@ abstract class FlutterCommand extends Command<void> {
       bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
       performanceMeasurementFile: performanceMeasurementFile,
-      packagesPath: globalResults['packages'] as String
-        ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'),
+      packagesPath: packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'),
       nullSafetyMode: nullSafetyMode,
       codeSizeDirectory: codeSizeDirectory,
       androidGradleDaemon: androidGradleDaemon,
@@ -1094,7 +1105,7 @@ abstract class FlutterCommand extends Command<void> {
     }
     assert(commandResult != null);
     // Send command result.
-    CommandResultEvent(commandPath, commandResult).send();
+    CommandResultEvent(commandPath, commandResult.toString()).send();
 
     // Send timing.
     final List<String> labels = <String>[
@@ -1151,8 +1162,8 @@ abstract class FlutterCommand extends Command<void> {
         flutterRootDir: globals.fs.directory(Cache.flutterRoot),
         outputDir: globals.fs.directory(getBuildDirectory()),
         processManager: globals.processManager,
+        platform: globals.platform,
         projectDir: project.directory,
-        generateDartPluginRegistry: true,
       );
 
       await generateLocalizationsSyntheticPackage(
@@ -1365,7 +1376,7 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
     };
     for (final Device device in devices) {
       final TargetPlatform targetPlatform = await device.targetPlatform;
-      final DevelopmentArtifact developmentArtifact = _artifactFromTargetPlatform(targetPlatform);
+      final DevelopmentArtifact developmentArtifact = artifactFromTargetPlatform(targetPlatform);
       if (developmentArtifact != null) {
         artifacts.add(developmentArtifact);
       }
@@ -1374,31 +1385,10 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
   }
 }
 
-/// A mixin which applies an implementation of [requiredArtifacts] that only
-/// downloads artifacts corresponding to a target device.
-mixin TargetPlatformBasedDevelopmentArtifacts on FlutterCommand {
-  @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
-    // If there is no specified target device, fallback to the default
-    // configuration.
-    final String rawTargetPlatform = stringArg('target-platform');
-    final TargetPlatform targetPlatform = getTargetPlatformForName(rawTargetPlatform);
-    if (targetPlatform == null) {
-      return super.requiredArtifacts;
-    }
-
-    final Set<DevelopmentArtifact> artifacts = <DevelopmentArtifact>{};
-    final DevelopmentArtifact developmentArtifact = _artifactFromTargetPlatform(targetPlatform);
-    if (developmentArtifact != null) {
-      artifacts.add(developmentArtifact);
-    }
-    return artifacts;
-  }
-}
-
 // Returns the development artifact for the target platform, or null
 // if none is supported
-DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
+@protected
+DevelopmentArtifact artifactFromTargetPlatform(TargetPlatform targetPlatform) {
   switch (targetPlatform) {
     case TargetPlatform.android:
     case TargetPlatform.android_arm:

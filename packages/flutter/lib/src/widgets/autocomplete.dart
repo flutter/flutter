@@ -78,12 +78,30 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// This example shows how to create a very basic autocomplete widget using the
 /// [fieldViewBuilder] and [optionsViewBuilder] parameters.
 ///
-/// ```dart imports
-/// import 'package:flutter/widgets.dart';
+/// ```dart main
 /// import 'package:flutter/material.dart';
-/// ```
+/// import 'package:flutter/widgets.dart';
 ///
-/// ```dart
+/// void main() => runApp(const AutocompleteExampleApp());
+///
+/// class AutocompleteExampleApp extends StatelessWidget {
+///   const AutocompleteExampleApp({Key? key}) : super(key: key);
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       home: Scaffold(
+///         appBar: AppBar(
+///           title: const Text('RawAutocomplete Basic'),
+///         ),
+///         body: const Center(
+///           child: AutocompleteBasicExample(),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+///
 /// class AutocompleteBasicExample extends StatelessWidget {
 ///   const AutocompleteBasicExample({Key? key}) : super(key: key);
 ///
@@ -152,12 +170,30 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// This example is similar to the previous example, but it uses a custom T data
 /// type instead of directly using String.
 ///
-/// ```dart imports
-/// import 'package:flutter/widgets.dart';
+/// ```dart main
 /// import 'package:flutter/material.dart';
-/// ```
+/// import 'package:flutter/widgets.dart';
 ///
-/// ```dart
+/// void main() => runApp(const AutocompleteExampleApp());
+///
+/// class AutocompleteExampleApp extends StatelessWidget {
+///   const AutocompleteExampleApp({Key? key}) : super(key: key);
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       home: Scaffold(
+///         appBar: AppBar(
+///           title: const Text('RawAutocomplete Custom Type'),
+///         ),
+///         body: const Center(
+///           child: AutocompleteCustomTypeExample(),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+///
 /// // An example of a type that someone might want to autocomplete a list of.
 /// @immutable
 /// class User {
@@ -254,26 +290,44 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// {@tool dartpad --template=freeform}
 /// This example shows the use of RawAutocomplete in a form.
 ///
-/// ```dart imports
-/// import 'package:flutter/widgets.dart';
+/// ```dart main
 /// import 'package:flutter/material.dart';
-/// ```
+/// import 'package:flutter/widgets.dart';
 ///
-/// ```dart
-/// class AutocompleteFormExamplePage extends StatefulWidget {
-///   const AutocompleteFormExamplePage({Key? key}) : super(key: key);
+/// void main() => runApp(const AutocompleteExampleApp());
+///
+/// class AutocompleteExampleApp extends StatelessWidget {
+///   const AutocompleteExampleApp({Key? key}) : super(key: key);
 ///
 ///   @override
-///   AutocompleteFormExample createState() => AutocompleteFormExample();
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       home: Scaffold(
+///         appBar: AppBar(
+///           title: const Text('RawAutocomplete Form'),
+///         ),
+///         body: const Center(
+///           child: AutocompleteFormExample(),
+///         ),
+///       ),
+///     );
+///   }
 /// }
 ///
-/// class AutocompleteFormExample extends State<AutocompleteFormExamplePage> {
+/// class AutocompleteFormExample extends StatefulWidget {
+///   const AutocompleteFormExample({Key? key}) : super(key: key);
+///
+///   @override
+///   AutocompleteFormExampleState createState() => AutocompleteFormExampleState();
+/// }
+///
+/// class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
 ///   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 ///   final TextEditingController _textEditingController = TextEditingController();
 ///   String? _dropdownValue;
 ///   String? _autocompleteSelection;
 ///
-///   final List<String> _options = <String>[
+///   static const List<String> _options = <String>[
 ///     'aardvark',
 ///     'bobcat',
 ///     'chameleon',
@@ -281,146 +335,139 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return Scaffold(
-///       appBar: AppBar(
-///         title: const Text('Autocomplete Form Example'),
-///       ),
-///       body: Center(
-///         child: Form(
-///           key: _formKey,
-///           child: Column(
-///             children: <Widget>[
-///               DropdownButtonFormField<String>(
-///                 value: _dropdownValue,
-///                 icon: const Icon(Icons.arrow_downward),
-///                 hint: const Text('This is a regular DropdownButtonFormField'),
-///                 iconSize: 24,
-///                 elevation: 16,
-///                 style: const TextStyle(color: Colors.deepPurple),
-///                 onChanged: (String? newValue) {
-///                   setState(() {
-///                     _dropdownValue = newValue;
-///                   });
-///                 },
-///                 items: <String>['One', 'Two', 'Free', 'Four']
-///                     .map<DropdownMenuItem<String>>((String value) {
-///                   return DropdownMenuItem<String>(
-///                     value: value,
-///                     child: Text(value),
-///                   );
-///                 }).toList(),
-///                 validator: (String? value) {
-///                   if (value == null) {
-///                     return 'Must make a selection.';
-///                   }
-///                   return null;
-///                 },
-///               ),
-///               TextFormField(
-///                 controller: _textEditingController,
+///     return Form(
+///       key: _formKey,
+///       child: Column(
+///         children: <Widget>[
+///           DropdownButtonFormField<String>(
+///             value: _dropdownValue,
+///             icon: const Icon(Icons.arrow_downward),
+///             hint: const Text('This is a regular DropdownButtonFormField'),
+///             iconSize: 24,
+///             elevation: 16,
+///             style: const TextStyle(color: Colors.deepPurple),
+///             onChanged: (String? newValue) {
+///               setState(() {
+///                 _dropdownValue = newValue;
+///               });
+///             },
+///             items: <String>['One', 'Two', 'Free', 'Four']
+///                 .map<DropdownMenuItem<String>>((String value) {
+///               return DropdownMenuItem<String>(
+///                 value: value,
+///                 child: Text(value),
+///               );
+///             }).toList(),
+///             validator: (String? value) {
+///               if (value == null) {
+///                 return 'Must make a selection.';
+///               }
+///               return null;
+///             },
+///           ),
+///           TextFormField(
+///             controller: _textEditingController,
+///             decoration: const InputDecoration(
+///               hintText: 'This is a regular TextFormField',
+///             ),
+///             validator: (String? value) {
+///               if (value == null || value.isEmpty) {
+///                 return 'Can\'t be empty.';
+///               }
+///               return null;
+///             },
+///           ),
+///           RawAutocomplete<String>(
+///             optionsBuilder: (TextEditingValue textEditingValue) {
+///               return _options.where((String option) {
+///                 return option.contains(textEditingValue.text.toLowerCase());
+///               });
+///             },
+///             onSelected: (String selection) {
+///               setState(() {
+///                 _autocompleteSelection = selection;
+///               });
+///             },
+///             fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
+///               return TextFormField(
+///                 controller: textEditingController,
 ///                 decoration: const InputDecoration(
-///                   hintText: 'This is a regular TextFormField',
+///                   hintText: 'This is a RawAutocomplete!',
 ///                 ),
+///                 focusNode: focusNode,
+///                 onFieldSubmitted: (String value) {
+///                   onFieldSubmitted();
+///                 },
 ///                 validator: (String? value) {
-///                   if (value == null || value.isEmpty) {
-///                     return 'Can\'t be empty.';
+///                   if (!_options.contains(value)) {
+///                     return 'Nothing selected.';
 ///                   }
 ///                   return null;
 ///                 },
-///               ),
-///               RawAutocomplete<String>(
-///                 optionsBuilder: (TextEditingValue textEditingValue) {
-///                   return _options.where((String option) {
-///                     return option.contains(textEditingValue.text.toLowerCase());
-///                   });
-///                 },
-///                 onSelected: (String selection) {
-///                   setState(() {
-///                     _autocompleteSelection = selection;
-///                   });
-///                 },
-///                 fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
-///                   return TextFormField(
-///                     controller: textEditingController,
-///                     decoration: const InputDecoration(
-///                       hintText: 'This is an RawAutocomplete!',
-///                     ),
-///                     focusNode: focusNode,
-///                     onFieldSubmitted: (String value) {
-///                       onFieldSubmitted();
-///                     },
-///                     validator: (String? value) {
-///                       if (!_options.contains(value)) {
-///                         return 'Nothing selected.';
-///                       }
-///                       return null;
-///                     },
-///                   );
-///                 },
-///                 optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
-///                   return Align(
-///                     alignment: Alignment.topLeft,
-///                     child: Material(
-///                       elevation: 4.0,
-///                       child: SizedBox(
-///                         height: 200.0,
-///                         child: ListView.builder(
-///                           padding: const EdgeInsets.all(8.0),
-///                           itemCount: options.length,
-///                           itemBuilder: (BuildContext context, int index) {
-///                             final String option = options.elementAt(index);
-///                             return GestureDetector(
-///                               onTap: () {
-///                                 onSelected(option);
-///                               },
-///                               child: ListTile(
-///                                 title: Text(option),
-///                               ),
-///                             );
+///               );
+///             },
+///             optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+///               return Align(
+///                 alignment: Alignment.topLeft,
+///                 child: Material(
+///                   elevation: 4.0,
+///                   child: SizedBox(
+///                     height: 200.0,
+///                     child: ListView.builder(
+///                       padding: const EdgeInsets.all(8.0),
+///                       itemCount: options.length,
+///                       itemBuilder: (BuildContext context, int index) {
+///                         final String option = options.elementAt(index);
+///                         return GestureDetector(
+///                           onTap: () {
+///                             onSelected(option);
 ///                           },
-///                         ),
+///                           child: ListTile(
+///                             title: Text(option),
+///                           ),
+///                         );
+///                       },
+///                     ),
+///                   ),
+///                 ),
+///               );
+///             },
+///           ),
+///           ElevatedButton(
+///             onPressed: () {
+///               FocusScope.of(context).requestFocus(new FocusNode());
+///               if (!_formKey.currentState!.validate()) {
+///                 return;
+///               }
+///               showDialog<void>(
+///                 context: context,
+///                 builder: (BuildContext context) {
+///                   return AlertDialog(
+///                     title: const Text('Successfully submitted'),
+///                     content: SingleChildScrollView(
+///                       child: ListBody(
+///                         children: <Widget>[
+///                           Text('DropdownButtonFormField: "$_dropdownValue"'),
+///                           Text('TextFormField: "${_textEditingController.text}"'),
+///                           Text('RawAutocomplete: "$_autocompleteSelection"'),
+///                         ],
 ///                       ),
 ///                     ),
+///                     actions: <Widget>[
+///                       TextButton(
+///                         child: const Text('Ok'),
+///                         onPressed: () {
+///                           Navigator.of(context).pop();
+///                         },
+///                       ),
+///                     ],
 ///                   );
 ///                 },
-///               ),
-///               ElevatedButton(
-///                 onPressed: () {
-///                   FocusScope.of(context).requestFocus(new FocusNode());
-///                   if (!_formKey.currentState!.validate()) {
-///                     return;
-///                   }
-///                   showDialog<void>(
-///                     context: context,
-///                     builder: (BuildContext context) {
-///                       return AlertDialog(
-///                         title: const Text('Successfully submitted'),
-///                         content: SingleChildScrollView(
-///                           child: ListBody(
-///                             children: <Widget>[
-///                               Text('DropdownButtonFormField: "$_dropdownValue"'),
-///                               Text('TextFormField: "${_textEditingController.text}"'),
-///                               Text('RawAutocomplete: "$_autocompleteSelection"'),
-///                             ],
-///                           ),
-///                         ),
-///                         actions: <Widget>[
-///                           TextButton(
-///                             child: const Text('Ok'),
-///                             onPressed: () {
-///                               Navigator.of(context).pop();
-///                             },
-///                           ),
-///                         ],
-///                       );
-///                     },
-///                   );
-///                 },
-///                 child: const Text('Submit'),
-///               ),
-///             ],
+///               );
+///             },
+///             child: const Text('Submit'),
 ///           ),
-///         ),
+///         ],
 ///       ),
 ///     );
 ///   }
@@ -483,78 +530,83 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// This examples shows how to create an autocomplete widget with the text
   /// field in the AppBar and the results in the main body of the app.
   ///
-  /// ```dart imports
-  /// import 'package:flutter/widgets.dart';
+  /// ```dart main
   /// import 'package:flutter/material.dart';
-  /// ```
+  /// import 'package:flutter/widgets.dart';
   ///
-  /// ```dart
-  /// final List<String> _options = <String>[
+  /// void main() => runApp(const AutocompleteExampleApp());
+  ///
+  /// class AutocompleteExampleApp extends StatelessWidget {
+  ///   const AutocompleteExampleApp({Key? key}) : super(key: key);
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return const MaterialApp(
+  ///       home: RawAutocompleteSplit(),
+  ///     );
+  ///   }
+  /// }
+  ///
+  /// const List<String> _options = <String>[
   ///   'aardvark',
   ///   'bobcat',
   ///   'chameleon',
   /// ];
   ///
-  /// class RawAutocompleteSplitPage extends StatefulWidget {
-  ///   const RawAutocompleteSplitPage({Key? key}) : super(key: key);
+  /// class RawAutocompleteSplit extends StatefulWidget {
+  ///   const RawAutocompleteSplit({Key? key}) : super(key: key);
   ///
   ///   @override
-  ///   RawAutocompleteSplitPageState createState() => RawAutocompleteSplitPageState();
+  ///   RawAutocompleteSplitState createState() => RawAutocompleteSplitState();
   /// }
   ///
-  /// class RawAutocompleteSplitPageState extends State<RawAutocompleteSplitPage> {
+  /// class RawAutocompleteSplitState extends State<RawAutocompleteSplit> {
   ///   final TextEditingController _textEditingController = TextEditingController();
   ///   final FocusNode _focusNode = FocusNode();
   ///   final GlobalKey _autocompleteKey = GlobalKey();
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return MaterialApp(
-  ///       theme: ThemeData(
-  ///         primarySwatch: Colors.blue,
-  ///       ),
-  ///       title: 'Split RawAutocomplete App',
-  ///       home: Scaffold(
-  ///         appBar: AppBar(
-  ///           // This is where the real field is being built.
-  ///           title: TextFormField(
-  ///             controller: _textEditingController,
-  ///             focusNode: _focusNode,
-  ///             decoration: const InputDecoration(
-  ///               hintText: 'Split RawAutocomplete App',
-  ///             ),
-  ///             onFieldSubmitted: (String value) {
-  ///               RawAutocomplete.onFieldSubmitted<String>(_autocompleteKey);
-  ///             },
+  ///     return Scaffold(
+  ///       appBar: AppBar(
+  ///         // This is where the real field is being built.
+  ///         title: TextFormField(
+  ///           controller: _textEditingController,
+  ///           focusNode: _focusNode,
+  ///           decoration: const InputDecoration(
+  ///             hintText: 'Split RawAutocomplete App',
   ///           ),
+  ///           onFieldSubmitted: (String value) {
+  ///             RawAutocomplete.onFieldSubmitted<String>(_autocompleteKey);
+  ///           },
   ///         ),
-  ///         body: Align(
-  ///           alignment: Alignment.topLeft,
-  ///           child: RawAutocomplete<String>(
-  ///             key: _autocompleteKey,
-  ///             focusNode: _focusNode,
-  ///             textEditingController: _textEditingController,
-  ///             optionsBuilder: (TextEditingValue textEditingValue) {
-  ///               return _options.where((String option) {
-  ///                 return option.contains(textEditingValue.text.toLowerCase());
-  ///               }).toList();
-  ///             },
-  ///             optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
-  ///               return Material(
-  ///                 elevation: 4.0,
-  ///                 child: ListView(
-  ///                   children: options.map((String option) => GestureDetector(
-  ///                     onTap: () {
-  ///                       onSelected(option);
-  ///                     },
-  ///                     child: ListTile(
-  ///                       title: Text(option),
-  ///                     ),
-  ///                   )).toList(),
-  ///                 ),
-  ///               );
-  ///             },
-  ///           ),
+  ///       ),
+  ///       body: Align(
+  ///         alignment: Alignment.topLeft,
+  ///         child: RawAutocomplete<String>(
+  ///           key: _autocompleteKey,
+  ///           focusNode: _focusNode,
+  ///           textEditingController: _textEditingController,
+  ///           optionsBuilder: (TextEditingValue textEditingValue) {
+  ///             return _options.where((String option) {
+  ///               return option.contains(textEditingValue.text.toLowerCase());
+  ///             }).toList();
+  ///           },
+  ///           optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+  ///             return Material(
+  ///               elevation: 4.0,
+  ///               child: ListView(
+  ///                 children: options.map((String option) => GestureDetector(
+  ///                   onTap: () {
+  ///                     onSelected(option);
+  ///                   },
+  ///                   child: ListTile(
+  ///                     title: Text(option),
+  ///                   ),
+  ///                 )).toList(),
+  ///               ),
+  ///             );
+  ///           },
   ///         ),
   ///       ),
   ///     );

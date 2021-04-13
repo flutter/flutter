@@ -1031,7 +1031,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       final EditableTextState editable = state<EditableTextState>(
         find.descendant(
           of: finder,
-          matching: find.byType(EditableText),
+          matching: find.byType(EditableText, skipOffstage: finder.skipOffstage),
           matchRoot: true,
         ),
       );
@@ -1040,12 +1040,15 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     });
   }
 
-  /// Give the text input widget specified by [finder] the focus and
-  /// enter [text] as if it been provided by the onscreen keyboard.
+  /// Give the text input widget specified by [finder] the focus and replace its
+  /// content with [text], as if it had been provided by the onscreen keyboard.
   ///
   /// The widget specified by [finder] must be an [EditableText] or have
   /// an [EditableText] descendant. For example `find.byType(TextField)`
   /// or `find.byType(TextFormField)`, or `find.byType(EditableText)`.
+  ///
+  /// When the returned future completes, the text input widget's text will be
+  /// exactly `text`, and the caret will be placed at the end of `text`.
   ///
   /// To just give [finder] the focus without entering any text,
   /// see [showKeyboard].

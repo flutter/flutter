@@ -10,7 +10,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../vmservice.dart';
 
@@ -65,9 +65,13 @@ class ScreenshotCommand extends FlutterCommand {
 
   Device device;
 
-  static void validateOptions(String screenshotType, Device device, String observatoryUri) {
+  Future<void> _validateOptions(String screenshotType, String observatoryUri) async {
     switch (screenshotType) {
       case _kDeviceType:
+        if (observatoryUri != null) {
+          throwToolExit('Observatory URI cannot be provided for screenshot type $screenshotType');
+        }
+        device = await findTargetDevice();
         if (device == null) {
           throwToolExit('Must have a connected device for screenshot type $screenshotType');
         }
@@ -87,8 +91,7 @@ class ScreenshotCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
-    device = await findTargetDevice();
-    validateOptions(stringArg(_kType), device, stringArg(_kObservatoryUri));
+    await _validateOptions(stringArg(_kType), stringArg(_kObservatoryUri));
     return super.verifyThenRunCommand(commandPath);
   }
 
@@ -132,7 +135,7 @@ class ScreenshotCommand extends FlutterCommand {
 
   Future<bool> runSkia(File outputFile) async {
     final Uri observatoryUri = Uri.parse(stringArg(_kObservatoryUri));
-    final FlutterVmService vmService = await connectToVmService(observatoryUri);
+    final FlutterVmService vmService = await connectToVmService(observatoryUri, logger: globals.logger);
     final vm_service.Response skp = await vmService.screenshotSkp();
     if (skp == null) {
       globals.printError(
@@ -156,7 +159,7 @@ class ScreenshotCommand extends FlutterCommand {
 
   Future<bool> runRasterizer(File outputFile) async {
     final Uri observatoryUri = Uri.parse(stringArg(_kObservatoryUri));
-    final FlutterVmService vmService = await connectToVmService(observatoryUri);
+    final FlutterVmService vmService = await connectToVmService(observatoryUri, logger: globals.logger);
     final vm_service.Response response = await vmService.screenshot();
     if (response == null) {
       globals.printError(

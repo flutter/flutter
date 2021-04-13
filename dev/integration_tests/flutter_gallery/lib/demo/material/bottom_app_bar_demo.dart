@@ -437,7 +437,7 @@ class _DiamondFab extends StatelessWidget {
           width: 56.0,
           height: 56.0,
           child: IconTheme.merge(
-            data: IconThemeData(color: Theme.of(context).accentIconTheme.color),
+            data: IconThemeData(color: Theme.of(context).colorScheme.secondary),
             child: child!,
           ),
         ),

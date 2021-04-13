@@ -65,7 +65,6 @@ class GradleUtils {
       'Unable to locate gradlew script. Please check that ${gradle.path} '
       'exists or that ${gradle.dirname} can be read.'
     );
-    return null;
   }
 
   /// Injects the Gradle wrapper files if any of these files don't exist in [directory].
@@ -180,7 +179,6 @@ String getGradleVersionFor(String androidPluginVersion) {
     return '6.7';
   }
   throwToolExit('Unsupported Android Plugin version: $androidPluginVersion.');
-  return '';
 }
 
 /// Overwrite local.properties in the specified Flutter project's Android
@@ -257,7 +255,7 @@ void writeLocalProperties(File properties) {
 }
 
 void exitWithNoSdkMessage() {
-  BuildEvent('unsupported-project', eventError: 'android-sdk-not-found', flutterUsage: globals.flutterUsage).send();
+  BuildEvent('unsupported-project', type: 'gradle', eventError: 'android-sdk-not-found', flutterUsage: globals.flutterUsage).send();
   throwToolExit(
     '${globals.logger.terminal.warningMark} No Android SDK found. '
     'Try setting the ANDROID_SDK_ROOT environment variable.'

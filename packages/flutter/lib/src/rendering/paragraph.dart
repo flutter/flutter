@@ -123,7 +123,7 @@ class RenderParagraph extends RenderBox
          locale: locale,
          strutStyle: strutStyle,
          textWidthBasis: textWidthBasis,
-         textHeightBehavior: textHeightBehavior
+         textHeightBehavior: textHeightBehavior,
        ) {
     addAll(children);
     _extractPlaceholderSpans(text);
@@ -373,9 +373,11 @@ class RenderParagraph extends RenderBox
         case ui.PlaceholderAlignment.baseline:
         case ui.PlaceholderAlignment.aboveBaseline:
         case ui.PlaceholderAlignment.belowBaseline: {
-          assert(RenderObject.debugCheckingIntrinsics,
+          assert(
+            RenderObject.debugCheckingIntrinsics,
             'Intrinsics are not available for PlaceholderAlignment.baseline, '
-            'PlaceholderAlignment.aboveBaseline, or PlaceholderAlignment.belowBaseline.');
+            'PlaceholderAlignment.aboveBaseline, or PlaceholderAlignment.belowBaseline.',
+          );
           return false;
         }
         case ui.PlaceholderAlignment.top:
@@ -449,6 +451,18 @@ class RenderParagraph extends RenderBox
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+    // Hit test text spans.
+    late final bool hitText;
+    final TextPosition textPosition = _textPainter.getPositionForOffset(position);
+    final InlineSpan? span = _textPainter.text!.getSpanForPosition(textPosition);
+    if (span != null && span is HitTestTarget) {
+      result.add(HitTestEntry(span as HitTestTarget));
+      hitText = true;
+    } else {
+      hitText = false;
+    }
+
+    // Hit test render object children
     RenderBox? child = firstChild;
     int childIndex = 0;
     while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes!.length) {
@@ -480,24 +494,7 @@ class RenderParagraph extends RenderBox
       child = childAfter(child);
       childIndex += 1;
     }
-    return false;
-  }
-
-  @override
-  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
-    assert(debugHandleEvent(event, entry));
-    if (event is! PointerDownEvent)
-      return;
-    _layoutTextWithConstraints(constraints);
-    final Offset offset = entry.localPosition;
-    final TextPosition position = _textPainter.getPositionForOffset(offset);
-    final InlineSpan? span = _textPainter.text!.getSpanForPosition(position);
-    if (span == null) {
-      return;
-    }
-    if (span is TextSpan) {
-      span.recognizer?.addPointer(event);
-    }
+    return hitText;
   }
 
   bool _needsClipping = false;
@@ -568,7 +565,7 @@ class RenderParagraph extends RenderBox
         switch (_placeholderSpans[childIndex].alignment) {
           case ui.PlaceholderAlignment.baseline: {
             baselineOffset = child.getDistanceToBaseline(
-              _placeholderSpans[childIndex].baseline!
+              _placeholderSpans[childIndex].baseline!,
             );
             break;
           }
@@ -1010,7 +1007,7 @@ class RenderParagraph extends RenderBox
       text.toDiagnosticsNode(
         name: 'text',
         style: DiagnosticsTreeStyle.transition,
-      )
+      ),
     ];
   }
 
@@ -1026,7 +1023,7 @@ class RenderParagraph extends RenderBox
         ifTrue: 'wrapping at box width',
         ifFalse: 'no wrapping except at line break characters',
         showName: true,
-      )
+      ),
     );
     properties.add(EnumProperty<TextOverflow>('overflow', overflow));
     properties.add(
@@ -1034,14 +1031,14 @@ class RenderParagraph extends RenderBox
         'textScaleFactor',
         textScaleFactor,
         defaultValue: 1.0,
-      )
+      ),
     );
     properties.add(
       DiagnosticsProperty<Locale>(
         'locale',
         locale,
         defaultValue: null,
-      )
+      ),
     );
     properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
   }

@@ -151,19 +151,26 @@ enum MaterialTapTargetSize {
 ///
 /// {@tool snippet}
 ///
-/// This sample creates a [MaterialApp] widget that stores `ThemeData` and
-/// passes the `ThemeData` to descendant widgets. The [AppBar] widget uses the
-/// [primaryColor] to create a blue background. The [Text] widget uses the
-/// [TextTheme.bodyText2] to create purple text. The [FloatingActionButton] widget
-/// uses the [accentColor] to create a green background.
+/// This sample creates a [MaterialApp] with a [Theme] whose
+/// [ColorScheme] is based on [Colors.blue], but with the color
+/// scheme's [ColorScheme.secondary] color overridden to be green. The
+/// [AppBar] widget uses the color scheme's [ColorScheme.primary] as
+/// its default background color and the [FloatingActionButton] widget
+/// uses the color scheme's [ColorScheme.secondary] for its default
+/// background. By default, the [Text] widget uses
+/// [TextTheme.bodyText2], and the color of that [TextStyle] has been
+/// changed to purple.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/material_app_theme_data.png)
 ///
 /// ```dart
 /// MaterialApp(
 ///   theme: ThemeData(
-///     primaryColor: Colors.blue,
-///     accentColor: Colors.green,
+///     colorScheme: ColorScheme.fromSwatch(
+///       primarySwatch: Colors.blue,
+///     ).copyWith(
+///       secondary: Colors.green,
+///     ),
 ///     textTheme: const TextTheme(bodyText2: TextStyle(color: Colors.purple)),
 ///   ),
 ///   home: Scaffold(
@@ -238,17 +245,17 @@ class ThemeData with Diagnosticable {
     Color? secondaryHeaderColor,
     @Deprecated(
       'Use TextSelectionThemeData.selectionColor instead. '
-      'This feature was deprecated after v1.26.0-18.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.',
     )
     Color? textSelectionColor,
     @Deprecated(
       'Use TextSelectionThemeData.cursorColor instead. '
-      'This feature was deprecated after v1.26.0-18.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.',
     )
     Color? cursorColor,
     @Deprecated(
       'Use TextSelectionThemeData.selectionHandleColor instead. '
-      'This feature was deprecated after v1.26.0-18.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.',
     )
     Color? textSelectionHandleColor,
     Color? backgroundColor,
@@ -302,7 +309,7 @@ class ThemeData with Diagnosticable {
     bool? fixTextFieldOutlineLabel,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after v1.23.0-4.0.pre.'
+      'This feature was deprecated after v1.23.0-4.0.pre.',
     )
     bool? useTextSelectionTheme,
   }) {
@@ -559,17 +566,17 @@ class ThemeData with Diagnosticable {
     required this.secondaryHeaderColor,
     @Deprecated(
       'Use TextSelectionThemeData.selectionColor instead. '
-      'This feature was deprecated after v1.26.0-18.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.',
     )
     required this.textSelectionColor,
     @Deprecated(
       'Use TextSelectionThemeData.cursorColor instead. '
-      'This feature was deprecated after v1.26.0-18.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.',
     )
     required this.cursorColor,
     @Deprecated(
       'Use TextSelectionThemeData.selectionHandleColor instead. '
-      'This feature was deprecated after v1.26.0-18.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.',
     )
     required this.textSelectionHandleColor,
     required this.backgroundColor,
@@ -622,7 +629,7 @@ class ThemeData with Diagnosticable {
     required this.fixTextFieldOutlineLabel,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after v1.23.0-4.0.pre.'
+      'This feature was deprecated after v1.23.0-4.0.pre.',
     )
     required this.useTextSelectionTheme,
   }) : assert(visualDensity != null),
@@ -946,21 +953,21 @@ class ThemeData with Diagnosticable {
   /// The color of text selections in text fields, such as [TextField].
   @Deprecated(
     'Use TextSelectionThemeData.selectionColor instead. '
-    'This feature was deprecated after v1.26.0-18.0.pre.'
+    'This feature was deprecated after v1.26.0-18.0.pre.',
   )
   final Color textSelectionColor;
 
   /// The color of cursors in Material-style text fields, such as [TextField].
   @Deprecated(
     'Use TextSelectionThemeData.cursorColor instead. '
-    'This feature was deprecated after v1.26.0-18.0.pre.'
+    'This feature was deprecated after v1.26.0-18.0.pre.',
   )
   final Color cursorColor;
 
   /// The color of the handles used to adjust what part of the text is currently selected.
   @Deprecated(
     'Use TextSelectionThemeData.selectionHandleColor instead. '
-    'This feature was deprecated after v1.26.0-18.0.pre.'
+    'This feature was deprecated after v1.26.0-18.0.pre.',
   )
   final Color textSelectionHandleColor;
 
@@ -1219,7 +1226,7 @@ class ThemeData with Diagnosticable {
   /// reference to this property, as it will be removed in future releases.
   @Deprecated(
     'No longer used by the framework, please remove any reference to it. '
-    'This feature was deprecated after v1.23.0-4.0.pre.'
+    'This feature was deprecated after v1.23.0-4.0.pre.',
   )
   final bool useTextSelectionTheme;
 
@@ -1255,17 +1262,17 @@ class ThemeData with Diagnosticable {
     Color? secondaryHeaderColor,
     @Deprecated(
       'Use TextSelectionThemeData.selectionColor instead. '
-      'This feature was deprecated after v1.26.0-18.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.',
     )
     Color? textSelectionColor,
     @Deprecated(
       'Use TextSelectionThemeData.cursorColor instead. '
-      'This feature was deprecated after v1.26.0-18.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.',
     )
     Color? cursorColor,
     @Deprecated(
       'Use TextSelectionThemeData.selectionHandleColor instead. '
-      'This feature was deprecated after v1.26.0-18.0.pre.'
+      'This feature was deprecated after v1.26.0-18.0.pre.',
     )
     Color? textSelectionHandleColor,
     Color? backgroundColor,
@@ -1318,7 +1325,7 @@ class ThemeData with Diagnosticable {
     bool? fixTextFieldOutlineLabel,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after v1.23.0-4.0.pre.'
+      'This feature was deprecated after v1.23.0-4.0.pre.',
     )
     bool? useTextSelectionTheme,
   }) {

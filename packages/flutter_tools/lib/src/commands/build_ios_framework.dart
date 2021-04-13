@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
@@ -382,10 +381,10 @@ end
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
+          platform: globals.platform,
           engineVersion: globals.artifacts.isLocalEngine
               ? null
               : globals.flutterVersion.engineRevision,
-          generateDartPluginRegistry: true,
         );
         Target target;
         // Always build debug for simulator.

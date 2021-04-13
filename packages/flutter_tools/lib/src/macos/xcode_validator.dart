@@ -7,7 +7,7 @@
 import 'package:meta/meta.dart';
 
 import '../base/user_messages.dart';
-import '../doctor.dart';
+import '../doctor_validator.dart';
 import 'xcode.dart';
 
 class XcodeValidator extends DoctorValidator {

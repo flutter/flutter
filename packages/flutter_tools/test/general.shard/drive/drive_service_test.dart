@@ -16,12 +16,14 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/drive_service.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_vm_services.dart';
 import '../../src/fakes.dart';
 
 
@@ -388,6 +390,7 @@ FlutterDriverService setUpDriverService({
       PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
       Object compression,
       Device device,
+      Logger logger,
     }) async {
       if (httpUri.scheme != 'http') {
         fail('Expected an HTTP scheme, found $httpUri');
@@ -487,8 +490,9 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
     Uri observatoryUri,
     int hostPort,
     bool ipv6,
-    bool disableServiceAuthCodes,
-  ) async {
+    bool disableServiceAuthCodes, {
+    @required Logger logger,
+  }) async {
     started = true;
   }
 

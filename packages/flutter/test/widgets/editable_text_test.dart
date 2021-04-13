@@ -121,6 +121,62 @@ void main() {
         equals(serializedActionName));
   }
 
+  // Regression test for https://github.com/flutter/flutter/issues/34538.
+  testWidgets('RTL arabic correct caret placement after trailing whitespace', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.blue,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 1, // Sets text keyboard implicitly.
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    await tester.idle();
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Simulates Gboard Persian input.
+    state.updateEditingValue(const TextEditingValue(text: 'گ', selection: TextSelection.collapsed(offset: 1)));
+    await tester.pump();
+    double previousCaretXPosition = state.renderEditable.getLocalRectForCaret(state.textEditingValue.selection.base).left;
+
+    state.updateEditingValue(const TextEditingValue(text: 'گی', selection: TextSelection.collapsed(offset: 2)));
+    await tester.pump();
+    double caretXPosition = state.renderEditable.getLocalRectForCaret(state.textEditingValue.selection.base).left;
+    expect(caretXPosition, lessThan(previousCaretXPosition));
+    previousCaretXPosition = caretXPosition;
+
+    state.updateEditingValue(const TextEditingValue(text: 'گیگ', selection: TextSelection.collapsed(offset: 3)));
+    await tester.pump();
+    caretXPosition = state.renderEditable.getLocalRectForCaret(state.textEditingValue.selection.base).left;
+    expect(caretXPosition, lessThan(previousCaretXPosition));
+    previousCaretXPosition = caretXPosition;
+
+    // Enter a whitespace in a RTL input field moves the caret to the left.
+    state.updateEditingValue(const TextEditingValue(text: 'گیگ ', selection: TextSelection.collapsed(offset: 4)));
+    await tester.pump();
+    caretXPosition = state.renderEditable.getLocalRectForCaret(state.textEditingValue.selection.base).left;
+    expect(caretXPosition, lessThan(previousCaretXPosition));
+
+    expect(state.currentTextEditingValue.text, equals('گیگ '));
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/78550.
+
   testWidgets('has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
@@ -3427,6 +3483,100 @@ void main() {
     );
   });
 
+  group('setCaretRect', () {
+    Widget builder() {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: EditableText(
+                  backgroundCursorColor: Colors.grey,
+                  controller: controller,
+                  focusNode: FocusNode(),
+                  style: textStyle,
+                  cursorColor: Colors.blue,
+                  selectionControls: materialTextSelectionControls,
+                  keyboardType: TextInputType.text,
+                  onChanged: (String value) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets(
+      'called with proper coordinates',
+      (WidgetTester tester) async {
+        controller.value = TextEditingValue(text: 'a' * 50);
+        await tester.pumpWidget(builder());
+        await tester.showKeyboard(find.byType(EditableText));
+
+        expect(tester.testTextInput.log, contains(
+          matchesMethodCall(
+            'TextInput.setCaretRect',
+            args: allOf(
+              // No composing text so the width should not be too wide because
+              // it's empty.
+              containsPair('x', equals(700)),
+              containsPair('y', equals(0)),
+              containsPair('width', equals(2)),
+              containsPair('height', equals(14)),
+            ),
+          ),
+        ));
+
+        tester.testTextInput.log.clear();
+
+        controller.value = TextEditingValue(
+          text: 'a' * 50, selection: const TextSelection(baseOffset: 0, extentOffset: 0));
+        await tester.pump();
+
+        expect(tester.testTextInput.log, contains(
+          matchesMethodCall(
+            'TextInput.setCaretRect',
+            // Now the composing range is not empty.
+            args: allOf(
+              containsPair('x', equals(0)),
+              containsPair('y', equals(0)),
+            )
+          ),
+        ));
+    }, skip: isBrowser); // Related to https://github.com/flutter/flutter/issues/66089
+
+    testWidgets(
+      'only send updates when necessary',
+      (WidgetTester tester) async {
+        controller.value = TextEditingValue(text: 'a' * 100);
+        await tester.pumpWidget(builder());
+        await tester.showKeyboard(find.byType(EditableText));
+
+        expect(tester.testTextInput.log, contains(matchesMethodCall('TextInput.setCaretRect')));
+
+        tester.testTextInput.log.clear();
+
+        // Should not send updates every frame.
+        await tester.pump();
+
+        expect(tester.testTextInput.log, isNot(contains(matchesMethodCall('TextInput.setCaretRect'))));
+    });
+
+    testWidgets(
+      'not sent with selection',
+      (WidgetTester tester) async {
+        controller.value = TextEditingValue(
+          text: 'a' * 100, selection: const TextSelection(baseOffset: 0, extentOffset: 10));
+        await tester.pumpWidget(builder());
+        await tester.showKeyboard(find.byType(EditableText));
+
+        expect(tester.testTextInput.log, isNot(contains(matchesMethodCall('TextInput.setCaretRect'))));
+    });
+  });
+
   group('setMarkedTextRect', () {
     Widget builder() {
       return MaterialApp(
@@ -5381,6 +5531,7 @@ void main() {
       'TextInput.setEditingState',
       'TextInput.setEditingState',
       'TextInput.show',
+      'TextInput.setCaretRect',
     ];
     expect(
       tester.testTextInput.log.map((MethodCall m) => m.method),
@@ -5424,6 +5575,7 @@ void main() {
       'TextInput.setEditingState',
       'TextInput.setEditingState',
       'TextInput.show',
+      'TextInput.setCaretRect',
       'TextInput.show',
     ];
     expect(tester.testTextInput.log.length, logOrder.length);
@@ -5473,6 +5625,7 @@ void main() {
       'TextInput.setEditingState',
       'TextInput.setEditingState',
       'TextInput.show',
+      'TextInput.setCaretRect',
       'TextInput.setEditingState',
     ];
 
@@ -5754,9 +5907,9 @@ void main() {
     expect(log.length, 2);
     MethodCall methodCall = log[0];
     // Close the InputConnection.
-    expect(methodCall, isMethodCall('TextInput.clearClient', arguments: null),);
+    expect(methodCall, isMethodCall('TextInput.clearClient', arguments: null));
     methodCall = log[1];
-    expect(methodCall, isMethodCall('TextInput.hide', arguments: null),);
+    expect(methodCall, isMethodCall('TextInput.hide', arguments: null));
     // The keyboard loses focus.
     expect(focusNode.hasFocus, false);
 
@@ -5888,8 +6041,11 @@ void main() {
     testWidgets('TextEditingController.buildTextSpan receives build context', (WidgetTester tester) async {
       final _AccentColorTextEditingController controller = _AccentColorTextEditingController('a');
       const Color color = Color.fromARGB(255, 1, 2, 3);
+      final ThemeData lightTheme = ThemeData.light();
       await tester.pumpWidget(MaterialApp(
-        theme: ThemeData.light().copyWith(accentColor: color),
+        theme: lightTheme.copyWith(
+          colorScheme: lightTheme.colorScheme.copyWith(secondary: color),
+        ),
         home: EditableText(
           controller: controller,
           focusNode: FocusNode(),
@@ -6131,271 +6287,6 @@ void main() {
     state.updateEditingValue(const TextEditingValue(text: '0')); // pass to formatter once to check the values.
     expect(formatter.lastOldValue.composing, const TextRange(start: 1, end: 2));
     expect(formatter.lastOldValue.text, 'test');
-  });
-
-  testWidgets('Whitespace directionality formatter input Arabic', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(text: 'testText');
-    await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: FocusScope(
-            node: focusScopeNode,
-            autofocus: true,
-            child: EditableText(
-              backgroundCursorColor: Colors.blue,
-              controller: controller,
-              focusNode: focusNode,
-              maxLines: 1, // Sets text keyboard implicitly.
-              style: textStyle,
-              cursorColor: cursorColor,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    await tester.tap(find.byType(EditableText));
-    await tester.showKeyboard(find.byType(EditableText));
-    controller.text = '';
-    await tester.idle();
-
-    final EditableTextState state =
-        tester.state<EditableTextState>(find.byType(EditableText));
-    expect(tester.testTextInput.editingState!['text'], equals(''));
-    expect(state.wantKeepAlive, true);
-
-    // Simple mixed directional input.
-    state.updateEditingValue(const TextEditingValue(text: 'h'));
-    state.updateEditingValue(const TextEditingValue(text: 'he'));
-    state.updateEditingValue(const TextEditingValue(text: 'hel'));
-    state.updateEditingValue(const TextEditingValue(text: 'hell'));
-    state.updateEditingValue(const TextEditingValue(text: 'hello'));
-    expect(state.currentTextEditingValue.text, equals('hello'));
-    state.updateEditingValue(const TextEditingValue(text: 'hello ', composing: TextRange(start: 4, end: 5)));
-    expect(state.currentTextEditingValue.text, equals('hello '));
-    state.updateEditingValue(const TextEditingValue(text: 'hello ا', composing: TextRange(start: 4, end: 6)));
-    expect(state.currentTextEditingValue.text, equals('hello \u{200E}ا'));
-    expect(state.currentTextEditingValue.composing, equals(const TextRange(start: 4, end: 7)));
-    state.updateEditingValue(const TextEditingValue(text: 'hello الْ', composing: TextRange(start: 4, end: 7)));
-    state.updateEditingValue(const TextEditingValue(text: 'hello الْعَ', composing: TextRange(start: 4, end: 8)));
-    state.updateEditingValue(const TextEditingValue(text: 'hello الْعَ ', composing: TextRange(start: 4, end: 9)));
-    expect(state.currentTextEditingValue.text, equals('hello \u{200E}الْعَ \u{200F}'));
-    expect(state.currentTextEditingValue.composing, equals(const TextRange(start: 4, end: 10)));
-    state.updateEditingValue(const TextEditingValue(text: 'hello الْعَ بِيَّةُ'));
-    state.updateEditingValue(const TextEditingValue(text: 'hello الْعَ بِيَّةُ '));
-    expect(state.currentTextEditingValue.text, equals('hello \u{200E}الْعَ بِيَّةُ \u{200F}'));
-  });
-
-  testWidgets('Whitespace directionality formatter doesn\'t overwrite existing Arabic', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(text: 'testText');
-    await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: FocusScope(
-            node: focusScopeNode,
-            autofocus: true,
-            child: EditableText(
-              backgroundCursorColor: Colors.blue,
-              controller: controller,
-              focusNode: focusNode,
-              maxLines: 1, // Sets text keyboard implicitly.
-              style: textStyle,
-              cursorColor: cursorColor,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    await tester.tap(find.byType(EditableText));
-    await tester.showKeyboard(find.byType(EditableText));
-    controller.text = '';
-    await tester.idle();
-
-    final EditableTextState state =
-        tester.state<EditableTextState>(find.byType(EditableText));
-    expect(tester.testTextInput.editingState!['text'], equals(''));
-    expect(state.wantKeepAlive, true);
-
-    // Does not overwrite existing RLM or LRM characters
-    state.updateEditingValue(const TextEditingValue(text: 'hello \u{200F}ا'));
-    expect(state.currentTextEditingValue.text, equals('hello \u{200F}ا'));
-    state.updateEditingValue(const TextEditingValue(text: 'hello \u{200F}ا \u{200E}ا ا '));
-    expect(state.currentTextEditingValue.text, equals('hello \u{200F}ا \u{200E}ا ا \u{200F}'));
-
-    // Handles only directionality markers.
-    state.updateEditingValue(const TextEditingValue(text: '\u{200E}\u{200F}'));
-    expect(state.currentTextEditingValue.text, equals('\u{200E}\u{200F}'));
-    state.updateEditingValue(const TextEditingValue(text: '\u{200E}\u{200F}\u{200E}\u{200F}\u{200E}\u{200F}'));
-    expect(state.currentTextEditingValue.text, equals('\u{200E}\u{200F}\u{200E}\u{200F}\u{200E}\u{200F}'));
-    state.updateEditingValue(const TextEditingValue(text: '\u{200E}\u{200F}\u{200F}\u{200F}'));
-    expect(state.currentTextEditingValue.text, equals('\u{200E}\u{200F}\u{200F}\u{200F}'));
-  });
-
-  testWidgets('Whitespace directionality formatter is not leaky Arabic', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(text: 'testText');
-    await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: FocusScope(
-            node: focusScopeNode,
-            autofocus: true,
-            child: EditableText(
-              backgroundCursorColor: Colors.blue,
-              controller: controller,
-              focusNode: focusNode,
-              maxLines: 1, // Sets text keyboard implicitly.
-              style: textStyle,
-              cursorColor: cursorColor,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    await tester.tap(find.byType(EditableText));
-    await tester.showKeyboard(find.byType(EditableText));
-    controller.text = '';
-    await tester.idle();
-
-    final EditableTextState state =
-        tester.state<EditableTextState>(find.byType(EditableText));
-    expect(tester.testTextInput.editingState!['text'], equals(''));
-    expect(state.wantKeepAlive, true);
-
-    // Can be passed through formatter repeatedly without leaking/growing.
-    state.updateEditingValue(const TextEditingValue(text: 'hello \u{200E}عَ \u{200F}عَ \u{200F}عَ \u{200F}'));
-    expect(state.currentTextEditingValue.text, equals('hello \u{200E}عَ \u{200F}عَ \u{200F}عَ \u{200F}'));
-    state.updateEditingValue(const TextEditingValue(text: 'hello \u{200E}عَ \u{200F}عَ \u{200F}عَ \u{200F}'));
-    expect(state.currentTextEditingValue.text, equals('hello \u{200E}عَ \u{200F}عَ \u{200F}عَ \u{200F}'));
-    state.updateEditingValue(const TextEditingValue(text: 'hello \u{200E}عَ \u{200F}عَ \u{200F}عَ \u{200F}'));
-    expect(state.currentTextEditingValue.text, equals('hello \u{200E}عَ \u{200F}عَ \u{200F}عَ \u{200F}'));
-  });
-
-  testWidgets('Whitespace directionality formatter emojis', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(text: 'testText');
-    await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: FocusScope(
-            node: focusScopeNode,
-            autofocus: true,
-            child: EditableText(
-              backgroundCursorColor: Colors.blue,
-              controller: controller,
-              focusNode: focusNode,
-              maxLines: 1, // Sets text keyboard implicitly.
-              style: textStyle,
-              cursorColor: cursorColor,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    await tester.tap(find.byType(EditableText));
-    await tester.showKeyboard(find.byType(EditableText));
-    controller.text = '';
-    await tester.idle();
-
-    final EditableTextState state =
-        tester.state<EditableTextState>(find.byType(EditableText));
-    expect(tester.testTextInput.editingState!['text'], equals(''));
-    expect(state.wantKeepAlive, true);
-
-    // Doesn't eat emojis
-    state.updateEditingValue(const TextEditingValue(text: '\u{200E}😀😁😂🤣😃 💑 👩‍❤️‍👩 👨‍❤️‍👨 💏 👩‍❤️‍💋‍👩 👨‍❤️‍💋‍👨 👪 👨‍👩‍👧 👨‍👩‍👧‍👦 👨‍👩‍👦‍👦 \u{200F}'));
-    expect(state.currentTextEditingValue.text, equals('\u{200E}😀😁😂🤣😃 💑 👩‍❤️‍👩 👨‍❤️‍👨 💏 👩‍❤️‍💋‍👩 👨‍❤️‍💋‍👨 👪 👨‍👩‍👧 👨‍👩‍👧‍👦 👨‍👩‍👦‍👦 \u{200F}'));
-    state.updateEditingValue(const TextEditingValue(text: '\u{200E}🇧🇼🇧🇷🇮🇴 🇻🇬🇧🇳wahhh!🇧🇬🇧🇫 🇧🇮🇰🇭عَ عَ 🇨🇲 🇨🇦🇮🇨 🇨🇻🇧🇶 🇰🇾🇨🇫 🇹🇩🇨🇱 🇨🇳🇨🇽\u{200F}'));
-    expect(state.currentTextEditingValue.text, equals('\u{200E}🇧🇼🇧🇷🇮🇴 🇻🇬🇧🇳wahhh!🇧🇬🇧🇫 🇧🇮🇰🇭عَ عَ \u{200F}🇨🇲 🇨🇦🇮🇨 🇨🇻🇧🇶 🇰🇾🇨🇫 🇹🇩🇨🇱 🇨🇳🇨🇽\u{200F}'));
-  });
-
-  testWidgets('Whitespace directionality formatter emojis', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(text: 'testText');
-    await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: FocusScope(
-            node: focusScopeNode,
-            autofocus: true,
-            child: EditableText(
-              backgroundCursorColor: Colors.blue,
-              controller: controller,
-              focusNode: focusNode,
-              maxLines: 1, // Sets text keyboard implicitly.
-              style: textStyle,
-              cursorColor: cursorColor,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    await tester.tap(find.byType(EditableText));
-    await tester.showKeyboard(find.byType(EditableText));
-    controller.text = '';
-    await tester.idle();
-
-    final EditableTextState state =
-        tester.state<EditableTextState>(find.byType(EditableText));
-    expect(tester.testTextInput.editingState!['text'], equals(''));
-    expect(state.wantKeepAlive, true);
-
-    // Doesn't eat emojis
-    state.updateEditingValue(const TextEditingValue(text: '\u{200E}😀😁😂🤣😃 💑 👩‍❤️‍👩 👨‍❤️‍👨 💏 👩‍❤️‍💋‍👩 👨‍❤️‍💋‍👨 👪 👨‍👩‍👧 👨‍👩‍👧‍👦 👨‍👩‍👦‍👦 \u{200F}'));
-    expect(state.currentTextEditingValue.text, equals('\u{200E}😀😁😂🤣😃 💑 👩‍❤️‍👩 👨‍❤️‍👨 💏 👩‍❤️‍💋‍👩 👨‍❤️‍💋‍👨 👪 👨‍👩‍👧 👨‍👩‍👧‍👦 👨‍👩‍👦‍👦 \u{200F}'));
-    state.updateEditingValue(const TextEditingValue(text: '\u{200E}🇧🇼🇧🇷🇮🇴 🇻🇬🇧🇳wahhh!🇧🇬🇧🇫 🇧🇮🇰🇭عَ عَ 🇨🇲 🇨🇦🇮🇨 🇨🇻🇧🇶 🇰🇾🇨🇫 🇹🇩🇨🇱 🇨🇳🇨🇽\u{200F}'));
-    expect(state.currentTextEditingValue.text, equals('\u{200E}🇧🇼🇧🇷🇮🇴 🇻🇬🇧🇳wahhh!🇧🇬🇧🇫 🇧🇮🇰🇭عَ عَ \u{200F}🇨🇲 🇨🇦🇮🇨 🇨🇻🇧🇶 🇰🇾🇨🇫 🇹🇩🇨🇱 🇨🇳🇨🇽\u{200F}'));
-  });
-
-  testWidgets('Whitespace directionality formatter handles deletion of trailing whitespace', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(text: 'testText');
-    await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: FocusScope(
-            node: focusScopeNode,
-            autofocus: true,
-            child: EditableText(
-              backgroundCursorColor: Colors.blue,
-              controller: controller,
-              focusNode: focusNode,
-              maxLines: 1, // Sets text keyboard implicitly.
-              style: textStyle,
-              cursorColor: cursorColor,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    await tester.tap(find.byType(EditableText));
-    await tester.showKeyboard(find.byType(EditableText));
-    controller.text = '';
-    await tester.idle();
-
-    final EditableTextState state =
-        tester.state<EditableTextState>(find.byType(EditableText));
-    expect(tester.testTextInput.editingState!['text'], equals(''));
-    expect(state.wantKeepAlive, true);
-
-    // Simulate deleting only the trailing RTL mark.
-    state.updateEditingValue(const TextEditingValue(text: 'hello \u{200E}الْعَ بِيَّةُ \u{200F}'));
-    state.updateEditingValue(const TextEditingValue(text: 'hello \u{200E}الْعَ بِيَّةُ '));
-    // The trailing space should be gone here.
-    expect(state.currentTextEditingValue.text, equals('hello \u{200E}الْعَ بِيَّةُ'));
   });
 
   testWidgets('EditableText changes mouse cursor when hovered', (WidgetTester tester) async {
@@ -7221,6 +7112,147 @@ void main() {
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb);
 
+  testWidgets('navigating by word', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'word word word');
+    // word wo|rd| word
+    controller.selection = const TextSelection(
+      baseOffset: 7,
+      extentOffset: 9,
+      affinity: TextAffinity.upstream,
+    );
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: EditableText(
+            maxLines: 10,
+            controller: controller,
+            autofocus: true,
+            focusNode: focusNode,
+            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            keyboardType: TextInputType.text,
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 7);
+    expect(controller.selection.extentOffset, 9);
+
+    final String targetPlatform = defaultTargetPlatform.toString();
+    final String platform = targetPlatform.substring(targetPlatform.indexOf('.') + 1).toLowerCase();
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.arrowRight],
+      shift: true,
+      wordModifier: true,
+      platform: platform,
+    );
+    await tester.pump();
+    // word wo|rd word|
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 7);
+    expect(controller.selection.extentOffset, 14);
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.arrowLeft],
+      shift: true,
+      wordModifier: true,
+      platform: platform,
+    );
+    // word wo|rd |word
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 7);
+    expect(controller.selection.extentOffset, 10);
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.arrowLeft],
+      shift: true,
+      wordModifier: true,
+      platform: platform,
+    );
+    if (platform == 'macos') {
+      // word wo|rd word
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 7);
+      expect(controller.selection.extentOffset, 7);
+
+      await sendKeys(
+        tester,
+        <LogicalKeyboardKey>[LogicalKeyboardKey.arrowLeft],
+        shift: true,
+        wordModifier: true,
+        platform: platform,
+      );
+    }
+
+    // word |wo|rd word
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 7);
+    expect(controller.selection.extentOffset, 5);
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.arrowLeft],
+      shift: true,
+      wordModifier: true,
+      platform: platform,
+    );
+    // |word wo|rd word
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 7);
+    expect(controller.selection.extentOffset, 0);
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.arrowRight],
+      shift: true,
+      wordModifier: true,
+      platform: platform,
+    );
+    // word| wo|rd word
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 7);
+    expect(controller.selection.extentOffset, 4);
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.arrowRight],
+      shift: true,
+      wordModifier: true,
+      platform: platform,
+    );
+    if (platform == 'macos') {
+      // word wo|rd word
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 7);
+      expect(controller.selection.extentOffset, 7);
+
+      await sendKeys(
+        tester,
+        <LogicalKeyboardKey>[LogicalKeyboardKey.arrowRight],
+        shift: true,
+        wordModifier: true,
+        platform: platform,
+      );
+    }
+
+    // word wo|rd| word
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 7);
+    expect(controller.selection.extentOffset, 9);
+
+    // On web, using keyboard for selection is handled by the browser.
+  }, skip: kIsWeb, variant: TargetPlatformVariant.all());
+
   testWidgets('can change behavior by overriding text editing actions', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: testText);
     controller.selection = const TextSelection(
@@ -7335,6 +7367,71 @@ void main() {
       expect(controller.selection.baseOffset, 1);
     }
   });
+
+  testWidgets('the toolbar is disposed when selection changes and there is no selectionControls', (WidgetTester tester) async {
+    late StateSetter setState;
+    bool enableInteractiveSelection = true;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setter) {
+                setState = setter;
+                return EditableText(
+                  focusNode: focusNode,
+                  style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+                  cursorColor: Colors.blue,
+                  backgroundCursorColor: Colors.grey,
+                  selectionControls: enableInteractiveSelection ? materialTextSelectionControls : null,
+                  controller: controller,
+                  enableInteractiveSelection: enableInteractiveSelection,
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Can't show the toolbar when there's no focus.
+    expect(state.showToolbar(), false);
+    await tester.pumpAndSettle();
+    expect(find.text('Paste'), findsNothing);
+
+    // Can show the toolbar when focused even though there's no text.
+    state.renderEditable.selectWordsInRange(
+      from: Offset.zero,
+      cause: SelectionChangedCause.tap,
+    );
+    await tester.pump();
+    expect(state.showToolbar(), isTrue);
+    await tester.pumpAndSettle();
+    expect(find.text('Paste'), findsOneWidget);
+
+    // Find the FadeTransition in the toolbar and expect that it has not been
+    // disposed.
+    final FadeTransition fadeTransition = find.byType(FadeTransition).evaluate()
+      .map((Element element) => element.widget as FadeTransition)
+      .firstWhere((FadeTransition fadeTransition) {
+        return fadeTransition.child is CompositedTransformFollower;
+      });
+    expect(fadeTransition.toString(), isNot(contains('DISPOSED')));
+
+    // Turn off interactive selection and change the text, which triggers the
+    // toolbar to be disposed.
+    setState(() {
+      enableInteractiveSelection = false;
+    });
+    await tester.pump();
+    await tester.enterText(find.byType(EditableText), 'abc');
+    await tester.pump();
+
+    expect(fadeTransition.toString(), contains('DISPOSED'));
+  }, skip: kIsWeb);
 }
 
 class UnsettableController extends TextEditingController {
@@ -7559,7 +7656,7 @@ class _AccentColorTextEditingController extends TextEditingController {
 
   @override
   TextSpan buildTextSpan({required BuildContext context, TextStyle? style, required bool withComposing}) {
-    final Color color = Theme.of(context).accentColor;
+    final Color color = Theme.of(context).colorScheme.secondary;
     return super.buildTextSpan(context: context, style: TextStyle(color: color), withComposing: withComposing);
   }
 }

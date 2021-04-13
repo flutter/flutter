@@ -22,9 +22,6 @@ import 'common.dart';
 /// only the glyphs used by the application.
 const String kIconTreeShakerFlag = 'TreeShakeIcons';
 
-/// Whether icon font subsetting is enabled by default.
-const bool kIconTreeShakerEnabledDefault = true;
-
 List<Map<String, dynamic>> _getList(dynamic object, String errorMessage) {
   if (object is List<dynamic>) {
     return object.cast<Map<String, dynamic>>();
