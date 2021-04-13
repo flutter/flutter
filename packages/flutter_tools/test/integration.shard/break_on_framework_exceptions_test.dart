@@ -281,12 +281,122 @@ void main() {
 
     expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'highlight mode listener';")));
   });
+
+  testWithoutContext('breaks when GestureBinding.dispatchEvent throws', () async {
+    final TestProject project = TestProject(
+      r'''
+      await tester.pumpWidget(
+        MouseRegion(
+          onHover: (_) {
+            throw 'onHover';
+          },
+        )
+      );
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: Offset.zero);
+      await tester.pump();
+      await gesture.moveTo(tester.getCenter(find.byType(MouseRegion)));
+      await tester.pump();
+      gesture.removePointer();
+      '''
+    );
+    await project.setUpIn(tempDir);
+    final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
+    await flutter.test(withDebugger: true, pauseOnExceptions: true);
+    await flutter.waitForPause();
+
+    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'onHover';")));
+  });
+
+  testWithoutContext('breaks when ImageStreamListener.onImage throws', () async {
+    final TestProject project = TestProject(
+      r'''
+      final Completer<ImageInfo> completer = Completer<ImageInfo>();
+      OneFrameImageStreamCompleter(completer.future)
+        ..addListener(ImageStreamListener((ImageInfo _, bool __) {
+          throw 'setImage';
+        }));
+      completer.complete(ImageInfo(image: image));
+      ''',
+      setup: r'''
+        late ui.Image image;
+        setUp(() async {
+          image = await createTestImage();
+        });
+      '''
+    );
+    await project.setUpIn(tempDir);
+    final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
+    await flutter.test(withDebugger: true, pauseOnExceptions: true);
+    await flutter.waitForPause();
+
+    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'setImage';")));
+  });
+
+  testWithoutContext('breaks when ImageStreamListener.onError throws', () async {
+    final TestProject project = TestProject(
+      r'''
+      final Completer<ImageInfo> completer = Completer<ImageInfo>();
+      OneFrameImageStreamCompleter(completer.future)
+        ..addListener(ImageStreamListener(
+          (ImageInfo _, bool __) { },
+          onError: (Object _, StackTrace? __) {
+            throw 'onError';
+          },
+        ));
+      completer.completeError('ERROR');
+      '''
+    );
+    await project.setUpIn(tempDir);
+    final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
+    await flutter.test(withDebugger: true, pauseOnExceptions: true);
+    await flutter.waitForPause();
+
+    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'onError';")));
+  });
+
+  testWithoutContext('breaks when LayoutBuilder.builder throws', () async {
+    final TestProject project = TestProject(
+      r'''
+      await tester.pumpWidget(LayoutBuilder(
+        builder: (_, __) {
+          throw 'LayoutBuilder.builder';
+        },
+      ));
+      '''
+    );
+    await project.setUpIn(tempDir);
+    final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
+    await flutter.test(withDebugger: true, pauseOnExceptions: true);
+    await flutter.waitForPause();
+
+    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'LayoutBuilder.builder';")));
+  }, skip: 'https://github.com/flutter/flutter/issues/17007#issuecomment-818952818');
+
+  testWithoutContext('breaks when _CallbackHookProvider callback throws', () async {
+    final TestProject project = TestProject(
+      r'''
+      RootBackButtonDispatcher()
+        ..addCallback(() {
+          throw '_CallbackHookProvider.callback';
+        })
+        ..invokeCallback(Future.value(false));
+      '''
+    );
+    await project.setUpIn(tempDir);
+    final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
+    await flutter.test(withDebugger: true, pauseOnExceptions: true);
+    await flutter.waitForPause();
+
+    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw '_CallbackHookProvider.callback';")));
+  });
 }
 
 class TestProject extends Project {
-  TestProject(this.testBody);
+  TestProject(this.testBody, { this.setup });
 
   final String testBody;
+  final String setup;
 
   @override
   final String pubspec = '''
@@ -306,9 +416,12 @@ class TestProject extends Project {
   final String main = '';
 
   @override
-  String get test => _test.replaceFirst('// TEST_BODY', testBody);
+  String get test => _test.replaceFirst('// SETUP', setup ?? '').replaceFirst('// TEST_BODY', testBody);
 
   final String _test = r'''
+  import 'dart:async';
+  import 'dart:ui' as ui;
+
   import 'package:flutter/animation.dart';
   import 'package:flutter/foundation.dart';
   import 'package:flutter/gestures.dart';
@@ -317,6 +430,7 @@ class TestProject extends Project {
   import 'package:flutter_test/flutter_test.dart';
 
   void main() {
+    // SETUP 
     testWidgets('test', (WidgetTester tester) async {
       // TEST_BODY
     });

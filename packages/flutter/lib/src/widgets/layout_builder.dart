@@ -114,7 +114,8 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
     super.unmount();
   }
 
-  @pragma('vm:notify-debugger-on-exception')
+  // TODO(goderbauer): The pragma should be applied to the buildScope closure, https://github.com/flutter/flutter/issues/17007#issuecomment-818952818
+  // @pragma('vm:notify-debugger-on-exception')
   void _layout(ConstraintType constraints) {
     owner!.buildScope(this, () {
       Widget built;

@@ -774,7 +774,7 @@ class _CallbackHookProvider<T> {
         context: ErrorDescription('while invoking the callback for $runtimeType'),
         informationCollector: () sync* {
           yield DiagnosticsProperty<_CallbackHookProvider<T>>(
-            'The $runtimeType that invoked the callback was:',
+            'The $runtimeType that invoked the callback was',
             this,
             style: DiagnosticsTreeStyle.errorProperty,
           );
