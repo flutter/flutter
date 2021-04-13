@@ -451,7 +451,9 @@ mixin SchedulerBinding on BindingBase {
   ///
   /// Also returns false if there are no tasks remaining.
   @visibleForTesting
-  // TODO(goderbauer): figure out why the pragma doesn't work here.
+  // TODO(goderbauer): Add pragma (and enable test in
+  //   break_on_framework_exceptions_test.dart) once debugger breaks on correct
+  //   line, https://github.com/dart-lang/sdk/issues/45684
   // @pragma('vm:notify-debugger-on-exception')
   bool handleEventLoopCallback() {
     if (_taskQueue.isEmpty || locked)

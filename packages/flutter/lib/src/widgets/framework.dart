@@ -2834,7 +2834,9 @@ class BuildOwner {
   ///
   /// After the current call stack unwinds, a microtask that notifies listeners
   /// about changes to global keys will run.
-  // TODO(goderbauer): Figure out why the pragma doesn't work on this method.
+  // TODO(goderbauer): Add pragma (and enable test in
+  //   break_on_framework_exceptions_test.dart) once debugger breaks on correct
+  //   line, https://github.com/dart-lang/sdk/issues/45684
   // @pragma('vm:notify-debugger-on-exception')
   void finalizeTree() {
     Timeline.startSync('Finalize tree', arguments: timelineArgumentsIndicatingLandmarkEvent);
