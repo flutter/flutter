@@ -22,7 +22,7 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
     final StringBuffer xkbScanCodeMap = StringBuffer();
     for (final PhysicalKeyEntry entry in keyData.data) {
       if (entry.xKbScanCode != null) {
-        xkbScanCodeMap.writeln('  insert_record(table, ${toHex(entry.xKbScanCode)}, ${toHex(entry.usbHidCode)});    // ${entry.constantName}');
+        xkbScanCodeMap.writeln('  insert_record(table, ${toHex(entry.xKbScanCode)}, ${toHex(entry.usbHidCode)});  // ${entry.constantName}');
       }
     }
     return xkbScanCodeMap.toString().trimRight();
@@ -33,7 +33,7 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
     final StringBuffer gtkKeyvalCodeMap = StringBuffer();
     for (final LogicalKeyEntry entry in logicalData.data.values) {
       zipStrict(entry.gtkValues, entry.gtkNames, (int value, String name) {
-        gtkKeyvalCodeMap.writeln('  insert_record(table, ${toHex(value)}, ${toHex(entry.value)});    // ${name}');
+        gtkKeyvalCodeMap.writeln('  insert_record(table, ${toHex(value)}, ${toHex(entry.value, digits: 9)});  // ${name}');
       });
     }
     return gtkKeyvalCodeMap.toString().trimRight();
