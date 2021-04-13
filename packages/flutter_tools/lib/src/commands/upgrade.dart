@@ -252,7 +252,9 @@ class UpgradeCommandRunner {
   /// Returns the remote HEAD flutter version.
   ///
   /// Exits tool if HEAD isn't pointing to a branch, or there is no upstream.
-  Future<FlutterVersion> fetchLatestVersion({@required FlutterVersion localVersion}) async {
+  Future<FlutterVersion> fetchLatestVersion({
+    @required FlutterVersion localVersion,
+  }) async {
     String revision;
     try {
       // Fetch upstream branch's commits and tags
