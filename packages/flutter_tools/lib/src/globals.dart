@@ -17,6 +17,7 @@ import 'ios/simulators.dart';
 import 'ios/xcodeproj.dart';
 import 'macos/cocoapods.dart';
 import 'macos/cocoapods_validator.dart';
+import 'macos/xcdevice.dart';
 import 'macos/xcode.dart';
 import 'project.dart';
 import 'reporting/crash_reporting.dart';
