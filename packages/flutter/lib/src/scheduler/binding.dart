@@ -451,7 +451,8 @@ mixin SchedulerBinding on BindingBase {
   ///
   /// Also returns false if there are no tasks remaining.
   @visibleForTesting
-  @pragma('vm:notify-debugger-on-exception')
+  // TODO(goderbauer): figure out why the pragma doesn't work here.
+  // @pragma('vm:notify-debugger-on-exception')
   bool handleEventLoopCallback() {
     if (_taskQueue.isEmpty || locked)
       return false;

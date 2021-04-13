@@ -390,50 +390,348 @@ void main() {
 
     expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw '_CallbackHookProvider.callback';")));
   });
+
+  testWithoutContext('breaks when TimingsCallback throws', () async {
+    final TestProject project = TestProject(
+      r'''
+      SchedulerBinding.instance!.addTimingsCallback((List<FrameTiming> timings) {
+        throw 'TimingsCallback';
+      });
+      ui.window.onReportTimings!(<FrameTiming>[]);
+      '''
+    );
+    await project.setUpIn(tempDir);
+    final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
+    await flutter.test(withDebugger: true, pauseOnExceptions: true);
+    await flutter.waitForPause();
+
+    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'TimingsCallback';")));
+  });
+
+  testWithoutContext('breaks when TimingsCallback throws', () async {
+    final TestProject project = TestProject(
+      r'''
+      SchedulerBinding.instance!.scheduleTask(
+        () {
+          throw 'scheduled task';
+        },
+        Priority.touch,
+      );
+      await tester.pumpAndSettle();
+      '''
+    );
+    await project.setUpIn(tempDir);
+    final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
+    await flutter.test(withDebugger: true, pauseOnExceptions: true);
+    await flutter.waitForPause();
+
+    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'scheduled task';")));
+  }, skip: 'TODO(goderbauer): figure out why the pragma does not work on SchedulerBinding.handleEventLoopCallback');
+
+  testWithoutContext('breaks when FrameCallback throws', () async {
+    final TestProject project = TestProject(
+      r'''
+      SchedulerBinding.instance!.addPostFrameCallback((_) {
+        throw 'FrameCallback';
+      });
+      await tester.pump();
+      '''
+    );
+    await project.setUpIn(tempDir);
+    final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
+    await flutter.test(withDebugger: true, pauseOnExceptions: true);
+    await flutter.waitForPause();
+
+    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'FrameCallback';")));
+  });
+
+  testWithoutContext('breaks when attaching to render tree throws', () async {
+    final TestProject project = TestProject(
+      r'''
+      await tester.pumpWidget(TestWidget());
+      ''',
+      classes: r'''
+        class TestWidget extends StatelessWidget {
+          @override
+          StatelessElement createElement() {
+            throw 'create element';
+          }
+
+          @override
+          Widget build(BuildContext context) => Container();
+        }
+      ''',
+    );
+    await project.setUpIn(tempDir);
+    final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
+    await flutter.test(withDebugger: true, pauseOnExceptions: true);
+    await flutter.waitForPause();
+
+    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'create element';")));
+  });
+
+  testWithoutContext('breaks when RenderObject.performLayout throws', () async {
+    final TestProject project = TestProject(
+      r'''
+      TestRender().layout(BoxConstraints());
+      ''',
+      classes: r'''
+        class TestRender extends RenderBox {
+          @override
+          void performLayout() {
+            throw 'performLayout';
+          }
+        }
+      ''',
+    );
+    await project.setUpIn(tempDir);
+    final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
+    await flutter.test(withDebugger: true, pauseOnExceptions: true);
+    await flutter.waitForPause();
+
+    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'performLayout';")));
+  });
+
+  testWithoutContext('breaks when RenderObject.performResize throws', () async {
+    final TestProject project = TestProject(
+      r'''
+      TestRender().layout(BoxConstraints());
+      ''',
+      classes: r'''
+        class TestRender extends RenderBox {
+          @override
+          bool get sizedByParent => true;
+
+          @override
+          void performResize() {
+            throw 'performResize';
+          }
+        }
+      ''',
+    );
+    await project.setUpIn(tempDir);
+    final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
+    await flutter.test(withDebugger: true, pauseOnExceptions: true);
+    await flutter.waitForPause();
+
+    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'performResize';")));
+  });
+
+  testWithoutContext('breaks when RenderObject.performLayout (without resize) throws', () async {
+    final TestProject project = TestProject(
+      r'''
+      await tester.pumpWidget(TestWidget());
+      tester.renderObject<TestRender>(find.byType(TestWidget)).layoutThrows = true;
+      await tester.pump();
+      ''',
+      classes: r'''
+        class TestWidget extends LeafRenderObjectWidget {
+          @override
+          RenderObject createRenderObject(BuildContext context) => TestRender();
+        }
+
+        class TestRender extends RenderBox {
+          bool get layoutThrows => _layoutThrows;
+          bool _layoutThrows = false;
+          set layoutThrows(bool value) {
+            if (value == _layoutThrows) {
+              return;
+            }
+            _layoutThrows = value;
+            markNeedsLayout();
+          }
+
+          @override
+          void performLayout() {
+            if (layoutThrows) {
+              throw 'performLayout without resize';
+            }
+            size = constraints.biggest;
+          }
+        }
+      ''',
+    );
+    await project.setUpIn(tempDir);
+    final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
+    await flutter.test(withDebugger: true, pauseOnExceptions: true);
+    await flutter.waitForPause();
+
+    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'performLayout without resize';")));
+  });
+
+  testWithoutContext('breaks when StatelessWidget.build throws', () async {
+    final TestProject project = TestProject(
+      r'''
+      await tester.pumpWidget(TestWidget());
+      ''',
+      classes: r'''
+        class TestWidget extends StatelessWidget {
+          @override
+          Widget build(BuildContext context) {
+            throw 'StatelessWidget.build';
+          }
+        }
+      ''',
+    );
+    await project.setUpIn(tempDir);
+    final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
+    await flutter.test(withDebugger: true, pauseOnExceptions: true);
+    await flutter.waitForPause();
+
+    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'StatelessWidget.build';")));
+  });
+
+  testWithoutContext('breaks when StatefulWidget.build throws', () async {
+    final TestProject project = TestProject(
+      r'''
+      await tester.pumpWidget(TestWidget());
+      ''',
+      classes: r'''
+        class TestWidget extends StatefulWidget {
+          @override
+          _TestWidgetState createState() => _TestWidgetState();
+        }
+
+        class _TestWidgetState extends State<TestWidget> {
+          @override
+          Widget build(BuildContext context) {
+            throw 'StatefulWidget.build';
+          }
+        }
+      ''',
+    );
+    await project.setUpIn(tempDir);
+    final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
+    await flutter.test(withDebugger: true, pauseOnExceptions: true);
+    await flutter.waitForPause();
+
+    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'StatefulWidget.build';")));
+  });
+
+  testWithoutContext('breaks when finalizing the tree throws', () async {
+    final TestProject project = TestProject(
+      r'''
+      await tester.pumpWidget(TestWidget());
+      ''',
+      classes: r'''
+        class TestWidget extends StatefulWidget {
+          @override
+          _TestWidgetState createState() => _TestWidgetState();
+        }
+
+        class _TestWidgetState extends State<TestWidget> {
+          @override
+          void dispose() {
+            super.dispose();
+            throw 'dispose';
+          }
+
+          @override
+          Widget build(BuildContext context) => Container();
+        }
+      ''',
+    );
+    await project.setUpIn(tempDir);
+    final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
+    await flutter.test(withDebugger: true, pauseOnExceptions: true);
+    await flutter.waitForPause();
+
+    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'dispose';")));
+  }, skip: 'TODO(goderbauer): Figure out why the pragma on BuildOwner.finalizeTree does not work');
+
+  testWithoutContext('breaks when rebuilding dirty elements throws', () async {
+    final TestProject project = TestProject(
+      r'''
+      await tester.pumpWidget(TestWidget());
+      tester.element<TestElement>(find.byType(TestWidget)).throwOnRebuild = true;
+      await tester.pump();
+      ''',
+      classes: r'''
+        class TestWidget extends StatelessWidget {
+          @override
+          StatelessElement createElement() => TestElement(this);
+        
+          @override
+          Widget build(BuildContext context) => Container();
+        }
+        
+        class TestElement extends StatelessElement {
+          TestElement(StatelessWidget widget) : super(widget);
+        
+          bool get throwOnRebuild => _throwOnRebuild;
+          bool _throwOnRebuild = false;
+          set throwOnRebuild(bool value) {
+            if (value == _throwOnRebuild) {
+              return;
+            }
+            _throwOnRebuild = value;
+            markNeedsBuild();
+          }
+        
+          @override
+          void rebuild() {
+            if (_throwOnRebuild) {
+              throw 'rebuild';
+            }
+            super.rebuild();
+          }
+        }
+      ''',
+    );
+    await project.setUpIn(tempDir);
+    final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
+    await flutter.test(withDebugger: true, pauseOnExceptions: true);
+    await flutter.waitForPause();
+
+    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'rebuild';")));
+  });
 }
 
 class TestProject extends Project {
-  TestProject(this.testBody, { this.setup });
+  TestProject(this.testBody, { this.setup, this.classes });
 
   final String testBody;
   final String setup;
+  final String classes;
 
   @override
   final String pubspec = '''
-  name: test
-  environment:
-    sdk: ">=2.12.0-0 <3.0.0"
-
-  dependencies:
-    flutter:
-      sdk: flutter
-  dev_dependencies:
-    flutter_test:
-      sdk: flutter
+    name: test
+    environment:
+      sdk: ">=2.12.0-0 <3.0.0"
+  
+    dependencies:
+      flutter:
+        sdk: flutter
+    dev_dependencies:
+      flutter_test:
+        sdk: flutter
   ''';
 
   @override
   final String main = '';
 
   @override
-  String get test => _test.replaceFirst('// SETUP', setup ?? '').replaceFirst('// TEST_BODY', testBody);
+  String get test => _test.replaceFirst('// SETUP', setup ?? '').replaceFirst('// TEST_BODY', testBody).replaceFirst('// CLASSES', classes ?? '');
 
   final String _test = r'''
-  import 'dart:async';
-  import 'dart:ui' as ui;
-
-  import 'package:flutter/animation.dart';
-  import 'package:flutter/foundation.dart';
-  import 'package:flutter/gestures.dart';
-  import 'package:flutter/material.dart';
-  import 'package:flutter/services.dart';
-  import 'package:flutter_test/flutter_test.dart';
-
-  void main() {
-    // SETUP 
-    testWidgets('test', (WidgetTester tester) async {
-      // TEST_BODY
-    });
-  }
-''';
+    import 'dart:async';
+    import 'dart:ui' as ui;
+  
+    import 'package:flutter/animation.dart';
+    import 'package:flutter/foundation.dart';
+    import 'package:flutter/gestures.dart';
+    import 'package:flutter/material.dart';
+    import 'package:flutter/scheduler.dart';
+    import 'package:flutter/services.dart';
+    import 'package:flutter_test/flutter_test.dart';
+  
+    void main() {
+      // SETUP 
+      testWidgets('test', (WidgetTester tester) async {
+        // TEST_BODY
+      });
+    }
+    // CLASSES
+  ''';
 }
