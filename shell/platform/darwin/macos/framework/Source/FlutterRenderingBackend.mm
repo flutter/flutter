@@ -19,29 +19,4 @@
   return NO;
 }
 
-+ (Class)layerClass {
-  BOOL enableMetal = [FlutterRenderingBackend renderUsingMetal];
-  if (enableMetal) {
-    return [CAMetalLayer class];
-  } else {
-    return [CAOpenGLLayer class];
-  }
-}
-
-+ (CALayer*)createBackingLayer {
-  BOOL enableMetal = [FlutterRenderingBackend renderUsingMetal];
-  if (enableMetal) {
-    CAMetalLayer* metalLayer = [CAMetalLayer layer];
-    // This is set to true to synchronize the presentation of the layer and its contents with Core
-    // Animation. When presenting the texture see `[FlutterMetalResizableBackingStoreProvider
-    // resizeSynchronizerCommit:]` we start a CATransaction and wait for the command buffer to be
-    // scheduled. This ensures that the resizing process is smooth.
-    metalLayer.presentsWithTransaction = YES;
-    metalLayer.autoresizingMask = kCALayerHeightSizable | kCALayerWidthSizable;
-    return metalLayer;
-  } else {
-    return [CAOpenGLLayer layer];
-  }
-}
-
 @end
