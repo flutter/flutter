@@ -221,4 +221,21 @@ void main() {
     expect(result.exitCode, isNot(0));
     expect(result.stderr, contains('Could not find an option named "release"'));
   });
+
+  testWithoutContext('flutter can report crashes', () async {
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      ...getLocalEngineArguments(),
+      'update-packages',
+      '--crash',
+    ], workingDirectory: helloWorld);
+
+    expect(result.exitCode, isNot(0));
+    expect(result.stderr, contains(
+      'Oops; flutter has exited unexpectedly: "Bad state: test crash please ignore.".\n'
+      'A crash report has been written to',
+    ));
+  });
 }
