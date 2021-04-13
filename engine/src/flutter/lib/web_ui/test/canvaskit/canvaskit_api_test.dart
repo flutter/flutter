@@ -368,6 +368,7 @@ SkShader _makeTestShader() {
     Uint32List.fromList(<int>[0xff0000ff]),
     Float32List.fromList([0, 1]),
     canvasKit.TileMode.Repeat,
+    null,
   );
 }
 

@@ -278,10 +278,14 @@ abstract class Gradient extends Shader {
     List<double>? colorStops,
     TileMode tileMode = TileMode.clamp,
     Float64List? matrix4,
-  ]) => engine.useCanvasKit
-    ? engine.CkGradientLinear(from, to, colors, colorStops, tileMode, matrix4)
-    : engine.GradientLinear(from, to, colors, colorStops, tileMode,
-        matrix4 == null ? null : engine.toMatrix32(matrix4));
+  ]) {
+    Float32List? matrix = matrix4 == null ? null : engine.toMatrix32(matrix4);
+    return engine.useCanvasKit
+        ? engine.CkGradientLinear(
+        from, to, colors, colorStops, tileMode, matrix)
+        : engine.GradientLinear(from, to, colors, colorStops, tileMode, matrix);
+  }
+
   factory Gradient.radial(
     Offset center,
     double radius,
