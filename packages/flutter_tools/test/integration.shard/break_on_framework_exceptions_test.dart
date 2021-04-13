@@ -117,7 +117,7 @@ void main() {
     await flutter.waitForPause();
 
     expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'platform message callback';")));
-  }, skip: 'https://github.com/flutter/flutter/issues/17007#issuecomment-818318520');
+  }, skip: 'https://github.com/dart-lang/sdk/issues/45673');
 
   testWithoutContext('breaks when SliverChildBuilderDelegate.builder throws', () async {
     final TestProject project = TestProject(

@@ -272,7 +272,7 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
   }
 
   @override
-  // TODO(goderbauer): pragme doesn't work on async methods, https://github.com/flutter/flutter/issues/17007#issuecomment-818318520
+  // TODO(goderbauer): uncomment pragma when it works on async methods, https://github.com/dart-lang/sdk/issues/45673
   // @pragma('vm:notify-debugger-on-exception')
   Future<void> handlePlatformMessage(
     String channel,
