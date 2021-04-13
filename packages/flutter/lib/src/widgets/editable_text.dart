@@ -227,11 +227,12 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
         for (final TextRange range in rangeSpanMapping.keys) {
           // Only the first match for a given text range is replaced.
           // Overlapping matches are ignored.
-          if (match.start < range.start &&
-              match.end <= range.start ||
-              match.start >= range.end &&
-              match.end > range.end) {
+          if (match.start >= range.start &&
+              match.start < range.end ||
+              match.end > range.start &&
+              match.end < range.end) {
             overlap = true;
+            print('OVERLAP DETECTED match(${match.start}, ${match.end}) range($range)');
             break;
           }
         }
