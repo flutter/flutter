@@ -221,6 +221,8 @@ class ListTileTheme extends InheritedTheme {
 ///  * [CheckboxListTile], which combines a [ListTile] with a [Checkbox].
 ///  * [RadioListTile], which combines a [ListTile] with a [Radio] button.
 ///  * [SwitchListTile], which combines a [ListTile] with a [Switch].
+///  * [ExpansionTile], which combines a [ListTile] with a button that expands
+///    or collapses the tile to reveal or hide the children.
 enum ListTileControlAffinity {
   /// Position the control on the leading edge, and the secondary widget, if
   /// any, on the trailing edge.
