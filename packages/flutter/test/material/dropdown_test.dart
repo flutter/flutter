@@ -3238,20 +3238,9 @@ void main() {
     await tester.tap(find.text('enabled').hitTestable());
     await tester.pumpAndSettle();
 
-    try {
-      // try to get the focus node for disabled item
-      final FocusNode node = Focus.of(tester.element(find.text('disabled').hitTestable()));
-      // For disabled item, [Focus.of] should throw an exception,
-      // but it doesn't when platform=chrome and web-renderer=html when flutter test is run
-      // In that case, the node should not be able to request focus
-      expect(node.canRequestFocus, false, reason: 'Disabled menu item should not be able to request focus');
-    } on AssertionError catch (error) {
-      expect(
-        error.toString(),
-        contains('Focus.of() was called with a context that does not contain a '
-            'Focus between the given context and the nearest FocusScope widget'),
-      );
-    }
+    // The value of [disabled] should be `null` as disabled item is not supposed to have a FocusNode
+    final FocusNode? disabled = Focus.maybeOf(tester.element(find.text('disabled').hitTestable()));
+    expect(disabled, null, reason: 'Disabled menu item should not be able to request focus');
   });
 
   testWidgets('value should be null if enabled is false', (WidgetTester tester) async {

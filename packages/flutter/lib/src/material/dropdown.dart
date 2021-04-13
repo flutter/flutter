@@ -179,7 +179,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
       );
     }
     child = FadeTransition(opacity: opacity, child: child);
-    if (kIsWeb) {
+    if (kIsWeb && dropdownMenuItem.enabled) {
       child = Shortcuts(
         shortcuts: _webShortcuts,
         child: child,
