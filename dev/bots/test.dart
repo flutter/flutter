@@ -496,7 +496,6 @@ Future<void> _flutterBuild(
       <String>[
         'build',
         platformBuildName,
-        '--no-pub',
         '--performance-measurement-file=perf.json',
         ...additionalArgs,
         if (release)
