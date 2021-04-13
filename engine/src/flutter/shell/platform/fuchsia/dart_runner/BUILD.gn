@@ -65,6 +65,7 @@ template("runner") {
              "$fuchsia_sdk_root/pkg:async-loop-cpp",
              "$fuchsia_sdk_root/pkg:async-loop-default",
              "$fuchsia_sdk_root/pkg:fidl_cpp",
+             "$fuchsia_sdk_root/pkg:sys_inspect_cpp",
              "$fuchsia_sdk_root/pkg:sys_cpp",
              "$fuchsia_sdk_root/pkg:syslog",
              "$fuchsia_sdk_root/pkg:trace",
